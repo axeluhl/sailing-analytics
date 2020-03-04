@@ -20,6 +20,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AbortingFlagFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFlagEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogPassChangeEventImpl;
 import com.sap.sailing.domain.common.racelog.Flags;
@@ -63,7 +64,7 @@ public class TestTracTracRaceAndCompetitorStatusReconciler {
     }
     
     @Test
-    public void testAbandonInFirstPass() {
+    public void testAbandonInFirstPassAndRestart() {
         assertNull(new AbortingFlagFinder(raceLog).analyze());
         when(tractracRace.getStatus()).thenReturn(RaceStatusType.ABANDONED);
         final TimePoint abandonTimePoint = startOfPass.plus(Duration.ONE_MINUTE);
@@ -74,5 +75,28 @@ public class TestTracTracRaceAndCompetitorStatusReconciler {
         assertSame(Flags.NOVEMBER, abandonFlagEvent.getUpperFlag());
         assertTrue(abandonFlagEvent.isDisplayed());
         assertEquals(abandonTimePoint, abandonFlagEvent.getLogicalTimePoint());
+        // now change status back to START
+        when(tractracRace.getStatus()).thenReturn(RaceStatusType.START);
+        final TimePoint restartTimePoint = startOfPass.plus(Duration.ONE_MINUTE.times(2));
+        when(tractracRace.getStatusTime()).thenReturn(restartTimePoint.asMillis());
+        reconciler.reconcileRaceStatus(tractracRace, trackedRace);
+        final RaceLogFlagEvent newAbandonFlagEvent = new AbortingFlagFinder(raceLog).analyze();
+        assertNull(newAbandonFlagEvent);
+        assertEquals(2, raceLog.getCurrentPassId());
+    }
+
+    @Test
+    public void testManualAbandonButLaterTracTracGeneralRecall() {
+        final TimePoint manualAbortTimePoint = startOfPass.plus(Duration.ONE_MINUTE);
+        raceLog.add(new RaceLogFlagEventImpl(manualAbortTimePoint, author, /* pass id */ 1, Flags.NOVEMBER, /* lower flag */ null, /* isDisplayed */ true));
+        when(tractracRace.getStatus()).thenReturn(RaceStatusType.GENERAL_RECALL);
+        final TimePoint generalRecallTimePoint = manualAbortTimePoint.plus(Duration.ONE_MINUTE);
+        when(tractracRace.getStatusTime()).thenReturn(generalRecallTimePoint.asMillis());
+        reconciler.reconcileRaceStatus(tractracRace, trackedRace);
+        final RaceLogFlagEvent generalRecallFlagEvent = new AbortingFlagFinder(raceLog).analyze();
+        assertNotNull(generalRecallFlagEvent);
+        assertSame(Flags.FIRSTSUBSTITUTE, generalRecallFlagEvent.getUpperFlag());
+        assertTrue(generalRecallFlagEvent.isDisplayed());
+        assertEquals(generalRecallTimePoint, generalRecallFlagEvent.getLogicalTimePoint());
     }
 }
