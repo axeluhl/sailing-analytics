@@ -82,13 +82,14 @@ public class TestTracTracRaceAndCompetitorStatusReconciler {
         reconciler.reconcileRaceStatus(tractracRace, trackedRace);
         final RaceLogFlagEvent newAbandonFlagEvent = new AbortingFlagFinder(raceLog).analyze();
         assertNull(newAbandonFlagEvent);
-        assertEquals(2, raceLog.getCurrentPassId());
+        assertEquals(3, raceLog.getCurrentPassId()); // abandoning also creates the next pass immediately
     }
 
     @Test
     public void testManualAbandonButLaterTracTracGeneralRecall() {
         final TimePoint manualAbortTimePoint = startOfPass.plus(Duration.ONE_MINUTE);
         raceLog.add(new RaceLogFlagEventImpl(manualAbortTimePoint, author, /* pass id */ 1, Flags.NOVEMBER, /* lower flag */ null, /* isDisplayed */ true));
+        raceLog.add(new RaceLogPassChangeEventImpl(manualAbortTimePoint, author, /* pass id */ 2));
         when(tractracRace.getStatus()).thenReturn(RaceStatusType.GENERAL_RECALL);
         final TimePoint generalRecallTimePoint = manualAbortTimePoint.plus(Duration.ONE_MINUTE);
         when(tractracRace.getStatusTime()).thenReturn(generalRecallTimePoint.asMillis());

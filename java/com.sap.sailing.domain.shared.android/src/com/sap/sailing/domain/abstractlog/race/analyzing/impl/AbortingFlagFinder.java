@@ -16,10 +16,9 @@ public class AbortingFlagFinder extends RaceLogAnalyzer<RaceLogFlagEvent> {
         if (getLog().getCurrentPassId() <= RaceLog.DefaultPassId) {
             return null;
         }
-
         int lastButOnePass = getLog().getCurrentPassId() - 1;
         for (RaceLogEvent event : getAllEventsDescending()) {
-            if (event.getPassId() == lastButOnePass && event instanceof RaceLogFlagEvent) {
+            if (event.getPassId() >= lastButOnePass && event instanceof RaceLogFlagEvent) {
                 RaceLogFlagEvent flagEvent = (RaceLogFlagEvent) event;
                 if (isDisplayedAbortingFlag(flagEvent)) {
                     return flagEvent;

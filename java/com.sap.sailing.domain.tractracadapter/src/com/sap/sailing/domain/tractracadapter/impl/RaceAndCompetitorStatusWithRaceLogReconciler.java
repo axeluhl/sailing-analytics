@@ -1,21 +1,27 @@
 package com.sap.sailing.domain.tractracadapter.impl;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.StreamSupport;
 
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AbortingFlagFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFlagEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogPassChangeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
+import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.tractrac.model.lib.api.event.IRace;
 import com.tractrac.model.lib.api.event.IRaceCompetitor;
 import com.tractrac.model.lib.api.event.RaceCompetitorStatusType;
@@ -34,11 +40,21 @@ import com.tractrac.model.lib.api.event.RaceStatusType;
 public class RaceAndCompetitorStatusWithRaceLogReconciler {
     private final DomainFactory domainFactory;
     private final RaceLogResolver raceLogResolver;
+    private final LogEventAuthorImpl raceLogEventAuthor;
+    private final static Map<RaceStatusType, Flags> flagForRaceStatus;
+    
+    static {
+        flagForRaceStatus = new HashMap<>();
+        flagForRaceStatus.put(RaceStatusType.ABANDONED, Flags.NOVEMBER);
+        flagForRaceStatus.put(RaceStatusType.POSTPONED, Flags.AP);
+        flagForRaceStatus.put(RaceStatusType.GENERAL_RECALL, Flags.FIRSTSUBSTITUTE);
+    }
     
     public RaceAndCompetitorStatusWithRaceLogReconciler(DomainFactory domainFactory, RaceLogResolver raceLogResolver) {
         super();
         this.domainFactory = domainFactory;
         this.raceLogResolver = raceLogResolver;
+        raceLogEventAuthor = new LogEventAuthorImpl(getClass().getName(), 1);
     }
 
     /**
@@ -71,27 +87,41 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
      * <p>
      * 
      * If multiple race logs are attached, a "default" race log will be determined, e.g., based on the one that already
-     * has the most events in it. See {@link #getDefaultRaceLog}. Here go the cases:
-     * <ul>
-     * <li>any to {@code ABANDONED}: ensure the current pass has the "November" (N) flag set</li>
-     * <li>any to {@code GENERAL_RECALL}: ensure the current pass has the "1st Substitute" flag set</li>
-     * <li>any to {@code POSTPONED}: ensure the current pass has the "Answering Pennant" (AP) flag set</li>
-     * <li></li>
-     * <li></li>
-     * </ul>
+     * has the most events in it. See {@link #getDefaultRaceLog}.
      */
     public void reconcileRaceStatus(IRace tractracRace, TrackedRace trackedRace) {
         final RaceStatusType raceStatus = tractracRace.getStatus();
-        final long raceStatusUpdateTime = tractracRace.getStatusTime();
+        final MillisecondsTimePoint raceStatusUpdateTime = new MillisecondsTimePoint(tractracRace.getStatusTime());
+        RaceLogFlagEvent abortingFlagEvent = null;
         for (final RaceLog raceLog : trackedRace.getAttachedRaceLogs()) {
-            final ReadonlyRaceState raceState = ReadonlyRaceStateImpl.getOrCreate(raceLogResolver, raceLog);
-            final RaceLogRaceStatus raceLogRaceStatus = raceState.getStatus();
-            final AbortingFlagFinder abortingFlagFinder = new AbortingFlagFinder(raceLog);
-            final RaceLogFlagEvent abortingFlagEvent = abortingFlagFinder.analyze();
-            
-            // TODO bug5154: 
+            if (abortingFlagEvent == null) {
+                final AbortingFlagFinder abortingFlagFinder = new AbortingFlagFinder(raceLog);
+                abortingFlagEvent = abortingFlagFinder.analyze();
+            }
         }
-        // TODO bug5154 check IRace.getStatus() and somewhere update status once it reached RaceStatusType.OFFICIAL
+        final RaceLog defaultRaceLog = getDefaultRaceLog(trackedRace);
+        if (abortingFlagEvent != null && !isAbortedState(raceStatus) && raceStatusUpdateTime.after(abortingFlagEvent.getLogicalTimePoint())) {
+            startNewPass(raceStatusUpdateTime, defaultRaceLog);
+        } else if (isAbortedState(raceStatus) &&
+                (abortingFlagEvent == null || (!abortingFlagMatches(raceStatus, abortingFlagEvent.getUpperFlag()) &&
+                                               raceStatusUpdateTime.after(abortingFlagEvent.getLogicalTimePoint())))) {
+            defaultRaceLog.add(new RaceLogFlagEventImpl(raceStatusUpdateTime, raceLogEventAuthor, defaultRaceLog.getCurrentPassId(),
+                    flagForRaceStatus.get(raceStatus), /* lower flag */ null, /* is displayed */ true));
+            startNewPass(raceStatusUpdateTime, defaultRaceLog);
+        }
+        // TODO bug5154 check IRace.getStatus() and copy all competitor ranks to the leaderboard once the race status reached RaceStatusType.OFFICIAL
+    }
+
+    protected void startNewPass(final MillisecondsTimePoint timePointForStartOfNewPass, final RaceLog raceLog) {
+        raceLog.add(new RaceLogPassChangeEventImpl(timePointForStartOfNewPass, raceLogEventAuthor, raceLog.getCurrentPassId() + 1));
+    }
+
+    private boolean abortingFlagMatches(RaceStatusType raceStatus, Flags upperFlag) {
+        return flagForRaceStatus.get(raceStatus) == upperFlag;
+    }
+
+    private boolean isAbortedState(RaceStatusType raceStatus) {
+        return raceStatus == RaceStatusType.ABANDONED || raceStatus == RaceStatusType.GENERAL_RECALL || raceStatus == RaceStatusType.POSTPONED;
     }
 
     /**
@@ -126,7 +156,7 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
     public void reconcileCompetitorStatus(IRaceCompetitor raceCompetitor, TrackedRace trackedRace) {
         final Competitor competitor = domainFactory.resolveCompetitor(raceCompetitor.getCompetitor());
         final RaceCompetitorStatusType competitorStatus = raceCompetitor.getStatus();
-        final int officialRank = raceCompetitor.getOfficialRank();
+        final int officialRank = raceCompetitor.getOfficialRank(); // TODO accept rank information only if race status is OFFICIAL
         final long officialFinishingTime = raceCompetitor.getOfficialFinishTime();
         final long timePointForStatusEvent = raceCompetitor.getStatusTime();
         for (final RaceLog raceLog : trackedRace.getAttachedRaceLogs()) {
