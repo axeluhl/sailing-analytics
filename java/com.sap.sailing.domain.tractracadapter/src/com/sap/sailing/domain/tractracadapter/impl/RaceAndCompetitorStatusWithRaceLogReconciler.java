@@ -6,10 +6,13 @@ import java.util.stream.StreamSupport;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AbortingFlagFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sse.common.Util;
@@ -38,11 +41,73 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
         this.raceLogResolver = raceLogResolver;
     }
 
+    /**
+     * The following race status types are currently available on the TracTrac side (see {@link RaceStatusType}):
+     * <ul>
+     * <li>NONE(0)</li>
+     * <li>START(4)</li>
+     * <li>RACING(5)</li>
+     * <li>UNOFFICIAL(7)</li>
+     * <li>ABANDONED(8)</li>
+     * <li>OFFICIAL(9)</li>
+     * <li>GENERAL_RECALL(10)</li>
+     * <li>POSTPONED(11)</li>
+     * </ul>
+     * We are interested in status transitions that need to be reflected by an "N" ("November", abort), "AP" (answering
+     * pennant, postponement), or 1st substitute (general recall) flag status in the race log. The TracTrac-provided
+     * status transition has a time stamp on it (see {@link IRace#getStatusTime()}), and so would any aborting flag
+     * event in a {@link RaceLog} as well as any pass change event. If the TracTrac status time is later than the last
+     * race log-based aborting flag event from the current pass and the TracTrac status is none of {@code ABANDONED},
+     * {@code GENERAL_RECALL} or {@code POSTPONED}, a new pass will be established in the race log. If the TracTrac
+     * status is any of {@code ABANDONED}, {@code GENERAL_RECALL} or {@code POSTPONED}, and the race log has not the
+     * matching aborting flag in the current pass, and the TracTrac status update time is later than the last race log
+     * status, the corresponding race log event that represents {@code ABANDONED}, {@code GENERAL_RECALL} or
+     * {@code POSTPONED}, respectively, will be appended to the {@link #getDefaultRaceLog(TrackedRace) default race
+     * log}.
+     * <p>
+     * 
+     * There is no API currently that allows us to determine the start mode flag. Manual intervention would be required
+     * if a non-default start mode flag is to be shown.
+     * <p>
+     * 
+     * If multiple race logs are attached, a "default" race log will be determined, e.g., based on the one that already
+     * has the most events in it. See {@link #getDefaultRaceLog}. Here go the cases:
+     * <ul>
+     * <li>any to {@code ABANDONED}: ensure the current pass has the "November" (N) flag set</li>
+     * <li>any to {@code GENERAL_RECALL}: ensure the current pass has the "1st Substitute" flag set</li>
+     * <li>any to {@code POSTPONED}: ensure the current pass has the "Answering Pennant" (AP) flag set</li>
+     * <li></li>
+     * <li></li>
+     * </ul>
+     */
     public void reconcileRaceStatus(IRace tractracRace, TrackedRace trackedRace) {
-        final RaceStatusType status = tractracRace.getStatus();
+        final RaceStatusType raceStatus = tractracRace.getStatus();
+        final long raceStatusUpdateTime = tractracRace.getStatusTime();
+        for (final RaceLog raceLog : trackedRace.getAttachedRaceLogs()) {
+            final ReadonlyRaceState raceState = ReadonlyRaceStateImpl.getOrCreate(raceLogResolver, raceLog);
+            final RaceLogRaceStatus raceLogRaceStatus = raceState.getStatus();
+            final AbortingFlagFinder abortingFlagFinder = new AbortingFlagFinder(raceLog);
+            final RaceLogFlagEvent abortingFlagEvent = abortingFlagFinder.analyze();
+            
+            // TODO bug5154: 
+        }
         // TODO bug5154 check IRace.getStatus() and somewhere update status once it reached RaceStatusType.OFFICIAL
     }
 
+    /**
+     * If no race log is attached to the {@code trackedRace}, {@code null} is returned. If exactly one race log
+     * is attached, it is returned. If multiple race logs are attached, the one with the most entries is returned.
+     */
+    private RaceLog getDefaultRaceLog(TrackedRace trackedRace) {
+        final RaceLog result;
+        if (Util.isEmpty(trackedRace.getAttachedRaceLogs())) {
+            result = null;
+        } else {
+            result = Util.stream(trackedRace.getAttachedRaceLogs()).max((rl1, rl2)->Integer.compare(rl1.size(), rl2.size())).get();
+        }
+        return result;
+    }
+    
     /**
      * If an official finish time exists on the {@link IRaceCompetitor} but not in any of the {@link TrackedRace}'s
      * {@link RaceLog}-based results, or the corresponding TracTrac information is newer than the race log-based result,
@@ -60,7 +125,7 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
      */
     public void reconcileCompetitorStatus(IRaceCompetitor raceCompetitor, TrackedRace trackedRace) {
         final Competitor competitor = domainFactory.resolveCompetitor(raceCompetitor.getCompetitor());
-        final RaceCompetitorStatusType status = raceCompetitor.getStatus();
+        final RaceCompetitorStatusType competitorStatus = raceCompetitor.getStatus();
         final int officialRank = raceCompetitor.getOfficialRank();
         final long officialFinishingTime = raceCompetitor.getOfficialFinishTime();
         final long timePointForStatusEvent = raceCompetitor.getStatusTime();

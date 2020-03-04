@@ -26,7 +26,6 @@ public class AbortingFlagFinder extends RaceLogAnalyzer<RaceLogFlagEvent> {
                 }
             }
         }
-
         return null;
     }
 

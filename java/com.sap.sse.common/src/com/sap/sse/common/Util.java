@@ -16,6 +16,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import com.sap.sse.common.util.MappingIterable;
@@ -927,5 +928,13 @@ public class Util {
             }
             c++;
         }
+    }
+
+    /**
+     * @return a non-parallel stream for the {@link Iterable} passed. Short for
+     * {@code StreamSupport.stream(iterable.spliterator(), false)}.
+     */
+    public static <T> Stream<T> stream(Iterable<T> iterable) {
+        return StreamSupport.stream(iterable.spliterator(), /* parallel */ false);
     }
 }
