@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.orc;
 
-import java.text.ParseException;
+import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Set;
@@ -169,5 +169,5 @@ public interface ORCPublicCertificateDatabase {
      */
     Future<Set<ORCCertificate>> search(String yachtName, String sailNumber, BoatClass boatClass);
     
-    Date parseDate(final String dateString) throws ParseException;
+    Date parseDate(final String dateString) throws DateTimeParseException;
 }
