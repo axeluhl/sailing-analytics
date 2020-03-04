@@ -42,7 +42,7 @@ public class EventApi {
         return event;
     }
 
-    public class Event extends JsonWrapper {
+    public static class Event extends JsonWrapper {
 
         public Event(JSONObject json) {
             super(json);
@@ -69,7 +69,7 @@ public class EventApi {
         }
     }
 
-    public class EventForCreate extends Event {
+    public static class EventForCreate extends Event {
 
         public EventForCreate(JSONObject json) {
             super(json);

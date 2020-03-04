@@ -2,7 +2,6 @@ package com.sap.sailing.selenium.api.core;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -157,7 +156,6 @@ public class ApiRequest<I, O> {
             return null;
         } else if (isOfType(this.resultType, JsonWrapper.class)) {
             try {
-                Arrays.stream(resultType.getConstructors()).forEach(c -> System.out.println(c.getParameters()));
                 return (O) resultType.getConstructor(JSONObject.class).newInstance(JSONValue.parse(result));
             } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
                     | InvocationTargetException | NoSuchMethodException | SecurityException e) {
