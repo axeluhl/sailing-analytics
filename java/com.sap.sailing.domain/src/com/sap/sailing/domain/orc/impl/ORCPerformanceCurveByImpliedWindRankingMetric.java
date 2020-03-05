@@ -76,7 +76,8 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 
-public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRankingMetric {
+public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRankingMetric
+implements com.sap.sailing.domain.orc.ORCPerformanceCurveRankingMetric {
     private static final long serialVersionUID = -7814822523533929816L;
     private static final Logger logger = Logger.getLogger(ORCPerformanceCurveByImpliedWindRankingMetric.class.getName());
     
@@ -492,7 +493,8 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
         return performanceCurveForPartialCourse;
     }
 
-    protected Speed getImpliedWind(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws FunctionEvaluationException, MaxIterationsExceededException {
+    @Override
+    public Speed getImpliedWind(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws FunctionEvaluationException, MaxIterationsExceededException {
         final Speed result;
         final ORCPerformanceCurve performanceCurveForPartialCourse = cache.getPerformanceCurveForPartialCourse(timePoint, getTrackedRace(), competitor, getPerformanceCurveSupplier(cache));
         if (performanceCurveForPartialCourse != null) {
@@ -565,7 +567,7 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
             return result;
         };
     }
-
+    
     @Override
     public Duration getCorrectedTime(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         Duration result = null;
