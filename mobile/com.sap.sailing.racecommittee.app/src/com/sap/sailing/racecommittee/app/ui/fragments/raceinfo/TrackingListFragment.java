@@ -867,7 +867,7 @@ public class TrackingListFragment extends BaseFragment
             boolean found = false;
             for (CompetitorResult newItem : newResults) {
                 if (oldItem.getCompetitorId().equals(newItem.getCompetitorId())) {
-                    if (!oldItem.equals(newItem)) {
+                    if (!areEqual(oldItem, newItem)) {
                         result.add(new CompetitorResultImpl(newItem));
                     }
                     found = true;
