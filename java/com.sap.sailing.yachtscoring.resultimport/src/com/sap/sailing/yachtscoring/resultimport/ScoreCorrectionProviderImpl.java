@@ -118,8 +118,13 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, Res
     }
 
     @Override
-    public Iterable<URL> getUrls() {
-        return resultUrlRegistry.getResultUrls(NAME);
+    public Iterable<URL> getReadableUrls() {
+        return resultUrlRegistry.getReadableResultUrls(NAME);
+    }
+
+    @Override
+    public Iterable<URL> getAllUrls() {
+        return resultUrlRegistry.getAllResultUrls(NAME);
     }
 
     @Override

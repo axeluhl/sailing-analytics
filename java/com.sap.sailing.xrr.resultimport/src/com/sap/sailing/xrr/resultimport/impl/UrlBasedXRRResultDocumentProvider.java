@@ -31,7 +31,7 @@ public abstract class UrlBasedXRRResultDocumentProvider implements ResultDocumen
     @Override
     public Iterable<ResultDocumentDescriptor> getResultDocumentDescriptors() throws IOException {
         List<ResultDocumentDescriptor> result = new ArrayList<>();
-        for (URL url : resultUrlProvider.getUrls()) {
+        for (URL url : resultUrlProvider.getReadableUrls()) {
             URLConnection eventResultConn = url.openConnection();
             InputStream is = (InputStream) eventResultConn.getContent();
             Parser parser = parserFactory.createParser(is, url.toString());

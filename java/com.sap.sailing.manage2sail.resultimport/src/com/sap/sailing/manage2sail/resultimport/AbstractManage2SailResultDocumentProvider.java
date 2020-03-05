@@ -26,7 +26,7 @@ public abstract class AbstractManage2SailResultDocumentProvider {
     public Iterable<ResultDocumentDescriptor> getResultDocumentDescriptors() throws IOException {
         List<ResultDocumentDescriptor> result = new ArrayList<>();
         Manage2SailEventResultsParserImpl parser = new Manage2SailEventResultsParserImpl();
-        for (URL url : resultUrlProvider.getUrls()) {
+        for (URL url : resultUrlProvider.getReadableUrls()) {
             URLConnection eventResultConn = HttpUrlConnectionHelper.redirectConnection(url);
             EventResultDescriptor eventResult = parser.getEventResult((InputStream) eventResultConn.getContent());
             addResultsForEvent(result, eventResult);

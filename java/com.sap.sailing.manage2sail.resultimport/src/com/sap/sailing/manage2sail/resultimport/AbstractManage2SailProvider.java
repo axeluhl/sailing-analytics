@@ -33,8 +33,13 @@ public abstract class AbstractManage2SailProvider implements ResultUrlProvider {
     }
 
     @Override
-    public Iterable<URL> getUrls() {
-        return getResultUrlRegistry().getResultUrls(NAME);
+    public Iterable<URL> getReadableUrls() {
+        return getResultUrlRegistry().getReadableResultUrls(NAME);
+    }
+
+    @Override
+    public Iterable<URL> getAllUrls() {
+        return getResultUrlRegistry().getAllResultUrls(NAME);
     }
 
     @Override

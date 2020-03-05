@@ -1027,7 +1027,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     public void ensureOwnerships() {
         SecurityService securityService = getSecurityService();
         for (ResultUrlProvider resultUrlProvider : getAllUrlBasedScoreCorrectionProviders()) {
-            for (URL resultImportUrl : resultUrlProvider.getUrls()) {
+            for (URL resultImportUrl : resultUrlProvider.getAllUrls()) {
                 QualifiedObjectIdentifier ident = SecuredDomainType.RESULT_IMPORT_URL.getQualifiedObjectIdentifier(
                         new TypeRelativeObjectIdentifier(resultUrlProvider.getName(), resultImportUrl.toString()));
                 securityService.migrateOwnership(ident, ident.toString());
@@ -3767,7 +3767,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         Optional<ResultUrlProvider> resultUrlProvider = getUrlBasedScoreCorrectionProvider(resultProviderName);
         Optional<ResultUrlRegistry> resultUrlRegistry = getResultUrlRegistry();
         if (resultUrlProvider.isPresent() && resultUrlRegistry.isPresent()) {
-            return resultUrlRegistry.get().getResultUrls(resultUrlProvider.get().getName());
+            return resultUrlRegistry.get().getReadableResultUrls(resultUrlProvider.get().getName());
         }
         return null;
     }

@@ -39,7 +39,7 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, Res
     public Map<String, Set<Util.Pair<String, TimePoint>>> getHasResultsForBoatClassFromDateByEventName() {
         Map<String, Set<Util.Pair<String, TimePoint>>> result = new HashMap<String, Set<Util.Pair<String,TimePoint>>>();
         FregHtmlParser parser = new FregHtmlParser();
-        for (URL url : getUrls()) {
+        for (URL url : getReadableUrls()) {
             URLConnection conn;
             try {
                 conn = url.openConnection();
@@ -69,8 +69,13 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, Res
     }
 
     @Override
-    public Iterable<URL> getUrls() {
-        return resultUrlRegistry.getResultUrls(PROVIDER_NAME);
+    public Iterable<URL> getReadableUrls() {
+        return resultUrlRegistry.getReadableResultUrls(PROVIDER_NAME);
+    }
+
+    @Override
+    public Iterable<URL> getAllUrls() {
+        return resultUrlRegistry.getAllResultUrls(PROVIDER_NAME);
     }
 
     @Override
@@ -82,7 +87,7 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, Res
     public RegattaScoreCorrections getScoreCorrections(String eventName, String boatClassName,
             TimePoint timePoint) throws Exception {
         final FregHtmlParser parser = new FregHtmlParser();
-        for (URL url : getUrls()) {
+        for (URL url : getReadableUrls()) {
             final URLConnection conn = url.openConnection();
             final RegattaResults regattaResult = parser.getRegattaResults((InputStream) conn.getContent());
             if ((boatClassName == null && getBoatClassName(regattaResult) == null) ||
