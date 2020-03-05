@@ -1001,7 +1001,6 @@ public class TrackingListFragment extends BaseFragment
             CompetitorResultWithIdImpl local = null;
             CompetitorResultWithIdImpl draft = null;
             CompetitorResultWithIdImpl mergedResult;
-            MergeState state;
             for (CompetitorResult item : mChangedData) {
                 if (result.getCompetitorId().equals(item.getCompetitorId())) {
                     initial = item;
@@ -1040,7 +1039,7 @@ public class TrackingListFragment extends BaseFragment
                 }
 
                 //At least a warning
-                state = MergeState.WARNING;
+                MergeState state = MergeState.WARNING;
 
                 //Compare ranks
                 int oneBasedRank = result.getOneBasedRank();
