@@ -10,6 +10,7 @@ import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 
 /**
@@ -120,6 +121,19 @@ public class LeaderboardEntryDTO implements Serializable {
      * For one-design classes this equals the time spent in the race.
      */
     public Duration calculatedTime;
+    
+    /**
+     * If this is a leaderboard entry for an ORC Performance Curve Scoring (PCS) race,
+     * the field holds the so-called "implied wind" as a speed. It is the wind speed with which,
+     * according to its polar, the competitor would have sailed the part of the course sailed
+     * so far in the time elapsed so far. For ORC PCS before 2015 this was the primary ranking
+     * criterion. Since 2015, however, implied wind has lost in significance because it is
+     * used only to compute a default wind speed by maximizing all implied wind values of all
+     * competitors in the race, and then using this wind speed to determine the time allowance
+     * for each competitor so that a different between time elapsed and the allowance can then
+     * be used for ranking.
+     */
+    public Speed impliedWind;
     
     /**
      * The corrections applied to the time and distance sailed when the competitor would have reached the
