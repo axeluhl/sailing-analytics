@@ -2360,4 +2360,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String setDeviceIdentifier();
     String setPosition();
     String spareMarksAndTheirOptionalDefaultMarkRoles();
+    String impliedWind();
+    String impliedWindTooltip();
 }

@@ -166,7 +166,6 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
                     overallDetailCheckboxes);
             overallDetailDialogContent.add(checkbox);
         }
-        
         FlowPanel overallDetailDialogContentSecondLine = new FlowPanel();
         overallDetailDialogContentSecondLine.addStyleName("dialogInnerContent");
         showCompetitorShortNameColumnCheckBox = dialog.createCheckbox(stringMessages.showCompetitorShortNameColumn());
@@ -185,7 +184,6 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         isCompetitorNationalityColumnVisible.setTitle(stringMessages.showCompetitorNationalityColumnTooltip());
         isCompetitorNationalityColumnVisible.setValue(initialSettings.isShowCompetitorNationality());
         overallDetailDialogContentSecondLine.add(isCompetitorNationalityColumnVisible);
-
         overallDetailDialog.add(overallDetailDialogContent);
         overallDetailDialog.add(overallDetailDialogContentSecondLine);
         return overallDetailDialog;
