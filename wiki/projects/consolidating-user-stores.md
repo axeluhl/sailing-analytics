@@ -391,7 +391,9 @@ REPLICATE_ON_START=com.sap.sse.security.impl.SecurityServiceImpl,com.sap.sailing
 REPLICATE_MASTER_SERVLET_HOST=security-service.sapsailing.com
 REPLICATE_MASTER_SERVLET_PORT=443
 REPLICATE_MASTER_EXCHANGE_NAME=security_service
-REPLICATE_MASTER_BEARER_TOKEN="Gecx+W/dwFKRAxFbIvC/IMafEnJ8kTQF+MlYNVhEwD4="
+REPLICATE_MASTER_BEARER_TOKEN="..."
 ```
+
+The bearer token can be obtained by logging on as user ``security-service-replicator`` to ``https://security-service.sapsailing.com`` and then getting the access token from ``https://security-service.sapsailing.com/security/api/restsecurity/access_token``. Ask one of j.hamann@sailtracks.tv, alessandro.stoltenberg@sap.com and axel.uhl@sap.com for the user credentials. Of course, any other user that has permissions  ``SERVER:REPLICATE:security-service`` and ``SERVER:READ_REPLICATOR:security-service`` can do the same, so a user may also ask someone who has the premissions required to transfer the permissions to another user.
 
 These properties have now been appended to the env.sh files of the existing servers on the multi-instance set-up (including swisstimingtest, sailtracks, and tractractest). 
