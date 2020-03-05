@@ -108,4 +108,26 @@ public class TestTracTracRaceAndCompetitorStatusReconciler {
         assertEquals(3, raceLog.getCurrentPassId());
         assertSame(generalRecallFlagEvent, abortingFlagFinder.analyze());
     }
+
+    @Test
+    public void testManualAbandonAndEarlierTracTracGeneralRecallWillBeIgnored() {
+        final TimePoint manualAbortTimePoint = startOfPass.plus(Duration.ONE_MINUTE);
+        raceLog.add(new RaceLogFlagEventImpl(manualAbortTimePoint, author, /* pass id */ 1, Flags.NOVEMBER, /* lower flag */ null, /* isDisplayed */ true));
+        raceLog.add(new RaceLogPassChangeEventImpl(manualAbortTimePoint, author, /* pass id */ 2));
+        when(tractracRace.getStatus()).thenReturn(RaceStatusType.GENERAL_RECALL);
+        final TimePoint generalRecallTimePoint = manualAbortTimePoint.minus(Duration.ONE_MINUTE.times(2));
+        when(tractracRace.getStatusTime()).thenReturn(generalRecallTimePoint.asMillis());
+        reconciler.reconcileRaceStatus(tractracRace, trackedRace);
+        final AbortingFlagFinder abortingFlagFinder = new AbortingFlagFinder(raceLog);
+        final RaceLogFlagEvent abortFlagEvent = abortingFlagFinder.analyze();
+        assertNotNull(abortFlagEvent);
+        assertSame(Flags.NOVEMBER, abortFlagEvent.getUpperFlag());
+        assertTrue(abortFlagEvent.isDisplayed());
+        assertEquals(manualAbortTimePoint, abortFlagEvent.getLogicalTimePoint());
+        assertEquals(1, abortFlagEvent.getPassId());
+        assertEquals(2, raceLog.getCurrentPassId());
+        reconciler.reconcileRaceStatus(tractracRace, trackedRace); // assert that reconciliation is idempotent
+        assertEquals(2, raceLog.getCurrentPassId());
+        assertSame(abortFlagEvent, abortingFlagFinder.analyze());
+    }
 }
