@@ -20,6 +20,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.tractrac.model.lib.api.event.IRace;
@@ -149,13 +150,13 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
      * has an empty finishing time and zero rank.
      * 
      * TODO bug5154 continue here...
-     * 
-     * @param raceCompetitor
-     * @param trackedRace
      */
     public void reconcileCompetitorStatus(IRaceCompetitor raceCompetitor, TrackedRace trackedRace) {
         final Competitor competitor = domainFactory.resolveCompetitor(raceCompetitor.getCompetitor());
         final RaceCompetitorStatusType competitorStatus = raceCompetitor.getStatus();
+        final IRace tractracRace = raceCompetitor.getRace();
+        final RaceStatusType raceStatus = tractracRace.getStatus();
+        final TimePoint raceStatusTimePoint = new MillisecondsTimePoint(tractracRace.getStatusTime());
         final int officialRank = raceCompetitor.getOfficialRank(); // TODO accept rank information only if race status is OFFICIAL
         final long officialFinishingTime = raceCompetitor.getOfficialFinishTime();
         final long timePointForStatusEvent = raceCompetitor.getStatusTime();

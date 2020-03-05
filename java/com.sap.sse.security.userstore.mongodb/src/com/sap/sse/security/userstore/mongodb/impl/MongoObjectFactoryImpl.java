@@ -50,7 +50,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
                     settingCollection.dropIndex(index.getString("name"));
                     break;
                 }
-    }
+            }
         }
         try {
             settingCollection.createIndex(new Document(FieldNames.Preferences.USERNAME.name(), 1), new IndexOptions().name("uniquebyusername").unique(true));
