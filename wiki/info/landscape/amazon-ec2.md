@@ -73,7 +73,6 @@ SERVER_NAME=MYSPECIFICEVENT
 REPLICATION_CHANNEL=myspecificevent
 MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/myspecificevent?replicaSet=live&retryWrites=true"
 SERVER_STARTUP_NOTIFY=you@email.com
-ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Dcom.sap.sailing.domain.tracking.MailInvitationType=SailInsight2"
 </pre>
 
 - After your master server is ready, note the internal IP and configure your replica instances. Set up a user account there that has the following permission: ``SERVER:REPLICATE:{SERVERNAME}``. You will need this user's credentials to authenticate your replicas for replication.
@@ -97,7 +96,6 @@ SERVER_NAME=MYSPECIFICEVENT
 MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/myspecificevent-replica?replicaSet=live&retryWrites=true"
 EVENT_ID=&lt;some-uuid-of-an-event-you-want-to-feature&gt;
 SERVER_STARTUP_NOTIFY=you@email.com
-ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Dcom.sap.sailing.domain.tracking.MailInvitationType=SailInsight2"
 </pre>
 
 #### Setting up a Multi Instance
@@ -197,8 +195,6 @@ To set up a multi instance for a server with name "SSV", subdomain "ssv.sapsaili
 12. Change the admin password now and create a new user with admin role.
 
 13. Your multi instance is now configured and started. It can be reached over ec2-34-250-136-229.eu-west-1.compute.amazonaws.com:8888. 
-
-
 
 
 ##### Reachability

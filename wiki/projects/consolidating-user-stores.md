@@ -373,3 +373,25 @@ So the total sequence of commands for running the entire import/merge process is
         ./mergedbs.sh
 ```
 This produces all ``storemerge_....log`` files and a merge result in the ``mongodb://localhost:10203/security_service?replicaSet=live&retryWrites=true`` database. Again, search for WARNING and Exception in the logs, understand dropped objects and do some spot checks. Also validate by launching the ``security-service.sapsailing.com`` server and inspect security-related objects in the AdminConsole.
+
+### Updating the server instances
+
+The first step is to restart the security-service.sapsailing.com instance based on the new DB. It uses the following configuration options in its env.sh to expose the shared services:
+
+```
+ADDITIONAL_JAVA_ARGS=... -Dsecurity.sharedAcrossSubdomainsOf=sapsailing.com -Dsecurity.baseUrlForCrossDomainStorage=https://security-service.sapsailing.com -Dgwt.acceptableCrossDomainStorageRequestOriginRegexp=https?://(.*\.)?sapsailing\.com(:[0-9]*)?$
+REPLICATION_CHANNEL=security_service
+```
+
+A new user ``security-service-replicator`` has been added that has replication permissions for the ``security-service`` server. Other servers need to obtain an access token for that user and add it in their startup options as follows:
+
+```
+ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Dsecurity.sharedAcrossSubdomainsOf=sapsailing.com -Dsecurity.baseUrlForCrossDomainStorage=https://security-service.sapsailing.com -Dgwt.acceptableCrossDomainStorageRequestOriginRegexp=https?://(.*\.)?sapsailing\.com(:[0-9]*)?$"
+REPLICATE_ON_START=com.sap.sse.security.impl.SecurityServiceImpl,com.sap.sailing.shared.server.impl.SharedSailingDataImpl
+REPLICATE_MASTER_SERVLET_HOST=security-service.sapsailing.com
+REPLICATE_MASTER_SERVLET_PORT=443
+REPLICATE_MASTER_EXCHANGE_NAME=security_service
+REPLICATE_MASTER_BEARER_TOKEN="Gecx+W/dwFKRAxFbIvC/IMafEnJ8kTQF+MlYNVhEwD4="
+```
+
+These properties have now been appended to the env.sh files of the existing servers on the multi-instance set-up (including swisstimingtest, sailtracks, and tractractest). 
