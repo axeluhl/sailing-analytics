@@ -332,9 +332,9 @@ Should we implement a migration of Local Storage properties? If a server is conf
 
 ## The Actual Merging Process
 
-There is a new server instance ``security-service.sapsailing.com`` with MongoDB ``mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/security_service?replicaSet=live&retryWrites=true``. The initial contents of the DB were the copies of the security-related collections as taken from the ``ARCHIVE`` server, with DB connectivity string ``mongodb://dbserver.internal.sapsailing.com:10201/winddb?replicaSet=archive&retryWrites=true``. This process is encoded in the script ``copyarchivestore.sh``.
+There is a new server instance ``security-service.sapsailing.com`` with MongoDB ``mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/security_service?replicaSet=live&retryWrites=true``. The initial contents of the DB were the copies of the security-related collections as taken from the ``ARCHIVE`` server, with DB connectivity string ``mongodb://dbserver.internal.sapsailing.com:10201/winddb?replicaSet=archive&retryWrites=true``. This process is encoded in the script ``dbserver.internal.sapsailing.com:/var/lib/mongodb/security_service/copyarchivestore.sh``. A copy of this script can also be found in git under ``configuration/``. It uses the scripts ``export_security.sh`` and ``import_security.sh`` which are found in the same directory, respectively.
 
-An exported JAR file based on a launch configuration for the ``SecurityStoreMerger`` class has been placed under ``dbserver.internal.sapsailing.com:/var/lib/mongodb/security_service``. To merge, e.g., the ``VSAW`` database, use the following command:
+An exported JAR file based on a launch configuration (``MergeSecurityAndAccessControlStores.launch``) for the ``SecurityStoreMerger`` class has been placed under ``dbserver.internal.sapsailing.com:/var/lib/mongodb/security_service``. To merge, e.g., the ``VSAW`` database, use the following command:
 
 ```
       java -Dmongo.uri="mongodb://localhost:10203/security_service?replicaSet=live&retryWrites=true" -Ddefault.tenant.name=ARCHIVE-server -jar SecurityStoreMerger.jar "mongodb://localhost:10203/VSAW?replicaSet=live&retryWrites=true" VSAW-server 2>&1 | tee storemerge_VSAW.log      
