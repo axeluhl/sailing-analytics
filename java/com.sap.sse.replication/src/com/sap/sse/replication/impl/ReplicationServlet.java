@@ -342,7 +342,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
     private ReplicaDescriptor getReplicaDescriptor(HttpServletRequest req) throws UnknownHostException {
         final String forwardedFor = req.getHeader("X-Forwarded-For"); // could have come through a load balancer / reverse proxy
         final InetAddress ipAddress = forwardedFor != null && !forwardedFor.trim().isEmpty()
-                ? InetAddress.getByName(forwardedFor)
+                ? InetAddress.getByName(forwardedFor.split(",")[0].trim())
                 : InetAddress.getByName(req.getRemoteAddr());
         final UUID uuid = UUID.fromString(req.getParameter(SERVER_UUID));
         final String additional = req.getParameter(ADDITIONAL_INFORMATION);
