@@ -83,11 +83,11 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
     private static final DateTimeFormatter[] DATE_FORMATTERS = 
             new DateTimeFormatter[] {
                     DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"),
-                    DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS"),
-                    DateTimeFormatter.ISO_INSTANT
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS")                    
     };
     private static final DateTimeFormatter[] DATE_FORMATTERS_WITH_ZONE = 
             new DateTimeFormatter[] {
+                    DateTimeFormatter.ISO_INSTANT,
                     DateTimeFormatter.ISO_DATE_TIME,
                     DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssX"),
                     DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ"),

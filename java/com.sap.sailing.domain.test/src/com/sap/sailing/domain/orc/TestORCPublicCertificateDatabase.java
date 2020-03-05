@@ -49,18 +49,39 @@ public class TestORCPublicCertificateDatabase {
          * month as February.
          */
         dateComparisonMap.put("2019-02-21T10:38:59Z", Date.from(ZonedDateTime.parse("2019-02-21T10:38:59Z").toInstant()));
-        //        dateComparisonMap.put("2019-02-21T12:00:00.000GMT+2", Date.from(ZonedDateTime.of(2019, 2, 21, 10, 38, 59, 0, ZoneId.systemDefault()).toInstant()));
-        //        dateComparisonMap.put("2019-02-21T15:00:00.000 GMT-2", Date.from(ZonedDateTime.of(2019, 2, 21, 10, 38, 59, 0, ZoneId.systemDefault()).toInstant()));
-        //        dateComparisonMap.put("2019-02-21T10:38:55.000-0800", 
-        //                Date.from(ZonedDateTime.parse("2019-02-21T10:38:55.000-0800", DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ")).toInstant())
-        //                );
-        //        dateComparisonMap.put("2019-02-21T10:38:32.000+08:00", Date.from(ZonedDateTime.parse("2019-02-21T10:38:59Z").toInstant()));
-        //        dateComparisonMap.put("2019-02-21T10:38:09.000-06", new GregorianCalendar(2019, 1, 21, 21, 38, 9));
-        //        dateComparisonMap.put("2019-02-21T10:38:22.000Z", new GregorianCalendar(2019, 1, 21, 15, 38, 22));
-        //        dateComparisonMap.put("2019-02-21T10:38:00.000z", new GregorianCalendar(2019, 1, 21, 15, 38, 00));
-        //        dateComparisonMap.put("2019-02-21T10:38:46z", new GregorianCalendar(2019, 1, 21, 15, 38, 46));
-        //        dateComparisonMap.put("2019-02-21T10:38:17", new GregorianCalendar(2019, 1, 21, 15, 38, 17));
-//        dateComparisonMap.put("2019-02-21T10:38:33.000", new GregorianCalendar(2019, 1, 21, 15, 38, 33));
+        //                dateComparisonMap.put("2019-02-21T12:00:00.000GMT+2", Date.from(ZonedDateTime.of(2019, 2, 21, 10, 38, 59, 0, ZoneId.systemDefault()).toInstant()));
+        //        //        dateComparisonMap.put("2019-02-21T15:00:00.000 GMT-2", Date.from(ZonedDateTime.of(2019, 2, 21, 10, 38, 59, 0, ZoneId.systemDefault()).toInstant()));
+        dateComparisonMap.put("2019-02-21T10:38:55.000-0800", 
+                Date.from(ZonedDateTime.parse("2019-02-21T10:38:55.000-0800", DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ")).toInstant())
+                );
+        dateComparisonMap.put(
+                "2019-02-21T10:38:32.000+08:00", 
+                Date.from(ZonedDateTime.parse("2019-02-21T10:38:32.000+08:00").toInstant())
+                );
+        dateComparisonMap.put(
+                "2019-02-21T10:38:09.000-06", 
+                Date.from(ZonedDateTime.parse("2019-02-21T10:38:09.000-06", DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSx")).toInstant())
+                );
+        dateComparisonMap.put(
+                "2019-02-21T10:38:22.000Z", 
+                Date.from(ZonedDateTime.parse("2019-02-21T10:38:22.000Z").toInstant())
+                );
+        dateComparisonMap.put(
+                "2019-02-21T10:38:00.000z", 
+                Date.from(ZonedDateTime.parse("2019-02-21T10:38:00.000z").toInstant())
+                );
+        dateComparisonMap.put(
+                "2019-02-21T10:38:46z", 
+                Date.from(ZonedDateTime.parse("2019-02-21T10:38:46z").toInstant())
+                );
+        dateComparisonMap.put(
+                "2019-02-21T10:38:17", 
+                Date.from(LocalDateTime.parse("2019-02-21T10:38:17").toInstant(ZoneOffset.UTC))
+                );
+        dateComparisonMap.put(
+                "2019-02-21T10:38:33.000", 
+                Date.from(LocalDateTime.parse("2019-02-21T10:38:33.000").toInstant(ZoneOffset.UTC))
+                );
     }
     
     @Test
