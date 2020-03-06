@@ -20,19 +20,20 @@ public class ClientConfigurationServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-
+        
+        boolean debugDebranding = false;
+        if (req.getParameterMap().containsKey("whitelabel")) { // override with url parameter for testing usage only
+            debugDebranding = true;
+        }        
         
         final String servletPath = req.getServletPath();
         byte[] value = null;
-        if ((value = cache.get(servletPath)) != null) {
+        if (!debugDebranding && (value = cache.get(servletPath)) != null) {
             IOUtils.write(value, resp.getOutputStream());
             return;
         }
 
-        boolean deBrandingActive = Boolean.valueOf(System.getProperty("com.sap.sailing.debranding", "false"));
-        if (req.getParameterMap().containsKey("whitelabel")) { // override with url parameter for testing usage only
-            deBrandingActive = true;
-        }        
+        boolean deBrandingActive = Boolean.valueOf(System.getProperty("com.sap.sailing.debranding", "false")) || debugDebranding;
         
         String title = "";
         String faviconPath = "images/whitelabel.ico";
@@ -53,7 +54,9 @@ public class ClientConfigurationServlet extends HttpServlet {
 
             byte[] bytes = replaced.getBytes();
             IOUtils.write(bytes, resp.getOutputStream());
-            cache.computeIfAbsent(servletPath, key -> bytes);
+            if (!debugDebranding) {
+                cache.computeIfAbsent(servletPath, key -> bytes);
+            }
         }
     }
 
