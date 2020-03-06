@@ -38,7 +38,8 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sse.security.common,
  com.sap.sailing.shared.persistence
 Bundle-ClassPath: .
-Export-Package: com.sap.sailing.shared.server.impl;
+Export-Package: com.sap.sailing.shared.server,
+ com.sap.sailing.shared.server.impl;
   x-friends:="com.sap.sailing.mongodb.test,
    com.sap.sailing.server.test,
    com.sap.sailing.server.gateway.test,

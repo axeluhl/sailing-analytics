@@ -53,6 +53,7 @@ import com.sap.sailing.server.notification.impl.SailingNotificationServiceImpl;
 import com.sap.sailing.server.security.SailingViewerRole;
 import com.sap.sailing.server.statistics.TrackedRaceStatisticsCache;
 import com.sap.sailing.server.statistics.TrackedRaceStatisticsCacheImpl;
+import com.sap.sailing.shared.server.ReplicatingSharedSailingData;
 import com.sap.sse.MasterDataImportClassLoaderService;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.Util;

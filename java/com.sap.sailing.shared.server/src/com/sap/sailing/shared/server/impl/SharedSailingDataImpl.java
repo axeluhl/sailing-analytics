@@ -17,8 +17,6 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import org.osgi.util.tracker.ServiceTracker;
-
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
@@ -42,11 +40,13 @@ import com.sap.sailing.domain.coursetemplate.impl.TrackingDeviceBasedPositioning
 import com.sap.sailing.shared.persistence.DomainObjectFactory;
 import com.sap.sailing.shared.persistence.MongoObjectFactory;
 import com.sap.sailing.shared.persistence.device.DeviceIdentifierMongoHandler;
+import com.sap.sailing.shared.server.ReplicatingSharedSailingData;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.replication.FullyInitializedReplicableTracker;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.OperationWithResultWithIdWrapper;
@@ -69,7 +69,7 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     private final Map<UUID, MarkRole> markRolesById = new ConcurrentHashMap<>();
 
     private final TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder;
-    private final ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
+    private final FullyInitializedReplicableTracker<SecurityService> securityServiceTracker;
 
     // Replication related methods and fields
     private final ConcurrentHashMap<OperationExecutionListener<ReplicatingSharedSailingData>, OperationExecutionListener<ReplicatingSharedSailingData>> operationExecutionListeners = new ConcurrentHashMap<>();
@@ -87,7 +87,7 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
 
     public SharedSailingDataImpl(final DomainObjectFactory domainObjectFactory,
             final MongoObjectFactory mongoObjectFactory, TypeBasedServiceFinderFactory serviceFinderFactory,
-            ServiceTracker<SecurityService, SecurityService> securityServiceTracker) {
+            FullyInitializedReplicableTracker<SecurityService> securityServiceTracker) {
         this.currentlyFillingFromInitialLoad = false;
         this.domainObjectFactory = domainObjectFactory;
         this.mongoObjectFactory = mongoObjectFactory;
@@ -124,7 +124,11 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     }
 
     public SecurityService getSecurityService() {
-        return securityServiceTracker.getService();
+        try {
+            return securityServiceTracker.getInitializedService(0);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

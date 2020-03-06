@@ -602,6 +602,7 @@ import com.sap.sailing.server.operationaltransformation.UpdateSpecificRegatta;
 import com.sap.sailing.server.security.PermissionAwareRaceTrackingHandler;
 import com.sap.sailing.server.security.SailingViewerRole;
 import com.sap.sailing.server.util.WaitForTrackedRaceUtil;
+import com.sap.sailing.shared.server.ReplicatingSharedSailingData;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SimulationResults;
@@ -659,6 +660,7 @@ import com.sap.sse.pairinglist.PairingList;
 import com.sap.sse.pairinglist.PairingListTemplate;
 import com.sap.sse.pairinglist.impl.PairingListTemplateImpl;
 import com.sap.sse.qrcode.QRCodeGenerationUtil;
+import com.sap.sse.replication.FullyInitializedReplicableTracker;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicaDescriptor;
 import com.sap.sse.replication.Replicable;
@@ -707,7 +709,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     private static final long serialVersionUID = 9031688830194537489L;
 
-    private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
+    private final FullyInitializedReplicableTracker<RacingEventService> racingEventServiceTracker;
 
     private final ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker;
 
@@ -736,9 +738,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     private final ServiceTracker<DeviceIdentifierStringSerializationHandler, DeviceIdentifierStringSerializationHandler>
     deviceIdentifierStringSerializationHandlerTracker;
     
-    private final ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
+    private final FullyInitializedReplicableTracker<SecurityService> securityServiceTracker;
 
-    private final ServiceTracker<SharedSailingData, SharedSailingData> sharedSailingDataTracker;
+    private final FullyInitializedReplicableTracker<ReplicatingSharedSailingData> sharedSailingDataTracker;
     
     private final com.sap.sailing.domain.tractracadapter.persistence.MongoObjectFactory tractracMongoObjectFactory;
 
@@ -781,10 +783,14 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         BundleContext context = Activator.getDefault();
         Activator activator = Activator.getInstance();
         quickRanksLiveCache = new QuickRanksLiveCache(this);
-        racingEventServiceTracker = ServiceTrackerFactory.createAndOpen(context, RacingEventService.class);
-        sharedSailingDataTracker = ServiceTrackerFactory.createAndOpen(context, SharedSailingData.class);
-        windFinderTrackerFactoryServiceTracker = ServiceTrackerFactory.createAndOpen(context, WindFinderTrackerFactory.class);
         replicationServiceTracker = ServiceTrackerFactory.createAndOpen(context, ReplicationService.class);
+        racingEventServiceTracker = new FullyInitializedReplicableTracker<>(context, RacingEventService.class,
+                /* customizer */ null, replicationServiceTracker);
+        racingEventServiceTracker.open();
+        sharedSailingDataTracker = new FullyInitializedReplicableTracker<>(context, ReplicatingSharedSailingData.class,
+                /* service tracker customizer */ null, replicationServiceTracker);
+        sharedSailingDataTracker.open();
+        windFinderTrackerFactoryServiceTracker = ServiceTrackerFactory.createAndOpen(context, WindFinderTrackerFactory.class);
         resultUrlRegistryServiceTracker = ServiceTrackerFactory.createAndOpen(context, ResultUrlRegistry.class);
         swissTimingAdapterTracker = ServiceTrackerFactory.createAndOpen(context, SwissTimingAdapterFactory.class);
         tractracAdapterTracker = ServiceTrackerFactory.createAndOpen(context, TracTracAdapterFactory.class);
@@ -792,7 +798,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 RaceLogTrackingAdapterFactory.class);
         deviceIdentifierStringSerializationHandlerTracker = ServiceTrackerFactory.createAndOpen(context,
                 DeviceIdentifierStringSerializationHandler.class);
-        securityServiceTracker = ServiceTrackerFactory.createAndOpen(context, SecurityService.class);
+        securityServiceTracker = new FullyInitializedReplicableTracker<>(context, SecurityService.class,
+                /* service tracker customizer */ null, replicationServiceTracker);
+        securityServiceTracker.open();
         igtimiAdapterTracker = ServiceTrackerFactory.createAndOpen(context, IgtimiConnectionFactory.class);
         baseDomainFactory = getService().getBaseDomainFactory();
         mongoObjectFactory = getService().getMongoObjectFactory();
@@ -2780,7 +2788,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     protected RacingEventService getService() {
         try {
-            return racingEventServiceTracker.waitForService(0);
+            return racingEventServiceTracker.getInitializedService(0);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         } // grab the service
@@ -2788,7 +2796,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     protected SharedSailingData getSharedSailingData() {
         try {
-            return sharedSailingDataTracker.waitForService(0);
+            return sharedSailingDataTracker.getInitializedService(0);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         } // grab the service
@@ -2804,7 +2812,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     
     protected SecurityService getSecurityService() {
         try {
-            return securityServiceTracker.waitForService(0);
+            return securityServiceTracker.getInitializedService(0);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
