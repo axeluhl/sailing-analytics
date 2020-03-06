@@ -4,6 +4,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import com.sap.sailing.selenium.core.BySeleniumId;
+import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.HostPage;
 import com.sap.sailing.selenium.pages.HostPageWithAuthentication;
 import com.sap.sailing.selenium.pages.PageObject;
@@ -12,6 +13,42 @@ import com.sap.sailing.selenium.pages.PageObject;
  * {@link PageObject} representing the SAP Sailing home page.
  */
 public class HomePage extends HostPageWithAuthentication {
+    
+    @FindBy(how = BySeleniumId.class, using = "shortcutIcon")
+    private WebElement favIcon;
+    
+    @FindBy(how = BySeleniumId.class, using = "logoImage")
+    private WebElement sapSailingHeaderImage;
+
+    @FindBy(how=BySeleniumId.class, using ="logoAnchor")
+    private WebElement logoAnchor;
+
+    @FindBy(how=BySeleniumId.class, using ="solutionsPageLink")
+    private WebElement solutionsPageLink;
+
+    @FindBy(how=BySeleniumId.class, using ="socialFooter")
+    private WebElement socialMediaFooter;
+
+    @FindBy(how=BySeleniumId.class, using ="copyrightDiv")
+    private WebElement copyrightDiv;
+    
+    @FindBy(how=BySeleniumId.class, using = "imprintAnchorLink")
+    private WebElement imprintAnchorLink;
+    
+    @FindBy(how=BySeleniumId.class, using = "privacyAnchorLink")
+    private WebElement privacyAnchorLink;
+    
+    @FindBy(how=BySeleniumId.class, using = "sapJobsAnchor")
+    private WebElement sapJobsAnchor;
+
+    @FindBy(how = BySeleniumId.class, using = "feedbackAnchor")
+    private WebElement feedbackAnchor;
+    
+    @FindBy(how= BySeleniumId.class, using = "whatsNewAnchor")
+    private WebElement whatsNewAnchor;
+    
+    @FindBy(how=BySeleniumId.class, using ="languageSelector")
+    private WebElement languageSelector;
     
     /**
      * Navigates to the home page and provides the corresponding {@link PageObject}.
@@ -44,7 +81,7 @@ public class HomePage extends HostPageWithAuthentication {
     }
     
     public WebElement getFavicon() {
-        return driver.findElement(new BySeleniumId("shortcutIcon"));
+        return favIcon;
     }
     
     public String getPageTitle() {
@@ -52,39 +89,50 @@ public class HomePage extends HostPageWithAuthentication {
     }
     
     public WebElement getSapSailingHeaderImage() {
-        return driver.findElement(new BySeleniumId("logoImage"));
+        return sapSailingHeaderImage;
     }
     
     public WebElement getLogoAnchor() {
-        return driver.findElement(new BySeleniumId("logoAnchor"));
+        return logoAnchor;
     }
     
     public WebElement getSolutionsPageLink() {
-        return driver.findElement(new BySeleniumId("solutionsPageLink"));
+        return solutionsPageLink;
     }
     
     public WebElement getSocialmediaFooter() {
-        throw new RuntimeException("");
+        return socialMediaFooter;
     }
     
-    public WebElement getCopyrightLink() {
-        throw new RuntimeException("");
+    public WebElement getCopyrightDiv() {
+        return copyrightDiv;
+    }
+    
+    public WebElement getImprintLink() {
+        return imprintAnchorLink;
+    }
+
+    public WebElement getPrivacyLink() {
+        return privacyAnchorLink;
     }
     
     public WebElement getJobsLink() {
-        throw new RuntimeException("");
+        return sapJobsAnchor;
     }
     
     public WebElement getFeedbackLink() {
-        throw new RuntimeException("");    
+        return feedbackAnchor;
     }
     
     public WebElement getNewsLink() {
-        throw new RuntimeException("");
+        return whatsNewAnchor;
     }
     
     public WebElement getLanguageSelectionLabel() {
-        throw new RuntimeException("");
+        return languageSelector;
     }
     
+    public void clickOnEventsMenuItem() {
+        driver.findElement(new BySeleniumId("eventsPage")).click();
+    }
 }
