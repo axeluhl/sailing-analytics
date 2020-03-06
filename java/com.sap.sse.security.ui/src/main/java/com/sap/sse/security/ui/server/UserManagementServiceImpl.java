@@ -514,7 +514,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                     public User call() throws Exception {
                         if (userGroupExists(username + SecurityService.TENANT_SUFFIX)) {
                             throw new UserManagementException(
-                                    "User tenant already exists, please chose a different username!");
+                                    "User "+username+" already exists, please chose a different username!");
                         }
                         try {
                             User newUser = getSecurityService().createSimpleUser(username, email, password, fullName,

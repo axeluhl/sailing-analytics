@@ -62,6 +62,7 @@ import com.sap.sse.mail.queue.MailQueue;
 import com.sap.sse.mail.queue.impl.ExecutorMailQueue;
 import com.sap.sse.osgi.CachedOsgiTypeBasedServiceFinderFactory;
 import com.sap.sse.replication.Replicable;
+import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.security.SecurityInitializationCustomizer;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.interfaces.PreferenceConverter;
@@ -112,6 +113,8 @@ public class Activator implements BundleActivator {
     private ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
 
     private ServiceTracker<SharedSailingData, SharedSailingData> sharedSailingDataTracker;
+    
+    private ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker;
     
     public Activator() {
         clearPersistentCompetitors = Boolean
@@ -198,6 +201,7 @@ public class Activator implements BundleActivator {
         mailQueue.stop();
         mailServiceTracker.close();
         sharedSailingDataTracker.close();
+        replicationServiceTracker.close();
         securityServiceTracker.close();
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
         mbs.unregisterMBean(mBeanName);
@@ -236,10 +240,11 @@ public class Activator implements BundleActivator {
         // instead.
         serviceFinderFactory = new CachedOsgiTypeBasedServiceFinderFactory(context);
         sharedSailingDataTracker = ServiceTrackerFactory.createAndOpen(context, SharedSailingData.class);
+        replicationServiceTracker = ServiceTrackerFactory.createAndOpen(context, ReplicationService.class);
         racingEventService = new RacingEventServiceImpl(clearPersistentCompetitors,
                 serviceFinderFactory, trackedRegattaListener, notificationService,
                 trackedRaceStatisticsCache, restoreTrackedRaces, securityServiceTracker,
-                sharedSailingDataTracker);
+                sharedSailingDataTracker, replicationServiceTracker);
         notificationService.setRacingEventService(racingEventService);
         masterDataImportClassLoaderServiceTracker = new ServiceTracker<MasterDataImportClassLoaderService, MasterDataImportClassLoaderService>(
                 context, MasterDataImportClassLoaderService.class,

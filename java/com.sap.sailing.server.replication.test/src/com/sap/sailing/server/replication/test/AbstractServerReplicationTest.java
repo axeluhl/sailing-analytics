@@ -55,8 +55,10 @@ public abstract class AbstractServerReplicationTest extends com.sap.sse.replicat
                     @Override public DomainFactory getBaseDomainFactory() { return baseDomainFactory; }
                     @Override public CompetitorAndBoatStore getCompetitorAndBoatStore() { return getBaseDomainFactory().getCompetitorAndBoatStore(); }
                 };
-            }, MediaDBFactory.INSTANCE.getMediaDB(mongoDBService), EmptyWindStore.INSTANCE, EmptySensorFixStore.INSTANCE, null, null, /* sailingNotificationService */ null,
-                    /* trackedRaceStatisticsCache */ null, /* restoreTrackedRaces */ false, null, /* sharedSailingData */ null);
+            }, MediaDBFactory.INSTANCE.getMediaDB(mongoDBService), EmptyWindStore.INSTANCE,
+                    EmptySensorFixStore.INSTANCE, null, null, /* sailingNotificationService */ null,
+                    /* trackedRaceStatisticsCache */ null, /* restoreTrackedRaces */ false,
+                    /* security service tracker */ null, /* sharedSailingData */ null, /* replicationServiceTracker */ null);
         }
 
         @Override
@@ -74,9 +76,10 @@ public abstract class AbstractServerReplicationTest extends com.sap.sse.replicat
                             @Override public DomainFactory getBaseDomainFactory() { return domainObjectFactory.getBaseDomainFactory(); }
                             @Override public CompetitorAndBoatStore getCompetitorAndBoatStore() { return getBaseDomainFactory().getCompetitorAndBoatStore(); }
                         };
-                    }, MediaDBFactory.INSTANCE.getMediaDB(mongoDBService), EmptyWindStore.INSTANCE, EmptySensorFixStore.INSTANCE,
-                    /* serviceFinderFactory */ null, null, /* sailingNotificationService */ null,
-                    /* trackedRaceStatisticsCache */ null, /* restoreTrackedRaces */ false, null, /* sharedSailingData */ null);
+                    }, MediaDBFactory.INSTANCE.getMediaDB(mongoDBService), EmptyWindStore.INSTANCE,
+                    EmptySensorFixStore.INSTANCE, /* serviceFinderFactory */ null, null,
+                    /* sailingNotificationService */ null, /* trackedRaceStatisticsCache */ null,
+                    /* restoreTrackedRaces */ false, /* security service tracker */ null, /* sharedSailingData */ null, /* replicationServiceTracker */ null);
         }
     }
 }

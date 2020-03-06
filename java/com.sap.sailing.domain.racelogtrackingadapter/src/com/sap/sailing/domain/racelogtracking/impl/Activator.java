@@ -97,8 +97,11 @@ public class Activator implements BundleActivator {
                 racingEventServiceTracker, new SensorFixMapperFactoryImpl(sensorFixMapperTracker));
         registrations.add(context.registerService(TrackedRegattaListener.class,
                 regattaLogSensorDataTrackerTrackedRegattaListener, null));
+        final Dictionary<String, String> replicableServiceProperties = new Hashtable<>();
+        replicableServiceProperties.put(Replicable.OSGi_Service_Registry_ID_Property_Name,
+                regattaLogSensorDataTrackerTrackedRegattaListener.getId().toString());
         registrations.add(context.registerService(Replicable.class,
-                regattaLogSensorDataTrackerTrackedRegattaListener, null));
+                regattaLogSensorDataTrackerTrackedRegattaListener, replicableServiceProperties));
         new Thread(()->{
             try {
                 registrations.add(context.registerService(RaceTrackingConnectivityParametersHandler.class,

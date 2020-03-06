@@ -1,6 +1,8 @@
 package com.sap.sailing.shared.server.impl;
 
+import java.util.Dictionary;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Set;
 
 import org.osgi.framework.BundleActivator;
@@ -38,7 +40,10 @@ public class Activator implements BundleActivator {
         registrations.add(context.registerService(SharedSailingData.class, sharedSailingData, /* properties */ null));
         registrations
                 .add(context.registerService(ClearStateTestSupport.class, sharedSailingData, /* properties */ null));
-        registrations.add(context.registerService(Replicable.class, sharedSailingData, /* properties */ null));
+        final Dictionary<String, String> replicableServiceProperties = new Hashtable<>();
+        replicableServiceProperties.put(Replicable.OSGi_Service_Registry_ID_Property_Name,
+                sharedSailingData.getId().toString());
+        registrations.add(context.registerService(Replicable.class, sharedSailingData, /* properties */ replicableServiceProperties));
     }
 
     public static BundleContext getContext() {

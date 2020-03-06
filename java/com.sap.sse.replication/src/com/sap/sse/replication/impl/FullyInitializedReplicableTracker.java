@@ -34,24 +34,39 @@ import com.sap.sse.replication.ReplicationService;
  *            the type of {@link Replicable} to track
  */
 public class FullyInitializedReplicableTracker<R extends Replicable<?, ?>> extends ServiceTracker<R, R> {
+    /**
+     * Used to find the {@link ReplicationService}. If {@code null}, no attempt will be made to look
+     * for the {@link ReplicationService}, and only the replicable's {@link Replicable#isCurrentlyFillingFromInitialLoad()}
+     * result will be considered.
+     */
+    private final ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker;
+    
     public FullyInitializedReplicableTracker(BundleContext context, Class<R> clazz,
-            ServiceTrackerCustomizer<R, R> customizer) {
+            ServiceTrackerCustomizer<R, R> customizer,
+            ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker) {
         super(context, clazz, customizer);
+        this.replicationServiceTracker = replicationServiceTracker;
     }
 
     public FullyInitializedReplicableTracker(BundleContext context, Filter filter,
-            ServiceTrackerCustomizer<R, R> customizer) {
+            ServiceTrackerCustomizer<R, R> customizer,
+            ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker) {
         super(context, filter, customizer);
+        this.replicationServiceTracker = replicationServiceTracker;
     }
 
     public FullyInitializedReplicableTracker(BundleContext context, ServiceReference<R> reference,
-            ServiceTrackerCustomizer<R, R> customizer) {
+            ServiceTrackerCustomizer<R, R> customizer,
+            ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker) {
         super(context, reference, customizer);
+        this.replicationServiceTracker = replicationServiceTracker;
     }
 
     public FullyInitializedReplicableTracker(BundleContext context, String clazz,
-            ServiceTrackerCustomizer<R, R> customizer) {
+            ServiceTrackerCustomizer<R, R> customizer,
+            ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker) {
         super(context, clazz, customizer);
+        this.replicationServiceTracker = replicationServiceTracker;
     }
 
     @Override
