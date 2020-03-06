@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.desktop.partials.footer;
 
 import static com.google.gwt.dom.client.Style.Display.NONE;
+import static com.sap.sse.gwt.shared.DebugConstants.DEBUG_ID_ATTRIBUTE;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;
@@ -22,6 +23,7 @@ import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.controls.languageselect.LanguageSelector;
 import com.sap.sse.gwt.shared.Branding;
+import com.sap.sse.gwt.shared.DebugConstants;
 
 public class Footer extends Composite {
     private static FooterPanelUiBinder uiBinder = GWT.create(FooterPanelUiBinder.class);
@@ -67,6 +69,13 @@ public class Footer extends Composite {
             imprintAnchorLink.getStyle().setDisplay(Display.NONE);
             privacyAnchorLink.getStyle().setDisplay(Display.NONE);
         }
+        copyrightDiv.setAttribute(DebugConstants.DEBUG_ID_ATTRIBUTE, "copyrightDiv");
+        sapJobsAnchor.setAttribute(DEBUG_ID_ATTRIBUTE, "sapJobsAnchor");
+        feedbackAnchor.setAttribute(DEBUG_ID_ATTRIBUTE, "feedbackAnchor");
+        whatsNewAnchor.setAttribute(DEBUG_ID_ATTRIBUTE, "whatsNewAnchor");
+        imprintAnchorLink.setAttribute(DEBUG_ID_ATTRIBUTE, "imprintAnchorLink");
+        privacyAnchorLink.setAttribute(DEBUG_ID_ATTRIBUTE, "privacyAnchorLink");
+        languageSelector.getElement().setAttribute(DEBUG_ID_ATTRIBUTE, "languageSelector");
     }
     
 }

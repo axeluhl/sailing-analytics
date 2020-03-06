@@ -166,6 +166,7 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 import com.sap.sse.gwt.shared.Branding;
+import com.sap.sse.gwt.shared.DebugConstants;
 
 public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> implements TimeListener, CompetitorSelectionChangeListener,
         RaceTimesInfoProviderListener, TailFactory, ColorMapperChangedListener, RequiresDataInitialization, RequiresResize, QuickRankProvider {
@@ -3216,6 +3217,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             }
         });
         sapLogo.setStyleName("raceBoard-Logo");
+        sapLogo.getElement().setAttribute(DebugConstants.DEBUG_ID_ATTRIBUTE, "raceBoardSapLogo");
         return sapLogo;
     }
 

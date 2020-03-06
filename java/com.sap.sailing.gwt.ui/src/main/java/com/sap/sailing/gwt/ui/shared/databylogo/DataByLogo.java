@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.tracking.TrackingConnectorType;
 import com.sap.sailing.gwt.ui.shared.TrackingConnectorInfoDTO;
 import com.sap.sse.gwt.shared.Branding;
+import com.sap.sse.gwt.shared.DebugConstants;
 
 public class DataByLogo extends Widget {
 
@@ -33,6 +34,7 @@ public class DataByLogo extends Widget {
         if (!Branding.getInstance().isActive()) {
             dataByContainer.getStyle().setDisplay(Display.NONE);
         }
+        dataByContainer.setAttribute(DebugConstants.DEBUG_ID_ATTRIBUTE, "dataByContainer");
     }
 
     public void setUp(Set<TrackingConnectorInfoDTO> trackingConnectorInfos, boolean colorIfPossible,

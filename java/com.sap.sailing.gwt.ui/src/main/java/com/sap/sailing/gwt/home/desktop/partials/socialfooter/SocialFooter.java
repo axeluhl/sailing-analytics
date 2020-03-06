@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.desktop.partials.socialfooter;
 
 import static com.google.gwt.dom.client.Style.Display.NONE;
+import static com.sap.sse.gwt.shared.DebugConstants.DEBUG_ID_ATTRIBUTE;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -26,6 +27,7 @@ public class SocialFooter extends Composite {
         if (!Branding.getInstance().isActive()) {
             htmlPanel.getElement().getStyle().setDisplay(NONE);
         }
+        htmlPanel.getElement().setAttribute(DEBUG_ID_ATTRIBUTE, "socialFooter");
     }
 
 }

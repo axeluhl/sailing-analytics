@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.home.desktop.partials.header;
 
+import static com.sap.sse.gwt.shared.DebugConstants.DEBUG_ID_ATTRIBUTE;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -112,8 +114,9 @@ public class Header extends Composite {
         }
         
         logoImage.setAttribute(DebugConstants.DEBUG_ID_ATTRIBUTE, "logoImage");
-        solutionsPageLink.getElement().setAttribute(DebugConstants.DEBUG_ID_ATTRIBUTE, "solutionsPageLink");
-        logoAnchor.setAttribute(DEBUG_ID_PREFIX, "logoAnchor");
+        solutionsPageLink.getElement().setAttribute(DEBUG_ID_ATTRIBUTE, "solutionsPageLink");
+        logoAnchor.setAttribute(DEBUG_ID_ATTRIBUTE, "logoAnchor");
+        eventsPageLink.getElement().setAttribute(DEBUG_ID_ATTRIBUTE, "eventsPage");
     }
 
     @UiHandler("startPageLink")
