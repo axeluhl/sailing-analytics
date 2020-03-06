@@ -32,6 +32,7 @@ import com.sap.sailing.domain.coursetemplate.MarkTemplate.MarkTemplateResolver;
 import com.sap.sailing.domain.coursetemplate.Positioning;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
+import com.sap.sailing.domain.coursetemplate.impl.CommonMarkPropertiesImpl;
 import com.sap.sailing.domain.coursetemplate.impl.CourseTemplateImpl;
 import com.sap.sailing.domain.coursetemplate.impl.FixedPositioningImpl;
 import com.sap.sailing.domain.coursetemplate.impl.MarkPropertiesImpl;
@@ -219,7 +220,11 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
                 MarkProperties.getTypeRelativeObjectIdentifier(idOfNewMarkProperties),
                 idOfNewMarkProperties + "/" + properties.getName(), () -> {
                     final UUID idOfNewMarkPropertiesForReplication = idOfNewMarkProperties;
-                    final CommonMarkProperties propertiesForReplication = properties;
+                    // important: CommonMarkProperties can be a variety of objects, particularly MarkImpl
+                    // which would try to resolve against SharedDomainFactory which is not what this Replicable's
+                    // object input stream resolves against. So clone into a CommonMarkPropertiesImpl
+                    // which doesn't need resolution
+                    final CommonMarkProperties propertiesForReplication = new CommonMarkPropertiesImpl(properties);
                     final Iterable<String> tagsForReplication = tags;
                     apply(s -> s.internalCreateMarkProperties(idOfNewMarkPropertiesForReplication,
                             propertiesForReplication, tagsForReplication));
@@ -245,7 +250,12 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
         }
         if (markProperties != properties) { // no update required if same object
             getSecurityService().checkCurrentUserUpdatePermission(markProperties);
-            apply(s -> s.internalUpdateMarkProperties(uuid, properties, tags));
+            // important: CommonMarkProperties can be a variety of objects, particularly MarkImpl
+            // which would try to resolve against SharedDomainFactory which is not what this Replicable's
+            // object input stream resolves against. So clone into a CommonMarkPropertiesImpl
+            // which doesn't need resolution
+            final CommonMarkProperties commonMarkPropertiesForSerialization = new CommonMarkPropertiesImpl(properties);
+            apply(s -> s.internalUpdateMarkProperties(uuid, commonMarkPropertiesForSerialization, tags));
         }
         return getMarkPropertiesById(uuid);
     }
@@ -323,7 +333,11 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
                 SecuredDomainType.MARK_TEMPLATE, MarkTemplate.getTypeRelativeObjectIdentifier(idOfNewMarkTemplate),
                 idOfNewMarkTemplate + "/" + properties.getName(), () -> {
                     final UUID idOfNewMarkTemplateForReplication = idOfNewMarkTemplate;
-                    final CommonMarkProperties propertiesForReplication = properties;
+                    // important: CommonMarkProperties can be a variety of objects, particularly MarkImpl
+                    // which would try to resolve against SharedDomainFactory which is not what this Replicable's
+                    // object input stream resolves against. So clone into a CommonMarkPropertiesImpl
+                    // which doesn't need resolution
+                    final CommonMarkProperties propertiesForReplication = new CommonMarkPropertiesImpl(properties);
                     apply(s -> s.internalCreateMarkTemplate(idOfNewMarkTemplateForReplication,
                             propertiesForReplication));
                 });
@@ -607,6 +621,7 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     public synchronized void initiallyFillFromInternal(ObjectInputStream is)
             throws IOException, ClassNotFoundException, InterruptedException {
         markTemplatesById.putAll((Map<UUID, MarkTemplate>) is.readObject());
+        markRolesById.putAll((Map<UUID, MarkRole>) is.readObject());
         markPropertiesById.putAll((Map<UUID, MarkProperties>) is.readObject());
         courseTemplatesById.putAll((Map<UUID, CourseTemplate>) is.readObject());
     }
@@ -614,6 +629,7 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     @Override
     public void serializeForInitialReplicationInternal(ObjectOutputStream objectOutputStream) throws IOException {
         objectOutputStream.writeObject(markTemplatesById);
+        objectOutputStream.writeObject(markRolesById);
         objectOutputStream.writeObject(markPropertiesById);
         objectOutputStream.writeObject(courseTemplatesById);
     }
