@@ -307,7 +307,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
             throws ClassNotFoundException, IOException, InvocationTargetException {
         ClassLoader oldContextClassLoader = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(replicable.getClass().getClassLoader());
-        OperationWithResult<S, ?> operation = replicable.readOperation(is);
+        OperationWithResult<S, ?> operation = replicable.readOperation(is); // TODO add logging in case of a de-serialization exception
         Thread.currentThread().setContextClassLoader(oldContextClassLoader);
         logger.info("Applying operation of type " + operation.getClass().getName()
                 + " received from replica to replicable " + replicable.toString());
