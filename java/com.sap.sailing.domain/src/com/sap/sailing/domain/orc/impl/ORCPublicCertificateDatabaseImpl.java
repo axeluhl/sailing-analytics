@@ -1,9 +1,7 @@
 package com.sap.sailing.domain.orc.impl;
 
 import java.io.InputStream;
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -83,7 +81,7 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
     private static final DateTimeFormatter[] DATE_FORMATTERS = 
             new DateTimeFormatter[] {
                     DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"),
-                    DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS")                    
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS")
     };
     private static final DateTimeFormatter[] DATE_FORMATTERS_WITH_ZONE = 
             new DateTimeFormatter[] {

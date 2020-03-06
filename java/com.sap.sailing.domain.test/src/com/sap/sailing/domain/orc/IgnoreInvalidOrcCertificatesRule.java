@@ -1,6 +1,11 @@
 package com.sap.sailing.domain.orc;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
@@ -28,6 +33,12 @@ import com.sap.sse.common.CountryCodeFactory;
 
 public class IgnoreInvalidOrcCertificatesRule implements TestRule {
     private ORCPublicCertificateDatabase db = new ORCPublicCertificateDatabaseImpl();
+    
+    private List<ORCCertificate> availableCerts;
+
+    public Collection<ORCCertificate> getAvailableCerts() {
+        return Collections.unmodifiableCollection(availableCerts);
+    }
 
     @Override
     public Statement apply(Statement base, Description description) {
@@ -41,6 +52,7 @@ public class IgnoreInvalidOrcCertificatesRule implements TestRule {
         public IgnorableStatement(Statement base, Description description) {
             this.base = base;
             this.description = description;
+            availableCerts = new ArrayList<>();
         }
 
         /***
@@ -59,6 +71,7 @@ public class IgnoreInvalidOrcCertificatesRule implements TestRule {
                     try {
                         Iterable<CertificateHandle> certificateHandles = db.search(cc, year, null, null, null, null);
                         Iterable<ORCCertificate> orcCertificates = db.getCertificates(certificateHandles);
+                        orcCertificates.forEach(availableCerts::add);
                         if (orcCertificates.iterator().hasNext()) {
                             certificateExists = true;
                             break;
@@ -72,5 +85,7 @@ public class IgnoreInvalidOrcCertificatesRule implements TestRule {
             Assert.assertTrue(certificateExists);
             base.evaluate();
         }
+        
+        
     }
 }

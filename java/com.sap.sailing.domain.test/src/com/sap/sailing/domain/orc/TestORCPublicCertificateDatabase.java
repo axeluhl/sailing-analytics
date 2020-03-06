@@ -5,11 +5,11 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -25,14 +26,13 @@ import java.util.concurrent.Future;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.orc.ORCPublicCertificateDatabase.CertificateHandle;
 import com.sap.sailing.domain.orc.impl.ORCPublicCertificateDatabaseImpl;
-import com.sap.sse.common.CountryCode;
-import com.sap.sse.common.CountryCodeFactory;
 import com.sap.sse.common.Util;
 
 public class TestORCPublicCertificateDatabase {
@@ -40,6 +40,9 @@ public class TestORCPublicCertificateDatabase {
     private Map<String, Date> dateComparisonMap = new LinkedHashMap<String, Date>();
     private List<String> dateFailureCases = Arrays.asList("2019-02-21T10:44GMT+2","2019-02-21T10:38+0800","2019-02-21T10:38+08:00",
             "2019-02-21T10:38-08","2019-02-21T10:38Z","2019-02-21T10z","2019-02-21T10:38z");
+    
+    @Rule
+    public IgnoreInvalidOrcCertificatesRule customIgnoreRule = new IgnoreInvalidOrcCertificatesRule();
     
     @Before
     public void setUp() {
@@ -129,13 +132,19 @@ public class TestORCPublicCertificateDatabase {
     }
 
     // TODO this test will probably break 2020 when 2019 certificates will no longer be returned as valid...
+    @IgnoreInvalidOrcCertificates
     @Test
-    public void testGetCertificate() throws Exception {
-        final String referenceNumber = "FRA00013881";
+    public void testGetCertificate() throws Exception {        
+        Collection<ORCCertificate> certificates = customIgnoreRule.getAvailableCerts();
+        final ORCCertificate cert = certificates.stream().findFirst().get();
+        Iterable<CertificateHandle> certHandles = db.search(null, LocalDate.now().getYear(), null, cert.getBoatName(), cert.getSailNumber(), cert.getBoatClassName());
+        Optional<CertificateHandle> certificateHandle = Optional.ofNullable(certHandles.iterator().hasNext() ? certHandles.iterator().next() : null);
+        assertTrue(certificateHandle.isPresent());
+        final String referenceNumber = certificateHandle.get().getReferenceNumber();
         final CertificateHandle handle = db.getCertificateHandle(referenceNumber);
         final ORCCertificate result = db.getCertificate(referenceNumber);
         assertEquals(handle.getGPH(), result.getGPH().asSeconds(), 0.00001);
-        assertEquals(handle.getIssueDate(), result.getIssueDate());
+        assertEquals(handle.getIssueDate().asMillis(), result.getIssueDate().asMillis(), 1000.0);
         assertEquals(handle.getSailNumber(), result.getSailNumber());
     }
     
@@ -143,26 +152,12 @@ public class TestORCPublicCertificateDatabase {
     @Test
     public void testParallelFuzzySearch() throws InterruptedException, ExecutionException {
         int year = LocalDate.now().getYear();
-        ArrayList<ORCCertificate> certificates = new ArrayList<ORCCertificate>();
-        for (CountryCode cc : CountryCodeFactory.INSTANCE.getAll()) {
-            try {
-                Iterable<CertificateHandle> certificateHandles = db.search(cc, year, null, null, null, null);
-                Iterable<ORCCertificate> orcCertificates = db.getCertificates(certificateHandles);
-                if (certificates.size() == 2) {// certificates size set to two as we are trying to test the
-                    // parallel search functionality
-                    break;
-                }
-                orcCertificates.forEach(certificates::add);
-            } catch (Exception ex) {
-                // Exceptions are ignored because we are searching for any countries orc certificate's availability.
-            }
-        }
         ArrayList<Future<Set<ORCCertificate>>> futures = new ArrayList<Future<Set<ORCCertificate>>>();
-        for (ORCCertificate orcCertificate : certificates) {
+        boolean isYearFound = false;
+        for (ORCCertificate orcCertificate : customIgnoreRule.getAvailableCerts()) {
             futures.add(db.search(orcCertificate.getBoatName(), orcCertificate.getSailNumber(),
                     new BoatClassImpl(orcCertificate.getBoatClassName(), true)));
         }
-        boolean isYearFound = false;
         for (Future<Set<ORCCertificate>> futureResult : futures) {
             isYearFound = isYearFound || assertFoundYear(futureResult.get(), year);
         }
