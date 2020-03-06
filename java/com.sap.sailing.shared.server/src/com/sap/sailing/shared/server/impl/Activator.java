@@ -38,6 +38,7 @@ public class Activator implements BundleActivator {
                 PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(serviceFinderFactory), serviceFinderFactory,
                 securityServiceTracker);
         registrations.add(context.registerService(SharedSailingData.class, sharedSailingData, /* properties */ null));
+        registrations.add(context.registerService(ReplicatingSharedSailingData.class, sharedSailingData, /* properties */ null));
         registrations
                 .add(context.registerService(ClearStateTestSupport.class, sharedSailingData, /* properties */ null));
         final Dictionary<String, String> replicableServiceProperties = new Hashtable<>();

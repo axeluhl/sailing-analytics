@@ -1,4 +1,7 @@
-package com.sap.sse.replication.impl;
+package com.sap.sse.replication;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
@@ -6,8 +9,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
-import com.sap.sse.replication.Replicable;
-import com.sap.sse.replication.ReplicationService;
+import com.sap.sse.replication.ReplicationService.ReplicationStartingListener;
 
 /**
  * While a regular OSGi {@link ServiceTracker} would {@link ServiceTracker#waitForService(long) wait} for the service's
@@ -68,19 +70,60 @@ public class FullyInitializedReplicableTracker<R extends Replicable<?, ?>> exten
         super(context, clazz, customizer);
         this.replicationServiceTracker = replicationServiceTracker;
     }
-
-    @Override
-    public R waitForService(long timeout) throws InterruptedException {
-        final R replicable = super.waitForService(timeout);
-        // TODO bug4006: continue here...
-//        waitForReplicationServiceToBeReady();
-//        waitForReplicableToBeFullyInitialized(replicable);
-        return replicable;
+    
+    /**
+     * @param timeoutInMillis
+     *            0 means indefinite waiting time
+     * @return {@code true} if the {@link #replicationServiceTracker} is {@code null} or the {@link ReplicationService}
+     *         was obtained successfully and has been in or has reached the state of not
+     *         {@link ReplicationService#isReplicationStarting()} within the timeout provided. {@code false} otherwise.
+     */
+    private boolean waitForReplicationToBeInitialized(long timeoutInMillis) throws InterruptedException {
+        final boolean result;
+        if (replicationServiceTracker != null) {
+            final CountDownLatch latch = new CountDownLatch(1); // counted down either by the direct check or the listener
+            final ReplicationService replicationService = replicationServiceTracker.waitForService(timeoutInMillis);
+            final ReplicationStartingListener replicationStartingListener = newIsReplicationStarting->{
+                if (!newIsReplicationStarting) {
+                    latch.countDown();
+                }
+            };
+            replicationService.addReplicationStartingListener(replicationStartingListener);
+            if (!replicationService.isReplicationStarting()) {
+                latch.countDown();
+            }
+            result = latch.await(timeoutInMillis, TimeUnit.MILLISECONDS);
+            replicationService.removeReplicationStartingListener(replicationStartingListener);
+        } else {
+            result = true;
+        }
+        return result;
     }
 
-    @Override
-    public R getService(ServiceReference<R> reference) {
-        // TODO Implement FullyInitializedReplicableTracker.getService(...)
-        return super.getService(reference);
+    /**
+     * Waits for one service object tracked to appear for {@code timeoutInMillis} milliseconds (see
+     * {@link #waitForService(long)}). If no such service object can be found before timing out, {@code null}
+     * is returned. Once a service object has been retrieved and a non-{@code null} {@link #replicationServiceTracker}
+     * has been provided at construction time, the {@link ReplicationService} is obtained from that tracker by
+     * waiting for it at least {@code timeoutInMillis} milliseconds and then 
+     * 
+     * @param timeoutInMillis
+     *            0 means indefinite wait time
+     * @return {@code null} if no service was obtained from the registry in the timeout specified or the replication did
+     *         not reach a fully initialized state in the timeout specified.
+     */
+    public R getInitializedService(long timeoutInMillis) throws InterruptedException {
+        final R service = waitForService(timeoutInMillis);
+        final R result;
+        if (service != null) {
+            if (waitForReplicationToBeInitialized(timeoutInMillis)) {
+                result = service;
+            } else {
+                result = null;
+            }
+        } else {
+            result = null;
+        }
+        return result;
     }
 }

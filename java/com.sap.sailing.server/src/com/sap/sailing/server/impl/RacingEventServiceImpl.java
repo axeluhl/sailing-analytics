@@ -186,7 +186,6 @@ import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
-import com.sap.sailing.domain.sharedsailingdata.SharedSailingData;
 import com.sap.sailing.domain.statistics.Statistics;
 import com.sap.sailing.domain.tracking.AddResult;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
@@ -305,6 +304,7 @@ import com.sap.sse.pairinglist.PairingFrameProvider;
 import com.sap.sse.pairinglist.PairingList;
 import com.sap.sse.pairinglist.PairingListTemplate;
 import com.sap.sse.pairinglist.PairingListTemplateFactory;
+import com.sap.sse.replication.FullyInitializedReplicableTracker;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.OperationWithResultWithIdWrapper;
@@ -556,10 +556,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      */
     private OperationsToMasterSendingQueue unsentOperationsToMasterSender;
 
-    private final ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
+    private final FullyInitializedReplicableTracker<SecurityService> securityServiceTracker;
     
-    private final ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker;
-
     private final CourseAndMarkConfigurationFactory courseAndMarkConfigurationFactory;
 
     /**
@@ -628,8 +626,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             final TypeBasedServiceFinderFactory serviceFinderFactory, TrackedRegattaListenerManager trackedRegattaListener,
             SailingNotificationService sailingNotificationService,
             TrackedRaceStatisticsCache trackedRaceStatisticsCache, boolean restoreTrackedRaces,
-            ServiceTracker<SecurityService, SecurityService> securityServiceTracker,
-            ServiceTracker<SharedSailingData, SharedSailingData> sharedSailingDataTracker, ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker) {
+            FullyInitializedReplicableTracker<SecurityService> securityServiceTracker,
+            FullyInitializedReplicableTracker<ReplicatingSharedSailingData> sharedSailingDataTracker, ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker) {
         this((final RaceLogAndTrackedRaceResolver raceLogResolver) -> {
             return new ConstructorParameters() {
                 private final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE
@@ -761,13 +759,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             TypeBasedServiceFinderFactory serviceFinderFactory, TrackedRegattaListenerManager trackedRegattaListener,
             SailingNotificationService sailingNotificationService,
             TrackedRaceStatisticsCache trackedRaceStatisticsCache, boolean restoreTrackedRaces,
-            ServiceTracker<SecurityService, SecurityService> securityServiceTracker,
-            ServiceTracker<SharedSailingData, SharedSailingData> sharedSailingDataTracker,
+            FullyInitializedReplicableTracker<SecurityService> securityServiceTracker,
+            FullyInitializedReplicableTracker<ReplicatingSharedSailingData> sharedSailingDataTracker,
             ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker) {
         logger.info("Created " + this);
         this.currentlyFillingFromInitialLoad = false;
         this.securityServiceTracker = securityServiceTracker;
-        this.replicationServiceTracker = replicationServiceTracker;
         this.numberOfTrackedRacesRestored = new AtomicInteger();
         this.scoreCorrectionListenersByLeaderboard = new ConcurrentHashMap<>();
         this.connectivityParametersByRace = new ConcurrentHashMap<>();
@@ -4686,7 +4683,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public SecurityService getSecurityService() {
         try {
-            return securityServiceTracker.waitForService(0);
+            return securityServiceTracker.getInitializedService(0);
         } catch (InterruptedException e) {
             logger.severe("Interrupted while waiting for security service; returning null");
             return null;

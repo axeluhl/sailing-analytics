@@ -40,7 +40,6 @@ import com.sap.sailing.domain.persistence.racelog.tracking.impl.GPSFixMongoHandl
 import com.sap.sailing.domain.persistence.racelog.tracking.impl.GPSFixMovingMongoHandlerImpl;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStoreSupplier;
-import com.sap.sailing.domain.sharedsailingdata.SharedSailingData;
 import com.sap.sailing.domain.tracking.TrackedRegattaListener;
 import com.sap.sailing.domain.windestimation.WindEstimationFactoryService;
 import com.sap.sailing.server.RacingEventServiceMXBean;
@@ -61,6 +60,7 @@ import com.sap.sse.mail.MailService;
 import com.sap.sse.mail.queue.MailQueue;
 import com.sap.sse.mail.queue.impl.ExecutorMailQueue;
 import com.sap.sse.osgi.CachedOsgiTypeBasedServiceFinderFactory;
+import com.sap.sse.replication.FullyInitializedReplicableTracker;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.security.SecurityInitializationCustomizer;
@@ -110,9 +110,9 @@ public class Activator implements BundleActivator {
 
     private ServiceTracker<MailService, MailService> mailServiceTracker;
 
-    private ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
+    private FullyInitializedReplicableTracker<SecurityService> securityServiceTracker;
 
-    private ServiceTracker<SharedSailingData, SharedSailingData> sharedSailingDataTracker;
+    private FullyInitializedReplicableTracker<ReplicatingSharedSailingData> sharedSailingDataTracker;
     
     private ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker;
     
@@ -131,7 +131,13 @@ public class Activator implements BundleActivator {
         extenderBundleTracker = new ExtenderBundleTracker(context);
         extenderBundleTracker.open();
         mailServiceTracker = ServiceTrackerFactory.createAndOpen(context, MailService.class);
-        securityServiceTracker = ServiceTrackerFactory.createAndOpen(context, SecurityService.class);
+        replicationServiceTracker = ServiceTrackerFactory.createAndOpen(context, ReplicationService.class);
+        sharedSailingDataTracker = new FullyInitializedReplicableTracker<>(context, ReplicatingSharedSailingData.class,
+                /* customizer */ null, replicationServiceTracker);
+        sharedSailingDataTracker.open();
+        securityServiceTracker = new FullyInitializedReplicableTracker<>(context, SecurityService.class,
+                /* customizer */ null, replicationServiceTracker);
+        securityServiceTracker.open();
         if (securityServiceTracker != null) {
             new Thread("Racingevent wait for securityservice for migration thread") {
                 public void run() {
@@ -239,8 +245,6 @@ public class Activator implements BundleActivator {
         // this code block is not run, and the test case can inject some other type of finder
         // instead.
         serviceFinderFactory = new CachedOsgiTypeBasedServiceFinderFactory(context);
-        sharedSailingDataTracker = ServiceTrackerFactory.createAndOpen(context, SharedSailingData.class);
-        replicationServiceTracker = ServiceTrackerFactory.createAndOpen(context, ReplicationService.class);
         racingEventService = new RacingEventServiceImpl(clearPersistentCompetitors,
                 serviceFinderFactory, trackedRegattaListener, notificationService,
                 trackedRaceStatisticsCache, restoreTrackedRaces, securityServiceTracker,

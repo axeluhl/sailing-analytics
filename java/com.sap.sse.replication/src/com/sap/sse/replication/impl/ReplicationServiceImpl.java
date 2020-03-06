@@ -48,7 +48,6 @@ import com.sap.sse.replication.ReplicablesProvider.ReplicableLifeCycleListener;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationReceiver;
 import com.sap.sse.replication.ReplicationService;
-import com.sap.sse.replication.ReplicationService.ReplicationStartingListener;
 import com.sap.sse.replication.ReplicationStatus;
 import com.sap.sse.replication.persistence.MongoObjectFactory;
 import com.sap.sse.util.HttpUrlConnectionHelper;
