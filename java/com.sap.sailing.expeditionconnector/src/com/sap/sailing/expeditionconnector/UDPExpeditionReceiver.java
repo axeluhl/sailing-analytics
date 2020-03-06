@@ -38,6 +38,23 @@ public class UDPExpeditionReceiver extends UDPReceiver<ExpeditionMessage, Expedi
      * Otherwise, only wind data will be forwarded.
      */
     private final DeviceRegistry deviceRegistry;
+    
+    private final static Map<Integer, ExpeditionExtendedSensorDataMetadata> mapExpeditionMessageFieldIdToMetadata;
+    
+    static {
+        mapExpeditionMessageFieldIdToMetadata = new HashMap<>();
+        mapExpeditionMessageFieldIdToMetadata.put(ExpeditionMessage.ID_ROLL, ExpeditionExtendedSensorDataMetadata.HEEL);
+        mapExpeditionMessageFieldIdToMetadata.put(ExpeditionMessage.ID_PITCH, ExpeditionExtendedSensorDataMetadata.TRIM);
+        mapExpeditionMessageFieldIdToMetadata.put(ExpeditionMessage.ID_RUDDER, ExpeditionExtendedSensorDataMetadata.RUDDER);
+        mapExpeditionMessageFieldIdToMetadata.put(ExpeditionMessage.ID_TACK_ANGLE, ExpeditionExtendedSensorDataMetadata.TACK_ANGLE);
+        mapExpeditionMessageFieldIdToMetadata.put(ExpeditionMessage.ID_RAKE_DEG, ExpeditionExtendedSensorDataMetadata.RAKE_DEG);
+        mapExpeditionMessageFieldIdToMetadata.put(ExpeditionMessage.ID_DFLCTR_PP, ExpeditionExtendedSensorDataMetadata.DEFLECTOR_PERCENTAGE);
+        mapExpeditionMessageFieldIdToMetadata.put(ExpeditionMessage.ID_TG_HEEL, ExpeditionExtendedSensorDataMetadata.TARGET_HEEL);
+        mapExpeditionMessageFieldIdToMetadata.put(ExpeditionMessage.ID_FORESTAY_LOAD, ExpeditionExtendedSensorDataMetadata.FORESTAY_LOAD);
+        mapExpeditionMessageFieldIdToMetadata.put(ExpeditionMessage.ID_FORESTAY_PRES, ExpeditionExtendedSensorDataMetadata.FORESTAY_PRESSURE);
+        mapExpeditionMessageFieldIdToMetadata.put(ExpeditionMessage.ID_DFLECTR_MM, ExpeditionExtendedSensorDataMetadata.DEFLECTOR_MILLIMETERS);
+        mapExpeditionMessageFieldIdToMetadata.put(ExpeditionMessage.ID_TARG_BSP_P, ExpeditionExtendedSensorDataMetadata.TARGET_BOATSPEED_P);
+    }
 
     /**
      * Launches a listener and dumps messages received to the console
@@ -100,19 +117,6 @@ public class UDPExpeditionReceiver extends UDPReceiver<ExpeditionMessage, Expedi
      * store in the {@link DeviceRegistry#getSensorFixStore() sensor fix store}.
      */
     private void tryToProduceAndStoreSensorFix(ExpeditionMessage msg, ExpeditionSensorDeviceIdentifier sensorDeviceIdentifier) {
-        final Map<Integer, ExpeditionExtendedSensorDataMetadata> mapExpeditionMessageFieldIdToMetadata = new HashMap<>();
-        mapExpeditionMessageFieldIdToMetadata.put(ExpeditionMessage.ID_ROLL, ExpeditionExtendedSensorDataMetadata.HEEL);
-        mapExpeditionMessageFieldIdToMetadata.put(ExpeditionMessage.ID_PITCH, ExpeditionExtendedSensorDataMetadata.TRIM);
-        mapExpeditionMessageFieldIdToMetadata.put(ExpeditionMessage.ID_RUDDER, ExpeditionExtendedSensorDataMetadata.RUDDER);
-        mapExpeditionMessageFieldIdToMetadata.put(ExpeditionMessage.ID_TACK_ANGLE, ExpeditionExtendedSensorDataMetadata.TACK_ANGLE);
-        mapExpeditionMessageFieldIdToMetadata.put(ExpeditionMessage.ID_RAKE_DEG, ExpeditionExtendedSensorDataMetadata.RAKE_DEG);
-        mapExpeditionMessageFieldIdToMetadata.put(ExpeditionMessage.ID_DFLCTR_PP, ExpeditionExtendedSensorDataMetadata.DEFLECTOR_PERCENTAGE);
-        mapExpeditionMessageFieldIdToMetadata.put(ExpeditionMessage.ID_TG_HEEL, ExpeditionExtendedSensorDataMetadata.TARGET_HEEL);
-        mapExpeditionMessageFieldIdToMetadata.put(ExpeditionMessage.ID_FORESTAY_LOAD, ExpeditionExtendedSensorDataMetadata.FORESTAY_LOAD);
-        mapExpeditionMessageFieldIdToMetadata.put(ExpeditionMessage.ID_FORESTAY_PRES, ExpeditionExtendedSensorDataMetadata.FORESTAY_PRESSURE);
-        mapExpeditionMessageFieldIdToMetadata.put(ExpeditionMessage.ID_DFLECTR_MM, ExpeditionExtendedSensorDataMetadata.DEFLECTOR_MILLIMETERS);
-        mapExpeditionMessageFieldIdToMetadata.put(ExpeditionMessage.ID_TARG_BSP_P, ExpeditionExtendedSensorDataMetadata.TARGET_BOATSPEED_P);
-        
         int maxColumnIndex = -1;
         final Map<Integer, Double> valuesPerDoubleVectorFixColumnIndices = new HashMap<>();
         for (final Entry<Integer, ExpeditionExtendedSensorDataMetadata> mapEntry : mapExpeditionMessageFieldIdToMetadata.entrySet()) {
@@ -126,7 +130,7 @@ public class UDPExpeditionReceiver extends UDPReceiver<ExpeditionMessage, Expedi
             vector[valuesPerDoubleVectorFixColumnIndex.getKey()] = valuesPerDoubleVectorFixColumnIndex.getValue();
         }
         final DoubleVectorFix fix = new DoubleVectorFixImpl(msg.getTimePoint(), vector);
-        if (fix != null && fix.hasValidData()) {
+        if (fix.hasValidData()) {
             deviceRegistry.getSensorFixStore().storeFix(sensorDeviceIdentifier, fix);
         }
     }

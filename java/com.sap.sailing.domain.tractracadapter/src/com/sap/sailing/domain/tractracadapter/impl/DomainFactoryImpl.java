@@ -52,6 +52,7 @@ import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
@@ -63,8 +64,8 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.RaceLogStore;
-import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
+import com.sap.sailing.domain.ranking.RankingMetricsFactory;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -455,7 +456,10 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public Regatta getOrCreateDefaultRegatta(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             IRace race, TrackedRegattaRegistry trackedRegattaRegistry) {
-        return getOrCreateDefaultRegatta(raceLogStore, regattaLogStore, race, trackedRegattaRegistry, OneDesignRankingMetric::new);
+        return getOrCreateDefaultRegatta(raceLogStore, regattaLogStore, race, trackedRegattaRegistry,
+                // delegate the construction of the lambda to a bundle that the serialization classloaders
+                // for replication can see:
+                RankingMetricsFactory.getRankingMetricConstructor(RankingMetrics.ONE_DESIGN));
     }
     
     @Override
