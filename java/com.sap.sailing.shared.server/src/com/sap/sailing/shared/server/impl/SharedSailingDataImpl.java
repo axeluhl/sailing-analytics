@@ -620,7 +620,7 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     public synchronized void initiallyFillFromInternal(ObjectInputStream is)
             throws IOException, ClassNotFoundException, InterruptedException {
         markTemplatesById.putAll((Map<UUID, MarkTemplate>) is.readObject());
-        // FIXME markRolesById???
+        markRolesById.putAll((Map<UUID, MarkRole>) is.readObject());
         markPropertiesById.putAll((Map<UUID, MarkProperties>) is.readObject());
         courseTemplatesById.putAll((Map<UUID, CourseTemplate>) is.readObject());
     }
@@ -628,7 +628,7 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     @Override
     public void serializeForInitialReplicationInternal(ObjectOutputStream objectOutputStream) throws IOException {
         objectOutputStream.writeObject(markTemplatesById);
-        // FIXME markRolesById???
+        objectOutputStream.writeObject(markRolesById);
         objectOutputStream.writeObject(markPropertiesById);
         objectOutputStream.writeObject(courseTemplatesById);
     }
