@@ -514,7 +514,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     private Set<OperationWithResultWithIdWrapper<?, ?>> operationsSentToMasterForReplication;
 
-    private boolean currentlyFillingFromInitialLoad = false;
+    private volatile boolean currentlyFillingFromInitialLoad;
     
     private ThreadLocal<Boolean> currentlyApplyingOperationReceivedFromMaster = ThreadLocal.withInitial(() -> false);
 
@@ -759,6 +759,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             ServiceTracker<SecurityService, SecurityService> securityServiceTracker,
             ServiceTracker<SharedSailingData, SharedSailingData> sharedSailingDataTracker) {
         logger.info("Created " + this);
+        this.currentlyFillingFromInitialLoad = false;
         this.securityServiceTracker = securityServiceTracker;
         this.numberOfTrackedRacesRestored = new AtomicInteger();
         this.scoreCorrectionListenersByLeaderboard = new ConcurrentHashMap<>();
@@ -4671,13 +4672,18 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         return competitorWithBoat;
     }
 
-    @Override
     /**
      * This should only be used for replicable Operations that need access to the SecurityService, all other should
      * obtain the SecurityService in another way.
      */
+    @Override
     public SecurityService getSecurityService() {
-        return securityServiceTracker.getService();
+        try {
+            return securityServiceTracker.waitForService(0);
+        } catch (InterruptedException e) {
+            logger.severe("Interrupted while waiting for security service; returning null");
+            return null;
+        }
     }
     
     @Override

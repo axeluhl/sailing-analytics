@@ -67,6 +67,7 @@ public class RegattaLogFixTrackerRegattaListener extends AbstractTrackedRegattaA
             SensorFixMapperFactory sensorFixMapperFactory) {
         this.racingEventServiceTracker = racingEventServiceTracker;
         this.sensorFixMapperFactory = sensorFixMapperFactory;
+        this.currentlyFillingFromInitialLoad = false;
     }
 
     @Override
@@ -130,7 +131,7 @@ public class RegattaLogFixTrackerRegattaListener extends AbstractTrackedRegattaA
     
     // Replication related methods and fields
     private final ConcurrentHashMap<OperationExecutionListener<RegattaLogFixTrackerRegattaListener>, OperationExecutionListener<RegattaLogFixTrackerRegattaListener>> operationExecutionListeners = new ConcurrentHashMap<>();
-    private ThreadLocal<Boolean> currentlyFillingFromInitialLoad = ThreadLocal.withInitial(() -> false);
+    private volatile boolean currentlyFillingFromInitialLoad;
     private ThreadLocal<Boolean> currentlyApplyingOperationReceivedFromMaster = ThreadLocal.withInitial(() -> false);
     private final Set<OperationWithResultWithIdWrapper<RegattaLogFixTrackerRegattaListener, ?>> operationsSentToMasterForReplication = new HashSet<>();
     private ReplicationMasterDescriptor master;
@@ -174,12 +175,12 @@ public class RegattaLogFixTrackerRegattaListener extends AbstractTrackedRegattaA
 
     @Override
     public boolean isCurrentlyFillingFromInitialLoad() {
-        return currentlyFillingFromInitialLoad.get();
+        return currentlyFillingFromInitialLoad;
     }
 
     @Override
     public void setCurrentlyFillingFromInitialLoad(boolean currentlyFillingFromInitialLoad) {
-        this.currentlyFillingFromInitialLoad.set(currentlyFillingFromInitialLoad);
+        this.currentlyFillingFromInitialLoad = currentlyFillingFromInitialLoad;
     }
 
     @Override

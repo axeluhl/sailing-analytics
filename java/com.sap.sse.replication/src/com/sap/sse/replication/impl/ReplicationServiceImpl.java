@@ -232,7 +232,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
     /**
      * Will be set
      */
-    private boolean replicationStarting;
+    private volatile boolean replicationStarting;
 
     /**
      * An optional link to a persistence layer that allows this service to record replicas
@@ -521,7 +521,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
                 outboundBufferClasses = new ArrayList<>();
             }
             outboundObjectBuffer.writeObject(serializedOperation);
-            outboundBufferClasses.add(operation.getClass());
+            outboundBufferClasses.add(operation.getClassForLogging());
             if (outboundBuffer.size() > TRIGGER_MESSAGE_SIZE_IN_BYTES) {
                 logger.info("Triggering replication because buffer holds " + outboundBuffer.size()
                         + " bytes which exceeds trigger size " + TRIGGER_MESSAGE_SIZE_IN_BYTES + " bytes");
@@ -680,7 +680,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
             final URL initialLoadURL = master.getInitialLoadURL(replicables);
             logger.info("Initial load URL is " + initialLoadURL);
             // start receiving messages already now, but start in suspended mode
-            replicator = new ReplicationReceiverImpl(master, replicablesProvider, /* startSuspended */true, consumer);
+            replicator = new ReplicationReceiverImpl(master, replicablesProvider, /* startSuspended */ true, consumer);
             // clear Replicable state here, before starting to receive and de-serialize operations which builds up
             // new state, e.g., in competitor store
             for (Replicable<?, ?> r : replicables) {

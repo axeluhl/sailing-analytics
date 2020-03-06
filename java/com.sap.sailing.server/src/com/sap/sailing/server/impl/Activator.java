@@ -205,6 +205,7 @@ public class Activator implements BundleActivator {
 
     private void internalStartBundle(BundleContext context) throws MalformedURLException, MalformedObjectNameException,
             InstanceAlreadyExistsException, MBeanRegistrationException, NotCompliantMBeanException {
+        assert securityServiceTracker.getService() != null; // callers must call securityServiceTracker.waitForService(0) before calling this method
         mailQueue = new ExecutorMailQueue(mailServiceTracker);
         notificationService = new SailingNotificationServiceImpl(context, mailQueue);
         trackedRegattaListener = new OSGiBasedTrackedRegattaListener(context);
