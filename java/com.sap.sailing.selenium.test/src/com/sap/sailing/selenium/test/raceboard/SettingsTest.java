@@ -92,7 +92,7 @@ public class SettingsTest extends AbstractSeleniumTest {
         initTrackingForBmwCupRace(adminConsole);
 
         RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA,
-                BMW_CUP_REGATTA, String.format(BMW_RACE, 1), "PLAYER");
+                BMW_CUP_REGATTA, String.format(BMW_RACE, 1), "PLAYER", false);
         
         DetailCheckboxInfo[] detailsToSelect = new DetailCheckboxInfo[] {
                 // Overall details
@@ -127,7 +127,7 @@ public class SettingsTest extends AbstractSeleniumTest {
         mapSettings.pressMakeDefault();
 
         raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA, BMW_CUP_REGATTA,
-                String.format(BMW_RACE, 1), "WINNING_LANES");
+                String.format(BMW_RACE, 1), "WINNING_LANES", false);
 
         detailsToSelect = new DetailCheckboxInfo[] {
                 // Race details
@@ -172,7 +172,7 @@ public class SettingsTest extends AbstractSeleniumTest {
         mapSettings.setTransparentHoverlines(false);
         mapSettings.pressOk(false, false);
         raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA, BMW_CUP_REGATTA,
-                String.format(BMW_RACE, 1), "WINNING_LANES");
+                String.format(BMW_RACE, 1), "WINNING_LANES", false);
         leaderboardSettingsDialog = raceboard.openLeaderboardSettingsDialog();
         leaderboardSettingsPanelPO = leaderboardSettingsDialog.getLeaderboardSettingsPanelPO();
         selectedDetails = leaderboardSettingsPanelPO.getSelectedDetails();
@@ -189,7 +189,7 @@ public class SettingsTest extends AbstractSeleniumTest {
         Assert.assertFalse(mapSettings.isTransparentHoverlines());
         // verify that custom document settings override mode settings of other modes
         raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA, BMW_CUP_REGATTA,
-                String.format(BMW_RACE, 1), "START_ANALYSIS");
+                String.format(BMW_RACE, 1), "START_ANALYSIS", false);
         leaderboardSettingsDialog = raceboard.openLeaderboardSettingsDialog();
         leaderboardSettingsPanelPO = leaderboardSettingsDialog.getLeaderboardSettingsPanelPO();
         selectedDetails = leaderboardSettingsPanelPO.getSelectedDetails();
@@ -224,7 +224,7 @@ public class SettingsTest extends AbstractSeleniumTest {
         initTrackingForBmwCupRace(adminConsole);
         
         RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA,
-                BMW_CUP_REGATTA, String.format(BMW_RACE, 1), "PLAYER");
+                BMW_CUP_REGATTA, String.format(BMW_RACE, 1), "PLAYER", false);
         
         MapSettingsPO mapSettings = raceboard.openMapSettings();
         // Verify initial settings for mode PLAYER
@@ -235,14 +235,14 @@ public class SettingsTest extends AbstractSeleniumTest {
         mapSettings.pressMakeDefault();
         
         raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA, BMW_CUP_REGATTA,
-                String.format(BMW_RACE, 1), "WINNING_LANES");
+                String.format(BMW_RACE, 1), "WINNING_LANES", false);
 
         mapSettings = raceboard.openMapSettings();
         // Verify initial settings for mode WINNING_LANES
         Assert.assertFalse(mapSettings.isShowWindStreamletOverlay());
         
         raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA,
-                BMW_CUP_REGATTA, String.format(BMW_RACE, 1), "PLAYER");
+                BMW_CUP_REGATTA, String.format(BMW_RACE, 1), "PLAYER", false);
         
         // Map settings for mode PLAYER are changed
         mapSettings = raceboard.openMapSettings();
@@ -250,7 +250,7 @@ public class SettingsTest extends AbstractSeleniumTest {
         mapSettings.pressMakeDefault();
         
         raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA, BMW_CUP_REGATTA,
-                String.format(BMW_RACE, 1), "WINNING_LANES");
+                String.format(BMW_RACE, 1), "WINNING_LANES", false);
 
         mapSettings = raceboard.openMapSettings();
         // Verify settings for mode WINNING_LANES are unchanged
@@ -271,7 +271,7 @@ public class SettingsTest extends AbstractSeleniumTest {
         initTrackingForBmwCupRace(adminConsole);
         
         RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA,
-                BMW_CUP_REGATTA, String.format(BMW_RACE, 1), "PLAYER");
+                BMW_CUP_REGATTA, String.format(BMW_RACE, 1), "PLAYER", false);
         
         MapSettingsPO mapSettings = raceboard.openMapSettings();
         // Verify initial mode settings
@@ -282,7 +282,7 @@ public class SettingsTest extends AbstractSeleniumTest {
         mapSettings.pressMakeDefault();
         
         raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA, BMW_CUP_REGATTA,
-                String.format(BMW_RACE, 1), "PLAYER");
+                String.format(BMW_RACE, 1), "PLAYER", false);
         
         mapSettings = raceboard.openMapSettings();
         // verify default settings work
@@ -304,7 +304,7 @@ public class SettingsTest extends AbstractSeleniumTest {
         initTrackingForBmwCupRace(adminConsole);
         
         RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA,
-                BMW_CUP_REGATTA, String.format(BMW_RACE, 1), "WINNING_LANES");
+                BMW_CUP_REGATTA, String.format(BMW_RACE, 1), "WINNING_LANES", false);
         
         MapSettingsPO mapSettings = raceboard.openMapSettings();
         // The following options are false in the system default but activated by the WINNING_LANES mode
@@ -315,7 +315,7 @@ public class SettingsTest extends AbstractSeleniumTest {
         mapSettings.pressMakeDefault();
         
         raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA, BMW_CUP_REGATTA,
-                String.format(BMW_RACE, 1), "WINNING_LANES");
+                String.format(BMW_RACE, 1), "WINNING_LANES", false);
         
         mapSettings = raceboard.openMapSettings();
         // verify mode settigns have been overwritten
