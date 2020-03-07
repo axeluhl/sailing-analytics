@@ -89,7 +89,8 @@ public class LeaderboardScoringAndRankingTestBase extends AbstractLeaderboardTes
         for (Competitor[] competitorList : competitorLists) {
             RaceColumn raceColumn = columnIter.next();
             final Map<Competitor, TimePoint> lastMarkPassingTimes = lastMarkPassingTimesForCompetitors[i];
-            final Waypoint start = new WaypointImpl(new ControlPointWithTwoMarksImpl(new MarkImpl("Left StartBuoy"), new MarkImpl("Right StartBuoy"), "Start"));
+            final Waypoint start = new WaypointImpl(new ControlPointWithTwoMarksImpl(new MarkImpl("Left StartBuoy"),
+                    new MarkImpl("Right StartBuoy"), "Start", "Start"));
             final Waypoint finish = new WaypointImpl(new MarkImpl("FinishBuoy"));
             TrackedRace trackedRace = new MockedTrackedRaceWithStartTimeAndRanks(startTimes[i], Arrays.asList(competitorList)) {
                 private static final long serialVersionUID = 1L;

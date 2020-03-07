@@ -339,7 +339,8 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
         if (id2 != null && !id2.trim().isEmpty()) {
             markNamesAsIds.add(id2.trim());
         }
-        final ControlPoint controlPoint = domainFactory.getOrCreateControlPoint(name, markNamesAsIds, getMarkType(markType));
+        final ControlPoint controlPoint = domainFactory.getOrCreateControlPoint(name, markNamesAsIds,
+                getMarkType(markType), name);
         if (index == 0) {
             currentCourseDefinition = new ArrayList<>();
         }
@@ -392,7 +393,8 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
                 for (ControlPoint cp : currentCourseDefinition) {
                     courseToUpdate.add(new Pair<ControlPoint, PassingInstruction>(cp, PassingInstruction.None));
                 }
-                course.update(courseToUpdate, domainFactory.getBaseDomainFactory());
+                course.update(courseToUpdate, course.getAssociatedRoles(),
+                        course.getOriginatingCourseTemplateIdOrNull(), domainFactory.getBaseDomainFactory());
             } catch (PatchFailedException e) {
                 throw new RuntimeException(e);
             }

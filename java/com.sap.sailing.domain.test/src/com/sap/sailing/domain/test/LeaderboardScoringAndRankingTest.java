@@ -66,6 +66,7 @@ import com.sap.sailing.domain.leaderboard.impl.HighPointFirstGets10Or8AndLastBre
 import com.sap.sailing.domain.leaderboard.impl.HighPointFirstGets12Or8AndLastBreaksTie2017;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
+import com.sap.sailing.domain.leaderboard.impl.LowPointTieBreakBasedOnLastSeriesOnly;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
@@ -2404,8 +2405,10 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
         final TimePoint startOfR1 = withinR1.minus(10000);
         final TimePoint beforeStartOfR1 = startOfR1.minus(10000);
         final TimePoint afterEndOfR1 = endOfR1.plus(1000);
-        final Waypoint start = new WaypointImpl(new ControlPointWithTwoMarksImpl(new MarkImpl("Start Pin End"), new MarkImpl("Start Committee Boat"), "Start"));
-        final Waypoint finish = new WaypointImpl(new ControlPointWithTwoMarksImpl(new MarkImpl("Finish Pin End"), new MarkImpl("Finish Committee Boat"), "Finish"));
+        final Waypoint start = new WaypointImpl(new ControlPointWithTwoMarksImpl(new MarkImpl("Start Pin End"),
+                new MarkImpl("Start Committee Boat"), "Start", "Start"));
+        final Waypoint finish = new WaypointImpl(new ControlPointWithTwoMarksImpl(new MarkImpl("Finish Pin End"),
+                new MarkImpl("Finish Committee Boat"), "Finish", "Finish"));
         FlexibleLeaderboard leaderboard1 = new FlexibleLeaderboardImpl("Leaderboard 1", new ThresholdBasedResultDiscardingRuleImpl(/* discarding thresholds */ new int[0]),
                 new LowPoint(), null);
         final MockedTrackedRaceWithStartTimeAndRanks trackedRace = new MockedTrackedRaceWithStartTimeAndRanks(startOfR1, Arrays.asList(f1)) {

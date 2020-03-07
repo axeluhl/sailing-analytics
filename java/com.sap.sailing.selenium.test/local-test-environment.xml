@@ -50,7 +50,7 @@
      -->
      <system-property>
         <name>webdriver.gecko.driver</name>
-        <value>/path/to/geckodriver.exe</value>
+        <value>/usr/bin/geckodriver</value>
      </system-property>
      <!--
         geckodriver automatically finds an installed version of Firefox.
@@ -90,8 +90,10 @@
   <driver-definition class="org.openqa.selenium.firefox.FirefoxDriver">
   </driver-definition>
   -->
+  <!-- -->
   <driver-definition class="org.openqa.selenium.chrome.ChromeDriver">
   </driver-definition>
+  <!-- -->
   <!--
   <driver-definition class="org.openqa.selenium.ie.InternetExplorerDriver">
     <capabilities>

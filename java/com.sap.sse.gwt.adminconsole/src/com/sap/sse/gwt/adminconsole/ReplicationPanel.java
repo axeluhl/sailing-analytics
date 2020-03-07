@@ -303,6 +303,10 @@ public class ReplicationPanel extends FlowPanel {
                     registeredReplicas.setWidget(i, 2, new Label(""+replica.getAverageNumberOfOperationsPerMessage()));
                     i++;
                     registeredReplicas.insertRow(i);
+                    registeredReplicas.setWidget(i, 1, new Label(stringMessages.additionalInformation()));
+                    registeredReplicas.setWidget(i, 2, new Label(""+replica.getAdditionalInformation()));
+                    i++;
+                    registeredReplicas.insertRow(i);
                     registeredReplicas.setWidget(i, 1, new Label(stringMessages.numberOfQueueMessagesSent()));
                     registeredReplicas.setWidget(i, 2, new Label(""+replica.getNumberOfMessagesSent()));
                     i++;

@@ -122,7 +122,7 @@ public class ORCCertificatesCollectionRMS extends AbstractORCCertificatesCollect
         final Map<Speed, Speed> longDistanceSpeedPredictionPerTrueWindSpeed = new HashMap<>();
         final Map<Speed, Speed> circularRandomSpeedPredictionPerTrueWindSpeed = new HashMap<>();
         final Map<Speed, Speed> nonSpinnakerSpeedPredictionPerTrueWindSpeed = new HashMap<>();
-        for (Speed tws : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS) {
+        for (Speed tws : ORCCertificate.ALLOWANCES_TRUE_WIND_SPEEDS) {
             String windSpeed = Integer.toString((int) tws.getKnots());
             String beatAngleKey = BEAT_ANGLE + windSpeed;
             String beatAllowanceKey = BEAT_ALLOWANCE + windSpeed;
@@ -147,7 +147,7 @@ public class ORCCertificatesCollectionRMS extends AbstractORCCertificatesCollect
             nonSpinnakerSpeedPredictionPerTrueWindSpeed.put(tws, ORCCertificateImpl.NAUTICAL_MILE.inTime(
                     new SecondsDurationImpl(Double.parseDouble(certificateValues.getValue(nonSpinnakerKey)))));
             Map<Bearing, Speed> velocityPredictionPerTrueWindAngle = new HashMap<>();
-            for (Bearing twa : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_ANGLES ) {
+            for (Bearing twa : ORCCertificate.ALLOWANCES_TRUE_WIND_ANGLES ) {
                 String twaCoursesKey = TWA_COURSES + Integer.toString((int) twa.getDegrees()) + windSpeed;
                 velocityPredictionPerTrueWindAngle.put(twa, ORCCertificateImpl.NAUTICAL_MILE.inTime(
                         new SecondsDurationImpl(Double.parseDouble(certificateValues.getValue(twaCoursesKey)))));

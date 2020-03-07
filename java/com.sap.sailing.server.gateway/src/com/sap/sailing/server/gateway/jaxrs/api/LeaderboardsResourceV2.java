@@ -33,6 +33,8 @@ import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
@@ -41,14 +43,18 @@ import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.LegEntryDTO;
 import com.sap.sailing.domain.common.sharding.ShardingType;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.sharding.ShardingContext;
+import com.sap.sailing.domain.tracking.GPSFixTrack;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.InvalidDateException;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 
@@ -92,9 +98,9 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                     if (timePoint != null || resultState == ResultStates.Live) {
                         jsonLeaderboard = getLeaderboardJson(leaderboard, timePoint, resultState, maxCompetitorsCount,
                                 raceColumnNames, raceDetails, competitorAndBoatIdsOnly,
-                                showOnlyActiveRacesForCompetitorIds);
+                                showOnlyActiveRacesForCompetitorIds, skip);
                     } else {
-                        jsonLeaderboard = createEmptyLeaderboardJson(leaderboard, resultState, maxCompetitorsCount);
+                        jsonLeaderboard = createEmptyLeaderboardJson(leaderboard, resultState, maxCompetitorsCount, skip);
                     }
                     StringWriter sw = new StringWriter();
                     jsonLeaderboard.writeJSONString(sw);
@@ -112,9 +118,10 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
     }
 
     @Override
-    protected JSONObject getLeaderboardJson(Leaderboard leaderboard,
-            TimePoint resultTimePoint, ResultStates resultState, Integer maxCompetitorsCount,
-            List<String> raceColumnNames, List<String> raceDetailNames, boolean competitorAndBoatIdsOnly, List<String> showOnlyActiveRacesForCompetitorIds)
+    protected JSONObject getLeaderboardJson(Leaderboard leaderboard, TimePoint resultTimePoint,
+            ResultStates resultState, Integer maxCompetitorsCount, List<String> raceColumnNames,
+            List<String> raceDetailNames, boolean competitorAndBoatIdsOnly,
+            List<String> showOnlyActiveRacesForCompetitorIds, boolean userPresentedValidRegattaSecret)
             throws NoWindException, InterruptedException, ExecutionException {
         List<String> raceColumnsToShow = calculateRaceColumnsToShow(leaderboard, raceColumnNames, showOnlyActiveRacesForCompetitorIds, resultTimePoint);
         List<DetailType> raceDetailsToShow = calculateRaceDetailTypesToShow(raceDetailNames);
@@ -131,7 +138,7 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
             Map<String, Map<CompetitorDTO, Integer>> competitorsOrderedByFleets = new HashMap<>();
             List<CompetitorDTO> filteredCompetitorsFromBestToWorst = new ArrayList<>();
             competitorsFromBestToWorst.forEach(competitor -> {
-                if (SecurityUtils.getSubject().isPermitted(competitor.getIdentifier()
+                if (userPresentedValidRegattaSecret || SecurityUtils.getSubject().isPermitted(competitor.getIdentifier()
                         .getStringPermission(SecuredSecurityTypes.PublicReadableActions.READ_PUBLIC))
                         || SecurityUtils.getSubject()
                                 .isPermitted(competitor.getIdentifier().getStringPermission(DefaultActions.READ))) {
@@ -155,7 +162,6 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
         }
         JSONArray jsonCompetitorEntries = new JSONArray();
         jsonLeaderboard.put("competitors", jsonCompetitorEntries);
-        jsonLeaderboard.put("ShardingLeaderboardName", ShardingType.LEADERBOARDNAME.encodeIfNeeded(leaderboard.getName()));
         final int[] regattaRankCounter = new int[] { 1 };
         // Remark: leaderboardDTO.competitors are ordered by total rank
         List<CompetitorDTO> filteredCompetitors = new ArrayList<>();
@@ -243,7 +249,12 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                         JSONObject jsonRaceDetails = new JSONObject();
                         jsonEntry.put("data", jsonRaceDetails);
                         for (DetailType type : raceDetailsToShow) {
-                            Pair<String, Object> valueForRaceDetailType = getValueForRaceDetailType(type, leaderboardRowDTO, leaderboardEntry, currentLegEntry);
+                            final RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
+                            final Competitor c = getService().getCompetitorAndBoatStore().getExistingCompetitorByIdAsString(competitor.getIdAsString());
+                            final TrackedRace trackedRace = c == null || raceColumn == null ? null : raceColumn.getTrackedRace(c);
+                            Pair<String, Object> valueForRaceDetailType = getValueForRaceDetailType(type,
+                                    leaderboardRowDTO, leaderboardEntry, currentLegEntry, trackedRace, raceColumn,
+                                    c, new MillisecondsTimePoint(leaderboardDTO.getTimePoint()));
                             if (valueForRaceDetailType != null && valueForRaceDetailType.getA() != null && valueForRaceDetailType.getB() != null) {
                                 jsonRaceDetails.put(valueForRaceDetailType.getA(), valueForRaceDetailType.getB());
                             }
@@ -294,18 +305,26 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS,
                 DetailType.RACE_DISTANCE_TRAVELED,
                 DetailType.RACE_TIME_TRAVELED,
+                DetailType.RACE_IMPLIED_WIND,
                 DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS,
+                DetailType.RACE_CURRENT_COURSE_OVER_GROUND_IN_TRUE_DEGREES,
+                DetailType.RACE_CURRENT_POSITION_LAT_DEG,
+                DetailType.RACE_CURRENT_POSITION_LNG_DEG,
                 DetailType.RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_IN_METERS, 
                 DetailType.NUMBER_OF_MANEUVERS,
                 DetailType.RACE_CURRENT_LEG,
-                DetailType.OVERALL_MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS };
+                DetailType.OVERALL_MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS,
+                DetailType.LEG_VELOCITY_MADE_GOOD_IN_KNOTS,
+                DetailType.LEG_WINDWARD_DISTANCE_TO_GO_IN_METERS };
     }
 
     private DetailType[] getAvailableOverallDetailColumnTypes() {
         return new DetailType[] { DetailType.OVERALL_MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS };
     }
 
-    private Pair<String, Object> getValueForRaceDetailType(DetailType type, LeaderboardRowDTO leaderboardRowDTO, LeaderboardEntryDTO entry, LegEntryDTO currentLegEntry) {
+    private Pair<String, Object> getValueForRaceDetailType(DetailType type, LeaderboardRowDTO leaderboardRowDTO,
+            LeaderboardEntryDTO entry, LegEntryDTO currentLegEntry, TrackedRace trackedRace, RaceColumn raceColumn,
+            Competitor competitor, TimePoint timePoint) {
         String name;
         Object value = null;
         Pair<String, Object> result = null;
@@ -344,10 +363,52 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                     value = timeTraveled.asSeconds();
                 }
                 break;
+            case RACE_IMPLIED_WIND:
+                name = "impliedWind-kts";
+                if (entry.impliedWind != null) {
+                    value = entry.impliedWind.getKnots();
+                }
+                break;
             case RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
                 name = "currentSpeedOverGround-kts";
                 if (currentLegEntry != null && currentLegEntry.currentSpeedOverGroundInKnots != null) {
                     value = roundDouble(currentLegEntry.currentSpeedOverGroundInKnots, 2);
+                }
+                break;
+            case RACE_CURRENT_COURSE_OVER_GROUND_IN_TRUE_DEGREES:
+                name = "currentCourseOverGround-deg";
+                if (trackedRace != null) {
+                    final GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
+                    if (track != null) {
+                        final SpeedWithBearing speed = track.getEstimatedSpeed(timePoint);
+                        if (speed != null) {
+                            value = roundDouble(speed.getBearing().getDegrees(), 2);
+                        }
+                    }
+                }
+                break;
+            case RACE_CURRENT_POSITION_LAT_DEG:
+                name = "currentPositionLatitude-deg";
+                if (trackedRace != null) {
+                    final GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
+                    if (track != null) {
+                        final Position position = track.getEstimatedPosition(timePoint, /* extrapolated */ true);
+                        if (position != null) {
+                            value = roundDouble(position.getLatDeg(), 10);
+                        }
+                    }
+                }
+                break;
+            case RACE_CURRENT_POSITION_LNG_DEG:
+                name = "currentPositionLongitude-deg";
+                if (trackedRace != null) {
+                    final GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
+                    if (track != null) {
+                        final Position position = track.getEstimatedPosition(timePoint, /* extrapolated */ true);
+                        if (position != null) {
+                            value = roundDouble(position.getLngDeg(), 10);
+                        }
+                    }
                 }
                 break;
             case NUMBER_OF_MANEUVERS:
@@ -375,6 +436,18 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
             case OVERALL_MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS:
                 name = "maxSpeedOverGroundInKnots";
                 value = leaderboardRowDTO.maximumSpeedOverGroundInKnots==null?null:roundDouble(leaderboardRowDTO.maximumSpeedOverGroundInKnots, 2);
+                break;
+            case LEG_WINDWARD_DISTANCE_TO_GO_IN_METERS:
+                name = "legWindwardDistanceToGoInMeters";
+                if (currentLegEntry != null && currentLegEntry.windwardDistanceToGoInMeters != null) {
+                    value = currentLegEntry.windwardDistanceToGoInMeters;
+                }
+                break;
+            case LEG_VELOCITY_MADE_GOOD_IN_KNOTS:
+                name = "legVelocityMadeGoodInKnots";
+                if (currentLegEntry != null && currentLegEntry.velocityMadeGoodInKnots != null) {
+                    value = currentLegEntry.velocityMadeGoodInKnots;
+                }
                 break;
             default:
                 name = null;
@@ -434,7 +507,6 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
      * If {@code raceColumnNames} is empty or {@code null}, return the names of all {@link raceColumnsOfLeaderboard};
      * otherwise return those race column names from {@code raceColumnsOfLeaderboard} that are also in
      * {@code raceColumnNames}.
-     * @param leaderboard TODO
      * @param showOnlyActiveRacesForCompetitorIds
      *            {@code null}, or specifies zero or more competitor IDs, requesting that the result contained the race
      *            column holding that competitor's "active" race at the time requested; see also the

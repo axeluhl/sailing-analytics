@@ -1,0 +1,5 @@
+{"_id":{"$oid":"5e306ab09d7cdfdd30a6dc6b"},"ID":{"$binary":"j0uvojtzI3+FTBVGMcXvqg==","$type":"03"},"NAME":"unknown server name-server","USERNAMES":["admin"],"ROLE_DEFINITION_MAP":[{"ROLE_DEFINITION_MAP_ROLE_ID":{"$binary":"y0V7Ud9IKcQV4Rif59Gpnw==","$type":"03"},"ROLE_DEFINITION_MAP_FOR_ALL":true}]}
+{"_id":{"$oid":"5e306ab09d7cdfdd30a6dc7c"},"ID":{"$binary":"VkOyJjQunBu1WzEI5fW7ow==","$type":"03"},"NAME":"admin-tenant","USERNAMES":["admin"],"ROLE_DEFINITION_MAP":[]}
+{"_id":{"$oid":"5e306b299d7cdfdd30a6dee1"},"ID":{"$binary":"4Ex2YndrJSmaaATyOm92gw==","$type":"03"},"NAME":"aaa-tenant","USERNAMES":["aaa"],"ROLE_DEFINITION_MAP":[]}
+{"_id":{"$oid":"5e306b4c9d7cdfdd30a6df0c"},"ID":{"$binary":"bUVsfDCczzb8aa2s0lx1gA==","$type":"03"},"NAME":"Group1","USERNAMES":["admin"],"ROLE_DEFINITION_MAP":[]}
+{"_id":{"$oid":"5e306e279d7cdfdd30a6e65a"},"ID":{"$binary":"EUibfUM1stx2DMRM731Msg==","$type":"03"},"NAME":"same-email-tenant","USERNAMES":["same-email"],"ROLE_DEFINITION_MAP":[]}

@@ -52,7 +52,6 @@ public class GPSFixesResourceTest {
     
     @Test
     public void deserialize() throws ParseException, TransformationException, NoCorrespondingServiceRegisteredException {
-
         GPSFixesResource resource = new GPSFixesResource() {
             public RacingEventService getService() {
                 return service;
@@ -60,7 +59,6 @@ public class GPSFixesResourceTest {
         };
         Response response = resource.postFixes(FIXES_JSON);
         assertThat("response is ok", response.getStatus(), equalTo(Response.Status.OK.getStatusCode()));
-        
         DeviceIdentifier device = new SmartphoneUUIDIdentifierImpl(UUID.fromString("af855a56-9726-4a9c-a77e-da955bd289bf"));
         assertThat("all fixes stored", service.getSensorFixStore().getNumberOfFixes(device), equalTo(2L));
     }

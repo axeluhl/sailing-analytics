@@ -62,7 +62,7 @@ fi
 # same channel the master is using in its REPLICATION_CHANNEL variable
 
 if [ -n "$AUTO_REPLICATE" ]; then
-  REPLICATE_ON_START=com.sap.sailing.server.impl.RacingEventServiceImpl,com.sap.sse.security.impl.SecurityServiceImpl,com.sap.sse.filestorage.impl.FileStorageManagementServiceImpl,com.sap.sse.mail.impl.MailServiceImpl,com.sap.sailing.polars.impl.PolarDataServiceImpl,com.sap.sailing.domain.racelogtracking.impl.fixtracker.RegattaLogFixTrackerRegattaListener,com.sap.sailing.windestimation.integration.WindEstimationFactoryServiceImpl
+  REPLICATE_ON_START=com.sap.sailing.server.impl.RacingEventServiceImpl,com.sap.sse.security.impl.SecurityServiceImpl,com.sap.sse.filestorage.impl.FileStorageManagementServiceImpl,com.sap.sse.mail.impl.MailServiceImpl,com.sap.sailing.polars.impl.PolarDataServiceImpl,com.sap.sailing.domain.racelogtracking.impl.fixtracker.RegattaLogFixTrackerRegattaListener,com.sap.sailing.windestimation.integration.WindEstimationFactoryServiceImpl,com.sap.sailing.server.impl.com.sap.sailing.shared.server.impl.SharedSailingDataImpl
 fi
 # Host where the master Java instance is running
 # Make sure firewall configurations allow access
@@ -88,6 +88,8 @@ fi
 # Credentials can be provided either as a combination of username and password,
 # or alternatively as a single bearer token that was obtained, e.g., through
 #   curl -d "username=myuser&password=mysecretpassword" "https://master-server.sapsailing.com/security/api/restsecurity/access_token" | jq .access_token
+# or by logging in to the master server using your web browser and then navigating to
+#     https://master-server.sapsailing.com/security/api/restsecurity/access_token
 # 
 # REPLICATE_MASTER_USERNAME=
 # REPLICATE_MASTER_PASSWORD=
@@ -161,6 +163,17 @@ else
   JAVA_VERSION_SPECIFIC_ARGS=$JAVA_8_ARGS
 fi
 ADDITIONAL_JAVA_ARGS="$JAVA_VERSION_SPECIFIC_ARGS $ADDITIONAL_JAVA_ARGS -Dpersistentcompetitors.clear=false -Drestore.tracked.races=true -Dpolardata.source.url=https://www.sapsailing.com -Dwindestimation.source.url=https://www.sapsailing.com -XX:MaxGCPauseMillis=500"
+
+# To enable the use of the shared SecurityService and SharedSailingData from security-service.sapsailing.com, uncomment and fill in the following:
+#ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Dsecurity.sharedAcrossSubdomainsOf=sapsailing.com -Dsecurity.baseUrlForCrossDomainStorage=https://security-service.sapsailing.com -Dgwt.acceptableCrossDomainStorageRequestOriginRegexp=https?://(.*\.)?sapsailing\.com(:[0-9]*)?$"
+#REPLICATE_ON_START=com.sap.sse.security.impl.SecurityServiceImpl,com.sap.sailing.shared.server.impl.SharedSailingDataImpl
+#REPLICATE_MASTER_SERVLET_HOST=security-service.sapsailing.com
+#REPLICATE_MASTER_SERVLET_PORT=443
+#REPLICATE_MASTER_EXCHANGE_NAME=security_service
+# Obtain the bearer token for user security-service-replicator by logging on to https://security-service.sapsailing.com and then
+# getting https://security-service.sapsailing.com/security/api/restsecurity/access_token
+#REPLICATE_MASTER_BEARER_TOKEN="..."
+
 echo ADDITIONAL_JAVA_ARGS=${ADDITIONAL_JAVA_ARGS}
 ON_AMAZON=`command -v ec2-metadata`
 

@@ -11,8 +11,8 @@ import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 public class CompetitorWithBoatRefJsonSerializer implements JsonSerializer<CompetitorWithBoat> {
     private final JsonSerializer<Competitor> competitorJsonSerializer;
 
-    public static CompetitorWithBoatRefJsonSerializer create() {
-        return new CompetitorWithBoatRefJsonSerializer(CompetitorJsonSerializer.create(/* serialize boat */ false));
+    public static CompetitorWithBoatRefJsonSerializer create(boolean serializeNonPublicCompetitorFields) {
+        return new CompetitorWithBoatRefJsonSerializer(CompetitorJsonSerializer.create(/* serialize boat */ false, serializeNonPublicCompetitorFields));
     }
 
     public CompetitorWithBoatRefJsonSerializer(JsonSerializer<Competitor> competitorJsonSerializer) {

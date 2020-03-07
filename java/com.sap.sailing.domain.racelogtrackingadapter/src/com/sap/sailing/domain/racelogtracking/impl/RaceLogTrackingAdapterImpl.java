@@ -54,7 +54,6 @@ import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
-import com.sap.sailing.domain.racelogtracking.PingDeviceIdentifierImpl;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceTrackingHandler;
@@ -203,11 +202,10 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
         if (course != null) {
             course.getWaypoints().forEach(wp -> Util.addAll(wp.getMarks(), marks));
         }
-
         for (RaceLog toRaceLog : toRaceLogs) {
             if (new RaceLogTrackingStateAnalyzer(toRaceLog).analyze().isForTracking()) {
                 if (course != null) {
-                    CourseBase newCourse = new CourseDataImpl(course.getName());
+                    CourseBase newCourse = new CourseDataImpl(course.getName(), course.getOriginatingCourseTemplateIdOrNull());
                     TimePoint now = MillisecondsTimePoint.now();
                     int i = 0;
                     for (Waypoint oldWaypoint : course.getWaypoints()) {
@@ -220,7 +218,6 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
                             passId, newCourse, CourseDesignerMode.ADMIN_CONSOLE);
                     toRaceLog.add(newCourseEvent);
                 }
-
             }
         }
     }
@@ -357,10 +354,9 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
             mail = new LegacyRaceLogTrackingInvitationMailBuilder(locale);
             break;
         case SailInsight1:
-            mail = new BranchIO1RaceLogTrackingInvitationMailBuilder(locale);
-            break;
         case SailInsight2:
-            mail = new BranchIO2RaceLogTrackingInvitationMailBuilder(locale);
+        case SailInsight3:
+            mail = new BranchIORaceLogTrackingInvitationMailBuilder(locale, type);
             break;
         default:
             throw new IllegalArgumentException("Unhandled mail type");

@@ -32,6 +32,14 @@ public class ControlPointTableWrapper<S extends RefreshableSelectionModel<Contro
         };
         table.addColumn(nameColumn, stringMessages.name());
         
+        TextColumn<ControlPointDTO> shortNameColumn = new TextColumn<ControlPointDTO>() {
+            @Override
+            public String getValue(ControlPointDTO d) {
+                return d.getShortName();
+            }
+        };
+        table.addColumn(shortNameColumn, stringMessages.shortName());
+
         TextColumn<ControlPointDTO> typeColumn = new TextColumn<ControlPointDTO>() {
             @Override
             public String getValue(ControlPointDTO d) {

@@ -9,6 +9,7 @@ import com.sap.sailing.datamining.Activator;
 import com.sap.sailing.datamining.SailingClusterGroups;
 import com.sap.sailing.datamining.data.HasLeaderboardContext;
 import com.sap.sailing.datamining.data.HasRaceResultOfCompetitorContext;
+import com.sap.sailing.datamining.data.HasTrackedRaceContext;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -44,18 +45,25 @@ public class RaceResultOfCompetitorWithContext implements HasRaceResultOfCompeti
     private final RaceColumn raceColumn;
     private final Competitor competitor;
     private final PolarDataService polarDataService;
+    private final HasTrackedRaceContext trackedRaceContext;
 
     public RaceResultOfCompetitorWithContext(HasLeaderboardContext leaderboardWithContext, RaceColumn raceColumn,
-            Competitor competitor, PolarDataService polarDataService) {
+            Competitor competitor, PolarDataService polarDataService, HasTrackedRaceContext trackedRaceContext) {
         this.leaderboardWithContext = leaderboardWithContext;
         this.raceColumn = raceColumn;
         this.competitor = competitor;
         this.polarDataService = polarDataService;
+        this.trackedRaceContext = trackedRaceContext;
     }
 
     @Override
     public HasLeaderboardContext getLeaderboardContext() {
         return leaderboardWithContext;
+    }
+    
+    @Override
+    public HasTrackedRaceContext getTrackedRaceContext() {
+        return trackedRaceContext;
     }
 
     private Leaderboard getLeaderboard() {
@@ -174,6 +182,8 @@ public class RaceResultOfCompetitorWithContext implements HasRaceResultOfCompeti
         final TimePoint now = MillisecondsTimePoint.now();
         final double competitorCountInRace;
         final TrackedRace trackedRace = raceColumn.getTrackedRace(competitor);
+        double highest = -1000;
+        double lowest = 1000;
         if (trackedRace != null) {
             competitorCountInRace = Util.size(trackedRace.getRace().getCompetitors());
         } else {
@@ -182,10 +192,27 @@ public class RaceResultOfCompetitorWithContext implements HasRaceResultOfCompeti
             final LeaderboardDTOCalculationReuseCache cache = new LeaderboardDTOCalculationReuseCache(now);
             for (final Competitor c : leaderboard.getCompetitors()) {
                 final MaxPointsReason maxPointsReason = leaderboard.getMaxPointsReason(c, raceColumn, now);
-                if (maxPointsReason != null && maxPointsReason != MaxPointsReason.NONE) {
+                if (maxPointsReason != null && maxPointsReason == MaxPointsReason.NONE) {
                     final Double totalPoints = leaderboard.getTotalPoints(c, raceColumn, now, cache);
-                    if (totalPoints != null && maxNonPenaltyScoreInColumn < totalPoints) {
-                        maxNonPenaltyScoreInColumn = totalPoints;
+                    if (leaderboard.getScoringScheme().isHigherBetter()) {
+                        // high-point scheme
+                        // remember highest and lowest point and subtract to get competitor count better
+                        if (totalPoints > highest) highest = totalPoints;
+                        if (totalPoints < lowest) lowest = totalPoints;
+                        // Add 1 because last boat gets 1 point
+                        double diff = highest - lowest + 1;
+                        if (totalPoints != null && maxNonPenaltyScoreInColumn < diff) {
+                            maxNonPenaltyScoreInColumn = diff;
+                        }
+                    } else {
+                        // low-point scheme
+                        if (totalPoints != null && maxNonPenaltyScoreInColumn < totalPoints) {
+                            maxNonPenaltyScoreInColumn = totalPoints;
+                        }
+                        // add 1 competitor if a 'n/a' (no score is entered in this race for the competitor) is found in the leaderboard
+                        if(totalPoints == null) {
+                            maxNonPenaltyScoreInColumn += 1;
+                        }
                     }
                 }
             }

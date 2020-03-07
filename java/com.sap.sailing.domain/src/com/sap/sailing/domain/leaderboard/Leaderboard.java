@@ -25,6 +25,9 @@ import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.RegattaName;
+import com.sap.sailing.domain.common.RegattaScoreCorrections;
+import com.sap.sailing.domain.common.RegattaScoreCorrections.ScoreCorrectionForCompetitorInRace;
+import com.sap.sailing.domain.common.RegattaScoreCorrections.ScoreCorrectionsForRace;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
@@ -724,7 +727,7 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
 
     @Override
     default QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+        return getPermissionType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
     }
 
     default TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
@@ -740,7 +743,7 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
     }
 
     @Override
-    default HasPermissions getType() {
+    default HasPermissions getPermissionType() {
         return SecuredDomainType.LEADERBOARD;
     }
     
@@ -763,4 +766,33 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      *         given as the key, and as the second pair component the number of computations in that time period.
      */
     Map<Duration, Pair<Duration, Integer>> getComputationTimeStatistics();
+    
+    /**
+     * Matches the results in {@code regattaScoreCorrections} to the {@link RaceColumn}s and {@link Competitor}s in this
+     * leaderboard. The race columns are identified in {@code regattaScoreCorrections} by the
+     * {@link ScoreCorrectionsForRace#getRaceNameOrNumber()} result and the ordering of the
+     * {@link ScoreCorrectionsForRace} objects as delivered by
+     * {@link RegattaScoreCorrections#getScoreCorrectionsForRaces()} as compared to the {@link #getRaceColumns()}
+     * ordering of this leaderboard, furthermore the explicit mappings specified in
+     * {@code raceNumberOrNameToRaceColumnMap}. The competitor mapping happens based on the
+     * {@link ScoreCorrectionForCompetitorInRace#getSailID()} result that is compared to the {@link Competitor}'s
+     * {@link Competitor#getShortName() short name} if the boats can change in this leaderboard, or to the
+     * {@link Boat#getSailID()} result of the competitor's boat, overruled by the explicit mappings in
+     * {@code sailIdToCompetitorMap}.
+     * 
+     * @param allowRaceDefaultsByOrder
+     *            if {@code true}, an attempt will be made to map the race names/numbers from the
+     *            {@link RegattaScoreCorrections} to the leaderboard's {@link RaceColumn}s by their ordering, one by
+     *            one, but only for those that are not mapped explicitly by {@code raceNumberOrNameToRaceColumnMap}. If
+     *            there are excess race names/numbers in the {@link RegattaScoreCorrections} objects beyond the number
+     *            of race columns in this leaderboard, no mapping will be inferred for the excess races.
+     * @param allowPartialImport
+     *            if {@code true}, a valid mapping will result even if the mapping is not complete regarding the set of
+     *            races and the set of competitors for which results are provided in {@code regattaScoreCorrections}. If
+     *            {@code false} and if one or more competitors or one or more races cannot be mapped successfully to
+     *            this leaderboard, {@code null} will be returned, implying that no results shall be imported at all.
+     */
+    ScoreCorrectionMapping mapRegattaScoreCorrections(RegattaScoreCorrections regattaScoreCorrections,
+            Map<String, RaceColumn> raceNumberOrNameToRaceColumnMap, Map<String, Competitor> sailIdToCompetitorMap,
+            boolean allowRaceDefaultsByOrder, boolean allowPartialImport);
 }

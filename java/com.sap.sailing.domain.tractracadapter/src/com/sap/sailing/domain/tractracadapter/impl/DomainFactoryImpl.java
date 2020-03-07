@@ -52,6 +52,7 @@ import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
@@ -63,8 +64,8 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.RaceLogStore;
-import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
+import com.sap.sailing.domain.ranking.RankingMetricsFactory;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -200,7 +201,8 @@ public class DomainFactoryImpl implements DomainFactory {
             com.sap.sailing.domain.base.ControlPoint newDomainControlPoint = getOrCreateControlPoint(tractracControlPoint.getA());
             newDomainControlPoints.add(new com.sap.sse.common.Util.Pair<com.sap.sailing.domain.base.ControlPoint, PassingInstruction>(newDomainControlPoint, tractracControlPoint.getB()));
         }
-        courseToUpdate.update(newDomainControlPoints, baseDomainFactory);
+        courseToUpdate.update(newDomainControlPoints, courseToUpdate.getAssociatedRoles(),
+                courseToUpdate.getOriginatingCourseTemplateIdOrNull(), baseDomainFactory);
     }
 
     @Override
@@ -224,8 +226,9 @@ public class DomainFactoryImpl implements DomainFactory {
                 List<Mark> marks = new ArrayList<Mark>();
                 for (ControlPointMetaData markMetadata : controlPointMetadata) {
                     Mark mark = baseDomainFactory.getOrCreateMark(markMetadata.getId(), markMetadata.getName(),
-                            markMetadata.getType(), markMetadata.getColor(), markMetadata.getShape(),
-                            markMetadata.getPattern());
+                            /* no separate short name; use name as short name, too */ markMetadata.getName(),
+                            markMetadata.getType(), markMetadata.getColor(),
+                            markMetadata.getShape(), markMetadata.getPattern());
                     marks.add(mark);
                 }
                 if (controlPoint.getHasTwoPoints()) {
@@ -233,7 +236,8 @@ public class DomainFactoryImpl implements DomainFactory {
                     Iterator<Mark> markIter = marks.iterator();
                     Mark mark1 = markIter.next();
                     Mark mark2 = markIter.next();
-                    domainControlPoint = baseDomainFactory.createControlPointWithTwoMarks(controlPoint.getId(), mark1, mark2, controlPoint.getName());
+                    domainControlPoint = baseDomainFactory.createControlPointWithTwoMarks(controlPoint.getId(), mark1,
+                            mark2, controlPoint.getName(), controlPoint.getShortName());
                 } else {
                     Mark mark = marks.iterator().next();
                     domainControlPoint = mark;
@@ -452,7 +456,10 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public Regatta getOrCreateDefaultRegatta(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             IRace race, TrackedRegattaRegistry trackedRegattaRegistry) {
-        return getOrCreateDefaultRegatta(raceLogStore, regattaLogStore, race, trackedRegattaRegistry, OneDesignRankingMetric::new);
+        return getOrCreateDefaultRegatta(raceLogStore, regattaLogStore, race, trackedRegattaRegistry,
+                // delegate the construction of the lambda to a bundle that the serialization classloaders
+                // for replication can see:
+                RankingMetricsFactory.getRankingMetricConstructor(RankingMetrics.ONE_DESIGN));
     }
     
     @Override

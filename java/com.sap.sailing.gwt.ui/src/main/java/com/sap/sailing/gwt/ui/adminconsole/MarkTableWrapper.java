@@ -37,6 +37,14 @@ public class MarkTableWrapper<S extends RefreshableSelectionModel<MarkDTO>> exte
         };
         table.addColumn(markNameColumn, stringMessages.mark());
 
+        TextColumn<MarkDTO> markShortNameColumn = new TextColumn<MarkDTO>() {
+            @Override
+            public String getValue(MarkDTO markDTO) {
+                return markDTO.getShortName();
+            }
+        };
+        table.addColumn(markShortNameColumn, stringMessages.shortName());
+
         TextColumn<MarkDTO> markPositionColumn = new TextColumn<MarkDTO>() {
             @Override
             public String getValue(MarkDTO mark) {

@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.persistence.impl;
 
 import static com.mongodb.client.model.Filters.eq;
+import static com.sap.sailing.shared.persistence.impl.DomainObjectFactoryImpl.loadDeviceId;
+import static com.sap.sailing.shared.persistence.impl.DomainObjectFactoryImpl.loadPosition;
 
 import java.io.Serializable;
 import java.net.MalformedURLException;
@@ -187,7 +189,6 @@ import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.PassingInstruction;
-import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.RegattaName;
@@ -199,7 +200,6 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.domain.common.dto.EventType;
-import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.impl.WindImpl;
@@ -211,7 +211,6 @@ import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
-import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonConstants;
 import com.sap.sailing.domain.leaderboard.DelayedLeaderboardCorrections;
 import com.sap.sailing.domain.leaderboard.EventResolver;
@@ -235,11 +234,8 @@ import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.persistence.MongoRegattaLogStoreFactory;
-import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
-import com.sap.sailing.domain.persistence.racelog.tracking.impl.PlaceHolderDeviceIdentifierMongoHandler;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
-import com.sap.sailing.domain.racelogtracking.impl.PlaceHolderDeviceIdentifierSerializationHandler;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.ranking.RankingMetricsFactory;
@@ -261,11 +257,12 @@ import com.sap.sailing.server.gateway.deserialization.impl.RegattaConfigurationJ
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.ImpliedWindSourceDeserializer;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.ORCCertificateJsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.DeviceConfigurationJsonSerializer;
+import com.sap.sailing.shared.persistence.device.DeviceIdentifierMongoHandler;
+import com.sap.sailing.shared.persistence.device.impl.PlaceHolderDeviceIdentifierMongoHandler;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
-import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.TypeBasedServiceFinder;
@@ -337,18 +334,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     public Wind loadWind(Document object) {
         return new WindImpl(loadPosition(object), loadTimePoint(object), loadSpeedWithBearing(object));
-    }
-
-    public Position loadPosition(Document object) {
-        Number latNumber = (Number) object.get(FieldNames.LAT_DEG.name());
-        Double lat = latNumber == null ? null : latNumber.doubleValue();
-        Number lngNumber = (Number) object.get(FieldNames.LNG_DEG.name());
-        Double lng = lngNumber == null ? null : lngNumber.doubleValue();
-        if (lat != null && lng != null) {
-            return new DegreePosition(lat, lng);
-        } else {
-            return null;
-        }
     }
 
     public static TimePoint loadTimePoint(Document object, String fieldName) {
@@ -1159,6 +1144,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         UUID id = (UUID) eventDBObject.get(FieldNames.EVENT_ID.name());
         TimePoint startDate = loadTimePoint(eventDBObject, FieldNames.EVENT_START_DATE);
         TimePoint endDate = loadTimePoint(eventDBObject, FieldNames.EVENT_END_DATE);
+        if (endDate.before(startDate)) {
+            logger.warning("End date "+endDate+" of event "+name+" with ID "+id+" is before its start date "+
+                    startDate+"; adjusting such that end date equals start date.");
+            endDate = startDate;
+        }
         boolean isPublic = eventDBObject.get(FieldNames.EVENT_IS_PUBLIC.name()) != null
                 ? (Boolean) eventDBObject.get(FieldNames.EVENT_IS_PUBLIC.name()) : false;
         Venue venue = loadVenue((Document) eventDBObject.get(FieldNames.VENUE.name()));
@@ -1908,8 +1898,34 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, Integer passId,
             List<Competitor> competitors, Document dbObject) {
         String courseName = (String) dbObject.get(FieldNames.RACE_LOG_COURSE_DESIGN_NAME.name());
+        UUID courseOriginatingTemplateId = (UUID) dbObject.get(FieldNames.RACE_LOG_COURSE_ORIGINATING_TEMPLATE_ID.name());
         Pair<CourseBase, Boolean> courseData = loadCourseData((Iterable<?>) dbObject.get(FieldNames.RACE_LOG_COURSE_DESIGN.name()),
-                courseName);
+                courseName, courseOriginatingTemplateId);
+
+        // load associated roles
+        final ArrayList<?> markList = dbObject.get(FieldNames.RACE_LOG_COURSE_ASSOCIATED_ROLES.name(), ArrayList.class);
+        if (markList != null) {
+            for (final Object entry : markList) {
+                if (entry instanceof Document) {
+                    final Document entryObject = (Document) entry;
+                    final UUID markUUID = UUID.fromString(
+                            entryObject.getString(FieldNames.RACE_LOG_COURSE_ASSOCIATED_ROLES_MARK_ID.name()));
+                    final Mark mark = baseDomainFactory.getExistingMarkById(markUUID);
+                    if (mark != null) {
+                        final String roleIdAsStringOrNull = entryObject
+                                .getString(FieldNames.RACE_LOG_COURSE_ASSOCIATED_ROLES_ROLE_ID.name());
+                        if (roleIdAsStringOrNull != null) {
+                            courseData.getA().addRoleMapping(mark, UUID.fromString(roleIdAsStringOrNull));
+                        }
+                    } else {
+                        logger.warning(String.format("Could not resolve mark with id %s for course %s.", markUUID, id));
+                    }
+                } else {
+                    logger.warning(String.format("Unexpected mark entry found for course %s.", id));
+                }
+            }
+        }
+
         final String courseDesignerModeName = (String) dbObject.get(FieldNames.RACE_LOG_COURSE_DESIGNER_MODE.name());
         final CourseDesignerMode courseDesignerMode = courseDesignerModeName == null ? null
                 : CourseDesignerMode.valueOf(courseDesignerModeName);
@@ -2445,12 +2461,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
      *         been edited "in place" to describe the migration that has happened
      */
     @SuppressWarnings("deprecation") // Used to migrate from PASSINGSIDE to the new PASSINGINSTRUCTIONS
-    private Pair<CourseBase, Boolean> loadCourseData(Iterable<?> dbCourseList, String courseName) {
+    private Pair<CourseBase, Boolean> loadCourseData(Iterable<?> dbCourseList, String courseName,
+            UUID originatingCourseTemplateId) {
         boolean migrated = false;
         if (courseName == null) {
             courseName = "Course";
         }
-        CourseBase courseData = new CourseDataImpl(courseName);
+        CourseBase courseData = new CourseDataImpl(courseName, originatingCourseTemplateId);
         int i = 0;
         for (Object object : dbCourseList) {
             Document dbObject = (Document) object;
@@ -2552,8 +2569,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             dbObject.remove(FieldNames.GATE_RIGHT.name());
         }
         Mark rightMark = loadMark(dbRight);
+        String shortName = (String) dbObject.get(FieldNames.CONTROLPOINTWITHTWOMARKS_SHORT_NAME.name());
+
+        if (shortName == null || shortName.isEmpty()) {
+            shortName = controlPointName;
+        }
         ControlPointWithTwoMarks gate = baseDomainFactory.createControlPointWithTwoMarks(controlPointId, leftMark,
-                rightMark, controlPointName);
+                rightMark, controlPointName, shortName);
         return gate;
     }
 
@@ -2562,12 +2584,21 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         String markColorAsString = (String) dbObject.get(FieldNames.MARK_COLOR.name());
         Color markColor = AbstractColor.getCssColor(markColorAsString);
         String markName = (String) dbObject.get(FieldNames.MARK_NAME.name());
+        String markShortName = (String) dbObject.get(FieldNames.MARK_SHORT_NAME.name());
         String markPattern = (String) dbObject.get(FieldNames.MARK_PATTERN.name());
         String markShape = (String) dbObject.get(FieldNames.MARK_SHAPE.name());
         Object markTypeRaw = dbObject.get(FieldNames.MARK_TYPE.name());
+        Object originatingMarkTemplateIdObject = dbObject.get(FieldNames.MARK_ORIGINATING_MARK_TEMPLATE_ID.name());
+        UUID originatingMarkTemplateId = originatingMarkTemplateIdObject == null ? null
+                : UUID.fromString(originatingMarkTemplateIdObject.toString());
+        Object originatingMarkPropertiesIdObject = dbObject
+                .get(FieldNames.MARK_ORIGINATING_MARK_PROPERTIES_ID.name());
+        UUID originatingMarkPropertiesId = originatingMarkPropertiesIdObject == null ? null
+                : UUID.fromString(originatingMarkPropertiesIdObject.toString());
         MarkType markType = markTypeRaw == null ? null : MarkType.valueOf((String) markTypeRaw);
 
-        Mark mark = baseDomainFactory.getOrCreateMark(markId, markName, markType, markColor, markShape, markPattern);
+        Mark mark = baseDomainFactory.getOrCreateMark(markId, markName, markShortName, markType, markColor, markShape,
+                markPattern, originatingMarkTemplateId, originatingMarkPropertiesId);
         return mark;
     }
 
@@ -2678,6 +2709,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
 
+
     private DeviceConfiguration loadConfigurationEntry(Document dbObject) throws JsonDeserializationException, ParseException {
         final String idAsString = dbObject.getString(FieldNames.CONFIGURATION_ID_AS_STRING.name());
         final DeviceConfiguration configuration;
@@ -2712,22 +2744,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(configObject.toJson(writerSettings)));
         configuration = deserializer.deserialize(json);
         return configuration;
-    }
-
-    private DeviceIdentifier loadDeviceId(
-            TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder, Document deviceId)
-            throws TransformationException, NoCorrespondingServiceRegisteredException {
-        String deviceType = (String) deviceId.get(FieldNames.DEVICE_TYPE.name());
-        Object deviceTypeId = deviceId.get(FieldNames.DEVICE_TYPE_SPECIFIC_ID.name());
-        String stringRepresentation = (String) deviceId.get(FieldNames.DEVICE_STRING_REPRESENTATION.name());
-
-        try {
-            return deviceIdentifierServiceFinder.findService(deviceType).deserialize(deviceTypeId, deviceType,
-                    stringRepresentation);
-        } catch (TransformationException e) {
-            return new PlaceHolderDeviceIdentifierSerializationHandler().deserialize(stringRepresentation, deviceType,
-                    stringRepresentation);
-        }
     }
 
     @Override
@@ -3046,4 +3062,5 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
         return fromDb;
     }
+
 }

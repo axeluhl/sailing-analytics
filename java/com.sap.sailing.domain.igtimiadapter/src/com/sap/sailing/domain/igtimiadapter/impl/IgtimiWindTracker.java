@@ -101,7 +101,7 @@ public class IgtimiWindTracker extends AbstractWindTracker implements WindTracke
                 final UserGroup groupOwner = ownershipOfRace == null ? null
                         : ownershipOfRace.getAnnotation().getTenantOwner();
                 if (groupOwner != null) {
-                    if (groupOwner.equals(optionalSecurityService.getDefaultTenant())) {
+                    if (groupOwner.equals(optionalSecurityService.getServerGroup())) {
                         // It is assumed to be an auto-migration case
                         isPermittedToUseAccount = true;
                     } else {

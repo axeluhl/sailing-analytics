@@ -38,7 +38,8 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sse.security.common,
  com.sap.sse.security.testsupport,
  com.sap.sailing.server.gateway.serialization,
- com.sap.sailing.server.gateway.serialization.shared.android
+ com.sap.sailing.server.gateway.serialization.shared.android,
+ com.sap.sailing.shared.persistence
 Import-Package: com.sap.sailing.domain.common,
  com.sap.sailing.domain.common.impl,
  com.sap.sailing.domain.common.orc,

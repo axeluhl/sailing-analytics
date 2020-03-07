@@ -20,8 +20,14 @@ public interface HasTrackedRaceContext {
     @Connector(scanForStatistics=false)
     public HasLeaderboardContext getLeaderboardContext();
     
+    /**
+     * May be {@code null}
+     */
     public TrackedRace getTrackedRace();
     
+    /**
+     * May be {@code null}
+     */
     @Connector(messageKey="Regatta", ordinal=0)
     public Regatta getRegatta();
     

@@ -65,6 +65,10 @@ name to make sure you get to the event you're interested in.
 		<td>Gets the details of a regatta</td>
 	</tr>
 	<tr>
+		<td><a href="regattaUpdateDoc.html">/api/v1/regattas/{name}</a></td>
+		<td>Updates the details of a regatta</td>
+	</tr>
+	<tr>
 		<td><a href="racesGetDoc.html">/api/v1/regattas/{name}/races</a></td>
 		<td>Gets the list of races in a regatta</td>
 	</tr>
@@ -105,6 +109,14 @@ name to make sure you get to the event you're interested in.
 		<td>Gets the course of a race</td>
 	</tr>
 	<tr>
+		<td><a href="raceCourseGetByRegattaStructureDoc.html">/api/v1/regattas/{regattaname}/structure/{raceColumn}/{fleet}/course</a></td>
+		<td>Gets the course of a race by using the regatta structure</td>
+	</tr>
+	<tr>
+		<td><a href="raceStartanalysisGet.html">/api/v1/regattas/{regattaname}/races/{racename}/startanalysis</a></td>
+		<td>Obtains start analysis parameters for the competitors, such as start delay, distance to line at gun, etc.</td>
+	</tr>
+	<tr>
 		<td><a href="raceTimesGetDoc.html">/api/v1/regattas/{regattaname}/races/{racename}/times</a></td>
 		<td>Gets the timing data for a race, including the start/end times, the tracking start/end times
 		    as well as the "split times" or "mark passing times" of the first competitor rounding each mark.</td>
@@ -141,10 +153,10 @@ name to make sure you get to the event you're interested in.
 		<td><a href="regattaWindsummaryGet.html">/api/v1/regattas/{regattaname}/windsummary</a></td>
 		<td>Obtains a summary of the wind conditions for one or more races in the regatta</td>
 	</tr>
-    <tr>
-        <td><a href="regattaUpdateOrCreateSeries.html">/api/v1/regattas/updateOrCreateSeries</a></td>
-        <td>Creates a Series in an regatta, and configures the Series it contains</td>
-    </tr>
+        <tr>
+                <td><a href="regattaUpdateOrCreateSeries.html">/api/v1/regattas/updateOrCreateSeries</a></td>
+        	<td>Creates a Series in an regatta, and configures the Series it contains</td>
+        </tr>
    <tr>
         <td><a href="regattasCompetitorsCreateAndAddWithBoat.html">/api/v1/regattas/{regattaname}/competitors/createandaddwithboat</a></td>
         <td>Creates a competitor using an already exising boat and adds it to the regatta</td>
@@ -190,6 +202,10 @@ name to make sure you get to the event you're interested in.
 		<td>Gets the details of a leaderboard</td>
 	</tr>
 	<tr>
+		<td><a href="leaderboardUpdateDoc.html">/api/v1/leaderboards/{name}/update</a></td>
+		<td>Modifies attributes of a leaderboard</td>
+	</tr>
+	<tr>
 		<td><a href="leaderboardCheckinPostDoc.html">/api/v1/leaderboards/{name}/device_mappings/start</a></td>
 		<td>Tracking App Device Checkin on leaderboard</td>
 	</tr>
@@ -217,6 +233,14 @@ name to make sure you get to the event you're interested in.
         <td><a href="leaderboardRaceStartorderGetDoc.html">/api/v1/leaderboards/{name}/startorder</a></td>
         <td>Gets the order in which competitors have started or are expected to start for a race</td>
     </tr>
+	<tr>
+		<td><a href="leaderboardRaceSetStartTimeAndRacingProcedure.html">/api/v1/leaderboards/{name}/starttime</a></td>
+		<td>Sets the race start time and racing procedure in the race log (PUT)</td>
+	</tr>
+	<tr>
+		<td><a href="leaderboardRaceGetStartTimeAndRacingProcedure.html">/api/v1/leaderboards/{name}/starttime</a></td>
+		<td>Fetches a race's start time and racing procedure, as well as the current pass in the race log (GET).</td>
+	</tr>
 	<tr>
 		<td><a href="leaderboardRaceSetTrackingTimes.html">/api/v1/leaderboards/{name}/settrackingtimes</a></td>
 		<td>Modifies the race's tracking interval</td>
@@ -367,6 +391,18 @@ name to make sure you get to the event you're interested in.
     <tr>
         <td><a href="trackingDeviceStatusesGet.html">/api/v1/tracking_devices</a></td>
         <td>Gets the status of multiple app based tracking devices (GET)</td>
+    </tr>
+    <tr>
+        <td><a href="courseConfigurationCreateCourse.html">/api/v1/courseconfiguration/createCourse/{regattaName}/{raceColumn}/{fleet}</a></td>
+        <td>Creates a course based on a course configuration.</td>
+    </tr>
+    <tr>
+        <td><a href="courseConfigurationCreateCourseTemplate.html">/api/v1/courseconfiguration/createCourseTemplate</a></td>
+        <td>Creates a course template based on a course configuration.</td>
+    </tr>
+    <tr>
+        <td><a href="courseConfigurationGetFromCourse.html">/api/v1/courseconfiguration/getFromCourse/{regattaName}/{raceColumn}/{fleet}</a></td>
+        <td>Gets the course from a race defined by regattaName, raceColumn and fleet and returns it as course configuration.</td>
     </tr>
 </tbody>
 </table>

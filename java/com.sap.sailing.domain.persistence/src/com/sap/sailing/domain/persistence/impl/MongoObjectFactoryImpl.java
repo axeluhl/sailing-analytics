@@ -1,5 +1,8 @@
 package com.sap.sailing.domain.persistence.impl;
 
+import static com.sap.sailing.shared.persistence.impl.MongoObjectFactoryImpl.getPassingInstructions;
+import static com.sap.sailing.shared.persistence.impl.MongoObjectFactoryImpl.storeDeviceId;
+
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -98,7 +101,6 @@ import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Positioned;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.SpeedWithBearing;
@@ -116,8 +118,6 @@ import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
-import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
-import com.sap.sailing.domain.persistence.racelog.tracking.impl.PlaceHolderDeviceIdentifierMongoHandler;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
@@ -134,6 +134,8 @@ import com.sap.sailing.server.gateway.serialization.impl.DeviceConfigurationJson
 import com.sap.sailing.server.gateway.serialization.impl.RegattaConfigurationJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.ImpliedWindSourceSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.ORCCertificateJsonSerializer;
+import com.sap.sailing.shared.persistence.device.DeviceIdentifierMongoHandler;
+import com.sap.sailing.shared.persistence.device.impl.PlaceHolderDeviceIdentifierMongoHandler;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
@@ -152,7 +154,7 @@ import com.sap.sse.shared.media.VideoDescriptor;
 public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private static Logger logger = Logger.getLogger(MongoObjectFactoryImpl.class.getName());
     private final MongoDatabase database;
-    private final CompetitorWithBoatRefJsonSerializer competitorWithBoatRefSerializer = CompetitorWithBoatRefJsonSerializer.create();
+    private final CompetitorWithBoatRefJsonSerializer competitorWithBoatRefSerializer = CompetitorWithBoatRefJsonSerializer.create(/* serializeNonPublicCompetitorFields */ true);
     private final CompetitorJsonSerializer competitorSerializer = CompetitorJsonSerializer.create(
             /* serialize boat */ true, /* serializeNonPublicCompetitorFields */ true, /* verboseBoatClassSerializer */ false);
     private final BoatJsonSerializer boatSerializer = new BoatJsonSerializer(new BoatClassJsonSerializer(/* verbose */ false));
@@ -258,9 +260,9 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         dropIndexSafe(gpsFixCollection, "DEVICE_ID_1_GPSFIX.TIME_AS_MILLIS_1");
         Document index = new Document();
         index.put(FieldNames.TIME_AS_MILLIS.name(), 1);
-        index.put(FieldNames.DEVICE_ID.name()+"."+FieldNames.DEVICE_TYPE.name(), 1);
-        index.put(FieldNames.DEVICE_ID.name()+"."+FieldNames.DEVICE_TYPE_SPECIFIC_ID.name(), 1);
-        index.put(FieldNames.DEVICE_ID.name()+"."+FieldNames.DEVICE_STRING_REPRESENTATION.name(), 1);
+        index.put(FieldNames.DEVICE_ID.name()+"."+com.sap.sailing.shared.persistence.impl.FieldNames.DEVICE_TYPE.name(), 1);
+        index.put(FieldNames.DEVICE_ID.name()+"."+com.sap.sailing.shared.persistence.impl.FieldNames.DEVICE_TYPE_SPECIFIC_ID.name(), 1);
+        index.put(FieldNames.DEVICE_ID.name()+"."+com.sap.sailing.shared.persistence.impl.FieldNames.DEVICE_STRING_REPRESENTATION.name(), 1);
         gpsFixCollection.createIndex(index, new IndexOptions().name("fixbytimeanddev"));
         return gpsFixCollection;
     }
@@ -995,7 +997,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogSuppressedMarkPassingsEvent(event));
         return result;
     }
-    
+
     public Document storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogORCLegDataEvent event) {
         Document result = new Document();
         storeRaceLogIdentifier(raceLogIdentifier, result);
@@ -1290,9 +1292,23 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         storeRaceLogEventProperties(courseDesignChangedEvent, result);
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogCourseDesignChangedEvent.class.getSimpleName());
         result.put(FieldNames.RACE_LOG_COURSE_DESIGN_NAME.name(), courseDesignChangedEvent.getCourseDesign().getName());
+        result.put(FieldNames.RACE_LOG_COURSE_ORIGINATING_TEMPLATE_ID.name(),
+                courseDesignChangedEvent.getCourseDesign().getOriginatingCourseTemplateIdOrNull());
         result.put(FieldNames.RACE_LOG_COURSE_DESIGNER_MODE.name(),
                 courseDesignChangedEvent.getCourseDesignerMode() == null ? null : courseDesignChangedEvent.getCourseDesignerMode().name());
         result.put(FieldNames.RACE_LOG_COURSE_DESIGN.name(), storeCourseBase(courseDesignChangedEvent.getCourseDesign()));
+
+        final BasicDBList roleMap = new BasicDBList();
+        courseDesignChangedEvent.getCourseDesign().getAssociatedRoles().forEach((mark, role) -> {
+            final Document mapping = new Document();
+            mapping.put(FieldNames.RACE_LOG_COURSE_ASSOCIATED_ROLES_MARK_ID.name(), mark.getId().toString());
+            mapping.put(FieldNames.RACE_LOG_COURSE_ASSOCIATED_ROLES_ROLE_ID.name(), role.toString());
+            roleMap.add(mapping);
+        });
+
+        if (!roleMap.isEmpty()) {
+            result.put(FieldNames.RACE_LOG_COURSE_ASSOCIATED_ROLES.name(), roleMap);
+        }
         return result;
     }
     
@@ -1301,6 +1317,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         storeRaceLogEventProperties(finishPositioningListChangedEvent, result);
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogFinishPositioningListChangedEvent.class.getSimpleName());
         result.put(FieldNames.RACE_LOG_POSITIONED_COMPETITORS.name(), storePositionedCompetitors(finishPositioningListChangedEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons()));
+
         return result;
     }
 
@@ -1309,6 +1326,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         storeRaceLogEventProperties(finishPositioningConfirmedEvent, result);
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogFinishPositioningConfirmedEvent.class.getSimpleName());
         result.put(FieldNames.RACE_LOG_POSITIONED_COMPETITORS.name(), storePositionedCompetitors(finishPositioningConfirmedEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons()));
+
         return result;
     }
     
@@ -1379,6 +1397,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         Document result = new Document();
         result.put(FieldNames.CONTROLPOINTWITHTWOMARKS_ID.name(), cpwtm.getId());
         result.put(FieldNames.CONTROLPOINTWITHTWOMARKS_NAME.name(), cpwtm.getName());
+        result.put(FieldNames.CONTROLPOINTWITHTWOMARKS_SHORT_NAME.name(), cpwtm.getShortName());
         result.put(FieldNames.CONTROLPOINTWITHTWOMARKS_LEFT.name(), storeMark(cpwtm.getLeft()));
         result.put(FieldNames.CONTROLPOINTWITHTWOMARKS_RIGHT.name(), storeMark(cpwtm.getRight()));
         return result;
@@ -1389,20 +1408,13 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.MARK_ID.name(), mark.getId());
         result.put(FieldNames.MARK_COLOR.name(), mark.getColor()==null?null:mark.getColor().getAsHtml());
         result.put(FieldNames.MARK_NAME.name(), mark.getName());
+        result.put(FieldNames.MARK_SHORT_NAME.name(), mark.getShortName());
         result.put(FieldNames.MARK_PATTERN.name(), mark.getPattern());
         result.put(FieldNames.MARK_SHAPE.name(), mark.getShape());
         result.put(FieldNames.MARK_TYPE.name(), mark.getType() == null ? null : mark.getType().name());
+        result.put(FieldNames.MARK_ORIGINATING_MARK_TEMPLATE_ID.name(), mark.getOriginatingMarkTemplateIdOrNull());
+        result.put(FieldNames.MARK_ORIGINATING_MARK_PROPERTIES_ID.name(), mark.getOriginatingMarkPropertiesIdOrNull());
         return result;
-    }
-    
-    private String getPassingInstructions(PassingInstruction passingInstructions) {
-        final String passing;
-        if (passingInstructions != null) {
-            passing = passingInstructions.name();
-        } else {
-            passing = null;
-        }
-        return passing;
     }
     
     @Override
@@ -1554,20 +1566,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         MongoCollection<Document> configurationsCollections = database.getCollection(CollectionNames.CONFIGURATIONS.name());
         Document query = new Document(FieldNames.CONFIGURATION_ID_AS_STRING.name(), id.toString());
         configurationsCollections.deleteOne(query);
-    }
-
-    public static Document storeDeviceId(
-    		TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder, DeviceIdentifier device)
-    				throws TransformationException, NoCorrespondingServiceRegisteredException {
-        String type = device.getIdentifierType();
-        DeviceIdentifierMongoHandler handler = deviceIdentifierServiceFinder.findService(type);
-        com.sap.sse.common.Util.Pair<String, ? extends Object> pair = handler.serialize(device);
-        type = pair.getA();
-    	Object deviceTypeSpecificId = pair.getB();
-    	return new Document()
-    			.append(FieldNames.DEVICE_TYPE.name(), type)
-    			.append(FieldNames.DEVICE_TYPE_SPECIFIC_ID.name(), deviceTypeSpecificId)
-    			.append(FieldNames.DEVICE_STRING_REPRESENTATION.name(), device.getStringRepresentation());
     }
     
     void storeRaceLogEventEvent(Document eventEntry) {
@@ -1886,4 +1884,5 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         document.append(FieldNames.ORC_CERTIFICATE.name(), createORCCertificateObject(event.getCertificate()));
         storeRegattaLogEvent(regattaLikeIdentifier, document);
     }
+
 }

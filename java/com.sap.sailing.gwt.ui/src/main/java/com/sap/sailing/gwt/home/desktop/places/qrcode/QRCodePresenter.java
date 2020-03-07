@@ -9,7 +9,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.BranchIOConstants;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.gwt.home.desktop.places.qrcode.QRCodePlace.InvitationMode;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.QRCodeEvent;
 import com.sap.sse.common.Util;
@@ -123,6 +122,7 @@ public class QRCodePresenter {
             break;
         case COMPETITOR:
         case COMPETITOR_2:
+        case COMPETITOR_3:
             logger.info("QR Code for competitor/boat/buoy tracking to be shown");
             if (place.getEncodedCheckInUrl() == null || place.getEncodedCheckInUrl().isEmpty()) {
                 view.setError();
@@ -142,6 +142,7 @@ public class QRCodePresenter {
             }
             break;
         case PUBLIC_INVITE:
+        case PUBLIC_INVITE3:
             logger.info("QR Code for public regatta invite to be shown");
             // as the event is most likely displayed on a different server anyway, do not load additional data
             dataCollector = new DataCollector(view);
@@ -280,13 +281,13 @@ public class QRCodePresenter {
                 break;
             case COMPETITOR:
             case COMPETITOR_2:
+            case COMPETITOR_3:
                 if (participantIsSet && eventIsSet) {
                     logger.info("About to show QR Code for competitor/boat/mark tracking");
-                    String sailInsightBranch = place.getMode() == InvitationMode.COMPETITOR
-                            ? BranchIOConstants.SAILINSIGHT_APP_BRANCHIO
-                            : BranchIOConstants.SAILINSIGHT_2_APP_BRANCHIO;
+                    String sailInsightBranch = place.getMode().getMailInvitationType().getBranchIOinviteURL();
                     String branchIoUrl = sailInsightBranch + "?"
-                            + BranchIOConstants.SAILINSIGHT_APP_BRANCHIO_PATH + "=" + place.getEncodedCheckInUrl();
+                            + place.getMode().getMailInvitationType().getBranchIOcheckinPath() + "="
+                            + place.getEncodedCheckInUrl();
                     view.showCompetitor(event, competitor, boat, mark, place.getLeaderboardName(), branchIoUrl);
                 } else {
                     if (!participantIsSet) {
@@ -298,11 +299,12 @@ public class QRCodePresenter {
                 }
                 break;
             case PUBLIC_INVITE:
+            case PUBLIC_INVITE3:
                 logger.info("About to show QR Code for public regatta invite");
-                view.showPublic(place.getPublicRegattaName(), place.getPublicInviteBranchIOUrl());
+                view.showPublic(place.getPublicRegattaName(),
+                        place.getPublicInviteBranchIOUrl(place.getMode().getMailInvitationType()));
                 break;
             }
         }
     }
-
 }

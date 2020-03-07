@@ -48,7 +48,7 @@ public class FixFactory {
                 int i=1;
                 JSONArray values;
                 while ((values=(JSONArray) fixesJson.get(""+i)) != null) {
-                    valuesPerSubindex.put(i, (Number) values.get(fixIndex));
+                    valuesPerSubindex.put(i, values.get(fixIndex));
                     i++;
                 }
                 Sensor sensor = new SensorImpl(deviceSerialNumber,

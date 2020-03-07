@@ -24,6 +24,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 public class GateCreationDialog extends DataEntryDialog<GateDTO> {    
     private final MarkTableWrapper<RefreshableMultiSelectionModel<MarkDTO>> marksWrapper;
     private final TextBox name;
+    private final TextBox shortName;
     private final StringMessages stringMessages;
     
     public GateCreationDialog(SailingServiceAsync sailingService, ErrorReporter errorReporter,
@@ -43,6 +44,7 @@ public class GateCreationDialog extends DataEntryDialog<GateDTO> {
                 }, /* animationEnabled */ false, callback);
         this.stringMessages = stringMessages;
         name = createTextBox("");
+        shortName = createTextBox("");
         marksWrapper = new MarkTableWrapper<RefreshableMultiSelectionModel<MarkDTO>>(
                 /* multiSelection */ true, sailingService, stringMessages, errorReporter);
         marksWrapper.getDataProvider().getList().addAll(marks);
@@ -63,19 +65,25 @@ public class GateCreationDialog extends DataEntryDialog<GateDTO> {
             Iterator<MarkDTO> i = marksWrapper.getSelectionModel().getSelectedSet().iterator();
             MarkDTO first = i.next();
             MarkDTO second = i.next();
-            controlPoint = new GateDTO(UUID.randomUUID().toString(), name.getText(), first, second);
+            controlPoint = new GateDTO(UUID.randomUUID().toString(), name.getText(), first, second,
+                    shortName.getText());
         }
         return controlPoint;
     }
 
     @Override
     protected Widget getAdditionalWidget() {
-        Grid grid = new Grid(2,1);
+        Grid grid = new Grid(3, 1);
         HorizontalPanel nameRow = new HorizontalPanel();
         nameRow.add(new Label(stringMessages.name()));
         nameRow.add(name);
+
+        HorizontalPanel shortnameRow = new HorizontalPanel();
+        shortnameRow.add(new Label(stringMessages.shortName()));
+        shortnameRow.add(shortName);
         grid.setWidget(0, 0, nameRow);
-        grid.setWidget(1, 0, marksWrapper);
+        grid.setWidget(1, 0, shortnameRow);
+        grid.setWidget(2, 0, marksWrapper);
         return grid;
     }
 }

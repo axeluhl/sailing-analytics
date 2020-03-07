@@ -134,6 +134,15 @@ public abstract class EventBaseImpl implements EventBase {
     }
 
     @Override
+    public void setStartAndEndDate(TimePoint startDate, TimePoint endDate) {
+        if (startDate != null && endDate != null && endDate.before(startDate)) {
+            throw new IllegalArgumentException("Event start date ("+startDate+") for event "+this+" must not be after end date "+endDate);
+        }
+        this.startDate = startDate;
+        this.endDate = endDate;
+    }
+
+    @Override
     public void setStartDate(TimePoint startDate) {
         if (startDate != null && getEndDate() != null && getEndDate().before(startDate)) {
             throw new IllegalArgumentException("Event start date ("+startDate+") for event "+this+" must not be after end date "+getEndDate());
@@ -384,11 +393,11 @@ public abstract class EventBaseImpl implements EventBase {
 
     @Override
     public QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+        return getPermissionType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
     }
 
     @Override
-    public HasPermissions getType() {
+    public HasPermissions getPermissionType() {
         return SecuredDomainType.EVENT;
     }
 

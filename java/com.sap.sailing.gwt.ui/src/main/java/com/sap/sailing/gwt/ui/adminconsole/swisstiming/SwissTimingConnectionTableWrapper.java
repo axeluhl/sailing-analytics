@@ -37,7 +37,7 @@ import com.sap.sse.security.ui.client.i18n.StringMessages;
  * event id, the event json url, the hostname, the port, the update url, the username for sending updates, the password
  * for sending updates, the name of the creator, the group and user each user group is owned by. There are options edit
  * or to delete the connection, change the ownership or edit the associated ACL. Editing the connection will open a new
- * instance of {@link EditSwissTimingConnectionDialog}.
+ * instance of {@link SwissTimingConnectionDialog}.
  */
 public class SwissTimingConnectionTableWrapper extends
         TableWrapper<SwissTimingConfigurationWithSecurityDTO, RefreshableSingleSelectionModel<SwissTimingConfigurationWithSecurityDTO>, StringMessages, CellTableWithCheckboxResources> {
@@ -88,7 +88,7 @@ public class SwissTimingConnectionTableWrapper extends
         final AccessControlledActionsColumn<SwissTimingConfigurationWithSecurityDTO, DefaultActionsImagesBarCell> actionColumn = create(
                 new DefaultActionsImagesBarCell(stringMessages), userService);
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_UPDATE, DefaultActions.UPDATE, dto -> {
-            new EditSwissTimingConnectionDialog(dto, new DialogCallback<SwissTimingConfigurationWithSecurityDTO>() {
+            new SwissTimingConnectionEditDialog(dto, new DialogCallback<SwissTimingConfigurationWithSecurityDTO>() {
                 @Override
                 public void ok(final SwissTimingConfigurationWithSecurityDTO editedObject) {
                     sailingServiceAsync.updateSwissTimingConfiguration(editedObject,

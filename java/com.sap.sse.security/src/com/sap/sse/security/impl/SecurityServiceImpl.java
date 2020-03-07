@@ -93,6 +93,7 @@ import com.sap.sse.security.ClientUtils;
 import com.sap.sse.security.GithubApi;
 import com.sap.sse.security.InstagramApi;
 import com.sap.sse.security.OAuthRealm;
+import com.sap.sse.security.SecurityInitializationCustomizer;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionCacheManager;
 import com.sap.sse.security.SessionUtils;
@@ -156,6 +157,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     private AccessControlStore accessControlStore;
     
     private boolean isInitialOrMigration;
+    private boolean isNewServer;
     
     private final ServiceTracker<MailService, MailService> mailServiceTracker;
     private final ConcurrentMap<OperationExecutionListener<ReplicableSecurityService>, OperationExecutionListener<ReplicableSecurityService>> operationExecutionListeners;
@@ -189,6 +191,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     private String sharedAcrossSubdomainsOf;
     
     private String baseUrlForCrossDomainStorage;
+    
+    private final transient Set<SecurityInitializationCustomizer> customizers = ConcurrentHashMap.newKeySet();
     
     static {
         shiroConfiguration = new Ini();
@@ -325,23 +329,21 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                         ADMIN_DEFAULT_PASSWORD,
                         /* fullName */ null, /* company */ null, Locale.ENGLISH, /* validationBaseURL */ null,
                         null);
-
                 setOwnership(adminUser.getIdentifier(), adminUser, null);
                 Role adminRole = new Role(adminRoleDefinition);
                 addRoleForUserAndSetUserAsOwner(adminUser, adminRole);
-                final UserGroup defaultTenant = getDefaultTenant();
+                // add new admin user to server group and make server group the default creation group for the admin user:
+                final UserGroup defaultTenant = getServerGroup();
                 addUserToUserGroup(defaultTenant, adminUser);
                 setDefaultTenantForCurrentServerForUser(adminUser.getName(), defaultTenant.getId());
             }
-            
             if (store.getUserByName(SecurityService.ALL_USERNAME) == null) {
                 isInitialOrMigration = true;
+                isNewServer = true;
                 logger.info(SecurityService.ALL_USERNAME + " not found -> creating it now");
                 User allUser = apply(s->s.internalCreateUser(SecurityService.ALL_USERNAME, null));
-
                 // <all> user is explicitly not owned by itself because this would enable anybody to modify this user
-                setOwnership(allUser.getIdentifier(), null, getDefaultTenant());
-
+                setOwnership(allUser.getIdentifier(), null, getServerGroup());
                 // The permission to create new users is initially added but not recreated on server start if the admin removed it in the meanwhile.
                 // This allows servers to be configured to not permit self-registration of new users but only users being managed by an admin user.
                 WildcardPermission createUserPermission = SecuredSecurityTypes.USER.getPermission(DefaultActions.CREATE);
@@ -350,9 +352,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                         .getQualifiedObjectIdentifier(PermissionAndRoleAssociation.get(createUserPermission, allUser));
                 // Permission association is owned by the server tenant.
                 // This typically ensures that the server admin is able to remove the association.
-                setOwnership(qualifiedTypeIdentifierForPermission, null, getDefaultTenant());
+                setOwnership(qualifiedTypeIdentifierForPermission, null, getServerGroup());
             }
-            
             if (isInitialOrMigration) {
                 // predefined roles are meant to be publicly readable
                 for (UUID predefinedRoleId : getPredefinedRoleIds()) {
@@ -524,6 +525,14 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
+    public AccessControlList overrideAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
+            Map<UserGroup, Set<String>> permissionMap, String displayNameOfAccessControlledObject) {
+        accessControlStore.removeAccessControlList(idOfAccessControlledObject);
+        accessControlStore.setEmptyAccessControlList(idOfAccessControlledObject, displayNameOfAccessControlledObject);
+        return updateAccessControlList(idOfAccessControlledObject, permissionMap);
+    }
+
+    @Override
     public AccessControlList updateAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
             Map<UserGroup, Set<String>> permissionMap) {
         if (getAccessControlList(idOfAccessControlledObject) == null) {
@@ -663,8 +672,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         return createUserGroupWithInitialUser(id, name, getCurrentUser());
     }
     
-    private UserGroup createUserGroupWithInitialUser(UUID id, String name, User initialUser)
-            throws UserGroupManagementException {
+    private UserGroup createUserGroupWithInitialUser(UUID id, String name, User initialUser) {
         logger.info("Creating user group " + name + " with ID " + id);
         apply(s -> s.internalCreateUserGroup(id, name));
         final UserGroup userGroup = store.getUserGroup(id);
@@ -718,7 +726,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public void putRoleDefinitionToUserGroup(UserGroup userGroup, RoleDefinition roleDefinition, boolean forAll) {
-        logger.info("Removing role definition " + roleDefinition.getName() + "(forAll = " + forAll + ") to group "
+        logger.info("Adding role definition " + roleDefinition.getName() + "(forAll = " + forAll + ") to group "
                 + userGroup.getName());
         apply(s -> s.internalPutRoleDefinitionToUserGroup(userGroup.getId(), roleDefinition.getId(), forAll));
     }
@@ -859,12 +867,13 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     private void addUserRoleToUser(final User user) {
-        addRoleForUserAndSetUserAsOwner(user,
-                new Role(UserRole.getInstance(), /* tenant qualifier */ null, /* user qualifier */ user));
+        addRoleForUserAndSetUserAsOwner(user, new Role(store.getRoleDefinitionByPrototype(UserRole.getInstance()),
+                /* tenant qualifier */ null, /* user qualifier */ user));
     }
     
     private void addUserRoleForGroupToUser(final UserGroup group, final User user) {
-        addRoleForUserAndSetUserAsOwner(user, new Role(UserRole.getInstance(), /* tenant qualifier */ group, /* user qualifier */ null));
+        addRoleForUserAndSetUserAsOwner(user, new Role(store.getRoleDefinitionByPrototype(UserRole.getInstance()),
+                /* tenant qualifier */ group, /* user qualifier */ null));
     }
     
     private UserGroup getOrCreateTenantForUser(User user) throws UserGroupManagementException {
@@ -1650,8 +1659,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public UserGroup getDefaultTenant() {
-        return store.getDefaultTenant();
+    public UserGroup getServerGroup() {
+        return store.getServerGroup();
     }
 
     @Override
@@ -1693,7 +1702,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             } else {
                 logger.fine("Preexisting ownership found for " + identifier + ": " + preexistingOwnership);
             }
-
             if (doServerCreateObjectCheck) {
                 checkCurrentUserServerPermission(ServerActions.CREATE_OBJECT);
             }
@@ -2037,7 +2045,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (potentiallyExistingRoleDefinition == null) {
             result = store.createRoleDefinition(rolePrototype.getId(), rolePrototype.getName(),
                     rolePrototype.getPermissions());
-            setOwnership(result.getIdentifier(), null, getDefaultTenant());
+            setOwnership(result.getIdentifier(), null, getServerGroup());
         } else {
             result = potentiallyExistingRoleDefinition;
         }
@@ -2074,9 +2082,23 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             Thread.currentThread().setContextClassLoader(store.getClass().getClassLoader());
         }
         logger.info("Reading user store...");
+        boolean createdServerGroup = false;
         try {
-            UserStore newUserStore = (UserStore) is.readObject();
+            final UserStore newUserStore = (UserStore) is.readObject();
+            final UserGroup newServerGroup = newUserStore.getUserGroupByName(store.getServerGroupName());
+            // before replacing the local UserStore's contents, capture the server group:
+            final UserGroup oldServerGroup = store.getServerGroup();
             store.replaceContentsFrom(newUserStore);
+            if (newServerGroup == null) {
+                // create the server group in a replication-aware fashion, making sure it appears on the master
+                final String serverGroupName = store.getServerGroupName();
+                final UUID serverGroupUuid = UUID.randomUUID();
+                createUserGroupWithInitialUser(serverGroupUuid, serverGroupName, /* initial user */ null);
+                store.setServerGroup(store.getUserGroupByName(store.getServerGroupName()));
+                createdServerGroup = true;
+            } else if (newServerGroup != oldServerGroup) {
+                store.setServerGroup(newServerGroup);
+            }
         } finally {
             Thread.currentThread().setContextClassLoader(oldCCL);
         }
@@ -2090,10 +2112,30 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         } finally {
             Thread.currentThread().setContextClassLoader(oldCCL);
         }
+        // now ensure that the SERVER object has a valid ownership; use the (potentially new) server group as the default:
+        migrateServerObject();
+        if (createdServerGroup) {
+            final UserGroup serverGroup = store.getServerGroup();
+            setOwnership(serverGroup.getIdentifier(), null, serverGroup, serverGroup.getName());
+            final User adminUserOrNull = store.getUserByName(UserStore.ADMIN_USERNAME);
+            if (adminUserOrNull == null) {
+                logger.info("User 'admin' does not exist on replicated central SecurityService. "
+                        + "'admin' will not be properly set up for this server.");
+            } else {
+                addUserToUserGroup(serverGroup, adminUserOrNull);
+                setDefaultTenantForCurrentServerForUser(UserStore.ADMIN_USERNAME, serverGroup.getId());
+            }
+            isNewServer = true;
+        }
+        isInitialOrMigration = false;
         logger.info("Reading isSharedAcrossSubdomains...");
         sharedAcrossSubdomainsOf = (String) is.readObject();
-        baseUrlForCrossDomainStorage = (String) is.readObject();
         logger.info("...as "+sharedAcrossSubdomainsOf);
+        logger.info("Reading baseUrlForCrossDomainStorage...");
+        baseUrlForCrossDomainStorage = (String) is.readObject();
+        logger.info("...as "+baseUrlForCrossDomainStorage);
+        logger.info("Triggering SecurityInitializationCustomizers upon replication ...");
+        customizers.forEach(c -> c.customizeSecurityService(this));
         logger.info("Done filling SecurityService");
     }
 
@@ -2178,17 +2220,17 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 final RoleDefinition adminRoleDefinition = getRoleDefinition(AdminRole.getInstance().getId());
                 for (Role roleOfUser : user.getRoles()) {
                     if (roleOfUser.getRoleDefinition().equals(adminRoleDefinition)) {
-                        final UserGroup defaultTenant = getDefaultTenant();
+                        final UserGroup serverGroup = getServerGroup();
                         if (roleOfUser.getQualifiedForTenant() == null
-                                || roleOfUser.getQualifiedForTenant().equals(defaultTenant)) {
+                                || roleOfUser.getQualifiedForTenant().equals(serverGroup)) {
                             // The user is a server admin -> Add it to the server group to allow setting the server
                             // group as default creation group
-                            addUserToUserGroup(defaultTenant, user);
+                            addUserToUserGroup(serverGroup, user);
                             if (UserStore.ADMIN_USERNAME.equals(user.getName())) {
                                 // For the "admin" user the server group is initially set as
                                 // default creation group. This is consistent to a newly created server
                                 // and in most cases this is the group, the admin is meant to work with.
-                                setDefaultTenantForCurrentServerForUser(user.getName(), getDefaultTenant().getId());
+                                setDefaultTenantForCurrentServerForUser(user.getName(), getServerGroup().getId());
                             }
                         }
                     }
@@ -2223,7 +2265,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         // initialize ownerships on migration and fix objects that were orphaned by e.g. deleting the owning user/group
         if (owner == null
                 || owner.getAnnotation().getTenantOwner() == null && owner.getAnnotation().getUserOwner() == null) {
-            final UserGroup tenantOwnerToSet = setServerGroupAsOwner ? this.getDefaultTenant() : null;
+            final UserGroup tenantOwnerToSet = setServerGroupAsOwner ? this.getServerGroup() : null;
             logger.info("missing Ownership fixed: Setting ownership for: " + identifier
                     + " to tenant: "
                     + tenantOwnerToSet + "; user: " + userOwnerToSet);
@@ -2232,6 +2274,14 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         }
         migratedHasPermissionTypes.add(identifier.getTypeIdentifier());
         return wasNecessaryToMigrate;
+    }
+
+    @Override
+    public void migrateServerObject() {
+        final QualifiedObjectIdentifier serverIdentifier = SecuredSecurityTypes.SERVER
+                .getQualifiedObjectIdentifier(
+                        new TypeRelativeObjectIdentifier(ServerInfo.getName()));
+        migrateOwnership(serverIdentifier, serverIdentifier.toString());
     }
 
     @Override
@@ -2253,26 +2303,26 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public boolean hasCurrentUserReadPermission(WithQualifiedObjectIdentifier object) {
         return object == null ? true :
-            SecurityUtils.getSubject().isPermitted(object.getType().getStringPermissionForObject(DefaultActions.READ, object));
+            SecurityUtils.getSubject().isPermitted(object.getPermissionType().getStringPermissionForObject(DefaultActions.READ, object));
     }
 
     @Override
     public boolean hasCurrentUserUpdatePermission(WithQualifiedObjectIdentifier object) {
         return object == null ? true :
-            SecurityUtils.getSubject().isPermitted(object.getType().getStringPermissionForObject(DefaultActions.UPDATE, object));
+            SecurityUtils.getSubject().isPermitted(object.getPermissionType().getStringPermissionForObject(DefaultActions.UPDATE, object));
     }
 
     @Override
     public boolean hasCurrentUserDeletePermission(WithQualifiedObjectIdentifier object) {
         return object == null ? true :
-            SecurityUtils.getSubject().isPermitted(object.getType().getStringPermissionForObject(DefaultActions.DELETE, object));
+            SecurityUtils.getSubject().isPermitted(object.getPermissionType().getStringPermissionForObject(DefaultActions.DELETE, object));
     }
 
     public boolean hasCurrentUserExplicitPermissions(WithQualifiedObjectIdentifier object, HasPermissions.Action... actions) {
         boolean isPermitted = true;
         if (object != null) {
             for (int i = 0; i < actions.length; i++) {
-                isPermitted &= SecurityUtils.getSubject().isPermitted(object.getType().getStringPermissionForObject(actions[i], object));
+                isPermitted &= SecurityUtils.getSubject().isPermitted(object.getPermissionType().getStringPermissionForObject(actions[i], object));
             }
         }
         return isPermitted;
@@ -2294,21 +2344,21 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public void checkCurrentUserReadPermission(WithQualifiedObjectIdentifier object) {
         if (object != null) {
-            SecurityUtils.getSubject().checkPermission(object.getType().getStringPermissionForObject(DefaultActions.READ, object));
+            SecurityUtils.getSubject().checkPermission(object.getPermissionType().getStringPermissionForObject(DefaultActions.READ, object));
         }
     }
 
     @Override
     public void checkCurrentUserUpdatePermission(WithQualifiedObjectIdentifier object) {
         if (object != null) {
-            SecurityUtils.getSubject().checkPermission(object.getType().getStringPermissionForObject(DefaultActions.UPDATE, object));
+            SecurityUtils.getSubject().checkPermission(object.getPermissionType().getStringPermissionForObject(DefaultActions.UPDATE, object));
         }
     }
 
     @Override
     public void checkCurrentUserDeletePermission(WithQualifiedObjectIdentifier object) {
         if (object != null) {
-            SecurityUtils.getSubject().checkPermission(object.getType().getStringPermissionForObject(DefaultActions.DELETE, object));
+            SecurityUtils.getSubject().checkPermission(object.getPermissionType().getStringPermissionForObject(DefaultActions.DELETE, object));
         }
     }
 
@@ -2323,7 +2373,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public void checkCurrentUserExplicitPermissions(WithQualifiedObjectIdentifier object, HasPermissions.Action... actions) {
         if (object != null) {
             for (int i = 0; i < actions.length; i++) {
-                SecurityUtils.getSubject().checkPermission(object.getType().getStringPermissionForObject(actions[i], object));
+                SecurityUtils.getSubject().checkPermission(object.getPermissionType().getStringPermissionForObject(actions[i], object));
             }
         }
     }
@@ -2334,7 +2384,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             boolean isPermitted = false;
             for (int i = 0; i < actions.length; i++) {
                 if (SecurityUtils.getSubject()
-                        .isPermitted(object.getType().getStringPermissionForObject(actions[i], object))) {
+                        .isPermitted(object.getPermissionType().getStringPermissionForObject(actions[i], object))) {
                     isPermitted = true;
                     break;
                 }
@@ -2462,6 +2512,11 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public boolean isInitialOrMigration() {
         return isInitialOrMigration;
     }
+    
+    @Override
+    public boolean isNewServer() {
+        return isNewServer;
+    }
 
     @Override
     public String getSharedAcrossSubdomainsOf() {
@@ -2471,5 +2526,11 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public String getBaseUrlForCrossDomainStorage() {
         return baseUrlForCrossDomainStorage;
+    }
+    
+    @Override
+    public void registerCustomizer(SecurityInitializationCustomizer customizer) {
+        customizers.add(customizer);
+        customizer.customizeSecurityService(this);
     }
 }

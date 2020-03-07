@@ -93,6 +93,8 @@ import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.DataExtractor;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sse.common.Bearing;
+import com.sap.sse.common.CountryCode;
+import com.sap.sse.common.CountryCodeFactory;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.InvertibleComparator;
@@ -188,7 +190,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     }
 
     public interface LeaderBoardStyle {
-        void renderNationalityFlag(ImageResource nationalityFlagImageResource, SafeHtmlBuilder sb);
+        void renderNationalityFlag(ImageResource nationalityFlagImageResource, CountryCode countryCode, SafeHtmlBuilder sb);
 
         void renderFlagImage(String flagImageURL, SafeHtmlBuilder sb, CompetitorDTO competitor);
 
@@ -751,13 +753,11 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             setValuesWithReferenceOrder(Util.retainCopy(newSettings.getOverallDetailsToShow(), availableDetailTypes),
                     DetailType.getAvailableOverallDetailColumnTypes(), selectedOverallDetailColumns);
         }
-
         setShowCompetitorNationality(newSettings.isShowCompetitorNationality());
         setShowAddedScores(newSettings.isShowAddedScores());
         setShowCompetitorShortName(newSettings.isShowCompetitorShortNameColumn());
         setShowCompetitorFullName(newSettings.isShowCompetitorFullNameColumn());
         setShowCompetitorBoatInfo(newSettings.isShowCompetitorBoatInfoColumn());
-
         if (newSettings.getManeuverDetailsToShow() != null) {
             setValuesWithReferenceOrder(Util.retainCopy(newSettings.getManeuverDetailsToShow(), availableDetailTypes),
                     ManeuverCountRaceColumn.getAvailableManeuverDetailColumnTypes(), selectedManeuverDetails);
@@ -1270,6 +1270,10 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             result.put(DetailType.RACE_CALCULATED_TIME_TRAVELED,
                     new TotalTimeColumn(DetailType.RACE_CALCULATED_TIME_TRAVELED,
                             new RaceCalculatedTimeTraveledInSeconds(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
+                            LeaderboardPanel.this));
+            result.put(DetailType.RACE_IMPLIED_WIND,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.RACE_IMPLIED_WIND,
+                            new RaceImpliedWindInKnots(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
                             LeaderboardPanel.this));
             result.put(DetailType.RACE_CALCULATED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD,
                     new TotalTimeColumn(DetailType.RACE_CALCULATED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD,
@@ -1791,6 +1795,18 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                 LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
                 if (fieldsForRace != null) {
                     result = fieldsForRace.calculatedTime == null ? null : fieldsForRace.calculatedTime.asSeconds();
+                }
+                return result;
+            }
+        }
+
+        private class RaceImpliedWindInKnots implements DataExtractor<Double, LeaderboardRowDTO> {
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                Double result = null;
+                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
+                if (fieldsForRace != null) {
+                    result = fieldsForRace.impliedWind == null ? null : fieldsForRace.impliedWind.getKnots();
                 }
                 return result;
             }
@@ -3583,6 +3599,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             final String flagImageURL = competitor.getFlagImageURL();
             if (isShowCompetitorNationality || flagImageURL == null || flagImageURL.isEmpty()) {
                 final String twoLetterIsoCountryCode = competitor.getTwoLetterIsoCountryCode();
+                final CountryCode countryCode = CountryCodeFactory.INSTANCE.getFromTwoLetterISOName(twoLetterIsoCountryCode);
                 final ImageResource nationalityFlagImageResource;
                 if (twoLetterIsoCountryCode == null || twoLetterIsoCountryCode.isEmpty()) {
                     nationalityFlagImageResource = flagImageResolver.getEmptyFlagImageResource();
@@ -3590,7 +3607,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                     nationalityFlagImageResource = flagImageResolver.getFlagImageResource(twoLetterIsoCountryCode);
                 }
                 if (nationalityFlagImageResource != null) {
-                    style.renderNationalityFlag(nationalityFlagImageResource, sb);
+                    style.renderNationalityFlag(nationalityFlagImageResource, countryCode, sb);
                     sb.appendHtmlConstant("&nbsp;");
                 }
             }
