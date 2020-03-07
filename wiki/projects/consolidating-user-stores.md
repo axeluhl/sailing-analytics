@@ -332,9 +332,9 @@ Should we implement a migration of Local Storage properties? If a server is conf
 
 ## The Actual Merging Process
 
-There is a new server instance ``security-service.sapsailing.com`` with MongoDB ``mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/security_service?replicaSet=live&retryWrites=true``. The initial contents of the DB were the copies of the security-related collections as taken from the ``ARCHIVE`` server, with DB connectivity string ``mongodb://dbserver.internal.sapsailing.com:10201/winddb?replicaSet=archive&retryWrites=true``. This process is encoded in the script ``copyarchivestore.sh``.
+There is a new server instance ``security-service.sapsailing.com`` with MongoDB ``mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/security_service?replicaSet=live&retryWrites=true``. The initial contents of the DB were the copies of the security-related collections as taken from the ``ARCHIVE`` server, with DB connectivity string ``mongodb://dbserver.internal.sapsailing.com:10201/winddb?replicaSet=archive&retryWrites=true``. This process is encoded in the script ``dbserver.internal.sapsailing.com:/var/lib/mongodb/security_service/copyarchivestore.sh``. A copy of this script can also be found in git under ``configuration/``. It uses the scripts ``export_security.sh`` and ``import_security.sh`` which are found in the same directory, respectively.
 
-An exported JAR file based on a launch configuration for the ``SecurityStoreMerger`` class has been placed under ``dbserver.internal.sapsailing.com:/var/lib/mongodb/security_service``. To merge, e.g., the ``VSAW`` database, use the following command:
+An exported JAR file based on a launch configuration (``MergeSecurityAndAccessControlStores.launch``) for the ``SecurityStoreMerger`` class has been placed under ``dbserver.internal.sapsailing.com:/var/lib/mongodb/security_service``. To merge, e.g., the ``VSAW`` database, use the following command:
 
 ```
       java -Dmongo.uri="mongodb://localhost:10203/security_service?replicaSet=live&retryWrites=true" -Ddefault.tenant.name=ARCHIVE-server -jar SecurityStoreMerger.jar "mongodb://localhost:10203/VSAW?replicaSet=live&retryWrites=true" VSAW-server 2>&1 | tee storemerge_VSAW.log      
@@ -373,3 +373,27 @@ So the total sequence of commands for running the entire import/merge process is
         ./mergedbs.sh
 ```
 This produces all ``storemerge_....log`` files and a merge result in the ``mongodb://localhost:10203/security_service?replicaSet=live&retryWrites=true`` database. Again, search for WARNING and Exception in the logs, understand dropped objects and do some spot checks. Also validate by launching the ``security-service.sapsailing.com`` server and inspect security-related objects in the AdminConsole.
+
+### Updating the server instances
+
+The first step is to restart the security-service.sapsailing.com instance based on the new DB. It uses the following configuration options in its env.sh to expose the shared services:
+
+```
+ADDITIONAL_JAVA_ARGS=... -Dsecurity.sharedAcrossSubdomainsOf=sapsailing.com -Dsecurity.baseUrlForCrossDomainStorage=https://security-service.sapsailing.com -Dgwt.acceptableCrossDomainStorageRequestOriginRegexp=https?://(.*\.)?sapsailing\.com(:[0-9]*)?$
+REPLICATION_CHANNEL=security_service
+```
+
+A new user ``security-service-replicator`` has been added that has replication permissions for the ``security-service`` server. Other servers need to obtain an access token for that user and add it in their startup options as follows:
+
+```
+ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Dsecurity.sharedAcrossSubdomainsOf=sapsailing.com -Dsecurity.baseUrlForCrossDomainStorage=https://security-service.sapsailing.com -Dgwt.acceptableCrossDomainStorageRequestOriginRegexp=https?://(.*\.)?sapsailing\.com(:[0-9]*)?$"
+REPLICATE_ON_START=com.sap.sse.security.impl.SecurityServiceImpl,com.sap.sailing.shared.server.impl.SharedSailingDataImpl
+REPLICATE_MASTER_SERVLET_HOST=security-service.sapsailing.com
+REPLICATE_MASTER_SERVLET_PORT=443
+REPLICATE_MASTER_EXCHANGE_NAME=security_service
+REPLICATE_MASTER_BEARER_TOKEN="..."
+```
+
+The bearer token can be obtained by logging on as user ``security-service-replicator`` to ``https://security-service.sapsailing.com`` and then getting the access token from ``https://security-service.sapsailing.com/security/api/restsecurity/access_token``. Ask one of j.hamann@sailtracks.tv, alessandro.stoltenberg@sap.com and axel.uhl@sap.com for the user credentials. Of course, any other user that has permissions  ``SERVER:REPLICATE:security-service`` and ``SERVER:READ_REPLICATOR:security-service`` can do the same, so a user may also ask someone who has the premissions required to transfer the permissions to another user.
+
+These properties have now been appended to the env.sh files of the existing servers on the multi-instance set-up (including swisstimingtest, sailtracks, and tractractest). 
