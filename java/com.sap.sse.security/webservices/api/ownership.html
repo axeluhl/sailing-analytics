@@ -72,6 +72,30 @@
     
     <tr>
         <td>Request Method:</td>
+        <td>GET /{objectType}?id={typeRelativeObjectIdPart1}&id={typeRelativeObjectIdPart2}&...</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>a JSON document of the following format<br>
+            <pre>{"objectType":"USER_GROUP","objectId":"82832851-07ac-47ee-9ddf-6f4f9eaa7823","groupId":"82832851-07ac-47ee-9ddf-6f4f9eaa7823","username":"admin"}</pre>
+        </td>
+    </tr>
+     <tr>
+        <td>Parameter (path)</td>
+        <td>
+            <div>objectType</div> Object type represents the type of object to change the ownership.
+            <div>id</div> Can be used multiple times, e.g., in order to encode a composite type-relative object ID such as they
+                          are used for objects of type TRACKED_RACE.
+        </td>
+    </tr>
+    <tr>
+        <td>Example:</td>
+        <td><code>curl "http://127.0.0.1:8888/security/api/restsecurity/ownership/TRACKED_RACE?id=Croatia%20Coast%20Cup%202019%20-%20ORC%20with%20Spinnaker&id=Race%201%20-%20ORC%20mit%20Spi"</code><br>
+                Will provide a JSON document as explained above.</td>
+    </tr>
+
+    <tr>
+        <td>Request Method:</td>
         <td>GET /{objectType}/{typeRelativeObjectId}/acl</td>
     </tr>
     <tr>
