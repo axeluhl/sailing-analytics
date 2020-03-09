@@ -21,8 +21,8 @@ import com.sap.sse.common.CountryCodeFactory;
  * A IgnoreInvalidOrcCerticatesRule is an implementation of TestRule. This class execution depends on
  * {@link IgnoreInvalidOrcCertificates} annotation on any method in a test class containing
  * {@link org.junit.rules.TestRule} annotation with current class implementation. When any test class added
- * {@link IgnoreInvalidOrcCertificatesRule} rule then before executing all of it's test method, Junit will execute the
- * evaluate() method of {@link IgnoreInvalidOrcCertificatesRule} class. This method first check whether the current test
+ * {@link FailIfNoValidOrcCertificateRule} rule then before executing all of it's test method, Junit will execute the
+ * evaluate() method of {@link FailIfNoValidOrcCertificateRule} class. This method first check whether the current test
  * method contains the {@link IgnoreInvalidOrcCertificates} annotation, if yes then it will check for any certificate
  * available to parse on ORC Website. If at least one certificate is available then this method continues execution of
  * the current test method; otherwise it will let the test fail because the searching for certificates may be broken, or
@@ -33,7 +33,7 @@ import com.sap.sse.common.CountryCodeFactory;
  *
  */
 
-public class IgnoreInvalidOrcCertificatesRule implements TestRule {
+public class FailIfNoValidOrcCertificateRule implements TestRule {
     private ORCPublicCertificateDatabase db = new ORCPublicCertificateDatabaseImpl();
     
     private List<ORCCertificate> availableCerts;
@@ -59,7 +59,7 @@ public class IgnoreInvalidOrcCertificatesRule implements TestRule {
 
         /***
          * This method executes for every test case having {@link TestRule} annotation of
-         * {@link IgnoreInvalidOrcCertificatesRule} class. Assume statement at the end of this method evaluates whether
+         * {@link FailIfNoValidOrcCertificateRule} class. Assume statement at the end of this method evaluates whether
          * the test method will execute or be ignored.
          */
         @Override

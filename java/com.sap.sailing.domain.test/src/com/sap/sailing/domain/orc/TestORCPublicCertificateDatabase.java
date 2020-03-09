@@ -42,7 +42,7 @@ public class TestORCPublicCertificateDatabase {
             "2019-02-21T10:38-08","2019-02-21T10:38Z","2019-02-21T10z","2019-02-21T10:38z");
     
     @Rule
-    public IgnoreInvalidOrcCertificatesRule customIgnoreRule = new IgnoreInvalidOrcCertificatesRule();
+    public FailIfNoValidOrcCertificateRule customIgnoreRule = new FailIfNoValidOrcCertificateRule();
     
     @Before
     public void setUp() {

@@ -19,7 +19,7 @@ public class TestORCCertificateImporterRMS {
     private static final String RESOURCES = "resources/orc/";
     
     @Rule
-    public IgnoreInvalidOrcCertificatesRule customIgnoreRule = new IgnoreInvalidOrcCertificatesRule();
+    public FailIfNoValidOrcCertificateRule customIgnoreRule = new FailIfNoValidOrcCertificateRule();
     
     @Test
     public void testSimpleLocalRMSFileRead() throws IOException, ParseException {

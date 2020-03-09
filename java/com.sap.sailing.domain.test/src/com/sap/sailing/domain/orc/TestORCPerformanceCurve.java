@@ -56,7 +56,7 @@ public class TestORCPerformanceCurve {
     private static final String RESOURCES = "resources/orc/";
     
     @Rule
-    public IgnoreInvalidOrcCertificatesRule customIgnoreRule = new IgnoreInvalidOrcCertificatesRule();
+    public FailIfNoValidOrcCertificateRule customIgnoreRule = new FailIfNoValidOrcCertificateRule();
 
     @Rule
     public ErrorCollector collector = new ErrorCollector();
