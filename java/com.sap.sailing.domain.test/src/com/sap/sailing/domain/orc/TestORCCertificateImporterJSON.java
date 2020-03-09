@@ -1,25 +1,17 @@
 package com.sap.sailing.domain.orc;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
-
 import org.json.simple.parser.ParseException;
 import org.junit.Rule;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.orc.ORCCertificate;
-import com.sap.sailing.domain.common.orc.impl.ORCCertificateImpl;
 
 
 public class TestORCCertificateImporterJSON {
