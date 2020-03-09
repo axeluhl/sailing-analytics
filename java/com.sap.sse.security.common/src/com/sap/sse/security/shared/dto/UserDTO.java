@@ -155,4 +155,11 @@ public class UserDTO extends
         return new TypeRelativeObjectIdentifier(getName());
     }
 
+    /**
+     * Erases the fields a user is not supposed to read with only the READ_PUBLIC and not the
+     * READ permission.
+     */
+    public void clearNonPublicFields() {
+        this.email = null;
+    }
 }

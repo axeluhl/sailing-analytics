@@ -30,12 +30,11 @@ public class YachtscoringResultDocumentProvider extends UrlBasedXRRResultDocumen
     public List<ResultDocumentDescriptor> resolveResultDocumentDescriptors(RegattaResults xrrParserResult, URL url) {
         List<ResultDocumentDescriptor> result = new ArrayList<>();
         TimePoint xrrDocumentDateAndTime = XRRParserUtil.calculateTimePointForRegattaResults(xrrParserResult);
-        
         for (Object o : xrrParserResult.getPersonOrBoatOrTeam()) {
             if (o instanceof Event) {
                 Event event = (Event) o;
                 String eventName = event.getTitle();
-                for(Object d: event.getRaceOrDivisionOrRegattaSeriesResult()) {
+                for (Object d: event.getRaceOrDivisionOrRegattaSeriesResult()) {
                     if (d instanceof Division) {
                         Division division = (Division) d;
                         String regattaName = division.getTitle();

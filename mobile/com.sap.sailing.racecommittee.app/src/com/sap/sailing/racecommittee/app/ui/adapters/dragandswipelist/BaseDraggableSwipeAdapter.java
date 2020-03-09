@@ -1,10 +1,10 @@
 package com.sap.sailing.racecommittee.app.ui.adapters.dragandswipelist;
 
-import java.util.Collections;
-import java.util.List;
-
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+
+import java.util.Collections;
+import java.util.List;
 
 public abstract class BaseDraggableSwipeAdapter<VH extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<VH>
         implements ItemTouchHelperAdapter {
@@ -40,17 +40,23 @@ public abstract class BaseDraggableSwipeAdapter<VH extends RecyclerView.ViewHold
      * Implementations should call {@link RecyclerView.Adapter#notifyItemMoved(int, int)} after adjusting the underlying
      * data to reflect this move.
      *
-     * @param fromPosition
-     *            The start position of the moved item.
-     * @param toPosition
-     *            Then resolved position of the moved item.
+     * @param fromPosition The start position of the moved item.
+     * @param toPosition   Then resolved position of the moved item.
      * @return True if the item was moved to the new adapter position.
      * @see RecyclerView#getAdapterPositionFor(RecyclerView.ViewHolder)
      * @see RecyclerView.ViewHolder#getAdapterPosition()
      */
     @Override
     public boolean onItemMove(int fromPosition, int toPosition) {
-        Collections.swap(mItems, fromPosition, toPosition);
+        if (fromPosition < toPosition) {
+            for (int i = fromPosition; i < toPosition; i++) {
+                Collections.swap(mItems, i, i + 1);
+            }
+        } else if (fromPosition > toPosition) {
+            for (int i = fromPosition; i > toPosition; i--) {
+                Collections.swap(mItems, i, i - 1);
+            }
+        }
         notifyItemMoved(fromPosition, toPosition);
         return true;
     }
@@ -61,8 +67,7 @@ public abstract class BaseDraggableSwipeAdapter<VH extends RecyclerView.ViewHold
      * Implementations should call {@link RecyclerView.Adapter#notifyItemRemoved(int)} after adjusting the underlying
      * data to reflect this removal.
      *
-     * @param position
-     *            The position of the item dismissed.
+     * @param position The position of the item dismissed.
      * @see RecyclerView#getAdapterPositionFor(RecyclerView.ViewHolder)
      * @see RecyclerView.ViewHolder#getAdapterPosition()
      */

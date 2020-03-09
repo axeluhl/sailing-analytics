@@ -82,14 +82,14 @@ public class TestORCPublicCertificateDatabase {
         assertSoulmate(referenceNumber, result);
     }
 
-    // TODO this test will probably break 2020 when 2019 certificates will no longer be returned as valid...
+    // TODO this test will probably break 2021 when 2020 certificates will no longer be returned as valid...
     @Test
     public void testGetCertificate() throws Exception {
-        final String referenceNumber = "FRA00013881";
+        final String referenceNumber = "03360000CE8";
         final CertificateHandle handle = db.getCertificateHandle(referenceNumber);
         final ORCCertificate result = db.getCertificate(referenceNumber);
         assertEquals(handle.getGPH(), result.getGPH().asSeconds(), 0.00001);
-        assertEquals(handle.getIssueDate(), result.getIssueDate());
+        assertTrue(handle.getIssueDate().until(result.getIssueDate()).abs().asSeconds() < 10);
         assertEquals(handle.getSailNumber(), result.getSailNumber());
     }
     

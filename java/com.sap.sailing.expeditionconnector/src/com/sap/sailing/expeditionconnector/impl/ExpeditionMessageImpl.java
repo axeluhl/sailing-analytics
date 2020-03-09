@@ -162,10 +162,11 @@ public class ExpeditionMessageImpl implements ExpeditionMessage {
     @Override
     public SpeedWithBearing getTrueWind() {
         final SpeedWithBearing result;
-        if (hasValue(ID_TWD) && hasValue(ID_TWS)) {
-            result = new KnotSpeedWithBearingImpl(getValue(ID_TWS), getTrueWindBearing());
-        } else if (hasValue(ID_GWD) && hasValue(ID_GWS)) {
+        // FIXME bug 5223: prefer own TWD calculation over reported TWD/TWS because that may still contain a current-based correction
+        if (hasValue(ID_GWD) && hasValue(ID_GWS)) {
             result = new KnotSpeedWithBearingImpl(getValue(ID_GWS), getTrueWindBearing());
+        } else if (hasValue(ID_TWD) && hasValue(ID_TWS)) {
+            result = new KnotSpeedWithBearingImpl(getValue(ID_TWS), getTrueWindBearing());
         } else {
             result = null;
         }

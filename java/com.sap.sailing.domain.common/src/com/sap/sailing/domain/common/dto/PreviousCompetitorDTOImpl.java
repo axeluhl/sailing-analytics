@@ -151,6 +151,12 @@ public class PreviousCompetitorDTOImpl extends NamedSecuredObjectDTO implements 
     }
 
     @Override
+    public void clearNonPublicFields() {
+        throw new RuntimeException("Internal error. Objects of type "+PreviousCompetitorDTOImpl.class.getName()+
+                " need to be replaced by an object of "+CompetitorWithBoatDTOImpl.class.getName()+" after deserialization");
+    }
+
+    @Override
     public Double getTimeOnTimeFactor() {
         throw new RuntimeException("Internal error. Objects of type "+PreviousCompetitorDTOImpl.class.getName()+
                 " need to be replaced by an object of "+CompetitorWithBoatDTOImpl.class.getName()+" after deserialization");
