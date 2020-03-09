@@ -40,6 +40,7 @@ import com.sap.sailing.selenium.core.WindowManager;
 import com.sap.sailing.selenium.pages.PageObject;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sun.jersey.api.container.httpserver.HttpServerFactory;
 
 /**
  * <p>Abstract base class for unit tests with Selenium. This class is already annotated as required to get executed
@@ -63,6 +64,8 @@ public abstract class AbstractSeleniumTest {
     private static final String ATTACHMENT_FORMAT = "[[ATTACHMENT|%s]]"; //$NON-NLS-1$
     
     private static final String CLEAR_STATE_URL = "sailingserver/test-support/clearState"; //$NON-NLS-1$
+    
+    private static final String SWITCH_WHITELABEL_URL = "sailingserver/test-support/switch/whitelabel/"; //$NON-NLS-1$
     
     private static final String OBTAIN_ACCESS_TOKEN_URL = "security/api/restsecurity/access_token";
     
@@ -136,8 +139,41 @@ public abstract class AbstractSeleniumTest {
      */
     protected void clearState(String contextRoot) {
         clearState(contextRoot, false);
+        setWhitelabel(false, contextRoot);
     }
 
+    protected void setWhitelabel(boolean status, String contextRoot) {
+        try {
+            URL url = new URL(contextRoot + SWITCH_WHITELABEL_URL + Boolean.toString(status));
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("PUT");
+            connection.connect();
+            if (connection.getResponseCode() != 200) {
+                throw new RuntimeException(connection.getResponseMessage());
+            }
+        } catch (IOException exception) {
+            throw new RuntimeException(exception);
+        }
+    }
+    
+    protected boolean getWhitelabel(String contextRoot) {
+        try {
+            URL url = new URL(contextRoot + SWITCH_WHITELABEL_URL + "status");
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.connect();
+            if (connection.getResponseCode() != 200) {
+                throw new RuntimeException(connection.getResponseMessage());
+            }
+            String response = (String)connection.getContent();
+            return Boolean.valueOf(response);
+        } catch (IOException exception) {
+            throw new RuntimeException(exception);
+        }
+    }
+    
+    
+    
     protected void setUpAuthenticatedSession(WebDriver webDriver) {
         // To be able to set a cookie we need to load a page having the target origin
         webDriver.get(getContextRoot());
