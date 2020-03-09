@@ -406,10 +406,10 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
     @Override
     public ORCCertificate getCertificate(String referenceNumber) throws Exception {
         final HttpClient client = new SystemDefaultHttpClient();
-        final HttpGet getRequest = new HttpGet("http://data.orc.org/public/WPub.dll?action=DownBoatRMS&RefNo="+referenceNumber);
+        final HttpGet getRequest = new HttpGet("http://data.orc.org/public/WPub.dll?action=DownBoatRMS&ext=json&RefNo="+referenceNumber);
         addAuthorizationHeader(getRequest);
         logger.fine("Obtaining certificate for reference number "+referenceNumber);
-        final Iterable<ORCCertificate> certificates = new ORCCertificatesRmsImporter().read(client.execute(getRequest).getEntity().getContent())
+        final Iterable<ORCCertificate> certificates = new ORCCertificatesJsonImporter().read(client.execute(getRequest).getEntity().getContent())
                 .getCertificates();
         final ORCCertificate result;
         if (certificates.iterator().hasNext()) {
