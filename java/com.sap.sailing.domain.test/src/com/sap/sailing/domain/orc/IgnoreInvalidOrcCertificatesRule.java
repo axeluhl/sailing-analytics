@@ -24,8 +24,10 @@ import com.sap.sse.common.CountryCodeFactory;
  * {@link IgnoreInvalidOrcCertificatesRule} rule then before executing all of it's test method, Junit will execute the
  * evaluate() method of {@link IgnoreInvalidOrcCertificatesRule} class. This method first check whether the current test
  * method contains the {@link IgnoreInvalidOrcCertificates} annotation, if yes then it will check for any certificate
- * available to parse on ORC Website. If certificate available then this method continue execution of the current test
- * method otherwise it will ignore it.
+ * available to parse on ORC Website. If at least one certificate is available then this method continues execution of
+ * the current test method; otherwise it will let the test fail because the searching for certificates may be broken, or
+ * the unlikely corner case applies where temporarily at the beginning of a new calendar year no valid certificate
+ * exists at all in the ORC database.
  * 
  * @author Usman Ali
  *
@@ -58,7 +60,7 @@ public class IgnoreInvalidOrcCertificatesRule implements TestRule {
         /***
          * This method executes for every test case having {@link TestRule} annotation of
          * {@link IgnoreInvalidOrcCertificatesRule} class. Assume statement at the end of this method evaluates whether
-         * the test method will execute or ignored.
+         * the test method will execute or be ignored.
          */
         @Override
         public void evaluate() throws Throwable {
