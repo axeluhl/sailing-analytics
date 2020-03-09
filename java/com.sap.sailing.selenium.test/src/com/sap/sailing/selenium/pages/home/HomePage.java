@@ -58,11 +58,7 @@ public class HomePage extends HostPageWithAuthentication {
      * @return the {@link PageObject} for the home page
      */
     public static HomePage goToPage(WebDriver driver, String root) {
-        return goToPage(driver, root, false);
-    }
-
-    public static HomePage goToPage(WebDriver driver, String root, boolean debranded) {
-        return goToHomeUrl(driver, root + "gwt/Home.html" + (debranded ? "?whitelabel" : ""));
+        return goToHomeUrl(driver, root + "gwt/Home.html");
     }
 
     /**

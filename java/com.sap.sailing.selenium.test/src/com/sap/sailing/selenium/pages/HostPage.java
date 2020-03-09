@@ -40,19 +40,23 @@ public abstract class HostPage extends PageObject {
             throw new IllegalArgumentException(exc);
         }
     }
-    
+
     private static final void goToPage(WebDriver driver, URI uri) throws URISyntaxException {
-        String scheme = uri.getScheme(), userInfo = uri.getUserInfo(), host = uri.getHost(); 
-        String path = uri.getPath(), query = getGWTCodeServerAndLocale() + "&" + uri.getQuery(), fragment = uri.getFragment();
+        String scheme = uri.getScheme(), userInfo = uri.getUserInfo(), host = uri.getHost();
+        String path = uri.getPath(),
+                query = getGWTCodeServerAndLocale() + (uri.getQuery() != null ? "&" + uri.getQuery() : ""),
+                fragment = uri.getFragment();
         driver.get(new URI(scheme, userInfo, host, uri.getPort(), path, query, fragment).toString());
     }
-    
+
     /**
-     * <p>Creates a new page object with the given web driver. In GWT an entry point is connected to a HTML page in
-     *   which the code for the application is executed, whereby the page is represented by the web driver.</p>
+     * <p>
+     * Creates a new page object with the given web driver. In GWT an entry point is connected to a HTML page in which
+     * the code for the application is executed, whereby the page is represented by the web driver.
+     * </p>
      * 
      * @param driver
-     *   The web driver to use.
+     *            The web driver to use.
      */
     public HostPage(WebDriver driver) {
         super(driver);

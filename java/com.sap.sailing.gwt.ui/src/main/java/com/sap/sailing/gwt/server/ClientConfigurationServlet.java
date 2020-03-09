@@ -15,25 +15,21 @@ public class ClientConfigurationServlet extends HttpServlet {
 
     /** serial version uid */
     private static final long serialVersionUID = -2228462977010198686L;
+
+    public static final String DEBRANDING_PROPERTY_NAME = "com.sap.sailing.debranding";
     
     private final ConcurrentHashMap<String, byte[]> cache = new ConcurrentHashMap<>();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        
-        boolean debugDebranding = false;
-        if (req.getParameterMap().containsKey("whitelabel")) { // override with url parameter for testing usage only
-            debugDebranding = true;
-        }        
-        
+
+        final boolean deBrandingActive = Boolean.valueOf(System.getProperty(DEBRANDING_PROPERTY_NAME, "false"));
         final String servletPath = req.getServletPath();
         byte[] value = null;
-        if (!debugDebranding && (value = cache.get(servletPath)) != null) {
+        if ((value = cache.get(generateKey(servletPath, deBrandingActive))) != null) {
             IOUtils.write(value, resp.getOutputStream());
             return;
         }
-
-        boolean deBrandingActive = Boolean.valueOf(System.getProperty("com.sap.sailing.debranding", "false")) || debugDebranding;
         
         String title = "";
         String faviconPath = "images/whitelabel.ico";
@@ -54,10 +50,12 @@ public class ClientConfigurationServlet extends HttpServlet {
 
             byte[] bytes = replaced.getBytes();
             IOUtils.write(bytes, resp.getOutputStream());
-            if (!debugDebranding) {
-                cache.computeIfAbsent(servletPath, key -> bytes);
-            }
+            cache.computeIfAbsent(generateKey(servletPath, deBrandingActive), key -> bytes);
         }
     }
 
+    private String generateKey(String servletPath, boolean active) {
+        return servletPath + "_" + active;
+    }
+    
 }
