@@ -117,7 +117,8 @@ public abstract class CompetitorEditDialog<CompetitorType extends CompetitorDTO>
         this.imageUrlAndUploadComposite = new URLFieldWithFileUpload(stringMessages);
         this.imageUrlAndUploadComposite.setURL(competitorToEdit.getImageURL());
         this.yardstickLabel = new Label(stringMessages.yardstickNumber(yardstickScale));
-        this.yardstickNumber = createDoubleBox(convertYardstickTimeOnTime(competitorToEdit.getTimeOnTimeFactor(), yardstickScale), 10);
+        this.yardstickNumber = createDoubleBox(competitorToEdit.getTimeOnTimeFactor() == null ? null
+                : convertYardstickTimeOnTime(competitorToEdit.getTimeOnTimeFactor(), yardstickScale), 10);
         Button yardstickScaleButton = new Button(SafeHtmlUtils.fromSafeConstant(stringMessages.changeScale()));
         yardstickScaleButton.getElement().getStyle().setMarginLeft(3, Unit.PX);
         yardstickScaleButton.addClickHandler(event -> {
