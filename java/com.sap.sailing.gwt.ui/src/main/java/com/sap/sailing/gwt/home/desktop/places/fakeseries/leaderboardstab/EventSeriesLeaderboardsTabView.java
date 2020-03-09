@@ -72,20 +72,15 @@ public class EventSeriesLeaderboardsTabView extends Composite implements SeriesT
     public void start(final EventSeriesLeaderboardsPlace myPlace, final AcceptsOneWidget contentArea) {
         contentArea.setWidget(currentPresenter.getErrorAndBusyClientFactory().createBusyView());
         String leaderboardName = currentPresenter.getSeriesDTO().getLeaderboardId();
-        
         if (leaderboardName != null && !leaderboardName.isEmpty()) {
             final EventSeriesAnalyticsDataManager regattaAnalyticsManager = currentPresenter.getCtx()
                     .getAnalyticsManager();
-
             regattaAnalyticsManager.getAvailableDetailTypesForLeaderboard(leaderboardName,
                     null, new AsyncCallback<Iterable<DetailType>>() {
-
                         @Override
                         public void onSuccess(Iterable<DetailType> result) {
-
                             final boolean autoExpandLastRaceColumn = GwtHttpRequestUtils.getBooleanParameter(
                                     LeaderboardUrlSettings.PARAM_AUTO_EXPAND_LAST_RACE_COLUMN, false);
-
                             final ComponentContext<MultiRaceLeaderboardSettings> componentContext = createLeaderboardComponentContext(
                                     leaderboardName, currentPresenter.getUserService(), /* FIXME placeToken */ null, result);
                             componentContext.getInitialSettings(
@@ -93,32 +88,19 @@ public class EventSeriesLeaderboardsTabView extends Composite implements SeriesT
                                         @Override
                                         public void onSuccess(MultiRaceLeaderboardSettings settings) {
                                             MultiLeaderboardProxyPanel leaderboardPanel = regattaAnalyticsManager
-                                                    .createMultiLeaderboardPanel(null, componentContext, settings, null, // TODO:
-                                                                                                                         // preselectedLeaderboardName
-                                                            "leaderboardGroupName", leaderboardName, true, // TODO @FM
-                                                                                                           // this
-                                                                                                           // information
-                                                                                                           // came from
-                                                                                                           // place, now
-                                                                                                           // hard
-                                                                                                           // coded.
-                                                                                                           // check with
-                                                                                                           // frank
+                                                    .createMultiLeaderboardPanel(null, componentContext, settings, null, // TODO: preselectedLeaderboardName
+                                                            "leaderboardGroupName", leaderboardName, true, // TODO @FM this information came from place, now hard coded. check with frank
                                                             autoExpandLastRaceColumn, result);
                                             leaderboardPanel.addAttachHandler(new Handler() {
-
                                                 @Override
                                                 public void onAttachOrDetach(AttachEvent event) {
                                                     if (!event.isAttached()) {
                                                         componentContext.dispose();
                                                     }
                                                 }
-
                                             });
-
                                             initWidget(
                                                     ourUiBinder.createAndBindUi(EventSeriesLeaderboardsTabView.this));
-
                                             leaderboard.setMultiLeaderboard(leaderboardPanel,
                                                     currentPresenter.getAutoRefreshTimer());
                                             leaderboardPanel
@@ -133,7 +115,6 @@ public class EventSeriesLeaderboardsTabView extends Composite implements SeriesT
                                             regattaAnalyticsManager.hideCompetitorChart();
                                             leaderboardPanel.setVisible(true);
                                             contentArea.setWidget(EventSeriesLeaderboardsTabView.this);
-
                                         }
                                     });
                         }
