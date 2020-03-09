@@ -104,6 +104,7 @@ import com.sap.sse.security.interfaces.Social;
 import com.sap.sse.security.interfaces.SocialSettingsKeys;
 import com.sap.sse.security.interfaces.UserImpl;
 import com.sap.sse.security.interfaces.UserStore;
+import com.sap.sse.security.operations.AddUserToUserGroupOperation;
 import com.sap.sse.security.operations.CreateUserGroupOperation;
 import com.sap.sse.security.persistence.PersistenceFactory;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
@@ -697,7 +698,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         userGroup.add(user);
         final UUID groupId = userGroup.getId();
         final String username = user.getName();
-        apply(s->s.internalAddUserToUserGroup(groupId, username));
+        apply(new AddUserToUserGroupOperation(groupId, username));
     }
 
     @Override
