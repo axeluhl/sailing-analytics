@@ -36,6 +36,7 @@ import com.sap.sse.security.Action;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.interfaces.Credential;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
+import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
@@ -204,13 +205,10 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public OwnershipDTO setOwnership(final String username, final UUID userGroupId,
             final QualifiedObjectIdentifier idOfOwnedObject, final String displayNameOfOwnedObject) {
-
         SecurityUtils.getSubject()
                 .checkPermission(idOfOwnedObject.getStringPermission(DefaultActions.CHANGE_OWNERSHIP));
-
         final User user = getSecurityService().getUserByName(username);
         // no security check if current user can see the user associated with the given username
-
         final Ownership result = getSecurityService().setOwnership(idOfOwnedObject, user,
                 getSecurityService().getUserGroup(userGroupId), displayNameOfOwnedObject);
         return securityDTOFactory.createOwnershipDTO(result, new HashMap<>(), new HashMap<>());
@@ -452,18 +450,10 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public Collection<UserDTO> getUserList() throws UnauthorizedException {
-        List<UserDTO> users = new ArrayList<>();
-        for (User u : getSecurityService().getUserList()) {
-            if (SecurityUtils.getSubject()
-                    .isPermitted(SecuredSecurityTypes.USER.getStringPermissionForObject(DefaultActions.READ, u))
-                    || SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.USER
-                            .getStringPermissionForObject(SecuredSecurityTypes.PublicReadableActions.READ_PUBLIC, u))) {
-                // TODO: pruning if subject only has READ_PUBLIC permission
-                final UserDTO userDTO = getUserDTOWithFilteredRolesAndPermissions(u);
-                users.add(userDTO);
-            }
-        }
-        return users;
+        final HasPermissions.Action[] requiredActionsForRead = SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS;
+        return getSecurityService().mapAndFilterByAnyExplicitPermissionForCurrentUser(SecuredSecurityTypes.USER,
+                requiredActionsForRead, getSecurityService().getUserList(),
+                this::getUserDTOWithFilteredRolesAndPermissions);
     }
 
     @Override
@@ -1110,7 +1100,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
      *         user can actually see.
      */
     private UserDTO getUserDTOWithFilteredRolesAndPermissions(final User user) {
-        return securityDTOFactory.createUserDTOFromUser(user, getSecurityService(), permission -> {
+        final UserDTO result = securityDTOFactory.createUserDTOFromUser(user, getSecurityService(), permission -> {
             final TypeRelativeObjectIdentifier typeRelativeObjectIdentifier = PermissionAndRoleAssociation
                     .get(permission, user);
             return SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.PERMISSION_ASSOCIATION
@@ -1121,6 +1111,10 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             return SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.ROLE_ASSOCIATION
                     .getStringPermissionForTypeRelativeIdentifier(DefaultActions.READ, typeRelativeObjectIdentifier));
         });
+        if (!getSecurityService().hasCurrentUserReadPermission(user)) {
+            result.clearNonPublicFields();
+        }
+        return result;
     }
 
     @Override
