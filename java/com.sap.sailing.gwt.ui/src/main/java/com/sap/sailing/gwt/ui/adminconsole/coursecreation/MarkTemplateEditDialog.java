@@ -125,8 +125,8 @@ public class MarkTemplateEditDialog extends DataEntryDialog<MarkTemplateDTO> {
 
     @Override
     protected MarkTemplateDTO getResult() {
-        Color color;
-        if (displayColorTextBox.getColor() == null) {
+        final Color color;
+        if (!displayColorTextBox.isValid()) {
             color = new InvalidColor(stringMessages, displayColorTextBox.getValue());
         } else {
             color = displayColorTextBox.getColor();

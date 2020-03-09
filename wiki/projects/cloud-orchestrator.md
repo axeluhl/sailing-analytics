@@ -75,6 +75,8 @@ When the archive server fails, a few people get an SMS/text message notification
 
 Alternatively, we could look at other mechanisms for implementing the fail-over functionality. For example, Apache can be configured in "balancer" mode where failover rules can be specified explicitly.
 
+Alternatively, consider looking at Elastic Beanstalk.
+
 #### No good approach for dynamic scale-up
 
 As a server fills up, be it the archive or an event server or a shared, multi-tenant server such as we currently run under my.sapsailing.com, the server resources may at some point not suffice to host more data. Moving scopes out of the server can be one approach, involving master data import and other less automated steps such as starting the tracking again for the races on the receiving side (we should consider sending and executing the RaceTrackingConnectivityParameters to the importing server, optionally restoring everything automatically). But in other cases, a scope may not be splittable and may already live in its dedicated replica set. In this case, the instances of the replica set must be scaled up.

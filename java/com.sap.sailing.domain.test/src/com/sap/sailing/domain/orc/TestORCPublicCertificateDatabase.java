@@ -131,7 +131,7 @@ public class TestORCPublicCertificateDatabase {
         assertSoulmate(referenceNumber, result);
     }
 
-    // TODO this test will probably break 2020 when 2019 certificates will no longer be returned as valid...
+    // TODO this test will probably break 2021 when 2020 certificates will no longer be returned as valid...
     @IgnoreInvalidOrcCertificates
     @Test
     public void testGetCertificate() throws Exception {        

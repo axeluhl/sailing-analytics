@@ -3,6 +3,7 @@ package com.sap.sailing.domain.tracking;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
@@ -33,4 +34,8 @@ public interface LineDetails {
     Mark getPortMarkWhileApproachingLine();
 
     Distance getAdvantage();
+
+    Position getPortMarkPosition();
+
+    Position getStarboardMarkPosition();
 }
