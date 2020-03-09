@@ -106,6 +106,7 @@ import com.sap.sse.security.interfaces.UserImpl;
 import com.sap.sse.security.interfaces.UserStore;
 import com.sap.sse.security.operations.AddUserToUserGroupOperation;
 import com.sap.sse.security.operations.CreateUserGroupOperation;
+import com.sap.sse.security.operations.RemoveUserFromUserGroupOperation;
 import com.sap.sse.security.persistence.PersistenceFactory;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.Account;
@@ -723,7 +724,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         userGroup.remove(user);
         final UUID userGroupId = userGroup.getId();
         final String username = user.getName();
-        apply(s->s.internalRemoveUserFromUserGroup(userGroupId, username));
+        apply(new RemoveUserFromUserGroupOperation(userGroupId, username));
     }
 
     @Override
