@@ -104,6 +104,7 @@ import com.sap.sse.security.interfaces.Social;
 import com.sap.sse.security.interfaces.SocialSettingsKeys;
 import com.sap.sse.security.interfaces.UserImpl;
 import com.sap.sse.security.interfaces.UserStore;
+import com.sap.sse.security.operations.CreateUserGroupOperation;
 import com.sap.sse.security.persistence.PersistenceFactory;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.Account;
@@ -674,7 +675,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     
     private UserGroup createUserGroupWithInitialUser(UUID id, String name, User initialUser) {
         logger.info("Creating user group " + name + " with ID " + id);
-        apply(s -> s.internalCreateUserGroup(id, name));
+        apply(new CreateUserGroupOperation(id, name));
         final UserGroup userGroup = store.getUserGroup(id);
         if (initialUser != null) {
             logger.info("Adding initial user " + initialUser + " to group " + userGroup);
