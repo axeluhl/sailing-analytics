@@ -107,6 +107,7 @@ import com.sap.sse.security.interfaces.UserStore;
 import com.sap.sse.security.operations.AddUserToUserGroupOperation;
 import com.sap.sse.security.operations.CreateUserGroupOperation;
 import com.sap.sse.security.operations.PutRoleDefinitionToUserGroupOperation;
+import com.sap.sse.security.operations.RemoveRoleDefinitionFromUserGroupOperation;
 import com.sap.sse.security.operations.RemoveUserFromUserGroupOperation;
 import com.sap.sse.security.persistence.PersistenceFactory;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
@@ -747,7 +748,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public void removeRoleDefintionFromUserGroup(UserGroup userGroup, RoleDefinition roleDefinition) {
         logger.info("Removing role definition " + roleDefinition.getName() + " from group " + userGroup.getName());
-        apply(s -> s.internalRemoveRoleDefinitionFromUserGroup(userGroup.getId(), roleDefinition.getId()));
+        apply(new RemoveRoleDefinitionFromUserGroupOperation(userGroup.getId(), roleDefinition.getId()));
     }
 
     @Override
