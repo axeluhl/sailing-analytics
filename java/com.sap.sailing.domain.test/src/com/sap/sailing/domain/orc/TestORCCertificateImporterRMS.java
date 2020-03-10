@@ -2,6 +2,7 @@ package com.sap.sailing.domain.orc;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -20,7 +21,7 @@ public class TestORCCertificateImporterRMS {
     private static final String RESOURCES = "resources/orc/";
     
     @Rule
-    public IgnoreInvalidOrcCerticatesRule customIgnoreRule = new IgnoreInvalidOrcCerticatesRule();
+    public FailIfNoValidOrcCertificateRule customIgnoreRule = new FailIfNoValidOrcCertificateRule();
     
     @Test
     public void testSimpleLocalRMSFileRead() throws IOException, ParseException {
@@ -30,20 +31,27 @@ public class TestORCCertificateImporterRMS {
         assertNotNull(milan);
     }
     
-    @IgnoreInvalidOrcCerticates
+    @IgnoreInvalidOrcCertificates
     @Test
     public void testSimpleOnlineRMSFileRead() throws IOException, ParseException {
-        ORCCertificatesCollection certificates = ORCCertificatesImporter.INSTANCE.read(new URL("https://data.orc.org/public/WPub.dll?action=DownRMS&CountryId=GER&ext=rms").openStream());
-        ORCCertificate swan  = certificates.getCertificateById("GER140849GER5335");
-        ORCCertificate moana = certificates.getCertificateById("GER140772GER5549");
-        assertNotNull(swan);
-        assertNotNull(moana);
-        assertEquals(539.1, swan .getGPHInSecondsToTheMile(), 0.0000001);
-        assertEquals(490.4, moana.getGPHInSecondsToTheMile(), 0.0000001);
-        assertEquals(862.2, swan .getWindwardLeewardSpeedPrediction().get(ORCCertificate.ALLOWANCES_TRUE_WIND_SPEEDS[0]).getDuration(ORCCertificateImpl.NAUTICAL_MILE).asSeconds(), 0.1);
-        assertEquals(788.2, moana.getWindwardLeewardSpeedPrediction().get(ORCCertificate.ALLOWANCES_TRUE_WIND_SPEEDS[0]).getDuration(ORCCertificateImpl.NAUTICAL_MILE).asSeconds(), 0.1);
-        assertEquals(861.0, swan .getLongDistanceSpeedPredictions().get(ORCCertificate.ALLOWANCES_TRUE_WIND_SPEEDS[0]).getDuration(ORCCertificateImpl.NAUTICAL_MILE).asSeconds(), 0.1);
-        assertEquals(787.2, moana.getLongDistanceSpeedPredictions().get(ORCCertificate.ALLOWANCES_TRUE_WIND_SPEEDS[0]).getDuration(ORCCertificateImpl.NAUTICAL_MILE).asSeconds(), 0.1);
+        Collection<ORCCertificate> certificates = customIgnoreRule.getAvailableCerts();
+        final ORCCertificate cert = certificates.stream().findFirst().get();
+        String countryCode = cert.getId().substring(0, 3);
+        String url = String.format("https://data.orc.org/public/WPub.dll?action=DownBoatRMS&CountryId=%s&ext=json", countryCode);
+        ORCCertificatesCollection importer = ORCCertificatesImporter.INSTANCE.read(new URL(url).openStream());
+        ORCCertificate anyValidCertificate = null, referenceCert = null;
+        for (ORCCertificate orcCertificate : certificates) {
+            anyValidCertificate = importer.getCertificateById(orcCertificate.getId());
+            if (anyValidCertificate != null) {
+                referenceCert = orcCertificate;
+                break;
+            }
+        }
+        assertNotNull(anyValidCertificate);
+        assertNotNull(referenceCert);
+        assertEquals(referenceCert.getGPHInSecondsToTheMile(), anyValidCertificate .getGPHInSecondsToTheMile(), 0.0000001);
+        assertTrue(referenceCert.getWindwardLeewardSpeedPrediction().get(ORCCertificate.ALLOWANCES_TRUE_WIND_SPEEDS[0]).getDuration(ORCCertificateImpl.NAUTICAL_MILE).asSeconds() > 10);
+        assertTrue(referenceCert.getLongDistanceSpeedPredictions().get(ORCCertificate.ALLOWANCES_TRUE_WIND_SPEEDS[0]).getDuration(ORCCertificateImpl.NAUTICAL_MILE).asSeconds() > 10);
     }
     
     @Test

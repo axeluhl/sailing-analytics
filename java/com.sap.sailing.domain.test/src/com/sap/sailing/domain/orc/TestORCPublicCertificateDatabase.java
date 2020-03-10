@@ -4,17 +4,27 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
-import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -23,19 +33,58 @@ import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.orc.ORCPublicCertificateDatabase.CertificateHandle;
 import com.sap.sailing.domain.orc.impl.ORCPublicCertificateDatabaseImpl;
-import com.sap.sse.common.CountryCode;
-import com.sap.sse.common.CountryCodeFactory;
 import com.sap.sse.common.Util;
 
 public class TestORCPublicCertificateDatabase {
     private ORCPublicCertificateDatabase db;
+    private Map<String, Date> dateComparisonMap = new LinkedHashMap<String, Date>();
+    private List<String> dateFailureCases = Arrays.asList("2019-02-21T10:44GMT+2","2019-02-21T10:38+0800","2019-02-21T10:38+08:00",
+            "2019-02-21T10:38-08","2019-02-21T10:38Z","2019-02-21T10z","2019-02-21T10:38z");
     
     @Rule
-    public IgnoreInvalidOrcCerticatesRule customIgnoreRule = new IgnoreInvalidOrcCerticatesRule();
+    public FailIfNoValidOrcCertificateRule customIgnoreRule = new FailIfNoValidOrcCertificateRule();
     
     @Before
     public void setUp() {
         db = new ORCPublicCertificateDatabaseImpl();
+        /**
+         * By default GregorianCalendar month starts from 0 as January and so on. In below cases 1 specifies the date
+         * month as February.
+         */
+        dateComparisonMap.put("2019-02-21T10:38:59Z", Date.from(ZonedDateTime.parse("2019-02-21T10:38:59Z").toInstant()));
+        //                dateComparisonMap.put("2019-02-21T12:00:00.000GMT+2", Date.from(ZonedDateTime.of(2019, 2, 21, 10, 38, 59, 0, ZoneId.systemDefault()).toInstant()));
+        //        //        dateComparisonMap.put("2019-02-21T15:00:00.000 GMT-2", Date.from(ZonedDateTime.of(2019, 2, 21, 10, 38, 59, 0, ZoneId.systemDefault()).toInstant()));
+        dateComparisonMap.put("2019-02-21T10:38:55.000-0800", 
+                Date.from(ZonedDateTime.parse("2019-02-21T10:38:55.000-0800", DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ")).toInstant())
+                );
+        dateComparisonMap.put(
+                "2019-02-21T10:38:32.000+08:00", 
+                Date.from(ZonedDateTime.parse("2019-02-21T10:38:32.000+08:00").toInstant())
+                );
+        dateComparisonMap.put(
+                "2019-02-21T10:38:09.000-06", 
+                Date.from(ZonedDateTime.parse("2019-02-21T10:38:09.000-06", DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSx")).toInstant())
+                );
+        dateComparisonMap.put(
+                "2019-02-21T10:38:22.000Z", 
+                Date.from(ZonedDateTime.parse("2019-02-21T10:38:22.000Z").toInstant())
+                );
+        dateComparisonMap.put(
+                "2019-02-21T10:38:00.000z", 
+                Date.from(ZonedDateTime.parse("2019-02-21T10:38:00.000z").toInstant())
+                );
+        dateComparisonMap.put(
+                "2019-02-21T10:38:46z", 
+                Date.from(ZonedDateTime.parse("2019-02-21T10:38:46z").toInstant())
+                );
+        dateComparisonMap.put(
+                "2019-02-21T10:38:17", 
+                Date.from(LocalDateTime.parse("2019-02-21T10:38:17").toInstant(ZoneOffset.UTC))
+                );
+        dateComparisonMap.put(
+                "2019-02-21T10:38:33.000", 
+                Date.from(LocalDateTime.parse("2019-02-21T10:38:33.000").toInstant(ZoneOffset.UTC))
+                );
     }
     
     @Test
@@ -82,68 +131,65 @@ public class TestORCPublicCertificateDatabase {
         assertSoulmate(referenceNumber, result);
     }
 
-    // TODO this test will probably break 2021 when 2020 certificates will no longer be returned as valid...
+    @IgnoreInvalidOrcCertificates
     @Test
-    public void testGetCertificate() throws Exception {
-        final String referenceNumber = "03360000CE8";
+    public void testGetCertificate() throws Exception {        
+        Collection<ORCCertificate> certificates = customIgnoreRule.getAvailableCerts();
+        final ORCCertificate cert = certificates.stream().findFirst().get();
+        Iterable<CertificateHandle> certHandles = db.search(null, LocalDate.now().getYear(), null, cert.getBoatName(),
+                cert.getSailNumber(), /*
+                                       * boat class name; could be set to cert.getBoatClassName() but there are
+                                       * deviations in ORC DBs and query API, so leaving null:
+                                       */ null);
+        Optional<CertificateHandle> certificateHandle = Optional.ofNullable(certHandles.iterator().hasNext() ? certHandles.iterator().next() : null);
+        assertTrue("No certificate found for handle "+certificateHandle+
+                " extracted from certificates "+certificates, certificateHandle.isPresent());
+        final String referenceNumber = certificateHandle.get().getReferenceNumber();
         final CertificateHandle handle = db.getCertificateHandle(referenceNumber);
         final ORCCertificate result = db.getCertificate(referenceNumber);
         assertEquals(handle.getGPH(), result.getGPH().asSeconds(), 0.00001);
-        assertTrue(handle.getIssueDate().until(result.getIssueDate()).abs().asSeconds() < 10);
+        assertEquals(handle.getIssueDate().asMillis(), result.getIssueDate().asMillis(), 1000.0);
         assertEquals(handle.getSailNumber(), result.getSailNumber());
     }
     
-    @IgnoreInvalidOrcCerticates
+    @IgnoreInvalidOrcCertificates
     @Test
     public void testParallelFuzzySearch() throws InterruptedException, ExecutionException {
-        Iterator<CountryCode> iterator = CountryCodeFactory.INSTANCE.getAll().iterator();
-        int year = Calendar.getInstance().get(Calendar.YEAR);
-        List<ORCCertificate> certificates = new ArrayList<ORCCertificate>();
-        while (iterator.hasNext()) {
-            CountryCode cc = iterator.next();
-            try {
-                Iterable<CertificateHandle> certificateHandles = db.search(cc, year, null, null, null, null);
-                if (certificateHandles.iterator().hasNext()) {
-                    Iterable<ORCCertificate> orcCertificates = db.getCertificates(certificateHandles);
-                    if (orcCertificates.iterator().hasNext()) {
-                        if (certificates.size() == 2) {// certificates size set to two as we are trying to test the
-                                                       // parallel search functionality
-                            break;
-                        }
-                        ORCCertificate orcCertificate = orcCertificates.iterator().next();
-                        certificates.add(orcCertificate);
-                    }
-                }
-            } catch (Exception ex) {
-                // Exceptions are ignored because we are searching for any countries orc certificate's availability.
-            }
-        }
-        List<Future<Set<ORCCertificate>>> futures = new ArrayList<Future<Set<ORCCertificate>>>();
-        for (ORCCertificate orcCertificate : certificates) {
+        int year = LocalDate.now().getYear();
+        ArrayList<Future<Set<ORCCertificate>>> futures = new ArrayList<Future<Set<ORCCertificate>>>();
+        boolean isYearFound = false;
+        for (ORCCertificate orcCertificate : customIgnoreRule.getAvailableCerts()) {
             futures.add(db.search(orcCertificate.getBoatName(), orcCertificate.getSailNumber(),
                     new BoatClassImpl(orcCertificate.getBoatClassName(), true)));
         }
-        boolean isYearFound = false;
         for (Future<Set<ORCCertificate>> futureResult : futures) {
             isYearFound = isYearFound || assertFoundYear(futureResult.get(), year);
         }
         assertTrue(isYearFound);
     }
+    
+    @Test
+    public void testParseDateSuccessCases() {
+        for (String date : dateComparisonMap.keySet()) {
+            Date convertedDate = db.parseDate(date);
+            assertEquals(convertedDate, dateComparisonMap.get(date));
+        }
+    }
+    
+    @Test(expected = DateTimeParseException.class)
+    public void testShould() throws Exception {
+        for (String dateString : dateFailureCases) {
+            db.parseDate(dateString);
+            Assert.fail(dateString + " is parsable");
+        }
+    }
 
     private boolean assertFoundYear(final Set<ORCCertificate> certificates, int year) {
-        boolean foundYear = false;
-        for (final ORCCertificate certificate : certificates) {
-            if (certificate.getIssueDate() != null) {
-                final GregorianCalendar cal = new GregorianCalendar();
-                cal.setTimeZone(TimeZone.getTimeZone("UTC"));
-                cal.setTimeInMillis(certificate.getIssueDate().asMillis());
-                if (cal.get(Calendar.YEAR) == year) {
-                    foundYear = true;
-                    break;
-                }
-            }
-        }
-        return foundYear;
+        return certificates.stream().map(cert -> {
+            LocalDate certDate = Instant.ofEpochMilli(cert.getIssueDate().asMillis()).atOffset(ZoneOffset.UTC)
+                    .toLocalDate();
+            return certDate.getYear();
+        }).anyMatch(cy -> cy == year);
     }
 
     private void assertSoulmate(final String referenceNumber, CertificateHandle handle) {

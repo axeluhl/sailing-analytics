@@ -1,10 +1,14 @@
 package com.sap.sailing.domain.orc.impl;
 
 import java.io.InputStream;
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Calendar;
 import java.util.Date;
@@ -15,6 +19,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Future;
@@ -72,7 +77,20 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
     private static final String ROOT_ELEMENT = "ROOT";
     private static final String DATA_ELEMENT = "DATA";
     private static final String ROW_ELEMENT = "ROW";
-    private static final DateFormat isoTimestampFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+
+    private static final DateTimeFormatter[] DATE_FORMATTERS = 
+            new DateTimeFormatter[] {
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"),
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS")
+    };
+    private static final DateTimeFormatter[] DATE_FORMATTERS_WITH_ZONE = 
+            new DateTimeFormatter[] {
+                    DateTimeFormatter.ISO_INSTANT,
+                    DateTimeFormatter.ISO_DATE_TIME,
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssX"),
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ"),
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX")
+    };
     
     /**
      * Hash code and equality as based on {@link #getReferenceNumber() the reference number field} only.
@@ -350,26 +368,48 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
         return new CertificateHandleImpl(issuingCountry, gph, sssid, datInGID, referenceNumber, yachtName,
                 sailNumber, boatClassName, designer, builder, yearBuilt, issueDate, certType, isOneDesign, isProvisional);
     }
-
-    private Date parseDate(String dateString) throws ParseException {
-        final StringBuilder stringBuilder = new StringBuilder(dateString);
-        final char timeZoneCharacter = stringBuilder.charAt(stringBuilder.length() - 1);
-        if (timeZoneCharacter == 'z' || timeZoneCharacter == 'Z' || timeZoneCharacter == 'X') {
-            stringBuilder.deleteCharAt(stringBuilder.length() - 1);
+    
+    @Override
+    public Date parseDate(final String dateString) throws DateTimeParseException {
+        Optional<LocalDateTime> parsedDateWithoutZone = Arrays.asList(DATE_FORMATTERS).stream()
+                .map(f -> {
+                    try {
+                        return LocalDateTime.parse(dateString, f);
+                    } catch (DateTimeParseException e) {
+                        return null;
+                    }
+                })
+                .filter(out -> out != null)
+                .findAny();
+        Optional<ZonedDateTime> parsedDateWithZone = Arrays.asList(DATE_FORMATTERS_WITH_ZONE).stream()
+                .map(f -> {
+                    try {
+                        return ZonedDateTime.parse(dateString, f);
+                    } catch (DateTimeParseException e) {
+                        return null;
+                    }
+                })
+                .filter(out -> out != null)
+                .findAny();
+        if (parsedDateWithoutZone.isPresent()) {
+            LocalDateTime localDateTime = parsedDateWithoutZone.get();
+            return Date.from(localDateTime.toInstant(ZoneOffset.UTC));
         }
-        if (stringBuilder.indexOf("+") == -1) {
-            stringBuilder.append("+0000");
+        if (parsedDateWithZone.isPresent()) {
+            ZonedDateTime zonedDateTime = parsedDateWithZone.get();
+            return Date.from(zonedDateTime.toInstant());
         }
-        return isoTimestampFormat.parse(stringBuilder.toString());
+        logger.fine("Date is not parsable by any of the format :" + dateString);
+        throw new DateTimeParseException("Date is not parsable by any of the format", dateString, 0);
     }
 
     @Override
     public ORCCertificate getCertificate(String referenceNumber) throws Exception {
         final HttpClient client = new SystemDefaultHttpClient();
-        final HttpGet getRequest = new HttpGet("http://data.orc.org/public/WPub.dll?action=DownBoatRMS&RefNo="+referenceNumber);
+        final HttpGet getRequest = new HttpGet("http://data.orc.org/public/WPub.dll?action=DownBoatRMS&ext=json&RefNo="+referenceNumber);
         addAuthorizationHeader(getRequest);
         logger.fine("Obtaining certificate for reference number "+referenceNumber);
-        final Iterable<ORCCertificate> certificates = new ORCCertificatesRmsImporter().read(client.execute(getRequest).getEntity().getContent())
+        final Iterable<ORCCertificate> certificates = new ORCCertificatesJsonImporter().read(client.execute(getRequest).getEntity().getContent())
                 .getCertificates();
         final ORCCertificate result;
         if (certificates.iterator().hasNext()) {
