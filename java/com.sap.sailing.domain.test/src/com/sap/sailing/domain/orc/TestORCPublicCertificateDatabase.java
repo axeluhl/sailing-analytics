@@ -5,9 +5,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -16,6 +13,9 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +24,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.logging.Logger;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -37,6 +38,8 @@ import com.sap.sailing.domain.orc.impl.ORCPublicCertificateDatabaseImpl;
 import com.sap.sse.common.Util;
 
 public class TestORCPublicCertificateDatabase {
+    private static final Logger logger = Logger.getLogger(TestORCPublicCertificateDatabase.class.getName());
+    
     private ORCPublicCertificateDatabase db;
     private Map<String, Date> dateComparisonMap = new LinkedHashMap<String, Date>();
     private List<String> dateFailureCases = Arrays.asList("2019-02-21T10:44GMT+2","2019-02-21T10:38+0800","2019-02-21T10:38+08:00",
@@ -130,6 +133,21 @@ public class TestORCPublicCertificateDatabase {
         final String referenceNumber = "FRA00013881";
         final CertificateHandle result = db.getCertificateHandle(referenceNumber);
         assertSoulmate(referenceNumber, result);
+    }
+
+    @Test
+    public void testCertificateUpdate() throws Exception {
+        final String referenceNumber = "FRA00013881";
+        final CertificateHandle oldHandle = db.getCertificateHandle(referenceNumber);
+        final ORCCertificate result = db.searchForUpdate(oldHandle);
+        if (result != null) {
+            assertEquals(oldHandle.getFileId(), result.getFileId());
+            assertEquals(oldHandle.getIssuingCountry(), result.getIssuingCountry());
+            assertFalse(oldHandle.getIssueDate().after(result.getIssueDate()));
+        } else {
+            logger.warning("Couldn't find an update to certificate with reference number "+referenceNumber+
+                    " anymore. Consider updating this test case to using a different certificate that still has a valid update.");
+        }
     }
 
     @FailIfNoValidOrcCertificates

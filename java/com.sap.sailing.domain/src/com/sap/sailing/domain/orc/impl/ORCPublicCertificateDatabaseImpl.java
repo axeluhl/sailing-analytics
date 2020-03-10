@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.orc.impl;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
 import java.time.LocalDateTime;
@@ -34,6 +35,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.http.HttpMessage;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
@@ -74,6 +76,7 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
     private static final NameValuePair ACTION_PARAM = new BasicNameValuePair(ACTION_PARAM_NAME, ACTION_PARAM_VALUE_LIST_CERT);
     private static final NameValuePair XSLP_PARAM = new BasicNameValuePair(XSLP_PARAM_NAME, XSLP_PARAM_VALUE_LIST_CERT);
     private static final String SEARCH_URL = "http://data.orc.org/public/WPub.dll";
+    private static final String SINGLE_CERTIFICATE_DOWNLOAD_URL = "http://data.orc.org/public/WPub.dll?action=DownBoatRMS";
     private static final String ROOT_ELEMENT = "ROOT";
     private static final String DATA_ELEMENT = "DATA";
     private static final String ROW_ELEMENT = "ROW";
@@ -436,11 +439,53 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
     }
 
     @Override
+    public ORCCertificate searchForUpdate(CertificateHandle certificateHandle)
+            throws ClientProtocolException, IOException, org.json.simple.parser.ParseException {
+        return searchForUpdate(certificateHandle.getIssuingCountry(), certificateHandle.getFileId(), certificateHandle.getReferenceNumber());
+    }
+
+    @Override
+    public ORCCertificate searchForUpdate(ORCCertificate certificate)
+            throws ClientProtocolException, IOException, org.json.simple.parser.ParseException {
+        return searchForUpdate(certificate.getIssuingCountry(), certificate.getFileId(), certificate.getReferenceNumber());
+    }
+
+    private ORCCertificate searchForUpdate(final CountryCode issuingCountry, final String fileId,
+            final String existingCertificateRefNo)
+            throws IOException, org.json.simple.parser.ParseException, ClientProtocolException {
+        logger.fine("Looking for update of certificate with reference number "+existingCertificateRefNo);
+        final String queryParameters = "ext=json&CountryId=" + issuingCountry.getThreeLetterIOCCode()+
+                "&dxtName="+fileId+".dxt";
+        final ORCCertificate result = getSingleCertificate(queryParameters);
+        if (result == null) {
+            logger.info("Couldn't find any valid certificate for that boat");
+        } else {
+            if (result.getReferenceNumber().equals(existingCertificateRefNo)) {
+                logger.info("Found no new certificate; the one with reference number "+existingCertificateRefNo+
+                        " is still valid.");
+            } else {
+                logger.info("Found update for "+existingCertificateRefNo+": "+result);
+            }
+        }
+        return result;
+    }
+
+    @Override
     public ORCCertificate getCertificate(String referenceNumber) throws Exception {
-        final HttpClient client = new SystemDefaultHttpClient();
-        final HttpGet getRequest = new HttpGet("http://data.orc.org/public/WPub.dll?action=DownBoatRMS&ext=json&RefNo="+referenceNumber);
-        addAuthorizationHeader(getRequest);
+        final String queryParameters = "ext=json&RefNo="+referenceNumber;
         logger.fine("Obtaining certificate for reference number "+referenceNumber);
+        final ORCCertificate result = getSingleCertificate(queryParameters);
+        if (result == null) {
+            logger.info("Couldn't find ORC certificate with reference number "+referenceNumber);
+        }
+        return result;
+    }
+
+    private ORCCertificate getSingleCertificate(final String queryParameters)
+            throws IOException, org.json.simple.parser.ParseException, ClientProtocolException {
+        final HttpGet getRequest = new HttpGet(SINGLE_CERTIFICATE_DOWNLOAD_URL+"&"+queryParameters);
+        final HttpClient client = new SystemDefaultHttpClient();
+        addAuthorizationHeader(getRequest);
         final Iterable<ORCCertificate> certificates = new ORCCertificatesJsonImporter().read(client.execute(getRequest).getEntity().getContent())
                 .getCertificates();
         final ORCCertificate result;
@@ -448,7 +493,6 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
             result = certificates.iterator().next();
         } else {
             result = null;
-            logger.info("Couldn't find ORC certificate with reference number "+referenceNumber);
         }
         return result;
     }

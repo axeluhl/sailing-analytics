@@ -10,7 +10,6 @@ import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.WithID;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 
@@ -88,15 +87,6 @@ public interface ORCCertificate extends WithID, Serializable {
      */
     CountryCode getIssuingCountry();
     
-    /**
-     * A unique key of the boat to which this certificate belongs; it consists of the {@link #getFileId() file ID} and the
-     * {@link #getIssuingCountry() issuing country}. For any such key the ORC database delivers at most one valid certificate
-     * at any given time.
-     */
-    default Pair<String, CountryCode> getBoatKey() {
-        return new Pair<>(getFileId(), getIssuingCountry());
-    }
-
     /**
      * Returns the sailnumber of the {@link Competitor} which this certificate belongs to.
      * 

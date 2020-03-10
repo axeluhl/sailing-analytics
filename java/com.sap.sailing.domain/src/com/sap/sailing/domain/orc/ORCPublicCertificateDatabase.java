@@ -126,9 +126,16 @@ public interface ORCPublicCertificateDatabase {
      * results based on that criterion. You can use "%" as wildcards in the {@code yachtName}, {@code sailNumber} and
      * {@code boatClassName} parameters.
      * <p>
-     * @param includeInvalid TODO
      * 
-     * @return an always valid, never {@code null} object which may be {@link Util#isEmpty() empty}.
+     * @param includeInvalid
+     *            If {@code true}, handles may have {@link CertificateHandle#isValid()}{@code == false}, meaning that
+     *            such a handle cannot be resolved to a {@link ORCCertificate} using any of
+     *            {@link #getCertificate(String)}, {@link #getCertificates(Iterable)} and
+     *            {@link #getCertificates(CertificateHandle...)}. If {@code false}, only valid certificate handles
+     *            will be returned that should all be resolvable into an {@link ORCCertificate} with any of the methods
+     *            listed above.
+     * 
+     * @return never {@code null}; an object which may be {@link Util#isEmpty() empty}.
      */
     Iterable<CertificateHandle> search(CountryCode country, Integer yearOfIssuance, String referenceNumber,
             String yachtName, String sailNumber, String boatClassName, boolean includeInvalid) throws Exception;
@@ -150,6 +157,10 @@ public interface ORCPublicCertificateDatabase {
     default CertificateHandle getCertificateHandle(String referenceNumber) throws Exception {
         return search(null, null, referenceNumber, null, null, null, /* includeInvalid */ true).iterator().next();
     }
+    
+    ORCCertificate searchForUpdate(ORCCertificate certificate) throws Exception;
+    
+    ORCCertificate searchForUpdate(CertificateHandle certificate) throws Exception;
     
     ORCCertificate getCertificate(String referenceNumber) throws Exception;
     
