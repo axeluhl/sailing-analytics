@@ -285,6 +285,7 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
                 for (int rowNodeIndex=0; rowNodeIndex<rowNodes.getLength(); rowNodeIndex++) {
                     final Node rowNode = rowNodes.item(rowNodeIndex);
                     if (rowNode.getNodeName().equals(ROW_ELEMENT)) {
+                        // TODO only include results that have <CanSelect>True</CanSelect> CERTIFICATE_IS_ACTIVE
                         result.add(parseHandle(rowNode));
                     }
                 }
