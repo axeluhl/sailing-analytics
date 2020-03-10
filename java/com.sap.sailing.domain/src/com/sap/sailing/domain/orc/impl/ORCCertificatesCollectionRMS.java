@@ -63,15 +63,22 @@ public class ORCCertificatesCollectionRMS extends AbstractORCCertificatesCollect
     private static final String NON_SPINNAKER = "NSP";
     private static final String NATCERTN_FILE_ID = "NATCERTN.FILE_ID";
     private static final DateFormat timestampFormat = new SimpleDateFormat("dd MM yyyy HH:mm:ssZ");
+    
+    /**
+     * Keys are canonicalized through {@link #canonicalizeId(String)}.
+     */
     private final Map<String, Map<String, String>> certificateValuesByCertificateId;
     
 
     public class ORCCertificateValues {
+        /**
+         * Canonicalized through {@link AbstractORCCertificatesCollection#canonicalizeId(String)}
+         */
         private final String certificateId;
 
         public ORCCertificateValues(String certificateId) {
             super();
-            this.certificateId = certificateId;
+            this.certificateId = canonicalizeId(certificateId);
         }
 
         public String getValue(String columnName) {
@@ -82,7 +89,7 @@ public class ORCCertificatesCollectionRMS extends AbstractORCCertificatesCollect
     public ORCCertificatesCollectionRMS(Map<String, Map<String, String>> certificateValuesByCertificateId) throws IOException {
         this.certificateValuesByCertificateId = new HashMap<>();
         for (final Entry<String, Map<String, String>> e : certificateValuesByCertificateId.entrySet()) {
-            this.certificateValuesByCertificateId.put(e.getKey(), e.getValue());
+            this.certificateValuesByCertificateId.put(canonicalizeId(e.getKey()), e.getValue());
         }
     }
     
@@ -91,7 +98,7 @@ public class ORCCertificatesCollectionRMS extends AbstractORCCertificatesCollect
     }
 
     private ORCCertificateValues getValuesForCertificateId(String certificateId) {
-        return certificateValuesByCertificateId.containsKey(certificateId) ? new ORCCertificateValues(certificateId) : null;
+        return certificateValuesByCertificateId.containsKey(canonicalizeId(certificateId)) ? new ORCCertificateValues(certificateId) : null;
     }
     
     @Override

@@ -87,7 +87,5 @@ public class FailIfNoValidOrcCertificateRule implements TestRule {
             Assert.assertTrue(certificateExists);
             base.evaluate();
         }
-        
-        
     }
 }
