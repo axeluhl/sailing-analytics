@@ -148,7 +148,12 @@ public class TestORCPublicCertificateDatabase {
         final CertificateHandle handle = db.getCertificateHandle(referenceNumber);
         final ORCCertificate result = db.getCertificate(referenceNumber);
         assertEquals(handle.getGPH(), result.getGPH().asSeconds(), 0.00001);
-        assertEquals(handle.getIssueDate().asMillis(), result.getIssueDate().asMillis(), 1000.0);
+        // Use some tolerance as we found differences as much as 5s between the dxtDate in the handle coming from the XML search result
+        // and the IssueDate field in the JSON. Both suggest to report millisecond accuracy, but dxtDate always seems to have the
+        // milliseconds as "000" explaining many sub-second differences. But in some cases differences were significantly bigger.
+        assertEquals("Issue dates of certificate with reference number "+referenceNumber+
+                " varies between current year result handle ("+handle.getIssueDate()+") and certificate ("+
+                result.getIssueDate()+").", handle.getIssueDate().asMillis(), result.getIssueDate().asMillis(), 10000.0);
         assertEquals(handle.getSailNumber(), result.getSailNumber());
     }
     

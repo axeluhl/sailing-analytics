@@ -56,7 +56,7 @@ public class TestORCPerformanceCurve {
     private static final String RESOURCES = "resources/orc/";
     
     @Rule
-    public FailIfNoValidOrcCertificateRule customIgnoreRule = new FailIfNoValidOrcCertificateRule();
+    public FailIfNoValidOrcCertificateRule customFailRule = new FailIfNoValidOrcCertificateRule();
 
     @Rule
     public ErrorCollector collector = new ErrorCollector();
@@ -98,7 +98,7 @@ public class TestORCPerformanceCurve {
         File fileWithSpecificBins = new File(RESOURCES + "newFormatCertificate.json");
         importerWithSpecificBins = new ORCCertificatesJsonImporter().read(new FileInputStream(fileWithSpecificBins));
         // Online File:
-        importerOnline = new ORCCertificatesJsonImporter().read(new URL("https://data.orc.org/public/WPub.dll?action=DownRMS&CountryId=GER&ext=json").openStream());
+        importerOnline = new ORCCertificatesJsonImporter().read(new URL("https://data.orc.org/public/WPub.dll?action=DownBoatRMS&CountryId=GER&ext=json").openStream());
     }
     
     @Test
