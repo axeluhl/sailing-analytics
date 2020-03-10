@@ -71,7 +71,7 @@ public class FailIfNoValidOrcCertificateRule implements TestRule {
                 certificateExists = false;
                 for (CountryCode cc : CountryCodeFactory.INSTANCE.getAll()) {
                     try {
-                        Iterable<CertificateHandle> certificateHandles = db.search(cc, year, null, null, null, null);
+                        Iterable<CertificateHandle> certificateHandles = db.search(cc, year, null, null, null, null, /* includeInvalid */ false);
                         Iterable<ORCCertificate> orcCertificates = db.getCertificates(certificateHandles);
                         orcCertificates.forEach(availableCerts::add);
                         if (orcCertificates.iterator().hasNext()) {

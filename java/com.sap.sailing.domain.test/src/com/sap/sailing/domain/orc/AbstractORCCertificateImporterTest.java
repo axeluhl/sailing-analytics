@@ -35,8 +35,8 @@ public abstract class AbstractORCCertificateImporterTest {
     protected void testSimpleOnlineFileRead(String rmsOrJsonFormat) throws IOException, ParseException, InterruptedException {
         Collection<ORCCertificate> certificates = customIgnoreRule.getAvailableCerts();
         final ORCCertificate cert = certificates.stream().findFirst().get();
-        String countryCode = cert.getId().substring(0, 3);
-        String url = String.format("https://data.orc.org/public/WPub.dll?action=DownBoatRMS&CountryId=%s&ext=%s", countryCode, rmsOrJsonFormat);
+        String countryCode = cert.getIssuingCountry().getThreeLetterIOCCode();
+        String url = String.format("https://data.orc.org/public/WPub.dll?action=DownRMS&CountryId=%s&ext=%s", countryCode, rmsOrJsonFormat);
         ORCCertificatesCollection importer = ORCCertificatesImporter.INSTANCE.read(new URL(url).openStream());
         ORCCertificate someValidCert = null, referenceCert = null;
         for (ORCCertificate orcCertificate : certificates) {

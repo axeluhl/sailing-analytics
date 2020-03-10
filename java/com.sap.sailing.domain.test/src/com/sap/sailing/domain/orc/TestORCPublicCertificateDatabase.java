@@ -2,6 +2,7 @@ package com.sap.sailing.domain.orc;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
@@ -92,7 +93,7 @@ public class TestORCPublicCertificateDatabase {
         final String referenceNumber = "FRA00013881";
         final Iterable<CertificateHandle> result = db.search(/* country */ null, /* yearOfIssuance */ null,
                 /* referenceNumber */ referenceNumber, /* yachtName */ null, /* sailNumber */ null,
-                /* boatClassName */ null);
+                /* boatClassName */ null, /* includeInvalid */ true);
         assertEquals(1, Util.size(result));
         assertSoulmate(referenceNumber, result.iterator().next());
     }
@@ -102,7 +103,7 @@ public class TestORCPublicCertificateDatabase {
         final String referenceNumber = "FRA00013881";
         final Iterable<CertificateHandle> result = db.search(/* country */ null, /* yearOfIssuance */ 2019,
                 /* referenceNumber */ null, /* yachtName */ "Soulmate", /* sailNumber */ "DEN-   13",
-                /* boatClassName */ null);
+                /* boatClassName */ null, /* includeInvalid */ true);
         assertEquals(1, Util.size(result));
         assertSoulmate(referenceNumber, result.iterator().next());
     }
@@ -112,7 +113,7 @@ public class TestORCPublicCertificateDatabase {
         final String referenceNumber = "FRA00013881";
         final Iterable<CertificateHandle> result = db.search(/* country */ null, /* yearOfIssuance */ null,
                 /* referenceNumber */ null, /* yachtName */ "Soulmate", /* sailNumber */ null,
-                /* boatClassName */ null);
+                /* boatClassName */ null, /* includeInvalid */ true);
         assertTrue(Util.size(result)>1);
         boolean found = false;
         for (final CertificateHandle handle : result) {
@@ -140,13 +141,14 @@ public class TestORCPublicCertificateDatabase {
                 cert.getSailNumber(), /*
                                        * boat class name; could be set to cert.getBoatClassName() but there are
                                        * deviations in ORC DBs and query API, so leaving null:
-                                       */ null);
+                                       */ null, /* includeInvalid */ false);
         Optional<CertificateHandle> certificateHandle = Optional.ofNullable(certHandles.iterator().hasNext() ? certHandles.iterator().next() : null);
         assertTrue("No certificate found for handle "+certificateHandle+
                 " extracted from certificates "+certificates, certificateHandle.isPresent());
         final String referenceNumber = certificateHandle.get().getReferenceNumber();
         final CertificateHandle handle = db.getCertificateHandle(referenceNumber);
         final ORCCertificate result = db.getCertificate(referenceNumber);
+        assertNotNull("Unable to load certificate for reference number "+referenceNumber+" from handle "+certificateHandle);
         assertEquals(handle.getGPH(), result.getGPH().asSeconds(), 0.00001);
         // Use some tolerance as we found differences as much as 5s between the dxtDate in the handle coming from the XML search result
         // and the IssueDate field in the JSON. Both suggest to report millisecond accuracy, but dxtDate always seems to have the

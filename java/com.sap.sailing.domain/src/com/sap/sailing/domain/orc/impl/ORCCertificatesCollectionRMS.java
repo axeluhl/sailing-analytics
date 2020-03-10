@@ -14,10 +14,13 @@ import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.impl.ORCCertificateImpl;
 import com.sap.sse.common.Bearing;
+import com.sap.sse.common.CountryCode;
+import com.sap.sse.common.CountryCodeFactory;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.SecondsDurationImpl;
@@ -52,6 +55,7 @@ public class ORCCertificatesCollectionRMS extends AbstractORCCertificatesCollect
     private static final String SAILNUMBER = "SAILNUMB";
     private static final String BOATCLASS = "TYPE";
     static final String ISSUEDATE = "DD_MM_yyYY";
+    static final String LOA = "LOA";
     private static final String ISSUETIME = "HH:MM:SS";
     private static final String RUN_ALLOWANCE = "D";
     private static final String RUN_ANGLE = "DA";
@@ -61,7 +65,12 @@ public class ORCCertificatesCollectionRMS extends AbstractORCCertificatesCollect
     private static final String LONG_DISTANCE = "OC";
     private static final String CIRCULAR_RANDOM = "CR";
     private static final String NON_SPINNAKER = "NSP";
-    private static final String NATCERTN_FILE_ID = "NATCERTN.FILE_ID";
+    private static final String ISSUING_NATIONAL_AUTHORITY = "NAT";
+    private static final String CERTIFICATE_NUMBER = "CERTN";
+    private static final String NATCERTN = ISSUING_NATIONAL_AUTHORITY+CERTIFICATE_NUMBER;
+    private static final String FILE_ID = "FILE_ID";
+    private static final String NATCERTN_FILE_ID = NATCERTN+"."+FILE_ID;
+    static final String REFERENCE_NUMBER = "ReferenceNo";
     private static final DateFormat timestampFormat = new SimpleDateFormat("dd MM yyyy HH:mm:ssZ");
     
     /**
@@ -108,6 +117,7 @@ public class ORCCertificatesCollectionRMS extends AbstractORCCertificatesCollect
         if (certificateValues == null) {
             result = null;
         } else {
+            final String refNo = certificateValues.getValue(REFERENCE_NUMBER);
             final String sailNumber = certificateValues.getValue(SAILNUMBER);
             final String boatclass = certificateValues.getValue(BOATCLASS);
             final String boatName = certificateValues.getValue(BOATNAME);
@@ -165,13 +175,23 @@ public class ORCCertificatesCollectionRMS extends AbstractORCCertificatesCollect
                 }
                 velocityPredictionsPerTrueWindSpeedAndAngle.put(tws, velocityPredictionPerTrueWindAngle);
             }
-            result = new ORCCertificateImpl(certificateValues.getValue(NATCERTN_FILE_ID), sailNumber, boatName, boatclass,
-                    length, gph, cdl, issueDate, velocityPredictionsPerTrueWindSpeedAndAngle, beatAngles, beatVMGPredictionPerTrueWindSpeed,
-                    beatAllowancePerTrueWindSpeed, runAngles, runVMGPredictionPerTrueWindSpeed,
+            final Triple<CountryCode, String, String> natCertNoFileId = getIssuingNationalityCertificateNumberAndFileId(certificateValues.getValue(NATCERTN_FILE_ID));
+            result = new ORCCertificateImpl(refNo, natCertNoFileId.getC(), sailNumber, boatName, boatclass, length, gph,
+                    cdl, issueDate, natCertNoFileId.getA(), velocityPredictionsPerTrueWindSpeedAndAngle, beatAngles,
+                    beatVMGPredictionPerTrueWindSpeed,                    beatAllowancePerTrueWindSpeed, runAngles, runVMGPredictionPerTrueWindSpeed,
                     runAllowancePerTrueWindSpeed, windwardLeewardSpeedPredictionPerTrueWindSpeed,
-                    longDistanceSpeedPredictionPerTrueWindSpeed, circularRandomSpeedPredictionPerTrueWindSpeed, nonSpinnakerSpeedPredictionPerTrueWindSpeed);
+                    longDistanceSpeedPredictionPerTrueWindSpeed, circularRandomSpeedPredictionPerTrueWindSpeed,
+                    nonSpinnakerSpeedPredictionPerTrueWindSpeed);
         }
         return result;
+    }
+
+    private Triple<CountryCode, String, String> getIssuingNationalityCertificateNumberAndFileId(String natCertFileId) {
+        final CountryCode nationalityIOCCode = CountryCodeFactory.INSTANCE
+                .getFromThreeLetterIOCName(natCertFileId.substring(0, ISSUING_NATIONAL_AUTHORITY.length()));
+        final String certNo = natCertFileId.substring(ISSUING_NATIONAL_AUTHORITY.length(), ISSUING_NATIONAL_AUTHORITY.length()+CERTIFICATE_NUMBER.length()).trim();
+        final String fileId = natCertFileId.substring(NATCERTN.length()+".".length()).trim();
+        return new Triple<>(nationalityIOCCode, certNo, fileId);
     }
 
     @Override

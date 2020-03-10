@@ -15,7 +15,7 @@ public class TestORCCertificateImporterRMS extends AbstractORCCertificateImporte
     
     @Test
     public void testSimpleLocalRMSFileRead() throws IOException, ParseException {
-        testSimpleLocalFileRead("GER2019.rms", "GER166844GER7323");
+        testSimpleLocalFileRead("GER2019.rms", "GER20041179");
     }
     
     @FailIfNoValidOrcCertificates

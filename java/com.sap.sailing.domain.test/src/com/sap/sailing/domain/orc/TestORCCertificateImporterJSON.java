@@ -10,7 +10,7 @@ public class TestORCCertificateImporterJSON extends AbstractORCCertificateImport
     
     @Test
     public void testSimpleLocalJSONFileRead() throws IOException, ParseException {
-        testSimpleLocalFileRead("GER2019.json", "GER166844GER7323");
+        testSimpleLocalFileRead("GER2019.json", "GER20041179");
     }
     
     @FailIfNoValidOrcCertificates

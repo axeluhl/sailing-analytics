@@ -17,8 +17,14 @@ import com.sap.sse.common.Util;
 /**
  * An interface to {@code data.orc.org}, mostly the search functionality at
  * {@code https://data.orc.org/public/WPub.dll?action=SrchCert&xslp=scert.php}. It can search for certificates by a
- * number of criteria, among them the issuing country, sail number, ORC reference number, or boat name.
- * &lt;p&gt;
+ * number of criteria, among them the issuing country, sail number, ORC reference number, or boat name. Those search
+ * results are represented as {@link CertificateHandle} objects. Such handles can also be obtained for certificates that
+ * are not currently valid. See the {@code includeInvalid} parameter of the
+ * {@link #search(CountryCode, Integer, String, String, String, String, boolean)} method. However, handles for
+ * {@link CertificateHandle#isValid() invalid} certificates cannot be resolved into {@link ORCCertificate} objects
+ * through {@link #getCertificates(Iterable)} or {@link #getCertificates(CertificateHandle...)} because the database
+ * returns full certificates only if they are valid.
+ * <p>
  * 
  * As the web site emits XML documents as search results, those can be parsed and turned into handles to certificates.
  * An example output (excerpt):
@@ -80,8 +86,8 @@ import com.sap.sse.common.Util;
 &lt;/DATA&gt;
  * </pre>
  * 
- * This also shows that some query results do not provide a valid link to a downloadable copy of the certificate. Those are
- * automatically removed from the results here.
+ * This also shows that some query results do not provide a valid link to a downloadable copy of the certificate. Those
+ * are automatically removed from the results here.
  * 
  * @author Axel Uhl (D043530)
  *
@@ -97,6 +103,7 @@ public interface ORCPublicCertificateDatabase {
      */
     public interface CertificateHandle {
         CountryCode getIssuingCountry();
+        String getFileId();
         Double getGPH();
         String getSSSID();
         UUID getDatInGID();
@@ -111,6 +118,7 @@ public interface ORCPublicCertificateDatabase {
         Integer getCertType();
         Boolean isOd();
         Boolean isProvisional();
+        Boolean isValid();
     }
     
     /**
@@ -118,11 +126,12 @@ public interface ORCPublicCertificateDatabase {
      * results based on that criterion. You can use "%" as wildcards in the {@code yachtName}, {@code sailNumber} and
      * {@code boatClassName} parameters.
      * <p>
+     * @param includeInvalid TODO
      * 
      * @return an always valid, never {@code null} object which may be {@link Util#isEmpty() empty}.
      */
     Iterable<CertificateHandle> search(CountryCode country, Integer yearOfIssuance, String referenceNumber,
-            String yachtName, String sailNumber, String boatClassName) throws Exception;
+            String yachtName, String sailNumber, String boatClassName, boolean includeInvalid) throws Exception;
     
     default Iterable<ORCCertificate> getCertificates(Iterable<CertificateHandle> handles) throws Exception {
         return Util.map(handles, handle->{
@@ -139,7 +148,7 @@ public interface ORCPublicCertificateDatabase {
     }
     
     default CertificateHandle getCertificateHandle(String referenceNumber) throws Exception {
-        return search(null, null, referenceNumber, null, null, null).iterator().next();
+        return search(null, null, referenceNumber, null, null, null, /* includeInvalid */ true).iterator().next();
     }
     
     ORCCertificate getCertificate(String referenceNumber) throws Exception;

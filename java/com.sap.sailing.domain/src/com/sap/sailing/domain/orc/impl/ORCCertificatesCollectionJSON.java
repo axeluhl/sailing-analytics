@@ -21,6 +21,7 @@ import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.impl.ORCCertificateImpl;
 import com.sap.sse.common.Bearing;
+import com.sap.sse.common.CountryCodeFactory;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
@@ -52,16 +53,15 @@ public class ORCCertificatesCollectionJSON extends AbstractORCCertificatesCollec
     private static final String YACHT_NAME = "YachtName";
     private static final String LOA = "LOA";
     private static final String SAIL_NO = "SailNo";
-    private static final String CERT_NO = "CertNo";
     private static final String BIN = "BIN";
     private static final String NAT_AUTH = "NatAuth";
+    private static final String REFERENCE_NUMBER = "RefNo";
     private static final String RUN = "Run";
     private static final String BEAT = "Beat";
     private static final String WINDWARD_LEEWARD = "WL";
     private static final String LONG_DISTANCE = "OC";
     private static final String CIRCULAR_RANDOM = "CR";
     private static final String NON_SPINNAKER = "NS";
-    private static final String EMPTY_CERT_NO = "      ";
     private static final String WIND_SPEEDS = "WindSpeeds";
     
     /**
@@ -99,6 +99,9 @@ public class ORCCertificatesCollectionJSON extends AbstractORCCertificatesCollec
      */
     @Override
     public ORCCertificate getCertificateById(String certificateId) {
+        String refNo = null;
+        String natAuth = null;
+        String fileId = null;
         String boatName = null;
         String boatclass = null;
         Distance length = null;
@@ -121,6 +124,15 @@ public class ORCCertificatesCollectionJSON extends AbstractORCCertificatesCollec
             String sailNumber = null;
             for (Entry<Object, Object> entry : object.entrySet()) {
                 switch ((String) entry.getKey()) {
+                case REFERENCE_NUMBER:
+                    refNo = entry.getValue() == null ? null : entry.getValue().toString();
+                    break;
+                case NAT_AUTH:
+                    natAuth = entry.getValue() == null ? null : entry.getValue().toString();
+                    break;
+                case BIN:
+                    fileId = entry.getValue() == null ? null : entry.getValue().toString();
+                    break;
                 case SAIL_NO:
                     sailNumber = entry.getValue() == null ? null : entry.getValue().toString();
                     break;
@@ -256,7 +268,8 @@ public class ORCCertificatesCollectionJSON extends AbstractORCCertificatesCollec
                     Arrays.equals(ORCCertificate.ALLOWANCES_TRUE_WIND_ANGLES, dynamicAllowancesTrueWindAngles)
                             ? ORCCertificate.ALLOWANCES_TRUE_WIND_ANGLES
                             : dynamicAllowancesTrueWindAngles,
-                    getId(object), sailNumber, boatName, boatclass, length, gph, cdl, issueDate,
+                    refNo, fileId, sailNumber, boatName, boatclass, length, gph, cdl,
+                    issueDate, CountryCodeFactory.INSTANCE.getFromThreeLetterIOCName(natAuth),
                     velocityPredictionPerTrueWindSpeedAndAngle, beatAngles, beatVMGPredictionPerTrueWindSpeed,
                     beatAllowancePerTrueWindSpeed, gybeAngles, runVMGPredictionPerTrueWindSpeed,
                     runAllowancePerTrueWindSpeed, windwardLeewardSpeedPredictionPerTrueWindSpeed,
@@ -267,13 +280,7 @@ public class ORCCertificatesCollectionJSON extends AbstractORCCertificatesCollec
     }
 
     private String getId(JSONObject certificateAsJson) {
-        return getIdFromFields(certificateAsJson.get(NAT_AUTH).toString(),
-                certificateAsJson.get(CERT_NO) == null ? EMPTY_CERT_NO : certificateAsJson.get(CERT_NO).toString(),
-                certificateAsJson.get(BIN).toString());
-    }
-
-    private String getIdFromFields(final String natAuth, final String certNo, final String bin) {
-        return natAuth + certNo + bin;
+        return certificateAsJson.get(REFERENCE_NUMBER).toString();
     }
 
     @Override

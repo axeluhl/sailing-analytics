@@ -77,6 +77,7 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
     private static final String ROOT_ELEMENT = "ROOT";
     private static final String DATA_ELEMENT = "DATA";
     private static final String ROW_ELEMENT = "ROW";
+    private static final String DXT_SUFFIX = ".dxt";
 
     private static final DateTimeFormatter[] DATE_FORMATTERS = 
             new DateTimeFormatter[] {
@@ -100,6 +101,7 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
      */
     private static class CertificateHandleImpl implements CertificateHandle {
         private final CountryCode issuingCountry;
+        private final String fileId;
         private final String sssid;
         private final Double gph;
         private final UUID datInGID;
@@ -114,12 +116,15 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
         private final Integer certType;
         private final Boolean isOneDesign;
         private final Boolean isProvisional;
+        private final Boolean isValid;
 
-        public CertificateHandleImpl(CountryCode issuingCountry, Double gph, String sssid, UUID datInGID,
-                String referenceNumber, String yachtName, String sailNumber, String boatClassName, String designer,
-                String builder, Integer yearBuilt, TimePoint issueDate, Integer certType, Boolean oneDesign, Boolean isProvisional) {
+        public CertificateHandleImpl(CountryCode issuingCountry, String fileId, Double gph, String sssid,
+                UUID datInGID, String referenceNumber, String yachtName, String sailNumber, String boatClassName,
+                String designer, String builder, Integer yearBuilt, TimePoint issueDate, Integer certType,
+                Boolean oneDesign, Boolean isProvisional, Boolean isValid) {
             super();
             this.issuingCountry = issuingCountry;
+            this.fileId = fileId;
             this.gph = gph;
             this.sssid = sssid;
             this.datInGID = datInGID;
@@ -134,6 +139,7 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
             this.certType = certType;
             this.isOneDesign = oneDesign;
             this.isProvisional = isProvisional;
+            this.isValid = isValid;
         }
 
         @Override
@@ -164,6 +170,11 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
         @Override
         public CountryCode getIssuingCountry() {
             return issuingCountry;
+        }
+
+        @Override
+        public String getFileId() {
+            return fileId;
         }
 
         @Override
@@ -235,6 +246,11 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
         public Boolean isOd() {
             return isOneDesign;
         }
+        
+        @Override
+        public Boolean isValid() {
+            return isValid;
+        }
 
         @Override
         public String toString() {
@@ -242,13 +258,14 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
                     + ", datInGID=" + datInGID + ", referenceNumber=" + referenceNumber + ", yachtName=" + yachtName
                     + ", sailNumber=" + sailNumber + ", boatClassName=" + boatClassName + ", designer=" + designer
                     + ", builder=" + builder + ", yearBuilt=" + yearBuilt + ", issueDate=" + issueDate + ", certType="
-                    + certType + ", isOneDesign=" + isOneDesign + ", isProvisional=" + isProvisional + "]";
+                    + certType + ", isOneDesign=" + isOneDesign + ", isProvisional=" + isProvisional +
+                    ", isValid=" + isValid + "]";
         }
     }
     
     @Override
     public Iterable<CertificateHandle> search(CountryCode issuingCountry, Integer yearOfIssuance, String referenceNumber,
-            String yachtName, String sailNumber, String boatClassName) throws Exception {
+            String yachtName, String sailNumber, String boatClassName, boolean includeInvalid) throws Exception {
         final Set<ORCPublicCertificateDatabase.CertificateHandle> result = new HashSet<>(); 
         final HttpClient client = new SystemDefaultHttpClient();
         final List<NameValuePair> params = new ArrayList<>();
@@ -285,8 +302,11 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
                 for (int rowNodeIndex=0; rowNodeIndex<rowNodes.getLength(); rowNodeIndex++) {
                     final Node rowNode = rowNodes.item(rowNodeIndex);
                     if (rowNode.getNodeName().equals(ROW_ELEMENT)) {
-                        // TODO only include results that have <CanSelect>True</CanSelect> CERTIFICATE_IS_ACTIVE
-                        result.add(parseHandle(rowNode));
+                        final CertificateHandle certificateHandle = parseHandle(rowNode);
+                        // certificates can only be obtained if they are currently valid, so ignore expired ones
+                        if (includeInvalid || certificateHandle.isValid()) {
+                            result.add(certificateHandle);
+                        }
                     }
                 }
             }
@@ -302,6 +322,7 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
     private CertificateHandle parseHandle(Node rowNode) throws DOMException, ParseException {
         assert rowNode.getNodeName().equals(ROW_ELEMENT);
         CountryCode issuingCountry = null;
+        String fileId = null;
         String sssid = null;
         Double gph = null;
         UUID datInGID = null;
@@ -316,6 +337,7 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
         TimePoint issueDate = null;
         Boolean isOneDesign = null;
         Boolean isProvisional = null;
+        Boolean isValid = null;
         for (int i=0; i<rowNode.getChildNodes().getLength(); i++) {
             final Node child = rowNode.getChildNodes().item(i);
             switch (child.getNodeName()) {
@@ -352,6 +374,12 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
             case "dxtDate":
                 issueDate = new MillisecondsTimePoint(parseDate(child.getTextContent())); // assume UTC
                 break;
+            case "dxtName":
+                final String fileIdWithOptionalDxtSuffix = child.getTextContent();
+                fileId = fileIdWithOptionalDxtSuffix.toLowerCase().endsWith(DXT_SUFFIX) ?
+                        fileIdWithOptionalDxtSuffix.substring(0, fileIdWithOptionalDxtSuffix.length()-DXT_SUFFIX.length()) :
+                            fileIdWithOptionalDxtSuffix;
+                break;
             case "CertType":
                 certType = Integer.valueOf(child.getTextContent().trim());
                 break;
@@ -364,10 +392,13 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
             case "Provisional":
                 isProvisional = Boolean.valueOf(child.getTextContent());
                 break;
+            case "CanSelect":
+                isValid = Boolean.valueOf(child.getTextContent());
+                break;
             }
         }
-        return new CertificateHandleImpl(issuingCountry, gph, sssid, datInGID, referenceNumber, yachtName,
-                sailNumber, boatClassName, designer, builder, yearBuilt, issueDate, certType, isOneDesign, isProvisional);
+        return new CertificateHandleImpl(issuingCountry, fileId, gph, sssid, datInGID, referenceNumber,
+                yachtName, sailNumber, boatClassName, designer, builder, yearBuilt, issueDate, certType, isOneDesign, isProvisional, isValid);
     }
     
     @Override
@@ -525,13 +556,13 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
      */
     private Iterable<CertificateHandle> fuzzySearchVaryingBoatClassName(final String yachtName, final String sailNumber, final BoatClass boatClass) throws Exception {
         String successfulBoatClassName = boatClass==null?null:boatClass.getName();
-        Iterable<CertificateHandle> certificateHandles = search(/* issuingCountry */ null, /* yearOfIssuance */ null, /* referenceNumber */ null, yachtName, sailNumber, successfulBoatClassName);
+        Iterable<CertificateHandle> certificateHandles = search(/* issuingCountry */ null, /* yearOfIssuance */ null, /* referenceNumber */ null, yachtName, sailNumber, successfulBoatClassName, /* includeInvalid */ false);
         if (!containsHandleForCurrentYear(certificateHandles) && successfulBoatClassName != null) {
             if (yachtName != null || sailNumber != null) {
                 logger.fine(()->"Nothing found; removing boat class name restriction "+boatClass.getName());
                 // try without boat class restriction
                 successfulBoatClassName = null;
-                certificateHandles = search(/* issuingCountry */ null, /* yearOfIssuance */ null, /* referenceNumber */ null, yachtName, sailNumber, successfulBoatClassName);
+                certificateHandles = search(/* issuingCountry */ null, /* yearOfIssuance */ null, /* referenceNumber */ null, yachtName, sailNumber, successfulBoatClassName, /* includeInvalid */ false);
             } else {
                 logger.fine(()->"No current certificates found for boat class "+boatClass.getName()+
                         " but yacht name and sail number are not specified either; giving up.");
