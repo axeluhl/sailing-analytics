@@ -254,7 +254,7 @@ public class TestORCPerformanceCurve {
     /**
      * Tests to make sure, that the structure of the certificate files didn't change and performance curves can be built
      */
-    @IgnoreInvalidOrcCertificates
+    @FailIfNoValidOrcCertificates
     @Test
     public void testOnlineImport() throws FunctionEvaluationException {
         assertFalse(Util.isEmpty(importerOnline.getCertificateIds()));

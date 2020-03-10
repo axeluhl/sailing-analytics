@@ -131,7 +131,7 @@ public class TestORCPublicCertificateDatabase {
         assertSoulmate(referenceNumber, result);
     }
 
-    @IgnoreInvalidOrcCertificates
+    @FailIfNoValidOrcCertificates
     @Test
     public void testGetCertificate() throws Exception {        
         Collection<ORCCertificate> certificates = customIgnoreRule.getAvailableCerts();
@@ -152,7 +152,7 @@ public class TestORCPublicCertificateDatabase {
         assertEquals(handle.getSailNumber(), result.getSailNumber());
     }
     
-    @IgnoreInvalidOrcCertificates
+    @FailIfNoValidOrcCertificates
     @Test
     public void testParallelFuzzySearch() throws InterruptedException, ExecutionException {
         int year = LocalDate.now().getYear();

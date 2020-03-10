@@ -31,7 +31,7 @@ public class TestORCCertificateImporterRMS {
         assertNotNull(milan);
     }
     
-    @IgnoreInvalidOrcCertificates
+    @FailIfNoValidOrcCertificates
     @Test
     public void testSimpleOnlineRMSFileRead() throws IOException, ParseException {
         Collection<ORCCertificate> certificates = customIgnoreRule.getAvailableCerts();

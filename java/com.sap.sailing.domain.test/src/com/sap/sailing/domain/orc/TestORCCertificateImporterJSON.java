@@ -33,7 +33,7 @@ public class TestORCCertificateImporterJSON {
         assertNotNull(milan);
     }
     
-    @IgnoreInvalidOrcCertificates
+    @FailIfNoValidOrcCertificates
     @Test
     public void testSimpleOnlineJSONFileRead() throws IOException, ParseException, InterruptedException {
         Collection<ORCCertificate> certificates = customIgnoreRule.getAvailableCerts();

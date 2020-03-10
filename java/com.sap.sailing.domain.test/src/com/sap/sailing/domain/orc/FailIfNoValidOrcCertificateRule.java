@@ -19,11 +19,11 @@ import com.sap.sse.common.CountryCodeFactory;
 
 /***
  * A IgnoreInvalidOrcCerticatesRule is an implementation of TestRule. This class execution depends on
- * {@link IgnoreInvalidOrcCertificates} annotation on any method in a test class containing
+ * {@link FailIfNoValidOrcCertificates} annotation on any method in a test class containing
  * {@link org.junit.rules.TestRule} annotation with current class implementation. When any test class added
  * {@link FailIfNoValidOrcCertificateRule} rule then before executing all of it's test method, Junit will execute the
  * evaluate() method of {@link FailIfNoValidOrcCertificateRule} class. This method first check whether the current test
- * method contains the {@link IgnoreInvalidOrcCertificates} annotation, if yes then it will check for any certificate
+ * method contains the {@link FailIfNoValidOrcCertificates} annotation, if yes then it will check for any certificate
  * available to parse on ORC Website. If at least one certificate is available then this method continues execution of
  * the current test method; otherwise it will let the test fail because the searching for certificates may be broken, or
  * the unlikely corner case applies where temporarily at the beginning of a new calendar year no valid certificate
@@ -65,7 +65,7 @@ public class FailIfNoValidOrcCertificateRule implements TestRule {
         @Override
         public void evaluate() throws Throwable {
             boolean certificateExists = true;
-            IgnoreInvalidOrcCertificates annotation = description.getAnnotation(IgnoreInvalidOrcCertificates.class);
+            FailIfNoValidOrcCertificates annotation = description.getAnnotation(FailIfNoValidOrcCertificates.class);
             if (annotation != null) {
                 int year = LocalDate.now().getYear();
                 certificateExists = false;
