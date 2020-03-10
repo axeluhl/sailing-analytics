@@ -131,15 +131,19 @@ public class TestORCPublicCertificateDatabase {
         assertSoulmate(referenceNumber, result);
     }
 
-    // TODO this test will probably break 2021 when 2020 certificates will no longer be returned as valid...
     @IgnoreInvalidOrcCertificates
     @Test
     public void testGetCertificate() throws Exception {        
         Collection<ORCCertificate> certificates = customIgnoreRule.getAvailableCerts();
         final ORCCertificate cert = certificates.stream().findFirst().get();
-        Iterable<CertificateHandle> certHandles = db.search(null, LocalDate.now().getYear(), null, cert.getBoatName(), cert.getSailNumber(), cert.getBoatClassName());
+        Iterable<CertificateHandle> certHandles = db.search(null, LocalDate.now().getYear(), null, cert.getBoatName(),
+                cert.getSailNumber(), /*
+                                       * boat class name; could be set to cert.getBoatClassName() but there are
+                                       * deviations in ORC DBs and query API, so leaving null:
+                                       */ null);
         Optional<CertificateHandle> certificateHandle = Optional.ofNullable(certHandles.iterator().hasNext() ? certHandles.iterator().next() : null);
-        assertTrue(certificateHandle.isPresent());
+        assertTrue("No certificate found for handle "+certificateHandle+
+                " extracted from certificates "+certificates, certificateHandle.isPresent());
         final String referenceNumber = certificateHandle.get().getReferenceNumber();
         final CertificateHandle handle = db.getCertificateHandle(referenceNumber);
         final ORCCertificate result = db.getCertificate(referenceNumber);
