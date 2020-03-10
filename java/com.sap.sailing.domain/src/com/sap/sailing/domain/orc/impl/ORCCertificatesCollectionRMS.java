@@ -96,69 +96,75 @@ public class ORCCertificatesCollectionRMS extends AbstractORCCertificatesCollect
     
     @Override
     public ORCCertificate getCertificateById(String certificateId) {
-        ORCCertificateValues certificateValues = getValuesForCertificateId(certificateId);
-        final String sailNumber = certificateValues.getValue(SAILNUMBER);
-        final String boatclass = certificateValues.getValue(BOATCLASS);
-        final String boatName = certificateValues.getValue(BOATNAME);
-        final Distance length  = new MeterDistance(Double.parseDouble(certificateValues.getValue(LENGTH)));
-        final Duration gph     = new SecondsDurationImpl(Double.parseDouble(certificateValues.getValue(GPH)));
-        final Double cdl       = Double.parseDouble(certificateValues.getValue(CDL));
-        String dateString = certificateValues.getValue(ISSUEDATE);
-        String timeString = certificateValues.getValue(ISSUETIME);
-        TimePoint issueDate;
-        try {
-            issueDate = new MillisecondsTimePoint(timestampFormat.parse(dateString+" "+timeString+"+0000")); // assume UTC
-        } catch (ParseException e) {
-            issueDate = null;
-        }
-        final Map<Speed, Map<Bearing, Speed>> velocityPredictionsPerTrueWindSpeedAndAngle = new HashMap<>();
-        final Map<Speed, Bearing> beatAngles = new HashMap<>();
-        final Map<Speed, Speed> beatVMGPredictionPerTrueWindSpeed = new HashMap<>();
-        final Map<Speed, Duration> beatAllowancePerTrueWindSpeed = new HashMap<>();
-        final Map<Speed, Bearing> runAngles = new HashMap<>();
-        final Map<Speed, Speed> runVMGPredictionPerTrueWindSpeed = new HashMap<>();
-        final Map<Speed, Duration> runAllowancePerTrueWindSpeed = new HashMap<>();
-        final Map<Speed, Speed> windwardLeewardSpeedPredictionPerTrueWindSpeed = new HashMap<>();
-        final Map<Speed, Speed> longDistanceSpeedPredictionPerTrueWindSpeed = new HashMap<>();
-        final Map<Speed, Speed> circularRandomSpeedPredictionPerTrueWindSpeed = new HashMap<>();
-        final Map<Speed, Speed> nonSpinnakerSpeedPredictionPerTrueWindSpeed = new HashMap<>();
-        for (Speed tws : ORCCertificate.ALLOWANCES_TRUE_WIND_SPEEDS) {
-            String windSpeed = Integer.toString((int) tws.getKnots());
-            String beatAngleKey = BEAT_ANGLE + windSpeed;
-            String beatAllowanceKey = BEAT_ALLOWANCE + windSpeed;
-            String runAngleKey = RUN_ANGLE + windSpeed;
-            String runAllowanceKey = RUN_ALLOWANCE + windSpeed;
-            String windwardLeewardKey = WINDWARD_LEEWARD + windSpeed;
-            String longDistanceKey = LONG_DISTANCE + windSpeed;
-            String circularRandomKey = CIRCULAR_RANDOM + windSpeed;
-            String nonSpinnakerKey = NON_SPINNAKER + windSpeed;
-            beatAngles.put(tws, new DegreeBearingImpl(Double.parseDouble(certificateValues.getValue(beatAngleKey))));
-            beatAllowancePerTrueWindSpeed.put(tws, new SecondsDurationImpl(Double.parseDouble(certificateValues.getValue(beatAllowanceKey))));
-            beatVMGPredictionPerTrueWindSpeed.put(tws, ORCCertificateImpl.NAUTICAL_MILE.inTime(beatAllowancePerTrueWindSpeed.get(tws)));
-            runAngles.put(tws, new DegreeBearingImpl(Double.parseDouble(certificateValues.getValue(runAngleKey))));
-            runAllowancePerTrueWindSpeed.put(tws, new SecondsDurationImpl(Double.parseDouble(certificateValues.getValue(runAllowanceKey))));
-            runVMGPredictionPerTrueWindSpeed.put(tws, ORCCertificateImpl.NAUTICAL_MILE.inTime(runAllowancePerTrueWindSpeed.get(tws)));
-            windwardLeewardSpeedPredictionPerTrueWindSpeed.put(tws, ORCCertificateImpl.NAUTICAL_MILE.inTime(
-                    new SecondsDurationImpl(Double.parseDouble(certificateValues.getValue(windwardLeewardKey)))));
-            longDistanceSpeedPredictionPerTrueWindSpeed.put(tws, ORCCertificateImpl.NAUTICAL_MILE.inTime(
-                    new SecondsDurationImpl(Double.parseDouble(certificateValues.getValue(longDistanceKey)))));
-            circularRandomSpeedPredictionPerTrueWindSpeed.put(tws, ORCCertificateImpl.NAUTICAL_MILE.inTime(
-                    new SecondsDurationImpl(Double.parseDouble(certificateValues.getValue(circularRandomKey)))));
-            nonSpinnakerSpeedPredictionPerTrueWindSpeed.put(tws, ORCCertificateImpl.NAUTICAL_MILE.inTime(
-                    new SecondsDurationImpl(Double.parseDouble(certificateValues.getValue(nonSpinnakerKey)))));
-            Map<Bearing, Speed> velocityPredictionPerTrueWindAngle = new HashMap<>();
-            for (Bearing twa : ORCCertificate.ALLOWANCES_TRUE_WIND_ANGLES ) {
-                String twaCoursesKey = TWA_COURSES + Integer.toString((int) twa.getDegrees()) + windSpeed;
-                velocityPredictionPerTrueWindAngle.put(twa, ORCCertificateImpl.NAUTICAL_MILE.inTime(
-                        new SecondsDurationImpl(Double.parseDouble(certificateValues.getValue(twaCoursesKey)))));
+        final ORCCertificateValues certificateValues = getValuesForCertificateId(certificateId);
+        final ORCCertificate result;
+        if (certificateValues == null) {
+            result = null;
+        } else {
+            final String sailNumber = certificateValues.getValue(SAILNUMBER);
+            final String boatclass = certificateValues.getValue(BOATCLASS);
+            final String boatName = certificateValues.getValue(BOATNAME);
+            final Distance length  = new MeterDistance(Double.parseDouble(certificateValues.getValue(LENGTH)));
+            final Duration gph     = new SecondsDurationImpl(Double.parseDouble(certificateValues.getValue(GPH)));
+            final Double cdl       = Double.parseDouble(certificateValues.getValue(CDL));
+            String dateString = certificateValues.getValue(ISSUEDATE);
+            String timeString = certificateValues.getValue(ISSUETIME);
+            TimePoint issueDate;
+            try {
+                issueDate = new MillisecondsTimePoint(timestampFormat.parse(dateString+" "+timeString+"+0000")); // assume UTC
+            } catch (ParseException e) {
+                issueDate = null;
             }
-            velocityPredictionsPerTrueWindSpeedAndAngle.put(tws, velocityPredictionPerTrueWindAngle);
+            final Map<Speed, Map<Bearing, Speed>> velocityPredictionsPerTrueWindSpeedAndAngle = new HashMap<>();
+            final Map<Speed, Bearing> beatAngles = new HashMap<>();
+            final Map<Speed, Speed> beatVMGPredictionPerTrueWindSpeed = new HashMap<>();
+            final Map<Speed, Duration> beatAllowancePerTrueWindSpeed = new HashMap<>();
+            final Map<Speed, Bearing> runAngles = new HashMap<>();
+            final Map<Speed, Speed> runVMGPredictionPerTrueWindSpeed = new HashMap<>();
+            final Map<Speed, Duration> runAllowancePerTrueWindSpeed = new HashMap<>();
+            final Map<Speed, Speed> windwardLeewardSpeedPredictionPerTrueWindSpeed = new HashMap<>();
+            final Map<Speed, Speed> longDistanceSpeedPredictionPerTrueWindSpeed = new HashMap<>();
+            final Map<Speed, Speed> circularRandomSpeedPredictionPerTrueWindSpeed = new HashMap<>();
+            final Map<Speed, Speed> nonSpinnakerSpeedPredictionPerTrueWindSpeed = new HashMap<>();
+            for (Speed tws : ORCCertificate.ALLOWANCES_TRUE_WIND_SPEEDS) {
+                String windSpeed = Integer.toString((int) tws.getKnots());
+                String beatAngleKey = BEAT_ANGLE + windSpeed;
+                String beatAllowanceKey = BEAT_ALLOWANCE + windSpeed;
+                String runAngleKey = RUN_ANGLE + windSpeed;
+                String runAllowanceKey = RUN_ALLOWANCE + windSpeed;
+                String windwardLeewardKey = WINDWARD_LEEWARD + windSpeed;
+                String longDistanceKey = LONG_DISTANCE + windSpeed;
+                String circularRandomKey = CIRCULAR_RANDOM + windSpeed;
+                String nonSpinnakerKey = NON_SPINNAKER + windSpeed;
+                beatAngles.put(tws, new DegreeBearingImpl(Double.parseDouble(certificateValues.getValue(beatAngleKey))));
+                beatAllowancePerTrueWindSpeed.put(tws, new SecondsDurationImpl(Double.parseDouble(certificateValues.getValue(beatAllowanceKey))));
+                beatVMGPredictionPerTrueWindSpeed.put(tws, ORCCertificateImpl.NAUTICAL_MILE.inTime(beatAllowancePerTrueWindSpeed.get(tws)));
+                runAngles.put(tws, new DegreeBearingImpl(Double.parseDouble(certificateValues.getValue(runAngleKey))));
+                runAllowancePerTrueWindSpeed.put(tws, new SecondsDurationImpl(Double.parseDouble(certificateValues.getValue(runAllowanceKey))));
+                runVMGPredictionPerTrueWindSpeed.put(tws, ORCCertificateImpl.NAUTICAL_MILE.inTime(runAllowancePerTrueWindSpeed.get(tws)));
+                windwardLeewardSpeedPredictionPerTrueWindSpeed.put(tws, ORCCertificateImpl.NAUTICAL_MILE.inTime(
+                        new SecondsDurationImpl(Double.parseDouble(certificateValues.getValue(windwardLeewardKey)))));
+                longDistanceSpeedPredictionPerTrueWindSpeed.put(tws, ORCCertificateImpl.NAUTICAL_MILE.inTime(
+                        new SecondsDurationImpl(Double.parseDouble(certificateValues.getValue(longDistanceKey)))));
+                circularRandomSpeedPredictionPerTrueWindSpeed.put(tws, ORCCertificateImpl.NAUTICAL_MILE.inTime(
+                        new SecondsDurationImpl(Double.parseDouble(certificateValues.getValue(circularRandomKey)))));
+                nonSpinnakerSpeedPredictionPerTrueWindSpeed.put(tws, ORCCertificateImpl.NAUTICAL_MILE.inTime(
+                        new SecondsDurationImpl(Double.parseDouble(certificateValues.getValue(nonSpinnakerKey)))));
+                Map<Bearing, Speed> velocityPredictionPerTrueWindAngle = new HashMap<>();
+                for (Bearing twa : ORCCertificate.ALLOWANCES_TRUE_WIND_ANGLES ) {
+                    String twaCoursesKey = TWA_COURSES + Integer.toString((int) twa.getDegrees()) + windSpeed;
+                    velocityPredictionPerTrueWindAngle.put(twa, ORCCertificateImpl.NAUTICAL_MILE.inTime(
+                            new SecondsDurationImpl(Double.parseDouble(certificateValues.getValue(twaCoursesKey)))));
+                }
+                velocityPredictionsPerTrueWindSpeedAndAngle.put(tws, velocityPredictionPerTrueWindAngle);
+            }
+            result = new ORCCertificateImpl(certificateValues.getValue(NATCERTN_FILE_ID), sailNumber, boatName, boatclass,
+                    length, gph, cdl, issueDate, velocityPredictionsPerTrueWindSpeedAndAngle, beatAngles, beatVMGPredictionPerTrueWindSpeed,
+                    beatAllowancePerTrueWindSpeed, runAngles, runVMGPredictionPerTrueWindSpeed,
+                    runAllowancePerTrueWindSpeed, windwardLeewardSpeedPredictionPerTrueWindSpeed,
+                    longDistanceSpeedPredictionPerTrueWindSpeed, circularRandomSpeedPredictionPerTrueWindSpeed, nonSpinnakerSpeedPredictionPerTrueWindSpeed);
         }
-        return new ORCCertificateImpl(certificateValues.getValue(NATCERTN_FILE_ID), sailNumber, boatName, boatclass,
-                length, gph, cdl, issueDate, velocityPredictionsPerTrueWindSpeedAndAngle, beatAngles, beatVMGPredictionPerTrueWindSpeed,
-                beatAllowancePerTrueWindSpeed, runAngles, runVMGPredictionPerTrueWindSpeed,
-                runAllowancePerTrueWindSpeed, windwardLeewardSpeedPredictionPerTrueWindSpeed,
-                longDistanceSpeedPredictionPerTrueWindSpeed, circularRandomSpeedPredictionPerTrueWindSpeed, nonSpinnakerSpeedPredictionPerTrueWindSpeed);
+        return result;
     }
 
     @Override

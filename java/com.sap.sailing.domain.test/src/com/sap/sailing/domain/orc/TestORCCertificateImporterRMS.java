@@ -1,62 +1,32 @@
 package com.sap.sailing.domain.orc;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.URL;
 import java.util.Collection;
 
 import org.json.simple.parser.ParseException;
-import org.junit.Rule;
 import org.junit.Test;
 
-import com.sap.sailing.domain.common.orc.ORCCertificate;
-import com.sap.sailing.domain.common.orc.impl.ORCCertificateImpl;
-
-public class TestORCCertificateImporterRMS {
+public class TestORCCertificateImporterRMS extends AbstractORCCertificateImporterTest {
     private static final String RESOURCES = "resources/orc/";
-    
-    @Rule
-    public FailIfNoValidOrcCertificateRule customIgnoreRule = new FailIfNoValidOrcCertificateRule();
     
     @Test
     public void testSimpleLocalRMSFileRead() throws IOException, ParseException {
-        File fileGER = new File(RESOURCES + "GER2019.rms");
-        ORCCertificatesCollection certificates = ORCCertificatesImporter.INSTANCE.read(new FileInputStream(fileGER));
-        ORCCertificate milan = certificates.getCertificateById("GER166844GER7323");
-        assertNotNull(milan);
+        testSimpleLocalFileRead("GER2019.rms", "GER166844GER7323");
     }
     
     @FailIfNoValidOrcCertificates
     @Test
-    public void testSimpleOnlineRMSFileRead() throws IOException, ParseException {
-        Collection<ORCCertificate> certificates = customIgnoreRule.getAvailableCerts();
-        final ORCCertificate cert = certificates.stream().findFirst().get();
-        String countryCode = cert.getId().substring(0, 3);
-        String url = String.format("https://data.orc.org/public/WPub.dll?action=DownBoatRMS&CountryId=%s&ext=json", countryCode);
-        ORCCertificatesCollection importer = ORCCertificatesImporter.INSTANCE.read(new URL(url).openStream());
-        ORCCertificate anyValidCertificate = null, referenceCert = null;
-        for (ORCCertificate orcCertificate : certificates) {
-            anyValidCertificate = importer.getCertificateById(orcCertificate.getId());
-            if (anyValidCertificate != null) {
-                referenceCert = orcCertificate;
-                break;
-            }
-        }
-        assertNotNull(anyValidCertificate);
-        assertNotNull(referenceCert);
-        assertEquals(referenceCert.getGPHInSecondsToTheMile(), anyValidCertificate .getGPHInSecondsToTheMile(), 0.0000001);
-        assertTrue(referenceCert.getWindwardLeewardSpeedPrediction().get(ORCCertificate.ALLOWANCES_TRUE_WIND_SPEEDS[0]).getDuration(ORCCertificateImpl.NAUTICAL_MILE).asSeconds() > 10);
-        assertTrue(referenceCert.getLongDistanceSpeedPredictions().get(ORCCertificate.ALLOWANCES_TRUE_WIND_SPEEDS[0]).getDuration(ORCCertificateImpl.NAUTICAL_MILE).asSeconds() > 10);
+    public void testSimpleOnlineRMSFileRead() throws IOException, ParseException, InterruptedException {
+        testSimpleOnlineFileRead("rms");
     }
     
     @Test
     public void testLocalRMSFileReadWithIdenticalSailnumbers() throws IOException, ParseException {
-        //additional test to ensure certificates with same sailnumbers but different ids are equally parsed and saved
+        // additional test to ensure certificates with same sailnumbers but different ids are equally parsed and saved
         File file = new File(RESOURCES + "multipleIdenticalSailnumbers.rms");
         ORCCertificatesCollection certificates = ORCCertificatesImporter.INSTANCE.read(new FileInputStream(file));
         assertEquals(14, ((Collection<?>) (certificates.getCertificateIds())).size());
