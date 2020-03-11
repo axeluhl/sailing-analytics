@@ -260,4 +260,9 @@ public class CompetitorDTOImpl extends NamedSecuredObjectDTO implements Competit
         return new TypeRelativeObjectIdentifier(idAsString);
     }
 
+    @Override
+    public void clearNonPublicFields() {
+        email = null;
+    }
+
 }
