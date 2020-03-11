@@ -8340,9 +8340,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public Iterable<DetailType> determineDetailTypesForCompetitorChart(String leaderboardGroupName, RegattaAndRaceIdentifier identifier) {
-        final LinkedHashSet<DetailType> availableDetailsTypes = new LinkedHashSet<>();
-        availableDetailsTypes.addAll(DetailType.getAutoplayDetailTypesForChart());
-        availableDetailsTypes.removeAll(DetailType.getRaceBravoDetailTypes());
+        final LinkedHashSet<DetailType> availableDetailTypes = new LinkedHashSet<>();
+        availableDetailTypes.addAll(DetailType.getAutoplayDetailTypesForChart());
+        availableDetailTypes.removeAll(DetailType.getRaceBravoDetailTypes());
         final DynamicTrackedRace trackedRace = getService().getTrackedRace(identifier);
         if (trackedRace != null) {
             boolean hasBravoTrack = false;
@@ -8355,31 +8355,36 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 }
             }
             if (hasBravoTrack) {
-                availableDetailsTypes.addAll(DetailType.getRaceBravoDetailTypes());
+                availableDetailTypes.addAll(DetailType.getRaceBravoDetailTypes());
             }
             if (hasExtendedBravoFixes) {
-                availableDetailsTypes.addAll(DetailType.getRaceExtendedBravoDetailTypes());
-                availableDetailsTypes.addAll(DetailType.getRaceExpeditionDetailTypes());
+                availableDetailTypes.addAll(DetailType.getRaceExtendedBravoDetailTypes());
+                availableDetailTypes.addAll(DetailType.getRaceExpeditionDetailTypes());
             }
             final RankingMetrics rankingMetricType = trackedRace.getRankingMetric().getType();
             switch (rankingMetricType) {
             case ONE_DESIGN:
+                availableDetailTypes.removeAll(DetailType.getAllToTToDHandicapDetailTypes());
+                availableDetailTypes.removeAll(DetailType.getAllOrcPerformanceCurveDetailTypes());
+                break;
             case TIME_ON_TIME_AND_DISTANCE:
+                availableDetailTypes.addAll(DetailType.getAllToTToDHandicapDetailTypes());
+                availableDetailTypes.removeAll(DetailType.getAllOrcPerformanceCurveDetailTypes());
                 break;
             case ORC_PERFORMANCE_CURVE:
             case ORC_PERFORMANCE_CURVE_BY_IMPLIED_WIND:
             case ORC_PERFORMANCE_CURVE_LEADER_FOR_BASELINE:
-                availableDetailsTypes.addAll(DetailType.getAllOrcPerformanceCurveDetailTypes());
+                availableDetailTypes.addAll(DetailType.getAllOrcPerformanceCurveDetailTypes());
                 break;
             }
         }
         if (leaderboardGroupName != null) {
             final LeaderboardGroupDTO group = getLeaderboardGroupByName(leaderboardGroupName, false);
             if (group != null ? group.hasOverallLeaderboard() : false) {
-                availableDetailsTypes.add(DetailType.OVERALL_RANK);
+                availableDetailTypes.add(DetailType.OVERALL_RANK);
             }
         }
-        return availableDetailsTypes;
+        return availableDetailTypes;
     }
 
     @Override

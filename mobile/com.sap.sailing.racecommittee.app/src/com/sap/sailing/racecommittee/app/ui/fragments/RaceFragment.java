@@ -138,8 +138,12 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
             if (extra_key != null) {
                 intent.putExtra(extra_key, extra_value);
             }
-            BroadcastManager.getInstance(getActivity()).addIntent(intent);
+            sendIntent(intent);
         }
+    }
+
+    protected void sendIntent(Intent intent) {
+        BroadcastManager.getInstance(getActivity()).addIntent(intent);
     }
 
     protected String getCourseName() {
