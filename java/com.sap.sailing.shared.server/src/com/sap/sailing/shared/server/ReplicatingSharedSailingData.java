@@ -1,4 +1,4 @@
-package com.sap.sailing.shared.server.impl;
+package com.sap.sailing.shared.server;
 
 import java.net.URL;
 import java.util.ArrayList;

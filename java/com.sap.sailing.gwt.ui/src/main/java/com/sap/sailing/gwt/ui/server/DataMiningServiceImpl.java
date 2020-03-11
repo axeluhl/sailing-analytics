@@ -88,7 +88,11 @@ public class DataMiningServiceImpl extends ProxiedRemoteServiceServlet implement
     }
 
     private SecurityService getSecurityService() {
-        return securityServiceTracker.getService();
+        try {
+            return securityServiceTracker.getInitializedService(0);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

@@ -38,7 +38,7 @@ public class Activator implements BundleActivator {
         INSTANCE = this;
         igtimiConnectionFactoryTracker = ServiceTrackerFactory
                 .createAndOpen(context, IgtimiConnectionFactory.class);
-        securityServiceTracker = new FullyInitializedReplicableTracker<SecurityService>(context, SecurityService.class,
+        securityServiceTracker = new FullyInitializedReplicableTracker<>(context, SecurityService.class,
                 /* customizer */ null, ServiceTrackerFactory.createAndOpen(context, ReplicationService.class));
         securityServiceTracker.open();
     }

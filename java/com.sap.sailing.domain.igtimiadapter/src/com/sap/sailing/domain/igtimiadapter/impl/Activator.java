@@ -107,8 +107,8 @@ public class Activator implements BundleActivator {
                 }
             }
         });
-        securityServiceServiceTracker = new FullyInitializedReplicableTracker<>(context, SecurityService.class, /* customizer */ null,
-                ServiceTrackerFactory.createAndOpen(context, ReplicationService.class));
+        securityServiceServiceTracker = new FullyInitializedReplicableTracker<>(context, SecurityService.class,
+                /* customizer */ null, ServiceTrackerFactory.createAndOpen(context, ReplicationService.class));
         securityServiceServiceTracker.open();
         new Thread(() -> {
             try {
