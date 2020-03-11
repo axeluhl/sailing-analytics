@@ -40,7 +40,6 @@ import com.sap.sailing.domain.coursetemplate.impl.TrackingDeviceBasedPositioning
 import com.sap.sailing.shared.persistence.DomainObjectFactory;
 import com.sap.sailing.shared.persistence.MongoObjectFactory;
 import com.sap.sailing.shared.persistence.device.DeviceIdentifierMongoHandler;
-import com.sap.sailing.shared.server.ReplicatingSharedSailingData;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;

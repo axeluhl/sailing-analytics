@@ -782,12 +782,11 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         BundleContext context = Activator.getDefault();
         Activator activator = Activator.getInstance();
         quickRanksLiveCache = new QuickRanksLiveCache(this);
-        replicationServiceTracker = ServiceTrackerFactory.createAndOpen(context, ReplicationService.class); // TODO also use FullyInitializedReplicableTracker
-                /* customizer */ null, replicationServiceTracker);
+        replicationServiceTracker = ServiceTrackerFactory.createAndOpen(context, ReplicationService.class);
         racingEventServiceTracker = new FullyInitializedReplicableTracker<>(context, RacingEventService.class,
                 /* customizer */ null, replicationServiceTracker);
         racingEventServiceTracker.open();
-        sharedSailingDataTracker = new FullyInitializedReplicableTracker<>(context, ReplicatingSharedSailingData.class,
+        sharedSailingDataTracker = new FullyInitializedReplicableTracker<>(context, SharedSailingData.class,
                 /* service tracker customizer */ null, replicationServiceTracker);
         sharedSailingDataTracker.open();
         windFinderTrackerFactoryServiceTracker = ServiceTrackerFactory.createAndOpen(context, WindFinderTrackerFactory.class);
