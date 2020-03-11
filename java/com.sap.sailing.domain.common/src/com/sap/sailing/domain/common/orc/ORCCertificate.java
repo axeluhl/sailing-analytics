@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sse.common.Bearing;
+import com.sap.sse.common.CountryCode;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
@@ -24,10 +25,9 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
  * {@link RankingMetric}.
  * <p>
  * 
- * The {@link WithID} interface is to be implemented such that a {@link String} is produced as the ID that contains the
- * concatenation (without intermediate white space) of the {@code NatAuth}, the {@code CertNo} and the {@code BIN}
- * fields, as provided as single fields in the JSON representation, and as provided in the concatenated form in the
- * {@code NATCERTN.FILE_ID} column in the RMS format.
+ * The {@link WithID} interface is to be implemented based on the {@link #getReferenceNumber()} which is unique across the
+ * ORC world-wide certificate database. Note that the {@link #getBoatKey()} consisting of the {@link #getFileId()} and the
+ * {@link #getIssuingCountry()} field values is a unique key for the boat to which the certificate belongs.
  * <p>
  * 
  * The certificate contains time allowances (or, conversely, speed predictions) for a combination of true wind speeds
@@ -64,13 +64,28 @@ public interface ORCCertificate extends WithID, Serializable {
     Bearing[] ALLOWANCES_TRUE_WIND_ANGLES = { new DegreeBearingImpl(52), new DegreeBearingImpl(60),
                 new DegreeBearingImpl(75), new DegreeBearingImpl(90), new DegreeBearingImpl(110),
                 new DegreeBearingImpl(120), new DegreeBearingImpl(135), new DegreeBearingImpl(150) };
+
     /**
-     * As the ID of an ORC certificate we use the concatenation (without intermediate white space) of the
-     * {@code NatAuth}, the {@code CertNo} and the {@code BIN} fields, as provided as single fields in the JSON
-     * representation
+     * We use the {@link #getReferenceNumber() reference number ("RefNo")} as the ID of a certificate document.
+     * It is unique for all of ORC's certificates issued world-wide.
      */
     @Override
     String getId();
+
+    String getReferenceNumber();
+    
+    /**
+     * Technically, at ORC a certificate's boat is identified by a "file ID" as returned by this method, together
+     * with the {@link #getIssuingCountry() issuing country} which together makes this a unique boat key. For each
+     * such boat key there is at most one valid certificate at a time.
+     */
+    String getFileId();
+    
+    /**
+     * The country whose authority issued this certificate. Together with the {@link #getFileId() file ID} this makes for a
+     * unique key of the boat to which this certifiate belongs.
+     */
+    CountryCode getIssuingCountry();
     
     /**
      * Returns the sailnumber of the {@link Competitor} which this certificate belongs to.
