@@ -5325,7 +5325,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public List<UrlDTO> getResultImportUrls(String resultProviderName) {
         final List<UrlDTO> result = new ArrayList<>();
         SecurityService securityService = getSecurityService();
-        Iterable<URL> allUrlsReadableBySubject = racingEventServiceTracker.getService().getResultImportUrls(resultProviderName);
+        Iterable<URL> allUrlsReadableBySubject = getService().getResultImportUrls(resultProviderName);
         for (URL url : allUrlsReadableBySubject) {
             QualifiedObjectIdentifier objId = SecuredDomainType.RESULT_IMPORT_URL.getQualifiedObjectIdentifier(
                     new TypeRelativeObjectIdentifier(resultProviderName, url.toString()));
@@ -5338,7 +5338,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public void removeResultImportURLs(String resultProviderName, Set<UrlDTO> toRemove) throws Exception {
-        final RacingEventService racingEventService = racingEventServiceTracker.getService();
+        final RacingEventService racingEventService = getService();
         Set<URL> urlsToRemove = toRemove.stream()
                 .map(urlDto -> {
                     try {
@@ -5354,7 +5354,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public void addResultImportUrl(String resultProviderName, UrlDTO urlDTO) throws Exception {
-        final RacingEventService racingEventService = racingEventServiceTracker.getService();
+        final RacingEventService racingEventService = getService();
         ResultUrlProvider resultUrlProvider = racingEventService.getUrlBasedScoreCorrectionProvider(resultProviderName)
                 .orElseThrow(() -> new IllegalStateException("ResultUrlProvider not found: " + resultProviderName));
         final URL url = resultUrlProvider.resolveUrl(urlDTO.getUrl());
@@ -5366,7 +5366,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         if (urlDTO == null || urlDTO.getUrl() == null || urlDTO.getUrl().isEmpty()) {
             return serverStringMessages.get(getClientLocale(), "pleaseEnterNonEmptyUrl");
         }
-        Optional<ResultUrlProvider> resultUrlProvider = racingEventServiceTracker.getService()
+        Optional<ResultUrlProvider> resultUrlProvider = getService()
                 .getUrlBasedScoreCorrectionProvider(resultProviderName);
         if (!resultUrlProvider.isPresent()) {
             return serverStringMessages.get(getClientLocale(), "scoreCorrectionProviderNotFound");
