@@ -58,7 +58,7 @@ public class ORCCertificateJsonSerializer implements JsonSerializer<ORCCertifica
     public JSONObject serialize(ORCCertificate certificate) {
         JSONObject result = new JSONObject();
         result.put(ORC_CERTIFICATE_ID, certificate.getReferenceNumber());
-        result.put(ORC_CERTIFICATE_ISSUING_COUNTRY_IOC, certificate.getIssuingCountry().getThreeLetterIOCCode());
+        result.put(ORC_CERTIFICATE_ISSUING_COUNTRY_IOC, certificate.getIssuingCountry()==null?null:certificate.getIssuingCountry().getThreeLetterIOCCode());
         result.put(ORC_CERTIFICATE_FILE_ID, certificate.getFileId());
         result.put(ORC_CERTIFICATE_SAILNUMBER, certificate.getSailNumber());
         result.put(ORC_CERTIFICATE_BOATNAME, certificate.getBoatName());
