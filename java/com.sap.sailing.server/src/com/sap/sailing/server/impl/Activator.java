@@ -53,6 +53,7 @@ import com.sap.sailing.server.notification.impl.SailingNotificationServiceImpl;
 import com.sap.sailing.server.security.SailingViewerRole;
 import com.sap.sailing.server.statistics.TrackedRaceStatisticsCache;
 import com.sap.sailing.server.statistics.TrackedRaceStatisticsCacheImpl;
+import com.sap.sailing.shared.server.SharedSailingData;
 import com.sap.sse.MasterDataImportClassLoaderService;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.Util;
@@ -112,7 +113,7 @@ public class Activator implements BundleActivator {
 
     private FullyInitializedReplicableTracker<SecurityService> securityServiceTracker;
 
-    private FullyInitializedReplicableTracker<ReplicatingSharedSailingData> sharedSailingDataTracker;
+    private FullyInitializedReplicableTracker<SharedSailingData> sharedSailingDataTracker;
     
     private ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker;
     
@@ -132,7 +133,7 @@ public class Activator implements BundleActivator {
         extenderBundleTracker.open();
         mailServiceTracker = ServiceTrackerFactory.createAndOpen(context, MailService.class);
         replicationServiceTracker = ServiceTrackerFactory.createAndOpen(context, ReplicationService.class);
-        sharedSailingDataTracker = new FullyInitializedReplicableTracker<>(context, ReplicatingSharedSailingData.class,
+        sharedSailingDataTracker = new FullyInitializedReplicableTracker<>(context, SharedSailingData.class,
                 /* customizer */ null, replicationServiceTracker);
         sharedSailingDataTracker.open();
         securityServiceTracker = new FullyInitializedReplicableTracker<>(context, SecurityService.class,
@@ -143,7 +144,7 @@ public class Activator implements BundleActivator {
                 public void run() {
                     try {
                         // only continue once we have the service, as some of the services require it to start properly
-                        securityServiceTracker.waitForService(0);
+                        securityServiceTracker.getInitializedService(0);
                         internalStartBundle(context);
                     } catch (Exception e) {
                         logger.log(Level.SEVERE, "Could not start RacingEvent service properly", e);
@@ -214,8 +215,8 @@ public class Activator implements BundleActivator {
     }
 
     private void internalStartBundle(BundleContext context) throws MalformedURLException, MalformedObjectNameException,
-            InstanceAlreadyExistsException, MBeanRegistrationException, NotCompliantMBeanException {
-        assert securityServiceTracker.getService() != null; // callers must call securityServiceTracker.waitForService(0) before calling this method
+            InstanceAlreadyExistsException, MBeanRegistrationException, NotCompliantMBeanException, InterruptedException {
+        assert securityServiceTracker.getInitializedService(0) != null; // callers must call securityServiceTracker.waitForService(0) before calling this method
         mailQueue = new ExecutorMailQueue(mailServiceTracker);
         notificationService = new SailingNotificationServiceImpl(context, mailQueue);
         trackedRegattaListener = new OSGiBasedTrackedRegattaListener(context);

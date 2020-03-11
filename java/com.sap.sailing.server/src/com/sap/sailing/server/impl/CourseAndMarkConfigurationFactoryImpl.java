@@ -86,10 +86,10 @@ import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceMappingWithRegattaLogEvent;
 import com.sap.sailing.domain.racelogtracking.PingDeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.impl.PingDeviceIdentifierImpl;
-import com.sap.sailing.domain.sharedsailingdata.SharedSailingData;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseConfigurationBuilder;
 import com.sap.sailing.server.interfaces.CourseAndMarkConfigurationFactory;
+import com.sap.sailing.shared.server.SharedSailingData;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Timed;
@@ -102,7 +102,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
 
     private static final Logger logger = Logger.getLogger(CourseAndMarkConfigurationFactoryImpl.class.getName());
     
-    private final FullyInitializedReplicableTracker<ReplicatingSharedSailingData> sharedSailingDataTracker;
+    private final FullyInitializedReplicableTracker<SharedSailingData> sharedSailingDataTracker;
     private final SensorFixStore sensorFixStore;
     
     /**
@@ -116,7 +116,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
     private final DomainFactory domainFactory;
 
     public CourseAndMarkConfigurationFactoryImpl(
-            FullyInitializedReplicableTracker<ReplicatingSharedSailingData> sharedSailingDataTracker,
+            FullyInitializedReplicableTracker<SharedSailingData> sharedSailingDataTracker,
             SensorFixStore sensorFixStore, RaceLogResolver raceLogResolver, DomainFactory domainFactory) {
         this.sharedSailingDataTracker = sharedSailingDataTracker;
         this.domainFactory = domainFactory;
@@ -138,7 +138,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
     }
     
     private SharedSailingData getSharedSailingData() {
-        ReplicatingSharedSailingData result;
+        SharedSailingData result;
         try {
             result = sharedSailingDataTracker.getInitializedService(0);
         } catch (InterruptedException e) {

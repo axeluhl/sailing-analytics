@@ -10,6 +10,8 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.igtimiadapter.Client;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
+import com.sap.sse.replication.FullyInitializedReplicableTracker;
+import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.util.ServiceTrackerFactory;
 
@@ -26,7 +28,7 @@ import com.sap.sse.util.ServiceTrackerFactory;
 public class Activator implements BundleActivator {
     private static Activator INSTANCE;
     private ServiceTracker<IgtimiConnectionFactory, IgtimiConnectionFactory> igtimiConnectionFactoryTracker;
-    private ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
+    private FullyInitializedReplicableTracker<SecurityService> securityServiceTracker;
     
     public Activator() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
     }
@@ -34,11 +36,11 @@ public class Activator implements BundleActivator {
     @Override
     public void start(final BundleContext context) throws Exception {
         INSTANCE = this;
-        
         igtimiConnectionFactoryTracker = ServiceTrackerFactory
                 .createAndOpen(context, IgtimiConnectionFactory.class);
-
-        securityServiceTracker = ServiceTrackerFactory.createAndOpen(context, SecurityService.class);
+        securityServiceTracker = new FullyInitializedReplicableTracker<SecurityService>(context, SecurityService.class,
+                /* customizer */ null, ServiceTrackerFactory.createAndOpen(context, ReplicationService.class));
+        securityServiceTracker.open();
     }
     
     public static Activator getInstance() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
@@ -53,7 +55,11 @@ public class Activator implements BundleActivator {
     }
 
     public SecurityService getSecurityService() {
-        return securityServiceTracker.getService();
+        try {
+            return securityServiceTracker.getInitializedService(0);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

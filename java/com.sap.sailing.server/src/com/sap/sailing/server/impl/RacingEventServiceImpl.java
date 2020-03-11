@@ -281,6 +281,7 @@ import com.sap.sailing.server.statistics.StatisticsCalculator;
 import com.sap.sailing.server.statistics.TrackedRaceStatisticsCache;
 import com.sap.sailing.server.tagging.TaggingServiceFactory;
 import com.sap.sailing.server.util.EventUtil;
+import com.sap.sailing.shared.server.SharedSailingData;
 import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
@@ -627,7 +628,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             SailingNotificationService sailingNotificationService,
             TrackedRaceStatisticsCache trackedRaceStatisticsCache, boolean restoreTrackedRaces,
             FullyInitializedReplicableTracker<SecurityService> securityServiceTracker,
-            FullyInitializedReplicableTracker<ReplicatingSharedSailingData> sharedSailingDataTracker, ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker) {
+            FullyInitializedReplicableTracker<SharedSailingData> sharedSailingDataTracker, ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker) {
         this((final RaceLogAndTrackedRaceResolver raceLogResolver) -> {
             return new ConstructorParameters() {
                 private final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE
@@ -760,7 +761,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             SailingNotificationService sailingNotificationService,
             TrackedRaceStatisticsCache trackedRaceStatisticsCache, boolean restoreTrackedRaces,
             FullyInitializedReplicableTracker<SecurityService> securityServiceTracker,
-            FullyInitializedReplicableTracker<ReplicatingSharedSailingData> sharedSailingDataTracker,
+            FullyInitializedReplicableTracker<SharedSailingData> sharedSailingDataTracker,
             ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker) {
         logger.info("Created " + this);
         this.currentlyFillingFromInitialLoad = false;

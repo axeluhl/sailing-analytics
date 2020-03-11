@@ -49,6 +49,8 @@ import com.sap.sse.datamining.shared.impl.dto.StoredDataMiningQueryDTOImpl;
 import com.sap.sse.datamining.ui.client.DataMiningService;
 import com.sap.sse.gwt.server.ProxiedRemoteServiceServlet;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
+import com.sap.sse.replication.FullyInitializedReplicableTracker;
+import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.util.ServiceTrackerFactory;
@@ -58,14 +60,16 @@ public class DataMiningServiceImpl extends ProxiedRemoteServiceServlet implement
 
     private final BundleContext context;
     private final ServiceTracker<DataMiningServer, DataMiningServer> dataMiningServerTracker;
-    private final ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
+    private final FullyInitializedReplicableTracker<SecurityService> securityServiceTracker;
     private final StoredDataMiningQueryPersister storedDataMiningQueryPersistor;
     private final DataMiningDTOFactory dtoFactory;
 
     public DataMiningServiceImpl() {
         context = Activator.getDefault();
         dataMiningServerTracker = createAndOpenDataMiningServerTracker(context);
-        securityServiceTracker = ServiceTrackerFactory.createAndOpen(context, SecurityService.class);
+        securityServiceTracker = new FullyInitializedReplicableTracker<>(context, SecurityService.class,
+                /* customizer */ null, ServiceTrackerFactory.createAndOpen(context, ReplicationService.class));
+        securityServiceTracker.open();
         storedDataMiningQueryPersistor = new StoredDataMiningQueryPersisterImpl(getSecurityService(),
                 dataMiningServerTracker);
         dtoFactory = new DataMiningDTOFactory();

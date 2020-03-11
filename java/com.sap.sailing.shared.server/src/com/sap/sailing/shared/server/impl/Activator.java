@@ -10,8 +10,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.sap.sailing.domain.sharedsailingdata.SharedSailingData;
 import com.sap.sailing.shared.persistence.PersistenceFactory;
+import com.sap.sailing.shared.server.SharedSailingData;
 import com.sap.sse.osgi.CachedOsgiTypeBasedServiceFinderFactory;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.security.SecurityService;

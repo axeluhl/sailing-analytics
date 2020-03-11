@@ -23,6 +23,8 @@ import com.sap.sse.gwt.dispatch.client.transport.gwtrpc.RequestWrapper;
 import com.sap.sse.gwt.dispatch.servlets.AbstractDispatchServlet;
 import com.sap.sse.gwt.dispatch.shared.commands.Action;
 import com.sap.sse.gwt.dispatch.shared.commands.Result;
+import com.sap.sse.replication.FullyInitializedReplicableTracker;
+import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.util.ServiceTrackerFactory;
 
@@ -32,7 +34,7 @@ public class SailingDispatchServlet extends AbstractDispatchServlet<SailingDispa
     private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
     private final ServiceTracker<WindFinderTrackerFactory, WindFinderTrackerFactory> windFinderTrackerFactory;
     private final ServiceTracker<EventNewsService, EventNewsService> eventNewsServiceTracker;
-    private final ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
+    private final FullyInitializedReplicableTracker<SecurityService> securityServiceTracker;
     private final ServiceTracker<TrackedRaceStatisticsCache, TrackedRaceStatisticsCache> trackedRaceStatisticsCacheTracker;
 
     public SailingDispatchServlet() {
@@ -40,7 +42,9 @@ public class SailingDispatchServlet extends AbstractDispatchServlet<SailingDispa
         racingEventServiceTracker = ServiceTrackerFactory.createAndOpen(context, RacingEventService.class);
         windFinderTrackerFactory = ServiceTrackerFactory.createAndOpen(context, WindFinderTrackerFactory.class);
         eventNewsServiceTracker = ServiceTrackerFactory.createAndOpen(context, EventNewsService.class);
-        securityServiceTracker = ServiceTrackerFactory.createAndOpen(context, SecurityService.class);
+        securityServiceTracker = new FullyInitializedReplicableTracker<SecurityService>(context, SecurityService.class,
+                /* customizer */ null, ServiceTrackerFactory.createAndOpen(context, ReplicationService.class));
+        securityServiceTracker.open();
         trackedRaceStatisticsCacheTracker = ServiceTrackerFactory.createAndOpen(context, TrackedRaceStatisticsCache.class);
     }
 

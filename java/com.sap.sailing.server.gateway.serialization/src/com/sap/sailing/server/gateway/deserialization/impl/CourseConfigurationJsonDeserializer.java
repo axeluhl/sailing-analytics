@@ -22,10 +22,10 @@ import com.sap.sailing.domain.coursetemplate.MarkConfigurationRequestAnnotation.
 import com.sap.sailing.domain.coursetemplate.Positioning;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.impl.MarkConfigurationRequestAnnotationImpl.MarkRoleCreationRequestImpl;
-import com.sap.sailing.domain.sharedsailingdata.SharedSailingData;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.CourseConfigurationJsonSerializer;
+import com.sap.sailing.shared.server.SharedSailingData;
 
 public class CourseConfigurationJsonDeserializer implements JsonDeserializer<CourseConfiguration<MarkConfigurationRequestAnnotation>> {
 
