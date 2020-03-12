@@ -40,9 +40,10 @@ public class DefaultTenantApiTest extends AbstractSeleniumTest {
 
     @Test
     public void testEventApiWithUserTenant() {
-        EventApi.create("testEvent2", "GC 32", CompetitorRegistrationType.CLOSED, "somewhere")
+        final String eventName = "TestEvent2";
+        EventApi.create(eventName, "GC 32", CompetitorRegistrationType.CLOSED, "somewhere")
                 .auth("donald", "daisy0815").run();
-        assertEquals("donald-tenant", adminConsole.goToEvents().getEventEntry("testEvent").getColumnContent("Group"));
+        assertEquals("donald-tenant", adminConsole.goToEvents().getEventEntry(eventName).getColumnContent("Group"));
     }
 
     @Test
