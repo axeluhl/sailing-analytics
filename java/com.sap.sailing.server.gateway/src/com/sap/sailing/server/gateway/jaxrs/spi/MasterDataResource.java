@@ -38,6 +38,7 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.masterdataimport.TopLevelMasterData;
+import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.PublicReadableActions;
@@ -146,9 +147,11 @@ public class MasterDataResource extends AbstractSailingServerResource {
         for (MediaTrack mediaTrack : getService().getAllMediaTracks()) {
             mediaTracks.add(mediaTrack);
         }
+        ArrayList<RaceTrackingConnectivityParameters> connectivityParametersToRestore = new ArrayList<>();
         Map<String, Regatta> regattaRaceIds = new HashMap<>();
         for (Entry<String, Regatta> regattaRaceMap : getService().getPersistentRegattasForRaceIDs().entrySet()) {
             regattaRaceIds.put(regattaRaceMap.getKey(), regattaRaceMap.getValue());
+            connectivityParametersToRestore.add(getService().getConnectivityParametersByRace().get(regattaRaceMap.getKey()));
         }
         final TopLevelMasterData masterData = new TopLevelMasterData(groupsToExport,
                 events, regattaRaceIds, mediaTracks,

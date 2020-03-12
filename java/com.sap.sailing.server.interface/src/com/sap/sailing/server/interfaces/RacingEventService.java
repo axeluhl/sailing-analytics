@@ -901,4 +901,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     }
     
     CourseAndMarkConfigurationFactory getCourseAndMarkConfigurationFactory();
+    
+    ConcurrentHashMap<String, RaceTrackingConnectivityParameters> getConnectivityParametersByRace();
 }
