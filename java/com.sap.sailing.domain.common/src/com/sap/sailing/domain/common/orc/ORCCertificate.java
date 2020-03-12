@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Map;
 
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
+import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.CountryCode;
 import com.sap.sse.common.Distance;
@@ -64,6 +65,8 @@ public interface ORCCertificate extends WithID, Serializable {
     Bearing[] ALLOWANCES_TRUE_WIND_ANGLES = { new DegreeBearingImpl(52), new DegreeBearingImpl(60),
                 new DegreeBearingImpl(75), new DegreeBearingImpl(90), new DegreeBearingImpl(110),
                 new DegreeBearingImpl(120), new DegreeBearingImpl(135), new DegreeBearingImpl(150) };
+    
+    Distance NAUTICAL_MILE = new NauticalMileDistance(1);
 
     /**
      * We use the {@link #getReferenceNumber() reference number ("RefNo")} as the ID of a certificate document.

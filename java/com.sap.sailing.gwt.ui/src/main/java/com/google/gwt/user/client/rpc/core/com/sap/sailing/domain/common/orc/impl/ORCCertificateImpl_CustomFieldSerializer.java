@@ -26,7 +26,7 @@ public class ORCCertificateImpl_CustomFieldSerializer extends CustomFieldSeriali
         serialize(streamWriter, instance);
     }
     
-    public static void serialize(SerializationStreamWriter streamWriter, ORCCertificateImpl instance)
+    public static void serialize(SerializationStreamWriter streamWriter, ORCCertificate instance)
             throws SerializationException {
         streamWriter.writeString(instance.getReferenceNumber());
         streamWriter.writeString(instance.getFileId());
@@ -120,7 +120,7 @@ public class ORCCertificateImpl_CustomFieldSerializer extends CustomFieldSeriali
         deserialize(streamReader, instance);
     }
 
-    public static void deserialize(SerializationStreamReader streamReader, ORCCertificateImpl instance) {
+    public static void deserialize(SerializationStreamReader streamReader, ORCCertificate instance) {
         // Done by instantiateInstance
     }
 
