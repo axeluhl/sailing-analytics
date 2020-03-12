@@ -175,6 +175,7 @@ public class CertificatesTableWrapper<S extends RefreshableSelectionModel<ORCCer
     }
     
     protected void showCertificate(ORCCertificate certificate) {
+        // TODO embed <a href=\"http://data.orc.org/public/WPub.dll/CC/"+certificate.getReferenceNumber()+"\"> to link to the certificate PDF
         Window.confirm("Certificate: "+certificate);
         // TODO Implement CertificatesTableWrapper.showCertificate(...)
     }

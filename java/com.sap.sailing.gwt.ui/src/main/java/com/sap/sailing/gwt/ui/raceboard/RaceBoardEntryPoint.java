@@ -115,7 +115,6 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint implements Pr
                 raceboardData.getAvailableDetailTypesForLeaderboard(), raceboardData.getRace());
         RaceBoardComponentContext componentContext = new RaceBoardComponentContext(lifeCycle, getUserService(),
                 storageDefinition);
-        
         componentContext.getInitialSettings(
                 new DefaultOnSettingsLoadedCallback<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>>() {
                     @Override

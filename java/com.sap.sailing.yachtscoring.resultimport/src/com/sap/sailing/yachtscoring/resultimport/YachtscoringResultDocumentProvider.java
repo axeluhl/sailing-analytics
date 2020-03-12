@@ -6,8 +6,8 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sap.sailing.domain.resultimport.ResultUrlProvider;
 import com.sap.sailing.resultimport.ResultDocumentDescriptor;
-import com.sap.sailing.resultimport.ResultUrlProvider;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
 import com.sap.sailing.xrr.resultimport.impl.UrlBasedXRRResultDocumentProvider;
 import com.sap.sailing.xrr.resultimport.impl.XRRParserUtil;
