@@ -50,24 +50,24 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
     private PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> patchSettings() {
         PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> patchedSettings = lifecycle.createDefaultSettings();
         SettingsUtil.copyValues(perspectiveCompositeSettings, patchedSettings);
-        final RaceBoardPerspectiveOwnSettings patchedPerspectiveOwnSettings = patchedSettings.getPerspectiveOwnSettings();
-        if(!timeStampCheckbox.getValue()) {
+        final RaceBoardPerspectiveOwnSettings patchedPerspectiveOwnSettings = patchedSettings
+                .getPerspectiveOwnSettings();
+        if (!timeStampCheckbox.getValue()) {
             patchedPerspectiveOwnSettings.resetInitialDurationAfterRaceStartInReplay();
         }
-        if(!competitorChartCheckBox.getValue()) {
+        if (!competitorChartCheckBox.getValue()) {
             patchedPerspectiveOwnSettings.resetShowCompetitorsChart();
         }
-        if(!leaderBoardPanelCheckBox.getValue()) {
+        if (!leaderBoardPanelCheckBox.getValue()) {
             patchedPerspectiveOwnSettings.resetShowLeaderBoard();
         }
-        if(!windChartCheckBox.getValue()) {
+        if (!windChartCheckBox.getValue()) {
             patchedPerspectiveOwnSettings.resetShowWindChart();
         }
-        if(!filterSetNameCheckBox.getValue()) {
-            patchedPerspectiveOwnSettings.resetActiveCompetitorsFilterSetName();;
+        if (!filterSetNameCheckBox.getValue()) {
+            patchedPerspectiveOwnSettings.resetActiveCompetitorsFilterSetName();
         }
-        
-        if(!competitorSelectionCheckBox.getValue()) {
+        if (!competitorSelectionCheckBox.getValue()) {
             patchedPerspectiveOwnSettings.resetSelectedCompetitor();
             patchedPerspectiveOwnSettings.resetSelectedCompetitors();
         }
@@ -84,55 +84,49 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
         timeStampCheckbox = createCheckbox(stringMessages.timeStampCheckBoxLabel());
         timeStampCheckbox.setValue(true);
         timeStampCheckbox.addClickHandler(new ClickHandler() {
-
             @Override
             public void onClick(ClickEvent event) {
-                linkAnchor.setHref(assembleLink());
+                updateLink();
             }
         });
         windChartCheckBox = createCheckbox(stringMessages.windChartCheckBoxLabel());
         windChartCheckBox.setValue(true);
         windChartCheckBox.addClickHandler(new ClickHandler() {
-            
             @Override
             public void onClick(ClickEvent event) {
-                linkAnchor.setHref(assembleLink());
+                updateLink();
             }
         });
         leaderBoardPanelCheckBox = createCheckbox(stringMessages.leaderBoardCheckBoxLabel());
         leaderBoardPanelCheckBox.setValue(true);
         leaderBoardPanelCheckBox.addClickHandler(new ClickHandler() {
-            
             @Override
             public void onClick(ClickEvent event) {
-                linkAnchor.setHref(assembleLink());
+                updateLink();
             }
         });
         competitorChartCheckBox = createCheckbox(stringMessages.competitorChartCheckBoxLabel());
         competitorChartCheckBox.setValue(true);
         competitorChartCheckBox.addClickHandler(new ClickHandler() {
-            
             @Override
             public void onClick(ClickEvent event) {
-                linkAnchor.setHref(assembleLink());
+                updateLink();
             }
         });
         filterSetNameCheckBox = createCheckbox(stringMessages.filterSetNameCheckBoxLabel());
         filterSetNameCheckBox.setValue(true);
         filterSetNameCheckBox.addClickHandler(new ClickHandler() {
-            
             @Override
             public void onClick(ClickEvent event) {
-                linkAnchor.setHref(assembleLink());
+                updateLink();
             }
         });
         competitorSelectionCheckBox = createCheckbox(stringMessages.competitorSelectionCheckBoxLabel());
         competitorSelectionCheckBox.setValue(true);
         competitorSelectionCheckBox.addClickHandler(new ClickHandler() {
-            
             @Override
             public void onClick(ClickEvent event) {
-                linkAnchor.setHref(assembleLink());
+                updateLink();
             }
         });
         linkAnchor = new Anchor(stringMessages.linkSharingAnchorText(), assembleLink());
@@ -145,5 +139,9 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
         verticalPanel.add(competitorSelectionCheckBox);
         verticalPanel.add(linkAnchor);
         return verticalPanel;
+    }
+
+    private void updateLink() {
+        linkAnchor.setHref(assembleLink());
     }
 }

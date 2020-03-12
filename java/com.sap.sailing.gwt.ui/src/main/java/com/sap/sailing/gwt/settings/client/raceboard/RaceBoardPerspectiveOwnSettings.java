@@ -119,7 +119,7 @@ public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializable
     }
     
     public void resetShowCompetitorsChart() {
-        this.showLeaderboard.resetToDefault();;
+        this.showCompetitorsChart.resetToDefault();;
     }
 
     public void resetCanReplayDuringLiveRaces() {
