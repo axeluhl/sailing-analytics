@@ -132,20 +132,16 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
             }
         });
         updateUsers();
-
         final HorizontalPanel detailsPanel = new HorizontalPanel();
-
         // add details panel for user roles
         userRoleDefinitionPanel = new UserRoleDefinitionPanel(userService, stringMessages,
                 errorReporter,
                 tableResources, userList.getSelectionModel(), () -> updateUsers());
         detailsPanel.add(userRoleDefinitionPanel);
-
         // add details panel for user permissions
         final WildcardPermissionPanel userPermissionPanel = new WildcardPermissionPanel(userService, stringMessages,
                 errorReporter, tableResources, userList.getSelectionModel(), () -> updateUsers());
         detailsPanel.add(userPermissionPanel);
-
         west.add(detailsPanel);
     }
 

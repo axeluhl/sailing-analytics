@@ -1363,12 +1363,22 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     private CompetitorDTO convertToCompetitorDTO(Competitor competitor) {
         CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor);
         SecurityDTOUtil.addSecurityInformation(getSecurityService(), competitorDTO, competitor.getIdentifier());
+        clearNonPublicFieldsIfCurrentUserHasNoReadPermission(competitor, competitorDTO);
         return competitorDTO;
+    }
+
+    private void clearNonPublicFieldsIfCurrentUserHasNoReadPermission(Competitor competitor,
+            CompetitorDTO competitorDTO) {
+        if (!getSecurityService().hasCurrentUserReadPermission(competitor)) {
+            // probably only READ_PUBLIC; remove e-mail address from DTO:
+            competitorDTO.clearNonPublicFields();
+        }
     }
     
     private CompetitorWithBoatDTO convertToCompetitorWithBoatDTO(CompetitorWithBoat competitor) {
         CompetitorWithBoatDTO competitorDTO = baseDomainFactory.convertToCompetitorWithBoatDTO(competitor);
         SecurityDTOUtil.addSecurityInformation(getSecurityService(), competitorDTO, competitor.getIdentifier());
+        clearNonPublicFieldsIfCurrentUserHasNoReadPermission(competitor, competitorDTO);
         BoatDTO boatDTO = competitorDTO.getBoat();
         SecurityDTOUtil.addSecurityInformation(getSecurityService(), boatDTO, competitor.getBoat().getIdentifier());
         return competitorDTO;
@@ -1383,6 +1393,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         for (final Entry<? extends Competitor, ? extends Boat> c : competitorsAndTheirBoats.entrySet()) {
             CompetitorAndBoatDTO competitorAndBoatDTO = baseDomainFactory.convertToCompetitorAndBoatDTO(c.getKey(), c.getValue());
             SecurityDTOUtil.addSecurityInformation(getSecurityService(), competitorAndBoatDTO.getCompetitor(), c.getKey().getIdentifier());
+            clearNonPublicFieldsIfCurrentUserHasNoReadPermission(c.getKey(), competitorAndBoatDTO.getCompetitor());
             SecurityDTOUtil.addSecurityInformation(getSecurityService(), competitorAndBoatDTO.getBoat(), c.getValue().getIdentifier());
             result.add(competitorAndBoatDTO);
         }
@@ -1398,6 +1409,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         for (CompetitorWithBoat c : iterable) {
             CompetitorWithBoatDTO competitorDTO = baseDomainFactory.convertToCompetitorWithBoatDTO(c);
             SecurityDTOUtil.addSecurityInformation(getSecurityService(), competitorDTO, c.getIdentifier());
+            clearNonPublicFieldsIfCurrentUserHasNoReadPermission(c, competitorDTO);
             SecurityDTOUtil.addSecurityInformation(getSecurityService(), competitorDTO.getBoat(), c.getBoat().getIdentifier());
             result.add(competitorDTO);
         }
@@ -4425,10 +4437,10 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             }
             replicaDTOs.add(new ReplicaDTO(replicaDescriptor.getIpAddress().getHostName(),
                     replicaDescriptor.getRegistrationTime().asDate(), replicaDescriptor.getUuid().toString(),
-                    replicaDescriptor.getReplicableIdsAsStrings(), replicationCountByOperationClassName,
-                    service.getAverageNumberOfOperationsPerMessage(replicaDescriptor),
-                    service.getNumberOfMessagesSent(replicaDescriptor), service.getNumberOfBytesSent(replicaDescriptor),
-                    service.getAverageNumberOfBytesPerMessage(replicaDescriptor)));
+                    replicaDescriptor.getReplicableIdsAsStrings(), replicaDescriptor.getAdditionalInformation(),
+                    replicationCountByOperationClassName,
+                    service.getAverageNumberOfOperationsPerMessage(replicaDescriptor), service.getNumberOfMessagesSent(replicaDescriptor),
+                    service.getNumberOfBytesSent(replicaDescriptor), service.getAverageNumberOfBytesPerMessage(replicaDescriptor)));
         }
         ReplicationMasterDTO master;
         ReplicationMasterDescriptor replicatingFromMaster = service.getReplicatingFromMaster();
@@ -8328,9 +8340,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public Iterable<DetailType> determineDetailTypesForCompetitorChart(String leaderboardGroupName, RegattaAndRaceIdentifier identifier) {
-        final LinkedHashSet<DetailType> availableDetailsTypes = new LinkedHashSet<>();
-        availableDetailsTypes.addAll(DetailType.getAutoplayDetailTypesForChart());
-        availableDetailsTypes.removeAll(DetailType.getRaceBravoDetailTypes());
+        final LinkedHashSet<DetailType> availableDetailTypes = new LinkedHashSet<>();
+        availableDetailTypes.addAll(DetailType.getAutoplayDetailTypesForChart());
+        availableDetailTypes.removeAll(DetailType.getRaceBravoDetailTypes());
         final DynamicTrackedRace trackedRace = getService().getTrackedRace(identifier);
         if (trackedRace != null) {
             boolean hasBravoTrack = false;
@@ -8343,31 +8355,36 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 }
             }
             if (hasBravoTrack) {
-                availableDetailsTypes.addAll(DetailType.getRaceBravoDetailTypes());
+                availableDetailTypes.addAll(DetailType.getRaceBravoDetailTypes());
             }
             if (hasExtendedBravoFixes) {
-                availableDetailsTypes.addAll(DetailType.getRaceExtendedBravoDetailTypes());
-                availableDetailsTypes.addAll(DetailType.getRaceExpeditionDetailTypes());
+                availableDetailTypes.addAll(DetailType.getRaceExtendedBravoDetailTypes());
+                availableDetailTypes.addAll(DetailType.getRaceExpeditionDetailTypes());
             }
             final RankingMetrics rankingMetricType = trackedRace.getRankingMetric().getType();
             switch (rankingMetricType) {
             case ONE_DESIGN:
+                availableDetailTypes.removeAll(DetailType.getAllToTToDHandicapDetailTypes());
+                availableDetailTypes.removeAll(DetailType.getAllOrcPerformanceCurveDetailTypes());
+                break;
             case TIME_ON_TIME_AND_DISTANCE:
+                availableDetailTypes.addAll(DetailType.getAllToTToDHandicapDetailTypes());
+                availableDetailTypes.removeAll(DetailType.getAllOrcPerformanceCurveDetailTypes());
                 break;
             case ORC_PERFORMANCE_CURVE:
             case ORC_PERFORMANCE_CURVE_BY_IMPLIED_WIND:
             case ORC_PERFORMANCE_CURVE_LEADER_FOR_BASELINE:
-                availableDetailsTypes.addAll(DetailType.getAllOrcPerformanceCurveDetailTypes());
+                availableDetailTypes.addAll(DetailType.getAllOrcPerformanceCurveDetailTypes());
                 break;
             }
         }
         if (leaderboardGroupName != null) {
             final LeaderboardGroupDTO group = getLeaderboardGroupByName(leaderboardGroupName, false);
             if (group != null ? group.hasOverallLeaderboard() : false) {
-                availableDetailsTypes.add(DetailType.OVERALL_RANK);
+                availableDetailTypes.add(DetailType.OVERALL_RANK);
             }
         }
-        return availableDetailsTypes;
+        return availableDetailTypes;
     }
 
     @Override
@@ -9314,7 +9331,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public MailInvitationType getMailType() {
         MailInvitationType type = MailInvitationType
-                .valueOf(System.getProperty(MAILTYPE_PROPERTY, MailInvitationType.SailInsight2.name()));
+                .valueOf(System.getProperty(MAILTYPE_PROPERTY, MailInvitationType.SailInsight3.name()));
         return type;
     }
 
@@ -9964,7 +9981,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             String referenceNumber, String yachtName, String sailNumber, String boatClassName) throws Exception {
         final ORCPublicCertificateDatabase db = ORCPublicCertificateDatabase.INSTANCE;
         final Set<ORCCertificate> result = new HashSet<>();
-        final Iterable<CertificateHandle> searchResult = db.search(country, yearOfIssuance, referenceNumber, yachtName, sailNumber, boatClassName);
+        final Iterable<CertificateHandle> searchResult = db.search(country, yearOfIssuance, referenceNumber, yachtName, sailNumber, boatClassName, /* includeInvalid */ false);
         Util.addAll(
                 db.getCertificates(searchResult),
                 result);
