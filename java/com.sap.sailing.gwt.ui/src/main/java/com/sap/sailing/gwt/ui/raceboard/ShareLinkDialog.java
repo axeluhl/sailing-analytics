@@ -34,7 +34,7 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
             PerspectiveLifecycle<RaceBoardPerspectiveOwnSettings> lifecycle,
             PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> perspectiveCompositeSettings,
             StringMessages stringMessages) {
-        super(stringMessages.shareTheLink(), "", "ok", stringMessages.cancel(), null, null);
+        super(stringMessages.shareTheLink(), "", stringMessages.ok(), stringMessages.cancel(), null, null);
         this.lifecycle = lifecycle;
         this.perspectiveCompositeSettings = perspectiveCompositeSettings;
         this.linkWithSettingsGenerator = new LinkWithSettingsGenerator<>(path, raceboardContextDefinition);
