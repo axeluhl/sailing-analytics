@@ -4,10 +4,11 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import com.sap.sailing.domain.resultimport.ResultUrlProvider;
+import com.sap.sailing.resultimport.AbstractResultUrlProvider;
 import com.sap.sailing.resultimport.ResultUrlRegistry;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
 
-public abstract class AbstractManage2SailProvider implements ResultUrlProvider {
+public abstract class AbstractManage2SailProvider extends AbstractResultUrlProvider implements ResultUrlProvider {
     private static final long serialVersionUID = 2275835750471711783L;
 
     public static final String NAME = "Manage2Sail XRR Result Importer";
@@ -16,30 +17,14 @@ public abstract class AbstractManage2SailProvider implements ResultUrlProvider {
     protected static final String EVENT_ID_TEMPLATE = "http://manage2sail.com/api/public/links/event/%s?accesstoken=bDAv8CwsTM94ujZ&mediaType=json";
 
     private final ParserFactory parserFactory;
-    private final ResultUrlRegistry resultUrlRegistry;
 
     protected AbstractManage2SailProvider(ParserFactory parserFactory, ResultUrlRegistry resultUrlRegistry) {
-        super();
+        super(resultUrlRegistry);
         this.parserFactory = parserFactory;
-        this.resultUrlRegistry = resultUrlRegistry;
     }
 
     protected ParserFactory getParserFactory() {
         return parserFactory;
-    }
-
-    protected ResultUrlRegistry getResultUrlRegistry() {
-        return resultUrlRegistry;
-    }
-
-    @Override
-    public Iterable<URL> getReadableUrls() {
-        return getResultUrlRegistry().getReadableResultUrls(NAME);
-    }
-
-    @Override
-    public Iterable<URL> getAllUrls() {
-        return getResultUrlRegistry().getAllResultUrls(NAME);
     }
 
     @Override

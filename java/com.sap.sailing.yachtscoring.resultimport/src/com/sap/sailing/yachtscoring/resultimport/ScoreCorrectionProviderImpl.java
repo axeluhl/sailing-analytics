@@ -19,6 +19,7 @@ import org.xml.sax.SAXException;
 import com.sap.sailing.domain.common.RegattaScoreCorrections;
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.resultimport.ResultUrlProvider;
+import com.sap.sailing.resultimport.AbstractResultUrlProvider;
 import com.sap.sailing.resultimport.ResultDocumentDescriptor;
 import com.sap.sailing.resultimport.ResultDocumentProvider;
 import com.sap.sailing.resultimport.ResultUrlRegistry;
@@ -28,7 +29,7 @@ import com.sap.sailing.xrr.schema.RegattaResults;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
-public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, ResultUrlProvider {
+public class ScoreCorrectionProviderImpl extends AbstractResultUrlProvider implements ScoreCorrectionProvider, ResultUrlProvider {
     private static final Logger logger = Logger.getLogger(ScoreCorrectionProviderImpl.class.getName());
     private static final long serialVersionUID = 222663322974305822L;
 
@@ -38,19 +39,18 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, Res
     public static final String EVENT_ID_TEMPLATE = "http://www.yachtscoring.com/results_xrr_auto.cfm?eid=%s";
 
     private final ParserFactory parserFactory;
-    private final ResultUrlRegistry resultUrlRegistry;
     private final ResultDocumentProvider documentProvider;
     
     public ScoreCorrectionProviderImpl(ResultDocumentProvider documentProvider, ParserFactory parserFactory, ResultUrlRegistry resultUrlRegistry) {
+        super(resultUrlRegistry);
         this.documentProvider = documentProvider;
         this.parserFactory = parserFactory;
-        this.resultUrlRegistry = resultUrlRegistry;
     }
 
     public ScoreCorrectionProviderImpl(ParserFactory parserFactory, ResultUrlRegistry resultUrlRegistry) {
+        super(resultUrlRegistry);
         this.documentProvider = new YachtscoringResultDocumentProvider(this, parserFactory);
         this.parserFactory = parserFactory;
-        this.resultUrlRegistry = resultUrlRegistry;
     }
 
     @Override
@@ -115,16 +115,6 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, Res
             }
         }
         return result;
-    }
-
-    @Override
-    public Iterable<URL> getReadableUrls() {
-        return resultUrlRegistry.getReadableResultUrls(NAME);
-    }
-
-    @Override
-    public Iterable<URL> getAllUrls() {
-        return resultUrlRegistry.getAllResultUrls(NAME);
     }
 
     @Override

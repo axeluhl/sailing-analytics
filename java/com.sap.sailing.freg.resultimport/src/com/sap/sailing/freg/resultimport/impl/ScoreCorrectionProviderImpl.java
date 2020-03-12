@@ -13,6 +13,7 @@ import java.util.Set;
 import com.sap.sailing.domain.common.RegattaScoreCorrections;
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.resultimport.ResultUrlProvider;
+import com.sap.sailing.resultimport.AbstractResultUrlProvider;
 import com.sap.sailing.resultimport.RegattaResults;
 import com.sap.sailing.resultimport.ResultUrlRegistry;
 import com.sap.sailing.resultimport.impl.RegattaScoreCorrectionsImpl;
@@ -20,14 +21,12 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, ResultUrlProvider {
+public class ScoreCorrectionProviderImpl extends AbstractResultUrlProvider implements ScoreCorrectionProvider, ResultUrlProvider {
     private static final long serialVersionUID = 5853404150107387702L;
     public static final String PROVIDER_NAME = "FREG HTML Score Importer";
     
-    private final ResultUrlRegistry resultUrlRegistry;
-
     public ScoreCorrectionProviderImpl(ResultUrlRegistry resultUrlRegistry) {
-        this.resultUrlRegistry = resultUrlRegistry;
+        super(resultUrlRegistry);
     }
 
     @Override
@@ -48,8 +47,7 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, Res
                 final String boatClassName = getBoatClassName(regattaResult);
                 result.put(boatClassName, Collections.singleton(new Util.Pair<String, TimePoint>(boatClassName, lastModified)));
             } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                throw new RuntimeException(e);
             }
         }
         return result;
@@ -66,16 +64,6 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, Res
             }
         }
         return null;
-    }
-
-    @Override
-    public Iterable<URL> getReadableUrls() {
-        return resultUrlRegistry.getReadableResultUrls(PROVIDER_NAME);
-    }
-
-    @Override
-    public Iterable<URL> getAllUrls() {
-        return resultUrlRegistry.getAllResultUrls(PROVIDER_NAME);
     }
 
     @Override
