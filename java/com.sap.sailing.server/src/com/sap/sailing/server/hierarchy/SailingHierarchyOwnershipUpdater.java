@@ -274,14 +274,13 @@ public class SailingHierarchyOwnershipUpdater {
     private static UserGroup copyUserGroup(UserGroup userGroupToCopy, String name, SecurityService securitySerice,
             RacingEventService service) throws UserGroupManagementException {
         // explicitly loading the current version of the group in case the given instance e.g. originates from the UI
-        // and is possible out of date.
+        // and is possibly out of date.
         final UUID newGroupId = UUID.randomUUID();
         return securitySerice.setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredSecurityTypes.USER_GROUP, UserGroupImpl.getTypeRelativeObjectIdentifier(newGroupId), name, () -> {
-                    final UserGroup createdUserGroup = securitySerice.createUserGroup(newGroupId, name);
+                    final UserGroup createdUserGroup = securitySerice.createUserGroupGrantingCurrentUserAdminRole(newGroupId, name);
                     securitySerice.copyUsersAndRoleAssociations(userGroupToCopy, createdUserGroup,
                             new RoleCopyListener() {
-
                                 @Override
                                 public void onRoleCopy(User user, Role existingRole, Role copyRole) {
                                     TypeRelativeObjectIdentifier existingAssociationTypeIdentifier = PermissionAndRoleAssociation

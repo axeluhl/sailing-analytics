@@ -672,6 +672,18 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         return createUserGroupWithInitialUser(id, name, getCurrentUser());
     }
     
+    @Override
+    public UserGroup createUserGroupGrantingCurrentUserAdminRole(UUID newTenantId, String escapedName) throws UserGroupManagementException {
+        final UserGroup result = createUserGroup(newTenantId, escapedName);
+        final User currentUser = getCurrentUser();
+        if (currentUser != null) {
+            // add role admin:{groupName} to the authenticated user to grant admin permissions to everything the new group will own
+            addRoleForUser(currentUser, new Role(getOrCreateRoleDefinitionFromPrototype(AdminRole.getInstance()),
+                    /* qualifiedForTenant */ result, /* qualifiedForUser */ null));
+        }
+        return result;
+    }
+
     private UserGroup createUserGroupWithInitialUser(UUID id, String name, User initialUser) {
         logger.info("Creating user group " + name + " with ID " + id);
         apply(s -> s.internalCreateUserGroup(id, name));
@@ -2445,11 +2457,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         for (User user : source.getUsers()) {
             addUserToUserGroup(destination, user);
         }
-
         for (Map.Entry<RoleDefinition, Boolean> entr : source.getRoleDefinitionMap().entrySet()) {
             putRoleDefinitionToUserGroup(destination, entr.getKey(), entr.getValue());
         }
-
         for (Pair<User, Role> userAndRole : store.getRolesQualifiedByUserGroup(source)) {
             final Role existingRole = userAndRole.getB();
             final Role copyRole = new Role(existingRole.getRoleDefinition(), destination,
