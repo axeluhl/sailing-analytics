@@ -10,10 +10,13 @@ import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
+import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.subject.Subject;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
@@ -76,6 +79,7 @@ import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStoreSupplier;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
+import com.sap.sailing.domain.resultimport.ResultUrlProvider;
 import com.sap.sailing.domain.statistics.Statistics;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceListener;
@@ -479,6 +483,15 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     Iterable<MediaTrack> getMediaTracksInTimeRange(RegattaAndRaceIdentifier regattaAndRaceIdentifier);
 
     Iterable<MediaTrack> getAllMediaTracks();
+
+    Iterable<URL> getResultImportUrls(String resultProviderName) throws UnauthorizedException;
+
+    void removeResultImportURLs(String resultProviderName, Set<URL> toRemove)
+            throws UnauthorizedException, Exception;
+
+    void addResultImportUrl(String resultProviderName, URL url) throws UnauthorizedException, Exception;
+
+    Optional<ResultUrlProvider> getUrlBasedScoreCorrectionProvider(String resultProviderName);
 
     void reloadRaceLog(String leaderboardName, String raceColumnName, String fleetName);
 
