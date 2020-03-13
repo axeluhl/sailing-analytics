@@ -26,7 +26,6 @@ import com.sap.sse.security.interfaces.UserImpl;
 import com.sap.sse.security.interfaces.UserStore;
 import com.sap.sse.security.operations.SecurityOperation;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
-import com.sap.sse.security.shared.AdminRole;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.OwnershipAnnotation;
@@ -148,13 +147,6 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     UserGroup createUserGroup(UUID id, String name) throws UserGroupManagementException;
     
-    /**
-     * In addition to what {@link #createUserGroup(UUID, String)} does, this method also makes the current
-     * user, if {@link Subject#isAuthenticated() authenticated}, an admin for the group by granting that
-     * user the {@link AdminRole admin role} qualified by the group returned by this method.
-     */
-    UserGroup createUserGroupGrantingCurrentUserAdminRole(UUID newTenantId, String escapedName) throws UserGroupManagementException;
-
     void addUserToUserGroup(UserGroup group, User user);
     
     void removeUserFromUserGroup(UserGroup group, User user);

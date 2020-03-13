@@ -624,7 +624,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         }
         final UUID tenantId = tenantOwner == null ? null : tenantOwner.getId();
         final String userOwnerName = userOwner == null ? null : userOwner.getName();
-
         return apply(s -> s.internalSetOwnership(idOfOwnedObjectAsString, userOwnerName, tenantId,
                 displayNameOfOwnedObject));
     }
@@ -672,18 +671,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         return createUserGroupWithInitialUser(id, name, getCurrentUser());
     }
     
-    @Override
-    public UserGroup createUserGroupGrantingCurrentUserAdminRole(UUID newTenantId, String escapedName) throws UserGroupManagementException {
-        final UserGroup result = createUserGroup(newTenantId, escapedName);
-        final User currentUser = getCurrentUser();
-        if (currentUser != null) {
-            // add role admin:{groupName} to the authenticated user to grant admin permissions to everything the new group will own
-            addRoleForUser(currentUser, new Role(getOrCreateRoleDefinitionFromPrototype(AdminRole.getInstance()),
-                    /* qualifiedForTenant */ result, /* qualifiedForUser */ null));
-        }
-        return result;
-    }
-
     private UserGroup createUserGroupWithInitialUser(UUID id, String name, User initialUser) {
         logger.info("Creating user group " + name + " with ID " + id);
         apply(s -> s.internalCreateUserGroup(id, name));
@@ -691,7 +678,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (initialUser != null) {
             logger.info("Adding initial user " + initialUser + " to group " + userGroup);
             addUserToUserGroup(userGroup, initialUser);
-            addUserRoleForGroupToUser(userGroup, initialUser);
+            addAdminRoleForGroupToUser(userGroup, initialUser);
         }
         return userGroup;
     }
@@ -866,7 +853,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         String hashedPasswordBase64 = hashPassword(password, salt);
         UsernamePasswordAccount upa = new UsernamePasswordAccount(username, hashedPasswordBase64, salt);
         final User result = apply(s->s.internalCreateUser(username, email, upa)); // This also replicated the user creation
-        addUserRoleToUser(result);
+        addAdminRoleToUser(result);
         final UserGroup tenant = getOrCreateTenantForUser(result);
         setDefaultTenantForCurrentServerForUser(username, tenant.getId());
         // the new user becomes its owner to ensure the user role is working correctly
@@ -878,13 +865,13 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         return result;
     }
 
-    private void addUserRoleToUser(final User user) {
-        addRoleForUserAndSetUserAsOwner(user, new Role(store.getRoleDefinitionByPrototype(UserRole.getInstance()),
+    private void addAdminRoleToUser(final User user) {
+        addRoleForUserAndSetUserAsOwner(user, new Role(store.getRoleDefinitionByPrototype(AdminRole.getInstance()),
                 /* tenant qualifier */ null, /* user qualifier */ user));
     }
     
-    private void addUserRoleForGroupToUser(final UserGroup group, final User user) {
-        addRoleForUserAndSetUserAsOwner(user, new Role(store.getRoleDefinitionByPrototype(UserRole.getInstance()),
+    private void addAdminRoleForGroupToUser(final UserGroup group, final User user) {
+        addRoleForUserAndSetUserAsOwner(user, new Role(store.getRoleDefinitionByPrototype(AdminRole.getInstance()),
                 /* tenant qualifier */ group, /* user qualifier */ null));
     }
     
@@ -1136,7 +1123,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(role, user);
         QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
                 .getQualifiedObjectIdentifier(associationTypeIdentifier);
-        setOwnership(qualifiedTypeIdentifier, user, null);
+        setOwnership(qualifiedTypeIdentifier, user, /* group owner */ null);
     }
 
     @Override
@@ -2228,7 +2215,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 }
                 // Only adding user role if it is most probably a migration case
                 // In case an admin removes/changes the user role, it should not be recreated automatically
-                addUserRoleToUser(user);
+                addAdminRoleToUser(user);
                 final RoleDefinition adminRoleDefinition = getRoleDefinition(AdminRole.getInstance().getId());
                 for (Role roleOfUser : user.getRoles()) {
                     if (roleOfUser.getRoleDefinition().equals(adminRoleDefinition)) {

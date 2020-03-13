@@ -278,7 +278,7 @@ public class SailingHierarchyOwnershipUpdater {
         final UUID newGroupId = UUID.randomUUID();
         return securitySerice.setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredSecurityTypes.USER_GROUP, UserGroupImpl.getTypeRelativeObjectIdentifier(newGroupId), name, () -> {
-                    final UserGroup createdUserGroup = securitySerice.createUserGroupGrantingCurrentUserAdminRole(newGroupId, name);
+                    final UserGroup createdUserGroup = securitySerice.createUserGroup(newGroupId, name);
                     securitySerice.copyUsersAndRoleAssociations(userGroupToCopy, createdUserGroup,
                             new RoleCopyListener() {
                                 @Override

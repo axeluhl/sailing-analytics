@@ -350,7 +350,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                 SecuredSecurityTypes.USER_GROUP, UserGroupImpl.getTypeRelativeObjectIdentifier(newTenantId), name, () -> {
                     UserGroup userGroup;
                     try {
-                        userGroup = getSecurityService().createUserGroupGrantingCurrentUserAdminRole(newTenantId, name);
+                        userGroup = getSecurityService().createUserGroup(newTenantId, name);
                     } catch (UserGroupManagementException e) {
                         throw new UserGroupManagementException(e.getMessage());
                     }
@@ -880,7 +880,6 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                                     .getQualifiedObjectIdentifier(associationTypeIdentifier);
                             getSecurityService().addToAccessControlList(qualifiedObjectAssociationIdentifier,
                                     null, DefaultActions.READ.name());
-
                             getSecurityService().addRoleForUser(user, role);
                             logger.info(message);
                         }

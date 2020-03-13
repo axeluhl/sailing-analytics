@@ -132,7 +132,7 @@ public class UserGroupResource extends AbstractSecurityResource {
                     groupName, () -> {
                         UserGroup userGroup;
                         try {
-                            userGroup = getService().createUserGroupGrantingCurrentUserAdminRole(newTenantId, groupName);
+                            userGroup = getService().createUserGroup(newTenantId, groupName);
                         } catch (UserGroupManagementException e) {
                             throw new UserGroupManagementException(e.getMessage());
                         }
