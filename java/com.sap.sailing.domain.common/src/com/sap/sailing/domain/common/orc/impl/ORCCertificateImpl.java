@@ -3,9 +3,9 @@ package com.sap.sailing.domain.common.orc.impl;
 import java.util.Collections;
 import java.util.Map;
 
-import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sse.common.Bearing;
+import com.sap.sse.common.CountryCode;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
@@ -24,10 +24,8 @@ import com.sap.sse.common.Util;
 public class ORCCertificateImpl implements ORCCertificate {
     private static final long serialVersionUID = 8725162998514202782L;
     
-    private final String idConsistingOfNatAuthCertNoAndBIN;
+    private final String referenceNumber;
 
-    public final static Distance NAUTICAL_MILE = new NauticalMileDistance(1);
-    
     private final String sailNumber;
     private final String boatName;
     private final String boatClassName;
@@ -35,7 +33,9 @@ public class ORCCertificateImpl implements ORCCertificate {
     private final Duration gph;
     private final Double cdl;
     private final TimePoint issueDate;
-
+    private final String fileId;
+    private final CountryCode issuingCountry;
+    
     /**
      * The "core" of the certificate for performance curve scoring; the values in the map tell how fast the boat
      * described by this certificate is expected to sail for the true wind speed (TWS) provided by the key, and the true
@@ -111,11 +111,13 @@ public class ORCCertificateImpl implements ORCCertificate {
      *            {@link ORCCertificate#ALLOWANCES_TRUE_WIND_ANGLES}.
      */
     public ORCCertificateImpl(Speed[] allowancesTrueWindSpeeds, Bearing[] allowancesTrueWindAngles,
-            String idConsistingOfNatAuthCertNoAndBIN, String sailnumber, String boatName, String boatClassName,
-            Distance length, Duration gph, Double cdl, TimePoint issueDate,
+            String referenceNumber, String fileId, String sailnumber, String boatName,
+            String boatClassName, Distance length, Duration gph, Double cdl,
+            TimePoint issueDate, CountryCode issuingCountry,
             Map<Speed, Map<Bearing, Speed>> velocityPredictionsPerTrueWindSpeedAndAngle, Map<Speed, Bearing> beatAngles,
             Map<Speed, Speed> beatVMGPredictionPerTrueWindSpeed, Map<Speed, Duration> beatAllowancePerTrueWindSpeed,
-            Map<Speed, Bearing> runAngles, Map<Speed, Speed> runVMGPredictionPerTrueWindSpeed,
+            Map<Speed, Bearing> runAngles,
+            Map<Speed, Speed> runVMGPredictionPerTrueWindSpeed,
             Map<Speed, Duration> runAllowancePerTrueWindSpeed,
             Map<Speed, Speed> windwardLeewardSpeedPredictionsPerTrueWindSpeed,
             Map<Speed, Speed> longDistanceSpeedPredictionsPerTrueWindSpeed,
@@ -123,7 +125,9 @@ public class ORCCertificateImpl implements ORCCertificate {
             Map<Speed, Speed> nonSpinnakerSpeedPredictionsPerTrueWindSpeed) {
         this.allowancesTrueWindAngles = allowancesTrueWindAngles;
         this.allowancesTrueWindSpeeds = allowancesTrueWindSpeeds;
-        this.idConsistingOfNatAuthCertNoAndBIN = idConsistingOfNatAuthCertNoAndBIN;
+        this.referenceNumber = referenceNumber;
+        this.fileId = fileId;
+        this.issuingCountry = issuingCountry;
         this.sailNumber = sailnumber;
         this.boatName = boatName;
         this.boatClassName = boatClassName;
@@ -150,21 +154,23 @@ public class ORCCertificateImpl implements ORCCertificate {
      * {@link ORCCertificate#ALLOWANCES_TRUE_WIND_ANGLES}, respectively, for the matrix of time allowances
      * or, conversely, the speed predictions.
      */
-    public ORCCertificateImpl(String idConsistingOfNatAuthCertNoAndBIN,
-            String sailnumber, String boatName, String boatClassName,
-            Distance length, Duration gph,
-            Double cdl, TimePoint issueDate,
-            Map<Speed, Map<Bearing, Speed>> velocityPredictionsPerTrueWindSpeedAndAngle, 
+    public ORCCertificateImpl(String referenceNumber,
+            String fileId, String sailnumber, String boatName,
+            String boatClassName, Distance length,
+            Duration gph, Double cdl,
+            TimePoint issueDate, 
+            CountryCode issuingCountry, Map<Speed, Map<Bearing, Speed>> velocityPredictionsPerTrueWindSpeedAndAngle,
             Map<Speed, Bearing> beatAngles, Map<Speed, Speed> beatVMGPredictionPerTrueWindSpeed,
-            Map<Speed, Duration> beatAllowancePerTrueWindSpeed, Map<Speed, Bearing> runAngles,
+            Map<Speed, Duration> beatAllowancePerTrueWindSpeed,
+            Map<Speed, Bearing> runAngles,
             Map<Speed, Speed> runVMGPredictionPerTrueWindSpeed,
             Map<Speed, Duration> runAllowancePerTrueWindSpeed,
             Map<Speed, Speed> windwardLeewardSpeedPredictionsPerTrueWindSpeed,
             Map<Speed, Speed> longDistanceSpeedPredictionsPerTrueWindSpeed,
             Map<Speed, Speed> circularRandomSpeedPredictionsPerTrueWindSpeed,
             Map<Speed, Speed> nonSpinnakerSpeedPredictionsPerTrueWindSpeed) {
-        this(ALLOWANCES_TRUE_WIND_SPEEDS, ALLOWANCES_TRUE_WIND_ANGLES, idConsistingOfNatAuthCertNoAndBIN, sailnumber,
-                boatName, boatClassName, length, gph, cdl, issueDate, velocityPredictionsPerTrueWindSpeedAndAngle,
+        this(ALLOWANCES_TRUE_WIND_SPEEDS, ALLOWANCES_TRUE_WIND_ANGLES, referenceNumber, fileId, sailnumber, boatName,
+                boatClassName, length, gph, cdl, issueDate, issuingCountry, velocityPredictionsPerTrueWindSpeedAndAngle,
                 beatAngles, beatVMGPredictionPerTrueWindSpeed, beatAllowancePerTrueWindSpeed, runAngles,
                 runVMGPredictionPerTrueWindSpeed, runAllowancePerTrueWindSpeed,
                 windwardLeewardSpeedPredictionsPerTrueWindSpeed, longDistanceSpeedPredictionsPerTrueWindSpeed,
@@ -173,7 +179,22 @@ public class ORCCertificateImpl implements ORCCertificate {
 
     @Override
     public String getId() {
-        return idConsistingOfNatAuthCertNoAndBIN;
+        return getReferenceNumber();
+    }
+    
+    @Override
+    public String getReferenceNumber() {
+        return referenceNumber;
+    }
+
+    @Override
+    public String getFileId() {
+        return fileId;
+    }
+
+    @Override
+    public CountryCode getIssuingCountry() {
+        return issuingCountry;
     }
 
     @Override
