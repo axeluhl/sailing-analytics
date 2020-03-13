@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.tracking;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -178,6 +179,15 @@ public interface TrackedLeg extends Serializable {
      * waypoint's position at time point <code>at</code> and the position of the leg's end waypoint at time point <code>at</code>.
      */
     Position getMiddleOfLeg(TimePoint at);
+    
+    /**
+     * The positions of the course breaking up of line, connecting the start and the end of leg
+     * waypoint's position at time point <code>at</code> and the position of the leg's end waypoint at time point <code>at</code>.
+     * @param at
+     * @param parts number of parts for breaking
+     * @return
+     */
+    Collection<Position> getBreakedPartsOfLeg(TimePoint at, int parts);
 
     /**
      * @param timepoint Used for positions of marks and wind information
@@ -225,6 +235,17 @@ public interface TrackedLeg extends Serializable {
      * "now" is used.
      */
     TimePoint getReferenceTimePoint();
+    
+    
+    /**
+     * Computes a set of reference time point for this leg that is the same for all competitors and that is the equidistant 
+     * time points between first leg entry and last leg exit. If no competitor has entered the leg, "now" is used as a
+     * default. If competitors have entered the leg but none has finished it yet, the middle between first entry and
+     * "now" is used. 
+     * @param numParts
+     * @return
+     */
+    Collection<TimePoint> getReferenceTimePoint(int numParts);
 
     /**
      * The leader at the given <code>timePoint</code> in this leg, based on the {@link TrackedRace#getRankingMetric() ranking metric}

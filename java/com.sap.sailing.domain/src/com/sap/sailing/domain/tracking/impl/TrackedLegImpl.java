@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -12,11 +13,15 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
+import java.util.stream.StreamSupport;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -273,6 +278,24 @@ public class TrackedLegImpl implements TrackedLeg {
         return middleOfLeg;
     }
     
+    @Override
+    public Collection<Position> getBreakedPartsOfLeg(TimePoint at, int parts) {
+        Optional<Position> approximateLegStartPosition = Optional
+                .ofNullable(getTrackedRace().getApproximatePosition(getLeg().getFrom(), at));
+        Optional<Position> approximateLegEndPosition = Optional
+                .ofNullable(getTrackedRace().getApproximatePosition(getLeg().getTo(), at));
+        List<Position> positions = approximateLegStartPosition.map(legStart -> {
+            return approximateLegEndPosition.map(legEnd -> {
+                Bearing bearing = legStart.getBearingGreatCircle(legEnd);
+                List<Position> breakedLegs = DoubleStream.iterate(0.1, d -> d + 10 / parts)
+                        .mapToObj(scale -> legStart.getDistance(legEnd).scale(scale))
+                        .map(position -> legStart.translateGreatCircle(bearing, position)).collect(Collectors.toList());
+                return breakedLegs;
+            }).orElse(Collections.<Position>emptyList());
+        }).orElse(Collections.<Position>emptyList());
+        return positions;
+    }
+    
     public Position getEffectiveWindPosition(Callable<Position> exactPositionProvider, TimePoint at, WindPositionMode mode) {
         final Position effectivePosition;
         switch (mode) {
@@ -491,6 +514,33 @@ public class TrackedLegImpl implements TrackedLeg {
         }
         final TimePoint middle = firstLegStartMarkPassingTimePoint.plus(firstLegStartMarkPassingTimePoint.until(lastLegFinishMarkPassingTimePoint).divide(2));
         return middle;
+    }
+    
+    @Override
+    public Collection<TimePoint> getReferenceTimePoint(int parts) {
+        Iterable<MarkPassing> legStartMarkPassings = getTrackedRace().getMarkPassingsInOrder(getLeg().getFrom());
+        Iterable<MarkPassing> legFinishMarkPassings = getTrackedRace().getMarkPassingsInOrder(getLeg().getTo());
+        try {
+            getTrackedRace().lockForRead(legStartMarkPassings);
+            final TimePoint firstLegStartMarkPassingTimePoint = convert2TimePoint(legStartMarkPassings);
+            getTrackedRace().lockForRead(legFinishMarkPassings);
+            final TimePoint lastLegFinishMarkPassingTimePoint = convert2TimePoint(legFinishMarkPassings);
+            Duration equidistantTime = firstLegStartMarkPassingTimePoint.until(lastLegFinishMarkPassingTimePoint).divide(parts);
+            ArrayList<TimePoint> timePoints = new ArrayList<>(parts);
+            TimePoint accum = firstLegStartMarkPassingTimePoint;
+            for (int i = 0; i < parts; i++) {
+                timePoints.add(accum);
+                accum = accum.plus(equidistantTime);
+            }
+            return timePoints;
+        } finally {
+            getTrackedRace().unlockAfterRead(legStartMarkPassings);
+            getTrackedRace().unlockAfterRead(legFinishMarkPassings);
+        }
+    }
+    
+    private TimePoint convert2TimePoint(Iterable<MarkPassing> leg) {
+        return StreamSupport.stream(leg.spliterator(), false).map(MarkPassing::getTimePoint).findAny().orElse(MillisecondsTimePoint.now());
     }
 
     @Override
