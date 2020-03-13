@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.Map;
 import java.util.function.Function;
 
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.CaptionPanel;
