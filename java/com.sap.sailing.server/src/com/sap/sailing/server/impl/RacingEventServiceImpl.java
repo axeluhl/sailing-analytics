@@ -4697,10 +4697,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
     }
 
-    /**
-     * In order to be able to start the tracking after a Master Data Import the
-     * {@link RaceTrackingConnectivityParameters} of that race are needed.
-     */
     @Override
     public ConcurrentHashMap<String, RaceTrackingConnectivityParameters> getConnectivityParametersByRace() {
         ConcurrentHashMap<String, RaceTrackingConnectivityParameters> result = new ConcurrentHashMap<>();

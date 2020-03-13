@@ -151,6 +151,7 @@ public class MasterDataResource extends AbstractSailingServerResource {
         Map<String, Regatta> regattaRaceIds = new HashMap<>();
         for (Entry<String, Regatta> regattaRaceMap : getService().getPersistentRegattasForRaceIDs().entrySet()) {
             regattaRaceIds.put(regattaRaceMap.getKey(), regattaRaceMap.getValue());
+            // TODO: Permission check needs to be implemented
             connectivityParametersToRestore.add(getService().getConnectivityParametersByRace().get(regattaRaceMap.getKey()));
         }
         final TopLevelMasterData masterData = new TopLevelMasterData(groupsToExport,

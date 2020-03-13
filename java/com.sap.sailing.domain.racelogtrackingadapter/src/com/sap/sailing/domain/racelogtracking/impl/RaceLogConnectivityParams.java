@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.sap.sailing.domain.abstractlog.AbstractLog;
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceInformationFinder;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
@@ -27,7 +28,6 @@ import com.sap.sailing.domain.tracking.RaceTrackingHandler;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceTrackingConnectivityParameters;
-import com.sap.sailing.server.interfaces.RacingEventService;
 
 public class RaceLogConnectivityParams extends AbstractRaceTrackingConnectivityParameters {
     /**
@@ -35,7 +35,7 @@ public class RaceLogConnectivityParams extends AbstractRaceTrackingConnectivityP
      */
     public static final String TYPE = "RACE_LOG_TRACKING";
     
-    private final RacingEventService service;
+    private final AbstractLogEventAuthor serverAuthor;
     private final RaceColumn raceColumn;
     private final Fleet fleet;
     private final Leaderboard leaderboard;
@@ -43,11 +43,11 @@ public class RaceLogConnectivityParams extends AbstractRaceTrackingConnectivityP
     private final Regatta regatta;
     private final DomainFactory domainFactory;
 
-    public RaceLogConnectivityParams(RacingEventService service, Regatta regatta, RaceColumn raceColumn, Fleet fleet,
+    public RaceLogConnectivityParams(AbstractLogEventAuthor serverAuthor, Regatta regatta, RaceColumn raceColumn, Fleet fleet,
             Leaderboard leaderboard, long delayToLiveInMillis, DomainFactory domainFactory, boolean trackWind,
             boolean correctWindDirectionByMagneticDeclination) throws RaceNotCreatedException {
         super(trackWind, correctWindDirectionByMagneticDeclination);
-        this.service = service;
+        this.serverAuthor = serverAuthor;
         this.regatta = regatta;
         this.raceColumn = raceColumn;
         this.fleet = fleet;
@@ -78,7 +78,7 @@ public class RaceLogConnectivityParams extends AbstractRaceTrackingConnectivityP
             RaceTrackingHandler raceTrackingHandler) {
         if (regatta == null) {
             BoatClass boatClass = new RaceInformationFinder(getRaceLog()).analyze().getBoatClass();
-            regatta = service.getOrCreateDefaultRegatta(
+            regatta = trackedRegattaRegistry.getOrCreateDefaultRegatta(
                     RegattaImpl.getDefaultName("RaceLog-tracking default Regatta", boatClass.getName()),
                     boatClass.getName(), UUID.randomUUID());
         }
@@ -124,8 +124,8 @@ public class RaceLogConnectivityParams extends AbstractRaceTrackingConnectivityP
         }
     }
 
-    public RacingEventService getService() {
-        return service;
+    public AbstractLogEventAuthor getServerAuthor(){
+        return serverAuthor;
     }
     
     public DomainFactory getDomainFactory() {

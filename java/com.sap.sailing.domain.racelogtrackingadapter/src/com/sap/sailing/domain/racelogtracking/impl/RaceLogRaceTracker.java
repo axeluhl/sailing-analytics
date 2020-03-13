@@ -296,7 +296,7 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
         if (raceColumn.getTrackedRace(fleet) != null) {
             if (event != null) {
                 try {
-                    raceLog.revokeEvent(params.getService().getServerAuthor(), event,
+                    raceLog.revokeEvent(params.getServerAuthor(), event,
                             "could not start tracking because tracked race already exists");
                 } catch (NotRevokableException e) {
                     logger.log(Level.WARNING, "Couldn't revoke event "+event, e);

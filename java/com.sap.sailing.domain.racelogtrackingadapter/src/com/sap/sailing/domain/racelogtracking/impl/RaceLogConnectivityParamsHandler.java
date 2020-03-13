@@ -58,7 +58,7 @@ public class RaceLogConnectivityParamsHandler extends AbstractRaceTrackingConnec
 	        if (raceColumn == null) {
 	        	result = null;
 	        } else {
-		        result = new RaceLogConnectivityParams(racingEventService, leaderboard.getRegatta(), raceColumn, 
+		        result = new RaceLogConnectivityParams(racingEventService.getServerAuthor(), leaderboard.getRegatta(), raceColumn, 
 		                raceColumn.getFleetByName((String) map.get(FLEET_NAME)), leaderboard,
 		                ((Number) map.get(DELAY_TO_LIVE_IN_MILLIS)).longValue(), domainFactory, isTrackWind(map),
 		                isCorrectWindDirectionByMagneticDeclination(map));
