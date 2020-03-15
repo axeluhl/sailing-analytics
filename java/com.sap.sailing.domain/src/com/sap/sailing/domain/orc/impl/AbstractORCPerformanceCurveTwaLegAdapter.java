@@ -1,14 +1,23 @@
 package com.sap.sailing.domain.orc.impl;
 
+import java.util.Collection;
+import java.util.stream.Collectors;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Wind;
+import com.sap.sailing.domain.confidence.ConfidenceFactory;
+import com.sap.sailing.domain.common.confidence.impl.PositionAndTimePointWeigher;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLeg;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
+import com.sap.sailing.domain.confidence.ConfidenceBasedWindAverager;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
+import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 
 /**
  * Abstract base class for adapting a {@link TrackedLeg} to the {@link ORCPerformanceCurveLeg} interface. If wind
@@ -25,9 +34,16 @@ import com.sap.sse.common.TimePoint;
 public abstract class AbstractORCPerformanceCurveTwaLegAdapter implements ORCPerformanceCurveLeg {
     private static final long serialVersionUID = -6432064480098807397L;
     private final TrackedLeg trackedLeg;
+    private final int numParts;
     
     public AbstractORCPerformanceCurveTwaLegAdapter(TrackedLeg trackedLeg) {
         this.trackedLeg = trackedLeg;
+        this.numParts = 10;
+    }
+    
+    public AbstractORCPerformanceCurveTwaLegAdapter(TrackedLeg trackedLeg, int numParts) {
+        this.trackedLeg = trackedLeg;
+        this.numParts = numParts;
     }
     
     protected TrackedLeg getTrackedLeg() {
@@ -35,14 +51,20 @@ public abstract class AbstractORCPerformanceCurveTwaLegAdapter implements ORCPer
     }
 
     private Wind getWind() {
-        final Wind result;
         if (trackedLeg == null || trackedLeg.getTrackedRace() == null) {
-            result = null;
+            return null;
         } else {
-            final TimePoint referenceTimePoint = trackedLeg.getReferenceTimePoint();
-            result = trackedLeg.getTrackedRace().getWind(trackedLeg.getMiddleOfLeg(referenceTimePoint), referenceTimePoint);
+            ConfidenceBasedWindAverager<Util.Pair<Position, TimePoint>> timeWeigher = 
+                    ConfidenceFactory.INSTANCE.createWindAverager(new PositionAndTimePointWeigher(
+                            1000, WindTrack.WIND_HALF_CONFIDENCE_DISTANCE));
+            Collection<TimePoint> referenceTimePoints = trackedLeg.getReferenceTimePoint(numParts);
+            Collection<WindWithConfidence<Util.Pair<Position, TimePoint>>> winds = referenceTimePoints.stream().flatMap(t -> {
+                return trackedLeg.getBreakedPartsOfLeg(t, numParts).stream()
+                        .map(p -> trackedLeg.getTrackedRace().getWindWithConfidence(trackedLeg.getMiddleOfLeg(t), t));
+            }).collect(Collectors.toList());
+            WindWithConfidence<Util.Pair<Position, TimePoint>> avg = timeWeigher.getAverage(winds, null);
+            return avg.getObject();
         }
-        return result;
     }
 
     @Override
