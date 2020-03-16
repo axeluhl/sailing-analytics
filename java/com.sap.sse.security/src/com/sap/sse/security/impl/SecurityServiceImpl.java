@@ -104,6 +104,7 @@ import com.sap.sse.security.interfaces.Social;
 import com.sap.sse.security.interfaces.SocialSettingsKeys;
 import com.sap.sse.security.interfaces.UserImpl;
 import com.sap.sse.security.interfaces.UserStore;
+import com.sap.sse.security.operations.AddPermissionForUserOperation;
 import com.sap.sse.security.operations.AddRoleForUserOperation;
 import com.sap.sse.security.operations.AddUserToUserGroupOperation;
 import com.sap.sse.security.operations.CreateRoleDefinitionOperation;
@@ -1204,7 +1205,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public void addPermissionForUser(String username, WildcardPermission permissionToAdd) {
-        apply(s->s.internalAddPermissionForUser(username, permissionToAdd));
+        apply(new AddPermissionForUserOperation(username, permissionToAdd));
     }
 
     @Override
