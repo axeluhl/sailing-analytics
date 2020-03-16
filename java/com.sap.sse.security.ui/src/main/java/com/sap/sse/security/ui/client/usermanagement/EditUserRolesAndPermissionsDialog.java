@@ -36,14 +36,12 @@ public class EditUserRolesAndPermissionsDialog extends DataEntryDialog<Void> {
                 /* validator */ null, /* animationEnabled */true, callback);
         final MultiSelectionModel<UserDTO> selectionAdapter = new MultiSelectionModel<>();
         super.getCancelButton().removeFromParent();
-
         final Runnable updater = new Runnable() {
             @Override
             public void run() {
                 selectionAdapter.clear();
                 userService.getUserManagementService().getRolesAndPermissionsForUser(selectedUsername,
                         new AsyncCallback<RolesAndPermissionsForUserDTO>() {
-
                             @Override
                             public void onSuccess(RolesAndPermissionsForUserDTO result) {
                                 selectionAdapter.clear();
@@ -60,12 +58,10 @@ public class EditUserRolesAndPermissionsDialog extends DataEntryDialog<Void> {
                         });
             }
         };
-
         wildcardPermissionPanel = new WildcardPermissionPanel(userService, stringMessages, errorReporter,
-                tableResources, selectionAdapter, updater);
+                tableResources, selectionAdapter, updater, oracle->createSuggestBox(oracle));
         userRoleDefinitionPanel = new UserRoleDefinitionPanel(userService, stringMessages, errorReporter,
-                tableResources, selectionAdapter, updater);
-
+                tableResources, selectionAdapter, updater, oracle->createSuggestBox(oracle), ()->createTextBox(""));
         updater.run();
     }
 
