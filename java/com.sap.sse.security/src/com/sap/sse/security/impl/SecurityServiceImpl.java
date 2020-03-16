@@ -108,6 +108,7 @@ import com.sap.sse.security.operations.AddUserToUserGroupOperation;
 import com.sap.sse.security.operations.CreateRoleDefinitionOperation;
 import com.sap.sse.security.operations.CreateUserGroupOperation;
 import com.sap.sse.security.operations.CreateUserOperation;
+import com.sap.sse.security.operations.DeleteRoleDefinitionOperation;
 import com.sap.sse.security.operations.DeleteUserGroupOperation;
 import com.sap.sse.security.operations.PutRoleDefinitionToUserGroupOperation;
 import com.sap.sse.security.operations.RemoveRoleDefinitionFromUserGroupOperation;
@@ -1098,7 +1099,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public void deleteRoleDefinition(RoleDefinition roleDefinition) {
         final UUID roleId = roleDefinition.getId();
-        apply(s->s.internalDeleteRoleDefinition(roleId));
+        apply(new DeleteRoleDefinitionOperation(roleId));
     }
 
     @Override
