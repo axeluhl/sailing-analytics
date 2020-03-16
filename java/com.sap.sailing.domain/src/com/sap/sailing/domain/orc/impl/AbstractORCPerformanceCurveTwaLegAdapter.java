@@ -51,20 +51,16 @@ public abstract class AbstractORCPerformanceCurveTwaLegAdapter implements ORCPer
     }
 
     private Wind getWind() {
-        if (trackedLeg == null || trackedLeg.getTrackedRace() == null) {
-            return null;
-        } else {
-            ConfidenceBasedWindAverager<Util.Pair<Position, TimePoint>> timeWeigher = 
-                    ConfidenceFactory.INSTANCE.createWindAverager(new PositionAndTimePointWeigher(
-                            1000, WindTrack.WIND_HALF_CONFIDENCE_DISTANCE));
-            Collection<TimePoint> referenceTimePoints = trackedLeg.getReferenceTimePoint(numParts);
-            Collection<WindWithConfidence<Util.Pair<Position, TimePoint>>> winds = referenceTimePoints.stream().flatMap(t -> {
-                return trackedLeg.getSectionsByPartsOfLeg(t, numParts).stream()
-                        .map(p -> trackedLeg.getTrackedRace().getWindWithConfidence(trackedLeg.getMiddleOfLeg(t), t));
-            }).collect(Collectors.toList());
-            WindWithConfidence<Util.Pair<Position, TimePoint>> avg = timeWeigher.getAverage(winds, null);
-            return avg.getObject();
-        }
+        ConfidenceBasedWindAverager<Util.Pair<Position, TimePoint>> timeWeigher = 
+                ConfidenceFactory.INSTANCE.createWindAverager(new PositionAndTimePointWeigher(
+                        1000, WindTrack.WIND_HALF_CONFIDENCE_DISTANCE));
+        Collection<TimePoint> referenceTimePoints = trackedLeg.getEquadistantReferenceTimePoints(numParts);
+        Collection<WindWithConfidence<Util.Pair<Position, TimePoint>>> winds = 
+                referenceTimePoints.stream().flatMap(timepoint -> {
+                    return trackedLeg.getEquidistantSectionsOfLeg(timepoint, numParts).stream()
+                            .map(p -> trackedLeg.getTrackedRace().getWindWithConfidence(trackedLeg.getMiddleOfLeg(timepoint), timepoint));
+                }).collect(Collectors.toList());
+        return timeWeigher.getAverage(winds, null).getObject();
     }
 
     @Override

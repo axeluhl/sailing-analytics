@@ -279,7 +279,7 @@ public class TrackedLegImpl implements TrackedLeg {
     }
     
     @Override
-    public Collection<Position> getSectionsByPartsOfLeg(TimePoint at, int sections) {
+    public Collection<Position> getEquidistantSectionsOfLeg(TimePoint at, int numberOfSections) {
         Optional<Position> approximateLegStartPosition = Optional
                 .ofNullable(getTrackedRace().getApproximatePosition(getLeg().getFrom(), at));
         Optional<Position> approximateLegEndPosition = Optional
@@ -287,7 +287,7 @@ public class TrackedLegImpl implements TrackedLeg {
         List<Position> positions = approximateLegStartPosition.map(legStart -> {
             return approximateLegEndPosition.map(legEnd -> {
                 Bearing bearing = legStart.getBearingGreatCircle(legEnd);
-                List<Position> breakedLegs = DoubleStream.iterate(0.1, d -> d + 1 / sections)
+                List<Position> breakedLegs = DoubleStream.iterate(0.1, d -> d + 1 / numberOfSections)
                         .mapToObj(scale -> legStart.getDistance(legEnd).scale(scale))
                         .map(position -> legStart.translateGreatCircle(bearing, position)).collect(Collectors.toList());
                 return breakedLegs;
@@ -517,18 +517,18 @@ public class TrackedLegImpl implements TrackedLeg {
     }
     
     @Override
-    public Collection<TimePoint> getReferenceTimePoint(int parts) {
+    public Collection<TimePoint> getEquadistantReferenceTimePoints(int numberOfPoints) {
         Iterable<MarkPassing> legStartMarkPassings = getTrackedRace().getMarkPassingsInOrder(getLeg().getFrom());
         Iterable<MarkPassing> legFinishMarkPassings = getTrackedRace().getMarkPassingsInOrder(getLeg().getTo());
         try {
             getTrackedRace().lockForRead(legStartMarkPassings);
-            final TimePoint firstLegStartMarkPassingTimePoint = convert2TimePoint(legStartMarkPassings);
+            final TimePoint firstLegStartMarkPassingTimePoint = convertMarkPassingIteratorToTimePoint(legStartMarkPassings);
             getTrackedRace().lockForRead(legFinishMarkPassings);
-            final TimePoint lastLegFinishMarkPassingTimePoint = convert2TimePoint(legFinishMarkPassings);
-            Duration equidistantTime = firstLegStartMarkPassingTimePoint.until(lastLegFinishMarkPassingTimePoint).divide(parts);
-            ArrayList<TimePoint> timePoints = new ArrayList<>(parts);
+            final TimePoint lastLegFinishMarkPassingTimePoint = convertMarkPassingIteratorToTimePoint(legFinishMarkPassings);
+            Duration equidistantTime = firstLegStartMarkPassingTimePoint.until(lastLegFinishMarkPassingTimePoint).divide(numberOfPoints);
+            ArrayList<TimePoint> timePoints = new ArrayList<>(numberOfPoints);
             TimePoint accum = firstLegStartMarkPassingTimePoint;
-            for (int i = 0; i < parts; i++) {
+            for (int i = 0; i < numberOfPoints; i++) {
                 timePoints.add(accum);
                 accum = accum.plus(equidistantTime);
             }
@@ -539,7 +539,7 @@ public class TrackedLegImpl implements TrackedLeg {
         }
     }
     
-    private TimePoint convert2TimePoint(Iterable<MarkPassing> leg) {
+    private TimePoint convertMarkPassingIteratorToTimePoint(Iterable<MarkPassing> leg) {
         return StreamSupport.stream(leg.spliterator(), false).map(MarkPassing::getTimePoint).findAny().orElse(MillisecondsTimePoint.now());
     }
 

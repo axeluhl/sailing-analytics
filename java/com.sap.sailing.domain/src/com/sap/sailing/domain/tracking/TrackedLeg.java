@@ -187,7 +187,7 @@ public interface TrackedLeg extends Serializable {
      * @param parts number of parts for breaking
      * @return
      */
-    Collection<Position> getSectionsByPartsOfLeg(TimePoint at, int sections);
+    Collection<Position> getEquidistantSectionsOfLeg(TimePoint at, int numberOfSections);
 
     /**
      * @param timepoint Used for positions of marks and wind information
@@ -245,7 +245,7 @@ public interface TrackedLeg extends Serializable {
      * @param numParts
      * @return
      */
-    Collection<TimePoint> getReferenceTimePoint(int numParts);
+    Collection<TimePoint> getEquadistantReferenceTimePoints(int numberOfPoints);
 
     /**
      * The leader at the given <code>timePoint</code> in this leg, based on the {@link TrackedRace#getRankingMetric() ranking metric}
