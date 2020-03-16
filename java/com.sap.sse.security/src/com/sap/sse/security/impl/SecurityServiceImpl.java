@@ -113,6 +113,7 @@ import com.sap.sse.security.operations.RemoveRoleDefinitionFromUserGroupOperatio
 import com.sap.sse.security.operations.RemoveUserFromUserGroupOperation;
 import com.sap.sse.security.operations.SetOwnershipOperation;
 import com.sap.sse.security.operations.UpdateSimpleUserPasswordOperation;
+import com.sap.sse.security.operations.UpdateUserPropertiesOperation;
 import com.sap.sse.security.persistence.PersistenceFactory;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.Account;
@@ -949,7 +950,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
-        apply(s->s.internalUpdateUserProperties(username, fullName, company, locale));
+        apply(new UpdateUserPropertiesOperation(username, fullName, company, locale));
     }
 
     @Override
