@@ -112,6 +112,7 @@ import com.sap.sse.security.operations.PutRoleDefinitionToUserGroupOperation;
 import com.sap.sse.security.operations.RemoveRoleDefinitionFromUserGroupOperation;
 import com.sap.sse.security.operations.RemoveUserFromUserGroupOperation;
 import com.sap.sse.security.operations.SetOwnershipOperation;
+import com.sap.sse.security.operations.UpdateSimpleUserEmailOperation;
 import com.sap.sse.security.operations.UpdateSimpleUserPasswordOperation;
 import com.sap.sse.security.operations.UpdateUserPropertiesOperation;
 import com.sap.sse.security.persistence.PersistenceFactory;
@@ -991,7 +992,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         }
         logger.info("Changing e-mail address of user "+username+" to "+newEmail);
         final String validationSecret = user.createRandomSecret();
-        apply(s->s.internalUpdateSimpleUserEmail(username, newEmail, validationSecret));
+        apply(new UpdateSimpleUserEmailOperation(username, newEmail, validationSecret));
         if (validationBaseURL != null && newEmail != null && !newEmail.trim().isEmpty()) {
             new Thread("e-mail validation after changing e-mail of user " + username + " to " + newEmail) {
                 @Override
