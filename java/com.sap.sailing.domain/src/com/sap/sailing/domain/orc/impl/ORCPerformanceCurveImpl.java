@@ -375,7 +375,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
             result.append(e.getKey());
             result.append(':');
             final Speed averageSpeed = getCourse().getTotalLength().inTime(e.getValue());
-            result.append(averageSpeed.getDuration(ORCCertificateImpl.NAUTICAL_MILE).asSeconds());
+            result.append(averageSpeed.getDuration(ORCCertificate.NAUTICAL_MILE).asSeconds());
             result.append("s/NM, ");
             result.append(e.getValue().asSeconds());
             result.append("s total; ");

@@ -1428,6 +1428,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String orcPerformanceCurveByImpliedWindRankingMetricDescription();
     String orcPerformanceCurveLeaderForBaselineRankingMetricDescription();
     String timeOnTimeAndDistanceRankingMetricDescription();
+    String yardstickNumber(double scale);
+    String changeScale();
     String timeOnTimeFactor();
     String timeOnDistanceAllowanceInSecondsPerNauticalMile();
     String calculatedTimeTraveled();
@@ -2360,6 +2362,18 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String spareMarksAndTheirOptionalDefaultMarkRoles();
     String impliedWind();
     String impliedWindTooltip();
+    String orcCertificate();
+    String linkToOrcCertificate();
+    String orcFileId();
+    String orcCertificateReferenceNumber();
+    String cdl();
+    String gph();
+    String lengthOverAllInMeters();
+    String timeAllowances();
+    String beatVMG();
+    String runVMG();
+    String beatAngles();
+    String runAngles();
     String whitelabelFooterLanguage();
     String whitelabelSailing();
 }
