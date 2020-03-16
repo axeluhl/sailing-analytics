@@ -112,6 +112,7 @@ import com.sap.sse.security.operations.CreateUserOperation;
 import com.sap.sse.security.operations.DeleteRoleDefinitionOperation;
 import com.sap.sse.security.operations.DeleteUserGroupOperation;
 import com.sap.sse.security.operations.PutRoleDefinitionToUserGroupOperation;
+import com.sap.sse.security.operations.RemovePermissionForUserOperation;
 import com.sap.sse.security.operations.RemoveRoleDefinitionFromUserGroupOperation;
 import com.sap.sse.security.operations.RemoveRoleFromUserOperation;
 import com.sap.sse.security.operations.RemoveUserFromUserGroupOperation;
@@ -1192,7 +1193,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public void removePermissionFromUser(String username, WildcardPermission permissionToRemove) {
-        apply(s->s.internalRemovePermissionForUser(username, permissionToRemove));
+        apply(new RemovePermissionForUserOperation(username, permissionToRemove));
     }
 
     @Override
