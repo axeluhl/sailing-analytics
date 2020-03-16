@@ -106,6 +106,7 @@ import com.sap.sse.security.interfaces.UserImpl;
 import com.sap.sse.security.interfaces.UserStore;
 import com.sap.sse.security.operations.AddPermissionForUserOperation;
 import com.sap.sse.security.operations.AddRoleForUserOperation;
+import com.sap.sse.security.operations.AddSettingOperation;
 import com.sap.sse.security.operations.AddUserToUserGroupOperation;
 import com.sap.sse.security.operations.CreateRoleDefinitionOperation;
 import com.sap.sse.security.operations.CreateUserGroupOperation;
@@ -1534,7 +1535,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (!isValidSettingsKey(key)) {
             throw new UserManagementException("Invalid key!");
         }
-        apply(s->s.internalAddSetting(key, clazz));
+        apply(new AddSettingOperation(key, clazz));
     }
 
     @Override
