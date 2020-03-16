@@ -106,6 +106,7 @@ import com.sap.sse.security.interfaces.UserImpl;
 import com.sap.sse.security.interfaces.UserStore;
 import com.sap.sse.security.operations.AddUserToUserGroupOperation;
 import com.sap.sse.security.operations.CreateUserGroupOperation;
+import com.sap.sse.security.operations.CreateUserOperation;
 import com.sap.sse.security.operations.DeleteUserGroupOperation;
 import com.sap.sse.security.operations.PutRoleDefinitionToUserGroupOperation;
 import com.sap.sse.security.operations.RemoveRoleDefinitionFromUserGroupOperation;
@@ -859,7 +860,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         byte[] salt = rng.nextBytes().getBytes();
         String hashedPasswordBase64 = hashPassword(password, salt);
         UsernamePasswordAccount upa = new UsernamePasswordAccount(username, hashedPasswordBase64, salt);
-        final User result = apply(s->s.internalCreateUser(username, email, upa)); // This also replicated the user creation
+        final User result = apply(new CreateUserOperation(username, email, upa)); // This also replicated the user creation
         addUserRoleToUser(result);
         final UserGroup tenant = getOrCreateTenantForUser(result);
         setDefaultTenantForCurrentServerForUser(username, tenant.getId());
