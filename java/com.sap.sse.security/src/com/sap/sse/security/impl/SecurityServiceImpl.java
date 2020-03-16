@@ -104,6 +104,7 @@ import com.sap.sse.security.interfaces.Social;
 import com.sap.sse.security.interfaces.SocialSettingsKeys;
 import com.sap.sse.security.interfaces.UserImpl;
 import com.sap.sse.security.interfaces.UserStore;
+import com.sap.sse.security.operations.AddRoleForUserOperation;
 import com.sap.sse.security.operations.AddUserToUserGroupOperation;
 import com.sap.sse.security.operations.CreateRoleDefinitionOperation;
 import com.sap.sse.security.operations.CreateUserGroupOperation;
@@ -1151,7 +1152,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         final UUID roleDefinitionId = role.getRoleDefinition().getId();
         final UUID idOfTenantQualifyingRole = role.getQualifiedForTenant() == null ? null : role.getQualifiedForTenant().getId();
         final String nameOfUserQualifyingRole = role.getQualifiedForUser() == null ? null : role.getQualifiedForUser().getName();
-        apply(s->s.internalAddRoleForUser(username, roleDefinitionId, idOfTenantQualifyingRole, nameOfUserQualifyingRole));
+        apply(new AddRoleForUserOperation(username, roleDefinitionId, idOfTenantQualifyingRole, nameOfUserQualifyingRole));
     }
 
     @Override
