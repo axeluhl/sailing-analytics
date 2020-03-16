@@ -120,6 +120,7 @@ import com.sap.sse.security.operations.RemoveRoleDefinitionFromUserGroupOperatio
 import com.sap.sse.security.operations.RemoveRoleFromUserOperation;
 import com.sap.sse.security.operations.RemoveUserFromUserGroupOperation;
 import com.sap.sse.security.operations.SetOwnershipOperation;
+import com.sap.sse.security.operations.SetPreferenceOperation;
 import com.sap.sse.security.operations.SetSettingOperation;
 import com.sap.sse.security.operations.UpdateRoleDefinitionOperation;
 import com.sap.sse.security.operations.UpdateSimpleUserEmailOperation;
@@ -1586,13 +1587,13 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public void setPreference(final String username, final String key, final String value) {
-        apply(s->s.internalSetPreference(username, key, value));
+        apply(new SetPreferenceOperation(username, key, value));
     }
 
     @Override
     public void setPreferenceObject(final String username, final String key, final Object value) {
         final String preferenceObjectAsString = internalSetPreferenceObject(username, key, value);
-        apply(s->s.internalSetPreference(username, key, preferenceObjectAsString));
+        apply(new SetPreferenceOperation(username, key, preferenceObjectAsString));
     }
 
     @Override
