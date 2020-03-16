@@ -110,6 +110,7 @@ import com.sap.sse.security.operations.DeleteUserGroupOperation;
 import com.sap.sse.security.operations.PutRoleDefinitionToUserGroupOperation;
 import com.sap.sse.security.operations.RemoveRoleDefinitionFromUserGroupOperation;
 import com.sap.sse.security.operations.RemoveUserFromUserGroupOperation;
+import com.sap.sse.security.operations.SetOwnershipOperation;
 import com.sap.sse.security.persistence.PersistenceFactory;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.Account;
@@ -864,7 +865,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         setDefaultTenantForCurrentServerForUser(username, tenant.getId());
         // the new user becomes its owner to ensure the user role is working correctly
         // the default tenant is the owning tenant to allow users having admin role for a specific server tenant to also be able to delete users
-        apply(s->s.internalSetOwnership(result.getIdentifier(), username, groupOwningUser==null?null:groupOwningUser.getId(), username));
+        apply(new SetOwnershipOperation(result.getIdentifier(), username, groupOwningUser==null?null:groupOwningUser.getId(), username));
         updateUserProperties(username, fullName, company, locale);
         // email has been set during creation already; the following call will trigger the e-mail validation process
         updateSimpleUserEmail(username, email, validationBaseURL);
