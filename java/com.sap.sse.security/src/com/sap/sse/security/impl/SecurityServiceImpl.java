@@ -106,6 +106,7 @@ import com.sap.sse.security.interfaces.UserImpl;
 import com.sap.sse.security.interfaces.UserStore;
 import com.sap.sse.security.operations.AddUserToUserGroupOperation;
 import com.sap.sse.security.operations.CreateUserGroupOperation;
+import com.sap.sse.security.operations.DeleteUserGroupOperation;
 import com.sap.sse.security.operations.PutRoleDefinitionToUserGroupOperation;
 import com.sap.sse.security.operations.RemoveRoleDefinitionFromUserGroupOperation;
 import com.sap.sse.security.operations.RemoveUserFromUserGroupOperation;
@@ -763,8 +764,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public void deleteUserGroup(UserGroup userGroup) throws UserGroupManagementException {
         logger.info("Removing user group "+userGroup.getName());
-        final UUID groupId = userGroup.getId();
-        apply(s->s.internalDeleteUserGroup(groupId));
+        apply(new DeleteUserGroupOperation(userGroup.getId()));
     }
     
     @Override
