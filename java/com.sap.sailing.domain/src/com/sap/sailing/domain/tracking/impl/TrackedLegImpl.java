@@ -279,7 +279,7 @@ public class TrackedLegImpl implements TrackedLeg {
     }
     
     @Override
-    public Collection<Position> getBreakedPartsOfLeg(TimePoint at, int parts) {
+    public Collection<Position> getSectionsByPartsOfLeg(TimePoint at, int sections) {
         Optional<Position> approximateLegStartPosition = Optional
                 .ofNullable(getTrackedRace().getApproximatePosition(getLeg().getFrom(), at));
         Optional<Position> approximateLegEndPosition = Optional
@@ -287,7 +287,7 @@ public class TrackedLegImpl implements TrackedLeg {
         List<Position> positions = approximateLegStartPosition.map(legStart -> {
             return approximateLegEndPosition.map(legEnd -> {
                 Bearing bearing = legStart.getBearingGreatCircle(legEnd);
-                List<Position> breakedLegs = DoubleStream.iterate(0.1, d -> d + 10 / parts)
+                List<Position> breakedLegs = DoubleStream.iterate(0.1, d -> d + 1 / sections)
                         .mapToObj(scale -> legStart.getDistance(legEnd).scale(scale))
                         .map(position -> legStart.translateGreatCircle(bearing, position)).collect(Collectors.toList());
                 return breakedLegs;

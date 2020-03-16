@@ -187,7 +187,7 @@ public interface TrackedLeg extends Serializable {
      * @param parts number of parts for breaking
      * @return
      */
-    Collection<Position> getBreakedPartsOfLeg(TimePoint at, int parts);
+    Collection<Position> getSectionsByPartsOfLeg(TimePoint at, int sections);
 
     /**
      * @param timepoint Used for positions of marks and wind information
