@@ -105,6 +105,7 @@ import com.sap.sse.security.interfaces.SocialSettingsKeys;
 import com.sap.sse.security.interfaces.UserImpl;
 import com.sap.sse.security.interfaces.UserStore;
 import com.sap.sse.security.operations.AddUserToUserGroupOperation;
+import com.sap.sse.security.operations.CreateRoleDefinitionOperation;
 import com.sap.sse.security.operations.CreateUserGroupOperation;
 import com.sap.sse.security.operations.CreateUserOperation;
 import com.sap.sse.security.operations.DeleteUserGroupOperation;
@@ -1086,7 +1087,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public RoleDefinition createRoleDefinition(UUID roleId, String name) {
-        return apply(s->s.internalCreateRoleDefinition(roleId, name));
+        return apply(new CreateRoleDefinitionOperation(roleId, name));
     }
 
     @Override
