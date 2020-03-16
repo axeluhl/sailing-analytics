@@ -115,6 +115,7 @@ import com.sap.sse.security.operations.SetOwnershipOperation;
 import com.sap.sse.security.operations.UpdateSimpleUserEmailOperation;
 import com.sap.sse.security.operations.UpdateSimpleUserPasswordOperation;
 import com.sap.sse.security.operations.UpdateUserPropertiesOperation;
+import com.sap.sse.security.operations.ValidateEmailOperation;
 import com.sap.sse.security.persistence.PersistenceFactory;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.Account;
@@ -1022,7 +1023,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
-        return apply(s->s.internalValidateEmail(username, validationSecret));
+        return apply(new ValidateEmailOperation(username, validationSecret));
     }
     
     @Override
