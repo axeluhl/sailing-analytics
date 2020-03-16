@@ -1,0 +1,22 @@
+package com.sap.sse.security.operations;
+
+import com.sap.sse.replication.OperationWithResult;
+import com.sap.sse.security.impl.ReplicableSecurityService;
+
+public class UnsetPreferenceOperation implements OperationWithResult<ReplicableSecurityService, Void> {
+    private static final long serialVersionUID = 1L;
+
+    protected final String username;
+    protected final String key;
+
+    public UnsetPreferenceOperation(String username, String key) {
+        this.username = username;
+        this.key = key;
+    }
+
+    @Override
+    public Void internalApplyTo(ReplicableSecurityService toState) throws Exception {
+        toState.internalUnsetPreference(username, key);
+        return null;
+    }
+}
