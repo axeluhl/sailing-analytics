@@ -35,7 +35,7 @@ public class EditUserRolesAndPermissionsDialog extends DataEntryDialog<Void> {
         super(stringMessages.editRolesAndPermissionsForUser(selectedUsername), null, stringMessages.close(), null,
                 /* validator */ null, /* animationEnabled */true, callback);
         final MultiSelectionModel<UserDTO> selectionAdapter = new MultiSelectionModel<>();
-        super.getCancelButton().removeFromParent();
+        super.getCancelButton().setVisible(false);
         final Runnable updater = new Runnable() {
             @Override
             public void run() {
