@@ -113,6 +113,7 @@ import com.sap.sse.security.operations.DeleteRoleDefinitionOperation;
 import com.sap.sse.security.operations.DeleteUserGroupOperation;
 import com.sap.sse.security.operations.PutRoleDefinitionToUserGroupOperation;
 import com.sap.sse.security.operations.RemoveRoleDefinitionFromUserGroupOperation;
+import com.sap.sse.security.operations.RemoveRoleFromUserOperation;
 import com.sap.sse.security.operations.RemoveUserFromUserGroupOperation;
 import com.sap.sse.security.operations.SetOwnershipOperation;
 import com.sap.sse.security.operations.UpdateRoleDefinitionOperation;
@@ -1173,7 +1174,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         final UUID roleDefinitionId = role.getRoleDefinition().getId();
         final UUID idOfTenantQualifyingRole = role.getQualifiedForTenant() == null ? null : role.getQualifiedForTenant().getId();
         final String nameOfUserQualifyingRole = role.getQualifiedForUser() == null ? null : role.getQualifiedForUser().getName();
-        apply(s->s.internalRemoveRoleFromUser(username, roleDefinitionId, idOfTenantQualifyingRole, nameOfUserQualifyingRole));
+        apply(new RemoveRoleFromUserOperation(username, roleDefinitionId, idOfTenantQualifyingRole, nameOfUserQualifyingRole));
     }
 
     @Override
