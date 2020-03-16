@@ -112,6 +112,7 @@ import com.sap.sse.security.operations.CreateUserGroupOperation;
 import com.sap.sse.security.operations.CreateUserOperation;
 import com.sap.sse.security.operations.DeleteRoleDefinitionOperation;
 import com.sap.sse.security.operations.DeleteUserGroupOperation;
+import com.sap.sse.security.operations.DeleteUserOperation;
 import com.sap.sse.security.operations.PutRoleDefinitionToUserGroupOperation;
 import com.sap.sse.security.operations.RemovePermissionForUserOperation;
 import com.sap.sse.security.operations.RemoveRoleDefinitionFromUserGroupOperation;
@@ -1220,7 +1221,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (userToDelete == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
-        apply(s -> s.internalDeleteUser(username));
+        apply(new DeleteUserOperation(username));
     }
 
     @Override
