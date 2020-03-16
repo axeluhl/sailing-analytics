@@ -112,6 +112,7 @@ import com.sap.sse.security.operations.PutRoleDefinitionToUserGroupOperation;
 import com.sap.sse.security.operations.RemoveRoleDefinitionFromUserGroupOperation;
 import com.sap.sse.security.operations.RemoveUserFromUserGroupOperation;
 import com.sap.sse.security.operations.SetOwnershipOperation;
+import com.sap.sse.security.operations.UpdateSimpleUserPasswordOperation;
 import com.sap.sse.security.persistence.PersistenceFactory;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.Account;
@@ -929,7 +930,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         RandomNumberGenerator rng = new SecureRandomNumberGenerator();
         byte[] salt = rng.nextBytes().getBytes();
         String hashedPasswordBase64 = hashPassword(newPassword, salt);
-        apply(s->s.internalUpdateSimpleUserPassword(user.getName(), salt, hashedPasswordBase64));
+        apply(new UpdateSimpleUserPasswordOperation(user.getName(), salt, hashedPasswordBase64));
     }
     
     @Override
