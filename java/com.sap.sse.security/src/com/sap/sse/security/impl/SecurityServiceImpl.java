@@ -114,6 +114,7 @@ import com.sap.sse.security.operations.PutRoleDefinitionToUserGroupOperation;
 import com.sap.sse.security.operations.RemoveRoleDefinitionFromUserGroupOperation;
 import com.sap.sse.security.operations.RemoveUserFromUserGroupOperation;
 import com.sap.sse.security.operations.SetOwnershipOperation;
+import com.sap.sse.security.operations.UpdateRoleDefinitionOperation;
 import com.sap.sse.security.operations.UpdateSimpleUserEmailOperation;
 import com.sap.sse.security.operations.UpdateSimpleUserPasswordOperation;
 import com.sap.sse.security.operations.UpdateUserPropertiesOperation;
@@ -1111,7 +1112,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public void updateRoleDefinition(RoleDefinition roleDefinitionWithNewProperties) {
-        apply(s->s.internalUpdateRoleDefinition(roleDefinitionWithNewProperties));
+        apply(new UpdateRoleDefinitionOperation(roleDefinitionWithNewProperties));
     }
 
     @Override
