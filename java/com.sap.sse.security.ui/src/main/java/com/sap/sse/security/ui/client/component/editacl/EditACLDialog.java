@@ -1,6 +1,7 @@
 package com.sap.sse.security.ui.client.component.editacl;
 
 import static com.sap.sse.gwt.client.Notification.NotificationType.ERROR;
+import static com.sap.sse.gwt.shared.DebugConstants.DEBUG_ID_ATTRIBUTE;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -66,6 +67,8 @@ public class EditACLDialog extends DataEntryDialog<AclDialogResult> {
                         aclEditPanel.updateAcl(result);
                     }
                 });
+       
+       super.getDialogBox().getElement().setAttribute(DEBUG_ID_ATTRIBUTE, "AclDialog");
     }
 
     @Override

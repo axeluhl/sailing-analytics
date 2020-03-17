@@ -880,7 +880,6 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                                     .getQualifiedObjectIdentifier(associationTypeIdentifier);
                             getSecurityService().addToAccessControlList(qualifiedObjectAssociationIdentifier,
                                     null, DefaultActions.READ.name());
-
                             getSecurityService().addRoleForUser(user, role);
                             logger.info(message);
                         }
