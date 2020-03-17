@@ -15,7 +15,6 @@ import org.openqa.selenium.WebElement;
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.selenium.api.core.ApiContext;
 import com.sap.sailing.selenium.api.event.EventApi;
-import com.sap.sailing.selenium.api.event.EventApi.Event;
 import com.sap.sailing.selenium.api.event.SecurityApi;
 import com.sap.sailing.selenium.pages.adminconsole.AclPopupPO;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
@@ -43,8 +42,7 @@ public class AclRevokeAnonymousTest extends AbstractSeleniumTest {
         ownerCtx = createApiContext(getContextRoot(), SERVER_CONTEXT, "donald", "daisy0815");
         adminConsole = goToPage(getWebDriver(), getContextRoot());
         adminConsole.goToLocalServerPanel().setSelfServiceServer(true);
-        final Event event = eventApi.createEvent(ownerCtx, EVENT_NAME, BOAT_CLASS, CompetitorRegistrationType.CLOSED,
-                "Some special place");
+        eventApi.createEvent(ownerCtx, EVENT_NAME, BOAT_CLASS, CompetitorRegistrationType.CLOSED, "Some special place");
     }
 
     @Test

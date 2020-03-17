@@ -13,7 +13,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -60,8 +59,6 @@ public class AclEditPanel extends Composite {
 
     private static AclEditPanelUiBinder uiBinder = GWT.create(AclEditPanelUiBinder.class);
     
-    private static Logger log = Logger.getLogger(AclEditPanel.class.getName());
-
     interface AclEditPanelUiBinder extends UiBinder<Widget, AclEditPanel> {
     }
 
