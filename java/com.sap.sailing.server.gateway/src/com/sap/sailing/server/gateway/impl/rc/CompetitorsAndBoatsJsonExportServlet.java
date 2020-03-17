@@ -71,8 +71,8 @@ public class CompetitorsAndBoatsJsonExportServlet extends AbstractJsonHttpServle
         }
         for (Competitor competitor : leaderboard.getCompetitors(raceColumn, fleet)) {
             Boat boat = leaderboard.getBoatOfCompetitor(competitor, raceColumn, fleet);
-            if (getSecurityService().hasCurrentUserExplicitPermissions(competitor, PublicReadableActions.READ_PUBLIC) &&
-                    getSecurityService().hasCurrentUserExplicitPermissions(boat, PublicReadableActions.READ_PUBLIC)) {
+            if (getSecurityService().hasCurrentUserExplicitPermissions(competitor, PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS) &&
+                    getSecurityService().hasCurrentUserExplicitPermissions(boat, PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS)) {
                 // suppress those competitors / boats from the result for which the current user does not even have READ_PUBLIC permissions
                 CompetitorAndBoatJsonSerializer competitorsAndBoatsSerializer = CompetitorAndBoatJsonSerializer.create(
                         getSecurityService().hasCurrentUserReadPermission(competitor));

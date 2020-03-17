@@ -15,7 +15,7 @@ public class UserGroupImpl extends AbstractUserGroupImpl<User, RoleDefinition> i
     private static final long serialVersionUID = -1290667868080992763L;
 
     public UserGroupImpl(UUID id, String name) {
-        super(id, name, new HashSet<User>(), new HashMap<RoleDefinition, Boolean>());
+        this(id, name, new HashSet<>(), new HashMap<>());
     }
 
     public UserGroupImpl(UUID id, String name, Set<User> users, Map<RoleDefinition, Boolean> roleDefinitionMap) {

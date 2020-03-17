@@ -48,7 +48,7 @@ public class MailServiceImpl implements ReplicableMailService {
     private ReplicationMasterDescriptor replicatingFromMaster;
     private final ConcurrentMap<OperationExecutionListener<ReplicableMailService>, OperationExecutionListener<ReplicableMailService>> operationExecutionListeners;
     private final Set<OperationWithResultWithIdWrapper<?, ?>> operationsSentToMasterForReplication = new HashSet<>();
-    private ThreadLocal<Boolean> currentlyFillingFromInitialLoad = ThreadLocal.withInitial(() -> false);
+    private volatile boolean currentlyFillingFromInitialLoad;
     
     private ThreadLocal<Boolean> currentlyApplyingOperationReceivedFromMaster = ThreadLocal.withInitial(() -> false);
 
@@ -63,6 +63,7 @@ public class MailServiceImpl implements ReplicableMailService {
     private OperationsToMasterSendingQueue unsentOperationForMasterQueue;
 
     public MailServiceImpl(Properties mailProperties, MailServiceResolver mailServiceResolver) {
+        this.currentlyFillingFromInitialLoad = false;
         this.mailProperties = mailProperties;
         this.operationExecutionListeners = new ConcurrentHashMap<>();
         this.mailServiceResolver = mailServiceResolver;
@@ -238,12 +239,12 @@ public class MailServiceImpl implements ReplicableMailService {
 
     @Override
     public boolean isCurrentlyFillingFromInitialLoad() {
-        return currentlyFillingFromInitialLoad.get();
+        return currentlyFillingFromInitialLoad;
     }
 
     @Override
     public void setCurrentlyFillingFromInitialLoad(boolean currentlyFillingFromInitialLoad) {
-        this.currentlyFillingFromInitialLoad.set(currentlyFillingFromInitialLoad);
+        this.currentlyFillingFromInitialLoad = currentlyFillingFromInitialLoad;
     }
 
     @Override

@@ -1,6 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -8,6 +7,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.content.Loader;
+import android.support.v4.util.ObjectsCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -27,7 +27,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.BitmapHelper;
 import com.sap.sailing.android.shared.util.BroadcastManager;
@@ -65,12 +64,14 @@ import com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout;
 import com.sap.sailing.racecommittee.app.ui.utils.CompetitorUtils;
 import com.sap.sailing.racecommittee.app.ui.views.SearchView;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -79,10 +80,16 @@ import java.util.Set;
 
 public class PenaltyFragment extends BaseFragment
         implements PopupMenu.OnMenuItemClickListener, ItemListener, SearchView.SearchTextWatcher {
-    private static final String TAG = PenaltyFragment.class.getName();
 
     private static final int COMPETITOR_LOADER = 0;
     private static final int LEADERBOARD_ORDER_LOADER = 2;
+
+    private CompetitorResultsList<CompetitorResultEditableImpl> mCompetitorResults =
+            new CompetitorResultsList<CompetitorResultEditableImpl>(Collections.synchronizedList(new ArrayList<CompetitorResultEditableImpl>()));
+    private CompetitorResultsList<CompetitorResult> mChangedData =
+            new CompetitorResultsList<CompetitorResult>(Collections.synchronizedList(new ArrayList<CompetitorResult>()));
+    private CompetitorResultsList<CompetitorResult> mConfirmedData =
+            new CompetitorResultsList<CompetitorResult>(Collections.synchronizedList(new ArrayList<CompetitorResult>()));
 
     private View mButtonBar;
     private Spinner mPenaltyDropDown;
@@ -90,9 +97,7 @@ public class PenaltyFragment extends BaseFragment
     private Button mPublishButton;
     private PenaltyAdapter mAdapter;
     private TextView mEntryCount;
-    private CompetitorResultsList<CompetitorResultEditableImpl> mCompetitorResults;
-    private CompetitorResults mDraftData;
-    private CompetitorResults mConfirmedData;
+
     private View mListButtonLayout;
     private ImageView mListButton;
     private HeaderLayout mHeader;
@@ -106,17 +111,12 @@ public class PenaltyFragment extends BaseFragment
         return fragment;
     }
 
-    @Nullable
     @Override
-    @TargetApi(Build.VERSION_CODES.KITKAT)
     public View onCreateView(final LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.race_penalty_fragment, container, false);
 
         mStateChangeListener = new StateChangeListener(this);
 
-        mCompetitorResults = new CompetitorResultsList<>(new ArrayList<CompetitorResultEditableImpl>());
-        mDraftData = new CompetitorResultsImpl();
-        mConfirmedData = new CompetitorResultsImpl();
         mSearchView = ViewHelper.get(layout, R.id.competitor_search);
         if (mSearchView != null) {
             mSearchView.setSearchTextWatcher(this);
@@ -127,7 +127,7 @@ public class PenaltyFragment extends BaseFragment
             mListButtonLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    sendUnconfirmed();
+//                    sendUnconfirmed();
                     RaceFragment fragment = TrackingListFragment.newInstance(new Bundle(), 1);
                     int viewId = R.id.race_content;
                     switch (getRaceState().getStatus()) {
@@ -200,25 +200,23 @@ public class PenaltyFragment extends BaseFragment
             mPublishButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    sendConfirmed();
+                    TimePoint now = MillisecondsTimePoint.now();
+                    CompetitorResults diffChanged = getCompetitorResultsDiff(mChangedData);
+                    if (diffChanged.size() > 0) {
+                        getRaceState().setFinishPositioningListChanged(now, diffChanged);
+                    }
+                    CompetitorResults diffConfirmed = getCompetitorResultsDiff(mConfirmedData);
+                    if (diffConfirmed.size() > 0) {
+                        getRaceState().setFinishPositioningConfirmed(now, diffConfirmed);
+                    }
+                    initLocalData();
+                    setPublishButton();
+                    Toast.makeText(getActivity(), R.string.publish_clicked, Toast.LENGTH_SHORT).show();
                 }
             });
         }
         mEntryCount = ViewHelper.get(layout, R.id.competitor_entry_count);
         return layout;
-    }
-
-    private void setReason(String reason) {
-        for (CompetitorResultEditableImpl item : mCompetitorResults) {
-            if (item.isChecked()) {
-                item.setMergeState(MergeState.OK);
-                item.setMaxPointsReason(MaxPointsReason.valueOf(reason));
-                item.setChecked(false);
-                item.setDirty(true);
-            }
-        }
-        mAdapter.notifyDataSetChanged();
-        setPublishButton();
     }
 
     @Override
@@ -290,28 +288,9 @@ public class PenaltyFragment extends BaseFragment
         if (mListButtonLayout != null) {
             mSearchView.isEditSmall(mListButtonLayout.getVisibility() == View.VISIBLE);
         }
-        initLocalData();
+
         loadCompetitors();
-    }
-
-    private void initLocalData() {
-        mDraftData.clear();
-        if (getRaceState().getFinishPositioningList() != null) {
-            for (CompetitorResult item : getRaceState().getFinishPositioningList()) {
-                mDraftData.add(new CompetitorResultImpl(item));
-            }
-        }
-
-        initConfirmedData();
-    }
-
-    private void initConfirmedData() {
-        mConfirmedData.clear();
-        if (getRaceState().getConfirmedFinishPositioningList() != null) {
-            for (CompetitorResult item : getRaceState().getConfirmedFinishPositioningList()) {
-                mConfirmedData.add(new CompetitorResultImpl(item));
-            }
-        }
+        loadLeaderboardResult();
     }
 
     @Override
@@ -321,6 +300,8 @@ public class PenaltyFragment extends BaseFragment
         if (getRace() != null && getRaceState() != null) {
             getRaceState().addChangedListener(mStateChangeListener);
         }
+
+        initLocalData();
 
         Intent intent = new Intent(AppConstants.INTENT_ACTION_ON_LIFECYCLE);
         intent.putExtra(AppConstants.INTENT_ACTION_EXTRA_LIFECYCLE, AppConstants.INTENT_ACTION_EXTRA_START);
@@ -336,15 +317,10 @@ public class PenaltyFragment extends BaseFragment
             getRaceState().removeChangedListener(mStateChangeListener);
         }
 
-        boolean dirty = false;
-        for (CompetitorResultEditableImpl item : mCompetitorResults) {
-            if (item.isDirty()) {
-                dirty = true;
-                break;
-            }
-        }
-        if (dirty) {
-            sendUnconfirmed();
+        //Check and send the diff of changed results
+        CompetitorResults diff = getCompetitorResultsDiff(mChangedData);
+        if (diff.size() > 0) {
+            getRaceState().setFinishPositioningListChanged(MillisecondsTimePoint.now(), diff);
         }
 
         Intent intent = new Intent(AppConstants.INTENT_ACTION_ON_LIFECYCLE);
@@ -353,19 +329,32 @@ public class PenaltyFragment extends BaseFragment
         BroadcastManager.getInstance(getActivity()).addIntent(intent);
     }
 
-    private void sendUnconfirmed() {
-        CompetitorResultsImpl results = getCompetitorResultsDiff(mDraftData);
-        if (results.size() > 0) {
-            getRaceState().setFinishPositioningListChanged(MillisecondsTimePoint.now(), results);
+    private void setReason(String reason) {
+        for (CompetitorResultEditableImpl item : mCompetitorResults) {
+            if (item.isChecked()) {
+                item.setMergeState(MergeState.OK);
+                item.setMaxPointsReason(MaxPointsReason.valueOf(reason));
+                item.setChecked(false);
+            }
         }
+        mAdapter.notifyDataSetChanged();
+        setPublishButton();
     }
 
-    private void sendConfirmed() {
-        CompetitorResultsImpl results = getCompetitorResultsDiff(mDraftData);
-        getRaceState().setFinishPositioningConfirmed(MillisecondsTimePoint.now(), results);
-        Toast.makeText(getActivity(), R.string.publish_clicked, Toast.LENGTH_SHORT).show();
-        initLocalData();
-        setPublishButton();
+    private void initLocalData() {
+        mChangedData.clear();
+        if (getRaceState().getFinishPositioningList() != null) {
+            for (CompetitorResult item : getRaceState().getFinishPositioningList()) {
+                mChangedData.add(new CompetitorResultImpl(item));
+            }
+        }
+
+        mConfirmedData.clear();
+        if (getRaceState().getConfirmedFinishPositioningList() != null) {
+            for (CompetitorResult item : getRaceState().getConfirmedFinishPositioningList()) {
+                mConfirmedData.add(new CompetitorResultImpl(item));
+            }
+        }
     }
 
     private String[] getAllMaxPointsReasons() {
@@ -408,7 +397,6 @@ public class PenaltyFragment extends BaseFragment
                 dataManager.createLeaderboardLoader(getRace(), new LoadClient<LeaderboardResult>() {
                     @Override
                     public void onLoadFailed(Exception reason) {
-                        ExLog.ex(getActivity(), TAG, reason);
                     }
 
                     @Override
@@ -503,92 +491,149 @@ public class PenaltyFragment extends BaseFragment
         setPublishButton();
     }
 
-    private void mergeData(CompetitorResults results, boolean checkDirty) {
-        Map<Serializable, String> changedCompetitor = new HashMap<>();
+    private void mergeData(CompetitorResults results) {
+        //Wrap results
+        CompetitorResultsList<CompetitorResultEditableImpl> data = new CompetitorResultsList<CompetitorResultEditableImpl>(new ArrayList<CompetitorResultEditableImpl>());
         for (CompetitorResult result : results) {
-            CompetitorResultEditableImpl item = null;
-            CompetitorResult draft = null;
-            for (CompetitorResultEditableImpl edited : mCompetitorResults) {
-                if (result.getCompetitorId().equals(edited.getCompetitorId())) {
-                    item = edited;
+            data.add(new CompetitorResultEditableImpl(result));
+        }
+
+        //Evaluate changes between current race log and changed events
+        CompetitorResults localDiff = getCompetitorResultsDiff(mChangedData);
+        CompetitorResults raceLogDiff = getCompetitorResultsDiff(mChangedData, data);
+
+        Map<Serializable, String> changedCompetitor = new HashMap<>();
+        //Iterate over the race log diff
+        for (CompetitorResult result : raceLogDiff) {
+            CompetitorResult initial = null;
+            CompetitorResultEditableImpl local = null;
+            CompetitorResultEditableImpl draft = null;
+
+            for (CompetitorResult item : mChangedData) {
+                if (result.getCompetitorId().equals(item.getCompetitorId())) {
+                    initial = item;
                     break;
                 }
             }
-            for (CompetitorResult saved : mDraftData) {
-                if (result.getCompetitorId().equals(saved.getCompetitorId())) {
-                    draft = saved;
+            for (CompetitorResultEditableImpl item : mCompetitorResults) {
+                if (result.getCompetitorId().equals(item.getCompetitorId())) {
+                    local = item;
                     break;
                 }
             }
-            if (item != null) { // result is in list
-                if (checkDirty & item.isDirty()) {
-                    // check max point reason
-                    if (!item.getMaxPointsReason().equals(result.getMaxPointsReason())) {
-                        if (draft != null) {
-                            if (item.getMaxPointsReason().equals(draft.getMaxPointsReason())) {
-                                setMergeState(item, MergeState.WARNING);
-                            } else {
-                                setMergeState(item, MergeState.ERROR);
-                            }
-                        } else {
-                            setMergeState(item, MergeState.ERROR);
-                        }
-                        item.setMaxPointsReason(result.getMaxPointsReason());
-                        changedCompetitor.put(item.getCompetitorId(), CompetitorUtils.getDisplayName(item));
-                    }
-
-                    // check score
-                    if (item.getScore() != null) {
-                        if (!item.getScore().equals(result.getScore())) {
-                            if (draft != null) {
-                                if (item.getScore().equals(draft.getScore())) {
-                                    setMergeState(item, MergeState.WARNING);
-                                } else {
-                                    setMergeState(item, MergeState.ERROR);
-                                }
-                            } else {
-                                setMergeState(item, MergeState.ERROR);
-                            }
-                            item.setScore(result.getScore());
-                            changedCompetitor.put(item.getCompetitorId(), CompetitorUtils.getDisplayName(item));
-                        }
-                    } else if (result.getScore() != null) {
-                        setMergeState(item, MergeState.ERROR);
-                        item.setScore(result.getScore());
-                        changedCompetitor.put(item.getCompetitorId(), CompetitorUtils.getDisplayName(item));
-                    }
-
-                    // check score
-                    if (item.getComment() != null) {
-                        if (!item.getComment().equals(result.getComment())) {
-                            if (draft != null) {
-                                if (item.getComment().equals(draft.getComment())) {
-                                    setMergeState(item, MergeState.WARNING);
-                                } else {
-                                    setMergeState(item, MergeState.ERROR);
-                                }
-                            } else {
-                                setMergeState(item, MergeState.ERROR);
-                            }
-                            item.setComment(item.getComment() + " ## " + result.getComment());
-                            changedCompetitor.put(item.getCompetitorId(), CompetitorUtils.getDisplayName(item));
-                        }
-                    } else if (result.getComment() != null) {
-                        setMergeState(item, MergeState.ERROR);
-                        item.setComment(result.getComment());
-                        changedCompetitor.put(item.getCompetitorId(), CompetitorUtils.getDisplayName(item));
-                    }
-
-                    // check merge state
-                    if (!item.getMergeState().equals(result.getMergeState())) {
-                        setMergeState(item, result.getMergeState());
-                        changedCompetitor.put(item.getCompetitorId(), CompetitorUtils.getDisplayName(item));
-                    }
-                } else {
-                    item.setValue(result);
+            //Search draft in local diff
+            for (CompetitorResult item : localDiff) {
+                if (result.getCompetitorId().equals(item.getCompetitorId())) {
+                    draft = new CompetitorResultEditableImpl(local != null ? local : item);
+                    break;
                 }
-            } else { // unknown result, so it will be added
+            }
+
+            if (local == null) {
+                //Local item never exists; no need to compare properties
                 mCompetitorResults.add(new CompetitorResultEditableImpl(result));
+            } else if (draft == null) {
+                //Only the remote item has changes
+                local.setMaxPointsReason(result.getMaxPointsReason());
+                local.setScore(result.getScore());
+                local.setComment(result.getComment());
+                local.setMergeState(MergeState.OK);
+            } else {
+                //Both items have the same changes; nothing to do
+                if (areEqual(draft, result)) {
+                    break;
+                }
+
+                //At least a warning
+                MergeState state = MergeState.WARNING;
+
+                //Compare penalties
+                MaxPointsReason maxPointsReason = result.getMaxPointsReason();
+                if (!ObjectsCompat.equals(local.getMaxPointsReason(), result.getMaxPointsReason())) {
+                    if (initial != null) {
+                        if (!ObjectsCompat.equals(initial.getMaxPointsReason(), draft.getMaxPointsReason())) {
+                            if (!ObjectsCompat.equals(initial.getMaxPointsReason(), result.getMaxPointsReason())) {
+                                //Both penalties are different to the initial one
+                                state = MergeState.ERROR;
+                            } else {
+                                //Use the local penalty because it has not been changed remotely
+                                maxPointsReason = draft.getMaxPointsReason();
+                            }
+                        }
+                    } else {
+                        //Both items are new
+                        if (local.getMaxPointsReason() != MaxPointsReason.NONE && result.getMaxPointsReason() != MaxPointsReason.NONE) {
+                            //Both items have a valid penalty
+                            state = MergeState.ERROR;
+                        } else {
+                            if (result.getMaxPointsReason() == MaxPointsReason.NONE) {
+                                //Use the local penalty because it has not been changed remotely
+                                maxPointsReason = draft.getMaxPointsReason();
+                            }
+                        }
+                    }
+                }
+
+                //Compare scores
+                Double score = result.getScore();
+                if (!ObjectsCompat.equals(local.getScore(), result.getScore())) {
+                    if (initial != null) {
+                        if (!ObjectsCompat.equals(initial.getScore(), draft.getScore())) {
+                            if (!ObjectsCompat.equals(initial.getScore(), result.getScore())) {
+                                //Both scores are different to the initial one
+                                state = MergeState.ERROR;
+                            } else {
+                                //Use the local score because it has not been changed remotely
+                                score = draft.getScore();
+                            }
+                        }
+                    } else {
+                        //Both items are new
+                        if (local.getScore() != null && local.getScore() > 0 && result.getScore() != null && result.getScore() > 0) {
+                            //Both items have a valid score
+                            state = MergeState.ERROR;
+                        } else {
+                            if (result.getScore() == null || result.getScore() == 0) {
+                                //Use the local score because it has not been changed remotely
+                                score = draft.getScore();
+                            }
+                        }
+                    }
+                }
+
+                //Compare comments
+                String comment = result.getComment();
+//                if (!Util.equalStringsWithEmptyIsNull(local.getComment(), result.getComment())) {
+//                    if (initial != null) {
+//                        if (!Util.equalStringsWithEmptyIsNull(initial.getComment(), draft.getComment())) {
+//                            if (!Util.equalStringsWithEmptyIsNull(initial.getComment(), result.getComment())) {
+//                                //Both comments are different to the initial one
+//                                state = MergeState.ERROR;
+//                            } else {
+//                                //Use the local comment because it has not been changed remotely
+//                                comment = draft.getComment();
+//                            }
+//                        }
+//                    } else {
+//                        //Both items are new
+//                        if (!TextUtils.isEmpty(local.getComment()) && !TextUtils.isEmpty(result.getComment())) {
+//                            //Both items have a valid comment
+//                            state = MergeState.ERROR;
+//                        } else {
+//                            if (TextUtils.isEmpty(result.getComment())) {
+//                                //Use the local comment because it has not been changed remotely
+//                                comment = draft.getComment();
+//                            }
+//                        }
+//                    }
+//                }
+
+                local.setMaxPointsReason(maxPointsReason);
+                local.setScore(score);
+                local.setComment(comment);
+                local.setMergeState(state);
+
+                changedCompetitor.put(local.getCompetitorId(), CompetitorUtils.getDisplayName(local));
             }
         }
         mAdapter.notifyDataSetChanged();
@@ -613,7 +658,6 @@ public class PenaltyFragment extends BaseFragment
                 if (newState != MergeState.ERROR) {
                     break;
                 }
-                item.setDirty(true);
                 item.setMergeState(newState);
                 break;
 
@@ -621,12 +665,10 @@ public class PenaltyFragment extends BaseFragment
                 if (newState != MergeState.WARNING && newState != MergeState.ERROR) {
                     break;
                 }
-                item.setDirty(true);
                 item.setMergeState(newState);
                 break;
 
             case OK:
-                item.setDirty(true);
                 item.setMergeState(newState);
                 break;
         }
@@ -645,18 +687,9 @@ public class PenaltyFragment extends BaseFragment
                 hasError = true;
             }
         }
-        CompetitorResults list = getCompetitorResultsDiff(mDraftData);
-        for (CompetitorResult item : list) {
-            boolean found = false;
-            for (CompetitorResult server : mConfirmedData) {
-                if (server.equals(item)) {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
-                changed.add(item.getCompetitorId());
-            }
+        CompetitorResults diff = getCompetitorResultsDiff(mConfirmedData);
+        for (CompetitorResult item : diff) {
+            changed.add(item.getCompetitorId());
         }
         String text = getString(R.string.publish_button_empty);
         if (changed.size() != 0) {
@@ -693,37 +726,22 @@ public class PenaltyFragment extends BaseFragment
         builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                CompetitorResultWithIdImpl item = layout.getValue();
+                CompetitorResult item = layout.getValue();
                 // no need to compare rank as long as the dialog doesn't allow the user to edit it
                 if (!Util.equalsWithNull(competitor.getMaxPointsReason(), item.getMaxPointsReason())) {
                     competitor.setMaxPointsReason(item.getMaxPointsReason());
-                    competitor.setDirty(true);
-                }
-                if (!Util.equalsWithNull(competitor.getComment(), item.getComment())) {
-                    competitor.setComment(TextUtils.isEmpty(item.getComment()) ? null : item.getComment());
-                    competitor.setDirty(true);
                 }
                 if (!Util.equalsWithNull(competitor.getScore(), item.getScore())) {
                     competitor.setScore(item.getScore());
-                    competitor.setDirty(true);
+                }
+                if (!Util.equalStringsWithEmptyIsNull(competitor.getComment(), item.getComment())) {
+                    competitor.setComment(item.getComment());
                 }
                 mAdapter.notifyDataSetChanged();
                 setPublishButton();
             }
         });
-        builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
-        builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
-            @Override
-            public void onCancel(DialogInterface dialog) {
-                setPublishButton();
-                mAdapter.notifyDataSetChanged();
-            }
-        });
+        builder.setNegativeButton(android.R.string.cancel, null);
         AlertDialog dialog = builder.create();
         dialog.show();
         if (AppUtils.with(getActivity()).isTablet()) {
@@ -747,32 +765,42 @@ public class PenaltyFragment extends BaseFragment
         return boat;
     }
 
-    private CompetitorResultsImpl getCompetitorResultsDiff(CompetitorResults results) {
+    private CompetitorResults getCompetitorResultsDiff(CompetitorResultsList<? extends CompetitorResult> results) {
+        return getCompetitorResultsDiff(results, mCompetitorResults);
+    }
+
+    private CompetitorResultsImpl getCompetitorResultsDiff(CompetitorResultsList<? extends CompetitorResult> oldResults, CompetitorResultsList<CompetitorResultEditableImpl> newResults) {
         CompetitorResultsImpl result = new CompetitorResultsImpl();
 
-        for (CompetitorResultEditableImpl item : mCompetitorResults) {
+        // all changed items
+        for (CompetitorResult oldItem : oldResults) {
             boolean found = false;
-            for (CompetitorResult published : results) {
-                if (item.getCompetitorId().equals(published.getCompetitorId())) {
-                    result.add(new CompetitorResultImpl(item));
+            for (CompetitorResult newItem : newResults) {
+                if (oldItem.getCompetitorId().equals(newItem.getCompetitorId())) {
+                    if (!areEqual(oldItem, newItem)) {
+                        result.add(new CompetitorResultImpl(newItem));
+                    }
                     found = true;
                     break;
                 }
             }
-            if (!found && item.isDirty()) {
-                result.add(new CompetitorResultImpl(item));
+            if (!found && isValid(oldItem)) {
+                //Additionally reset penalty, score and finish time
+                //TODO Comment?
+                result.add(new CompetitorResultImpl(oldItem, 0, MaxPointsReason.NONE, null, null));
             }
         }
 
-        for (CompetitorResult item : results) {
+        // all new items
+        for (CompetitorResultEditableImpl newItem : newResults) {
             boolean found = false;
-            for (CompetitorResult current : mCompetitorResults) {
-                if (item.getCompetitorId().equals(current.getCompetitorId())) {
+            for (CompetitorResult oldItem : oldResults) {
+                if (newItem.getCompetitorId().equals(oldItem.getCompetitorId())) {
                     found = true;
                 }
             }
-            if (!found) {
-                result.add(new CompetitorResultImpl(item));
+            if (!found && isValid(newItem)) {
+                result.add(new CompetitorResultImpl(newItem));
             }
         }
 
@@ -795,6 +823,28 @@ public class PenaltyFragment extends BaseFragment
         }
     }
 
+    /**
+     * Checks a {@link CompetitorResult} if it is valid.
+     * It is valid, if it has a penalty or a score.
+     *
+     * @param result The competitor result to check whether it's a valid result or not.
+     * @return True if the result is valid.
+     */
+    private boolean isValid(CompetitorResult result) {
+        return result.getOneBasedRank() > 0
+                || result.getMaxPointsReason() != MaxPointsReason.NONE
+                || (result.getScore() != null && result.getScore() > 0);
+    }
+
+    /**
+     * Compares two {@link CompetitorResult}s.
+     * They are equal, if they have the same rank, penalty, score and finish time.
+     */
+    private boolean areEqual(CompetitorResult result, CompetitorResult anotherResult) {
+        return ObjectsCompat.equals(result.getMaxPointsReason(), anotherResult.getMaxPointsReason())
+                && ObjectsCompat.equals(result.getScore(), anotherResult.getScore());
+    }
+
     private static class StateChangeListener extends BaseRaceStateChangedListener {
 
         private WeakReference<PenaltyFragment> mReference;
@@ -804,24 +854,16 @@ public class PenaltyFragment extends BaseFragment
         }
 
         @Override
-        public void onFinishingPositionsConfirmed(ReadonlyRaceState state) {
-            super.onFinishingPositionsConfirmed(state);
-
-            PenaltyFragment fragment = mReference.get();
-            if (fragment != null) {
-                fragment.initConfirmedData();
-                fragment.mergeData(state.getConfirmedFinishPositioningList(), true);
-                fragment.setPublishButton();
-            }
-        }
-
-        @Override
         public void onFinishingPositioningsChanged(ReadonlyRaceState state) {
             super.onFinishingPositioningsChanged(state);
 
             PenaltyFragment fragment = mReference.get();
             if (fragment != null) {
-                fragment.mergeData(state.getFinishPositioningList(), true);
+                CompetitorResults results = state.getFinishPositioningList();
+                //Merge changes into draft
+                fragment.mergeData(results);
+                //Refresh changed and confirmed results because they serve as diff basis
+                fragment.initLocalData();
             }
         }
     }
