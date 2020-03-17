@@ -36,14 +36,16 @@ import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.shared.persistence.device.DeviceIdentifierMongoHandler;
 import com.sap.sse.MasterDataImportClassLoaderService;
 import com.sap.sse.common.TypeBasedServiceFinder;
+import com.sap.sse.replication.FullyInitializedReplicableTracker;
 import com.sap.sse.replication.Replicable;
+import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.util.ServiceTrackerFactory;
 
 public class Activator implements BundleActivator {
     private static final Logger logger = Logger.getLogger(Activator.class.getName());
     
     private static BundleContext context;
-    private ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
+    private FullyInitializedReplicableTracker<RacingEventService> racingEventServiceTracker;
     private ServiceTracker<SensorFixMapper<?, ?, ?>, SensorFixMapper<?, ?, ?>> sensorFixMapperTracker;
 
     public static BundleContext getContext() {
@@ -84,13 +86,18 @@ public class Activator implements BundleActivator {
         registrations.add(context.registerService(SensorFixMapper.class, new BravoExtendedDataFixMapper(), null));
         registrations.add(context.registerService(SensorFixMapper.class, new ExpeditionExtendedDataFixMapper(), null));
         sensorFixMapperTracker = createSensorFixMapperServiceTracker(context);
-        racingEventServiceTracker = ServiceTrackerFactory.createAndOpen(context, RacingEventService.class);
+        racingEventServiceTracker = new FullyInitializedReplicableTracker<>(context, RacingEventService.class,
+                /* customizer */ null, ServiceTrackerFactory.createAndOpen(context, ReplicationService.class));
+        racingEventServiceTracker.open();
         RegattaLogFixTrackerRegattaListener regattaLogSensorDataTrackerTrackedRegattaListener = new RegattaLogFixTrackerRegattaListener(
                 racingEventServiceTracker, new SensorFixMapperFactoryImpl(sensorFixMapperTracker));
         registrations.add(context.registerService(TrackedRegattaListener.class,
                 regattaLogSensorDataTrackerTrackedRegattaListener, null));
+        final Dictionary<String, String> replicableServiceProperties = new Hashtable<>();
+        replicableServiceProperties.put(Replicable.OSGi_Service_Registry_ID_Property_Name,
+                regattaLogSensorDataTrackerTrackedRegattaListener.getId().toString());
         registrations.add(context.registerService(Replicable.class,
-                regattaLogSensorDataTrackerTrackedRegattaListener, null));
+                regattaLogSensorDataTrackerTrackedRegattaListener, replicableServiceProperties));
         new Thread(()->{
             try {
                 registrations.add(context.registerService(RaceTrackingConnectivityParametersHandler.class,

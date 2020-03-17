@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
@@ -232,7 +233,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
     /**
      * Will be set
      */
-    private boolean replicationStarting;
+    private volatile boolean replicationStarting;
 
     /**
      * An optional link to a persistence layer that allows this service to record replicas
@@ -240,6 +241,8 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
      * links can be re-established.
      */
     private final Optional<MongoObjectFactory> mongoObjectFactory;
+    
+    private final Set<ReplicationStartingListener> replicationStartingListeners;
 
     private static class InitialLoadRequest {
         private final Channel channelForInitialLoad;
@@ -320,6 +323,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
             Optional<MongoObjectFactory> optionalMongoObjectFactory, String exchangeName, String exchangeHost, int exchangePort,
             ReplicationInstancesManager replicationInstancesManager, ReplicablesProvider replicablesProvider) throws IOException {
         this.mongoObjectFactory = optionalMongoObjectFactory;
+        this.replicationStartingListeners = new HashSet<>();
         timer = new Timer("ReplicationServiceImpl timer for delayed task sending", /* isDaemon */ true);
         unsentOperationsSenderJob = new UnsentOperationsSenderJob();
         executionListenersByReplicableIdAsString = new ConcurrentHashMap<>();
@@ -521,7 +525,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
                 outboundBufferClasses = new ArrayList<>();
             }
             outboundObjectBuffer.writeObject(serializedOperation);
-            outboundBufferClasses.add(operation.getClass());
+            outboundBufferClasses.add(operation.getClassForLogging());
             if (outboundBuffer.size() > TRIGGER_MESSAGE_SIZE_IN_BYTES) {
                 logger.info("Triggering replication because buffer holds " + outboundBuffer.size()
                         + " bytes which exceeds trigger size " + TRIGGER_MESSAGE_SIZE_IN_BYTES + " bytes");
@@ -647,7 +651,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
             final Iterable<Replicable<?, ?>> replicables = master.getReplicables();
             logger.info("Starting to replicate from " + master);
             try {
-                registerReplicaWithMaster(master, replicables);
+                registerReplicaWithMaster(master);
             } catch (Exception ex) {
                 logger.log(Level.SEVERE, "ERROR", ex);
                 throw ex;
@@ -680,7 +684,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
             final URL initialLoadURL = master.getInitialLoadURL(replicables);
             logger.info("Initial load URL is " + initialLoadURL);
             // start receiving messages already now, but start in suspended mode
-            replicator = new ReplicationReceiverImpl(master, replicablesProvider, /* startSuspended */true, consumer);
+            replicator = new ReplicationReceiverImpl(master, replicablesProvider, /* startSuspended */ true, consumer);
             // clear Replicable state here, before starting to receive and de-serialize operations which builds up
             // new state, e.g., in competitor store
             for (Replicable<?, ?> r : replicables) {
@@ -733,18 +737,13 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
     }
 
     /**
-     * @param replicables
-     *            the replica is registered for these {@link Replicable}s. The master sends operations only for
-     *            replicables that at least one replica has registered for. This may mean that operations are received
-     *            for replicables for which no replicable was requested. Replicas shall drop such operations silently.
-     *            TODO unused...
-     * 
      * @return the UUID that the master generated for this client which is also entered into {@link #replicaUUIDs}
      */
-    private String registerReplicaWithMaster(ReplicationMasterDescriptor master, Iterable<Replicable<?, ?>> replicables) throws IOException,
+    private String registerReplicaWithMaster(ReplicationMasterDescriptor master) throws IOException,
             ClassNotFoundException {
         URL replicationRegistrationRequestURL = master.getReplicationRegistrationRequestURL(getServerIdentifier(),
                 ServerInfo.getBuildVersion());
+        logger.info("Replication registration request URL: "+replicationRegistrationRequestURL);
         final URLConnection registrationRequestConnection = HttpUrlConnectionHelper
                 .redirectConnectionWithBearerToken(replicationRegistrationRequestURL, master.getBearerToken());
         final InputStream content = (InputStream) registrationRequestConnection.getContent();
@@ -761,6 +760,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
             }
         }
         final String replicaUUID = uuid.toString();
+        logger.info("Obtained replica UUID "+replicaUUID+" from master");
         registerReplicaUuidForMaster(replicaUUID, master);
         return replicaUUID;
     }
@@ -891,9 +891,31 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
                 servletPort, bearerToken, replicables);
     }
 
+    
     @Override
-    public void setReplicationStarting(boolean b) {
-        this.replicationStarting = b;
+    public void addReplicationStartingListener(ReplicationStartingListener listener) {
+        synchronized (replicationStartingListeners) {
+            replicationStartingListeners.add(listener);
+        }
+    }
+
+    @Override
+    public void removeReplicationStartingListener(ReplicationStartingListener listener) {
+        synchronized (replicationStartingListeners) {
+            replicationStartingListeners.remove(listener);
+        }
+    }
+
+    @Override
+    public void setReplicationStarting(boolean newReplicationStarting) {
+        if (this.replicationStarting != newReplicationStarting) {
+            this.replicationStarting = newReplicationStarting;
+            synchronized (replicationStartingListeners) {
+                for (final ReplicationStartingListener listener : replicationStartingListeners) {
+                    listener.onReplicationStartingChanged(newReplicationStarting);
+                }
+            }
+        }
     }
     
     @Override
