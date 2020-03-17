@@ -181,11 +181,11 @@ public interface TrackedLeg extends Serializable {
     Position getMiddleOfLeg(TimePoint at);
     
     /**
-     * The positions of the course breaking up of line, connecting the start and the end of leg
-     * waypoint's position at time point <code>at</code> and the position of the leg's end waypoint at time point <code>at</code>.
-     * @param at
-     * @param parts number of parts for breaking
-     * @return
+     * The positions of the course breaking up of line, connecting the start and the end of leg waypoint's position at
+     * time point <code>at</code> and the position of the leg's end waypoint at time point <code>at</code>.
+     * 
+     * @param parts
+     *            number of parts for breaking
      */
     Collection<Position> getEquidistantSectionsOfLeg(TimePoint at, int numberOfSections);
 
@@ -242,10 +242,8 @@ public interface TrackedLeg extends Serializable {
      * time points between first leg entry and last leg exit. If no competitor has entered the leg, "now" is used as a
      * default. If competitors have entered the leg but none has finished it yet, the middle between first entry and
      * "now" is used. 
-     * @param numParts
-     * @return
      */
-    Collection<TimePoint> getEquadistantReferenceTimePoints(int numberOfPoints);
+    Collection<TimePoint> getEquidistantReferenceTimePoints(int numberOfPoints);
 
     /**
      * The leader at the given <code>timePoint</code> in this leg, based on the {@link TrackedRace#getRankingMetric() ranking metric}

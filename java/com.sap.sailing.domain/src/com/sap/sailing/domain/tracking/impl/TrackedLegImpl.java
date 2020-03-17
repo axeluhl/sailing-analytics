@@ -517,7 +517,7 @@ public class TrackedLegImpl implements TrackedLeg {
     }
     
     @Override
-    public Collection<TimePoint> getEquadistantReferenceTimePoints(int numberOfPoints) {
+    public Collection<TimePoint> getEquidistantReferenceTimePoints(int numberOfPoints) {
         Iterable<MarkPassing> legStartMarkPassings = getTrackedRace().getMarkPassingsInOrder(getLeg().getFrom());
         Iterable<MarkPassing> legFinishMarkPassings = getTrackedRace().getMarkPassingsInOrder(getLeg().getTo());
         try {
