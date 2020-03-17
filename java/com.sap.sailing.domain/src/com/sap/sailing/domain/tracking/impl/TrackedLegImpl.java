@@ -5,7 +5,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -279,7 +278,7 @@ public class TrackedLegImpl implements TrackedLeg {
     }
     
     @Override
-    public Collection<Position> getEquidistantSectionsOfLeg(TimePoint at, int numberOfSections) {
+    public Iterable<Position> getEquidistantSectionsOfLeg(TimePoint at, int numberOfSections) {
         Optional<Position> approximateLegStartPosition = Optional
                 .ofNullable(getTrackedRace().getApproximatePosition(getLeg().getFrom(), at));
         Optional<Position> approximateLegEndPosition = Optional
@@ -517,7 +516,7 @@ public class TrackedLegImpl implements TrackedLeg {
     }
     
     @Override
-    public Collection<TimePoint> getEquidistantReferenceTimePoints(int numberOfPoints) {
+    public Iterable<TimePoint> getEquidistantReferenceTimePoints(int numberOfPoints) {
         Iterable<MarkPassing> legStartMarkPassings = getTrackedRace().getMarkPassingsInOrder(getLeg().getFrom());
         Iterable<MarkPassing> legFinishMarkPassings = getTrackedRace().getMarkPassingsInOrder(getLeg().getTo());
         try {
