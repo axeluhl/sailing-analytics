@@ -100,14 +100,16 @@ Additionally, on fresh instances not sharing a UserStore, a set of default roles
 
 ### Role "admin"
 
-This role implies the "*" permission. It should ideally be used with a user group ownership qualification, such as the server-specific group, making a user with a role qualified in this way an administrator for the server object as well as for all other objects owned by that server group.
+This role implies the "&ast;" permission. It should ideally be used with a user group ownership qualification, such as the server-specific group, making a user with a role qualified in this way an administrator for the server object as well as for all other objects owned by that server group. The ``admin`` role could also be used together with a user qualification, as in ``admin::{username}`` to grant a user full permissions to all objects owned by that user. Note that this in the future, as we introduce payed premium content, would include such premium permissions. Likewise, the ``admin`` role qualified to the user's default group ``{username}-tenant`` could be granted to users so they obtain full rights for all objects owned by their default ``{username}-tenant`` group. 
 
 ### Role "user"
 
 This role is intended to be used to describe the permissions that object owners shall be granted. In particular, when qualified
 for objects owned by the user being assigned the role, that user obtains the permission to execute actions
 ``CHANGE_ACL,CHANGE_OWNERSHIP,CREATE,DELETE,READ,READ_PUBLIC,UPDATE`` for objects of any type. By default, users are also assigned
-this role constrained for objects whose group owner is the user's dedicated group (``{username}-tenant``).
+this role qualified for objects whose group owner is the user's dedicated group (``{username}-tenant``).
+
+Note that for good reasons this role does not imply all ("&ast;") permissions to object owners. All permissions would include features that we may want to charge a price for. The ``user`` role shall include only those permissions that all users with no premium permissions have. In a sense, the user role's permission set is the difference of the admin role's permission set ("&ast;") minus all premium permissions.
 
 ### Role "sailing_viewer"
 

@@ -146,7 +146,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     Iterable<UserGroup> getUserGroupsOfUser(User user);
 
     UserGroup createUserGroup(UUID id, String name) throws UserGroupManagementException;
-
+    
     void addUserToUserGroup(UserGroup group, User user);
     
     void removeUserFromUserGroup(UserGroup group, User user);

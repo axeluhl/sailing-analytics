@@ -392,6 +392,7 @@ import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
+import com.sap.sailing.domain.resultimport.ResultUrlProvider;
 import com.sap.sailing.domain.sharding.ShardingContext;
 import com.sap.sailing.domain.sharedsailingdata.SharedSailingData;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
@@ -538,8 +539,6 @@ import com.sap.sailing.manage2sail.EventResultDescriptor;
 import com.sap.sailing.manage2sail.Manage2SailEventResultsParserImpl;
 import com.sap.sailing.manage2sail.RaceResultDescriptor;
 import com.sap.sailing.manage2sail.RegattaResultDescriptor;
-import com.sap.sailing.resultimport.ResultUrlProvider;
-import com.sap.sailing.resultimport.ResultUrlRegistry;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.ORCCertificateJsonDeserializer;
 import com.sap.sailing.server.hierarchy.SailingHierarchyOwnershipUpdater;
@@ -711,8 +710,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     private final ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker;
 
-    private final ServiceTracker<ResultUrlRegistry, ResultUrlRegistry> resultUrlRegistryServiceTracker;
-
     private final ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> scoreCorrectionProviderServiceTracker;
 
     private final ServiceTracker<CompetitorProvider, CompetitorProvider> competitorProviderServiceTracker;
@@ -785,7 +782,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         sharedSailingDataTracker = ServiceTrackerFactory.createAndOpen(context, SharedSailingData.class);
         windFinderTrackerFactoryServiceTracker = ServiceTrackerFactory.createAndOpen(context, WindFinderTrackerFactory.class);
         replicationServiceTracker = ServiceTrackerFactory.createAndOpen(context, ReplicationService.class);
-        resultUrlRegistryServiceTracker = ServiceTrackerFactory.createAndOpen(context, ResultUrlRegistry.class);
         swissTimingAdapterTracker = ServiceTrackerFactory.createAndOpen(context, SwissTimingAdapterFactory.class);
         tractracAdapterTracker = ServiceTrackerFactory.createAndOpen(context, TracTracAdapterFactory.class);
         raceLogTrackingAdapterTracker = ServiceTrackerFactory.createAndOpen(context,
@@ -5225,17 +5221,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         return result;
     }
 
-    private ResultUrlProvider getUrlBasedScoreCorrectionProvider(String resultProviderName) {
-        ResultUrlProvider result = null;
-        for (ScoreCorrectionProvider scp : getAllScoreCorrectionProviders()) {
-            if (scp instanceof ResultUrlProvider && scp.getName().equals(resultProviderName)) {
-                result = (ResultUrlProvider) scp;
-                break;
-            }
-        }
-        return result;
-    }
-
     private ServerInfoDTO getServerInfo() {
         ServerInfoDTO result = new ServerInfoDTO(ServerInfo.getName(), ServerInfo.getBuildVersion());
         SecurityDTOUtil.addSecurityInformation(getSecurityService(), result, result.getIdentifier());
@@ -5339,50 +5324,41 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public List<UrlDTO> getResultImportUrls(String resultProviderName) {
         final List<UrlDTO> result = new ArrayList<>();
-        ResultUrlProvider urlBasedScoreCorrectionProvider = getUrlBasedScoreCorrectionProvider(resultProviderName);
-        ResultUrlRegistry resultUrlRegistry = getResultUrlRegistry();
-        if (urlBasedScoreCorrectionProvider != null) {
-            SecurityService securityService = getSecurityService();
-            Iterable<URL> allUrlsReadableBySubject = resultUrlRegistry.getResultUrls(resultProviderName);
-            for (URL url : allUrlsReadableBySubject) {
-                QualifiedObjectIdentifier objId = SecuredDomainType.RESULT_IMPORT_URL.getQualifiedObjectIdentifier(
-                        new TypeRelativeObjectIdentifier(urlBasedScoreCorrectionProvider.getName(), url.toString()));
-                UrlDTO urlDTO = new UrlDTO(url.toString());
-                SecurityDTOUtil.addSecurityInformation(securityService, urlDTO, objId);
-                result.add(urlDTO);
-            }
+        SecurityService securityService = getSecurityService();
+        Iterable<URL> allUrlsReadableBySubject = getService().getResultImportUrls(resultProviderName);
+        for (URL url : allUrlsReadableBySubject) {
+            QualifiedObjectIdentifier objId = SecuredDomainType.RESULT_IMPORT_URL.getQualifiedObjectIdentifier(
+                    new TypeRelativeObjectIdentifier(resultProviderName, url.toString()));
+            UrlDTO urlDTO = new UrlDTO(url.toString());
+            SecurityDTOUtil.addSecurityInformation(securityService, urlDTO, objId);
+            result.add(urlDTO);
         }
         return result;
     }
 
     @Override
     public void removeResultImportURLs(String resultProviderName, Set<UrlDTO> toRemove) throws Exception {
-        ResultUrlProvider urlBasedScoreCorrectionProvider = getUrlBasedScoreCorrectionProvider(resultProviderName);
-        ResultUrlRegistry resultUrlRegistry = getResultUrlRegistry();
-        if (urlBasedScoreCorrectionProvider != null) {
-            for (UrlDTO urlToRemove : toRemove) {
-                getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(
-                        SecuredDomainType.RESULT_IMPORT_URL.getQualifiedObjectIdentifier(
-                                new TypeRelativeObjectIdentifier(urlBasedScoreCorrectionProvider.getName(),
-                                        urlToRemove.getUrl())),
-                        () -> resultUrlRegistry.unregisterResultUrl(resultProviderName, new URL(urlToRemove.getUrl())));
-            }
-        }
+        final RacingEventService racingEventService = getService();
+        Set<URL> urlsToRemove = toRemove.stream()
+                .map(urlDto -> {
+                    try {
+                        return new URL(urlDto.getUrl());
+                    } catch (MalformedURLException e) {
+                        return null;
+                    }
+                })
+                .filter(url -> url != null)
+                .collect(Collectors.toSet());
+        racingEventService.removeResultImportURLs(resultProviderName, urlsToRemove);
     }
 
     @Override
     public void addResultImportUrl(String resultProviderName, UrlDTO urlDTO) throws Exception {
-        ResultUrlProvider urlBasedScoreCorrectionProvider = getUrlBasedScoreCorrectionProvider(resultProviderName);
-        if (urlBasedScoreCorrectionProvider != null) {
-            URL url = urlBasedScoreCorrectionProvider.resolveUrl(urlDTO.getUrl());
-            ResultUrlRegistry resultUrlRegistry = getResultUrlRegistry();
-            getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                    SecuredDomainType.RESULT_IMPORT_URL,
-                    new TypeRelativeObjectIdentifier(urlBasedScoreCorrectionProvider.getName(), url.toString()),
-                    url.toString(), () -> {
-                        resultUrlRegistry.registerResultUrl(resultProviderName, url);
-                    });
-        }
+        final RacingEventService racingEventService = getService();
+        ResultUrlProvider resultUrlProvider = racingEventService.getUrlBasedScoreCorrectionProvider(resultProviderName)
+                .orElseThrow(() -> new IllegalStateException("ResultUrlProvider not found: " + resultProviderName));
+        final URL url = resultUrlProvider.resolveUrl(urlDTO.getUrl());
+        racingEventService.addResultImportUrl(resultProviderName, url);
     }
 
     @Override
@@ -5390,22 +5366,19 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         if (urlDTO == null || urlDTO.getUrl() == null || urlDTO.getUrl().isEmpty()) {
             return serverStringMessages.get(getClientLocale(), "pleaseEnterNonEmptyUrl");
         }
-        ResultUrlProvider urlBasedScoreCorrectionProvider = getUrlBasedScoreCorrectionProvider(resultProviderName);
-        if (urlBasedScoreCorrectionProvider == null) {
+        Optional<ResultUrlProvider> resultUrlProvider = getService()
+                .getUrlBasedScoreCorrectionProvider(resultProviderName);
+        if (!resultUrlProvider.isPresent()) {
             return serverStringMessages.get(getClientLocale(), "scoreCorrectionProviderNotFound");
         }
         String errorMessage = null;
         try {
-            urlBasedScoreCorrectionProvider.resolveUrl(urlDTO.getUrl());
+            resultUrlProvider.get().resolveUrl(urlDTO.getUrl());
         } catch (MalformedURLException e) {
             errorMessage = e.getMessage();
         }
         return errorMessage;
     }
-
-    private ResultUrlRegistry getResultUrlRegistry() {
-        return resultUrlRegistryServiceTracker.getService();
-    }    
 
     @Override
     public List<String> getOverallLeaderboardNamesContaining(String leaderboardName) {

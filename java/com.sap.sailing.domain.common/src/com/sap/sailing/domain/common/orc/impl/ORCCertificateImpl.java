@@ -3,7 +3,6 @@ package com.sap.sailing.domain.common.orc.impl;
 import java.util.Collections;
 import java.util.Map;
 
-import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.CountryCode;
@@ -27,8 +26,6 @@ public class ORCCertificateImpl implements ORCCertificate {
     
     private final String referenceNumber;
 
-    public final static Distance NAUTICAL_MILE = new NauticalMileDistance(1);
-    
     private final String sailNumber;
     private final String boatName;
     private final String boatClassName;

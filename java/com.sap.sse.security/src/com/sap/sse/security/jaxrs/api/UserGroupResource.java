@@ -122,8 +122,8 @@ public class UserGroupResource extends AbstractSecurityResource {
         final Response response;
         final JSONObject json = (JSONObject) JSONValue.parse(jsonBody);
         final String groupName = (String) json.get(KEY_GROUP_NAME);
-        final UserGroup usergroup = getService().getUserGroupByName(groupName);
-        if (usergroup != null) {
+        final UserGroup existingUserGroup = getService().getUserGroupByName(groupName);
+        if (existingUserGroup != null) {
             response = Response.status(Status.BAD_REQUEST).entity("Usergroup with this name already exists.").build();
         } else {
             UUID newTenantId = UUID.randomUUID();
