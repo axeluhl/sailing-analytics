@@ -171,9 +171,11 @@ public class MasterDataResource extends AbstractSailingServerResource {
         }
         final StreamingOutput streamingOutput;
         if (compress) {
-            streamingOutput = new CompressingStreamingOutput(masterData, competitorIds, startTime, securityService);
+            streamingOutput = new CompressingStreamingOutput(masterData, competitorIds, startTime, securityService,
+                    connectivityParametersToRestore);
         } else {
-            streamingOutput = new NonCompressingStreamingOutput(masterData, competitorIds, startTime, securityService);
+            streamingOutput = new NonCompressingStreamingOutput(masterData, competitorIds, startTime, securityService,
+                    connectivityParametersToRestore);
         }
         ResponseBuilder resp = Response.ok(streamingOutput);
         if (compress) {
@@ -194,13 +196,17 @@ public class MasterDataResource extends AbstractSailingServerResource {
         private final List<Serializable> competitorIds;
         private final long startTime;
         private final SecurityService securityService;
+        private final ArrayList<RaceTrackingConnectivityParameters> connectivityParametersToRestore;
 
-        protected AbstractStreamingOutput(TopLevelMasterData masterData, List<Serializable> competitorIds, long startTime, SecurityService securityService) {
+        protected AbstractStreamingOutput(TopLevelMasterData masterData, List<Serializable> competitorIds,
+                long startTime, SecurityService securityService,
+                ArrayList<RaceTrackingConnectivityParameters> connectivityParametersToRestore) {
             super();
             this.masterData = masterData;
             this.competitorIds = competitorIds;
             this.startTime = startTime;
             this.securityService = securityService;
+            this.connectivityParametersToRestore = connectivityParametersToRestore;
         }
         
         protected abstract OutputStream wrapOutputStream(OutputStream outputStream) throws IOException;
@@ -220,6 +226,7 @@ public class MasterDataResource extends AbstractSailingServerResource {
                         masterData.setMasterDataExportFlagOnRaceColumns(true);
                         // Actual start of streaming
                         writeObjects(competitorIds, masterData, objectOutputStream);
+                        objectOutputStream.writeObject(connectivityParametersToRestore);
                     } finally {
                         objectOutputStream.close();
                         masterData.setMasterDataExportFlagOnRaceColumns(false);
@@ -232,11 +239,12 @@ public class MasterDataResource extends AbstractSailingServerResource {
             });
         }
     }
-    
+
     private class NonCompressingStreamingOutput extends AbstractStreamingOutput {
         protected NonCompressingStreamingOutput(TopLevelMasterData masterData, List<Serializable> competitorIds,
-                long startTime, SecurityService securityService) {
-            super(masterData, competitorIds, startTime, securityService);
+                long startTime, SecurityService securityService,
+                ArrayList<RaceTrackingConnectivityParameters> connectivityParametersToRestore) {
+            super(masterData, competitorIds, startTime, securityService, connectivityParametersToRestore);
         }
 
         @Override
@@ -244,11 +252,12 @@ public class MasterDataResource extends AbstractSailingServerResource {
             return outputStream;
         }
     }
-    
+
     private class CompressingStreamingOutput extends AbstractStreamingOutput {
         protected CompressingStreamingOutput(TopLevelMasterData masterData, List<Serializable> competitorIds,
-                long startTime, SecurityService securityService) {
-            super(masterData, competitorIds, startTime, securityService);
+                long startTime, SecurityService securityService,
+                ArrayList<RaceTrackingConnectivityParameters> connectivityParametersToRestore) {
+            super(masterData, competitorIds, startTime, securityService, connectivityParametersToRestore);
         }
 
         @Override

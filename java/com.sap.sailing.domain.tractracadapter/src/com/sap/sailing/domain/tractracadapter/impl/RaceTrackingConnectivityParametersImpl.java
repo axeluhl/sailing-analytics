@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.tractracadapter.impl;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -26,7 +27,9 @@ import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.model.lib.api.event.IRace;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 
-public class RaceTrackingConnectivityParametersImpl extends AbstractRaceTrackingConnectivityParameters {
+public class RaceTrackingConnectivityParametersImpl extends AbstractRaceTrackingConnectivityParameters implements Serializable {
+
+    private static final long serialVersionUID = 5088282956033068149L;
     private static final Logger logger = Logger.getLogger(RaceTrackingConnectivityParametersImpl.class.getName());
     public static final String TYPE = "TRAC_TRAC";
     
@@ -36,9 +39,9 @@ public class RaceTrackingConnectivityParametersImpl extends AbstractRaceTracking
     private final URI courseDesignUpdateURI;
     private final TimePoint startOfTracking;
     private final TimePoint endOfTracking;
-    private final RaceLogStore raceLogStore;
-    private final RegattaLogStore regattaLogStore;
-    private final DomainFactory domainFactory;
+    private final transient RaceLogStore raceLogStore;
+    private final transient RegattaLogStore regattaLogStore;
+    private final transient DomainFactory domainFactory;
     private final long delayToLiveInMillis;
     private final Duration offsetToStartTimeOfSimulatedRace;
     private final String tracTracUsername;
