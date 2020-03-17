@@ -1,6 +1,6 @@
 # Security
 
-The Sports Sponsorships Engine (SSE) on which the SAP Sailing Analytics and the SAP Tennis Analytics are based, uses Apache Shiro to implement security. This in particular includes authentication and authorization. This document does not aim to replace the Shiro documentation which is available, e.g., at [http://shiro.apache.org/configuration.html](http://shiro.apache.org/configuration.html), [http://shiro.apache.org/permissions.html](http://shiro.apache.org/permissions.html) and [http://shiro.apache.org/web.html](http://shiro.apache.org/web.html). It relies on a sophisticated and powerful security engine that is part of SSE and whose [permission concept is described here](permission-concept.md).
+The Sports Sponsorships Engine (SSE) on which the SAP Sailing Analytics and the SAP Tennis Analytics are based, uses Apache Shiro to implement security. This in particular includes authentication and authorization. This document does not aim to replace the Shiro documentation which is available, e.g., at [http://shiro.apache.org/configuration.html](http://shiro.apache.org/configuration.html), [http://shiro.apache.org/permissions.html](http://shiro.apache.org/permissions.html) and [http://shiro.apache.org/web.html](http://shiro.apache.org/web.html). It relies on a sophisticated and powerful security engine that is part of SSE and whose [permission concept is described here](permission-concept).
 
 ## Users, Sessions, Roles, and Permissions
 
