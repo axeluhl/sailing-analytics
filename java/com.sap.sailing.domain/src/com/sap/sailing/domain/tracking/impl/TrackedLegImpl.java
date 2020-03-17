@@ -20,7 +20,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
-import java.util.stream.StreamSupport;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -519,10 +518,10 @@ public class TrackedLegImpl implements TrackedLeg {
     public Iterable<TimePoint> getEquidistantReferenceTimePoints(int numberOfPoints) {
         Iterable<MarkPassing> legStartMarkPassings = getTrackedRace().getMarkPassingsInOrder(getLeg().getFrom());
         Iterable<MarkPassing> legFinishMarkPassings = getTrackedRace().getMarkPassingsInOrder(getLeg().getTo());
+        getTrackedRace().lockForRead(legStartMarkPassings);
+        getTrackedRace().lockForRead(legFinishMarkPassings);
         try {
-            getTrackedRace().lockForRead(legStartMarkPassings);
             final TimePoint firstLegStartMarkPassingTimePoint = convertMarkPassingIteratorToTimePoint(legStartMarkPassings);
-            getTrackedRace().lockForRead(legFinishMarkPassings);
             final TimePoint lastLegFinishMarkPassingTimePoint = convertMarkPassingIteratorToTimePoint(legFinishMarkPassings);
             Duration equidistantTime = firstLegStartMarkPassingTimePoint.until(lastLegFinishMarkPassingTimePoint).divide(numberOfPoints);
             ArrayList<TimePoint> timePoints = new ArrayList<>(numberOfPoints);
@@ -533,13 +532,13 @@ public class TrackedLegImpl implements TrackedLeg {
             }
             return timePoints;
         } finally {
-            getTrackedRace().unlockAfterRead(legStartMarkPassings);
             getTrackedRace().unlockAfterRead(legFinishMarkPassings);
+            getTrackedRace().unlockAfterRead(legStartMarkPassings);
         }
     }
     
     private TimePoint convertMarkPassingIteratorToTimePoint(Iterable<MarkPassing> leg) {
-        return StreamSupport.stream(leg.spliterator(), false).map(MarkPassing::getTimePoint).findAny().orElse(MillisecondsTimePoint.now());
+        return Util.stream(leg).map(MarkPassing::getTimePoint).findAny().orElse(MillisecondsTimePoint.now());
     }
 
     @Override
