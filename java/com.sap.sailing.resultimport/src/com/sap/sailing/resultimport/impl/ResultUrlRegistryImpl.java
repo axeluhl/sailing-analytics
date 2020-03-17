@@ -48,19 +48,25 @@ public class ResultUrlRegistryImpl implements ResultUrlRegistry {
     }
 
     @Override
-    public Iterable<URL> getResultUrls(String resultProviderName) {
+    public Iterable<URL> getReadableResultUrls(String resultProviderName) {
         final Subject subject = SecurityUtils.getSubject();
+        final Iterable<URL> result = getAllResultUrls(resultProviderName);
+        for (final Iterator<URL> urlIterator = result.iterator(); urlIterator.hasNext();) {
+            final URL url = urlIterator.next();
+            if (!subject.isPermitted(SecuredDomainType.RESULT_IMPORT_URL
+                    .getStringPermissionForTypeRelativeIdentifier(DefaultActions.READ,
+                            new TypeRelativeObjectIdentifier(resultProviderName, url.toString())))) {
+                urlIterator.remove();
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public Iterable<URL> getAllResultUrls(String resultProviderName) {
         final Iterable<URL> result;
         if (resultUrls.containsKey(resultProviderName)) {
             result = new ArrayList<>(resultUrls.get(resultProviderName));
-            for (final Iterator<URL> urlIterator = result.iterator(); urlIterator.hasNext();) {
-                final URL url = urlIterator.next();
-                if (!subject.isPermitted(SecuredDomainType.RESULT_IMPORT_URL
-                        .getStringPermissionForTypeRelativeIdentifier(DefaultActions.READ,
-                                new TypeRelativeObjectIdentifier(resultProviderName, url.toString())))) {
-                    urlIterator.remove();
-                }
-            }
         } else {
             result = Collections.emptySet();
         }

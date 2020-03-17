@@ -98,9 +98,9 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                     if (timePoint != null || resultState == ResultStates.Live) {
                         jsonLeaderboard = getLeaderboardJson(leaderboard, timePoint, resultState, maxCompetitorsCount,
                                 raceColumnNames, raceDetails, competitorAndBoatIdsOnly,
-                                showOnlyActiveRacesForCompetitorIds);
+                                showOnlyActiveRacesForCompetitorIds, skip);
                     } else {
-                        jsonLeaderboard = createEmptyLeaderboardJson(leaderboard, resultState, maxCompetitorsCount);
+                        jsonLeaderboard = createEmptyLeaderboardJson(leaderboard, resultState, maxCompetitorsCount, skip);
                     }
                     StringWriter sw = new StringWriter();
                     jsonLeaderboard.writeJSONString(sw);
@@ -118,9 +118,10 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
     }
 
     @Override
-    protected JSONObject getLeaderboardJson(Leaderboard leaderboard,
-            TimePoint resultTimePoint, ResultStates resultState, Integer maxCompetitorsCount,
-            List<String> raceColumnNames, List<String> raceDetailNames, boolean competitorAndBoatIdsOnly, List<String> showOnlyActiveRacesForCompetitorIds)
+    protected JSONObject getLeaderboardJson(Leaderboard leaderboard, TimePoint resultTimePoint,
+            ResultStates resultState, Integer maxCompetitorsCount, List<String> raceColumnNames,
+            List<String> raceDetailNames, boolean competitorAndBoatIdsOnly,
+            List<String> showOnlyActiveRacesForCompetitorIds, boolean userPresentedValidRegattaSecret)
             throws NoWindException, InterruptedException, ExecutionException {
         List<String> raceColumnsToShow = calculateRaceColumnsToShow(leaderboard, raceColumnNames, showOnlyActiveRacesForCompetitorIds, resultTimePoint);
         List<DetailType> raceDetailsToShow = calculateRaceDetailTypesToShow(raceDetailNames);
@@ -137,7 +138,7 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
             Map<String, Map<CompetitorDTO, Integer>> competitorsOrderedByFleets = new HashMap<>();
             List<CompetitorDTO> filteredCompetitorsFromBestToWorst = new ArrayList<>();
             competitorsFromBestToWorst.forEach(competitor -> {
-                if (SecurityUtils.getSubject().isPermitted(competitor.getIdentifier()
+                if (userPresentedValidRegattaSecret || SecurityUtils.getSubject().isPermitted(competitor.getIdentifier()
                         .getStringPermission(SecuredSecurityTypes.PublicReadableActions.READ_PUBLIC))
                         || SecurityUtils.getSubject()
                                 .isPermitted(competitor.getIdentifier().getStringPermission(DefaultActions.READ))) {
@@ -304,6 +305,7 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS,
                 DetailType.RACE_DISTANCE_TRAVELED,
                 DetailType.RACE_TIME_TRAVELED,
+                DetailType.RACE_IMPLIED_WIND,
                 DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS,
                 DetailType.RACE_CURRENT_COURSE_OVER_GROUND_IN_TRUE_DEGREES,
                 DetailType.RACE_CURRENT_POSITION_LAT_DEG,
@@ -312,6 +314,7 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 DetailType.NUMBER_OF_MANEUVERS,
                 DetailType.RACE_CURRENT_LEG,
                 DetailType.OVERALL_MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS,
+                DetailType.LEG_VELOCITY_MADE_GOOD_IN_KNOTS,
                 DetailType.LEG_WINDWARD_DISTANCE_TO_GO_IN_METERS };
     }
 
@@ -358,6 +361,12 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 Duration timeTraveled = entry.getTimeSailed();
                 if (timeTraveled != null) {
                     value = timeTraveled.asSeconds();
+                }
+                break;
+            case RACE_IMPLIED_WIND:
+                name = "impliedWind-kts";
+                if (entry.impliedWind != null) {
+                    value = entry.impliedWind.getKnots();
                 }
                 break;
             case RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
@@ -432,6 +441,12 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 name = "legWindwardDistanceToGoInMeters";
                 if (currentLegEntry != null && currentLegEntry.windwardDistanceToGoInMeters != null) {
                     value = currentLegEntry.windwardDistanceToGoInMeters;
+                }
+                break;
+            case LEG_VELOCITY_MADE_GOOD_IN_KNOTS:
+                name = "legVelocityMadeGoodInKnots";
+                if (currentLegEntry != null && currentLegEntry.velocityMadeGoodInKnots != null) {
+                    value = currentLegEntry.velocityMadeGoodInKnots;
                 }
                 break;
             default:

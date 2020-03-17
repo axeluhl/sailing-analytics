@@ -1,11 +1,13 @@
 package com.sap.sailing.yachtscoring.resultimport;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -16,21 +18,18 @@ import org.xml.sax.SAXException;
 
 import com.sap.sailing.domain.common.RegattaScoreCorrections;
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
+import com.sap.sailing.domain.resultimport.ResultUrlProvider;
+import com.sap.sailing.resultimport.AbstractResultUrlProvider;
 import com.sap.sailing.resultimport.ResultDocumentDescriptor;
 import com.sap.sailing.resultimport.ResultDocumentProvider;
-import com.sap.sailing.resultimport.ResultUrlProvider;
 import com.sap.sailing.resultimport.ResultUrlRegistry;
 import com.sap.sailing.xrr.resultimport.Parser;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
-import com.sap.sailing.xrr.resultimport.impl.XRRRegattaResultsAsScoreCorrections;
-import com.sap.sailing.xrr.schema.Division;
-import com.sap.sailing.xrr.schema.Event;
-import com.sap.sailing.xrr.schema.EventGender;
 import com.sap.sailing.xrr.schema.RegattaResults;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
-public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, ResultUrlProvider {
+public class ScoreCorrectionProviderImpl extends AbstractResultUrlProvider implements ScoreCorrectionProvider, ResultUrlProvider {
     private static final Logger logger = Logger.getLogger(ScoreCorrectionProviderImpl.class.getName());
     private static final long serialVersionUID = 222663322974305822L;
 
@@ -40,19 +39,18 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, Res
     public static final String EVENT_ID_TEMPLATE = "http://www.yachtscoring.com/results_xrr_auto.cfm?eid=%s";
 
     private final ParserFactory parserFactory;
-    private final ResultUrlRegistry resultUrlRegistry;
     private final ResultDocumentProvider documentProvider;
     
     public ScoreCorrectionProviderImpl(ResultDocumentProvider documentProvider, ParserFactory parserFactory, ResultUrlRegistry resultUrlRegistry) {
+        super(resultUrlRegistry);
         this.documentProvider = documentProvider;
         this.parserFactory = parserFactory;
-        this.resultUrlRegistry = resultUrlRegistry;
     }
 
     public ScoreCorrectionProviderImpl(ParserFactory parserFactory, ResultUrlRegistry resultUrlRegistry) {
+        super(resultUrlRegistry);
         this.documentProvider = new YachtscoringResultDocumentProvider(this, parserFactory);
         this.parserFactory = parserFactory;
-        this.resultUrlRegistry = resultUrlRegistry;
     }
 
     @Override
@@ -91,27 +89,8 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, Res
         Parser parser = resolveParser(eventName, boatClassName);
         try {
             RegattaResults regattaResults = parser.parse();
-            for (Object o : regattaResults.getPersonOrBoatOrTeam()) {
-                if (o instanceof Event) {
-                    Event event = (Event) o;
-                    if (event.getTitle().equals(eventName)) {
-                        for (Object eventO : event.getRaceOrDivisionOrRegattaSeriesResult()) {
-                            if (eventO instanceof Division) {
-                                Division division = (Division) eventO;
-                                EventGender divisionGender = division.getGender();
-                                String divisionBoatClassAndGender = parser.getBoatClassName(division);
-                                if(divisionGender != null) {
-                                    divisionBoatClassAndGender += ", " + divisionGender.name();  
-                                }
-                                if (boatClassName.equalsIgnoreCase(divisionBoatClassAndGender) || boatClassName.contains(divisionBoatClassAndGender)) {
-                                    return new XRRRegattaResultsAsScoreCorrections(event, division, this,
-                                            parser);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            return parser.getRegattaScoreCorrections(regattaResults, /* scoreCorrectionProvider */ this,
+                    /* eventNameFilter */ Optional.of(eventName), /* boatClassNameFilter */ Optional.of(boatClassName));
         } catch (JAXBException e) {
             logger.info("Parse error during XRR import. Ignoring document " + parser.toString());
             logger.throwing(ScoreCorrectionProviderImpl.class.getName(), "getHasResultsForBoatClassFromDateByEventName", e);
@@ -119,20 +98,23 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, Res
         return null;
     }
     
+    @Override
+    public RegattaScoreCorrections getScoreCorrections(InputStream inputStream) throws Exception {
+        final Parser parser = parserFactory.createParser(inputStream, inputStream.toString());
+        final RegattaResults regattaResults = parser.parse();
+        return parser.getRegattaScoreCorrections(regattaResults, this, /* eventNameFilter */ Optional.empty(),
+                /* boatClassNameFilter */ Optional.empty());
+    }
+
     private Parser resolveParser(String eventName, String boatClassName) throws IOException {
         Parser result = null;
         for (ResultDocumentDescriptor resultDocDescr : documentProvider.getResultDocumentDescriptors()) {
-            if(eventName.equals(resultDocDescr.getEventName()) && boatClassName.equals(resultDocDescr.getBoatClass())) {
+            if (eventName.equals(resultDocDescr.getEventName()) && boatClassName.equals(resultDocDescr.getBoatClass())) {
                 result = parserFactory.createParser(resultDocDescr.getInputStream(), resultDocDescr.getEventName());
                 break;
             }
         }
         return result;
-    }
-
-    @Override
-    public Iterable<URL> getUrls() {
-        return resultUrlRegistry.getResultUrls(NAME);
     }
 
     @Override

@@ -106,7 +106,6 @@ public class Activator implements BundleActivator {
                 }
             }
         });
-        
         securityServiceServiceTracker = ServiceTrackerFactory.createAndOpen(context, SecurityService.class);
         new Thread(() -> {
             try {
@@ -120,7 +119,6 @@ public class Activator implements BundleActivator {
                 logger.log(Level.SEVERE, "Exception trying to migrate IgtimiAccounts implementation", e);
             }
         }, getClass().getName() + " registering connectivity handler").start();
-        
         context.registerService(ClearStateTestSupport.class.getName(), new ClearStateTestSupport() {
             @Override
             public void clearState() throws Exception {

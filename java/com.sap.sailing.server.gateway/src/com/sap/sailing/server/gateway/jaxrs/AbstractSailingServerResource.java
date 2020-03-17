@@ -1,7 +1,11 @@
 package com.sap.sailing.server.gateway.jaxrs;
 
+import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.stream.StreamSupport;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.core.Context;
@@ -13,6 +17,7 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.sharedsailingdata.SharedSailingData;
@@ -43,16 +48,31 @@ public abstract class AbstractSailingServerResource {
     }
     
     public <T> T getService(Class<T> clazz) {
-        BundleContext context = getBundleContext();
-        ServiceTracker<T, T> tracker = new ServiceTracker<T, T>(context, clazz, null);
-        tracker.open();
+        final ServiceTracker<T, T> tracker = getServiceTracker(clazz);
         T service = tracker.getService();
         tracker.close();
         return service;
     }
+    
+    protected <T> T[] getServices(Class<T> clazz) {
+        final ServiceTracker<T, T> tracker = getServiceTracker(clazz);
+        final Object[] objectServices = tracker.getServices();
+        @SuppressWarnings("unchecked")
+        final T[] services = (T[]) Array.newInstance(clazz, objectServices.length);
+        System.arraycopy(objectServices, 0, services, 0, services.length);
+        tracker.close();
+        return services;
+    }
+
+    protected <T> ServiceTracker<T, T> getServiceTracker(Class<T> clazz) {
+        final BundleContext context = getBundleContext();
+        final ServiceTracker<T, T> tracker = new ServiceTracker<T, T>(context, clazz, null);
+        tracker.open();
+        return tracker;
+    }
 
     protected BundleContext getBundleContext() {
-        BundleContext context = (BundleContext) servletContext
+        final BundleContext context = (BundleContext) servletContext
                 .getAttribute(RestServletContainer.OSGI_RFC66_WEBBUNDLE_BUNDLECONTEXT_NAME);
         return context;
     }
@@ -83,6 +103,15 @@ public abstract class AbstractSailingServerResource {
         @SuppressWarnings("unchecked")
         ServiceTracker<ReplicationService, ReplicationService> tracker = (ServiceTracker<ReplicationService, ReplicationService>) servletContext.getAttribute(RestServletContainer.REPLICATION_SERVICE_TRACKER_NAME);
         return tracker.getService(); 
+    }
+    
+    private Iterable<ScoreCorrectionProvider> getScoreCorrectionProviders() {
+        return Arrays.asList(getServices(ScoreCorrectionProvider.class));
+    }
+    
+    protected Optional<ScoreCorrectionProvider> getScoreCorrectionProvider(final String scoreCorrectionProviderName) {
+        return StreamSupport.stream(getScoreCorrectionProviders().spliterator(), /* parallel */ false).
+                filter(scp->scp.getName().equals(scoreCorrectionProviderName)).findAny();
     }
     
     protected Regatta findRegattaByName(String regattaName) {

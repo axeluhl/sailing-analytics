@@ -11,7 +11,7 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.view.client.SingleSelectionModel;
+import com.google.gwt.view.client.MultiSelectionModel;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.AbstractSortableTextColumn;
@@ -35,12 +35,12 @@ public class RoleDefinitionTableWrapper extends
         TableWrapper<Pair<StrippedRoleDefinitionDTO, Boolean>, RefreshableSingleSelectionModel<Pair<StrippedRoleDefinitionDTO, Boolean>>, StringMessages, CellTableWithCheckboxResources> {
 
     private final LabeledAbstractFilterablePanel<Pair<StrippedRoleDefinitionDTO, Boolean>> filterField;
-    private final SingleSelectionModel<UserGroupDTO> userGroupSelectionModel;
+    private final MultiSelectionModel<UserGroupDTO> userGroupSelectionModel;
 
     public RoleDefinitionTableWrapper(UserService userService, Iterable<HasPermissions> additionalPermissions,
             StringMessages stringMessages, ErrorReporter errorReporter, boolean enablePager,
             CellTableWithCheckboxResources tableResources, Runnable refresher,
-            SingleSelectionModel<UserGroupDTO> userGroupSelectionModel) {
+            MultiSelectionModel<UserGroupDTO> userGroupSelectionModel) {
         super(stringMessages, errorReporter, false, enablePager,
                 new EntityIdentityComparator<Pair<StrippedRoleDefinitionDTO, Boolean>>() {
                     @Override
@@ -64,9 +64,9 @@ public class RoleDefinitionTableWrapper extends
                 dto -> dto.getA().getName(), userColumnListHandler);
         final AccessControlledActionsColumn<Pair<StrippedRoleDefinitionDTO, Boolean>, RoleDefinitionImagesBarCell> actionsColumn = AccessControlledActionsColumn
                 .create(new RoleDefinitionImagesBarCell(stringMessages), userService,
-                        role -> userGroupSelectionModel.getSelectedObject());
+                        role -> TableWrapper.getSingleSelectedUserGroup(userGroupSelectionModel));
         actionsColumn.addAction(RoleDefinitionImagesBarCell.ACTION_UPDATE, UPDATE, rolePair -> {
-            final UserGroupDTO selectedObject = userGroupSelectionModel.getSelectedObject();
+            final UserGroupDTO selectedObject = TableWrapper.getSingleSelectedUserGroup(userGroupSelectionModel);
             final boolean value = !rolePair.getB().booleanValue();
             if (selectedObject != null) {
                 userService.getUserManagementService().putRoleDefintionToUserGroup(selectedObject.getId().toString(),
@@ -87,7 +87,7 @@ public class RoleDefinitionTableWrapper extends
         });
 
         actionsColumn.addAction(RoleDefinitionImagesBarCell.ACTION_DELETE, UPDATE, rolePair -> {
-            final UserGroupDTO selectedObject = userGroupSelectionModel.getSelectedObject();
+            final UserGroupDTO selectedObject = TableWrapper.getSingleSelectedUserGroup(userGroupSelectionModel);
             if (selectedObject != null) {
                 if (Window.confirm(stringMessages.doYouReallyWantToRemoveRole(rolePair.getA().getName()))) {
                     userService.getUserManagementService().removeRoleDefinitionFromUserGroup(
@@ -152,7 +152,7 @@ public class RoleDefinitionTableWrapper extends
     }
 
     public void refreshRoleList() {
-        UserGroupDTO selectedObject = userGroupSelectionModel.getSelectedObject();
+        UserGroupDTO selectedObject = TableWrapper.getSingleSelectedUserGroup(userGroupSelectionModel);
         if (selectedObject != null) {
             filterField.updateAll(selectedObject.getRoleDefinitions());
         }
