@@ -37,5 +37,6 @@ Require-Bundle: com.sap.sailing.server,
  com.sun.jersey;bundle-version="1.17.0",
  com.sap.sse.security.testsupport,
  com.sap.sailing.domain.racelogtrackingadapter,
- com.sap.sailing.shared.server
+ com.sap.sailing.shared.server,
+ com.sap.sailing.resultimport
 Automatic-Module-Name: com.sap.sailing.server.replication.test

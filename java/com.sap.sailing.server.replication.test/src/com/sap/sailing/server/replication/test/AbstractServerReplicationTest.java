@@ -58,7 +58,8 @@ public abstract class AbstractServerReplicationTest extends com.sap.sse.replicat
             }, MediaDBFactory.INSTANCE.getMediaDB(mongoDBService), EmptyWindStore.INSTANCE,
                     EmptySensorFixStore.INSTANCE, null, null, /* sailingNotificationService */ null,
                     /* trackedRaceStatisticsCache */ null, /* restoreTrackedRaces */ false,
-                    /* security service tracker */ null, /* sharedSailingData */ null, /* replicationServiceTracker */ null);
+                    /* security service tracker */ null, /* sharedSailingData */ null, /* replicationServiceTracker */ null,
+                    /* scoreCorrectionProviderServiceTracker */ null, /* resultUrlRegistryServiceTracker */ null);
         }
 
         @Override
@@ -79,7 +80,8 @@ public abstract class AbstractServerReplicationTest extends com.sap.sse.replicat
                     }, MediaDBFactory.INSTANCE.getMediaDB(mongoDBService), EmptyWindStore.INSTANCE,
                     EmptySensorFixStore.INSTANCE, /* serviceFinderFactory */ null, null,
                     /* sailingNotificationService */ null, /* trackedRaceStatisticsCache */ null,
-                    /* restoreTrackedRaces */ false, /* security service tracker */ null, /* sharedSailingData */ null, /* replicationServiceTracker */ null);
+                    /* restoreTrackedRaces */ false, /* security service tracker */ null, /* sharedSailingData */ null, /* replicationServiceTracker */ null,
+                    /* scoreCorrectionProviderServiceTracker */ null, /* resultUrlRegistryServiceTracker */ null);
         }
     }
 }

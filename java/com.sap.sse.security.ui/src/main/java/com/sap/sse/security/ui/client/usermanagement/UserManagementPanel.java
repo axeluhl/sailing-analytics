@@ -16,6 +16,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -136,11 +137,11 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
         // add details panel for user roles
         userRoleDefinitionPanel = new UserRoleDefinitionPanel(userService, stringMessages,
                 errorReporter,
-                tableResources, userList.getSelectionModel(), () -> updateUsers());
+                tableResources, userList.getSelectionModel(), () -> updateUsers(), SuggestBox::new, TextBox::new);
         detailsPanel.add(userRoleDefinitionPanel);
         // add details panel for user permissions
         final WildcardPermissionPanel userPermissionPanel = new WildcardPermissionPanel(userService, stringMessages,
-                errorReporter, tableResources, userList.getSelectionModel(), () -> updateUsers());
+                errorReporter, tableResources, userList.getSelectionModel(), () -> updateUsers(), SuggestBox::new);
         detailsPanel.add(userPermissionPanel);
         west.add(detailsPanel);
     }
