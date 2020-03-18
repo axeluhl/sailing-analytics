@@ -41,7 +41,9 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sse.mail,
  com.sap.sailing.server.interface,
  org.mongodb.mongo-java-driver;bundle-version="3.6.4",
- com.sap.sse.security.common
+ com.sap.sse.security.common,
+ com.sap.sailing.shared.server,
+ com.sap.sailing.resultimport
 Bundle-ClassPath: .
 Export-Package: com.sap.sailing.server,
  com.sap.sailing.server.anniversary,

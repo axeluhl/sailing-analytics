@@ -1,14 +1,14 @@
 package com.sap.sailing.domain.orc.impl;
 
-import java.util.Collection;
 import java.util.stream.Collectors;
+
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Wind;
-import com.sap.sailing.domain.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.common.confidence.impl.PositionAndTimePointWeigher;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLeg;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
 import com.sap.sailing.domain.confidence.ConfidenceBasedWindAverager;
+import com.sap.sailing.domain.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
@@ -54,10 +54,10 @@ public abstract class AbstractORCPerformanceCurveTwaLegAdapter implements ORCPer
         ConfidenceBasedWindAverager<Util.Pair<Position, TimePoint>> timeWeigher = 
                 ConfidenceFactory.INSTANCE.createWindAverager(new PositionAndTimePointWeigher(
                         1000, WindTrack.WIND_HALF_CONFIDENCE_DISTANCE));
-        Collection<TimePoint> referenceTimePoints = trackedLeg.getEquadistantReferenceTimePoints(numParts);
-        Collection<WindWithConfidence<Util.Pair<Position, TimePoint>>> winds = 
-                referenceTimePoints.stream().flatMap(timepoint -> {
-                    return trackedLeg.getEquidistantSectionsOfLeg(timepoint, numParts).stream()
+        final Iterable<TimePoint> referenceTimePoints = trackedLeg.getEquidistantReferenceTimePoints(numParts);
+        Iterable<WindWithConfidence<Util.Pair<Position, TimePoint>>> winds = 
+                Util.stream(referenceTimePoints).flatMap(timepoint -> {
+                    return Util.stream(trackedLeg.getEquidistantSectionsOfLeg(timepoint, numParts))
                             .map(p -> trackedLeg.getTrackedRace().getWindWithConfidence(p, timepoint));
                 }).collect(Collectors.toList());
         return timeWeigher.getAverage(winds, null).getObject();

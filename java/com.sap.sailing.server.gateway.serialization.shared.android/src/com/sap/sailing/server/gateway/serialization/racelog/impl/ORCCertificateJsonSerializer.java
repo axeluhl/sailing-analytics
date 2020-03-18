@@ -23,6 +23,8 @@ public class ORCCertificateJsonSerializer implements JsonSerializer<ORCCertifica
     public static final String ORC_CERTIFICATE_CIRCULAR_RANDOM_SPEED_PREDICTIONS = "circularRandomSpeedPredictions";
     public static final String ORC_CERTIFICATE_NON_SPINNAKER_SPEED_PREDICTIONS = "nonSpinnakerSpeedPredictions";
     public static final String ORC_CERTIFICATE_TWA_SPEED_PREDICTIONS = "twaSpeedPredictions";
+    public static final String ORC_CERTIFICATE_FILE_ID = "fileId";
+    public static final String ORC_CERTIFICATE_ISSUING_COUNTRY_IOC = "issuingCountryIOC";
     public static final String ORC_CERTIFICATE_SAILNUMBER = "sailNumber";
     public static final String ORC_CERTIFICATE_BOATNAME = "boatName";
     public static final String ORC_CERTIFICATE_BOATCLASS = "boatClass";
@@ -55,7 +57,9 @@ public class ORCCertificateJsonSerializer implements JsonSerializer<ORCCertifica
     @Override
     public JSONObject serialize(ORCCertificate certificate) {
         JSONObject result = new JSONObject();
-        result.put(ORC_CERTIFICATE_ID, certificate.getId());
+        result.put(ORC_CERTIFICATE_ID, certificate.getReferenceNumber());
+        result.put(ORC_CERTIFICATE_ISSUING_COUNTRY_IOC, certificate.getIssuingCountry()==null?null:certificate.getIssuingCountry().getThreeLetterIOCCode());
+        result.put(ORC_CERTIFICATE_FILE_ID, certificate.getFileId());
         result.put(ORC_CERTIFICATE_SAILNUMBER, certificate.getSailNumber());
         result.put(ORC_CERTIFICATE_BOATNAME, certificate.getBoatName());
         result.put(ORC_CERTIFICATE_BOATCLASS, certificate.getBoatClassName());

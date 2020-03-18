@@ -15,31 +15,44 @@ import com.sap.sse.gwt.dispatch.client.transport.gwtrpc.RequestWrapper;
 import com.sap.sse.gwt.dispatch.servlets.AbstractDispatchServlet;
 import com.sap.sse.gwt.dispatch.shared.commands.Action;
 import com.sap.sse.gwt.dispatch.shared.commands.Result;
+import com.sap.sse.replication.FullyInitializedReplicableTracker;
+import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.util.ServiceTrackerFactory;
 
 public class DashboardDispatchServlet extends AbstractDispatchServlet<DashboardDispatchContext> {
     private static final long serialVersionUID = -245230476512348999L;
 
-    private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
+    private final FullyInitializedReplicableTracker<RacingEventService> racingEventServiceTracker;
     private final PolarDataService polarDataService;
     private final DashboardLiveRaceProvider dashboardLiveRaceProvider;
     private final MovingAveragesCache movingAveragesCache;
 
     public DashboardDispatchServlet() {
         final BundleContext context = Activator.getDefault();
-        racingEventServiceTracker = ServiceTrackerFactory.createAndOpen(context, RacingEventService.class);
+        final ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker =
+                ServiceTrackerFactory.createAndOpen(context, ReplicationService.class);
+        racingEventServiceTracker = new FullyInitializedReplicableTracker<>(context, RacingEventService.class,
+                /* customizer */ null, replicationServiceTracker);
+        racingEventServiceTracker.open();
         polarDataService = getPolarDataService();
-        dashboardLiveRaceProvider = new DashboardLiveRaceProvider(racingEventServiceTracker.getService());
+        try {
+            dashboardLiveRaceProvider = new DashboardLiveRaceProvider(racingEventServiceTracker.getInitializedService(0));
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         movingAveragesCache = new MovingAveragesCache();
     }
 
     @Override
     protected <R extends Result, A extends Action<R, DashboardDispatchContext>> DashboardDispatchContext createDispatchContextFor(
             RequestWrapper<R, A, DashboardDispatchContext> request) {
-       return new DashboardDispatchContextImpl(request.getCurrentClientTime(),
- racingEventServiceTracker.getService(),
-                polarDataService, dashboardLiveRaceProvider, movingAveragesCache, request.getClientLocaleName(),
-                getThreadLocalRequest());
+        try {
+            return new DashboardDispatchContextImpl(request.getCurrentClientTime(), racingEventServiceTracker.getInitializedService(0),
+                    polarDataService, dashboardLiveRaceProvider, movingAveragesCache, request.getClientLocaleName(),
+                    getThreadLocalRequest());
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
     
     private PolarDataService getPolarDataService() {

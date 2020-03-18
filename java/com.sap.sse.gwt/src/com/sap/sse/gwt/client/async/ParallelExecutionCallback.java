@@ -1,7 +1,6 @@
-package com.sap.sailing.gwt.ui.client;
+package com.sap.sse.gwt.client.async;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 
 /**
  * The class is used together with the {@link ParallelExecutionHolder} when two or more asynchronous service calls

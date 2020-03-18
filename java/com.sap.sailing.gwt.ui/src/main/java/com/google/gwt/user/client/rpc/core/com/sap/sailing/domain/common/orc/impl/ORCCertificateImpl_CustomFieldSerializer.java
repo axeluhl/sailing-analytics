@@ -12,6 +12,7 @@ import com.google.gwt.user.client.rpc.SerializationStreamWriter;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.impl.ORCCertificateImpl;
 import com.sap.sse.common.Bearing;
+import com.sap.sse.common.CountryCode;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
@@ -25,9 +26,11 @@ public class ORCCertificateImpl_CustomFieldSerializer extends CustomFieldSeriali
         serialize(streamWriter, instance);
     }
     
-    public static void serialize(SerializationStreamWriter streamWriter, ORCCertificateImpl instance)
+    public static void serialize(SerializationStreamWriter streamWriter, ORCCertificate instance)
             throws SerializationException {
-        streamWriter.writeString(instance.getId());
+        streamWriter.writeString(instance.getReferenceNumber());
+        streamWriter.writeString(instance.getFileId());
+        streamWriter.writeObject(instance.getIssuingCountry());
         streamWriter.writeString(instance.getSailNumber());
         streamWriter.writeString(instance.getBoatName());
         streamWriter.writeString(instance.getBoatClassName());
@@ -65,7 +68,9 @@ public class ORCCertificateImpl_CustomFieldSerializer extends CustomFieldSeriali
 
     public static ORCCertificateImpl instantiate(SerializationStreamReader streamReader)
             throws SerializationException {
-        final String idConsistingOfNatAuthCertNoAndBIN = streamReader.readString();
+        final String referenceNumber = streamReader.readString();
+        final String fileId = streamReader.readString();
+        final CountryCode issuingCountry = (CountryCode) streamReader.readObject();
         final String sailnumber = streamReader.readString();
         final String boatName = streamReader.readString();
         final String boatclass = streamReader.readString();
@@ -101,12 +106,12 @@ public class ORCCertificateImpl_CustomFieldSerializer extends CustomFieldSeriali
         @SuppressWarnings("unchecked")
         final List<Speed> readTWSs = (List<Speed>) streamReader.readObject();
         final Speed[] trueWindSpeeds = readTWSs == null ? ORCCertificate.ALLOWANCES_TRUE_WIND_SPEEDS : readTWSs.toArray(new Speed[readTWSs.size()]);
-        return new ORCCertificateImpl(trueWindSpeeds,trueWindAngles,idConsistingOfNatAuthCertNoAndBIN, sailnumber, boatName, boatclass, length, gph,
-                cdl, issueDate, velocityPredictionsPerTrueWindSpeedAndAngle, beatAngles,
-                beatVMGPredictionPerTrueWindSpeed, beatAllowancePerTrueWindSpeed, runAngles,
+        return new ORCCertificateImpl(trueWindSpeeds,trueWindAngles,referenceNumber, fileId, sailnumber, boatName, boatclass, length,
+                gph, cdl, issueDate, issuingCountry,
+                velocityPredictionsPerTrueWindSpeedAndAngle, beatAngles, beatVMGPredictionPerTrueWindSpeed,
+                beatAllowancePerTrueWindSpeed, runAngles,
                 runVMGPredictionPerTrueWindSpeed, runAllowancePerTrueWindSpeed,
-                windwardLeewardSpeedPredictionsPerTrueWindSpeed, longDistanceSpeedPredictionsPerTrueWindSpeed,
-                circularRandomSpeedPredictionsPerTrueWindSpeed, nonSpinnakerSpeedPredictionsPerTrueWindSpeed);
+                windwardLeewardSpeedPredictionsPerTrueWindSpeed, longDistanceSpeedPredictionsPerTrueWindSpeed, circularRandomSpeedPredictionsPerTrueWindSpeed, nonSpinnakerSpeedPredictionsPerTrueWindSpeed);
     }
 
     @Override
@@ -115,7 +120,7 @@ public class ORCCertificateImpl_CustomFieldSerializer extends CustomFieldSeriali
         deserialize(streamReader, instance);
     }
 
-    public static void deserialize(SerializationStreamReader streamReader, ORCCertificateImpl instance) {
+    public static void deserialize(SerializationStreamReader streamReader, ORCCertificate instance) {
         // Done by instantiateInstance
     }
 

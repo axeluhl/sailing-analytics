@@ -52,9 +52,9 @@ import com.sap.sailing.domain.coursetemplate.impl.MarkTemplateBasedMarkConfigura
 import com.sap.sailing.domain.coursetemplate.impl.RegattaMarkConfigurationImpl;
 import com.sap.sailing.domain.coursetemplate.impl.WaypointWithMarkConfigurationImpl;
 import com.sap.sailing.domain.racelogtracking.DeviceMappingWithRegattaLogEvent;
-import com.sap.sailing.domain.sharedsailingdata.SharedSailingData;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.shared.server.SharedSailingData;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.WithID;
