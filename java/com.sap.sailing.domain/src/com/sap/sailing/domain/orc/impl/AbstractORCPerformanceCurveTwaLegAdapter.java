@@ -58,7 +58,7 @@ public abstract class AbstractORCPerformanceCurveTwaLegAdapter implements ORCPer
         Collection<WindWithConfidence<Util.Pair<Position, TimePoint>>> winds = 
                 referenceTimePoints.stream().flatMap(timepoint -> {
                     return trackedLeg.getEquidistantSectionsOfLeg(timepoint, numParts).stream()
-                            .map(p -> trackedLeg.getTrackedRace().getWindWithConfidence(trackedLeg.getMiddleOfLeg(timepoint), timepoint));
+                            .map(p -> trackedLeg.getTrackedRace().getWindWithConfidence(p, timepoint));
                 }).collect(Collectors.toList());
         return timeWeigher.getAverage(winds, null).getObject();
     }
