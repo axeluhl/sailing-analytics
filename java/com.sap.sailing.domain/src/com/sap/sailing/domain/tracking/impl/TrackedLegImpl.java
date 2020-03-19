@@ -538,7 +538,7 @@ public class TrackedLegImpl implements TrackedLeg {
     }
     
     private TimePoint convertMarkPassingIteratorToTimePoint(Iterable<MarkPassing> leg) {
-        return Util.stream(leg).map(MarkPassing::getTimePoint).findAny().orElse(MillisecondsTimePoint.now());
+        return Util.stream(leg).map(MarkPassing::getTimePoint).findFirst().orElse(MillisecondsTimePoint.now());
     }
 
     @Override

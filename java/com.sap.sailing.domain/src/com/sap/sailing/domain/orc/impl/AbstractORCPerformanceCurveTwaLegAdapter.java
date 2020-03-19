@@ -52,15 +52,15 @@ public abstract class AbstractORCPerformanceCurveTwaLegAdapter implements ORCPer
 
     private Wind getWind() {
         ConfidenceBasedWindAverager<Util.Pair<Position, TimePoint>> timeWeigher = 
-                ConfidenceFactory.INSTANCE.createWindAverager(new PositionAndTimePointWeigher(
-                        1000, WindTrack.WIND_HALF_CONFIDENCE_DISTANCE));
+                ConfidenceFactory.INSTANCE.createWindAverager(new PositionAndTimePointWeigher(1000, WindTrack.WIND_HALF_CONFIDENCE_DISTANCE));
         final Iterable<TimePoint> referenceTimePoints = trackedLeg.getEquidistantReferenceTimePoints(numParts);
         Iterable<WindWithConfidence<Util.Pair<Position, TimePoint>>> winds = 
                 Util.stream(referenceTimePoints).flatMap(timepoint -> {
                     return Util.stream(trackedLeg.getEquidistantSectionsOfLeg(timepoint, numParts))
                             .map(p -> trackedLeg.getTrackedRace().getWindWithConfidence(p, timepoint));
                 }).collect(Collectors.toList());
-        return timeWeigher.getAverage(winds, null).getObject();
+        Util.Pair<Position, TimePoint> at = winds.iterator().next().getRelativeTo();
+        return timeWeigher.getAverage(winds, at).getObject();
     }
 
     @Override
