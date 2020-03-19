@@ -119,6 +119,7 @@ import com.sap.sse.security.operations.RemovePermissionForUserOperation;
 import com.sap.sse.security.operations.RemoveRoleDefinitionFromUserGroupOperation;
 import com.sap.sse.security.operations.RemoveRoleFromUserOperation;
 import com.sap.sse.security.operations.RemoveUserFromUserGroupOperation;
+import com.sap.sse.security.operations.ResetPasswordOperation;
 import com.sap.sse.security.operations.SetDefaultTenantForServerForUserOperation;
 import com.sap.sse.security.operations.SetOwnershipOperation;
 import com.sap.sse.security.operations.SetPreferenceOperation;
@@ -437,7 +438,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             throw new UserManagementException(UserManagementException.CANNOT_RESET_PASSWORD_WITHOUT_VALIDATED_EMAIL);
         }
         final String passwordResetSecret = user.createRandomSecret();
-        apply(s->s.internalResetPassword(username, passwordResetSecret));
+        apply(new ResetPasswordOperation(username, passwordResetSecret));
         Map<String, String> urlParameters = new HashMap<>();
         try {
             urlParameters.put("u", URLEncoder.encode(user.getName(), "UTF-8"));
