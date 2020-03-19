@@ -394,7 +394,6 @@ import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.resultimport.ResultUrlProvider;
 import com.sap.sailing.domain.sharding.ShardingContext;
-import com.sap.sailing.domain.sharedsailingdata.SharedSailingData;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapter;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapterFactory;
@@ -601,6 +600,7 @@ import com.sap.sailing.server.operationaltransformation.UpdateSpecificRegatta;
 import com.sap.sailing.server.security.PermissionAwareRaceTrackingHandler;
 import com.sap.sailing.server.security.SailingViewerRole;
 import com.sap.sailing.server.util.WaitForTrackedRaceUtil;
+import com.sap.sailing.shared.server.SharedSailingData;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SimulationResults;
@@ -658,6 +658,7 @@ import com.sap.sse.pairinglist.PairingList;
 import com.sap.sse.pairinglist.PairingListTemplate;
 import com.sap.sse.pairinglist.impl.PairingListTemplateImpl;
 import com.sap.sse.qrcode.QRCodeGenerationUtil;
+import com.sap.sse.replication.FullyInitializedReplicableTracker;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicaDescriptor;
 import com.sap.sse.replication.Replicable;
@@ -706,7 +707,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     private static final long serialVersionUID = 9031688830194537489L;
 
-    private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
+    private final FullyInitializedReplicableTracker<RacingEventService> racingEventServiceTracker;
 
     private final ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker;
 
@@ -733,9 +734,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     private final ServiceTracker<DeviceIdentifierStringSerializationHandler, DeviceIdentifierStringSerializationHandler>
     deviceIdentifierStringSerializationHandlerTracker;
     
-    private final ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
+    private final FullyInitializedReplicableTracker<SecurityService> securityServiceTracker;
 
-    private final ServiceTracker<SharedSailingData, SharedSailingData> sharedSailingDataTracker;
+    private final FullyInitializedReplicableTracker<SharedSailingData> sharedSailingDataTracker;
     
     private final com.sap.sailing.domain.tractracadapter.persistence.MongoObjectFactory tractracMongoObjectFactory;
 
@@ -778,17 +779,23 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         BundleContext context = Activator.getDefault();
         Activator activator = Activator.getInstance();
         quickRanksLiveCache = new QuickRanksLiveCache(this);
-        racingEventServiceTracker = ServiceTrackerFactory.createAndOpen(context, RacingEventService.class);
-        sharedSailingDataTracker = ServiceTrackerFactory.createAndOpen(context, SharedSailingData.class);
-        windFinderTrackerFactoryServiceTracker = ServiceTrackerFactory.createAndOpen(context, WindFinderTrackerFactory.class);
         replicationServiceTracker = ServiceTrackerFactory.createAndOpen(context, ReplicationService.class);
+        racingEventServiceTracker = new FullyInitializedReplicableTracker<>(context, RacingEventService.class,
+                /* customizer */ null, replicationServiceTracker);
+        racingEventServiceTracker.open();
+        sharedSailingDataTracker = new FullyInitializedReplicableTracker<>(context, SharedSailingData.class,
+                /* service tracker customizer */ null, replicationServiceTracker);
+        sharedSailingDataTracker.open();
+        windFinderTrackerFactoryServiceTracker = ServiceTrackerFactory.createAndOpen(context, WindFinderTrackerFactory.class);
         swissTimingAdapterTracker = ServiceTrackerFactory.createAndOpen(context, SwissTimingAdapterFactory.class);
         tractracAdapterTracker = ServiceTrackerFactory.createAndOpen(context, TracTracAdapterFactory.class);
         raceLogTrackingAdapterTracker = ServiceTrackerFactory.createAndOpen(context,
                 RaceLogTrackingAdapterFactory.class);
         deviceIdentifierStringSerializationHandlerTracker = ServiceTrackerFactory.createAndOpen(context,
                 DeviceIdentifierStringSerializationHandler.class);
-        securityServiceTracker = ServiceTrackerFactory.createAndOpen(context, SecurityService.class);
+        securityServiceTracker = new FullyInitializedReplicableTracker<>(context, SecurityService.class,
+                /* service tracker customizer */ null, replicationServiceTracker);
+        securityServiceTracker.open();
         igtimiAdapterTracker = ServiceTrackerFactory.createAndOpen(context, IgtimiConnectionFactory.class);
         baseDomainFactory = getService().getBaseDomainFactory();
         mongoObjectFactory = getService().getMongoObjectFactory();
@@ -2776,7 +2783,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     protected RacingEventService getService() {
         try {
-            return racingEventServiceTracker.waitForService(0);
+            return racingEventServiceTracker.getInitializedService(0);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         } // grab the service
@@ -2784,7 +2791,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     protected SharedSailingData getSharedSailingData() {
         try {
-            return sharedSailingDataTracker.waitForService(0);
+            return sharedSailingDataTracker.getInitializedService(0);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         } // grab the service
@@ -2800,7 +2807,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     
     protected SecurityService getSecurityService() {
         try {
-            return securityServiceTracker.waitForService(0);
+            return securityServiceTracker.getInitializedService(0);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -4467,12 +4474,17 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         // The queue name must always be the same for this server. In order to achieve
         // this we're using the unique server identifier
         final ReplicationService replicationService = getReplicationService();
-        replicationService.startToReplicateFrom(replicationService.createReplicationMasterDescriptor(messagingHost,
-                masterHostName, exchangeName, servletPort, messagingPort,
-                /* use local server identifier as queue name */ replicationService.getServerIdentifier().toString(),
-                RemoteServerUtil.resolveBearerTokenForRemoteServer(masterHostName, servletPort, usernameOrNull,
-                        passwordOrNull),
-                replicationService.getAllReplicables()));
+        replicationService.setReplicationStarting(true);
+        try {
+            replicationService.startToReplicateFrom(replicationService.createReplicationMasterDescriptor(messagingHost,
+                    masterHostName, exchangeName, servletPort, messagingPort,
+                    /* use local server identifier as queue name */ replicationService.getServerIdentifier().toString(),
+                    RemoteServerUtil.resolveBearerTokenForRemoteServer(masterHostName, servletPort, usernameOrNull,
+                            passwordOrNull),
+                    replicationService.getAllReplicables()));
+        } finally {
+            replicationService.setReplicationStarting(false);
+        }
     }
 
     @Override
@@ -5324,15 +5336,15 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public List<UrlDTO> getResultImportUrls(String resultProviderName) {
         final List<UrlDTO> result = new ArrayList<>();
-        SecurityService securityService = getSecurityService();
+            SecurityService securityService = getSecurityService();
         Iterable<URL> allUrlsReadableBySubject = getService().getResultImportUrls(resultProviderName);
-        for (URL url : allUrlsReadableBySubject) {
-            QualifiedObjectIdentifier objId = SecuredDomainType.RESULT_IMPORT_URL.getQualifiedObjectIdentifier(
+            for (URL url : allUrlsReadableBySubject) {
+                QualifiedObjectIdentifier objId = SecuredDomainType.RESULT_IMPORT_URL.getQualifiedObjectIdentifier(
                     new TypeRelativeObjectIdentifier(resultProviderName, url.toString()));
-            UrlDTO urlDTO = new UrlDTO(url.toString());
-            SecurityDTOUtil.addSecurityInformation(securityService, urlDTO, objId);
-            result.add(urlDTO);
-        }
+                UrlDTO urlDTO = new UrlDTO(url.toString());
+                SecurityDTOUtil.addSecurityInformation(securityService, urlDTO, objId);
+                result.add(urlDTO);
+            }
         return result;
     }
 
@@ -5345,12 +5357,12 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                         return new URL(urlDto.getUrl());
                     } catch (MalformedURLException e) {
                         return null;
-                    }
+            }
                 })
                 .filter(url -> url != null)
                 .collect(Collectors.toSet());
         racingEventService.removeResultImportURLs(resultProviderName, urlsToRemove);
-    }
+        }
 
     @Override
     public void addResultImportUrl(String resultProviderName, UrlDTO urlDTO) throws Exception {
@@ -5359,7 +5371,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 .orElseThrow(() -> new IllegalStateException("ResultUrlProvider not found: " + resultProviderName));
         final URL url = resultUrlProvider.resolveUrl(urlDTO.getUrl());
         racingEventService.addResultImportUrl(resultProviderName, url);
-    }
+        }
 
     @Override
     public String validateResultImportUrl(String resultProviderName, UrlDTO urlDTO) {

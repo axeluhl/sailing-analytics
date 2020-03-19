@@ -13,7 +13,6 @@ import org.apache.http.client.ClientProtocolException;
 import org.json.simple.parser.ParseException;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.igtimiadapter.Account;
@@ -23,6 +22,8 @@ import com.sap.sailing.domain.igtimiadapter.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.igtimiadapter.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.igtimiadapter.persistence.PersistenceFactory;
 import com.sap.sailing.domain.tracking.WindTrackerFactory;
+import com.sap.sse.replication.FullyInitializedReplicableTracker;
+import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.util.ClearStateTestSupport;
 import com.sap.sse.util.ServiceTrackerFactory;
@@ -55,7 +56,7 @@ public class Activator implements BundleActivator {
     private static final String CLIENT_REDIRECT_PORT_PROPERTY_NAME = "igtimi.client.redirect.port";
     private final Future<IgtimiConnectionFactoryImpl> connectionFactory;
     private final Future<IgtimiWindTrackerFactory> windTrackerFactory;
-    private ServiceTracker<SecurityService, SecurityService> securityServiceServiceTracker;
+    private FullyInitializedReplicableTracker<SecurityService> securityServiceServiceTracker;
     private final ExecutorService executor = Executors.newSingleThreadExecutor(new ThreadFactoryWithPriority(Thread.NORM_PRIORITY, /* daemon */ true));
     private SecurityService securityServiceTest;
 
@@ -106,10 +107,12 @@ public class Activator implements BundleActivator {
                 }
             }
         });
-        securityServiceServiceTracker = ServiceTrackerFactory.createAndOpen(context, SecurityService.class);
+        securityServiceServiceTracker = new FullyInitializedReplicableTracker<>(context, SecurityService.class,
+                /* customizer */ null, ServiceTrackerFactory.createAndOpen(context, ReplicationService.class));
+        securityServiceServiceTracker.open();
         new Thread(() -> {
             try {
-                final SecurityService securityService = securityServiceServiceTracker.waitForService(0);
+                final SecurityService securityService = securityServiceServiceTracker.getInitializedService(0);
                 IgtimiConnectionFactoryImpl igtimiConnectionFactory = connectionFactory.get();
                 for (Account account : igtimiConnectionFactory.getAllAccounts()) {
                     securityService.migrateOwnership(account);
@@ -144,7 +147,11 @@ public class Activator implements BundleActivator {
     }
     
     public SecurityService getSecurityService() {
-        return securityServiceTest == null ? securityServiceServiceTracker.getService() : securityServiceTest;
+        try {
+            return securityServiceTest == null ? securityServiceServiceTracker.getInitializedService(0) : securityServiceTest;
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public IgtimiWindTrackerFactory getWindTrackerFactory() {

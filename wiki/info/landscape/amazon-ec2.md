@@ -12,82 +12,22 @@
 
 #### Starting an instance
 
+To start with, your user account needs to have sufficient permissions to create a new server group ``{NEWSERVERNAME}-server`` up-front so that you have at least the permissions granted by the ``user`` role for all objects owned by that group. Change the group's group ownership so that the new group is its own group owner. Additionally, in order to have the new server participate in the shared security service and shared sailing data service on ``security-service.sapsailing.com`` your user needs ``SERVER:REPLICATE:security-service``. Your user should also have the ``SERVER:*:{NEWSERVERNAME}`` permission (e.g., implied by the more general ``SERVER:*`` permission), e.g., granted by the ``server_admin`` role. The latter permission is helpful in order to be able to configure the resulting server and to set up replication for it. If your user account currently does not have those permissions, find an administrator who has at least ``SERVER:*`` which is implied in particular by having role ``server_admin:*``. Such an administrator will be able to grant you the ``SERVER``-related permissions described here.
 
-- Which instance type to choose:
-  - Archive: m2.2xlarge
-  - Live: c1.xlarge
+Now start by creating the new server group, named ``{NEWSERVERNAME}-server``. So for example, if your server will use ``SERVER_NAME=abc`` then create a user group called ``abc-server``. You will yourself be a member of that new group automatically. Add role ``user`` to the group, enabling it only for the members of the group ("Enabled for all users" set to "No"). This way, all members of the group will gain permissions for objects owned by that server as if they owned them themselves. This also goes for the new ``SERVER`` object, but owners only obtain permissions for default actions, not the dedicated ``SERVER`` actions.
+
+Now choose the instance type to start. For example:
+  - Archive server: i3.2xlarge
+  - Live event: c4.2xlarge
 
 You may need to select "All generations" instead of "Current generation" to see these instance configurations. Of course, you may choose variations of those as you feel is appropriate for your use case.
 
-- Using a release, set the following in the instance's user data, replacing `myspecificevent` by a unique name of the event or series you'll be running on that instance, such as `kielerwoche2014` or similar.
-
- ```
-  INSTALL_FROM_RELEASE=`name-of-release`
-  USE_ENVIRONMENT=live-server
-  MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/myspecificevent?replicaSet=live&retryWrites=true"
-  REPLICATION_CHANNEL=myspecificevent
-  SERVER_NAME=MYSPECIFICEVENT
-  BUILD_COMPLETE_NOTIFY=your@email.here
-  SERVER_STARTUP_NOTIFY=your@email.here
-  ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Dcom.sap.sailing.domain.tracking.MailInvitationType=SailInsight2"
-  # Provide authentication credentials for a user on security-service.sapsailing.com permitted to replicate, either by username/password...
-  #REPLICATE_MASTER_USERNAME=(user for replicator login on security-service.sapsailing.com server having SERVER:REPLICATE:&lt;server-name&gt; permission)
-  #REPLICATE_MASTER_PASSWORD=(password of the user for replication login on security-service.sapsailing.com)
-  # Or by bearer token, obtained, e.g., through
-  #   curl -d "username=myuser&password=mysecretpassword" "https://security-service.sapsailing.com/security/api/restsecurity/access_token" | jq .access_token
-  # or by logging in to the security-service.sapsailing.com server using your web browser and then navigating to
-  #     https://security-service.sapsailing.com/security/api/restsecurity/access_token
-  #REPLICATE_MASTER_BEARER_TOKEN=
-```
-
-The *MailInvitationType* property controls which version of the SAP Sail Insight app will be targeted by tracking invitations sent out by e-mail.
-Two different Branch.io URL schemes exist for the Sail Insight app: sailinsight-app.sapsailing.com and sailinsight20-app.sapsailing.com.
-They can be selected by providing *SailInsight1* or *SailInsight2*, respectively, as the values for the property. If the property is
-set to *LEGACY*, no Branch.io link is used in the invitation at all. This mode should no longer be used because the Branch.io-enabled
-iOS app has hit the store. If not provided, it will default to *SailInsight2*.
-
-Note that when you select to install an environment using the `USE_ENVIRONMENT` variable, any other variable that you specify in the user data, such as the `MONGODB_URI` or `REPLICATION_CHANNEL` properties in the example above, these additional user data properties will override whatever comes from the environment specified by the `USE_ENVIRONMENT` parameter.
-
-- To build from git, install and start, set the following in the instance's user data, adjusting the branch name (`BUILD_FROM`), the `myspecificevent` naming and memory settings according to your needs:
-
-```
-  BUILD_BEFORE_START=True
-  BUILD_FROM=master
-  RUN_TESTS=False
-  COMPILE_GWT=True
-  BUILD_COMPLETE_NOTIFY=you@email.com
-  SERVER_STARTUP_NOTIFY=
-  SERVER_NAME=MYSPECIFICEVENT
-  MEMORY=2048m
-  REPLICATION_HOST=rabbit.internal.sapsailing.com
-  REPLICATION_CHANNEL=myspecificevent
-  MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/myspecificevent?replicaSet=live&retryWrites=true"
-  # Provide authentication credentials for a user on security-service.sapsailing.com permitted to replicate, either by username/password...
-  #REPLICATE_MASTER_USERNAME=(user for replicator login on security-service.sapsailing.com server having SERVER:REPLICATE:&lt;server-name&gt; permission)
-  #REPLICATE_MASTER_PASSWORD=(password of the user for replication login on security-service.sapsailing.com)
-  # Or by bearer token, obtained, e.g., through
-  #   curl -d "username=myuser&password=mysecretpassword" "https://security-service.sapsailing.com/security/api/restsecurity/access_token" | jq .access_token
-  # or by logging in to the security-service.sapsailing.com server using your web browser and then navigating to
-  #     https://security-service.sapsailing.com/security/api/restsecurity/access_token
-  #REPLICATE_MASTER_BEARER_TOKEN=
-```
-
-#### Setting up a new image (AMI) from scratch (more or less)
-
-See [here](/wiki/creating-ec2-image-from-scratch)
-
-#### Receiving wind from Expedition
-
-- To receive and forward wind with an Expedition connector, log into webserver as user trac and switch to $HOME/servers/udpmirror. Start the mirror and forward it to the instance you want. In order to receive wind through the Igtimi connector, this step is not required as the wind data is received directly from the Igtimi server.
-
-#### Setting up Master and Replica
-
-- Fire up a master with the following configuration. There is a preconfigured master environment at http://releases.sapsailing.com/environments/live-master-server that you should use.
+Using a release, set the following in the instance's user data, replacing `myspecificevent` by a unique name of the event or series you'll be running on that instance, such as `kielerwoche2014` or similar. Note that when you select to install an environment using the `USE_ENVIRONMENT` variable, any other variable that you specify in the user data, such as the `MONGODB_URI` or `REPLICATION_CHANNEL` properties in the example above, these additional user data properties will override whatever comes from the environment specified by the `USE_ENVIRONMENT` parameter.
 
 ```
 INSTALL_FROM_RELEASE=(name-of-release)
 USE_ENVIRONMENT=live-master-server
-SERVER_NAME=MYSPECIFICEVENT
+SERVER_NAME=myspecificevent
 REPLICATION_CHANNEL=myspecificevent
 MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/myspecificevent?replicaSet=live&retryWrites=true"
 SERVER_STARTUP_NOTIFY=you@email.com
@@ -98,17 +38,22 @@ SERVER_STARTUP_NOTIFY=you@email.com
 #   curl -d "username=myuser&password=mysecretpassword" "https://security-service.sapsailing.com/security/api/restsecurity/access_token" | jq .access_token
 # or by logging in to the security-service.sapsailing.com server using your web browser and then navigating to
 #     https://security-service.sapsailing.com/security/api/restsecurity/access_token
-#REPLICATE_MASTER_BEARER_TOKEN=
+REPLICATE_MASTER_BEARER_TOKEN=(a bearer token allowing this master to replicate from security-service.sapsailing.com)
 ```
 
-- After your master server is ready, note the internal IP and configure your replica instances. Set up a user account there that has the following permission: ``SERVER:REPLICATE:{SERVERNAME}``. You will need this user's credentials to authenticate your replicas for replication.
+Have at least a public-facing target group ready. If you want to expose the master to the public (single-instance scenario or master-replica scenario where the master also handles reading client requests) add the master to the public target group.
 
-- Make sure to use the preconfigured environment from http://releases.sapsailing.com/environments/live-replica-server. Then absolutely make sure to add the line "REPLICATE_MASTER_SERVLET_HOST" to the user-data and adjust the `myspecificevent` master exchange name to the `REPLICATION_CHANNEL` setting you used for the master configuration. 
+If you want to launch one or more replicas, ensure you have a dedicated ``...-master`` target group to which you add your master instance, and a load balancer rule that forwards your replica's requests directed to the master to that ``...-master`` target group, for example, by using a dedicated ``...-master`` hostname rule in your load balancer which then forwards to the ``...-master`` target group.	
+
+After your master server is ready, note the internal IP and configure your replica instances if you'd like to connect using the master's IP address. Alternatively, you may route the replica requests through the load balancer again, using whatever your load balancer requires to route the requests to your master, such as the ``...-master`` hostname with HTTPS as a protocol and 443 for a port. If you don't want to use the credentials of your own user account (which is expected to have permission ``SERVER:REPLICATE:{SERVERNAME}`` already because as described above you need this for configuring the new server), e.g., because you then have to expose an access token in the environment that anyone with SSH access to the instance may be able to see, set up a new user account, such as ``{SERVERNAME}-replicator``, that has the following permission: ``SERVER:REPLICATE:{SERVERNAME}`` where ``{SERVERNAME}`` is what you provided above for the ``SERVER_NAME`` environment variable. You will be able to grant this permission to the new user because your own user account is expected to have this permission. You will need your own or this new user's credentials to authenticate your replicas for replication.
+
+Make sure to use the preconfigured environment from http://releases.sapsailing.com/environments/live-replica-server. Then absolutely make sure to add the line "REPLICATE_MASTER_SERVLET_HOST" to the user-data and adjust the `myspecificevent` master exchange name in the replica's ``REPLICATE_MASTER_EXCHANGE_NAME`` variable to the value of the ``REPLICATION_CHANNEL`` setting you used for the master configuration.  Also ensure that you provide the ``REPLICATE_MASTER_BEARER_TOKEN`` value (or, alternatively ``REPLICATE_MASTER_USERNAME`` and ``REPLICATE_MASTER_PASSWORD``) to grant the replica the permissions it needs to successfully register with the master as a replica.
 
 ```
 INSTALL_FROM_RELEASE=(name-of-release)
 USE_ENVIRONMENT=live-replica-server
-REPLICATE_MASTER_SERVLET_HOST=(IP of your master server)
+REPLICATE_MASTER_SERVLET_HOST=(IP of your master server or external -master hostname)
+REPLICATE_MASTER_SERVLET_PORT=(port your master is listening on for HTTP/HTTPS requests; defaults to 8888; use 443 for -master hostname)
 REPLICATE_MASTER_EXCHANGE_NAME=myspecificevent
 # Provide authentication credentials for a user on the master permitted to replicate, either by username/password...
 #REPLICATE_MASTER_USERNAME=(user for replicator login on master server having SERVER:REPLICATE:&lt;server-name&gt; permission)
@@ -117,12 +62,20 @@ REPLICATE_MASTER_EXCHANGE_NAME=myspecificevent
 #   curl -d "username=myuser&password=mysecretpassword" "https://master-server.sapsailing.com/security/api/restsecurity/access_token" | jq .access_token
 # or by logging in to the master server using your web browser and then navigating to
 #     https://master-server.sapsailing.com/security/api/restsecurity/access_token
-# REPLICATE_MASTER_BEARER_TOKEN=
+REPLICATE_MASTER_BEARER_TOKEN=(a bearer token allowing this master to replicate from your master)
 SERVER_NAME=MYSPECIFICEVENT
 MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/myspecificevent-replica?replicaSet=live&retryWrites=true"
 EVENT_ID=&lt;some-uuid-of-an-event-you-want-to-feature&gt;
 SERVER_STARTUP_NOTIFY=you@email.com
 ```
+
+#### Setting up a new image (AMI) from scratch (more or less)
+
+See [here](/wiki/creating-ec2-image-from-scratch)
+
+#### Receiving wind from Expedition
+
+- To receive and forward wind with an Expedition connector, log into webserver as user trac and switch to $HOME/servers/udpmirror. Start the mirror and forward it to the instance you want. In order to receive wind through the Igtimi connector, this step is not required as the wind data is received directly from the Igtimi server.
 
 #### Setting up a Multi Instance
 To set up a multi instance for a server with name "SSV", subdomain "ssv.sapsailing.com" and description "Schwartauer Segler-Verein, [www.ssv-net.de](http://www.ssv-net.de), Alexander Probst, [webmaster@alexprobst.de](mailto:webmaster@alexprobst.de)" perform the following steps:
