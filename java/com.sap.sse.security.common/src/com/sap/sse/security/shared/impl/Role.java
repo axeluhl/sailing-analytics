@@ -15,10 +15,12 @@ public class Role extends AbstractRole<RoleDefinition, UserGroup, User> {
     }
 
     public Ownership getQualificationAsOwnership() {
+        final Ownership result;
         if (qualifiedForTenant != null || qualifiedForUser != null) {
-            return new Ownership(qualifiedForUser, qualifiedForTenant);
+            result = new Ownership(qualifiedForUser, qualifiedForTenant);
+        } else {
+            result = null;
         }
-        return null;
+        return result;
     }
-
 }

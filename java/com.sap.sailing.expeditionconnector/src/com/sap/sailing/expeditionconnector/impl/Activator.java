@@ -12,7 +12,6 @@ import java.util.logging.Logger;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifierStringSerializationHandler;
@@ -28,6 +27,8 @@ import com.sap.sailing.expeditionconnector.persistence.PersistenceFactory;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
 import com.sap.sse.ServerInfo;
 import com.sap.sse.common.TypeBasedServiceFinder;
+import com.sap.sse.replication.FullyInitializedReplicableTracker;
+import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
@@ -91,10 +92,11 @@ public class Activator implements BundleActivator {
             registrations.add(context.registerService(DeviceIdentifierStringSerializationHandler.class, new ExpeditionSensorStringSerializationHandler(), getDict(ExpeditionSensorDeviceIdentifier.TYPE)));
 
             new Thread(() -> {
-                final ServiceTracker<SecurityService, SecurityService> securityServiceServiceTracker = ServiceTrackerFactory
-                        .createAndOpen(context, SecurityService.class);
+                final FullyInitializedReplicableTracker<SecurityService> securityServiceServiceTracker = new FullyInitializedReplicableTracker<>(
+                        context, SecurityService.class, /* customizer */ null, ServiceTrackerFactory.createAndOpen(context, ReplicationService.class));
+                securityServiceServiceTracker.open();
                 try {
-                    final SecurityService securityService = securityServiceServiceTracker.waitForService(0);
+                    final SecurityService securityService = securityServiceServiceTracker.getInitializedService(0);
                     final WildcardPermissionEncoder permissionEncoder = new WildcardPermissionEncoder();
                     for (ExpeditionDeviceConfiguration deviceConfiguration : expeditionTrackerFactory
                             .getDeviceConfigurations()) {

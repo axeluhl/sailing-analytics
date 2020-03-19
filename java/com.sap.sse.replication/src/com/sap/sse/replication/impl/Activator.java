@@ -170,42 +170,47 @@ public class Activator implements BundleActivator {
         new Thread("ServiceTracker waiting for Replicables "+Arrays.toString(replicableIdsAsStrings)) {
             @Override
             public void run() {
-                logger.info("Waiting for Replicables " + Arrays.toString(replicableIdsAsStrings) +
-                        " before firing up replication automatically...");
-                final List<Replicable<?, ?>> replicables = new ArrayList<>();
-                for (String replicableIdAsString : replicableIdsAsStrings) {
-                    Replicable<?, ?> replicable = replicablesProvider.getReplicable(replicableIdAsString, /* wait */true);
-                    logger.info("Obtained Replicable " + replicableIdAsString);
-                    replicables.add(replicable);
-                }
-                logger.info("Configuration requested automatic replication for replicables "+
-                        Arrays.toString(replicableIdsAsStrings)+". Starting it up...");
-                String replicateFromExchangeName = System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_EXCHANGE_NAME);
-                if (replicateFromExchangeName == null) {
-                    replicateFromExchangeName = masterExchangeName;
-                }
-                final String servletHost = System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_SERVLET_HOST);
-                final int servletPort = Integer.valueOf(System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_SERVLET_PORT).trim());
-                final String bearerToken;
-                if (System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_BEARER_TOKEN) != null) {
-                    bearerToken = System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_BEARER_TOKEN).trim();
-                } else {
-                    bearerToken = RemoteServerUtil.resolveBearerTokenForRemoteServer(servletHost, servletPort,
-                            System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_USERNAME),
-                            System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_PASSWORD));
-                }
-                ReplicationMasterDescriptorImpl master = new ReplicationMasterDescriptorImpl(
-                        System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_QUEUE_HOST),
-                        replicateFromExchangeName,
-                        Integer.valueOf(System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_QUEUE_PORT).trim()), 
-                        serverReplicationMasterService.getServerIdentifier().toString(), 
-                        servletHost, servletPort, bearerToken, replicables);
                 try {
-                    serverReplicationMasterService.startToReplicateFrom(master);
-                    serverReplicationMasterService.setReplicationStarting(false);
-                    logger.info("Automatic replication has been started.");
-                } catch (ClassNotFoundException | IOException | InterruptedException e) {
-                    logger.log(Level.SEVERE, "Error with automatic replication from "+master, e);
+                    logger.info("Waiting for Replicables " + Arrays.toString(replicableIdsAsStrings) +
+                            " before firing up replication automatically...");
+                    final List<Replicable<?, ?>> replicables = new ArrayList<>();
+                    for (String replicableIdAsString : replicableIdsAsStrings) {
+                    logger.info("Trying to obtain Replicable " + replicableIdAsString+", waiting if necessary");
+                        Replicable<?, ?> replicable = replicablesProvider.getReplicable(replicableIdAsString, /* wait */true);
+                        logger.info("Obtained Replicable " + replicableIdAsString);
+                        replicables.add(replicable);
+                    }
+                    logger.info("Configuration requested automatic replication for replicables "+
+                            Arrays.toString(replicableIdsAsStrings)+". Starting it up...");
+                    String replicateFromExchangeName = System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_EXCHANGE_NAME);
+                    if (replicateFromExchangeName == null) {
+                        replicateFromExchangeName = masterExchangeName;
+                    }
+                    final String servletHost = System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_SERVLET_HOST);
+                    final int servletPort = Integer.valueOf(System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_SERVLET_PORT).trim());
+                    final String bearerToken;
+                    if (System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_BEARER_TOKEN) != null) {
+                        bearerToken = System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_BEARER_TOKEN).trim();
+                    } else {
+                        bearerToken = RemoteServerUtil.resolveBearerTokenForRemoteServer(servletHost, servletPort,
+                                System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_USERNAME),
+                                System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_PASSWORD));
+                    }
+                    ReplicationMasterDescriptorImpl master = new ReplicationMasterDescriptorImpl(
+                            System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_QUEUE_HOST),
+                            replicateFromExchangeName,
+                            Integer.valueOf(System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_QUEUE_PORT).trim()), 
+                            serverReplicationMasterService.getServerIdentifier().toString(), 
+                            servletHost, servletPort, bearerToken, replicables);
+                    try {
+                        serverReplicationMasterService.startToReplicateFrom(master);
+                        serverReplicationMasterService.setReplicationStarting(false);
+                        logger.info("Automatic replication has been started.");
+                    } catch (ClassNotFoundException | IOException | InterruptedException e) {
+                        logger.log(Level.SEVERE, "Error with automatic replication from "+master, e);
+                    }
+                } catch (Exception e) {
+                    logger.log(Level.SEVERE, "Error starting automatic replication", e);
                 }
             }
         }.start();

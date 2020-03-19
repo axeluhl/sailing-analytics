@@ -2,6 +2,7 @@ package com.sap.sse.security.jaxrs.api;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -13,6 +14,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -101,12 +103,24 @@ public class OwnershipResource extends AbstractSecurityResource {
     @Produces("application/json;charset=UTF-8")
     public Response getOwnership(@PathParam("objectType") String objectType,
             @PathParam("typeRelativeObjectId") String typeRelativeObjectId) throws OwnershipException {
+        return getOwnership(objectType, new String[] { typeRelativeObjectId });
+    }
+
+    @Path("{objectType}")
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    public Response getOwnershipWithMultiId(@PathParam("objectType") String objectType,
+            @QueryParam("id") List<String> compositeTypeRelativeObjectId) throws OwnershipException {
+        return getOwnership(objectType, compositeTypeRelativeObjectId.toArray(new String[0]));
+    }
+
+    private Response getOwnership(String objectType, final String[] typeRelativeObjectIdArray) {
         QualifiedObjectIdentifier identifier = new QualifiedObjectIdentifierImpl(objectType,
-                new TypeRelativeObjectIdentifier(typeRelativeObjectId));
+                new TypeRelativeObjectIdentifier(typeRelativeObjectIdArray));
         final OwnershipAnnotation existingOwnership = getService().getOwnership(identifier);
         final JSONObject result = new JSONObject();
         result.put(KEY_OBJECT_TYPE, objectType);
-        result.put(KEY_OBJECT_ID, typeRelativeObjectId);
+        result.put(KEY_OBJECT_ID, identifier.getTypeRelativeObjectIdentifier());
         result.put(KEY_GROUP_ID, existingOwnership == null || existingOwnership.getAnnotation().getTenantOwner() == null ? null : existingOwnership.getAnnotation().getTenantOwner().getId().toString());
         result.put(KEY_USERNAME, existingOwnership == null || existingOwnership.getAnnotation().getUserOwner() == null ? null : existingOwnership.getAnnotation().getUserOwner().getName());
         result.put(KEY_DISPLAY_NAME, existingOwnership == null || existingOwnership.getDisplayNameOfAnnotatedObject() == null ? null : existingOwnership.getDisplayNameOfAnnotatedObject());

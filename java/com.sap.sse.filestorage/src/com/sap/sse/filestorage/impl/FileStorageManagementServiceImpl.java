@@ -48,7 +48,7 @@ public class FileStorageManagementServiceImpl implements ReplicableFileStorageMa
     private final Map<OperationExecutionListener<ReplicableFileStorageManagementService>, OperationExecutionListener<ReplicableFileStorageManagementService>> operationExecutionListeners = new ConcurrentHashMap<>();
     private final Set<OperationWithResultWithIdWrapper<?, ?>> operationsSentToMasterForReplication = new HashSet<>();
     private ReplicationMasterDescriptor replicationMasterDescriptor;
-    private ThreadLocal<Boolean> currentlyFillingFromInitialLoad = ThreadLocal.withInitial(() -> false);
+    private volatile boolean currentlyFillingFromInitialLoad;
     
     private ThreadLocal<Boolean> currentlyApplyingOperationReceivedFromMaster = ThreadLocal.withInitial(() -> false);
 
@@ -68,6 +68,7 @@ public class FileStorageManagementServiceImpl implements ReplicableFileStorageMa
 
     public FileStorageManagementServiceImpl(TypeBasedServiceFinder<FileStorageService> serviceFinder,
             FileStorageServicePropertyStore propertyStore) {
+        this.currentlyFillingFromInitialLoad = false;
         this.serviceFinder = serviceFinder;
         this.propertyStore = propertyStore;
         serviceResolver = new FileStorageServiceResolverAgainstOsgiRegistryImpl(serviceFinder);
@@ -229,12 +230,12 @@ public class FileStorageManagementServiceImpl implements ReplicableFileStorageMa
 
     @Override
     public boolean isCurrentlyFillingFromInitialLoad() {
-        return currentlyFillingFromInitialLoad.get();
+        return currentlyFillingFromInitialLoad;
     }
 
     @Override
     public void setCurrentlyFillingFromInitialLoad(boolean currentlyFillingFromInitialLoad) {
-        this.currentlyFillingFromInitialLoad.set(currentlyFillingFromInitialLoad);
+        this.currentlyFillingFromInitialLoad = currentlyFillingFromInitialLoad;
     }
 
     @Override
