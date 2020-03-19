@@ -2,12 +2,10 @@ package com.sap.sse.security.operations;
 
 import java.util.UUID;
 
-import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.security.impl.ReplicableSecurityService;
 
-public class DeleteRoleDefinitionOperation implements OperationWithResult<ReplicableSecurityService, Void> {
-    private static final long serialVersionUID = 1L;
-
+public class DeleteRoleDefinitionOperation implements SecurityOperation<Void> {
+    private static final long serialVersionUID = 2803534172168486392L;
     protected final UUID roleDefinitionId;
 
     public DeleteRoleDefinitionOperation(UUID roleDefinitionId) {

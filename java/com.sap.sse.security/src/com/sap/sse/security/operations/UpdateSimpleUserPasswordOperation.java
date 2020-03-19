@@ -1,11 +1,9 @@
 package com.sap.sse.security.operations;
 
-import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.security.impl.ReplicableSecurityService;
 
-public class UpdateSimpleUserPasswordOperation implements OperationWithResult<ReplicableSecurityService, Void> {
-    private static final long serialVersionUID = 1L;
-
+public class UpdateSimpleUserPasswordOperation implements SecurityOperation<Void> {
+    private static final long serialVersionUID = -3385425219743404833L;
     protected final String username;
     protected final byte[] salt;
     protected final String hashedPasswordBase64;

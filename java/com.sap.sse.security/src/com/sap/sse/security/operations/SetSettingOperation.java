@@ -1,11 +1,9 @@
 package com.sap.sse.security.operations;
 
-import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.security.impl.ReplicableSecurityService;
 
-public class SetSettingOperation implements OperationWithResult<ReplicableSecurityService, Boolean> {
-    private static final long serialVersionUID = 1L;
-
+public class SetSettingOperation implements SecurityOperation<Boolean> {
+    private static final long serialVersionUID = 3545710069181212486L;
     protected final String key;
     protected final Object setting;
 

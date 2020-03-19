@@ -1,12 +1,10 @@
 package com.sap.sse.security.operations;
 
-import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.security.impl.ReplicableSecurityService;
 import com.sap.sse.security.shared.WildcardPermission;
 
-public class AddPermissionForUserOperation implements OperationWithResult<ReplicableSecurityService, Void> {
-    private static final long serialVersionUID = 1L;
-
+public class AddPermissionForUserOperation implements SecurityOperation<Void> {
+    private static final long serialVersionUID = -1691758888518387758L;
     protected final String username;
     protected final WildcardPermission permissionToAdd;
 

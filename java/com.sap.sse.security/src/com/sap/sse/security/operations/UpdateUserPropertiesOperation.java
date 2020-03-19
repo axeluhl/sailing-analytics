@@ -2,12 +2,10 @@ package com.sap.sse.security.operations;
 
 import java.util.Locale;
 
-import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.security.impl.ReplicableSecurityService;
 
-public class UpdateUserPropertiesOperation implements OperationWithResult<ReplicableSecurityService, Void> {
-    private static final long serialVersionUID = 1L;
-
+public class UpdateUserPropertiesOperation implements SecurityOperation<Void> {
+    private static final long serialVersionUID = -6267523788529623080L;
     protected final String username;
     protected final String fullName;
     protected final String company;

@@ -2,13 +2,11 @@ package com.sap.sse.security.operations;
 
 import java.util.UUID;
 
-import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.security.impl.ReplicableSecurityService;
 import com.sap.sse.security.shared.RoleDefinition;
 
-public class CreateRoleDefinitionOperation implements OperationWithResult<ReplicableSecurityService, RoleDefinition> {
-    private static final long serialVersionUID = 1L;
-
+public class CreateRoleDefinitionOperation implements SecurityOperation<RoleDefinition> {
+    private static final long serialVersionUID = 4931617817218964817L;
     protected final UUID roleDefinitionId;
     protected final String name;
 

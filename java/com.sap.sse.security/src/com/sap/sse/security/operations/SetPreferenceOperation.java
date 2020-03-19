@@ -1,11 +1,9 @@
 package com.sap.sse.security.operations;
 
-import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.security.impl.ReplicableSecurityService;
 
-public class SetPreferenceOperation implements OperationWithResult<ReplicableSecurityService, Void> {
-    private static final long serialVersionUID = 1L;
-
+public class SetPreferenceOperation implements SecurityOperation<Void> {
+    private static final long serialVersionUID = 7364165213456514889L;
     protected final String username;
     protected final String key;
     protected final String value;

@@ -2,13 +2,11 @@ package com.sap.sse.security.operations;
 
 import java.util.UUID;
 
-import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.security.impl.ReplicableSecurityService;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 
-public class AclAddPermissionOperation implements OperationWithResult<ReplicableSecurityService, Void> {
-    private static final long serialVersionUID = 1L;
-
+public class AclAddPermissionOperation implements SecurityOperation<Void> {
+    private static final long serialVersionUID = 1128579912126797286L;
     protected final QualifiedObjectIdentifier idOfAccessControlledObject;
     protected final UUID groupId;
     protected final String action;

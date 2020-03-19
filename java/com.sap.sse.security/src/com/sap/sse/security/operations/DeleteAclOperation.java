@@ -1,12 +1,10 @@
 package com.sap.sse.security.operations;
 
-import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.security.impl.ReplicableSecurityService;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 
-public class DeleteAclOperation implements OperationWithResult<ReplicableSecurityService, Void> {
-    private static final long serialVersionUID = 1L;
-
+public class DeleteAclOperation implements SecurityOperation<Void> {
+    private static final long serialVersionUID = -8775552149162981191L;
     protected final QualifiedObjectIdentifier idOfAccessControlledObject;
 
     public DeleteAclOperation(QualifiedObjectIdentifier idOfAccessControlledObject) {

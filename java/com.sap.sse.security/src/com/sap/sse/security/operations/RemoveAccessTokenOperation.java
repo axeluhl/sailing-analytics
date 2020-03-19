@@ -1,11 +1,9 @@
 package com.sap.sse.security.operations;
 
-import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.security.impl.ReplicableSecurityService;
 
-public class RemoveAccessTokenOperation implements OperationWithResult<ReplicableSecurityService, Void> {
-    private static final long serialVersionUID = 1L;
-
+public class RemoveAccessTokenOperation implements SecurityOperation<Void> {
+    private static final long serialVersionUID = 1555085165323358858L;
     protected final String username;
 
     public RemoveAccessTokenOperation(String username) {

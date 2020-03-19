@@ -2,12 +2,10 @@ package com.sap.sse.security.operations;
 
 import java.util.UUID;
 
-import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.security.impl.ReplicableSecurityService;
 
-public class RemoveUserFromUserGroupOperation implements OperationWithResult<ReplicableSecurityService, Void> {
-    private static final long serialVersionUID = 1L;
-
+public class RemoveUserFromUserGroupOperation implements SecurityOperation<Void> {
+    private static final long serialVersionUID = 3268296841712265546L;
     protected final UUID groupId;
     protected final String username;
 

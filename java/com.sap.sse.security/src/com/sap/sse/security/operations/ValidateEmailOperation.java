@@ -1,11 +1,9 @@
 package com.sap.sse.security.operations;
 
-import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.security.impl.ReplicableSecurityService;
 
-public class ValidateEmailOperation implements OperationWithResult<ReplicableSecurityService, Boolean> {
-    private static final long serialVersionUID = 1L;
-
+public class ValidateEmailOperation implements SecurityOperation<Boolean> {
+    private static final long serialVersionUID = 2694639274918294183L;
     protected final String username;
     protected final String validationSecret;
 
