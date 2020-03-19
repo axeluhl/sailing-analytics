@@ -120,6 +120,7 @@ import com.sap.sse.security.operations.DeleteRoleDefinitionOperation;
 import com.sap.sse.security.operations.DeleteUserGroupOperation;
 import com.sap.sse.security.operations.DeleteUserOperation;
 import com.sap.sse.security.operations.PutRoleDefinitionToUserGroupOperation;
+import com.sap.sse.security.operations.RemoveAccessTokenOperation;
 import com.sap.sse.security.operations.RemovePermissionForUserOperation;
 import com.sap.sse.security.operations.RemoveRoleDefinitionFromUserGroupOperation;
 import com.sap.sse.security.operations.RemoveRoleFromUserOperation;
@@ -1683,7 +1684,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public void removeAccessToken(String username) {
         Subject subject = SecurityUtils.getSubject();
         if (hasCurrentUserUpdatePermission(getUserByName(username))) {
-            apply(s -> s.internalRemoveAccessToken(username));
+            apply(new RemoveAccessTokenOperation(username));
         } else {
             throw new org.apache.shiro.authz.AuthorizationException("User " + subject.getPrincipal().toString()
                     + " does not have permission to remove access token of user " + username);
