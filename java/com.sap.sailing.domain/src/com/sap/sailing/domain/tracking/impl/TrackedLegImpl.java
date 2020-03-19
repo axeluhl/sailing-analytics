@@ -17,6 +17,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
@@ -278,14 +279,14 @@ public class TrackedLegImpl implements TrackedLeg {
     
     @Override
     public Iterable<Position> getEquidistantSectionsOfLeg(TimePoint at, int numberOfSections) {
-        Optional<Position> approximateLegStartPosition = Optional
+        final Optional<Position> approximateLegStartPosition = Optional
                 .ofNullable(getTrackedRace().getApproximatePosition(getLeg().getFrom(), at));
-        Optional<Position> approximateLegEndPosition = Optional
+        final Optional<Position> approximateLegEndPosition = Optional
                 .ofNullable(getTrackedRace().getApproximatePosition(getLeg().getTo(), at));
-        List<Position> positions = approximateLegStartPosition.map(legStart -> {
+        final List<Position> positions = approximateLegStartPosition.map(legStart -> {
             return approximateLegEndPosition.map(legEnd -> {
-                Bearing bearing = legStart.getBearingGreatCircle(legEnd);
-                List<Position> breakedLegs = DoubleStream.iterate(0.1, d -> d + 1 / numberOfSections)
+                final Bearing bearing = legStart.getBearingGreatCircle(legEnd);
+                final List<Position> breakedLegs = DoubleStream.iterate(0.1, d -> d + 1 / numberOfSections)
                         .mapToObj(scale -> legStart.getDistance(legEnd).scale(scale))
                         .map(position -> legStart.translateGreatCircle(bearing, position)).collect(Collectors.toList());
                 return breakedLegs;
@@ -516,15 +517,15 @@ public class TrackedLegImpl implements TrackedLeg {
     
     @Override
     public Iterable<TimePoint> getEquidistantReferenceTimePoints(int numberOfPoints) {
-        Iterable<MarkPassing> legStartMarkPassings = getTrackedRace().getMarkPassingsInOrder(getLeg().getFrom());
-        Iterable<MarkPassing> legFinishMarkPassings = getTrackedRace().getMarkPassingsInOrder(getLeg().getTo());
+        final Iterable<MarkPassing> legStartMarkPassings = getTrackedRace().getMarkPassingsInOrder(getLeg().getFrom());
+        final Iterable<MarkPassing> legFinishMarkPassings = getTrackedRace().getMarkPassingsInOrder(getLeg().getTo());
         getTrackedRace().lockForRead(legStartMarkPassings);
         getTrackedRace().lockForRead(legFinishMarkPassings);
         try {
-            final TimePoint firstLegStartMarkPassingTimePoint = convertMarkPassingIteratorToTimePoint(legStartMarkPassings);
-            final TimePoint lastLegFinishMarkPassingTimePoint = convertMarkPassingIteratorToTimePoint(legFinishMarkPassings);
-            Duration equidistantTime = firstLegStartMarkPassingTimePoint.until(lastLegFinishMarkPassingTimePoint).divide(numberOfPoints);
-            ArrayList<TimePoint> timePoints = new ArrayList<>(numberOfPoints);
+            final TimePoint firstLegStartMarkPassingTimePoint = convertMarkPassingIteratorToTimePoint(legStartMarkPassings, Util::first);
+            final TimePoint lastLegFinishMarkPassingTimePoint = convertMarkPassingIteratorToTimePoint(legFinishMarkPassings, Util::last);
+            final Duration equidistantTime = firstLegStartMarkPassingTimePoint.until(lastLegFinishMarkPassingTimePoint).divide(numberOfPoints);
+            final ArrayList<TimePoint> timePoints = new ArrayList<>(numberOfPoints);
             TimePoint accum = firstLegStartMarkPassingTimePoint;
             for (int i = 0; i < numberOfPoints; i++) {
                 timePoints.add(accum);
@@ -536,11 +537,11 @@ public class TrackedLegImpl implements TrackedLeg {
             getTrackedRace().unlockAfterRead(legStartMarkPassings);
         }
     }
-    
-    private TimePoint convertMarkPassingIteratorToTimePoint(Iterable<MarkPassing> leg) {
-        return Util.stream(leg).map(MarkPassing::getTimePoint).findFirst().orElse(MillisecondsTimePoint.now());
-    }
 
+    private TimePoint convertMarkPassingIteratorToTimePoint(final Iterable<MarkPassing> markPassings, Function<Iterable<MarkPassing>, MarkPassing> firstOrLast) {
+        return Optional.ofNullable(firstOrLast.apply(markPassings)).map(MarkPassing::getTimePoint).orElse(MillisecondsTimePoint.now());
+    }
+    
     @Override
     public Distance getWindwardDistance(final TimePoint middle, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return getWindwardDistance(/* legType==null means infer leg type */ null, middle, cache);

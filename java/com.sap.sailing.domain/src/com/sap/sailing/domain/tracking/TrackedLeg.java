@@ -185,6 +185,8 @@ public interface TrackedLeg extends Serializable {
      * 
      * @param parts
      *            number of parts for breaking
+     * @return if the position of at least one of the leg's start/end waypoints cannot be determined, an empty sequence
+     *         of {@link Position}s will be returned
      */
     Iterable<Position> getEquidistantSectionsOfLeg(TimePoint at, int numberOfSections);
 
