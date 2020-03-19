@@ -106,6 +106,7 @@ import com.sap.sse.security.interfaces.UserImpl;
 import com.sap.sse.security.interfaces.UserStore;
 import com.sap.sse.security.operations.AclAddPermissionOperation;
 import com.sap.sse.security.operations.AclPutPermissionsOperation;
+import com.sap.sse.security.operations.AclRemovePermissionOperation;
 import com.sap.sse.security.operations.AddPermissionForUserOperation;
 import com.sap.sse.security.operations.AddRoleForUserOperation;
 import com.sap.sse.security.operations.AddSettingOperation;
@@ -612,7 +613,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         final AccessControlList result;
         if (getAccessControlList(idOfAccessControlledObjectAsString) != null) {
             final UUID groupId = group == null ? null : group.getId();
-            apply(s->s.internalAclRemovePermission(idOfAccessControlledObjectAsString, groupId, permission));
+            apply(new AclRemovePermissionOperation(idOfAccessControlledObjectAsString, groupId, permission));
             result = accessControlStore.getAccessControlList(idOfAccessControlledObjectAsString).getAnnotation();
         } else {
             result = null;
