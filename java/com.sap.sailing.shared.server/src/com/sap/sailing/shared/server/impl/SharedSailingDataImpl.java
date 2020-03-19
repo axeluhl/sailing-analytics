@@ -42,6 +42,7 @@ import com.sap.sailing.shared.persistence.MongoObjectFactory;
 import com.sap.sailing.shared.persistence.device.DeviceIdentifierMongoHandler;
 import com.sap.sailing.shared.server.operations.CreateMarkPropertiesOperation;
 import com.sap.sailing.shared.server.operations.CreateMarkRoleOperation;
+import com.sap.sailing.shared.server.operations.SetPositioningInformationForMarkPropertiesOperation;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
@@ -242,7 +243,7 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
             Positioning positioningInformation, Iterable<String> tags) {
         final MarkProperties markProperties = updateMarkProperties(uuid, properties, tags);
         if (positioningInformation != null && markProperties != properties) { // no update required if same object
-            apply(s -> s.internalSetPositioningInformationForMarkProperties(uuid, positioningInformation));
+            apply(new SetPositioningInformationForMarkPropertiesOperation(uuid, positioningInformation));
         }
         return getMarkPropertiesById(uuid);
     }
