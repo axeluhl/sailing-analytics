@@ -121,6 +121,7 @@ import com.sap.sse.security.operations.RemoveRoleFromUserOperation;
 import com.sap.sse.security.operations.RemoveUserFromUserGroupOperation;
 import com.sap.sse.security.operations.ResetPasswordOperation;
 import com.sap.sse.security.operations.SetDefaultTenantForServerForUserOperation;
+import com.sap.sse.security.operations.SetEmptyAccessControlListOperation;
 import com.sap.sse.security.operations.SetOwnershipOperation;
 import com.sap.sse.security.operations.SetPreferenceOperation;
 import com.sap.sse.security.operations.SetSettingOperation;
@@ -533,7 +534,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public SecurityService setEmptyAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObjectAsString, String displayNameOfAccessControlledObject) {
-        apply(s->s.internalSetEmptyAccessControlList(idOfAccessControlledObjectAsString, displayNameOfAccessControlledObject));
+        apply(new SetEmptyAccessControlListOperation(idOfAccessControlledObjectAsString, displayNameOfAccessControlledObject));
         return this;
     }
 
