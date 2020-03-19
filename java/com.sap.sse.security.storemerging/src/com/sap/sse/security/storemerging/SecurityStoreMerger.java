@@ -137,7 +137,7 @@ public class SecurityStoreMerger {
                 replaceSourceOwnershipReferencesToUsersAndGroups(sourceAccessControlStore, userMap, userGroupMap);
         mergePreferences(sourceUserStore, userMap);
         mergeOwnerships(sourceAccessControlStore, ownershipsToTryToImport);
-        mergeAccessControlLists(sourceAccessControlStore, userGroupMap);
+        mergeAccessControlLists(sourceAccessControlStore);
     }
 
     private Map<User, User> markUsersForAddMergeOrDrop(UserStore sourceUserStore, AccessControlStore sourceAccessControlStore) {
@@ -547,7 +547,7 @@ public class SecurityStoreMerger {
      * The source access control lists are expected to have their groups already updated to point to their corresponding
      * groups in the target store. See also {@link #replaceSourceAccessControlListReferencesToGroups(AccessControlStore, Map)}.
      */
-    private void mergeAccessControlLists(AccessControlStore sourceAccessControlStore, Map<UserGroup, UserGroup> userGroupMap) {
+    private void mergeAccessControlLists(AccessControlStore sourceAccessControlStore) {
         logger.info("Applying all source ACLs to target");
         for (final AccessControlListAnnotation sourceACL : sourceAccessControlStore.getAccessControlLists()) {
             for (final Entry<UserGroup, Set<String>> permissionsPerGroup : sourceACL.getAnnotation().getActionsByUserGroup().entrySet()) {
