@@ -92,7 +92,12 @@ public class FullyInitializedReplicableTracker<R extends Replicable<?, ?>> exten
             if (!replicationService.isReplicationStarting()) {
                 latch.countDown();
             }
-            result = latch.await(timeoutInMillis, TimeUnit.MILLISECONDS);
+            if (timeoutInMillis == 0) {
+                latch.await();
+                result = true;
+            } else {
+                result = latch.await(timeoutInMillis, TimeUnit.MILLISECONDS);
+            }
             replicationService.removeReplicationStartingListener(replicationStartingListener);
         } else {
             result = true;
