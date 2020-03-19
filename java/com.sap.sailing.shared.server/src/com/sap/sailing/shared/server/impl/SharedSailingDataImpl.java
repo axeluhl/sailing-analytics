@@ -304,7 +304,7 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     @Override
     public void setFixedPositionForMarkProperties(final MarkProperties markProperties, final Position position) {
         final UUID markPropertiesUUID = markProperties.getId();
-        apply(s -> s.internalSetPositioningInformationForMarkProperties(markPropertiesUUID, new FixedPositioningImpl(position)));
+        apply(new SetPositioningInformationForMarkPropertiesOperation(markPropertiesUUID, new FixedPositioningImpl(position)));
     }
 
     @Override
@@ -325,7 +325,7 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     public void setTrackingDeviceIdentifierForMarkProperties(final MarkProperties markProperties,
             final DeviceIdentifier deviceIdentifier) {
         final UUID markPropertiesUUID = markProperties.getId();
-        apply(s -> s.internalSetPositioningInformationForMarkProperties(markPropertiesUUID,
+        apply(new SetPositioningInformationForMarkPropertiesOperation(markPropertiesUUID,
                 new TrackingDeviceBasedPositioningImpl(deviceIdentifier)));
     }
 
