@@ -115,6 +115,7 @@ import com.sap.sse.security.operations.CreateRoleDefinitionOperation;
 import com.sap.sse.security.operations.CreateUserGroupOperation;
 import com.sap.sse.security.operations.CreateUserOperation;
 import com.sap.sse.security.operations.DeleteAclOperation;
+import com.sap.sse.security.operations.DeleteOwnershipOperation;
 import com.sap.sse.security.operations.DeleteRoleDefinitionOperation;
 import com.sap.sse.security.operations.DeleteUserGroupOperation;
 import com.sap.sse.security.operations.DeleteUserOperation;
@@ -668,7 +669,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public void deleteOwnership(QualifiedObjectIdentifier idOfOwnedObjectAsString) {
         if (getOwnership(idOfOwnedObjectAsString) != null) {
-            apply(s->s.internalDeleteOwnership(idOfOwnedObjectAsString));
+            apply(new DeleteOwnershipOperation(idOfOwnedObjectAsString));
         }
     }
 
