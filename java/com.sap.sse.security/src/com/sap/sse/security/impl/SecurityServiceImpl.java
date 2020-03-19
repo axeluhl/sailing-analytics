@@ -375,7 +375,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 isInitialOrMigration = true;
                 isNewServer = true;
                 logger.info(SecurityService.ALL_USERNAME + " not found -> creating it now");
-                User allUser = apply(s->s.internalCreateUser(SecurityService.ALL_USERNAME, null));
+                User allUser = apply(new CreateUserOperation(SecurityService.ALL_USERNAME, null));
                 // <all> user is explicitly not owned by itself because this would enable anybody to modify this user
                 setOwnership(allUser.getIdentifier(), null, getServerGroup());
                 // The permission to create new users is initially added but not recreated on server start if the admin removed it in the meanwhile.
@@ -659,7 +659,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         final UUID tenantId = tenantOwner == null ? null : tenantOwner.getId();
         final String userOwnerName = userOwner == null ? null : userOwner.getName();
 
-        return apply(s -> s.internalSetOwnership(idOfOwnedObjectAsString, userOwnerName, tenantId,
+        return apply(new SetOwnershipOperation(idOfOwnedObjectAsString, userOwnerName, tenantId,
                 displayNameOfOwnedObject));
     }
     
