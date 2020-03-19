@@ -125,6 +125,7 @@ import com.sap.sse.security.operations.RemoveRoleDefinitionFromUserGroupOperatio
 import com.sap.sse.security.operations.RemoveRoleFromUserOperation;
 import com.sap.sse.security.operations.RemoveUserFromUserGroupOperation;
 import com.sap.sse.security.operations.ResetPasswordOperation;
+import com.sap.sse.security.operations.SetAccessTokenOperation;
 import com.sap.sse.security.operations.SetDefaultTenantForServerForUserOperation;
 import com.sap.sse.security.operations.SetEmptyAccessControlListOperation;
 import com.sap.sse.security.operations.SetOwnershipOperation;
@@ -1671,7 +1672,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             RandomNumberGenerator rng = new SecureRandomNumberGenerator();
             byte[] salt = rng.nextBytes().getBytes();
             token = hashPassword(new String(rng.nextBytes().getBytes()), salt);
-            apply(s -> s.internalSetAccessToken(user.getName(), token));
+            apply(new SetAccessTokenOperation(user.getName(), token));
         } else {
             token = null;
         }
