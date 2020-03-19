@@ -40,6 +40,7 @@ import com.sap.sailing.domain.coursetemplate.impl.TrackingDeviceBasedPositioning
 import com.sap.sailing.shared.persistence.DomainObjectFactory;
 import com.sap.sailing.shared.persistence.MongoObjectFactory;
 import com.sap.sailing.shared.persistence.device.DeviceIdentifierMongoHandler;
+import com.sap.sailing.shared.server.operations.CreateCourseTemplateOperation;
 import com.sap.sailing.shared.server.operations.CreateMarkPropertiesOperation;
 import com.sap.sailing.shared.server.operations.CreateMarkRoleOperation;
 import com.sap.sailing.shared.server.operations.CreateMarkTemplateOperation;
@@ -407,7 +408,7 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
                     final Iterable<String> tagsForReplication = tags;
                     final URL optionalImageURLForReplication = optionalImageURL;
                     final Integer defaultNumberOfLapsForReplication = defaultNumberOfLaps;
-                    apply(s -> s.internalCreateCourseTemplate(idOfNewCourseTemplateForReplication, courseTemplateNameForReplication, courseTemplateShortName,
+                    apply(new CreateCourseTemplateOperation(idOfNewCourseTemplateForReplication, courseTemplateNameForReplication, courseTemplateShortName,
                             marksForReplication, waypointsForReplication, effectiveAssociatedRolesForReplication, defaultMarkTemplatesForMarkRoles, optionalRepeatablePartForReplication,
                             tagsForReplication, optionalImageURLForReplication, defaultNumberOfLapsForReplication));
                 });
