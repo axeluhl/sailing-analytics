@@ -104,6 +104,7 @@ import com.sap.sse.security.interfaces.Social;
 import com.sap.sse.security.interfaces.SocialSettingsKeys;
 import com.sap.sse.security.interfaces.UserImpl;
 import com.sap.sse.security.interfaces.UserStore;
+import com.sap.sse.security.operations.AclPutPermissionsOperation;
 import com.sap.sse.security.operations.AddPermissionForUserOperation;
 import com.sap.sse.security.operations.AddRoleForUserOperation;
 import com.sap.sse.security.operations.AddSettingOperation;
@@ -570,7 +571,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             final UUID userGroupId = userGroup == null ? null : userGroup.getId();
             final Set<String> actions = entry.getValue();
             // avoid the UserGroup object having to be serialized with the operation by using the ID
-            apply(s -> s.internalAclPutPermissions(idOfAccessControlledObject, userGroupId, actions));
+            apply(new AclPutPermissionsOperation(idOfAccessControlledObject, userGroupId, actions));
         }
         return accessControlStore.getAccessControlList(idOfAccessControlledObject).getAnnotation();
     }
