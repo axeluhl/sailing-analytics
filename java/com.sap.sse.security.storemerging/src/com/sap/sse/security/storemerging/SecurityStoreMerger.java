@@ -548,7 +548,11 @@ public class SecurityStoreMerger {
         for (final AccessControlListAnnotation sourceACL : sourceAccessControlStore.getAccessControlLists()) {
             for (final Entry<UserGroup, Set<String>> permissionsPerGroup : sourceACL.getAnnotation().getActionsByUserGroup().entrySet()) {
                 for (final String action : permissionsPerGroup.getValue()) {
-                    targetAccessControlStore.addAclPermission(sourceACL.getIdOfAnnotatedObject(), permissionsPerGroup.getKey(), action);
+                    final UserGroup sourceUserGroup = permissionsPerGroup.getKey();
+                    final UserGroup targetUserGroup = userGroupMap.get(sourceUserGroup);
+                    if (targetUserGroup != null) {
+                        targetAccessControlStore.addAclPermission(sourceACL.getIdOfAnnotatedObject(), targetUserGroup, action);
+                    }
                 }
             }
         }
