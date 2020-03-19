@@ -114,6 +114,7 @@ import com.sap.sse.security.operations.AddUserToUserGroupOperation;
 import com.sap.sse.security.operations.CreateRoleDefinitionOperation;
 import com.sap.sse.security.operations.CreateUserGroupOperation;
 import com.sap.sse.security.operations.CreateUserOperation;
+import com.sap.sse.security.operations.DeleteAclOperation;
 import com.sap.sse.security.operations.DeleteRoleDefinitionOperation;
 import com.sap.sse.security.operations.DeleteUserGroupOperation;
 import com.sap.sse.security.operations.DeleteUserOperation;
@@ -630,7 +631,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public void deleteAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObjectAsString) {
         if (getAccessControlList(idOfAccessControlledObjectAsString) != null) {
-            apply(s->s.internalDeleteAcl(idOfAccessControlledObjectAsString));
+            apply(new DeleteAclOperation(idOfAccessControlledObjectAsString));
         }
     }
 
