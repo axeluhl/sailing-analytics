@@ -40,6 +40,7 @@ import com.sap.sailing.domain.coursetemplate.impl.TrackingDeviceBasedPositioning
 import com.sap.sailing.shared.persistence.DomainObjectFactory;
 import com.sap.sailing.shared.persistence.MongoObjectFactory;
 import com.sap.sailing.shared.persistence.device.DeviceIdentifierMongoHandler;
+import com.sap.sailing.shared.server.operations.CreateMarkPropertiesOperation;
 import com.sap.sailing.shared.server.operations.CreateMarkRoleOperation;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinder;
@@ -230,7 +231,7 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
                     // which doesn't need resolution
                     final CommonMarkProperties propertiesForReplication = new CommonMarkPropertiesImpl(properties);
                     final Iterable<String> tagsForReplication = tags;
-                    apply(s -> s.internalCreateMarkProperties(idOfNewMarkPropertiesForReplication,
+                    apply(new CreateMarkPropertiesOperation(idOfNewMarkPropertiesForReplication,
                             propertiesForReplication, tagsForReplication));
                 });
         return getMarkPropertiesById(idOfNewMarkProperties);
