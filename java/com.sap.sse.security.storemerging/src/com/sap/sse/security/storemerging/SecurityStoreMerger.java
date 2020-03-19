@@ -543,16 +543,16 @@ public class SecurityStoreMerger {
         }
     }
 
+    /**
+     * The source access control lists are expected to have their groups already updated to point to their corresponding
+     * groups in the target store. See also {@link #replaceSourceAccessControlListReferencesToGroups(AccessControlStore, Map)}.
+     */
     private void mergeAccessControlLists(AccessControlStore sourceAccessControlStore, Map<UserGroup, UserGroup> userGroupMap) {
         logger.info("Applying all source ACLs to target");
         for (final AccessControlListAnnotation sourceACL : sourceAccessControlStore.getAccessControlLists()) {
             for (final Entry<UserGroup, Set<String>> permissionsPerGroup : sourceACL.getAnnotation().getActionsByUserGroup().entrySet()) {
                 for (final String action : permissionsPerGroup.getValue()) {
-                    final UserGroup sourceUserGroup = permissionsPerGroup.getKey();
-                    final UserGroup targetUserGroup = userGroupMap.get(sourceUserGroup);
-                    if (targetUserGroup != null) {
-                        targetAccessControlStore.addAclPermission(sourceACL.getIdOfAnnotatedObject(), targetUserGroup, action);
-                    }
+                    targetAccessControlStore.addAclPermission(sourceACL.getIdOfAnnotatedObject(), permissionsPerGroup.getKey(), action);
                 }
             }
         }
