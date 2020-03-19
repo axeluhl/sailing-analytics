@@ -104,6 +104,7 @@ import com.sap.sse.security.interfaces.Social;
 import com.sap.sse.security.interfaces.SocialSettingsKeys;
 import com.sap.sse.security.interfaces.UserImpl;
 import com.sap.sse.security.interfaces.UserStore;
+import com.sap.sse.security.operations.AclAddPermissionOperation;
 import com.sap.sse.security.operations.AclPutPermissionsOperation;
 import com.sap.sse.security.operations.AddPermissionForUserOperation;
 import com.sap.sse.security.operations.AddRoleForUserOperation;
@@ -592,7 +593,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             setEmptyAccessControlList(idOfAccessControlledObject);
         }
         final UUID groupId = group == null ? null : group.getId();
-        apply(s->s.internalAclAddPermission(idOfAccessControlledObject, groupId, action));
+        apply(new AclAddPermissionOperation(idOfAccessControlledObject, groupId, action));
         return accessControlStore.getAccessControlList(idOfAccessControlledObject).getAnnotation();
     }
 
