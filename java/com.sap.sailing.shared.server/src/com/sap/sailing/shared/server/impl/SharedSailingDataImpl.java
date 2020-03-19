@@ -43,6 +43,7 @@ import com.sap.sailing.shared.persistence.device.DeviceIdentifierMongoHandler;
 import com.sap.sailing.shared.server.operations.CreateMarkPropertiesOperation;
 import com.sap.sailing.shared.server.operations.CreateMarkRoleOperation;
 import com.sap.sailing.shared.server.operations.SetPositioningInformationForMarkPropertiesOperation;
+import com.sap.sailing.shared.server.operations.UpdateMarkPropertiesOperation;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
@@ -261,7 +262,7 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
             // object input stream resolves against. So clone into a CommonMarkPropertiesImpl
             // which doesn't need resolution
             final CommonMarkProperties commonMarkPropertiesForSerialization = new CommonMarkPropertiesImpl(properties);
-            apply(s -> s.internalUpdateMarkProperties(uuid, commonMarkPropertiesForSerialization, tags));
+            apply(new UpdateMarkPropertiesOperation(uuid, commonMarkPropertiesForSerialization, tags));
         }
         return getMarkPropertiesById(uuid);
     }
