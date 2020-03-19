@@ -119,6 +119,7 @@ import com.sap.sse.security.operations.RemovePermissionForUserOperation;
 import com.sap.sse.security.operations.RemoveRoleDefinitionFromUserGroupOperation;
 import com.sap.sse.security.operations.RemoveRoleFromUserOperation;
 import com.sap.sse.security.operations.RemoveUserFromUserGroupOperation;
+import com.sap.sse.security.operations.SetDefaultTenantForServerForUserOperation;
 import com.sap.sse.security.operations.SetOwnershipOperation;
 import com.sap.sse.security.operations.SetPreferenceOperation;
 import com.sap.sse.security.operations.SetSettingOperation;
@@ -2448,7 +2449,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public void setDefaultTenantForCurrentServerForUser(String username, UUID defaultTenantId) {
         final String serverName = ServerInfo.getName();
-        apply(s->s.internalSetDefaultTenantForServerForUser(username, defaultTenantId, serverName));
+        apply(new SetDefaultTenantForServerForUserOperation(username, defaultTenantId, serverName));
     }
     
     @Override
