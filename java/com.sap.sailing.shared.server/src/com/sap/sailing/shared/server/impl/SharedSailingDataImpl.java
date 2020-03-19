@@ -45,6 +45,7 @@ import com.sap.sailing.shared.server.operations.CreateMarkPropertiesOperation;
 import com.sap.sailing.shared.server.operations.CreateMarkRoleOperation;
 import com.sap.sailing.shared.server.operations.CreateMarkTemplateOperation;
 import com.sap.sailing.shared.server.operations.SetPositioningInformationForMarkPropertiesOperation;
+import com.sap.sailing.shared.server.operations.UpdateCourseTemplateOperation;
 import com.sap.sailing.shared.server.operations.UpdateMarkPropertiesOperation;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinder;
@@ -419,7 +420,7 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     public CourseTemplate updateCourseTemplate(UUID uuid, String name, String shortName, URL optionalImageURL, ArrayList<String> tags,
             Integer defaultNumberOfLaps) {
         getSecurityService().checkCurrentUserUpdatePermission(courseTemplatesById.get(uuid));
-        apply(s -> s.internalUpdateCourseTemplate(uuid, name, shortName, optionalImageURL, tags, defaultNumberOfLaps));
+        apply(new UpdateCourseTemplateOperation(uuid, name, shortName, optionalImageURL, tags, defaultNumberOfLaps));
         return getCourseTemplateById(uuid);
     }
 
