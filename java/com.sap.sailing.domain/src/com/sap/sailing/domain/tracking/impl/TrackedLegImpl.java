@@ -19,8 +19,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
-import java.util.stream.DoubleStream;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -283,18 +281,20 @@ public class TrackedLegImpl implements TrackedLeg {
                 .ofNullable(getTrackedRace().getApproximatePosition(getLeg().getFrom(), at));
         final Optional<Position> approximateLegEndPosition = Optional
                 .ofNullable(getTrackedRace().getApproximatePosition(getLeg().getTo(), at));
-        final List<Position> positions = approximateLegStartPosition.map(legStart -> {
+        final List<Position> result = approximateLegStartPosition.map(legStart -> {
             return approximateLegEndPosition.map(legEnd -> {
                 final Bearing bearing = legStart.getBearingGreatCircle(legEnd);
-                final Distance totalDistance = legStart.getDistance(legEnd);
-                double startValue = 1.0 / numberOfSections; // start step for scale
-                final List<Position> breakedLegs = DoubleStream.iterate(startValue, d -> d + 1.0 / numberOfSections).limit(numberOfSections)
-                        .mapToObj(scale -> totalDistance.scale(scale))
-                        .map(distance -> legStart.translateGreatCircle(bearing, distance)).collect(Collectors.toList());
-                return breakedLegs;
+                final Distance segmentDistance = legStart.getDistance(legEnd).scale(1.0 / numberOfSections);
+                final List<Position> positions = new ArrayList<>();
+                Position position = legStart;
+                for (int i=0; i<=numberOfSections; i++) {
+                    positions.add(position);
+                    position = position.translateGreatCircle(bearing, segmentDistance);
+                }
+                return positions;
             }).orElse(Collections.<Position>emptyList());
         }).orElse(Collections.<Position>emptyList());
-        return positions;
+        return result;
     }
     
     public Position getEffectiveWindPosition(Callable<Position> exactPositionProvider, TimePoint at, WindPositionMode mode) {
