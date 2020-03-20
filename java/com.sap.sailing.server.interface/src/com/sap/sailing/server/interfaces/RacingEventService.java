@@ -913,10 +913,5 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     
     CourseAndMarkConfigurationFactory getCourseAndMarkConfigurationFactory();
     
-    /**
-     * @return map where keys are the toString() representation of the {@link RaceDefinition#getId() IDs} of races that
-     *         are tracked. In order to be able to start the tracking after a Master Data Import the
-     *         {@link RaceTrackingConnectivityParameters} of that race are needed.
-     */
-    ConcurrentHashMap<String, RaceTrackingConnectivityParameters> getConnectivityParametersByRace();
+    ConcurrentHashMap<RaceDefinition, RaceTrackingConnectivityParameters> getConnectivityParametersByRace();
 }

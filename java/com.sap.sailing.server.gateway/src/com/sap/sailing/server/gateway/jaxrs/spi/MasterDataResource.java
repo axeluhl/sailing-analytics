@@ -39,6 +39,7 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.masterdataimport.TopLevelMasterData;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.PublicReadableActions;
@@ -99,6 +100,7 @@ public class MasterDataResource extends AbstractSailingServerResource {
             }
         }
         final List<Serializable> competitorIds = new ArrayList<Serializable>();
+        ArrayList<RaceTrackingConnectivityParameters> connectivityParametersToRestore = new ArrayList<>();
         for (LeaderboardGroup lg : groupsToExport) {
             for (Leaderboard leaderboard : lg.getLeaderboards()) {
                 // All Leaderboards/Regattas contained in the LeaderboardGroup need to be visible
@@ -131,6 +133,16 @@ public class MasterDataResource extends AbstractSailingServerResource {
                                 + " for leaderboard '" + leaderboard.getName() + "'");
                     }
                 }
+                if (exportTrackedRacesAndStartTracking) {
+                    for (TrackedRace trackedRace : leaderboard.getTrackedRaces()) {
+//                        if (!securityService.hasCurrentUserOneOfExplicitPermissions(trackedRace,
+//                                PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS)) {
+//                            throw new AuthorizationException("No permission to read tracked race "
+//                                    + trackedRace.getIdentifier() + " for leaderboard '" + leaderboard.getName() + "'");
+//                        }
+                        connectivityParametersToRestore.add(getService().getConnectivityParametersByRace().get(trackedRace.getRace()));
+                    }
+                }
             }
         }
         Set<DeviceConfiguration> raceManagerDeviceConfigurations = new HashSet<>();
@@ -152,14 +164,14 @@ public class MasterDataResource extends AbstractSailingServerResource {
         for (MediaTrack mediaTrack : getService().getAllMediaTracks()) {
             mediaTracks.add(mediaTrack);
         }
-        ArrayList<RaceTrackingConnectivityParameters> connectivityParametersToRestore = new ArrayList<>();
+//        ArrayList<RaceTrackingConnectivityParameters> connectivityParametersToRestore = new ArrayList<>();
         Map<String, Regatta> regattaRaceIds = new HashMap<>();
         for (Entry<String, Regatta> regattaRaceMap : getService().getPersistentRegattasForRaceIDs().entrySet()) {
             regattaRaceIds.put(regattaRaceMap.getKey(), regattaRaceMap.getValue());
             // TODO: Permission check needs to be implemented
-            if (exportTrackedRacesAndStartTracking) {
-                connectivityParametersToRestore.add(getService().getConnectivityParametersByRace().get(regattaRaceMap.getKey()));
-            }
+//            if (exportTrackedRacesAndStartTracking) {
+//                connectivityParametersToRestore.add(getService().getConnectivityParametersByRace().get(regattaRaceMap.getKey()));
+//            }
         }
         final TopLevelMasterData masterData = new TopLevelMasterData(groupsToExport,
                 events, regattaRaceIds, mediaTracks,

@@ -4803,12 +4803,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public ConcurrentHashMap<String, RaceTrackingConnectivityParameters> getConnectivityParametersByRace() {
-        ConcurrentHashMap<String, RaceTrackingConnectivityParameters> result = new ConcurrentHashMap<>();
-        for (Entry<RaceDefinition, RaceTrackingConnectivityParameters> entry : connectivityParametersByRace.entrySet()) {
-            result.put(entry.getKey().getId().toString(), entry.getValue());
-        }
-        return result;
+    public ConcurrentHashMap<RaceDefinition, RaceTrackingConnectivityParameters> getConnectivityParametersByRace() {
+        return connectivityParametersByRace;
     }
  
 }
