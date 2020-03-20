@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Collections;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -15,6 +16,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -59,8 +61,18 @@ public class TrackedLegTest {
 
     private void assertPositionsOnGreatCircle(final Position startPos, final Position finishPos,
             Iterable<Position> positions) {
+        Distance firstDistance = null;
+        Position lastPosition = null;
         for (final Position p : positions) {
             assertTrue(p.getDistanceToLine(startPos, finishPos).getMeters() < 1);
+            if (firstDistance == null && lastPosition != null) {
+                firstDistance = lastPosition.getDistance(p);
+            } else {
+                if (lastPosition != null) {
+                    assertEquals(firstDistance.getMeters(), lastPosition.getDistance(p).getMeters(), 0.1);
+                }
+            }
+            lastPosition = p;
         }
     }
 
