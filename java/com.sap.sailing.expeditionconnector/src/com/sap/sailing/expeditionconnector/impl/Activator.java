@@ -28,11 +28,9 @@ import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdent
 import com.sap.sse.ServerInfo;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.replication.FullyInitializedReplicableTracker;
-import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
-import com.sap.sse.util.ServiceTrackerFactory;
 import com.sap.sse.util.impl.ThreadFactoryWithPriority;
 
 public class Activator implements BundleActivator {
@@ -92,9 +90,7 @@ public class Activator implements BundleActivator {
             registrations.add(context.registerService(DeviceIdentifierStringSerializationHandler.class, new ExpeditionSensorStringSerializationHandler(), getDict(ExpeditionSensorDeviceIdentifier.TYPE)));
 
             new Thread(() -> {
-                final FullyInitializedReplicableTracker<SecurityService> securityServiceServiceTracker = new FullyInitializedReplicableTracker<>(
-                        context, SecurityService.class, /* customizer */ null, ServiceTrackerFactory.createAndOpen(context, ReplicationService.class));
-                securityServiceServiceTracker.open();
+                final FullyInitializedReplicableTracker<SecurityService> securityServiceServiceTracker = FullyInitializedReplicableTracker.createAndOpen(context, SecurityService.class);
                 try {
                     final SecurityService securityService = securityServiceServiceTracker.getInitializedService(0);
                     final WildcardPermissionEncoder permissionEncoder = new WildcardPermissionEncoder();
