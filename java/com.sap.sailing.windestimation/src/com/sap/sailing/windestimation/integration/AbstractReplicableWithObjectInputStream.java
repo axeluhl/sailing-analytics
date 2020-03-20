@@ -45,7 +45,7 @@ public abstract class AbstractReplicableWithObjectInputStream<S, O extends Opera
 
     private final Set<OperationWithResult<S, ?>> operationsSentToMasterForReplication;
 
-    private ThreadLocal<Boolean> currentlyFillingFromInitialLoad = ThreadLocal.withInitial(() -> false);
+    private volatile boolean currentlyFillingFromInitialLoad;
 
     private ThreadLocal<Boolean> currentlyApplyingOperationReceivedFromMaster = ThreadLocal.withInitial(() -> false);
 
@@ -54,6 +54,7 @@ public abstract class AbstractReplicableWithObjectInputStream<S, O extends Opera
     public AbstractReplicableWithObjectInputStream() {
         this.operationsSentToMasterForReplication = new HashSet<>();
         this.operationExecutionListeners = new ConcurrentHashMap<>();
+        this.currentlyFillingFromInitialLoad = false;
     }
 
     @Override
@@ -86,12 +87,12 @@ public abstract class AbstractReplicableWithObjectInputStream<S, O extends Opera
 
     @Override
     public boolean isCurrentlyFillingFromInitialLoad() {
-        return currentlyFillingFromInitialLoad.get();
+        return currentlyFillingFromInitialLoad;
     }
 
     @Override
     public void setCurrentlyFillingFromInitialLoad(boolean currentlyFillingFromInitialLoad) {
-        this.currentlyFillingFromInitialLoad.set(currentlyFillingFromInitialLoad);
+        this.currentlyFillingFromInitialLoad = currentlyFillingFromInitialLoad;
     }
 
     @Override

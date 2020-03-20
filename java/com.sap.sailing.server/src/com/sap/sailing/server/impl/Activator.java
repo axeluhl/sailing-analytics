@@ -41,7 +41,6 @@ import com.sap.sailing.domain.persistence.racelog.tracking.impl.GPSFixMongoHandl
 import com.sap.sailing.domain.persistence.racelog.tracking.impl.GPSFixMovingMongoHandlerImpl;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStoreSupplier;
-import com.sap.sailing.domain.sharedsailingdata.SharedSailingData;
 import com.sap.sailing.domain.tracking.TrackedRegattaListener;
 import com.sap.sailing.domain.windestimation.WindEstimationFactoryService;
 import com.sap.sailing.resultimport.ResultUrlRegistry;
@@ -56,6 +55,7 @@ import com.sap.sailing.server.notification.impl.SailingNotificationServiceImpl;
 import com.sap.sailing.server.security.SailingViewerRole;
 import com.sap.sailing.server.statistics.TrackedRaceStatisticsCache;
 import com.sap.sailing.server.statistics.TrackedRaceStatisticsCacheImpl;
+import com.sap.sailing.shared.server.SharedSailingData;
 import com.sap.sse.MasterDataImportClassLoaderService;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.Util;
@@ -63,7 +63,9 @@ import com.sap.sse.mail.MailService;
 import com.sap.sse.mail.queue.MailQueue;
 import com.sap.sse.mail.queue.impl.ExecutorMailQueue;
 import com.sap.sse.osgi.CachedOsgiTypeBasedServiceFinderFactory;
+import com.sap.sse.replication.FullyInitializedReplicableTracker;
 import com.sap.sse.replication.Replicable;
+import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.security.SecurityInitializationCustomizer;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.interfaces.PreferenceConverter;
@@ -111,9 +113,11 @@ public class Activator implements BundleActivator {
 
     private ServiceTracker<MailService, MailService> mailServiceTracker;
 
-    private ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
+    private FullyInitializedReplicableTracker<SecurityService> securityServiceTracker;
 
-    private ServiceTracker<SharedSailingData, SharedSailingData> sharedSailingDataTracker;
+    private FullyInitializedReplicableTracker<SharedSailingData> sharedSailingDataTracker;
+    
+    private ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker;
     
     public Activator() {
         clearPersistentCompetitors = Boolean
@@ -130,13 +134,19 @@ public class Activator implements BundleActivator {
         extenderBundleTracker = new ExtenderBundleTracker(context);
         extenderBundleTracker.open();
         mailServiceTracker = ServiceTrackerFactory.createAndOpen(context, MailService.class);
-        securityServiceTracker = ServiceTrackerFactory.createAndOpen(context, SecurityService.class);
+        replicationServiceTracker = ServiceTrackerFactory.createAndOpen(context, ReplicationService.class);
+        sharedSailingDataTracker = new FullyInitializedReplicableTracker<>(context, SharedSailingData.class,
+                /* customizer */ null, replicationServiceTracker);
+        sharedSailingDataTracker.open();
+        securityServiceTracker = new FullyInitializedReplicableTracker<>(context, SecurityService.class,
+                /* customizer */ null, replicationServiceTracker);
+        securityServiceTracker.open();
         if (securityServiceTracker != null) {
             new Thread("Racingevent wait for securityservice for migration thread") {
                 public void run() {
                     try {
                         // only continue once we have the service, as some of the services require it to start properly
-                        securityServiceTracker.waitForService(0);
+                        securityServiceTracker.getInitializedService(0);
                         internalStartBundle(context);
                     } catch (Exception e) {
                         logger.log(Level.SEVERE, "Could not start RacingEvent service properly", e);
@@ -200,13 +210,15 @@ public class Activator implements BundleActivator {
         mailQueue.stop();
         mailServiceTracker.close();
         sharedSailingDataTracker.close();
+        replicationServiceTracker.close();
         securityServiceTracker.close();
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
         mbs.unregisterMBean(mBeanName);
     }
 
     private void internalStartBundle(BundleContext context) throws MalformedURLException, MalformedObjectNameException,
-            InstanceAlreadyExistsException, MBeanRegistrationException, NotCompliantMBeanException {
+            InstanceAlreadyExistsException, MBeanRegistrationException, NotCompliantMBeanException, InterruptedException {
+        assert securityServiceTracker.getInitializedService(0) != null; // callers must call securityServiceTracker.waitForService(0) before calling this method
         mailQueue = new ExecutorMailQueue(mailServiceTracker);
         notificationService = new SailingNotificationServiceImpl(context, mailQueue);
         trackedRegattaListener = new OSGiBasedTrackedRegattaListener(context);
@@ -236,7 +248,6 @@ public class Activator implements BundleActivator {
         // this code block is not run, and the test case can inject some other type of finder
         // instead.
         serviceFinderFactory = new CachedOsgiTypeBasedServiceFinderFactory(context);
-        sharedSailingDataTracker = ServiceTrackerFactory.createAndOpen(context, SharedSailingData.class);
         ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> scoreCorrectionProviderServiceTracker =
                 ServiceTrackerFactory.createAndOpen(context, ScoreCorrectionProvider.class);
         ServiceTracker<ResultUrlRegistry, ResultUrlRegistry> resultUrlRegistryServiceTracker = ServiceTrackerFactory
@@ -244,7 +255,7 @@ public class Activator implements BundleActivator {
         racingEventService = new RacingEventServiceImpl(clearPersistentCompetitors,
                 serviceFinderFactory, trackedRegattaListener, notificationService,
                 trackedRaceStatisticsCache, restoreTrackedRaces, securityServiceTracker,
-                sharedSailingDataTracker, scoreCorrectionProviderServiceTracker, resultUrlRegistryServiceTracker);
+                sharedSailingDataTracker, replicationServiceTracker, scoreCorrectionProviderServiceTracker, resultUrlRegistryServiceTracker);
         notificationService.setRacingEventService(racingEventService);
         masterDataImportClassLoaderServiceTracker = new ServiceTracker<MasterDataImportClassLoaderService, MasterDataImportClassLoaderService>(
                 context, MasterDataImportClassLoaderService.class,

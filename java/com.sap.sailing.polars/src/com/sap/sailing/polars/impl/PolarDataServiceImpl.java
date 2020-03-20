@@ -84,7 +84,7 @@ public class PolarDataServiceImpl implements ReplicablePolarService, ClearStateT
 
     private final Set<OperationWithResult<PolarDataService, ?>> operationsSentToMasterForReplication;
 
-    private ThreadLocal<Boolean> currentlyFillingFromInitialLoad = ThreadLocal.withInitial(() -> false);
+    private volatile boolean currentlyFillingFromInitialLoad;
     
     private ThreadLocal<Boolean> currentlyApplyingOperationReceivedFromMaster = ThreadLocal.withInitial(() -> false);
 
@@ -103,6 +103,7 @@ public class PolarDataServiceImpl implements ReplicablePolarService, ClearStateT
      */
     public PolarDataServiceImpl() {
         resetState();
+        this.currentlyFillingFromInitialLoad = false;
         this.operationsSentToMasterForReplication = new HashSet<>();
         this.operationExecutionListeners = new ConcurrentHashMap<>();
     }
@@ -322,12 +323,12 @@ public class PolarDataServiceImpl implements ReplicablePolarService, ClearStateT
 
     @Override
     public boolean isCurrentlyFillingFromInitialLoad() {
-        return currentlyFillingFromInitialLoad.get();
+        return currentlyFillingFromInitialLoad;
     }
 
     @Override
     public void setCurrentlyFillingFromInitialLoad(boolean currentlyFillingFromInitialLoad) {
-        this.currentlyFillingFromInitialLoad.set(currentlyFillingFromInitialLoad);
+        this.currentlyFillingFromInitialLoad = currentlyFillingFromInitialLoad;
     }
 
     @Override

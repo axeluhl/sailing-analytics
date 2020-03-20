@@ -17,10 +17,10 @@
 	</div>
     </div>
 	<div class="yield_content">
-	<div class="contentWrapper">
-	<div class="mainContent">
-		<h2 class="releaseHeadline">Release Notes - Administration Console</h2>
-		<div class="innerContent">
+		<div class="contentWrapper">
+			<div class="mainContent">
+				<h2 class="releaseHeadline">Release Notes - Administration Console</h2>
+				<div class="innerContent">
                     <h2 class="articleSubheadline">March 2020</h2>
                     <ul class="bulletList">
 					<li>White label: Removal of SAP logos and brand related text from home page and racing panels. Use system property <pre>-Dcom.sap.sailing.debranding=true</pre>
@@ -29,6 +29,12 @@
                         <li>The visualization for ORC certificates has been much improved. It now shows all the
                             time allowances relevant for Performance Curve Scoring (PCS) and offers a link to the
                             official PDF version of the respective certificate, based on its reference number.
+                        </li>
+                        <li>Improved ESC/Enter key handling in user role/permission editing dialog</li>
+                        <li>The "Replication" panel in the "Advanced" category now has improved information about the
+                            replicables shown. An advanced replica information string may reveal more than just the address,
+                            and the address is now resolved through any <tt>X-Forwarded-For</tt> header fields present
+                            during replica registration, hence also working through load balancers and reverse proxies.
                         </li>
                     </ul>
                     <h2 class="articleSubheadline">February 2020</h2>
