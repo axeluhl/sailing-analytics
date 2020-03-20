@@ -1,4 +1,4 @@
-package com.sap.sailing.resultimport;
+package com.sap.sailing.domain.resultimport;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -7,9 +7,14 @@ import com.sap.sse.common.Named;
 
 public interface ResultUrlProvider extends Named {
     /**
-     * The URLs configured for this provider
+     * The URLs configured for this provider and readable with {@code Subject}'s permissions.
      */
-    Iterable<URL> getUrls();
+    Iterable<URL> getReadableUrls();
+
+    /**
+     * All URLs configured for this provider.
+     */
+    Iterable<URL> getAllUrls();
 
     /**
      * Validate that this provider can use the given {@link URL} which can be an URL, an event ID or a short name

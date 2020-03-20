@@ -7,8 +7,14 @@ public interface CountryCodeFactory {
 
     Iterable<CountryCode> getAll();
 
+    /**
+     * @param threeLetterIOCName if {@code null} then {@code null} will be returned
+     */
     CountryCode getFromThreeLetterIOCName(String threeLetterIOCName);
 
+    /**
+     * @param twoLetterISOName if {@code null} then {@code null} will be returned
+     */
     CountryCode getFromTwoLetterISOName(String twoLetterISOName);
 
     /**
@@ -16,11 +22,19 @@ public interface CountryCodeFactory {
      * <pre>
      *          getFromThreeLetterISOName(Locale.GERMANY.getISO3Country().toUpperCase())
      * </pre>
+     * 
+     * @param threeLetterISOName if {@code null} then {@code null} will be returned
      */
     CountryCode getFromThreeLetterISOName(String threeLetterISOName);
     
+    /**
+     * @param ianaInternet if {@code null} then {@code null} will be returned
+     */
     CountryCode getFromIANAInternet(String ianaInternet);
 
+    /**
+     * @param unVehicle if {@code null} then {@code null} will be returned
+     */
     CountryCode getFromUNVehicle(String unVehicle);
 
 }
