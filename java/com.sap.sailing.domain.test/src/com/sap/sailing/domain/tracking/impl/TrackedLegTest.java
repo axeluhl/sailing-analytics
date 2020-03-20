@@ -44,6 +44,8 @@ public class TrackedLegTest {
         assertEquals(10, Util.stream(positions10).count());
         Iterable<Position> positions15 = trackedLegImpl.getEquidistantSectionsOfLeg(at, 15);
         assertEquals(15, Util.stream(positions15).count());
+        Iterable<Position> positions100 = trackedLegImpl.getEquidistantSectionsOfLeg(at, 100);
+        assertEquals(100, Util.stream(positions100).count());
         
     }
 

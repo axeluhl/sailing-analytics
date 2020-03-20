@@ -287,7 +287,8 @@ public class TrackedLegImpl implements TrackedLeg {
             return approximateLegEndPosition.map(legEnd -> {
                 final Bearing bearing = legStart.getBearingGreatCircle(legEnd);
                 final Distance totalDistance = legStart.getDistance(legEnd);
-                final List<Position> breakedLegs = DoubleStream.iterate(0, d -> d + 1.0 / numberOfSections).limit(numberOfSections)
+                double startValue = 1.0 / numberOfSections; // start step for scale
+                final List<Position> breakedLegs = DoubleStream.iterate(startValue, d -> d + 1.0 / numberOfSections).limit(numberOfSections)
                         .mapToObj(scale -> totalDistance.scale(scale))
                         .map(distance -> legStart.translateGreatCircle(bearing, distance)).collect(Collectors.toList());
                 return breakedLegs;
