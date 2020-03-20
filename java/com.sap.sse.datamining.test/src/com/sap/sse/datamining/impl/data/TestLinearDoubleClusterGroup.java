@@ -8,11 +8,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sse.datamining.data.Cluster;
-import com.sap.sse.datamining.impl.data.ClusterWithLowerAndUpperBoundaries;
-import com.sap.sse.datamining.impl.data.ClusterWithSingleBoundary;
-import com.sap.sse.datamining.impl.data.ComparableClusterBoundary;
-import com.sap.sse.datamining.impl.data.ComparisonStrategy;
-import com.sap.sse.datamining.impl.data.LinearDoubleClusterGroup;
 
 public class TestLinearDoubleClusterGroup {
     
