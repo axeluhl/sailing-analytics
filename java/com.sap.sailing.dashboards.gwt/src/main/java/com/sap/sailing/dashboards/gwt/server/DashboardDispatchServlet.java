@@ -2,7 +2,6 @@ package com.sap.sailing.dashboards.gwt.server;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.dashboards.gwt.shared.DashboardLiveRaceProvider;
 import com.sap.sailing.dashboards.gwt.shared.MovingAveragesCache;
@@ -16,8 +15,6 @@ import com.sap.sse.gwt.dispatch.servlets.AbstractDispatchServlet;
 import com.sap.sse.gwt.dispatch.shared.commands.Action;
 import com.sap.sse.gwt.dispatch.shared.commands.Result;
 import com.sap.sse.replication.FullyInitializedReplicableTracker;
-import com.sap.sse.replication.ReplicationService;
-import com.sap.sse.util.ServiceTrackerFactory;
 
 public class DashboardDispatchServlet extends AbstractDispatchServlet<DashboardDispatchContext> {
     private static final long serialVersionUID = -245230476512348999L;
@@ -29,10 +26,7 @@ public class DashboardDispatchServlet extends AbstractDispatchServlet<DashboardD
 
     public DashboardDispatchServlet() {
         final BundleContext context = Activator.getDefault();
-        final ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker =
-                ServiceTrackerFactory.createAndOpen(context, ReplicationService.class);
-        racingEventServiceTracker = new FullyInitializedReplicableTracker<>(context, RacingEventService.class,
-                /* customizer */ null, replicationServiceTracker);
+        racingEventServiceTracker = FullyInitializedReplicableTracker.createAndOpen(context, RacingEventService.class);
         racingEventServiceTracker.open();
         polarDataService = getPolarDataService();
         try {

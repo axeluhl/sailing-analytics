@@ -23,7 +23,6 @@ import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParametersHandler
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.replication.FullyInitializedReplicableTracker;
-import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.util.ServiceTrackerFactory;
 
@@ -36,9 +35,7 @@ public class Activator implements BundleActivator {
             MongoDBService.INSTANCE.registerExclusively(CollectionNames.class, name.name());
         }
         new Thread(() -> {
-            final FullyInitializedReplicableTracker<SecurityService> securityServiceServiceTracker = new FullyInitializedReplicableTracker<>(context, SecurityService.class,
-                    /* customizer */ null, ServiceTrackerFactory.createAndOpen(context, ReplicationService.class));
-            securityServiceServiceTracker.open();
+            final FullyInitializedReplicableTracker<SecurityService> securityServiceServiceTracker = FullyInitializedReplicableTracker.createAndOpen(context, SecurityService.class);
             final ServiceTracker<MongoObjectFactory, MongoObjectFactory> mongoObjectFactoryServiceTracker = ServiceTrackerFactory.createAndOpen(context, MongoObjectFactory.class);
             final ServiceTracker<DomainObjectFactory, DomainObjectFactory> domainObjectFactoryServiceTracker = ServiceTrackerFactory.createAndOpen(context, DomainObjectFactory.class);
             final ServiceTracker<SwissTimingAdapterFactory, SwissTimingAdapterFactory> swissTimingAdapterFactoryServiceTracker = ServiceTrackerFactory.createAndOpen(context, SwissTimingAdapterFactory.class);
