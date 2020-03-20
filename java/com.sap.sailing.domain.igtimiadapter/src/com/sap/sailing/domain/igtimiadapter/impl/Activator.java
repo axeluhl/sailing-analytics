@@ -23,10 +23,8 @@ import com.sap.sailing.domain.igtimiadapter.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.igtimiadapter.persistence.PersistenceFactory;
 import com.sap.sailing.domain.tracking.WindTrackerFactory;
 import com.sap.sse.replication.FullyInitializedReplicableTracker;
-import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.util.ClearStateTestSupport;
-import com.sap.sse.util.ServiceTrackerFactory;
 import com.sap.sse.util.impl.ThreadFactoryWithPriority;
 
 /**
@@ -107,9 +105,7 @@ public class Activator implements BundleActivator {
                 }
             }
         });
-        securityServiceServiceTracker = new FullyInitializedReplicableTracker<>(context, SecurityService.class,
-                /* customizer */ null, ServiceTrackerFactory.createAndOpen(context, ReplicationService.class));
-        securityServiceServiceTracker.open();
+        securityServiceServiceTracker = FullyInitializedReplicableTracker.createAndOpen(context, SecurityService.class);
         new Thread(() -> {
             try {
                 final SecurityService securityService = securityServiceServiceTracker.getInitializedService(0);

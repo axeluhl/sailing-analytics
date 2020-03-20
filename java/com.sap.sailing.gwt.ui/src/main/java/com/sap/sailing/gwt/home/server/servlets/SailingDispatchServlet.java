@@ -24,7 +24,6 @@ import com.sap.sse.gwt.dispatch.servlets.AbstractDispatchServlet;
 import com.sap.sse.gwt.dispatch.shared.commands.Action;
 import com.sap.sse.gwt.dispatch.shared.commands.Result;
 import com.sap.sse.replication.FullyInitializedReplicableTracker;
-import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.util.ServiceTrackerFactory;
 
@@ -39,16 +38,10 @@ public class SailingDispatchServlet extends AbstractDispatchServlet<SailingDispa
 
     public SailingDispatchServlet() {
         final BundleContext context = Activator.getDefault();
-        final ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker =
-                ServiceTrackerFactory.createAndOpen(context, ReplicationService.class);
-        racingEventServiceTracker = new FullyInitializedReplicableTracker<>(context, RacingEventService.class,
-                /* customizer */ null, replicationServiceTracker);
-        racingEventServiceTracker.open();
+        racingEventServiceTracker = FullyInitializedReplicableTracker.createAndOpen(context, RacingEventService.class);
         windFinderTrackerFactory = ServiceTrackerFactory.createAndOpen(context, WindFinderTrackerFactory.class);
         eventNewsServiceTracker = ServiceTrackerFactory.createAndOpen(context, EventNewsService.class);
-        securityServiceTracker = new FullyInitializedReplicableTracker<>(context, SecurityService.class,
-                /* customizer */ null, replicationServiceTracker);
-        securityServiceTracker.open();
+        securityServiceTracker = FullyInitializedReplicableTracker.createAndOpen(context, SecurityService.class);
         trackedRaceStatisticsCacheTracker = ServiceTrackerFactory.createAndOpen(context, TrackedRaceStatisticsCache.class);
     }
 
