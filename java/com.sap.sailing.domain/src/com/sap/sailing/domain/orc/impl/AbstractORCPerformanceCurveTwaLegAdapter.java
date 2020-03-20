@@ -89,12 +89,18 @@ public abstract class AbstractORCPerformanceCurveTwaLegAdapter implements ORCPer
     @Override
     public ORCPerformanceCurveLegTypes getType() {
         final ORCPerformanceCurveLegTypes result;
-        if (getWind() == null) {
+        if (hasWind()) {
             result = ORCPerformanceCurveLegTypes.LONG_DISTANCE;
         } else {
             result = ORCPerformanceCurveLegTypes.TWA;
         }
         return result;
+    }
+
+    private boolean hasWind() {
+        final TimePoint referenceTimePoint = trackedLeg.getReferenceTimePoint();
+        final Wind result = trackedLeg.getTrackedRace().getWind(trackedLeg.getMiddleOfLeg(referenceTimePoint), referenceTimePoint);
+        return result != null;
     }
 
     /**
