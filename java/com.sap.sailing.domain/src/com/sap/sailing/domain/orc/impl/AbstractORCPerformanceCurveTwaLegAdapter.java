@@ -89,7 +89,7 @@ public abstract class AbstractORCPerformanceCurveTwaLegAdapter implements ORCPer
     @Override
     public ORCPerformanceCurveLegTypes getType() {
         final ORCPerformanceCurveLegTypes result;
-        if (hasWind()) {
+        if (!hasWind()) {
             result = ORCPerformanceCurveLegTypes.LONG_DISTANCE;
         } else {
             result = ORCPerformanceCurveLegTypes.TWA;
