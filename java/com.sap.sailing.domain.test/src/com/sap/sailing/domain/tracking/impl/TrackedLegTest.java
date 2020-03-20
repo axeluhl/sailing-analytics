@@ -41,11 +41,11 @@ public class TrackedLegTest {
         Mockito.when(dynamicTrackedRace.getApproximatePosition(start, at)).thenReturn(new DegreePosition(1, 2));
         Mockito.when(dynamicTrackedRace.getApproximatePosition(finish, at)).thenReturn(new DegreePosition(2, 5));
         Iterable<Position> positions10 = trackedLegImpl.getEquidistantSectionsOfLeg(at, 10);
-        assertEquals(10, Util.stream(positions10).count());
+        assertEquals(11, Util.stream(positions10).count());
         Iterable<Position> positions15 = trackedLegImpl.getEquidistantSectionsOfLeg(at, 15);
-        assertEquals(15, Util.stream(positions15).count());
+        assertEquals(16, Util.stream(positions15).count());
         Iterable<Position> positions100 = trackedLegImpl.getEquidistantSectionsOfLeg(at, 100);
-        assertEquals(100, Util.stream(positions100).count());
+        assertEquals(101, Util.stream(positions100).count());
         
     }
 
