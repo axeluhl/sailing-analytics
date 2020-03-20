@@ -79,16 +79,6 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     AccessControlListAnnotation getAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject);
 
-    /**
-     * @param idOfAccessControlledObject Has to be globally unique
-     */
-    SecurityService setEmptyAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject);
-
-    /**
-     * @param id Has to be globally unique
-     */
-    SecurityService setEmptyAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, String displayNameOfAccessControlledObject);
-
     AccessControlList overrideAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
             Map<UserGroup, Set<String>> permissionMap);
 
