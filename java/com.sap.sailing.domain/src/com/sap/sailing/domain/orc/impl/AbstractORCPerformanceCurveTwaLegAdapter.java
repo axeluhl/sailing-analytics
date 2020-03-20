@@ -37,8 +37,7 @@ public abstract class AbstractORCPerformanceCurveTwaLegAdapter implements ORCPer
     private final int numParts;
     
     public AbstractORCPerformanceCurveTwaLegAdapter(TrackedLeg trackedLeg) {
-        this.trackedLeg = trackedLeg;
-        this.numParts = 10;
+        this(trackedLeg, 10);
     }
     
     public AbstractORCPerformanceCurveTwaLegAdapter(TrackedLeg trackedLeg, int numParts) {
