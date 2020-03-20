@@ -8,6 +8,7 @@ Bundle-Activator: com.sap.sailing.server.impl.Activator
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.sap.sailing.server.gateway.deserialization,
+ com.tractrac.model.lib.api.event,
  javax.mail;version="1.4.0",
  javax.mail.internet;version="1.4.0",
  javax.mail.util;version="1.4.0",
@@ -42,7 +43,8 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.server.interface,
  org.mongodb.mongo-java-driver;bundle-version="3.6.4",
  com.sap.sse.security.common,
- com.sap.sailing.resultimport
+ com.sap.sailing.resultimport,
+ com.sap.sailing.domain.tractracadapter
 Bundle-ClassPath: .
 Export-Package: com.sap.sailing.server,
  com.sap.sailing.server.anniversary,

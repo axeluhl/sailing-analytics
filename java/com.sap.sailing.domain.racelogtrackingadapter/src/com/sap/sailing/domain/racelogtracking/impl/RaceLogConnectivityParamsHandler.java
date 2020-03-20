@@ -78,4 +78,15 @@ public class RaceLogConnectivityParamsHandler extends AbstractRaceTrackingConnec
         result.put(FLEET_NAME, rlParams.getFleet().getName());
         return result;
     }
+
+    @Override
+    public RaceTrackingConnectivityParameters resolve(RaceTrackingConnectivityParameters params) throws Exception {
+        assert params instanceof RaceTrackingConnectivityParameters;
+        final RaceLogConnectivityParams rLParams = (RaceLogConnectivityParams) params;
+        RaceLogConnectivityParams result = new RaceLogConnectivityParams(rLParams.getServerAuthor(),
+                rLParams.getRegatta(), rLParams.getRaceColumn(), rLParams.getFleet(), rLParams.getLeaderboard(),
+                rLParams.getDelayToLiveInMillis(), domainFactory, rLParams.isTrackWind(),
+                rLParams.isCorrectWindDirectionByMagneticDeclination());
+        return result;
+    }
 }

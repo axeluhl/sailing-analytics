@@ -53,7 +53,9 @@ public class MasterDataResource extends AbstractSailingServerResource {
     @GET
     @Produces("application/x-java-serialized-object")
     public Response getMasterDataByLeaderboardGroups(@QueryParam("names[]") List<String> requestedLeaderboardGroups,
-            @QueryParam("compress") Boolean compress, @QueryParam("exportWind") Boolean exportWind, @QueryParam("exportDeviceConfigs") Boolean exportDeviceConfigs)
+            @QueryParam("compress") Boolean compress, @QueryParam("exportWind") Boolean exportWind,
+            @QueryParam("exportDeviceConfigs") Boolean exportDeviceConfigs,
+            @QueryParam("exportTrackedRacesAndStartTracking") Boolean exportTrackedRacesAndStartTracking)
             throws UnsupportedEncodingException {
         final SecurityService securityService = getSecurityService();
         User user = securityService.getCurrentUser();
@@ -68,6 +70,9 @@ public class MasterDataResource extends AbstractSailingServerResource {
         }
         if (exportDeviceConfigs == null) {
             exportDeviceConfigs = false;
+        }
+        if (exportTrackedRacesAndStartTracking == null) {
+            exportTrackedRacesAndStartTracking = false;
         }
         logger.info(String.format("Masterdataexport gzip compression is turned %s", compress ? "on" : "off"));
         Map<String, LeaderboardGroup> allLeaderboardGroups = getService().getLeaderboardGroups();
@@ -152,7 +157,9 @@ public class MasterDataResource extends AbstractSailingServerResource {
         for (Entry<String, Regatta> regattaRaceMap : getService().getPersistentRegattasForRaceIDs().entrySet()) {
             regattaRaceIds.put(regattaRaceMap.getKey(), regattaRaceMap.getValue());
             // TODO: Permission check needs to be implemented
-            connectivityParametersToRestore.add(getService().getConnectivityParametersByRace().get(regattaRaceMap.getKey()));
+            if (exportTrackedRacesAndStartTracking) {
+                connectivityParametersToRestore.add(getService().getConnectivityParametersByRace().get(regattaRaceMap.getKey()));
+            }
         }
         final TopLevelMasterData masterData = new TopLevelMasterData(groupsToExport,
                 events, regattaRaceIds, mediaTracks,

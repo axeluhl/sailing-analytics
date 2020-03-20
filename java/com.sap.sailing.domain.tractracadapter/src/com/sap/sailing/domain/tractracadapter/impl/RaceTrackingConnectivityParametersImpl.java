@@ -50,7 +50,8 @@ public class RaceTrackingConnectivityParametersImpl extends AbstractRaceTracking
     private final String raceVisibility;
     private final boolean useInternalMarkPassingAlgorithm;
     private final boolean preferReplayIfAvailable;
-    private final IRace tractracRace;
+    private final transient IRace tractracRace;
+    private final int timeoutInMillis;
 
     /**
      * @param preferReplayIfAvailable
@@ -72,6 +73,7 @@ public class RaceTrackingConnectivityParametersImpl extends AbstractRaceTracking
             throws Exception {
         super(trackWind, correctWindDirectionByMagneticDeclination);
         this.paramURL = paramURL;
+        this.timeoutInMillis = timeoutInMillis;
         if (timeoutInMillis == -1) {
             this.tractracRace = ModelLocator.getEventFactory().createRace(new URI(paramURL.toString()));
         } else {
@@ -201,8 +203,33 @@ public class RaceTrackingConnectivityParametersImpl extends AbstractRaceTracking
         return preferReplayIfAvailable;
     }
     
+    public int getTimeoutInMillis() {
+        return timeoutInMillis;
+    }
+    
     @Override
     public String toString() {
         return getClass().getSimpleName()+" for "+paramURL+", liveURI: "+liveURI+", storedURI: "+storedURI;
     }
+
+//    @Override
+//    public RaceTrackingConnectivityParametersImpl resolve(DomainFactory domainFactory) {
+//        this.domainFactory = domainFactory;
+//        try {
+//            if (timeoutInMillis == -1) {
+//                this.tractracRace = ModelLocator.getEventFactory().createRace(new URI(paramURL.toString()));
+//            } else {
+//                this.tractracRace = ModelLocator.getEventFactory().createRace(new URI(paramURL.toString()),
+//                        timeoutInMillis);
+//            }
+//        } catch (Exception e) {
+//            // TODO Auto-generated catch block
+//            e.printStackTrace();
+//        }
+//        return this;
+    // }
+
+//    public Object readResolve() throws ObjectStreamException {
+//        return this;
+//    }
 }

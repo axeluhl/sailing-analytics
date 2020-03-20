@@ -57,6 +57,10 @@ import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.DummyTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
+import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParametersHandler;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler.DefaultRaceTrackingHandler;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.WindTrack;
@@ -65,6 +69,7 @@ import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.interfaces.RacingEventServiceOperation;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.Timed;
+import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.Util;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.security.SecurityService;
@@ -94,9 +99,11 @@ public class ImportMasterDataOperation extends
     private User user;
 
     private UserGroup tenant;
+    
+    private final ArrayList<RaceTrackingConnectivityParameters> connectivityParameterToRestore;
 
     public ImportMasterDataOperation(TopLevelMasterData topLevelMasterData, UUID importOperationId, boolean override,
-            MasterDataImportObjectCreationCountImpl existingCreationCount, User user, UserGroup tenant) {
+            MasterDataImportObjectCreationCountImpl existingCreationCount, User user, UserGroup tenant, ArrayList<RaceTrackingConnectivityParameters> connectivityParameterToRestore) {
 
         this.creationCount = new MasterDataImportObjectCreationCountImpl();
         this.creationCount.add(existingCreationCount);
@@ -105,6 +112,7 @@ public class ImportMasterDataOperation extends
         this.importOperationId = importOperationId;
         this.user = user;
         this.tenant = tenant;
+        this.connectivityParameterToRestore = connectivityParameterToRestore;
     }
 
     @Override
@@ -156,6 +164,9 @@ public class ImportMasterDataOperation extends
             }
             toState.mediaTracksImported(allMediaTracksToImport, creationCount, override);
 
+            // Import tracked races
+            importTrackedRaces(toState, securityService);
+            
             dataImportLock.getProgress(importOperationId).setResult(creationCount);
             return creationCount;
         } catch (Exception e) {
@@ -604,5 +615,53 @@ public class ImportMasterDataOperation extends
             regattaImpl.initializeSeriesAfterDeserialize();
         }
     }
-
+    
+    /**
+     * Starts the tracking of imported tracked races.
+     */
+    private void importTrackedRaces(RacingEventService toState, SecurityService securityService) throws Exception {
+        if (connectivityParameterToRestore != null) {
+            DomainObjectFactory domainObjectFactory = toState.getDomainObjectFactory();
+            final DefaultRaceTrackingHandler handler = new RaceTrackingHandler.DefaultRaceTrackingHandler();
+            TypeBasedServiceFinder<RaceTrackingConnectivityParametersHandler> serviceFinder = domainObjectFactory.getRaceTrackingConnectivityParamsServiceFinder();
+            for (RaceTrackingConnectivityParameters param : connectivityParameterToRestore) {
+                if (param != null) {
+                    final RaceTrackingConnectivityParameters paramToStartTracking = serviceFinder.findService(param.getTypeIdentifier()).resolve(param);
+                    toState.addRace(/* default */ null, paramToStartTracking, /* do not wait */ -1, handler);
+                }
+            }
+        }
+    
+//        if (connectivityParameterToRestore != null) {
+//            for (RaceTrackingConnectivityParameters param : connectivityParametersToRestore) {
+//                final String typeIdentifier = param.getTypeIdentifier();
+//                final RaceTrackingConnectivityParametersHandler handler = serviceFinder.findService(typeIdentifier);
+//                final PermissionAwareRaceTrackingHandler raceTrackingHandler = new PermissionAwareRaceTrackingHandler(racingEventService.getSecurityService());
+//                switch (typeIdentifier) {
+//                case "TRAC_TRAC":
+//                    assert param instanceof RaceTrackingConnectivityParametersImpl;
+//                    final RaceTrackingConnectivityParametersImpl ttParam = (RaceTrackingConnectivityParametersImpl) handler.resolve(param);
+//                    // racingEventService.addRace(/* addToRegatta==null means "default regatta" */ null, ttParam,
+//                    // ttParam.getTimeoutInMillis(), raceTrackingHandler);
+//                    // ttParam.createRaceTracker(racingEventService, windStore, racingEventService, racingEventService,
+//                    // ttParam.getTimeoutInMillis(), raceTrackingHandler);
+//                    connectivityParametersToRestore.add(ttParam);
+//                    break;
+//                case "RACE_LOG_TRACKING":
+//                    assert param instanceof RaceLogConnectivityParams;
+//                    final RaceLogConnectivityParams rLParam = (RaceLogConnectivityParams) handler.resolve(param);
+//                    break;
+//                }
+//                connectivityParametersToRestore.remove(param);
+//     
+////            final WindStore windStore = MongoWindStoreFactory.INSTANCE.getMongoWindStore(toState.getMongoObjectFactory(), toState.getDomainObjectFactory());
+//            final DefaultRaceTrackingHandler handler = new RaceTrackingHandler.DefaultRaceTrackingHandler();
+//            for (RaceTrackingConnectivityParameters param : connectivityParameterToRestore) {
+//                toState.addRace(/* default */ null, param, /* no timeout */ -1, handler);
+//////                param.createRaceTracker(toState, windStore, toState, toState, /* no timeout */ -1, handler);
+//////                 toState.addRace(/* default */ null, param, /* no timeout */ -1, new
+//////                 PermissionAwareRaceTrackingHandler(toState.getSecurityService()));
+//            }
+        
+    }
 }

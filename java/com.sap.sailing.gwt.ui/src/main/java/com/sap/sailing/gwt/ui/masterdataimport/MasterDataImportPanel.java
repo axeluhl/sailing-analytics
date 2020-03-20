@@ -64,6 +64,7 @@ public class MasterDataImportPanel extends VerticalPanel {
     private CheckBox compressSwitch;
     private CheckBox exportWindSwitch;
     private CheckBox exportDeviceConfigsSwitch;
+    private CheckBox exportTrackedRacesAndStartTrackingSwitch;
     private TextBox filterBox;
     private TextBox usernameBox;
     private TextBox passwordBox;
@@ -164,8 +165,9 @@ public class MasterDataImportPanel extends VerticalPanel {
             boolean compress = compressSwitch.getValue();
             boolean exportWind = exportWindSwitch.getValue();
             boolean exportDeviceConfigs = exportDeviceConfigsSwitch.getValue();
+            boolean exportTrackedRacesAndStartTracking = exportTrackedRacesAndStartTrackingSwitch.getValue();
             sailingService.importMasterData(currentHost, groupNames, override, compress, exportWind,
-                    exportDeviceConfigs, usernameBox.getValue(), passwordBox.getValue(), new AsyncCallback<UUID>() {
+                    exportDeviceConfigs, usernameBox.getValue(), passwordBox.getValue(), exportTrackedRacesAndStartTracking, new AsyncCallback<UUID>() {
 
                 @Override
                 public void onFailure(Throwable caught) {
@@ -387,6 +389,12 @@ public class MasterDataImportPanel extends VerticalPanel {
         exportDeviceConfigsSwitch.setTitle(stringMessages.importDeviceConfigurationsTooltip());
         exportDeviceConfigsSwitch.setValue(false);
         contentPanel.add(exportDeviceConfigsSwitch);
+        
+        exportTrackedRacesAndStartTrackingSwitch = new CheckBox(stringMessages.exportTrackedRacesAndStartTracking());
+        //TODO: Create Tooltip
+        exportTrackedRacesAndStartTrackingSwitch.setTitle("");
+        exportTrackedRacesAndStartTrackingSwitch.setValue(false);
+        contentPanel.add(exportTrackedRacesAndStartTrackingSwitch);
 
         importLeaderboardGroupsButton = new Button(stringMessages.importSelectedLeaderboardGroups());
         importLeaderboardGroupsButton.ensureDebugId("import");

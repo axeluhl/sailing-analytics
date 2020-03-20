@@ -580,8 +580,8 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
             throws UnauthorizedException;
 
     UUID importMasterData(String host, String[] groupNames, boolean override, boolean compress, boolean exportWind,
-            boolean exportDeviceConfigurations, String targetServerUsername, String targetServerPassword)
-            throws UnauthorizedException;
+            boolean exportDeviceConfigurations, String targetServerUsername, String targetServerPassword,
+            boolean exportTrackedRacesAndStartTracking) throws UnauthorizedException;
 
     DataImportProgress getImportOperationProgress(UUID id) throws UnauthorizedException;
 

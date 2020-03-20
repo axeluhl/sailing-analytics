@@ -198,4 +198,18 @@ public class SwissTimingConnectivityParamsHandler extends AbstractRaceTrackingCo
         result.put(RACE_ID, stParams.getRaceID());
         return result;
     }
+
+    @Override
+    public RaceTrackingConnectivityParameters resolve(RaceTrackingConnectivityParameters params) throws Exception {
+        assert params instanceof SwissTimingTrackingConnectivityParameters;
+        final SwissTimingTrackingConnectivityParameters stParams = (SwissTimingTrackingConnectivityParameters) params;
+        SwissTimingTrackingConnectivityParameters result = new SwissTimingTrackingConnectivityParameters(
+                stParams.getHostname(), stParams.getPort(), stParams.getRaceID(), stParams.getRaceName(),
+                stParams.getRaceDescription(), stParams.getBoatClass(), stParams.getStartList(),
+                stParams.getDelayToLiveInMillis(), swissTimingFactory, domainFactory, raceLogStore, regattaLogStore,
+                stParams.isUseInternalMarkPassingAlgorithm(), stParams.isTrackWind(),
+                stParams.isCorrectWindDirectionByMagneticDeclination(), stParams.getUpdateURL(),
+                stParams.getUpdateUsername(), stParams.getUpdatePassword());
+        return result;
+    }
 }

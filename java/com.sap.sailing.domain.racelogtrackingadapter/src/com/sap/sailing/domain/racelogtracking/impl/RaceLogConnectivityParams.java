@@ -141,6 +141,10 @@ public class RaceLogConnectivityParams extends AbstractRaceTrackingConnectivityP
         return result;
     }
     
+    public Regatta getRegatta() {
+        return regatta;
+    }
+    
     @Override
     public String toString() {
         return getClass().getSimpleName()+" for "+leaderboard.getName()+"/"+raceColumn.getName()+"/"+fleet.getName();

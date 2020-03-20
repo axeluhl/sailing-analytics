@@ -5877,7 +5877,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public UUID importMasterData(final String urlAsString, final String[] groupNames, final boolean override,
             final boolean compress, final boolean exportWind, final boolean exportDeviceConfigurations,
-            String targetServerUsername, String targetServerPassword) {
+            String targetServerUsername, String targetServerPassword, final boolean exportTrackedRacesAndStartTracking) {
         getSecurityService().checkCurrentUserServerPermission(ServerActions.CAN_IMPORT_MASTERDATA);
         String token = RemoteServerUtil.resolveBearerTokenForRemoteServer(urlAsString, targetServerUsername, targetServerPassword);
         final UUID importOperationId = UUID.randomUUID();
@@ -5894,7 +5894,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                         DataImportSubProgress.CONNECTION_SETUP, 0.5);
                 String query;
                 try {
-                    query = createLeaderboardQuery(groupNames, compress, exportWind, exportDeviceConfigurations);
+                    query = createLeaderboardQuery(groupNames, compress, exportWind, exportDeviceConfigurations, exportTrackedRacesAndStartTracking);
                 } catch (UnsupportedEncodingException e1) {
                     throw new RuntimeException(e1);
                 }
@@ -5969,15 +5969,16 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         return 0;
     }
 
-    private String createLeaderboardQuery(String[] groupNames, boolean compress, boolean exportWind, boolean exportDeviceConfigurations)
+    private String createLeaderboardQuery(String[] groupNames, boolean compress, boolean exportWind,
+            boolean exportDeviceConfigurations, boolean exportTrackedRacesAndStartTracking)
             throws UnsupportedEncodingException {
         StringBuffer queryStringBuffer = new StringBuffer("");
         for (int i = 0; i < groupNames.length; i++) {
             String encodedGroupName = URLEncoder.encode(groupNames[i], "UTF-8");
             queryStringBuffer.append("names[]=" + encodedGroupName + "&");
         }
-        queryStringBuffer.append(String.format("compress=%s&exportWind=%s&exportDeviceConfigs=%s", compress,
-                exportWind, exportDeviceConfigurations));
+        queryStringBuffer.append(String.format("compress=%s&exportWind=%s&exportDeviceConfigs=%s&exportTrackedRacesAndStartTracking=%s", compress,
+                exportWind, exportDeviceConfigurations, exportTrackedRacesAndStartTracking));
         return queryStringBuffer.toString();
     }
 

@@ -647,7 +647,7 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
 
     void importMasterData(String host, String[] names, boolean override, boolean compress, boolean exportWind,
             boolean exportDeviceConfigurations, String targetServerUsername, String targetServerPassword,
-            AsyncCallback<UUID> asyncCallback);
+            boolean exportTrackedRacesAndStartTracking, AsyncCallback<UUID> asyncCallback);
 
     void getImportOperationProgress(UUID id, AsyncCallback<DataImportProgress> asyncCallback);
 
