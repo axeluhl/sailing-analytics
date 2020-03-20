@@ -49,6 +49,16 @@ public abstract class AbstractORCPerformanceCurveTwaLegAdapter implements ORCPer
         return trackedLeg;
     }
 
+    /**
+     * Computes a {@link Wind} estimation based on {@link #numParts} x {@link #numParts} wind samples, taken for
+     * {@link #numParts} time points spread equally across the time range between the first boat entering and the last
+     * boat exiting the leg (defaulting to "now" if no boat has exited the leg yet) and across {@link #numParts}
+     * positions along the great circle segment connecting the approximate start waypoint's position and the approximate
+     * end waypoint's position at the respective time point. Those wind samples are averaged based on their original
+     * confidences. The {@link #scale(double) scaling} of this leg does not affect the wind sampling; in all cases, wind
+     * samples will always be taken along the full leg distance, making the result of this method the same for the same
+     * boundary conditions (mark passings etc.) for all competitors.
+     */
     private Wind getWind() {
         ConfidenceBasedWindAverager<Util.Pair<Position, TimePoint>> timeWeigher = 
                 ConfidenceFactory.INSTANCE.createWindAverager(new PositionAndTimePointWeigher(1000, WindTrack.WIND_HALF_CONFIDENCE_DISTANCE));
@@ -87,9 +97,13 @@ public abstract class AbstractORCPerformanceCurveTwaLegAdapter implements ORCPer
         return result;
     }
 
+    /**
+     * The TWA calculation must not be affected by scaling a leg because otherwise competitors who sailed different
+     * ratios of the same leg may get different {@link #getWind()} results.
+     */
     @Override
     public ORCPerformanceCurveLeg scale(final double share) {
-        return new AbstractORCPerformanceCurveTwaLegAdapter(trackedLeg) {
+        return new AbstractORCPerformanceCurveTwaLegAdapter(trackedLeg, numParts) {
             private static final long serialVersionUID = -6724721873285438431L;
 
             @Override
