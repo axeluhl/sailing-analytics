@@ -42,10 +42,6 @@ public interface UserManagementService extends RemoteService {
     AccessControlListAnnotationDTO getAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject)
             throws org.apache.shiro.authz.UnauthorizedException;
 
-    AccessControlListDTO updateAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
-            Map<String, Set<String>> permissionStrings)
-            throws UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;
-
     AccessControlListDTO addToAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
             String groupOrTenantIdAsString, String action)
             throws UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;

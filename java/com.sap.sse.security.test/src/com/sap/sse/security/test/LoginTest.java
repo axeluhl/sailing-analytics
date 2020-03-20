@@ -103,7 +103,7 @@ public class LoginTest {
         Map<UserGroup, Set<String>> permissionMap = new HashMap<>();
         permissionMap.put(defaultUserGroup, new HashSet<>(Arrays.asList(new String[] { "!READ", "UPDATE" })));
         permissionMap.put(null, new HashSet<>(Arrays.asList(new String[] { "!READ", "UPDATE" })));
-        AccessControlList acl = securityService.updateAccessControlList(
+        AccessControlList acl = securityService.overrideAccessControlList(
                 QualifiedObjectIdentifierImpl.fromDBWithoutEscaping("someid/more"), permissionMap);
 
         Map<UserGroup, Set<String>> result = acl.getActionsByUserGroup();

@@ -529,27 +529,23 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public AccessControlList overrideAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
             Map<UserGroup, Set<String>> permissionMap, String displayNameOfAccessControlledObject) {
-        accessControlStore.removeAccessControlList(idOfAccessControlledObject);
-        accessControlStore.setEmptyAccessControlList(idOfAccessControlledObject, displayNameOfAccessControlledObject);
-        return updateAccessControlList(idOfAccessControlledObject, permissionMap);
-    }
-
-    @Override
-    public AccessControlList updateAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
-            Map<UserGroup, Set<String>> permissionMap) {
-        if (getAccessControlList(idOfAccessControlledObject) == null) {
-            setEmptyAccessControlList(idOfAccessControlledObject);
-        }
+        setEmptyAccessControlList(idOfAccessControlledObject, displayNameOfAccessControlledObject);
+        
         for (Map.Entry<UserGroup, Set<String>> entry : permissionMap.entrySet()) {
             final UserGroup userGroup = entry.getKey();
-            // filter any denied action for anonymous user 
-            Set<String> filteredActions = entry.getValue().stream()
-                    .filter(action -> !(entry.getKey() == null && action != null && action.startsWith("!")))
-                    .collect(Collectors.toSet());
+            final Set<String> actionsToSet;
+            if (userGroup == null) {
+                // filter any denied action for anonymous user
+                actionsToSet = entry.getValue().stream()
+                        .filter(action -> !action.startsWith("!"))
+                        .collect(Collectors.toSet());
+            } else {
+                actionsToSet = entry.getValue();
+            }
             
             final UUID userGroupId = userGroup == null ? null : userGroup.getId();
             // avoid the UserGroup object having to be serialized with the operation by using the ID
-            apply(s -> s.internalAclPutPermissions(idOfAccessControlledObject, userGroupId, filteredActions));
+            apply(s -> s.internalAclPutPermissions(idOfAccessControlledObject, userGroupId, actionsToSet));
         }
         return accessControlStore.getAccessControlList(idOfAccessControlledObject).getAnnotation();
     }

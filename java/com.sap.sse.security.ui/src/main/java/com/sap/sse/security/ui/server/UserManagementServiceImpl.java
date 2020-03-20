@@ -244,21 +244,6 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public AccessControlListDTO updateAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
-            Map<String, Set<String>> permissionStrings) throws UnauthorizedException {
-        if (SecurityUtils.getSubject()
-                .isPermitted(idOfAccessControlledObject.getStringPermission(DefaultActions.CHANGE_ACL))) {
-            Map<UserGroup, Set<String>> permissionMap = new HashMap<>();
-            for (String group : permissionStrings.keySet()) {
-                permissionMap.put(getSecurityService().getUserGroupByName(group), permissionStrings.get(group));
-            }
-            return securityDTOFactory.createAccessControlListDTO(getSecurityService().updateAccessControlList(idOfAccessControlledObject, permissionMap));
-        } else {
-            throw new UnauthorizedException("Not permitted to grant and revoke permissions for user");
-        }
-    }
-
-    @Override
     public AccessControlListDTO addToAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
             String groupIdAsString, String action) throws UnauthorizedException {
         if (SecurityUtils.getSubject()
