@@ -112,8 +112,7 @@ public abstract class AbstractAccessControlList<G extends SecurityUserGroup<?>>
         return result;
     }
     
-    @Override
-    public boolean denyPermission(G userGroup, String action) {
+    private boolean denyPermission(G userGroup, String action) {
         final boolean result;
         if (action.startsWith("!")) {
             result = addPermission(userGroup, action.substring(1));
@@ -145,8 +144,7 @@ public abstract class AbstractAccessControlList<G extends SecurityUserGroup<?>>
         return result;
     }
 
-    @Override
-    public boolean removeDenial(G userGroup, String action) {
+    private boolean removeDenial(G userGroup, String action) {
         final boolean result;
         if (action.startsWith("!")) {
             result = removeDenial(userGroup, action.substring(1));

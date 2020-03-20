@@ -192,7 +192,7 @@ public class PermissionCheckerTest {
         assertTrue(PermissionChecker.isPermitted(eventReadPermission, /* user */ null, /* groups */ new HashSet<>(),
                 null, null, adminOwnership, acl));
         // now deny "public read" permission in ACL which is expected to supersede the granting from above:
-        acl.denyPermission(null, DefaultActions.READ.name());
+        acl.addPermission(null, "!"+DefaultActions.READ.name());
         assertFalse(PermissionChecker.isPermitted(eventReadPermission, /* user */ null, /* groups */ new HashSet<>(),
                 null, null, adminOwnership, acl));
     }
