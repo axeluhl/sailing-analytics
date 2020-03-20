@@ -119,6 +119,7 @@ import com.sap.sse.security.shared.PredefinedRoles;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RolePrototype;
+import com.sap.sse.security.shared.SecurityAccessControlList;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.UserGroupManagementException;
@@ -541,7 +542,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             if (userGroup == null) {
                 // filter any denied action for anonymous user
                 actionsToSet = entry.getValue().stream()
-                        .filter(action -> !action.startsWith("!"))
+                        .filter(action -> !SecurityAccessControlList.isDeniedAction(action))
                         .collect(Collectors.toSet());
             } else {
                 actionsToSet = entry.getValue();

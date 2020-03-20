@@ -72,5 +72,15 @@ public interface SecurityAccessControlList<G extends SecurityUserGroup<?>> exten
     boolean removePermission(G userGroup, String action);
 
     void setPermissions(G userGroup, Set<String> actions);
+    
+    /**
+     * When adding an action to a ACL prefixed with ! this is meant to be an explicit denial of that action instead of
+     * granting that action. This method checks if an action is such a denial.
+     * 
+     * @return {@code true} if it is a denied action, {@code false} otherwise
+     */
+    static boolean isDeniedAction(String action) {
+        return action.startsWith("!");
+    }
 
 }
