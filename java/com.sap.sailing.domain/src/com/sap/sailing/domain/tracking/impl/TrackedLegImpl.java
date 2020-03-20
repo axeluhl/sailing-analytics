@@ -276,7 +276,7 @@ public class TrackedLegImpl implements TrackedLeg {
     }
     
     @Override
-    public Iterable<Position> getEquidistantSectionsOfLeg(TimePoint at, int numberOfSections) {
+    public Iterable<Position> getEquidistantSectionsOfLeg(TimePoint at, int numberOfPositions) {
         final Optional<Position> approximateLegStartPosition = Optional
                 .ofNullable(getTrackedRace().getApproximatePosition(getLeg().getFrom(), at));
         final Optional<Position> approximateLegEndPosition = Optional
@@ -284,10 +284,10 @@ public class TrackedLegImpl implements TrackedLeg {
         final List<Position> result = approximateLegStartPosition.map(legStart -> {
             return approximateLegEndPosition.map(legEnd -> {
                 final Bearing bearing = legStart.getBearingGreatCircle(legEnd);
-                final Distance segmentDistance = legStart.getDistance(legEnd).scale(1.0 / numberOfSections);
+                final Distance segmentDistance = legStart.getDistance(legEnd).scale(1.0 / (numberOfPositions-1));
                 final List<Position> positions = new ArrayList<>();
                 Position position = legStart;
-                for (int i=0; i<=numberOfSections; i++) {
+                for (int i=0; i<numberOfPositions; i++) {
                     positions.add(position);
                     position = position.translateGreatCircle(bearing, segmentDistance);
                 }

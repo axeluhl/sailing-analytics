@@ -149,7 +149,9 @@ public class TestORCPerformanceCurveCourse {
         final TrackedLeg trackedLeg1 = Mockito.mock(TrackedLeg.class);
         TrackedRace trackedRace = Mockito.mock(TrackedRace.class);
         Mockito.when(trackedRace.getWindWithConfidence(Matchers.any(Position.class), Matchers.any(TimePoint.class)))
-        .thenReturn(new WindWithConfidenceImpl<Util.Pair<Position, TimePoint>>(w1, 1.0, new Util.Pair<Position, TimePoint>(new DegreePosition(1.0, 1.0), MillisecondsTimePoint.now()), false));
+                .thenReturn(new WindWithConfidenceImpl<Util.Pair<Position, TimePoint>>(w1, 1.0,
+                        new Util.Pair<Position, TimePoint>(new DegreePosition(1.0, 1.0), MillisecondsTimePoint.now()),
+                        false));
         Mockito.when(trackedLeg1.getEquidistantReferenceTimePoints(10)).thenReturn(Collections.singleton(new MillisecondsTimePoint(new Date(1))));
         Mockito.when(trackedLeg1.getEquidistantSectionsOfLeg(Matchers.any(TimePoint.class), Matchers.anyInt())).thenReturn(Collections.singleton(new DegreePosition(1.0d, 1.0d)));
         Mockito.when(trackedLeg1.getTrackedRace()).thenReturn(trackedRace);
