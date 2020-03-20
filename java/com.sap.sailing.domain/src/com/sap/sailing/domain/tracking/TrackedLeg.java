@@ -184,18 +184,20 @@ public interface TrackedLeg extends Serializable {
      * time point <code>at</code> and the position of the leg's end waypoint at time point <code>at</code>.
      * 
      * @param parts
-     *            number of parts for breaking
+     *            number of parts for breaking; the result will then have {@code parts+1} positions
      * @return if the position of at least one of the leg's start/end waypoints cannot be determined, an empty sequence
      *         of {@link Position}s will be returned
      */
     Iterable<Position> getEquidistantSectionsOfLeg(TimePoint at, int numberOfSections);
 
     /**
-     * @param timepoint Used for positions of marks and wind information
+     * @param timepoint
+     *            Used for positions of marks and wind information
      * @return estimated time it takes to complete the leg
-     * @throws NotEnoughDataHasBeenAddedException thrown if not enough polar data has been added or polar data service
-     * is not available
-     * @throws NoWindException no wind available. unable to determine legtypes for given timepoint
+     * @throws NotEnoughDataHasBeenAddedException
+     *             thrown if not enough polar data has been added or polar data service is not available
+     * @throws NoWindException
+     *             no wind available. unable to determine legtypes for given timepoint
      */
     LegTargetTimeInfo getEstimatedTimeAndDistanceToComplete(PolarDataService polarDataService, TimePoint timepoint, MarkPositionAtTimePointCache markPositionCache)
             throws NotEnoughDataHasBeenAddedException, NoWindException;
