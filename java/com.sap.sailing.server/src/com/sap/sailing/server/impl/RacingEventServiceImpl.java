@@ -279,6 +279,7 @@ import com.sap.sailing.server.operationaltransformation.UpdateStartTimeReceived;
 import com.sap.sailing.server.operationaltransformation.UpdateTrackedRaceStatus;
 import com.sap.sailing.server.operationaltransformation.UpdateWindAveragingTime;
 import com.sap.sailing.server.operationaltransformation.UpdateWindSourcesToExclude;
+import com.sap.sailing.server.security.PermissionAwareRaceTrackingHandler;
 import com.sap.sailing.server.simulation.SimulationServiceFactory;
 import com.sap.sailing.server.statistics.StatisticsAggregator;
 import com.sap.sailing.server.statistics.StatisticsCalculator;
@@ -4828,5 +4829,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     public RaceTrackingConnectivityParameters getConnectivityParametersByRace(RaceDefinition raceDefiniton) {
         return connectivityParametersByRace.get(raceDefiniton);
     }
- 
+
+    @Override
+    public RaceTrackingHandler getPermissionAwareRaceTrackingHandler() {
+        return new PermissionAwareRaceTrackingHandler(getSecurityService());
+    }
 }

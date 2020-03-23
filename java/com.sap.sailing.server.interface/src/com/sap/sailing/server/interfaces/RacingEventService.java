@@ -85,6 +85,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
@@ -918,4 +919,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * Used for MasterDataImport
      */
     RaceTrackingConnectivityParameters getConnectivityParametersByRace(RaceDefinition raceDefinition);
+
+    RaceTrackingHandler getPermissionAwareRaceTrackingHandler();
 }

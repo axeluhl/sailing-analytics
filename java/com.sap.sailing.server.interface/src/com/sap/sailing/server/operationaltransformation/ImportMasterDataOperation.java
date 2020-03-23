@@ -62,7 +62,6 @@ import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParametersHandler;
 import com.sap.sailing.domain.tracking.RaceTrackingHandler;
-import com.sap.sailing.domain.tracking.RaceTrackingHandler.DefaultRaceTrackingHandler;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.WindTrack;
@@ -620,12 +619,12 @@ public class ImportMasterDataOperation extends
     private void importTrackedRaces(RacingEventService toState, SecurityService securityService) throws Exception {
         if (connectivityParametersToRestore != null) {
             DomainObjectFactory domainObjectFactory = toState.getDomainObjectFactory();
-            final DefaultRaceTrackingHandler handler = new RaceTrackingHandler.DefaultRaceTrackingHandler();
             TypeBasedServiceFinder<RaceTrackingConnectivityParametersHandler> serviceFinder = domainObjectFactory.getRaceTrackingConnectivityParamsServiceFinder();
             for (RaceTrackingConnectivityParameters param : connectivityParametersToRestore) {
                 if (param != null) {
                     final RaceTrackingConnectivityParameters paramToStartTracking = serviceFinder.findService(param.getTypeIdentifier()).resolve(param);
-                    RaceHandle raceHandle = toState.addRace(/* default */ null, paramToStartTracking, /* do not wait */ -1, handler);
+                    final RaceTrackingHandler raceTrackingHandler = toState.getPermissionAwareRaceTrackingHandler();
+                    RaceHandle raceHandle = toState.addRace(/* default */ null, paramToStartTracking, /* do not wait */ -1, raceTrackingHandler);
                     final RaceDefinition race = raceHandle.getRace(RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
                     if (race != null) {
                         ensureOwnership(raceHandle.getTrackedRegatta().getTrackedRace(race).getIdentifier(), securityService);
