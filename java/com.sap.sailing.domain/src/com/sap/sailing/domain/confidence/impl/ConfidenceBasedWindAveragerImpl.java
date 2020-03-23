@@ -31,6 +31,11 @@ import com.sap.sse.common.Speed;
 public class ConfidenceBasedWindAveragerImpl<RelativeTo> extends
         ConfidenceBasedAveragerImpl<ScalableWind, Wind, RelativeTo> implements ConfidenceBasedWindAverager<RelativeTo> {
 
+    /**
+     * @param weigher
+     *            If <code>null</code>, 1.0 will be assumed as default confidence for all values provided, regardless
+     *            the reference point relative to which the average is to be computed
+     */
     public ConfidenceBasedWindAveragerImpl(Weigher<RelativeTo> weigher) {
         super(weigher);
     }
