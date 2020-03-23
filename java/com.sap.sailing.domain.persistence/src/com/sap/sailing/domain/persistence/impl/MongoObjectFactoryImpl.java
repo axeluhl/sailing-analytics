@@ -263,7 +263,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         index.put(FieldNames.DEVICE_ID.name()+"."+com.sap.sailing.shared.persistence.impl.FieldNames.DEVICE_TYPE.name(), 1);
         index.put(FieldNames.DEVICE_ID.name()+"."+com.sap.sailing.shared.persistence.impl.FieldNames.DEVICE_TYPE_SPECIFIC_ID.name(), 1);
         index.put(FieldNames.DEVICE_ID.name()+"."+com.sap.sailing.shared.persistence.impl.FieldNames.DEVICE_STRING_REPRESENTATION.name(), 1);
-        gpsFixCollection.createIndex(index, new IndexOptions().name("fixbytimeanddev"));
+        gpsFixCollection.createIndex(index, new IndexOptions().name("fixbytimeanddev").background(false));
         return gpsFixCollection;
     }
     
@@ -689,18 +689,18 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         MongoCollection<Document> regattasCollection = database.getCollection(CollectionNames.REGATTAS.name());
         Document regattaByNameIndexKey = new Document(FieldNames.REGATTA_NAME.name(), 1);
         try {
-            regattasCollection.createIndex(regattaByNameIndexKey, new IndexOptions().unique(true));
+            regattasCollection.createIndex(regattaByNameIndexKey, new IndexOptions().unique(true).background(false));
         } catch (MongoCommandException e) {
             // the index probably existed as non-unique; remove and create again
             regattasCollection.dropIndex(regattaByNameIndexKey);
-            regattasCollection.createIndex(regattaByNameIndexKey, new IndexOptions().unique(true));
+            regattasCollection.createIndex(regattaByNameIndexKey, new IndexOptions().unique(true).background(false));
         }
         Document regattaByIdIndexKey = new Document(FieldNames.REGATTA_ID.name(), 1);
         try {
-            regattasCollection.createIndex(regattaByIdIndexKey, new IndexOptions().unique(true));
+            regattasCollection.createIndex(regattaByIdIndexKey, new IndexOptions().unique(true).background(false));
         } catch (MongoCommandException e) {
             regattasCollection.dropIndex(regattaByIdIndexKey);
-            regattasCollection.createIndex(regattaByIdIndexKey, new IndexOptions().unique(true));
+            regattasCollection.createIndex(regattaByIdIndexKey, new IndexOptions().unique(true).background(false));
         }
         Document dbRegatta = new Document();
         Document query = new Document(FieldNames.REGATTA_NAME.name(), regatta.getName());
@@ -1617,7 +1617,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         MongoCollection<Document> result = database.getCollection(CollectionNames.REGATTA_LOGS.name());
         Document index = new Document(FieldNames.REGATTA_LOG_IDENTIFIER_TYPE.name(), 1);
         index.put(FieldNames.REGATTA_LOG_IDENTIFIER_NAME.name(), 1);
-        result.createIndex(index, new IndexOptions().name("regattaLogById"));
+        result.createIndex(index, new IndexOptions().name("regattaLogById").background(false));
         return result;
     }
     
