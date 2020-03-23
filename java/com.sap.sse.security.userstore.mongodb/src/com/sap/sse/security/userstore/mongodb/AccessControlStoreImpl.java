@@ -381,7 +381,6 @@ public class AccessControlStoreImpl implements AccessControlStore {
     public Iterable<OwnershipAnnotation> getOwnerships() {
         return LockUtil.executeWithReadLockAndResult(lockForManagementMappings,
                 new RunnableWithResult<Iterable<OwnershipAnnotation>>() {
-
                     @Override
                     public Iterable<OwnershipAnnotation> run() {
                         return new ArrayList<>(ownerships.values());
@@ -392,7 +391,6 @@ public class AccessControlStoreImpl implements AccessControlStore {
     @Override
     public void clear() {
         LockUtil.executeWithWriteLock(lockForManagementMappings, new Runnable() {
-
             @Override
             public void run() {
                 accessControlLists.clear();

@@ -382,7 +382,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
 
-    private void ensureIndicesOnWindTracks(MongoCollection<Document> windTracks) {
+    static void ensureIndicesOnWindTracks(MongoCollection<Document> windTracks) {
         windTracks.createIndex(new Document(FieldNames.RACE_ID.name(), 1), new IndexOptions().name("windbyrace")); // for new programmatic access
         windTracks.createIndex(new Document(FieldNames.REGATTA_NAME.name(), 1), new IndexOptions().name("windbyregatta")); // for export or human look-up
         // for legacy access to not yet migrated fixes
