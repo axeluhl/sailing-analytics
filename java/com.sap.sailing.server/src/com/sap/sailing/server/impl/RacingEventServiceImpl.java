@@ -286,6 +286,7 @@ import com.sap.sailing.server.statistics.TrackedRaceStatisticsCache;
 import com.sap.sailing.server.tagging.TaggingServiceFactory;
 import com.sap.sailing.server.util.EventUtil;
 import com.sap.sailing.shared.server.SharedSailingData;
+import com.sap.sse.MasterDataImportClassLoaderService;
 import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
@@ -524,7 +525,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     
     private ThreadLocal<Boolean> currentlyApplyingOperationReceivedFromMaster = ThreadLocal.withInitial(() -> false);
 
-    private final Set<ClassLoader> masterDataClassLoaders = new HashSet<ClassLoader>();
+    /**
+     * A synchronized set of the class loaders to use for importing master data. See also {@link MasterDataImportClassLoaderService},
+     * {@link #addMasterDataClassLoader(ClassLoader)} and {@link #removeMasterDataClassLoader(ClassLoader)}. In order to loop over
+     * these, synchronize on the object. See also {@link Collections#synchronizedSet(Set)}.
+     */
+    private final Set<ClassLoader> masterDataClassLoaders = Collections.synchronizedSet(new HashSet<ClassLoader>());
     
     private final JoinedClassLoader joinedClassLoader;
 
@@ -4250,11 +4256,15 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     public void addMasterDataClassLoader(ClassLoader classLoader) {
-        masterDataClassLoaders.add(classLoader);
+        synchronized (masterDataClassLoaders) {
+            masterDataClassLoaders.add(classLoader);
+        }
     }
 
     public void removeMasterDataClassLoader(ClassLoader classLoader) {
-        masterDataClassLoaders.remove(classLoader);
+        synchronized (masterDataClassLoaders) {
+            masterDataClassLoaders.remove(classLoader);
+        }
     }
     
     @Override
