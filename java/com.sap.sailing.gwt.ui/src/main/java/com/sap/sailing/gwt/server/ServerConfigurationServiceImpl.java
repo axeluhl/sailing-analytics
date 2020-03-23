@@ -7,8 +7,6 @@ import com.sap.sailing.gwt.ui.server.Activator;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.gwt.server.ProxiedRemoteServiceServlet;
 import com.sap.sse.replication.FullyInitializedReplicableTracker;
-import com.sap.sse.replication.ReplicationService;
-import com.sap.sse.util.ServiceTrackerFactory;
 
 /**
  * The server side implementation of the RPC service.
@@ -20,9 +18,7 @@ public class ServerConfigurationServiceImpl extends ProxiedRemoteServiceServlet 
 
     public ServerConfigurationServiceImpl() {
         BundleContext context = Activator.getDefault();
-        racingEventServiceTracker = new FullyInitializedReplicableTracker<>(context, RacingEventService.class,
-                /* customizer */ null, ServiceTrackerFactory.createAndOpen(context, ReplicationService.class));
-        racingEventServiceTracker.open();
+        racingEventServiceTracker = FullyInitializedReplicableTracker.createAndOpen(context, RacingEventService.class);
     }
 
     protected RacingEventService getService() {

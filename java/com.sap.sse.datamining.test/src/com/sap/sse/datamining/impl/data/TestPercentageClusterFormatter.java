@@ -8,8 +8,6 @@ import org.junit.Test;
 
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.data.ClusterGroup;
-import com.sap.sse.datamining.impl.data.LinearDoubleClusterGroup;
-import com.sap.sse.datamining.impl.data.PercentageClusterFormatter;
 
 public class TestPercentageClusterFormatter {
 

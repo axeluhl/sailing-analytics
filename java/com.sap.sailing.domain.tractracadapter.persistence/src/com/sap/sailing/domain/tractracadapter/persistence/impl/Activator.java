@@ -24,7 +24,6 @@ import com.sap.sailing.domain.tractracadapter.impl.RaceTrackingConnectivityParam
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.replication.FullyInitializedReplicableTracker;
-import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.util.ClearStateTestSupport;
 import com.sap.sse.util.ServiceTrackerFactory;
@@ -48,10 +47,7 @@ public class Activator implements BundleActivator {
                     .createAndOpen(context, MongoObjectFactory.class);
             final ServiceTracker<DomainObjectFactory, DomainObjectFactory> domainObjectFactoryServiceTracker = ServiceTrackerFactory
                     .createAndOpen(context, DomainObjectFactory.class);
-            final FullyInitializedReplicableTracker<SecurityService> securityServiceServiceTracker = new FullyInitializedReplicableTracker<>(
-                    context, SecurityService.class, /* customizer */ null,
-                    ServiceTrackerFactory.createAndOpen(context, ReplicationService.class));
-            securityServiceServiceTracker.open();
+            final FullyInitializedReplicableTracker<SecurityService> securityServiceServiceTracker = FullyInitializedReplicableTracker.createAndOpen(context, SecurityService.class);
             final ServiceTracker<TracTracAdapterFactory, TracTracAdapterFactory> tractracAdapterFactoryTracker = ServiceTrackerFactory
                     .createAndOpen(context, TracTracAdapterFactory.class);
             try {

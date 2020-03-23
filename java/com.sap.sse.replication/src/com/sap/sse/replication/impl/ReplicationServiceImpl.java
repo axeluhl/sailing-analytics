@@ -639,7 +639,8 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
     /**
      * The peer for this method is
      * {@link ReplicationServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)}
-     * which implements the initial load sending process.
+     * which implements the initial load sending process. This method will return only after the initial load for all
+     * replicas described in the {@code master} descriptor has completed.
      */
     @Override
     public void startToReplicateFrom(final ReplicationMasterDescriptor master)
@@ -908,9 +909,9 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
 
     @Override
     public void setReplicationStarting(boolean newReplicationStarting) {
-        if (this.replicationStarting != newReplicationStarting) {
-            this.replicationStarting = newReplicationStarting;
-            synchronized (replicationStartingListeners) {
+        synchronized (replicationStartingListeners) {
+            if (this.replicationStarting != newReplicationStarting) {
+                this.replicationStarting = newReplicationStarting;
                 for (final ReplicationStartingListener listener : replicationStartingListeners) {
                     listener.onReplicationStartingChanged(newReplicationStarting);
                 }
