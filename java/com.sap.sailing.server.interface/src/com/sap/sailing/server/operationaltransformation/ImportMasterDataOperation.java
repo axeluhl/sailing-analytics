@@ -57,6 +57,7 @@ import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.DummyTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParametersHandler;
 import com.sap.sailing.domain.tracking.RaceTrackingHandler;
@@ -624,7 +625,8 @@ public class ImportMasterDataOperation extends
             for (RaceTrackingConnectivityParameters param : connectivityParametersToRestore) {
                 if (param != null) {
                     final RaceTrackingConnectivityParameters paramToStartTracking = serviceFinder.findService(param.getTypeIdentifier()).resolve(param);
-                    toState.addRace(/* default */ null, paramToStartTracking, /* do not wait */ -1, handler);
+                    RaceHandle raceHandle = toState.addRace(/* default */ null, paramToStartTracking, /* do not wait */ -1, handler);
+                    ensureOwnership(raceHandle.getTrackedRegatta().getTrackedRace(raceHandle.getRace()).getIdentifier(), securityService);
                 }
             }
         }
