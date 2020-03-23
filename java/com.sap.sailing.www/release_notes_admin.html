@@ -21,6 +21,46 @@
 			<div class="mainContent">
 				<h2 class="releaseHeadline">Release Notes - Administration Console</h2>
 				<div class="innerContent">
+                    <h2 class="articleSubheadline">March 2020</h2>
+                    <ul class="bulletList">
+                        <li>The visualization for ORC certificates has been much improved. It now shows all the
+                            time allowances relevant for Performance Curve Scoring (PCS) and offers a link to the
+                            official PDF version of the respective certificate, based on its reference number.
+                        </li>
+                        <li>Improved ESC/Enter key handling in user role/permission editing dialog</li>
+                        <li>The "Replication" panel in the "Advanced" category now has improved information about the
+                            replicables shown. An advanced replica information string may reveal more than just the address,
+                            and the address is now resolved through any <tt>X-Forwarded-For</tt> header fields present
+                            during replica registration, hence also working through load balancers and reverse proxies.
+                        </li>
+                        <li>Mark Properties positioning information can now also be removed from a Mark Properties object
+                            again.
+                        </li>
+                    </ul>
+                    <h2 class="articleSubheadline">February 2020</h2>
+                    <ul class="bulletList">
+                        <li>The "Local Server" tab now refreshes automatically when it comes into view.</li>
+                        <li>There is a new system property <tt>repliate.restore.replicas</tt>. When it is set to <tt>true</tt>
+                            (which is the default),
+                            upon start-up the server instance will read the replica descriptors stored persistently when
+                            a replica registers, assuming that those replicas are still alive and want to continue to
+                            receive replication updates from this server. This way, replicas may not have to be
+                            re-started or re-connected to the re-started master instance. Note, though, that
+                            as the re-started master loads races, those loading activities will be broadcast
+                            to all replicas which are likely to have all that information already. Use the flag, e.g.,
+                            in the <tt>ADDITIONAL_JAVA_ARGS</tt> environment variable that the <tt>start</tt> script
+                            will consider, as in<pre>
+                              ADDITIONAL_JAVA_ARGS="${ADDITIONAL_JAVA_ARGS} -Drepliate.restore.replicas=true"
+                            </pre></li>
+                        <li>Replication from replica to master will now re-send upon HTTP status 404 which
+                            may indicate a re-starting master where the health check hasn't properly disabled
+                            forwarding requests to the instance.
+                        </li>
+                        <li>Replication operations that a replica needs to send back to the master instance are
+                            now consistently sent in a background task, avoiding any hold-ups and latencies in
+                            client / user interaction.
+                        </li>
+                    </ul>
                     <h2 class="articleSubheadline">January 2020</h2>
                     <ul class="bulletList">
                         <li>Overhaul of the Result Import URLs page to be more user friendly and to better fit in with
@@ -46,7 +86,7 @@
                     </ul>
                     <h2 class="articleSubheadline">November 2019</h2>
                     <ul class="bulletList">
-                        <li>Added system property <tt>security.sharedAcrossSubdomains</tt> which can be used to
+                        <li>Added system property <tt>security.sharedAcrossSubdomainsOf</tt> which can be used to
                             configure the security service as shared across several subdomains of the parent
                             domain specified by the system property. Use, e.g., as in<pre>
                               -Dsecurity.sharedAcrossSubdomainsOf=sapsailing.com

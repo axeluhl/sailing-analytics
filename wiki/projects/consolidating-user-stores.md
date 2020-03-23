@@ -27,7 +27,7 @@ To figure out which databases are active and then classify them into those to be
 There are a few dedicated server instances with their DBs:
 * ARCHIVE, DB ``dbserver.internal.sapsailing.com:10201/winddb``
 * AST (Australian Sailing Team), DB ``ast.sapsailing.com:27017/AST`` backed up to ``dbserver.internal.sapsailing.com:10202/AST``
-* The DBs of all instances running on "SL Multi-Instance Kiel" (we should check if we could take this opportunity to shut down those that are still entirely empty): bartlomiejkapusta benjaminalhadef ditlevleth emilienpochet filip frederiksivertsen guentherpachschwoell gustavhultgren hinnerksiemsen janekbalster jassiskogman joanameyerduro jyrikuivalainen konradlipski lukasgrallert mandy marcusbaur martinmaursundrishovd oriolmahiques paulbakker peterwagner rolandregnemer tamarafischer thorbennowak thorechristiansen
+* The DBs of all instances running on "SL Multi-Instance Kiel" (we should check if we could take this opportunity to shut down those that are still entirely empty): bartlomiejkapusta benjaminalhadef ditlevleth emilienpochet filip first-seascape-germany frederiksivertsen guentherpachschwoell gustavhultgren hinnerksiemsen janekbalster jassiskogman joanameyerduro jyrikuivalainen konradlipski lukasgrallert mandy marcusbaur martinmaursundrishovd oriolmahiques paulbakker peterwagner rolandregnemer tamarafischer thorbennowak thorechristiansen
 * The DBs of all instances running on "SL Multi-Instance Sailing Server NVMe" (we should check if we could take this opportunity to shut down those that are still entirely empty): AARHUSSEJLKLUB abeam-training alarie505 ASVIA baldeneysee BYC d-labs DUTCH_FEDERATION ess-team-training formula18 galvestaure HNV hsc-womensteam irishdbscdw3 ISR JOJOPOLGAR jonaswitt KBSC KJSCS KSSS kyc LYC mdf my NOR oakcliff phoenix PMYC RDSAILING rheinwoche2019 SAILCANADA SAILINGACADEMY sailracer Sailtracks schadewaldt schanzenberg schwielochsee seascape SEGELZENTRUM SINGAPORESAILING SITGES SRN SRV SSC SSV STARLAB TracTracTest ubilabs-test USSAILING VSAW YCL
 
 bartlomiejkapusta is empty. Removing. benjaminalhadef is largely empty. Removing. mandy is basically empty. Removing. filip is empty. Removing. thorbennowak empty. Removing. lukasgrallert basically empty. Removing. konradlipski only imported old stuff. Removing. gustavhultgren was not even started and had only one old test event. Removing. oriolmahiques has only empty events. Removing. thorechristiansen empty other than Bundesliga imports. Removing. tamarafischer basically empty. Removing. emilienpochet contains only empty events. Removing. paulbakker empty, removing. guentherpachschwoell only has league imports. Removing. rolandregnemer empty; removing. ditlevleth empty; removing. frederiksivertsen empty; removing. jassiskogman empty; removing. jyrikuivalainen empty; removing. martinmaursundrishovd empty; removing. The janekbalster and peterwagner DBs have remained, and their server instances have now been moved to the common multi-instance server. The "SL Multi-Instance Kiel" server has been terminated by now. YCL is completely empty. Removed.
@@ -43,6 +43,7 @@ So the list of remaining active, non-isolated server database names other than `
 * baldeneysee
 * BYC
 * DUTCH_FEDERATION
+* first-seascape-germany
 * formula18
 * galvestaure
 * HNV
@@ -328,3 +329,71 @@ Merging two ``AccessControlList`` objects considers the groups and the permissio
 ## Open Issues
 
 Should we implement a migration of Local Storage properties? If a server is configured to use a cross-domain storage and under the application origin's local storage there exist one or more properties, should we make an effort to copy those into the shared cross-domain storage? How to resolve conflicts there?
+
+## The Actual Merging Process
+
+There is a new server instance ``security-service.sapsailing.com`` with MongoDB ``mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/security_service?replicaSet=live&retryWrites=true``. The initial contents of the DB were the copies of the security-related collections as taken from the ``ARCHIVE`` server, with DB connectivity string ``mongodb://dbserver.internal.sapsailing.com:10201/winddb?replicaSet=archive&retryWrites=true``. This process is encoded in the script ``dbserver.internal.sapsailing.com:/var/lib/mongodb/security_service/copyarchivestore.sh``. A copy of this script can also be found in git under ``configuration/``. It uses the scripts ``export_security.sh`` and ``import_security.sh`` which are found in the same directory, respectively.
+
+An exported JAR file based on a launch configuration (``MergeSecurityAndAccessControlStores.launch``) for the ``SecurityStoreMerger`` class has been placed under ``dbserver.internal.sapsailing.com:/var/lib/mongodb/security_service``. To merge, e.g., the ``VSAW`` database, use the following command:
+
+```
+      java -Dmongo.uri="mongodb://localhost:10203/security_service?replicaSet=live&retryWrites=true" -Ddefault.tenant.name=ARCHIVE-server -jar SecurityStoreMerger.jar "mongodb://localhost:10203/VSAW?replicaSet=live&retryWrites=true" VSAW-server 2>&1 | tee storemerge_VSAW.log      
+```
+
+The log output is stored in the ``storemerge_VSAW.log`` file which may contain WARNINGs or even Exceptions. Search for those in the log and do some plausibility checks. You may also restart the security-service.sapsailing.com instance to use its AdminConsole for checking the results and comparing with the server from which the security-related information was imported.
+
+Then, repeat for more server DBs that you'd like to import. This may be scripted, at least for all DBs from the ``live`` replica set, as follows:
+
+```
+        for DB in VSAW SEASCAPE ...; do
+                java -Dmongo.uri="mongodb://localhost:10203/security_service?replicaSet=live&retryWrites=true" -Ddefault.tenant.name=ARCHIVE-server -jar SecurityStoreMerger.jar "mongodb://localhost:10203/${DB}?replicaSet=live&retryWrites=true" ${DB}-server 2>&1 | tee storemerge_${DB}.log
+        done
+```
+
+Likewise, those DBs that are not hosted on the ``live`` MongoDB replica set but on the MongoDB "archive" instance running on port 10202, the following would be the script:
+
+```
+        for DB in SSC SRV ...; do
+                java -Dmongo.uri="mongodb://localhost:10203/security_service?replicaSet=live&retryWrites=true" -Ddefault.tenant.name=ARCHIVE-server -jar SecurityStoreMerger.jar "mongodb://localhost:10202/${DB}" ${DB}-server 2>&1 | tee storemerge_${DB}.log
+        done
+```
+There are three files describing the DBs in question:
+* ``list-of-archive-dbs`` has those DBs available on ``dbserver.internal.sapsailing.com:10202``
+* ``list-of-live-dbs`` has those DBs available on ``mongodb://localhost:10203/security_service?replicaSet=live&retryWrites=true``
+* ``list-of-dbs-to-merge`` has the list of DBs we want to merge, taken from the list at the beginning of this document
+
+We now need to find each element from ``list-of-dbs-to-merge`` first in ``list-of-live-dbs`` and if it's not there, then in ``list-of-archive-dbs``. If a DB to merge cannot be found in either one then that's an error. There is the script ``dbserver.internal.sapsailing.com:/var/lib/mongodb/security_service/mergedbs.sh`` which enumerates all DBs to merge, looks them up in the archive and live DB lists and based on that decides which merge command to use. All logs wil be written to ``dbserver.internal.sapsailing.com:/var/lib/mongodb/security_service/storemerge_....log``. This script can be executed after the initial filling of the security_service DB that was done by the ``copyarchivestore.sh`` command.
+
+So the total sequence of commands for running the entire import/merge process is:
+
+```
+        ssh -A root@dbserver.internal.sapsailing.com
+        cd /var/lib/mongodb/security_service
+        ./copyarchivestore.sh
+        ./mergedbs.sh
+```
+This produces all ``storemerge_....log`` files and a merge result in the ``mongodb://localhost:10203/security_service?replicaSet=live&retryWrites=true`` database. Again, search for WARNING and Exception in the logs, understand dropped objects and do some spot checks. Also validate by launching the ``security-service.sapsailing.com`` server and inspect security-related objects in the AdminConsole.
+
+### Updating the server instances
+
+The first step is to restart the security-service.sapsailing.com instance based on the new DB. It uses the following configuration options in its env.sh to expose the shared services:
+
+```
+ADDITIONAL_JAVA_ARGS=... -Dsecurity.sharedAcrossSubdomainsOf=sapsailing.com -Dsecurity.baseUrlForCrossDomainStorage=https://security-service.sapsailing.com -Dgwt.acceptableCrossDomainStorageRequestOriginRegexp=https?://(.*\.)?sapsailing\.com(:[0-9]*)?$
+REPLICATION_CHANNEL=security_service
+```
+
+A new user ``security-service-replicator`` has been added that has replication permissions for the ``security-service`` server. Other servers need to obtain an access token for that user and add it in their startup options as follows:
+
+```
+ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Dsecurity.sharedAcrossSubdomainsOf=sapsailing.com -Dsecurity.baseUrlForCrossDomainStorage=https://security-service.sapsailing.com -Dgwt.acceptableCrossDomainStorageRequestOriginRegexp=https?://(.*\.)?sapsailing\.com(:[0-9]*)?$"
+REPLICATE_ON_START=com.sap.sse.security.impl.SecurityServiceImpl,com.sap.sailing.shared.server.impl.SharedSailingDataImpl
+REPLICATE_MASTER_SERVLET_HOST=security-service.sapsailing.com
+REPLICATE_MASTER_SERVLET_PORT=443
+REPLICATE_MASTER_EXCHANGE_NAME=security_service
+REPLICATE_MASTER_BEARER_TOKEN="..."
+```
+
+The bearer token can be obtained by logging on as user ``security-service-replicator`` to ``https://security-service.sapsailing.com`` and then getting the access token from ``https://security-service.sapsailing.com/security/api/restsecurity/access_token``. Ask one of j.hamann@sailtracks.tv, alessandro.stoltenberg@sap.com and axel.uhl@sap.com for the user credentials. Of course, any other user that has permissions  ``SERVER:REPLICATE:security-service`` and ``SERVER:READ_REPLICATOR:security-service`` can do the same, so a user may also ask someone who has the premissions required to transfer the permissions to another user.
+
+These properties have now been appended to the env.sh files of the existing servers on the multi-instance set-up (including swisstimingtest, sailtracks, and tractractest). 

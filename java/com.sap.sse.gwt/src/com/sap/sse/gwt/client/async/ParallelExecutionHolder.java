@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.client;
+package com.sap.sse.gwt.client.async;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
@@ -42,12 +42,12 @@ public abstract class ParallelExecutionHolder {
     }
 
     /**
-     * Called only when all parallel callbacks have been completed.
+     * Called only when all parallel callbacks have been completed successfully
      */
     protected abstract void handleSuccess();
 
     /**
-     * Called when one of the parallel callbacks has returned with a failure.
+     * Called when one of the parallel callbacks has returned with a failure
      */
     protected abstract void handleFailure(Throwable t);
 }

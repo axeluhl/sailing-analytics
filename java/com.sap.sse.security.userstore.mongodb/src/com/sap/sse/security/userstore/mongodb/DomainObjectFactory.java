@@ -47,7 +47,7 @@ public interface DomainObjectFactory {
      * @param userGroupProvider
      *            a way for the user object that will be created to dynamically obtain the user groups to which it
      *            belongs
-     * @return the user objects returned have dummy objects for their {@link SecurityUser#getDefaultTenant() default
+     * @return the user objects returned have dummy objects for their {@link SecurityUser#getServerGroup() default
      *         tenant} and for their {@link SecurityUser#getRoles() roles} attribute which need to be replaced by the
      *         caller once the {@link Tenant} objects and all user objects have been loaded from the DB. The only field
      *         that is set correctly in those dummy {@link Tenant} objects is their {@link Tenant#getId() ID} field. The

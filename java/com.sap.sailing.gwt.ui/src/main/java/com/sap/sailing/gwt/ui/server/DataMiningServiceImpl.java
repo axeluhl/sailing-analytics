@@ -49,23 +49,23 @@ import com.sap.sse.datamining.shared.impl.dto.StoredDataMiningQueryDTOImpl;
 import com.sap.sse.datamining.ui.client.DataMiningService;
 import com.sap.sse.gwt.server.ProxiedRemoteServiceServlet;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
+import com.sap.sse.replication.FullyInitializedReplicableTracker;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
-import com.sap.sse.util.ServiceTrackerFactory;
 
 public class DataMiningServiceImpl extends ProxiedRemoteServiceServlet implements DataMiningService {
     private static final long serialVersionUID = -7951930891674894528L;
 
     private final BundleContext context;
     private final ServiceTracker<DataMiningServer, DataMiningServer> dataMiningServerTracker;
-    private final ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
+    private final FullyInitializedReplicableTracker<SecurityService> securityServiceTracker;
     private final StoredDataMiningQueryPersister storedDataMiningQueryPersistor;
     private final DataMiningDTOFactory dtoFactory;
 
     public DataMiningServiceImpl() {
         context = Activator.getDefault();
         dataMiningServerTracker = createAndOpenDataMiningServerTracker(context);
-        securityServiceTracker = ServiceTrackerFactory.createAndOpen(context, SecurityService.class);
+        securityServiceTracker = FullyInitializedReplicableTracker.createAndOpen(context, SecurityService.class);
         storedDataMiningQueryPersistor = new StoredDataMiningQueryPersisterImpl(getSecurityService(),
                 dataMiningServerTracker);
         dtoFactory = new DataMiningDTOFactory();
@@ -84,7 +84,11 @@ public class DataMiningServiceImpl extends ProxiedRemoteServiceServlet implement
     }
 
     private SecurityService getSecurityService() {
-        return securityServiceTracker.getService();
+        try {
+            return securityServiceTracker.getInitializedService(0);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

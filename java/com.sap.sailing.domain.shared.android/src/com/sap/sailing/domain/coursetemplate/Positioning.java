@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.coursetemplate;
 
+import java.io.Serializable;
+
 import com.sap.sailing.domain.common.DeviceIdentifier;
 
 /**
@@ -9,6 +11,6 @@ import com.sap.sailing.domain.common.DeviceIdentifier;
  * @author Axel Uhl (D043530)
  *
  */
-public interface Positioning {
+public interface Positioning extends Serializable {
     <T> T accept(PositioningVisitor<T> visitor);
 }

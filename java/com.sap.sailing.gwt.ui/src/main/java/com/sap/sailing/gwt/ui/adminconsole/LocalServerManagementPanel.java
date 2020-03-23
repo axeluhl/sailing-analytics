@@ -61,15 +61,12 @@ public class LocalServerManagementPanel extends SimplePanel {
         this.userService = userService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
-
         final Panel mainPanel = new VerticalPanel();
         setWidget(mainPanel);
         mainPanel.setWidth("100%");
-
         mainPanel.add(this.buttonPanel = createServerActionsUi(userService));
         mainPanel.add(createServerInfoUI());
         mainPanel.add(createServerConfigurationUI());
-
         refreshServerConfiguration();
     }
 
@@ -150,7 +147,7 @@ public class LocalServerManagementPanel extends SimplePanel {
         });
     }
 
-    private void refreshServerConfiguration() {
+    void refreshServerConfiguration() {
         sailingService.getServerConfiguration(new RefreshAsyncCallback<>(this::updateServerConfiguration));
     }
 
@@ -164,7 +161,6 @@ public class LocalServerManagementPanel extends SimplePanel {
         final boolean hasUserOwner = ownership != null && ownership.getUserOwner() != null;
         groupOwnerInfo.setText(hasGroupOwner ? ownership.getTenantOwner().getName() : "---");
         userOwnerInfo.setText(hasUserOwner ? ownership.getUserOwner().getName() : "---");
-
         // Update changeability
         isSelfServiceServerCheckbox.setEnabled(userService.hasCurrentUserMetaPermission(
                 serverInfo.getIdentifier().getPermission(ServerActions.CREATE_OBJECT), serverInfo.getOwnership()));
@@ -175,7 +171,6 @@ public class LocalServerManagementPanel extends SimplePanel {
     private void updateServerConfiguration(ServerConfigurationDTO result) {
         isStandaloneServerCheckbox.setValue(result.isStandaloneServer(), false);
         isStandaloneServerCheckbox.setEnabled(true);
-
         isPublicServerCheckbox.setValue(result.isPublic(), false);
         isSelfServiceServerCheckbox.setValue(result.isSelfService(), false);
     }

@@ -306,27 +306,27 @@ public class CountryCodeFactoryImpl implements CountryCodeFactory {
 
     @Override
     public CountryCode getFromIANAInternet(String ianaInternet) {
-        return byIanaInternet.get(ianaInternet.toLowerCase());
+        return ianaInternet==null?null:byIanaInternet.get(ianaInternet.toLowerCase());
     }
 
     @Override
     public CountryCode getFromUNVehicle(String unVehicle) {
-        return byUNVehicle.get(unVehicle.toUpperCase());
+        return unVehicle==null?null:byUNVehicle.get(unVehicle.toUpperCase());
     }
 
     @Override
     public CountryCode getFromThreeLetterISOName(String threeLetterISOName) {
-        return byThreeLetterISOName.get(threeLetterISOName.toUpperCase());
+        return threeLetterISOName==null?null:byThreeLetterISOName.get(threeLetterISOName.toUpperCase());
     }
 
     @Override
     public CountryCode getFromThreeLetterIOCName(String threeLetterIOCName) {
-        return byThreeLetterIOCName.get(threeLetterIOCName.toUpperCase());
+        return threeLetterIOCName==null?null:byThreeLetterIOCName.get(threeLetterIOCName.toUpperCase());
     }
 
     @Override
     public CountryCode getFromTwoLetterISOName(String twoLetterISOName) {
-        return byTwoLetterISOName.get(twoLetterISOName.toUpperCase());
+        return twoLetterISOName==null?null:byTwoLetterISOName.get(twoLetterISOName.toUpperCase());
     }
 
     @Override

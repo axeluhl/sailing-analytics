@@ -71,6 +71,16 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
      * allowance in sec/nm.
      */
     private final UnivariateDifferentiableFunction functionImpliedWindInKnotsToAverageSpeedInKnotsForCourse;
+    
+    /**
+     * The {@link ORCCertificate#getTrueWindAngles()} from the certificate
+     */
+    private final Bearing[] trueWindAngles;
+
+    /**
+     * The {@link ORCCertificate#getTrueWindSpeeds()} from the certificate
+     */
+    private final Speed[] trueWindSpeeds;
 
     /**
      * Accepts the simplified polar data, one "column" for each of the defined true wind speeds, where each column is a
@@ -79,6 +89,8 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
      */
     public ORCPerformanceCurveImpl(ORCCertificate certificate, ORCPerformanceCurveCourse course) throws FunctionEvaluationException {
         this.course = course;
+        this.trueWindAngles = certificate.getTrueWindAngles();
+        this.trueWindSpeeds = certificate.getTrueWindSpeeds();
         functionImpliedWindInKnotsToAverageSpeedInKnotsForCourse = createPerformanceCurve(certificate);
     }
 
@@ -100,8 +112,8 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
      */
     private UnivariateDifferentiableFunction createPerformanceCurve(ORCCertificate certificate) throws FunctionEvaluationException {
         final Map<Speed, Duration> allowancesForCoursePerTrueWindSpeed = createAllowancesPerCourse(certificate);
-        double[] xs = new double[ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS.length+2];
-        double[] ys = new double[ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS.length+2];
+        double[] xs = new double[certificate.getTrueWindSpeeds().length+2];
+        double[] ys = new double[certificate.getTrueWindSpeeds().length+2];
         int i = 0;
         xs[i] = 0; // see original Pascal code; the first "knot" is set to (0.0, 0.0)
         ys[i] = 0;
@@ -142,7 +154,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
         for (final ORCPerformanceCurveLeg leg : course.getLegs()) {
             allowancesPerLeg.put(leg, createAllowancePerLeg(leg, certificate));
         }
-        for (final Speed tws : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS) {
+        for (final Speed tws : certificate.getTrueWindSpeeds()) {
             Duration allowancePerTws = new SecondsDurationImpl(0);
             for (final ORCPerformanceCurveLeg leg : course.getLegs()) {
                 allowancePerTws = allowancePerTws.plus(allowancesPerLeg.get(leg).get(tws));
@@ -168,7 +180,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
         
         switch (leg.getType()) {
         case TWA:
-            for (final Speed tws : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS) {
+            for (final Speed tws : certificate.getTrueWindSpeeds()) {
                 // Case switching on TWA (0. TWA == 0; 1. TWA < Beat; 2. Beat < TWA < Gybe; 3. Gybe < TWA; 4. TWA == 180)
                 if (leg.getTwa().abs().compareTo(beatAngles.get(tws)) <= 0) {
                     // Case 0 & 1 - result = beatVMG * distance * cos(TWA)
@@ -186,23 +198,23 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
             }
             break;
         case CIRCULAR_RANDOM:
-            for (final Speed tws : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS) {
+            for (final Speed tws : certificate.getTrueWindSpeeds()) {
                 result.put(tws, certificate.getCircularRandomSpeedPredictions().get(tws).getDuration(leg.getLength()));
             }
             break;
         case LONG_DISTANCE:
-            for (final Speed tws : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS) {
+            for (final Speed tws : certificate.getTrueWindSpeeds()) {
                 result.put(tws, certificate.getLongDistanceSpeedPredictions().get(tws).getDuration(leg.getLength()));
             }
             break;
         case WINDWARD_LEEWARD:
         case WINDWARD_LEEWARD_REAL_LIVE:
-            for (final Speed tws : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS) {
+            for (final Speed tws : certificate.getTrueWindSpeeds()) {
                 result.put(tws, certificate.getWindwardLeewardSpeedPrediction().get(tws).getDuration(leg.getLength()));
             }
             break;
         case NON_SPINNAKER:
-            for (final Speed tws : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS) {
+            for (final Speed tws :certificate.getTrueWindSpeeds()) {
                 result.put(tws, certificate.getNonSpinnakerSpeedPredictions().get(tws).getDuration(leg.getLength()));
             }
             break;
@@ -216,7 +228,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
      */
     private double[][] createPolarsPerTrueWindSpeed(Speed trueWindSpeed, Map<Speed, Map<Bearing, Speed>> reachingSpeedPredictionsPerTrueWindSpeedAndAngle,
             Map<Speed, Bearing> beatAngles, Map<Speed, Speed> beatVMGPredictionPerTrueWindSpeed,
-            Map<Speed, Bearing> runAngles, Map<Speed, Speed> runVMGPredictionPerTrueWindSpeed) {
+            Map<Speed, Bearing> runAngles, Map<Speed, Speed> runVMGPredictionPerTrueWindSpeed, Bearing[] trueWindAngles) {
         ArrayList<Double> resultWindAngles = new ArrayList<>();
         ArrayList<Double> resultSpeedsOverGroundInKnots = new ArrayList<>();
         Bearing beatAngle = beatAngles.get(trueWindSpeed);
@@ -228,7 +240,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
         resultSpeedsOverGroundInKnots.add(beatVMGPredictionPerTrueWindSpeed.get(trueWindSpeed).getKnots() / Math.cos(beatAngle.add(MINUS_TWO_DEGREES).getRadians()));
         resultWindAngles.add(beatAngle.getDegrees());
         resultSpeedsOverGroundInKnots.add(beatVMGPredictionPerTrueWindSpeed.get(trueWindSpeed).getKnots() / Math.cos(beatAngle.getRadians()));
-        for (final Bearing twa : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_ANGLES) {
+        for (final Bearing twa : trueWindAngles) {
             if (twa.compareTo(beatAngle) > 0 && twa.compareTo(runAngle) < 0) {
                 resultWindAngles.add(twa.getDegrees());
                 resultSpeedsOverGroundInKnots.add(reachingSpeedPredictionsPerTrueWindSpeedAndAngle.get(trueWindSpeed).get(twa).getKnots());
@@ -251,14 +263,14 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
     @Override
     public Speed getImpliedWind(Duration durationToCompleteCourse) throws MaxIterationsExceededException, FunctionEvaluationException{
         final Speed averageSpeedOnCourse = getCourse().getTotalLength().inTime(durationToCompleteCourse);
-        final double[] predictedSpeedsInKnotsForTotalCourseByTrueWindSpeed = Arrays.stream(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS).mapToDouble
+        final double[] predictedSpeedsInKnotsForTotalCourseByTrueWindSpeed = Arrays.stream(trueWindSpeeds).mapToDouble
                 (tws->{ return functionImpliedWindInKnotsToAverageSpeedInKnotsForCourse.value(tws.getKnots()); }).toArray();
         final Speed result;
         // Corner cases for Allowance > Allowance(20kt) or Allowance < Allowance(6kt)
         if (averageSpeedOnCourse.getKnots() >= predictedSpeedsInKnotsForTotalCourseByTrueWindSpeed[predictedSpeedsInKnotsForTotalCourseByTrueWindSpeed.length-1]) {
-            result = ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS.length-1];
+            result = trueWindSpeeds[trueWindSpeeds.length-1];
         } else if (averageSpeedOnCourse.equals(Speed.NULL) || averageSpeedOnCourse.getKnots() <= predictedSpeedsInKnotsForTotalCourseByTrueWindSpeed[0]) {
-            result = ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[0];
+            result = trueWindSpeeds[0];
         } else {
             // find the polynomial splined function that produces the durationToCompleteCourse within its validity range
             int i = 1; // skip the auxiliary spline segment from (0.0, 0.0) to (6.0, ...)
@@ -272,7 +284,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
             final UnivariateDifferentiableFunction targetZeroFunction = FunctionUtils.add(functionImpliedWindInKnotsToAverageSpeedInKnotsForCourse,
                     FunctionUtils.multiply((UnivariateDifferentiableFunction) averageSpeedInKnots,
                             (UnivariateDifferentiableFunction) new Constant(-1)));
-            final double impliedWindSpeedInKnots = newtonSolver.solve(1000, targetZeroFunction, 10 /* knots of true wind speed */);
+            final double impliedWindSpeedInKnots = newtonSolver.solve(1000, targetZeroFunction, 12 /* knots of true wind speed */);
             result = new KnotSpeedImpl(impliedWindSpeedInKnots);
         }
         return result;
@@ -294,9 +306,18 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
             Map<Speed, Bearing> beatAngles, Map<Speed, Speed> beatVMGPredictionPerTrueWindSpeed,
             Map<Speed, Bearing> runAngles, Map<Speed, Speed> runVMGPredictionPerTrueWindSpeed, Speed trueWindSpeed,
             Bearing trueWindAngle) throws FunctionEvaluationException, IllegalArgumentException {
+        return getLagrangeSpeedPredictionForTrueWindSpeedAndAngle(twaAllowances, beatAngles,
+                beatVMGPredictionPerTrueWindSpeed, runAngles, runVMGPredictionPerTrueWindSpeed, trueWindSpeed,
+                trueWindAngle, trueWindAngles);
+    }
+    
+    public Speed getLagrangeSpeedPredictionForTrueWindSpeedAndAngle(Map<Speed, Map<Bearing, Speed>> twaAllowances,
+            Map<Speed, Bearing> beatAngles, Map<Speed, Speed> beatVMGPredictionPerTrueWindSpeed,
+            Map<Speed, Bearing> runAngles, Map<Speed, Speed> runVMGPredictionPerTrueWindSpeed, Speed trueWindSpeed,
+            Bearing trueWindAngle, Bearing[] trueWindAngles) throws FunctionEvaluationException, IllegalArgumentException {
         final Speed result;
         double[][] polarPoints = createPolarsPerTrueWindSpeed(trueWindSpeed, twaAllowances, beatAngles,
-                beatVMGPredictionPerTrueWindSpeed, runAngles, runVMGPredictionPerTrueWindSpeed);
+                beatVMGPredictionPerTrueWindSpeed, runAngles, runVMGPredictionPerTrueWindSpeed, trueWindAngles);
         double[] twaPolarPoints = polarPoints[0];
         double[] speedsOverGroundInKnotsPolarPoints = polarPoints[1];
         int i = -1; // after the loop, i equals the next higher available polar data for the given TWA
@@ -330,9 +351,9 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
      * the {@link #course} (which may be a prefix of a longer course) at the true wind speed provided to the resulting
      * map as the key. Iteration order is in ascending true wind speeds.
      */
-    public LinkedHashMap<Speed, Duration> getAllowancesPerTrueWindSpeedsForCourse() throws ArgumentOutsideDomainException {
+    private LinkedHashMap<Speed, Duration> getAllowancesPerTrueWindSpeedsForCourse() throws ArgumentOutsideDomainException {
         final LinkedHashMap<Speed, Duration> result = new LinkedHashMap<>();
-        for (final Speed tws : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS) {
+        for (final Speed tws : trueWindSpeeds) {
             result.put(tws, getAllowancePerCourse(tws));
         }
         return result;
@@ -354,7 +375,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
             result.append(e.getKey());
             result.append(':');
             final Speed averageSpeed = getCourse().getTotalLength().inTime(e.getValue());
-            result.append(averageSpeed.getDuration(ORCCertificateImpl.NAUTICAL_MILE).asSeconds());
+            result.append(averageSpeed.getDuration(ORCCertificate.NAUTICAL_MILE).asSeconds());
             result.append("s/NM, ");
             result.append(e.getValue().asSeconds());
             result.append("s total; ");

@@ -18,6 +18,7 @@ import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -25,6 +26,7 @@ import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -40,7 +42,9 @@ import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.datepicker.client.DateBox;
+import com.sap.sse.common.Color;
 import com.sap.sse.common.Util;
+import com.sap.sse.gwt.client.ColorTextBox;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.controls.GenericListBox;
 import com.sap.sse.gwt.client.controls.GenericListBox.ValueBuilder;
@@ -62,7 +66,7 @@ public abstract class DataEntryDialog<T> {
     private Validator<T> validator;
     private final Button okButton;
     private final Button cancelButton;
-    private final Label statusLabel;
+    private final HTML statusLabel;
     private final FlowPanel panelForAdditionalWidget;
     private final DockPanel buttonPanel;
     private final FlowPanel rightButtonPanel;
@@ -124,7 +128,7 @@ public abstract class DataEntryDialog<T> {
         okButton.ensureDebugId("OkButton");
         FlowPanel dialogFPanel = new FlowPanel();
         dialogFPanel.setWidth("100%");
-        statusLabel = new Label();
+        statusLabel = new HTML(SafeHtmlUtils.fromSafeConstant("&nbsp;"));
         statusLabel.ensureDebugId("StatusLabel");
         dialogFPanel.add(statusLabel);
         if (message != null) {
@@ -210,11 +214,11 @@ public abstract class DataEntryDialog<T> {
                         onInvalidStateChanged(invalidState);
                     }
                     if (!invalidState) {
-                        getStatusLabel().setText("");
+                        statusLabel.setHTML(SafeHtmlUtils.fromSafeConstant("&nbsp;"));
                         onChange(result);
                     } else {
-                        getStatusLabel().setText(errorMessage);
-                        getStatusLabel().setStyleName("errorLabel");
+                        statusLabel.setHTML(SafeHtmlUtils.fromString(errorMessage));
+                        statusLabel.setStyleName("errorLabel");
                     }
                 }
             }, validationExecutor);
@@ -232,16 +236,6 @@ public abstract class DataEntryDialog<T> {
     }
 
     protected abstract T getResult();
-
-    /**
-     * Creates a text box with a key-up listener attached which ensures the value is updated after each
-     * key-up event and the entire dialog is {@link #validateAndUpdate() validated} in this case.
-     * 
-     * @param initialValue initial value to show in text box; <code>null</code> is permissible
-     */
-    public TextBox createTextBox(String initialValue) {
-        return createTextBoxInternal(initialValue, 30);
-    }
 
     /**
      * This methods creates a {@link MultiWordSuggestOracle} where the given suggest values are
@@ -302,14 +296,31 @@ public abstract class DataEntryDialog<T> {
      * key-up event and the entire dialog is {@link #validateAndUpdate() validated} in this case.
      * 
      * @param initialValue initial value to show in text box; <code>null</code> is permissible
+     */
+    public TextBox createTextBox(String initialValue) {
+        return createTextBox(initialValue, 30);
+    }
+    
+    /**
+     * Creates a text box with a key-up listener attached which ensures the value is updated after each
+     * key-up event and the entire dialog is {@link #validateAndUpdate() validated} in this case.
+     * 
+     * @param initialValue initial value to show in text box; <code>null</code> is permissible
      * @param visibleLength the visible length of the text box
      */
     public TextBox createTextBox(String initialValue, int visibleLength) {
-        return createTextBoxInternal(initialValue, visibleLength);
+        return configureTextBox(new TextBox(), initialValue, visibleLength);
     }
         
-    private TextBox createTextBoxInternal(String initialValue, int visibleLength) {
-        TextBox textBox = new TextBox();
+    public ColorTextBox createColorTextBox(Color initialValue) {
+        return createColorTextBox(initialValue, 30);
+    }
+    
+    public ColorTextBox createColorTextBox(Color initialValue, int visibleLength) {
+        return configureTextBox(new ColorTextBox(), initialValue == null ? null : initialValue.getAsHtml(), visibleLength);
+    }
+    
+    private <TextBoxType extends TextBox> TextBoxType configureTextBox(TextBoxType textBox, String initialValue, int visibleLength) {
         textBox.setVisibleLength(visibleLength);
         textBox.setText(initialValue == null ? "" : initialValue);
         DialogUtils.addFocusUponKeyUpToggler(textBox);
@@ -612,7 +623,7 @@ public abstract class DataEntryDialog<T> {
      * status label can be used to display status information within the dialog to the user
      */
     protected Label getStatusLabel() {
-        return statusLabel;
+        return (Label) statusLabel;
     }
 
     protected void setCursor(Style.Cursor cursor) {

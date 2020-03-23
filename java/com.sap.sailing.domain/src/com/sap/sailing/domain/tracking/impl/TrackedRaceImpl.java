@@ -3334,7 +3334,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             result = new LineDetailsImpl(timePoint, waypoint,
                     portMarkPositionWhileApproachingLine.getDistance(starboardMarkPositionWhileApproachingLine),
                     differenceToCombinedWind, advantageousSideWhileApproachingLine, distanceAdvantage,
-                    portMarkWhileApproachingLine, starboardMarkWhileApproachingLine);
+                    portMarkWhileApproachingLine, starboardMarkWhileApproachingLine,
+                    portMarkPositionWhileApproachingLine, starboardMarkPositionWhileApproachingLine);
         }
         return result;
     }

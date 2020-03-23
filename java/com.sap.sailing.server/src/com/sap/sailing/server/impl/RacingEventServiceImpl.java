@@ -52,6 +52,7 @@ import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.subject.Subject;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -130,6 +131,7 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
+import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.Wind;
@@ -186,7 +188,7 @@ import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
-import com.sap.sailing.domain.sharedsailingdata.SharedSailingData;
+import com.sap.sailing.domain.resultimport.ResultUrlProvider;
 import com.sap.sailing.domain.statistics.Statistics;
 import com.sap.sailing.domain.tracking.AddResult;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
@@ -206,15 +208,16 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaListener;
+import com.sap.sailing.domain.tracking.TrackingConnectorInfo;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTracker;
 import com.sap.sailing.domain.tracking.WindTrackerFactory;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
-import com.sap.sailing.domain.tracking.TrackingConnectorInfo;
 import com.sap.sailing.domain.windestimation.WindEstimationFactoryService;
 import com.sap.sailing.expeditionconnector.ExpeditionTrackerFactory;
+import com.sap.sailing.resultimport.ResultUrlRegistry;
 import com.sap.sailing.server.Replicator;
 import com.sap.sailing.server.anniversary.AnniversaryRaceDeterminatorImpl;
 import com.sap.sailing.server.anniversary.RaceChangeObserverForAnniversaryDetection;
@@ -282,6 +285,7 @@ import com.sap.sailing.server.statistics.StatisticsCalculator;
 import com.sap.sailing.server.statistics.TrackedRaceStatisticsCache;
 import com.sap.sailing.server.tagging.TaggingServiceFactory;
 import com.sap.sailing.server.util.EventUtil;
+import com.sap.sailing.shared.server.SharedSailingData;
 import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
@@ -305,6 +309,7 @@ import com.sap.sse.pairinglist.PairingFrameProvider;
 import com.sap.sse.pairinglist.PairingList;
 import com.sap.sse.pairinglist.PairingListTemplate;
 import com.sap.sse.pairinglist.PairingListTemplateFactory;
+import com.sap.sse.replication.FullyInitializedReplicableTracker;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.OperationWithResultWithIdWrapper;
@@ -313,6 +318,7 @@ import com.sap.sse.replication.OperationsToMasterSendingQueue;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
@@ -514,7 +520,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     private Set<OperationWithResultWithIdWrapper<?, ?>> operationsSentToMasterForReplication;
 
-    private boolean currentlyFillingFromInitialLoad = false;
+    private volatile boolean currentlyFillingFromInitialLoad;
     
     private ThreadLocal<Boolean> currentlyApplyingOperationReceivedFromMaster = ThreadLocal.withInitial(() -> false);
 
@@ -530,6 +536,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     
     private final AtomicInteger numberOfTrackedRacesRestored;
     
+    private final ServiceTracker<ResultUrlRegistry, ResultUrlRegistry> resultUrlRegistryServiceTracker;
+
+    private final ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> scoreCorrectionProviderServiceTracker;
+
     private transient final ConcurrentHashMap<Leaderboard, ScoreCorrectionListener> scoreCorrectionListenersByLeaderboard;
 
     private transient final ConcurrentHashMap<RaceDefinition, RaceTrackingConnectivityParameters> connectivityParametersByRace;
@@ -556,8 +566,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      */
     private OperationsToMasterSendingQueue unsentOperationsToMasterSender;
 
-    private ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
-
+    private final FullyInitializedReplicableTracker<SecurityService> securityServiceTracker;
+    
     private final CourseAndMarkConfigurationFactory courseAndMarkConfigurationFactory;
 
     /**
@@ -600,7 +610,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     public RacingEventServiceImpl(boolean clearPersistentCompetitorAndBoatStore, final TypeBasedServiceFinderFactory serviceFinderFactory, boolean restoreTrackedRaces) {
         this(clearPersistentCompetitorAndBoatStore, serviceFinderFactory, null, /* sailingNotificationService */ null,
-                /* trackedRaceStatisticsCache */ null, restoreTrackedRaces, null, /* sharedSailingDataTracker */ null);
+                /* trackedRaceStatisticsCache */ null, restoreTrackedRaces, null, /* sharedSailingDataTracker */ null, /* replicationServiceTracker */ null,
+                /* scoreCorrectionProviderServiceTracker */ null, /* resultUrlRegistryServiceTracker */ null);
     }
 
     /**
@@ -626,8 +637,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             final TypeBasedServiceFinderFactory serviceFinderFactory, TrackedRegattaListenerManager trackedRegattaListener,
             SailingNotificationService sailingNotificationService,
             TrackedRaceStatisticsCache trackedRaceStatisticsCache, boolean restoreTrackedRaces,
-            ServiceTracker<SecurityService, SecurityService> securityServiceTracker,
-            ServiceTracker<SharedSailingData, SharedSailingData> sharedSailingDataTracker) {
+            FullyInitializedReplicableTracker<SecurityService> securityServiceTracker,
+            FullyInitializedReplicableTracker<SharedSailingData> sharedSailingDataTracker, ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker,
+            ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> scoreCorrectionProviderServiceTracker,
+            ServiceTracker<ResultUrlRegistry, ResultUrlRegistry> resultUrlRegistryServiceTracker) {
         this((final RaceLogAndTrackedRaceResolver raceLogResolver) -> {
             return new ConstructorParameters() {
                 private final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE
@@ -658,7 +671,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             };
         }, MediaDBFactory.INSTANCE.getDefaultMediaDB(), null, null, serviceFinderFactory, trackedRegattaListener,
                 sailingNotificationService, trackedRaceStatisticsCache, restoreTrackedRaces,
-                securityServiceTracker, sharedSailingDataTracker);
+                securityServiceTracker, sharedSailingDataTracker, /* replicationServiceTracker */ null,
+                scoreCorrectionProviderServiceTracker, resultUrlRegistryServiceTracker);
     }
 
     private RacingEventServiceImpl(final boolean clearPersistentCompetitorStore, WindStore windStore,
@@ -691,9 +705,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                     return competitorStore;
                 }
             };
-        }, MediaDBFactory.INSTANCE.getDefaultMediaDB(), windStore, sensorFixStore, serviceFinderFactory, null,
-                sailingNotificationService, /* trackedRaceStatisticsCache */ null, restoreTrackedRaces, null,
-                /* sharedSailingDataTracker */ null);
+        }, MediaDBFactory.INSTANCE.getDefaultMediaDB(), windStore, sensorFixStore, serviceFinderFactory,
+                /* tracked regatta listener */ null,
+                sailingNotificationService, /* trackedRaceStatisticsCache */ null, restoreTrackedRaces,
+                /* security service tracker */ null, /* sharedSailingDataTracker */ null, /* replicationServiceTracker */ null,
+                /* scoreCorrectionProviderServiceTracker */ null, /* resultUrlRegistryServiceTracker */ null);
     }
 
     public RacingEventServiceImpl(final DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory,
@@ -720,8 +736,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                     return getBaseDomainFactory().getCompetitorAndBoatStore();
                 }
             };
-        }, mediaDB, windStore, sensorFixStore, null, null, /* sailingNotificationService */ null,
-                /* trackedRaceStatisticsCache */ null, restoreTrackedRaces, null, /* sharedSailingDataTracker */ null);
+        }, mediaDB, windStore, sensorFixStore, /* service finder factory */ null,
+                /* tracked regatta listener */ null, /* sailingNotificationService */ null,
+                /* trackedRaceStatisticsCache */ null, restoreTrackedRaces, /* security service tracker */ null,
+                /* sharedSailingDataTracker */ null, /* replicationServiceTracker */ null,
+                /* scoreCorrectionProviderServiceTracker */ null, /* resultUrlRegistryServiceTracker */ null);
     }
 
     /**
@@ -751,16 +770,23 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      *            will complete as soon as the securityServiceTracker is able to provide a SecurityService, NEVER hold a
      *            reference to the result of this, as it might become invalid if bundles are replaced/ restarted
      */
-    public RacingEventServiceImpl(Function<RaceLogAndTrackedRaceResolver, ConstructorParameters> constructorParametersProvider,
+    public RacingEventServiceImpl(
+            Function<RaceLogAndTrackedRaceResolver, ConstructorParameters> constructorParametersProvider,
             MediaDB mediaDb, final WindStore windStore, final SensorFixStore sensorFixStore,
             TypeBasedServiceFinderFactory serviceFinderFactory, TrackedRegattaListenerManager trackedRegattaListener,
             SailingNotificationService sailingNotificationService,
             TrackedRaceStatisticsCache trackedRaceStatisticsCache, boolean restoreTrackedRaces,
-            ServiceTracker<SecurityService, SecurityService> securityServiceTracker,
-            ServiceTracker<SharedSailingData, SharedSailingData> sharedSailingDataTracker) {
+            FullyInitializedReplicableTracker<SecurityService> securityServiceTracker,
+            FullyInitializedReplicableTracker<SharedSailingData> sharedSailingDataTracker,
+            ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker,
+            ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> scoreCorrectionProviderServiceTracker,
+            ServiceTracker<ResultUrlRegistry, ResultUrlRegistry> resultUrlRegistryServiceTracker) {
         logger.info("Created " + this);
+        this.currentlyFillingFromInitialLoad = false;
         this.securityServiceTracker = securityServiceTracker;
         this.numberOfTrackedRacesRestored = new AtomicInteger();
+        this.resultUrlRegistryServiceTracker = resultUrlRegistryServiceTracker;
+        this.scoreCorrectionProviderServiceTracker = scoreCorrectionProviderServiceTracker;
         this.scoreCorrectionListenersByLeaderboard = new ConcurrentHashMap<>();
         this.connectivityParametersByRace = new ConcurrentHashMap<>();
         this.notificationService = sailingNotificationService;
@@ -1007,6 +1033,13 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     public void ensureOwnerships() {
         SecurityService securityService = getSecurityService();
+        for (ResultUrlProvider resultUrlProvider : getAllUrlBasedScoreCorrectionProviders()) {
+            for (URL resultImportUrl : resultUrlProvider.getAllUrls()) {
+                QualifiedObjectIdentifier ident = SecuredDomainType.RESULT_IMPORT_URL.getQualifiedObjectIdentifier(
+                        new TypeRelativeObjectIdentifier(resultUrlProvider.getName(), resultImportUrl.toString()));
+                securityService.migrateOwnership(ident, ident.toString());
+            }
+        }
         securityService.assumeOwnershipMigrated(SecuredDomainType.RESULT_IMPORT_URL.getName());
         securityService.assumeOwnershipMigrated(SecuredDomainType.SIMULATOR.getName());
         securityService.assumeOwnershipMigrated(SecuredDomainType.FILE_STORAGE.getName());
@@ -3736,6 +3769,85 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         return mediaLibrary.allTracks();
     }
 
+    @Override
+    public Iterable<URL> getResultImportUrls(String resultProviderName) throws UnauthorizedException {
+        Optional<ResultUrlProvider> resultUrlProvider = getUrlBasedScoreCorrectionProvider(resultProviderName);
+        Optional<ResultUrlRegistry> resultUrlRegistry = getResultUrlRegistry();
+        if (resultUrlProvider.isPresent() && resultUrlRegistry.isPresent()) {
+            return resultUrlRegistry.get().getReadableResultUrls(resultUrlProvider.get().getName());
+        }
+        return null;
+    }
+
+    @Override
+    public void removeResultImportURLs(String resultProviderName, Set<URL> toRemove)
+            throws UnauthorizedException, Exception {
+        getUrlBasedScoreCorrectionProvider(resultProviderName).ifPresent(resultUrlProvider -> {
+            getResultUrlRegistry().ifPresent(resultUrlRegistry -> {
+                for (URL urlToRemove : toRemove) {
+                    getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(
+                            SecuredDomainType.RESULT_IMPORT_URL.getQualifiedObjectIdentifier(
+                                    new TypeRelativeObjectIdentifier(resultUrlProvider.getName(),
+                                            urlToRemove.toString())),
+                            () -> resultUrlRegistry.unregisterResultUrl(resultProviderName, urlToRemove));
+                }
+            });
+        });
+    }
+
+    @Override
+    public void addResultImportUrl(String resultProviderName, URL url) throws UnauthorizedException, Exception {
+        getUrlBasedScoreCorrectionProvider(resultProviderName).ifPresent(resultUrlProvider -> {
+            getResultUrlRegistry().ifPresent(resultUrlRegistry -> {
+                getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                        SecuredDomainType.RESULT_IMPORT_URL,
+                        new TypeRelativeObjectIdentifier(resultUrlProvider.getName(), url.toString()), url.toString(),
+                        () -> {
+                            resultUrlRegistry.registerResultUrl(resultProviderName, url);
+                        });
+            });
+        });
+    }
+
+    private Optional<ResultUrlRegistry> getResultUrlRegistry() {
+        if (resultUrlRegistryServiceTracker == null) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(resultUrlRegistryServiceTracker.getService());
+    }
+
+    @Override
+    public Optional<ResultUrlProvider> getUrlBasedScoreCorrectionProvider(String resultProviderName) {
+        for (ResultUrlProvider resultUrlProvider : getAllUrlBasedScoreCorrectionProviders()) {
+            if (resultUrlProvider.getName().equals(resultProviderName)) {
+                return Optional.of(resultUrlProvider);
+            }
+        }
+        return Optional.empty();
+    }
+
+    private Iterable<ResultUrlProvider> getAllUrlBasedScoreCorrectionProviders() {
+        List<ResultUrlProvider> result = new ArrayList<>();
+        for (ScoreCorrectionProvider scp : getAllScoreCorrectionProviders()) {
+            if (scp instanceof ResultUrlProvider) {
+                result.add((ResultUrlProvider) scp);
+            }
+        }
+        return result;
+    }
+
+    private Iterable<ScoreCorrectionProvider> getAllScoreCorrectionProviders() {
+        final ScoreCorrectionProvider[] services = scoreCorrectionProviderServiceTracker
+                .getServices(new ScoreCorrectionProvider[0]);
+        List<ScoreCorrectionProvider> result = new ArrayList<ScoreCorrectionProvider>();
+        if (services != null) {
+            for (final ScoreCorrectionProvider service : services) {
+                result.add(service);
+            }
+        }
+        return result;
+    }
+
     public String toString() {
         return "RacingEventService: " + this.hashCode() + " Build: " + ServerInfo.getBuildVersion();
     }
@@ -4671,13 +4783,18 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         return competitorWithBoat;
     }
 
-    @Override
     /**
      * This should only be used for replicable Operations that need access to the SecurityService, all other should
      * obtain the SecurityService in another way.
      */
+    @Override
     public SecurityService getSecurityService() {
-        return securityServiceTracker.getService();
+        try {
+            return securityServiceTracker.getInitializedService(0);
+        } catch (InterruptedException e) {
+            logger.severe("Interrupted while waiting for security service; returning null");
+            return null;
+        }
     }
     
     @Override

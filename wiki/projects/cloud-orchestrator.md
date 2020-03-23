@@ -75,6 +75,8 @@ When the archive server fails, a few people get an SMS/text message notification
 
 Alternatively, we could look at other mechanisms for implementing the fail-over functionality. For example, Apache can be configured in "balancer" mode where failover rules can be specified explicitly.
 
+Alternatively, consider looking at Elastic Beanstalk.
+
 #### No good approach for dynamic scale-up
 
 As a server fills up, be it the archive or an event server or a shared, multi-tenant server such as we currently run under my.sapsailing.com, the server resources may at some point not suffice to host more data. Moving scopes out of the server can be one approach, involving master data import and other less automated steps such as starting the tracking again for the races on the receiving side (we should consider sending and executing the RaceTrackingConnectivityParameters to the importing server, optionally restoring everything automatically). But in other cases, a scope may not be splittable and may already live in its dedicated replica set. In this case, the instances of the replica set must be scaled up.
@@ -84,6 +86,10 @@ Scaling up replicas is easy (add bigger replicas, terminate smaller replicas aft
 In other words, all updates need to be rejected for that replica set when the new master starts up. When the new master is ready, update requests will be accepted again and will be targeted to the new master. The old master can then be terminated. Since the new master will send updates into the same RabbitMQ fanout exchange, existing replicas will continue to receive updates after the master switch. If the replicas configured the HTTP channel to the master such that the new master is reached through the existing channel (e.g., through a load balancer's target group or an elastic IP or maybe some DNS configuration) then even "reverse replication" will continue to run smoothly. Replicas buffer reverse replication requests that cannot be delivered to the master currently, and they will try a re-send later.
 
 The problem with this approach is that the master re-start takes time, more so if the scope that needs to be loaded is bigger. For live scenarios this can easily be a show stopper. It would be much nicer if an existing replica could be turned into a master on the fly. It would have most in-memory content, so no long-running loading from the database would be required. But replicas currently have no consistent database state in their phony database, and they do not run any tracking connectors but receive updates only through the RabbitMQ queues. A replica would need to start all the active "trackers" including establishing connections to external systems such as the TracTrac system as well as the smartphone tracking listeners, and it would become the target of all update requests, similar to how a MongoDB can change a replica set member's role from SECONDARY to PRIMARY and have it accept write requests.
+
+#### No automated monitoring, alarms, notifications
+
+Today, we have to add alarms to the monitoring section of target groups and load balancers manually; something that people tend to forget and if alarms are put in place, forget to clean them up after dismantling event-specific infrastructure. Of course, notifications are only a poor means of getting the problems under control. Eventually, notifications and alarms should only accompany automated actions that aim at recovering from the failure without human interaction.
 
 #### Vast RAM requirements for "cold" storage
 

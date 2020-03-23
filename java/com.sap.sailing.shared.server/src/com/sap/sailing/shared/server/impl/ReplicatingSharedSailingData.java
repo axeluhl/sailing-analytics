@@ -11,12 +11,9 @@ import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.Positioning;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
-import com.sap.sailing.domain.sharedsailingdata.SharedSailingData;
-import com.sap.sse.replication.OperationWithResult;
-import com.sap.sse.replication.ReplicableWithObjectInputStream;
+import com.sap.sailing.shared.server.SharedSailingData;
 
-public interface ReplicatingSharedSailingData extends SharedSailingData,
-        ReplicableWithObjectInputStream<ReplicatingSharedSailingData, OperationWithResult<ReplicatingSharedSailingData, ?>> {
+public interface ReplicatingSharedSailingData extends SharedSailingData {
     
     Void internalCreateMarkRole(UUID idOfNewMarkRole, String name, String shortName);
 
