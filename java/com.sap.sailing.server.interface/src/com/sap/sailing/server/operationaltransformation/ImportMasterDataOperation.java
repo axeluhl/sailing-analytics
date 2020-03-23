@@ -58,6 +58,7 @@ import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.DummyTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceHandle;
+import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParametersHandler;
 import com.sap.sailing.domain.tracking.RaceTrackingHandler;
@@ -105,7 +106,6 @@ public class ImportMasterDataOperation extends
     
     public ImportMasterDataOperation(TopLevelMasterData topLevelMasterData, UUID importOperationId, boolean override,
             MasterDataImportObjectCreationCountImpl existingCreationCount, User user, UserGroup tenant) {
-
         this.creationCount = new MasterDataImportObjectCreationCountImpl();
         this.creationCount.add(existingCreationCount);
         this.masterData = topLevelMasterData;
@@ -583,8 +583,8 @@ public class ImportMasterDataOperation extends
     }
 
     private void ensureOwnership(QualifiedObjectIdentifier identifier, SecurityService securityService) {
-        logger.info( "Adopting " + identifier + " from Masterdataimport to " + user.getName() +
-                " and group " + (tenant==null?"null":tenant.getName()));
+        logger.info("Trying to adopting " + identifier + " from Masterdataimport to " + user.getName() +
+                " and group " + (tenant==null?"null":tenant.getName())+" if orphaned");
         securityService.setOwnershipIfNotSet(identifier, user, tenant);
     }
 
@@ -626,7 +626,12 @@ public class ImportMasterDataOperation extends
                 if (param != null) {
                     final RaceTrackingConnectivityParameters paramToStartTracking = serviceFinder.findService(param.getTypeIdentifier()).resolve(param);
                     RaceHandle raceHandle = toState.addRace(/* default */ null, paramToStartTracking, /* do not wait */ -1, handler);
-                    ensureOwnership(raceHandle.getTrackedRegatta().getTrackedRace(raceHandle.getRace()).getIdentifier(), securityService);
+                    final RaceDefinition race = raceHandle.getRace(RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
+                    if (race != null) {
+                        ensureOwnership(raceHandle.getTrackedRegatta().getTrackedRace(race).getIdentifier(), securityService);
+                    } else {
+                        logger.severe("Race for handle "+raceHandle+" didn't show in "+RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS+"ms; ownership not set");
+                    }
                 }
             }
         }
