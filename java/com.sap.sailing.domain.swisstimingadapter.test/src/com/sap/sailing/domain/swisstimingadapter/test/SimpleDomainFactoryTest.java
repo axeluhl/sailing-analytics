@@ -60,6 +60,7 @@ public class SimpleDomainFactoryTest {
     public void testUnknownBoatClassInValidRaceID() {
         DomainFactory domainFactory = DomainFactory.INSTANCE;
         final String raceID = "SAX920103";
+        @SuppressWarnings("serial")
         RaceDefinition raceDefinition = domainFactory.createRaceDefinition(domainFactory.getOrCreateDefaultRegatta(
                 EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE, raceID,
                 null /* boat class */, new RacingEventServiceImpl()), new Race() {
