@@ -249,7 +249,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     public MongoCollection<Document> getWindTrackCollection() {
         MongoCollection<Document> result = database.getCollection(CollectionNames.WIND_TRACKS.name());
-        result.createIndex(new Document(FieldNames.REGATTA_NAME.name(), 1));
+        DomainObjectFactoryImpl.ensureIndicesOnWindTracks(result);
         return result;
     }
 
