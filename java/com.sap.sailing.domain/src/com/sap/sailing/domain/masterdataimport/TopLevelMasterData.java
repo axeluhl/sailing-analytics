@@ -57,12 +57,12 @@ public class TopLevelMasterData implements Serializable {
     private final Map<LeaderboardGroup, Set<Event>> eventForLeaderboardGroup;
     private final Map<DeviceIdentifier, Set<Timed>> raceLogTrackingFixes;
     private final Iterable<DeviceConfiguration> deviceConfigurations;
-    private final Set<RaceTrackingConnectivityParameters> connectivityParameters;
+    private final Set<RaceTrackingConnectivityParameters> connectivityParametersToRestore;
 
     public TopLevelMasterData(final Set<LeaderboardGroup> groupsToExport, final Iterable<Event> allEvents,
             final Map<String, Regatta> regattaForRaceIdString, final Iterable<MediaTrack> allMediaTracks,
             SensorFixStore sensorFixStore, boolean exportWind,
-            Iterable<DeviceConfiguration> raceManagerDeviceConfigurations, final Set<RaceTrackingConnectivityParameters> connectivityParameters) {
+            Iterable<DeviceConfiguration> raceManagerDeviceConfigurations, final Set<RaceTrackingConnectivityParameters> connectivityParametersToRestore) {
         this.raceIdStringsForRegatta = convertToRaceIdStringsForRegattaMap(regattaForRaceIdString);
         this.leaderboardGroups = groupsToExport;
         this.raceLogTrackingFixes = getAllRelevantRaceLogTrackingFixes(sensorFixStore);
@@ -75,7 +75,7 @@ public class TopLevelMasterData implements Serializable {
         this.eventForLeaderboardGroup = createEventMap(groupsToExport, allEvents);
         this.filteredMediaTracks = new HashSet<MediaTrack>();
         filterMediaTracks(allMediaTracks, this.filteredMediaTracks);
-        this.connectivityParameters = connectivityParameters;
+        this.connectivityParametersToRestore = connectivityParametersToRestore;
     }
 
     private Map<DeviceIdentifier, Set<Timed>> getAllRelevantRaceLogTrackingFixes(SensorFixStore sensorFixStore) {
@@ -321,7 +321,7 @@ public class TopLevelMasterData implements Serializable {
         return deviceConfigurations;
     }
 
-    public Set<RaceTrackingConnectivityParameters> getConnectivityParameters() {
-        return connectivityParameters;
+    public Set<RaceTrackingConnectivityParameters> getConnectivityParametersToRestore() {
+        return connectivityParametersToRestore;
     }
 }

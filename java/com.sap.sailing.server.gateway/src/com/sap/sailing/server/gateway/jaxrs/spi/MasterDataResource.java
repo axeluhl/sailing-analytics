@@ -165,14 +165,9 @@ public class MasterDataResource extends AbstractSailingServerResource {
         for (MediaTrack mediaTrack : getService().getAllMediaTracks()) {
             mediaTracks.add(mediaTrack);
         }
-//        ArrayList<RaceTrackingConnectivityParameters> connectivityParametersToRestore = new ArrayList<>();
         Map<String, Regatta> regattaRaceIds = new HashMap<>();
         for (Entry<String, Regatta> regattaRaceMap : getService().getPersistentRegattasForRaceIDs().entrySet()) {
             regattaRaceIds.put(regattaRaceMap.getKey(), regattaRaceMap.getValue());
-            // TODO: Permission check needs to be implemented
-//            if (exportTrackedRacesAndStartTracking) {
-//                connectivityParametersToRestore.add(getService().getConnectivityParametersByRace().get(regattaRaceMap.getKey()));
-//            }
         }
         final TopLevelMasterData masterData = new TopLevelMasterData(groupsToExport,
                 events, regattaRaceIds, mediaTracks,

@@ -3,7 +3,6 @@ package com.sap.sailing.server.masterdata;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
@@ -21,7 +20,6 @@ import com.sap.sailing.domain.common.impl.MasterDataImportObjectCreationCountImp
 import com.sap.sailing.domain.masterdataimport.TopLevelMasterData;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.racelog.RaceLogStore;
-import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.operationaltransformation.ImportMasterDataOperation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
@@ -44,11 +42,10 @@ public class MasterDataImporter {
         this.racingEventService = racingEventService;
         this.user = user;
         this.tenant = tenant;
-
     }
 
     public void importFromStream(InputStream inputStream, UUID importOperationId, boolean override)
-            throws IOException, ClassNotFoundException, Exception {
+            throws IOException, ClassNotFoundException {
         ObjectInputStreamResolvingAgainstCache<DomainFactory> objectInputStream = racingEventService
                 .getBaseDomainFactory()
                 .createObjectInputStreamResolvingAgainstThisFactory(inputStream, new ResolveListener() {
@@ -95,38 +92,6 @@ public class MasterDataImporter {
                 regatta.setRegistrationLinkSecret(UUID.randomUUID().toString());
             }
         }
-        
-        // RaceTrackingConnectivityParameters de-serialization
-//        Thread.currentThread().setContextClassLoader(racingEventService.getCombinedMasterDataClassLoader());
-////        MongoObjectFactory mongoObjectFactory = racingEventService.getMongoObjectFactory();
-////        DomainObjectFactory domainObjectFactory = racingEventService.getDomainObjectFactory();
-////        TypeBasedServiceFinder<RaceTrackingConnectivityParametersHandler> serviceFinder = domainObjectFactory.getRaceTrackingConnectivityParamsServiceFinder();        
-////        WindStore windStore = MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory);
-//        ArrayList<RaceTrackingConnectivityParameters> connectivityParametersToRestore = (ArrayList<RaceTrackingConnectivityParameters>) objectInputStream.readObject();        
-////        for (RaceTrackingConnectivityParameters param : connectivityParametersToRestore) {
-////            final String typeIdentifier = param.getTypeIdentifier();
-////            final RaceTrackingConnectivityParametersHandler handler = serviceFinder.findService(typeIdentifier);
-////            final PermissionAwareRaceTrackingHandler raceTrackingHandler = new PermissionAwareRaceTrackingHandler(racingEventService.getSecurityService());
-////            switch (typeIdentifier) {
-////            case "TRAC_TRAC":
-////                assert param instanceof RaceTrackingConnectivityParametersImpl;
-////                final RaceTrackingConnectivityParametersImpl ttParam = (RaceTrackingConnectivityParametersImpl) handler.resolve(param);
-////                // racingEventService.addRace(/* addToRegatta==null means "default regatta" */ null, ttParam,
-////                // ttParam.getTimeoutInMillis(), raceTrackingHandler);
-////                // ttParam.createRaceTracker(racingEventService, windStore, racingEventService, racingEventService,
-////                // ttParam.getTimeoutInMillis(), raceTrackingHandler);
-////                connectivityParametersToRestore.add(ttParam);
-////                break;
-////            }
-//////            case "RACE_LOG_TRACKING":
-//////                assert param instanceof RaceLogConnectivityParams;
-//////                final RaceLogConnectivityParams rLParam = (RaceLogConnectivityParams) handler.resolve(param);
-//////                break;
-//////            }
-////            connectivityParametersToRestore.remove(param);
-////        }
-//        Thread.currentThread().setContextClassLoader(oldContextClassLoader);
-
         racingEventService.createOrUpdateDataImportProgressWithReplication(importOperationId, 0.3,
                 DataImportSubProgress.TRANSFER_COMPLETED, 0.5);
         applyMasterDataImportOperation(topLevelMasterData, importOperationId, override);

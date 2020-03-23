@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -113,7 +112,7 @@ public class ImportMasterDataOperation extends
         this.importOperationId = importOperationId;
         this.user = user;
         this.tenant = tenant;
-        this.connectivityParametersToRestore = masterData.getConnectivityParameters();
+        this.connectivityParametersToRestore = masterData.getConnectivityParametersToRestore();
     }
 
     @Override
@@ -164,10 +163,7 @@ public class ImportMasterDataOperation extends
                 ensureOwnership(trackToImport.getIdentifier(), securityService);
             }
             toState.mediaTracksImported(allMediaTracksToImport, creationCount, override);
-
-            // Import tracked races
-            importTrackedRaces(toState, securityService);
-            
+            importTrackedRaces(toState, securityService);            
             dataImportLock.getProgress(importOperationId).setResult(creationCount);
             return creationCount;
         } catch (Exception e) {
@@ -632,37 +628,5 @@ public class ImportMasterDataOperation extends
                 }
             }
         }
-    
-//        if (connectivityParameterToRestore != null) {
-//            for (RaceTrackingConnectivityParameters param : connectivityParametersToRestore) {
-//                final String typeIdentifier = param.getTypeIdentifier();
-//                final RaceTrackingConnectivityParametersHandler handler = serviceFinder.findService(typeIdentifier);
-//                final PermissionAwareRaceTrackingHandler raceTrackingHandler = new PermissionAwareRaceTrackingHandler(racingEventService.getSecurityService());
-//                switch (typeIdentifier) {
-//                case "TRAC_TRAC":
-//                    assert param instanceof RaceTrackingConnectivityParametersImpl;
-//                    final RaceTrackingConnectivityParametersImpl ttParam = (RaceTrackingConnectivityParametersImpl) handler.resolve(param);
-//                    // racingEventService.addRace(/* addToRegatta==null means "default regatta" */ null, ttParam,
-//                    // ttParam.getTimeoutInMillis(), raceTrackingHandler);
-//                    // ttParam.createRaceTracker(racingEventService, windStore, racingEventService, racingEventService,
-//                    // ttParam.getTimeoutInMillis(), raceTrackingHandler);
-//                    connectivityParametersToRestore.add(ttParam);
-//                    break;
-//                case "RACE_LOG_TRACKING":
-//                    assert param instanceof RaceLogConnectivityParams;
-//                    final RaceLogConnectivityParams rLParam = (RaceLogConnectivityParams) handler.resolve(param);
-//                    break;
-//                }
-//                connectivityParametersToRestore.remove(param);
-//     
-////            final WindStore windStore = MongoWindStoreFactory.INSTANCE.getMongoWindStore(toState.getMongoObjectFactory(), toState.getDomainObjectFactory());
-//            final DefaultRaceTrackingHandler handler = new RaceTrackingHandler.DefaultRaceTrackingHandler();
-//            for (RaceTrackingConnectivityParameters param : connectivityParameterToRestore) {
-//                toState.addRace(/* default */ null, param, /* no timeout */ -1, handler);
-//////                param.createRaceTracker(toState, windStore, toState, toState, /* no timeout */ -1, handler);
-//////                 toState.addRace(/* default */ null, param, /* no timeout */ -1, new
-//////                 PermissionAwareRaceTrackingHandler(toState.getSecurityService()));
-//            }
-        
     }
 }
