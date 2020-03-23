@@ -125,7 +125,7 @@ public class UnsentOperationsSenderJob implements OperationsToMasterSendingQueue
             // remove the operation that failed to arrive on the master server from those marked as sent to master for now:
             sender.hasSentOperationToMaster(operation);
             logger.log(Level.INFO, "Error (re-)sending operation "+operation+" to master "+sender.getMasterDescriptor()+
-                    ". Will try again in "+nextWaitDuration);
+                    ": "+e.getMessage()+". Will try again in "+nextWaitDuration);
         }
         return result;
     }
