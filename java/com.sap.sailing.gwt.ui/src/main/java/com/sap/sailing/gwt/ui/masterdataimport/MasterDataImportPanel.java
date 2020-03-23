@@ -391,8 +391,7 @@ public class MasterDataImportPanel extends VerticalPanel {
         contentPanel.add(exportDeviceConfigsSwitch);
         
         exportTrackedRacesAndStartTrackingSwitch = new CheckBox(stringMessages.exportTrackedRacesAndStartTracking());
-        //TODO: Create Tooltip
-        exportTrackedRacesAndStartTrackingSwitch.setTitle("");
+        exportTrackedRacesAndStartTrackingSwitch.setTitle(stringMessages.exportTrackedRacesAndStartTrackingTooltip());
         exportTrackedRacesAndStartTrackingSwitch.setValue(false);
         contentPanel.add(exportTrackedRacesAndStartTrackingSwitch);
 
