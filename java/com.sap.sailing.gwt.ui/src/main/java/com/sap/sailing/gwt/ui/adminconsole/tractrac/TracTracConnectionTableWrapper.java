@@ -13,6 +13,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationWithSecurityDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
@@ -43,10 +44,10 @@ import com.sap.sse.security.ui.client.i18n.StringMessages;
 public class TracTracConnectionTableWrapper extends
         TableWrapper<TracTracConfigurationWithSecurityDTO, RefreshableSingleSelectionModel<TracTracConfigurationWithSecurityDTO>, StringMessages, CellTableWithCheckboxResources> {
     private final LabeledAbstractFilterablePanel<TracTracConfigurationWithSecurityDTO> filterField;
-    private final SailingServiceAsync sailingServiceAsync;
+    private final SailingServiceAsync sailingServiceWriteAsync;
     private final com.sap.sailing.gwt.ui.client.StringMessages stringMessagesClient;
 
-    public TracTracConnectionTableWrapper(final UserService userService, final SailingServiceAsync sailingServiceAsync,
+    public TracTracConnectionTableWrapper(final UserService userService, final SailingServiceWriteAsync sailingServiceWriteAsync,
             final com.sap.sailing.gwt.ui.client.StringMessages stringMessages, final ErrorReporter errorReporter,
             final boolean enablePager, final CellTableWithCheckboxResources tableResources, final Runnable refresher) {
         super(stringMessages, errorReporter, false, enablePager,
@@ -63,7 +64,7 @@ public class TracTracConnectionTableWrapper extends
                     }
                 }, tableResources);
         this.stringMessagesClient = stringMessages;
-        this.sailingServiceAsync = sailingServiceAsync;
+        this.sailingServiceWriteAsync = sailingServiceWriteAsync;
         final ListHandler<TracTracConfigurationWithSecurityDTO> tracTracAccountColumnListHandler = getColumnSortHandler();
 
         // table
@@ -89,7 +90,7 @@ public class TracTracConnectionTableWrapper extends
             new TracTracConnectionEditDialog(dto, new DialogCallback<TracTracConfigurationWithSecurityDTO>() {
                 @Override
                 public void ok(final TracTracConfigurationWithSecurityDTO editedObject) {
-                    sailingServiceAsync.updateTracTracConfiguration(editedObject,
+                    sailingServiceWriteAsync.updateTracTracConfiguration(editedObject,
                             new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                                 @Override
                                 public void onFailure(Throwable caught) {
@@ -111,7 +112,7 @@ public class TracTracConnectionTableWrapper extends
         });
 
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_DELETE, DefaultActions.DELETE, dto -> {
-            sailingServiceAsync.deleteTracTracConfiguration(dto, new AsyncCallback<Void>() {
+            sailingServiceWriteAsync.deleteTracTracConfiguration(dto, new AsyncCallback<Void>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError("Exception trying to delete configuration in DB: " + caught.getMessage());
@@ -180,7 +181,7 @@ public class TracTracConnectionTableWrapper extends
      *            the same entity if present
      */
     public void refreshTracTracConnectionList(final TracTracConfigurationWithSecurityDTO selectEntityWhenDone) {
-        sailingServiceAsync
+        sailingServiceWriteAsync
                 .getPreviousTracTracConfigurations(new AsyncCallback<List<TracTracConfigurationWithSecurityDTO>>() {
                     @Override
                     public void onFailure(Throwable caught) {

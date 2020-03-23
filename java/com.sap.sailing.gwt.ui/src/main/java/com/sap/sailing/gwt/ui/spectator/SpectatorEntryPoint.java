@@ -13,7 +13,7 @@ import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.settings.client.spectator.SpectatorContextDefinition;
 import com.sap.sailing.gwt.settings.client.spectator.SpectatorSettings;
-import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
+import com.sap.sailing.gwt.ui.client.AbstractSailingReadEntryPoint;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.shared.panels.SimpleWelcomeWidget;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
@@ -24,7 +24,7 @@ import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
  * @author Lennart Hensler (D054527)
  *
  */
-public class SpectatorEntryPoint extends AbstractSailingEntryPoint implements RegattaRefresher {
+public class SpectatorEntryPoint extends AbstractSailingReadEntryPoint implements RegattaRefresher {
     
     @Override
     protected void doOnModuleLoad() {

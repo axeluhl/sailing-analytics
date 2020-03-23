@@ -449,7 +449,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         
         // Check if the assigned regatta makes sense
         if (checkBoatClassOK(selectedRegatta, selectedRaces)) {
-            sailingService.trackWithSwissTiming(
+            sailingServiceWrite.trackWithSwissTiming(
                 /* regattaToAddTo */ regattaIdentifier,
                 selectedRaces, hostname, port, trackWind, correctWindByDeclination,
                 useInternalMarkPassingAlgorithm, updateURL, updateUsername, updatePassword, new AsyncCallback<Void>() {

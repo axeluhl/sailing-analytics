@@ -124,7 +124,7 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
     @Override
     protected void markSelectionChanged() {
         Set<MarkDTO> marksToRemove = marks.getSelectionModel().getSelectedSet();
-        sailingService.checkIfMarksAreUsedInOtherRaceLogs(leaderboardName, raceColumnName, fleetName, marksToRemove,
+        sailingServiceWrite.checkIfMarksAreUsedInOtherRaceLogs(leaderboardName, raceColumnName, fleetName, marksToRemove,
                 new AsyncCallback<Pair<Boolean, String>>() {
                     @Override
                     public void onSuccess(Pair<Boolean, String> result) {
@@ -151,7 +151,7 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
     }
 
     private void refreshORCPerformanceCurveLegs() {
-        sailingService.getORCPerformanceCurveLegInfo(leaderboardName, raceColumnName, fleetName,
+        sailingServiceWrite.getORCPerformanceCurveLegInfo(leaderboardName, raceColumnName, fleetName,
                 new AsyncCallback<Map<Integer, ORCPerformanceCurveLegImpl>>() {
                     @Override
                     public void onSuccess(Map<Integer, ORCPerformanceCurveLegImpl> result) {
@@ -166,7 +166,7 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
     }
 
     private void refreshCourse() {
-        sailingService.getLastCourseDefinitionInRaceLog(leaderboardName, raceColumnName, fleetName,
+        sailingServiceWrite.getLastCourseDefinitionInRaceLog(leaderboardName, raceColumnName, fleetName,
                 new AsyncCallback<RaceCourseDTO>() {
                     @Override
                     public void onSuccess(RaceCourseDTO result) {
@@ -187,7 +187,7 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
      * the {@link #marks} table with the results.
      */
     protected void refreshMarks() {
-        sailingService.getMarksInRegattaLog(leaderboardName, new AsyncCallback<Iterable<MarkDTO>>() {
+        sailingServiceWrite.getMarksInRegattaLog(leaderboardName, new AsyncCallback<Iterable<MarkDTO>>() {
             @Override
             public void onSuccess(Iterable<MarkDTO> result) {
                 marks.refresh(result);
@@ -203,6 +203,6 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
     @Override
     protected LegGeometrySupplier getLegGeometrySupplier() {
         return (zeroBasedLegIndices, legTypes, callback)->
-            sailingService.getLegGeometry(leaderboardName, raceColumnName, fleetName, zeroBasedLegIndices, legTypes, callback);
+            sailingServiceWrite.getLegGeometry(leaderboardName, raceColumnName, fleetName, zeroBasedLegIndices, legTypes, callback);
     }
 }

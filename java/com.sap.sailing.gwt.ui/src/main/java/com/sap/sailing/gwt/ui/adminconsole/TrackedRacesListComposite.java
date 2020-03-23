@@ -18,7 +18,7 @@ import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.common.Util;
@@ -44,10 +44,10 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
     private boolean actionButtonsEnabled;
 
     public TrackedRacesListComposite(Component<?> parent, ComponentContext<?> context,
-            final SailingServiceAsync sailingService, UserService userService,
+            final SailingServiceWriteAsync sailingServiceWrite, UserService userService,
             final ErrorReporter errorReporter,
             final RegattaRefresher regattaRefresher, final StringMessages stringMessages, boolean hasMultiSelection, boolean actionButtonsEnabled) {
-        super(parent, context, sailingService, errorReporter, regattaRefresher, stringMessages, hasMultiSelection, userService);
+        super(parent, context, sailingServiceWrite, errorReporter, regattaRefresher, stringMessages, hasMultiSelection, userService);
         this.raceIsTrackedRaceChangeListener = new HashSet<TrackedRaceChangedListener>();
         this.actionButtonsEnabled = actionButtonsEnabled;
         createUI();

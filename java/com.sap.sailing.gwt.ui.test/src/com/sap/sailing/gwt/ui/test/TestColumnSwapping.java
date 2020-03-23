@@ -22,6 +22,7 @@ import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.server.SailingServiceImpl;
+import com.sap.sailing.gwt.ui.server.SailingServiceWriteImpl;
 
 public class TestColumnSwapping {
 
@@ -29,7 +30,7 @@ public class TestColumnSwapping {
     private static final String LEADERBOARDNAME = "test";
     private static final String DEFAULT_FLEET_NAME = "Default";
     private static final FleetDTO DEFAULT_FLEET = new FleetDTO(DEFAULT_FLEET_NAME, /* ordering */ 0, /* color */ null);
-    private SailingServiceImpl service;
+    private SailingServiceWriteImpl service;
     private LeaderboardDTO leaderboardOriginalDTO;
     private LeaderboardDTO leaderboardDTO;
     private Collection<String> leglist;

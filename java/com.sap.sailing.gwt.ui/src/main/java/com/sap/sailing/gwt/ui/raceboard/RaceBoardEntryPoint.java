@@ -19,7 +19,7 @@ import com.sap.sailing.gwt.common.communication.routing.ProvidesLeaderboardRouti
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceboardContextDefinition;
 import com.sap.sailing.gwt.settings.client.utils.StoredSettingsLocationFactory;
-import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
+import com.sap.sailing.gwt.ui.client.AbstractSailingReadEntryPoint;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.MediaService;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
@@ -40,7 +40,7 @@ import com.sap.sse.security.ui.authentication.generic.sapheader.SAPHeaderWithAut
 import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorage;
 import com.sap.sse.security.ui.settings.StoredSettingsLocation;
 
-public class RaceBoardEntryPoint extends AbstractSailingEntryPoint implements ProvidesLeaderboardRouting {
+public class RaceBoardEntryPoint extends AbstractSailingReadEntryPoint implements ProvidesLeaderboardRouting {
 
     /**
      * Controls the predefined mode into which to switch or configure the race viewer.
