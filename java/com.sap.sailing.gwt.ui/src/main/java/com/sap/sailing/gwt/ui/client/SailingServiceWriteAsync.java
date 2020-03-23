@@ -96,14 +96,14 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void addOrReplaceExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration expeditionDeviceConfiguration, AsyncCallback<Void> callback)
             throws UnauthorizedException;
 
-    void addOrUpdateBoat(BoatDTO boat, AsyncCallback<BoatDTO> callback) throws UnauthorizedException, Exception;
+    void addOrUpdateBoat(BoatDTO boat, AsyncCallback<BoatDTO> callback) throws UnauthorizedException;
 
     void addOrUpdateCompetitors(List<CompetitorDTO> competitors, AsyncCallback<List<CompetitorDTO>> callback) throws UnauthorizedException, Exception;
 
     void addOrUpdateCompetitorWithBoat(CompetitorWithBoatDTO competitor, AsyncCallback<CompetitorWithBoatDTO> callback)
-            throws UnauthorizedException, Exception;
+            throws UnauthorizedException;
 
-    void addOrUpdateCompetitorWithoutBoat(CompetitorDTO competitor, AsyncCallback<CompetitorDTO> callback) throws UnauthorizedException, Exception;
+    void addOrUpdateCompetitorWithoutBoat(CompetitorDTO competitor, AsyncCallback<CompetitorDTO> callback) throws UnauthorizedException;
 
     void addOrUpdateMarkProperties(MarkPropertiesDTO markProperties, AsyncCallback<MarkPropertiesDTO> callback);
 

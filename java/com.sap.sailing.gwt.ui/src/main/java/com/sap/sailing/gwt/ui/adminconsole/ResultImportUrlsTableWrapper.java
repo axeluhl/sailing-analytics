@@ -9,7 +9,7 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.UrlDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -21,8 +21,8 @@ import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
 import com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
-import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig;
+import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
 public class ResultImportUrlsTableWrapper<S extends RefreshableSelectionModel<UrlDTO>> extends TableWrapper<UrlDTO, S> {
@@ -41,9 +41,9 @@ public class ResultImportUrlsTableWrapper<S extends RefreshableSelectionModel<Ur
 
     private String lastUsedProviderName = null;
 
-    public ResultImportUrlsTableWrapper(SailingServiceAsync sailingService, UserService userService,
+    public ResultImportUrlsTableWrapper(SailingServiceWriteAsync sailingServiceWrite, UserService userService,
             StringMessages stringMessages, ErrorReporter errorReporter) {
-        super(sailingService, stringMessages, errorReporter, true, false, new UrlDTOEntityIdentityComparator());
+        super(sailingServiceWrite, stringMessages, errorReporter, true, false, new UrlDTOEntityIdentityComparator());
         ListHandler<UrlDTO> listHandler = super.getColumnSortHandler();
 
         TextColumn<UrlDTO> urlColumn = new AbstractSortableTextColumn<UrlDTO>(url -> url.getUrl());
@@ -76,7 +76,7 @@ public class ResultImportUrlsTableWrapper<S extends RefreshableSelectionModel<Ur
     public void update(String providerName) {
         lastUsedProviderName = providerName;
         if (providerName != null) {
-            sailingService.getResultImportUrls(providerName, new AsyncCallback<List<UrlDTO>>() {
+            sailingServiceWrite.getResultImportUrls(providerName, new AsyncCallback<List<UrlDTO>>() {
                 @Override
                 public void onSuccess(List<UrlDTO> result) {
                     ResultImportUrlsTableWrapper.super.refresh(result);

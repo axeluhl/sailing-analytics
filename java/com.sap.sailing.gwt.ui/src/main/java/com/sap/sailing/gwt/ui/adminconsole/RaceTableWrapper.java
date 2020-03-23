@@ -16,7 +16,7 @@ import com.sap.sailing.gwt.settings.client.raceboard.RaceboardContextDefinition;
 import com.sap.sailing.gwt.ui.adminconsole.AbstractLeaderboardConfigPanel.RaceColumnDTOAndFleetDTOWithNameBasedEquality;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorTemplates;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -29,9 +29,9 @@ public class RaceTableWrapper<S extends RefreshableSelectionModel<RaceColumnDTOA
     private final AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
     private String selectedLeaderboardName;
 
-    public RaceTableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages,
+    public RaceTableWrapper(SailingServiceWriteAsync sailingServiceWrite, StringMessages stringMessages,
             ErrorReporter errorReporter, boolean multiSelection) {
-        super(sailingService, stringMessages, errorReporter, multiSelection, /* enablePager */ false,
+        super(sailingServiceWrite, stringMessages, errorReporter, multiSelection, /* enablePager */ false,
                 new EntityIdentityComparator<RaceColumnDTOAndFleetDTOWithNameBasedEquality>() {
             @Override
                     public boolean representSameEntity(RaceColumnDTOAndFleetDTOWithNameBasedEquality dto1,
