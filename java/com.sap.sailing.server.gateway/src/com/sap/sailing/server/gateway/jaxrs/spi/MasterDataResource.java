@@ -100,7 +100,7 @@ public class MasterDataResource extends AbstractSailingServerResource {
             }
         }
         final List<Serializable> competitorIds = new ArrayList<Serializable>();
-        ArrayList<RaceTrackingConnectivityParameters> connectivityParametersToRestore = new ArrayList<>();
+        Set<RaceTrackingConnectivityParameters> connectivityParametersToRestore = new HashSet<RaceTrackingConnectivityParameters>();
         for (LeaderboardGroup lg : groupsToExport) {
             for (Leaderboard leaderboard : lg.getLeaderboards()) {
                 // All Leaderboards/Regattas contained in the LeaderboardGroup need to be visible
@@ -176,7 +176,7 @@ public class MasterDataResource extends AbstractSailingServerResource {
         }
         final TopLevelMasterData masterData = new TopLevelMasterData(groupsToExport,
                 events, regattaRaceIds, mediaTracks,
-                getService().getSensorFixStore(), exportWind, raceManagerDeviceConfigurations);
+                getService().getSensorFixStore(), exportWind, raceManagerDeviceConfigurations, connectivityParametersToRestore);
         // Checking permissions after filtering of Events to be transferred.
         for (Event event: masterData.getAllEvents()) {
             if (!securityService.hasCurrentUserReadPermission(event)) {
@@ -191,11 +191,9 @@ public class MasterDataResource extends AbstractSailingServerResource {
         }
         final StreamingOutput streamingOutput;
         if (compress) {
-            streamingOutput = new CompressingStreamingOutput(masterData, competitorIds, startTime, securityService,
-                    connectivityParametersToRestore);
+            streamingOutput = new CompressingStreamingOutput(masterData, competitorIds, startTime, securityService);
         } else {
-            streamingOutput = new NonCompressingStreamingOutput(masterData, competitorIds, startTime, securityService,
-                    connectivityParametersToRestore);
+            streamingOutput = new NonCompressingStreamingOutput(masterData, competitorIds, startTime, securityService);
         }
         ResponseBuilder resp = Response.ok(streamingOutput);
         if (compress) {
@@ -216,17 +214,14 @@ public class MasterDataResource extends AbstractSailingServerResource {
         private final List<Serializable> competitorIds;
         private final long startTime;
         private final SecurityService securityService;
-        private final ArrayList<RaceTrackingConnectivityParameters> connectivityParametersToRestore;
 
         protected AbstractStreamingOutput(TopLevelMasterData masterData, List<Serializable> competitorIds,
-                long startTime, SecurityService securityService,
-                ArrayList<RaceTrackingConnectivityParameters> connectivityParametersToRestore) {
+                long startTime, SecurityService securityService) {
             super();
             this.masterData = masterData;
             this.competitorIds = competitorIds;
             this.startTime = startTime;
             this.securityService = securityService;
-            this.connectivityParametersToRestore = connectivityParametersToRestore;
         }
         
         protected abstract OutputStream wrapOutputStream(OutputStream outputStream) throws IOException;
@@ -246,7 +241,6 @@ public class MasterDataResource extends AbstractSailingServerResource {
                         masterData.setMasterDataExportFlagOnRaceColumns(true);
                         // Actual start of streaming
                         writeObjects(competitorIds, masterData, objectOutputStream);
-                        objectOutputStream.writeObject(connectivityParametersToRestore);
                     } finally {
                         objectOutputStream.close();
                         masterData.setMasterDataExportFlagOnRaceColumns(false);
@@ -262,9 +256,8 @@ public class MasterDataResource extends AbstractSailingServerResource {
 
     private class NonCompressingStreamingOutput extends AbstractStreamingOutput {
         protected NonCompressingStreamingOutput(TopLevelMasterData masterData, List<Serializable> competitorIds,
-                long startTime, SecurityService securityService,
-                ArrayList<RaceTrackingConnectivityParameters> connectivityParametersToRestore) {
-            super(masterData, competitorIds, startTime, securityService, connectivityParametersToRestore);
+                long startTime, SecurityService securityService) {
+            super(masterData, competitorIds, startTime, securityService);
         }
 
         @Override
@@ -275,9 +268,8 @@ public class MasterDataResource extends AbstractSailingServerResource {
 
     private class CompressingStreamingOutput extends AbstractStreamingOutput {
         protected CompressingStreamingOutput(TopLevelMasterData masterData, List<Serializable> competitorIds,
-                long startTime, SecurityService securityService,
-                ArrayList<RaceTrackingConnectivityParameters> connectivityParametersToRestore) {
-            super(masterData, competitorIds, startTime, securityService, connectivityParametersToRestore);
+                long startTime, SecurityService securityService) {
+            super(masterData, competitorIds, startTime, securityService);
         }
 
         @Override

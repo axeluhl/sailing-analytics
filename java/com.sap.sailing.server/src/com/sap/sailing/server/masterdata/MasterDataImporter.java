@@ -97,39 +97,39 @@ public class MasterDataImporter {
         }
         
         // RaceTrackingConnectivityParameters de-serialization
-        Thread.currentThread().setContextClassLoader(racingEventService.getCombinedMasterDataClassLoader());
-//        MongoObjectFactory mongoObjectFactory = racingEventService.getMongoObjectFactory();
-//        DomainObjectFactory domainObjectFactory = racingEventService.getDomainObjectFactory();
-//        TypeBasedServiceFinder<RaceTrackingConnectivityParametersHandler> serviceFinder = domainObjectFactory.getRaceTrackingConnectivityParamsServiceFinder();        
-//        WindStore windStore = MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory);
-        ArrayList<RaceTrackingConnectivityParameters> connectivityParametersToRestore = (ArrayList<RaceTrackingConnectivityParameters>) objectInputStream.readObject();        
-//        for (RaceTrackingConnectivityParameters param : connectivityParametersToRestore) {
-//            final String typeIdentifier = param.getTypeIdentifier();
-//            final RaceTrackingConnectivityParametersHandler handler = serviceFinder.findService(typeIdentifier);
-//            final PermissionAwareRaceTrackingHandler raceTrackingHandler = new PermissionAwareRaceTrackingHandler(racingEventService.getSecurityService());
-//            switch (typeIdentifier) {
-//            case "TRAC_TRAC":
-//                assert param instanceof RaceTrackingConnectivityParametersImpl;
-//                final RaceTrackingConnectivityParametersImpl ttParam = (RaceTrackingConnectivityParametersImpl) handler.resolve(param);
-//                // racingEventService.addRace(/* addToRegatta==null means "default regatta" */ null, ttParam,
-//                // ttParam.getTimeoutInMillis(), raceTrackingHandler);
-//                // ttParam.createRaceTracker(racingEventService, windStore, racingEventService, racingEventService,
-//                // ttParam.getTimeoutInMillis(), raceTrackingHandler);
-//                connectivityParametersToRestore.add(ttParam);
-//                break;
-//            }
-////            case "RACE_LOG_TRACKING":
-////                assert param instanceof RaceLogConnectivityParams;
-////                final RaceLogConnectivityParams rLParam = (RaceLogConnectivityParams) handler.resolve(param);
+//        Thread.currentThread().setContextClassLoader(racingEventService.getCombinedMasterDataClassLoader());
+////        MongoObjectFactory mongoObjectFactory = racingEventService.getMongoObjectFactory();
+////        DomainObjectFactory domainObjectFactory = racingEventService.getDomainObjectFactory();
+////        TypeBasedServiceFinder<RaceTrackingConnectivityParametersHandler> serviceFinder = domainObjectFactory.getRaceTrackingConnectivityParamsServiceFinder();        
+////        WindStore windStore = MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory);
+//        ArrayList<RaceTrackingConnectivityParameters> connectivityParametersToRestore = (ArrayList<RaceTrackingConnectivityParameters>) objectInputStream.readObject();        
+////        for (RaceTrackingConnectivityParameters param : connectivityParametersToRestore) {
+////            final String typeIdentifier = param.getTypeIdentifier();
+////            final RaceTrackingConnectivityParametersHandler handler = serviceFinder.findService(typeIdentifier);
+////            final PermissionAwareRaceTrackingHandler raceTrackingHandler = new PermissionAwareRaceTrackingHandler(racingEventService.getSecurityService());
+////            switch (typeIdentifier) {
+////            case "TRAC_TRAC":
+////                assert param instanceof RaceTrackingConnectivityParametersImpl;
+////                final RaceTrackingConnectivityParametersImpl ttParam = (RaceTrackingConnectivityParametersImpl) handler.resolve(param);
+////                // racingEventService.addRace(/* addToRegatta==null means "default regatta" */ null, ttParam,
+////                // ttParam.getTimeoutInMillis(), raceTrackingHandler);
+////                // ttParam.createRaceTracker(racingEventService, windStore, racingEventService, racingEventService,
+////                // ttParam.getTimeoutInMillis(), raceTrackingHandler);
+////                connectivityParametersToRestore.add(ttParam);
 ////                break;
 ////            }
-//            connectivityParametersToRestore.remove(param);
-//        }
-        Thread.currentThread().setContextClassLoader(oldContextClassLoader);
+//////            case "RACE_LOG_TRACKING":
+//////                assert param instanceof RaceLogConnectivityParams;
+//////                final RaceLogConnectivityParams rLParam = (RaceLogConnectivityParams) handler.resolve(param);
+//////                break;
+//////            }
+////            connectivityParametersToRestore.remove(param);
+////        }
+//        Thread.currentThread().setContextClassLoader(oldContextClassLoader);
 
         racingEventService.createOrUpdateDataImportProgressWithReplication(importOperationId, 0.3,
                 DataImportSubProgress.TRANSFER_COMPLETED, 0.5);
-        applyMasterDataImportOperation(topLevelMasterData, importOperationId, override, connectivityParametersToRestore);
+        applyMasterDataImportOperation(topLevelMasterData, importOperationId, override);
     }
 
     private void setAllowCompetitorsDataToBeReset(List<Serializable> competitorIds) {
@@ -143,10 +143,10 @@ public class MasterDataImporter {
     }
 
     private MasterDataImportObjectCreationCount applyMasterDataImportOperation(TopLevelMasterData topLevelMasterData,
-            UUID importOperationId, boolean override, ArrayList<RaceTrackingConnectivityParameters> connectivityParametersToRestore) {
+            UUID importOperationId, boolean override) {
         MasterDataImportObjectCreationCountImpl creationCount = new MasterDataImportObjectCreationCountImpl();
         ImportMasterDataOperation op = new ImportMasterDataOperation(topLevelMasterData, importOperationId, override,
-                creationCount, user, tenant, connectivityParametersToRestore);
+                creationCount, user, tenant);
         creationCount = racingEventService.apply(op);
         return creationCount;
     }

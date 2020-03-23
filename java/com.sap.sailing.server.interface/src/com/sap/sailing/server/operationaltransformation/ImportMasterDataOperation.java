@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -100,10 +101,10 @@ public class ImportMasterDataOperation extends
 
     private UserGroup tenant;
     
-    private final ArrayList<RaceTrackingConnectivityParameters> connectivityParameterToRestore;
-
+    private final Set<RaceTrackingConnectivityParameters> connectivityParametersToRestore;
+    
     public ImportMasterDataOperation(TopLevelMasterData topLevelMasterData, UUID importOperationId, boolean override,
-            MasterDataImportObjectCreationCountImpl existingCreationCount, User user, UserGroup tenant, ArrayList<RaceTrackingConnectivityParameters> connectivityParameterToRestore) {
+            MasterDataImportObjectCreationCountImpl existingCreationCount, User user, UserGroup tenant) {
 
         this.creationCount = new MasterDataImportObjectCreationCountImpl();
         this.creationCount.add(existingCreationCount);
@@ -112,7 +113,7 @@ public class ImportMasterDataOperation extends
         this.importOperationId = importOperationId;
         this.user = user;
         this.tenant = tenant;
-        this.connectivityParameterToRestore = connectivityParameterToRestore;
+        this.connectivityParametersToRestore = masterData.getConnectivityParameters();
     }
 
     @Override
@@ -620,11 +621,11 @@ public class ImportMasterDataOperation extends
      * Starts the tracking of imported tracked races.
      */
     private void importTrackedRaces(RacingEventService toState, SecurityService securityService) throws Exception {
-        if (connectivityParameterToRestore != null) {
+        if (connectivityParametersToRestore != null) {
             DomainObjectFactory domainObjectFactory = toState.getDomainObjectFactory();
             final DefaultRaceTrackingHandler handler = new RaceTrackingHandler.DefaultRaceTrackingHandler();
             TypeBasedServiceFinder<RaceTrackingConnectivityParametersHandler> serviceFinder = domainObjectFactory.getRaceTrackingConnectivityParamsServiceFinder();
-            for (RaceTrackingConnectivityParameters param : connectivityParameterToRestore) {
+            for (RaceTrackingConnectivityParameters param : connectivityParametersToRestore) {
                 if (param != null) {
                     final RaceTrackingConnectivityParameters paramToStartTracking = serviceFinder.findService(param.getTypeIdentifier()).resolve(param);
                     toState.addRace(/* default */ null, paramToStartTracking, /* do not wait */ -1, handler);
