@@ -23,6 +23,7 @@ import com.sap.sse.filestorage.FileStorageService;
 import com.sap.sse.filestorage.FileStorageServiceProperty;
 import com.sap.sse.filestorage.FileStorageServicePropertyStore;
 import com.sap.sse.filestorage.FileStorageServiceResolver;
+import com.sap.sse.filestorage.operations.SetActiveFileStorageServiceOperation;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.OperationWithResultWithIdWrapper;
@@ -85,7 +86,7 @@ public class FileStorageManagementServiceImpl implements ReplicableFileStorageMa
 
     @Override
     public void setActiveFileStorageService(FileStorageService service) {
-        apply(s -> s.internalSetActiveFileStorageService(service));
+        apply(new SetActiveFileStorageServiceOperation(service));
     }
 
     @Override
