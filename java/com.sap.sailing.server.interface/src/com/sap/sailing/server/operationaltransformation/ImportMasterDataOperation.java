@@ -61,7 +61,6 @@ import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParametersHandler;
-import com.sap.sailing.domain.tracking.RaceTrackingHandler;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.WindTrack;
@@ -623,8 +622,7 @@ public class ImportMasterDataOperation extends
             for (RaceTrackingConnectivityParameters param : connectivityParametersToRestore) {
                 if (param != null) {
                     final RaceTrackingConnectivityParameters paramToStartTracking = serviceFinder.findService(param.getTypeIdentifier()).resolve(param);
-                    final RaceTrackingHandler raceTrackingHandler = toState.getPermissionAwareRaceTrackingHandler();
-                    RaceHandle raceHandle = toState.addRace(/* default */ null, paramToStartTracking, /* do not wait */ -1, raceTrackingHandler);
+                    RaceHandle raceHandle = toState.addRace(/* default */ null, paramToStartTracking, /* do not wait */ -1);
                     final RaceDefinition race = raceHandle.getRace(RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
                     if (race != null) {
                         ensureOwnership(raceHandle.getTrackedRegatta().getTrackedRace(race).getIdentifier(), securityService);

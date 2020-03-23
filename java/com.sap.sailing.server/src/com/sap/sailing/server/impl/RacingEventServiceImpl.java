@@ -1819,6 +1819,14 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
     }
 
+    /**
+     * Uses the {@link #getPermissionAwareRaceTrackingHandler()} as the {@link RaceTrackingHandler}
+     */
+    @Override
+    public RaceHandle addRace(RegattaIdentifier regattaToAddTo, RaceTrackingConnectivityParameters params, long timeoutInMilliseconds) throws Exception {
+        return addRace(regattaToAddTo, params, timeoutInMilliseconds, getPermissionAwareRaceTrackingHandler());
+    }
+    
     @Override
     public RaceHandle addRace(RegattaIdentifier regattaToAddTo, RaceTrackingConnectivityParameters params,
             long timeoutInMilliseconds, RaceTrackingHandler raceTrackingHandler) throws Exception {

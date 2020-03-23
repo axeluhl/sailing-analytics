@@ -113,7 +113,6 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
         this.trackedRegatta = regatta;
         this.raceLogResolver = raceLogResolver;
         this.raceTrackingHandler = raceTrackingHandler;
-
         // add log listeners
         for (AbstractLog<?, ?> log : params.getLogHierarchy()) {
             if (log instanceof RaceLog) {

@@ -597,7 +597,6 @@ import com.sap.sailing.server.operationaltransformation.UpdateRaceDelayToLive;
 import com.sap.sailing.server.operationaltransformation.UpdateSeries;
 import com.sap.sailing.server.operationaltransformation.UpdateServerConfiguration;
 import com.sap.sailing.server.operationaltransformation.UpdateSpecificRegatta;
-import com.sap.sailing.server.security.PermissionAwareRaceTrackingHandler;
 import com.sap.sailing.server.security.SailingViewerRole;
 import com.sap.sailing.server.util.WaitForTrackedRaceUtil;
 import com.sap.sailing.shared.server.SharedSailingData;
@@ -1494,7 +1493,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                         getRegattaLogStore(), RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS,
                         offsetToStartTimeOfSimulatedRace, useInternalMarkPassingAlgorithm, tracTracUsername,
                         tracTracPassword, record.getRaceStatus(), record.getRaceVisibility(), trackWind,
-                        correctWindByDeclination, new PermissionAwareRaceTrackingHandler(getSecurityService()));
+                        correctWindByDeclination);
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Error trying to load race " + rrs+". Continuing with remaining races...", e);
             }
@@ -3464,8 +3463,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                     rr.raceId, rr.getName(), raceDescription, boatClass, hostname, port, startList,
                     getRaceLogStore(), getRegattaLogStore(),
                     RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, useInternalMarkPassingAlgorithm, trackWind,
-                    correctWindByDeclination, updateURL, updateUsername, updatePassword,
-                    new PermissionAwareRaceTrackingHandler(getSecurityService()));
+                    correctWindByDeclination, updateURL, updateUsername, updatePassword);
         }
     }
     
@@ -3506,8 +3504,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                     boatClassName = null;
                 }
                 getSwissTimingReplayService().loadRaceData(regattaIdentifier, replayRaceDTO.link, replayRaceDTO.getName(),
-                        replayRaceDTO.race_id, boatClassName, getService(), getService(), useInternalMarkPassingAlgorithm, getRaceLogStore(), getRegattaLogStore(),
-                        new PermissionAwareRaceTrackingHandler(getSecurityService()));
+                        replayRaceDTO.race_id, boatClassName, getService(), getService(), useInternalMarkPassingAlgorithm, getRaceLogStore(), getRegattaLogStore());
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Error trying to load SwissTimingReplay race " + replayRaceDTO, e);
             }
@@ -7405,7 +7402,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
         Fleet fleet = raceColumn.getFleetByName(fleetName);
         getRaceLogTrackingAdapter().startTracking(getService(), leaderboard, raceColumn, fleet, trackWind, correctWindByDeclination,
-                new PermissionAwareRaceTrackingHandler(getSecurityService()));
+                getService().getPermissionAwareRaceTrackingHandler());
     }
     
     @Override
@@ -8994,7 +8991,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         try {
             final RaceHandle raceHandle = getRaceLogTrackingAdapter().startTracking(getService(), regattaLeaderboard,
                     raceColumn, fleet, /* trackWind */ true, /* correctWindDirectionByMagneticDeclination */ true,
-                    new PermissionAwareRaceTrackingHandler(getSecurityService()));
+                    getService().getPermissionAwareRaceTrackingHandler());
             
             // wait for the RaceDefinition to be created
             raceHandle.getRace();

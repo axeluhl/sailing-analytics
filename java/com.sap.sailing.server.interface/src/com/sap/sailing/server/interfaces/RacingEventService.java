@@ -82,6 +82,7 @@ import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.resultimport.ResultUrlProvider;
 import com.sap.sailing.domain.statistics.Statistics;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
@@ -921,4 +922,10 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     RaceTrackingConnectivityParameters getConnectivityParametersByRace(RaceDefinition raceDefinition);
 
     RaceTrackingHandler getPermissionAwareRaceTrackingHandler();
+    
+    /**
+     * Uses the {@link #getPermissionAwareRaceTrackingHandler()} as the {@link RaceTrackingHandler}
+     */
+    @Override
+    RaceHandle addRace(RegattaIdentifier regattaToAddTo, RaceTrackingConnectivityParameters params, long timeoutInMilliseconds) throws Exception;
 }
