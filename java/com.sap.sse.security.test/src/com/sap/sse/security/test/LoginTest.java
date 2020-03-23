@@ -101,14 +101,14 @@ public class LoginTest {
                 /* locale */ null, /* validationBaseURL */ null, /* owning group */ null);
         final UserGroup defaultUserGroup = securityService.getUserGroupByName(username + SecurityService.TENANT_SUFFIX);
         Map<UserGroup, Set<String>> permissionMap = new HashMap<>();
-        permissionMap.put(defaultUserGroup, new HashSet<>(Arrays.asList(new String[] { "!READ", "UPDATE" })));
-        permissionMap.put(null, new HashSet<>(Arrays.asList(new String[] { "!READ", "UPDATE" })));
+        permissionMap.put(defaultUserGroup, new HashSet<>(Arrays.asList(new String[] { "READ", "UPDATE" })));
+        permissionMap.put(null, new HashSet<>(Arrays.asList(new String[] { "READ", "UPDATE" })));
         AccessControlList acl = securityService.overrideAccessControlList(
                 QualifiedObjectIdentifierImpl.fromDBWithoutEscaping("someid/more"), permissionMap);
 
         Map<UserGroup, Set<String>> result = acl.getActionsByUserGroup();
 
-        Assert.assertThat(result.get(defaultUserGroup), Matchers.contains("!READ", "UPDATE"));
+        Assert.assertThat(result.get(defaultUserGroup), Matchers.contains("READ", "UPDATE"));
         Assert.assertThat(result.get(null), Matchers.contains("UPDATE"));
     }
     
