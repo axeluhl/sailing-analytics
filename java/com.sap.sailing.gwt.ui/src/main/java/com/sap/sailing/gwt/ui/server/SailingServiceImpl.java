@@ -10040,6 +10040,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             getSharedSailingData().setTrackingDeviceIdentifierForMarkProperties(markProperties, convertDtoToDeviceIdentifier(deviceIdentifier));
         } else if (fixedPosition != null) {
             getSharedSailingData().setFixedPositionForMarkProperties(markProperties, fixedPosition);
+        } else {
+            getSharedSailingData().clearPositioningForMarkProperties(markProperties);
         }
         return convertToMarkPropertiesDTO(getSharedSailingData().updateMarkProperties(markProperties.getId(),
                 markProperties, markProperties.getTags()));

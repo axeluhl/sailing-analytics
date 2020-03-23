@@ -2374,4 +2374,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String runVMG();
     String beatAngles();
     String runAngles();
+    String unsetPosition();
+    String errorTryingToUpdateMarkProperties(String message);
+    String confirmUnsettingPositionForMarkProperties(String name);
 }
