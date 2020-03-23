@@ -7131,4 +7131,22 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(getSharedSailingData().getAllMarkRoles(),
                 m -> convertToMarkRoleDTO(m));
     }
+
+    @Override
+    public EventDTO getEventById(UUID id, boolean withStatisticalData) throws MalformedURLException, UnauthorizedException {
+        EventDTO result = null;
+        Event event = getService().getEvent(id);
+        if (event != null) {
+            if (SecurityUtils.getSubject()
+                    .isPermitted(SecuredDomainType.EVENT.getStringPermissionForObject(DefaultActions.READ, event))) {
+                result = convertToEventDTO(event, withStatisticalData);
+                result.setBaseURL(getEventBaseURLFromEventOrRequest(event));
+                result.setIsOnRemoteServer(false);
+            } else {
+                throw new UnauthorizedException("You are not permitted to view event " + id);
+            }
+        }
+        return result;
+    
+    }
 }

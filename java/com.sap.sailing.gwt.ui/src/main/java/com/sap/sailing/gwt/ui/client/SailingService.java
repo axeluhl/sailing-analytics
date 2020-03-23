@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -597,6 +598,8 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
      * Allows reading public Events, or Events that are related to the given regatta
      */
     QRCodeEvent getEvent(UUID eventId, String regattaName, String regattaRegistrationLinkSecret);
+    
+    EventDTO getEventById(UUID id, boolean withStatisticalData) throws MalformedURLException, UnauthorizedException;
 
     /**
      * Allows reading public Competitors, or Competitors that are registered in the given regatta

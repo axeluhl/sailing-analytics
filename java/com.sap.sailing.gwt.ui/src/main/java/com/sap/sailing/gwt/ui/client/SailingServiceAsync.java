@@ -707,4 +707,6 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
 
     void getCompetitorRegistrationsForRace(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<Collection<CompetitorAndBoatDTO>> callback);
+
+    void getEventById(UUID id, boolean withStatisticalData, AsyncCallback<EventDTO> callback);
 }

@@ -81,11 +81,11 @@ import com.sap.sse.gwt.client.media.VideoDTO;
 import com.sap.sse.pairinglist.PairingList;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
-public interface SailingServiceWriteAsync extends FileStorageManagementGwtServiceAsync {
+public interface SailingServiceWriteAsync extends FileStorageManagementGwtServiceAsync, SailingServiceAsync {
     
     void addCourseDefinitionToRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             List<Util.Pair<ControlPointDTO, PassingInstruction>> course, int priority, AsyncCallback<Void> callback)
-            throws UnauthorizedException, NotFoundException;
+            throws UnauthorizedException;
 
     void addMarkFix(String leaderboardName, String raceColumnName, String fleetName, String markIdAsString,
             GPSFixDTO newFix, AsyncCallback<Void> callback) throws UnauthorizedException;
@@ -137,7 +137,7 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     
     void allowBoatResetToDefaults(Iterable<BoatDTO> boats, AsyncCallback<Void> callback) throws UnauthorizedException;
     
-    void setTrackingTimes(RaceLogSetTrackingTimesDTO dto, AsyncCallback<Void> callback) throws NotFoundException;
+    void setTrackingTimes(RaceLogSetTrackingTimesDTO dto, AsyncCallback<Void> callback);
     
     /**
      * Copies one race's competitor set to other races.
@@ -516,8 +516,6 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
 
     void importWindFromIgtimi(List<RaceDTO> selectedRaces, boolean correctByDeclination,
             AsyncCallback<Map<RegattaAndRaceIdentifier, Integer>> asyncCallback);
-
-    void getEventById(UUID id, boolean withStatisticalData, AsyncCallback<EventDTO> callback);
 
     /**
      * @return {@code true} if the race was not yet denoted for race log tracking and now has successfully been denoted
