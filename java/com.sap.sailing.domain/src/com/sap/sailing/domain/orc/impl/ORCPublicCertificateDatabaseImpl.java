@@ -109,6 +109,7 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
         private final Double gph;
         private final UUID datInGID;
         private final String referenceNumber;
+        private final CertificateFamily family;
         private final String yachtName;
         private final String sailNumber;
         private final String boatClassName;
@@ -122,9 +123,9 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
         private final Boolean isValid;
 
         public CertificateHandleImpl(CountryCode issuingCountry, String fileId, Double gph, String sssid,
-                UUID datInGID, String referenceNumber, String yachtName, String sailNumber, String boatClassName,
-                String designer, String builder, Integer yearBuilt, TimePoint issueDate, Integer certType,
-                Boolean oneDesign, Boolean isProvisional, Boolean isValid) {
+                UUID datInGID, String referenceNumber, CertificateFamily family, String yachtName, String sailNumber,
+                String boatClassName, String designer, String builder, Integer yearBuilt, TimePoint issueDate,
+                Integer certType, Boolean oneDesign, Boolean isProvisional, Boolean isValid) {
             super();
             this.issuingCountry = issuingCountry;
             this.fileId = fileId;
@@ -132,6 +133,7 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
             this.sssid = sssid;
             this.datInGID = datInGID;
             this.referenceNumber = referenceNumber;
+            this.family = family;
             this.yachtName = yachtName;
             this.sailNumber = sailNumber;
             this.boatClassName = boatClassName;
@@ -198,6 +200,11 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
         @Override
         public String getReferenceNumber() {
             return referenceNumber;
+        }
+
+        @Override
+        public CertificateFamily getFamily() {
+            return family;
         }
 
         @Override
@@ -330,6 +337,7 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
         Double gph = null;
         UUID datInGID = null;
         String referenceNumber = null;
+        CertificateFamily family = CertificateFamily.UNKNOWN;
         String yachtName = null;
         String sailNumber = null;
         String boatClassName = null;
@@ -358,6 +366,9 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
                 break;
             case "RefNo":
                 referenceNumber = child.getTextContent().trim();
+                break;
+            case "Family":
+                family = child.getTextContent().trim().isEmpty() ? CertificateFamily.UNKNOWN : CertificateFamily.fromId(Integer.valueOf(child.getTextContent().trim()));
                 break;
             case "YachtName":
                 yachtName = child.getTextContent();
@@ -400,8 +411,9 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
                 break;
             }
         }
-        return new CertificateHandleImpl(issuingCountry, fileId, gph, sssid, datInGID, referenceNumber,
-                yachtName, sailNumber, boatClassName, designer, builder, yearBuilt, issueDate, certType, isOneDesign, isProvisional, isValid);
+        return new CertificateHandleImpl(issuingCountry, fileId, gph, sssid, datInGID, referenceNumber, family,
+                yachtName, sailNumber, boatClassName, designer, builder, yearBuilt, issueDate, certType, isOneDesign,
+                isProvisional, isValid);
     }
     
     @Override
@@ -471,8 +483,8 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
     }
 
     @Override
-    public ORCCertificate getCertificate(String referenceNumber) throws Exception {
-        final String queryParameters = "ext=json&RefNo="+referenceNumber;
+    public ORCCertificate getCertificate(String referenceNumber, CertificateFamily family) throws Exception {
+        final String queryParameters = "ext=json&RefNo="+referenceNumber+"&family="+family.getFamilyQueryParamValue();
         logger.fine("Obtaining certificate for reference number "+referenceNumber);
         final ORCCertificate result = getSingleCertificate(queryParameters);
         if (result == null) {
@@ -501,7 +513,7 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
         final Map<CertificateHandle, Future<ORCCertificate>> futures = new HashMap<>();
         for (final CertificateHandle handle : handles) {
             if (!handle.getReferenceNumber().trim().isEmpty()) {
-                final FutureTask<ORCCertificate> task = new FutureTask<ORCCertificate>(()->getCertificate(handle.getReferenceNumber()));
+                final FutureTask<ORCCertificate> task = new FutureTask<ORCCertificate>(()->getCertificate(handle.getReferenceNumber(), handle.getFamily()));
                 final Thread backgroundExecutor = new Thread(task, "ORC certificate background download thread for "+handle.getReferenceNumber());
                 backgroundExecutor.setDaemon(true);
                 backgroundExecutor.start();
