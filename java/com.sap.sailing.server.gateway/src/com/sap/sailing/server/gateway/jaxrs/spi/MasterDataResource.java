@@ -135,12 +135,7 @@ public class MasterDataResource extends AbstractSailingServerResource {
                 }
                 if (exportTrackedRacesAndStartTracking) {
                     for (TrackedRace trackedRace : leaderboard.getTrackedRaces()) {
-                        // TODO: Bug5231: Why is this throwing exception?
-//                        if (!securityService.hasCurrentUserOneOfExplicitPermissions(trackedRace,
-//                                PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS)) {
-//                            throw new AuthorizationException("No permission to read tracked race "
-//                                    + trackedRace.getIdentifier() + " for leaderboard '" + leaderboard.getName() + "'");
-//                        }
+                        securityService.checkCurrentUserReadPermission(trackedRace);
                         connectivityParametersToRestore.add(getService().getConnectivityParametersByRace(trackedRace.getRace()));
                     }
                 }
