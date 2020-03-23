@@ -12,8 +12,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
-import org.osgi.util.tracker.ServiceTracker;
-
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelogsensortracking.SensorFixMapperFactory;
@@ -24,14 +22,15 @@ import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaListener;
 import com.sap.sailing.server.interfaces.RacingEventService;
+import com.sap.sse.replication.FullyInitializedReplicableTracker;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.OperationWithResultWithIdWrapper;
 import com.sap.sse.replication.OperationsToMasterSender;
+import com.sap.sse.replication.OperationsToMasterSendingQueue;
 import com.sap.sse.replication.ReplicableWithObjectInputStream;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationService;
-import com.sap.sse.replication.OperationsToMasterSendingQueue;
 
 /**
  * This is the main entry point of the {@link SensorFixStore} based fix tracking.
@@ -51,7 +50,7 @@ public class RegattaLogFixTrackerRegattaListener extends AbstractTrackedRegattaA
     private static final Logger log = Logger.getLogger(RegattaLogFixTrackerRegattaListener.class.getName());
     
     private final Map<RegattaAndRaceIdentifier, RaceLogFixTrackerManager> dataTrackers = new ConcurrentHashMap<>();
-    private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
+    private final FullyInitializedReplicableTracker<RacingEventService> racingEventServiceTracker;
     private final SensorFixMapperFactory sensorFixMapperFactory;
 
     /**
@@ -63,10 +62,11 @@ public class RegattaLogFixTrackerRegattaListener extends AbstractTrackedRegattaA
     private OperationsToMasterSendingQueue unsentOperationsToMasterSender;
 
     public RegattaLogFixTrackerRegattaListener(
-            ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker,
+            FullyInitializedReplicableTracker<RacingEventService> racingEventServiceTracker,
             SensorFixMapperFactory sensorFixMapperFactory) {
         this.racingEventServiceTracker = racingEventServiceTracker;
         this.sensorFixMapperFactory = sensorFixMapperFactory;
+        this.currentlyFillingFromInitialLoad = false;
     }
 
     @Override
@@ -81,30 +81,38 @@ public class RegattaLogFixTrackerRegattaListener extends AbstractTrackedRegattaA
     @Override
     protected void onRaceAdded(RegattaAndRaceIdentifier raceIdentifier, DynamicTrackedRegatta trackedRegatta,
             DynamicTrackedRace trackedRace) {
-        racingEventServiceTracker.getService().getRaceTrackerByRegattaAndRaceIdentifier(raceIdentifier, (raceTracker) -> {
-            if (raceTracker != null) {
-                boolean added = raceTracker.add(new RaceTracker.Listener() {
-                    @Override
-                    public void onTrackerWillStop(boolean preemptive, boolean willBeRemoved) {
-                        raceTracker.remove(this);
-                        removeRaceLogSensorDataTracker(raceIdentifier, preemptive, willBeRemoved);
+            try {
+                racingEventServiceTracker.getInitializedService(0).getRaceTrackerByRegattaAndRaceIdentifier(raceIdentifier, (raceTracker) -> {
+                    try {
+                        if (raceTracker != null) {
+                            boolean added = raceTracker.add(new RaceTracker.Listener() {
+                                @Override
+                                public void onTrackerWillStop(boolean preemptive, boolean willBeRemoved) {
+                                    raceTracker.remove(this);
+                                    removeRaceLogSensorDataTracker(raceIdentifier, preemptive, willBeRemoved);
+                                }
+                            });
+                            // if !added, the RaceTracker is already stopped, so we are not allowed to start fix tracking
+                            if (added) {
+                                RaceLogFixTrackerManager trackerManager = new RaceLogFixTrackerManager(
+                                        (DynamicTrackedRace) trackedRace, racingEventServiceTracker.getInitializedService(0).getSensorFixStore(),
+                                        sensorFixMapperFactory);
+                                RaceLogFixTrackerManager oldInstance = null;
+                                synchronized (this) {
+                                    oldInstance = dataTrackers.put(raceIdentifier, trackerManager);
+                                }
+                                if (oldInstance != null) {
+                                    oldInstance.stop(/* preemptive */ true, /* willBeRemoved */ false);
+                                }
+                            }
+                        }
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
                     }
                 });
-                // if !added, the RaceTracker is already stopped, so we are not allowed to start fix tracking
-                if (added) {
-                    RaceLogFixTrackerManager trackerManager = new RaceLogFixTrackerManager(
-                            (DynamicTrackedRace) trackedRace, racingEventServiceTracker.getService().getSensorFixStore(),
-                            sensorFixMapperFactory);
-                    RaceLogFixTrackerManager oldInstance = null;
-                    synchronized (this) {
-                        oldInstance = dataTrackers.put(raceIdentifier, trackerManager);
-                    }
-                    if (oldInstance != null) {
-                        oldInstance.stop(/* preemptive */ true, /* willBeRemoved */ false);
-                    }
-                }
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
-        });
     }
     
     @Override
@@ -130,7 +138,7 @@ public class RegattaLogFixTrackerRegattaListener extends AbstractTrackedRegattaA
     
     // Replication related methods and fields
     private final ConcurrentHashMap<OperationExecutionListener<RegattaLogFixTrackerRegattaListener>, OperationExecutionListener<RegattaLogFixTrackerRegattaListener>> operationExecutionListeners = new ConcurrentHashMap<>();
-    private ThreadLocal<Boolean> currentlyFillingFromInitialLoad = ThreadLocal.withInitial(() -> false);
+    private volatile boolean currentlyFillingFromInitialLoad;
     private ThreadLocal<Boolean> currentlyApplyingOperationReceivedFromMaster = ThreadLocal.withInitial(() -> false);
     private final Set<OperationWithResultWithIdWrapper<RegattaLogFixTrackerRegattaListener, ?>> operationsSentToMasterForReplication = new HashSet<>();
     private ReplicationMasterDescriptor master;
@@ -174,12 +182,12 @@ public class RegattaLogFixTrackerRegattaListener extends AbstractTrackedRegattaA
 
     @Override
     public boolean isCurrentlyFillingFromInitialLoad() {
-        return currentlyFillingFromInitialLoad.get();
+        return currentlyFillingFromInitialLoad;
     }
 
     @Override
     public void setCurrentlyFillingFromInitialLoad(boolean currentlyFillingFromInitialLoad) {
-        this.currentlyFillingFromInitialLoad.set(currentlyFillingFromInitialLoad);
+        this.currentlyFillingFromInitialLoad = currentlyFillingFromInitialLoad;
     }
 
     @Override
