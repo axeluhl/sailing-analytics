@@ -46,6 +46,7 @@ import com.sap.sailing.shared.server.operations.CreateMarkRoleOperation;
 import com.sap.sailing.shared.server.operations.CreateMarkTemplateOperation;
 import com.sap.sailing.shared.server.operations.DeleteCourseTemplateOperation;
 import com.sap.sailing.shared.server.operations.DeleteMarkPropertiesOperation;
+import com.sap.sailing.shared.server.operations.RecordUsageForMarkRoleOperation;
 import com.sap.sailing.shared.server.operations.RecordUsageForMarkTemplateOperation;
 import com.sap.sailing.shared.server.operations.SetPositioningInformationForMarkPropertiesOperation;
 import com.sap.sailing.shared.server.operations.UpdateCourseTemplateOperation;
@@ -495,7 +496,7 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     public void recordUsage(final MarkProperties markProperties, final MarkRole markRole) {
         getSecurityService().checkCurrentUserUpdatePermission(markProperties);
         final UUID markPropertiesId = markProperties.getId();
-        apply(s -> s.internalRecordUsage(markPropertiesId, markRole));
+        apply(new RecordUsageForMarkRoleOperation(markPropertiesId, markRole));
     }
 
     @Override
