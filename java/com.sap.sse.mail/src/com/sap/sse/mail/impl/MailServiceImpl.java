@@ -28,6 +28,7 @@ import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.mail.MailServiceResolver;
 import com.sap.sse.mail.SerializableMultipartSupplier;
+import com.sap.sse.mail.operations.SendMailOperation;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.OperationWithResultWithIdWrapper;
@@ -138,7 +139,7 @@ public class MailServiceImpl implements ReplicableMailService {
 
     @Override
     public void sendMail(String toAddress, String subject, String body) throws MailException {
-        apply(s -> s.internalSendMail(toAddress, subject, body));
+        apply(new SendMailOperation(toAddress, subject, body));
     }
 
     @Override
