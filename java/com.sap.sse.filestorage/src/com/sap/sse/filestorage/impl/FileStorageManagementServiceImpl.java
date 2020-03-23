@@ -24,6 +24,7 @@ import com.sap.sse.filestorage.FileStorageServiceProperty;
 import com.sap.sse.filestorage.FileStorageServicePropertyStore;
 import com.sap.sse.filestorage.FileStorageServiceResolver;
 import com.sap.sse.filestorage.operations.SetActiveFileStorageServiceOperation;
+import com.sap.sse.filestorage.operations.SetFileStorageServicePropertyOperation;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.OperationWithResultWithIdWrapper;
@@ -102,7 +103,7 @@ public class FileStorageManagementServiceImpl implements ReplicableFileStorageMa
     @Override
     public void setFileStorageServiceProperty(FileStorageService service, String propertyName, String propertyValue)
             throws NoCorrespondingServiceRegisteredException, IllegalArgumentException {
-        apply(s -> s.internalSetFileStorageServiceProperty(service, propertyName, propertyValue));
+        apply(new SetFileStorageServicePropertyOperation(service, propertyName, propertyValue));
     }
     
     @Override
