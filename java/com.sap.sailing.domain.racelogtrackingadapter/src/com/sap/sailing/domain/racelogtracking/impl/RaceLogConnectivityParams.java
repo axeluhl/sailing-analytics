@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.racelogtracking.impl;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -29,7 +30,9 @@ import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceTrackingConnectivityParameters;
 
-public class RaceLogConnectivityParams extends AbstractRaceTrackingConnectivityParameters {
+public class RaceLogConnectivityParams extends AbstractRaceTrackingConnectivityParameters implements Serializable {
+
+    private static final long serialVersionUID = -2011714861990480270L;
     /**
      * A type identifier that needs to be unique for the 
      */
@@ -41,7 +44,7 @@ public class RaceLogConnectivityParams extends AbstractRaceTrackingConnectivityP
     private final Leaderboard leaderboard;
     private final long delayToLiveInMillis;
     private final Regatta regatta;
-    private final DomainFactory domainFactory;
+    private final transient DomainFactory domainFactory;
 
     public RaceLogConnectivityParams(AbstractLogEventAuthor serverAuthor, Regatta regatta, RaceColumn raceColumn, Fleet fleet,
             Leaderboard leaderboard, long delayToLiveInMillis, DomainFactory domainFactory, boolean trackWind,

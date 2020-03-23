@@ -210,6 +210,7 @@ public class EditSTL extends javax.swing.JDialog {
         return stl;
     }
     
+    @SuppressWarnings("serial")
     private class CompetitorWithDesc extends CompetitorWithoutID {
         
         public CompetitorWithDesc(String boatID, String NOC, String name){
