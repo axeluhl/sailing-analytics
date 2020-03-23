@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.swisstimingadapter.impl;
 
 
+import java.io.Serializable;
+
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
@@ -16,7 +18,9 @@ import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceTrackingConnectivityParameters;
 
-public class SwissTimingTrackingConnectivityParameters extends AbstractRaceTrackingConnectivityParameters {
+public class SwissTimingTrackingConnectivityParameters extends AbstractRaceTrackingConnectivityParameters implements Serializable {
+
+    private static final long serialVersionUID = -8098116476615375419L;
     public static final String TYPE = "SWISS_TIMING";
     
     private final String hostname;
@@ -25,10 +29,10 @@ public class SwissTimingTrackingConnectivityParameters extends AbstractRaceTrack
     private final String raceName;
     private final String raceDescription;
     private final BoatClass boatClass;
-    private final SwissTimingFactory swissTimingFactory;
-    private final DomainFactory domainFactory;
-    private final RaceLogStore raceLogStore;
-    private final RegattaLogStore regattaLogStore;
+    private final transient SwissTimingFactory swissTimingFactory;
+    private final transient DomainFactory domainFactory;
+    private final transient RaceLogStore raceLogStore;
+    private final transient RegattaLogStore regattaLogStore;
     private final long delayToLiveInMillis;
     private final StartList startList;
     private final boolean useInternalMarkPassingAlgorithm;

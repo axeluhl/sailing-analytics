@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.swisstimingreplayadapter.impl;
 
+import java.io.Serializable;
+
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
@@ -18,18 +20,21 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceTrackingConnectivityParameters;
 import com.sap.sse.common.Util;
 
-public class SwissTimingReplayConnectivityParameters extends AbstractRaceTrackingConnectivityParameters {
+public class SwissTimingReplayConnectivityParameters extends AbstractRaceTrackingConnectivityParameters implements Serializable{
+
+    private static final long serialVersionUID = -1380661620949638776L;
+
     public static final String TYPE = "SWISS_TIMING_REPLAY";
     
     private final boolean useInternalMarkPassingAlgorithm;
-    private final DomainFactory domainFactory;
+    private final transient DomainFactory domainFactory;
     private final String boatClassName;
-    private final RaceLogStore raceLogStore;
-    private final RegattaLogStore regattaLogStore;
+    private final transient RaceLogStore raceLogStore;
+    private final transient RegattaLogStore regattaLogStore;
     private final String raceName;
     private final String raceID;
     private final String link;
-    private final SwissTimingReplayService replayService;
+    private final transient SwissTimingReplayService replayService;
     
     class SwissTimingReplayRaceTracker extends AbstractRaceTrackerImpl {
         private final WindStore windStore;
