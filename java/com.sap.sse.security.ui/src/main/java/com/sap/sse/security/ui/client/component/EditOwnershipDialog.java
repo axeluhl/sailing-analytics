@@ -128,7 +128,6 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
         this.securedObjectId = securedObjectId;
         final StrippedUserDTO userOwner = ownership == null ? null : ownership.getUserOwner();
         this.resolvedUserGroup = ownership == null ? null : ownership.getTenantOwner();
-
         // User Suggest
         final MultiWordSuggestOracle suggestUserOracle = new MultiWordSuggestOracle();
         this.userManagementService.getUserList(new AsyncCallback<Collection<UserDTO>>() {
@@ -144,14 +143,11 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
                 suggestUserOracle.setDefaultSuggestionsFromText(userNames);
             }
         });
-
         this.suggestUserName = createSuggestBox(suggestUserOracle);
         this.suggestUserName.setText(userOwner == null ? "" : userOwner.getName());
-
         // User Group Suggest
         final MultiWordSuggestOracle suggestUserGroupOracle = new MultiWordSuggestOracle();
         this.userManagementService.getUserGroups(new AsyncCallback<Collection<UserGroupDTO>>() {
-
             @Override
             public void onFailure(Throwable caught) {
                 Notification.notify(stringMessages.errorObtainingUserGroup(caught.getMessage()),
@@ -168,16 +164,12 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
         });
         this.suggestUserGroupName = createSuggestBox(suggestUserGroupOracle);
         this.suggestUserGroupName.setText(resolvedUserGroup == null ? "" : resolvedUserGroup.getName());
-
         this.suggestUserName.addValueChangeHandler(e -> checkIfUserExists());
         this.suggestUserGroupName.addValueChangeHandler(e -> resolveUserGroup());
-
         this.suggestUserName.addSelectionHandler(e -> checkIfUserExists());
         this.suggestUserGroupName.addSelectionHandler(e -> resolveUserGroup());
-
         DialogUtils.addFocusUponKeyUpToggler(this.suggestUserName);
         DialogUtils.addFocusUponKeyUpToggler(this.suggestUserGroupName);
-
         checkIfUserExists();
         resolveUserGroup();
     }
@@ -189,12 +181,17 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
         result.setWidget(0, 1, new Label(securedObjectId));
         result.setWidget(1, 0, new Label(stringMessages.permissionType() + ": "));
         result.setWidget(1, 1, new Label(permissionType));
-
         result.setWidget(2, 0, new Label(stringMessages.user()));
         result.setWidget(2, 1, suggestUserName);
         result.setWidget(3, 0, new Label(stringMessages.group()));
         result.setWidget(3, 1, suggestUserGroupName);
         return result;
+    }
+
+    @Override
+    public void show() {
+        super.show();
+        suggestUserName.setFocus(true);
     }
 
     private void resolveUserGroup() {
