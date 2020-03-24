@@ -13,15 +13,6 @@ public abstract class AbstractRaceTrackingConnectivityParameters implements Race
         this.trackWind = trackWind;
         this.correctWindDirectionByMagneticDeclination = correctWindDirectionByMagneticDeclination;
     }
-    
-//    /**
-//     * Needed for serialization of {@link com.sap.sailing.domain.tractracadapter.impl.RaceTrackingConnectivityParametersImpl}
-//     */
-//    protected AbstractRaceTrackingConnectivityParameters() {
-//        // TODO Auto-generated constructor stub
-//        super();
-//        this.correctWindDirectionByMagneticDeclination = true;
-//    }
 
     @Override
     public boolean isTrackWind() {
