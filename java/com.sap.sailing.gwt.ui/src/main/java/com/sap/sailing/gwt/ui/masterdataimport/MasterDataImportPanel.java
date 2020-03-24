@@ -236,6 +236,7 @@ public class MasterDataImportPanel extends VerticalPanel {
         int eventsCreated = creationCount.getEventCount();
         int regattasCreated = creationCount.getRegattaCount();
         int mediaTracksImported = creationCount.getMediaTrackCount();
+        int trackedRacesImported = creationCount.getTrackedRacesCount();
         if (regattasCreated > 0) {
             regattaRefresher.fillRegattas();
         }
@@ -249,11 +250,11 @@ public class MasterDataImportPanel extends VerticalPanel {
             leaderboardsRefresher.fillLeaderboards();
         }
         if (mediaTracksImported > 0) {
-        	mediaTracksRefresher.loadMediaTracks();
+            mediaTracksRefresher.loadMediaTracks();
         }
         Set<String> overwrittenRegattas = creationCount.getOverwrittenRegattaNames();
         showSuccessAlert(leaderboardsCreated, leaderboardGroupsCreated, eventsCreated, regattasCreated,
-                mediaTracksImported, overwrittenRegattas);
+                mediaTracksImported, trackedRacesImported, overwrittenRegattas);
         changeButtonStateAccordingToApplicationState();
     }
 
@@ -286,10 +287,10 @@ public class MasterDataImportPanel extends VerticalPanel {
     }
 
     protected void showSuccessAlert(int leaderboardsCreated, int leaderboardGroupsCreated, int eventsCreated,
-            int regattasCreated, int mediaTracksImported, Set<String> overwrittenRegattas) {
+            int regattasCreated, int mediaTracksImported, int trackedRacesImported, Set<String> overwrittenRegattas) {
         StringBuffer buffer = new StringBuffer();
         buffer.append(stringMessages.importSuccess(leaderboardGroupsCreated, leaderboardsCreated, eventsCreated,
-                regattasCreated, mediaTracksImported));
+                regattasCreated, mediaTracksImported, trackedRacesImported));
         if (overwrittenRegattas.size() > 0) {
             buffer.append("\n\n" + stringMessages.importSuccessOverwriteInfo() + "\n");
             for (String regattaName : overwrittenRegattas) {

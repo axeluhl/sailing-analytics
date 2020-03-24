@@ -150,7 +150,7 @@ public class ImportMasterDataOperation extends
             progress.setCurrentSubProgressPct(0);
             createWindTracks(toState);
             progress.setCurrentSubProgress(DataImportSubProgress.IMPORT_SENSOR_FIXES);
-            progress.setOverAllProgressPct(0.8);
+            progress.setOverAllProgressPct(0.7);
             progress.setCurrentSubProgressPct(0);
             importRaceLogTrackingGPSFixes(toState);
             if (masterData.getDeviceConfigurations() != null) {
@@ -162,6 +162,9 @@ public class ImportMasterDataOperation extends
                 ensureOwnership(trackToImport.getIdentifier(), securityService);
             }
             toState.mediaTracksImported(allMediaTracksToImport, creationCount, override);
+            progress.setCurrentSubProgress(DataImportSubProgress.IMPORT_TRACKED_RACES);
+            progress.setOverAllProgressPct(0.9);
+            progress.setCurrentSubProgressPct(0);
             importTrackedRaces(toState, securityService);            
             dataImportLock.getProgress(importOperationId).setResult(creationCount);
             return creationCount;
@@ -617,6 +620,8 @@ public class ImportMasterDataOperation extends
      */
     private void importTrackedRaces(RacingEventService toState, SecurityService securityService) throws Exception {
         if (connectivityParametersToRestore != null) {
+            int i = 0;
+            final int numberOfConnectivityParamsToRestore = connectivityParametersToRestore.size();
             DomainObjectFactory domainObjectFactory = toState.getDomainObjectFactory();
             TypeBasedServiceFinder<RaceTrackingConnectivityParametersHandler> serviceFinder = domainObjectFactory.getRaceTrackingConnectivityParamsServiceFinder();
             for (RaceTrackingConnectivityParameters param : connectivityParametersToRestore) {
@@ -626,10 +631,13 @@ public class ImportMasterDataOperation extends
                     final RaceDefinition race = raceHandle.getRace(RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
                     if (race != null) {
                         ensureOwnership(raceHandle.getTrackedRegatta().getTrackedRace(race).getIdentifier(), securityService);
+                        creationCount.addOneTrackedRace(race.getId().toString());
                     } else {
                         logger.severe("Race for handle "+raceHandle+" didn't show in "+RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS+"ms; ownership not set");
                     }
                 }
+                i++;
+                progress.setCurrentSubProgressPct((double) i / numberOfConnectivityParamsToRestore);
             }
         }
     }
