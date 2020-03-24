@@ -287,7 +287,7 @@ public class MasterDataImportPanel extends VerticalPanel {
             int regattasCreated, int mediaTracksImported, Set<String> overwrittenRegattas) {
         StringBuffer buffer = new StringBuffer();
         buffer.append(stringMessages.importSuccess(leaderboardGroupsCreated, leaderboardsCreated, eventsCreated,
-                regattasCreated, mediaTracksImported));
+                regattasCreated, mediaTracksImported, /** constant for translation only **/ 1));
         if (overwrittenRegattas.size() > 0) {
             buffer.append("\n\n" + stringMessages.importSuccessOverwriteInfo() + "\n");
             for (String regattaName : overwrittenRegattas) {
