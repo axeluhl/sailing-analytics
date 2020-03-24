@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.racelogtracking.impl;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -30,7 +29,7 @@ import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceTrackingConnectivityParameters;
 
-public class RaceLogConnectivityParams extends AbstractRaceTrackingConnectivityParameters implements Serializable {
+public class RaceLogConnectivityParams extends AbstractRaceTrackingConnectivityParameters {
 
     private static final long serialVersionUID = -2011714861990480270L;
     /**

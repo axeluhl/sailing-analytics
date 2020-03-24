@@ -1,7 +1,5 @@
 package com.sap.sailing.domain.swisstimingreplayadapter.impl;
 
-import java.io.Serializable;
-
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
@@ -20,7 +18,7 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceTrackingConnectivityParameters;
 import com.sap.sse.common.Util;
 
-public class SwissTimingReplayConnectivityParameters extends AbstractRaceTrackingConnectivityParameters implements Serializable{
+public class SwissTimingReplayConnectivityParameters extends AbstractRaceTrackingConnectivityParameters {
 
     private static final long serialVersionUID = -1380661620949638776L;
 

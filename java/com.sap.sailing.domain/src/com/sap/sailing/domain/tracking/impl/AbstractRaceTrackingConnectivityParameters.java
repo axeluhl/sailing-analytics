@@ -3,6 +3,8 @@ package com.sap.sailing.domain.tracking.impl;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 
 public abstract class AbstractRaceTrackingConnectivityParameters implements RaceTrackingConnectivityParameters {
+
+    private static final long serialVersionUID = 7339793330019551583L;
     private boolean trackWind;
     private final boolean correctWindDirectionByMagneticDeclination;
     
@@ -12,14 +14,14 @@ public abstract class AbstractRaceTrackingConnectivityParameters implements Race
         this.correctWindDirectionByMagneticDeclination = correctWindDirectionByMagneticDeclination;
     }
     
-    /**
-     * Needed for serialization of {@link com.sap.sailing.domain.tractracadapter.impl.RaceTrackingConnectivityParametersImpl}
-     */
-    protected AbstractRaceTrackingConnectivityParameters() {
-        // TODO Auto-generated constructor stub
-        super();
-        this.correctWindDirectionByMagneticDeclination = true;
-    }
+//    /**
+//     * Needed for serialization of {@link com.sap.sailing.domain.tractracadapter.impl.RaceTrackingConnectivityParametersImpl}
+//     */
+//    protected AbstractRaceTrackingConnectivityParameters() {
+//        // TODO Auto-generated constructor stub
+//        super();
+//        this.correctWindDirectionByMagneticDeclination = true;
+//    }
 
     @Override
     public boolean isTrackWind() {

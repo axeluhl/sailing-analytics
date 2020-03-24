@@ -1,8 +1,6 @@
 package com.sap.sailing.domain.swisstimingadapter.impl;
 
 
-import java.io.Serializable;
-
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
@@ -18,7 +16,7 @@ import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceTrackingConnectivityParameters;
 
-public class SwissTimingTrackingConnectivityParameters extends AbstractRaceTrackingConnectivityParameters implements Serializable {
+public class SwissTimingTrackingConnectivityParameters extends AbstractRaceTrackingConnectivityParameters {
 
     private static final long serialVersionUID = -8098116476615375419L;
     public static final String TYPE = "SWISS_TIMING";
