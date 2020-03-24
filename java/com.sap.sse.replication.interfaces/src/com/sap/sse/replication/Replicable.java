@@ -71,12 +71,14 @@ extends OperationsToMasterSender<S, OperationWithResult<S, ?>>, Replicator<S, O>
      * If this object is not a replica, executes the <code>operation</code>. By
      * {@link OperationExecutionListener#executed(OperationWithTransformationSupport) notifying} all registered
      * operation execution listeners about the execution of the operation, the <code>operation</code> will in particular
-     * be replicated to all replicas registered.
+     * be replicated to all replicas registered, unless its
+     * {@link OperationWithResult#isRequiresExplicitTransitiveReplication()} method returns {@code false}.
      * <p>
      * 
-     * If this object is a replica, the operation will not be executed locally and will instead be forwarded to the
+     * If this object is a replica, the operation will be executed locally and will then be forwarded to the
      * master server for execution from where it is expected to replicate to all replicas including this object where
-     * the {@link #applyReplicated(OperationWithResult)} method will then carry out the operation.
+     * the {@link #applyReplicated(OperationWithResult)} method will identify it as the one that originated here and
+     * ignore it (see also {@link OperationWithResultWithIdWrapper}).
      * <p>
      * 
      * To determine whether this {@link Replicable} is a replica, this method uses the
@@ -87,9 +89,11 @@ extends OperationsToMasterSender<S, OperationWithResult<S, ?>>, Replicator<S, O>
 
     /**
      * Executes an operation received from another (usually "master") server where this object lives on a replica. The
-     * <code>operation</code>'s effects also need to be replicated to any replica of this service known and
+     * <code>operation</code>'s effects also need to be replicated to any replica of this service known, so this method
      * {@link OperationExecutionListener#executed(OperationWithTransformationSupport) notifies} all registered operation
-     * execution listeners about the execution of the operation.<p>
+     * execution listeners about the execution of the operation, unless its
+     * {@link OperationWithResult#isRequiresExplicitTransitiveReplication()} method returns {@code false}.
+     * <p>
      * 
      * One important difference to {@link #apply(OperationWithResult)} is that the operation will be applied immediately
      * in any case whereas {@link #apply(OperationWithResult)} will check first if this is a replica and in that case
