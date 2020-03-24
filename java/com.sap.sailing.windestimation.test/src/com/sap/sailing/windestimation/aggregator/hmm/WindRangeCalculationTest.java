@@ -4,8 +4,6 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import com.sap.sailing.windestimation.aggregator.hmm.IntersectedWindRange;
-import com.sap.sailing.windestimation.aggregator.hmm.WindCourseRange;
 import com.sap.sailing.windestimation.aggregator.hmm.WindCourseRange.CombinationModeOnViolation;
 
 /**

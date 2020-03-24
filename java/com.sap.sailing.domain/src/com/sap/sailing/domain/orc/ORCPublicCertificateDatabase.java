@@ -3,6 +3,8 @@ package com.sap.sailing.domain.orc;
 import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Future;
@@ -95,6 +97,37 @@ import com.sap.sse.common.Util;
 public interface ORCPublicCertificateDatabase {
     ORCPublicCertificateDatabase INSTANCE = new ORCPublicCertificateDatabaseImpl();
     
+    public enum CertificateFamily {
+        UNKNOWN(0, ""), ORC(1, "ORC"), SUPER_YACHT(2, "SY"), DOUBLE_HANDED(3, "DH"), MULTI_HULL(4, "Mu");
+        
+        private final int familyId;
+        private final String familyQueryParamValue;
+        private final static Map<Integer, CertificateFamily> familyById;
+        
+        static {
+            familyById = new HashMap<>();
+            for (final CertificateFamily family : values()) {
+                familyById.put(family.getFamilyId(), family);
+            }
+        }
+        
+        private CertificateFamily(int familyId, String familyQueryParamValue) {
+            this.familyId = familyId;
+            this.familyQueryParamValue = familyQueryParamValue;
+        }
+
+        public int getFamilyId() {
+            return familyId;
+        }
+
+        public String getFamilyQueryParamValue() {
+            return familyQueryParamValue;
+        }
+        
+        public static CertificateFamily fromId(int familyId) {
+            return familyById.get(familyId);
+        }
+    }
     /**
      * Equality and hash code of such handles is based on the {@link #getReferenceNumber() reference number} only.
      * 
@@ -108,6 +141,7 @@ public interface ORCPublicCertificateDatabase {
         String getSSSID();
         UUID getDatInGID();
         String getReferenceNumber();
+        CertificateFamily getFamily();
         String getYachtName();
         String getSailNumber();
         String getBoatClassName();
@@ -140,15 +174,7 @@ public interface ORCPublicCertificateDatabase {
     Iterable<CertificateHandle> search(CountryCode country, Integer yearOfIssuance, String referenceNumber,
             String yachtName, String sailNumber, String boatClassName, boolean includeInvalid) throws Exception;
     
-    default Iterable<ORCCertificate> getCertificates(Iterable<CertificateHandle> handles) throws Exception {
-        return Util.map(handles, handle->{
-            try {
-                return getCertificate(handle.getReferenceNumber());
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        });
-    }
+    Iterable<ORCCertificate> getCertificates(Iterable<CertificateHandle> handles) throws Exception;
     
     default Iterable<ORCCertificate> getCertificates(CertificateHandle... handles) throws Exception {
         return getCertificates(Arrays.asList(handles));
@@ -160,10 +186,23 @@ public interface ORCPublicCertificateDatabase {
     
     ORCCertificate searchForUpdate(ORCCertificate certificate) throws Exception;
     
-    ORCCertificate searchForUpdate(CertificateHandle certificate) throws Exception;
+    ORCCertificate searchForUpdate(CertificateHandle certificateHandle) throws Exception;
     
-    ORCCertificate getCertificate(String referenceNumber) throws Exception;
-    
+    /**
+     * Searches for a default {@link CertificateFamily#ORC} certificate by the given {@code referenceNumber}.
+     * Note that this may not find certificates of other families.
+     */
+    default ORCCertificate getCertificate(String referenceNumber) throws Exception {
+        return getCertificate(referenceNumber, CertificateFamily.ORC);
+    }
+
+    ORCCertificate getCertificate(String referenceNumber, CertificateFamily family) throws Exception;
+
+    default ORCCertificate getCertificate(CertificateHandle certificateHandle) throws Exception {
+        final Iterable<ORCCertificate> certificates = getCertificates(certificateHandle);
+        return certificates.iterator().hasNext() ? certificates.iterator().next() : null;
+    }
+
     /**
      * Creates a lookup job that is forked into the background. The job will first try an exact lookup
      * with the parameters as specified. If one or more results are obtained this way, they are returned. If no
