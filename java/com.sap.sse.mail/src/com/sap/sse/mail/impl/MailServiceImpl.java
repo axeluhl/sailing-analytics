@@ -266,7 +266,7 @@ public class MailServiceImpl implements ReplicableMailService {
 
     @Override
     public <S, O extends OperationWithResult<S, ?>, T> void scheduleForSending(
-            OperationWithResult<S, T> operationWithResult, OperationsToMasterSender<S, O> sender) {
+            O operationWithResult, OperationsToMasterSender<S, O> sender) {
         if (unsentOperationForMasterQueue != null) {
             unsentOperationForMasterQueue.scheduleForSending(operationWithResult, sender);
         }

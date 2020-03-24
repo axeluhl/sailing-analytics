@@ -56,7 +56,7 @@ import com.sap.sse.util.ThreadLocalTransporter;
  *
  */
 public interface Replicable<S, O extends OperationWithResult<S, ?>>
-extends OperationsToMasterSender<S, OperationWithResult<S, ?>>, Replicator<S, O> {
+extends OperationsToMasterSender<S, O>, Replicator<S, O> {
     static final Logger logger = Logger.getLogger(Replicable.class.getName());
     
     /**
@@ -85,7 +85,7 @@ extends OperationsToMasterSender<S, OperationWithResult<S, ?>>, Replicator<S, O>
      * {@link ReplicationService#getReplicatingFromMaster()} method which also provides the master server's connectivity
      * information required to forward the <code>operation</code>.
      */
-    <T> T apply(OperationWithResult<S, T> operation);
+    <T> T apply(O operation);
 
     /**
      * Executes an operation received from another (usually "master") server where this object lives on a replica. The
@@ -99,7 +99,7 @@ extends OperationsToMasterSender<S, OperationWithResult<S, ?>>, Replicator<S, O>
      * in any case whereas {@link #apply(OperationWithResult)} will check first if this is a replica and in that case
      * forward the operation to the master for first execution instead of initiating the execution on the replica.
      */
-    <T> T applyReplicated(OperationWithResult<S, T> operation);
+    <T> T applyReplicated(O operation);
     
     void startedReplicatingFrom(ReplicationMasterDescriptor master);
     
@@ -162,7 +162,7 @@ extends OperationsToMasterSender<S, OperationWithResult<S, ?>>, Replicator<S, O>
      * sent to the master}. If so, the operation is ignored because it has been applied before to this replica.
      * Otherwise, it is locally applied and replicated, using a call to {@link #applyReplicated(OperationWithResult)}. 
      */
-    default void applyReceivedReplicated(OperationWithResult<S, ?> operation) {
+    default void applyReceivedReplicated(O operation) {
         if (!hasSentOperationToMaster(operation)) {
             assert !isCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster();
             try {
