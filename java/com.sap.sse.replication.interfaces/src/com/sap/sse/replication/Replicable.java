@@ -50,7 +50,17 @@ import com.sap.sse.util.ThreadLocalTransporter;
  *            the type of state to which the operations are applied; usually this will be set to the implementing
  *            subclass
  * @param <O>
- *            type of operation that the replicable accepts
+ *            type of operation that the replicable accepts; it is good practice to declare a dedicated interface for
+ *            the operation type of each {@link Replicable} implementation class. This helps to avoid accidentally
+ *            passing an operation intended for a different replicable service. Make sure to implement operation types
+ *            as dedicated classes and withstand the temptation to use lambdas. While lambdas may work at first and look
+ *            nice and compact, two major problems emerge (see also
+ *            <a href="https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=5197">bug 5197</a>): you may unintentionally
+ *            reference comprehensive contextual state in your lambda which then needs to get serialized with it; and by
+ *            using {@link Serializable} lambdas, serialization compatibility is brittle because it depends on the lambda's
+ *            position in its type, and hence code insertions, removals or changes in method ordering can already cause
+ *            unnecessary incompatibilities. Specifically for {@link Replicable} services shared by many instances this should
+ *            be avoided at any cost because incompatible changes then require upgrading the entire landscape.
  * 
  * @author Axel Uhl (D043530)
  *
