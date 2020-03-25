@@ -10,7 +10,6 @@ import java.util.stream.StreamSupport;
 
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
-import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
@@ -18,6 +17,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogPassChangeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AbortingFlagFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AbstractFinishPositioningListFinder.CompetitorResultsAndTheirCreationTimePoints;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.impl.BaseRaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFlagEventImpl;
@@ -42,7 +42,10 @@ import com.tractrac.model.lib.api.event.RaceStatusType;
  * {@link IRace#getStatus() race status} and can reconcile them with the {@link RaceLog} of a {@link TrackedRace} such
  * that afterwards the {@link RaceLog} is guaranteed to describe the competitor status accordingly. When the
  * reconciliation is requested and the {@link RaceLog} already represents the competitor status appropriately, no
- * changes will be applied to the race log.
+ * changes will be applied to the race log.<p>
+ * 
+ * When you create an object of this type, make sure to inform it about race logs being attached to / detached from
+ * the {@link TrackedRace} once the tracked race is known.
  * 
  * @author Axel Uhl (D043530)
  *
@@ -63,7 +66,15 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
     }
     
     /**
-     * Handles those race log events that may have an impact on the 
+     * Handles those race log events that may have an impact on the reconciliation process, including revocations and
+     * pass changes, and invokes
+     * {@link RaceAndCompetitorStatusWithRaceLogReconciler#reconcileCompetitorStatus(IRaceCompetitor, TrackedRace)} or
+     * {@link RaceAndCompetitorStatusWithRaceLogReconciler#reconcileRaceStatus(IRace, TrackedRace)} or both, depending
+     * on the type of even. Instances of this type are registered with race logs because the enclosing
+     * {@link RaceAndCompetitorStatusWithRaceLogReconciler} object has to get informed about race log attachments/detachments
+     * in its {@link RaceAndCompetitorStatusWithRaceLogReconciler#raceLogAttached(TrackedRace, RaceLog)} and
+     * {@link RaceAndCompetitorStatusWithRaceLogReconciler#raceLogDetached(TrackedRace, RaceLog)} methods.
+     * 
      * @author Axel Uhl (D043530)
      *
      */
@@ -75,24 +86,33 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
             super();
             this.raceLog = raceLog;
             this.trackedRace = trackedRace;
+            reconcileRaceStatus(tractracRace, trackedRace);
+            reconcileAllCompetitors(trackedRace);
+        }
+
+        private void reconcileAllCompetitors(TrackedRace trackedRace) {
+            for (final Competitor competitor : trackedRace.getRace().getCompetitors()) {
+                if (competitor.getId() instanceof UUID) {
+                    final IRaceCompetitor raceCompetitor = tractracRace.getRaceCompetitor((UUID) competitor.getId());
+                    reconcileCompetitorStatus(raceCompetitor, trackedRace);
+                }
+            }
         }
 
         @Override
         public void visit(RaceLogFlagEvent event) {
-            // TODO Implement RaceAndCompetitorStatusWithRaceLogReconciler.RaceLogListener.visit(...)
-            super.visit(event);
+            reconcileRaceStatus(tractracRace, trackedRace);
         }
 
         @Override
         public void visit(RaceLogPassChangeEvent event) {
-            // TODO Implement RaceAndCompetitorStatusWithRaceLogReconciler.RaceLogListener.visit(...)
-            super.visit(event);
+            reconcileRaceStatus(tractracRace, trackedRace);
+            reconcileAllCompetitors(trackedRace);
         }
 
         @Override
         public void visit(RaceLogFinishPositioningConfirmedEvent event) {
-            // TODO Implement RaceAndCompetitorStatusWithRaceLogReconciler.RaceLogListener.visit(...)
-            super.visit(event);
+            reconcileCompetitorsWithResults(event);
         }
 
         @Override
@@ -100,14 +120,19 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
             final RaceLogEvent revokedEvent = raceLog.getEventById(event.getRevokedEventId());
             if (revokedEvent != null) {
                 if (revokedEvent instanceof RaceLogFinishPositioningConfirmedEvent) {
-                    for (final CompetitorResult competitorResult : ((RaceLogFinishPositioningConfirmedEvent) revokedEvent).getPositionedCompetitorsIDsNamesMaxPointsReasons()) {
-                        final Serializable competitorId = competitorResult.getCompetitorId();
-                        if (competitorId instanceof UUID) {
-                            reconcileCompetitorStatus(tractracRace.getRaceCompetitor((UUID) competitorId), trackedRace);
-                        }
-                    }
+                    final RaceLogFinishPositioningConfirmedEvent revokedResultsEvent = (RaceLogFinishPositioningConfirmedEvent) revokedEvent;
+                    reconcileCompetitorsWithResults(revokedResultsEvent);
                 } else if (revokedEvent instanceof RaceLogFlagEvent || revokedEvent instanceof RaceLogPassChangeEvent) {
                     reconcileRaceStatus(tractracRace, trackedRace);
+                }
+            }
+        }
+
+        private void reconcileCompetitorsWithResults(final RaceLogFinishPositioningConfirmedEvent resultsEvent) {
+            for (final CompetitorResult competitorResult : resultsEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons()) {
+                final Serializable competitorId = competitorResult.getCompetitorId();
+                if (competitorId instanceof UUID) {
+                    reconcileCompetitorStatus(tractracRace.getRaceCompetitor((UUID) competitorId), trackedRace);
                 }
             }
         }
@@ -242,16 +267,19 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
         for (final RaceLog raceLog : trackedRace.getAttachedRaceLogs()) {
             final ReadonlyRaceState raceState = ReadonlyRaceStateImpl.getOrCreate(raceLogResolver, raceLog);
             // FIXME we would need the time point of the RaceLogFinishPositioningConfirmedEvent in order to see if the timePointForStatusEvent indicates a newer update
-            final CompetitorResults results = raceState.getConfirmedFinishPositioningList();
-            final Optional<CompetitorResult> result = StreamSupport.stream(results.spliterator(), /* parallel */ false)
-                    .filter(r -> Util.equalsWithNull(competitor.getId(), r.getCompetitorId())).findAny();
-            if (result.isPresent()) {
-                if (result.get().getOneBasedRank() != officialRank ||
-                    ((result.get().getFinishingTime()==null)?0:result.get().getFinishingTime().asMillis()) != officialFinishingTime) {
-                    // rank or finishing time varies
+            final CompetitorResultsAndTheirCreationTimePoints results = raceState.getConfirmedFinishPositioningList();
+            if (results.getCompetitorResults() != null) {
+                final Optional<CompetitorResult> result = StreamSupport.stream(results.getCompetitorResults().spliterator(), /* parallel */ false)
+                        .filter(r -> Util.equalsWithNull(competitor.getId(), r.getCompetitorId())).findAny();
+                if (result.isPresent()) {
+                    if (result.get().getOneBasedRank() != officialRank ||
+                        ((result.get().getFinishingTime()==null)?0:result.get().getFinishingTime().asMillis()) != officialFinishingTime) {
+                        // rank or finishing time varies
+                        
+                    }
                 }
             }
-            // TODO bug5154 continue here, checking for changes in the IRaceCompetitor status, official rank and official finishing time
+            // TODO bug5154 continue here, checking for changes in the IRaceCompetitor status, official rank and official finishing time which may require generating a result in the RaceLog
         }
     }
 }

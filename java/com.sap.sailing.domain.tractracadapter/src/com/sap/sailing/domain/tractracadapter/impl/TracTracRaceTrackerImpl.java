@@ -698,6 +698,9 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
      * {@link RaceAndCompetitorStatusWithRaceLogReconciler#raceLogAttached(TrackedRace, com.sap.sailing.domain.abstractlog.race.RaceLog)}
      * and
      * {@link RaceAndCompetitorStatusWithRaceLogReconciler#raceLogDetached(TrackedRace, com.sap.sailing.domain.abstractlog.race.RaceLog)}.
+     * Furthermore, the {@link #reconciler} is {@link RaceAndCompetitorStatusWithRaceLogReconciler#raceLogAttached(TrackedRace, RaceLog) informed}
+     * about all {@link RaceLog}s already currently attached to the {@link TrackedRace}. As a result, the {@link #reconciler} will listen
+     * to all those race logs for events that may require reconciliation of results, race and competitor statuses.
      */
     private void registerRaceAndCompetitorStatusWithRaceLogReconciler(final DynamicTrackedRace trackedRace) {
         trackedRace.addListener(new AbstractRaceChangeListener() {
@@ -711,6 +714,9 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
                 reconciler.raceLogDetached(trackedRace, raceLog);
             }
         });
+        for (final RaceLog alreadyAttachedRaceLog : trackedRace.getAttachedRaceLogs()) {
+            reconciler.raceLogAttached(trackedRace, alreadyAttachedRaceLog);
+        }
     }
 
     /**
