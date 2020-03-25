@@ -524,7 +524,7 @@ public class DomainFactoryImpl implements DomainFactory {
             TrackedRegattaRegistry trackedRegattaRegistry, RaceLogAndTrackedRaceResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, 
             URI courseDesignUpdateURI, String tracTracUsername, String tracTracPassword,
             IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber, boolean useInternalMarkPassingAlgorithm,
-            long timeoutInMilliseconds, RaceTrackingHandler raceTrackingHandler, ReceiverType... types) {
+            long timeoutInMilliseconds, RaceTrackingHandler raceTrackingHandler, RaceAndCompetitorStatusWithRaceLogReconciler raceAndCompetitorStatusWithRaceLogReconciler, ReceiverType... types) {
         IEvent tractracEvent = tractracRace.getEvent();
         Collection<Receiver> result = new ArrayList<Receiver>();
         for (ReceiverType type : types) {
@@ -560,7 +560,7 @@ public class DomainFactoryImpl implements DomainFactory {
                 break;
             case COMPETITOR:
                 result.add(new CompetitorChangeReceiver(
-                        trackedRegatta, tractracEvent, simulator, this, eventSubscriber, raceSubscriber, timeoutInMilliseconds));
+                        trackedRegatta, tractracEvent, tractracRace, simulator, this, eventSubscriber, raceSubscriber, timeoutInMilliseconds, raceAndCompetitorStatusWithRaceLogReconciler));
                 break;
             }                
         }
@@ -571,15 +571,17 @@ public class DomainFactoryImpl implements DomainFactory {
     public Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedRegatta,
             long delayToLiveInMillis, Simulator simulator, WindStore windStore,
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry, RaceLogAndTrackedRaceResolver raceLogResolver,
-            LeaderboardGroupResolver leaderboardGroupResolver, IRace tractracRace, URI courseDesignUpdateURI, 
-            String tracTracUsername, String tracTracPassword, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber,
-            boolean useInternalMarkPassingAlgorithm, long timeoutInMilliseconds, RaceTrackingHandler raceTrackingHandler) {
+            LeaderboardGroupResolver leaderboardGroupResolver, IRace tractracRace, URI courseDesignUpdateURI,
+            String tracTracUsername, String tracTracPassword, IEventSubscriber eventSubscriber,
+            IRaceSubscriber raceSubscriber, boolean useInternalMarkPassingAlgorithm, long timeoutInMilliseconds,
+            RaceTrackingHandler raceTrackingHandler,
+            RaceAndCompetitorStatusWithRaceLogReconciler raceAndCompetitorStatusWithRaceLogReconciler) {
         return getUpdateReceivers(trackedRegatta, tractracRace, windStore, delayToLiveInMillis, simulator,
                 raceDefinitionSetToUpdate, trackedRegattaRegistry, raceLogResolver, leaderboardGroupResolver, courseDesignUpdateURI,
                 tracTracUsername, tracTracPassword, eventSubscriber, raceSubscriber,
-                useInternalMarkPassingAlgorithm, timeoutInMilliseconds, raceTrackingHandler, ReceiverType.RACECOURSE,
-                ReceiverType.MARKPASSINGS, ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS,
-                ReceiverType.SENSORDATA);
+                useInternalMarkPassingAlgorithm, timeoutInMilliseconds, raceTrackingHandler, raceAndCompetitorStatusWithRaceLogReconciler,
+                ReceiverType.RACECOURSE, ReceiverType.MARKPASSINGS, ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH,
+                ReceiverType.RAWPOSITIONS, ReceiverType.SENSORDATA);
     }
     
     @Override

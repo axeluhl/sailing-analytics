@@ -1,17 +1,25 @@
 package com.sap.sailing.domain.tractracadapter.impl;
 
+import java.io.Serializable;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.StreamSupport;
 
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogPassChangeEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AbortingFlagFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.abstractlog.race.impl.BaseRaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFlagEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogPassChangeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
@@ -22,6 +30,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.tractrac.model.lib.api.event.IRace;
 import com.tractrac.model.lib.api.event.IRaceCompetitor;
@@ -42,6 +51,8 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
     private final DomainFactory domainFactory;
     private final RaceLogResolver raceLogResolver;
     private final LogEventAuthorImpl raceLogEventAuthor;
+    private final IRace tractracRace;
+    private final Map<Pair<TrackedRace, RaceLog>, RaceLogListener> raceLogListeners;
     private final static Map<RaceStatusType, Flags> flagForRaceStatus;
     
     static {
@@ -51,11 +62,77 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
         flagForRaceStatus.put(RaceStatusType.GENERAL_RECALL, Flags.FIRSTSUBSTITUTE);
     }
     
-    public RaceAndCompetitorStatusWithRaceLogReconciler(DomainFactory domainFactory, RaceLogResolver raceLogResolver) {
+    /**
+     * Handles those race log events that may have an impact on the 
+     * @author Axel Uhl (D043530)
+     *
+     */
+    private class RaceLogListener extends BaseRaceLogEventVisitor {
+        private final RaceLog raceLog;
+        private final TrackedRace trackedRace;
+        
+        public RaceLogListener(TrackedRace trackedRace, RaceLog raceLog) {
+            super();
+            this.raceLog = raceLog;
+            this.trackedRace = trackedRace;
+        }
+
+        @Override
+        public void visit(RaceLogFlagEvent event) {
+            // TODO Implement RaceAndCompetitorStatusWithRaceLogReconciler.RaceLogListener.visit(...)
+            super.visit(event);
+        }
+
+        @Override
+        public void visit(RaceLogPassChangeEvent event) {
+            // TODO Implement RaceAndCompetitorStatusWithRaceLogReconciler.RaceLogListener.visit(...)
+            super.visit(event);
+        }
+
+        @Override
+        public void visit(RaceLogFinishPositioningConfirmedEvent event) {
+            // TODO Implement RaceAndCompetitorStatusWithRaceLogReconciler.RaceLogListener.visit(...)
+            super.visit(event);
+        }
+
+        @Override
+        public void visit(RaceLogRevokeEvent event) {
+            final RaceLogEvent revokedEvent = raceLog.getEventById(event.getRevokedEventId());
+            if (revokedEvent != null) {
+                if (revokedEvent instanceof RaceLogFinishPositioningConfirmedEvent) {
+                    for (final CompetitorResult competitorResult : ((RaceLogFinishPositioningConfirmedEvent) revokedEvent).getPositionedCompetitorsIDsNamesMaxPointsReasons()) {
+                        final Serializable competitorId = competitorResult.getCompetitorId();
+                        if (competitorId instanceof UUID) {
+                            reconcileCompetitorStatus(tractracRace.getRaceCompetitor((UUID) competitorId), trackedRace);
+                        }
+                    }
+                } else if (revokedEvent instanceof RaceLogFlagEvent || revokedEvent instanceof RaceLogPassChangeEvent) {
+                    reconcileRaceStatus(tractracRace, trackedRace);
+                }
+            }
+        }
+    }
+    
+    public RaceAndCompetitorStatusWithRaceLogReconciler(DomainFactory domainFactory, RaceLogResolver raceLogResolver, IRace tractracRace) {
         super();
         this.domainFactory = domainFactory;
         this.raceLogResolver = raceLogResolver;
+        this.tractracRace = tractracRace;
+        raceLogListeners = Collections.synchronizedMap(new HashMap<>());
         raceLogEventAuthor = new LogEventAuthorImpl(getClass().getName(), 1);
+    }
+    
+    public void raceLogAttached(TrackedRace trackedRace, RaceLog raceLog) {
+        final RaceLogListener listener = new RaceLogListener(trackedRace, raceLog);
+        raceLog.addListener(listener);
+        raceLogListeners.put(new Pair<>(trackedRace, raceLog), listener);
+    }
+    
+    public void raceLogDetached(TrackedRace trackedRace, RaceLog raceLog) {
+        final RaceLogListener listener = raceLogListeners.remove(new Pair<>(trackedRace, raceLog));
+        if (listener != null) {
+            raceLog.removeListener(listener);
+        }
     }
 
     /**
@@ -150,6 +227,8 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
      * has an empty finishing time and zero rank.
      * 
      * TODO bug5154 continue here...
+     * 
+     * TODO bug5154 this method will also need to be called whenever new results are published on the RaceLog because a "more official" or more recent update may already exist in the TracTrac IRaceCompetitor
      */
     public void reconcileCompetitorStatus(IRaceCompetitor raceCompetitor, TrackedRace trackedRace) {
         final Competitor competitor = domainFactory.resolveCompetitor(raceCompetitor.getCompetitor());

@@ -59,7 +59,7 @@ public class TestTracTracRaceAndCompetitorStatusReconciler {
             public RaceLog resolve(SimpleRaceLogIdentifier identifier) {
                 return raceLog;
             }
-        });
+        }, tractracRace);
         raceLog.add(new RaceLogPassChangeEventImpl(startOfPass, author, /* pPassId */ 1));
     }
     

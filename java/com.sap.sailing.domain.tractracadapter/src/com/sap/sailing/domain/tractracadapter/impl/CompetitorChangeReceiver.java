@@ -36,13 +36,12 @@ public class CompetitorChangeReceiver extends AbstractReceiverWithQueue<IRaceCom
     private static final Logger logger = Logger.getLogger(CompetitorChangeReceiver.class.getName());
     private final IRaceCompetitorListener listener;
     private final RaceAndCompetitorStatusWithRaceLogReconciler reconciler;
-    private int received;
 
     public CompetitorChangeReceiver(DynamicTrackedRegatta trackedRegatta, IEvent tractracEvent,
-            Simulator simulator, DomainFactory domainFactory, IEventSubscriber eventSubscriber,
-            IRaceSubscriber raceSubscriber, long timeoutInMilliseconds) {
+            IRace tractracRace, Simulator simulator, DomainFactory domainFactory,
+            IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber, long timeoutInMilliseconds, RaceAndCompetitorStatusWithRaceLogReconciler raceAndCompetitorStatusWithRaceLogReconciler) {
         super(domainFactory, tractracEvent, trackedRegatta, simulator, eventSubscriber, raceSubscriber, timeoutInMilliseconds);
-        reconciler = new RaceAndCompetitorStatusWithRaceLogReconciler(domainFactory, domainFactory.getBaseDomainFactory().getRaceLogResolver());
+        reconciler = raceAndCompetitorStatusWithRaceLogReconciler;
         listener = new IRaceCompetitorListener() {
             @Override
             public void addRaceCompetitor(IRaceCompetitor raceCompetitor) {
@@ -88,17 +87,11 @@ public class CompetitorChangeReceiver extends AbstractReceiverWithQueue<IRaceCom
      */
     @Override
     protected void handleEvent(Triple<IRaceCompetitor, Void, Void> event) {
-        if (received++ % 1000 == 0) {
-            System.out.print("E");
-            if ((received / 1000 + 1) % 80 == 0) {
-                System.out.println();
-            }
-        }
         final IRace race = event.getA().getRace();
         final DynamicTrackedRace trackedRace = getTrackedRace(race);
         if (trackedRace != null) {
             final IRaceCompetitor raceCompetitor = event.getA();
-            if (raceCompetitor != null) {
+            if (reconciler != null && raceCompetitor != null) {
                 reconciler.reconcileCompetitorStatus(raceCompetitor, trackedRace);
             }
         } else {
