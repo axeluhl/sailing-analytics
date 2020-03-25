@@ -50,6 +50,12 @@ public class AbstractFinishPositioningListFinder extends RaceLogAnalyzer<Competi
             return competitorResults;
         }
 
+        /**
+         * For every competitor result in {@link #getCompetitorResults()}, if you take its
+         * {@link CompetitorResult#getCompetitorId() competitor ID} and pass it as parameter to this method you can be
+         * guaranteed to obtain a non-{@code null} result that tells the creation time point of the race log event that
+         * contains the result of the competitor identified this way.
+         */
         public TimePoint getCreationTimePointOfResultForCompetitorWithId(Serializable competitorId) {
             return resultCreationTimePointByCompetitorId.get(competitorId);
         }

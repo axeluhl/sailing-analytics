@@ -270,7 +270,7 @@ public class TimePanelFragment extends BasePanelFragment {
 
     private void checkWarnings(ReadonlyRaceState state) {
         CompetitorResults draft = state.getFinishPositioningList();
-        CompetitorResults confirmed = state.getConfirmedFinishPositioningList();
+        CompetitorResults confirmed = state.getConfirmedFinishPositioningList().getCompetitorResults();
         mCompetitorList.showAdditionalImage(
                 (draft != null && draft.hasConflicts()) || (confirmed != null && confirmed.hasConflicts()));
     }
