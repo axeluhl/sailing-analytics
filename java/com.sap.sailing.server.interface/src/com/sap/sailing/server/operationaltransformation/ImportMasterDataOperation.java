@@ -60,7 +60,6 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
-import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParametersHandler;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.WindTrack;
@@ -69,7 +68,6 @@ import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.interfaces.RacingEventServiceOperation;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.Timed;
-import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.Util;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.security.SecurityService;
@@ -622,11 +620,11 @@ public class ImportMasterDataOperation extends
         if (connectivityParametersToRestore != null) {
             int i = 0;
             final int numberOfConnectivityParamsToRestore = connectivityParametersToRestore.size();
-            DomainObjectFactory domainObjectFactory = toState.getDomainObjectFactory();
-            TypeBasedServiceFinder<RaceTrackingConnectivityParametersHandler> serviceFinder = domainObjectFactory.getRaceTrackingConnectivityParamsServiceFinder();
             for (RaceTrackingConnectivityParameters param : connectivityParametersToRestore) {
                 if (param != null) {
-                    final RaceTrackingConnectivityParameters paramToStartTracking = serviceFinder.findService(param.getTypeIdentifier()).resolve(param);
+                    final RaceTrackingConnectivityParameters paramToStartTracking = toState
+                            .getRaceTrackingConnectivityParamsServiceFinder().findService(param.getTypeIdentifier())
+                            .resolve(param);
                     RaceHandle raceHandle = toState.addRace(/* default */ null, paramToStartTracking, /* do not wait */ -1);
                     final RaceDefinition race = raceHandle.getRace(RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
                     if (race != null) {

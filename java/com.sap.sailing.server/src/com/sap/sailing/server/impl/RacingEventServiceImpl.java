@@ -202,6 +202,7 @@ import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
+import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParametersHandler;
 import com.sap.sailing.domain.tracking.RaceTrackingHandler;
 import com.sap.sailing.domain.tracking.RaceTrackingHandler.DefaultRaceTrackingHandler;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -294,6 +295,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.PairingListCreationException;
 import com.sap.sse.common.Renamable;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -4841,5 +4843,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public RaceTrackingHandler getPermissionAwareRaceTrackingHandler() {
         return new PermissionAwareRaceTrackingHandler(getSecurityService());
+    }
+
+    @Override
+    public TypeBasedServiceFinder<RaceTrackingConnectivityParametersHandler> getRaceTrackingConnectivityParamsServiceFinder() {
+        return domainObjectFactory.getRaceTrackingConnectivityParamsServiceFinder();
     }
 }
