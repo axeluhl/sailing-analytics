@@ -60,7 +60,6 @@ public class SimpleDomainFactoryTest {
     public void testUnknownBoatClassInValidRaceID() {
         DomainFactory domainFactory = DomainFactory.INSTANCE;
         final String raceID = "SAX920103";
-        @SuppressWarnings("serial")
         RaceDefinition raceDefinition = domainFactory.createRaceDefinition(domainFactory.getOrCreateDefaultRegatta(
                 EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE, raceID,
                 null /* boat class */, new RacingEventServiceImpl()), new Race() {
@@ -84,6 +83,8 @@ public class SimpleDomainFactoryTest {
                 return "The famous SAX920103 race";
             }
         }, new StartList() {
+            private static final long serialVersionUID = -4148295407963335012L;
+
             @Override
             public String getRaceID() {
                 return raceID;

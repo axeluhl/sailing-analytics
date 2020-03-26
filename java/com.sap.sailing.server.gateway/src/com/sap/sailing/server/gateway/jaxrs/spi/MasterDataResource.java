@@ -100,7 +100,7 @@ public class MasterDataResource extends AbstractSailingServerResource {
             }
         }
         final List<Serializable> competitorIds = new ArrayList<Serializable>();
-        Set<RaceTrackingConnectivityParameters> connectivityParametersToRestore = new HashSet<RaceTrackingConnectivityParameters>();
+        Set<RaceTrackingConnectivityParameters> connectivityParametersToRestore = new HashSet<>();
         for (LeaderboardGroup lg : groupsToExport) {
             for (Leaderboard leaderboard : lg.getLeaderboards()) {
                 // All Leaderboards/Regattas contained in the LeaderboardGroup need to be visible

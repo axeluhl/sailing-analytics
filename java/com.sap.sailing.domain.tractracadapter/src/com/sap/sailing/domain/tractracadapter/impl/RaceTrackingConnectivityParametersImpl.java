@@ -106,7 +106,6 @@ public class RaceTrackingConnectivityParametersImpl extends AbstractRaceTracking
     }
 
     private boolean isReplayRace(IRace tractracRace) {
-        // TODO bug 4037: change into tractracRace.getConnectionType() == File once TracAPI 3.3.2 is available
         return tractracRace.getStoredURI() != null && tractracRace.getStoredURI().toString().toLowerCase().endsWith(".mtb");
     }
     
@@ -210,25 +209,4 @@ public class RaceTrackingConnectivityParametersImpl extends AbstractRaceTracking
     public String toString() {
         return getClass().getSimpleName()+" for "+paramURL+", liveURI: "+liveURI+", storedURI: "+storedURI;
     }
-
-//    @Override
-//    public RaceTrackingConnectivityParametersImpl resolve(DomainFactory domainFactory) {
-//        this.domainFactory = domainFactory;
-//        try {
-//            if (timeoutInMillis == -1) {
-//                this.tractracRace = ModelLocator.getEventFactory().createRace(new URI(paramURL.toString()));
-//            } else {
-//                this.tractracRace = ModelLocator.getEventFactory().createRace(new URI(paramURL.toString()),
-//                        timeoutInMillis);
-//            }
-//        } catch (Exception e) {
-//            // TODO Auto-generated catch block
-//            e.printStackTrace();
-//        }
-//        return this;
-    // }
-
-//    public Object readResolve() throws ObjectStreamException {
-//        return this;
-//    }
 }

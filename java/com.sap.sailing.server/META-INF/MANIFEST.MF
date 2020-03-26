@@ -8,7 +8,6 @@ Bundle-Activator: com.sap.sailing.server.impl.Activator
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.sap.sailing.server.gateway.deserialization,
- com.tractrac.model.lib.api.event,
  javax.mail;version="1.4.0",
  javax.mail.internet;version="1.4.0",
  javax.mail.util;version="1.4.0",

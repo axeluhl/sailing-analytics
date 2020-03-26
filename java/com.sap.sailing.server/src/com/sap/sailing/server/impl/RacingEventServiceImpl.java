@@ -531,7 +531,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      * {@link #addMasterDataClassLoader(ClassLoader)} and {@link #removeMasterDataClassLoader(ClassLoader)}. In order to loop over
      * these, synchronize on the object. See also {@link Collections#synchronizedSet(Set)}.
      */
-    private final Set<ClassLoader> masterDataClassLoaders = Collections.synchronizedSet(new HashSet<ClassLoader>());
+    private final Set<ClassLoader> masterDataClassLoaders = Collections.synchronizedSet(new HashSet<>());
     
     private final JoinedClassLoader joinedClassLoader;
 
@@ -4082,7 +4082,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public AbstractLogEventAuthor getServerAuthor() {
-        Subject subject  = null;
+        Subject subject = null;
         try {
             subject = SecurityUtils.getSubject();
         } catch (Exception e) {

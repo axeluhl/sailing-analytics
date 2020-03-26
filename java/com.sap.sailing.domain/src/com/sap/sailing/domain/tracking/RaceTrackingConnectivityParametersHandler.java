@@ -51,7 +51,8 @@ public interface RaceTrackingConnectivityParametersHandler {
     /**
      * Produces a {@link RaceTrackingConnectivityParameters} object from a de-serialized stump. This is needed because
      * some of the fields in {@link RaceTrackingConnectivityParameters} are transient and need to be filled.
+     * 
+     * TODO: bug5245 add ConnectionParameters to Connectors persistent and in-memory representation.
      */
-
     RaceTrackingConnectivityParameters resolve(RaceTrackingConnectivityParameters params) throws Exception;
 }

@@ -210,9 +210,9 @@ public class EditSTL extends javax.swing.JDialog {
         return stl;
     }
     
-    @SuppressWarnings("serial")
     private class CompetitorWithDesc extends CompetitorWithoutID {
-        
+        private static final long serialVersionUID = -1958819144866891505L;
+
         public CompetitorWithDesc(String boatID, String NOC, String name){
             super(boatID, NOC, name);
         }
