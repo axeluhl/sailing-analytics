@@ -209,11 +209,12 @@ public abstract class ImageDialog extends DataEntryDialog<ImageResizingTaskDTO>
         this.creationDate = creationDate;
         getDialogBox().getWidget().setWidth("730px");
         busyIndicator = new SimpleBusyIndicator();
-        imageURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages, false, true);
-        imageURLAndUploadComposite.addValueChangeHandler(new ValueChangeHandler<String>() {
+        imageURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages, false, false);
+        imageURLAndUploadComposite.addValueChangeHandler(new ValueChangeHandler<List<String>>() {
             @Override
-            public void onValueChange(ValueChangeEvent<String> event) {
-                String imageUrlAsString = event.getValue();
+            public void onValueChange(ValueChangeEvent<List<String>> event) {
+                List<String> imageUrls = event.getValue();
+                String imageUrlAsString = imageUrls.isEmpty() ? null : imageUrls.get(0);
                 if (imageUrlAsString == null || imageUrlAsString.isEmpty()) {
                     widthInPxBox.setText("");
                     heightInPxBox.setText("");

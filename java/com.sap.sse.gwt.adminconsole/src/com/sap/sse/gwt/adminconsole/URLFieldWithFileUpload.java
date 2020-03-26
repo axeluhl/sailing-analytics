@@ -2,9 +2,8 @@ package com.sap.sse.gwt.adminconsole;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
-
 import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -44,26 +43,27 @@ import com.sap.sse.gwt.client.Notification.NotificationType;
 public class URLFieldWithFileUpload extends Composite implements HasValue<List<String>> {
     private static final URLFieldWithFileUploadResources RESOURCES = URLFieldWithFileUploadResources.INSTANCE;
     private static final String URI_DELIMITER = " ";
+    private static final String URI_DELIMITER_REGEX = "\\s+";
 
     private final TextBox urlTextBox;
-    
+
     private final FileUpload fileUploadField;
-    
+
     private final List<String> uriList;
     private boolean multiFileUpload;
 
     private final Button removeButton;
 
     private boolean valueChangeHandlerInitialized = false;
-    
+
     private final FormPanel uploadFormPanel;
-    
+
     private final FlowPanel uploadPanel;
-    
+
     public URLFieldWithFileUpload(final StringMessages stringMessages) {
         this(stringMessages, true, false);
     }
-   
+
     public URLFieldWithFileUpload(final StringMessages stringMessages, boolean initiallyEnableUpload,
             boolean multiFileUpload) {
         RESOURCES.urlFieldWithFileUploadStyle().ensureInjected();
@@ -74,7 +74,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<List<S
         imageUrlPanel.addStyleName(RESOURCES.urlFieldWithFileUploadStyle().spaceDirectChildrenClass());
         mainPanel.add(new Label(stringMessages.pleaseOnlyUploadContentYouHaveAllUsageRightsFor()));
         mainPanel.add(imageUrlPanel);
-        
+
         final FormPanel removePanel = new FormPanel();
         removePanel.addStyleName(RESOURCES.urlFieldWithFileUploadStyle().inlineClass());
         removePanel.addSubmitCompleteHandler(new SubmitCompleteHandler() {
@@ -107,7 +107,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<List<S
         urlTextBox.setWidth("400px");
         imageUrlPanel.add(urlTextBox);
         imageUrlPanel.add(removePanel);
-        
+
         // the upload panel
         uploadFormPanel = new FormPanel();
         mainPanel.add(uploadFormPanel);
@@ -149,8 +149,10 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<List<S
                     if (resultJson.get(0).isObject().get(FileUploadConstants.FILE_URI) != null) {
                         uriList.clear();
                         for (int i = 1; i < resultJson.size(); i++) {
-                            uriList.add(URI_DELIMITER + resultJson.get(i).isObject().get(FileUploadConstants.FILE_URI)
-                                    .isString().stringValue());
+                            if (resultJson.get(i).isObject().get(FileUploadConstants.FILE_URI) != null) {
+                                uriList.add(URI_DELIMITER + resultJson.get(i).isObject()
+                                        .get(FileUploadConstants.FILE_URI).isString().stringValue());
+                            }
                         }
                         setValue(uriList, true);
                         removeButton.setEnabled(true);
@@ -166,29 +168,41 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<List<S
     }
     
     /**
-     * Returns <code>null</code> if the trimmed URL field contents are empty
+     * @return <code>null</code> if the trimmed URL field contents are empty. Even if {@link #multiFileUpload} is
+     * enabled this method will only return the first URL.
+     * @see {@link #getURLs()}
      */
     public String getURL() {
-        final String trimmedUrl = urlTextBox.getValue().trim();
-        return trimmedUrl.isEmpty() ? null : trimmedUrl;
+        final List<String> urls = getURLs();
+        return urls.isEmpty() ? null : urls.get(0);
     }
 
+    /**
+     * @return an empty List or a List with the first URL if {@link #multiFileUpload} is disabled. Otherwise an empty List
+     * or a List of all URLs in the URL field.
+     */
     public List<String> getURLs() {
-        String[] urls = urlTextBox.getValue().split(URI_DELIMITER);
+        String[] urls = urlTextBox.getValue().trim().split(URI_DELIMITER_REGEX);
         if (urls.length == 0) {
-            return null;
+            return Collections.emptyList();
         }
-        return Arrays.stream(urls).map(String::trim).collect(Collectors.toList());
+        if (multiFileUpload) {
+            return Arrays.asList(urls);
+        } else {
+            return Arrays.asList(urls[0]);
+        }
     }
 
+    /**
+     * @see {@link #setURLs(List)}
+     */
     public void setURL(String imageURL) {
+        uriList.clear();
         if (imageURL == null) {
             urlTextBox.setValue("");
-            uriList.clear();
             removeButton.setEnabled(false);
         } else {
             urlTextBox.setValue(imageURL);
-            uriList.clear();
             uriList.add(imageURL);
             removeButton.setEnabled(true);
         }
@@ -196,7 +210,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<List<S
 
     public void setURLs(List<String> imageURLs) {
         uriList.clear();
-        if (imageURLs == null || imageURLs.size() == 0) {
+        if (imageURLs == null || imageURLs.isEmpty()) {
             urlTextBox.setValue("");
             removeButton.setEnabled(false);
         } else {

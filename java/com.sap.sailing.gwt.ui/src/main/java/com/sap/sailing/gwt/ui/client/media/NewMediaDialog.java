@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.client.media;
 
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import com.google.gwt.dom.client.AnchorElement;
@@ -127,9 +128,9 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
         this.mediaService = mediaService;
 
         urlBox = new URLFieldWithFileUpload(stringMessages, false, false);
-        urlBox.addValueChangeHandler(new ValueChangeHandler<String>() {
+        urlBox.addValueChangeHandler(new ValueChangeHandler<List<String>>() {
             @Override
-            public void onValueChange(ValueChangeEvent<String> event) {
+            public void onValueChange(ValueChangeEvent<List<String>> event) {
                 validateAndUpdate();
             }
         });
@@ -193,7 +194,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
     }
 
     protected void updateFromUrl() {
-        String url = urlBox.getValue();
+        String url = urlBox.getURL();
         if (url != null && !url.isEmpty()) {
             boolean urlChanged = !url.equals(lastCheckedUrl);
             lastCheckedUrl = url;

@@ -240,7 +240,7 @@ public class TagInputPanel extends FlowPanel {
     }
 
     protected void setImageURL(String imageURL) {
-        getImageURLTextBox().setValue(imageURL);
+        getImageURLTextBox().setURL(imageURL);
     }
 
     protected void setVisibleForPublic(boolean visibleForPublic) {

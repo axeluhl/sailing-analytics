@@ -85,9 +85,9 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> implements F
             localeListBox.addItem(GWTLocaleUtil.getDecoratedLanguageDisplayNameWithDefaultLocaleSupport(locale), locale == null ? "" : locale);
         }
         videoURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages, false, false);
-        videoURLAndUploadComposite.addValueChangeHandler(new ValueChangeHandler<String>() {
+        videoURLAndUploadComposite.addValueChangeHandler(new ValueChangeHandler<List<String>>() {
             @Override
-            public void onValueChange(ValueChangeEvent<String> event) {
+            public void onValueChange(ValueChangeEvent<List<String>> event) {
                 validateAndUpdate();
             }
         });
