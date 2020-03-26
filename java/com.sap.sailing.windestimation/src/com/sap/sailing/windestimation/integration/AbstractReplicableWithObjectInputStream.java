@@ -64,7 +64,7 @@ public abstract class AbstractReplicableWithObjectInputStream<S, O extends Opera
 
     @Override
     public <S1, O1 extends OperationWithResult<S1, ?>, T1> void scheduleForSending(
-            OperationWithResult<S1, T1> operationWithResult, OperationsToMasterSender<S1, O1> sender) {
+            O1 operationWithResult, OperationsToMasterSender<S1, O1> sender) {
         if (unsentOperationsToMasterSender != null) {
             unsentOperationsToMasterSender.scheduleForSending(operationWithResult, sender);
         }
