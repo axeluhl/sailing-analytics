@@ -239,6 +239,7 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     public MarkProperties updateMarkProperties(UUID uuid, CommonMarkProperties properties,
             Positioning positioningInformation, Iterable<String> tags) {
         final MarkProperties markProperties = updateMarkProperties(uuid, properties, tags);
+        getSecurityService().checkCurrentUserUpdatePermission(markProperties);
         if (positioningInformation != null && markProperties != properties) { // no update required if same object
             apply(s -> s.internalSetPositioningInformationForMarkProperties(uuid, positioningInformation));
         }
@@ -294,12 +295,14 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     
     @Override
     public void clearPositioningForMarkProperties(final MarkProperties markProperties) {
+        getSecurityService().checkCurrentUserUpdatePermission(markProperties);
         final UUID markPropertiesUUID = markProperties.getId();
         apply(s -> s.internalSetPositioningInformationForMarkProperties(markPropertiesUUID, null));
     }
 
     @Override
     public void setFixedPositionForMarkProperties(final MarkProperties markProperties, final Position position) {
+        getSecurityService().checkCurrentUserUpdatePermission(markProperties);
         final UUID markPropertiesUUID = markProperties.getId();
         apply(s -> s.internalSetPositioningInformationForMarkProperties(markPropertiesUUID, new FixedPositioningImpl(position)));
     }
@@ -321,6 +324,7 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     @Override
     public void setTrackingDeviceIdentifierForMarkProperties(final MarkProperties markProperties,
             final DeviceIdentifier deviceIdentifier) {
+        getSecurityService().checkCurrentUserUpdatePermission(markProperties);
         final UUID markPropertiesUUID = markProperties.getId();
         apply(s -> s.internalSetPositioningInformationForMarkProperties(markPropertiesUUID,
                 new TrackingDeviceBasedPositioningImpl(deviceIdentifier)));

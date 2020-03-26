@@ -5,6 +5,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogTagEvent;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AbstractFinishPositioningListFinder.CompetitorResultsAndTheirCreationTimePoints;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventComparator;
@@ -131,7 +132,7 @@ public interface ReadonlyRaceState extends RaceStateEventProcessor {
      * If there is a (confirmed) finish positioning list set for the current pass, returns the most recent one.
      * Otherwise <code>null</code>.
      */
-    CompetitorResults getConfirmedFinishPositioningList();
+    CompetitorResultsAndTheirCreationTimePoints getConfirmedFinishPositioningList();
 
     /**
      * If there is a protest time set, returns the most recent one. Otherwise <code>null</code>.
