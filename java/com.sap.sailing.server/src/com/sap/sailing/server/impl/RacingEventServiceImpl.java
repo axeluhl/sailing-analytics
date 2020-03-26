@@ -4808,7 +4808,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public <S, O extends OperationWithResult<S, ?>, T> void scheduleForSending(
-            OperationWithResult<S, T> operationWithResult, OperationsToMasterSender<S, O> sender) {
+            O operationWithResult, OperationsToMasterSender<S, O> sender) {
         if (unsentOperationsToMasterSender != null) {
             unsentOperationsToMasterSender.scheduleForSending(operationWithResult, sender);
         }
