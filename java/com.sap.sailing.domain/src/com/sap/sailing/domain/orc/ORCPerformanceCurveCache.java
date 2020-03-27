@@ -61,5 +61,9 @@ public interface ORCPerformanceCurveCache {
     Duration getRelativeCorrectedTime(Competitor competitor, TrackedRace raceContext,
             TimePoint timePoint, BiFunction<Competitor, TimePoint, Duration> relativeCorrectedTimeSupplier);
     
+    /**
+     * Determines the wind at the leg. The result is cached for subsequent calls with equal parameters.
+     * @param value function for compute wind value if it's not preset in cache
+     */
     Wind getWindForLeg(TrackedLeg leg, Supplier<Wind> value);
 }

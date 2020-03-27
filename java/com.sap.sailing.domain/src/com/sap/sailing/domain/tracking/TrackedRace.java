@@ -1258,5 +1258,10 @@ public interface TrackedRace
      */
     TrackingConnectorInfo getTrackingConnectorInfo();
     
+    /**
+     * Obtains estimated interpolated wind information for a given tracked leg. 
+     * @param value
+     * @return cached value or value computed by supplier function 
+     */
     Wind getWindByTrackedLeg(TrackedLeg leg, Supplier<Wind> value);
 }
