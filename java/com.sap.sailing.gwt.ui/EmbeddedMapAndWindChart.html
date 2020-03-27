@@ -3,7 +3,7 @@
 <html>
   <head>
 	<!--[if lt IE 9]>
-	   <meta http-equiv="REFRESH" content="0; url=http://www.sapsailing.com/browser-info.html">
+	   <meta http-equiv="REFRESH" content="0; url=/browser-info.html">
 	<![endif]-->
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
     <title>${SAP}Sailing Analytics Race Board</title>
@@ -21,7 +21,11 @@
 	<link rel="stylesheet" type="text/css" href="EmbeddedMapAndWindChart.css">
 	
 	<script type="text/javascript" src="js/jquery-3.3.1.min.js"></script>
-    
+    <script>
+    document.sailingContext = {
+            debrandingActive: ${debrandingActive}
+        };
+    </script>
     <script type="text/javascript" language="javascript" src="com.sap.sailing.gwt.ui.EmbeddedMapAndWindChart/com.sap.sailing.gwt.ui.EmbeddedMapAndWindChart.nocache.js"></script>
 
 	<!-- Loading Indicator -->

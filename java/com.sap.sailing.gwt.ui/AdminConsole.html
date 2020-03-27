@@ -32,7 +32,11 @@
   
    <!-- Client-side QR code generation -->
    <script type="text/javascript" src="qrcode/qrcode.min.js"></script>
-    
+   <script>
+    document.sailingContext = {
+            debrandingActive: ${debrandingActive}
+        };
+    </script>
     <!--                                           -->
     <!-- This script loads your compiled module.   -->
     <!-- If you add any GWT meta tags, they must   -->
