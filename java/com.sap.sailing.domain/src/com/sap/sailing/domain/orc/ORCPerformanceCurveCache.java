@@ -5,6 +5,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveCourse;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
@@ -59,4 +60,6 @@ public interface ORCPerformanceCurveCache {
      */
     Duration getRelativeCorrectedTime(Competitor competitor, TrackedRace raceContext,
             TimePoint timePoint, BiFunction<Competitor, TimePoint, Duration> relativeCorrectedTimeSupplier);
+    
+    Wind getWindForLeg(TrackedLeg leg, Supplier<Wind> value);
 }

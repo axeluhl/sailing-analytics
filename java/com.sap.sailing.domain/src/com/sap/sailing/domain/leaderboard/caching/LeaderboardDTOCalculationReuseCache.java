@@ -2,6 +2,7 @@ package com.sap.sailing.domain.leaderboard.caching;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.BiFunction;
@@ -312,5 +313,14 @@ public class LeaderboardDTOCalculationReuseCache implements WindLegTypeAndLegBea
                 return trackedRace;
             }
         };
+    }
+
+    @Override
+    public Wind getWindForLeg(TrackedLeg leg, Supplier<Wind> value) {
+        Triple<TrackedRace, Competitor, TimePoint> cacheKey = new Triple<>(leg.getTrackedRace(), null, timePoint);
+        return Optional.ofNullable(windCache.get(cacheKey)).orElseGet(() -> {
+            windCache.put(cacheKey, value.get());
+            return windCache.get(cacheKey);
+        });
     }
 }

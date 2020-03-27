@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.function.Supplier;
 
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCImpliedWindSourceEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -1256,4 +1257,6 @@ public interface TrackedRace
      * may be {@code null}, particularly in test set-ups
      */
     TrackingConnectorInfo getTrackingConnectorInfo();
+    
+    Wind getWindByTrackedLeg(TrackedLeg leg, Supplier<Wind> value);
 }
