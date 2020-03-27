@@ -83,7 +83,7 @@ public class PermissionAwareRaceTrackingHandler extends DefaultRaceTrackingHandl
     }
 
     /**
-     * Check if there is already an ownership asssociated to the object identified by the
+     * Check if there is already an ownership associated to the object identified by the
      * {@link QualifiedObjectIdentifier}. If no ownership exists, one will be created in the context of the current
      * user.
      */

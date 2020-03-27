@@ -3063,4 +3063,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return fromDb;
     }
 
+    @Override
+    public TypeBasedServiceFinder<RaceTrackingConnectivityParametersHandler> getRaceTrackingConnectivityParamsServiceFinder() {
+        return raceTrackingConnectivityParamsServiceFinder;
+    }
+
 }

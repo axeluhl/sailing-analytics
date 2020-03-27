@@ -139,7 +139,6 @@ import com.sap.sailing.server.operationaltransformation.UpdateLeaderboard;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardMaxPointsReason;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardScoreCorrection;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardScoreCorrectionMetadata;
-import com.sap.sailing.server.security.PermissionAwareRaceTrackingHandler;
 import com.sap.sse.InvalidDateException;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
@@ -716,7 +715,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                         leaderboardAndRaceColumnAndFleetAndResponse.getFleet(),
                         trackWind == null ? true : trackWind,
                                 correctWindDirectionByMagneticDeclination == null ? true : correctWindDirectionByMagneticDeclination,
-                                        new PermissionAwareRaceTrackingHandler(getSecurityService()));
+                                        getService().getPermissionAwareRaceTrackingHandler());
                 jsonResult.put("regatta", raceHandle.getRegatta().getName());
                 result = Response.ok(jsonResult.toJSONString()).build();
             } else {

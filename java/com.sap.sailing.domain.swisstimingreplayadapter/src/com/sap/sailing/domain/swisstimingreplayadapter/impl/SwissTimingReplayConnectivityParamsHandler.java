@@ -75,4 +75,15 @@ public class SwissTimingReplayConnectivityParamsHandler extends AbstractRaceTrac
         result.put(LINK, stParams.getLink());
         return result;
     }
+
+    @Override
+    public RaceTrackingConnectivityParameters resolve(RaceTrackingConnectivityParameters params) throws Exception {
+        assert params instanceof SwissTimingReplayConnectivityParameters;
+        final SwissTimingReplayConnectivityParameters stParams = (SwissTimingReplayConnectivityParameters) params;
+        SwissTimingReplayConnectivityParameters result = new SwissTimingReplayConnectivityParameters(stParams.getLink(),
+                stParams.getRaceName(), stParams.getRaceID(), stParams.getBoatClassName(),
+                stParams.isUseInternalMarkPassingAlgorithm(), domainFactory, replayService, raceLogStore,
+                regattaLogStore);
+        return result;
+    }
 }
