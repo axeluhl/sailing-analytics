@@ -56,7 +56,7 @@ public class UnsentOperationsSenderJob implements OperationsToMasterSendingQueue
 
     @Override
     public synchronized <S, O extends OperationWithResult<S, ?>, T> void scheduleForSending(
-            OperationWithResult<S, T> operationWithResult,
+            O operationWithResult,
             OperationsToMasterSender<S, O> sender) {
         queue.addLast(new Pair<>(operationWithResult, sender));
         ensureScheduled();
