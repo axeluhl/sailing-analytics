@@ -14,7 +14,6 @@ import org.json.simple.parser.ParseException;
 import org.junit.Rule;
 
 import com.sap.sailing.domain.common.orc.ORCCertificate;
-import com.sap.sailing.domain.common.orc.impl.ORCCertificateImpl;
 import com.sap.sse.common.Util;
 
 
@@ -50,7 +49,7 @@ public abstract class AbstractORCCertificateImporterTest {
                 " was found when importing the country document from "+url, someValidCert);
         assertNotNull(referenceCert);
         assertEquals(referenceCert.getGPHInSecondsToTheMile(), someValidCert.getGPHInSecondsToTheMile(), 0.0000001);
-        assertTrue(referenceCert.getWindwardLeewardSpeedPrediction().get(ORCCertificate.ALLOWANCES_TRUE_WIND_SPEEDS[0]).getDuration(ORCCertificateImpl.NAUTICAL_MILE).asSeconds() > 10); 
-        assertTrue(referenceCert.getLongDistanceSpeedPredictions().get(ORCCertificate.ALLOWANCES_TRUE_WIND_SPEEDS[0]).getDuration(ORCCertificateImpl.NAUTICAL_MILE).asSeconds() > 10);
+        assertTrue(referenceCert.getWindwardLeewardSpeedPrediction().get(ORCCertificate.ALLOWANCES_TRUE_WIND_SPEEDS[0]).getDuration(ORCCertificate.NAUTICAL_MILE).asSeconds() > 10); 
+        assertTrue(referenceCert.getLongDistanceSpeedPredictions().get(ORCCertificate.ALLOWANCES_TRUE_WIND_SPEEDS[0]).getDuration(ORCCertificate.NAUTICAL_MILE).asSeconds() > 10);
     }
 }
