@@ -10,6 +10,7 @@ import javax.xml.bind.DatatypeConverter;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
@@ -82,6 +83,8 @@ public class SettingsTest extends AbstractSeleniumTest {
      * settings and global settings.
      */
     @Test
+    // FIXME Bug 5246: temporarily ignored due to Selenium test instabilities
+    @Ignore
     public void testRaceBoardPageSettingsStorage() throws InterruptedException, UnsupportedEncodingException {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         EventConfigurationPanelPO events = adminConsole.goToEvents();

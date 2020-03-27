@@ -60,6 +60,7 @@ public class CountryCodeTest {
                 }
             }
         }
+        br.close();
         assertEquals(NUMBER_OF_COUNTRY_CODES, matrix.size());
         for (String[] r : matrix) {
             StringBuilder sb = new StringBuilder("        add(new CountryCodeImpl(");

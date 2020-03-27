@@ -10,6 +10,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 import com.sap.sse.replication.ReplicationService.ReplicationStartingListener;
+import com.sap.sse.util.ServiceTrackerFactory;
 
 /**
  * While a regular OSGi {@link ServiceTracker} would {@link ServiceTracker#waitForService(long) wait} for the service's
@@ -42,6 +43,21 @@ public class FullyInitializedReplicableTracker<R extends Replicable<?, ?>> exten
      * result will be considered.
      */
     private final ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker;
+
+    /**
+     * Same as {@link #createAndOpen(BundleContext, Class, ServiceTrackerCustomizer)}, but using {@code null} for the customizer.
+     */
+    public static <R extends Replicable<?, ?>> FullyInitializedReplicableTracker<R> createAndOpen(BundleContext context, Class<R> clazz) {
+        return createAndOpen(context, clazz, /* customizer */ null);
+    }
+
+    public static <R extends Replicable<?, ?>> FullyInitializedReplicableTracker<R> createAndOpen(BundleContext context, Class<R> clazz,
+            ServiceTrackerCustomizer<R, R> customizer) {
+        final FullyInitializedReplicableTracker<R> result = new FullyInitializedReplicableTracker<R>(context, clazz, customizer,
+                ServiceTrackerFactory.createAndOpen(context, ReplicationService.class));
+        result.open();
+        return result;
+    }
     
     public FullyInitializedReplicableTracker(BundleContext context, Class<R> clazz,
             ServiceTrackerCustomizer<R, R> customizer,

@@ -11,7 +11,6 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.sap.sailing.domain.igtimiadapter.Client;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
 import com.sap.sse.replication.FullyInitializedReplicableTracker;
-import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.util.ServiceTrackerFactory;
 
@@ -36,11 +35,8 @@ public class Activator implements BundleActivator {
     @Override
     public void start(final BundleContext context) throws Exception {
         INSTANCE = this;
-        igtimiConnectionFactoryTracker = ServiceTrackerFactory
-                .createAndOpen(context, IgtimiConnectionFactory.class);
-        securityServiceTracker = new FullyInitializedReplicableTracker<>(context, SecurityService.class,
-                /* customizer */ null, ServiceTrackerFactory.createAndOpen(context, ReplicationService.class));
-        securityServiceTracker.open();
+        igtimiConnectionFactoryTracker = ServiceTrackerFactory.createAndOpen(context, IgtimiConnectionFactory.class);
+        securityServiceTracker = FullyInitializedReplicableTracker.createAndOpen(context, SecurityService.class);
     }
     
     public static Activator getInstance() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
