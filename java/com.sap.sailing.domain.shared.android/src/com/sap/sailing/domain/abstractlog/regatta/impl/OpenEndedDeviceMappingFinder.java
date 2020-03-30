@@ -12,19 +12,19 @@ import com.sap.sse.common.WithID;
 
 /**
  * {@link BaseLogAnalyzer} used for finding the ID of an open ended {@link DeviceMappingEvent} to a corresponding
- * {@link RegattaLogCloseOpenEndedDeviceMappingEvent}
+ * {@link RegattaLogCloseOpenEndedDeviceMappingEvent}.<p>
  * 
- * If no corresponding event has been found, null is returned
+ * If no corresponding event has been found, {@code null} is returned.
  */
 public class OpenEndedDeviceMappingFinder extends BaseLogAnalyzer<RegattaLog, RegattaLogEvent, RegattaLogEventVisitor, Serializable> {
 
     private final WithID mappedTo;
-    private final Serializable deviceUuid;
+    private final Serializable deviceUuidAsString;
     
-    public OpenEndedDeviceMappingFinder(RegattaLog log, WithID mappedTo, Serializable deviceUuid) {
+    public OpenEndedDeviceMappingFinder(RegattaLog log, WithID mappedTo, String deviceUuidAsString) {
         super(log);
         this.mappedTo = mappedTo;
-        this.deviceUuid = deviceUuid;
+        this.deviceUuidAsString = deviceUuidAsString;
     }
 
     @Override
@@ -33,7 +33,7 @@ public class OpenEndedDeviceMappingFinder extends BaseLogAnalyzer<RegattaLog, Re
             if (regattaLogEvent instanceof RegattaLogDeviceMappingEvent<?>) {
                 RegattaLogDeviceMappingEvent<?> deviceMappingEvent = (RegattaLogDeviceMappingEvent<?>) regattaLogEvent;
                 if (deviceMappingEvent.getMappedTo().equals(mappedTo) &&
-                        deviceMappingEvent.getDevice().getStringRepresentation().equals(deviceUuid)) {
+                        deviceMappingEvent.getDevice().getStringRepresentation().equals(deviceUuidAsString)) {
                     return deviceMappingEvent.getId();
                 }
             }
