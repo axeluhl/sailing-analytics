@@ -15,6 +15,5 @@ import com.sap.sse.common.WithID;
  * 
  */
 public interface DeviceMappingWithRegattaLogEvent<ItemType extends WithID> extends DeviceMapping<ItemType> {
-    
     RegattaLogDeviceMappingEvent<ItemType> getRegattaLogEvent();
 }
