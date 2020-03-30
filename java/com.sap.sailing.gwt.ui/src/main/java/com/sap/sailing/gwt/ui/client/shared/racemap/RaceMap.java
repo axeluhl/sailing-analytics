@@ -26,8 +26,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.NumberFormat;
-import com.google.gwt.maps.client.LoadApi;
-import com.google.gwt.maps.client.LoadApi.LoadLibrary;
 import com.google.gwt.maps.client.MapOptions;
 import com.google.gwt.maps.client.MapTypeId;
 import com.google.gwt.maps.client.MapWidget;
@@ -130,8 +128,8 @@ import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.CanvasOverlayV3;
 import com.sap.sailing.gwt.ui.shared.racemap.DetailTypeMetricOverlay;
-import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapAPIKey;
 import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapStyleHelper;
+import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapsLoader;
 import com.sap.sailing.gwt.ui.shared.racemap.RaceSimulationOverlay;
 import com.sap.sailing.gwt.ui.shared.racemap.WindStreamletsRaceboardOverlay;
 import com.sap.sse.common.Bearing;
@@ -750,11 +748,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
 
     private void loadMapsAPIV3(final boolean showMapControls, final boolean showHeaderPanel,
             final boolean showSatelliteLayer) {
-        // load all the libs for use in the maps
-        ArrayList<LoadLibrary> loadLibraries = new ArrayList<LoadApi.LoadLibrary>();
-        loadLibraries.add(LoadLibrary.DRAWING);
-        loadLibraries.add(LoadLibrary.GEOMETRY);
-
         Runnable onLoad = new Runnable() {
             @Override
             public void run() {
@@ -926,9 +919,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 RaceMap.this.managedInfoWindow = new ManagedInfoWindow(map);
             }
         };
-        // Emergency patch: problems with gme-sapglobalmarketing key?
-//        LoadApi.go(onLoad, loadLibraries, GoogleMapAPIKey.V3_PARAMS);
-        LoadApi.go(onLoad, loadLibraries, "key="+GoogleMapAPIKey.V3_APIKey);
+        GoogleMapsLoader.load(onLoad);
     }
 
     /**
