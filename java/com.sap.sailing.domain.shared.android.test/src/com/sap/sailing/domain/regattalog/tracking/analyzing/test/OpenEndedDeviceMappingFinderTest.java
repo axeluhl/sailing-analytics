@@ -62,8 +62,8 @@ public class OpenEndedDeviceMappingFinderTest extends AbstractRegattaLogTracking
         log.add(mappingEvent1);
         final RegattaLogDeviceMarkMappingEventImpl mappingEvent2 = new RegattaLogDeviceMarkMappingEventImpl(MillisecondsTimePoint.now().plus(Duration.ONE_YEAR), author, mappedToMark,
                 new SmartphoneUUIDIdentifierImpl(deviceUuid), MillisecondsTimePoint.now(), MillisecondsTimePoint.now().plus(Duration.ONE_YEAR).plus(Duration.ONE_HOUR));
-        log.add(mappingEvent1);
-        assertEquals(mappingEvent2.getId(), finder.analyze());
+        log.add(mappingEvent2);
+        assertEquals(mappingEvent1.getId(), finder.analyze());
     }
     
 }
