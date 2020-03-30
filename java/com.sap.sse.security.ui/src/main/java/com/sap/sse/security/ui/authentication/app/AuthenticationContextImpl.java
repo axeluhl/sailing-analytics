@@ -69,7 +69,13 @@ public class AuthenticationContextImpl implements AuthenticationContext {
         return currentUser.getName();
     }
     
+    @Override
     public boolean hasPermission(SecuredDTO securedDTO, Action action) {
         return userService.hasPermission(securedDTO, action);
+    }
+    
+    @Override
+    public boolean hasServerPermission(Action action) {
+        return userService.hasServerPermission(action);
     }
 }

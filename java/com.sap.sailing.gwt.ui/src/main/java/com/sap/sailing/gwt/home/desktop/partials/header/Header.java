@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyPressEvent;
@@ -32,6 +33,10 @@ import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.Solutions
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.mvp.PlaceChangedEvent;
+import com.sap.sse.security.shared.dto.UserDTO;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
+import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
+import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.authentication.view.AuthenticationMenuView;
 import com.sap.sse.security.ui.authentication.view.AuthenticationMenuViewImpl;
 
@@ -39,6 +44,7 @@ public class Header extends Composite {
     @UiField Anchor startPageLink;
     @UiField Anchor eventsPageLink;
     @UiField Anchor solutionsPageLink;
+    @UiField Anchor adminConsolePageLink;
 //    @UiField Anchor sponsoringPageLink;
     
     @UiField TextBox searchText;
@@ -68,7 +74,7 @@ public class Header extends Composite {
         HeaderResources.INSTANCE.css().ensureInjected();
         
         initWidget(uiBinder.createAndBindUi(this));
-        links = Arrays.asList(new Anchor[] { startPageLink, eventsPageLink, solutionsPageLink });
+        links = Arrays.asList(new Anchor[] { startPageLink, eventsPageLink, solutionsPageLink, adminConsolePageLink });
         
         homeNavigation = navigator.getHomeNavigation();
         eventsNavigation = navigator.getEventsNavigation();
@@ -77,6 +83,18 @@ public class Header extends Composite {
         startPageLink.setHref(homeNavigation.getTargetUrl());
         eventsPageLink.setHref(eventsNavigation.getTargetUrl());
         solutionsPageLink.setHref(solutionsNavigation.getTargetUrl());
+        
+        adminConsolePageLink.setHref("/gwt/AdminConsole.html");
+        adminConsolePageLink.getElement().getStyle().setDisplay(Display.NONE);
+        eventBus.addHandler(AuthenticationContextEvent.TYPE, event->{
+            AuthenticationContext authContext = event.getCtx();
+            UserDTO user = authContext.getCurrentUser();
+            if (authContext.hasServerPermission(ServerActions.CREATE_OBJECT)) {
+                adminConsolePageLink.getElement().getStyle().setDisplay(Display.INLINE_BLOCK);
+            } else {
+                adminConsolePageLink.getElement().getStyle().setDisplay(Display.NONE);
+            }
+        });
         
         searchText.getElement().setAttribute("placeholder", StringMessages.INSTANCE.headerSearchPlaceholder());
         searchText.addKeyPressHandler(new KeyPressHandler() {

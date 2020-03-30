@@ -41,4 +41,6 @@ public interface AuthenticationContext {
     String getUserSubtitle();
     
     boolean hasPermission(SecuredDTO securedDTO, Action action);
+
+    boolean hasServerPermission(Action action);
 }
