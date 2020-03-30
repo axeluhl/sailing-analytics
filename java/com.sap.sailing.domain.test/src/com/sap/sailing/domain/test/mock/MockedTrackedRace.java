@@ -8,7 +8,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.Future;
-import java.util.function.Supplier;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
@@ -1292,10 +1291,4 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public TrackingConnectorInfo getTrackingConnectorInfo() {
         return null;
     }
-
-    @Override
-    public Wind getWindByTrackedLeg(TrackedLeg leg, Supplier<Wind> value) {
-        return null;
-    }
-
 }

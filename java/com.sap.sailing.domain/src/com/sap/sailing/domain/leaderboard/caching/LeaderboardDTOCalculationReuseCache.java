@@ -2,7 +2,6 @@ package com.sap.sailing.domain.leaderboard.caching;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.BiFunction;
@@ -32,6 +31,7 @@ import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveCourseImpl;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
 import com.sap.sailing.domain.leaderboard.impl.AbstractSimpleLeaderboardImpl;
 import com.sap.sailing.domain.orc.ORCPerformanceCurve;
+import com.sap.sailing.domain.orc.ORCPerformanceCurveCache;
 import com.sap.sailing.domain.orc.impl.AbstractORCPerformanceCurveTwaLegAdapter;
 import com.sap.sailing.domain.orc.impl.ORCPerformanceCurveByImpliedWindRankingMetric;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -82,6 +82,11 @@ public class LeaderboardDTOCalculationReuseCache implements WindLegTypeAndLegBea
      * the wind at competitor's position at timePoint; <code>null</code> values are represented by {@link #NULL_WIND}.
      */
     final ConcurrentHashMap<Triple<TrackedRace, Competitor, TimePoint>, Wind> windCache;
+    
+    /**
+     * The average wind in a leg as defined by {@link TrackedLeg#getAverageWind(int)}. See {@link #getWindForLeg(TrackedLeg, Function)}.
+     */
+    private final ConcurrentHashMap<ORCPerformanceCurveLeg, Wind> trackedLegAverageWindCache;
     
     private static final Wind NULL_WIND = new WindImpl(/* position */ new DegreePosition(0, 0),
             /* time point */ MillisecondsTimePoint.now(), /* windSpeedWithBearing */ new KnotSpeedWithBearingImpl(0, new DegreeBearingImpl(0)));
@@ -146,6 +151,7 @@ public class LeaderboardDTOCalculationReuseCache implements WindLegTypeAndLegBea
         windCache = new ConcurrentHashMap<>();
         scratchBoat = new ConcurrentHashMap<>();
         legBearingCache = new ConcurrentHashMap<>();
+        trackedLegAverageWindCache = new ConcurrentHashMap<>();
         relativeCorrectedTimePerCompetitor = new ConcurrentHashMap<>();
         approximateWaypointPositions = new ConcurrentHashMap<>();
         this.performanceCurvesPerCompetitor = new ConcurrentHashMap<>();
@@ -209,12 +215,12 @@ public class LeaderboardDTOCalculationReuseCache implements WindLegTypeAndLegBea
     @Override
     public ORCPerformanceCurveCourse getTotalCourse(TrackedRace raceContext, Supplier<ORCPerformanceCurveCourse> totalCourseSupplier) {
         if (totalCourse == null) {
-            totalCourse = fixORCPerformanceCurveCourse(totalCourseSupplier.get());
+            totalCourse = fixORCPerformanceCurveCourse(totalCourseSupplier.get(), /* cache */ this);
         }
         return totalCourse;
     }
 
-    private ORCPerformanceCurveCourse fixORCPerformanceCurveCourse(ORCPerformanceCurveCourse course) {
+    private ORCPerformanceCurveCourse fixORCPerformanceCurveCourse(ORCPerformanceCurveCourse course, ORCPerformanceCurveCache cache) {
         final List<ORCPerformanceCurveLeg> legs = new ArrayList<>();
         boolean changed = false;
         for (final ORCPerformanceCurveLeg leg : course.getLegs()) {
@@ -316,11 +322,13 @@ public class LeaderboardDTOCalculationReuseCache implements WindLegTypeAndLegBea
     }
 
     @Override
-    public Wind getWindForLeg(TrackedLeg leg, Supplier<Wind> value) {
-        Triple<TrackedRace, Competitor, TimePoint> cacheKey = new Triple<>(leg.getTrackedRace(), null, timePoint);
-        return Optional.ofNullable(windCache.get(cacheKey)).orElseGet(() -> {
-            windCache.put(cacheKey, value.get());
-            return windCache.get(cacheKey);
-        });
+    public <L extends ORCPerformanceCurveLeg> Wind getAverageWind(L leg,
+            Function<L, Wind> averageWindForLegSupplier) {
+        Wind result = trackedLegAverageWindCache.get(leg);
+        if (result == null) {
+            result = averageWindForLegSupplier.apply(leg);
+            trackedLegAverageWindCache.put(leg, result);
+        }
+        return result;
     }
 }

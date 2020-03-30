@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.SortedSet;
-import java.util.function.Supplier;
 
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCImpliedWindSourceEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -1257,11 +1256,4 @@ public interface TrackedRace
      * may be {@code null}, particularly in test set-ups
      */
     TrackingConnectorInfo getTrackingConnectorInfo();
-    
-    /**
-     * Obtains estimated interpolated wind information for a given tracked leg. 
-     * @param value
-     * @return cached value or value computed by supplier function 
-     */
-    Wind getWindByTrackedLeg(TrackedLeg leg, Supplier<Wind> value);
 }

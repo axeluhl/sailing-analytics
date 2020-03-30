@@ -19,6 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -36,6 +37,8 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.TargetTimeInfoImpl;
+import com.sap.sailing.domain.confidence.ConfidenceBasedWindAverager;
+import com.sap.sailing.domain.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
@@ -296,6 +299,21 @@ public class TrackedLegImpl implements TrackedLeg {
         }).orElse(Collections.<Position>emptyList());
         return result;
     }
+    
+    @Override
+    public WindWithConfidence<Pair<Position, TimePoint>> getAverageWind(int numParts) {
+        ConfidenceBasedWindAverager<Util.Pair<Position, TimePoint>> timeWeigher = 
+                ConfidenceFactory.INSTANCE.createWindAverager(/* weigher==null means use 1.0 as base confidence */ null);
+        final Iterable<TimePoint> referenceTimePoints = getEquidistantReferenceTimePoints(numParts);
+        Iterable<WindWithConfidence<Util.Pair<Position, TimePoint>>> winds = 
+                Util.stream(referenceTimePoints).flatMap(timepoint -> {
+                    return Util.stream(getEquidistantSectionsOfLeg(timepoint, numParts))
+                            .map(p -> getTrackedRace().getWindWithConfidence(p, timepoint));
+                }).collect(Collectors.toList());
+        return timeWeigher.getAverage(winds, null);
+    }
+
+
     
     public Position getEffectiveWindPosition(Callable<Position> exactPositionProvider, TimePoint at, WindPositionMode mode) {
         final Position effectivePosition;

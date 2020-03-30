@@ -33,7 +33,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -431,8 +430,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     
     private final NamedReentrantReadWriteLock sensorTracksLock;
     
-    private transient ConcurrentMap<TimePoint, LeaderboardDTOCalculationReuseCache> windLegByTimepointCache;
-    
     /**
      * Constructs the tracked race with one-design ranking.
      */
@@ -594,13 +591,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             logger.log(Level.SEVERE, "Waiting for loading from stores to finish was interrupted", e);
         }
         rankingMetric = rankingMetricConstructor.apply(this);
-        windLegByTimepointCache = new ConcurrentHashMap<>();
-    }
-    
-    @Override
-    public Wind getWindByTrackedLeg(TrackedLeg leg, Supplier<Wind> value) {
-        LeaderboardDTOCalculationReuseCache windByLeg = windLegByTimepointCache.computeIfAbsent(leg.getReferenceTimePoint(), LeaderboardDTOCalculationReuseCache::new);
-        return windByLeg.getWindForLeg(leg, value);
     }
     
     @Override

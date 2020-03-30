@@ -5,7 +5,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.Wind;
+import com.sap.sailing.domain.common.orc.AverageWindOnLegCache;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveCourse;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
@@ -15,7 +15,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 
-public interface ORCPerformanceCurveCache {
+public interface ORCPerformanceCurveCache extends AverageWindOnLegCache {
     /**
      * If not yet computed, computes a copy of the total course supplied by the {@code totalCourseSupplier} where
      * any adapted leg that would query a live {@link TrackedLeg} for TWA and distance is replaced by a leg of
@@ -60,10 +60,4 @@ public interface ORCPerformanceCurveCache {
      */
     Duration getRelativeCorrectedTime(Competitor competitor, TrackedRace raceContext,
             TimePoint timePoint, BiFunction<Competitor, TimePoint, Duration> relativeCorrectedTimeSupplier);
-    
-    /**
-     * Determines the wind at the leg. The result is cached for subsequent calls with equal parameters.
-     * @param value function for compute wind value if it's not preset in cache
-     */
-    Wind getWindForLeg(TrackedLeg leg, Supplier<Wind> value);
 }

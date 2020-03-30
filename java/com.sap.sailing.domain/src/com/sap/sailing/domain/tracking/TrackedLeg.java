@@ -9,11 +9,13 @@ import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TargetTimeInfo.LegTargetTimeInfo;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 
 public interface TrackedLeg extends Serializable {
@@ -248,7 +250,24 @@ public interface TrackedLeg extends Serializable {
      * "now" is used. 
      */
     Iterable<TimePoint> getEquidistantReferenceTimePoints(int numberOfPoints);
-
+    
+    /**
+     * Computes a {@link Wind} estimation based on {@link #numParts} x {@link #numParts} wind samples, taken for
+     * {@link #numParts} time points spread equally across the time range between the first boat entering and the last
+     * boat exiting the leg (defaulting to "now" if no boat has exited the leg yet) and across {@link #numParts}
+     * positions along the great circle segment connecting the approximate start waypoint's position and the approximate
+     * end waypoint's position at the respective time point. Those wind samples are averaged based on their original
+     * confidences. The {@link #scale(double) scaling} of this leg does not affect the wind sampling; in all cases, wind
+     * samples will always be taken along the full leg distance, making the result of this method the same for the same
+     * boundary conditions (mark passings etc.) for all competitors.
+     * 
+     * @param numParts
+     *            the number of positions and the number of time points to use for averaging the wind field; the result
+     *            will hence be computed as an average---weighted by the original confidence of each wind estimation at
+     *            any of these positions/time points---of these {@code numParts*numParts} wind estimations.
+     */
+    WindWithConfidence<Util.Pair<Position, TimePoint>> getAverageWind(int numParts);
+    
     /**
      * The leader at the given <code>timePoint</code> in this leg, based on the {@link TrackedRace#getRankingMetric() ranking metric}
      * installed for the race.

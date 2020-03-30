@@ -1,21 +1,16 @@
 package com.sap.sailing.domain.orc.impl;
 
-import java.util.stream.Collectors;
-
-import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Wind;
+import com.sap.sailing.domain.common.orc.AverageWindOnLegCache;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLeg;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
-import com.sap.sailing.domain.confidence.ConfidenceBasedWindAverager;
-import com.sap.sailing.domain.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
-import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sailing.domain.tracking.impl.NoCachingWindLegTypeAndLegBearingCache;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.Util;
 
 /**
  * Abstract base class for adapting a {@link TrackedLeg} to the {@link ORCPerformanceCurveLeg} interface. If wind
@@ -47,31 +42,14 @@ public abstract class AbstractORCPerformanceCurveTwaLegAdapter implements ORCPer
         return trackedLeg;
     }
 
-    /**
-     * Computes a {@link Wind} estimation based on {@link #numParts} x {@link #numParts} wind samples, taken for
-     * {@link #numParts} time points spread equally across the time range between the first boat entering and the last
-     * boat exiting the leg (defaulting to "now" if no boat has exited the leg yet) and across {@link #numParts}
-     * positions along the great circle segment connecting the approximate start waypoint's position and the approximate
-     * end waypoint's position at the respective time point. Those wind samples are averaged based on their original
-     * confidences. The {@link #scale(double) scaling} of this leg does not affect the wind sampling; in all cases, wind
-     * samples will always be taken along the full leg distance, making the result of this method the same for the same
-     * boundary conditions (mark passings etc.) for all competitors.
-     */
-    private Wind getWind() {        
-        ConfidenceBasedWindAverager<Util.Pair<Position, TimePoint>> timeWeigher = 
-                ConfidenceFactory.INSTANCE.createWindAverager(/* weigher==null means use 1.0 as base confidence */ null);
-        final Iterable<TimePoint> referenceTimePoints = trackedLeg.getEquidistantReferenceTimePoints(numParts);
-        Iterable<WindWithConfidence<Util.Pair<Position, TimePoint>>> winds = 
-                Util.stream(referenceTimePoints).flatMap(timepoint -> {
-                    return Util.stream(trackedLeg.getEquidistantSectionsOfLeg(timepoint, numParts))
-                            .map(p -> trackedLeg.getTrackedRace().getWindWithConfidence(p, timepoint));
-                }).collect(Collectors.toList());
-        return timeWeigher.getAverage(winds, null).getObject();
-    }
-
     @Override
     public Bearing getTwa() {
-        final Wind wind = getTrackedLeg().getTrackedRace().getWindByTrackedLeg(getTrackedLeg(), () -> getWind());
+        return getTwa(new NoCachingWindLegTypeAndLegBearingCache());
+    }
+    
+    @Override
+    public Bearing getTwa(AverageWindOnLegCache cache) {
+        final Wind wind = cache.getAverageWind(this, legAdapter->legAdapter.getTrackedLeg().getAverageWind(/* numParts */ 10).getObject());
         final Bearing result;
         if (wind == null) {
             result = null;
