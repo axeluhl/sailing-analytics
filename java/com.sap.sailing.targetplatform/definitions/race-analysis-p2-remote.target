@@ -5,7 +5,7 @@
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="javax.ws.rs" version="1.1.1.v20130318-1750"/>
 <unit id="javax.ws.rs.source" version="1.1.1.v20130318-1750"/>
-<repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20160221192158/repository/"/>
+<repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20160221192158/repository/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.hamcrest" version="1.1.0.v20090501071000"/>
@@ -59,11 +59,11 @@
 <unit id="org.jdom.source" version="1.1.1.v201101151400"/>
 <unit id="org.objectweb.asm" version="5.0.1.v201404251740"/>
 <unit id="org.objectweb.asm.source" version="5.0.1.v201404251740"/>
-<repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20180905201904/repository/"/>
+<repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20180905201904/repository/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.jetty.bundles.f.feature.group" version="9.4.8.201802270002"/>
-<repository location="http://download.eclipse.org/jetty/updates/jetty-bundles-9.x/"/>
+<repository location="https://download.eclipse.org/jetty/updates/jetty-bundles-9.x/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.apache.felix.gogo.command" version="0.10.0.v201209301215"/>
@@ -110,7 +110,7 @@
 <unit id="org.eclipse.osgi" version="3.12.100.v20180210-1608"/>
 <unit id="org.eclipse.osgi.services" version="3.6.0.v20170228-1906"/>
 <unit id="org.eclipse.osgi.util" version="3.4.0.v20170111-1608"/>
-<repository location="http://download.eclipse.org/releases/oxygen/"/>
+<repository location="https://download.eclipse.org/releases/oxygen/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="com.sap.sailing.target.base.feature.group" version="1.0.0"/>

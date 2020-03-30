@@ -79,7 +79,17 @@ public interface SharedSailingData extends ReplicableWithObjectInputStream<Repli
     MarkProperties updateMarkProperties(UUID uuid, CommonMarkProperties properties, Positioning positioningInformation, Iterable<String> tags);
 
     /**
+     * Removes any positioning information from the {@code markProperties} object, regardless of what the positioning was before
+     * (device-based or fixed position or empty);
+     */
+    void clearPositioningForMarkProperties(MarkProperties markProperties);
+    
+    /**
      * This overrides a previously set fixed position or associated tracking device.
+     * 
+     * @param position
+     *            must not be {@code null}; use {@link #clearPositioningForMarkProperties} if you'd like to remove any
+     *            positioning assignment from the {@link MarkProperties} object altogether.
      */
     void setFixedPositionForMarkProperties(MarkProperties markProperties, Position position);
     
@@ -87,6 +97,10 @@ public interface SharedSailingData extends ReplicableWithObjectInputStream<Repli
     
     /**
      * This overrides a previously set fixed position or associated tracking device.
+     * 
+     * @param deviceIdentifier
+     *            must not be {@code null}; use {@link #clearPositioningForMarkProperties} if you'd like to remove any
+     *            positioning assignment from the {@link MarkProperties} object altogether.
      */
     void setTrackingDeviceIdentifierForMarkProperties(MarkProperties markProperties, DeviceIdentifier deviceIdentifier);
     

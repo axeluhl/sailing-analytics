@@ -936,9 +936,9 @@ public class Util {
             c++;
         }
     }
-    
+
     /**
-     * Produces a non-parallel stream from the {@code iterable}. Short for
+     * @return a non-parallel stream for the {@link Iterable} passed. Short for
      * {@code StreamSupport.stream(iterable.spliterator(), false)}.
      */
     public static <T> Stream<T> stream(Iterable<T> iterable) {

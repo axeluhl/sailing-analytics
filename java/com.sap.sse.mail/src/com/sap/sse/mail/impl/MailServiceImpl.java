@@ -28,6 +28,8 @@ import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.mail.MailServiceResolver;
 import com.sap.sse.mail.SerializableMultipartSupplier;
+import com.sap.sse.mail.operations.SendMailOperation;
+import com.sap.sse.mail.operations.SendMailWithMultipartSupplierOperation;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.OperationWithResultWithIdWrapper;
@@ -138,7 +140,7 @@ public class MailServiceImpl implements ReplicableMailService {
 
     @Override
     public void sendMail(String toAddress, String subject, String body) throws MailException {
-        apply(s -> s.internalSendMail(toAddress, subject, body));
+        apply(new SendMailOperation(toAddress, subject, body));
     }
 
     @Override
@@ -154,7 +156,7 @@ public class MailServiceImpl implements ReplicableMailService {
 
     @Override
     public void sendMail(String toAddress, String subject, SerializableMultipartSupplier multipartSupplier) throws MailException {
-        apply(s -> s.internalSendMail(toAddress, subject, multipartSupplier));
+        apply(new SendMailWithMultipartSupplierOperation(toAddress, subject, multipartSupplier));
     }
 
     @Override
@@ -264,7 +266,7 @@ public class MailServiceImpl implements ReplicableMailService {
 
     @Override
     public <S, O extends OperationWithResult<S, ?>, T> void scheduleForSending(
-            OperationWithResult<S, T> operationWithResult, OperationsToMasterSender<S, O> sender) {
+            O operationWithResult, OperationsToMasterSender<S, O> sender) {
         if (unsentOperationForMasterQueue != null) {
             unsentOperationForMasterQueue.scheduleForSending(operationWithResult, sender);
         }

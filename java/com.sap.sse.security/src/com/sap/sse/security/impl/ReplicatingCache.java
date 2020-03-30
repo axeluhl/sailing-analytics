@@ -14,6 +14,9 @@ import org.apache.shiro.cache.CacheException;
 import org.apache.shiro.session.Session;
 
 import com.sap.sse.common.Named;
+import com.sap.sse.security.operations.ClearReplicatingCacheOperation;
+import com.sap.sse.security.operations.PutToReplicatingCacheOperation;
+import com.sap.sse.security.operations.RemoveFromReplicatingCacheOperation;
 
 /**
  * A {@link Cache}s whose modifying operations are replicated. This works by intercepting the writing operations
@@ -68,10 +71,8 @@ public class ReplicatingCache<K, V> implements Cache<K, V>, Named {
             }
         }
         V result = cache.put(key, value);
-        final String myName = name;
         if (store && value instanceof Session) {
-            securityService.replicate(s->
-            s.getCacheManager().getCache(myName).put(key, value));
+            securityService.replicate(new PutToReplicatingCacheOperation<K, V>(getName(), key, value));
             securityService.storeSession(getName(), (Session) value);
         }
         return result;
@@ -93,9 +94,7 @@ public class ReplicatingCache<K, V> implements Cache<K, V>, Named {
     @Override
     public V remove(K key) throws CacheException {
         V result = cache.remove(key);
-        final String myName = name;
-        securityService.replicate(s->
-            s.getCacheManager().getCache(myName).remove(key));
+        securityService.replicate(new RemoveFromReplicatingCacheOperation<K>(getName(), key));
         if (result instanceof Session) {
             securityService.removeSession(getName(), (Session) result);
         }
@@ -105,10 +104,7 @@ public class ReplicatingCache<K, V> implements Cache<K, V>, Named {
     @Override
     public void clear() throws CacheException {
         cache.clear();
-        final String myName = name;
-        securityService.replicate(s->{ 
-            s.getCacheManager().getCache(myName).clear(); return null;
-        });
+        securityService.replicate(new ClearReplicatingCacheOperation(getName()));
         securityService.removeAllSessions(getName());
     }
 

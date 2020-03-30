@@ -202,6 +202,7 @@ import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
+import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParametersHandler;
 import com.sap.sailing.domain.tracking.RaceTrackingHandler;
 import com.sap.sailing.domain.tracking.RaceTrackingHandler.DefaultRaceTrackingHandler;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -279,6 +280,7 @@ import com.sap.sailing.server.operationaltransformation.UpdateStartTimeReceived;
 import com.sap.sailing.server.operationaltransformation.UpdateTrackedRaceStatus;
 import com.sap.sailing.server.operationaltransformation.UpdateWindAveragingTime;
 import com.sap.sailing.server.operationaltransformation.UpdateWindSourcesToExclude;
+import com.sap.sailing.server.security.PermissionAwareRaceTrackingHandler;
 import com.sap.sailing.server.simulation.SimulationServiceFactory;
 import com.sap.sailing.server.statistics.StatisticsAggregator;
 import com.sap.sailing.server.statistics.StatisticsCalculator;
@@ -286,12 +288,14 @@ import com.sap.sailing.server.statistics.TrackedRaceStatisticsCache;
 import com.sap.sailing.server.tagging.TaggingServiceFactory;
 import com.sap.sailing.server.util.EventUtil;
 import com.sap.sailing.shared.server.SharedSailingData;
+import com.sap.sse.MasterDataImportClassLoaderService;
 import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.PairingListCreationException;
 import com.sap.sse.common.Renamable;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -524,7 +528,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     
     private ThreadLocal<Boolean> currentlyApplyingOperationReceivedFromMaster = ThreadLocal.withInitial(() -> false);
 
-    private final Set<ClassLoader> masterDataClassLoaders = new HashSet<ClassLoader>();
+    /**
+     * A synchronized set of the class loaders to use for importing master data. See also {@link MasterDataImportClassLoaderService},
+     * {@link #addMasterDataClassLoader(ClassLoader)} and {@link #removeMasterDataClassLoader(ClassLoader)}. In order to loop over
+     * these, synchronize on the object. See also {@link Collections#synchronizedSet(Set)}.
+     */
+    private final Set<ClassLoader> masterDataClassLoaders = Collections.synchronizedSet(new HashSet<>());
     
     private final JoinedClassLoader joinedClassLoader;
 
@@ -1812,6 +1821,14 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
     }
 
+    /**
+     * Uses the {@link #getPermissionAwareRaceTrackingHandler()} as the {@link RaceTrackingHandler}
+     */
+    @Override
+    public RaceHandle addRace(RegattaIdentifier regattaToAddTo, RaceTrackingConnectivityParameters params, long timeoutInMilliseconds) throws Exception {
+        return addRace(regattaToAddTo, params, timeoutInMilliseconds, getPermissionAwareRaceTrackingHandler());
+    }
+    
     @Override
     public RaceHandle addRace(RegattaIdentifier regattaToAddTo, RaceTrackingConnectivityParameters params,
             long timeoutInMilliseconds, RaceTrackingHandler raceTrackingHandler) throws Exception {
@@ -4067,7 +4084,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public AbstractLogEventAuthor getServerAuthor() {
-        Subject subject  = null;
+        Subject subject = null;
         try {
             subject = SecurityUtils.getSubject();
         } catch (Exception e) {
@@ -4250,11 +4267,15 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     public void addMasterDataClassLoader(ClassLoader classLoader) {
-        masterDataClassLoaders.add(classLoader);
+        synchronized (masterDataClassLoaders) {
+            masterDataClassLoaders.add(classLoader);
+        }
     }
 
     public void removeMasterDataClassLoader(ClassLoader classLoader) {
-        masterDataClassLoaders.remove(classLoader);
+        synchronized (masterDataClassLoaders) {
+            masterDataClassLoaders.remove(classLoader);
+        }
     }
     
     @Override
@@ -4808,9 +4829,24 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public <S, O extends OperationWithResult<S, ?>, T> void scheduleForSending(
-            OperationWithResult<S, T> operationWithResult, OperationsToMasterSender<S, O> sender) {
+            O operationWithResult, OperationsToMasterSender<S, O> sender) {
         if (unsentOperationsToMasterSender != null) {
             unsentOperationsToMasterSender.scheduleForSending(operationWithResult, sender);
         }
+    }
+
+    @Override
+    public RaceTrackingConnectivityParameters getConnectivityParametersByRace(RaceDefinition raceDefiniton) {
+        return connectivityParametersByRace.get(raceDefiniton);
+    }
+
+    @Override
+    public RaceTrackingHandler getPermissionAwareRaceTrackingHandler() {
+        return new PermissionAwareRaceTrackingHandler(getSecurityService());
+    }
+
+    @Override
+    public TypeBasedServiceFinder<RaceTrackingConnectivityParametersHandler> getRaceTrackingConnectivityParamsServiceFinder() {
+        return domainObjectFactory.getRaceTrackingConnectivityParamsServiceFinder();
     }
 }

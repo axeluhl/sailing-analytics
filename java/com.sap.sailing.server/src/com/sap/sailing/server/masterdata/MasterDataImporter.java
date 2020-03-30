@@ -42,12 +42,10 @@ public class MasterDataImporter {
         this.racingEventService = racingEventService;
         this.user = user;
         this.tenant = tenant;
-
     }
 
     public void importFromStream(InputStream inputStream, UUID importOperationId, boolean override)
-            throws IOException,
-            ClassNotFoundException {
+            throws IOException, ClassNotFoundException {
         ObjectInputStreamResolvingAgainstCache<DomainFactory> objectInputStream = racingEventService
                 .getBaseDomainFactory()
                 .createObjectInputStreamResolvingAgainstThisFactory(inputStream, new ResolveListener() {

@@ -139,7 +139,6 @@ import com.sap.sailing.server.operationaltransformation.UpdateLeaderboard;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardMaxPointsReason;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardScoreCorrection;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardScoreCorrectionMetadata;
-import com.sap.sailing.server.security.PermissionAwareRaceTrackingHandler;
 import com.sap.sse.InvalidDateException;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
@@ -473,13 +472,13 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         String competitorId = (String) requestObject.get(DeviceMappingConstants.JSON_COMPETITOR_ID_AS_STRING);
         String boatId = (String) requestObject.get(DeviceMappingConstants.JSON_BOAT_ID_AS_STRING);
         String markId = (String) requestObject.get(DeviceMappingConstants.JSON_MARK_ID_AS_STRING);
-        String deviceUuid = (String) requestObject.get(DeviceMappingConstants.JSON_DEVICE_UUID);
+        String deviceUuidAsString = (String) requestObject.get(DeviceMappingConstants.JSON_DEVICE_UUID);
         String regattaSecret = (String) requestObject.get(DeviceMappingConstants.JSON_REGISTER_SECRET);
         TimePoint closingTimePointInclusive = new MillisecondsTimePoint(toMillis);
         boolean allowedViaPermission = getSecurityService().hasCurrentUserUpdatePermission(leaderboard);
         boolean allowedViaSecret = getService().skipChecksDueToCorrectSecret(leaderboardName, regattaSecret);
         if (allowedViaPermission || allowedViaSecret) {
-            if (toMillis == null || deviceUuid == null || closingTimePointInclusive == null
+            if (toMillis == null || deviceUuidAsString == null || closingTimePointInclusive == null
                     || (competitorId == null && boatId == null && markId == null)) {
                 logger.warning("Invalid JSON body in request");
                 return Response.status(Status.BAD_REQUEST).entity("Invalid JSON body in request").type(MediaType.TEXT_PLAIN)
@@ -522,7 +521,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                 mappedToTypeString = (markId != null) ? "mark" : "boat";
             }
             OpenEndedDeviceMappingFinder finder = new OpenEndedDeviceMappingFinder(isRegattaLike.getRegattaLog(), mappedTo,
-                    deviceUuid);
+                    deviceUuidAsString);
             Serializable deviceMappingEventId = finder.analyze();
             if (deviceMappingEventId == null) {
                 logger.warning("No corresponding open " + mappedToTypeString + " to device mapping has been found");
@@ -716,7 +715,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                         leaderboardAndRaceColumnAndFleetAndResponse.getFleet(),
                         trackWind == null ? true : trackWind,
                                 correctWindDirectionByMagneticDeclination == null ? true : correctWindDirectionByMagneticDeclination,
-                                        new PermissionAwareRaceTrackingHandler(getSecurityService()));
+                                        getService().getPermissionAwareRaceTrackingHandler());
                 jsonResult.put("regatta", raceHandle.getRegatta().getName());
                 result = Response.ok(jsonResult.toJSONString()).build();
             } else {

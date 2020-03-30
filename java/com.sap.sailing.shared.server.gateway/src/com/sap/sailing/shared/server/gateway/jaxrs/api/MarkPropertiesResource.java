@@ -147,10 +147,11 @@ public class MarkPropertiesResource extends AbstractSailingServerResource {
         if (deviceUuid != null && deviceUuid.length() > 0) {
             final DeviceIdentifier device = new SmartphoneUUIDIdentifierImpl(UUID.fromString(deviceUuid));
             getSharedSailingData().setTrackingDeviceIdentifierForMarkProperties(markProperties, device);
-        }
-        if (latDeg != null && lonDeg != null) {
+        } else if (latDeg != null && lonDeg != null) {
             final Position fixedPosition = new DegreePosition(latDeg, lonDeg);
             getSharedSailingData().setFixedPositionForMarkProperties(markProperties, fixedPosition);
+        } else {
+            getSharedSailingData().clearPositioningForMarkProperties(markProperties);
         }
         final JSONObject serializedMarkedProperties = getMarkPropertiesSerializer().serialize(markProperties);
         final String json = serializedMarkedProperties.toJSONString();
@@ -172,7 +173,6 @@ public class MarkPropertiesResource extends AbstractSailingServerResource {
         if (markProperties == null) {
             return getMarkPropertiesNotFoundErrorResponse();
         }
-        
         if (name == null || name.isEmpty()) {
             return getBadMarkPropertiesValidationErrorResponse("name must be given");
         }
@@ -182,7 +182,6 @@ public class MarkPropertiesResource extends AbstractSailingServerResource {
         } else {
             effectiveShortName = shortName;
         }
-        
         Color color = null;
         if (rgbColor != null && rgbColor.length() > 0) {
             try {

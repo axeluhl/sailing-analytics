@@ -47,4 +47,12 @@ public interface RaceTrackingConnectivityParametersHandler {
      *         entries that uniquely identify the {@code params} object in the database, in particular for removing.
      */
     Map<String, Object> getKey(RaceTrackingConnectivityParameters params) throws MalformedURLException;
+    
+    /**
+     * Produces a {@link RaceTrackingConnectivityParameters} object from a de-serialized stump. This is needed because
+     * some of the fields in {@link RaceTrackingConnectivityParameters} are transient and need to be filled.
+     * 
+     * TODO: bug5245 add ConnectionParameters to Connectors persistent and in-memory representation.
+     */
+    RaceTrackingConnectivityParameters resolve(RaceTrackingConnectivityParameters params) throws Exception;
 }

@@ -925,7 +925,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
     }
 
     @Override
-    public <S, O extends OperationWithResult<S, ?>, T> void scheduleForSending(OperationWithResult<S, T> operationWithResult, OperationsToMasterSender<S, O> sender) {
+    public <S, O extends OperationWithResult<S, ?>, T> void scheduleForSending(O operationWithResult, OperationsToMasterSender<S, O> sender) {
         unsentOperationsSenderJob.scheduleForSending(operationWithResult, sender);
     }
 

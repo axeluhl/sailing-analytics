@@ -27,6 +27,8 @@ import com.tractrac.model.lib.api.event.IRace;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 
 public class RaceTrackingConnectivityParametersImpl extends AbstractRaceTrackingConnectivityParameters {
+
+    private static final long serialVersionUID = 5088282956033068149L;
     private static final Logger logger = Logger.getLogger(RaceTrackingConnectivityParametersImpl.class.getName());
     public static final String TYPE = "TRAC_TRAC";
     
@@ -36,9 +38,9 @@ public class RaceTrackingConnectivityParametersImpl extends AbstractRaceTracking
     private final URI courseDesignUpdateURI;
     private final TimePoint startOfTracking;
     private final TimePoint endOfTracking;
-    private final RaceLogStore raceLogStore;
-    private final RegattaLogStore regattaLogStore;
-    private final DomainFactory domainFactory;
+    private final transient RaceLogStore raceLogStore;
+    private final transient RegattaLogStore regattaLogStore;
+    private final transient DomainFactory domainFactory;
     private final long delayToLiveInMillis;
     private final Duration offsetToStartTimeOfSimulatedRace;
     private final String tracTracUsername;
@@ -47,7 +49,8 @@ public class RaceTrackingConnectivityParametersImpl extends AbstractRaceTracking
     private final String raceVisibility;
     private final boolean useInternalMarkPassingAlgorithm;
     private final boolean preferReplayIfAvailable;
-    private final IRace tractracRace;
+    private final transient IRace tractracRace;
+    private final int timeoutInMillis;
 
     /**
      * @param preferReplayIfAvailable
@@ -69,6 +72,7 @@ public class RaceTrackingConnectivityParametersImpl extends AbstractRaceTracking
             throws Exception {
         super(trackWind, correctWindDirectionByMagneticDeclination);
         this.paramURL = paramURL;
+        this.timeoutInMillis = timeoutInMillis;
         if (timeoutInMillis == -1) {
             this.tractracRace = ModelLocator.getEventFactory().createRace(new URI(paramURL.toString()));
         } else {
@@ -102,7 +106,6 @@ public class RaceTrackingConnectivityParametersImpl extends AbstractRaceTracking
     }
 
     private boolean isReplayRace(IRace tractracRace) {
-        // TODO bug 4037: change into tractracRace.getConnectionType() == File once TracAPI 3.3.2 is available
         return tractracRace.getStoredURI() != null && tractracRace.getStoredURI().toString().toLowerCase().endsWith(".mtb");
     }
     
@@ -196,6 +199,10 @@ public class RaceTrackingConnectivityParametersImpl extends AbstractRaceTracking
 
     public boolean isPreferReplayIfAvailable() {
         return preferReplayIfAvailable;
+    }
+    
+    public int getTimeoutInMillis() {
+        return timeoutInMillis;
     }
     
     @Override
