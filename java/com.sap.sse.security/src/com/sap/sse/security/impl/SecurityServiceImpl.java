@@ -105,6 +105,40 @@ import com.sap.sse.security.interfaces.Social;
 import com.sap.sse.security.interfaces.SocialSettingsKeys;
 import com.sap.sse.security.interfaces.UserImpl;
 import com.sap.sse.security.interfaces.UserStore;
+import com.sap.sse.security.operations.AclAddPermissionOperation;
+import com.sap.sse.security.operations.AclPutPermissionsOperation;
+import com.sap.sse.security.operations.AclRemovePermissionOperation;
+import com.sap.sse.security.operations.AddPermissionForUserOperation;
+import com.sap.sse.security.operations.AddRoleForUserOperation;
+import com.sap.sse.security.operations.AddSettingOperation;
+import com.sap.sse.security.operations.AddUserToUserGroupOperation;
+import com.sap.sse.security.operations.CreateRoleDefinitionOperation;
+import com.sap.sse.security.operations.CreateUserGroupOperation;
+import com.sap.sse.security.operations.CreateUserOperation;
+import com.sap.sse.security.operations.DeleteAclOperation;
+import com.sap.sse.security.operations.DeleteOwnershipOperation;
+import com.sap.sse.security.operations.DeleteRoleDefinitionOperation;
+import com.sap.sse.security.operations.DeleteUserGroupOperation;
+import com.sap.sse.security.operations.DeleteUserOperation;
+import com.sap.sse.security.operations.PutRoleDefinitionToUserGroupOperation;
+import com.sap.sse.security.operations.RemoveAccessTokenOperation;
+import com.sap.sse.security.operations.RemovePermissionForUserOperation;
+import com.sap.sse.security.operations.RemoveRoleDefinitionFromUserGroupOperation;
+import com.sap.sse.security.operations.RemoveRoleFromUserOperation;
+import com.sap.sse.security.operations.RemoveUserFromUserGroupOperation;
+import com.sap.sse.security.operations.ResetPasswordOperation;
+import com.sap.sse.security.operations.SetAccessTokenOperation;
+import com.sap.sse.security.operations.SetDefaultTenantForServerForUserOperation;
+import com.sap.sse.security.operations.SetEmptyAccessControlListOperation;
+import com.sap.sse.security.operations.SetOwnershipOperation;
+import com.sap.sse.security.operations.SetPreferenceOperation;
+import com.sap.sse.security.operations.SetSettingOperation;
+import com.sap.sse.security.operations.UnsetPreferenceOperation;
+import com.sap.sse.security.operations.UpdateRoleDefinitionOperation;
+import com.sap.sse.security.operations.UpdateSimpleUserEmailOperation;
+import com.sap.sse.security.operations.UpdateSimpleUserPasswordOperation;
+import com.sap.sse.security.operations.UpdateUserPropertiesOperation;
+import com.sap.sse.security.operations.ValidateEmailOperation;
 import com.sap.sse.security.persistence.PersistenceFactory;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.Account;
@@ -171,7 +205,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     
     private Set<OperationWithResultWithIdWrapper<?, ?>> operationsSentToMasterForReplication;
     
-    private ThreadLocal<Boolean> currentlyFillingFromInitialLoad = ThreadLocal.withInitial(() -> false);
+    private volatile boolean currentlyFillingFromInitialLoad;
     
     private ThreadLocal<Boolean> currentlyApplyingOperationReceivedFromMaster = ThreadLocal.withInitial(() -> false);
 
@@ -240,6 +274,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             AccessControlStore accessControlStore, HasPermissionsProvider hasPermissionsProvider,
             String sharedAcrossSubdomainsOf, String baseUrlForCrossDomainStorage) {
         logger.info("Initializing Security Service with user store " + userStore);
+        this.currentlyFillingFromInitialLoad = false;
+        this.currentlyFillingFromInitialLoad = false;
         operationsSentToMasterForReplication = new HashSet<>();
         this.sharedAcrossSubdomainsOf = sharedAcrossSubdomainsOf;
         this.baseUrlForCrossDomainStorage = baseUrlForCrossDomainStorage;
@@ -288,12 +324,12 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public boolean isCurrentlyFillingFromInitialLoad() {
-        return currentlyFillingFromInitialLoad.get();
+        return currentlyFillingFromInitialLoad;
     }
 
     @Override
     public void setCurrentlyFillingFromInitialLoad(boolean currentlyFillingFromInitialLoad) {
-        this.currentlyFillingFromInitialLoad.set(currentlyFillingFromInitialLoad);
+        this.currentlyFillingFromInitialLoad = currentlyFillingFromInitialLoad;
     }
 
     @Override
@@ -342,7 +378,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 isInitialOrMigration = true;
                 isNewServer = true;
                 logger.info(SecurityService.ALL_USERNAME + " not found -> creating it now");
-                User allUser = apply(s->s.internalCreateUser(SecurityService.ALL_USERNAME, null));
+                User allUser = apply(new CreateUserOperation(SecurityService.ALL_USERNAME, null));
                 // <all> user is explicitly not owned by itself because this would enable anybody to modify this user
                 setOwnership(allUser.getIdentifier(), null, getServerGroup());
                 // The permission to create new users is initially added but not recreated on server start if the admin removed it in the meanwhile.
@@ -413,7 +449,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             throw new UserManagementException(UserManagementException.CANNOT_RESET_PASSWORD_WITHOUT_VALIDATED_EMAIL);
         }
         final String passwordResetSecret = user.createRandomSecret();
-        apply(s->s.internalResetPassword(username, passwordResetSecret));
+        apply(new ResetPasswordOperation(username, passwordResetSecret));
         Map<String, String> urlParameters = new HashMap<>();
         try {
             urlParameters.put("u", URLEncoder.encode(user.getName(), "UTF-8"));
@@ -508,7 +544,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public SecurityService setEmptyAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObjectAsString, String displayNameOfAccessControlledObject) {
-        apply(s->s.internalSetEmptyAccessControlList(idOfAccessControlledObjectAsString, displayNameOfAccessControlledObject));
+        apply(new SetEmptyAccessControlListOperation(idOfAccessControlledObjectAsString, displayNameOfAccessControlledObject));
         return this;
     }
 
@@ -548,7 +584,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             
             final UUID userGroupId = userGroup == null ? null : userGroup.getId();
             // avoid the UserGroup object having to be serialized with the operation by using the ID
-            apply(s -> s.internalAclPutPermissions(idOfAccessControlledObject, userGroupId, filteredActions));
+            apply(new AclPutPermissionsOperation(idOfAccessControlledObject, userGroupId, filteredActions));
         }
         return accessControlStore.getAccessControlList(idOfAccessControlledObject).getAnnotation();
     }
@@ -569,7 +605,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             setEmptyAccessControlList(idOfAccessControlledObject);
         }
         final UUID groupId = group == null ? null : group.getId();
-        apply(s->s.internalAclAddPermission(idOfAccessControlledObject, groupId, action));
+        apply(new AclAddPermissionOperation(idOfAccessControlledObject, groupId, action));
         return accessControlStore.getAccessControlList(idOfAccessControlledObject).getAnnotation();
     }
 
@@ -588,7 +624,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         final AccessControlList result;
         if (getAccessControlList(idOfAccessControlledObjectAsString) != null) {
             final UUID groupId = group == null ? null : group.getId();
-            apply(s->s.internalAclRemovePermission(idOfAccessControlledObjectAsString, groupId, permission));
+            apply(new AclRemovePermissionOperation(idOfAccessControlledObjectAsString, groupId, permission));
             result = accessControlStore.getAccessControlList(idOfAccessControlledObjectAsString).getAnnotation();
         } else {
             result = null;
@@ -605,7 +641,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public void deleteAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObjectAsString) {
         if (getAccessControlList(idOfAccessControlledObjectAsString) != null) {
-            apply(s->s.internalDeleteAcl(idOfAccessControlledObjectAsString));
+            apply(new DeleteAclOperation(idOfAccessControlledObjectAsString));
         }
     }
 
@@ -630,7 +666,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         final UUID tenantId = tenantOwner == null ? null : tenantOwner.getId();
         final String userOwnerName = userOwner == null ? null : userOwner.getName();
 
-        return apply(s -> s.internalSetOwnership(idOfOwnedObjectAsString, userOwnerName, tenantId,
+        return apply(new SetOwnershipOperation(idOfOwnedObjectAsString, userOwnerName, tenantId,
                 displayNameOfOwnedObject));
     }
     
@@ -642,7 +678,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public void deleteOwnership(QualifiedObjectIdentifier idOfOwnedObjectAsString) {
         if (getOwnership(idOfOwnedObjectAsString) != null) {
-            apply(s->s.internalDeleteOwnership(idOfOwnedObjectAsString));
+            apply(new DeleteOwnershipOperation(idOfOwnedObjectAsString));
         }
     }
 
@@ -679,7 +715,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     
     private UserGroup createUserGroupWithInitialUser(UUID id, String name, User initialUser) {
         logger.info("Creating user group " + name + " with ID " + id);
-        apply(s -> s.internalCreateUserGroup(id, name));
+        apply(new CreateUserGroupOperation(id, name));
         final UserGroup userGroup = store.getUserGroup(id);
         if (initialUser != null) {
             logger.info("Adding initial user " + initialUser + " to group " + userGroup);
@@ -701,7 +737,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         userGroup.add(user);
         final UUID groupId = userGroup.getId();
         final String username = user.getName();
-        apply(s->s.internalAddUserToUserGroup(groupId, username));
+        apply(new AddUserToUserGroupOperation(groupId, username));
     }
 
     @Override
@@ -726,14 +762,14 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         userGroup.remove(user);
         final UUID userGroupId = userGroup.getId();
         final String username = user.getName();
-        apply(s->s.internalRemoveUserFromUserGroup(userGroupId, username));
+        apply(new RemoveUserFromUserGroupOperation(userGroupId, username));
     }
 
     @Override
     public void putRoleDefinitionToUserGroup(UserGroup userGroup, RoleDefinition roleDefinition, boolean forAll) {
         logger.info("Adding role definition " + roleDefinition.getName() + "(forAll = " + forAll + ") to group "
                 + userGroup.getName());
-        apply(s -> s.internalPutRoleDefinitionToUserGroup(userGroup.getId(), roleDefinition.getId(), forAll));
+        apply(new PutRoleDefinitionToUserGroupOperation(userGroup.getId(), roleDefinition.getId(), forAll));
     }
 
     @Override
@@ -748,7 +784,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public void removeRoleDefintionFromUserGroup(UserGroup userGroup, RoleDefinition roleDefinition) {
         logger.info("Removing role definition " + roleDefinition.getName() + " from group " + userGroup.getName());
-        apply(s -> s.internalRemoveRoleDefinitionFromUserGroup(userGroup.getId(), roleDefinition.getId()));
+        apply(new RemoveRoleDefinitionFromUserGroupOperation(userGroup.getId(), roleDefinition.getId()));
     }
 
     @Override
@@ -763,8 +799,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public void deleteUserGroup(UserGroup userGroup) throws UserGroupManagementException {
         logger.info("Removing user group "+userGroup.getName());
-        final UUID groupId = userGroup.getId();
-        apply(s->s.internalDeleteUserGroup(groupId));
+        apply(new DeleteUserGroupOperation(userGroup.getId()));
     }
     
     @Override
@@ -858,13 +893,13 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         byte[] salt = rng.nextBytes().getBytes();
         String hashedPasswordBase64 = hashPassword(password, salt);
         UsernamePasswordAccount upa = new UsernamePasswordAccount(username, hashedPasswordBase64, salt);
-        final User result = apply(s->s.internalCreateUser(username, email, upa)); // This also replicated the user creation
+        final User result = apply(new CreateUserOperation(username, email, upa)); // This also replicated the user creation
         addUserRoleToUser(result);
         final UserGroup tenant = getOrCreateTenantForUser(result);
         setDefaultTenantForCurrentServerForUser(username, tenant.getId());
         // the new user becomes its owner to ensure the user role is working correctly
         // the default tenant is the owning tenant to allow users having admin role for a specific server tenant to also be able to delete users
-        apply(s->s.internalSetOwnership(result.getIdentifier(), username, groupOwningUser==null?null:groupOwningUser.getId(), username));
+        apply(new SetOwnershipOperation(result.getIdentifier(), username, groupOwningUser==null?null:groupOwningUser.getId(), username));
         updateUserProperties(username, fullName, company, locale);
         // email has been set during creation already; the following call will trigger the e-mail validation process
         updateSimpleUserEmail(username, email, validationBaseURL);
@@ -927,7 +962,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         RandomNumberGenerator rng = new SecureRandomNumberGenerator();
         byte[] salt = rng.nextBytes().getBytes();
         String hashedPasswordBase64 = hashPassword(newPassword, salt);
-        apply(s->s.internalUpdateSimpleUserPassword(user.getName(), salt, hashedPasswordBase64));
+        apply(new UpdateSimpleUserPasswordOperation(user.getName(), salt, hashedPasswordBase64));
     }
     
     @Override
@@ -946,7 +981,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
-        apply(s->s.internalUpdateUserProperties(username, fullName, company, locale));
+        apply(new UpdateUserPropertiesOperation(username, fullName, company, locale));
     }
 
     @Override
@@ -987,7 +1022,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         }
         logger.info("Changing e-mail address of user "+username+" to "+newEmail);
         final String validationSecret = user.createRandomSecret();
-        apply(s->s.internalUpdateSimpleUserEmail(username, newEmail, validationSecret));
+        apply(new UpdateSimpleUserEmailOperation(username, newEmail, validationSecret));
         if (validationBaseURL != null && newEmail != null && !newEmail.trim().isEmpty()) {
             new Thread("e-mail validation after changing e-mail of user " + username + " to " + newEmail) {
                 @Override
@@ -1017,7 +1052,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
-        return apply(s->s.internalValidateEmail(username, validationSecret));
+        return apply(new ValidateEmailOperation(username, validationSecret));
     }
     
     @Override
@@ -1080,7 +1115,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public RoleDefinition createRoleDefinition(UUID roleId, String name) {
-        return apply(s->s.internalCreateRoleDefinition(roleId, name));
+        return apply(new CreateRoleDefinitionOperation(roleId, name));
     }
 
     @Override
@@ -1091,7 +1126,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public void deleteRoleDefinition(RoleDefinition roleDefinition) {
         final UUID roleId = roleDefinition.getId();
-        apply(s->s.internalDeleteRoleDefinition(roleId));
+        apply(new DeleteRoleDefinitionOperation(roleId));
     }
 
     @Override
@@ -1103,7 +1138,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public void updateRoleDefinition(RoleDefinition roleDefinitionWithNewProperties) {
-        apply(s->s.internalUpdateRoleDefinition(roleDefinitionWithNewProperties));
+        apply(new UpdateRoleDefinitionOperation(roleDefinitionWithNewProperties));
     }
 
     @Override
@@ -1142,7 +1177,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         final UUID roleDefinitionId = role.getRoleDefinition().getId();
         final UUID idOfTenantQualifyingRole = role.getQualifiedForTenant() == null ? null : role.getQualifiedForTenant().getId();
         final String nameOfUserQualifyingRole = role.getQualifiedForUser() == null ? null : role.getQualifiedForUser().getName();
-        apply(s->s.internalAddRoleForUser(username, roleDefinitionId, idOfTenantQualifyingRole, nameOfUserQualifyingRole));
+        apply(new AddRoleForUserOperation(username, roleDefinitionId, idOfTenantQualifyingRole, nameOfUserQualifyingRole));
     }
 
     @Override
@@ -1163,7 +1198,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         final UUID roleDefinitionId = role.getRoleDefinition().getId();
         final UUID idOfTenantQualifyingRole = role.getQualifiedForTenant() == null ? null : role.getQualifiedForTenant().getId();
         final String nameOfUserQualifyingRole = role.getQualifiedForUser() == null ? null : role.getQualifiedForUser().getName();
-        apply(s->s.internalRemoveRoleFromUser(username, roleDefinitionId, idOfTenantQualifyingRole, nameOfUserQualifyingRole));
+        apply(new RemoveRoleFromUserOperation(username, roleDefinitionId, idOfTenantQualifyingRole, nameOfUserQualifyingRole));
     }
 
     @Override
@@ -1181,7 +1216,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public void removePermissionFromUser(String username, WildcardPermission permissionToRemove) {
-        apply(s->s.internalRemovePermissionForUser(username, permissionToRemove));
+        apply(new RemovePermissionForUserOperation(username, permissionToRemove));
     }
 
     @Override
@@ -1192,7 +1227,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public void addPermissionForUser(String username, WildcardPermission permissionToAdd) {
-        apply(s->s.internalAddPermissionForUser(username, permissionToAdd));
+        apply(new AddPermissionForUserOperation(username, permissionToAdd));
     }
 
     @Override
@@ -1207,7 +1242,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (userToDelete == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
-        apply(s -> s.internalDeleteUser(username));
+        apply(new DeleteUserOperation(username));
     }
 
     @Override
@@ -1246,7 +1281,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public boolean setSetting(String key, Object setting) {
-        return apply(s->s.internalSetSetting(key, setting));
+        return apply(new SetSettingOperation(key, setting));
     }
 
     @Override
@@ -1519,7 +1554,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (!isValidSettingsKey(key)) {
             throw new UserManagementException("Invalid key!");
         }
-        apply(s->s.internalAddSetting(key, clazz));
+        apply(new AddSettingOperation(key, clazz));
     }
 
     @Override
@@ -1570,13 +1605,13 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public void setPreference(final String username, final String key, final String value) {
-        apply(s->s.internalSetPreference(username, key, value));
+        apply(new SetPreferenceOperation(username, key, value));
     }
 
     @Override
     public void setPreferenceObject(final String username, final String key, final Object value) {
         final String preferenceObjectAsString = internalSetPreferenceObject(username, key, value);
-        apply(s->s.internalSetPreference(username, key, preferenceObjectAsString));
+        apply(new SetPreferenceOperation(username, key, preferenceObjectAsString));
     }
 
     @Override
@@ -1592,7 +1627,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     
     @Override
     public void unsetPreference(String username, String key) {
-        apply(s->s.internalUnsetPreference(username, key));
+        apply(new UnsetPreferenceOperation(username, key));
     }
 
     @Override
@@ -1645,7 +1680,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             RandomNumberGenerator rng = new SecureRandomNumberGenerator();
             byte[] salt = rng.nextBytes().getBytes();
             token = hashPassword(new String(rng.nextBytes().getBytes()), salt);
-            apply(s -> s.internalSetAccessToken(user.getName(), token));
+            apply(new SetAccessTokenOperation(user.getName(), token));
         } else {
             token = null;
         }
@@ -1656,7 +1691,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public void removeAccessToken(String username) {
         Subject subject = SecurityUtils.getSubject();
         if (hasCurrentUserUpdatePermission(getUserByName(username))) {
-            apply(s -> s.internalRemoveAccessToken(username));
+            apply(new RemoveAccessTokenOperation(username));
         } else {
             throw new org.apache.shiro.authz.AuthorizationException("User " + subject.getPrincipal().toString()
                     + " does not have permission to remove access token of user " + username);
@@ -2430,7 +2465,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public void setDefaultTenantForCurrentServerForUser(String username, UUID defaultTenantId) {
         final String serverName = ServerInfo.getName();
-        apply(s->s.internalSetDefaultTenantForServerForUser(username, defaultTenantId, serverName));
+        apply(new SetDefaultTenantForServerForUserOperation(username, defaultTenantId, serverName));
     }
     
     @Override
@@ -2497,7 +2532,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public <S, O extends OperationWithResult<S, ?>, T> void scheduleForSending(
-            OperationWithResult<S, T> operationWithResult, OperationsToMasterSender<S, O> sender) {
+            O operationWithResult, OperationsToMasterSender<S, O> sender) {
         if (unsentOperationsToMasterSender != null) {
             unsentOperationsToMasterSender.scheduleForSending(operationWithResult, sender);
         }

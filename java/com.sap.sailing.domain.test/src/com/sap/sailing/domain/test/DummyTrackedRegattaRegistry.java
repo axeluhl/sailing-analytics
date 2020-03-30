@@ -67,4 +67,9 @@ public class DummyTrackedRegattaRegistry implements TrackedRegattaRegistry {
     public void stopTracker(Regatta regatta, RaceTracker tracker)
             throws MalformedURLException, IOException, InterruptedException {
     }
+
+    @Override
+    public Regatta getOrCreateDefaultRegatta(String name, String boatClassName, Serializable id) {
+        return null;
+    }
 }

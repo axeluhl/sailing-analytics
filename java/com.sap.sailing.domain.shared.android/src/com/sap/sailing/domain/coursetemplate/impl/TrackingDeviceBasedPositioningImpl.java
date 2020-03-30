@@ -10,6 +10,9 @@ public class TrackingDeviceBasedPositioningImpl implements TrackingDeviceBasedPo
 
     public TrackingDeviceBasedPositioningImpl(DeviceIdentifier deviceIdentifier) {
         super();
+        if (deviceIdentifier == null) {
+            throw new IllegalArgumentException("It is not permissible to use a null device identifier for a tracking device-based mark positioning");
+        }
         this.deviceIdentifier = deviceIdentifier;
     }
 

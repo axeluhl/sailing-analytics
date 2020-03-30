@@ -23,6 +23,8 @@ import com.sap.sse.filestorage.FileStorageService;
 import com.sap.sse.filestorage.FileStorageServiceProperty;
 import com.sap.sse.filestorage.FileStorageServicePropertyStore;
 import com.sap.sse.filestorage.FileStorageServiceResolver;
+import com.sap.sse.filestorage.operations.SetActiveFileStorageServiceOperation;
+import com.sap.sse.filestorage.operations.SetFileStorageServicePropertyOperation;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.OperationWithResultWithIdWrapper;
@@ -48,7 +50,7 @@ public class FileStorageManagementServiceImpl implements ReplicableFileStorageMa
     private final Map<OperationExecutionListener<ReplicableFileStorageManagementService>, OperationExecutionListener<ReplicableFileStorageManagementService>> operationExecutionListeners = new ConcurrentHashMap<>();
     private final Set<OperationWithResultWithIdWrapper<?, ?>> operationsSentToMasterForReplication = new HashSet<>();
     private ReplicationMasterDescriptor replicationMasterDescriptor;
-    private ThreadLocal<Boolean> currentlyFillingFromInitialLoad = ThreadLocal.withInitial(() -> false);
+    private volatile boolean currentlyFillingFromInitialLoad;
     
     private ThreadLocal<Boolean> currentlyApplyingOperationReceivedFromMaster = ThreadLocal.withInitial(() -> false);
 
@@ -68,6 +70,7 @@ public class FileStorageManagementServiceImpl implements ReplicableFileStorageMa
 
     public FileStorageManagementServiceImpl(TypeBasedServiceFinder<FileStorageService> serviceFinder,
             FileStorageServicePropertyStore propertyStore) {
+        this.currentlyFillingFromInitialLoad = false;
         this.serviceFinder = serviceFinder;
         this.propertyStore = propertyStore;
         serviceResolver = new FileStorageServiceResolverAgainstOsgiRegistryImpl(serviceFinder);
@@ -84,7 +87,7 @@ public class FileStorageManagementServiceImpl implements ReplicableFileStorageMa
 
     @Override
     public void setActiveFileStorageService(FileStorageService service) {
-        apply(s -> s.internalSetActiveFileStorageService(service));
+        apply(new SetActiveFileStorageServiceOperation(service));
     }
 
     @Override
@@ -100,7 +103,7 @@ public class FileStorageManagementServiceImpl implements ReplicableFileStorageMa
     @Override
     public void setFileStorageServiceProperty(FileStorageService service, String propertyName, String propertyValue)
             throws NoCorrespondingServiceRegisteredException, IllegalArgumentException {
-        apply(s -> s.internalSetFileStorageServiceProperty(service, propertyName, propertyValue));
+        apply(new SetFileStorageServicePropertyOperation(service, propertyName, propertyValue));
     }
     
     @Override
@@ -229,12 +232,12 @@ public class FileStorageManagementServiceImpl implements ReplicableFileStorageMa
 
     @Override
     public boolean isCurrentlyFillingFromInitialLoad() {
-        return currentlyFillingFromInitialLoad.get();
+        return currentlyFillingFromInitialLoad;
     }
 
     @Override
     public void setCurrentlyFillingFromInitialLoad(boolean currentlyFillingFromInitialLoad) {
-        this.currentlyFillingFromInitialLoad.set(currentlyFillingFromInitialLoad);
+        this.currentlyFillingFromInitialLoad = currentlyFillingFromInitialLoad;
     }
 
     @Override
@@ -254,7 +257,7 @@ public class FileStorageManagementServiceImpl implements ReplicableFileStorageMa
 
     @Override
     public <S, O extends OperationWithResult<S, ?>, T> void scheduleForSending(
-            OperationWithResult<S, T> operationWithResult, OperationsToMasterSender<S, O> sender) {
+            O operationWithResult, OperationsToMasterSender<S, O> sender) {
         if (unsentOperationForMasterQueue != null) {
             unsentOperationForMasterQueue.scheduleForSending(operationWithResult, sender);
         }

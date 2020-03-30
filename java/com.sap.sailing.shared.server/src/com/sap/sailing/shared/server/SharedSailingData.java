@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.sharedsailingdata;
+package com.sap.sailing.shared.server;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -17,8 +17,11 @@ import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.Positioning;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
+import com.sap.sailing.shared.server.impl.ReplicatingSharedSailingData;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.replication.OperationWithResult;
+import com.sap.sse.replication.ReplicableWithObjectInputStream;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.impl.UserGroup;
@@ -42,7 +45,7 @@ import com.sap.sse.security.shared.impl.UserGroup;
  * @author Axel Uhl (D043530)
  *
  */
-public interface SharedSailingData {
+public interface SharedSailingData extends ReplicableWithObjectInputStream<ReplicatingSharedSailingData, OperationWithResult<ReplicatingSharedSailingData, ?>> {
     
     Iterable<MarkProperties> getAllMarkProperties(Iterable<String> tagsToFilterFor);
     
@@ -76,7 +79,17 @@ public interface SharedSailingData {
     MarkProperties updateMarkProperties(UUID uuid, CommonMarkProperties properties, Positioning positioningInformation, Iterable<String> tags);
 
     /**
+     * Removes any positioning information from the {@code markProperties} object, regardless of what the positioning was before
+     * (device-based or fixed position or empty);
+     */
+    void clearPositioningForMarkProperties(MarkProperties markProperties);
+    
+    /**
      * This overrides a previously set fixed position or associated tracking device.
+     * 
+     * @param position
+     *            must not be {@code null}; use {@link #clearPositioningForMarkProperties} if you'd like to remove any
+     *            positioning assignment from the {@link MarkProperties} object altogether.
      */
     void setFixedPositionForMarkProperties(MarkProperties markProperties, Position position);
     
@@ -84,6 +97,10 @@ public interface SharedSailingData {
     
     /**
      * This overrides a previously set fixed position or associated tracking device.
+     * 
+     * @param deviceIdentifier
+     *            must not be {@code null}; use {@link #clearPositioningForMarkProperties} if you'd like to remove any
+     *            positioning assignment from the {@link MarkProperties} object altogether.
      */
     void setTrackingDeviceIdentifierForMarkProperties(MarkProperties markProperties, DeviceIdentifier deviceIdentifier);
     

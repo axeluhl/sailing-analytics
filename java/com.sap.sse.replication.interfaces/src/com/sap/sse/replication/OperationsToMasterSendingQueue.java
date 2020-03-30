@@ -17,5 +17,5 @@ public interface OperationsToMasterSendingQueue {
      * @param sender
      *            the object to use to try to send the operation to the master server upon the next attempt
      */
-    <S, O extends OperationWithResult<S, ?>, T> void scheduleForSending(OperationWithResult<S, T> operationWithResult, OperationsToMasterSender<S, O> sender);
+    <S, O extends OperationWithResult<S, ?>, T> void scheduleForSending(O operationWithResult, OperationsToMasterSender<S, O> sender);
 }

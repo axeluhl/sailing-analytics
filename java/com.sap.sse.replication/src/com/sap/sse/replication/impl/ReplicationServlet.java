@@ -303,11 +303,11 @@ public class ReplicationServlet extends AbstractHttpServlet {
      *             not try sending the operation again, and in particular not at the expense of later operations that
      *             otherwise may keep queued forever (see also bug 5117). 
      */
-    private <S, R> void applyOperationToReplicable(Replicable<S, ?> replicable, InputStream is)
+    private <S, R, O extends OperationWithResult<S, ?>> void applyOperationToReplicable(Replicable<S, O> replicable, InputStream is)
             throws ClassNotFoundException, IOException, InvocationTargetException {
         ClassLoader oldContextClassLoader = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(replicable.getClass().getClassLoader());
-        final OperationWithResult<S, ?> operation;
+        final O operation;
         try {
             operation = replicable.readOperation(is);
         } catch (Exception e) {
