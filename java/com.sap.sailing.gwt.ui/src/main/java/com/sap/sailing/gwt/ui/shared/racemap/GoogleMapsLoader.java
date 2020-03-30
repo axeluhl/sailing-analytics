@@ -6,6 +6,15 @@ import java.util.Set;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.ScriptElement;
 
+/**
+ * The {@link #load(Runnable)} method can be used by clients to request the loading of the Google Maps API.
+ * The callback passed will be invoked immediately if the API has already been loaded (e.g., by another
+ * client call to the {@link #load(Runnable)} method within the same frame / document); it will be queued
+ * for invocation by a Google Maps API callback function registered otherwise. This callback function
+ * is injected at most once when the {@link #load(Runnable)} method is invoked for the first time and
+ * will trigger all callbacks registered through the {@link #load(Runnable)} method until the maps API
+ * invokes the callback registered.
+ */
 public class GoogleMapsLoader {
     /**
      * These params define the required information to authenticate with the Google Maps API.
@@ -20,7 +29,8 @@ public class GoogleMapsLoader {
     public final static String API_VERSION = "3";
     
     /**
-     * The required Google Maps libraries.
+     * The required Google Maps libraries; a comma-separated list. See https://developers.google.com/maps/documentation/javascript/libraries
+     * for more details. Examples: <tt>drawing,geometry,places,visualization</tt>
      */
     public final static String LIBRARIES = "drawing,geometry";
     
@@ -31,6 +41,9 @@ public class GoogleMapsLoader {
     private GoogleMapsLoader() {
     }
 
+    /**
+     * @param callback must not be {@code null}.
+     */
     public static void load(Runnable callback) {
         if (loaded) {
             callback.run();
