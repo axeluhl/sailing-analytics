@@ -82,4 +82,9 @@ public class NoCachingWindLegTypeAndLegBearingCache implements WindLegTypeAndLeg
         return new MarkPositionAtTimePointCacheImpl(trackedRace, markPositionTimePoint);
     }
 
+    @Override
+    public Wind getWindForLeg(TrackedLeg leg, Supplier<Wind> value) {
+        return null;
+    }
+
 }

@@ -57,7 +57,7 @@ public abstract class AbstractORCPerformanceCurveTwaLegAdapter implements ORCPer
      * samples will always be taken along the full leg distance, making the result of this method the same for the same
      * boundary conditions (mark passings etc.) for all competitors.
      */
-    private Wind getWind() {
+    private Wind getWind() {        
         ConfidenceBasedWindAverager<Util.Pair<Position, TimePoint>> timeWeigher = 
                 ConfidenceFactory.INSTANCE.createWindAverager(/* weigher==null means use 1.0 as base confidence */ null);
         final Iterable<TimePoint> referenceTimePoints = trackedLeg.getEquidistantReferenceTimePoints(numParts);
@@ -66,13 +66,12 @@ public abstract class AbstractORCPerformanceCurveTwaLegAdapter implements ORCPer
                     return Util.stream(trackedLeg.getEquidistantSectionsOfLeg(timepoint, numParts))
                             .map(p -> trackedLeg.getTrackedRace().getWindWithConfidence(p, timepoint));
                 }).collect(Collectors.toList());
-        Util.Pair<Position, TimePoint> at = winds.iterator().next().getRelativeTo();
-        return timeWeigher.getAverage(winds, at).getObject();
+        return timeWeigher.getAverage(winds, null).getObject();
     }
 
     @Override
     public Bearing getTwa() {
-        final Wind wind = getWind();
+        final Wind wind = getTrackedLeg().getTrackedRace().getWindByTrackedLeg(getTrackedLeg(), () -> getWind());
         final Bearing result;
         if (wind == null) {
             result = null;
