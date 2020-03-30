@@ -19,17 +19,20 @@ import com.sap.sailing.domain.tracking.impl.AbstractRaceTrackingConnectivityPara
 import com.sap.sse.common.Util;
 
 public class SwissTimingReplayConnectivityParameters extends AbstractRaceTrackingConnectivityParameters {
+
+    private static final long serialVersionUID = -1380661620949638776L;
+
     public static final String TYPE = "SWISS_TIMING_REPLAY";
     
     private final boolean useInternalMarkPassingAlgorithm;
-    private final DomainFactory domainFactory;
+    private final transient DomainFactory domainFactory;
     private final String boatClassName;
-    private final RaceLogStore raceLogStore;
-    private final RegattaLogStore regattaLogStore;
+    private final transient RaceLogStore raceLogStore;
+    private final transient RegattaLogStore regattaLogStore;
     private final String raceName;
     private final String raceID;
     private final String link;
-    private final SwissTimingReplayService replayService;
+    private final transient SwissTimingReplayService replayService;
     
     class SwissTimingReplayRaceTracker extends AbstractRaceTrackerImpl {
         private final WindStore windStore;

@@ -11,7 +11,8 @@ import com.sap.sse.common.WithID;
 
 
 /**
- * BaseLogAnalyzer used for finding the ID of an open ended @link{DeviceMappingEvent} to a corresponding @link{CloseOpenEndedDeviceMappingEvent}
+ * {@link BaseLogAnalyzer} used for finding the ID of an open ended {@link DeviceMappingEvent} to a corresponding
+ * {@link RegattaLogCloseOpenEndedDeviceMappingEvent}
  * 
  * If no corresponding event has been found, null is returned
  */

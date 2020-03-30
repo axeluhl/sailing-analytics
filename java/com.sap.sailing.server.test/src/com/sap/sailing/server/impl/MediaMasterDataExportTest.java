@@ -146,7 +146,9 @@ public class MediaMasterDataExportTest {
         SensorFixStore sensorFixStore = mock(SensorFixStore.class);
         boolean exportWind = false;
         TopLevelMasterData topLevelMasterData = new TopLevelMasterData(groupsToExport, allEvents,
-                regattaForRaceIdString, allMediaTracks, sensorFixStore, exportWind, /* race manager device configs */ new HashSet<>());
+                regattaForRaceIdString, allMediaTracks, sensorFixStore, exportWind,
+                /* race manager device configs */ new HashSet<>(),
+                /* RaceTrackingConnectivityParameters to restore */ null);
         return topLevelMasterData;
     }
 }
