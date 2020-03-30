@@ -29,6 +29,56 @@ public abstract class AbstractORCPerformanceCurveTwaLegAdapter implements ORCPer
     private final TrackedLeg trackedLeg;
     private final int numParts;
     
+    /**
+     * A wrapper around the enclosing object that delegates all methods to the enclosing instance but defines equality /
+     * hash code based on the {@link AbstractORCPerformanceCurveTwaLegAdapter#getTrackedLeg()} result only.
+     * 
+     * @author Axel Uhl (D043530)
+     *
+     */
+    private class EqualityByTrackedLegWrapper implements ORCPerformanceCurveLeg {
+        private static final long serialVersionUID = 2580336707637358724L;
+
+        @Override
+        public boolean equals(Object o) {
+            return o instanceof AbstractORCPerformanceCurveTwaLegAdapter && getTrackedLeg() == ((AbstractORCPerformanceCurveTwaLegAdapter) o).getTrackedLeg();
+        }
+        
+        @Override
+        public int hashCode() {
+            return getTrackedLeg().hashCode();
+        }
+        
+        @Override
+        public Distance getLength() {
+            return AbstractORCPerformanceCurveTwaLegAdapter.this.getLength();
+        }
+
+        @Override
+        public Bearing getTwa() {
+            return AbstractORCPerformanceCurveTwaLegAdapter.this.getTwa();
+        }
+
+        @Override
+        public Bearing getTwa(AverageWindOnLegCache cache) {
+            return AbstractORCPerformanceCurveTwaLegAdapter.this.getTwa(cache);
+        }
+
+        @Override
+        public ORCPerformanceCurveLegTypes getType() {
+            return AbstractORCPerformanceCurveTwaLegAdapter.this.getType();
+        }
+
+        @Override
+        public ORCPerformanceCurveLeg scale(double share) {
+            return AbstractORCPerformanceCurveTwaLegAdapter.this.scale(share);
+        }
+        
+        public TrackedLeg getTrackedLeg() {
+            return AbstractORCPerformanceCurveTwaLegAdapter.this.getTrackedLeg();
+        }
+    }
+    
     public AbstractORCPerformanceCurveTwaLegAdapter(TrackedLeg trackedLeg) {
         this(trackedLeg, 10);
     }
@@ -49,7 +99,8 @@ public abstract class AbstractORCPerformanceCurveTwaLegAdapter implements ORCPer
     
     @Override
     public Bearing getTwa(AverageWindOnLegCache cache) {
-        final Wind wind = cache.getAverageWind(this, legAdapter->legAdapter.getTrackedLeg().getAverageWind(/* numParts */ 10).getObject());
+        final EqualityByTrackedLegWrapper wrapper = new EqualityByTrackedLegWrapper();
+        final Wind wind = cache.getAverageWind(wrapper, legAdapter->legAdapter.getTrackedLeg().getAverageWind(numParts).getObject());
         final Bearing result;
         if (wind == null) {
             result = null;

@@ -227,7 +227,7 @@ public class LeaderboardDTOCalculationReuseCache implements WindLegTypeAndLegBea
             if (leg instanceof AbstractORCPerformanceCurveTwaLegAdapter) {
                 final ORCPerformanceCurveLeg pcl;
                 if (leg.getType() == ORCPerformanceCurveLegTypes.TWA) {
-                    pcl = new ORCPerformanceCurveLegImpl(((AbstractORCPerformanceCurveTwaLegAdapter) leg).getLength(this), leg.getTwa());
+                    pcl = new ORCPerformanceCurveLegImpl(((AbstractORCPerformanceCurveTwaLegAdapter) leg).getLength(this), leg.getTwa(cache));
                 } else {
                     pcl = new ORCPerformanceCurveLegImpl(((AbstractORCPerformanceCurveTwaLegAdapter) leg).getLength(this), leg.getType());
                 }

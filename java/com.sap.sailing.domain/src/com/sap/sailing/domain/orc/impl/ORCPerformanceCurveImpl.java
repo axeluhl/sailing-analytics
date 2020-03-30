@@ -197,7 +197,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
         case TWA:
             for (final Speed tws : certificate.getTrueWindSpeeds()) {
                 // Case switching on TWA (0. TWA == 0; 1. TWA < Beat; 2. Beat < TWA < Gybe; 3. Gybe < TWA; 4. TWA == 180)
-                if (leg.getTwa().abs().compareTo(beatAngles.get(tws)) <= 0) {
+                if (leg.getTwa(cache).abs().compareTo(beatAngles.get(tws)) <= 0) {
                     // Case 0 & 1 - result = beatVMG * distance * cos(TWA)
                     result.put(tws, beatAllowancePerTrueWindSpeed.get(tws).times(leg.getLength().getNauticalMiles()).times(Math.cos(leg.getTwa().abs().getRadians())));
                 } else if (leg.getTwa().abs().compareTo(runAngles.get(tws)) >= 0) {
