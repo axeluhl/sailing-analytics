@@ -350,8 +350,6 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         final int repeatablePartLength = repeatablePartEnd - repeatablePartStart;
         final Pair<CourseConfiguration, CourseConfiguration> result = createCourseFromTemplateBasedCourseConfiguration(
                 numberOfLaps, numberOfLapsForCourse, repeatablePartStart, repeatablePartEnd, true);
-        result.getA().getWaypoints().forEach(System.out::println);
-        result.getB().getWaypoints().forEach(System.out::println);
         // get repeatable part sequence from template configuration
         List<WaypointWithMarkConfiguration> repeatablePartWpsA = new ArrayList<>(
                 repeatablePartEnd - repeatablePartStart);
@@ -445,21 +443,56 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
 
     @Test
     public void testMarkPropertiesWithPositioning() throws JSONException {
-        final MarkProperties mp1 = markPropertiesApi.createMarkProperties(sharedServerCtx, "mpWithPos",
-                "mpWithPos", /* deviceUuid */ null, "#ffffff", "shape", "pattern", MarkType.LANDMARK.name(),
-                /* tags */ Collections.emptyList(), 49.097487, 8.648631);
-        System.out.println(mp1);
-        final MarkConfiguration mc1 = MarkConfiguration.createMarkPropertiesBased(mp1.getId(), markRoleApi.createMarkRole(sharedServerCtx, "role_mc1_1", /* shortName */ null).getId());
+        final double MP_LAT_DEG = 49.097487;
+        final double MP_LNG_DEG = 8.648631;
+        final MarkProperties mp1 = markPropertiesApi.createMarkProperties(sharedServerCtx, "mpWithPos", "mpWithPos",
+                /* deviceUuid */ null, "#ffffff", "shape", "pattern", MarkType.LANDMARK.name(),
+                /* tags */ Collections.emptyList(), MP_LAT_DEG, MP_LNG_DEG);
+        assertEquals(MP_LAT_DEG, mp1.getLatDeg().doubleValue(), .1);
+        assertEquals(MP_LNG_DEG, mp1.getLonDeg().doubleValue(), .1);
+        final MarkConfiguration mc1 = MarkConfiguration.createMarkPropertiesBased(mp1.getId(),
+                markRoleApi.createMarkRole(sharedServerCtx, "role_mc1_1", /* shortName */ null).getId());
         final WaypointWithMarkConfiguration wp1 = new WaypointWithMarkConfiguration("landmark", "landmark",
                 PassingInstruction.Single_Unknown, Arrays.asList(mc1.getId()));
-        final CourseConfiguration courseConfiguration = new CourseConfiguration("test1", Arrays.asList(mc1), Arrays.asList(wp1));
-        
-        final String regattaName = UUID.randomUUID().toString();
+        final CourseConfiguration courseConfiguration = new CourseConfiguration("test1", Arrays.asList(mc1),
+                Arrays.asList(wp1));
+        final String regattaName = "Regatta1";
         eventApi.createEvent(ctx, regattaName, "", CompetitorRegistrationType.CLOSED, "");
         final RaceColumn race = regattaApi.addRaceColumn(ctx, regattaName, null, 1)[0];
         final CourseConfiguration course = courseConfigurationApi.createCourse(ctx, courseConfiguration, regattaName,
                 race.getRaceName(), "Default");
-        System.out.println(course);
+        final MarkConfiguration mc1_1 = course.getMarkConfigurationByEffectiveName("mpWithPos");
+        assertEquals(MP_LAT_DEG, mc1_1.getLastKnownPosition().getLatDeg(), .1);
+        assertEquals(MP_LNG_DEG, mc1_1.getLastKnownPosition().getLngDeg(), .1);
+        for (final DeviceMapping dm : mc1_1.getDeviceMappings()) {
+            boolean hasPingDevice = false;
+            if ("PING".equals(dm.getType())) {
+                hasPingDevice = true;
+                assertEquals(MP_LAT_DEG, dm.getLastKnownPosition().getLatDeg(), .1);
+                assertEquals(MP_LNG_DEG, dm.getLastKnownPosition().getLngDeg(), .1);
+            }
+            assertTrue(hasPingDevice);
+        }
+
+        // TODO: how to add mark template to mark properties?
+        final String regattaName2 = "Regatta2";
+        eventApi.createEvent(ctx, regattaName2, "", CompetitorRegistrationType.CLOSED, "");
+        final RaceColumn race2 = regattaApi.addRaceColumn(ctx, regattaName2, null, 1)[0];
+        final MarkTemplate mt = markTemplateApi.createMarkTemplate(sharedServerCtx, "mt2", "mt2", "#ffffff", "shape",
+                "pattern", MarkType.LANDMARK.name());
+        final MarkConfiguration mc2 = MarkConfiguration.createMarkPropertiesBased(mp1.getId(),
+                markRoleApi.createMarkRole(sharedServerCtx, "role_mc2_1", /* shortName */ null).getId());
+
+        final WaypointWithMarkConfiguration wp2 = new WaypointWithMarkConfiguration("landmark", "landmark",
+                PassingInstruction.Single_Unknown, Arrays.asList(mc2.getId()));
+        final CourseConfiguration ctConfiguration = new CourseConfiguration("ctConfiguration", Arrays.asList(mc2),
+                Arrays.asList(wp2));
+        final CourseConfiguration ct = courseConfigurationApi.createCourseTemplate(ctx, ctConfiguration, regattaName2);
+        final CourseConfiguration courseConfiguration2 = courseConfigurationApi
+                .createCourseConfigurationFromCourseTemplate(ctx, ct.getOptionalCourseTemplateId(), null,
+                        Collections.emptyList(), null);
+        CourseConfiguration course2 = courseConfigurationApi.createCourse(ctx, courseConfiguration2, regattaName2,
+                race2.getRaceName(), "Default");
     }
 
     @Test @Ignore
