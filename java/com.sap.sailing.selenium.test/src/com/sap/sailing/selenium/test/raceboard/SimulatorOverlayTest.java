@@ -11,7 +11,6 @@ import javax.xml.bind.DatatypeConverter;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
@@ -66,8 +65,6 @@ public class SimulatorOverlayTest extends AbstractSeleniumTest {
      * appears after successfully loading wind.
      */
     @Test
-    // FIXME Bug 5246: temporarily ignored due to Selenium test instabilities
-    @Ignore
     public void testSimulatorOverlayIsAvailableFor49erAtKW2015() throws InterruptedException, UnsupportedEncodingException {
         final RegattaDescriptor regattaDescriptor = new RegattaDescriptor(REGATTA_49ER, BOAT_CLASS_49ER);
         {
