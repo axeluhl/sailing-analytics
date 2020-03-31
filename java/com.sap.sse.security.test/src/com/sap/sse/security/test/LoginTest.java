@@ -102,7 +102,7 @@ public class LoginTest {
         final UserGroup defaultUserGroup = securityService.getUserGroupByName(username + SecurityService.TENANT_SUFFIX);
         Map<UserGroup, Set<String>> permissionMap = new HashMap<>();
         permissionMap.put(defaultUserGroup, new HashSet<>(Arrays.asList(new String[] { "READ", "UPDATE" })));
-        permissionMap.put(null, new HashSet<>(Arrays.asList(new String[] { "READ", "UPDATE" })));
+        permissionMap.put(null, new HashSet<>(Arrays.asList(new String[] { "UPDATE" })));
         AccessControlList acl = securityService.overrideAccessControlList(
                 QualifiedObjectIdentifierImpl.fromDBWithoutEscaping("someid/more"), permissionMap);
 
