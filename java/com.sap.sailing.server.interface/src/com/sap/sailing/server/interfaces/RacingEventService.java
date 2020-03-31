@@ -932,4 +932,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     RaceHandle addRace(RegattaIdentifier regattaToAddTo, RaceTrackingConnectivityParameters params, long timeoutInMilliseconds) throws Exception;
     
     TypeBasedServiceFinder<RaceTrackingConnectivityParametersHandler> getRaceTrackingConnectivityParamsServiceFinder();
+    
+    void importMasterData(final String urlAsString, final String[] groupNames, final boolean override,
+            final boolean compress, final boolean exportWind, final boolean exportDeviceConfigurations,
+            String targetServerUsername, String targetServerPassword, final boolean exportTrackedRacesAndStartTracking,
+            final UUID importOperationId);
 }
