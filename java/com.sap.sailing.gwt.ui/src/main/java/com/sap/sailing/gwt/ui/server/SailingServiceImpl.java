@@ -5874,15 +5874,11 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public UUID importMasterData(final String urlAsString, final String[] groupNames, final boolean override,
             final boolean compress, final boolean exportWind, final boolean exportDeviceConfigurations,
-            String targetServerUsername, String targetServerPassword, final boolean exportTrackedRacesAndStartTracking) {
-//        getSecurityService().checkCurrentUserServerPermission(ServerActions.CAN_IMPORT_MASTERDATA);
-//        String token = RemoteServerUtil.resolveBearerTokenForRemoteServer(urlAsString, targetServerUsername, targetServerPassword);
+            String targetServerUsername, String targetServerPassword,
+            final boolean exportTrackedRacesAndStartTracking) {
         final UUID importOperationId = UUID.randomUUID();
-//        getService().createOrUpdateDataImportProgressWithReplication(importOperationId, 0.0, DataImportSubProgress.INIT, 0.0);
-//        final User user = getSecurityService().getCurrentUser();
-//        final UserGroup tenant = getSecurityService().getDefaultTenantForCurrentUser();
-//        // Create a progress indicator for as long as the server gets data from the other server.
-//        // As soon as the server starts the import operation, a progress object will be built on every server
+        // // Create a progress indicator for as long as the server gets data from the other server.
+        // // As soon as the server starts the import operation, a progress object will be built on every server
         Runnable masterDataImportTask = new Runnable() {
             @Override
             public void run() {

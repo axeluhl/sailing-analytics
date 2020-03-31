@@ -4862,12 +4862,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public void importMasterData(final String urlAsString, final String[] groupNames, final boolean override,
             final boolean compress, final boolean exportWind, final boolean exportDeviceConfigurations,
-            String targetServerUsername, String targetServerPassword,
-            final boolean exportTrackedRacesAndStartTracking, UUID importOperationId) {
+            String targetServerUsername, String targetServerPassword, final boolean exportTrackedRacesAndStartTracking,
+            UUID importOperationId) {
         getSecurityService().checkCurrentUserServerPermission(ServerActions.CAN_IMPORT_MASTERDATA);
         String token = RemoteServerUtil.resolveBearerTokenForRemoteServer(urlAsString, targetServerUsername,
                 targetServerPassword);
-//        final UUID importOperationId = UUID.randomUUID();
         createOrUpdateDataImportProgressWithReplication(importOperationId, 0.0, DataImportSubProgress.INIT, 0.0);
         final User user = getSecurityService().getCurrentUser();
         final UserGroup tenant = getSecurityService().getDefaultTenantForCurrentUser();
@@ -4938,7 +4937,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 logger.log(Level.INFO, "Couldn't close input stream", e);
             }
         }
-//        return importOperationId;
     }
     
     private String createLeaderboardQuery(String[] groupNames, boolean compress, boolean exportWind,
