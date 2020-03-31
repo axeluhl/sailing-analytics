@@ -26,6 +26,7 @@ import com.sap.sse.common.TimePoint;
  */
 public abstract class AbstractORCPerformanceCurveTwaLegAdapter implements ORCPerformanceCurveLeg {
     private static final long serialVersionUID = -6432064480098807397L;
+    private static final int DEFAULT_NUMBER_OF_TIME_POINTS_AND_POSITIONS_FOR_AVERAGE_WIND = 10;
     private final TrackedLeg trackedLeg;
     private final int numParts;
     
@@ -80,7 +81,7 @@ public abstract class AbstractORCPerformanceCurveTwaLegAdapter implements ORCPer
     }
     
     public AbstractORCPerformanceCurveTwaLegAdapter(TrackedLeg trackedLeg) {
-        this(trackedLeg, 10);
+        this(trackedLeg, DEFAULT_NUMBER_OF_TIME_POINTS_AND_POSITIONS_FOR_AVERAGE_WIND);
     }
     
     public AbstractORCPerformanceCurveTwaLegAdapter(TrackedLeg trackedLeg, int numParts) {
