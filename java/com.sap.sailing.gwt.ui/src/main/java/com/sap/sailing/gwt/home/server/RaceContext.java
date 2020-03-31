@@ -550,13 +550,13 @@ public class RaceContext {
             RaceLogFlagEvent abortingFlagEvent = checkForAbortFlagEvent();
             if (abortingFlagEvent != null) {
                 Flags upperFlag = abortingFlagEvent.getUpperFlag();
-                if(upperFlag.equals(Flags.AP)) {
+                if (upperFlag.equals(Flags.AP)) {
                     return RaceViewState.POSTPONED;
                 }
-                if(upperFlag.equals(Flags.NOVEMBER)) {
+                if (upperFlag.equals(Flags.NOVEMBER)) {
                     return RaceViewState.ABANDONED;
                 }
-                if(upperFlag.equals(Flags.FIRSTSUBSTITUTE)) {
+                if (upperFlag.equals(Flags.FIRSTSUBSTITUTE)) {
                     return RaceViewState.ABANDONED;
                 }
             }

@@ -79,8 +79,7 @@ public interface TracTracAdapter {
             URI liveURI, URI storedURI, URI courseDesignUpdateURI, TimePoint trackingStartTime,
             TimePoint trackingEndTime, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             long timeoutForReceivingRaceDefinitionInMilliseconds, Duration offsetToStartTimeOfSimulatedRace,  boolean useInternalMarkPassingAlgorithm,
-            String tracTracUsername, String tracTracPassword, String raceStatus, String raceVisibility, boolean trackWind, boolean correctWindDirectionByMagneticDeclination,
-            RaceTrackingHandler raceTrackingHandler)
+            String tracTracUsername, String tracTracPassword, String raceStatus, String raceVisibility, boolean trackWind, boolean correctWindDirectionByMagneticDeclination)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
     /**

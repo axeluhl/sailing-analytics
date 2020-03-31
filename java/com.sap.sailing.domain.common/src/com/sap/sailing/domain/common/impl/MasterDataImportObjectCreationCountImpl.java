@@ -23,11 +23,13 @@ public class MasterDataImportObjectCreationCountImpl implements MasterDataImport
     private int eventCount = 0;
     private int regattaCount = 0;
     private int mediaTrackCount = 0;
+    private int trackedRacesCount = 0;
     
     private Set<String> createdLeaderboards = new HashSet<String>(); 
     private Set<String> createdLeaderboardGroups = new HashSet<String>(); 
     private Set<String> createdEvents = new HashSet<String>(); 
     private Set<String> createdRegattas = new HashSet<String>(); 
+    private Set<String> createdTrackedRaces = new HashSet<String>();
     
     private Set<String> overwrittenRegattas = new HashSet<String>();
 
@@ -54,6 +56,11 @@ public class MasterDataImportObjectCreationCountImpl implements MasterDataImport
         regattaCount++;
     }
     
+    public void addOneTrackedRace(String id) {
+        createdTrackedRaces.add(id);
+        trackedRacesCount++;
+    }
+    
     @Override
     public void addOneMediaTrack() {
     	mediaTrackCount++;
@@ -64,10 +71,12 @@ public class MasterDataImportObjectCreationCountImpl implements MasterDataImport
         leaderboardGroupCount = leaderboardGroupCount + toAdd.leaderboardGroupCount;
         eventCount = eventCount + toAdd.eventCount;
         regattaCount = regattaCount + toAdd.regattaCount;
+        trackedRacesCount = trackedRacesCount + toAdd.trackedRacesCount;
         createdEvents.addAll(toAdd.createdEvents);
         createdLeaderboardGroups.addAll(toAdd.createdLeaderboardGroups);
         createdLeaderboards.addAll(toAdd.createdLeaderboards);
         createdRegattas.addAll(toAdd.createdRegattas);
+        createdTrackedRaces.addAll(toAdd.createdTrackedRaces);
     }
     
     public boolean alreadyAddedLeaderboardWithName(String name) {
@@ -84,6 +93,10 @@ public class MasterDataImportObjectCreationCountImpl implements MasterDataImport
     
     public boolean alreadyAddedRegattaWithId(String id) {
         return createdRegattas.contains(id);
+    }
+    
+    public boolean alreadyAddedTrackedRaceWithId(String id) {
+        return createdTrackedRaces.contains(id);
     }
 
     @Override
@@ -109,6 +122,11 @@ public class MasterDataImportObjectCreationCountImpl implements MasterDataImport
     @Override
     public int getMediaTrackCount() {
     	return mediaTrackCount;
+    }
+    
+    @Override
+    public int getTrackedRacesCount() {
+        return trackedRacesCount;
     }
 
     @Override

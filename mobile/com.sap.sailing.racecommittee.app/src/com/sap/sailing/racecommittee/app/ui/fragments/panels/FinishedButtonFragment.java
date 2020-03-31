@@ -101,7 +101,7 @@ public class FinishedButtonFragment extends BasePanelFragment {
         if (!preferences.getRacingProcedureIsResultEntryEnabled(getRaceState().getRacingProcedure().getType())) {
             mList.setVisibility(View.GONE);
         } else {
-            CompetitorResults results = getRaceState().getConfirmedFinishPositioningList();
+            CompetitorResults results = getRaceState().getConfirmedFinishPositioningList().getCompetitorResults();
             if (results != null) {
                 mWarning.setVisibility(results.hasConflicts() ? View.VISIBLE : View.GONE);
             }

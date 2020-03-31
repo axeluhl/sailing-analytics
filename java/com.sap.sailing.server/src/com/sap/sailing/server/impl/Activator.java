@@ -253,10 +253,14 @@ public class Activator implements BundleActivator {
                 trackedRaceStatisticsCache, restoreTrackedRaces, securityServiceTracker,
                 sharedSailingDataTracker, replicationServiceTracker, scoreCorrectionProviderServiceTracker, resultUrlRegistryServiceTracker);
         notificationService.setRacingEventService(racingEventService);
+        final MasterDataImportClassLoaderServiceTrackerCustomizer mdiClassLoaderCustomizer = new MasterDataImportClassLoaderServiceTrackerCustomizer(context, racingEventService);
         masterDataImportClassLoaderServiceTracker = new ServiceTracker<MasterDataImportClassLoaderService, MasterDataImportClassLoaderService>(
                 context, MasterDataImportClassLoaderService.class,
-                new MasterDataImportClassLoaderServiceTrackerCustomizer(context, racingEventService));
+                mdiClassLoaderCustomizer);
         masterDataImportClassLoaderServiceTracker.open();
+        for (final ServiceReference<MasterDataImportClassLoaderService> mdiClassLoaderService : masterDataImportClassLoaderServiceTracker.getServiceReferences()) {
+            mdiClassLoaderCustomizer.addingService(mdiClassLoaderService);
+        }
         polarDataServiceTracker = new ServiceTracker<PolarDataService, PolarDataService>(context,
                 PolarDataService.class,
                 new PolarDataServiceTrackerCustomizer(context, racingEventService));

@@ -104,4 +104,20 @@ public class TracTracConnectivityParamsHandler extends AbstractRaceTrackingConne
         result.put(PARAM_URL, TracTracRaceTrackerImpl.getParamURLStrippedOfRandomParam(new URL(ttParams.getParamURL().toString())).toString());
         return result;
     }
+
+    @Override
+    public RaceTrackingConnectivityParameters resolve(RaceTrackingConnectivityParameters params) throws Exception {
+        assert params instanceof RaceTrackingConnectivityParametersImpl;
+        final RaceTrackingConnectivityParametersImpl ttParams = (RaceTrackingConnectivityParametersImpl) params;
+        RaceTrackingConnectivityParametersImpl result = new RaceTrackingConnectivityParametersImpl(
+                ttParams.getParamURL(), ttParams.getLiveURI(), ttParams.getStoredURI(),
+                ttParams.getCourseDesignUpdateURI(), ttParams.getStartOfTracking(), ttParams.getEndOfTracking(),
+                ttParams.getDelayToLiveInMillis(), ttParams.getOffsetToStartTimeOfSimulatedRace(),
+                ttParams.isUseInternalMarkPassingAlgorithm(), raceLogStore, regattaLogStore, domainFactory,
+                ttParams.getTracTracUsername(), ttParams.getTracTracPassword(), ttParams.getRaceStatus(),
+                ttParams.getRaceVisibility(), ttParams.isTrackWind(),
+                ttParams.isCorrectWindDirectionByMagneticDeclination(), ttParams.isPreferReplayIfAvailable(),
+                ttParams.getTimeoutInMillis());
+        return result;     
+    }
 }
