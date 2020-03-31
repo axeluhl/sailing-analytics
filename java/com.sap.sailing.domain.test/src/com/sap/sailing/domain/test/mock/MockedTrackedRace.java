@@ -1291,5 +1291,4 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public TrackingConnectorInfo getTrackingConnectorInfo() {
         return null;
     }
-
 }

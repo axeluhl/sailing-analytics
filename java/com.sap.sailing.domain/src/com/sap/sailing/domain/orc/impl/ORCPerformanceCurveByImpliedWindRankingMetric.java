@@ -485,7 +485,7 @@ implements com.sap.sailing.domain.orc.ORCPerformanceCurveRankingMetric {
         } else {
             final ORCCertificate certificate = getCertificate(getTrackedRace().getBoatOfCompetitor(competitor));
             if (certificate != null) {
-                performanceCurveForPartialCourse = new ORCPerformanceCurveImpl(certificate, competitorsPartialCourseAtTimePoint);
+                performanceCurveForPartialCourse = new ORCPerformanceCurveImpl(certificate, competitorsPartialCourseAtTimePoint, cache);
             } else {
                 performanceCurveForPartialCourse = null;
             }
@@ -671,7 +671,7 @@ implements com.sap.sailing.domain.orc.ORCPerformanceCurveRankingMetric {
             final ORCCertificate certificate = getCertificate(getTrackedRace().getBoatOfCompetitor(competitor));
             if (certificate != null) {
                 performanceCurveForCompetitorToPositionOfCompetitorFarthestAhread = new ORCPerformanceCurveImpl(certificate,
-                        courseOfCompetitorFarthestAhead);
+                        courseOfCompetitorFarthestAhead, cache);
                 final Speed competitorsCurrentImpliedWind = cache.getImpliedWind(timePoint, getTrackedRace(), competitorFarthestAhead, getImpliedWindSupplier(cache));
                 if (competitorsCurrentImpliedWind != null) {
                     final Duration allowanceToPositionOfBoatFarthestAhead = performanceCurveForCompetitorToPositionOfCompetitorFarthestAhread
