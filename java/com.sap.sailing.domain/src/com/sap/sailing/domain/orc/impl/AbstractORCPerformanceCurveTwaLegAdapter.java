@@ -41,7 +41,7 @@ public abstract class AbstractORCPerformanceCurveTwaLegAdapter implements ORCPer
 
         @Override
         public boolean equals(Object o) {
-            return o instanceof AbstractORCPerformanceCurveTwaLegAdapter && getTrackedLeg() == ((AbstractORCPerformanceCurveTwaLegAdapter) o).getTrackedLeg();
+            return o instanceof EqualityByTrackedLegWrapper && getTrackedLeg() == ((EqualityByTrackedLegWrapper) o).getTrackedLeg();
         }
         
         @Override
