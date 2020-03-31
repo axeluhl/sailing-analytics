@@ -20,6 +20,7 @@ import org.apache.shiro.SecurityUtils;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.mongodb.MongoException;
@@ -92,23 +93,24 @@ public class LoginTest {
         assertFalse(Util.contains(specialUserGroup1.getUsers(), user));
         assertFalse(Util.contains(specialUserGroup2.getUsers(), user));
     }
-    
-    
+
     @Test
+    // FIXME Bug 5239: Negative ACL actions are currently disabled due to bugs
+    @Ignore
     public void testAclAnonUserGroup() throws UserManagementException, MailException, UserGroupManagementException {
         final String username = "TheNewUser";
         securityService.createSimpleUser(username, "u@a.b", "Humba", username, /* company */ null,
                 /* locale */ null, /* validationBaseURL */ null, /* owning group */ null);
         final UserGroup defaultUserGroup = securityService.getUserGroupByName(username + SecurityService.TENANT_SUFFIX);
         Map<UserGroup, Set<String>> permissionMap = new HashMap<>();
-        permissionMap.put(defaultUserGroup, new HashSet<>(Arrays.asList(new String[] { "READ", "UPDATE" })));
-        permissionMap.put(null, new HashSet<>(Arrays.asList(new String[] { "UPDATE" })));
+        permissionMap.put(defaultUserGroup, new HashSet<>(Arrays.asList(new String[] { "!READ", "UPDATE" })));
+        permissionMap.put(null, new HashSet<>(Arrays.asList(new String[] { "!READ", "UPDATE" })));
         AccessControlList acl = securityService.overrideAccessControlList(
                 QualifiedObjectIdentifierImpl.fromDBWithoutEscaping("someid/more"), permissionMap);
 
         Map<UserGroup, Set<String>> result = acl.getActionsByUserGroup();
 
-        Assert.assertThat(result.get(defaultUserGroup), Matchers.contains("READ", "UPDATE"));
+        Assert.assertThat(result.get(defaultUserGroup), Matchers.contains("!READ", "UPDATE"));
         Assert.assertThat(result.get(null), Matchers.contains("UPDATE"));
     }
     
