@@ -1,11 +1,13 @@
 package com.sap.sailing.domain.orc.impl;
 
 import com.sap.sailing.domain.common.Wind;
+import com.sap.sailing.domain.common.orc.AverageWindOnLegCache;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLeg;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
+import com.sap.sailing.domain.tracking.impl.NoCachingWindLegTypeAndLegBearingCache;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
@@ -24,30 +26,82 @@ import com.sap.sse.common.TimePoint;
  */
 public abstract class AbstractORCPerformanceCurveTwaLegAdapter implements ORCPerformanceCurveLeg {
     private static final long serialVersionUID = -6432064480098807397L;
+    private static final int DEFAULT_NUMBER_OF_TIME_POINTS_AND_POSITIONS_FOR_AVERAGE_WIND = 10;
     private final TrackedLeg trackedLeg;
+    private final int numParts;
+    
+    /**
+     * A wrapper around the enclosing object that delegates all methods to the enclosing instance but defines equality /
+     * hash code based on the {@link AbstractORCPerformanceCurveTwaLegAdapter#getTrackedLeg()} result only.
+     * 
+     * @author Axel Uhl (D043530)
+     *
+     */
+    private class EqualityByTrackedLegWrapper implements ORCPerformanceCurveLeg {
+        private static final long serialVersionUID = 2580336707637358724L;
+
+        @Override
+        public boolean equals(Object o) {
+            return o instanceof EqualityByTrackedLegWrapper && getTrackedLeg() == ((EqualityByTrackedLegWrapper) o).getTrackedLeg();
+        }
+        
+        @Override
+        public int hashCode() {
+            return getTrackedLeg().hashCode();
+        }
+        
+        @Override
+        public Distance getLength() {
+            return AbstractORCPerformanceCurveTwaLegAdapter.this.getLength();
+        }
+
+        @Override
+        public Bearing getTwa() {
+            return AbstractORCPerformanceCurveTwaLegAdapter.this.getTwa();
+        }
+
+        @Override
+        public Bearing getTwa(AverageWindOnLegCache cache) {
+            return AbstractORCPerformanceCurveTwaLegAdapter.this.getTwa(cache);
+        }
+
+        @Override
+        public ORCPerformanceCurveLegTypes getType() {
+            return AbstractORCPerformanceCurveTwaLegAdapter.this.getType();
+        }
+
+        @Override
+        public ORCPerformanceCurveLeg scale(double share) {
+            return AbstractORCPerformanceCurveTwaLegAdapter.this.scale(share);
+        }
+        
+        public TrackedLeg getTrackedLeg() {
+            return AbstractORCPerformanceCurveTwaLegAdapter.this.getTrackedLeg();
+        }
+    }
     
     public AbstractORCPerformanceCurveTwaLegAdapter(TrackedLeg trackedLeg) {
+        this(trackedLeg, DEFAULT_NUMBER_OF_TIME_POINTS_AND_POSITIONS_FOR_AVERAGE_WIND);
+    }
+    
+    public AbstractORCPerformanceCurveTwaLegAdapter(TrackedLeg trackedLeg, int numParts) {
         this.trackedLeg = trackedLeg;
+        this.numParts = numParts;
     }
     
     protected TrackedLeg getTrackedLeg() {
         return trackedLeg;
     }
 
-    private Wind getWind() {
-        final Wind result;
-        if (trackedLeg == null || trackedLeg.getTrackedRace() == null) {
-            result = null;
-        } else {
-            final TimePoint referenceTimePoint = trackedLeg.getReferenceTimePoint();
-            result = trackedLeg.getTrackedRace().getWind(trackedLeg.getMiddleOfLeg(referenceTimePoint), referenceTimePoint);
-        }
-        return result;
-    }
-
     @Override
     public Bearing getTwa() {
-        final Wind wind = getWind();
+        return getTwa(new NoCachingWindLegTypeAndLegBearingCache());
+    }
+    
+    @Override
+    public Bearing getTwa(AverageWindOnLegCache cache) {
+        final EqualityByTrackedLegWrapper wrapper = new EqualityByTrackedLegWrapper();
+        final Wind wind = cache.getAverageWind(wrapper, legAdapter->legAdapter.getTrackedLeg().getAverageWind(numParts).getObject());
         final Bearing result;
         if (wind == null) {
             result = null;
@@ -62,7 +116,7 @@ public abstract class AbstractORCPerformanceCurveTwaLegAdapter implements ORCPer
     @Override
     public ORCPerformanceCurveLegTypes getType() {
         final ORCPerformanceCurveLegTypes result;
-        if (getWind() == null) {
+        if (!hasWind()) {
             result = ORCPerformanceCurveLegTypes.LONG_DISTANCE;
         } else {
             result = ORCPerformanceCurveLegTypes.TWA;
@@ -70,9 +124,19 @@ public abstract class AbstractORCPerformanceCurveTwaLegAdapter implements ORCPer
         return result;
     }
 
+    private boolean hasWind() {
+        final TimePoint referenceTimePoint = trackedLeg.getReferenceTimePoint();
+        final Wind result = trackedLeg.getTrackedRace().getWind(trackedLeg.getMiddleOfLeg(referenceTimePoint), referenceTimePoint);
+        return result != null;
+    }
+
+    /**
+     * The TWA calculation must not be affected by scaling a leg because otherwise competitors who sailed different
+     * ratios of the same leg may get different {@link #getWind()} results.
+     */
     @Override
     public ORCPerformanceCurveLeg scale(final double share) {
-        return new AbstractORCPerformanceCurveTwaLegAdapter(trackedLeg) {
+        return new AbstractORCPerformanceCurveTwaLegAdapter(trackedLeg, numParts) {
             private static final long serialVersionUID = -6724721873285438431L;
 
             @Override

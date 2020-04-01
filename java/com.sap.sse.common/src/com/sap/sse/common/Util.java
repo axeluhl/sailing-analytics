@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -326,6 +327,8 @@ public class Util {
         final T result;
         if (isEmpty(iterable)) {
             result = null;
+        } else if (iterable instanceof SortedSet) {
+            result = ((SortedSet<T>) iterable).last();
         } else {
             result = get(iterable, size(iterable)-1);
         }

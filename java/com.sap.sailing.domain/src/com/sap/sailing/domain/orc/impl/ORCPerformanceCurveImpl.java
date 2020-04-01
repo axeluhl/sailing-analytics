@@ -27,6 +27,9 @@ import com.sap.sailing.domain.common.orc.ORCPerformanceCurveCourse;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLeg;
 import com.sap.sailing.domain.common.orc.impl.ORCCertificateImpl;
 import com.sap.sailing.domain.orc.ORCPerformanceCurve;
+import com.sap.sailing.domain.orc.ORCPerformanceCurveCache;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
+import com.sap.sailing.domain.tracking.impl.NoCachingWindLegTypeAndLegBearingCache;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
@@ -88,10 +91,15 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
      * boat is assumed to need at that true wind speed/angle for one nautical mile.
      */
     public ORCPerformanceCurveImpl(ORCCertificate certificate, ORCPerformanceCurveCourse course) throws FunctionEvaluationException {
+        this(certificate, course, new NoCachingWindLegTypeAndLegBearingCache());
+    }
+    
+    public ORCPerformanceCurveImpl(ORCCertificate certificate, ORCPerformanceCurveCourse course,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws FunctionEvaluationException {
         this.course = course;
         this.trueWindAngles = certificate.getTrueWindAngles();
         this.trueWindSpeeds = certificate.getTrueWindSpeeds();
-        functionImpliedWindInKnotsToAverageSpeedInKnotsForCourse = createPerformanceCurve(certificate);
+        functionImpliedWindInKnotsToAverageSpeedInKnotsForCourse = createPerformanceCurve(certificate, cache);
     }
 
     /**
@@ -110,8 +118,9 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
      * assumed at 10000kts true wind speed is the same as for the highest wind speed from the original list.
      * <p>
      */
-    private UnivariateDifferentiableFunction createPerformanceCurve(ORCCertificate certificate) throws FunctionEvaluationException {
-        final Map<Speed, Duration> allowancesForCoursePerTrueWindSpeed = createAllowancesPerCourse(certificate);
+    private UnivariateDifferentiableFunction createPerformanceCurve(ORCCertificate certificate,
+            ORCPerformanceCurveCache cache) throws FunctionEvaluationException {
+        final Map<Speed, Duration> allowancesForCoursePerTrueWindSpeed = createAllowancesPerCourse(certificate, cache);
         double[] xs = new double[certificate.getTrueWindSpeeds().length+2];
         double[] ys = new double[certificate.getTrueWindSpeeds().length+2];
         int i = 0;
@@ -148,7 +157,8 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
      * {@link #course}, keyed by the different true wind speeds. The resulting {@link LinkedHashMap}'s iteration
      * order is guaranteed to deliver the true wind speed keys in the order of ascending wind speeds.
      */
-    public LinkedHashMap<Speed, Duration> createAllowancesPerCourse(ORCCertificate certificate) throws FunctionEvaluationException  {
+    public LinkedHashMap<Speed, Duration> createAllowancesPerCourse(ORCCertificate certificate,
+            ORCPerformanceCurveCache cache) throws FunctionEvaluationException {
         final LinkedHashMap<Speed, Duration> result = new LinkedHashMap<>();
         final Map<ORCPerformanceCurveLeg, Map<Speed, Duration>> allowancesPerLeg = new HashMap<>();
         for (final ORCPerformanceCurveLeg leg : course.getLegs()) {
@@ -169,6 +179,11 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
      * considering the leg's {@link ORCPerformanceCurveLeg#getLength() length}.
      */
     private Map<Speed, Duration> createAllowancePerLeg(ORCPerformanceCurveLeg leg, ORCCertificate certificate) throws FunctionEvaluationException {
+        return createAllowancePerLeg(leg, certificate, new NoCachingWindLegTypeAndLegBearingCache());
+    }
+    
+    private Map<Speed, Duration> createAllowancePerLeg(ORCPerformanceCurveLeg leg, ORCCertificate certificate,
+            ORCPerformanceCurveCache cache) throws FunctionEvaluationException {
         Map<Speed, Map<Bearing, Speed>> twaAllowances = certificate.getVelocityPredictionPerTrueWindSpeedAndAngle();
         Map<Speed, Bearing> beatAngles = certificate.getBeatAngles();
         Map<Speed, Speed> beatVMGPredictionPerTrueWindSpeed = certificate.getBeatVMGPredictions(); 
@@ -182,7 +197,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
         case TWA:
             for (final Speed tws : certificate.getTrueWindSpeeds()) {
                 // Case switching on TWA (0. TWA == 0; 1. TWA < Beat; 2. Beat < TWA < Gybe; 3. Gybe < TWA; 4. TWA == 180)
-                if (leg.getTwa().abs().compareTo(beatAngles.get(tws)) <= 0) {
+                if (leg.getTwa(cache).abs().compareTo(beatAngles.get(tws)) <= 0) {
                     // Case 0 & 1 - result = beatVMG * distance * cos(TWA)
                     result.put(tws, beatAllowancePerTrueWindSpeed.get(tws).times(leg.getLength().getNauticalMiles()).times(Math.cos(leg.getTwa().abs().getRadians())));
                 } else if (leg.getTwa().abs().compareTo(runAngles.get(tws)) >= 0) {
