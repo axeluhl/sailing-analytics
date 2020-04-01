@@ -23,7 +23,7 @@ public class MasterDataImportResource extends AbstractSailingServerResource {
     
     public MasterDataImportResource() {
     }
-    
+
     @POST
     // TODO: Think about moving User/Password information from query string to form parameter, due to logging full URLs
     // in access log.
@@ -31,15 +31,16 @@ public class MasterDataImportResource extends AbstractSailingServerResource {
     public Response importMasterData(@QueryParam("targetServerUrl") String targetServerUrlAsString,
             @QueryParam("targetServerUsername") String targetServerUsername,
             @QueryParam("targetServerPassword") String targetServerPassword,
-            @QueryParam("names[]") List<String> requestedLeaderboardGroups, @QueryParam("override") Boolean override,
-            @QueryParam("compress") Boolean compress, @QueryParam("exportWind") Boolean exportWind,
+            @QueryParam("names[]") List<String> requestedLeaderboardGroups, 
+            @QueryParam("override") Boolean override,
+            @QueryParam("compress") Boolean compress, 
+            @QueryParam("exportWind") Boolean exportWind,
             @QueryParam("exportDeviceConfigs") Boolean exportDeviceConfigs,
             @QueryParam("exportTrackedRacesAndStartTracking") Boolean exportTrackedRacesAndStartTracking) {
         Response response = null;
         if (targetServerUrlAsString == null || requestedLeaderboardGroups.isEmpty() || targetServerUsername == null
-                || targetServerPassword == null || requestedLeaderboardGroups.isEmpty() || override == null
-                || compress == null || exportWind == null || exportDeviceConfigs == null
-                || exportTrackedRacesAndStartTracking == null) {
+                || targetServerPassword == null || override == null || compress == null || exportWind == null
+                || exportDeviceConfigs == null || exportTrackedRacesAndStartTracking == null) {
             response = Response.status(Status.BAD_REQUEST).build();
         } else {
             final UUID importMasterDataUid = UUID.randomUUID();
@@ -59,17 +60,17 @@ public class MasterDataImportResource extends AbstractSailingServerResource {
             } catch (UnauthorizedException e) {
                 response = Response.status(Status.UNAUTHORIZED).build();
                 logger.warning(e.getMessage());
-            } catch (Exception e) {
-                response = Response.status(Status.INTERNAL_SERVER_ERROR).build();
+            } catch (Throwable e) {
+                response = Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage())
+                        .type(MediaType.TEXT_PLAIN).build();
                 logger.severe(e.toString());
                 e.printStackTrace();
             }
         }
         return response;
     }
-    
+
     private Response ok(String message, String mediaType) {
         return Response.ok(message).header("Content-Type", mediaType + ";charset=UTF-8").build();
     }
-
 }
