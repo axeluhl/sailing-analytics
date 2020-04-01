@@ -62,7 +62,8 @@ public class AclEditPanel extends Composite {
     interface AclEditPanelUiBinder extends UiBinder<Widget, AclEditPanel> {
     }
     
-    private static final boolean showDeniedActions = false;
+ // TODO Bug 5239: remove, once we allow denied ACLs again
+    private static final boolean showDeniedActions = true;
 
     @UiField
     FlowPanel userGroupCellListPanelUi;

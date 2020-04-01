@@ -20,7 +20,6 @@ import org.apache.shiro.SecurityUtils;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.mongodb.MongoException;
@@ -95,8 +94,6 @@ public class LoginTest {
     }
 
     @Test
-    // FIXME Bug 5239: Negative ACL actions are currently disabled due to bugs
-    @Ignore
     public void testAclAnonUserGroup() throws UserManagementException, MailException, UserGroupManagementException {
         final String username = "TheNewUser";
         securityService.createSimpleUser(username, "u@a.b", "Humba", username, /* company */ null,

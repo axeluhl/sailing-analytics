@@ -178,8 +178,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     private static final String ADMIN_DEFAULT_PASSWORD = "admin";
     
-    // TODO remove, once we allow denied ACLs again
-    private static final boolean supportDeniedActions = false;
+    // TODO Bug 5239: remove, once we allow denied ACLs again
+    private static final boolean supportDeniedActions = true;
 
     private final Set<String> migratedHasPermissionTypes = new ConcurrentSkipListSet<>();;
 
@@ -571,7 +571,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public AccessControlList overrideAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
             Map<UserGroup, Set<String>> permissionMap, String displayNameOfAccessControlledObject) {
-        // TODO remove, once we allow denied ACLs again
+        // TODO Bug 5239: remove, once we allow denied ACLs again
         if (!supportDeniedActions) {
             for (Set<String> actions : permissionMap.values()) {
                 for (String action : actions) {
@@ -611,10 +611,11 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     /*
      * @param name The name of the user group to add
      */
+    @SuppressWarnings("unused")
     @Override
     public AccessControlList addToAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
             UserGroup group, String action) {
-        // TODO remove, once we allow denied ACLs again
+        // TODO Bug 5239: remove, once we allow denied ACLs again
         if (!supportDeniedActions && SecurityAccessControlList.isDeniedAction(action)) {
             throw new IllegalArgumentException("Adding denied actions to an ACL is not allowed");
         }

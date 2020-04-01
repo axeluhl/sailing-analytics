@@ -9,7 +9,6 @@ import static com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage.goToP
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.WebElement;
 
@@ -47,8 +46,6 @@ public class AclRevokeAnonymousTest extends AbstractSeleniumTest {
     }
 
     @Test
-    // TODO remove, once we allow denied ACLs again
-    @Ignore("Bug 5239 deactivates denied actions")
     public void test() {
         EventConfigurationPanelPO eventPanel = adminConsole.goToEvents();
         EventEntryPO eventEntry = eventPanel.getEventEntry(EVENT_NAME);
