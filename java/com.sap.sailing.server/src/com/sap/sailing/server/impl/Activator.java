@@ -135,25 +135,22 @@ public class Activator implements BundleActivator {
         extenderBundleTracker.open();
         mailServiceTracker = ServiceTrackerFactory.createAndOpen(context, MailService.class);
         replicationServiceTracker = ServiceTrackerFactory.createAndOpen(context, ReplicationService.class);
-        sharedSailingDataTracker = new FullyInitializedReplicableTracker<>(context, SharedSailingData.class,
-                /* customizer */ null, replicationServiceTracker);
-        sharedSailingDataTracker.open();
-        securityServiceTracker = new FullyInitializedReplicableTracker<>(context, SecurityService.class,
-                /* customizer */ null, replicationServiceTracker);
+        sharedSailingDataTracker = FullyInitializedReplicableTracker.createAndOpen(context, SharedSailingData.class);
+        securityServiceTracker = FullyInitializedReplicableTracker.createAndOpen(context, SecurityService.class);
         securityServiceTracker.open();
-        if (securityServiceTracker != null) {
-            new Thread("Racingevent wait for securityservice for migration thread") {
-                public void run() {
-                    try {
-                        // only continue once we have the service, as some of the services require it to start properly
-                        securityServiceTracker.getInitializedService(0);
-                        internalStartBundle(context);
-                    } catch (Exception e) {
-                        logger.log(Level.SEVERE, "Could not start RacingEvent service properly", e);
-                    }
-                };
-            }.start();
-        }
+        new Thread(""+this+" initializing RacingEventService in the background") {
+            public void run() {
+                try {
+                    // we used to wait for the SecurityService here, but this now (see bug 4006) would be suspended until replication
+                    // is finished with its initial load, and it's important to get RacingEventService registered with the OSGi service
+                    // registry before the first access to the SecurityService, because only registering RacingEventService can unblock
+                    // the replication and hence make a fully-initialized SecurityService with the initial load already completed available.
+                    internalStartBundle(context);
+                } catch (Exception e) {
+                    logger.log(Level.SEVERE, "Could not start RacingEvent service properly", e);
+                }
+            };
+        }.start();
     }
 
     /**
@@ -218,7 +215,6 @@ public class Activator implements BundleActivator {
 
     private void internalStartBundle(BundleContext context) throws MalformedURLException, MalformedObjectNameException,
             InstanceAlreadyExistsException, MBeanRegistrationException, NotCompliantMBeanException, InterruptedException {
-        assert securityServiceTracker.getInitializedService(0) != null; // callers must call securityServiceTracker.waitForService(0) before calling this method
         mailQueue = new ExecutorMailQueue(mailServiceTracker);
         notificationService = new SailingNotificationServiceImpl(context, mailQueue);
         trackedRegattaListener = new OSGiBasedTrackedRegattaListener(context);
@@ -257,10 +253,14 @@ public class Activator implements BundleActivator {
                 trackedRaceStatisticsCache, restoreTrackedRaces, securityServiceTracker,
                 sharedSailingDataTracker, replicationServiceTracker, scoreCorrectionProviderServiceTracker, resultUrlRegistryServiceTracker);
         notificationService.setRacingEventService(racingEventService);
+        final MasterDataImportClassLoaderServiceTrackerCustomizer mdiClassLoaderCustomizer = new MasterDataImportClassLoaderServiceTrackerCustomizer(context, racingEventService);
         masterDataImportClassLoaderServiceTracker = new ServiceTracker<MasterDataImportClassLoaderService, MasterDataImportClassLoaderService>(
                 context, MasterDataImportClassLoaderService.class,
-                new MasterDataImportClassLoaderServiceTrackerCustomizer(context, racingEventService));
+                mdiClassLoaderCustomizer);
         masterDataImportClassLoaderServiceTracker.open();
+        for (final ServiceReference<MasterDataImportClassLoaderService> mdiClassLoaderService : masterDataImportClassLoaderServiceTracker.getServiceReferences()) {
+            mdiClassLoaderCustomizer.addingService(mdiClassLoaderService);
+        }
         polarDataServiceTracker = new ServiceTracker<PolarDataService, PolarDataService>(context,
                 PolarDataService.class,
                 new PolarDataServiceTrackerCustomizer(context, racingEventService));
@@ -317,7 +317,9 @@ public class Activator implements BundleActivator {
         mbs.registerMBean(mbean, mBeanName);
         logger.log(Level.INFO, "Started " + context.getBundle().getSymbolicName()
                 + ". Character encoding: " + Charset.defaultCharset());
-        // do initial setup/migration logic
+        // do initial setup/migration logic; do this after the RacingEventService has been published to the OSGi
+        // registry because this will require the SecurityService and that can only become available once the initial
+        // load has been finished in case this is a replica with auto-replication.
         racingEventService.ensureOwnerships();
     }
 

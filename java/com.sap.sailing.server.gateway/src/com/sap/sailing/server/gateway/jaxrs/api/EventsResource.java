@@ -648,7 +648,8 @@ public class EventsResource extends AbstractSailingServerResource {
                 SecuredDomainType.EVENT.getStringPermissionForObject(DefaultActions.UPDATE, event));
         String[] courseAreaNames = new String[] { courseAreaName };
         UUID[] courseAreaIds = new UUID[] { UUID.randomUUID() };
-        return getService().apply(new AddCourseAreas(event.getId(), courseAreaNames, courseAreaIds))[0];
+        final CourseArea[] courseAreas = getService().apply(new AddCourseAreas(event.getId(), courseAreaNames, courseAreaIds));
+        return courseAreas[0];
     }
 
     private void addLeaderboardToDefaultLeaderboardGroup(final RegattaLeaderboard leaderboard) {

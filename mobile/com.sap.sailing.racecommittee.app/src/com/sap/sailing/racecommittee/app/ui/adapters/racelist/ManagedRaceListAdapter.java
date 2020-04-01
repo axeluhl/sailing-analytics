@@ -97,7 +97,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             RaceState state = race.getState();
             boolean draft = state.getFinishPositioningList() != null && state.getFinishPositioningList().hasConflicts();
             boolean confirmed = state.getConfirmedFinishPositioningList() != null
-                    && state.getConfirmedFinishPositioningList().hasConflicts();
+                    && state.getConfirmedFinishPositioningList().getCompetitorResults().hasConflicts();
             boolean hasConflict = draft || confirmed;
             if (!viewItemsSeriesHeaders.containsKey(series)) {
                 viewItemsSeriesHeaders.put(series,
@@ -208,7 +208,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             holder.time.setRaceState(state);
             if (state != null) {
                 CompetitorResults draft = state.getFinishPositioningList();
-                CompetitorResults confirmed = state.getConfirmedFinishPositioningList();
+                CompetitorResults confirmed = state.getConfirmedFinishPositioningList().getCompetitorResults();
                 holder.warning_sign.setVisibility(
                         ((draft != null && draft.hasConflicts()) || confirmed != null && confirmed.hasConflicts())
                                 ? View.VISIBLE

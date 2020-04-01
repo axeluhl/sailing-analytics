@@ -38,7 +38,6 @@ import com.sap.sse.MasterDataImportClassLoaderService;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.replication.FullyInitializedReplicableTracker;
 import com.sap.sse.replication.Replicable;
-import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.util.ServiceTrackerFactory;
 
 public class Activator implements BundleActivator {
@@ -86,9 +85,7 @@ public class Activator implements BundleActivator {
         registrations.add(context.registerService(SensorFixMapper.class, new BravoExtendedDataFixMapper(), null));
         registrations.add(context.registerService(SensorFixMapper.class, new ExpeditionExtendedDataFixMapper(), null));
         sensorFixMapperTracker = createSensorFixMapperServiceTracker(context);
-        racingEventServiceTracker = new FullyInitializedReplicableTracker<>(context, RacingEventService.class,
-                /* customizer */ null, ServiceTrackerFactory.createAndOpen(context, ReplicationService.class));
-        racingEventServiceTracker.open();
+        racingEventServiceTracker = FullyInitializedReplicableTracker.createAndOpen(context, RacingEventService.class);
         RegattaLogFixTrackerRegattaListener regattaLogSensorDataTrackerTrackedRegattaListener = new RegattaLogFixTrackerRegattaListener(
                 racingEventServiceTracker, new SensorFixMapperFactoryImpl(sensorFixMapperTracker));
         registrations.add(context.registerService(TrackedRegattaListener.class,

@@ -50,10 +50,8 @@ import com.sap.sse.datamining.ui.client.DataMiningService;
 import com.sap.sse.gwt.server.ProxiedRemoteServiceServlet;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.replication.FullyInitializedReplicableTracker;
-import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
-import com.sap.sse.util.ServiceTrackerFactory;
 
 public class DataMiningServiceImpl extends ProxiedRemoteServiceServlet implements DataMiningService {
     private static final long serialVersionUID = -7951930891674894528L;
@@ -67,9 +65,7 @@ public class DataMiningServiceImpl extends ProxiedRemoteServiceServlet implement
     public DataMiningServiceImpl() {
         context = Activator.getDefault();
         dataMiningServerTracker = createAndOpenDataMiningServerTracker(context);
-        securityServiceTracker = new FullyInitializedReplicableTracker<>(context, SecurityService.class,
-                /* customizer */ null, ServiceTrackerFactory.createAndOpen(context, ReplicationService.class));
-        securityServiceTracker.open();
+        securityServiceTracker = FullyInitializedReplicableTracker.createAndOpen(context, SecurityService.class);
         storedDataMiningQueryPersistor = new StoredDataMiningQueryPersisterImpl(getSecurityService(),
                 dataMiningServerTracker);
         dtoFactory = new DataMiningDTOFactory();
