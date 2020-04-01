@@ -31,7 +31,7 @@
          Due to ECJ/JDT bugs it may fail depending on the Eclipse version tycho is based on 
          (see Bugzilla: https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=3859). -->
     <!-- Most likely, serialization/replication will fail with tycho versions based on Eclipse Neon R (4.6.0). -->
-    <tycho-version>1.0.0</tycho-version>
+    <tycho-version>1.6.3</tycho-version>
     <gwt.version>2.8.2</gwt.version>
     <!-- gwt-maven-plugin is typically in sync with the GWT version. But sometimes versions need extra time after a new GWT release. -->
     <gwt.plugin.version>2.8.2</gwt.plugin.version>
