@@ -22,9 +22,9 @@ Steps to build and run the Race Analysis Suite below)
 
 #### Automatic Eclipse plugin installation
 
-The necessary Eclipse plugins described above can be automatically be installed into a newly unzipped version of [Eclipse IDE for Eclipse Committers 4.11.0 "2019-09"](https://www.eclipse.org/downloads/packages/release/2019-09/r/eclipse-ide-eclipse-committers) by using the script "configuration/installPluginsForEclipse2019-09.sh". In addition, the script applies some updates to plugins packaged with Eclipse itself. To start the plugin installation, run the following command using your Eclipse installation directory as command line parameter for the script:
+The necessary Eclipse plugins described above can be automatically be installed into a newly unzipped version of [Eclipse IDE for Eclipse Committers "2020-03"](https://www.eclipse.org/downloads/packages/release/2020-03/r/eclipse-ide-eclipse-committers) by using the script "configuration/installPluginsForEclipse2020-03.sh". In addition, the script applies some updates to plugins packaged with Eclipse itself. To start the plugin installation, run the following command using your Eclipse installation directory as command line parameter for the script:
 
-    ./installPluginsForEclipse2019-09.sh "/some/path/on/my/computer/eclipse"
+    ./installPluginsForEclipse2020-03.sh "/some/path/on/my/computer/eclipse"
 
 Be aware that with this script it's not possible to update the plugins to newer versions. Instead you can install a new version by unpacking the base package and executing the script.
 
