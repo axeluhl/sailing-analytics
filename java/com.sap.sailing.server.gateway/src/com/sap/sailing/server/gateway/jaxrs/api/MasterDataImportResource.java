@@ -28,7 +28,7 @@ public class MasterDataImportResource extends AbstractSailingServerResource {
     // TODO: Think about moving User/Password information from query string to form parameter, due to logging full URLs
     // in access log.
     @Produces("application/json;charset=UTF-8")
-    public Response importMasterData(@QueryParam("scope") String scopeIDorURLasString,
+    public Response importMasterData(@QueryParam("targetServerUrl") String targetServerUrlAsString,
             @QueryParam("targetServerUsername") String targetServerUsername,
             @QueryParam("targetServerPassword") String targetServerPassword,
             @QueryParam("names[]") List<String> requestedLeaderboardGroups, @QueryParam("override") Boolean override,
@@ -36,7 +36,7 @@ public class MasterDataImportResource extends AbstractSailingServerResource {
             @QueryParam("exportDeviceConfigs") Boolean exportDeviceConfigs,
             @QueryParam("exportTrackedRacesAndStartTracking") Boolean exportTrackedRacesAndStartTracking) {
         Response response = null;
-        if (scopeIDorURLasString == null || requestedLeaderboardGroups.isEmpty() || targetServerUsername == null
+        if (targetServerUrlAsString == null || requestedLeaderboardGroups.isEmpty() || targetServerUsername == null
                 || targetServerPassword == null || requestedLeaderboardGroups.isEmpty() || override == null
                 || compress == null || exportWind == null || exportDeviceConfigs == null
                 || exportTrackedRacesAndStartTracking == null) {
@@ -44,13 +44,13 @@ public class MasterDataImportResource extends AbstractSailingServerResource {
         } else {
             final UUID importMasterDataUid = UUID.randomUUID();
             try {
-                getService().importMasterData(scopeIDorURLasString,
+                getService().importMasterData(targetServerUrlAsString,
                         requestedLeaderboardGroups.toArray(new String[requestedLeaderboardGroups.size()]), override,
                         compress, exportWind, exportDeviceConfigs, targetServerUsername, targetServerPassword,
                         exportTrackedRacesAndStartTracking, importMasterDataUid);
                 final JSONObject jsonResponse = new JSONObject();
                 jsonResponse.put("LeaderboardgroupsImported", requestedLeaderboardGroups);
-                jsonResponse.put("ImportedFrom", scopeIDorURLasString);
+                jsonResponse.put("ImportedFrom", targetServerUrlAsString);
                 jsonResponse.put("override", override);
                 jsonResponse.put("exportWind", exportWind);
                 jsonResponse.put("exportDeviceConfigs", exportDeviceConfigs);
