@@ -28,7 +28,6 @@ import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.dto.OwnershipDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
-import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
@@ -162,8 +161,7 @@ public class LocalServerManagementPanel extends SimplePanel {
         groupOwnerInfo.setText(hasGroupOwner ? ownership.getTenantOwner().getName() : "---");
         userOwnerInfo.setText(hasUserOwner ? ownership.getUserOwner().getName() : "---");
         // Update changeability
-        isSelfServiceServerCheckbox.setEnabled(userService.hasCurrentUserMetaPermission(
-                serverInfo.getIdentifier().getPermission(ServerActions.CREATE_OBJECT), serverInfo.getOwnership()));
+        isSelfServiceServerCheckbox.setEnabled(userService.hasServerPermission(DefaultActions.CHANGE_ACL));
         // TODO update isPublicServerCheckbox -> default server tenant is currently not available in the UI
         isPublicServerCheckbox.setEnabled(true);
     }
