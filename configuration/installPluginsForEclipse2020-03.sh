@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# You need an installation of the Photon release of "Eclipse IDE for Eclipse Committers" matching you OS and JDK (32 vs 64 Bit):
+# You need an installation of the 2020-03 release of "Eclipse IDE for Eclipse Committers" matching you OS and JDK (32 vs 64 Bit):
 # https://www.eclipse.org/downloads/packages/release/2020-03/r/eclipse-ide-eclipse-committers
 
 if [[ $1 == "" ]]; then
