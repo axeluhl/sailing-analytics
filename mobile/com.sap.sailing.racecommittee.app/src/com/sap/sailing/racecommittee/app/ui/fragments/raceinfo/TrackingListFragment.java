@@ -571,7 +571,7 @@ public class TrackingListFragment extends BaseFragment
         }
 
         mConfirmedData.clear();
-        if (getRaceState().getConfirmedFinishPositioningList() != null) {
+        if (getRaceState().getConfirmedFinishPositioningList().getCompetitorResults() != null) {
             for (CompetitorResult item : getRaceState().getConfirmedFinishPositioningList().getCompetitorResults()) {
                 mConfirmedData.add(new CompetitorResultWithIdImpl(-1, item));
             }

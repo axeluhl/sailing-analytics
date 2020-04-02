@@ -317,10 +317,6 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
      * empty results and there is a {@link CompetitorResult} for that competitor coming from the race log, that competitor
      * result will be "invalidated" / "revoked" by adding a new {@link CompetitorResult} at the end of the race log that
      * has an empty finishing time and zero rank.
-     * 
-     * TODO bug5154 continue here...
-     * 
-     * TODO bug5154 this method will also need to be called whenever new results are published on the RaceLog because a "more official" or more recent update may already exist in the TracTrac IRaceCompetitor
      */
     public void reconcileCompetitorStatus(IRaceCompetitor raceCompetitor, TrackedRace trackedRace) {
         final IRace tractracRace = raceCompetitor.getRace();
@@ -338,12 +334,18 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
                 final RaceCompetitorStatusType competitorStatus = raceCompetitor.getStatus();
                 final MaxPointsReason officialMaxPointsReason = getMaxPointsReason(competitorStatus);
                 final MillisecondsTimePoint officialResultTime = new MillisecondsTimePoint(timePointForStatusEvent);
-                if (resultFromRaceLogAndItsCreationTimePoint == null
+                // accept even OFFICIAL results only if at least one of officialRank or officialFinishingTime is
+                // provided:
+                // Jorge Piera Llodra on 2020-04-01: "If both the finishing time and the rank are not defined means that
+                // we don’t have these values. In fact, we only have these values for some races of the test event in
+                // Enoshima last year.
+                // If the race is OFFICIAL but these values are empty, just ignore them."
+                if ((officialFinishingTime != 0 || officialRank != 0) && (resultFromRaceLogAndItsCreationTimePoint == null
                         || (resultFromRaceLogAndItsCreationTimePoint.getA().getOneBasedRank() != officialRank
                          || ((resultFromRaceLogAndItsCreationTimePoint.getA().getFinishingTime() == null) ? 0
                                 : resultFromRaceLogAndItsCreationTimePoint.getA().getFinishingTime().asMillis()) != officialFinishingTime
                          || resultFromRaceLogAndItsCreationTimePoint.getA().getMaxPointsReason() != officialMaxPointsReason)
-                        && resultFromRaceLogAndItsCreationTimePoint.getB().before(officialResultTime)) {
+                        && resultFromRaceLogAndItsCreationTimePoint.getB().before(officialResultTime))) {
                     // We have an official statement from TracTrac, rank or finishing time or penalty varies and is newer
                     // than the last thing we see in the race log (including we may not have anything in the race
                     // log for the results of that competitor at all yet).

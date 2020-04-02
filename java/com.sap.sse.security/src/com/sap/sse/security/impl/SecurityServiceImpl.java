@@ -153,6 +153,7 @@ import com.sap.sse.security.shared.PredefinedRoles;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RolePrototype;
+import com.sap.sse.security.shared.SecurityAccessControlList;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.UserGroupManagementException;
@@ -176,6 +177,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     private static final Logger logger = Logger.getLogger(SecurityServiceImpl.class.getName());
 
     private static final String ADMIN_DEFAULT_PASSWORD = "admin";
+    
+    // TODO remove, once we allow denied ACLs again
+    private static final boolean supportDeniedActions = false;
 
     private final Set<String> migratedHasPermissionTypes = new ConcurrentSkipListSet<>();;
 
@@ -537,13 +541,17 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         return accessControlStore.getAccessControlList(idOfAccessControlledObjectAsString);
     }
 
-    @Override
-    public SecurityService setEmptyAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObjectAsString) {
+    /**
+     * @param id Has to be globally unique
+     */
+    private SecurityService setEmptyAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObjectAsString) {
         return setEmptyAccessControlList(idOfAccessControlledObjectAsString, /* display name of access-controlled object */ null);
     }
 
-    @Override
-    public SecurityService setEmptyAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObjectAsString, String displayNameOfAccessControlledObject) {
+    /**
+     * @param id Has to be globally unique
+     */
+    private SecurityService setEmptyAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObjectAsString, String displayNameOfAccessControlledObject) {
         apply(new SetEmptyAccessControlListOperation(idOfAccessControlledObjectAsString, displayNameOfAccessControlledObject));
         return this;
     }
@@ -557,38 +565,43 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public AccessControlList overrideAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
             Map<UserGroup, Set<String>> permissionMap) {
-        accessControlStore.removeAccessControlList(idOfAccessControlledObject);
-        return updateAccessControlList(idOfAccessControlledObject, permissionMap);
+        return overrideAccessControlList(idOfAccessControlledObject, permissionMap, /* displayNameOfAccessControlledObject */ null);
     }
 
     @Override
     public AccessControlList overrideAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
             Map<UserGroup, Set<String>> permissionMap, String displayNameOfAccessControlledObject) {
-        accessControlStore.removeAccessControlList(idOfAccessControlledObject);
-        accessControlStore.setEmptyAccessControlList(idOfAccessControlledObject, displayNameOfAccessControlledObject);
-        return updateAccessControlList(idOfAccessControlledObject, permissionMap);
-    }
-
-    @Override
-    public AccessControlList updateAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
-            Map<UserGroup, Set<String>> permissionMap) {
-        if (getAccessControlList(idOfAccessControlledObject) == null) {
-            setEmptyAccessControlList(idOfAccessControlledObject);
+        // TODO remove, once we allow denied ACLs again
+        if (!supportDeniedActions) {
+            for (Set<String> actions : permissionMap.values()) {
+                for (String action : actions) {
+                    if (SecurityAccessControlList.isDeniedAction(action)) {
+                        throw new IllegalArgumentException("Adding denied actions to an ACL is not allowed");
+                    }
+                }
+            }
         }
+        setEmptyAccessControlList(idOfAccessControlledObject, displayNameOfAccessControlledObject);
+        
         for (Map.Entry<UserGroup, Set<String>> entry : permissionMap.entrySet()) {
             final UserGroup userGroup = entry.getKey();
-            // filter any denied action for anonymous user 
-            Set<String> filteredActions = entry.getValue().stream()
-                    .filter(action -> !(entry.getKey() == null && action != null && action.startsWith("!")))
-                    .collect(Collectors.toSet());
+            final Set<String> actionsToSet;
+            if (userGroup == null) {
+                // filter any denied action for anonymous user
+                actionsToSet = entry.getValue().stream()
+                        .filter(action -> !SecurityAccessControlList.isDeniedAction(action))
+                        .collect(Collectors.toSet());
+            } else {
+                actionsToSet = entry.getValue();
+            }
             
             final UUID userGroupId = userGroup == null ? null : userGroup.getId();
             // avoid the UserGroup object having to be serialized with the operation by using the ID
-            apply(new AclPutPermissionsOperation(idOfAccessControlledObject, userGroupId, filteredActions));
+            apply(new AclPutPermissionsOperation(idOfAccessControlledObject, userGroupId, actionsToSet));
         }
         return accessControlStore.getAccessControlList(idOfAccessControlledObject).getAnnotation();
     }
-
+    
     @Override
     public Void internalAclPutPermissions(QualifiedObjectIdentifier idOfAccessControlledObject, UUID groupId, Set<String> actions) {
         accessControlStore.setAclPermissions(idOfAccessControlledObject, getUserGroup(groupId), actions);
@@ -601,6 +614,10 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public AccessControlList addToAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
             UserGroup group, String action) {
+        // TODO remove, once we allow denied ACLs again
+        if (!supportDeniedActions && SecurityAccessControlList.isDeniedAction(action)) {
+            throw new IllegalArgumentException("Adding denied actions to an ACL is not allowed");
+        }
         if (getAccessControlList(idOfAccessControlledObject) == null) {
             setEmptyAccessControlList(idOfAccessControlledObject);
         }

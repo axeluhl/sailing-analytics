@@ -111,11 +111,14 @@ public abstract class AbstractAccessControlList<G extends SecurityUserGroup<?>>
         }
         return result;
     }
+
+    private boolean isDeniedAction(String action) {
+        return SecurityAccessControlList.isDeniedAction(action);
+    }
     
-    @Override
-    public boolean denyPermission(G userGroup, String action) {
+    private boolean denyPermission(G userGroup, String action) {
         final boolean result;
-        if (action.startsWith("!")) {
+        if (isDeniedAction(action)) {
             result = addPermission(userGroup, action.substring(1));
         } else {
             result = Util.addToValueSet(deniedActionsByUserGroup, userGroup, new WildcardPermission(action));
@@ -126,7 +129,7 @@ public abstract class AbstractAccessControlList<G extends SecurityUserGroup<?>>
     @Override
     public boolean addPermission(G userGroup, String action) {
         final boolean result;
-        if (action.startsWith("!")) {
+        if (isDeniedAction(action)) {
             result = denyPermission(userGroup, action.substring(1));
         } else {
             result = Util.addToValueSet(allowedActionsByUserGroup, userGroup, new WildcardPermission(action));
@@ -137,7 +140,7 @@ public abstract class AbstractAccessControlList<G extends SecurityUserGroup<?>>
     @Override
     public boolean removePermission(G userGroup, String action) {
         final boolean result;
-        if (action.startsWith("!")) {
+        if (isDeniedAction(action)) {
             result = removeDenial(userGroup, action.substring(1));
         } else {
             result = Util.removeFromValueSet(allowedActionsByUserGroup, userGroup, new WildcardPermission(action));
@@ -145,10 +148,9 @@ public abstract class AbstractAccessControlList<G extends SecurityUserGroup<?>>
         return result;
     }
 
-    @Override
-    public boolean removeDenial(G userGroup, String action) {
+    private boolean removeDenial(G userGroup, String action) {
         final boolean result;
-        if (action.startsWith("!")) {
+        if (isDeniedAction(action)) {
             result = removeDenial(userGroup, action.substring(1));
         } else {
             result = Util.removeFromValueSet(deniedActionsByUserGroup, userGroup, new WildcardPermission(action));
@@ -161,7 +163,7 @@ public abstract class AbstractAccessControlList<G extends SecurityUserGroup<?>>
         allowedActionsByUserGroup.remove(userGroup);
         deniedActionsByUserGroup.remove(userGroup);
         for (final String actionAsString : actions) {
-            if (actionAsString.startsWith("!")) {
+            if (isDeniedAction(actionAsString)) {
                 denyPermission(userGroup, actionAsString.substring(1));
             } else {
                 addPermission(userGroup, actionAsString);
