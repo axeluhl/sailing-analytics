@@ -79,6 +79,7 @@ public class MasterDataImporter {
         objectInputStream.readObject();
         TopLevelMasterData topLevelMasterData = (TopLevelMasterData) objectInputStream.readObject();
         RegattaImpl.setOngoingMasterDataImport(null);
+        //TODO: finally clause
         Thread.currentThread().setContextClassLoader(oldContextClassLoader);
         // in order to restore all listeners we need to initialize the regatta
         // after the whole object graph has been restored

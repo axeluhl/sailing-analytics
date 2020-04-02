@@ -329,7 +329,6 @@ import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
-import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.util.RemoteServerUtil;
@@ -4864,7 +4863,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             final boolean compress, final boolean exportWind, final boolean exportDeviceConfigurations,
             String targetServerUsername, String targetServerPassword, final boolean exportTrackedRacesAndStartTracking,
             UUID importOperationId) {
-        getSecurityService().checkCurrentUserServerPermission(ServerActions.CAN_IMPORT_MASTERDATA);
+        //TODO dataimportlock throw illegal argument UUID
+        if (dataImportLock.getProgress(importOperationId) != null) {
+            logger.severe("");
+            throw new IllegalArgumentException();
+        }
         String token = RemoteServerUtil.resolveBearerTokenForRemoteServer(urlAsString, targetServerUsername,
                 targetServerPassword);
         createOrUpdateDataImportProgressWithReplication(importOperationId, 0.0, DataImportSubProgress.INIT, 0.0);

@@ -16,6 +16,7 @@ import org.apache.shiro.authz.UnauthorizedException;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 
 @Path ("/v1/masterdataimport")
 public class MasterDataImportResource extends AbstractSailingServerResource {
@@ -25,8 +26,8 @@ public class MasterDataImportResource extends AbstractSailingServerResource {
     }
 
     @POST
-    // TODO: Think about moving User/Password information from query string to form parameter, due to logging full URLs
-    // in access log.
+    // TODO: Move User/Password information from query string to form parameter, due to logging full URLs
+    // in access log. Accept bearer token. Use current subject as default
     @Produces("application/json;charset=UTF-8")
     public Response importMasterData(@QueryParam("targetServerUrl") String targetServerUrlAsString,
             @QueryParam("targetServerUsername") String targetServerUsername,
@@ -45,6 +46,7 @@ public class MasterDataImportResource extends AbstractSailingServerResource {
         } else {
             final UUID importMasterDataUid = UUID.randomUUID();
             try {
+                getSecurityService().checkCurrentUserServerPermission(ServerActions.CAN_IMPORT_MASTERDATA);
                 getService().importMasterData(targetServerUrlAsString,
                         requestedLeaderboardGroups.toArray(new String[requestedLeaderboardGroups.size()]), override,
                         compress, exportWind, exportDeviceConfigs, targetServerUsername, targetServerPassword,
@@ -56,10 +58,10 @@ public class MasterDataImportResource extends AbstractSailingServerResource {
                 jsonResponse.put("exportWind", exportWind);
                 jsonResponse.put("exportDeviceConfigs", exportDeviceConfigs);
                 jsonResponse.put("exportTrackedRacesAndStartTracking", exportTrackedRacesAndStartTracking);
-                response = ok(jsonResponse.toJSONString(), MediaType.APPLICATION_JSON);
+                response = Response.ok(jsonResponse.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
             } catch (UnauthorizedException e) {
                 response = Response.status(Status.UNAUTHORIZED).build();
-                logger.warning(e.getMessage());
+                logger.warning(e.getMessage() + " for user: " + getSecurityService().getCurrentUser());
             } catch (Throwable e) {
                 response = Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage())
                         .type(MediaType.TEXT_PLAIN).build();
@@ -68,9 +70,5 @@ public class MasterDataImportResource extends AbstractSailingServerResource {
             }
         }
         return response;
-    }
-
-    private Response ok(String message, String mediaType) {
-        return Response.ok(message).header("Content-Type", mediaType + ";charset=UTF-8").build();
     }
 }
