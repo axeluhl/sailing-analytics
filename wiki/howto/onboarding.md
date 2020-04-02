@@ -8,7 +8,7 @@ First of all, make sure you've looked at [http://www.amazon.de/Patterns-Elements
 
 #### Installations
 
-1. Eclipse (Eclipse IDE for Eclipse Committers, version 4.13.0 ["2019-09"]https://www.eclipse.org/downloads/packages/release/2019-09/r/eclipse-ide-eclipse-committers)), [http://www.eclipse.org](http://www.eclipse.org)
+1. Eclipse (Eclipse IDE for Eclipse Committers, version 4.15.0 ["2020-03"]https://www.eclipse.org/downloads/packages/release/2020-03/r/eclipse-ide-eclipse-committers)), [http://www.eclipse.org](http://www.eclipse.org)
 2. Get the content of the git repository (see 
 Steps to build and run the Race Analysis Suite below)
 3. Install the eclipse plugins (see Automatic Eclipse plugin installation below)
