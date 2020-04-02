@@ -4,10 +4,11 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
 
+import javax.ws.rs.Consumes;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -28,16 +29,18 @@ public class MasterDataImportResource extends AbstractSailingServerResource {
     @POST
     // TODO: Move User/Password information from query string to form parameter, due to logging full URLs
     // in access log. Accept bearer token. Use current subject as default
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces("application/json;charset=UTF-8")
-    public Response importMasterData(@QueryParam("targetServerUrl") String targetServerUrlAsString,
-            @QueryParam("targetServerUsername") String targetServerUsername,
-            @QueryParam("targetServerPassword") String targetServerPassword,
-            @QueryParam("names[]") List<String> requestedLeaderboardGroups, 
-            @QueryParam("override") Boolean override,
-            @QueryParam("compress") Boolean compress, 
-            @QueryParam("exportWind") Boolean exportWind,
-            @QueryParam("exportDeviceConfigs") Boolean exportDeviceConfigs,
-            @QueryParam("exportTrackedRacesAndStartTracking") Boolean exportTrackedRacesAndStartTracking) {
+    public Response importMasterData(
+            @FormParam("targetServerUrl") String targetServerUrlAsString,
+            @FormParam("targetServerUsername") String targetServerUsername,
+            @FormParam("targetServerPassword") String targetServerPassword,
+            @FormParam("names[]") List<String> requestedLeaderboardGroups, 
+            @FormParam("override") Boolean override,
+            @FormParam("compress") Boolean compress, 
+            @FormParam("exportWind") Boolean exportWind,
+            @FormParam("exportDeviceConfigs") Boolean exportDeviceConfigs,
+            @FormParam("exportTrackedRacesAndStartTracking") Boolean exportTrackedRacesAndStartTracking) {
         Response response = null;
         if (targetServerUrlAsString == null || requestedLeaderboardGroups.isEmpty() || targetServerUsername == null
                 || targetServerPassword == null || override == null || compress == null || exportWind == null

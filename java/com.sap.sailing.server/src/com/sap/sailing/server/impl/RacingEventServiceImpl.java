@@ -4863,9 +4863,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             final boolean compress, final boolean exportWind, final boolean exportDeviceConfigurations,
             String targetServerUsername, String targetServerPassword, final boolean exportTrackedRacesAndStartTracking,
             UUID importOperationId) {
-        //TODO dataimportlock throw illegal argument UUID
         if (dataImportLock.getProgress(importOperationId) != null) {
-            logger.severe("");
             throw new IllegalArgumentException();
         }
         String token = RemoteServerUtil.resolveBearerTokenForRemoteServer(urlAsString, targetServerUsername,
