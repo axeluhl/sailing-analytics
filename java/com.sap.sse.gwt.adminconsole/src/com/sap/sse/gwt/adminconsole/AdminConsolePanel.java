@@ -26,6 +26,7 @@ import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.gwt.client.panels.AbstractTabLayoutPanel;
 import com.sap.sse.gwt.client.panels.HorizontalTabLayoutPanel;
 import com.sap.sse.gwt.client.panels.VerticalTabLayoutPanel;
+import com.sap.sse.gwt.shared.Branding;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.dto.UserDTO;
@@ -205,8 +206,11 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
         informationPanel.add(errorReporter.getPersistentInformationWidget(), DockPanel.CENTER);
         SystemInformationPanel sysinfoPanel = new SystemInformationPanel(serverInfo, errorReporter, stringMessages);
         sysinfoPanel.ensureDebugId("SystemInformation");
-        final Anchor releaseNotesLink = new Anchor(new SafeHtmlBuilder().appendEscaped(releaseNotesAnchorLabel).toSafeHtml(), releaseNotesURL);
-        sysinfoPanel.add(releaseNotesLink);
+        if (Branding.getInstance().isActive()) {
+            final Anchor releaseNotesLink = new Anchor(
+                    new SafeHtmlBuilder().appendEscaped(releaseNotesAnchorLabel).toSafeHtml(), releaseNotesURL);
+            sysinfoPanel.add(releaseNotesLink);
+        }
         informationPanel.add(sysinfoPanel, DockPanel.EAST);
         informationPanel.setCellHorizontalAlignment(sysinfoPanel, HasHorizontalAlignment.ALIGN_RIGHT);
         this.setFooterWidget(informationPanel);
