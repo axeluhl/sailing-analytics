@@ -216,6 +216,7 @@ public class RaceTrackingConnectivityParametersImpl extends AbstractRaceTracking
     
     @Override
     public String toString() {
-        return getClass().getSimpleName()+" for "+paramURL+", liveURI: "+liveURI+", storedURI: "+storedURI;
+        return getClass().getSimpleName() + " for " + paramURL + ", liveURI: " + liveURI + ", storedURI: " + storedURI
+                + ", useOfficialEventsToUpdateRaceLog: " + useOfficialEventsToUpdateRaceLog;
     }
 }

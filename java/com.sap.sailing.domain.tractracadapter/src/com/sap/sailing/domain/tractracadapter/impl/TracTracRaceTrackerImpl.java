@@ -708,19 +708,21 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
      * to all those race logs for events that may require reconciliation of results, race and competitor statuses.
      */
     private void registerRaceAndCompetitorStatusWithRaceLogReconciler(final DynamicTrackedRace trackedRace) {
-        trackedRace.addListener(new AbstractRaceChangeListener() {
-            @Override
-            public void raceLogAttached(RaceLog raceLog) {
-                reconciler.raceLogAttached(trackedRace, raceLog);
+        if (reconciler != null) {
+            trackedRace.addListener(new AbstractRaceChangeListener() {
+                @Override
+                public void raceLogAttached(RaceLog raceLog) {
+                    reconciler.raceLogAttached(trackedRace, raceLog);
+                }
+    
+                @Override
+                public void raceLogDetached(RaceLog raceLog) {
+                    reconciler.raceLogDetached(trackedRace, raceLog);
+                }
+            });
+            for (final RaceLog alreadyAttachedRaceLog : trackedRace.getAttachedRaceLogs()) {
+                reconciler.raceLogAttached(trackedRace, alreadyAttachedRaceLog);
             }
-
-            @Override
-            public void raceLogDetached(RaceLog raceLog) {
-                reconciler.raceLogDetached(trackedRace, raceLog);
-            }
-        });
-        for (final RaceLog alreadyAttachedRaceLog : trackedRace.getAttachedRaceLogs()) {
-            reconciler.raceLogAttached(trackedRace, alreadyAttachedRaceLog);
         }
     }
 
