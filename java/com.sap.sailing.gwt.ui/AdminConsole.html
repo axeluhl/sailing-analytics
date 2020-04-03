@@ -12,7 +12,7 @@
     <!--                                                               -->
     <!-- Consider inlining CSS to reduce the number of requested files -->
     <!--                                                               -->
-	<link rel="shortcut icon" type="image/x-icon" href="${faviconPath}" />
+    <link rel="shortcut icon" type="image/x-icon" href="${faviconPath}" />
 
 
     <!--                                           -->
@@ -44,72 +44,72 @@
     <!--                                           -->
     <script type="text/javascript" language="javascript" src="com.sap.sailing.gwt.ui.AdminConsole/com.sap.sailing.gwt.ui.AdminConsole.nocache.js"></script>
 
-	<!-- Loading Indicator -->
-    	<style type="text/css">
-	.loading {
-		position: absolute;
-		top: 80px;
-		bottom: 0;
-		left: 0;
-		right: 0;
-		font-size: 120%;
-	}
-	.loading > .sapsailing {
-		margin: 40px;
-		color: #008fcc;
-		font-weight: bold;
-	}
-	.loading > .waitmessage {
-		margin: 60px 40px;
-	}
-	
-	.signal {
-	    border:3px solid #6a6a6a;
-	    border-radius: 50%;
-	    position: relative;
-	    height:300px;
-	    width:300px;
-	    margin: 0px auto;
-	    opacity:0;	 
-	    -webkit-animation: pulsate 2s ease-out;
-	            animation: pulsate 2s ease-out;
-	    -webkit-animation-iteration-count:infinite;
-	            animation-iteration-count:infinite;
-	    -webkit-transform: translate(-50%, -50%);
-	}
+    <!-- Loading Indicator -->
+        <style type="text/css">
+    .loading {
+        position: absolute;
+        top: 80px;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        font-size: 120%;
+    }
+    .loading > .sapsailing {
+        margin: 40px;
+        color: #008fcc;
+        font-weight: bold;
+    }
+    .loading > .waitmessage {
+        margin: 60px 40px;
+    }
+    
+    .signal {
+        border:3px solid #6a6a6a;
+        border-radius: 50%;
+        position: relative;
+        height:300px;
+        width:300px;
+        margin: 0px auto;
+        opacity:0;
+        -webkit-animation: pulsate 2s ease-out;
+                animation: pulsate 2s ease-out;
+        -webkit-animation-iteration-count:infinite;
+                animation-iteration-count:infinite;
+        -webkit-transform: translate(-50%, -50%);
+    }
 
-	@-webkit-keyframes pulsate {
-	    0% {
-	      -webkit-transform:scale(.1);
-	              transform:scale(.1);
-	      opacity: 0.0;
-	    }
-	    50% {
-	      opacity:1;
-	    }
-	    100% {
-	      -webkit-transform:scale(1.2);
-	              transform:scale(1.2);
-	      opacity:0;
-	    }
-	}
-	
-	@keyframes pulsate {
-	    0% {
-	      -webkit-transform:scale(.1);
-	              transform:scale(.1);
-	      opacity: 0.0;
-	    }
-	    50% {
-	      opacity:1;
-	    }
-	    100% {
-	      -webkit-transform:scale(1.2);
-	              transform:scale(1.2);
-	      opacity:0;
-	    }
-	}
-	</style>
+    @-webkit-keyframes pulsate {
+        0% {
+          -webkit-transform:scale(.1);
+                  transform:scale(.1);
+          opacity: 0.0;
+        }
+        50% {
+          opacity:1;
+        }
+        100% {
+          -webkit-transform:scale(1.2);
+                  transform:scale(1.2);
+          opacity:0;
+        }
+    }
+    
+    @keyframes pulsate {
+        0% {
+          -webkit-transform:scale(.1);
+                  transform:scale(.1);
+          opacity: 0.0;
+        }
+        50% {
+          opacity:1;
+        }
+        100% {
+          -webkit-transform:scale(1.2);
+                  transform:scale(1.2);
+          opacity:0;
+        }
+    }
+    </style>
   </head>
 
   <!--                                           -->
@@ -130,10 +130,10 @@
       </div>
     </noscript>
 
-    	<div id="loading" class="loading">
-		<p class="sapsailing">${SAP}Sailing Analytics</p>
-		<p class="waitmessage">Loading, please wait...</p>
-		<div class="signal"></div>
-	</div>
+        <div id="loading" class="loading">
+        <p class="sapsailing">${SAP}Sailing Analytics</p>
+        <p class="waitmessage">Loading, please wait...</p>
+        <div class="signal"></div>
+    </div>
   </body>
 </html>
