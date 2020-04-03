@@ -123,6 +123,7 @@
 <setEntry value="com.sap.sailing.datamining.provider@default:default"/>
 <setEntry value="com.sap.sailing.datamining.shared@default:default"/>
 <setEntry value="com.sap.sailing.datamining@5:true"/>
+<setEntry value="com.sap.sailing.debranding@5:true"/>
 <setEntry value="com.sap.sailing.declination@default:default"/>
 <setEntry value="com.sap.sailing.domain.bravoadapter@5:true"/>
 <setEntry value="com.sap.sailing.domain.common@default:default"/>
