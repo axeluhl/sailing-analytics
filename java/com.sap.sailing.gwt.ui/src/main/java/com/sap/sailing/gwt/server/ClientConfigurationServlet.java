@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -12,6 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpStatus;
 
 /**
  * Use ${[variable name]} to get strings replaced within static pages.
@@ -54,6 +57,8 @@ import org.apache.commons.io.IOUtils;
  */
 public class ClientConfigurationServlet extends HttpServlet {
 
+    private static final Logger logger = Logger.getLogger(ClientConfigurationServlet.class.getName());
+    
     /** serial version uid */
     private static final long serialVersionUID = -2228462977010198686L;
 
@@ -63,7 +68,6 @@ public class ClientConfigurationServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-
         final boolean deBrandingActive = Boolean.valueOf(System.getProperty(DEBRANDING_PROPERTY_NAME, "false"));
         final String servletPath = req.getServletPath();
         byte[] cachedPage = null;
@@ -71,7 +75,6 @@ public class ClientConfigurationServlet extends HttpServlet {
             IOUtils.write(cachedPage, resp.getOutputStream());
             return;
         }
-
         try (InputStream in = this.getServletContext().getResourceAsStream(servletPath);) {
             byte[] buffer = IOUtils.toByteArray(in);
 
@@ -84,7 +87,8 @@ public class ClientConfigurationServlet extends HttpServlet {
             IOUtils.write(bytes, resp.getOutputStream());
             cache.computeIfAbsent(generateKey(servletPath, deBrandingActive), key -> bytes);
         } catch (RuntimeException e) {
-            
+            logger.log(Level.WARNING, "could not process or read resource " + servletPath, e);
+            resp.sendError(HttpStatus.SC_INTERNAL_SERVER_ERROR);
         }
     }
 
