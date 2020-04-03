@@ -42,8 +42,8 @@ public class Branding {
     }
 
     /**
-     * Access whitelabeling information
-     * @return true when debranding/whitelabeling is activated
+     * Access whitelabeling information.
+     * @return true when branding information shall be shown
      */
     public boolean isActive() {
         return active;
