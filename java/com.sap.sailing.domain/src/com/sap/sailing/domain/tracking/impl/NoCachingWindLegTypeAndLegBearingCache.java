@@ -11,6 +11,7 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveCourse;
+import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLeg;
 import com.sap.sailing.domain.orc.ORCPerformanceCurve;
 import com.sap.sailing.domain.tracking.MarkPositionAtTimePointCache;
 import com.sap.sailing.domain.tracking.TrackedLeg;
@@ -82,4 +83,8 @@ public class NoCachingWindLegTypeAndLegBearingCache implements WindLegTypeAndLeg
         return new MarkPositionAtTimePointCacheImpl(trackedRace, markPositionTimePoint);
     }
 
+    @Override
+    public <L extends ORCPerformanceCurveLeg> Wind getAverageWind(L leg, Function<L, Wind> averageWindForLegSupplier) {
+        return averageWindForLegSupplier.apply(leg);
+    }
 }

@@ -750,5 +750,4 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     public TrackingConnectorInfo getTrackingConnectorInfo() {
         return null;
     }
-    
 }
