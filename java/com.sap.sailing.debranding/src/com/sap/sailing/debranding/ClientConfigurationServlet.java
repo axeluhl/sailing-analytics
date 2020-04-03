@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.server;
+package com.sap.sailing.debranding;
 
 import java.io.IOException;
 import java.io.InputStream;
