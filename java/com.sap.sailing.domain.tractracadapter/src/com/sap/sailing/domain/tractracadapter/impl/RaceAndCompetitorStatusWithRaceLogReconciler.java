@@ -243,7 +243,7 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
         MaxPointsReason result;
         switch (raceCompetitorStatusType) {
         case ABANDONED:
-            result = null; // TODO bug 5154: find out what ABANDONED means and if/how we can translate it to a MaxPointsReason
+            result = MaxPointsReason.NONE; // TODO bug 5154: find out what ABANDONED means and if/how we can translate it to a MaxPointsReason
             break;
         case BFD:
             result = MaxPointsReason.BFD;
@@ -261,25 +261,25 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
             result = MaxPointsReason.DNS; // TODO bug 5154: find out what DONT_RACE means and if/how we can translate it to a MaxPointsReason; is it DNS?
             break;
         case FIN:
-            result = null; // TODO bug 5154: find out what FIN means and if/how we can translate it to a MaxPointsReason; does it mean the competitor finished properly?
+            result = MaxPointsReason.NONE; // TODO bug 5154: find out what FIN means and if/how we can translate it to a MaxPointsReason; does it mean the competitor finished properly?
             break;
         case FINISH_CONFIRMED:
-            result = null; // TODO bug 5154: find out what FINISH_CONFIRMED means and if/how we can translate it to a MaxPointsReason; does it mean the competitor finished properly?
+            result = MaxPointsReason.NONE; // TODO bug 5154: find out what FINISH_CONFIRMED means and if/how we can translate it to a MaxPointsReason; does it mean the competitor finished properly?
             break;
         case MIS:
-            result = null; // TODO bug 5154: find out what MIS means and if/how we can translate it to a MaxPointsReason; does it mean the competitor is "missing?"
+            result = MaxPointsReason.NONE; // TODO bug 5154: find out what MIS means and if/how we can translate it to a MaxPointsReason; does it mean the competitor is "missing?"
             break;
         case NO_COLLECT:
-            result = null; // TODO bug 5154: find out what NO_COLLECT means and if/how we can translate it to a MaxPointsReason
+            result = MaxPointsReason.NONE; // TODO bug 5154: find out what NO_COLLECT means and if/how we can translate it to a MaxPointsReason
             break;
         case NO_DATA:
-            result = null;
+            result = MaxPointsReason.NONE;
             break;
         case OCS:
             result = MaxPointsReason.OCS;
             break;
         case RACING:
-            result = null;
+            result = MaxPointsReason.NONE;
             break;
         case RETIRED:
             result = MaxPointsReason.RET;
@@ -288,7 +288,7 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
             result = MaxPointsReason.UFD;
             break;
         default:
-            result = null;
+            result = MaxPointsReason.NONE;
             break;
         }
         return result;
