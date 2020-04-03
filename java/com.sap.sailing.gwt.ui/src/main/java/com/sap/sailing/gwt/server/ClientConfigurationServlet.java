@@ -93,24 +93,27 @@ public class ClientConfigurationServlet extends HttpServlet {
     }
 
     private Map<String,String> createReplacementMap(boolean deBrandingActive) {
-        Map<String,String> map = new HashMap<>();
-        String title = "";
-        String faviconPath = "images/whitelabel.ico";
-        String appiconPath = "images/sailing-app-icon.png";
-        String saplogoBrowserInfo = "";
-        if (!deBrandingActive) {
+        final Map<String,String> map = new HashMap<>();
+        final String title;
+        final String faviconPath;
+        final String appiconPath;
+        final String saplogoBrowserInfo;
+        if (deBrandingActive) {
+            title = "";
+            faviconPath = "images/whitelabel.ico";
+            appiconPath = "images/sailing-app-icon.png";
+            saplogoBrowserInfo = "";
+        } else {
             title = "SAP ";
             faviconPath = "images/sap.ico";
             appiconPath = "images/sap-sailing-app-icon.png";
             saplogoBrowserInfo = "<a class=\"sapLogo\" href=\"http://www.sap.com\"><img class=\"sapLogoImage\" src=\"/images/logo-small@2x.png\" alt=\"SAP Website\"/></a>\r\n";
-        }
-
+        } 
         map.put("SAP", title);
         map.put("faviconPath", faviconPath);
         map.put("appiconPath", appiconPath);
         map.put("debrandingActive", Boolean.toString(deBrandingActive));
         map.put("saplogoBrowserInfo", saplogoBrowserInfo);
-
         return map;
     }
 }
