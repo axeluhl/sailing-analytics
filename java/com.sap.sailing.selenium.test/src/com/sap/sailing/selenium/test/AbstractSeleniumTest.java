@@ -40,7 +40,6 @@ import com.sap.sailing.selenium.core.WindowManager;
 import com.sap.sailing.selenium.pages.PageObject;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sun.jersey.api.container.httpserver.HttpServerFactory;
 
 /**
  * <p>Abstract base class for unit tests with Selenium. This class is already annotated as required to get executed

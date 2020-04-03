@@ -86,7 +86,6 @@ import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalablePosition;
 import com.sap.sailing.domain.common.windfinder.SpotDTO;
-import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.ui.actions.GetBoatPositionsAction;
 import com.sap.sailing.gwt.ui.actions.GetPolarAction;
 import com.sap.sailing.gwt.ui.actions.GetRaceMapDataAction;
