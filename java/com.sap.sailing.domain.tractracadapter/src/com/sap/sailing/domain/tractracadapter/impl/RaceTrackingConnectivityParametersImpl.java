@@ -51,6 +51,7 @@ public class RaceTrackingConnectivityParametersImpl extends AbstractRaceTracking
     private final boolean preferReplayIfAvailable;
     private final transient IRace tractracRace;
     private final int timeoutInMillis;
+    private final boolean useOfficialEventsToUpdateRaceLog;
 
     /**
      * @param preferReplayIfAvailable
@@ -62,15 +63,19 @@ public class RaceTrackingConnectivityParametersImpl extends AbstractRaceTracking
      * @param timeoutInMillis
      *            -1 means no timeout; otherwise, this is the timeout for waiting for the {@link IRace} to be obtained
      *            from the {@code paramURL} document. A {@link TimeoutException} will result if the timeout applied.
+     * @param useOfficialEventsToUpdateRaceLog
+     *            whether to use race and competitor status to create according race log entries that for official
+     *            competitor results can then also lead to leaderboard updates
      */
     public RaceTrackingConnectivityParametersImpl(URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI,
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
             Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm,
             RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, DomainFactory domainFactory,
             String tracTracUsername, String tracTracPassword, String raceStatus, String raceVisibility,
-            boolean trackWind, boolean correctWindDirectionByMagneticDeclination, boolean preferReplayIfAvailable, int timeoutInMillis)
-            throws Exception {
+            boolean trackWind, boolean correctWindDirectionByMagneticDeclination, boolean preferReplayIfAvailable,
+            int timeoutInMillis, boolean useOfficialEventsToUpdateRaceLog) throws Exception {
         super(trackWind, correctWindDirectionByMagneticDeclination);
+        this.useOfficialEventsToUpdateRaceLog = useOfficialEventsToUpdateRaceLog;
         this.paramURL = paramURL;
         this.timeoutInMillis = timeoutInMillis;
         if (timeoutInMillis == -1) {
@@ -203,6 +208,10 @@ public class RaceTrackingConnectivityParametersImpl extends AbstractRaceTracking
     
     public int getTimeoutInMillis() {
         return timeoutInMillis;
+    }
+
+    public boolean isUseOfficialEventsToUpdateRaceLog() {
+        return useOfficialEventsToUpdateRaceLog;
     }
     
     @Override

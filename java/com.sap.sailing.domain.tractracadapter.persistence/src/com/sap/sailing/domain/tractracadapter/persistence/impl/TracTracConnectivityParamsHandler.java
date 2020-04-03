@@ -30,6 +30,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  */
 public class TracTracConnectivityParamsHandler extends AbstractRaceTrackingConnectivityParametersHandler {
     private static final String USE_INTERNAL_MARK_PASSING_ALGORITHM = "useInternalMarkPassingAlgorithm";
+    private static final String USE_OFFICIAL_EVENTS_TO_UPDATE_RACE_LOG = "useOfficialEventsToUpdateRaceLog";
     private static final String TRAC_TRAC_USERNAME = "tracTracUsername";
     private static final String TRAC_TRAC_PASSWORD = "tracTracPassword";
     private static final String STORED_URI = "storedURI";
@@ -70,6 +71,7 @@ public class TracTracConnectivityParamsHandler extends AbstractRaceTrackingConne
         result.put(TRAC_TRAC_PASSWORD, ttParams.getTracTracPassword());
         result.put(TRAC_TRAC_USERNAME, ttParams.getTracTracUsername().toString());
         result.put(USE_INTERNAL_MARK_PASSING_ALGORITHM, ttParams.isUseInternalMarkPassingAlgorithm());
+        result.put(USE_OFFICIAL_EVENTS_TO_UPDATE_RACE_LOG, ttParams.isUseOfficialEventsToUpdateRaceLog());
         addWindTrackingParameters(ttParams, result);
         return result;
     }
@@ -92,7 +94,8 @@ public class TracTracConnectivityParamsHandler extends AbstractRaceTrackingConne
                 map.get(RACE_STATUS)==null?null:map.get(RACE_STATUS).toString(),
                 map.get(RACE_VISIBILITY)==null?null:map.get(RACE_VISIBILITY).toString(), isTrackWind(map),
                 isCorrectWindDirectionByMagneticDeclination(map), /* preferReplayIfAvailable */ true,
-                /* default timeout for obtaining IRace object from params URL */ (int) RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
+                /* default timeout for obtaining IRace object from params URL */ (int) RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS,
+                map.get(USE_OFFICIAL_EVENTS_TO_UPDATE_RACE_LOG) == null ? false : Boolean.valueOf((String) map.get(USE_OFFICIAL_EVENTS_TO_UPDATE_RACE_LOG)) );
     }
 
     @Override
@@ -117,7 +120,7 @@ public class TracTracConnectivityParamsHandler extends AbstractRaceTrackingConne
                 ttParams.getTracTracUsername(), ttParams.getTracTracPassword(), ttParams.getRaceStatus(),
                 ttParams.getRaceVisibility(), ttParams.isTrackWind(),
                 ttParams.isCorrectWindDirectionByMagneticDeclination(), ttParams.isPreferReplayIfAvailable(),
-                ttParams.getTimeoutInMillis());
+                ttParams.getTimeoutInMillis(), ttParams.isUseOfficialEventsToUpdateRaceLog());
         return result;     
     }
 }
