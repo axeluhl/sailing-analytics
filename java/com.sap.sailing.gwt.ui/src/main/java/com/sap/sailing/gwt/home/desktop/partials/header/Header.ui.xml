@@ -21,7 +21,7 @@
             styleName="{local_res.css.sitenavigation_link}" text="{i18n.home}" />
           <g:Anchor ui:field="eventsPageLink"
             styleName="{local_res.css.sitenavigation_link}" text="{i18n.events}" />
-	  <g:Anchor ui:field="solutionsPageLink"
+          <g:Anchor ui:field="solutionsPageLink"
             styleName="{local_res.css.sitenavigation_link}" text="{i18n.solutions}" />
           <!-- 
           <g:Anchor ui:field="sponsoringPageLink"
