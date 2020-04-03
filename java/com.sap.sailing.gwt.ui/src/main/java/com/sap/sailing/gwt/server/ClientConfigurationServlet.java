@@ -13,6 +13,45 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
 
+/**
+ * Use ${[variable name]} to get strings replaced within static pages.
+ * These variables are available at the moment:
+ * <table>
+ *      <tr>
+ *              <th>Variablename</th>
+ *              <th>branded value</th>
+ *              <th>debranded/whitelabeled</th>
+ *      </tr>
+ *      <tr>
+ *              <td>SAP</td>
+ *              <td>SAP&nbsp;</td>
+ *              <td></td>
+ *      </tr>
+ *      <tr>
+ *              <td>faviconPath</td>
+ *              <td>images/whitelabel.ico</td>
+ *              <td></td>
+ *      </tr>
+ *      <tr>
+ *              <td>appiconPath</td>
+ *              <td>images/sap-sailing-app-icon.png</td>
+ *              <td></td>
+ *      </tr>
+ *      <tr>
+ *              <td>debrandingActive</td>
+ *              <td>false</td>
+ *              <td>true</td>
+ *      </tr>
+ *      <tr>
+ *              <td>saplogoBrowserInfo</td>
+ *              <td>{@code <a class="sapLogo" href="http://www.sap.com"><img class="sapLogoImage" src="/images/logo-small@2x.png" alt="SAP Website"/></a>}</td>
+ *              <td></td>
+ *      </tr>
+ * </table>
+ * 
+ * @author Georg Herdt
+ *
+ */
 public class ClientConfigurationServlet extends HttpServlet {
 
     /** serial version uid */

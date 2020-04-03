@@ -4,6 +4,18 @@ import com.google.gwt.core.client.GWT;
 import com.sap.sse.gwt.client.context.data.SapSailingContextDataJSO;
 import com.sap.sse.gwt.client.context.impl.SapSailingContextDataFactoryImpl;
 
+/**
+ * Provides information for the GWT client if debranding/whitelabeling is currently active.
+ * Data is read from the static HTML page which starts the GWT client code.
+ * Within the header there is  script section that contains such a structure:
+ *      document.sailingContext = &lbrace;
+ *          debrandingActive: true&rbrace;;
+ * The data in this structure is integrated into the document object tree within the browser.
+ * That can be accessed from here using the {@link SapSailingContextDataJSO}.
+ * 
+ * @author Georg Herdt
+ *
+ */
 public class Branding {
 
     private static final Branding INSTANCE;
@@ -28,8 +40,8 @@ public class Branding {
     }
 
     /**
-     * 
-     * @return true when
+     * Access whitelabeling information
+     * @return true when debranding/whitelabeling is activated
      */
     public boolean isActive() {
         return active;
