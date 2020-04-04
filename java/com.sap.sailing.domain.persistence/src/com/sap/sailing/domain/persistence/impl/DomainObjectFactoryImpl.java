@@ -1968,8 +1968,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             // server restarts and the timepoint of loading
             // competitors by tracking providers.
             final Integer rank = (Integer) dbObject.get(FieldNames.LEADERBOARD_RANK.name());
-            final MaxPointsReason maxPointsReason = MaxPointsReason
-                    .valueOf((String) dbObject.get(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name()));
+            final String maxPointsReasonString = (String) dbObject.get(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name());
+            final MaxPointsReason maxPointsReason = maxPointsReasonString == null ? MaxPointsReason.NONE : MaxPointsReason.valueOf(maxPointsReasonString);
             final Number scoreAsNumber = (Number) dbObject.get(FieldNames.LEADERBOARD_CORRECTED_SCORE.name());
             final Double score = scoreAsNumber == null ? null : scoreAsNumber.doubleValue();
             final Number finishingTimePointAsMillisAsNumber = (Number) dbObject

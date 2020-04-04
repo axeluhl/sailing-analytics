@@ -95,7 +95,8 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
                 + TracTracConnectionConstants.PORT_TUNNEL_STORED : "tcp://" + TracTracConnectionConstants.HOST_NAME
                 + ":" + TracTracConnectionConstants.PORT_STORED, 
                 COURSE_DESIGN_UPDATE_URI, 
-                false, false, /* offsetToStartTimeOfSimulatedRace */ null, /* ignoreTracTracMarkPassings */ false, TRACTRAC_USERNAME, TRACTRAC_PASSWORD, new AsyncCallback<Void>() {
+                false, false, /* offsetToStartTimeOfSimulatedRace */ null, /* ignoreTracTracMarkPassings */ false,
+                /* useOfficialEventsToUpdateRaceLog */ false, TRACTRAC_USERNAME, TRACTRAC_PASSWORD, new AsyncCallback<Void>() {
 
             @Override
             public void onFailure(Throwable caught) {
