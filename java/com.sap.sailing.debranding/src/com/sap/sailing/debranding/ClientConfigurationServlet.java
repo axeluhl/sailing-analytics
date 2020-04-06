@@ -103,22 +103,26 @@ public class ClientConfigurationServlet extends HttpServlet {
         final String faviconPath;
         final String appiconPath;
         final String saplogoBrowserInfo;
+        final String ribDashboardIcon;
         if (deBrandingActive) {
             title = "";
             faviconPath = "images/whitelabel.ico";
             appiconPath = "images/sailing-app-icon.png";
             saplogoBrowserInfo = "";
+            ribDashboardIcon = "images/dashboardicon-whitelabeled.png";
         } else {
             title = "SAP ";
             faviconPath = "images/sap.ico";
             appiconPath = "images/sap-sailing-app-icon.png";
             saplogoBrowserInfo = "<a class=\"sapLogo\" href=\"http://www.sap.com\"><img class=\"sapLogoImage\" src=\"/images/logo-small@2x.png\" alt=\"SAP Website\"/></a>\r\n";
+            ribDashboardIcon = "images/dashboardicon.png";
         } 
         map.put("SAP", title);
         map.put("faviconPath", faviconPath);
         map.put("appiconPath", appiconPath);
         map.put("debrandingActive", Boolean.toString(deBrandingActive));
         map.put("saplogoBrowserInfo", saplogoBrowserInfo);
+        map.put("ribDashboardIcon", ribDashboardIcon);
         return map;
     }
 }
