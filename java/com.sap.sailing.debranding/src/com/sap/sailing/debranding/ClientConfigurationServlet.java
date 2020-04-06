@@ -32,13 +32,13 @@ import org.apache.http.HttpStatus;
  *      </tr>
  *      <tr>
  *              <td>faviconPath</td>
+ *              <td>images/sap.ico</td>
  *              <td>images/whitelabel.ico</td>
- *              <td></td>
  *      </tr>
  *      <tr>
  *              <td>appiconPath</td>
  *              <td>images/sap-sailing-app-icon.png</td>
- *              <td></td>
+ *              <td>images/sailing-app-icon.png</td>
  *      </tr>
  *      <tr>
  *              <td>debrandingActive</td>
