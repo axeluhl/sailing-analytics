@@ -4861,15 +4861,31 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public void importMasterData(final String urlAsString, final String[] groupNames, final boolean override,
             final boolean compress, final boolean exportWind, final boolean exportDeviceConfigurations,
-            String targetServerUsername, String targetServerPassword, final boolean exportTrackedRacesAndStartTracking,
-            UUID importOperationId) {
+            String targetServerUsername, String targetServerPassword, String targetServerBearerToken,
+            final boolean exportTrackedRacesAndStartTracking, UUID importOperationId) throws IllegalArgumentException {
         if (dataImportLock.getProgress(importOperationId) != null) {
-            throw new IllegalArgumentException();
+            IllegalArgumentException e = new IllegalArgumentException(
+                    "The UUID for the importOperationId already exists.");
+            logger.log(Level.SEVERE, e.getMessage());
+            throw e;
         }
-        String token = RemoteServerUtil.resolveBearerTokenForRemoteServer(urlAsString, targetServerUsername,
-                targetServerPassword);
-        createOrUpdateDataImportProgressWithReplication(importOperationId, 0.0, DataImportSubProgress.INIT, 0.0);
+        if (Util.hasLength(targetServerUsername) && Util.hasLength(targetServerPassword)
+                && Util.hasLength(targetServerBearerToken)) {
+            IllegalArgumentException e = new IllegalArgumentException(
+                    "Please use either username/password or bearer token, not both.");
+            logger.log(Level.WARNING, e.getMessage(), e);
+            throw e;
+        }
         final User user = getSecurityService().getCurrentUser();
+        // Default to current user's token
+        if (!Util.hasLength(targetServerUsername) && !Util.hasLength(targetServerPassword)
+                && !Util.hasLength(targetServerBearerToken)) {
+            targetServerBearerToken = getSecurityService().getOrCreateAccessToken(user.getName());
+        }
+        String token = (!Util.hasLength(targetServerBearerToken)
+                ? RemoteServerUtil.resolveBearerTokenForRemoteServer(urlAsString, targetServerUsername,
+                        targetServerPassword) : targetServerBearerToken);
+        createOrUpdateDataImportProgressWithReplication(importOperationId, 0.0, DataImportSubProgress.INIT, 0.0);
         final UserGroup tenant = getSecurityService().getDefaultTenantForCurrentUser();
         // Create a progress indicator for as long as the server gets data from the other server.
         // As soon as the server starts the import operation, a progress object will be built on every server

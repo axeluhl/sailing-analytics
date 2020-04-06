@@ -944,4 +944,19 @@ public class Util {
     public static <T> Stream<T> stream(Iterable<T> iterable) {
         return StreamSupport.stream(iterable.spliterator(), /* parallel */ false);
     }
+    
+    /**
+     * Checks whether a given String is <code>null</code> or empty.
+     * @param str String to check
+     * @return <code>false</code> if empty or <code>null</code>, otherwise <code>true</code>.
+     */
+    public static boolean hasLength(String str) {
+        if (str == null) {
+            return false;
+        } else if (str.isEmpty()) {
+            return false;
+        } else {
+            return true;
+        }
+    }
 }

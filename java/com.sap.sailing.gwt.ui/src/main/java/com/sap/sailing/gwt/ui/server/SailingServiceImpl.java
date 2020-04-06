@@ -5884,7 +5884,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             @Override
             public void run() {
                 getService().importMasterData(urlAsString, groupNames, override, compress, exportWind,
-                        exportDeviceConfigurations, targetServerUsername, targetServerPassword,
+                        exportDeviceConfigurations, targetServerUsername, targetServerPassword, null,
                         exportTrackedRacesAndStartTracking, importOperationId);
             }
         };
