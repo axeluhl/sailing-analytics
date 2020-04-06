@@ -4,12 +4,16 @@
     <link href="sailing-fontface-1.0.cache.css" media="screen" rel="stylesheet" title="Default stylesheet" type="text/css" />
     <link href="start.css" rel="stylesheet" type="text/css" />
     <link href="release_notes.css" rel="stylesheet" type="text/css" />
-    <link rel="shortcut icon" type="image/x-icon" href="${faviconPath}"  selenium-id="shortcutIcon"/>
+    <link rel="shortcut icon" type="image/x-icon" href="images/sap${whitelabeled}.ico"  selenium-id="shortcutIcon"/>
     <title>${SAP}Sailing Analytics - Admin Console Release Notes</title>
 </head>
 <body>
     <div class="logoAndTitlePanel">
-        ${saplogoBrowserInfo}
+        <script>
+            if (!${debrandingActive}){
+                document.write("<a class=\"sapLogo\" href=\"http://www.sap.com\"><img class=\"sapLogoImage\" src=\"/images/logo-small@2x.png\" alt=\"SAP Website\"/></a>\r\n");
+            }
+        </script>
     <div class="sailingAnalyticsLabelPanel">
     <div class="sailingAnalyticsLabel">Sailing Analytics</div>
     </div>

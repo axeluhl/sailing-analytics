@@ -100,29 +100,36 @@ public class ClientConfigurationServlet extends HttpServlet {
     private Map<String,String> createReplacementMap(boolean deBrandingActive) {
         final Map<String,String> map = new HashMap<>();
         final String title;
-        final String faviconPath;
-        final String appiconPath;
+//        final String faviconPath;
+//        final String appiconPath;
         final String saplogoBrowserInfo;
-        final String ribDashboardIcon;
+//        final String ribDashboardIcon;
+        
+        final String whitelabeled;
         if (deBrandingActive) {
             title = "";
-            faviconPath = "images/whitelabel.ico";
-            appiconPath = "images/sailing-app-icon.png";
+            //faviconPath = "images/whitelabel.ico";
+//            appiconPath = "images/sailing-app-icon.png";
             saplogoBrowserInfo = "";
-            ribDashboardIcon = "images/dashboardicon-whitelabeled.png";
+//            ribDashboardIcon = "images/dashboardicon-whitelabeled.png";
+
+            whitelabeled = "-whitelabeled";
         } else {
             title = "SAP ";
-            faviconPath = "images/sap.ico";
-            appiconPath = "images/sap-sailing-app-icon.png";
+            //faviconPath = "images/sap.ico";
+//            appiconPath = "images/sap-sailing-app-icon.png";
             saplogoBrowserInfo = "<a class=\"sapLogo\" href=\"http://www.sap.com\"><img class=\"sapLogoImage\" src=\"/images/logo-small@2x.png\" alt=\"SAP Website\"/></a>\r\n";
-            ribDashboardIcon = "images/dashboardicon.png";
+//            ribDashboardIcon = "images/dashboardicon.png";
+
+            whitelabeled = "";
         } 
         map.put("SAP", title);
-        map.put("faviconPath", faviconPath);
-        map.put("appiconPath", appiconPath);
+//        map.put("faviconPath", faviconPath);
+//        map.put("appiconPath", appiconPath);
         map.put("debrandingActive", Boolean.toString(deBrandingActive));
         map.put("saplogoBrowserInfo", saplogoBrowserInfo);
-        map.put("ribDashboardIcon", ribDashboardIcon);
+//        map.put("ribDashboardIcon", ribDashboardIcon);
+        map.put("whitelabeled", whitelabeled);
         return map;
     }
 }
