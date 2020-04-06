@@ -89,7 +89,6 @@ public class MasterDataImporter {
         for (Regatta regatta : topLevelMasterData.getAllRegattas()) {
             RegattaImpl regattaImpl = (RegattaImpl)regatta;
             regattaImpl.initializeSeriesAfterDeserialize();
-
             // master data import from older system, generate a uuid for this.
             if (regatta.getRegistrationLinkSecret() == null) {
                 logger.info("Generated missing registrationLinkSecret for " + this + " while importing MasterData");
