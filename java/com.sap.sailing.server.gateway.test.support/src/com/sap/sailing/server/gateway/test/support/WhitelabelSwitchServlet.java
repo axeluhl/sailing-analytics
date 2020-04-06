@@ -8,6 +8,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+/**
+ * Use this servlet to turn whitelabelling on and off during testing.
+ * @see com.sap.sailing.debranding.ClientConfigurationServlet
+ * @author Georg Herdt
+ *
+ */
 public class WhitelabelSwitchServlet extends HttpServlet {
 
     private static final String COM_SAP_SAILING_DEBRANDING = "com.sap.sailing.debranding";

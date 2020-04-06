@@ -19,7 +19,7 @@ import org.apache.http.HttpStatus;
 /**
  * Use ${[variable name]} to get strings replaced within static pages.
  * These variables are available at the moment:
- * <table>
+ * <table border="1">
  *      <tr>
  *              <th>Variablename</th>
  *              <th>branded value</th>
@@ -52,6 +52,7 @@ import org.apache.http.HttpStatus;
  *      </tr>
  * </table>
  * 
+ * @see com.sap.sailing.server.gateway.test.support.WhitelabelSwitchServlet
  * @author Georg Herdt
  *
  */
