@@ -95,7 +95,7 @@ public class TracTracConnectivityParamsHandler extends AbstractRaceTrackingConne
                 map.get(RACE_VISIBILITY)==null?null:map.get(RACE_VISIBILITY).toString(), isTrackWind(map),
                 isCorrectWindDirectionByMagneticDeclination(map), /* preferReplayIfAvailable */ true,
                 /* default timeout for obtaining IRace object from params URL */ (int) RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS,
-                map.get(USE_OFFICIAL_EVENTS_TO_UPDATE_RACE_LOG) == null ? false : Boolean.valueOf((String) map.get(USE_OFFICIAL_EVENTS_TO_UPDATE_RACE_LOG)) );
+                map.get(USE_OFFICIAL_EVENTS_TO_UPDATE_RACE_LOG) == null ? false : (Boolean) map.get(USE_OFFICIAL_EVENTS_TO_UPDATE_RACE_LOG));
     }
 
     @Override
