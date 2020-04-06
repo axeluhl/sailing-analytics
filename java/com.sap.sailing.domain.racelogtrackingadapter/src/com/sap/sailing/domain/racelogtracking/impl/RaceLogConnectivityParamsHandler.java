@@ -83,7 +83,7 @@ public class RaceLogConnectivityParamsHandler extends AbstractRaceTrackingConnec
     public RaceTrackingConnectivityParameters resolve(RaceTrackingConnectivityParameters params) throws Exception {
         assert params instanceof RaceTrackingConnectivityParameters;
         final RaceLogConnectivityParams rLParams = (RaceLogConnectivityParams) params;
-        RaceLogConnectivityParams result = new RaceLogConnectivityParams(rLParams.getServerAuthor(),
+        RaceLogConnectivityParams result = new RaceLogConnectivityParams(racingEventService.getServerAuthor(),
                 rLParams.getRegatta(), rLParams.getRaceColumn(), rLParams.getFleet(), rLParams.getLeaderboard(),
                 rLParams.getDelayToLiveInMillis(), domainFactory, rLParams.isTrackWind(),
                 rLParams.isCorrectWindDirectionByMagneticDeclination());

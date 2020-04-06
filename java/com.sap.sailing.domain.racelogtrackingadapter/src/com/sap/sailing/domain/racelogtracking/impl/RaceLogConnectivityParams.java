@@ -37,7 +37,7 @@ public class RaceLogConnectivityParams extends AbstractRaceTrackingConnectivityP
      */
     public static final String TYPE = "RACE_LOG_TRACKING";
     
-    private final AbstractLogEventAuthor serverAuthor;
+    private final transient AbstractLogEventAuthor serverAuthor;
     private final RaceColumn raceColumn;
     private final Fleet fleet;
     private final Leaderboard leaderboard;

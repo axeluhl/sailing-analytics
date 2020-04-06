@@ -239,12 +239,16 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         final CheckBox ignoreTracTracMarkPassingsCheckbox = new CheckBox(stringMessages.useInternalAlgorithm());
         ignoreTracTracMarkPassingsCheckbox.setWordWrap(false);
         ignoreTracTracMarkPassingsCheckbox.setValue(Boolean.FALSE);
+        final CheckBox useOfficialResultsToUpdateRaceLogsCheckbox = new CheckBox(stringMessages.useOfficialResultsForAutomaticUpdates());
+        ignoreTracTracMarkPassingsCheckbox.setWordWrap(false);
+        ignoreTracTracMarkPassingsCheckbox.setValue(Boolean.FALSE);
         
         layoutTable.setWidget(++row, 0, trackSettingsLabel);
         layoutTable.setWidget(row, 1, trackWindCheckBox);
         layoutTable.setWidget(++row, 1, correctWindCheckBox);
         layoutTable.setWidget(++row, 1, simulationPanel);
         layoutTable.setWidget(++row, 1, ignoreTracTracMarkPassingsCheckbox);
+        layoutTable.setWidget(++row, 1, useOfficialResultsToUpdateRaceLogsCheckbox);
         
         // Filter
         Label racesFilterLabel = new Label(stringMessages.filterRaces() + ":");
@@ -360,7 +364,8 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                     offsetToStartTimeOfSimulatedRace = getMillisecondsDurationFromMinutesAsString(simulationPanel.getOffsetToStartTimeInMinutes());
                 }
                 trackSelectedRaces(trackWindCheckBox.getValue(), correctWindCheckBox.getValue(),
-                        offsetToStartTimeOfSimulatedRace, ignoreTracTracMarkPassingsCheckbox.getValue());
+                        offsetToStartTimeOfSimulatedRace, ignoreTracTracMarkPassingsCheckbox.getValue(),
+                        useOfficialResultsToUpdateRaceLogsCheckbox.getValue());
             }
         });
         layoutTable.setWidget(++row, 1, startTrackingButton);
@@ -495,7 +500,9 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         }
     }
 
-    private void trackSelectedRaces(boolean trackWind, boolean correctWind, final Duration offsetToStartTimeOfSimulatedRace, boolean ignoreTracTracMarkPassings) {
+    private void trackSelectedRaces(boolean trackWind, boolean correctWind,
+            final Duration offsetToStartTimeOfSimulatedRace, boolean ignoreTracTracMarkPassings,
+            boolean useOfficialResultsToUpdateRaceLogs) {
         final TracTracConfigurationWithSecurityDTO selectedConnection = connectionsTable.getSelectionModel()
                 .getSelectedObject();
         String liveURI = selectedConnection.getLiveDataURI();
@@ -523,7 +530,8 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         }
         if (checkBoatClassOK(selectedRegatta, selectedRaces)) {
             sailingService.trackWithTracTrac(regattaIdentifier, selectedRaces, liveURI, storedURI,
-                    courseDesignUpdateURI, trackWind, correctWind, offsetToStartTimeOfSimulatedRace, ignoreTracTracMarkPassings, tractracUsername,
+                    courseDesignUpdateURI, trackWind, correctWind, offsetToStartTimeOfSimulatedRace, ignoreTracTracMarkPassings,
+                    useOfficialResultsToUpdateRaceLogs, tractracUsername,
                     tractracPassword, new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {

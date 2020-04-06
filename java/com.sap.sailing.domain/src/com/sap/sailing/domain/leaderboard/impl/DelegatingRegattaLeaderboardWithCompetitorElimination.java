@@ -3,6 +3,7 @@ package com.sap.sailing.domain.leaderboard.impl;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -300,7 +301,8 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
     }
 
     public Iterable<RaceColumn> getRaceColumns() {
-        return getFullLeaderboard().getRaceColumns();
+        final RegattaLeaderboard theFullLeaderboard = getFullLeaderboard();
+        return theFullLeaderboard == null ? Collections.emptySet() : theFullLeaderboard.getRaceColumns();
     }
 
     public RaceColumn getRaceColumnByName(String name) {

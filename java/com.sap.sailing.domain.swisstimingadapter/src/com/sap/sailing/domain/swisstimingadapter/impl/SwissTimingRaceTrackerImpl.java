@@ -503,7 +503,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
             logger.info("Created SwissTiming RaceDefinition and TrackedRace for "+race.getName());
         } catch (Exception exception) {
             logger.log(Level.WARNING,
-                    "Error while creating race " + raceName + " for retatta " + trackedRegatta.getRegatta(), exception);
+                    "Error while creating race " + raceName + " for regatta " + trackedRegatta.getRegatta(), exception);
             try {
                 if (race == null) {
                     trackedRegattaRegistry.stopTracker(regatta, this);
