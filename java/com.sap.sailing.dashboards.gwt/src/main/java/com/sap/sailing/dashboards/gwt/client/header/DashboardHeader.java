@@ -12,6 +12,7 @@ import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.shared.Branding;
 
 public class DashboardHeader extends Composite implements HasWidgets {
 
@@ -37,7 +38,9 @@ public class DashboardHeader extends Composite implements HasWidgets {
     public DashboardHeader() {
         dashboardHeaderResources.gss().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
-        sapLogo.setResource(DashboardHeaderResources.INSTANCE.sapLogo());
+        if (Branding.getInstance().isActive()) {
+            sapLogo.setResource(DashboardHeaderResources.INSTANCE.sapLogo());
+        }
         event.setInnerHTML(StringMessages.INSTANCE.dashboardHeader());
     }
     
