@@ -36,6 +36,16 @@
 		<filter-name>LocaleInjectionFilter</filter-name>
 		<url-pattern>*.html</url-pattern>
 	</filter-mapping>
+    <servlet>
+        <display-name>ClientConfigurationServlet</display-name>
+        <servlet-name>ClientConfigurationServlet</servlet-name>
+        <servlet-class>com.sap.sailing.debranding.ClientConfigurationServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ClientConfigurationServlet</servlet-name>
+        <url-pattern>*.html</url-pattern>
+    </servlet-mapping>
+
 
         <filter>
                 <filter-name>GWTCacheControlServletFilter</filter-name>
