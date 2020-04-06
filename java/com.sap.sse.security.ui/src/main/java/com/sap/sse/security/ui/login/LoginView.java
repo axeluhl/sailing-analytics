@@ -3,6 +3,8 @@ package com.sap.sse.security.ui.login;
 import java.util.Collections;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.ImageElement;
+import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.event.logical.shared.AttachEvent.Handler;
@@ -22,6 +24,7 @@ import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.controls.PasswordTextBoxWithWatermark;
 import com.sap.sse.gwt.client.controls.TextBoxWithWatermark;
 import com.sap.sse.gwt.client.dialog.DialogUtils;
+import com.sap.sse.gwt.shared.Branding;
 import com.sap.sse.security.ui.client.EntryPointLinkFactory;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
@@ -47,6 +50,7 @@ public class LoginView extends Composite {
     @UiField Button loginButton;
     @UiField Anchor signUpAnchor;
     @UiField HTMLPanel oAuthPanel;
+    @UiField ImageElement logoImage;
     
     public LoginView(UserManagementServiceAsync userManagementService, UserService userService, StringMessages stringMessages, String appName) {
         this.userManagementService = userManagementService;
@@ -69,6 +73,10 @@ public class LoginView extends Composite {
                 userNameTextBox.setFocus(true);
             }
         });
+        
+        if (!Branding.getInstance().isActive()) {
+            logoImage.getStyle().setDisplay(Display.NONE);
+        }
     }
     
     @UiHandler("loginButton")

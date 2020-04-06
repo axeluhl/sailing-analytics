@@ -18,12 +18,16 @@
     <!--                                           -->
     <!-- Any title is fine                         -->
     <!--                                           -->
-    <title>SAP Sailing Analytics Login</title>
+    <title>${SAP}Sailing Analytics Login</title>
     
     <link rel="stylesheet" type="text/css" href="/sailing-normalize-3.0.2.cache.css">
     <link rel="stylesheet" type="text/css" href="/clean/sailing-clean-1.0.cache.css">
     <link rel="stylesheet" type="text/css" href="Login.css">
-    
+    <script>
+       document.sailingContext = {
+            debrandingActive: ${debrandingActive}
+       };
+    </script>
     <!--                                           -->
     <!-- This script loads your compiled module.   -->
     <!-- If you add any GWT meta tags, they must   -->
