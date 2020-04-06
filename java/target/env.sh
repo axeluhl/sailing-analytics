@@ -163,8 +163,8 @@ else
   JAVA_VERSION_SPECIFIC_ARGS=$JAVA_8_ARGS
 fi
 
-# White labeling: use -Dcom.sap.sailing.debranding=true to remove branding images and text
-#ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Dcom.sap.sailing.debranding=true"
+# White labeling: use -Dcom.sap.sse.debranding=true to remove branding images and text
+#ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Dcom.sap.sse.debranding=true"
 ADDITIONAL_JAVA_ARGS="$JAVA_VERSION_SPECIFIC_ARGS $ADDITIONAL_JAVA_ARGS -Dpersistentcompetitors.clear=false -Drestore.tracked.races=true -Dpolardata.source.url=https://www.sapsailing.com -Dwindestimation.source.url=https://www.sapsailing.com -XX:MaxGCPauseMillis=500"
 
 

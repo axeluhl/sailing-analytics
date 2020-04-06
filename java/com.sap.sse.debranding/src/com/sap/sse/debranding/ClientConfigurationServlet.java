@@ -1,4 +1,4 @@
-package com.sap.sailing.debranding;
+package com.sap.sse.debranding;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -63,7 +63,7 @@ public class ClientConfigurationServlet extends HttpServlet {
     /** serial version uid */
     private static final long serialVersionUID = -2228462977010198686L;
 
-    public static final String DEBRANDING_PROPERTY_NAME = "com.sap.sailing.debranding";
+    public static final String DEBRANDING_PROPERTY_NAME = "com.sap.sse.debranding";
     
     private final ConcurrentHashMap<String, byte[]> cache = new ConcurrentHashMap<>();
 

@@ -56,7 +56,7 @@
     <servlet>
         <display-name>ClientConfigurationServlet</display-name>
         <servlet-name>ClientConfigurationServlet</servlet-name>
-        <servlet-class>com.sap.sailing.debranding.ClientConfigurationServlet</servlet-class>
+        <servlet-class>com.sap.sse.debranding.ClientConfigurationServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>ClientConfigurationServlet</servlet-name>
