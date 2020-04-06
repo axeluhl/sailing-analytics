@@ -28,8 +28,6 @@ public class MasterDataImportResource extends AbstractSailingServerResource {
     }
 
     @POST
-    // TODO: Move User/Password information from query string to form parameter, due to logging full URLs
-    // in access log. Accept bearer token. Use current subject as default
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces("application/json;charset=UTF-8")
     public Response importMasterData(
@@ -78,6 +76,6 @@ public class MasterDataImportResource extends AbstractSailingServerResource {
                 logger.severe(e.toString());
             }
         }
-         return response;
+        return response;
     }
 }

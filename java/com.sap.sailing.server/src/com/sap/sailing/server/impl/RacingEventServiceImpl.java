@@ -4861,12 +4861,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public void importMasterData(final String urlAsString, final String[] groupNames, final boolean override,
             final boolean compress, final boolean exportWind, final boolean exportDeviceConfigurations,
-            String targetServerUsername, String targetServerPassword, String targetServerBearerToken,
-            final boolean exportTrackedRacesAndStartTracking, UUID importOperationId) throws IllegalArgumentException {
+            final String targetServerUsername, final String targetServerPassword, final String targetServerBearerToken,
+            final boolean exportTrackedRacesAndStartTracking, final UUID importOperationId) throws IllegalArgumentException {
         if (dataImportLock.getProgress(importOperationId) != null) {
             IllegalArgumentException e = new IllegalArgumentException(
                     "The UUID for the importOperationId already exists.");
-            logger.log(Level.SEVERE, e.getMessage());
+            logger.log(Level.SEVERE, e.getMessage(), e);
             throw e;
         }
         if (Util.hasLength(targetServerUsername) && Util.hasLength(targetServerPassword)
@@ -4878,13 +4878,16 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
         final User user = getSecurityService().getCurrentUser();
         // Default to current user's token
+        final String effectiveTargetServerBearerToken;
         if (!Util.hasLength(targetServerUsername) && !Util.hasLength(targetServerPassword)
                 && !Util.hasLength(targetServerBearerToken)) {
-            targetServerBearerToken = getSecurityService().getOrCreateAccessToken(user.getName());
+            effectiveTargetServerBearerToken = getSecurityService().getOrCreateAccessToken(user.getName());
+        } else {
+            effectiveTargetServerBearerToken = targetServerBearerToken;
         }
-        String token = (!Util.hasLength(targetServerBearerToken)
+        final String token = (!Util.hasLength(effectiveTargetServerBearerToken)
                 ? RemoteServerUtil.resolveBearerTokenForRemoteServer(urlAsString, targetServerUsername,
-                        targetServerPassword) : targetServerBearerToken);
+                        targetServerPassword) : effectiveTargetServerBearerToken);
         createOrUpdateDataImportProgressWithReplication(importOperationId, 0.0, DataImportSubProgress.INIT, 0.0);
         final UserGroup tenant = getSecurityService().getDefaultTenantForCurrentUser();
         // Create a progress indicator for as long as the server gets data from the other server.
@@ -4892,7 +4895,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         long startTime = System.currentTimeMillis();
         createOrUpdateDataImportProgressWithReplication(importOperationId, 0.01, DataImportSubProgress.CONNECTION_SETUP,
                 0.5);
-        String query;
+        final String query;
         try {
             query = createLeaderboardQuery(groupNames, compress, exportWind, exportDeviceConfigurations,
                     exportTrackedRacesAndStartTracking);
@@ -4903,8 +4906,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         URL serverAddress = null;
         InputStream inputStream = null;
         try {
-            String masterDataPath = "/sailingserver/spi/v1/masterdata/leaderboardgroups";
-            URL base = RemoteServerUtil.createBaseUrl(urlAsString);
+            final String masterDataPath = "/sailingserver/spi/v1/masterdata/leaderboardgroups";
+            final URL base = RemoteServerUtil.createBaseUrl(urlAsString);
             serverAddress = RemoteServerUtil.createRemoteServerUrl(base, masterDataPath, query);
             // the response can take a very long time for MDI that include foiling data or such
             connection = HttpUrlConnectionHelper.redirectConnectionWithBearerToken(serverAddress,
