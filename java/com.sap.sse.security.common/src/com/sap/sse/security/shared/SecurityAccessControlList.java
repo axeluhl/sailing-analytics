@@ -62,28 +62,6 @@ public interface SecurityAccessControlList<G extends SecurityUserGroup<?>> exten
     boolean addPermission(G userGroup, String actionToAllow);
 
     /**
-     * @param actionToDeny
-     *            the action to be denied. The wildcard string {@code "*"} can be used to deny permission for all
-     *            possible actions for the {@code userGroup}. Prefixing the action by an exclamation mark character
-     *            {@code '!'} instead allows the action that follows. Multiple leading exclamation marks toggle
-     *            accordingly.
-     * @return {@code true} if the denial was added; {@code false} if the denial was already in this ACL and therefore
-     *         didn't need to be added
-     * @see #addPermission(UserGroupImpl, String)
-     */
-    boolean denyPermission(G userGroup, String actionToDeny);
-
-    /**
-     * Removes a permission denial from those permissions denied for the user group. If the action starts with an
-     * {@code "!"} exclamation mark, the exclamation mark is stripped, and {@link #removePermission(UserGroupImpl, String)}
-     * is invoked with the remaining string.
-     * 
-     * @return {@code true} if the permission was removed; {@code false} if the permission was not in this ACL and
-     *         therefore didn't need to be removed
-     */
-    boolean removeDenial(G userGroup, String substring);
-
-    /**
      * Removes a permission from those permissions granted to the user group. If the action starts with an {@code "!"}
      * exclamation mark, the exclamation mark is stripped, and {@link #removeDenial(UserGroupImpl, String)} is invoked with
      * the remaining string.
@@ -94,5 +72,15 @@ public interface SecurityAccessControlList<G extends SecurityUserGroup<?>> exten
     boolean removePermission(G userGroup, String action);
 
     void setPermissions(G userGroup, Set<String> actions);
+    
+    /**
+     * When adding an action to a ACL prefixed with ! this is meant to be an explicit denial of that action instead of
+     * granting that action. This method checks if an action is such a denial.
+     * 
+     * @return {@code true} if it is a denied action, {@code false} otherwise
+     */
+    static boolean isDeniedAction(String action) {
+        return action.startsWith("!");
+    }
 
 }

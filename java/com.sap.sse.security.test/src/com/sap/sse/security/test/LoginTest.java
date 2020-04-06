@@ -20,6 +20,7 @@ import org.apache.shiro.SecurityUtils;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.mongodb.MongoException;
@@ -92,9 +93,10 @@ public class LoginTest {
         assertFalse(Util.contains(specialUserGroup1.getUsers(), user));
         assertFalse(Util.contains(specialUserGroup2.getUsers(), user));
     }
-    
-    
+
     @Test
+    // FIXME Bug 5239: Negative ACL actions are currently disabled due to bugs
+    @Ignore
     public void testAclAnonUserGroup() throws UserManagementException, MailException, UserGroupManagementException {
         final String username = "TheNewUser";
         securityService.createSimpleUser(username, "u@a.b", "Humba", username, /* company */ null,
@@ -103,7 +105,7 @@ public class LoginTest {
         Map<UserGroup, Set<String>> permissionMap = new HashMap<>();
         permissionMap.put(defaultUserGroup, new HashSet<>(Arrays.asList(new String[] { "!READ", "UPDATE" })));
         permissionMap.put(null, new HashSet<>(Arrays.asList(new String[] { "!READ", "UPDATE" })));
-        AccessControlList acl = securityService.updateAccessControlList(
+        AccessControlList acl = securityService.overrideAccessControlList(
                 QualifiedObjectIdentifierImpl.fromDBWithoutEscaping("someid/more"), permissionMap);
 
         Map<UserGroup, Set<String>> result = acl.getActionsByUserGroup();
