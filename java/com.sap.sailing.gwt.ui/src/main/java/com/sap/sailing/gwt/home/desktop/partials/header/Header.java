@@ -10,6 +10,7 @@ import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.place.shared.Place;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -88,8 +89,11 @@ public class Header extends Composite {
         adminConsolePageLink.getElement().getStyle().setDisplay(Display.NONE);
         eventBus.addHandler(AuthenticationContextEvent.TYPE, event->{
             AuthenticationContext authContext = event.getCtx();
-            UserDTO user = authContext.getCurrentUser();
             if (authContext.hasServerPermission(ServerActions.CREATE_OBJECT)) {
+                adminConsolePageLink.getElement().getStyle().setDisplay(Display.INLINE_BLOCK);
+            } else if (authContext.isLoggedIn()) {
+                String base = authContext.getServerInfo().getManageEventsBaseUrl();
+                adminConsolePageLink.setHref(UriUtils.fromString(base + "/gwt/AdminConsole.html"));
                 adminConsolePageLink.getElement().getStyle().setDisplay(Display.INLINE_BLOCK);
             } else {
                 adminConsolePageLink.getElement().getStyle().setDisplay(Display.NONE);

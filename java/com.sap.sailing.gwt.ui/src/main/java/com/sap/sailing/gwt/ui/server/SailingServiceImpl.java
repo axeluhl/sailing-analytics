@@ -5220,7 +5220,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     private ServerInfoDTO getServerInfo() {
-        ServerInfoDTO result = new ServerInfoDTO(ServerInfo.getName(), ServerInfo.getBuildVersion());
+        ServerInfoDTO result = new ServerInfoDTO(ServerInfo.getName(), ServerInfo.getBuildVersion(), ServerInfo.getManageEventsBaseUrl());
         SecurityDTOUtil.addSecurityInformation(getSecurityService(), result, result.getIdentifier());
         return result;
     }

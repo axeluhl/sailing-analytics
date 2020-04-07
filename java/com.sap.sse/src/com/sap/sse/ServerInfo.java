@@ -30,4 +30,8 @@ public class ServerInfo {
     public static String getName() {
         return ServerStartupConstants.SERVER_NAME;
     }
+    
+    public static String getManageEventsBaseUrl() {
+        return ServerStartupConstants.MANAGE_EVENTS_URL;
+    }
 }

@@ -12,18 +12,25 @@ public class ServerInfoDTO extends NamedSecuredObjectDTO implements IsSerializab
     private static final long serialVersionUID = 554811472250094684L;
 
     private String buildVersion;
+
+    private String manageEventsBaseUrl;
     
     // for GWT
     ServerInfoDTO() {
     }
 
-    public ServerInfoDTO(String serverName, String buildVersion) {
+    public ServerInfoDTO(String serverName, String buildVersion, String manageEventsBaseUrl) {
         setName(serverName);
         this.buildVersion = buildVersion;
+        this.manageEventsBaseUrl = manageEventsBaseUrl;
     }
 
     public String getBuildVersion() {
         return buildVersion;
+    }
+    
+    public String getManageEventsBaseUrl() {
+        return this.manageEventsBaseUrl;
     }
 
     public static TypeRelativeObjectIdentifier getServerIdentifier(String serverName) {
