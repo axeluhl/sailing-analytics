@@ -10,6 +10,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
@@ -127,7 +128,7 @@ public class TabletAndDesktopWhatsNewView extends Composite implements WhatsNewV
     }
 
     private void setActiveContent(HTML activeHTML, Anchor activeLink) {
-        for (HTML html: contentWidgets) {
+        for (HTML html : contentWidgets) {
             html.setVisible(html == activeHTML);
         }
         for (Anchor link : links) {
@@ -137,8 +138,9 @@ public class TabletAndDesktopWhatsNewView extends Composite implements WhatsNewV
                 link.removeStyleName(WhatsNewResources.INSTANCE.css().whatsnew_nav_linkactive());
             }
         }
+        Window.scrollTo (0 ,0);
     }
-    
+
     private void handleClickEventWithLocalNavigation(ClickEvent e, PlaceNavigation<?> placeNavigation) {
         if (HYPERLINK_IMPL.handleAsClick((Event) e.getNativeEvent())) {
             // don't use the placecontroller for navigation here as we want to avoid a page reload
