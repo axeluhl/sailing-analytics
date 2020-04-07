@@ -113,7 +113,19 @@ public class TabletAndDesktopWhatsNewView extends Composite implements WhatsNewV
         setActiveContent(raceCommitteeAppNotes, raceCommitteeAppNotesAnchor);
         handleClickEventWithLocalNavigation(event, raceCommitteeAppNotesNavigation);
     }
-    
+
+    @UiHandler("buoyPingerAppNotesAnchor")
+    void buoyPingerClicked(ClickEvent event) {
+        setActiveContent(buoyPingerAppNotes, buoyPingerAppNotesAnchor);
+        handleClickEventWithLocalNavigation(event, buoyPingerAppNotesNavigation);
+    }
+
+    @UiHandler("inSightAppNotesAnchor")
+    void inSightAppClicked(ClickEvent event) {
+        setActiveContent(inSightAppNotes, inSightAppNotesAnchor);
+        handleClickEventWithLocalNavigation(event, inSightAppNotesNavigation);
+    }
+
     private void setActiveContent(HTML activeHTML, Anchor activeLink) {
         for (HTML html: contentWidgets) {
             html.setVisible(html == activeHTML);
