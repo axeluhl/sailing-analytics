@@ -122,6 +122,9 @@ public class RemoteSailingServerSet {
 
     public void add(RemoteSailingServerReference remoteSailingServerReference) {
         LockUtil.executeWithWriteLock(lock, () -> {
+            if (remoteSailingServers.containsKey(remoteSailingServerReference.getName())){
+                remove(remoteSailingServerReference.getName());
+            }
             remoteSailingServers.put(remoteSailingServerReference.getName(), remoteSailingServerReference);
             triggerAsynchronousEventCacheUpdate(remoteSailingServerReference);
         });
