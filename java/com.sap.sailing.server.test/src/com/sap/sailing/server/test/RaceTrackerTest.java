@@ -78,7 +78,7 @@ public class RaceTrackerTest {
                 TracTracConnectionConstants.ONLINE_STATUS, TracTracConnectionConstants.ONLINE_VISIBILITY,
                 /* trackWind */ false, /* correctWindDirectionByMagneticDeclination */ false,
                 /* timeoutInMillis */ (int) RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS,
-                new DefaultRaceTrackingHandler());
+                /* useOfficialEventsToUpdateRaceLog */ false, new DefaultRaceTrackingHandler());
         logger.info("Calling raceHandle.getRaces()");
         RaceDefinition race = raceHandle.getRace(); // wait for RaceDefinition to be completely wired in Regatta
         logger.info("Obtained race: "+race);
@@ -138,7 +138,7 @@ public class RaceTrackerTest {
                         tracTracUsername, tracTracPassword, TracTracConnectionConstants.ONLINE_STATUS,
                         TracTracConnectionConstants.ONLINE_VISIBILITY, /* trackWind */ false,
                         /* correctWindDirectionByMagneticDeclination */ false, /* timeoutInMillis */ (int) RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS,
-                        new DefaultRaceTrackingHandler());
+                        /* useOfficialEventsToUpdateRaceLog */ false, new DefaultRaceTrackingHandler());
         TrackedRegatta newTrackedRegatta = myRaceHandle.getTrackedRegatta();
         assertNotSame(oldTrackedRegatta, newTrackedRegatta);
         TrackedRace newTrackedRace = getTrackedRace(newTrackedRegatta);
@@ -168,7 +168,7 @@ public class RaceTrackerTest {
                         tracTracUsername, tracTracPassword, TracTracConnectionConstants.ONLINE_STATUS,
                         TracTracConnectionConstants.ONLINE_VISIBILITY, /* trackWind */ false,
                         /* correctWindDirectionByMagneticDeclination */ false, /* timeoutInMillis */ (int) RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS,
-                        new DefaultRaceTrackingHandler());
+                        /* useOfficialEventsToUpdateRaceLog */ false, new DefaultRaceTrackingHandler());
         TrackedRegatta newTrackedEvent = myRaceHandle.getTrackedRegatta();
         TrackedRace newTrackedRace = getTrackedRace(newTrackedEvent);
         // expecting a new tracked race to be created when starting over with tracking

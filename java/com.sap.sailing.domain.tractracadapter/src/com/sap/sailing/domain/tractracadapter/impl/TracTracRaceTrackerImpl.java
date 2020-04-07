@@ -314,6 +314,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
         final String tracTracPassword = connectivityParams.getTracTracPassword();
         final String raceStatus = connectivityParams.getRaceStatus();
         final String raceVisibility = connectivityParams.getRaceVisibility();
+        final boolean useOfficialEventsToUpdateRaceLog = connectivityParams.isUseOfficialEventsToUpdateRaceLog();
         this.trackedRegattaRegistry = trackedRegattaRegistry;
         this.tractracRace = connectivityParams.getTractracRace();
         this.tractracEvent = tractracRace.getEvent();
@@ -364,7 +365,11 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
             }
         };
         eventSubscriber.subscribeCompetitors(competitorsListener);
-        reconciler = new RaceAndCompetitorStatusWithRaceLogReconciler(domainFactory, raceLogResolver, tractracRace);
+        if (useOfficialEventsToUpdateRaceLog) {
+            reconciler = new RaceAndCompetitorStatusWithRaceLogReconciler(domainFactory, raceLogResolver, tractracRace);
+        } else {
+            reconciler = null;
+        }
         racesListener = new IRacesListener() {
             @Override public void abandonRace(UUID raceId) {
                 if (raceId.equals(tractracRace.getId())) {
@@ -388,7 +393,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
             @Override public void dataSourceChanged(IRace race, DataSource oldDataSource, URI oldLiveURI, URI oldStoredURI) {}
             @Override
             public void updateRace(IRace race) {
-                if (Util.equalsWithNull(race, TracTracRaceTrackerImpl.this.tractracRace)) {
+                if (reconciler != null && Util.equalsWithNull(race, TracTracRaceTrackerImpl.this.tractracRace)) {
                     int delayToLiveInMillis = race.getLiveDelay()*1000;
                     if (getRace() != null) {
                         DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(getRace());
@@ -703,19 +708,21 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
      * to all those race logs for events that may require reconciliation of results, race and competitor statuses.
      */
     private void registerRaceAndCompetitorStatusWithRaceLogReconciler(final DynamicTrackedRace trackedRace) {
-        trackedRace.addListener(new AbstractRaceChangeListener() {
-            @Override
-            public void raceLogAttached(RaceLog raceLog) {
-                reconciler.raceLogAttached(trackedRace, raceLog);
+        if (reconciler != null) {
+            trackedRace.addListener(new AbstractRaceChangeListener() {
+                @Override
+                public void raceLogAttached(RaceLog raceLog) {
+                    reconciler.raceLogAttached(trackedRace, raceLog);
+                }
+    
+                @Override
+                public void raceLogDetached(RaceLog raceLog) {
+                    reconciler.raceLogDetached(trackedRace, raceLog);
+                }
+            });
+            for (final RaceLog alreadyAttachedRaceLog : trackedRace.getAttachedRaceLogs()) {
+                reconciler.raceLogAttached(trackedRace, alreadyAttachedRaceLog);
             }
-
-            @Override
-            public void raceLogDetached(RaceLog raceLog) {
-                reconciler.raceLogDetached(trackedRace, raceLog);
-            }
-        });
-        for (final RaceLog alreadyAttachedRaceLog : trackedRace.getAttachedRaceLogs()) {
-            reconciler.raceLogAttached(trackedRace, alreadyAttachedRaceLog);
         }
     }
 
