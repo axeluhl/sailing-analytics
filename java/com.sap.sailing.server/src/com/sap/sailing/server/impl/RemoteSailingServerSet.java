@@ -60,7 +60,7 @@ import com.sap.sse.util.HttpUrlConnectionHelper;
  */
 public class RemoteSailingServerSet {
     private static final int POLLING_INTERVAL_IN_SECONDS = 60;
-    private NamedReentrantReadWriteLock lock = new NamedReentrantReadWriteLock("lock for RemoteSailingServerSet", true);
+    private NamedReentrantReadWriteLock lock = new NamedReentrantReadWriteLock("lock for RemoteSailingServerSet", /* fair */ true);
 
     private static final Logger logger = Logger.getLogger(RemoteSailingServerSet.class.getName());
 
@@ -122,7 +122,7 @@ public class RemoteSailingServerSet {
 
     public void add(RemoteSailingServerReference remoteSailingServerReference) {
         LockUtil.executeWithWriteLock(lock, () -> {
-            if (remoteSailingServers.containsKey(remoteSailingServerReference.getName())){
+            if (remoteSailingServers.containsKey(remoteSailingServerReference.getName())) {
                 remove(remoteSailingServerReference.getName());
             }
             remoteSailingServers.put(remoteSailingServerReference.getName(), remoteSailingServerReference);
