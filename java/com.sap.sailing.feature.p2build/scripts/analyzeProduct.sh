@@ -21,7 +21,7 @@
 # will be set to default:default unless the bundle occurs in the <configuration> section of the
 # .product definition in which case the start level and auto start values are copied from the
 # .product's <configuration> section.
-
+NL=$'\n'
 GIT_ROOT=`dirname $0`/../../..
 echo "GIT ROOT: $GIT_ROOT"
 features=$(cat "$1" | grep "feature id=" | sed -e 's/^.*feature id="\([^"]*\)".*$/\1/')
@@ -55,26 +55,32 @@ for feature in $features; do
         fi
         if [[ $feature =~ .runtime$ ]]; then
             # contribute to target_bundles
-            target_bundles="${target_bundles},${bundle_spec_for_launch}"
+            target_bundles="${target_bundles}${NL}<setEntry value=\"${bundle_spec_for_launch}\"\/>"
         else
             # contribute to workspace_bundles
-            workspace_bundles="${workspace_bundles},${bundle_spec_for_launch}"
+            workspace_bundles="${workspace_bundles}${NL}<setEntry value=\"${bundle_spec_for_launch}\"\/>"
         fi
     done 
 done
 echo ' *** Target Bundles ***'
-echo "<stringAttribute key=\"target_bundles\" value=\"${target_bundles:1}\"/>"
+echo "${target_bundles}"
 echo ' *** Workspace Bundles ***'
-echo "<stringAttribute key=\"workspace_bundles\" value=\"${workspace_bundles:1}\"/>"
+echo "${workspace_bundles}"
 # Now patch the .launch file if provided
 while [ "$2" != "" ]; do
-    echo "Patching $2 ..."
-    if echo "$2" | grep -q winddbTest; then
-      patched_workspace_bundles="${workspace_bundles},com.sap.sailing.server.gateway.test.support@default:default"
-    else
-      patched_workspace_bundles="${workspace_bundles}"
+	if grep -q key=\"target_bundles\" "$2"; then
+		echo "Not patching $2  ... please use script for eclipse 2019-09 or older"
+	else
+        echo "Patching $2 ..."
+        if echo "$2" | grep -q winddbTest; then
+          patched_workspace_bundles="${workspace_bundles}${NL}<setEntry value=\"com.sap.sailing.server.gateway.test.support@default:default\"\/>${NL}"
+        else
+          patched_workspace_bundles="${workspace_bundles}"
+        fi
+	    target_bundles="<setAttribute key=\"selected_target_bundles\">${target_bundles}${NL}<\setAttribute>"
+	    patched_workspace_bundles="<setAttribute key=\"selected_workspace_bundles\">${patched_workspace_bundles}${NL}<\setAttribute>"
+	    perl -i -p0e "s/<setAttribute key=\"selected_target_bundles\">(.*?)<\/setAttribute>/${target_bundles}/sg" "$2"
+	    perl -i -p0e "s/<setAttribute key=\"selected_workspace_bundles\">(.*?)<\/setAttribute>/${patched_workspace_bundles}/sg" "$2"
     fi
-    sed -i 's/<stringAttribute key="target_bundles" value="[^"]*"/<stringAttribute key="target_bundles" value="'${target_bundles:1}'"/' "$2"
-    sed -i 's/<stringAttribute key="workspace_bundles" value="[^"]*"/<stringAttribute key="workspace_bundles" value="'${patched_workspace_bundles:1}'"/' "$2"
     shift
 done
