@@ -100,16 +100,17 @@ public class MasterDataImportPanel extends VerticalPanel {
         passwordBox.setWidth("300px");
         passwordPanel.add(passwordBox);
         HorizontalPanel userContextInformation = new HorizontalPanel();
-        userContextInformation.add(new Label(stringMessages.keepEmptyForDefaultUserAndPassword()));
+        userContextInformation.setWidth("350px");
+        userContextInformation.add(new Label(stringMessages.keepEmptyForDefaultUserAndPassword(), true));
         fetchIdsButton = new Button(stringMessages.importFetchRemoteLgs());
         fetchIdsButton.ensureDebugId("fetchLeaderboardGroupList");
         DialogUtils.linkEnterToButton(fetchIdsButton, usernameBox);
         DialogUtils.linkEnterToButton(fetchIdsButton, passwordBox);
 
         this.add(serverAddressPanel);
+        this.add(userContextInformation);
         this.add(usernamePanel);
         this.add(passwordPanel);
-        this.add(userContextInformation);
         this.add(fetchIdsButton);
 
         ScrollPanel scrollPanel = new ScrollPanel();
