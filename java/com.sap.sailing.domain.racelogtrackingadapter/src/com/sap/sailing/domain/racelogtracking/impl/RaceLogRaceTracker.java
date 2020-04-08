@@ -113,7 +113,6 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
         this.trackedRegatta = regatta;
         this.raceLogResolver = raceLogResolver;
         this.raceTrackingHandler = raceTrackingHandler;
-
         // add log listeners
         for (AbstractLog<?, ?> log : params.getLogHierarchy()) {
             if (log instanceof RaceLog) {
@@ -296,7 +295,7 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
         if (raceColumn.getTrackedRace(fleet) != null) {
             if (event != null) {
                 try {
-                    raceLog.revokeEvent(params.getService().getServerAuthor(), event,
+                    raceLog.revokeEvent(params.getServerAuthor(), event,
                             "could not start tracking because tracked race already exists");
                 } catch (NotRevokableException e) {
                     logger.log(Level.WARNING, "Couldn't revoke event "+event, e);
@@ -323,7 +322,7 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
             // this wakes up all waiting race handles
         } catch (Exception exception) {
             logger.log(Level.WARNING,
-                    "Error while creating race " + raceName + " for retatta " + trackedRegatta.getRegatta(), exception);
+                    "Error while creating race " + raceName + " for regatta " + trackedRegatta.getRegatta(), exception);
             try {
                 trackedRegattaRegistry.stopTracker(trackedRegatta.getRegatta(), this);
             } catch (Exception e) {

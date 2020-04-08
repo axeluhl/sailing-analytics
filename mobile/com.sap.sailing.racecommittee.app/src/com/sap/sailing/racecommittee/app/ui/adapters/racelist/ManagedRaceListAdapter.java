@@ -95,10 +95,11 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             viewItemsRaces.put(race, new RaceListDataTypeRace(race, mInflater));
             final SeriesBase series = race.getSeries();
             RaceState state = race.getState();
-            boolean draft = state.getFinishPositioningList() != null && state.getFinishPositioningList().hasConflicts();
-            boolean confirmed = state.getConfirmedFinishPositioningList() != null
-                    && state.getConfirmedFinishPositioningList().getCompetitorResults().hasConflicts();
-            boolean hasConflict = draft || confirmed;
+            CompetitorResults draft = state.getFinishPositioningList();
+            CompetitorResults confirmed = state.getConfirmedFinishPositioningList().getCompetitorResults();
+            boolean draftHasConflict = draft != null && draft.hasConflicts();
+            boolean confirmedHasConflict = confirmed != null && confirmed.hasConflicts();
+            boolean hasConflict = draftHasConflict || confirmedHasConflict;
             if (!viewItemsSeriesHeaders.containsKey(series)) {
                 viewItemsSeriesHeaders.put(series,
                         new RaceListDataTypeHeader(new RaceGroupSeries(race), mInflater, hasConflict));

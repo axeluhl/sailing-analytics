@@ -185,7 +185,8 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
      */
     void trackWithTracTrac(RegattaIdentifier regattaToAddTo, Iterable<TracTracRaceRecordDTO> rrs, String liveURI,
             String storedURI, String courseDesignUpdateURI, boolean trackWind, boolean correctWindByDeclination,
-            Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm, String tracTracUsername,
+            Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm, 
+            boolean useOfficialEventsToUpdateRaceLog, String tracTracUsername,
             String tracTracPassword, AsyncCallback<Void> callback);
 
     void trackWithSwissTiming(RegattaIdentifier regattaToAddTo, Iterable<SwissTimingRaceRecordDTO> rrs,
@@ -647,7 +648,7 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
 
     void importMasterData(String host, String[] names, boolean override, boolean compress, boolean exportWind,
             boolean exportDeviceConfigurations, String targetServerUsername, String targetServerPassword,
-            AsyncCallback<UUID> asyncCallback);
+            boolean exportTrackedRacesAndStartTracking, AsyncCallback<UUID> asyncCallback);
 
     void getImportOperationProgress(UUID id, AsyncCallback<DataImportProgress> asyncCallback);
 

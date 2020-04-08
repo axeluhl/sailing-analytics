@@ -63,7 +63,7 @@ public class RaceLogConnectivityParamsLoadAndStoreTest extends AbstractConnectiv
         RaceLogTrackingAdapterFactory.INSTANCE.getAdapter(domainObjectFactory.getBaseDomainFactory()).denoteAllRacesForRaceLogTracking(racingEventService, leaderboard,
                 /* race name prefix */ null);
         final RaceLogConnectivityParams rlParams = new RaceLogConnectivityParams(
-                racingEventService, regatta, leaderboard.getRaceColumnByName("R2"), fleet, leaderboard,
+                racingEventService.getServerAuthor(), regatta, leaderboard.getRaceColumnByName("R2"), fleet, leaderboard,
                 delayToLiveInMillis, domainObjectFactory.getBaseDomainFactory(), trackWind,
                 correctWindDirectionByMagneticDeclination);
         // store

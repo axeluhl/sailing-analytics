@@ -82,9 +82,12 @@ import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.resultimport.ResultUrlProvider;
 import com.sap.sailing.domain.statistics.Statistics;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
+import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParametersHandler;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
@@ -94,6 +97,7 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTracker;
 import com.sap.sse.common.PairingListCreationException;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -326,8 +330,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     DynamicTrackedRace createTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore,
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
             boolean useMarkPassingCalculator, TrackingConnectorInfo trackingConnectorInfo);
-
-    Regatta getOrCreateDefaultRegatta(String name, String boatClassName, Serializable id);
 
     /**
      * Creates a regatta and replicates this to all replicas currently attached.
@@ -914,4 +916,30 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     }
     
     CourseAndMarkConfigurationFactory getCourseAndMarkConfigurationFactory();
+    
+    /**
+     * @return A {@link RaceTrackingConnectivityParameters} for a given {@link RaceDefinition}. 
+     * Used for MasterDataImport
+     */
+    RaceTrackingConnectivityParameters getConnectivityParametersByRace(RaceDefinition raceDefinition);
+
+    RaceTrackingHandler getPermissionAwareRaceTrackingHandler();
+    
+    /**
+     * Uses the {@link #getPermissionAwareRaceTrackingHandler()} as the {@link RaceTrackingHandler}
+     */
+    @Override
+    RaceHandle addRace(RegattaIdentifier regattaToAddTo, RaceTrackingConnectivityParameters params, long timeoutInMilliseconds) throws Exception;
+    
+    TypeBasedServiceFinder<RaceTrackingConnectivityParametersHandler> getRaceTrackingConnectivityParamsServiceFinder();
+    
+    /**
+     * Import MasterData from a remote server URL. A caller might provide either targetServerUsername and
+     * targetServerPassword or targetServerBearerToken. If neither of those are provided the method will try to create
+     * or get the bearer token for the current user.
+     */
+    void importMasterData(final String urlAsString, final String[] groupNames, final boolean override,
+            final boolean compress, final boolean exportWind, final boolean exportDeviceConfigurations,
+            String targetServerUsername, String targetServerPassword, String targetServerBearerToken,
+            final boolean exportTrackedRacesAndStartTracking, final UUID importOperationId) throws IllegalArgumentException;
 }

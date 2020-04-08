@@ -803,7 +803,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String regattaDefinesResultDiscardingRules();
     String startsWithZeroScore();
     String masterDataImportPanel();
-    String importSuccess(int leaderboardGroups, int leaderboards, int events, int regattas, int mediaTracksImported);
+    String importSuccess(int leaderboardGroups, int leaderboards, int events, int regattas, int mediaTracksImported, int importedTrackedRaces);
     String importSuccessOverwriteInfo();
     String regattaOverviewConfiguration();
     String firstRaceIsNonDiscardableCarryForward();
@@ -2374,7 +2374,11 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String runVMG();
     String beatAngles();
     String runAngles();
+    String exportTrackedRacesAndStartTracking();
+    String exportTrackedRacesAndStartTrackingTooltip();
     String unsetPosition();
     String errorTryingToUpdateMarkProperties(String message);
     String confirmUnsettingPositionForMarkProperties(String name);
+    String useOfficialResultsForAutomaticUpdates();
+    String keepEmptyForDefaultUserAndPassword();
 }

@@ -87,5 +87,8 @@ public interface TrackedRegattaRegistry {
      * yet.
      */
     void stopTracker(Regatta regatta, RaceTracker tracker) throws MalformedURLException, IOException, InterruptedException;
+    
+
+    Regatta getOrCreateDefaultRegatta(String name, String boatClassName, Serializable id);
 
 }
