@@ -96,8 +96,7 @@ public class WhitelabelTest extends AbstractSeleniumTest {
         }
         setWhitelabel(true, getContextRoot());
     }
-    
-    
+
     @Test
     public void testHomepageWhitelabel() throws UnsupportedEncodingException {
         HomePage homePage = HomePage.goToPage(getWebDriver(), getContextRoot());

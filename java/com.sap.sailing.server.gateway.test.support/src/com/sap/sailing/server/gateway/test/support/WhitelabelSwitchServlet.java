@@ -16,7 +16,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class WhitelabelSwitchServlet extends HttpServlet {
 
-    private static final String COM_SAP_SAILING_DEBRANDING = "com.sap.sailing.debranding";
+    private static final String COM_SAP_SAILING_DEBRANDING = "com.sap.sse.debranding";
 
     private static final long serialVersionUID = 7132508855846001729L;
 
