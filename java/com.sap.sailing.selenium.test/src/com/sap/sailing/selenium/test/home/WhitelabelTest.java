@@ -59,7 +59,6 @@ public class WhitelabelTest extends AbstractSeleniumTest {
     public void setUp() {
         clearState(getContextRoot());
         super.setUp();
-        
         final RegattaDescriptor regattaDescriptor = new RegattaDescriptor(REGATTA_49ER, BOAT_CLASS_49ER);
         {
             final AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
@@ -74,18 +73,14 @@ public class WhitelabelTest extends AbstractSeleniumTest {
             editRegatta.addSeries(SERIES_QUALIFICATION);
             editRegatta.addSeries(SERIES_MEDALS);
             editRegatta.pressOk();
-            
             final SeriesEditDialogPO editSeriesQualification = regattaDetails.editSeries(SERIES_QUALIFICATION);
             editSeriesQualification.addRaces(1, 11, "Q");
             editSeriesQualification.pressOk();
-            
             final SeriesEditDialogPO editSeriesMedals = regattaDetails.editSeries(SERIES_MEDALS);
             editSeriesMedals.setMedalSeries(true);
             editSeriesMedals.addSingleRace("M");
             editSeriesMedals.pressOk();
-    
             trackRacesFor49er(regattaDescriptor, adminConsole.goToTracTracEvents());
-    
             final LeaderboardConfigurationPanelPO leaderboard = adminConsole.goToLeaderboardConfiguration();
             final LeaderboardDetailsPanelPO details = leaderboard.getLeaderboardDetails(REGATTA_49ER_WITH_SUFFIX);
             
@@ -100,9 +95,7 @@ public class WhitelabelTest extends AbstractSeleniumTest {
     @Test
     public void testHomepageWhitelabel() throws UnsupportedEncodingException {
         HomePage homePage = HomePage.goToPage(getWebDriver(), getContextRoot());
-
         assertThat(homePage.getPageTitle(), not(containsString("SAP")));
-
         validateIsDisplayed(homePage.getFavicon(), false);
         validateIsDisplayed(homePage.getSolutionsPageLink(), false);
         validateIsDisplayed(homePage.getSapSailingHeaderImage(), false);
@@ -116,10 +109,8 @@ public class WhitelabelTest extends AbstractSeleniumTest {
         validateIsDisplayed(homePage.getNewsLink(), false);
         validateIsDisplayed(homePage.getLanguageSelectionLabel(), true);
         assertThat(homePage.getLanguageSelectionLabel().getText(), not(containsString("SAP")));
-
         RaceBoardPage raceboardPage = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), REGATTA_49ER_WITH_SUFFIX,
                 REGATTA_49ER_WITH_SUFFIX, MEDAL_RACE_49ER, true);
-        
         assertThat(raceboardPage.isRaceBoardLogoExisting(),equalTo(false));
         validateIsDisplayed(raceboardPage.getDataByContainer(), false);
 
@@ -132,7 +123,6 @@ public class WhitelabelTest extends AbstractSeleniumTest {
         tracTracEvents.setFilterForTrackableRaces("(49er)");
         // races are filtered so that all shown entries belong to the correct regatta
         tracTracEvents.startTrackingForAllRaces();
-        
         final TrackedRacesListPO trackedRacesList = tracTracEvents.getTrackedRacesList();
         final List<TrackedRaceDescriptor> racesToWaitLoadingFor = new ArrayList<>();
         for(int i = 1; i<=11; i++) {
@@ -145,5 +135,4 @@ public class WhitelabelTest extends AbstractSeleniumTest {
     private void validateIsDisplayed(WebElement element, boolean displayed) {
         assertThat(element.isDisplayed(),equalTo(displayed));
     }
-    
 }
