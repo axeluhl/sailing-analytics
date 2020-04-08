@@ -17,7 +17,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpStatus;
 
 /**
- * Use ${[variable name]} to get strings replaced within static pages. All occurrences of the variables listed below
+ * Use ${[variable name]} to get strings replaced within static pages. No escape syntax is currently available. All occurrences of the variables listed below
  * that are found in the document will be replaced. The following variables are available at the moment:
  * <table border="1">
  * <tr>
