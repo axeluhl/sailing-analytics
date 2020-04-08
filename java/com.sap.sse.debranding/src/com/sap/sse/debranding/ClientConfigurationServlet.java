@@ -17,30 +17,49 @@ import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpStatus;
 
 /**
- * Use ${[variable name]} to get strings replaced within static pages.
- * These variables are available at the moment:
+ * Use ${[variable name]} to get strings replaced within static pages. All occurrences of the variables listed below
+ * that are found in the document will be replaced. The following variables are available at the moment:
  * <table border="1">
- *      <tr>
- *              <th>Variablename</th>
- *              <th>branded value</th>
- *              <th>debranded/whitelabeled</th>
- *      </tr>
- *      <tr>
- *              <td>SAP</td>
- *              <td>SAP&nbsp;</td>
- *              <td></td>
- *      </tr>
- *      <tr>
- *              <td>debrandingActive</td>
- *              <td>false</td>
- *              <td>true</td>
- *      </tr>
- *      <tr>
- *              <td>whitelabeled</td>
- *              <td></td>
- *              <td>-whitelabeled</td>
- *      </tr>
+ * <tr>
+ * <th>Variablename</th>
+ * <th>branded value</th>
+ * <th>debranded/whitelabeled</th>
+ * </tr>
+ * <tr>
+ * <td>"SAP"</td>
+ * <td>"SAP&nbsp;"</td>
+ * <td>""</td>
+ * </tr>
+ * <tr>
+ * <td>"debrandingActive"</td>
+ * <td>"false"</td>
+ * <td>"true"</td>
+ * </tr>
+ * <tr>
+ * <td>"whitelabeled"</td>
+ * <td>""</td>
+ * <td>"-whitelabeled"</td>
+ * </tr>
  * </table>
+ * <p>
+ *
+ * Register as a servlet for all the URLs that produce such static pages that you'd like to run replacements on. Example
+ * registration in a {@code web.xml} configuration file:
+ * 
+ * <pre>
+ *   &lt;servlet&gt;
+ *       &lt;display-name&gt;ClientConfigurationServlet&lt;/display-name&gt;
+ *       &lt;servlet-name&gt;ClientConfigurationServlet&lt;/servlet-name&gt;
+ *       &lt;servlet-class&gt;com.sap.sse.debranding.ClientConfigurationServlet&lt;/servlet-class&gt;
+ *   &lt;/servlet&gt;
+ *   &lt;servlet-mapping&gt;
+ *       &lt;servlet-name&gt;ClientConfigurationServlet&lt;/servlet-name&gt;
+ *       &lt;url-pattern&gt;*.html&lt;/url-pattern&gt;
+ *   &lt;/servlet-mapping&gt;
+ * </pre>
+ * <p>
+ * 
+ * The servlet caches the results, both, for the branded as well as the unbranded/replaced contents.
  * 
  * @see com.sap.sailing.server.gateway.test.support.WhitelabelSwitchServlet
  * @author Georg Herdt
@@ -61,25 +80,24 @@ public class ClientConfigurationServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         final boolean deBrandingActive = Boolean.valueOf(System.getProperty(DEBRANDING_PROPERTY_NAME, "false"));
         final String servletPath = req.getServletPath();
-        byte[] cachedPage = null;
-        if ((cachedPage = cache.get(generateKey(servletPath, deBrandingActive))) != null) {
+        final byte[] cachedPage;
+        final String pageKey = generateKey(servletPath, deBrandingActive);
+        if ((cachedPage = cache.get(pageKey)) != null) {
             IOUtils.write(cachedPage, resp.getOutputStream());
-            return;
-        }
-        try (InputStream in = this.getServletContext().getResourceAsStream(servletPath);) {
-            byte[] buffer = IOUtils.toByteArray(in);
-
-            String content = new String(buffer);
-            for (Map.Entry<String, String> item : createReplacementMap(deBrandingActive).entrySet()) {
-                content = content.replace("${" + item.getKey() + "}", item.getValue());
+        } else {
+            try (InputStream in = this.getServletContext().getResourceAsStream(servletPath)) {
+                byte[] buffer = IOUtils.toByteArray(in);
+                String content = new String(buffer);
+                for (Map.Entry<String, String> item : createReplacementMap(deBrandingActive).entrySet()) {
+                    content = content.replace("${" + item.getKey() + "}", item.getValue());
+                }
+                byte[] bytes = content.getBytes();
+                IOUtils.write(bytes, resp.getOutputStream());
+                cache.computeIfAbsent(pageKey, key -> bytes);
+            } catch (RuntimeException e) {
+                logger.log(Level.WARNING, "could not process or read resource " + servletPath, e);
+                resp.sendError(HttpStatus.SC_INTERNAL_SERVER_ERROR);
             }
-            
-            byte[] bytes = content.getBytes();
-            IOUtils.write(bytes, resp.getOutputStream());
-            cache.computeIfAbsent(generateKey(servletPath, deBrandingActive), key -> bytes);
-        } catch (RuntimeException e) {
-            logger.log(Level.WARNING, "could not process or read resource " + servletPath, e);
-            resp.sendError(HttpStatus.SC_INTERNAL_SERVER_ERROR);
         }
     }
 

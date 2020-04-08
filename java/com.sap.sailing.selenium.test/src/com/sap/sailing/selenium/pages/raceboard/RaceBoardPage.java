@@ -149,8 +149,6 @@ public class RaceBoardPage extends HostPageWithAuthentication {
         return dataByContainer;
     }
     
-    
-    
     public static RaceBoardPage goToRaceboardUrl(WebDriver webDriver,String context, String leaderboardName, String regattaName,
             String raceName, boolean whitelabel) throws UnsupportedEncodingException {
         return goToRaceboardUrl(webDriver, context, leaderboardName, regattaName, raceName, null, whitelabel);
@@ -158,7 +156,7 @@ public class RaceBoardPage extends HostPageWithAuthentication {
 
     public static RaceBoardPage goToRaceboardUrl(WebDriver webDriver,String context, String leaderboardName, String regattaName,
             String raceName, String raceMode, boolean whitelabel) throws UnsupportedEncodingException {
-//        private static final String EVENT_LINK = "gwt/RaceBoard.html?leaderboardName=BMW+Cup+(J80)&regattaName=BMW+Cup+(J80)&raceName=BMW+Cup+Race+1&canReplayDuringLiveRaces=true";
+        // structure of an event link: "gwt/RaceBoard.html?leaderboardName=BMW+Cup+(J80)&regattaName=BMW+Cup+(J80)&raceName=BMW+Cup+Race+1&canReplayDuringLiveRaces=true"
         String escapedLeaderBoardName = URLEncoder.encode(leaderboardName,"UTF-8");
         String escapedRegattaName = URLEncoder.encode(regattaName, "UTF-8");
         String escapedRaceName = URLEncoder.encode(raceName, "UTF-8");
