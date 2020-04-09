@@ -74,57 +74,8 @@ public class MarkTemplatePanel extends FlowPanel {
                 SecuredDomainType.MARK_TEMPLATE);
         add(buttonAndFilterPanel);
         allMarkTemplates = new ArrayList<>();
-        buttonAndFilterPanel.addUnsecuredAction(stringMessages.refresh(), new Command() {
-
-            @Override
-            public void execute() {
-                loadMarkTemplates();
-            }
-        });
-        buttonAndFilterPanel.addCreateAction(stringMessages.add(), new Command() {
-            @Override
-            public void execute() {
-                openEditMarkTemplateDialog(new MarkTemplateDTO());
-                // TODO add action
-            }
-        });
-
-        final Button removeButton = buttonAndFilterPanel.addRemoveAction(stringMessages.remove(), new Command() {
-
-            @Override public void execute() {
-                if (askUserForConfirmation()) {
-                    removeMarkTemplates(refreshableSelectionModel.getSelectedSet());
-                }
-            }
-
-            private void removeMarkTemplates(Collection<MarkTemplateDTO> markTemplateDTOS) {
-                if (!markTemplateDTOS.isEmpty()) {
-                    sailingService.removeMarkTemplates(markTemplateDTOS, new AsyncCallback<Void>() {
-                        @Override public void onFailure(Throwable caught) {
-                            errorReporter.reportError("Error trying to remove mark templates:" + caught.getMessage());
-                        }
-
-                        @Override public void onSuccess(Void result) {
-                            refreshMarkTemplates();
-                        }
-                    });
-                }
-            }
-
-            private boolean askUserForConfirmation() {
-                if (refreshableSelectionModel.itemIsSelectedButNotVisible(markTemplateTable.getVisibleItems())) {
-                    final String markTemplatesNames = refreshableSelectionModel.getSelectedSet().stream()
-                            .map(MarkTemplateDTO::getName).collect(Collectors.joining("\n"));
-                    return Window.confirm(stringMessages.doYouReallyWantToRemoveNonVisibleMarkTemplates(markTemplatesNames));
-                }
-                return Window.confirm(stringMessages.doYouReallyWantToRemoveMarkTemplates());
-            }
-        });
-        removeButton.setEnabled(false);
-
         Label lblFilterRaces = new Label(stringMessages.filterMarkTemplateByName() + ":");
         lblFilterRaces.setWordWrap(false);
-        buttonAndFilterPanel.addUnsecuredWidget(lblFilterRaces);
 
         this.filterableMarkTemplates = new LabeledAbstractFilterablePanel<MarkTemplateDTO>(lblFilterRaces,
                 allMarkTemplates, markTemplateListDataProvider, stringMessages) {
@@ -142,9 +93,63 @@ public class MarkTemplatePanel extends FlowPanel {
                 return markTemplateTable;
             }
         };
-        createMarkTemplatesTable(userService);
-        buttonAndFilterPanel.addRemoveButtonStateUpdater(refreshableSelectionModel, stringMessages.remove());
         filterableMarkTemplates.getTextBox().ensureDebugId("MarkTemplatesFilterTextBox");
+        createMarkTemplatesTable(userService);
+        buttonAndFilterPanel.addUnsecuredAction(stringMessages.refresh(), new Command() {
+
+            @Override
+            public void execute() {
+                loadMarkTemplates();
+            }
+        });
+        buttonAndFilterPanel.addCreateAction(stringMessages.add(), new Command() {
+            @Override
+            public void execute() {
+                openEditMarkTemplateDialog(new MarkTemplateDTO());
+                // TODO add action
+            }
+        });
+
+        final Button removeButton = buttonAndFilterPanel.addRemoveAction(refreshableSelectionModel,
+                stringMessages.remove(), new Command() {
+
+                    @Override
+                    public void execute() {
+                        if (askUserForConfirmation()) {
+                            removeMarkTemplates(refreshableSelectionModel.getSelectedSet());
+                        }
+                    }
+
+                    private void removeMarkTemplates(Collection<MarkTemplateDTO> markTemplateDTOS) {
+                        if (!markTemplateDTOS.isEmpty()) {
+                            sailingService.removeMarkTemplates(markTemplateDTOS, new AsyncCallback<Void>() {
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    errorReporter.reportError(
+                                            "Error trying to remove mark templates:" + caught.getMessage());
+                                }
+
+                                @Override
+                                public void onSuccess(Void result) {
+                                    refreshMarkTemplates();
+                                }
+                            });
+                        }
+                    }
+
+                    private boolean askUserForConfirmation() {
+                        if (refreshableSelectionModel
+                                .itemIsSelectedButNotVisible(markTemplateTable.getVisibleItems())) {
+                            final String markTemplatesNames = refreshableSelectionModel.getSelectedSet().stream()
+                                    .map(MarkTemplateDTO::getName).collect(Collectors.joining("\n"));
+                            return Window.confirm(
+                                    stringMessages.doYouReallyWantToRemoveNonVisibleMarkTemplates(markTemplatesNames));
+                        }
+                        return Window.confirm(stringMessages.doYouReallyWantToRemoveMarkTemplates());
+                    }
+                });
+        removeButton.setEnabled(false);
+        buttonAndFilterPanel.addUnsecuredWidget(lblFilterRaces);
         buttonAndFilterPanel.addUnsecuredWidget(filterableMarkTemplates);
         filterableMarkTemplates
                 .setUpdatePermissionFilterForCheckbox(event -> userService.hasPermission(event, DefaultActions.UPDATE));

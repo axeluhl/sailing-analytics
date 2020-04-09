@@ -90,54 +90,8 @@ public class MarkPropertiesPanel extends FlowPanel {
                 SecuredDomainType.MARK_TEMPLATE);
         add(buttonAndFilterPanel);
         allMarkProperties = new ArrayList<>();
-        buttonAndFilterPanel.addUnsecuredAction(stringMessages.refresh(), new Command() {
-            @Override
-            public void execute() {
-                loadMarkProperties();
-            }
-        });
-        buttonAndFilterPanel.addCreateAction(stringMessages.add(), new Command() {
-            @Override
-            public void execute() {
-                openEditMarkPropertiesDialog(new MarkPropertiesDTO());
-            }
-        });
-        final Button removeButton = buttonAndFilterPanel.addRemoveAction(stringMessages.remove(), new Command() {
-
-            @Override public void execute() {
-                if (askUserForConfirmation()) {
-                    removeMarkProperties(refreshableSelectionModel.getSelectedSet());
-                }
-            }
-
-            private void removeMarkProperties(Collection<MarkPropertiesDTO> markPropertiesDTOS) {
-                if (!markPropertiesDTOS.isEmpty()) {
-                    sailingService.removeMarkProperties(markPropertiesDTOS, new AsyncCallback<Void>() {
-                        @Override public void onFailure(Throwable caught) {
-                            errorReporter.reportError("Error trying to remove mark properties:" + caught.getMessage());
-                        }
-
-                        @Override public void onSuccess(Void result) {
-                            refreshMarkProperties();
-                        }
-                    });
-                }
-            }
-
-            private boolean askUserForConfirmation() {
-                if (refreshableSelectionModel.itemIsSelectedButNotVisible(markPropertiesTable.getVisibleItems())) {
-                    final String markPropertiesNames = refreshableSelectionModel.getSelectedSet().stream()
-                            .map(MarkPropertiesDTO::getName).collect(Collectors.joining("\n"));
-                    return Window.confirm(stringMessages.doYouReallyWantToRemoveNonVisibleMarkProperties(markPropertiesNames));
-                }
-                return Window.confirm(stringMessages.doYouReallyWantToRemoveSeveralMarkProperties());
-            }
-        });
-        removeButton.setEnabled(false);
-
         Label lblFilterRaces = new Label(stringMessages.filterMarkPropertiesByName() + ":");
         lblFilterRaces.setWordWrap(false);
-        buttonAndFilterPanel.addUnsecuredWidget(lblFilterRaces);
         this.filterableMarkProperties = new LabeledAbstractFilterablePanel<MarkPropertiesDTO>(lblFilterRaces,
                 allMarkProperties, markPropertiesListDataProvider, stringMessages) {
             @Override
@@ -156,7 +110,58 @@ public class MarkPropertiesPanel extends FlowPanel {
             }
         };
         createMarkPropertiesTable(userService);
-        buttonAndFilterPanel.addRemoveButtonStateUpdater(refreshableSelectionModel, stringMessages.remove());
+        buttonAndFilterPanel.addUnsecuredAction(stringMessages.refresh(), new Command() {
+            @Override
+            public void execute() {
+                loadMarkProperties();
+            }
+        });
+        buttonAndFilterPanel.addCreateAction(stringMessages.add(), new Command() {
+            @Override
+            public void execute() {
+                openEditMarkPropertiesDialog(new MarkPropertiesDTO());
+            }
+        });
+        final Button removeButton = buttonAndFilterPanel.addRemoveAction(refreshableSelectionModel,
+                stringMessages.remove(), new Command() {
+
+                    @Override
+                    public void execute() {
+                        if (askUserForConfirmation()) {
+                            removeMarkProperties(refreshableSelectionModel.getSelectedSet());
+                        }
+                    }
+
+                    private void removeMarkProperties(Collection<MarkPropertiesDTO> markPropertiesDTOS) {
+                        if (!markPropertiesDTOS.isEmpty()) {
+                            sailingService.removeMarkProperties(markPropertiesDTOS, new AsyncCallback<Void>() {
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    errorReporter.reportError(
+                                            "Error trying to remove mark properties:" + caught.getMessage());
+                                }
+
+                                @Override
+                                public void onSuccess(Void result) {
+                                    refreshMarkProperties();
+                                }
+                            });
+                        }
+                    }
+
+                    private boolean askUserForConfirmation() {
+                        if (refreshableSelectionModel
+                                .itemIsSelectedButNotVisible(markPropertiesTable.getVisibleItems())) {
+                            final String markPropertiesNames = refreshableSelectionModel.getSelectedSet().stream()
+                                    .map(MarkPropertiesDTO::getName).collect(Collectors.joining("\n"));
+                            return Window.confirm(stringMessages
+                                    .doYouReallyWantToRemoveNonVisibleMarkProperties(markPropertiesNames));
+                        }
+                        return Window.confirm(stringMessages.doYouReallyWantToRemoveSeveralMarkProperties());
+                    }
+                });
+        removeButton.setEnabled(false);
+        buttonAndFilterPanel.addUnsecuredWidget(lblFilterRaces);
         filterableMarkProperties.getTextBox().ensureDebugId("MarkPropertiesFilterTextBox");
         buttonAndFilterPanel.addUnsecuredWidget(filterableMarkProperties);
         filterableMarkProperties

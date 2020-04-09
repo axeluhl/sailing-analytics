@@ -32,7 +32,6 @@ public class AccessControlledButtonPanel extends Composite {
     private final Supplier<Boolean> createPermissionCheck, createPermissionCheckWithoutServerCreateObjectCheck,
             removePermissionCheck, updatePermissionCheck;
     private final BiConsumer<Button, Supplier<Boolean>> visibilityUpdater = (btn, check) -> btn.setVisible(check.get());
-    private Button removeButton;
 
     /**
      * Creates an {@link AccessControlledButtonPanel} instance for the given {@link HasPermissions type} using the
@@ -115,16 +114,30 @@ public class AccessControlledButtonPanel extends Composite {
      * @return the created {@link Button} instance
      */
     public Button addRemoveAction(final String text, final Command callback) {
-        removeButton = addAction(text, removePermissionCheck, callback);
-        return removeButton;
+        return addAction(text, removePermissionCheck, callback);
     }
 
-    public <T> void addRemoveButtonStateUpdater(RefreshableMultiSelectionModel<T> selectionModel, String text) {
+    /**
+     * Adds a secured action button, which is only visible if the current user has any
+     * {@link UserService#hasCurrentUserPermissionToDeleteAnyObjectOfType(HasPermissions) delete permission} for the
+     * {@link HasPermissions type} provided in this {@link AccessControlledButtonPanel}'s constructor.
+     *
+     * @param selectionModel
+     *            the selection model of the table
+     * @param text
+     *            the {@link String text} to show on the button
+     * @param callback
+     *            the {@link Command callback} to execute on button click, if permission is granted
+     * @return the created {@link Button} instance
+     */
+    public <T> Button addRemoveAction(RefreshableMultiSelectionModel<T> selectionModel, final String text, final Command callback) {
+        final Button removeButton = addAction(text, removePermissionCheck, callback);
         selectionModel.addSelectionChangeHandler((event) -> {
             Set<T> selectedSet = selectionModel.getSelectedSet();
             removeButton.setEnabled(!selectedSet.isEmpty());
             removeButton.setText(selectedSet.size() <= 1 ? text : text + '(' + selectedSet.size() + ')');
         });
+        return removeButton;
     }
 
     /**

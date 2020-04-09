@@ -38,10 +38,10 @@ import com.sap.sse.security.ui.client.usermanagement.roles.UserRoleDefinitionPan
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
 public class UserManagementPanel<TR extends CellTableWithCheckboxResources> extends DockPanel {
-    
+
     private final List<UserCreatedEventHandler> userCreatedHandlers = new ArrayList<>();
     private final List<UserDeletedEventHandler> userDeletedHandlers = new ArrayList<>();
-    
+
     private final UserTableWrapper<RefreshableMultiSelectionModel<UserDTO>, TR> userList;
     private final RefreshableMultiSelectionModel<UserDTO> userSelectionModel;
     private final TextBox userNameTextbox;
@@ -49,9 +49,9 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
 
     public UserManagementPanel(final UserService userService, final StringMessages stringMessages,
             ErrorReporter errorReporter, TR tableResources) {
-        this(userService, stringMessages, Collections.<HasPermissions>emptySet(), errorReporter, tableResources);
+        this(userService, stringMessages, Collections.<HasPermissions> emptySet(), errorReporter, tableResources);
     }
-    
+
     public UserManagementPanel(final UserService userService, final StringMessages stringMessages,
             Iterable<HasPermissions> additionalPermissions, ErrorReporter errorReporter, TR tableResources) {
         final UserManagementServiceAsync userManagementService = userService.getUserManagementService();
@@ -73,40 +73,40 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
                 e -> editRolesAndPermissionsForUserButton.setEnabled(!userNameTextbox.getText().isEmpty()));
         editRolesAndPermissionsForUserButton.setEnabled(false);
         userSelectionModel = userList.getSelectionModel();
-        final Button deleteButton = buttonPanel.addRemoveAction(stringMessages.remove(), () -> {
-                assert userSelectionModel.getSelectedSet().size() > 0;
-                final Set<UserDTO> usersToDelete = new HashSet<>();
-                final Set<String> usernamesToDelete = new HashSet<>();
-                for (UserDTO userToDelete : userSelectionModel.getSelectedSet()) {
-                    usersToDelete.add(userToDelete);
-                    usernamesToDelete.add(userToDelete.getName());
-                }
-                if (Window.confirm(usernamesToDelete.size() == 1
-                        ? stringMessages.doYouReallyWantToDeleteUser(usernamesToDelete.iterator().next())
-                        : stringMessages.doYouReallyWantToDeleteNUsers(usernamesToDelete.size()))) {
-                    userManagementService.deleteUsers(usernamesToDelete, new AsyncCallback<Set<SuccessInfo>>() {
-                        @Override
-                        public void onSuccess(Set<SuccessInfo> result) {
-                            for (UserDTO userToDelete : usersToDelete) {
-                                for (UserDeletedEventHandler userDeletedHandler : userDeletedHandlers) {
-                                    userDeletedHandler.onUserDeleted(userToDelete);
+        final Button deleteButton = buttonPanel.addRemoveAction(userList.getSelectionModel(), stringMessages.remove(),
+                () -> {
+                    assert userSelectionModel.getSelectedSet().size() > 0;
+                    final Set<UserDTO> usersToDelete = new HashSet<>();
+                    final Set<String> usernamesToDelete = new HashSet<>();
+                    for (UserDTO userToDelete : userSelectionModel.getSelectedSet()) {
+                        usersToDelete.add(userToDelete);
+                        usernamesToDelete.add(userToDelete.getName());
+                    }
+                    if (Window.confirm(usernamesToDelete.size() == 1
+                            ? stringMessages.doYouReallyWantToDeleteUser(usernamesToDelete.iterator().next())
+                            : stringMessages.doYouReallyWantToDeleteNUsers(usernamesToDelete.size()))) {
+                        userManagementService.deleteUsers(usernamesToDelete, new AsyncCallback<Set<SuccessInfo>>() {
+                            @Override
+                            public void onSuccess(Set<SuccessInfo> result) {
+                                for (UserDTO userToDelete : usersToDelete) {
+                                    for (UserDeletedEventHandler userDeletedHandler : userDeletedHandlers) {
+                                        userDeletedHandler.onUserDeleted(userToDelete);
+                                    }
+                                }
+                                for (SuccessInfo successInfo : result) {
+                                    Notification.notify(successInfo.getMessage(), NotificationType.SUCCESS);
                                 }
                             }
-                            for (SuccessInfo successInfo : result) {
-                                Notification.notify(successInfo.getMessage(), NotificationType.SUCCESS);
-                            }
-                        }
 
-                        @Override
-                        public void onFailure(Throwable caught) {
-                        errorReporter.reportError(stringMessages.errorDeletingUser(usernamesToDelete.iterator().next(),
-                                caught.getMessage()));
-                        }
-                    });
-                }
-        });
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter.reportError(stringMessages
+                                        .errorDeletingUser(usernamesToDelete.iterator().next(), caught.getMessage()));
+                            }
+                        });
+                    }
+                });
         deleteButton.setEnabled(userSelectionModel.getSelectedSet().size() >= 1);
-        buttonPanel.addRemoveButtonStateUpdater(userSelectionModel, stringMessages.remove());
         ScrollPanel scrollPanel = new ScrollPanel(userList.asWidget());
         LabeledAbstractFilterablePanel<UserDTO> filterBox = userList.getFilterField();
         filterBox.getElement().setPropertyString("placeholder", stringMessages.filterUsers());
@@ -132,8 +132,7 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
         updateUsers();
         final HorizontalPanel detailsPanel = new HorizontalPanel();
         // add details panel for user roles
-        userRoleDefinitionPanel = new UserRoleDefinitionPanel(userService, stringMessages,
-                errorReporter,
+        userRoleDefinitionPanel = new UserRoleDefinitionPanel(userService, stringMessages, errorReporter,
                 tableResources, userList.getSelectionModel(), () -> updateUsers(), SuggestBox::new, TextBox::new);
         detailsPanel.add(userRoleDefinitionPanel);
         // add details panel for user permissions
@@ -162,8 +161,7 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
                                     updateUsers();
                                 }
                             }).show();
-                }
-                else {
+                } else {
                     Notification.notify(StringMessages.INSTANCE.userNotFound(userNameTextbox.getText()),
                             NotificationType.ERROR);
                 }
@@ -184,26 +182,26 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
         userList.refreshUserList((Callback<Iterable<UserDTO>, Throwable>) null);
     }
 
-    public void addUserCreatedEventHandler(UserCreatedEventHandler handler){
+    public void addUserCreatedEventHandler(UserCreatedEventHandler handler) {
         this.userCreatedHandlers.add(handler);
     }
-    
-    public void removeUserCreatedEventHandler(UserCreatedEventHandler handler){
+
+    public void removeUserCreatedEventHandler(UserCreatedEventHandler handler) {
         this.userCreatedHandlers.remove(handler);
     }
-    
+
     public static interface UserCreatedEventHandler extends EventHandler {
         void onUserCreated(UserDTO user);
     }
 
-    public void addUserDeletedEventHandler(UserDeletedEventHandler handler){
+    public void addUserDeletedEventHandler(UserDeletedEventHandler handler) {
         this.userDeletedHandlers.add(handler);
     }
-    
-    public void removeUserDeletedEventHandler(UserDeletedEventHandler handler){
+
+    public void removeUserDeletedEventHandler(UserDeletedEventHandler handler) {
         this.userDeletedHandlers.remove(handler);
     }
-    
+
     public static interface UserDeletedEventHandler extends EventHandler {
         void onUserDeleted(UserDTO user);
     }

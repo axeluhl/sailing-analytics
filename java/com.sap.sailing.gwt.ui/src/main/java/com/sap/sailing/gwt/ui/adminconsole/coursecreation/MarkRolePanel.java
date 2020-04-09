@@ -73,55 +73,8 @@ public class MarkRolePanel extends FlowPanel {
                 SecuredDomainType.MARK_ROLE);
         add(buttonAndFilterPanel);
         allMarkRoles = new ArrayList<>();
-        buttonAndFilterPanel.addUnsecuredAction(stringMessages.refresh(), new Command() {
-
-            @Override
-            public void execute() {
-                loadMarkRoles();
-            }
-        });
-        buttonAndFilterPanel.addCreateAction(stringMessages.add(), new Command() {
-            @Override
-            public void execute() {
-                openEditMarkRoleDialog(new MarkRoleDTO());
-            }
-        });
-        final Button removeButton = buttonAndFilterPanel.addRemoveAction(stringMessages.remove(), new Command() {
-
-            @Override public void execute() {
-                if (askUserForConfirmation()) {
-                    removeMarkRoles(refreshableSelectionModel.getSelectedSet());
-                }
-            }
-
-            private void removeMarkRoles(Collection<MarkRoleDTO> markRoleDTOS) {
-                if (!markRoleDTOS.isEmpty()) {
-                    sailingService.removeMarkRoles(markRoleDTOS, new AsyncCallback<Void>() {
-                        @Override public void onFailure(Throwable caught) {
-                            errorReporter.reportError("Error trying to remove mark roles:" + caught.getMessage());
-                        }
-
-                        @Override public void onSuccess(Void result) {
-                            refreshMarkRoles();
-                        }
-                    });
-                }
-            }
-
-            private boolean askUserForConfirmation() {
-                if (refreshableSelectionModel.itemIsSelectedButNotVisible(markRolesTable.getVisibleItems())) {
-                    final String markRolesNames = refreshableSelectionModel.getSelectedSet().stream()
-                            .map(MarkRoleDTO::getName).collect(Collectors.joining("\n"));
-                    return Window.confirm(stringMessages.doYouReallyWantToRemoveNonVisibleMarkRoles(markRolesNames));
-                }
-                return Window.confirm(stringMessages.doYouReallyWantToRemoveMarkRoles());
-            }
-        });
-
-        removeButton.setEnabled(false);
         Label lblFilter = new Label(stringMessages.filterMarkRoles() + ":");
         lblFilter.setWordWrap(false);
-        buttonAndFilterPanel.addUnsecuredWidget(lblFilter);
         this.filterableMarkRoles = new LabeledAbstractFilterablePanel<MarkRoleDTO>(lblFilter, allMarkRoles,
                 markRoleListDataProvider, stringMessages) {
             @Override
@@ -138,7 +91,59 @@ public class MarkRolePanel extends FlowPanel {
             }
         };
         createMarkRoleTable(userService);
-        buttonAndFilterPanel.addRemoveButtonStateUpdater(refreshableSelectionModel, stringMessages.remove());
+        buttonAndFilterPanel.addUnsecuredAction(stringMessages.refresh(), new Command() {
+
+            @Override
+            public void execute() {
+                loadMarkRoles();
+            }
+        });
+        buttonAndFilterPanel.addCreateAction(stringMessages.add(), new Command() {
+            @Override
+            public void execute() {
+                openEditMarkRoleDialog(new MarkRoleDTO());
+            }
+        });
+        final Button removeButton = buttonAndFilterPanel.addRemoveAction(refreshableSelectionModel,
+                stringMessages.remove(), new Command() {
+
+                    @Override
+                    public void execute() {
+                        if (askUserForConfirmation()) {
+                            removeMarkRoles(refreshableSelectionModel.getSelectedSet());
+                        }
+                    }
+
+                    private void removeMarkRoles(Collection<MarkRoleDTO> markRoleDTOS) {
+                        if (!markRoleDTOS.isEmpty()) {
+                            sailingService.removeMarkRoles(markRoleDTOS, new AsyncCallback<Void>() {
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    errorReporter
+                                            .reportError("Error trying to remove mark roles:" + caught.getMessage());
+                                }
+
+                                @Override
+                                public void onSuccess(Void result) {
+                                    refreshMarkRoles();
+                                }
+                            });
+                        }
+                    }
+
+                    private boolean askUserForConfirmation() {
+                        if (refreshableSelectionModel.itemIsSelectedButNotVisible(markRolesTable.getVisibleItems())) {
+                            final String markRolesNames = refreshableSelectionModel.getSelectedSet().stream()
+                                    .map(MarkRoleDTO::getName).collect(Collectors.joining("\n"));
+                            return Window
+                                    .confirm(stringMessages.doYouReallyWantToRemoveNonVisibleMarkRoles(markRolesNames));
+                        }
+                        return Window.confirm(stringMessages.doYouReallyWantToRemoveMarkRoles());
+                    }
+                });
+
+        removeButton.setEnabled(false);
+        buttonAndFilterPanel.addUnsecuredWidget(lblFilter);
         filterableMarkRoles.getTextBox().ensureDebugId("MarkRolesFilterTextBox");
         buttonAndFilterPanel.addUnsecuredWidget(filterableMarkRoles);
         filterableMarkRoles
@@ -287,7 +292,6 @@ public class MarkRolePanel extends FlowPanel {
         markRolesTable.addColumn(idColumn, stringMessages.id());
         markRolesTable.addColumn(actionsColumn, stringMessages.actions());
     }
-
 
     private void openEditMarkRoleDialog(final MarkRoleDTO originalMarkRole) {
         final MarkRoleEditDialog dialog = new MarkRoleEditDialog(stringMessages, originalMarkRole,
