@@ -38,9 +38,6 @@ public interface UserManagementServiceAsync {
 
     void getAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, AsyncCallback<AccessControlListAnnotationDTO> callback);
 
-    void updateAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
-            Map<String, Set<String>> permissionStrings, AsyncCallback<AccessControlListDTO> callback);
-
     void getAccessControlListWithoutPruning(QualifiedObjectIdentifier idOfAccessControlledObject,
             AsyncCallback<AccessControlListDTO> updateAclAsyncCallback);
 
