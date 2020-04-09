@@ -90,7 +90,7 @@ public class MasterDataImportPanel extends VerticalPanel {
         HorizontalPanel usernamePanel = new HorizontalPanel();
         usernamePanel.add(new Label(stringMessages.username()));
         usernameBox = new TextBox();
-        usernameBox.setText("admin");
+        usernameBox.setText("");
         usernameBox.setWidth("300px");
         usernamePanel.add(usernameBox);
         HorizontalPanel passwordPanel = new HorizontalPanel();
@@ -99,12 +99,16 @@ public class MasterDataImportPanel extends VerticalPanel {
         passwordBox.setText("");
         passwordBox.setWidth("300px");
         passwordPanel.add(passwordBox);
+        HorizontalPanel userContextInformation = new HorizontalPanel();
+        userContextInformation.setWidth("350px");
+        userContextInformation.add(new Label(stringMessages.keepEmptyForDefaultUserAndPassword(), true));
         fetchIdsButton = new Button(stringMessages.importFetchRemoteLgs());
         fetchIdsButton.ensureDebugId("fetchLeaderboardGroupList");
         DialogUtils.linkEnterToButton(fetchIdsButton, usernameBox);
         DialogUtils.linkEnterToButton(fetchIdsButton, passwordBox);
 
         this.add(serverAddressPanel);
+        this.add(userContextInformation);
         this.add(usernamePanel);
         this.add(passwordPanel);
         this.add(fetchIdsButton);

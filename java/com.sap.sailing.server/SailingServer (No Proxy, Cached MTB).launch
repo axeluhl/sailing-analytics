@@ -121,7 +121,6 @@
 <setEntry value="com.sap.sailing.domain.windfinderadapter:true"/>
 <setEntry value="com.sap.sailing.server:true"/>
 <setEntry value="com.sap.sailing.server.gateway:true"/>
-<setEntry value="com.tractrac.clientmodule:default"/>
 <setEntry value="com.sap.sailing.declination:default"/>
 <setEntry value="com.sap.sailing.domain.persistence:default"/>
 <setEntry value="com.sap.sailing.domain.swisstimingadapter:true"/>
@@ -151,7 +150,6 @@
 <setEntry value="com.sap.sailing.xrr.structureimport:default"/>
 <setEntry value="com.sap.sailing.server.gateway.serialization.shared.android:default"/>
 <setEntry value="com.sap.sailing.server.gateway.serialization:default"/>
-<setEntry value="com.sap.sailing.dashboards.gwt:true"/>
 <setEntry value="com.sap.sailing.dashboards.gwt:true"/>
 <setEntry value="com.sap.sailing.datamining:true"/>
 <setEntry value="com.sap.sailing.datamining.shared:default"/>
