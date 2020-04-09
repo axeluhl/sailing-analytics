@@ -18,7 +18,7 @@ import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.gwt.shared.Branding;
+import com.sap.sse.gwt.shared.ClientConfiguration;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.userprofile.desktop.userheader.UserHeader;
 
@@ -73,7 +73,7 @@ public class TabletAndDesktopUserProfileView extends Composite
     public void navigateTabsTo(AbstractUserProfilePlace place) {
         tabPanelUi.activatePlace(place);
         StringBuilder titleBuilder = new StringBuilder(
-                (Branding.getInstance().isActive() ? StringMessages.INSTANCE.sapSailing()
+                (ClientConfiguration.getInstance().isBrandingActive() ? StringMessages.INSTANCE.sapSailing()
                         : StringMessages.INSTANCE.whitelabelSailing())).append(" - ");
 
         titleBuilder.append(place.getLocationTitle());

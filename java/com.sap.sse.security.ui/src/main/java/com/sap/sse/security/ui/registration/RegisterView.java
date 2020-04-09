@@ -22,7 +22,7 @@ import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.controls.PasswordTextBoxWithWatermark;
 import com.sap.sse.gwt.client.controls.TextBoxWithWatermark;
 import com.sap.sse.gwt.client.dialog.DialogUtils;
-import com.sap.sse.gwt.shared.Branding;
+import com.sap.sse.gwt.shared.ClientConfiguration;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.EntryPointLinkFactory;
@@ -78,7 +78,7 @@ public class RegisterView extends Composite {
         password2TextBox.addKeyUpHandler(keyUpHandler);
         
         DialogUtils.linkEnterToButton(signUpButton, usernameTextBox, emailTextBox, passwordTextBox, password2TextBox);
-        if (!Branding.getInstance().isActive()) {
+        if (!ClientConfiguration.getInstance().isBrandingActive()) {
             logoImage.getStyle().setDisplay(Display.NONE);
         }
     }

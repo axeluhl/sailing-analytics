@@ -12,7 +12,7 @@ import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewResources;
 import com.sap.sailing.gwt.home.shared.partials.dialog.DialogFactory;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.settings.SettingsToJsonSerializerGWT;
-import com.sap.sse.gwt.shared.Branding;
+import com.sap.sse.gwt.shared.ClientConfiguration;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
@@ -54,7 +54,7 @@ public final class WhatsNewDialogFactory {
      */
     private static void showWhatsNewDialogIfNecessaryAndUpdatePreference(UserService userService,
             PlaceController placeController) {
-        if (isUserNotified || !Branding.getInstance().isActive()) {
+        if (isUserNotified || !ClientConfiguration.getInstance().isBrandingActive()) {
             return;
         }
         final long charactersInWhatsChangedDocument = WhatsNewResources.INSTANCE.getSailingAnalyticsNotesHtml()

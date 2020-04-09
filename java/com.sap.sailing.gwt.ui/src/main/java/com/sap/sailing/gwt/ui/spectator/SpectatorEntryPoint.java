@@ -18,7 +18,7 @@ import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.shared.panels.SimpleWelcomeWidget;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
-import com.sap.sse.gwt.shared.Branding;
+import com.sap.sse.gwt.shared.ClientConfiguration;
 
 /**
  * 
@@ -70,7 +70,7 @@ public class SpectatorEntryPoint extends AbstractSailingEntryPoint implements Re
             if (!embedded) {
                 groupPanel.setWelcomeWidget(new SimpleWelcomeWidget(getStringMessages().welcomeToSailingAnalytics(),
                         getStringMessages().welcomeToSailingAnalyticsBody()));
-                if (Branding.getInstance().isActive()) {
+                if (ClientConfiguration.getInstance().isBrandingActive()) {
                     SimplePanel feedbackPanel = new SimplePanel();
                     feedbackPanel.getElement().getStyle().setProperty("clear", "right");
                     feedbackPanel.addStyleName("feedbackPanel");

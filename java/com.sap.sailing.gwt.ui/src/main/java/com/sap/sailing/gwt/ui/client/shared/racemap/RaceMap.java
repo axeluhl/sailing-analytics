@@ -162,7 +162,7 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
-import com.sap.sse.gwt.shared.Branding;
+import com.sap.sse.gwt.shared.ClientConfiguration;
 import com.sap.sse.gwt.shared.DebugConstants;
 
 public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> implements TimeListener, CompetitorSelectionChangeListener,
@@ -758,7 +758,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 rootPanel.add(map, 0, 0);
                 if (showHeaderPanel) {
                     Image sapLogo = createSAPLogo();
-                    if (Branding.getInstance().isActive()) {
+                    if (ClientConfiguration.getInstance().isBrandingActive()) {
                         rootPanel.add(sapLogo);
                     }
                 }

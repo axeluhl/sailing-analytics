@@ -13,7 +13,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.tracking.TrackingConnectorType;
 import com.sap.sailing.gwt.ui.shared.TrackingConnectorInfoDTO;
-import com.sap.sse.gwt.shared.Branding;
+import com.sap.sse.gwt.shared.ClientConfiguration;
 import com.sap.sse.gwt.shared.DebugConstants;
 
 public class DataByLogo extends Widget {
@@ -31,7 +31,7 @@ public class DataByLogo extends Widget {
     public DataByLogo() {
         DataByLogoResources.INSTANCE.css().ensureInjected();
         setElement(uiBinder.createAndBindUi(this));
-        if (!Branding.getInstance().isActive()) {
+        if (!ClientConfiguration.getInstance().isBrandingActive()) {
             dataByContainer.getStyle().setDisplay(Display.NONE);
         }
         dataByContainer.setAttribute(DebugConstants.DEBUG_ID_ATTRIBUTE, "dataByContainer");
@@ -39,7 +39,7 @@ public class DataByLogo extends Widget {
 
     public void setUp(Set<TrackingConnectorInfoDTO> trackingConnectorInfos, boolean colorIfPossible,
             boolean enforceTextColor) {
-        if (Branding.getInstance().isActive()) {
+        if (ClientConfiguration.getInstance().isBrandingActive()) {
             TrackingConnectorInfoDTO mostProminentConnectorInfo = selectMostProminentConnectorInfo(
                     trackingConnectorInfos);
             if (mostProminentConnectorInfo == null) {

@@ -21,7 +21,7 @@ import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
 import com.sap.sailing.gwt.home.shared.SwitchingEntryPoint;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.controls.languageselect.LanguageSelector;
-import com.sap.sse.gwt.shared.Branding;
+import com.sap.sse.gwt.shared.ClientConfiguration;
 
 /**
  * Mobile page footer with several links and the ability to switch the language.
@@ -60,7 +60,7 @@ public class Footer extends Composite {
             }
         });
         
-        if (!Branding.getInstance().isActive()) {
+        if (!ClientConfiguration.getInstance().isBrandingActive()) {
             copyrightDiv.getStyle().setDisplay(NONE);
             languageSelector.setLabelText(StringMessages.INSTANCE.whitelabelFooterLanguage());
             sapJobsAnchor.getStyle().setDisplay(Display.NONE);

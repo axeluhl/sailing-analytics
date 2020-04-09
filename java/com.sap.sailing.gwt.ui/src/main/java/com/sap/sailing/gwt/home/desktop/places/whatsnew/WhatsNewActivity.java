@@ -5,7 +5,7 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.gwt.shared.Branding;
+import com.sap.sse.gwt.shared.ClientConfiguration;
 
 public class WhatsNewActivity extends AbstractActivity {
     private final WhatsNewPlace place;
@@ -20,7 +20,7 @@ public class WhatsNewActivity extends AbstractActivity {
     public void start(AcceptsOneWidget panel, EventBus eventBus) {
         WhatsNewView whatsNewView = clientFactory.createWhatsNewView(place.getNavigationTab());
         panel.setWidget(whatsNewView.asWidget());
-        Window.setTitle((Branding.getInstance().isActive() ? StringMessages.INSTANCE.sapSailing()
+        Window.setTitle((ClientConfiguration.getInstance().isBrandingActive() ? StringMessages.INSTANCE.sapSailing()
                 : StringMessages.INSTANCE.whitelabelSailing()) + " - " + StringMessages.INSTANCE.whatsNew());
     }
 }

@@ -29,7 +29,7 @@ import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.LinkUtil;
-import com.sap.sse.gwt.shared.Branding;
+import com.sap.sse.gwt.shared.ClientConfiguration;
 
 public class TabletAndDesktopMultiRegattaEventView extends Composite implements EventMultiregattaView {
     
@@ -94,7 +94,7 @@ public class TabletAndDesktopMultiRegattaEventView extends Composite implements 
     public void navigateTabsTo(AbstractMultiregattaEventPlace place) {
         tabPanelUi.activatePlace(place);
         StringBuilder titleBuilder = new StringBuilder(
-                (Branding.getInstance().isActive() ? StringMessages.INSTANCE.sapSailing()
+                (ClientConfiguration.getInstance().isBrandingActive() ? StringMessages.INSTANCE.sapSailing()
                         : StringMessages.INSTANCE.whitelabelSailing())).append(" - ");
 
         titleBuilder.append(currentPresenter.showRegattaMetadata() ? currentPresenter.getRegattaMetadata()

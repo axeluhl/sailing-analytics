@@ -5,14 +5,14 @@ import com.google.gwt.core.client.JavaScriptObject;
 /**
  * Access custom information for GWT client from static browser page.
  * 
- * @see com.sap.sse.gwt.client.context.impl.SapSailingContextDataFactoryImpl
- * @see com.sap.sse.gwt.shared.Branding
+ * @see com.sap.sse.gwt.client.context.impl.ClientConfigurationContextDataFactoryImpl
+ * @see com.sap.sse.gwt.shared.ClientConfiguration
  * @author Georg Herdt
  *
  */
-public class SapSailingContextDataJSO extends JavaScriptObject {
+public class ClientConfigurationContextDataJSO extends JavaScriptObject {
 
-    protected SapSailingContextDataJSO() {
+    protected ClientConfigurationContextDataJSO() {
     }
 
     public final native boolean isDebrandingActive() /*-{

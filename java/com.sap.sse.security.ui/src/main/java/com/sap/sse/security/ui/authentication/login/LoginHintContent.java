@@ -13,7 +13,7 @@ import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sse.gwt.shared.Branding;
+import com.sap.sse.gwt.shared.ClientConfiguration;
 
 /**
  * Widget that shows a message to inform the user that it has benefits to log in. There are two links the user can
@@ -71,7 +71,7 @@ public class LoginHintContent extends Composite {
             }
         });
 
-        if (!Branding.getInstance().isActive()) {
+        if (!ClientConfiguration.getInstance().isBrandingActive()) {
             moreInfo.getElement().getStyle().setDisplay(Display.NONE);
         }
 

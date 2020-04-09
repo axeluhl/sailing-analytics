@@ -24,7 +24,7 @@ import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.Solutions
 import com.sap.sailing.gwt.home.shared.utils.DropdownHandler;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.LinkUtil;
-import com.sap.sse.gwt.shared.Branding;
+import com.sap.sse.gwt.shared.ClientConfiguration;
 import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
 import com.sap.sse.security.ui.authentication.AuthenticationSignOutRequestEvent;
 
@@ -108,7 +108,7 @@ public class Header extends Composite {
             }
         });
         
-        if (!Branding.getInstance().isActive()) {
+        if (!ClientConfiguration.getInstance().isBrandingActive()) {
             logoImage.getStyle().setDisplay(Display.NONE);
             logoAnchor.setHref("");
         }

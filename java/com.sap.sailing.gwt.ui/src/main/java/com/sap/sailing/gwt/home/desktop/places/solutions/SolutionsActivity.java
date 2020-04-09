@@ -6,7 +6,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.gwt.shared.Branding;
+import com.sap.sse.gwt.shared.ClientConfiguration;
 
 public class SolutionsActivity extends AbstractActivity {
     private final SolutionsPlace solutionsPlace;
@@ -21,7 +21,7 @@ public class SolutionsActivity extends AbstractActivity {
     public void start(AcceptsOneWidget panel, EventBus eventBus) {
         SolutionsView solutionsView = clientFactory.createSolutionsView(solutionsPlace.getNavigationTab());
         panel.setWidget(solutionsView.asWidget());
-        Window.setTitle((Branding.getInstance().isActive() ? StringMessages.INSTANCE.sapSailing()
+        Window.setTitle((ClientConfiguration.getInstance().isBrandingActive() ? StringMessages.INSTANCE.sapSailing()
                 : StringMessages.INSTANCE.whitelabelSailing()) + " - " + StringMessages.INSTANCE.solutions());
     }
 }

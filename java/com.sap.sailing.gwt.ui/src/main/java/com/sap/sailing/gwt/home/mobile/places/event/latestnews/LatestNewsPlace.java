@@ -11,7 +11,7 @@ import com.sap.sailing.gwt.home.shared.places.PlaceTokenPrefixes;
 import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.shared.places.event.EventContext;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.gwt.shared.Branding;
+import com.sap.sse.gwt.shared.ClientConfiguration;
 
 public class LatestNewsPlace extends AbstractEventPlace implements HasMobileVersion {
     private List<NewsEntryDTO> news = new LinkedList<NewsEntryDTO>();
@@ -34,7 +34,7 @@ public class LatestNewsPlace extends AbstractEventPlace implements HasMobileVers
     }
 
     public String getTitle() {
-        return (Branding.getInstance().isActive() ? StringMessages.INSTANCE.sapSailing()
+        return (ClientConfiguration.getInstance().isBrandingActive() ? StringMessages.INSTANCE.sapSailing()
                 : StringMessages.INSTANCE.whitelabelSailing());
     }
 

@@ -7,7 +7,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sse.gwt.shared.Branding;
+import com.sap.sse.gwt.shared.ClientConfiguration;
 
 public class SocialFooter extends Composite {
 
@@ -22,7 +22,7 @@ public class SocialFooter extends Composite {
         SocialFooterResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
 
-        if (!Branding.getInstance().isActive()) {
+        if (!ClientConfiguration.getInstance().isBrandingActive()) {
             htmlPanel.getElement().getStyle().setDisplay(Display.NONE);
         }
     }

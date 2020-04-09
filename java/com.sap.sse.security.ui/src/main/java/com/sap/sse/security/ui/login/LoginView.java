@@ -24,7 +24,7 @@ import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.controls.PasswordTextBoxWithWatermark;
 import com.sap.sse.gwt.client.controls.TextBoxWithWatermark;
 import com.sap.sse.gwt.client.dialog.DialogUtils;
-import com.sap.sse.gwt.shared.Branding;
+import com.sap.sse.gwt.shared.ClientConfiguration;
 import com.sap.sse.security.ui.client.EntryPointLinkFactory;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
@@ -74,7 +74,7 @@ public class LoginView extends Composite {
             }
         });
         
-        if (!Branding.getInstance().isActive()) {
+        if (!ClientConfiguration.getInstance().isBrandingActive()) {
             logoImage.getStyle().setDisplay(Display.NONE);
         }
     }

@@ -26,7 +26,7 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sse.gwt.shared.Branding;
+import com.sap.sse.gwt.shared.ClientConfiguration;
 
 /**
  * Base class for fullscreen viewer UIs. This viewer has an extensible header area with a close button and a content
@@ -82,7 +82,7 @@ public class FullscreenContainer<T extends Widget> {
     }
     
     protected void showLogo() {
-        if (Branding.getInstance().isActive()) {
+        if (ClientConfiguration.getInstance().isBrandingActive()) {
             headerContentUi.getElement().getStyle().setMarginLeft(5, Unit.EM);
         } else {
             logoUi.getStyle().setDisplay(Display.NONE);

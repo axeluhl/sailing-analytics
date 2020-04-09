@@ -11,7 +11,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sse.gwt.shared.Branding;
+import com.sap.sse.gwt.shared.ClientConfiguration;
 
 public class SharingButtons extends Composite {
 
@@ -28,13 +28,13 @@ public class SharingButtons extends Composite {
     public SharingButtons() {
         SharingButtonsResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
-        if (!Branding.getInstance().isActive()) {
+        if (!ClientConfiguration.getInstance().isBrandingActive()) {
             htmlPanel.getElement().getStyle().setDisplay(NONE);
         } 
     }
     
     public void setUp(SharingMetadataProvider provider) {
-        if (!Branding.getInstance().isActive()) {
+        if (!ClientConfiguration.getInstance().isBrandingActive()) {
             return;
         }
         

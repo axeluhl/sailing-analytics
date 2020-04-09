@@ -11,7 +11,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sse.gwt.shared.Branding;
+import com.sap.sse.gwt.shared.ClientConfiguration;
 import com.sap.sse.gwt.shared.DebugConstants;
 
 /**
@@ -55,7 +55,7 @@ public class SAPHeader extends Composite {
         String sapSailingUrl = applicationBaseUrl + "?locale=" + LocaleInfo.getCurrentLocale().getLocaleName();
         applicationNameAnchor.setHref(sapSailingUrl);
 
-        if (!Branding.getInstance().isActive()) {
+        if (!ClientConfiguration.getInstance().isBrandingActive()) {
             logoAnchor.getStyle().setDisplay(Display.NONE);
             applicationNameAnchor.setHref("");
         }

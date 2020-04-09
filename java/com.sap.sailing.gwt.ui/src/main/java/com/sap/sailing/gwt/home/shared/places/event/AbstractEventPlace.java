@@ -9,7 +9,7 @@ import com.sap.sailing.gwt.common.client.AbstractMapTokenizer;
 import com.sap.sailing.gwt.home.shared.app.HasLocationTitle;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util;
-import com.sap.sse.gwt.shared.Branding;
+import com.sap.sse.gwt.shared.ClientConfiguration;
 
 public abstract class AbstractEventPlace extends Place implements HasLocationTitle {
     private final EventContext ctx;
@@ -28,7 +28,7 @@ public abstract class AbstractEventPlace extends Place implements HasLocationTit
     }
 
     public String getTitle(String eventName) {
-        return (Branding.getInstance().isActive() ? StringMessages.INSTANCE.sapSailing()
+        return (ClientConfiguration.getInstance().isBrandingActive() ? StringMessages.INSTANCE.sapSailing()
                 : StringMessages.INSTANCE.whitelabelSailing()) + " - " + eventName;
     }
 
