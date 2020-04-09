@@ -146,24 +146,24 @@ public class AccessControlledButtonPanel extends Composite {
      * @return the created {@link Button} instance
      */
     public Button addAction(final String text, final Supplier<Boolean> permissionCheck, final Command callback) {
-        final Button button = new Button(text, (ClickHandler) event -> {
-            if (permissionCheck.get()) {
-                callback.execute();
-            }
-        });
+        return addAction(null, text, permissionCheck, callback);
+    }
+
+    private <T> Button addAction(RefreshableSelectionModel<T> selectionModel, final String text,
+            final Supplier<Boolean> permissionCheck, final Command callback) {
+        ClickHandler handler = wrap(permissionCheck, callback);
+        final Button button = selectionModel == null ? new Button(text, handler)
+                : new SelectedElementsCountingRemoveButton(selectionModel, text, handler);
         resolveButtonVisibility(permissionCheck, button);
         return button;
     }
 
-    public Button addAction(RefreshableSelectionModel selectionModel, final String text,
-            final Supplier<Boolean> permissionCheck, final Command callback) {
-        final Button button = new SelectedElementsCountingRemoveButton(selectionModel, text, (ClickHandler) event -> {
+    private ClickHandler wrap(Supplier<Boolean> permissionCheck, Command callback) {
+        return event -> {
             if (permissionCheck.get()) {
                 callback.execute();
             }
-        });
-        resolveButtonVisibility(permissionCheck, button);
-        return button;
+        };
     }
 
     private void resolveButtonVisibility(Supplier<Boolean> permissionCheck, Button button) {
