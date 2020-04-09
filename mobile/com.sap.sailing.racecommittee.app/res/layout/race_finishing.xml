@@ -38,5 +38,6 @@
             android:textSize="@dimen/finishing_text_size"/>
 
         <include layout="@layout/race_finishing_button"/>
+        <include layout="@layout/race_finishing_revoke_button"/>
     </LinearLayout>
 </RelativeLayout>

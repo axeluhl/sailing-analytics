@@ -47,5 +47,7 @@
             android:src="?attr/arrow_down_normal"/>
 
         <include layout="@layout/race_finishing_button"/>
+        <include layout="@layout/race_finishing_revoke_button"/>
+
     </LinearLayout>
 </RelativeLayout>

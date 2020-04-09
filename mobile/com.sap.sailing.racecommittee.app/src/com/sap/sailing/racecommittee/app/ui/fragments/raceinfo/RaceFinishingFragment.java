@@ -4,6 +4,7 @@ package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.domain.impl.Result;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
@@ -43,6 +44,7 @@ public class RaceFinishingFragment extends BaseFragment {
         }
 
         Button down = ViewHelper.get(layout, R.id.flag_down);
+
         if (down != null) {
             down.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -52,7 +54,15 @@ public class RaceFinishingFragment extends BaseFragment {
                 }
             });
         }
-
+        Button revoke = ViewHelper.get(layout, R.id.flag_finishing_revoke);
+        if (revoke!=null){
+            revoke.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    final Result result = getRace().revokeFinish(preferences.getAuthor());
+                }
+            });
+        }
         return layout;
     }
 

@@ -12,6 +12,7 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishingTimeFinder;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sse.common.TimePoint;
@@ -61,5 +62,19 @@ public class FinishingTimeFinderTest extends PassAwareRaceLogAnalyzerTest<Finish
         raceLog.add(event2);
 
         assertSame(event1.getLogicalTimePoint(), analyzer.analyze());
+    }
+    
+    @Test
+    public void testRevokeFinishing() {        
+        RaceLogRaceStatusEvent event1 = createEvent(RaceLogRaceStatusEvent.class, 1);
+        when(event1.getNextStatus()).thenReturn(RaceLogRaceStatus.FINISHING);
+        RaceLogRevokeEvent revokeEvent = createEvent(RaceLogRevokeEvent.class,1);
+        RaceLogRaceStatusEvent event2 = createEvent(RaceLogRaceStatusEvent.class, 1);
+        when(event2.getNextStatus()).thenReturn(RaceLogRaceStatus.FINISHING);
+        raceLog.add(event1);
+        raceLog.add(revokeEvent);
+        raceLog.add(event2);
+       
+        assertSame(event2.getLogicalTimePoint(), analyzer.analyze());
     }
 }

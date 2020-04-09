@@ -386,6 +386,7 @@
     <string name="finishing_started">First in finish at %1$s</string>
     <string name="finishing_started_since">(%s)</string>
     <string name="finishing_done">Down now</string>
+    <string name="finishing_revoke">Revoke</string>
 
     <string name="finished_recording">Recording</string>
     <string name="finished_replay">Replay Voice</string>
