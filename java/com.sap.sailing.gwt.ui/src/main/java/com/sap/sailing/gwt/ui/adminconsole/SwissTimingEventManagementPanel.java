@@ -121,7 +121,8 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                         }, userService, errorReporter).show());
 
         // Remove SwissTiming Connection
-        final Button removeButton = buttonPanel.addRemoveAction(stringMessages.remove(), () -> {
+        final Button removeButton = buttonPanel.addRemoveAction(connectionsTable.getSelectionModel(), 
+                stringMessages.remove(), () -> {
             sailingService.deleteSwissTimingConfiguration(connectionsTable.getSelectionModel().getSelectedObject(),
                     new AsyncCallback<Void>() {
                         @Override

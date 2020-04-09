@@ -54,42 +54,11 @@ public class ResultImportUrlsListComposite extends Composite {
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService,
                 SecuredDomainType.RESULT_IMPORT_URL);
 
-        final Button add = buttonPanel.addCreateAction(stringMessages.add(), this::addUrl);
-        add.setEnabled(false);
-
-        final Button remove = buttonPanel.addRemoveAction(stringMessages.remove(), new Command() {
-            @Override
-            public void execute() {
-                if (Window.confirm(stringMessages.doYouReallyWantToRemoveResultImportUrls())) {
-                    removeUrls(table.getSelectionModel().getSelectedSet());
-                }
-            }
-        });
-        remove.setEnabled(false);
-
-        final Button refresh = buttonPanel.addUnsecuredAction(stringMessages.refresh(), this::updateTable);
-        refresh.setEnabled(false);
-
         Grid urlSample = new Grid(1, 2);
         urlSample.setWidget(0, 0, new Label(stringMessages.sampleURL("")));
         Label urlSampleLabel = new Label();
         urlSample.setWidget(0, 1, urlSampleLabel);
 
-        urlProviderListBox = new ListBox();
-        urlProviderListBox.setMultipleSelect(false);
-        urlProviderListBox.addChangeHandler(new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent event) {
-                int index = urlProviderListBox.getSelectedIndex();
-                boolean buttonsEnabled = index > 0;
-                add.setEnabled(buttonsEnabled);
-                refresh.setEnabled(buttonsEnabled);
-                table.getSelectionModel().clear();
-                table.update(getSelectedProviderName());
-                String provider = urlProviderListBox.getSelectedValue();
-                urlSampleLabel.setText(provider == null || provider.equals("null") ? "" : provider);
-            }
-        });
         sailingService.getUrlResultProviderNamesAndOptionalSampleURL(new AsyncCallback<List<Pair<String, String>>>() {
             @Override
             public void onSuccess(List<Pair<String, String>> urlProviderNamesAndOptionalSampleURL) {
@@ -106,10 +75,43 @@ public class ResultImportUrlsListComposite extends Composite {
         });
 
         table = new ResultImportUrlsTableWrapper<>(sailingServiceAsync, userService, stringMessages, errorReporter);
+
+        final Button add = buttonPanel.addCreateAction(stringMessages.add(), this::addUrl);
+        add.setEnabled(false);
+
+        final Button remove = buttonPanel.addRemoveAction(table.getSelectionModel(), stringMessages.remove(), new Command() {
+            @Override
+            public void execute() {
+                if (Window.confirm(stringMessages.doYouReallyWantToRemoveResultImportUrls())) {
+                    removeUrls(table.getSelectionModel().getSelectedSet());
+                }
+            }
+        });
+        remove.setEnabled(false);
+
         table.getSelectionModel().addSelectionChangeHandler(new Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 remove.setEnabled(!table.getSelectionModel().getSelectedSet().isEmpty());
+            }
+        });
+
+        final Button refresh = buttonPanel.addUnsecuredAction(stringMessages.refresh(), this::updateTable);
+        refresh.setEnabled(false);
+
+        urlProviderListBox = new ListBox();
+        urlProviderListBox.setMultipleSelect(false);
+        urlProviderListBox.addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent event) {
+                int index = urlProviderListBox.getSelectedIndex();
+                boolean buttonsEnabled = index > 0;
+                add.setEnabled(buttonsEnabled);
+                refresh.setEnabled(buttonsEnabled);
+                table.getSelectionModel().clear();
+                table.update(getSelectedProviderName());
+                String provider = urlProviderListBox.getSelectedValue();
+                urlSampleLabel.setText(provider == null || provider.equals("null") ? "" : provider);
             }
         });
 

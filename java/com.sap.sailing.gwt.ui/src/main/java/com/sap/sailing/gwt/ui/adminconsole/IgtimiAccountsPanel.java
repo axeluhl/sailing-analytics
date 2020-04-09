@@ -134,15 +134,16 @@ public class IgtimiAccountsPanel extends FlowPanel {
         buttonPanel.addUnsecuredAction(stringMessages.refresh(), () -> refresh());
 
         // setup controls
-        final Button removeAccountButton = buttonPanel.addRemoveAction(stringMessages.remove(), () -> {
-            if (refreshableAccountsSelectionModel.getSelectedSet().size() > 0) {
-                if (Window.confirm(stringMessages.doYouReallyWantToRemoveTheSelectedIgtimiAccounts())) {
-                    for (AccountWithSecurityDTO account : refreshableAccountsSelectionModel.getSelectedSet()) {
-                        removeAccount(account, filteredAccounts);
+        final Button removeAccountButton = buttonPanel.addRemoveAction(refreshableAccountsSelectionModel,
+                stringMessages.remove(), () -> {
+                    if (refreshableAccountsSelectionModel.getSelectedSet().size() > 0) {
+                        if (Window.confirm(stringMessages.doYouReallyWantToRemoveTheSelectedIgtimiAccounts())) {
+                            for (AccountWithSecurityDTO account : refreshableAccountsSelectionModel.getSelectedSet()) {
+                                removeAccount(account, filteredAccounts);
+                            }
+                        }
                     }
-                }
-            }
-        });
+                });
         removeAccountButton.setEnabled(false);
         refreshableAccountsSelectionModel.addSelectionChangeHandler(
                 e -> removeAccountButton.setEnabled(refreshableAccountsSelectionModel.getSelectedSet().size() > 0));

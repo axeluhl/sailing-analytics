@@ -281,7 +281,8 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
                             }
                         }, userService, errorReporter).show());
         // Remove action
-        final Button removeButton = buttonPanel.addRemoveAction(stringMessages.remove(), () -> {
+        final Button removeButton = buttonPanel.addRemoveAction(connectionsTable.getSelectionModel(),
+                stringMessages.remove(), () -> {
             sailingService.deleteSwissTimingArchiveConfiguration(
                     connectionsTable.getSelectionModel().getSelectedObject(), new AsyncCallback<Void>() {
                         @Override

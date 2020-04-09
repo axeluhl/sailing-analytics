@@ -25,6 +25,7 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
@@ -102,7 +103,8 @@ public class RoleDefinitionsPanel extends VerticalPanel {
         buttonPanel.addUnsecuredAction(stringMessages.refresh(), this::updateRoleDefinitions);
         buttonPanel.addCreateActionWithoutServerCreateObjectPermissionCheck(stringMessages.add(),
                 this::createRoleDefinition);
-        buttonPanel.addRemoveAction(stringMessages.remove(), () -> {
+        Button removeButton = buttonPanel.addRemoveAction(refreshableRoleDefinitionMultiSelectionModel,
+                stringMessages.remove(), () -> {
             final String roles = String.join(", ", Util.map(getSelectedRoleDefinitions(), RoleDefinitionDTO::getName));
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveRole(roles))) {
                 final Set<RoleDefinitionDTO> selectedRoles = new HashSet<>(getSelectedRoleDefinitions());
@@ -110,6 +112,7 @@ public class RoleDefinitionsPanel extends VerticalPanel {
             }
         });
 
+        removeButton.setEnabled(false);
         add(buttonPanel);
         add(filterablePanelRoleDefinitions);
         add(roleDefinitionsTable);

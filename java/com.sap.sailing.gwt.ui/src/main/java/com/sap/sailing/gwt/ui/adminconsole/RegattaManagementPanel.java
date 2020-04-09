@@ -68,12 +68,16 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
         mainPanel.add(regattasPanel);
         final VerticalPanel regattasContentPanel = new VerticalPanel();
         regattasPanel.setContentWidget(regattasContentPanel);
-        
+
+        regattaListComposite = new RegattaListComposite(sailingService, userService, regattaRefresher, errorReporter,
+                stringMessages);
+        regattaListComposite.ensureDebugId("RegattaListComposite");
+        refreshableRegattaMultiSelectionModel = regattaListComposite.getRefreshableMultiSelectionModel();
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, REGATTA);
         final Button create = buttonPanel.addCreateAction(stringMessages.addRegatta(), this::openCreateRegattaDialog);
         create.ensureDebugId("AddRegattaButton");
 
-        final Button remove = buttonPanel.addRemoveAction(stringMessages.remove(), new Command() {
+        final Button remove = buttonPanel.addRemoveAction(refreshableRegattaMultiSelectionModel, stringMessages.remove(), new Command() {
 
             @Override
             public void execute() {
@@ -97,10 +101,6 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
         remove.setEnabled(false);
         regattasContentPanel.add(buttonPanel);
 
-        regattaListComposite = new RegattaListComposite(sailingService, userService, regattaRefresher, errorReporter,
-                stringMessages);
-        regattaListComposite.ensureDebugId("RegattaListComposite");
-        refreshableRegattaMultiSelectionModel = regattaListComposite.getRefreshableMultiSelectionModel();
         refreshableRegattaMultiSelectionModel.addSelectionChangeHandler(new Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {

@@ -164,7 +164,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                 leaderboardCreateAndRegattaReadPermission, this::createRegattaLeaderboardWithEliminations);
         createRegattaLeaderboardWithEliminationsBtn.ensureDebugId("CreateRegattaLeaderboardWithEliminationsButton");
 
-        leaderboardRemoveButton = buttonPanel.addRemoveAction(stringMessages.remove(), new Command() {
+        leaderboardRemoveButton = buttonPanel.addRemoveAction(leaderboardSelectionModel, stringMessages.remove(), new Command() {
 
             @Override
             public void execute() {
@@ -866,8 +866,6 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
         }
 
         leaderboardRemoveButton.setEnabled(!selectedLeaderboards.isEmpty() && canDeleteAllSelected);
-        leaderboardRemoveButton.setText(selectedLeaderboards.size() <= 1 ? stringMessages.remove()
-                : stringMessages.removeNumber(selectedLeaderboards.size()));
 
         final StrippedLeaderboardDTOWithSecurity selectedLeaderboard = getSelectedLeaderboard();
         if (leaderboardSelectionModel.getSelectedSet().size() == 1 && selectedLeaderboard != null) {

@@ -2,7 +2,6 @@ package com.sap.sse.security.ui.client.component;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
@@ -14,14 +13,14 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
+import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.ui.client.UserService;
 
 /**
  * Panel where several buttons can be added which are either {@link #addUnsecuredAction(String, Command) unsecured} or
  * restricted for users with {@link #addCreateAction(String, Command) create} and /or
- * {@link #addRemoveAction(String, Command) remove} permissions. The {@link Button#setVisible(boolean) visibility} of
+ * {@link #addRemoveAction(RefreshableSelectionModel, String, Command)} remove} permissions. The {@link Button#setVisible(boolean) visibility} of
  * secured buttons depend on the permissions of the currently logged-in user and changes dynamically.
  */
 public class AccessControlledButtonPanel extends Composite {
@@ -106,38 +105,18 @@ public class AccessControlledButtonPanel extends Composite {
      * Adds a secured action button, which is only visible if the current user has any
      * {@link UserService#hasCurrentUserPermissionToDeleteAnyObjectOfType(HasPermissions) delete permission} for the
      * {@link HasPermissions type} provided in this {@link AccessControlledButtonPanel}'s constructor.
-     * 
-     * @param text
-     *            the {@link String text} to show on the button
-     * @param callback
-     *            the {@link Command callback} to execute on button click, if permission is granted
-     * @return the created {@link Button} instance
-     */
-    public Button addRemoveAction(final String text, final Command callback) {
-        return addAction(text, removePermissionCheck, callback);
-    }
-
-    /**
-     * Adds a secured action button, which is only visible if the current user has any
-     * {@link UserService#hasCurrentUserPermissionToDeleteAnyObjectOfType(HasPermissions) delete permission} for the
-     * {@link HasPermissions type} provided in this {@link AccessControlledButtonPanel}'s constructor.
      *
      * @param selectionModel
-     *            the selection model of the table
+     *            the {@link RefreshableSelectionModel<T>}selection model of the table
      * @param text
      *            the {@link String text} to show on the button
      * @param callback
      *            the {@link Command callback} to execute on button click, if permission is granted
      * @return the created {@link Button} instance
      */
-    public <T> Button addRemoveAction(RefreshableMultiSelectionModel<T> selectionModel, final String text, final Command callback) {
-        final Button removeButton = addAction(text, removePermissionCheck, callback);
-        selectionModel.addSelectionChangeHandler((event) -> {
-            Set<T> selectedSet = selectionModel.getSelectedSet();
-            removeButton.setEnabled(!selectedSet.isEmpty());
-            removeButton.setText(selectedSet.size() <= 1 ? text : text + '(' + selectedSet.size() + ')');
-        });
-        return removeButton;
+    public <T> Button addRemoveAction(RefreshableSelectionModel<T> selectionModel, final String text,
+            final Command callback) {
+        return addAction(selectionModel, text, removePermissionCheck, callback);
     }
 
     /**
@@ -172,11 +151,26 @@ public class AccessControlledButtonPanel extends Composite {
                 callback.execute();
             }
         });
+        resolveButtonVisibility(permissionCheck, button);
+        return button;
+    }
+
+    public Button addAction(RefreshableSelectionModel selectionModel, final String text,
+            final Supplier<Boolean> permissionCheck, final Command callback) {
+        final Button button = new SelectedElementsCountingRemoveButton(selectionModel, text, (ClickHandler) event -> {
+            if (permissionCheck.get()) {
+                callback.execute();
+            }
+        });
+        resolveButtonVisibility(permissionCheck, button);
+        return button;
+    }
+
+    private void resolveButtonVisibility(Supplier<Boolean> permissionCheck, Button button) {
         this.buttonToPermissions.put(button, permissionCheck);
         button.getElement().getStyle().setMarginRight(5, Unit.PX);
         this.panel.add(button);
         this.visibilityUpdater.accept(button, permissionCheck);
-        return button;
     }
 
     /**

@@ -512,28 +512,6 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
         });
         refreshButton.ensureDebugId("RefreshLeaderboardGroupsButton");
         
-        removeButton = buttonPanel.addRemoveAction(stringMessages.remove(), new Command() {
-        
-            @Override
-            public void execute() {
-                if(askUserForConfirmation()){
-                    removeLeaderboardGroups(refreshableGroupsSelectionModel.getSelectedSet()); 
-                }
-            }
-
-            private boolean askUserForConfirmation() {
-                if (refreshableGroupsSelectionModel.itemIsSelectedButNotVisible(groupsTable.getVisibleItems())) {
-                    final String leaderboardGroupNames = refreshableGroupsSelectionModel.getSelectedSet().stream()
-                            .map(LeaderboardGroupDTO::getName).collect(Collectors.joining("\n"));
-                    return Window.confirm(
-                            stringMessages.doYouReallyWantToRemoveNonVisibleLeaderboardGroups(leaderboardGroupNames));
-                } 
-                return Window.confirm(stringMessages.doYouReallyWantToRemoveLeaderboardGroups());
-            }
-        });
-        removeButton.ensureDebugId("RemoveLeaderboardButton");
-        removeButton.setEnabled(false);
-
         AnchorCell anchorCell = new AnchorCell();
 
         final TextColumn<LeaderboardGroupDTO> groupUUidColumn = new AbstractSortableTextColumn<LeaderboardGroupDTO>(
@@ -673,6 +651,31 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
         groupsTable.addColumnSortHandler(leaderboardGroupsListHandler);
 
         refreshableGroupsSelectionModel = leaderboardTableSelectionColumn.getSelectionModel();
+
+        removeButton = buttonPanel.addRemoveAction(refreshableGroupsSelectionModel, stringMessages.remove(),
+                new Command() {
+
+                    @Override
+                    public void execute() {
+                        if (askUserForConfirmation()) {
+                            removeLeaderboardGroups(refreshableGroupsSelectionModel.getSelectedSet());
+                        }
+                    }
+
+                    private boolean askUserForConfirmation() {
+                        if (refreshableGroupsSelectionModel
+                                .itemIsSelectedButNotVisible(groupsTable.getVisibleItems())) {
+                            final String leaderboardGroupNames = refreshableGroupsSelectionModel.getSelectedSet()
+                                    .stream().map(LeaderboardGroupDTO::getName).collect(Collectors.joining("\n"));
+                            return Window.confirm(stringMessages
+                                    .doYouReallyWantToRemoveNonVisibleLeaderboardGroups(leaderboardGroupNames));
+                        }
+                        return Window.confirm(stringMessages.doYouReallyWantToRemoveLeaderboardGroups());
+                    }
+                });
+        removeButton.ensureDebugId("RemoveLeaderboardButton");
+        removeButton.setEnabled(false);
+
         refreshableGroupsSelectionModel.addSelectionChangeHandler(event -> groupSelectionChanged());
 
         groupsTable.setSelectionModel(refreshableGroupsSelectionModel, leaderboardTableSelectionColumn.getSelectionManager());
@@ -908,7 +911,6 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
         Set<LeaderboardGroupDTO> selectedLeaderboardGroups = refreshableGroupsSelectionModel.getSelectedSet();
         isSingleGroupSelected = selectedLeaderboardGroups.size() == 1;
 
-        removeButton.setText(selectedLeaderboardGroups.size() <= 1 ? stringMessages.remove() : stringMessages.removeNumber(selectedLeaderboardGroups.size()));
         boolean canDeleteAllSelected = true;
         for (LeaderboardGroupDTO group : selectedLeaderboardGroups) {
             if (!userService.hasPermission(group, DefaultActions.DELETE)) {
