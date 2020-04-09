@@ -62,12 +62,10 @@ public class UserGroupsResource extends AbstractSailingServerResource {
         if (user != null && getSecurityService().hasCurrentUserReadPermission(user)) {
             final List<UserGroup> userGroups = new ArrayList<>();
             getSecurityService().getUserGroupList().forEach(ug -> {
-                System.out.println(ug.getName());
                 if (getSecurityService().getSecurityManager().isPermitted(
                         new SimplePrincipalCollection(userName, userName),
                         ug.getIdentifier().getPermission(DefaultActions.READ).toString())) {
                     userGroups.add(ug);
-                    System.out.println("OK");
                 }
             });
             final JSONObject root = new JSONObject();
@@ -147,7 +145,7 @@ public class UserGroupsResource extends AbstractSailingServerResource {
         }
         return response;
     }
-    
+
     @DELETE
     @Path("{userGroupId}/roles")
     @Produces("application/json;charset=UTF-8")

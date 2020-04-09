@@ -59,7 +59,6 @@ public class UserGroupApi {
 
     public Iterable<UserGroup> getReadableGroupsOfUser(ApiContext ctx, String userName) {
         JSONObject result = ctx.get(USERGROUPS_URL + "readable/" + userName);
-        System.out.println(result.toJSONString());
         return ((JSONArray) result.get("readableGroups")).stream().map(UserGroup::new).collect(Collectors.toList());
     }
 
