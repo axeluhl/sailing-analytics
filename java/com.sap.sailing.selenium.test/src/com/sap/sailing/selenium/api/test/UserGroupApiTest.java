@@ -128,9 +128,9 @@ public class UserGroupApiTest extends AbstractSeleniumTest {
                 "password");
         assertEquals(1, Util.size(userGroupApi.getReadableGroupsOfUser(user1Ctx, user1Name)));
 
-        // admin creates new group and adds user -> does not mean the group is allowed to read
+        // admin creates new group and adds user -> does not mean the user is allowed to read the group
         final LongAdder counter = new LongAdder();
-        UserGroup group1ToAdd = userGroupApi.createUserGroup(adminSecurityCtx, "group1ToAdd");
+        final UserGroup group1ToAdd = userGroupApi.createUserGroup(adminSecurityCtx, "group1ToAdd");
         userGroupApi.addUserToGroup(adminSecurityCtx, group1ToAdd.getGroupId(), user1Name);
         userGroupApi.getReadableGroupsOfUser(user1Ctx, user1Name).forEach(ug -> {
             if (group1ToAdd.getGroupId().equals(ug.getGroupId())) {
@@ -139,10 +139,19 @@ public class UserGroupApiTest extends AbstractSeleniumTest {
         });
         assertEquals(0, counter.intValue());
 
-        // user creates new group
+        // user1 creates new group -> this group is readable by user1
         counter.reset();
-        UserGroup group2ToAdd = userGroupApi.createUserGroup(user1SecurityCtx, "group2ToAdd");
+        final UserGroup group2ToAdd = userGroupApi.createUserGroup(user1SecurityCtx, "group2ToAdd");
         userGroupApi.getReadableGroupsOfUser(user1Ctx, user1Name).forEach(ug -> {
+            if (group2ToAdd.getGroupId().equals(ug.getGroupId())) {
+                counter.increment();
+            }
+        });
+        assertEquals(1, counter.intValue());
+
+        // if passing null for the username, implying the current user, should return the same result
+        counter.reset();
+        userGroupApi.getReadableGroupsOfCurrentUser(user1Ctx).forEach(ug -> {
             if (group2ToAdd.getGroupId().equals(ug.getGroupId())) {
                 counter.increment();
             }

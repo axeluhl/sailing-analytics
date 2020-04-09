@@ -23,10 +23,12 @@ public class UserGroupApi {
     private static final String KEY_ROLES = "roles";
     private static final String KEY_FOR_ALL = "forAll";
     private static final String KEY_TENANT_GROUP_UUID = "tenantGroup";
+    private static final String KEY_READABLE_GROUPS = "readableGroups";
 
     private static final String USERGROUP_URL = "/api/restsecurity/usergroup/";
     private static final String USERGROUPS_URL = "/api/v1/usergroups/";
-    private static final String SET_DEFAULT_TENANT_FOR_CURRENT_USER = USERGROUPS_URL + "setDefaultTenantForCurrentServerAndUser";
+    private static final String SET_DEFAULT_TENANT_FOR_CURRENT_USER = USERGROUPS_URL
+            + "setDefaultTenantForCurrentServerAndUser";
     private static final String ADD_USER_TO_USERGROUP_URL = USERGROUPS_URL + "addAnyUserToGroup";
 
     public UserGroup getUserGroup(ApiContext ctx, UUID groupId) {
@@ -58,8 +60,15 @@ public class UserGroupApi {
     }
 
     public Iterable<UserGroup> getReadableGroupsOfUser(ApiContext ctx, String userName) {
-        JSONObject result = ctx.get(USERGROUPS_URL + "readable/" + userName);
-        return ((JSONArray) result.get("readableGroups")).stream().map(UserGroup::new).collect(Collectors.toList());
+        final Map<String, String> queryParams = new HashMap<>();
+        queryParams.put(KEY_USER_NAME, userName);
+        JSONObject result = ctx.get(USERGROUPS_URL + "readable", queryParams);
+        return ((JSONArray) result.get(KEY_READABLE_GROUPS)).stream().map(UserGroup::new).collect(Collectors.toList());
+    }
+
+    public Iterable<UserGroup> getReadableGroupsOfCurrentUser(ApiContext ctx) {
+        JSONObject result = ctx.get(USERGROUPS_URL + "readable/");
+        return ((JSONArray) result.get(KEY_READABLE_GROUPS)).stream().map(UserGroup::new).collect(Collectors.toList());
     }
 
     public void addRoleToGroup(ApiContext ctx, UUID groupId, UUID roleId, boolean forAll) {

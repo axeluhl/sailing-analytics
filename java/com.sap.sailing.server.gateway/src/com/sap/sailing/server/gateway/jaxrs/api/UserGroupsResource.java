@@ -53,9 +53,9 @@ public class UserGroupsResource extends AbstractSailingServerResource {
     }
 
     @GET
-    @Path("readable/{userName}")
+    @Path("readable")
     @Produces("application/json;charset=UTF-8")
-    public Response getReadableUserGroupsForCurrentUser(@PathParam("userName") String userName) {
+    public Response getReadableUserGroupsForCurrentUser(@QueryParam("userName") String userName) {
         Response response = null;
         final User user = userName != null ? getSecurityService().getUserByName(userName)
                 : getSecurityService().getCurrentUser();
@@ -63,7 +63,7 @@ public class UserGroupsResource extends AbstractSailingServerResource {
             final List<UserGroup> userGroups = new ArrayList<>();
             getSecurityService().getUserGroupList().forEach(ug -> {
                 if (getSecurityService().getSecurityManager().isPermitted(
-                        new SimplePrincipalCollection(userName, userName),
+                        new SimplePrincipalCollection(user.getName(), user.getName()),
                         ug.getIdentifier().getPermission(DefaultActions.READ).toString())) {
                     userGroups.add(ug);
                 }
