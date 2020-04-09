@@ -8,12 +8,10 @@ import java.util.Set;
 
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.AbstractCellTable;
-import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -33,9 +31,10 @@ import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
-import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
+import com.sap.sse.gwt.client.celltable.FlushableCellTable;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
+import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
@@ -43,7 +42,7 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
-    private CellTable<RemoteSailingServerReferenceDTO> remoteServersTable; 
+    private FlushableCellTable<RemoteSailingServerReferenceDTO> remoteServersTable; 
 
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
     private final ListDataProvider<RemoteSailingServerReferenceDTO> serverDataProvider;
@@ -103,38 +102,40 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
         HorizontalPanel buttonPanel = new HorizontalPanel();
         buttonPanel.setSpacing(5);
 
-        Button addButton = new Button(stringMessages.add());
-        buttonPanel.add(addButton);
-        addButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                addRemoteSailingServerReference();
-            }
-        });
+        buttonPanel.add(new Button(stringMessages.add(), (ClickHandler) event -> addRemoteSailingServerReference()));
+        buttonPanel.add(createRemoveButton(buttonPanel, event -> removeSelectedSailingServers()));
+        buttonPanel.add(new Button(stringMessages.refresh(), (ClickHandler) event -> refreshSailingServerList()));
 
-        Button removeButton = new Button(stringMessages.remove());
-        buttonPanel.add(removeButton);
-        removeButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                removeSelectedSailingServers();
-            }
-        });
-
-        Button refreshButton = new Button(stringMessages.refresh());
-        buttonPanel.add(refreshButton);
-        refreshButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                refreshSailingServerList();
-            }
-        });
         return buttonPanel;
     }
     
-    private CellTable<RemoteSailingServerReferenceDTO> createRemoteServersTable() {
-        CellTable<RemoteSailingServerReferenceDTO> serverTable = new BaseCelltable<RemoteSailingServerReferenceDTO>(
+    private Button createRemoveButton(HorizontalPanel buttonPanel, ClickHandler handler) {
+        Button button = new Button(stringMessages.remove(), (ClickHandler) event -> removeSelectedSailingServers());
+        refreshableServerSelectionModel.addSelectionChangeHandler(event -> {
+            Set<RemoteSailingServerReferenceDTO> set = refreshableServerSelectionModel.getSelectedSet();
+            button.setText(set.size() <= 1 ? stringMessages.remove() : stringMessages.removeNumber(set.size()));
+        });
+        return button;
+    }
+    
+    private FlushableCellTable<RemoteSailingServerReferenceDTO> createRemoteServersTable() {
+        FlushableCellTable<RemoteSailingServerReferenceDTO> serverTable = new FlushableCellTable<RemoteSailingServerReferenceDTO>(
                 10000, tableRes);
+
+        SelectionCheckboxColumn<RemoteSailingServerReferenceDTO> checkBoxColumn = new SelectionCheckboxColumn<RemoteSailingServerReferenceDTO>(
+                tableRes.cellTableStyle().cellTableCheckboxSelected(),
+                tableRes.cellTableStyle().cellTableCheckboxDeselected(),
+                tableRes.cellTableStyle().cellTableCheckboxColumnCell(), new EntityIdentityComparator<RemoteSailingServerReferenceDTO>() {
+                    @Override
+                    public boolean representSameEntity(RemoteSailingServerReferenceDTO dto1, RemoteSailingServerReferenceDTO dto2) {
+                        return dto1.getUrl().equals(dto2.getUrl());
+                    }
+                    @Override
+                    public int hashCode(RemoteSailingServerReferenceDTO t) {
+                        return t.getUrl().hashCode();
+                    }
+                }, filteredServerTablePanel.getAllListDataProvider(), serverTable);
+        
         TextColumn<RemoteSailingServerReferenceDTO> serverNameColumn = new TextColumn<RemoteSailingServerReferenceDTO>() {
             @Override
             public String getValue(RemoteSailingServerReferenceDTO server) {
@@ -165,26 +166,17 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
                 return builder.toSafeHtml();
             }
         };
+        serverTable.addColumn(checkBoxColumn);
         serverTable.addColumn(serverNameColumn, stringMessages.name());
         serverTable.addColumn(serverUrlColumn, stringMessages.url());
         serverTable.addColumn(eventsOrErrorColumn, stringMessages.events());
 
         serverTable.setEmptyTableWidget(new Label(stringMessages.noSailingServerInstancesYet()));
-        
-        refreshableServerSelectionModel = new RefreshableMultiSelectionModel<RemoteSailingServerReferenceDTO>(
-                new EntityIdentityComparator<RemoteSailingServerReferenceDTO>() {
-                    @Override
-                    public boolean representSameEntity(RemoteSailingServerReferenceDTO dto1,
-                            RemoteSailingServerReferenceDTO dto2) {
-                        return dto1.getUrl().equals(dto2.getUrl());
-                    }
-                    @Override
-                    public int hashCode(RemoteSailingServerReferenceDTO t) {
-                        return t.getUrl().hashCode();
-                    }
-                }, filteredServerTablePanel.getAllListDataProvider());
-        serverTable.setSelectionModel(refreshableServerSelectionModel);
 
+        serverTable.setSelectionModel(checkBoxColumn.getSelectionModel(), checkBoxColumn.getSelectionManager());
+        
+        refreshableServerSelectionModel = checkBoxColumn.getSelectionModel();
+        
         return serverTable;
     }
     
