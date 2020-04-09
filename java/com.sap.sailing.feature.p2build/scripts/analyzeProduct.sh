@@ -86,8 +86,8 @@ while [ "$2" != "" ]; do
         else
           patched_workspace_bundles="${workspace_bundles}"
         fi
-        selected_target_bundles="<setAttribute key=\"selected_target_bundles\">${target_bundles}${NL}<\setAttribute>"
-        patched_workspace_bundles="<setAttribute key=\"selected_workspace_bundles\">${patched_workspace_bundles}${NL}<\setAttribute>"
+        selected_target_bundles="<setAttribute key=\"selected_target_bundles\">${target_bundles}${NL}<\/setAttribute>"
+        patched_workspace_bundles="<setAttribute key=\"selected_workspace_bundles\">${patched_workspace_bundles}${NL}<\/setAttribute>"
         perl -i -p0e "s/<setAttribute key=\"selected_target_bundles\">(.*?)<\/setAttribute>/${selected_target_bundles}/sg" "$2"
         perl -i -p0e "s/<setAttribute key=\"selected_workspace_bundles\">(.*?)<\/setAttribute>/${patched_workspace_bundles}/sg" "$2"
     fi
