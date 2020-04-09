@@ -8,12 +8,10 @@ import android.util.TypedValue;
 
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.utils.TickListener;
-import com.sap.sailing.racecommittee.app.utils.TickSingleton;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
 
-public class RaceTimeView extends android.support.v7.widget.AppCompatTextView implements TickListener {
+public class RaceTimeView extends BaseTimeView {
 
     private RaceState state;
 
@@ -23,18 +21,6 @@ public class RaceTimeView extends android.support.v7.widget.AppCompatTextView im
 
     public void setRaceState(RaceState state) {
         this.state = state;
-    }
-
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        TickSingleton.INSTANCE.registerListener(this);
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        TickSingleton.INSTANCE.unregisterListener(this);
     }
 
     @Override

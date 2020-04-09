@@ -1,5 +1,6 @@
 package com.sap.sailing.racecommittee.app.ui.adapters.racelist;
 
+import com.sap.sailing.racecommittee.app.ui.views.FlagTimeView;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -486,7 +487,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         if (timer != null) {
             timer = timer.replace("-", "");
         }
-        holder.showFlag(flag, arrow, timer);
+        holder.showFlag(flag, arrow, timer, state);
     }
 
     private boolean isNextFlag(Flags flag, FlagPole pole) {
@@ -524,7 +525,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         /* package */ TextView race_started;
         /* package */ LinearLayout race_scheduled;
         /* package */ TextView race_unscheduled;
-        /* package */ TextView flag_timer;
+        /* package */ FlagTimeView flag_timer;
         /* package */ View protest_layout;
         /* package */ ImageView protest_image;
         /* package */ ImageView protest_warning_image;
@@ -560,10 +561,11 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             warning_sign = ViewHelper.get(layout, R.id.panel_additional_image);
         }
 
-        /* package */ void showFlag(LayerDrawable flag, Drawable arrow, String timer) {
+        /* package */ void showFlag(final LayerDrawable flag, final Drawable arrow, final String timer, final RaceState state) {
             if (flag != null && timer != null) {
                 current_flag.setImageDrawable(flag);
-                flag_timer.setText(timer);
+                flag_timer.setRaceState(state);
+                flag_timer.setTimer(timer);
                 flag_timer.setCompoundDrawablesWithIntrinsicBounds(arrow, null, null, null);
                 race_flag.setVisibility(View.VISIBLE);
             }
