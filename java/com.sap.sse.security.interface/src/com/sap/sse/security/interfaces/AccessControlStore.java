@@ -32,10 +32,6 @@ public interface AccessControlStore extends Named {
 
     void removeAclPermission(QualifiedObjectIdentifier idOfAccessControlledObject, UserGroup userGroup, String action);
 
-    void removeAclDenial(QualifiedObjectIdentifier idOfAccessControlledObject, UserGroup userGroup, String action);
-
-    void denyAclPermission(QualifiedObjectIdentifier idOfAccessControlledObject, UserGroup userGroup, String action);
-
     void removeAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject);
     
     Iterable<OwnershipAnnotation> getOwnerships();

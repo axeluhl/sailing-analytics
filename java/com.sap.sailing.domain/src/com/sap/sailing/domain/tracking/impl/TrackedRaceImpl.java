@@ -176,6 +176,7 @@ import difflib.Patch;
 import difflib.PatchFailedException;
 
 public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials implements CourseListener {
+
     private static final long serialVersionUID = -4825546964220003507L;
 
     private static final Logger logger = Logger.getLogger(TrackedRaceImpl.class.getName());
