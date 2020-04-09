@@ -4,6 +4,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.when;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 import org.junit.Test;
@@ -69,6 +70,8 @@ public class FinishingTimeFinderTest extends PassAwareRaceLogAnalyzerTest<Finish
         RaceLogRaceStatusEvent event1 = createEvent(RaceLogRaceStatusEvent.class, 1);
         when(event1.getNextStatus()).thenReturn(RaceLogRaceStatus.FINISHING);
         RaceLogRevokeEvent revokeEvent = createEvent(RaceLogRevokeEvent.class,1);
+        final Serializable id = event1.getId();
+        when(revokeEvent.getRevokedEventId()).thenReturn(id);
         RaceLogRaceStatusEvent event2 = createEvent(RaceLogRaceStatusEvent.class, 1);
         when(event2.getNextStatus()).thenReturn(RaceLogRaceStatus.FINISHING);
         raceLog.add(event1);
