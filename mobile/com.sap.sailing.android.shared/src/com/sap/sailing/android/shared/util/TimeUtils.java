@@ -27,13 +27,12 @@ public class TimeUtils {
     /**
      * Formats your time to 'kk:mm:ss'.
      *
-     * @param timePoint
-     *            timestamp to format
+     * @param timePoint timestamp to format
      */
     public static String formatTime(TimePoint timePoint, boolean includeSeconds) {
         if (includeSeconds) {
             return formatTime(timePoint, "kk:mm:ss");
-        }else{
+        } else {
             return formatTime(timePoint, "kk:mm");
         }
     }
@@ -41,8 +40,7 @@ public class TimeUtils {
     /**
      * Formats your time to 'kk:mm:ss'.
      *
-     * @param timePoint
-     *            timestamp to format
+     * @param timePoint timestamp to format
      */
     public static String formatTime(TimePoint timePoint) {
         return formatTime(timePoint, true);
@@ -51,10 +49,8 @@ public class TimeUtils {
     /**
      * Formats your time with the help of {@link DateFormat}.
      *
-     * @param timePoint
-     *            timestamp to format
-     * @param format
-     *            format as defined by {@link DateFormat}
+     * @param timePoint timestamp to format
+     * @param format    format as defined by {@link DateFormat}
      * @return timestamp formatted as {@link String}
      */
     public static String formatTime(TimePoint timePoint, String format) {
@@ -168,12 +164,12 @@ public class TimeUtils {
     }
 
     public static void initDatePicker(Context context, NumberPicker datePicker, Calendar time, int pastDays,
-            int futureDays) {
+                                      int futureDays) {
         initDatePicker(context, datePicker, time, pastDays, futureDays, true);
     }
 
     public static void initDatePicker(Context context, NumberPicker datePicker, Calendar time, int pastDays,
-            int futureDays, boolean useWords) {
+                                      int futureDays, boolean useWords) {
         java.text.DateFormat dateFormat = java.text.DateFormat.getDateInstance();
         ArrayList<String> dates = new ArrayList<>();
         Calendar calendar = Calendar.getInstance();
