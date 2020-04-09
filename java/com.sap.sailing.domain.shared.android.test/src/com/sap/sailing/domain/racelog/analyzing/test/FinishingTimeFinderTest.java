@@ -69,10 +69,24 @@ public class FinishingTimeFinderTest extends PassAwareRaceLogAnalyzerTest<Finish
     public void testRevokeFinishing() {        
         RaceLogRaceStatusEvent event1 = createEvent(RaceLogRaceStatusEvent.class, 1);
         when(event1.getNextStatus()).thenReturn(RaceLogRaceStatus.FINISHING);
-        RaceLogRevokeEvent revokeEvent = createEvent(RaceLogRevokeEvent.class,1);
+        RaceLogRevokeEvent revokeEvent = createEvent(RaceLogRevokeEvent.class,2);
         final Serializable id = event1.getId();
         when(revokeEvent.getRevokedEventId()).thenReturn(id);
-        RaceLogRaceStatusEvent event2 = createEvent(RaceLogRaceStatusEvent.class, 1);
+        
+        raceLog.add(event1);
+        raceLog.add(revokeEvent);
+        
+        assertNull(analyzer.analyze());        
+    }
+    
+    @Test
+    public void testRevokeFinishingSecond() {        
+        RaceLogRaceStatusEvent event1 = createEvent(RaceLogRaceStatusEvent.class, 1);
+        when(event1.getNextStatus()).thenReturn(RaceLogRaceStatus.FINISHING);
+        RaceLogRevokeEvent revokeEvent = createEvent(RaceLogRevokeEvent.class,2);
+        final Serializable id = event1.getId();
+        when(revokeEvent.getRevokedEventId()).thenReturn(id);
+        RaceLogRaceStatusEvent event2 = createEvent(RaceLogRaceStatusEvent.class, 3);
         when(event2.getNextStatus()).thenReturn(RaceLogRaceStatus.FINISHING);
         raceLog.add(event1);
         raceLog.add(revokeEvent);
@@ -80,4 +94,6 @@ public class FinishingTimeFinderTest extends PassAwareRaceLogAnalyzerTest<Finish
        
         assertSame(event2.getLogicalTimePoint(), analyzer.analyze());
     }
+    
+   
 }

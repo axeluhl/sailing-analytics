@@ -60,6 +60,7 @@ public class RaceFinishingFragment extends BaseFragment {
                 @Override
                 public void onClick(View v) {
                     final Result result = getRace().revokeFinish(preferences.getAuthor());
+
                 }
             });
         }
