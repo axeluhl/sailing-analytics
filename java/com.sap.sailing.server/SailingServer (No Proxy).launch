@@ -113,7 +113,7 @@
 <setEntry value="javax.xml.stream:default"/>
 <setEntry value="javax.xml.ws:default"/>
 <setEntry value="org.eclipse.osgi.util:default"/>
-<setAttribute>
+</setAttribute>
 <setAttribute key="selected_workspace_bundles">
 <setEntry value="com.sap.sailing.geocoding:default"/>
 <setEntry value="com.sap.sailing.domain.common:default"/>
@@ -212,7 +212,7 @@
 <setEntry value="com.sap.sse.security.interface:default"/>
 <setEntry value="com.sap.sse.jettyextensions:default"/>
 <setEntry value="com.sap.sse.replication.persistence:default"/>
-<setAttribute>
+</setAttribute>
 <booleanAttribute key="show_selected_only" value="false"/>
 <booleanAttribute key="tracing" value="false"/>
 <booleanAttribute key="useCustomFeatures" value="false"/>
