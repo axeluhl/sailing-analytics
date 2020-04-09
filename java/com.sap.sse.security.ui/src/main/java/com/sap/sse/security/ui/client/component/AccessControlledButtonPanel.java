@@ -2,6 +2,7 @@ package com.sap.sse.security.ui.client.component;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
@@ -13,6 +14,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.ui.client.UserService;
 
@@ -30,6 +32,7 @@ public class AccessControlledButtonPanel extends Composite {
     private final Supplier<Boolean> createPermissionCheck, createPermissionCheckWithoutServerCreateObjectCheck,
             removePermissionCheck, updatePermissionCheck;
     private final BiConsumer<Button, Supplier<Boolean>> visibilityUpdater = (btn, check) -> btn.setVisible(check.get());
+    private Button removeButton;
 
     /**
      * Creates an {@link AccessControlledButtonPanel} instance for the given {@link HasPermissions type} using the
@@ -112,9 +115,18 @@ public class AccessControlledButtonPanel extends Composite {
      * @return the created {@link Button} instance
      */
     public Button addRemoveAction(final String text, final Command callback) {
-        return addAction(text, removePermissionCheck, callback);
+        removeButton = addAction(text, removePermissionCheck, callback);
+        return removeButton;
     }
-    
+
+    public <T> void addRemoveButtonStateUpdater(RefreshableMultiSelectionModel<T> selectionModel, String text) {
+        selectionModel.addSelectionChangeHandler((event) -> {
+            Set<T> selectedSet = selectionModel.getSelectedSet();
+            removeButton.setEnabled(!selectedSet.isEmpty());
+            removeButton.setText(selectedSet.size() <= 1 ? text : text + '(' + selectedSet.size() + ')');
+        });
+    }
+
     /**
      * Adds a secured action button, which is only visible if the current user has any
      * {@link UserService#hasCurrentUserPermissionToUpdateAnyObjectOfType(HasPermissions) update permission} for the

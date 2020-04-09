@@ -106,10 +106,7 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
                 }
         });
         deleteButton.setEnabled(userSelectionModel.getSelectedSet().size() >= 1);
-        userSelectionModel.addSelectionChangeHandler(event -> {
-            deleteButton.setText(stringMessages.remove() + " (" + userSelectionModel.getSelectedSet().size() + ")");
-            deleteButton.setEnabled(userSelectionModel.getSelectedSet().size() >= 1);
-        });
+        buttonPanel.addRemoveButtonStateUpdater(userSelectionModel, stringMessages.remove());
         ScrollPanel scrollPanel = new ScrollPanel(userList.asWidget());
         LabeledAbstractFilterablePanel<UserDTO> filterBox = userList.getFilterField();
         filterBox.getElement().setPropertyString("placeholder", stringMessages.filterUsers());

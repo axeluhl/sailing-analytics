@@ -10096,4 +10096,33 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         }
         return result;
     }
+
+    @Override
+    public void removeMarkRoles(Collection<MarkRoleDTO> markRoleDTOs) {
+            for (MarkRoleDTO markRoleDTO : markRoleDTOs) {
+                    getSharedSailingData().deleteMarkRole(getSharedSailingData().getMarkRoleById(markRoleDTO.getUuid()));
+            }
+    }
+
+    @Override
+    public void removeCourseTemplates(Collection<CourseTemplateDTO> courseTemplateDTOs) {
+            for (CourseTemplateDTO courseTemplateDTO : courseTemplateDTOs) {
+                    getSharedSailingData().deleteCourseTemplate(getSharedSailingData().getCourseTemplateById(courseTemplateDTO.getUuid()));
+            }
+    }
+
+
+    @Override
+    public void removeMarkProperties(Collection<MarkPropertiesDTO> markPropertiesDTOS) {
+            for (MarkPropertiesDTO markPropertiesDTO : markPropertiesDTOS) {
+                    getSharedSailingData().deleteMarkProperties(getSharedSailingData().getMarkPropertiesById(markPropertiesDTO.getUuid()));
+            }
+    }
+
+    @Override
+    public void removeMarkTemplates(Collection<MarkTemplateDTO> markTemplatesDTOs) {
+            for (MarkTemplateDTO markTemplateDTO : markTemplatesDTOs) {
+                    getSharedSailingData().deleteMarkTemplate(getSharedSailingData().getMarkTemplateById(markTemplateDTO.getUuid()));
+            }
+    }
 }

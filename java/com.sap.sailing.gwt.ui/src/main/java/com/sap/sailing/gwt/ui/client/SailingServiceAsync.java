@@ -1243,4 +1243,13 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
     void getMarkRoles(AsyncCallback<List<MarkRoleDTO>> callback);
 
     void createMarkRole(MarkRoleDTO markRole, AsyncCallback<MarkRoleDTO> asyncCallback);
+
+    void removeMarkRoles(Collection<MarkRoleDTO> markRoleDTOs, AsyncCallback<Void> asyncCallback);
+    
+    void removeCourseTemplates(Collection<CourseTemplateDTO> courseTemplatesDTOs, AsyncCallback<Void> asyncCallback);
+    
+    void removeMarkProperties(Collection<MarkPropertiesDTO> markPropertiesDTOs, AsyncCallback<Void> asyncCallback);
+    
+    void removeMarkTemplates(Collection<MarkTemplateDTO> markTemplateDTOs, AsyncCallback<Void> asyncCallback);
+
 }

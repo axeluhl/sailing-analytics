@@ -10,8 +10,10 @@ import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCe
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.TextCell;
@@ -29,6 +31,7 @@ import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.view.client.CellPreviewEvent;
@@ -99,6 +102,39 @@ public class MarkPropertiesPanel extends FlowPanel {
                 openEditMarkPropertiesDialog(new MarkPropertiesDTO());
             }
         });
+        final Button removeButton = buttonAndFilterPanel.addRemoveAction(stringMessages.remove(), new Command() {
+
+            @Override public void execute() {
+                if (askUserForConfirmation()) {
+                    removeMarkProperties(refreshableSelectionModel.getSelectedSet());
+                }
+            }
+
+            private void removeMarkProperties(Collection<MarkPropertiesDTO> markPropertiesDTOS) {
+                if (!markPropertiesDTOS.isEmpty()) {
+                    sailingService.removeMarkProperties(markPropertiesDTOS, new AsyncCallback<Void>() {
+                        @Override public void onFailure(Throwable caught) {
+                            errorReporter.reportError("Error trying to remove mark properties:" + caught.getMessage());
+                        }
+
+                        @Override public void onSuccess(Void result) {
+                            refreshMarkProperties();
+                        }
+                    });
+                }
+            }
+
+            private boolean askUserForConfirmation() {
+                if (refreshableSelectionModel.itemIsSelectedButNotVisible(markPropertiesTable.getVisibleItems())) {
+                    final String markPropertiesNames = refreshableSelectionModel.getSelectedSet().stream()
+                            .map(MarkPropertiesDTO::getName).collect(Collectors.joining("\n"));
+                    return Window.confirm(stringMessages.doYouReallyWantToRemoveNonVisibleMarkProperties(markPropertiesNames));
+                }
+                return Window.confirm(stringMessages.doYouReallyWantToRemoveSeveralMarkProperties());
+            }
+        });
+        removeButton.setEnabled(false);
+
         Label lblFilterRaces = new Label(stringMessages.filterMarkPropertiesByName() + ":");
         lblFilterRaces.setWordWrap(false);
         buttonAndFilterPanel.addUnsecuredWidget(lblFilterRaces);
@@ -120,6 +156,7 @@ public class MarkPropertiesPanel extends FlowPanel {
             }
         };
         createMarkPropertiesTable(userService);
+        buttonAndFilterPanel.addRemoveButtonStateUpdater(refreshableSelectionModel, stringMessages.remove());
         filterableMarkProperties.getTextBox().ensureDebugId("MarkPropertiesFilterTextBox");
         buttonAndFilterPanel.addUnsecuredWidget(filterableMarkProperties);
         filterableMarkProperties

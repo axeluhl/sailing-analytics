@@ -46,6 +46,8 @@ import com.sap.sailing.shared.server.operations.CreateMarkRoleOperation;
 import com.sap.sailing.shared.server.operations.CreateMarkTemplateOperation;
 import com.sap.sailing.shared.server.operations.DeleteCourseTemplateOperation;
 import com.sap.sailing.shared.server.operations.DeleteMarkPropertiesOperation;
+import com.sap.sailing.shared.server.operations.DeleteMarkRoleOperation;
+import com.sap.sailing.shared.server.operations.DeleteMarkTemplateOperation;
 import com.sap.sailing.shared.server.operations.RecordUsageForMarkRoleOperation;
 import com.sap.sailing.shared.server.operations.RecordUsageForMarkTemplateOperation;
 import com.sap.sailing.shared.server.operations.SetPositioningInformationForMarkPropertiesOperation;
@@ -200,7 +202,7 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
                 });
         return getMarkRoleById(idOfNewMarkRole);
     }
-
+    
     @Override
     public Void internalCreateMarkRole(UUID idOfNewMarkRole, String name, String shortName) {
         final MarkRole markRole = new MarkRoleImpl(idOfNewMarkRole, name, shortName);
@@ -545,6 +547,40 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
         } else {
             throw new NullPointerException(
                     String.format("Did not find a mark properties with ID %s", markPropertiesUUID));
+        }
+        return null;
+    }
+
+    @Override
+    public void deleteMarkTemplate(MarkTemplate markTemplate) {
+        final UUID id = markTemplate.getId();
+        getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(markTemplate,
+                () -> apply(new DeleteMarkTemplateOperation(id)));
+    }
+
+    @Override
+    public Void internalDeleteMarkTemplate(UUID markTemplateUUID) {
+        if (this.markTemplatesById.remove(markTemplateUUID) != null) {
+            mongoObjectFactory.removeMarkTemplate(markTemplateUUID);
+        } else {
+            throw new NullPointerException(String.format("Did not find a mark template with ID %s", markTemplateUUID));
+        }
+        return null;
+    }
+
+    @Override
+    public void deleteMarkRole(final MarkRole markRole) {
+        final UUID id = markRole.getId();
+        getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(markRole,
+                () -> apply(new DeleteMarkRoleOperation(id)));
+    }
+
+    @Override
+    public Void internalDeleteMarkRole(UUID markRoleUUID) {
+        if (this.markRolesById.remove(markRoleUUID) != null) {
+            mongoObjectFactory.removeMarkRole(markRoleUUID);
+        } else {
+            throw new NullPointerException(String.format("Did not find a mark role with ID %s", markRoleUUID));
         }
         return null;
     }

@@ -2335,6 +2335,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String courseCreation();
     String filterMarkTemplateByName();
     String markTemplates();
+    String doYouReallyWantToRemoveMarkTemplates();
+    String doYouReallyWantToRemoveNonVisibleMarkTemplates(String message);
     String filterMarkPropertiesByName();
     String markProperties();
     String filterCourseTemplateByName();
@@ -2345,8 +2347,14 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String pleaseSelectAValidPassingInstruction();
     String pleaseSelectAValidMarkTemplate();
     String doYouReallyWantToRemoveCourseTemplate(String name);
+    String doYouReallyWantToRemoveCourseTemplates();
+    String doYouReallyWantToRemoveNonVisibleCourseTemplates(String message);
     String couldNotRemoveCourseTemplate(String message);
+    String doYouReallyWantToRemoveMarkRoles();
+    String doYouReallyWantToRemoveNonVisibleMarkRoles(String message);
     String doYouReallyWantToRemoveMarkProperties(String name);
+    String doYouReallyWantToRemoveSeveralMarkProperties();
+    String doYouReallyWantToRemoveNonVisibleMarkProperties(String message);
     String couldNotRemoveMarkProperties(String message);
     String markRoles();
     String filterMarkRoles();

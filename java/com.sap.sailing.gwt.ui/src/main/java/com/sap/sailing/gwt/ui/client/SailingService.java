@@ -1296,4 +1296,28 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     List<MarkRoleDTO> getMarkRoles();
 
     MarkRoleDTO createMarkRole(MarkRoleDTO markRole);
+
+    /**
+     * Removes mark roles list
+     * @param markRoleDTOs list of mark roles to remove
+     */
+    void removeMarkRoles(Collection<MarkRoleDTO> markRoleDTOs);
+    
+    /**
+     * Removes course templates list
+     * @param courseTemplateDTOs list of course templates to remove
+     */
+    void removeCourseTemplates(Collection<CourseTemplateDTO> courseTemplateDTOs);
+
+    /**
+     * Removes mark templates list
+     * @param markTemplateDTOS list of mark templates to remove
+     */
+    void removeMarkTemplates(Collection<MarkTemplateDTO> markTemplateDTOS);
+
+    /**
+     * Removes mark properties list
+     * @param markPropertiesDTOS list of mark properties to remove
+     */
+    void removeMarkProperties(Collection<MarkPropertiesDTO> markPropertiesDTOS);
 }

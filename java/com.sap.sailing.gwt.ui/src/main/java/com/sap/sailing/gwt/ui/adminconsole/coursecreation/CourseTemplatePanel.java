@@ -9,8 +9,10 @@ import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCe
 import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell.ACTION_UPDATE;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
@@ -25,6 +27,7 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.view.client.CellPreviewEvent;
@@ -92,6 +95,39 @@ public class CourseTemplatePanel extends FlowPanel {
             }
         });
 
+        final Button removeButton = buttonAndFilterPanel.addRemoveAction(stringMessages.remove(), new Command() {
+
+            @Override public void execute() {
+                if (askUserForConfirmation()) {
+                    removeCourseTemplates(refreshableSelectionModel.getSelectedSet());
+                }
+            }
+
+            private void removeCourseTemplates(Collection<CourseTemplateDTO> courseTemplateDTOS) {
+                if (!courseTemplateDTOS.isEmpty()) {
+                    sailingService.removeCourseTemplates(courseTemplateDTOS, new AsyncCallback<Void>() {
+                        @Override public void onFailure(Throwable caught) {
+                            errorReporter.reportError("Error trying to remove course teamplates:" + caught.getMessage());
+                        }
+
+                        @Override public void onSuccess(Void result) {
+                            refreshCourseTemplates();
+                        }
+                    });
+                }
+            }
+
+            private boolean askUserForConfirmation() {
+                if (refreshableSelectionModel.itemIsSelectedButNotVisible(courseTemplateTable.getVisibleItems())) {
+                    final String markRolesNames = refreshableSelectionModel.getSelectedSet().stream()
+                            .map(CourseTemplateDTO::getName).collect(Collectors.joining("\n"));
+                    return Window.confirm(stringMessages.doYouReallyWantToRemoveNonVisibleCourseTemplates(markRolesNames));
+                }
+                return Window.confirm(stringMessages.doYouReallyWantToRemoveCourseTemplates());
+            }
+        });
+
+        removeButton.setEnabled(false);
         Label lblFilterRaces = new Label(stringMessages.filterCourseTemplateByName() + ":");
         lblFilterRaces.setWordWrap(false);
         buttonAndFilterPanel.addUnsecuredWidget(lblFilterRaces);
@@ -112,6 +148,7 @@ public class CourseTemplatePanel extends FlowPanel {
             }
         };
         createCourseTemplateTable(userService);
+        buttonAndFilterPanel.addRemoveButtonStateUpdater(refreshableSelectionModel, stringMessages.remove());
         filterableCourseTemplatePanel.getTextBox().ensureDebugId("CourseTemplateFilterTextBox");
         buttonAndFilterPanel.addUnsecuredWidget(filterableCourseTemplatePanel);
         filterableCourseTemplatePanel
