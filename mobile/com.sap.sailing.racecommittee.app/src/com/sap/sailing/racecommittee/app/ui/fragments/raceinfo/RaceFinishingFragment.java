@@ -18,6 +18,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class RaceFinishingFragment extends BaseFragment {
 
@@ -55,12 +56,14 @@ public class RaceFinishingFragment extends BaseFragment {
             });
         }
         Button revoke = ViewHelper.get(layout, R.id.flag_finishing_revoke);
-        if (revoke!=null){
+        if (revoke != null) {
             revoke.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     final Result result = getRace().revokeFinish(preferences.getAuthor());
-
+                    if (result.hasError()) {
+                        Toast.makeText(getActivity(), result.getMessage(getActivity()), Toast.LENGTH_LONG).show();
+                    }
                 }
             });
         }

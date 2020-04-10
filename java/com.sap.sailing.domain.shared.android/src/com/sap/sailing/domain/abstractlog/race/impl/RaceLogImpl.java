@@ -59,11 +59,8 @@ public class RaceLogImpl extends AbstractLogImpl<RaceLogEvent, RaceLogEventVisit
 
     @Override
     protected NavigableSet<RaceLogEvent> getInternalFixes() {
-        return new PartialNavigableSetView<RaceLogEvent>(super.getInternalFixes()) {
-            @Override
-            protected boolean isValid(RaceLogEvent e) {
-                return e.getPassId() == getCurrentPassId();
-            }
-        };
+        return new FilteredPartialNavigableSetView<>(super.getInternalFixes(),new PassValidator(getCurrentPassId()));
     }
+
+
 }

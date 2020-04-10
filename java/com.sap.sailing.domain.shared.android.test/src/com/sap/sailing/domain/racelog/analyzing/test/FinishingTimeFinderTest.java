@@ -95,5 +95,21 @@ public class FinishingTimeFinderTest extends PassAwareRaceLogAnalyzerTest<Finish
         assertSame(event2.getLogicalTimePoint(), analyzer.analyze());
     }
     
+    @Test
+    public void testFindFinishEventAfterRevoke() {        
+        RaceLogRaceStatusEvent event1 = createEvent(RaceLogRaceStatusEvent.class, 1);
+        when(event1.getNextStatus()).thenReturn(RaceLogRaceStatus.FINISHING);
+        RaceLogRevokeEvent revokeEvent = createEvent(RaceLogRevokeEvent.class,2);
+        final Serializable id = event1.getId();
+        when(revokeEvent.getRevokedEventId()).thenReturn(id);
+        RaceLogRaceStatusEvent event2 = createEvent(RaceLogRaceStatusEvent.class, 3);
+        when(event2.getNextStatus()).thenReturn(RaceLogRaceStatus.FINISHING);
+        raceLog.add(event1);
+        raceLog.add(revokeEvent);
+        raceLog.add(event2);
+       
+        assertSame(event2, analyzer.findFinishingEvent());
+    }
+    
    
 }
