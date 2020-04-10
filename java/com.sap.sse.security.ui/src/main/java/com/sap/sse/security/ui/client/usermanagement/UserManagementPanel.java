@@ -73,40 +73,38 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
                 e -> editRolesAndPermissionsForUserButton.setEnabled(!userNameTextbox.getText().isEmpty()));
         editRolesAndPermissionsForUserButton.setEnabled(false);
         userSelectionModel = userList.getSelectionModel();
-        final Button deleteButton = buttonPanel.addRemoveAction(userList.getSelectionModel(), stringMessages.remove(),
-                () -> {
-                    assert userSelectionModel.getSelectedSet().size() > 0;
-                    final Set<UserDTO> usersToDelete = new HashSet<>();
-                    final Set<String> usernamesToDelete = new HashSet<>();
-                    for (UserDTO userToDelete : userSelectionModel.getSelectedSet()) {
-                        usersToDelete.add(userToDelete);
-                        usernamesToDelete.add(userToDelete.getName());
+        buttonPanel.addRemoveAction(userList.getSelectionModel(), stringMessages.remove(), () -> {
+            assert userSelectionModel.getSelectedSet().size() > 0;
+            final Set<UserDTO> usersToDelete = new HashSet<>();
+            final Set<String> usernamesToDelete = new HashSet<>();
+            for (UserDTO userToDelete : userSelectionModel.getSelectedSet()) {
+                usersToDelete.add(userToDelete);
+                usernamesToDelete.add(userToDelete.getName());
+            }
+            if (Window.confirm(usernamesToDelete.size() == 1
+                    ? stringMessages.doYouReallyWantToDeleteUser(usernamesToDelete.iterator().next())
+                    : stringMessages.doYouReallyWantToDeleteNUsers(usernamesToDelete.size()))) {
+                userManagementService.deleteUsers(usernamesToDelete, new AsyncCallback<Set<SuccessInfo>>() {
+                    @Override
+                    public void onSuccess(Set<SuccessInfo> result) {
+                        for (UserDTO userToDelete : usersToDelete) {
+                            for (UserDeletedEventHandler userDeletedHandler : userDeletedHandlers) {
+                                userDeletedHandler.onUserDeleted(userToDelete);
+                            }
+                        }
+                        for (SuccessInfo successInfo : result) {
+                            Notification.notify(successInfo.getMessage(), NotificationType.SUCCESS);
+                        }
                     }
-                    if (Window.confirm(usernamesToDelete.size() == 1
-                            ? stringMessages.doYouReallyWantToDeleteUser(usernamesToDelete.iterator().next())
-                            : stringMessages.doYouReallyWantToDeleteNUsers(usernamesToDelete.size()))) {
-                        userManagementService.deleteUsers(usernamesToDelete, new AsyncCallback<Set<SuccessInfo>>() {
-                            @Override
-                            public void onSuccess(Set<SuccessInfo> result) {
-                                for (UserDTO userToDelete : usersToDelete) {
-                                    for (UserDeletedEventHandler userDeletedHandler : userDeletedHandlers) {
-                                        userDeletedHandler.onUserDeleted(userToDelete);
-                                    }
-                                }
-                                for (SuccessInfo successInfo : result) {
-                                    Notification.notify(successInfo.getMessage(), NotificationType.SUCCESS);
-                                }
-                            }
 
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                errorReporter.reportError(stringMessages
-                                        .errorDeletingUser(usernamesToDelete.iterator().next(), caught.getMessage()));
-                            }
-                        });
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError(stringMessages.errorDeletingUser(usernamesToDelete.iterator().next(),
+                                caught.getMessage()));
                     }
                 });
-        deleteButton.setEnabled(userSelectionModel.getSelectedSet().size() >= 1);
+            }
+        });
         ScrollPanel scrollPanel = new ScrollPanel(userList.asWidget());
         LabeledAbstractFilterablePanel<UserDTO> filterBox = userList.getFilterField();
         filterBox.getElement().setPropertyString("placeholder", stringMessages.filterUsers());

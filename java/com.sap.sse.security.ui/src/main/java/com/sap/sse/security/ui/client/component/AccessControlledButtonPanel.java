@@ -13,6 +13,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.SetSelectionModel;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.ui.client.UserService;
@@ -149,12 +150,32 @@ public class AccessControlledButtonPanel extends Composite {
         return addAction(null, text, permissionCheck, callback);
     }
 
-    private <T> Button addAction(RefreshableSelectionModel<T> selectionModel, final String text,
+    /**
+     * Adds an action button, which's visibility depends on the provided {@link Supplier permission check}
+     *
+     * @param selectionModel
+     *            the {@link RefreshableSelectionModel} selection model. If actual object is passed then instance of
+     *            {@link SelectedElementsCountingButton} is created. If null is passed then native gwt {@link Button} is
+     *            created.
+     * @param text
+     *            the {@link String text} to show on the button
+     * @param permissionCheck
+     *            the {@link Supplier permission check} to decide if the action button is visible or not
+     * @param callback
+     *            the {@link Command callback} to execute on button click, if permission is granted
+     * @param <T>
+     *            type of DTO objects which are selected
+     * @return the {@link Button} instance
+     */
+    private <T> Button addAction(final SetSelectionModel<T> selectionModel, final String text,
             final Supplier<Boolean> permissionCheck, final Command callback) {
         ClickHandler handler = wrap(permissionCheck, callback);
         final Button button = selectionModel == null ? new Button(text, handler)
-                : new SelectedElementsCountingRemoveButton(selectionModel, text, handler);
-        resolveButtonVisibility(permissionCheck, button);
+                : new SelectedElementsCountingButton<T>(selectionModel, text, handler);
+        this.buttonToPermissions.put(button, permissionCheck);
+        button.getElement().getStyle().setMarginRight(5, Unit.PX);
+        this.panel.add(button);
+        this.visibilityUpdater.accept(button, permissionCheck);
         return button;
     }
 
@@ -164,13 +185,6 @@ public class AccessControlledButtonPanel extends Composite {
                 callback.execute();
             }
         };
-    }
-
-    private void resolveButtonVisibility(Supplier<Boolean> permissionCheck, Button button) {
-        this.buttonToPermissions.put(button, permissionCheck);
-        button.getElement().getStyle().setMarginRight(5, Unit.PX);
-        this.panel.add(button);
-        this.visibilityUpdater.accept(button, permissionCheck);
     }
 
     /**

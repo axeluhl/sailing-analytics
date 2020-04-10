@@ -10004,6 +10004,13 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         getSharedSailingData().deleteCourseTemplate(getSharedSailingData().getCourseTemplateById(uuid));
     }
 
+    @Override
+    public void removeCourseTemplates(Collection<UUID> courseTemplateUuids) {
+        for (UUID uuid : courseTemplateUuids) {
+            removeCourseTemplate(uuid);
+        }
+    }
+
     private WaypointTemplate convertToWaypointTemplate(WaypointTemplateDTO waypointTemplate, final MarkRolePairFactory markRolePairFactory) {
         final List<MarkRole> resolvedMarkRoles = waypointTemplate.getMarkRolesForControlPoint().stream()
                 .map(t -> getSharedSailingData().getMarkRoleById(t.getUuid())).collect(Collectors.toList());
@@ -10073,6 +10080,13 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         getSharedSailingData().deleteMarkProperties(getSharedSailingData().getMarkPropertiesById(uuid));
     }
 
+    @Override
+    public void removeMarkProperties(Collection<UUID> markPropertiesUuids) {
+        for (UUID uuid : markPropertiesUuids) {
+            removeMarkProperties(uuid);
+        }
+    }
+
     private MarkRoleDTO convertToMarkRoleDTO(final MarkRole markRole) {
         final MarkRoleDTO markRoleDTO = new MarkRoleDTO(markRole.getId(), markRole.getName(), markRole.getShortName());
         SecurityDTOUtil.addSecurityInformation(getSecurityService(), markRoleDTO, markRole.getIdentifier());
@@ -10095,34 +10109,5 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             result = convertToMarkRoleDTO(getSharedSailingData().createMarkRole(markRole.getName(), markRole.getShortName()));
         }
         return result;
-    }
-
-    @Override
-    public void removeMarkRoles(Collection<MarkRoleDTO> markRoleDTOs) {
-            for (MarkRoleDTO markRoleDTO : markRoleDTOs) {
-                    getSharedSailingData().deleteMarkRole(getSharedSailingData().getMarkRoleById(markRoleDTO.getUuid()));
-            }
-    }
-
-    @Override
-    public void removeCourseTemplates(Collection<CourseTemplateDTO> courseTemplateDTOs) {
-            for (CourseTemplateDTO courseTemplateDTO : courseTemplateDTOs) {
-                    getSharedSailingData().deleteCourseTemplate(getSharedSailingData().getCourseTemplateById(courseTemplateDTO.getUuid()));
-            }
-    }
-
-
-    @Override
-    public void removeMarkProperties(Collection<MarkPropertiesDTO> markPropertiesDTOS) {
-            for (MarkPropertiesDTO markPropertiesDTO : markPropertiesDTOS) {
-                    getSharedSailingData().deleteMarkProperties(getSharedSailingData().getMarkPropertiesById(markPropertiesDTO.getUuid()));
-            }
-    }
-
-    @Override
-    public void removeMarkTemplates(Collection<MarkTemplateDTO> markTemplatesDTOs) {
-            for (MarkTemplateDTO markTemplateDTO : markTemplatesDTOs) {
-                    getSharedSailingData().deleteMarkTemplate(getSharedSailingData().getMarkTemplateById(markTemplateDTO.getUuid()));
-            }
     }
 }

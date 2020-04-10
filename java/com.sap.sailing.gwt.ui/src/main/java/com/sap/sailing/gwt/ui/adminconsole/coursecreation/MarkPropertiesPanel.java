@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.google.gwt.cell.client.AbstractCell;
@@ -128,13 +129,16 @@ public class MarkPropertiesPanel extends FlowPanel {
                     @Override
                     public void execute() {
                         if (askUserForConfirmation()) {
-                            removeMarkProperties(refreshableSelectionModel.getSelectedSet());
+                            removeMarkProperties(
+                                    refreshableSelectionModel.getSelectedSet().stream().map(markPropertiesDTO -> {
+                                        return markPropertiesDTO.getUuid();
+                                    }).collect(Collectors.toList()));
                         }
                     }
 
-                    private void removeMarkProperties(Collection<MarkPropertiesDTO> markPropertiesDTOS) {
-                        if (!markPropertiesDTOS.isEmpty()) {
-                            sailingService.removeMarkProperties(markPropertiesDTOS, new AsyncCallback<Void>() {
+                    private void removeMarkProperties(Collection<UUID> markPropertiesUuids) {
+                        if (!markPropertiesUuids.isEmpty()) {
+                            sailingService.removeMarkProperties(markPropertiesUuids, new AsyncCallback<Void>() {
                                 @Override
                                 public void onFailure(Throwable caught) {
                                     errorReporter.reportError(

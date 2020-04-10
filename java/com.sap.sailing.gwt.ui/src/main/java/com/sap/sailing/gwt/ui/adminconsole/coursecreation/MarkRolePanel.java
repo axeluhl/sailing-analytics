@@ -5,10 +5,8 @@ import static com.sap.sse.security.ui.client.component.AccessControlledActionsCo
 import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell.ACTION_CHANGE_OWNERSHIP;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
@@ -21,9 +19,7 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.view.client.CellPreviewEvent;
@@ -73,8 +69,22 @@ public class MarkRolePanel extends FlowPanel {
                 SecuredDomainType.MARK_ROLE);
         add(buttonAndFilterPanel);
         allMarkRoles = new ArrayList<>();
+        buttonAndFilterPanel.addUnsecuredAction(stringMessages.refresh(), new Command() {
+
+            @Override
+            public void execute() {
+                loadMarkRoles();
+            }
+        });
+        buttonAndFilterPanel.addCreateAction(stringMessages.add(), new Command() {
+            @Override
+            public void execute() {
+                openEditMarkRoleDialog(new MarkRoleDTO());
+            }
+        });
         Label lblFilter = new Label(stringMessages.filterMarkRoles() + ":");
         lblFilter.setWordWrap(false);
+        buttonAndFilterPanel.addUnsecuredWidget(lblFilter);
         this.filterableMarkRoles = new LabeledAbstractFilterablePanel<MarkRoleDTO>(lblFilter, allMarkRoles,
                 markRoleListDataProvider, stringMessages) {
             @Override
@@ -91,59 +101,6 @@ public class MarkRolePanel extends FlowPanel {
             }
         };
         createMarkRoleTable(userService);
-        buttonAndFilterPanel.addUnsecuredAction(stringMessages.refresh(), new Command() {
-
-            @Override
-            public void execute() {
-                loadMarkRoles();
-            }
-        });
-        buttonAndFilterPanel.addCreateAction(stringMessages.add(), new Command() {
-            @Override
-            public void execute() {
-                openEditMarkRoleDialog(new MarkRoleDTO());
-            }
-        });
-        final Button removeButton = buttonAndFilterPanel.addRemoveAction(refreshableSelectionModel,
-                stringMessages.remove(), new Command() {
-
-                    @Override
-                    public void execute() {
-                        if (askUserForConfirmation()) {
-                            removeMarkRoles(refreshableSelectionModel.getSelectedSet());
-                        }
-                    }
-
-                    private void removeMarkRoles(Collection<MarkRoleDTO> markRoleDTOS) {
-                        if (!markRoleDTOS.isEmpty()) {
-                            sailingService.removeMarkRoles(markRoleDTOS, new AsyncCallback<Void>() {
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                    errorReporter
-                                            .reportError("Error trying to remove mark roles:" + caught.getMessage());
-                                }
-
-                                @Override
-                                public void onSuccess(Void result) {
-                                    refreshMarkRoles();
-                                }
-                            });
-                        }
-                    }
-
-                    private boolean askUserForConfirmation() {
-                        if (refreshableSelectionModel.itemIsSelectedButNotVisible(markRolesTable.getVisibleItems())) {
-                            final String markRolesNames = refreshableSelectionModel.getSelectedSet().stream()
-                                    .map(MarkRoleDTO::getName).collect(Collectors.joining("\n"));
-                            return Window
-                                    .confirm(stringMessages.doYouReallyWantToRemoveNonVisibleMarkRoles(markRolesNames));
-                        }
-                        return Window.confirm(stringMessages.doYouReallyWantToRemoveMarkRoles());
-                    }
-                });
-
-        removeButton.setEnabled(false);
-        buttonAndFilterPanel.addUnsecuredWidget(lblFilter);
         filterableMarkRoles.getTextBox().ensureDebugId("MarkRolesFilterTextBox");
         buttonAndFilterPanel.addUnsecuredWidget(filterableMarkRoles);
         filterableMarkRoles

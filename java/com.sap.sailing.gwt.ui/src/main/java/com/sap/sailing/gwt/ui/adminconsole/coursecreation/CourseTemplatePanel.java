@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.google.gwt.cell.client.TextCell;
@@ -115,38 +116,47 @@ public class CourseTemplatePanel extends FlowPanel {
             }
         });
 
-        final Button removeButton = buttonAndFilterPanel.addRemoveAction(refreshableSelectionModel, stringMessages.remove(), new Command() {
+        final Button removeButton = buttonAndFilterPanel.addRemoveAction(refreshableSelectionModel,
+                stringMessages.remove(), new Command() {
 
-            @Override public void execute() {
-                if (askUserForConfirmation()) {
-                    removeCourseTemplates(refreshableSelectionModel.getSelectedSet());
-                }
-            }
-
-            private void removeCourseTemplates(Collection<CourseTemplateDTO> courseTemplateDTOS) {
-                if (!courseTemplateDTOS.isEmpty()) {
-                    sailingService.removeCourseTemplates(courseTemplateDTOS, new AsyncCallback<Void>() {
-                        @Override public void onFailure(Throwable caught) {
-                            errorReporter.reportError("Error trying to remove course teamplates:" + caught.getMessage());
+                    @Override
+                    public void execute() {
+                        if (askUserForConfirmation()) {
+                            removeCourseTemplates(
+                                    refreshableSelectionModel.getSelectedSet().stream().map(courseTemplateDTO -> {
+                                        return courseTemplateDTO.getUuid();
+                                    }).collect(Collectors.toList()));
                         }
+                    }
 
-                        @Override public void onSuccess(Void result) {
-                            refreshCourseTemplates();
+                    private void removeCourseTemplates(Collection<UUID> courseTemplatesUuids) {
+                        if (!courseTemplatesUuids.isEmpty()) {
+                            sailingService.removeCourseTemplates(courseTemplatesUuids, new AsyncCallback<Void>() {
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    errorReporter.reportError(
+                                            "Error trying to remove course teamplates:" + caught.getMessage());
+                                }
+
+                                @Override
+                                public void onSuccess(Void result) {
+                                    refreshCourseTemplates();
+                                }
+                            });
                         }
-                    });
-                }
-            }
+                    }
 
-            private boolean askUserForConfirmation() {
-                if (refreshableSelectionModel.itemIsSelectedButNotVisible(courseTemplateTable.getVisibleItems())) {
-                    final String markRolesNames = refreshableSelectionModel.getSelectedSet().stream()
-                            .map(CourseTemplateDTO::getName).collect(Collectors.joining("\n"));
-                    return Window
-                            .confirm(stringMessages.doYouReallyWantToRemoveNonVisibleCourseTemplates(markRolesNames));
-                }
-                return Window.confirm(stringMessages.doYouReallyWantToRemoveCourseTemplates());
-            }
-        });
+                    private boolean askUserForConfirmation() {
+                        if (refreshableSelectionModel
+                                .itemIsSelectedButNotVisible(courseTemplateTable.getVisibleItems())) {
+                            final String markRolesNames = refreshableSelectionModel.getSelectedSet().stream()
+                                    .map(CourseTemplateDTO::getName).collect(Collectors.joining("\n"));
+                            return Window.confirm(
+                                    stringMessages.doYouReallyWantToRemoveNonVisibleCourseTemplates(markRolesNames));
+                        }
+                        return Window.confirm(stringMessages.doYouReallyWantToRemoveCourseTemplates());
+                    }
+                });
 
         removeButton.setEnabled(false);
         buttonAndFilterPanel.addUnsecuredWidget(lblFilterRaces);

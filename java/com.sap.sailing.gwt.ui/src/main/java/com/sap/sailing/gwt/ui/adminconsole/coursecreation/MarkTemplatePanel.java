@@ -5,10 +5,8 @@ import static com.sap.sse.security.ui.client.component.AccessControlledActionsCo
 import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell.ACTION_CHANGE_OWNERSHIP;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
@@ -21,9 +19,7 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.view.client.CellPreviewEvent;
@@ -74,8 +70,24 @@ public class MarkTemplatePanel extends FlowPanel {
                 SecuredDomainType.MARK_TEMPLATE);
         add(buttonAndFilterPanel);
         allMarkTemplates = new ArrayList<>();
+        buttonAndFilterPanel.addUnsecuredAction(stringMessages.refresh(), new Command() {
+
+            @Override
+            public void execute() {
+                loadMarkTemplates();
+            }
+        });
+        buttonAndFilterPanel.addCreateAction(stringMessages.add(), new Command() {
+            @Override
+            public void execute() {
+                openEditMarkTemplateDialog(new MarkTemplateDTO());
+                // TODO add action
+            }
+        });
+
         Label lblFilterRaces = new Label(stringMessages.filterMarkTemplateByName() + ":");
         lblFilterRaces.setWordWrap(false);
+        buttonAndFilterPanel.addUnsecuredWidget(lblFilterRaces);
 
         this.filterableMarkTemplates = new LabeledAbstractFilterablePanel<MarkTemplateDTO>(lblFilterRaces,
                 allMarkTemplates, markTemplateListDataProvider, stringMessages) {
@@ -93,63 +105,8 @@ public class MarkTemplatePanel extends FlowPanel {
                 return markTemplateTable;
             }
         };
-        filterableMarkTemplates.getTextBox().ensureDebugId("MarkTemplatesFilterTextBox");
         createMarkTemplatesTable(userService);
-        buttonAndFilterPanel.addUnsecuredAction(stringMessages.refresh(), new Command() {
-
-            @Override
-            public void execute() {
-                loadMarkTemplates();
-            }
-        });
-        buttonAndFilterPanel.addCreateAction(stringMessages.add(), new Command() {
-            @Override
-            public void execute() {
-                openEditMarkTemplateDialog(new MarkTemplateDTO());
-                // TODO add action
-            }
-        });
-
-        final Button removeButton = buttonAndFilterPanel.addRemoveAction(refreshableSelectionModel,
-                stringMessages.remove(), new Command() {
-
-                    @Override
-                    public void execute() {
-                        if (askUserForConfirmation()) {
-                            removeMarkTemplates(refreshableSelectionModel.getSelectedSet());
-                        }
-                    }
-
-                    private void removeMarkTemplates(Collection<MarkTemplateDTO> markTemplateDTOS) {
-                        if (!markTemplateDTOS.isEmpty()) {
-                            sailingService.removeMarkTemplates(markTemplateDTOS, new AsyncCallback<Void>() {
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                    errorReporter.reportError(
-                                            "Error trying to remove mark templates:" + caught.getMessage());
-                                }
-
-                                @Override
-                                public void onSuccess(Void result) {
-                                    refreshMarkTemplates();
-                                }
-                            });
-                        }
-                    }
-
-                    private boolean askUserForConfirmation() {
-                        if (refreshableSelectionModel
-                                .itemIsSelectedButNotVisible(markTemplateTable.getVisibleItems())) {
-                            final String markTemplatesNames = refreshableSelectionModel.getSelectedSet().stream()
-                                    .map(MarkTemplateDTO::getName).collect(Collectors.joining("\n"));
-                            return Window.confirm(
-                                    stringMessages.doYouReallyWantToRemoveNonVisibleMarkTemplates(markTemplatesNames));
-                        }
-                        return Window.confirm(stringMessages.doYouReallyWantToRemoveMarkTemplates());
-                    }
-                });
-        removeButton.setEnabled(false);
-        buttonAndFilterPanel.addUnsecuredWidget(lblFilterRaces);
+        filterableMarkTemplates.getTextBox().ensureDebugId("MarkTemplatesFilterTextBox");
         buttonAndFilterPanel.addUnsecuredWidget(filterableMarkTemplates);
         filterableMarkTemplates
                 .setUpdatePermissionFilterForCheckbox(event -> userService.hasPermission(event, DefaultActions.UPDATE));

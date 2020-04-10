@@ -146,18 +146,6 @@ public interface SharedSailingData extends ReplicableWithObjectInputStream<Repli
     
     void deleteMarkProperties(MarkProperties markProperties);
 
-    /**
-     * deletes the mark role
-     * @param markRole mark role object which is being deleted
-     */
-    void deleteMarkRole(MarkRole markRole);
-
-    /**
-     * deletes the mark template
-     * @param markTemplate mark template object which is being deleted
-     */
-    void deleteMarkTemplate(MarkTemplate markTemplate);
-
     void deleteCourseTemplate(CourseTemplate courseTemplate);
 
     Iterable<MarkProperties> getAllMarkProperties();

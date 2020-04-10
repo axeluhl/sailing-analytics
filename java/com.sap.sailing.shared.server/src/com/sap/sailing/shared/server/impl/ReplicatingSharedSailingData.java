@@ -33,10 +33,6 @@ public interface ReplicatingSharedSailingData extends SharedSailingData {
     
     Void internalDeleteMarkProperties(UUID markPropertiesUUID);
 
-    Void internalDeleteMarkTemplate(UUID markPropertiesUUID);
-
-    Void internalDeleteMarkRole(UUID markRoleUUID);
-
     Void internalDeleteCourseTemplate(UUID courseTemplateUUID);
 
     Void internalRecordUsage(UUID markTemplateId, UUID markPropertiesId);

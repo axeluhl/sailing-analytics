@@ -1238,18 +1238,29 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
 
     void removeCourseTemplate(UUID uuid, AsyncCallback<Void> asyncCallback);
 
+    /**
+     * Remove course templates by UUIDs
+     * 
+     * @param courseTemplatesUuids
+     *            the {@link Collection} of course templates' UUIDs which will be remove
+     * @param asyncCallback
+     *            {@link AsyncCallback} object
+     */
+    void removeCourseTemplates(Collection<UUID> courseTemplatesUuids, AsyncCallback<Void> asyncCallback);
+
     void removeMarkProperties(UUID uuid, AsyncCallback<Void> asyncCallback);
+
+    /**
+     * Remove mark properties by UUIDs
+     * 
+     * @param markPropertiesUuids
+     *            the {@link Collection} of mark properties' UUIDs which will be remove
+     * @param asyncCallback
+     *            {@link AsyncCallback} object
+     */
+    void removeMarkProperties(Collection<UUID> markPropertiesUuids, AsyncCallback<Void> asyncCallback);
 
     void getMarkRoles(AsyncCallback<List<MarkRoleDTO>> callback);
 
     void createMarkRole(MarkRoleDTO markRole, AsyncCallback<MarkRoleDTO> asyncCallback);
-
-    void removeMarkRoles(Collection<MarkRoleDTO> markRoleDTOs, AsyncCallback<Void> asyncCallback);
-    
-    void removeCourseTemplates(Collection<CourseTemplateDTO> courseTemplatesDTOs, AsyncCallback<Void> asyncCallback);
-    
-    void removeMarkProperties(Collection<MarkPropertiesDTO> markPropertiesDTOs, AsyncCallback<Void> asyncCallback);
-    
-    void removeMarkTemplates(Collection<MarkTemplateDTO> markTemplateDTOs, AsyncCallback<Void> asyncCallback);
-
 }
