@@ -83,7 +83,6 @@ public class CourseTemplatePanel extends FlowPanel {
         allCourseTemplates = new ArrayList<>();
         Label lblFilterRaces = new Label(stringMessages.filterCourseTemplateByName() + ":");
         lblFilterRaces.setWordWrap(false);
-
         this.filterableCourseTemplatePanel = new LabeledAbstractFilterablePanel<CourseTemplateDTO>(lblFilterRaces,
                 allCourseTemplates, courseTemplateListDataProvider, stringMessages) {
             @Override
@@ -102,7 +101,6 @@ public class CourseTemplatePanel extends FlowPanel {
         filterableCourseTemplatePanel.getTextBox().ensureDebugId("CourseTemplateFilterTextBox");
         createCourseTemplateTable(userService);
         buttonAndFilterPanel.addUnsecuredAction(stringMessages.refresh(), new Command() {
-
             @Override
             public void execute() {
                 loadCourseTemplates();
@@ -114,14 +112,12 @@ public class CourseTemplatePanel extends FlowPanel {
                 openEditCourseTemplateDialog(new CourseTemplateDTO(), userService, true);
             }
         });
-
         buttonAndFilterPanel.addRemoveAction(refreshableSelectionModel, stringMessages.remove(), new Command() {
             @Override
             public void execute() {
                 if (askUserForConfirmation()) {
-                    removeCourseTemplates(refreshableSelectionModel.getSelectedSet().stream().map(courseTemplateDTO -> {
-                        return courseTemplateDTO.getUuid();
-                    }).collect(Collectors.toList()));
+                    removeCourseTemplates(refreshableSelectionModel.getSelectedSet().stream().map(
+                        courseTemplateDTO -> courseTemplateDTO.getUuid()).collect(Collectors.toList()));
                 }
             }
 
@@ -143,16 +139,18 @@ public class CourseTemplatePanel extends FlowPanel {
             }
 
             private boolean askUserForConfirmation() {
+                final boolean result;
                 if (refreshableSelectionModel.itemIsSelectedButNotVisible(courseTemplateTable.getVisibleItems())) {
                     final String markRolesNames = refreshableSelectionModel.getSelectedSet().stream()
                             .map(CourseTemplateDTO::getName).collect(Collectors.joining("\n"));
-                    return Window
+                    result = Window
                             .confirm(stringMessages.doYouReallyWantToRemoveNonVisibleCourseTemplates(markRolesNames));
+                } else {
+                    result = Window.confirm(stringMessages.doYouReallyWantToRemoveCourseTemplates());
                 }
-                return Window.confirm(stringMessages.doYouReallyWantToRemoveCourseTemplates());
+                return result;
             }
         });
-
         buttonAndFilterPanel.addUnsecuredWidget(lblFilterRaces);
         buttonAndFilterPanel.addUnsecuredWidget(filterableCourseTemplatePanel);
         filterableCourseTemplatePanel
