@@ -12,11 +12,28 @@ public class FinishedTimeFinder extends RaceLogAnalyzer<TimePoint> {
         super(raceLog);
     }
 
+    public RaceLogRaceStatusEvent findFinishedEvent() {
+        log.lockForRead();
+        try {
+            for (RaceLogEvent event : getPassUnrevokedEventsDescending()) {
+                if (event instanceof RaceLogRaceStatusEvent) {
+                    final RaceLogRaceStatusEvent statusEvent = (RaceLogRaceStatusEvent) event;
+                    if (statusEvent.getNextStatus().equals(RaceLogRaceStatus.FINISHED)) {
+                        return statusEvent;
+                    }
+                }
+            }
+            return null;
+        } finally {
+            log.unlockAfterRead();
+        }
+    }
+
     @Override
     protected TimePoint performAnalysis() {
-        for (RaceLogEvent event : getPassEventsDescending()) {
+        for (RaceLogEvent event : getPassUnrevokedEventsDescending()) {
             if (event instanceof RaceLogRaceStatusEvent) {
-                RaceLogRaceStatusEvent statusEvent = (RaceLogRaceStatusEvent) event;
+                final RaceLogRaceStatusEvent statusEvent = (RaceLogRaceStatusEvent) event;
                 if (statusEvent.getNextStatus().equals(RaceLogRaceStatus.FINISHED)) {
                     return statusEvent.getLogicalTimePoint();
                 }

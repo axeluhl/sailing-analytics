@@ -17,7 +17,7 @@ public class FinishingTimeFinder extends RaceLogAnalyzer<TimePoint> {
         try {
             for (RaceLogEvent event : getPassUnrevokedEventsDescending()) {
                 if (event instanceof RaceLogRaceStatusEvent) {
-                    RaceLogRaceStatusEvent statusEvent = (RaceLogRaceStatusEvent) event;
+                    final RaceLogRaceStatusEvent statusEvent = (RaceLogRaceStatusEvent) event;
                     if (statusEvent.getNextStatus().equals(RaceLogRaceStatus.FINISHING)) {
                         return statusEvent;
                     }
@@ -33,7 +33,7 @@ public class FinishingTimeFinder extends RaceLogAnalyzer<TimePoint> {
     protected TimePoint performAnalysis() {
         for (RaceLogEvent event : getPassUnrevokedEventsDescending()) {
             if (event instanceof RaceLogRaceStatusEvent) {
-                RaceLogRaceStatusEvent statusEvent = (RaceLogRaceStatusEvent) event;
+                final RaceLogRaceStatusEvent statusEvent = (RaceLogRaceStatusEvent) event;
                 if (statusEvent.getNextStatus().equals(RaceLogRaceStatus.FINISHING)) {
                     return statusEvent.getLogicalTimePoint();
                 }

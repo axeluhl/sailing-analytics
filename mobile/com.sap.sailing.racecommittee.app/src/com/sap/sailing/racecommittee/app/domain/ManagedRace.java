@@ -118,5 +118,7 @@ public interface ManagedRace extends FilterableRace, ManagedRaceIdentifier, Name
      */
     void setExplicitFactor(Double factor);
 
+    Result revokeFinishing(AbstractLogEventAuthor author);
+
     Result revokeFinish(AbstractLogEventAuthor author);
 }

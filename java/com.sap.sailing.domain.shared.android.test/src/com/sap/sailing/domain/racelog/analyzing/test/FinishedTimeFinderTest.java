@@ -2,8 +2,10 @@ package com.sap.sailing.domain.racelog.analyzing.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.when;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 import org.junit.Test;
@@ -12,6 +14,7 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishedTimeFinder;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sse.common.TimePoint;
@@ -61,5 +64,51 @@ public class FinishedTimeFinderTest extends PassAwareRaceLogAnalyzerTest<Finishe
         raceLog.add(event2);
 
         assertEquals(event1.getLogicalTimePoint(), analyzer.analyze());
+    }
+    
+    @Test
+    public void testRevokeFinished() {        
+        RaceLogRaceStatusEvent event1 = createEvent(RaceLogRaceStatusEvent.class, 1);
+        when(event1.getNextStatus()).thenReturn(RaceLogRaceStatus.FINISHED);
+        RaceLogRevokeEvent revokeEvent = createEvent(RaceLogRevokeEvent.class,2);
+        final Serializable id = event1.getId();
+        when(revokeEvent.getRevokedEventId()).thenReturn(id);
+        
+        raceLog.add(event1);
+        raceLog.add(revokeEvent);
+        
+        assertNull(analyzer.analyze());        
+    }
+    
+    @Test
+    public void testRevokeFinishedSecond() {        
+        RaceLogRaceStatusEvent event1 = createEvent(RaceLogRaceStatusEvent.class, 1);
+        when(event1.getNextStatus()).thenReturn(RaceLogRaceStatus.FINISHED);
+        RaceLogRevokeEvent revokeEvent = createEvent(RaceLogRevokeEvent.class,2);
+        final Serializable id = event1.getId();
+        when(revokeEvent.getRevokedEventId()).thenReturn(id);
+        RaceLogRaceStatusEvent event2 = createEvent(RaceLogRaceStatusEvent.class, 3);
+        when(event2.getNextStatus()).thenReturn(RaceLogRaceStatus.FINISHED);
+        raceLog.add(event1);
+        raceLog.add(revokeEvent);
+        raceLog.add(event2);
+       
+        assertSame(event2.getLogicalTimePoint(), analyzer.analyze());
+    }
+    
+    @Test
+    public void testFindFinishEventAfterRevoke() {        
+        RaceLogRaceStatusEvent event1 = createEvent(RaceLogRaceStatusEvent.class, 1);
+        when(event1.getNextStatus()).thenReturn(RaceLogRaceStatus.FINISHED);
+        RaceLogRevokeEvent revokeEvent = createEvent(RaceLogRevokeEvent.class,2);
+        final Serializable id = event1.getId();
+        when(revokeEvent.getRevokedEventId()).thenReturn(id);
+        RaceLogRaceStatusEvent event2 = createEvent(RaceLogRaceStatusEvent.class, 3);
+        when(event2.getNextStatus()).thenReturn(RaceLogRaceStatus.FINISHED);
+        raceLog.add(event1);
+        raceLog.add(revokeEvent);
+        raceLog.add(event2);
+       
+        assertSame(event2, analyzer.findFinishedEvent());
     }
 }

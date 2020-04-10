@@ -60,7 +60,7 @@ public class RaceFinishingFragment extends BaseFragment {
             revoke.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    final Result result = getRace().revokeFinish(preferences.getAuthor());
+                    final Result result = getRace().revokeFinishing(preferences.getAuthor());
                     if (result.hasError()) {
                         Toast.makeText(getActivity(), result.getMessage(getActivity()), Toast.LENGTH_LONG).show();
                     }
