@@ -144,7 +144,6 @@ public class IgtimiAccountsPanel extends FlowPanel {
                         }
                     }
                 });
-        removeAccountButton.setEnabled(false);
         refreshableAccountsSelectionModel.addSelectionChangeHandler(
                 e -> removeAccountButton.setEnabled(refreshableAccountsSelectionModel.getSelectedSet().size() > 0));
         add(controlsPanel);

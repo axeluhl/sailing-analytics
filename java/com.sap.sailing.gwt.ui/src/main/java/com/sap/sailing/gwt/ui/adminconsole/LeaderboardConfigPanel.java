@@ -184,7 +184,6 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
             }
         });
         leaderboardRemoveButton.ensureDebugId("LeaderboardsRemoveButton");
-        leaderboardRemoveButton.setEnabled(false);
     }
 
     @Override

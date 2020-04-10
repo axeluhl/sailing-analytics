@@ -184,7 +184,6 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                         return Window.confirm(stringMessages.doYouReallyWantToRemoveEvents());
                     }
                 });
-        remove.setEnabled(false);
         remove.ensureDebugId("RemoveEventsButton");
 
         this.refreshableEventSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {

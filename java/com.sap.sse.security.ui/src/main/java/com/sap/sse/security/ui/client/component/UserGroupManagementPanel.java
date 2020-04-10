@@ -101,9 +101,7 @@ public class UserGroupManagementPanel extends Composite {
                 }
             }
         });
-        removeButton.setEnabled(false);
         userGroupSelectionModel.addSelectionChangeHandler(event -> {
-            removeButton.setText(stringMessages.remove() + " (" + userGroupSelectionModel.getSelectedSet().size() + ")");
             removeButton.setEnabled(userGroupSelectionModel.getSelectedSet().size() >= 1);
         });
         return buttonPanel;

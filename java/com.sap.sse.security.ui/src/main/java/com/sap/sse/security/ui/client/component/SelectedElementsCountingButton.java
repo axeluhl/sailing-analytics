@@ -18,9 +18,11 @@ public class SelectedElementsCountingButton<T> extends Button {
     public SelectedElementsCountingButton(final SetSelectionModel<T> selectionModel, final @IsSafeHtml String html,
             final ClickHandler handler) {
         super(html, handler);
+        setEnabled(false);
         selectionModel.addSelectionChangeHandler(event -> {
             Set<T> selectedSet = selectionModel.getSelectedSet();
             setText(selectedSet.size() <= 1 ? html : html + " (" + selectedSet.size() + ")");
+            setEnabled(!selectedSet.isEmpty());
         });
 
     }

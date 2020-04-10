@@ -98,7 +98,6 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
                 return Window.confirm(stringMessages.doYouReallyWantToRemoveRegattas());
             }
         });
-        remove.setEnabled(false);
         regattasContentPanel.add(buttonPanel);
 
         refreshableRegattaMultiSelectionModel.addSelectionChangeHandler(new Handler() {

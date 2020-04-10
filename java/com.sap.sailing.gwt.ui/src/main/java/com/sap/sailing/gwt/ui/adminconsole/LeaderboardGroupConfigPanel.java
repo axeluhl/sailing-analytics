@@ -674,7 +674,6 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
                     }
                 });
         removeButton.ensureDebugId("RemoveLeaderboardButton");
-        removeButton.setEnabled(false);
 
         refreshableGroupsSelectionModel.addSelectionChangeHandler(event -> groupSelectionChanged());
 

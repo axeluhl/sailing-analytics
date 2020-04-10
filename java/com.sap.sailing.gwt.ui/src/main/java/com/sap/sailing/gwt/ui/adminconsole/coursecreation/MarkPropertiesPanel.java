@@ -32,7 +32,6 @@ import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.view.client.CellPreviewEvent;
@@ -123,48 +122,43 @@ public class MarkPropertiesPanel extends FlowPanel {
                 openEditMarkPropertiesDialog(new MarkPropertiesDTO());
             }
         });
-        final Button removeButton = buttonAndFilterPanel.addRemoveAction(refreshableSelectionModel,
-                stringMessages.remove(), new Command() {
+        buttonAndFilterPanel.addRemoveAction(refreshableSelectionModel, stringMessages.remove(), new Command() {
 
-                    @Override
-                    public void execute() {
-                        if (askUserForConfirmation()) {
-                            removeMarkProperties(
-                                    refreshableSelectionModel.getSelectedSet().stream().map(markPropertiesDTO -> {
-                                        return markPropertiesDTO.getUuid();
-                                    }).collect(Collectors.toList()));
+            @Override
+            public void execute() {
+                if (askUserForConfirmation()) {
+                    removeMarkProperties(refreshableSelectionModel.getSelectedSet().stream().map(markPropertiesDTO -> {
+                        return markPropertiesDTO.getUuid();
+                    }).collect(Collectors.toList()));
+                }
+            }
+
+            private void removeMarkProperties(Collection<UUID> markPropertiesUuids) {
+                if (!markPropertiesUuids.isEmpty()) {
+                    sailingService.removeMarkProperties(markPropertiesUuids, new AsyncCallback<Void>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError("Error trying to remove mark properties:" + caught.getMessage());
                         }
-                    }
 
-                    private void removeMarkProperties(Collection<UUID> markPropertiesUuids) {
-                        if (!markPropertiesUuids.isEmpty()) {
-                            sailingService.removeMarkProperties(markPropertiesUuids, new AsyncCallback<Void>() {
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                    errorReporter.reportError(
-                                            "Error trying to remove mark properties:" + caught.getMessage());
-                                }
-
-                                @Override
-                                public void onSuccess(Void result) {
-                                    refreshMarkProperties();
-                                }
-                            });
+                        @Override
+                        public void onSuccess(Void result) {
+                            refreshMarkProperties();
                         }
-                    }
+                    });
+                }
+            }
 
-                    private boolean askUserForConfirmation() {
-                        if (refreshableSelectionModel
-                                .itemIsSelectedButNotVisible(markPropertiesTable.getVisibleItems())) {
-                            final String markPropertiesNames = refreshableSelectionModel.getSelectedSet().stream()
-                                    .map(MarkPropertiesDTO::getName).collect(Collectors.joining("\n"));
-                            return Window.confirm(stringMessages
-                                    .doYouReallyWantToRemoveNonVisibleMarkProperties(markPropertiesNames));
-                        }
-                        return Window.confirm(stringMessages.doYouReallyWantToRemoveSeveralMarkProperties());
-                    }
-                });
-        removeButton.setEnabled(false);
+            private boolean askUserForConfirmation() {
+                if (refreshableSelectionModel.itemIsSelectedButNotVisible(markPropertiesTable.getVisibleItems())) {
+                    final String markPropertiesNames = refreshableSelectionModel.getSelectedSet().stream()
+                            .map(MarkPropertiesDTO::getName).collect(Collectors.joining("\n"));
+                    return Window.confirm(
+                            stringMessages.doYouReallyWantToRemoveNonVisibleMarkProperties(markPropertiesNames));
+                }
+                return Window.confirm(stringMessages.doYouReallyWantToRemoveSeveralMarkProperties());
+            }
+        });
         buttonAndFilterPanel.addUnsecuredWidget(lblFilterRaces);
         filterableMarkProperties.getTextBox().ensureDebugId("MarkPropertiesFilterTextBox");
         buttonAndFilterPanel.addUnsecuredWidget(filterableMarkProperties);

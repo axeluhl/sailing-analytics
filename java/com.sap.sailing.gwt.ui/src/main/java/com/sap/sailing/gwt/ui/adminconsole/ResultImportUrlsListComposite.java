@@ -87,7 +87,6 @@ public class ResultImportUrlsListComposite extends Composite {
                 }
             }
         });
-        remove.setEnabled(false);
 
         table.getSelectionModel().addSelectionChangeHandler(new Handler() {
             @Override
