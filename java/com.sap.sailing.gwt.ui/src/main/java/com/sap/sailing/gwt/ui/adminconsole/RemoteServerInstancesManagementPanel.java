@@ -56,16 +56,13 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
-
         VerticalPanel mainPanel = new VerticalPanel();
         setWidget(mainPanel);
         mainPanel.setWidth("100%");
-
         remoteServersPanel = new CaptionPanel(stringMessages.registeredSailingServerInstances());
         mainPanel.add(remoteServersPanel);
         VerticalPanel remoteServersContentPanel = new VerticalPanel();
         remoteServersPanel.setContentWidget(remoteServersContentPanel);
-        
         serverDataProvider = new ListDataProvider<RemoteSailingServerReferenceDTO>();
         filteredServerTablePanel = new LabeledAbstractFilterablePanel<RemoteSailingServerReferenceDTO>(
                 new Label(stringMessages.filterBy() + ":"), Collections.<RemoteSailingServerReferenceDTO> emptyList(),
@@ -90,7 +87,6 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
         };
         remoteServersTable = createRemoteServersTable();
         serverDataProvider.addDataDisplay(remoteServersTable);
-
         remoteServersContentPanel.add(filteredServerTablePanel);
         remoteServersContentPanel.add(remoteServersTable);
         remoteServersContentPanel.add(createButtonToolbar());
@@ -101,11 +97,9 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
     private Panel createButtonToolbar() {
         HorizontalPanel buttonPanel = new HorizontalPanel();
         buttonPanel.setSpacing(5);
-
         buttonPanel.add(new Button(stringMessages.add(), (ClickHandler) event -> addRemoteSailingServerReference()));
         buttonPanel.add(createRemoveButton(buttonPanel, event -> removeSelectedSailingServers()));
         buttonPanel.add(new Button(stringMessages.refresh(), (ClickHandler) event -> refreshSailingServerList()));
-
         return buttonPanel;
     }
     
@@ -121,7 +115,6 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
     private FlushableCellTable<RemoteSailingServerReferenceDTO> createRemoteServersTable() {
         FlushableCellTable<RemoteSailingServerReferenceDTO> serverTable = new FlushableCellTable<RemoteSailingServerReferenceDTO>(
                 10000, tableRes);
-
         SelectionCheckboxColumn<RemoteSailingServerReferenceDTO> checkBoxColumn = new SelectionCheckboxColumn<RemoteSailingServerReferenceDTO>(
                 tableRes.cellTableStyle().cellTableCheckboxSelected(),
                 tableRes.cellTableStyle().cellTableCheckboxDeselected(),
@@ -135,7 +128,6 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
                         return t.getUrl().hashCode();
                     }
                 }, filteredServerTablePanel.getAllListDataProvider(), serverTable);
-        
         TextColumn<RemoteSailingServerReferenceDTO> serverNameColumn = new TextColumn<RemoteSailingServerReferenceDTO>() {
             @Override
             public String getValue(RemoteSailingServerReferenceDTO server) {
@@ -166,17 +158,13 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
                 return builder.toSafeHtml();
             }
         };
-        serverTable.addColumn(checkBoxColumn);
+        serverTable.addColumn(checkBoxColumn, checkBoxColumn.getHeader());
         serverTable.addColumn(serverNameColumn, stringMessages.name());
         serverTable.addColumn(serverUrlColumn, stringMessages.url());
         serverTable.addColumn(eventsOrErrorColumn, stringMessages.events());
-
         serverTable.setEmptyTableWidget(new Label(stringMessages.noSailingServerInstancesYet()));
-
         serverTable.setSelectionModel(checkBoxColumn.getSelectionModel(), checkBoxColumn.getSelectionManager());
-        
         refreshableServerSelectionModel = checkBoxColumn.getSelectionModel();
-        
         return serverTable;
     }
     
@@ -199,7 +187,6 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
         for (RemoteSailingServerReferenceDTO selectedServer: refreshableServerSelectionModel.getSelectedSet()) {
         	toRemove.add(selectedServer.getName());
         }
-        
         sailingService.removeSailingServers(toRemove, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
