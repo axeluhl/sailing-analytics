@@ -165,7 +165,6 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
         createRegattaLeaderboardWithEliminationsBtn.ensureDebugId("CreateRegattaLeaderboardWithEliminationsButton");
 
         leaderboardRemoveButton = buttonPanel.addRemoveAction(leaderboardSelectionModel, stringMessages.remove(), new Command() {
-
             @Override
             public void execute() {
                 if (askUserForConfirmation()) {

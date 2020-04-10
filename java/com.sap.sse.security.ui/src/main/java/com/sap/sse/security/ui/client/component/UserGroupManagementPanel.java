@@ -8,7 +8,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -71,7 +70,7 @@ public class UserGroupManagementPanel extends Composite {
         buttonPanel.addCreateActionWithoutServerCreateObjectPermissionCheck(stringMessages.createUserGroup(),
                 () -> new CreateUserGroupDialog(stringMessages,
                 userService, userManagementService, userGroupListDataProvider, () -> updateUserGroups()).show());
-        final Button removeButton = buttonPanel.addRemoveAction(userGroupSelectionModel, stringMessages.removeUserGroup(), () -> {
+        buttonPanel.addRemoveAction(userGroupSelectionModel, stringMessages.removeUserGroup(), () -> {
             Set<UserGroupDTO> userGroups = userGroupTableWrapper.getSelectionModel().getSelectedSet();
             if (userGroups == null || userGroups.isEmpty()) {
                 Window.alert(stringMessages.youHaveToSelectAUserGroup());
@@ -100,9 +99,6 @@ public class UserGroupManagementPanel extends Composite {
                     }
                 }
             }
-        });
-        userGroupSelectionModel.addSelectionChangeHandler(event -> {
-            removeButton.setEnabled(userGroupSelectionModel.getSelectedSet().size() >= 1);
         });
         return buttonPanel;
     }

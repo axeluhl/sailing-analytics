@@ -78,7 +78,6 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
         create.ensureDebugId("AddRegattaButton");
 
         final Button remove = buttonPanel.addRemoveAction(refreshableRegattaMultiSelectionModel, stringMessages.remove(), new Command() {
-
             @Override
             public void execute() {
                 if (askUserForConfirmation()) {

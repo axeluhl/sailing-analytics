@@ -654,7 +654,6 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
 
         removeButton = buttonPanel.addRemoveAction(refreshableGroupsSelectionModel, stringMessages.remove(),
                 new Command() {
-
                     @Override
                     public void execute() {
                         if (askUserForConfirmation()) {

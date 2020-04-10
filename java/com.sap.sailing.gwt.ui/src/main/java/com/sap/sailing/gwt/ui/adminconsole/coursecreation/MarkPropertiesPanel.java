@@ -123,7 +123,6 @@ public class MarkPropertiesPanel extends FlowPanel {
             }
         });
         buttonAndFilterPanel.addRemoveAction(refreshableSelectionModel, stringMessages.remove(), new Command() {
-
             @Override
             public void execute() {
                 if (askUserForConfirmation()) {
