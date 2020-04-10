@@ -1,6 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 import com.sap.sailing.android.shared.util.AppUtils;
@@ -92,7 +91,6 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
 
     public static class FinishTimeFragment extends BaseFragment implements View.OnClickListener {
 
-        private SimpleDateFormat mDateFormat;
         private TimePicker mTimePicker;
         private NumberPicker mSecondPicker;
         private TextView mCurrentTime;
@@ -112,8 +110,6 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View layout = inflater.inflate(R.layout.race_finish_config, container, false);
-
-            mDateFormat = new SimpleDateFormat("HH:mm:ss", getResources().getConfiguration().locale);
 
             final Calendar calendar = Calendar.getInstance();
             mTimePicker = ViewHelper.get(layout, R.id.time_picker);
@@ -172,7 +168,7 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
                 TextView headline = ViewHelper.get(getView(), R.id.header_headline);
                 if (headline != null) {
                     headline.setText(getString(R.string.race_end_finish_header,
-                            mDateFormat.format(getRaceState().getFinishingTime().asMillis())));
+                            TimeUtils.formatTime(getRaceState().getFinishingTime())));
                 }
                 break;
 
@@ -218,7 +214,7 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
             super.notifyTick(now);
 
             if (mCurrentTime != null) {
-                mCurrentTime.setText(mDateFormat.format(now.asMillis()));
+                mCurrentTime.setText(TimeUtils.formatTime(now));
                 mCurrentTime.setVisibility(View.VISIBLE);
             }
         }
