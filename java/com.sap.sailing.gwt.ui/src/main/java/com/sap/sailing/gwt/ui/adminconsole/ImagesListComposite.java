@@ -275,18 +275,20 @@ public class ImagesListComposite extends Composite {
 
     private void openCreateImageDialog(String initialTag) {
         ImageCreateDialog dialog = new ImageCreateDialog(initialTag, sailingService, stringMessages,
-                storageServiceAvailable, new DialogCallback<ImageResizingTaskDTO>() {
+                storageServiceAvailable, new DialogCallback<List<ImageResizingTaskDTO>>() {
                     @Override
                     public void cancel() {
                     }
 
                     @Override
-                    public void ok(ImageResizingTaskDTO resizingTask) {
-                        if (resizingTask.getResizingTask().size() != 0) {
-                            callResizingServiceAndUpdateTable(resizingTask, null);
-                        } else {
-                            imageListDataProvider.getList().add(resizingTask.getImage());
-                            updateTableVisibility();
+                    public void ok(List<ImageResizingTaskDTO> resizingTasks) {
+                        for (ImageResizingTaskDTO resizingTask : resizingTasks) {
+                            if (resizingTask.getResizingTask().size() != 0) {
+                                callResizingServiceAndUpdateTable(resizingTask, null);
+                            } else {
+                                imageListDataProvider.getList().add(resizingTask.getImage());
+                                updateTableVisibility();
+                            }
                         }
                     }
                 });
@@ -295,19 +297,21 @@ public class ImagesListComposite extends Composite {
 
     private void openEditImageDialog(final ImageDTO selectedImage) {
         ImageEditDialog dialog = new ImageEditDialog(selectedImage, sailingService, stringMessages,
-                storageServiceAvailable, new DialogCallback<ImageResizingTaskDTO>() {
+                storageServiceAvailable, new DialogCallback<List<ImageResizingTaskDTO>>() {
                     @Override
                     public void cancel() {
                     }
 
                     @Override
-                    public void ok(ImageResizingTaskDTO resizingTask) {
-                        if (resizingTask.getResizingTask().size() != 0) {
-                            callResizingServiceAndUpdateTable(resizingTask, selectedImage);
-                        } else {
-                            imageListDataProvider.getList().remove(selectedImage);
-                            imageListDataProvider.getList().add(resizingTask.getImage());
-                            updateTableVisibility();
+                    public void ok(List<ImageResizingTaskDTO> resizingTasks) {
+                        for (ImageResizingTaskDTO resizingTask : resizingTasks) {
+                            if (resizingTask.getResizingTask().size() != 0) {
+                                callResizingServiceAndUpdateTable(resizingTask, selectedImage);
+                            } else {
+                                imageListDataProvider.getList().remove(selectedImage);
+                                imageListDataProvider.getList().add(resizingTask.getImage());
+                                updateTableVisibility();
+                            }
                         }
                     }
                 });

@@ -146,20 +146,26 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<List<S
                 String result = event.getResults();
                 JSONArray resultJson = parseAfterReplacingSurroundingPreElement(result).isArray();
                 if (resultJson != null) {
-                    if (resultJson.get(0).isObject().get(FileUploadConstants.FILE_URI) != null) {
-                        uriList.clear();
-                        for (int i = 1; i < resultJson.size(); i++) {
+                    List<String> uris = new ArrayList<>(resultJson.size());
+                    for (int i = 0; i < resultJson.size(); i++) {
+                        if (resultJson.get(i).isObject() != null) {
                             if (resultJson.get(i).isObject().get(FileUploadConstants.FILE_URI) != null) {
-                                uriList.add(URI_DELIMITER + resultJson.get(i).isObject()
-                                        .get(FileUploadConstants.FILE_URI).isString().stringValue());
+                                uris.add(resultJson.get(i).isObject().get(FileUploadConstants.FILE_URI).isString()
+                                        .stringValue());
+                            } else {
+                                Notification.notify(stringMessages.fileUploadResult(
+                                        resultJson.get(i).isObject().get(FileUploadConstants.STATUS).isString()
+                                                .stringValue(),
+                                        resultJson.get(i).isObject().get(FileUploadConstants.MESSAGE).isString()
+                                                .stringValue()),
+                                        NotificationType.ERROR);
                             }
                         }
-                        setValue(uriList, true);
+                    }
+                    setValue(uris, true);
+                    if (!uris.isEmpty()) {
                         removeButton.setEnabled(true);
                         Notification.notify(stringMessages.uploadSuccessful(), NotificationType.SUCCESS);
-                    } else {
-                        Notification.notify(stringMessages.fileUploadResult(resultJson.get(0).isObject().get(FileUploadConstants.STATUS).isString().stringValue(),
-                                resultJson.get(0).isObject().get(FileUploadConstants.MESSAGE).isString().stringValue()), NotificationType.ERROR);
                     }
                 }
             }

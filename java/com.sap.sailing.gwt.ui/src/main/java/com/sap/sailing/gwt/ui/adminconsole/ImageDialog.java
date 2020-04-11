@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.StringJoiner;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -38,7 +39,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.ImageResizingTaskDTO;
 
-public abstract class ImageDialog extends DataEntryDialog<ImageResizingTaskDTO>
+public abstract class ImageDialog extends DataEntryDialog<List<ImageResizingTaskDTO>>
         implements FileStorageServiceConnectionTestObserver {
     private final SailingServiceAsync sailingService;
     
@@ -56,7 +57,7 @@ public abstract class ImageDialog extends DataEntryDialog<ImageResizingTaskDTO>
     private final ExpandedUiWithCheckboxes<String> expandedUi;
     private final BusyIndicator busyIndicator;
 
-    protected static class ImageParameterValidator implements Validator<ImageResizingTaskDTO> {
+    protected static class ImageParameterValidator implements Validator<List<ImageResizingTaskDTO>> {
         private final StringMessages stringMessages;
         private List<CheckBox> doResize;
         private final FileStorageServiceConnectionTestObservable storageServiceAvailable;
@@ -80,56 +81,62 @@ public abstract class ImageDialog extends DataEntryDialog<ImageResizingTaskDTO>
          * will disable the checkbox if there is no working FileStorageService
          */
         @Override
-        public String getErrorMessage(final ImageResizingTaskDTO resizingTask) {
-            String errorMessage = null;
-            final ImageDTO imageToValidate = resizingTask.getImage();
-            final Integer imageWidth = imageToValidate.getWidthInPx();
-            final Integer imageHeight = imageToValidate.getHeightInPx();
+        public String getErrorMessage(final List<ImageResizingTaskDTO> resizingTasks) {
+            StringJoiner errorJoiner = new StringJoiner("\n");
+            for (ImageResizingTaskDTO resizingTask : resizingTasks) {
+                String errorMessage = null;
+                final ImageDTO imageToValidate = resizingTask.getImage();
+                final Integer imageWidth = imageToValidate.getWidthInPx();
+                final Integer imageHeight = imageToValidate.getHeightInPx();
 
-            if (imageToValidate.getSourceRef() == null || imageToValidate.getSourceRef().isEmpty()) {
-                errorMessage = stringMessages.pleaseEnterNonEmptyUrlOrUploadImage();
-            } else if (imageWidth == null || imageHeight == null) {
-                errorMessage = stringMessages.couldNotRetrieveImageSizeYet();
-            } else {
-                // check if image is too small for resizing
-                errorMessage = "";
-                for (MediaTagConstants mediaTag : MediaTagConstants.values()) {
-                    if (imageToValidate.hasTag(mediaTag.getName())
-                            && (imageWidth < mediaTag.getMinWidth() || imageHeight < mediaTag.getMinHeight())) {
-                        errorMessage += getImageToSmallErrorMessage(mediaTag, stringMessages) + "\n";
-                    }
-                }
-                if (errorMessage.equals("")) {// Check if image ratio fits for resizing
-                    errorMessage = imageRatioFits(imageToValidate);
-                }
-                if (errorMessage.equals("")) {// check for checkboxes and resizing
+                if (imageToValidate.getSourceRef() == null || imageToValidate.getSourceRef().isEmpty()) {
+                    errorMessage = stringMessages.pleaseEnterNonEmptyUrlOrUploadImage();
+                } else if (imageWidth == null || imageHeight == null) {
+                    errorMessage = stringMessages.couldNotRetrieveImageSizeYet();
+                } else {
+                    // check if image is too small for resizing
+                    errorMessage = "";
                     for (MediaTagConstants mediaTag : MediaTagConstants.values()) {
-                        final CheckBox checkBox = getCheckBoxForTag(mediaTag.getName(), imageToValidate);
                         if (imageToValidate.hasTag(mediaTag.getName())
-                                && (imageWidth > mediaTag.getMaxWidth() || imageHeight > mediaTag.getMaxHeight())) {
-                            if (!resizingTask.getResizingTask().contains(mediaTag)) {
-                                errorMessage += getSizeErrorMessage(mediaTag, stringMessages) + "\n";
-                                checkBox.setStyleName(ExpandedUiWithCheckboxes.getErrorStyle());
-                                if (!errorMessage.equals("") && !storageServiceAvailable.getValue()) {
-                                    checkBox.setEnabled(false);
-                                }
-                            } else {
-                                checkBox.setStyleName(ExpandedUiWithCheckboxes.getNormalStyle());
-                            }
-                        } else {
-                            checkBox.setStyleName(ExpandedUiWithCheckboxes.getInvisibleStyle());
-                            checkBox.setValue(false);
+                                && (imageWidth < mediaTag.getMinWidth() || imageHeight < mediaTag.getMinHeight())) {
+                            errorMessage += getImageToSmallErrorMessage(mediaTag, stringMessages) + "\n";
                         }
                     }
+                    if (errorMessage.equals("")) {// Check if image ratio fits for resizing
+                        errorMessage = imageRatioFits(imageToValidate);
+                    }
+                    if (errorMessage.equals("")) {// check for checkboxes and resizing
+                        for (MediaTagConstants mediaTag : MediaTagConstants.values()) {
+                            final CheckBox checkBox = getCheckBoxForTag(mediaTag.getName(), imageToValidate);
+                            if (imageToValidate.hasTag(mediaTag.getName())
+                                    && (imageWidth > mediaTag.getMaxWidth() || imageHeight > mediaTag.getMaxHeight())) {
+                                if (!resizingTask.getResizingTask().contains(mediaTag)) {
+                                    errorMessage += getSizeErrorMessage(mediaTag, stringMessages) + "\n";
+                                    checkBox.setStyleName(ExpandedUiWithCheckboxes.getErrorStyle());
+                                    if (!errorMessage.equals("") && !storageServiceAvailable.getValue()) {
+                                        checkBox.setEnabled(false);
+                                    }
+                                } else {
+                                    checkBox.setStyleName(ExpandedUiWithCheckboxes.getNormalStyle());
+                                }
+                            } else {
+                                checkBox.setStyleName(ExpandedUiWithCheckboxes.getInvisibleStyle());
+                                checkBox.setValue(false);
+                            }
+                        }
+                    }
+                    if (!errorMessage.equals("") && !storageServiceAvailable.getValue()) {
+                        errorMessage += stringMessages.automaticResizeNeedsStorageService() + "\n";
+                    }
                 }
-                if (!errorMessage.equals("") && !storageServiceAvailable.getValue()) {
-                    errorMessage += stringMessages.automaticResizeNeedsStorageService() + "\n";
+                if (errorMessage.equals("")) {
+                    errorMessage = null;
+                }
+                if (errorMessage != null) {
+                    errorJoiner.add(errorMessage);
                 }
             }
-            if (errorMessage.equals("")) {
-                errorMessage = null;
-            }
-            return errorMessage;
+            return errorJoiner.toString();
         }
 
         /**
@@ -195,21 +202,21 @@ public abstract class ImageDialog extends DataEntryDialog<ImageResizingTaskDTO>
 
     public ImageDialog(Date creationDate, SailingServiceAsync sailingService, StringMessages stringMessages,
             FileStorageServiceConnectionTestObservable storageServiceAvailable,
-            DialogCallback<ImageResizingTaskDTO> callback) {
+            DialogCallback<List<ImageResizingTaskDTO>> callback) {
         this(creationDate, sailingService, stringMessages, storageServiceAvailable,
                 new ImageParameterValidator(stringMessages, storageServiceAvailable), callback);
     }
 
     private ImageDialog(Date creationDate, SailingServiceAsync sailingService, StringMessages stringMessages,
             FileStorageServiceConnectionTestObservable storageServiceAvailable, ImageParameterValidator validator,
-            DialogCallback<ImageResizingTaskDTO> callback) {
+            DialogCallback<List<ImageResizingTaskDTO>> callback) {
         super(stringMessages.image(), null, stringMessages.ok(), stringMessages.cancel(), validator, callback);
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
         this.creationDate = creationDate;
         getDialogBox().getWidget().setWidth("730px");
         busyIndicator = new SimpleBusyIndicator();
-        imageURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages, false, false);
+        imageURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages, false, true);
         imageURLAndUploadComposite.addValueChangeHandler(new ValueChangeHandler<List<String>>() {
             @Override
             public void onValueChange(ValueChangeEvent<List<String>> event) {
@@ -269,7 +276,7 @@ public abstract class ImageDialog extends DataEntryDialog<ImageResizingTaskDTO>
      * For a lookout to further progressing see {@link SailingService#resizeImage(ImageResizingTaskDTO)}
      */
     @Override
-    protected ImageResizingTaskDTO getResult() {
+    protected List<ImageResizingTaskDTO> getResult() {
         final List<String> tags = new ArrayList<String>();
         for (String tag : tagsListEditor.getValue()) {
             tags.add(tag);
@@ -281,15 +288,19 @@ public abstract class ImageDialog extends DataEntryDialog<ImageResizingTaskDTO>
                 resizingTask.add(MediaTagConstants.fromName(tags.get(i)));
             }
         }
-        final ImageDTO image = new ImageDTO(imageURLAndUploadComposite.getURL(), creationDate);
-        image.setTitle(titleTextBox.getValue());
-        image.setSubtitle(subtitleTextBox.getValue());
-        image.setCopyright(copyrightTextBox.getValue());
-        if (widthInPxBox.getValue() != null && heightInPxBox.getValue() != null) {
-            image.setSizeInPx(widthInPxBox.getValue(), heightInPxBox.getValue());
+        ArrayList<ImageResizingTaskDTO> results = new ArrayList<>(imageURLAndUploadComposite.getURLs().size());
+        for (String imageURL : imageURLAndUploadComposite.getURLs()) {
+            final ImageDTO image = new ImageDTO(imageURL, creationDate);
+            image.setTitle(titleTextBox.getValue());
+            image.setSubtitle(subtitleTextBox.getValue());
+            image.setCopyright(copyrightTextBox.getValue());
+            if (widthInPxBox.getValue() != null && heightInPxBox.getValue() != null) {
+                image.setSizeInPx(widthInPxBox.getValue(), heightInPxBox.getValue());
+            }
+            image.setTags(tags);
+            results.add(new ImageResizingTaskDTO(image, resizingTask));
         }
-        image.setTags(tags);
-        return new ImageResizingTaskDTO(image, resizingTask);
+        return results;
     }
 
     @Override

@@ -10,7 +10,7 @@ import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.ImageResizingTaskDTO;
 
 public class ImageEditDialog extends ImageDialog {
-    public ImageEditDialog(ImageDTO imageDTO, SailingServiceAsync sailingService, StringMessages stringMessages, FileStorageServiceConnectionTestObservable storageServiceAvailable, DialogCallback<ImageResizingTaskDTO> dialogCallback) {
+    public ImageEditDialog(ImageDTO imageDTO, SailingServiceAsync sailingService, StringMessages stringMessages, FileStorageServiceConnectionTestObservable storageServiceAvailable, DialogCallback<List<ImageResizingTaskDTO>> dialogCallback) {
         super(imageDTO.getCreatedAtDate(), sailingService, stringMessages, storageServiceAvailable, dialogCallback);
         createdAtLabel = new Label(imageDTO.getCreatedAtDate().toString());
         imageURLAndUploadComposite.setURL(imageDTO.getSourceRef());
