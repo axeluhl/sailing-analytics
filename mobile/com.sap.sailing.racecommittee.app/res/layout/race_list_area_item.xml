@@ -123,7 +123,7 @@
                     android:scaleType="centerInside"
                     tools:src="@drawable/flag_alpha_64dp" />
 
-                <TextView
+                <com.sap.sailing.racecommittee.app.ui.views.FlagTimeView
                     android:id="@+id/flag_timer"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
