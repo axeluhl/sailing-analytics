@@ -115,44 +115,33 @@ public class CourseTemplatePanel extends FlowPanel {
             }
         });
 
-        buttonAndFilterPanel.addRemoveAction(refreshableSelectionModel, stringMessages.remove(), new Command() {
+        buttonAndFilterPanel.addRemoveActionWithConfirmation(refreshableSelectionModel, stringMessages.remove(),
+                new Command() {
 
-            @Override
-            public void execute() {
-                if (askUserForConfirmation()) {
-                    removeCourseTemplates(refreshableSelectionModel.getSelectedSet().stream().map(courseTemplateDTO -> {
-                        return courseTemplateDTO.getUuid();
-                    }).collect(Collectors.toList()));
-                }
-            }
+                    @Override
+                    public void execute() {
+                        removeCourseTemplates(refreshableSelectionModel.getSelectedSet().stream()
+                                .map(courseTemplateDTO -> courseTemplateDTO.getUuid()).collect(Collectors.toList()));
+                    }
 
-            private void removeCourseTemplates(Collection<UUID> courseTemplatesUuids) {
-                if (!courseTemplatesUuids.isEmpty()) {
-                    sailingService.removeCourseTemplates(courseTemplatesUuids, new AsyncCallback<Void>() {
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            errorReporter
-                                    .reportError("Error trying to remove course teamplates:" + caught.getMessage());
+                    private void removeCourseTemplates(Collection<UUID> courseTemplatesUuids) {
+                        if (!courseTemplatesUuids.isEmpty()) {
+                            sailingService.removeCourseTemplates(courseTemplatesUuids, new AsyncCallback<Void>() {
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    errorReporter.reportError(
+                                            "Error trying to remove course teamplates:" + caught.getMessage());
+                                }
+
+                                @Override
+                                public void onSuccess(Void result) {
+                                    refreshCourseTemplates();
+                                }
+                            });
                         }
+                    }
 
-                        @Override
-                        public void onSuccess(Void result) {
-                            refreshCourseTemplates();
-                        }
-                    });
-                }
-            }
-
-            private boolean askUserForConfirmation() {
-                if (refreshableSelectionModel.itemIsSelectedButNotVisible(courseTemplateTable.getVisibleItems())) {
-                    final String markRolesNames = refreshableSelectionModel.getSelectedSet().stream()
-                            .map(CourseTemplateDTO::getName).collect(Collectors.joining("\n"));
-                    return Window
-                            .confirm(stringMessages.doYouReallyWantToRemoveNonVisibleCourseTemplates(markRolesNames));
-                }
-                return Window.confirm(stringMessages.doYouReallyWantToRemoveCourseTemplates());
-            }
-        });
+                });
 
         buttonAndFilterPanel.addUnsecuredWidget(lblFilterRaces);
         buttonAndFilterPanel.addUnsecuredWidget(filterableCourseTemplatePanel);

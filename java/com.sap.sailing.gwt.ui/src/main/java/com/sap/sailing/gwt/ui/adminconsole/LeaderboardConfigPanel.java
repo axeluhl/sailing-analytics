@@ -102,6 +102,7 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogForLinkSharing;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.dto.NamedDTO;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
 import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
@@ -164,25 +165,22 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                 leaderboardCreateAndRegattaReadPermission, this::createRegattaLeaderboardWithEliminations);
         createRegattaLeaderboardWithEliminationsBtn.ensureDebugId("CreateRegattaLeaderboardWithEliminationsButton");
 
-        leaderboardRemoveButton = buttonPanel.addRemoveAction(leaderboardSelectionModel, stringMessages.remove(), new Command() {
+        leaderboardRemoveButton = buttonPanel.addRemoveAction(leaderboardSelectionModel, stringMessages.remove(),
+                new Command() {
 
-            @Override
-            public void execute() {
-                if (askUserForConfirmation()) {
-                    removeLeaderboards(leaderboardSelectionModel.getSelectedSet());
-                }
-            }
+                    @Override
+                    public void execute() {
+                        if (askUserForConfirmation()) {
+                            removeLeaderboards(leaderboardSelectionModel.getSelectedSet());
+                        }
+                    }
 
-            private boolean askUserForConfirmation() {
-                if (leaderboardSelectionModel.itemIsSelectedButNotVisible(leaderboardTable.getVisibleItems())) {
-                    final String leaderboardNames = leaderboardSelectionModel.getSelectedSet().stream()
-                            .map(StrippedLeaderboardDTO::getName).collect(Collectors.joining("\n"));
-                    return Window
-                            .confirm(stringMessages.doYouReallyWantToRemoveNonVisibleLeaderboards(leaderboardNames));
-                }
-                return Window.confirm(stringMessages.doYouReallyWantToRemoveLeaderboards());
-            }
-        });
+                    private boolean askUserForConfirmation() {
+                        final String names = leaderboardSelectionModel.getSelectedSet().stream().map(NamedDTO::getName)
+                                .collect(Collectors.joining("\n"));
+                        return Window.confirm(StringMessages.INSTANCE.doYouReallyWantToRemoveSelectedElements(names));
+                    }
+                });
         leaderboardRemoveButton.ensureDebugId("LeaderboardsRemoveButton");
     }
 

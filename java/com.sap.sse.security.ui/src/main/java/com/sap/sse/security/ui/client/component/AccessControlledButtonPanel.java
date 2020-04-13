@@ -14,14 +14,14 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SetSelectionModel;
-import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.dto.NamedDTO;
 import com.sap.sse.security.ui.client.UserService;
 
 /**
  * Panel where several buttons can be added which are either {@link #addUnsecuredAction(String, Command) unsecured} or
  * restricted for users with {@link #addCreateAction(String, Command) create} and /or
- * {@link #addRemoveAction(RefreshableSelectionModel, String, Command)} remove} permissions. The {@link Button#setVisible(boolean) visibility} of
+ * {@link #addRemoveAction(String, Command) remove} permissions. The {@link Button#setVisible(boolean) visibility} of
  * secured buttons depend on the permissions of the currently logged-in user and changes dynamically.
  */
 public class AccessControlledButtonPanel extends Composite {
@@ -105,19 +105,62 @@ public class AccessControlledButtonPanel extends Composite {
     /**
      * Adds a secured action button, which is only visible if the current user has any
      * {@link UserService#hasCurrentUserPermissionToDeleteAnyObjectOfType(HasPermissions) delete permission} for the
-     * {@link HasPermissions type} provided in this {@link AccessControlledButtonPanel}'s constructor.
-     *
-     * @param selectionModel
-     *            the {@link RefreshableSelectionModel<T>}selection model of the table
+     * {@link HasPermissions type} provided in this {@link AccessControlledButtonPanel}'s constructor. This remove
+     * action is for panels with single selection model used.
+     * 
      * @param text
      *            the {@link String text} to show on the button
      * @param callback
      *            the {@link Command callback} to execute on button click, if permission is granted
      * @return the created {@link Button} instance
      */
-    public <T> Button addRemoveAction(RefreshableSelectionModel<T> selectionModel, final String text,
+    public Button addRemoveAction(final String text, final Command callback) {
+        return addAction(text, removePermissionCheck, callback);
+    }
+
+    /**
+     * Adds a secured action button, which is only visible if the current user has any
+     * {@link UserService#hasCurrentUserPermissionToDeleteAnyObjectOfType(HasPermissions) delete permission} for the
+     * {@link HasPermissions type} provided in this {@link AccessControlledButtonPanel}'s constructor. This remove
+     * action is for panels which use multi selection model and list of selected elements could be shown on confirmation
+     * window.
+     *
+     * @param selectionModel
+     *            the {@link SetSelectionModel} of elements which will show their names on the remove button
+     * @param text
+     *            the {@link String text} to show on the button
+     * @param callback
+     *            the {@link Command callback} to execute on button click, if permission is granted
+     * @return the created {@link Button} instance
+     */
+    public <T extends NamedDTO> Button addRemoveActionWithConfirmation(final SetSelectionModel<T> selectionModel,
+            final String text, final Command callback) {
+        ClickHandler handler = wrap(removePermissionCheck, callback);
+        final Button button = new SelectedElementsCountingButton(text, selectionModel, handler);
+        resolveButtonVisibility(removePermissionCheck, button);
+        return button;
+    }
+
+    /**
+     * Adds a secured action button, which is only visible if the current user has any
+     * {@link UserService#hasCurrentUserPermissionToDeleteAnyObjectOfType(HasPermissions) delete permission} for the
+     * {@link HasPermissions type} provided in this {@link AccessControlledButtonPanel}'s constructor. This remove
+     * action is for panels which use multi selection model where callback could not be passed to button.
+     *
+     * @param selectionModel
+     *            the {@link SetSelectionModel} of elements which will show their names on the remove button
+     * @param text
+     *            the {@link String text} to show on the button
+     * @param callback
+     *            the {@link Command callback} to execute on button click, if permission is granted
+     * @return the created {@link Button} instance
+     */
+    public <T> Button addRemoveAction(final SetSelectionModel<T> selectionModel, final String text,
             final Command callback) {
-        return addAction(selectionModel, text, removePermissionCheck, callback);
+        ClickHandler handler = wrap(removePermissionCheck, callback);
+        final Button button = new SelectedElementsCountingButton(selectionModel, text, handler);
+        resolveButtonVisibility(removePermissionCheck, button);
+        return button;
     }
 
     /**
@@ -147,36 +190,44 @@ public class AccessControlledButtonPanel extends Composite {
      * @return the created {@link Button} instance
      */
     public Button addAction(final String text, final Supplier<Boolean> permissionCheck, final Command callback) {
-        return addAction(null, text, permissionCheck, callback);
+        final Button button = new Button(text, (ClickHandler) event -> {
+            if (permissionCheck.get()) {
+                callback.execute();
+            }
+        });
+        resolveButtonVisibility(permissionCheck, button);
+        return button;
     }
 
     /**
      * Adds an action button, which's visibility depends on the provided {@link Supplier permission check}
-     *
-     * @param selectionModel
-     *            the {@link RefreshableSelectionModel} selection model. If actual object is passed then instance of
-     *            {@link SelectedElementsCountingButton} is created. If null is passed then native gwt {@link Button} is
-     *            created.
+     * 
+     * @param <T>
+     *            the type of selected elements which could provide their names to confirmation window
      * @param text
-     *            the {@link String text} to show on the button
+     *            the essential part of {@link String text} to show on the button
      * @param permissionCheck
      *            the {@link Supplier permission check} to decide if the action button is visible or not
      * @param callback
      *            the {@link Command callback} to execute on button click, if permission is granted
-     * @param <T>
-     *            type of DTO objects which are selected
-     * @return the {@link Button} instance
+     * @return the created {@link Button} instance
      */
-    private <T> Button addAction(final SetSelectionModel<T> selectionModel, final String text,
-            final Supplier<Boolean> permissionCheck, final Command callback) {
-        ClickHandler handler = wrap(permissionCheck, callback);
-        final Button button = selectionModel == null ? new Button(text, handler)
-                : new SelectedElementsCountingButton<T>(selectionModel, text, handler);
+    public <T extends NamedDTO> Button addRemoveCountingAction(final SetSelectionModel<T> selectionModel,
+            final String text, final Supplier<Boolean> permissionCheck, final Command callback) {
+        final Button button = new SelectedElementsCountingButton(text, selectionModel, (ClickHandler) event -> {
+            if (permissionCheck.get()) {
+                callback.execute();
+            }
+        });
+        resolveButtonVisibility(permissionCheck, button);
+        return button;
+    }
+
+    private void resolveButtonVisibility(final Supplier<Boolean> permissionCheck, final Button button) {
         this.buttonToPermissions.put(button, permissionCheck);
         button.getElement().getStyle().setMarginRight(5, Unit.PX);
         this.panel.add(button);
         this.visibilityUpdater.accept(button, permissionCheck);
-        return button;
     }
 
     private ClickHandler wrap(Supplier<Boolean> permissionCheck, Command callback) {

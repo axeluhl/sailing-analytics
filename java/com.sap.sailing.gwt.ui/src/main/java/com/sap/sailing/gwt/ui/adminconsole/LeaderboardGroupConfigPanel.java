@@ -652,25 +652,12 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
 
         refreshableGroupsSelectionModel = leaderboardTableSelectionColumn.getSelectionModel();
 
-        removeButton = buttonPanel.addRemoveAction(refreshableGroupsSelectionModel, stringMessages.remove(),
-                new Command() {
+        removeButton = buttonPanel.addRemoveActionWithConfirmation(refreshableGroupsSelectionModel,
+                stringMessages.remove(), new Command() {
 
                     @Override
                     public void execute() {
-                        if (askUserForConfirmation()) {
-                            removeLeaderboardGroups(refreshableGroupsSelectionModel.getSelectedSet());
-                        }
-                    }
-
-                    private boolean askUserForConfirmation() {
-                        if (refreshableGroupsSelectionModel
-                                .itemIsSelectedButNotVisible(groupsTable.getVisibleItems())) {
-                            final String leaderboardGroupNames = refreshableGroupsSelectionModel.getSelectedSet()
-                                    .stream().map(LeaderboardGroupDTO::getName).collect(Collectors.joining("\n"));
-                            return Window.confirm(stringMessages
-                                    .doYouReallyWantToRemoveNonVisibleLeaderboardGroups(leaderboardGroupNames));
-                        }
-                        return Window.confirm(stringMessages.doYouReallyWantToRemoveLeaderboardGroups());
+                        removeLeaderboardGroups(refreshableGroupsSelectionModel.getSelectedSet());
                     }
                 });
         removeButton.ensureDebugId("RemoveLeaderboardButton");

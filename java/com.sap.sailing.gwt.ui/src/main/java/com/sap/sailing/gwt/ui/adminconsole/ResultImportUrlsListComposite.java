@@ -14,8 +14,6 @@ import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.view.client.SelectionChangeEvent;
-import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -54,32 +52,11 @@ public class ResultImportUrlsListComposite extends Composite {
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService,
                 SecuredDomainType.RESULT_IMPORT_URL);
 
-        Grid urlSample = new Grid(1, 2);
-        urlSample.setWidget(0, 0, new Label(stringMessages.sampleURL("")));
-        Label urlSampleLabel = new Label();
-        urlSample.setWidget(0, 1, urlSampleLabel);
-
-        sailingService.getUrlResultProviderNamesAndOptionalSampleURL(new AsyncCallback<List<Pair<String, String>>>() {
-            @Override
-            public void onSuccess(List<Pair<String, String>> urlProviderNamesAndOptionalSampleURL) {
-                urlProviderListBox.clear();
-                urlProviderListBox.addItem(stringMessages.pleaseSelectAURLProvider());
-                for (Pair<String, String> urlProviderNameAndSampleURL : urlProviderNamesAndOptionalSampleURL) {
-                    urlProviderListBox.addItem(urlProviderNameAndSampleURL.getA(), urlProviderNameAndSampleURL.getB());
-                }
-            }
-
-            @Override
-            public void onFailure(Throwable caught) {
-            }
-        });
-
         table = new ResultImportUrlsTableWrapper<>(sailingServiceAsync, userService, stringMessages, errorReporter);
-
         final Button add = buttonPanel.addCreateAction(stringMessages.add(), this::addUrl);
         add.setEnabled(false);
 
-        final Button remove = buttonPanel.addRemoveAction(table.getSelectionModel(), stringMessages.remove(), new Command() {
+        buttonPanel.addRemoveAction(table.getSelectionModel(), stringMessages.remove(), new Command() {
             @Override
             public void execute() {
                 if (Window.confirm(stringMessages.doYouReallyWantToRemoveResultImportUrls())) {
@@ -88,15 +65,13 @@ public class ResultImportUrlsListComposite extends Composite {
             }
         });
 
-        table.getSelectionModel().addSelectionChangeHandler(new Handler() {
-            @Override
-            public void onSelectionChange(SelectionChangeEvent event) {
-                remove.setEnabled(!table.getSelectionModel().getSelectedSet().isEmpty());
-            }
-        });
-
         final Button refresh = buttonPanel.addUnsecuredAction(stringMessages.refresh(), this::updateTable);
         refresh.setEnabled(false);
+
+        Grid urlSample = new Grid(1, 2);
+        urlSample.setWidget(0, 0, new Label(stringMessages.sampleURL("")));
+        Label urlSampleLabel = new Label();
+        urlSample.setWidget(0, 1, urlSampleLabel);
 
         urlProviderListBox = new ListBox();
         urlProviderListBox.setMultipleSelect(false);
@@ -111,6 +86,20 @@ public class ResultImportUrlsListComposite extends Composite {
                 table.update(getSelectedProviderName());
                 String provider = urlProviderListBox.getSelectedValue();
                 urlSampleLabel.setText(provider == null || provider.equals("null") ? "" : provider);
+            }
+        });
+        sailingService.getUrlResultProviderNamesAndOptionalSampleURL(new AsyncCallback<List<Pair<String, String>>>() {
+            @Override
+            public void onSuccess(List<Pair<String, String>> urlProviderNamesAndOptionalSampleURL) {
+                urlProviderListBox.clear();
+                urlProviderListBox.addItem(stringMessages.pleaseSelectAURLProvider());
+                for (Pair<String, String> urlProviderNameAndSampleURL : urlProviderNamesAndOptionalSampleURL) {
+                    urlProviderListBox.addItem(urlProviderNameAndSampleURL.getA(), urlProviderNameAndSampleURL.getB());
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
             }
         });
 

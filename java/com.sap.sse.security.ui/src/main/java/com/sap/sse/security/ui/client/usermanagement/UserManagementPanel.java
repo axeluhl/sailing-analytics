@@ -49,7 +49,7 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
 
     public UserManagementPanel(final UserService userService, final StringMessages stringMessages,
             ErrorReporter errorReporter, TR tableResources) {
-        this(userService, stringMessages, Collections.<HasPermissions> emptySet(), errorReporter, tableResources);
+        this(userService, stringMessages, Collections.<HasPermissions>emptySet(), errorReporter, tableResources);
     }
 
     public UserManagementPanel(final UserService userService, final StringMessages stringMessages,
@@ -73,7 +73,7 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
                 e -> editRolesAndPermissionsForUserButton.setEnabled(!userNameTextbox.getText().isEmpty()));
         editRolesAndPermissionsForUserButton.setEnabled(false);
         userSelectionModel = userList.getSelectionModel();
-        buttonPanel.addRemoveAction(userList.getSelectionModel(), stringMessages.remove(), () -> {
+        buttonPanel.addRemoveAction(userSelectionModel, stringMessages.remove(), () -> {
             assert userSelectionModel.getSelectedSet().size() > 0;
             final Set<UserDTO> usersToDelete = new HashSet<>();
             final Set<String> usernamesToDelete = new HashSet<>();
@@ -159,7 +159,8 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
                                     updateUsers();
                                 }
                             }).show();
-                } else {
+                }
+                else {
                     Notification.notify(StringMessages.INSTANCE.userNotFound(userNameTextbox.getText()),
                             NotificationType.ERROR);
                 }
@@ -180,11 +181,11 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
         userList.refreshUserList((Callback<Iterable<UserDTO>, Throwable>) null);
     }
 
-    public void addUserCreatedEventHandler(UserCreatedEventHandler handler) {
+    public void addUserCreatedEventHandler(UserCreatedEventHandler handler){
         this.userCreatedHandlers.add(handler);
     }
 
-    public void removeUserCreatedEventHandler(UserCreatedEventHandler handler) {
+    public void removeUserCreatedEventHandler(UserCreatedEventHandler handler){
         this.userCreatedHandlers.remove(handler);
     }
 
@@ -192,11 +193,11 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
         void onUserCreated(UserDTO user);
     }
 
-    public void addUserDeletedEventHandler(UserDeletedEventHandler handler) {
+    public void addUserDeletedEventHandler(UserDeletedEventHandler handler){
         this.userDeletedHandlers.add(handler);
     }
 
-    public void removeUserDeletedEventHandler(UserDeletedEventHandler handler) {
+    public void removeUserDeletedEventHandler(UserDeletedEventHandler handler){
         this.userDeletedHandlers.remove(handler);
     }
 

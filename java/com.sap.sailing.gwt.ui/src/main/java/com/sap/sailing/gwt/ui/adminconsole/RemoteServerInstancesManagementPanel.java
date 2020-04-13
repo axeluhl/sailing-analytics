@@ -113,7 +113,7 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
             }
         });
 
-        buttonPanel.add(new SelectedElementsCountingButton<>(refreshableServerSelectionModel, stringMessages.remove(),
+        buttonPanel.add(new SelectedElementsCountingButton(refreshableServerSelectionModel, stringMessages.remove(),
                 new ClickHandler() {
 
                     @Override

@@ -151,8 +151,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                             }
                         }, userService, errorReporter).show());
         addCreateAction.ensureDebugId("AddConnectionButton");
-        final Button removeButton = buttonPanel.addRemoveAction(connectionsTable.getSelectionModel(),
-                stringMessages.remove(), () -> {
+        final Button removeButton = buttonPanel.addRemoveAction(stringMessages.remove(), () -> {
             sailingService.deleteTracTracConfiguration(connectionsTable.getSelectionModel().getSelectedObject(),
                     new AsyncCallback<Void>() {
                         @Override

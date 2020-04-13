@@ -147,8 +147,8 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
             btnExport.setEnabled(false);
             trackedRacesButtonPanel.add(btnExport);
 
-            btnRemoveRace = new SelectedElementsCountingButton<RaceDTO>(refreshableSelectionModel,
-                    stringMessages.remove(), new ClickHandler() {
+            btnRemoveRace = new SelectedElementsCountingButton(refreshableSelectionModel, stringMessages.remove(),
+                    new ClickHandler() {
                         @Override
                         public void onClick(ClickEvent event) {
                             if (askUserForConfirmation()) {
@@ -157,18 +157,15 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
                         }
 
                         private boolean askUserForConfirmation() {
-                            if (refreshableSelectionModel.itemIsSelectedButNotVisible(raceTable.getVisibleItems())) {
-                                final String trackedRaceNames = refreshableSelectionModel.getSelectedSet().stream()
-                                        .map(e -> e.getRegattaName() + " - " + e.getName())
-                                        .collect(Collectors.joining("\n"));
-                                return Window.confirm(
-                                        stringMessages.doYouReallyWantToRemoveNonVisibleTrackedRaces(trackedRaceNames));
-                            }
-                            return true;
+                            final String names = refreshableSelectionModel.getSelectedSet().stream()
+                                    .map(e -> e.getRegattaName() + " - " + e.getName())
+                                    .collect(Collectors.joining("\n"));
+                            return Window
+                                    .confirm(StringMessages.INSTANCE.doYouReallyWantToRemoveSelectedElements(names));
                         }
+
                     });
             btnRemoveRace.ensureDebugId("RemoveRaceButton");
-            btnRemoveRace.setEnabled(false);
             trackedRacesButtonPanel.add(btnRemoveRace);
         }
     }

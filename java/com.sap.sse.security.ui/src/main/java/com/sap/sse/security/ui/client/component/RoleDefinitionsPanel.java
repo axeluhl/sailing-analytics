@@ -102,7 +102,7 @@ public class RoleDefinitionsPanel extends VerticalPanel {
         buttonPanel.addUnsecuredAction(stringMessages.refresh(), this::updateRoleDefinitions);
         buttonPanel.addCreateActionWithoutServerCreateObjectPermissionCheck(stringMessages.add(),
                 this::createRoleDefinition);
-        buttonPanel.addRemoveAction(refreshableRoleDefinitionMultiSelectionModel, stringMessages.remove(), () -> {
+        buttonPanel.addRemoveAction(stringMessages.remove(), () -> {
             final String roles = String.join(", ", Util.map(getSelectedRoleDefinitions(), RoleDefinitionDTO::getName));
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveRole(roles))) {
                 final Set<RoleDefinitionDTO> selectedRoles = new HashSet<>(getSelectedRoleDefinitions());

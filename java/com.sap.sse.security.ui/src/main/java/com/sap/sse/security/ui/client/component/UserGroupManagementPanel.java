@@ -71,7 +71,7 @@ public class UserGroupManagementPanel extends Composite {
         buttonPanel.addCreateActionWithoutServerCreateObjectPermissionCheck(stringMessages.createUserGroup(),
                 () -> new CreateUserGroupDialog(stringMessages,
                 userService, userManagementService, userGroupListDataProvider, () -> updateUserGroups()).show());
-        final Button removeButton = buttonPanel.addRemoveAction(userGroupSelectionModel, stringMessages.removeUserGroup(), () -> {
+        final Button removeButton = buttonPanel.addRemoveAction(stringMessages.removeUserGroup(), () -> {
             Set<UserGroupDTO> userGroups = userGroupTableWrapper.getSelectionModel().getSelectedSet();
             if (userGroups == null || userGroups.isEmpty()) {
                 Window.alert(stringMessages.youHaveToSelectAUserGroup());
@@ -102,6 +102,7 @@ public class UserGroupManagementPanel extends Composite {
             }
         });
         userGroupSelectionModel.addSelectionChangeHandler(event -> {
+            removeButton.setText(stringMessages.remove() + " (" + userGroupSelectionModel.getSelectedSet().size() + ")");
             removeButton.setEnabled(userGroupSelectionModel.getSelectedSet().size() >= 1);
         });
         return buttonPanel;

@@ -71,6 +71,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.dto.NamedDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
@@ -176,12 +177,9 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                     }
 
                     private boolean askUserForConfirmation() {
-                        if (refreshableEventSelectionModel.itemIsSelectedButNotVisible(eventTable.getVisibleItems())) {
-                            final String eventNames = refreshableEventSelectionModel.getSelectedSet().stream()
-                                    .map(EventDTO::getName).collect(Collectors.joining("\n"));
-                            return Window.confirm(stringMessages.doYouReallyWantToRemoveNonVisibleEvents(eventNames));
-                        }
-                        return Window.confirm(stringMessages.doYouReallyWantToRemoveEvents());
+                        final String names = refreshableEventSelectionModel.getSelectedSet().stream()
+                                .map(NamedDTO::getName).collect(Collectors.joining("\n"));
+                        return Window.confirm(StringMessages.INSTANCE.doYouReallyWantToRemoveSelectedElements(names));
                     }
                 });
         remove.ensureDebugId("RemoveEventsButton");
