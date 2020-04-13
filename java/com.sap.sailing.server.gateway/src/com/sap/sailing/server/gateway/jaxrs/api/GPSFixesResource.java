@@ -28,8 +28,10 @@ import com.sap.sailing.server.gateway.deserialization.impl.FlatSmartphoneUuidAnd
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 @Path("/v1/gps_fixes")
 public class GPSFixesResource extends AbstractSailingServerResource {
@@ -41,6 +43,7 @@ public class GPSFixesResource extends AbstractSailingServerResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces("application/json;charset=UTF-8")
     public Response postFixes(String json) {
+        final TimePoint received = MillisecondsTimePoint.now();
         Pair<UUID, List<GPSFixMoving>> data = null;
         try {
             logger.fine("Post issued to " + this.getClass().getName());
@@ -67,7 +70,8 @@ public class GPSFixesResource extends AbstractSailingServerResource {
                     changed.add(singleRaceRegatta);
                 }
             }
-            logger.log(Level.INFO, "Added " + fixes.size() + " fixes for device " + device.toString()  + " to store");
+            logger.log(Level.INFO, "Added " + fixes.size() + " fixes for device " + device.toString()  + " to store."+
+                    (fixes.isEmpty()?"":" Delay: "+fixes.iterator().next().getTimePoint().until(received)));
         } catch (NoCorrespondingServiceRegisteredException e) {
             logger.log(Level.WARNING, "Could not store fix for device " + device);
         }
