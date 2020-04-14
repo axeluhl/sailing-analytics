@@ -1,6 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import java.text.SimpleDateFormat;
 
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.common.racelog.Flags;
@@ -21,7 +20,6 @@ import android.widget.TextView;
 
 public class RaceFinishingFragment extends BaseFragment {
 
-    private SimpleDateFormat mDateFormat;
     private TextView mFinishingSince;
 
     public static RaceFinishingFragment newInstance() {
@@ -36,7 +34,6 @@ public class RaceFinishingFragment extends BaseFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.race_finishing, container, false);
 
-        mDateFormat = new SimpleDateFormat("HH:mm:ss", getResources().getConfiguration().locale);
         mFinishingSince = ViewHelper.get(layout, R.id.first_vessel_since);
 
         ImageView flag = ViewHelper.get(layout, R.id.flag);
@@ -67,7 +64,7 @@ public class RaceFinishingFragment extends BaseFragment {
             TextView first_vessel = ViewHelper.get(getView(), R.id.first_vessel);
             if (first_vessel != null && getRaceState() != null && getRaceState().getFinishingTime() != null) {
                 first_vessel.setText(getString(R.string.finishing_started,
-                        mDateFormat.format(getRaceState().getFinishingTime().asDate())));
+                        TimeUtils.formatTime(getRaceState().getFinishingTime())));
             }
         }
         notifyTick(MillisecondsTimePoint.now());
