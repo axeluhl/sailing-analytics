@@ -122,38 +122,30 @@ public class MarkPropertiesPanel extends FlowPanel {
                 openEditMarkPropertiesDialog(new MarkPropertiesDTO());
             }
         });
-        buttonAndFilterPanel.addRemoveActionWithConfirmation(refreshableSelectionModel, stringMessages.remove(),
-                new Command() {
-
-                    @Override
-                    public void execute() {
-                        removeMarkProperties(refreshableSelectionModel.getSelectedSet().stream()
-                                .map(markPropertiesDTO -> markPropertiesDTO.getUuid()).collect(Collectors.toList()));
-                    }
-
-                    private void removeMarkProperties(Collection<UUID> markPropertiesUuids) {
-                        if (!markPropertiesUuids.isEmpty()) {
-                            sailingService.removeMarkProperties(markPropertiesUuids, new AsyncCallback<Void>() {
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                    errorReporter.reportError(
-                                            "Error trying to remove mark properties:" + caught.getMessage());
-                                }
-
-                                @Override
-                                public void onSuccess(Void result) {
-                                    refreshMarkProperties();
-                                }
-                            });
-                        }
-                    }
-
-                });
+        buttonAndFilterPanel.addRemoveAction(stringMessages.remove(), refreshableSelectionModel, true,
+                () -> removeMarkProperties(refreshableSelectionModel.getSelectedSet().stream()
+                        .map(markPropertiesDTO -> markPropertiesDTO.getUuid()).collect(Collectors.toList())));
         buttonAndFilterPanel.addUnsecuredWidget(lblFilterRaces);
         filterableMarkProperties.getTextBox().ensureDebugId("MarkPropertiesFilterTextBox");
         buttonAndFilterPanel.addUnsecuredWidget(filterableMarkProperties);
         filterableMarkProperties
                 .setUpdatePermissionFilterForCheckbox(event -> userService.hasPermission(event, DefaultActions.UPDATE));
+    }
+
+    private void removeMarkProperties(Collection<UUID> markPropertiesUuids) {
+        if (!markPropertiesUuids.isEmpty()) {
+            sailingService.removeMarkProperties(markPropertiesUuids, new AsyncCallback<Void>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    errorReporter.reportError("Error trying to remove mark properties:" + caught.getMessage());
+                }
+
+                @Override
+                public void onSuccess(Void result) {
+                    refreshMarkProperties();
+                }
+            });
+        }
     }
 
     public void loadMarkProperties() {

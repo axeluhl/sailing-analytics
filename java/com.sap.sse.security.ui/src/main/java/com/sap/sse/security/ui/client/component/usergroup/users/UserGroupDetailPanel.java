@@ -165,7 +165,7 @@ public class UserGroupDetailPanel extends Composite
             }
         });
         // add remove button
-        final Button removeButton = buttonPanel.addUpdateAction(stringMessages.actionRemove(), () -> {
+        final Button removeButton = buttonPanel.addUpdateAction("ccc", () -> {
             final Set<UserGroupDTO> selectedUserGroups = userGroupSelectionModel.getSelectedSet();
             if (selectedUserGroups != null && selectedUserGroups.size() == 1) {
                 final UserGroupDTO selectedUserGroup = selectedUserGroups.iterator().next();

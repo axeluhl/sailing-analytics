@@ -73,7 +73,7 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
                 e -> editRolesAndPermissionsForUserButton.setEnabled(!userNameTextbox.getText().isEmpty()));
         editRolesAndPermissionsForUserButton.setEnabled(false);
         userSelectionModel = userList.getSelectionModel();
-        buttonPanel.addRemoveAction(userSelectionModel, stringMessages.remove(), () -> {
+        buttonPanel.addRemoveAction(stringMessages.remove(), userSelectionModel, false, () -> {
             assert userSelectionModel.getSelectedSet().size() > 0;
             final Set<UserDTO> usersToDelete = new HashSet<>();
             final Set<String> usernamesToDelete = new HashSet<>();

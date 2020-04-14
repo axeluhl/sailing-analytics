@@ -281,22 +281,22 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
                             }
                         }, userService, errorReporter).show());
         // Remove action
-        final Button removeButton = buttonPanel.addRemoveAction(connectionsTable.getSelectionModel(),
-                stringMessages.remove(), () -> {
-            sailingService.deleteSwissTimingArchiveConfiguration(
-                    connectionsTable.getSelectionModel().getSelectedObject(), new AsyncCallback<Void>() {
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            errorReporter.reportError(
-                                    "Exception trying to delete configuration in DB: " + caught.getMessage());
-                        }
+        final Button removeButton = buttonPanel.addRemoveAction(stringMessages.remove(),
+                connectionsTable.getSelectionModel(), false, () -> {
+                    sailingService.deleteSwissTimingArchiveConfiguration(
+                            connectionsTable.getSelectionModel().getSelectedObject(), new AsyncCallback<Void>() {
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    errorReporter.reportError(
+                                            "Exception trying to delete configuration in DB: " + caught.getMessage());
+                                }
 
-                        @Override
-                        public void onSuccess(Void result) {
-                            connectionsTable.refreshConnectionList();
-                        }
-                    });
-        });
+                                @Override
+                                public void onSuccess(Void result) {
+                                    connectionsTable.refreshConnectionList();
+                                }
+                            });
+                });
         // List Race action
         final Button listRacesButton = buttonPanel.addUnsecuredAction(stringMessages.listRaces(), () -> {
             fillRaces(sailingService);

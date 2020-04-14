@@ -91,52 +91,50 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                 () -> connectionsTable.refreshSwissTimingConnectionList());
         // Add SwissTiming Connection
         buttonPanel.addCreateAction(stringMessages.addSwissTimingConnection(),
-                () -> new SwissTimingConnectionDialog(
-                        new DialogCallback<SwissTimingConfigurationWithSecurityDTO>() {
-                            @Override
-                            public void ok(SwissTimingConfigurationWithSecurityDTO editedConnection) {
-                                sailingService.createSwissTimingConfiguration(editedConnection.getName(),
-                                        editedConnection.getJsonUrl(), editedConnection.getHostname(),
-                                        editedConnection.getPort(), editedConnection.getUpdateURL(),
-                                        editedConnection.getUpdateUsername(), editedConnection.getUpdatePassword(),
-                                        new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
-                                            @Override
-                                            public void onFailure(Throwable caught) {
-                                                errorReporter
-                                                        .reportError("Exception trying to create configuration in DB: "
-                                                                + caught.getMessage());
-                                            }
+                () -> new SwissTimingConnectionDialog(new DialogCallback<SwissTimingConfigurationWithSecurityDTO>() {
+                    @Override
+                    public void ok(SwissTimingConfigurationWithSecurityDTO editedConnection) {
+                        sailingService.createSwissTimingConfiguration(editedConnection.getName(),
+                                editedConnection.getJsonUrl(), editedConnection.getHostname(),
+                                editedConnection.getPort(), editedConnection.getUpdateURL(),
+                                editedConnection.getUpdateUsername(), editedConnection.getUpdatePassword(),
+                                new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        errorReporter.reportError("Exception trying to create configuration in DB: "
+                                                + caught.getMessage());
+                                    }
 
-                                            @Override
-                                            public void onSuccess(Void voidResult) {
-                                                connectionsTable.refreshSwissTimingConnectionList();
-                                                connectionsTable.getFilterField().search(editedConnection.getJsonUrl());
-                                            }
-                                        }));
-                            }
+                                    @Override
+                                    public void onSuccess(Void voidResult) {
+                                        connectionsTable.refreshSwissTimingConnectionList();
+                                        connectionsTable.getFilterField().search(editedConnection.getJsonUrl());
+                                    }
+                                }));
+                    }
 
-                            @Override
-                            public void cancel() {
-                            }
-                        }, userService, errorReporter).show());
+                    @Override
+                    public void cancel() {
+                    }
+                }, userService, errorReporter).show());
 
         // Remove SwissTiming Connection
-        final Button removeButton = buttonPanel.addRemoveAction(connectionsTable.getSelectionModel(), 
-                stringMessages.remove(), () -> {
-            sailingService.deleteSwissTimingConfiguration(connectionsTable.getSelectionModel().getSelectedObject(),
-                    new AsyncCallback<Void>() {
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            errorReporter.reportError(
-                                    "Exception trying to delete configuration in DB: " + caught.getMessage());
-                        }
+        final Button removeButton = buttonPanel.addRemoveAction(stringMessages.remove(),
+                connectionsTable.getSelectionModel(), false, () -> {
+                    sailingService.deleteSwissTimingConfiguration(
+                            connectionsTable.getSelectionModel().getSelectedObject(), new AsyncCallback<Void>() {
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    errorReporter.reportError(
+                                            "Exception trying to delete configuration in DB: " + caught.getMessage());
+                                }
 
-                        @Override
-                        public void onSuccess(Void result) {
-                            connectionsTable.refreshSwissTimingConnectionList();
-                        }
-                    });
-        });
+                                @Override
+                                public void onSuccess(Void result) {
+                                    connectionsTable.refreshSwissTimingConnectionList();
+                                }
+                            });
+                });
 
         // List Races in SwissTiming Connection
         final Button listRacesButton = buttonPanel.addUnsecuredAction(stringMessages.listRaces(), () -> {

@@ -115,39 +115,31 @@ public class CourseTemplatePanel extends FlowPanel {
             }
         });
 
-        buttonAndFilterPanel.addRemoveActionWithConfirmation(refreshableSelectionModel, stringMessages.remove(),
-                new Command() {
-
-                    @Override
-                    public void execute() {
-                        removeCourseTemplates(refreshableSelectionModel.getSelectedSet().stream()
-                                .map(courseTemplateDTO -> courseTemplateDTO.getUuid()).collect(Collectors.toList()));
-                    }
-
-                    private void removeCourseTemplates(Collection<UUID> courseTemplatesUuids) {
-                        if (!courseTemplatesUuids.isEmpty()) {
-                            sailingService.removeCourseTemplates(courseTemplatesUuids, new AsyncCallback<Void>() {
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                    errorReporter.reportError(
-                                            "Error trying to remove course teamplates:" + caught.getMessage());
-                                }
-
-                                @Override
-                                public void onSuccess(Void result) {
-                                    refreshCourseTemplates();
-                                }
-                            });
-                        }
-                    }
-
-                });
+        buttonAndFilterPanel.addRemoveAction(stringMessages.remove(), refreshableSelectionModel, true,
+                () -> removeCourseTemplates(refreshableSelectionModel.getSelectedSet().stream()
+                        .map(courseTemplateDTO -> courseTemplateDTO.getUuid()).collect(Collectors.toList())));
 
         buttonAndFilterPanel.addUnsecuredWidget(lblFilterRaces);
         buttonAndFilterPanel.addUnsecuredWidget(filterableCourseTemplatePanel);
         filterableCourseTemplatePanel
                 .setUpdatePermissionFilterForCheckbox(event -> userService.hasPermission(event, DefaultActions.UPDATE));
 
+    }
+
+    private void removeCourseTemplates(Collection<UUID> courseTemplatesUuids) {
+        if (!courseTemplatesUuids.isEmpty()) {
+            sailingService.removeCourseTemplates(courseTemplatesUuids, new AsyncCallback<Void>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    errorReporter.reportError("Error trying to remove course teamplates:" + caught.getMessage());
+                }
+
+                @Override
+                public void onSuccess(Void result) {
+                    refreshCourseTemplates();
+                }
+            });
+        }
     }
 
     public void loadCourseTemplates() {

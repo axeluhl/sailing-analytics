@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.Set;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
@@ -56,14 +54,8 @@ public class ResultImportUrlsListComposite extends Composite {
         final Button add = buttonPanel.addCreateAction(stringMessages.add(), this::addUrl);
         add.setEnabled(false);
 
-        buttonPanel.addRemoveAction(table.getSelectionModel(), stringMessages.remove(), new Command() {
-            @Override
-            public void execute() {
-                if (Window.confirm(stringMessages.doYouReallyWantToRemoveResultImportUrls())) {
-                    removeUrls(table.getSelectionModel().getSelectedSet());
-                }
-            }
-        });
+        buttonPanel.addRemoveAction(stringMessages.remove(), table.getSelectionModel(), true,
+                () -> removeUrls(table.getSelectionModel().getSelectedSet()));
 
         final Button refresh = buttonPanel.addUnsecuredAction(stringMessages.refresh(), this::updateTable);
         refresh.setEnabled(false);

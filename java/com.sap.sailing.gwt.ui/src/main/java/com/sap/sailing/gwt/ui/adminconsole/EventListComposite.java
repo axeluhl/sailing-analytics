@@ -16,8 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
-
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.cell.client.ValueUpdater;
@@ -32,7 +30,6 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -71,7 +68,6 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
-import com.sap.sse.security.shared.dto.NamedDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
@@ -167,21 +163,8 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         refresh.ensureDebugId("RefreshEventsButton");
         final Button create = buttonPanel.addCreateAction(stringMessages.actionAddEvent(), this::openCreateEventDialog);
         create.ensureDebugId("CreateEventButton");
-        final Button remove = buttonPanel.addRemoveAction(refreshableEventSelectionModel, stringMessages.remove(),
-                new Command() {
-                    @Override
-                    public void execute() {
-                        if (askUserForConfirmation()) {
-                            removeEvents(refreshableEventSelectionModel.getSelectedSet());
-                        }
-                    }
-
-                    private boolean askUserForConfirmation() {
-                        final String names = refreshableEventSelectionModel.getSelectedSet().stream()
-                                .map(NamedDTO::getName).collect(Collectors.joining("\n"));
-                        return Window.confirm(StringMessages.INSTANCE.doYouReallyWantToRemoveSelectedElements(names));
-                    }
-                });
+        final Button remove = buttonPanel.addRemoveAction(stringMessages.remove(), refreshableEventSelectionModel, true,
+                () -> removeEvents(refreshableEventSelectionModel.getSelectedSet()));
         remove.ensureDebugId("RemoveEventsButton");
 
         this.refreshableEventSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
