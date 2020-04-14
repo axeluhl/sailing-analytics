@@ -1,3 +1,5 @@
+# Set Up of Support E Mail Address support at sapsailing dot com with AWS SES slash SNS slash Lambda
+
 We use AWS SES for all e-mail services, inbound and outbound. See also [Amazon Simple Email Service (SES) Set-Up](wiki/info/landscape/mail-relaying) for details on the general SES set-up. We have established ``support@sapsailing.com`` now as another inbound e-mail address that forwards to an SNS topic named ``Support-Mail``.
 
 The messages forwarded from SES to SNS are JSON-formatted wrappers around the original e-mail message augmented with various meta-data. Forwarding these messages with a straight SNS subscription of type EMAIL results in human-unreadable e-mails in JSON format with all the metadata included.
