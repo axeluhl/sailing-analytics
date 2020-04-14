@@ -183,7 +183,7 @@ public class AccessControlledButtonPanel extends Composite {
         return button;
     }
 
-    private ClickHandler wrap(Supplier<Boolean> permissionCheck, Command callback) {
+    private ClickHandler wrap(final Supplier<Boolean> permissionCheck, final Command callback) {
         return event -> {
             if (permissionCheck.get()) {
                 callback.execute();
