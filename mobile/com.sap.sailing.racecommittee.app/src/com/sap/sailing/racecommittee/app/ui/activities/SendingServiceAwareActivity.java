@@ -194,10 +194,7 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity
     @Override
     public void onException(Exception exception) {
         if (exception == null || exception instanceof UnauthorizedException) {
-            Context context = this;
-            if (getSupportActionBar() != null) {
-                context = getSupportActionBar().getThemedContext();
-            }
+            final Context context = this;
             AlertDialog.Builder builder = new AlertDialog.Builder(context);
             builder.setTitle(getString(R.string.sending_exception_title));
             builder.setMessage(getString(R.string.sending_exception_message));
