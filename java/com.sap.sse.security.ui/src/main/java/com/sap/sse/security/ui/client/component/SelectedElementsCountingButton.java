@@ -28,19 +28,19 @@ public class SelectedElementsCountingButton<T extends Named> extends Button {
     }
 
     public SelectedElementsCountingButton(final String html, final SetSelectionModel<T> selectionModel,
-            Function<T, String> nameMapper, final ClickHandler clickHandler) {
+            final Function<T, String> nameMapper, final ClickHandler clickHandler) {
         this(html, selectionModel, nameMapper == null ? null : createAsker(selectionModel, nameMapper), clickHandler);
     }
 
     public SelectedElementsCountingButton(final String html, final SetSelectionModel<T> selectionModel,
-            Supplier<Boolean> asker, final ClickHandler clickHandler) {
+            final Supplier<Boolean> asker, final ClickHandler clickHandler) {
         super(html);
         setEnabled(!selectionModel.getSelectedSet().isEmpty());
         addSelectionEventHandler(html, selectionModel);
         addClickHandler(asker, selectionModel, clickHandler);
     }
 
-    private void addSelectionEventHandler(String html, SetSelectionModel<T> selectionModel) {
+    private void addSelectionEventHandler(final String html, final SetSelectionModel<T> selectionModel) {
         selectionModel.addSelectionChangeHandler(event -> {
             Set<T> selectedSet = selectionModel.getSelectedSet();
             setText(selectedSet.size() <= 1 ? html : html + " (" + selectedSet.size() + ")");
