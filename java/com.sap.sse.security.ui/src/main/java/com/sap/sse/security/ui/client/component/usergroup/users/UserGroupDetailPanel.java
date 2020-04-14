@@ -165,7 +165,7 @@ public class UserGroupDetailPanel extends Composite
             }
         });
         // add remove button
-        final Button removeButton = buttonPanel.addUpdateAction("ccc", () -> {
+        final Button removeButton = buttonPanel.addUpdateAction(stringMessages.actionRemove(), () -> {
             final Set<UserGroupDTO> selectedUserGroups = userGroupSelectionModel.getSelectedSet();
             if (selectedUserGroups != null && selectedUserGroups.size() == 1) {
                 final UserGroupDTO selectedUserGroup = selectedUserGroups.iterator().next();
@@ -180,10 +180,10 @@ public class UserGroupDetailPanel extends Composite
                             new AsyncCallback<Void>() {
                                 @Override
                                 public void onFailure(Throwable caught) {
-                                    Window.alert(stringMessages.couldNotRemoveUserFromUserGroup(username, selectedUserGroup.getName(),
-                                            caught.getMessage()));
+                                    Window.alert(stringMessages.couldNotRemoveUserFromUserGroup(username,
+                                            selectedUserGroup.getName(), caught.getMessage()));
                                 }
-    
+
                                 @Override
                                 public void onSuccess(Void result) {
                                     StrippedUserDTO userToRemoveFromTenant = null;

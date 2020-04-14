@@ -92,7 +92,8 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
         if (userService.hasCreatePermission(SecuredDomainType.RACE_MANAGER_APP_DEVICE_CONFIGURATION)) {
             deviceManagementControlPanel.add(addConfigurationButton);
         }
-        removeConfigurationButton = new SelectedElementsCountingButton<DeviceConfigurationWithSecurityDTO>(stringMessages.remove(), refreshableMultiSelectionModel, true, (event) -> removeConfiguration());
+        removeConfigurationButton = new SelectedElementsCountingButton<DeviceConfigurationWithSecurityDTO>(
+                stringMessages.remove(), refreshableMultiSelectionModel, true, (event) -> removeConfiguration());
         deviceManagementControlPanel.add(removeConfigurationButton);
         refreshConfigurationsButton = new Button(stringMessages.refresh());
         refreshConfigurationsButton.addClickHandler(new ClickHandler() {

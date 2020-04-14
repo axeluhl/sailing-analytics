@@ -113,7 +113,8 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
             }
         });
 
-        buttonPanel.add(new SelectedElementsCountingButton<RemoteSailingServerReferenceDTO>(stringMessages.remove(), refreshableServerSelectionModel, true, (event) -> removeSelectedSailingServers())); 
+        buttonPanel.add(new SelectedElementsCountingButton<RemoteSailingServerReferenceDTO>(stringMessages.remove(),
+                refreshableServerSelectionModel, true, (event) -> removeSelectedSailingServers())); 
 
         Button refreshButton = new Button(stringMessages.refresh());
         buttonPanel.add(refreshButton);
