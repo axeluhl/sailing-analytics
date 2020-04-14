@@ -2379,4 +2379,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String unsetPosition();
     String errorTryingToUpdateMarkProperties(String message);
     String confirmUnsettingPositionForMarkProperties(String name);
+    String useOfficialResultsForAutomaticUpdates();
+    String keepEmptyForDefaultUserAndPassword();
 }
