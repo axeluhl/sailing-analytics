@@ -32,7 +32,6 @@ import com.google.gwt.user.cellview.client.CellTable.Resources;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -652,26 +651,8 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
 
         refreshableGroupsSelectionModel = leaderboardTableSelectionColumn.getSelectionModel();
 
-        removeButton = buttonPanel.addRemoveAction(refreshableGroupsSelectionModel, stringMessages.remove(),
-                new Command() {
-                    @Override
-                    public void execute() {
-                        if (askUserForConfirmation()) {
-                            removeLeaderboardGroups(refreshableGroupsSelectionModel.getSelectedSet());
-                        }
-                    }
-
-                    private boolean askUserForConfirmation() {
-                        if (refreshableGroupsSelectionModel
-                                .itemIsSelectedButNotVisible(groupsTable.getVisibleItems())) {
-                            final String leaderboardGroupNames = refreshableGroupsSelectionModel.getSelectedSet()
-                                    .stream().map(LeaderboardGroupDTO::getName).collect(Collectors.joining("\n"));
-                            return Window.confirm(stringMessages
-                                    .doYouReallyWantToRemoveNonVisibleLeaderboardGroups(leaderboardGroupNames));
-                        }
-                        return Window.confirm(stringMessages.doYouReallyWantToRemoveLeaderboardGroups());
-                    }
-                });
+        removeButton = buttonPanel.addRemoveAction(stringMessages.remove(), refreshableGroupsSelectionModel, true,
+                () -> removeLeaderboardGroups(refreshableGroupsSelectionModel.getSelectedSet()));
         removeButton.ensureDebugId("RemoveLeaderboardButton");
 
         refreshableGroupsSelectionModel.addSelectionChangeHandler(event -> groupSelectionChanged());

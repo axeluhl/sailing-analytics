@@ -126,6 +126,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String actionChangeOwnership();
     String errorUpdatingOwnership(String name);
     String doYouReallyWantToRemoveRole(String name);
+    String doYouReallyWantToRemoveSelectedElements(String message);
     String errorTryingToDeleteRole(String rolename, String message);
     String pleaseEnterARoleName();
     String editRoles();

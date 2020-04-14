@@ -1,29 +1,68 @@
 package com.sap.sse.security.ui.client.component;
 
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.safehtml.shared.annotations.IsSafeHtml;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.view.client.SetSelectionModel;
+import com.sap.sse.common.Named;
+import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
- * The implementation of Button which re-draws it's label based on SelectionEvent with showing the number of selected
- * items. If number of selected items is <= 1 then no number is shown. The button's enablement state depends on whether
- * the selection is empty or not. It will be shown disabled for an empty selection, also upon first creation.
- * 
+ * The button which shows the count of selected element(s). Optionally callback could be passed from outside and
+ * confirmation window could appear depending on the flag.
+ *
  * @author Dmitry Bilyk
  *
  */
-public class SelectedElementsCountingButton<T> extends Button {
-    public SelectedElementsCountingButton(final SetSelectionModel<T> selectionModel, final @IsSafeHtml String html,
-            final ClickHandler handler) {
-        super(html, handler);
+
+public class SelectedElementsCountingButton<T extends Named> extends Button {
+
+    public SelectedElementsCountingButton(final String html, final SetSelectionModel<T> selectionModel,
+            boolean withConfirmation, final ClickHandler clickHandler) {
+        this(html, selectionModel, withConfirmation ? Named::getName : null, clickHandler);
+    }
+
+    public SelectedElementsCountingButton(final String html, final SetSelectionModel<T> selectionModel,
+            Function<T, String> nameMapper, final ClickHandler clickHandler) {
+        this(html, selectionModel, nameMapper == null ? null : createAsker(selectionModel, nameMapper), clickHandler);
+    }
+
+    public SelectedElementsCountingButton(final String html, final SetSelectionModel<T> selectionModel,
+            Supplier<Boolean> asker, final ClickHandler clickHandler) {
+        super(html);
         setEnabled(!selectionModel.getSelectedSet().isEmpty());
+        addSelectionEventHandler(html, selectionModel);
+        addClickHandler(asker, selectionModel, clickHandler);
+    }
+
+    private void addSelectionEventHandler(String html, SetSelectionModel<T> selectionModel) {
         selectionModel.addSelectionChangeHandler(event -> {
             Set<T> selectedSet = selectionModel.getSelectedSet();
             setText(selectedSet.size() <= 1 ? html : html + " (" + selectedSet.size() + ")");
             setEnabled(!selectedSet.isEmpty());
         });
+    }
+
+    private void addClickHandler(Supplier<Boolean> asker, SetSelectionModel<T> selectionModel,
+            ClickHandler clickHandler) {
+        if (clickHandler != null) {
+            addClickHandler(event -> {
+                if (asker == null || asker.get()) {
+                    clickHandler.onClick(event);
+                }
+            });
+        }
+    }
+
+    private static <T> Supplier<Boolean> createAsker(SetSelectionModel<T> selectionModel, Function<T, String> mapper) {
+        return () -> {
+            final String names = selectionModel.getSelectedSet().stream().map(mapper).collect(Collectors.joining("\n"));
+            return Window.confirm(StringMessages.INSTANCE.doYouReallyWantToRemoveSelectedElements(names));
+        };
     }
 }

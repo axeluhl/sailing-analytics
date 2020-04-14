@@ -48,13 +48,15 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
         this.userService = userService;
         this.stringMessages = stringMessages;
         this.errorReporter = reporter;
-        listComposite = new DeviceConfigurationListComposite(sailingService, errorReporter, stringMessages, userService);
+        listComposite = new DeviceConfigurationListComposite(sailingService, errorReporter, stringMessages,
+                userService);
         refreshableMultiSelectionModel = listComposite.getSelectionModel();
         setupUi();
         refreshableMultiSelectionModel.addSelectionChangeHandler(new Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                Set<DeviceConfigurationWithSecurityDTO> selectedConfigurations = refreshableMultiSelectionModel.getSelectedSet();
+                Set<DeviceConfigurationWithSecurityDTO> selectedConfigurations = refreshableMultiSelectionModel
+                        .getSelectedSet();
                 if (selectedConfigurations.size() == 1 && selectedConfigurations.iterator().hasNext()) {
                     detailComposite.setConfiguration(selectedConfigurations.iterator().next());
                 } else {
@@ -62,7 +64,7 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
                 }
                 removeConfigurationButton.setEnabled(!selectedConfigurations.isEmpty());
             }
-        }); 
+        });
     }
     
     protected UserService getUserService() {
@@ -90,15 +92,7 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
         if (userService.hasCreatePermission(SecuredDomainType.RACE_MANAGER_APP_DEVICE_CONFIGURATION)) {
             deviceManagementControlPanel.add(addConfigurationButton);
         }
-        removeConfigurationButton = new SelectedElementsCountingButton<DeviceConfigurationWithSecurityDTO>(
-                refreshableMultiSelectionModel, stringMessages.remove(), new ClickHandler() {
-
-                    @Override
-                    public void onClick(ClickEvent event) {
-                        removeConfiguration();
-                    }
-                });
-        removeConfigurationButton.setEnabled(false);
+        removeConfigurationButton = new SelectedElementsCountingButton<DeviceConfigurationWithSecurityDTO>(stringMessages.remove(), refreshableMultiSelectionModel, true, (event) -> removeConfiguration());
         deviceManagementControlPanel.add(removeConfigurationButton);
         refreshConfigurationsButton = new Button(stringMessages.refresh());
         refreshConfigurationsButton.addClickHandler(new ClickHandler() {

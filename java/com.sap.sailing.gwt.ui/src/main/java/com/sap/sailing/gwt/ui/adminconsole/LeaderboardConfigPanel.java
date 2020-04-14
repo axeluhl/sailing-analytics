@@ -31,8 +31,6 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
-
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
@@ -46,7 +44,6 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -164,24 +161,8 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                 leaderboardCreateAndRegattaReadPermission, this::createRegattaLeaderboardWithEliminations);
         createRegattaLeaderboardWithEliminationsBtn.ensureDebugId("CreateRegattaLeaderboardWithEliminationsButton");
 
-        leaderboardRemoveButton = buttonPanel.addRemoveAction(leaderboardSelectionModel, stringMessages.remove(), new Command() {
-            @Override
-            public void execute() {
-                if (askUserForConfirmation()) {
-                    removeLeaderboards(leaderboardSelectionModel.getSelectedSet());
-                }
-            }
-
-            private boolean askUserForConfirmation() {
-                if (leaderboardSelectionModel.itemIsSelectedButNotVisible(leaderboardTable.getVisibleItems())) {
-                    final String leaderboardNames = leaderboardSelectionModel.getSelectedSet().stream()
-                            .map(StrippedLeaderboardDTO::getName).collect(Collectors.joining("\n"));
-                    return Window
-                            .confirm(stringMessages.doYouReallyWantToRemoveNonVisibleLeaderboards(leaderboardNames));
-                }
-                return Window.confirm(stringMessages.doYouReallyWantToRemoveLeaderboards());
-            }
-        });
+        leaderboardRemoveButton = buttonPanel.addRemoveAction(stringMessages.remove(), leaderboardSelectionModel, true,
+                () -> removeLeaderboards(leaderboardSelectionModel.getSelectedSet()));
         leaderboardRemoveButton.ensureDebugId("LeaderboardsRemoveButton");
     }
 
@@ -345,8 +326,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                             });
                     editCompetitorsDialog.show();
                 });
-        leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_CONFIGURE_URL, READ,
-                leaderboardDTO -> {
+        leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_CONFIGURE_URL, READ, leaderboardDTO -> {
             sailingService.getAvailableDetailTypesForLeaderboard(leaderboardDTO.getName(), null,
                     new AsyncCallback<Iterable<DetailType>>() {
 
@@ -870,8 +850,8 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
             raceColumnTable.getDataProvider().getList().clear();
             for (RaceColumnDTO raceColumn : selectedLeaderboard.getRaceList()) {
                 for (FleetDTO fleet : raceColumn.getFleets()) {
-                    raceColumnTable.getDataProvider().getList().add(new RaceColumnDTOAndFleetDTOWithNameBasedEquality(
-                            raceColumn, fleet, selectedLeaderboard));
+                    raceColumnTable.getDataProvider().getList().add(
+                            new RaceColumnDTOAndFleetDTOWithNameBasedEquality(raceColumn, fleet, selectedLeaderboard));
                 }
             }
             selectedLeaderBoardPanel.setVisible(true);

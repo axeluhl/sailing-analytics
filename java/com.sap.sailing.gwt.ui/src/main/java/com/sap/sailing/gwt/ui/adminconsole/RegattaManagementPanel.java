@@ -7,10 +7,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
@@ -77,32 +74,19 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
         final Button create = buttonPanel.addCreateAction(stringMessages.addRegatta(), this::openCreateRegattaDialog);
         create.ensureDebugId("AddRegattaButton");
 
-        final Button remove = buttonPanel.addRemoveAction(refreshableRegattaMultiSelectionModel, stringMessages.remove(), new Command() {
-            @Override
-            public void execute() {
-                if (askUserForConfirmation()) {
+        final Button remove = buttonPanel.addRemoveAction(stringMessages.remove(),
+                refreshableRegattaMultiSelectionModel, true, () -> {
                     // unmodifiable collection can't be sent to the server.
                     final Collection<RegattaIdentifier> regattas = createModifiableCollection();
                     removeRegattas(regattas);
-                }
-            }
-
-            private boolean askUserForConfirmation() {
-                if (refreshableRegattaMultiSelectionModel
-                        .itemIsSelectedButNotVisible(regattaListComposite.getRegattaTable().getVisibleItems())) {
-                    final String regattaNames = refreshableRegattaMultiSelectionModel.getSelectedSet().stream()
-                            .map(RegattaDTO::getName).collect(Collectors.joining("\n"));
-                    return Window.confirm(stringMessages.doYouReallyWantToRemoveNonVisibleRegattas(regattaNames));
-                }
-                return Window.confirm(stringMessages.doYouReallyWantToRemoveRegattas());
-            }
-        });
+                });
         regattasContentPanel.add(buttonPanel);
 
         refreshableRegattaMultiSelectionModel.addSelectionChangeHandler(new Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                List<RegattaDTO> selectedRegattas = new ArrayList<>(refreshableRegattaMultiSelectionModel.getSelectedSet());
+                List<RegattaDTO> selectedRegattas = new ArrayList<>(
+                        refreshableRegattaMultiSelectionModel.getSelectedSet());
                 final RegattaIdentifier selectedRegatta;
                 if (selectedRegattas.size() == 1) {
                     selectedRegatta = selectedRegattas.iterator().next().getRegattaIdentifier();
@@ -126,9 +110,6 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
                     }
                 }
                 remove.setEnabled(!selectedRegattas.isEmpty() && canDeleteAllSelected);
-
-                remove.setText(selectedRegattas.size() <= 1 ? stringMessages.remove()
-                        : stringMessages.removeNumber(selectedRegattas.size()));
             }
         });
         regattasContentPanel.add(regattaListComposite);

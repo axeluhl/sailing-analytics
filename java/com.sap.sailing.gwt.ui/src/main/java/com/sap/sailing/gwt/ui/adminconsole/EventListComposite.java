@@ -16,8 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
-
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.cell.client.ValueUpdater;
@@ -32,7 +30,6 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -166,24 +163,8 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         refresh.ensureDebugId("RefreshEventsButton");
         final Button create = buttonPanel.addCreateAction(stringMessages.actionAddEvent(), this::openCreateEventDialog);
         create.ensureDebugId("CreateEventButton");
-        final Button remove = buttonPanel.addRemoveAction(refreshableEventSelectionModel, stringMessages.remove(),
-                new Command() {
-                    @Override
-                    public void execute() {
-                        if (askUserForConfirmation()) {
-                            removeEvents(refreshableEventSelectionModel.getSelectedSet());
-                        }
-                    }
-
-                    private boolean askUserForConfirmation() {
-                        if (refreshableEventSelectionModel.itemIsSelectedButNotVisible(eventTable.getVisibleItems())) {
-                            final String eventNames = refreshableEventSelectionModel.getSelectedSet().stream()
-                                    .map(EventDTO::getName).collect(Collectors.joining("\n"));
-                            return Window.confirm(stringMessages.doYouReallyWantToRemoveNonVisibleEvents(eventNames));
-                        }
-                        return Window.confirm(stringMessages.doYouReallyWantToRemoveEvents());
-                    }
-                });
+        final Button remove = buttonPanel.addRemoveAction(stringMessages.remove(), refreshableEventSelectionModel, true,
+                () -> removeEvents(refreshableEventSelectionModel.getSelectedSet()));
         remove.ensureDebugId("RemoveEventsButton");
 
         this.refreshableEventSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {

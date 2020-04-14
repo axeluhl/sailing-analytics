@@ -112,50 +112,32 @@ public class CourseTemplatePanel extends FlowPanel {
                 openEditCourseTemplateDialog(new CourseTemplateDTO(), userService, true);
             }
         });
-        buttonAndFilterPanel.addRemoveAction(refreshableSelectionModel, stringMessages.remove(), new Command() {
-            @Override
-            public void execute() {
-                if (askUserForConfirmation()) {
-                    removeCourseTemplates(refreshableSelectionModel.getSelectedSet().stream().map(
-                        courseTemplateDTO -> courseTemplateDTO.getUuid()).collect(Collectors.toList()));
-                }
-            }
 
-            private void removeCourseTemplates(Collection<UUID> courseTemplatesUuids) {
-                if (!courseTemplatesUuids.isEmpty()) {
-                    sailingService.removeCourseTemplates(courseTemplatesUuids, new AsyncCallback<Void>() {
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            errorReporter
-                                    .reportError("Error trying to remove course teamplates:" + caught.getMessage());
-                        }
+        buttonAndFilterPanel.addRemoveAction(stringMessages.remove(), refreshableSelectionModel, true,
+                () -> removeCourseTemplates(refreshableSelectionModel.getSelectedSet().stream()
+                        .map(courseTemplateDTO -> courseTemplateDTO.getUuid()).collect(Collectors.toList())));
 
-                        @Override
-                        public void onSuccess(Void result) {
-                            refreshCourseTemplates();
-                        }
-                    });
-                }
-            }
-
-            private boolean askUserForConfirmation() {
-                final boolean result;
-                if (refreshableSelectionModel.itemIsSelectedButNotVisible(courseTemplateTable.getVisibleItems())) {
-                    final String markRolesNames = refreshableSelectionModel.getSelectedSet().stream()
-                            .map(CourseTemplateDTO::getName).collect(Collectors.joining("\n"));
-                    result = Window
-                            .confirm(stringMessages.doYouReallyWantToRemoveNonVisibleCourseTemplates(markRolesNames));
-                } else {
-                    result = Window.confirm(stringMessages.doYouReallyWantToRemoveCourseTemplates());
-                }
-                return result;
-            }
-        });
         buttonAndFilterPanel.addUnsecuredWidget(lblFilterRaces);
         buttonAndFilterPanel.addUnsecuredWidget(filterableCourseTemplatePanel);
         filterableCourseTemplatePanel
                 .setUpdatePermissionFilterForCheckbox(event -> userService.hasPermission(event, DefaultActions.UPDATE));
 
+    }
+
+    private void removeCourseTemplates(Collection<UUID> courseTemplatesUuids) {
+        if (!courseTemplatesUuids.isEmpty()) {
+            sailingService.removeCourseTemplates(courseTemplatesUuids, new AsyncCallback<Void>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    errorReporter.reportError("Error trying to remove course teamplates:" + caught.getMessage());
+                }
+
+                @Override
+                public void onSuccess(Void result) {
+                    refreshCourseTemplates();
+                }
+            });
+        }
     }
 
     public void loadCourseTemplates() {
