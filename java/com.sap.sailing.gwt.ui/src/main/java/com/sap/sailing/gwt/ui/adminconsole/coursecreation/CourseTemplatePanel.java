@@ -25,7 +25,6 @@ import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
-import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -100,19 +99,9 @@ public class CourseTemplatePanel extends FlowPanel {
         };
         filterableCourseTemplatePanel.getTextBox().ensureDebugId("CourseTemplateFilterTextBox");
         createCourseTemplateTable(userService);
-        buttonAndFilterPanel.addUnsecuredAction(stringMessages.refresh(), new Command() {
-            @Override
-            public void execute() {
-                loadCourseTemplates();
-            }
-        });
-        buttonAndFilterPanel.addCreateAction(stringMessages.add(), new Command() {
-            @Override
-            public void execute() {
-                openEditCourseTemplateDialog(new CourseTemplateDTO(), userService, true);
-            }
-        });
-
+        buttonAndFilterPanel.addUnsecuredAction(stringMessages.refresh(), this::loadCourseTemplates);
+        buttonAndFilterPanel.addCreateAction(stringMessages.add(),
+                () -> openEditCourseTemplateDialog(new CourseTemplateDTO(), userService, true));
         buttonAndFilterPanel.addRemoveAction(stringMessages.remove(), refreshableSelectionModel, true,
                 () -> removeCourseTemplates(refreshableSelectionModel.getSelectedSet().stream()
                         .map(courseTemplateDTO -> courseTemplateDTO.getUuid()).collect(Collectors.toList())));

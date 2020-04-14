@@ -71,7 +71,7 @@ public class UserGroupManagementPanel extends Composite {
         buttonPanel.addCreateActionWithoutServerCreateObjectPermissionCheck(stringMessages.createUserGroup(),
                 () -> new CreateUserGroupDialog(stringMessages, userService, userManagementService,
                         userGroupListDataProvider, () -> updateUserGroups()).show());
-        buttonPanel.addRemoveAction(stringMessages.removeUserGroup(), () -> {
+        buttonPanel.addRemoveAction(stringMessages.removeUserGroup(), userGroupSelectionModel, false, () -> {
             Set<UserGroupDTO> userGroups = userGroupTableWrapper.getSelectionModel().getSelectedSet();
             if (userGroups == null || userGroups.isEmpty()) {
                 Window.alert(stringMessages.youHaveToSelectAUserGroup());

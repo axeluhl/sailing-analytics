@@ -28,7 +28,6 @@ import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
-import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
@@ -110,18 +109,9 @@ public class MarkPropertiesPanel extends FlowPanel {
             }
         };
         createMarkPropertiesTable(userService);
-        buttonAndFilterPanel.addUnsecuredAction(stringMessages.refresh(), new Command() {
-            @Override
-            public void execute() {
-                loadMarkProperties();
-            }
-        });
-        buttonAndFilterPanel.addCreateAction(stringMessages.add(), new Command() {
-            @Override
-            public void execute() {
-                openEditMarkPropertiesDialog(new MarkPropertiesDTO());
-            }
-        });
+        buttonAndFilterPanel.addUnsecuredAction(stringMessages.refresh(), this::loadMarkProperties);
+        buttonAndFilterPanel.addCreateAction(stringMessages.add(),
+                () -> openEditMarkPropertiesDialog(new MarkPropertiesDTO()));
         buttonAndFilterPanel.addRemoveAction(stringMessages.remove(), refreshableSelectionModel, true,
                 () -> removeMarkProperties(refreshableSelectionModel.getSelectedSet().stream()
                         .map(markPropertiesDTO -> markPropertiesDTO.getUuid()).collect(Collectors.toList())));
