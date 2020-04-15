@@ -238,10 +238,6 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                         holder.race_scheduled.setVisibility(View.GONE);
                         holder.race_unscheduled.setVisibility(View.VISIBLE);
                     }
-                } else {
-                    if (holder.race_name != null) {
-                        holder.race_name.setTextColor(ThemeHelper.getColor(getContext(), R.attr.white));
-                    }
                 }
             }
 
@@ -393,7 +389,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             holder.race_unscheduled.setVisibility(View.GONE);
         }
         if (holder.race_name != null) {
-            holder.race_name.setTextColor(ThemeHelper.getColor(getContext(), R.attr.sap_light_gray));
+            holder.race_name.setTextColor(ThemeHelper.getColor(getContext(), R.attr.black));
         }
         if (holder.has_dependent_races != null) {
             holder.has_dependent_races.setVisibility(View.GONE);

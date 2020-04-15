@@ -10,38 +10,48 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_alignParentRight="true"
+        android:background="@color/white"
         android:gravity="center_vertical"
         android:orientation="vertical">
 
-        <RelativeLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:orientation="vertical"
+            android:gravity="center_vertical"
+            android:background="?attr/selectableItemBackground"
+            android:layout_height="match_parent">
 
-            <ImageView
-                android:id="@+id/protest_image"
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/protest_image"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/default_margin"
+                    android:layout_marginRight="@dimen/default_margin"
+                    tools:src="@drawable/flag_bravo_48dp" />
+
+                <ImageView
+                    android:id="@+id/protest_warning_image"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:src="@drawable/ic_warning_yellow"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+            </RelativeLayout>
+
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="@dimen/default_margin"
-                android:layout_marginRight="@dimen/default_margin"
-                tools:src="@drawable/flag_bravo_48dp" />
+                android:layout_gravity="center_horizontal"
+                android:paddingTop="3dp"
+                android:text="@string/protest_time"
+                android:textAppearance="?attr/textPanelCaption" />
 
-            <ImageView
-                android:id="@+id/protest_warning_image"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:src="@drawable/ic_warning_yellow"
-                android:visibility="gone"
-                tools:visibility="visible" />
-        </RelativeLayout>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:paddingTop="3dp"
-            android:text="@string/protest_time"
-            android:textAppearance="?attr/textPanelCaption" />
+        </LinearLayout>
     </LinearLayout>
 
     <ImageView
