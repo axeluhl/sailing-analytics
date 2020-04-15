@@ -40,12 +40,17 @@ import com.sap.sailing.android.shared.util.BroadcastManager;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
+import com.sap.sailing.domain.abstractlog.race.state.RaceState;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.ConfigurableStartModeFlagRacingProcedure;
 import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.base.racegroup.RaceGroupSeriesFleet;
+import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -59,6 +64,7 @@ import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesRegattaConfigurationLoader;
+import com.sap.sailing.racecommittee.app.domain.coursedesign.CourseDesign;
 import com.sap.sailing.racecommittee.app.logging.LogEvent;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataType;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeHeader;
@@ -298,13 +304,34 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
     }
 
     @Override
-    public void onRaceListItemSelected(RaceListDataType selectedItem) {
+    public void onRaceListItemSelected(RaceListDataType selectedItem, RaceListDataTypeRace prevRaceItem) {
+
         if (selectedItem instanceof RaceListDataTypeRace) {
             RaceListDataTypeRace selectedElement = (RaceListDataTypeRace) selectedItem;
             selectedElement.setUpdateIndicatorVisible(false);
 
             ManagedRace managedRace = selectedElement.getRace();
             ExLog.i(this, LogEvent.RACE_SELECTED_ELEMENT, managedRace.getId() + " " + managedRace.getStatus());
+            if (prevRaceItem != null && managedRace.getStatus() == RaceLogRaceStatus.UNSCHEDULED) {
+                final ManagedRace prevRace = prevRaceItem.getRace();
+                final RaceState currentRaceState = managedRace.getState();
+                final RacingProcedure racingProcedure = prevRace.getState().getRacingProcedure();
+                currentRaceState.setRacingProcedure(MillisecondsTimePoint.now(), racingProcedure.getType());
+                final RacingProcedure newRacingProcedure = currentRaceState.getRacingProcedure();
+                if (racingProcedure instanceof ConfigurableStartModeFlagRacingProcedure && newRacingProcedure instanceof ConfigurableStartModeFlagRacingProcedure){
+                    ConfigurableStartModeFlagRacingProcedure configurableFlag = (ConfigurableStartModeFlagRacingProcedure)racingProcedure;
+                    ((ConfigurableStartModeFlagRacingProcedure)newRacingProcedure).setStartModeFlag(MillisecondsTimePoint.now(), configurableFlag.getStartModeFlag());
+                }
+                final CourseBase courseDesign = prevRace.getCourseDesign();
+                if (courseDesign != null) {
+                    currentRaceState.setCourseDesign(MillisecondsTimePoint.now(), courseDesign, CourseDesignerMode.BY_NAME);
+                }
+
+                final Wind windFix = prevRace.getState().getWindFix();
+                if (windFix != null) {
+                    currentRaceState.setWindFix(MillisecondsTimePoint.now(), windFix, preferences.isMagnetic());
+                }
+            }
             onRaceItemClicked(managedRace);
         } else if (selectedItem instanceof RaceListDataTypeHeader) {
             // This is for logging purposes only!

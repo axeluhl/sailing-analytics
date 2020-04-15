@@ -1,6 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.adapters.racelist;
 
 import com.sap.sailing.racecommittee.app.ui.views.FlagTimeView;
+
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -228,15 +229,15 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                 setDependingText(holder, race);
                 if (state.getStartTime() == null && state.getFinishedTime() == null) {
                     switch (race.getRace().getStatus()) {
-                    case PRESCHEDULED:
-                        holder.panel_right.setVisibility(View.GONE);
-                        holder.race_scheduled.setVisibility(View.GONE);
-                        holder.race_unscheduled.setVisibility(View.GONE);
-                        break;
+                        case PRESCHEDULED:
+                            holder.panel_right.setVisibility(View.GONE);
+                            holder.race_scheduled.setVisibility(View.GONE);
+                            holder.race_unscheduled.setVisibility(View.GONE);
+                            break;
 
-                    default:
-                        holder.race_scheduled.setVisibility(View.GONE);
-                        holder.race_unscheduled.setVisibility(View.VISIBLE);
+                        default:
+                            holder.race_scheduled.setVisibility(View.GONE);
+                            holder.race_unscheduled.setVisibility(View.VISIBLE);
                     }
                 } else {
                     if (holder.race_name != null) {
@@ -289,6 +290,25 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             }
             notifyDataSetChanged();
         }
+    }
+
+
+    public RaceListDataTypeRace getPreviousRaceInSeries(RaceListDataType selectedItem) {
+        List<RaceListDataType> races = getShownViewItems(new ArrayList<>(mAllRaces));
+        int index = races.indexOf(selectedItem);
+        if (index >= 1 && selectedItem instanceof RaceListDataTypeRace) {
+            RaceListDataTypeRace currentRace = (RaceListDataTypeRace) selectedItem;
+            for (int i = index; i >= 0; i--) {
+                final RaceListDataType prevItem = races.get(i);
+                if (prevItem instanceof RaceListDataTypeRace) {
+                    RaceListDataTypeRace prevRace = (RaceListDataTypeRace) prevItem;
+                    if (prevRace.getFleet() == currentRace.getFleet()) {
+                        return prevRace;
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     /**
@@ -448,20 +468,20 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                     if (isNext != 0) {
                         flag = FlagsResources.getFlagDrawable(getContext(), currentFlag.name(), flag_size);
                         switch (isNext) {
-                        case 1:
-                            if (nextPole.isDisplayed()) {
+                            case 1:
+                                if (nextPole.isDisplayed()) {
+                                    arrow = BitmapHelper.getAttrDrawable(getContext(), R.attr.arrow_up);
+                                } else {
+                                    arrow = BitmapHelper.getAttrDrawable(getContext(), R.attr.arrow_down);
+                                }
+                                break;
+
+                            case 2:
                                 arrow = BitmapHelper.getAttrDrawable(getContext(), R.attr.arrow_up);
-                            } else {
-                                arrow = BitmapHelper.getAttrDrawable(getContext(), R.attr.arrow_down);
-                            }
-                            break;
+                                break;
 
-                        case 2:
-                            arrow = BitmapHelper.getAttrDrawable(getContext(), R.attr.arrow_up);
-                            break;
-
-                        default:
-                            ExLog.i(getContext(), TAG, "unknown flag");
+                            default:
+                                ExLog.i(getContext(), TAG, "unknown flag");
                         }
                         timer = TimeUtils.formatDuration(now, poleState.getNextStateValidFrom());
                     }
