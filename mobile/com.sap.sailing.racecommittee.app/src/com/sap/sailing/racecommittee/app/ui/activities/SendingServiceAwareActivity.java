@@ -194,8 +194,7 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity
     @Override
     public void onException(Exception exception) {
         if (exception == null || exception instanceof UnauthorizedException) {
-            final Context context = this;
-            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle(getString(R.string.sending_exception_title));
             builder.setMessage(getString(R.string.sending_exception_message));
             builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
