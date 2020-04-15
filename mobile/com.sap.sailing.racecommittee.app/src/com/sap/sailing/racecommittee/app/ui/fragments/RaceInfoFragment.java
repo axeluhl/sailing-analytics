@@ -43,22 +43,18 @@ public class RaceInfoFragment extends RaceFragment {
         infoFragmentChooser = RaceInfoFragmentChooser.on(getRaceState().getRacingProcedure().getType());
 
         // Initial fragment selection...
-
-        // TODO: why at all is the fragment managing other fragments. Shouldn't this be done by the containing activity?
-        switchToInfoFragment();
     }
 
-    public void onResume() {
-        super.onResume();
+    public void onStart() {
+        super.onStart();
         getRace().getState().addChangedListener(stateChangedListener);
         switchToInfoFragment();
     }
 
     @Override
     public void onStop() {
-        // TODO: If the listener is added on resume it maybe should be removed onPause?!
-        getRace().getState().removeChangedListener(stateChangedListener);
         super.onStop();
+        getRace().getState().removeChangedListener(stateChangedListener);
     }
 
     protected void switchToInfoFragment() {
