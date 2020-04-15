@@ -65,7 +65,7 @@ public class MockConnectivityParamsServiceFinderFactory implements TypeBasedServ
                     return new com.sap.sailing.domain.swisstimingadapter.persistence.impl.SwissTimingConnectivityParamsHandler(
                             MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory),
                             MongoRegattaLogStoreFactory.INSTANCE.getMongoRegattaLogStore(mongoObjectFactory, domainObjectFactory),
-                            swissTimingDomainFactory);
+                            swissTimingDomainFactory, securityServiceMock);
                 case SwissTimingReplayConnectivityParameters.TYPE:
                     return new SwissTimingReplayConnectivityParamsHandler(
                             MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory),

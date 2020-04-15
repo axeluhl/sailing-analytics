@@ -28,7 +28,6 @@ import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionUtils;
-import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.util.HttpUrlConnectionHelper;
 
 /**
@@ -158,11 +157,6 @@ public class TracTracConnectivityParamsHandler extends AbstractRaceTrackingConne
                 /* live URI */ null, /* stored URI */ null, // we mainly want to enable the user to list the event's races again in case they are removed; live/stored stuff comes from the tracking params
                 params.getCourseDesignUpdateURI()==null?null:params.getCourseDesignUpdateURI().toString(), params.getTracTracUsername(), params.getTracTracPassword());
         tractracMongoObjectFactory.updateTracTracConfiguration(tracTracConfiguration);
-        final OwnershipAnnotation existingOwnership = securityService.getOwnership(tracTracConfiguration.getIdentifier());
-        if (existingOwnership == null || existingOwnership.getAnnotation() == null ||
-                (existingOwnership.getAnnotation().getTenantOwner() == null &&
-                    existingOwnership.getAnnotation().getUserOwner() == null)) {
-            securityService.setDefaultOwnership(tracTracConfiguration.getIdentifier(), tracTracConfiguration.getName());
-        }
+        securityService.setDefaultOwnershipIfNotSet(tracTracConfiguration.getIdentifier());
     }
 }

@@ -17,7 +17,6 @@ import com.sap.sailing.domain.tracking.impl.AbstractRaceTrackingConnectivityPara
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionUtils;
-import com.sap.sse.security.shared.OwnershipAnnotation;
 
 /**
  * Handles mapping TracTrac connectivity parameters from and to a map with {@link String} keys. The
@@ -99,12 +98,7 @@ public class SwissTimingReplayConnectivityParamsHandler extends AbstractRaceTrac
             final SwissTimingArchiveConfiguration swissTimingArchiveConfiguration = SwissTimingFactory.INSTANCE
                     .createSwissTimingArchiveConfiguration(result.getSwissTimingUrl(), creatorName);
             SwissTimingAdapterPersistence.INSTANCE.updateSwissTimingArchiveConfiguration(swissTimingArchiveConfiguration);
-            final OwnershipAnnotation existingOwnership = securityService.getOwnership(swissTimingArchiveConfiguration.getIdentifier());
-            if (existingOwnership == null || existingOwnership.getAnnotation() == null ||
-                    (existingOwnership.getAnnotation().getTenantOwner() == null &&
-                        existingOwnership.getAnnotation().getUserOwner() == null)) {
-                securityService.setDefaultOwnership(swissTimingArchiveConfiguration.getIdentifier(), swissTimingArchiveConfiguration.getName());
-            }
+            securityService.setDefaultOwnershipIfNotSet(swissTimingArchiveConfiguration.getIdentifier());
         }
         return result;
     }

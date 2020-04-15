@@ -16,15 +16,19 @@ import com.sap.sailing.domain.swisstimingadapter.Competitor;
 import com.sap.sailing.domain.swisstimingadapter.CrewMember;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
+import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.swisstimingadapter.impl.CompetitorWithID;
 import com.sap.sailing.domain.swisstimingadapter.impl.CompetitorWithoutID;
 import com.sap.sailing.domain.swisstimingadapter.impl.CrewMemberImpl;
 import com.sap.sailing.domain.swisstimingadapter.impl.StartListImpl;
 import com.sap.sailing.domain.swisstimingadapter.impl.SwissTimingTrackingConnectivityParameters;
+import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterPersistence;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceTrackingConnectivityParametersHandler;
 import com.sap.sse.common.TypeBasedServiceFinder;
+import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.SessionUtils;
 
 /**
  * Handles mapping TracTrac connectivity parameters from and to a map with {@link String} keys. The
@@ -57,16 +61,20 @@ public class SwissTimingConnectivityParamsHandler extends AbstractRaceTrackingCo
     private static final String UPDATE_URL = "updateURL";
     private static final String UPDATE_USERNAME = "updateUsername";
     private static final String UPDATE_PASSWORD = "updatePassword";
+    private static final String EVENT_NAME = "eventName";
+    private static final String MANAGE2SAIL_EVENT_URL = "manage2SailEventUrl";
     private final RaceLogStore raceLogStore;
     private final RegattaLogStore regattaLogStore;
     private final DomainFactory domainFactory;
     private final SwissTimingFactory swissTimingFactory;
+    private final SecurityService securityService;
 
-    public SwissTimingConnectivityParamsHandler(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, DomainFactory domainFactory) {
+    public SwissTimingConnectivityParamsHandler(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, DomainFactory domainFactory, SecurityService securityService) {
         super();
         this.raceLogStore = raceLogStore;
         this.regattaLogStore = regattaLogStore;
         this.domainFactory = domainFactory;
+        this.securityService = securityService;
         this.swissTimingFactory = SwissTimingFactory.INSTANCE;
     }
 
@@ -84,6 +92,8 @@ public class SwissTimingConnectivityParamsHandler extends AbstractRaceTrackingCo
         result.put(UPDATE_URL, stParams.getUpdateURL());
         result.put(UPDATE_USERNAME, stParams.getUpdateUsername());
         result.put(UPDATE_PASSWORD, stParams.getUpdatePassword());
+        result.put(EVENT_NAME, stParams.getEventName());
+        result.put(MANAGE2SAIL_EVENT_URL, stParams.getManage2SailEventUrl());
         addWindTrackingParameters(stParams, result);
         return result;
     }
@@ -184,7 +194,9 @@ public class SwissTimingConnectivityParamsHandler extends AbstractRaceTrackingCo
                 (boolean) map.get(USE_INTERNAL_MARK_PASSING_ALGORITHM), isTrackWind(map), isCorrectWindDirectionByMagneticDeclination(map),
                 (String) map.get(UPDATE_URL),
                 (String) map.get(UPDATE_USERNAME),
-                (String) map.get(UPDATE_PASSWORD));
+                (String) map.get(UPDATE_PASSWORD),
+                (String) map.get(EVENT_NAME),
+                (String) map.get(MANAGE2SAIL_EVENT_URL));
     }
 
     @Override
@@ -209,8 +221,15 @@ public class SwissTimingConnectivityParamsHandler extends AbstractRaceTrackingCo
                 stParams.getDelayToLiveInMillis(), swissTimingFactory, domainFactory, raceLogStore, regattaLogStore,
                 stParams.isUseInternalMarkPassingAlgorithm(), stParams.isTrackWind(),
                 stParams.isCorrectWindDirectionByMagneticDeclination(), stParams.getUpdateURL(),
-                stParams.getUpdateUsername(), stParams.getUpdatePassword());
-        // TODO bug5245: update persistent connector configs
+                stParams.getUpdateUsername(), stParams.getUpdatePassword(), stParams.getEventName(), stParams.getManage2SailEventUrl());
+        final String creatorName = SessionUtils.getPrincipal().toString();
+        if (result.getManage2SailEventUrl() != null) { // legacy records won't have this URL stored in their connectivity params
+            final SwissTimingConfiguration swissTimingConfiguration = SwissTimingFactory.INSTANCE
+                    .createSwissTimingConfiguration(result.getEventName(), result.getManage2SailEventUrl(), result.getHostname(), result.getPort(), result.getUpdateURL(),
+                            result.getUpdateUsername(), result.getUpdatePassword(), creatorName);
+            SwissTimingAdapterPersistence.INSTANCE.updateSwissTimingConfiguration(swissTimingConfiguration);
+            securityService.setDefaultOwnershipIfNotSet(swissTimingConfiguration.getIdentifier());
+        }
         return result;
     }
 }
