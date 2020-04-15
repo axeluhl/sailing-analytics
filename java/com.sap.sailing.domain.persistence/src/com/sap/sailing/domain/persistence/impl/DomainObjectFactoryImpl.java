@@ -1302,7 +1302,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 canBoatsOfCompetitorsChangePerRace = false;
                 createMigratableRegatta = true;
             }
-            
             CompetitorRegistrationType competitorRegistrationType = CompetitorRegistrationType
                     .valueOfOrDefault((String) dbRegatta.get(FieldNames.REGATTA_COMPETITOR_REGISTRATION_TYPE.name()));
             final RankingMetricConstructor rankingMetricConstructor = loadRankingMetricConstructor(dbRegatta);
@@ -1324,7 +1323,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                                 : buoyZoneRadiusInHullLengths,
                         useStartTimeInference == null ? true : useStartTimeInference,
                         controlTrackingFromStartAndFinishTimes == null ? false : controlTrackingFromStartAndFinishTimes,
-                        autoRestartTrackingUponCompetitorSetChange, rankingMetricConstructor, registrationLinkSecret);
+                        autoRestartTrackingUponCompetitorSetChange == null ? false : autoRestartTrackingUponCompetitorSetChange, rankingMetricConstructor, registrationLinkSecret);
             }
             result.setRegattaConfiguration(configuration);
         }
