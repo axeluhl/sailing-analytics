@@ -84,6 +84,7 @@ public class SwissTimingReplayConnectivityParamsHandler extends AbstractRaceTrac
                 stParams.getRaceName(), stParams.getRaceID(), stParams.getBoatClassName(),
                 stParams.isUseInternalMarkPassingAlgorithm(), domainFactory, replayService, raceLogStore,
                 regattaLogStore);
+        // TODO bug5245: update persistent connector configs
         return result;
     }
 }

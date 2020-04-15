@@ -21,6 +21,7 @@ import com.sap.sailing.domain.swisstimingreplayadapter.impl.SwissTimingReplayCon
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParametersHandler;
 import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
 import com.sap.sailing.domain.tractracadapter.impl.RaceTrackingConnectivityParametersImpl;
+import com.sap.sailing.domain.tractracadapter.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.tractracadapter.persistence.impl.TracTracConnectivityParamsHandler;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.interfaces.RacingEventService;
@@ -55,7 +56,8 @@ public class MockConnectivityParamsServiceFinderFactory implements TypeBasedServ
                     return new TracTracConnectivityParamsHandler(
                             MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory),
                             MongoRegattaLogStoreFactory.INSTANCE.getMongoRegattaLogStore(mongoObjectFactory, domainObjectFactory),
-                            TracTracAdapterFactory.INSTANCE.getOrCreateTracTracAdapter(domainObjectFactory.getBaseDomainFactory()).getTracTracDomainFactory(), tractracMongoObjectFactory);
+                            TracTracAdapterFactory.INSTANCE.getOrCreateTracTracAdapter(domainObjectFactory.getBaseDomainFactory()).getTracTracDomainFactory(),
+                            new MongoObjectFactoryImpl(mongoObjectFactory.getDatabase()));
                 case SwissTimingTrackingConnectivityParameters.TYPE:
                     return new com.sap.sailing.domain.swisstimingadapter.persistence.impl.SwissTimingConnectivityParamsHandler(
                             MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory),

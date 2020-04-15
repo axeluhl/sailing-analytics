@@ -210,6 +210,7 @@ public class SwissTimingConnectivityParamsHandler extends AbstractRaceTrackingCo
                 stParams.isUseInternalMarkPassingAlgorithm(), stParams.isTrackWind(),
                 stParams.isCorrectWindDirectionByMagneticDeclination(), stParams.getUpdateURL(),
                 stParams.getUpdateUsername(), stParams.getUpdatePassword());
+        // TODO bug5245: update persistent connector configs
         return result;
     }
 }
