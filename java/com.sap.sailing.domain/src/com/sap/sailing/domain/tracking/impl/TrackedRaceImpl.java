@@ -1567,7 +1567,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         final TimePoint timePoint;
         // normalize the time point to get cache hits when asking for time points that are later than
         // the last time point affected by any event received for this tracked race
-        if (Util.compareToWithNull(unadjustedTimePoint, getTimePointOfNewestEvent(), /* nullIsLess */ true) <= 0) {
+        if (Util.compareToWithNull(unadjustedTimePoint, getTimePointOfNewestEvent(), /* nullIsLess */ false) <= 0) {
             timePoint = unadjustedTimePoint;
         } else {
             timePoint = getTimePointOfNewestEvent();
