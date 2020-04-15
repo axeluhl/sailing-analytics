@@ -67,7 +67,7 @@ public class Activator implements BundleActivator {
                         MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory),
                         MongoRegattaLogStoreFactory.INSTANCE.getMongoRegattaLogStore(mongoObjectFactory,
                                 domainObjectFactory),
-                        domainFactory, tractracMongoObjectFactory);
+                        domainFactory, tractracMongoObjectFactory, securityService);
                 for (TracTracConfiguration trackTrackConfig : tractracDomainObjectFactory.getTracTracConfigurations()) {
                     securityService.migrateOwnership(trackTrackConfig);
                 }

@@ -26,7 +26,9 @@ import com.sap.sailing.domain.tractracadapter.persistence.MongoObjectFactory;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionUtils;
+import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.util.HttpUrlConnectionHelper;
 
 /**
@@ -58,13 +60,17 @@ public class TracTracConnectivityParamsHandler extends AbstractRaceTrackingConne
     private final RegattaLogStore regattaLogStore;
     private final DomainFactory domainFactory;
     private final MongoObjectFactory tractracMongoObjectFactory;
+    private final SecurityService securityService;
 
-    public TracTracConnectivityParamsHandler(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, DomainFactory domainFactory, MongoObjectFactory tractracMongoObjectFactory) {
+    public TracTracConnectivityParamsHandler(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
+            DomainFactory domainFactory, MongoObjectFactory tractracMongoObjectFactory,
+            SecurityService securityService) {
         super();
         this.raceLogStore = raceLogStore;
         this.regattaLogStore = regattaLogStore;
         this.domainFactory = domainFactory;
         this.tractracMongoObjectFactory = tractracMongoObjectFactory;
+        this.securityService = securityService;
     }
 
     @Override
@@ -148,8 +154,15 @@ public class TracTracConnectivityParamsHandler extends AbstractRaceTrackingConne
         final JSONObject paramsJson = (JSONObject) new JSONParser().parse(new InputStreamReader(conn.getInputStream()));
         final String jsonURL = (String) paramsJson.get("eventJSON");
         final String creatorName = SessionUtils.getPrincipal().toString();
-        tractracMongoObjectFactory.updateTracTracConfiguration(new TracTracConfigurationImpl(creatorName, params.getTractracRace().getEvent().getName(), jsonURL,
+        final TracTracConfigurationImpl tracTracConfiguration = new TracTracConfigurationImpl(creatorName, params.getTractracRace().getEvent().getName(), jsonURL,
                 /* live URI */ null, /* stored URI */ null, // we mainly want to enable the user to list the event's races again in case they are removed; live/stored stuff comes from the tracking params
-                params.getCourseDesignUpdateURI()==null?null:params.getCourseDesignUpdateURI().toString(), params.getTracTracUsername(), params.getTracTracPassword()));
+                params.getCourseDesignUpdateURI()==null?null:params.getCourseDesignUpdateURI().toString(), params.getTracTracUsername(), params.getTracTracPassword());
+        tractracMongoObjectFactory.updateTracTracConfiguration(tracTracConfiguration);
+        final OwnershipAnnotation existingOwnership = securityService.getOwnership(tracTracConfiguration.getIdentifier());
+        if (existingOwnership == null || existingOwnership.getAnnotation() == null ||
+                (existingOwnership.getAnnotation().getTenantOwner() == null &&
+                    existingOwnership.getAnnotation().getUserOwner() == null)) {
+            securityService.setDefaultOwnership(tracTracConfiguration.getIdentifier(), tracTracConfiguration.getName());
+        }
     }
 }

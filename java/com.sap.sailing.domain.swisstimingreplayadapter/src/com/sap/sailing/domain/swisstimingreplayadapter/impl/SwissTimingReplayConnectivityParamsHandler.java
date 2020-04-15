@@ -8,13 +8,16 @@ import java.util.Map;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
+import com.sap.sailing.domain.swisstimingadapter.SwissTimingArchiveConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterPersistence;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayService;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceTrackingConnectivityParametersHandler;
 import com.sap.sse.common.TypeBasedServiceFinder;
+import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionUtils;
+import com.sap.sse.security.shared.OwnershipAnnotation;
 
 /**
  * Handles mapping TracTrac connectivity parameters from and to a map with {@link String} keys. The
@@ -38,14 +41,16 @@ public class SwissTimingReplayConnectivityParamsHandler extends AbstractRaceTrac
     private final RegattaLogStore regattaLogStore;
     private final DomainFactory domainFactory;
     private final SwissTimingReplayService replayService;
+    private final SecurityService securityService;
 
     public SwissTimingReplayConnectivityParamsHandler(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
-            DomainFactory domainFactory, SwissTimingReplayService replayService) {
+            DomainFactory domainFactory, SwissTimingReplayService replayService, SecurityService securityService) {
         super();
         this.raceLogStore = raceLogStore;
         this.regattaLogStore = regattaLogStore;
         this.domainFactory = domainFactory;
         this.replayService = replayService;
+        this.securityService = securityService;
     }
 
     @Override
@@ -91,8 +96,15 @@ public class SwissTimingReplayConnectivityParamsHandler extends AbstractRaceTrac
                 raceLogStore, regattaLogStore);
         final String creatorName = SessionUtils.getPrincipal().toString();
         if (result.getSwissTimingUrl() != null) { // legacy records won't have this URL stored in their connectivity params
-            SwissTimingAdapterPersistence.INSTANCE.updateSwissTimingArchiveConfiguration(SwissTimingFactory.INSTANCE
-                    .createSwissTimingArchiveConfiguration(result.getSwissTimingUrl(), creatorName));
+            final SwissTimingArchiveConfiguration swissTimingArchiveConfiguration = SwissTimingFactory.INSTANCE
+                    .createSwissTimingArchiveConfiguration(result.getSwissTimingUrl(), creatorName);
+            SwissTimingAdapterPersistence.INSTANCE.updateSwissTimingArchiveConfiguration(swissTimingArchiveConfiguration);
+            final OwnershipAnnotation existingOwnership = securityService.getOwnership(swissTimingArchiveConfiguration.getIdentifier());
+            if (existingOwnership == null || existingOwnership.getAnnotation() == null ||
+                    (existingOwnership.getAnnotation().getTenantOwner() == null &&
+                        existingOwnership.getAnnotation().getUserOwner() == null)) {
+                securityService.setDefaultOwnership(swissTimingArchiveConfiguration.getIdentifier(), swissTimingArchiveConfiguration.getName());
+            }
         }
         return result;
     }

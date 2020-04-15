@@ -2247,13 +2247,13 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public void migrateOwnership(WithQualifiedObjectIdentifier identifier) {
-        migrateOwnership(identifier.getIdentifier(), identifier.getName());
+    public boolean migrateOwnership(WithQualifiedObjectIdentifier identifier) {
+        return migrateOwnership(identifier.getIdentifier(), identifier.getName());
     }
 
     @Override
-    public void migrateOwnership(final QualifiedObjectIdentifier identifier, final String displayName) {
-        this.migrateOwnership(identifier, null, /* setServerGroupAsOwner */ true, displayName);
+    public boolean migrateOwnership(final QualifiedObjectIdentifier identifier, final String displayName) {
+        return this.migrateOwnership(identifier, null, /* setServerGroupAsOwner */ true, displayName);
     }
     
     @Override
