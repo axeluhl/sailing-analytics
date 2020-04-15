@@ -9,3 +9,7 @@ Instead, we subscribe a Lambda function on the ``Support-Mail`` SNS topic that p
 The role that is created to execute the Lambda needs to have a policy set that can access SES and write logs. See also https://github.com/sirceljm/AWS-SES-simple-mail-forward/blob/master/mail_forward_policy.json.
 
 The relevant files have been committed to our git as ``configuration/mail_forward.js`` for the Lambda's code, and as ``configuration/mail_forward_policy.json`` for the security policy for the IAM role used for the Lambda.
+
+## Changing the List of Recipients
+
+Go to [https://eu-west-1.console.aws.amazon.com/lambda/home?region=eu-west-1#/functions/email-forward?tab=configuration](https://eu-west-1.console.aws.amazon.com/lambda/home?region=eu-west-1#/functions/email-forward?tab=configuration) and edit the ``to_address`` environment variable accordingly.
