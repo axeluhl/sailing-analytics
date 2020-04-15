@@ -174,6 +174,7 @@ public class TrackedRacesListPO extends PageArea {
 
     private void removeSelectedTrackedRacesAndWaitForAjaxRequests() {
         this.removeButton.click();
+        this.waitForAlertAndAccept();
         waitForAjaxRequests();
     }
     
