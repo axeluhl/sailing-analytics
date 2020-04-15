@@ -311,14 +311,8 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
     }
 
     private String calcCountdown(TimePoint timePoint) {
-        Calendar now = (Calendar) mCalendar.clone();
-        now.setTime(timePoint.asDate());
-
         RacingActivity activity = (RacingActivity) getActivity();
-        Calendar startTime = (Calendar) mCalendar.clone();
-        startTime.setTime(activity.getStartTime().asDate());
-
-        return TimeUtils.calcDuration(TimeUtils.floorTime(now), TimeUtils.floorTime(startTime));
+        return TimeUtils.formatDuration(activity.getStartTime(), timePoint, true);
     }
 
     private void openFragment(RaceFragment fragment) {
