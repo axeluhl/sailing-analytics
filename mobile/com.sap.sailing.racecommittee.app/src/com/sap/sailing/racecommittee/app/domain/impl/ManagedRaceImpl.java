@@ -6,6 +6,7 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishedTimeFinder
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -54,7 +55,7 @@ public class ManagedRaceImpl implements ManagedRace {
      *                              the index
      *                              is of the race column in which this cell lies.
      *                              <p>
-     *                              <p>
+     *
      *                              Indices returned by this method start with zero, meaning the first race column in the series.
      *                              This
      *                              corresponds to what one would get by asking {@link Util#indexOf(Iterable, Object)
@@ -147,7 +148,7 @@ public class ManagedRaceImpl implements ManagedRace {
 
     @Override
     public Map<Competitor, Boat> getCompetitorsAndBoats() {
-        return competitorsAndBoats;
+        return Collections.unmodifiableMap(new HashMap<>(competitorsAndBoats));
     }
 
     @Override
