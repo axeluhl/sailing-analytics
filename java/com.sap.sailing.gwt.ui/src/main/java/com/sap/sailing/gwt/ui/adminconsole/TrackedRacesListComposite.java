@@ -143,7 +143,6 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
             });
             btnExport.setEnabled(false);
             trackedRacesButtonPanel.add(btnExport);
-
             btnRemoveRace = new SelectedElementsCountingButton<RaceDTO>(stringMessages.remove(),
                     refreshableSelectionModel,
                     e -> e.getRegattaName() + " - " + e.getName(),
