@@ -56,7 +56,7 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.flag_list, container, false);
 
-        ListView listView = (ListView) view.findViewById(R.id.listView);
+        ListView listView = view.findViewById(R.id.listView);
         if (listView != null) {
             mAdapter = new MoreFlagsAdapter(requireContext(), this);
             listView.setAdapter(mAdapter);

@@ -57,7 +57,6 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -172,22 +171,12 @@ public class StartTimeFragment extends BaseFragment
 
             mAbsoluteButton = view.findViewById(R.id.absolute);
             if (mAbsoluteButton != null) {
-                mAbsoluteButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        showTab(ABSOLUTE);
-                    }
-                });
+                mAbsoluteButton.setOnClickListener(v -> showTab(ABSOLUTE));
             }
 
             mRelativeButton = view.findViewById(R.id.relative);
             if (mRelativeButton != null) {
-                mRelativeButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        showTab(RELATIVE);
-                    }
-                });
+                mRelativeButton.setOnClickListener(v -> showTab(RELATIVE));
             }
         }
 
@@ -361,27 +350,17 @@ public class StartTimeFragment extends BaseFragment
             mTimeOffset.setWrapSelectorWheel(false);
             mTimeOffset.setValue((mStartTimeOffset == null) ? preferences.getDependentRacesOffset()
                     : (int) mStartTimeOffset.asMinutes());
-            mTimeOffset.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
-                @Override
-                public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
-                    activateSetTime(RELATIVE);
-                }
-            });
+            mTimeOffset.setOnValueChangedListener((picker, oldVal, newVal) -> activateSetTime(RELATIVE));
         }
 
         List<ManagedRace> sortedRaces = new ArrayList<>(mDataStore.getRaces());
-        Collections.sort(sortedRaces, new Comparator<ManagedRace>() {
-            @Override
-            public int compare(ManagedRace lhs, ManagedRace rhs) {
-                return new NaturalComparator().compare(lhs.getId(), rhs.getId());
-            }
-        });
+        Collections.sort(sortedRaces, (lhs, rhs) -> new NaturalComparator().compare(lhs.getId(), rhs.getId()));
 
         for (ManagedRace race : sortedRaces) {
             RaceGroupSeriesFleet container = new RaceGroupSeriesFleet(race);
 
             if (!mGroupHeaders.containsKey(container)) {
-                mGroupHeaders.put(container, new LinkedList<ManagedRace>());
+                mGroupHeaders.put(container, new LinkedList<>());
             }
             final List<ManagedRace> managedRaces = mGroupHeaders.get(container);
             if (managedRaces != null) {
