@@ -31,6 +31,7 @@ public class RaceEventSender implements RaceLogChangedListener {
         ExLog.i(service, TAG, "RaceEventSender.eventAdded: " + event.getShortInfo());
         JSONObject serializedEvent = serializer.serialize(event);
         try {
+            //TODO Log
             service.startService(EventSendingServiceUtil.createEventIntent(service, race, event.getId(),
                     serializedEvent.toJSONString(), RaceLogEventsCallback.class));
         } catch (UnsupportedEncodingException e) {
