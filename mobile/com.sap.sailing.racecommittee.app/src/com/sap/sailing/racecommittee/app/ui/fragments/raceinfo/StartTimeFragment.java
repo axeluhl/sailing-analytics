@@ -1,12 +1,10 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
 import android.app.DatePickerDialog;
-import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
@@ -131,21 +129,23 @@ public class StartTimeFragment extends BaseFragment
     }
 
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        mDataStore = DataManager.create(context).getDataStore();
-        final Serializable id = mDataStore.getEventUUID();
-        if (id != null) {
-            mEvent = mDataStore.getEvent(id);
-        }
-    }
-
-    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mDataStore = DataManager.create(requireContext()).getDataStore();
         final Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
+        final Serializable id = mDataStore.getEventUUID();
+        if (id != null) {
+            mEvent = mDataStore.getEvent(id);
+            if (calendar.before(null)) {
+                //Today is before the start date of the event
+                calendar.setTime(mEvent.getStartDate().asDate());
+            } else if (calendar.after(mEvent.getEndDate().asDate())) {
+                //Today is after the end date of the event
+                calendar.setTime(mEvent.getEndDate().asDate());
+            }
+        }
         mStartTime = new MillisecondsTimePoint(calendar.getTime());
     }
 
@@ -225,12 +225,12 @@ public class StartTimeFragment extends BaseFragment
             }
         };
 
-        final View rootView = getView();
-        if (rootView != null && getArguments() != null) {
-            View header = rootView.findViewById(R.id.header);
-            View back = rootView.findViewById(R.id.header_back);
-            View text = rootView.findViewById(R.id.header_text);
-            View sync = rootView.findViewById(R.id.sync_to_minute);
+        final View view = getView();
+        if (view != null && getArguments() != null) {
+            View header = view.findViewById(R.id.header);
+            View back = view.findViewById(R.id.header_back);
+            View text = view.findViewById(R.id.header_text);
+            View sync = view.findViewById(R.id.sync_to_minute);
             switch (getArguments().getInt(START_MODE, START_MODE_PRESETUP)) {
                 case START_MODE_PLANNED:
                     if (back != null) {
@@ -695,7 +695,7 @@ public class StartTimeFragment extends BaseFragment
                 }
                 break;
             case R.id.start_date_button:
-                showDatePickerDialog();
+                TimeUtils.showDatePickerDialog(getChildFragmentManager(), mStartTime, mEvent);
                 break;
         }
     }
@@ -706,27 +706,6 @@ public class StartTimeFragment extends BaseFragment
         mListenerIgnore = true;
         updateTimePickerAndSeconds();
         activateSetTime(ABSOLUTE);
-    }
-
-    private void showDatePickerDialog() {
-        final Calendar calendar = Calendar.getInstance();
-        calendar.setTime(mStartTime.asDate());
-        final int year = calendar.get(Calendar.YEAR);
-        final int month = calendar.get(Calendar.MONTH);
-        final int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
-        Long minDate = null, maxDate = null;
-        if (mEvent != null) {
-            final TimePoint startDate = mEvent.getStartDate();
-            final TimePoint endDate = mEvent.getEndDate();
-            if (startDate != null) {
-                minDate = startDate.asMillis();
-            }
-            if (endDate != null) {
-                maxDate = endDate.asMillis();
-            }
-        }
-        final DialogFragment fragment = DatePickerFragment.newInstance(year, month, dayOfMonth, minDate, maxDate);
-        fragment.show(getChildFragmentManager(), DatePickerFragment.TAG);
     }
 
     @Override
