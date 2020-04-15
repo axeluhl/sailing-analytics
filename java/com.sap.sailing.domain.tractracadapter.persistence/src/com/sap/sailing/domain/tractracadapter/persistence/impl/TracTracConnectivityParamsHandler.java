@@ -1,10 +1,17 @@
 package com.sap.sailing.domain.tractracadapter.persistence.impl;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
@@ -13,10 +20,14 @@ import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceTrackingConnectivityParametersHandler;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.impl.RaceTrackingConnectivityParametersImpl;
+import com.sap.sailing.domain.tractracadapter.impl.TracTracConfigurationImpl;
 import com.sap.sailing.domain.tractracadapter.impl.TracTracRaceTrackerImpl;
+import com.sap.sailing.domain.tractracadapter.persistence.MongoObjectFactory;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.security.SessionUtils;
+import com.sap.sse.util.HttpUrlConnectionHelper;
 
 /**
  * Handles mapping TracTrac connectivity parameters from and to a map with {@link String} keys. The
@@ -46,12 +57,14 @@ public class TracTracConnectivityParamsHandler extends AbstractRaceTrackingConne
     private final RaceLogStore raceLogStore;
     private final RegattaLogStore regattaLogStore;
     private final DomainFactory domainFactory;
+    private final MongoObjectFactory tractracMongoObjectFactory;
 
-    public TracTracConnectivityParamsHandler(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, DomainFactory domainFactory) {
+    public TracTracConnectivityParamsHandler(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, DomainFactory domainFactory, MongoObjectFactory tractracMongoObjectFactory) {
         super();
         this.raceLogStore = raceLogStore;
         this.regattaLogStore = regattaLogStore;
         this.domainFactory = domainFactory;
+        this.tractracMongoObjectFactory = tractracMongoObjectFactory;
     }
 
     @Override
@@ -121,6 +134,22 @@ public class TracTracConnectivityParamsHandler extends AbstractRaceTrackingConne
                 ttParams.getRaceVisibility(), ttParams.isTrackWind(),
                 ttParams.isCorrectWindDirectionByMagneticDeclination(), ttParams.isPreferReplayIfAvailable(),
                 ttParams.getTimeoutInMillis(), ttParams.isUseOfficialEventsToUpdateRaceLog());
-        return result;     
+        updatePersistentTracTracConfiguration(result);
+        return result;
+    }
+
+    private void updatePersistentTracTracConfiguration(RaceTrackingConnectivityParametersImpl params)
+            throws MalformedURLException, IOException, ParseException {
+        final String EVENT_MANAGER_HOSTNAME_PREFIX = "em.";
+        final URL paramsJsonUrl = new URL(params.getParamURL().getProtocol(),
+                params.getParamURL().getHost().startsWith(EVENT_MANAGER_HOSTNAME_PREFIX) ? params.getParamURL().getHost() : EVENT_MANAGER_HOSTNAME_PREFIX+params.getParamURL().getHost(),
+                        "/events/"+params.getTractracRace().getEvent().getId().toString()+"/races/"+params.getTractracRace().getId().toString()+".json");
+        final URLConnection conn = HttpUrlConnectionHelper.redirectConnection(paramsJsonUrl);
+        final JSONObject paramsJson = (JSONObject) new JSONParser().parse(new InputStreamReader(conn.getInputStream()));
+        final String jsonURL = (String) paramsJson.get("eventJSON");
+        final String creatorName = SessionUtils.getPrincipal().toString();
+        tractracMongoObjectFactory.updateTracTracConfiguration(new TracTracConfigurationImpl(creatorName, params.getTractracRace().getEvent().getName(), jsonURL,
+                /* live URI */ null, /* stored URI */ null, // we mainly want to enable the user to list the event's races again in case they are removed; live/stored stuff comes from the tracking params
+                params.getCourseDesignUpdateURI()==null?null:params.getCourseDesignUpdateURI().toString(), params.getTracTracUsername(), params.getTracTracPassword()));
     }
 }

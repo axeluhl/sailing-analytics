@@ -55,7 +55,7 @@ public class MockConnectivityParamsServiceFinderFactory implements TypeBasedServ
                     return new TracTracConnectivityParamsHandler(
                             MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory),
                             MongoRegattaLogStoreFactory.INSTANCE.getMongoRegattaLogStore(mongoObjectFactory, domainObjectFactory),
-                            TracTracAdapterFactory.INSTANCE.getOrCreateTracTracAdapter(domainObjectFactory.getBaseDomainFactory()).getTracTracDomainFactory());
+                            TracTracAdapterFactory.INSTANCE.getOrCreateTracTracAdapter(domainObjectFactory.getBaseDomainFactory()).getTracTracDomainFactory(), tractracMongoObjectFactory);
                 case SwissTimingTrackingConnectivityParameters.TYPE:
                     return new com.sap.sailing.domain.swisstimingadapter.persistence.impl.SwissTimingConnectivityParamsHandler(
                             MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory),

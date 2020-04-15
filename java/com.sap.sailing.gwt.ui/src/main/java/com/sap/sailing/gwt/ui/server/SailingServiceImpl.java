@@ -1503,9 +1503,10 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                     TracTracConfigurationWithSecurityDTO config = new TracTracConfigurationWithSecurityDTO(
                             ttConfig.getName(),
                         ttConfig.getJSONURL().toString(),
-                        ttConfig.getLiveDataURI().toString(), ttConfig.getStoredDataURI().toString(),
-                        ttConfig.getCourseDesignUpdateURI().toString(), ttConfig.getTracTracUsername().toString(),
-                            ttConfig.getTracTracPassword().toString(), ttConfig.getCreatorName());
+                        ttConfig.getLiveDataURI()==null?null:ttConfig.getLiveDataURI().toString(),
+                        ttConfig.getStoredDataURI()==null?null:ttConfig.getStoredDataURI().toString(),
+                        ttConfig.getCourseDesignUpdateURI()==null?null:ttConfig.getCourseDesignUpdateURI().toString(),
+                        ttConfig.getTracTracUsername(), ttConfig.getTracTracPassword(), ttConfig.getCreatorName());
                     SecurityDTOUtil.addSecurityInformation(getSecurityService(), config, config.getIdentifier());
                     return config;
                 });
