@@ -40,6 +40,7 @@ public class RestApiApplication extends Application {
         classes.add(CourseConfigurationResource.class);
         classes.add(MasterDataImportResource.class);
         classes.add(RemoteServerReferenceResource.class);
+        classes.add(CompareServersResource.class);
         
         // Exception Mappers
         classes.add(ShiroAuthorizationExceptionTo401ResponseMapper.class);

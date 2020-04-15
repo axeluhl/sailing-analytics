@@ -1,0 +1,133 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <link href='../../../../sailing-fontface-1.0.cache.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+    <title>SAP Sailing Analytics Webservices API Version 1.0</title>
+</head>
+<body>
+<h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
+<h2>URL: /api/v1/compareservers</h2>
+
+<b>Description:</b>
+ <p>Compares two SAP Sailing Analytics servers based on the content.
+  The return contains either the missing leaderboardgroup name or if the
+  leaderboardgroups match on both servers the missing parts within the
+  leaderboardgroups. If the servers contain the exact same content the
+  return will just have the given server URLs in it.</p>
+ <br/>
+<table>
+    <tr>
+        <td>Webservice Type:</td>
+        <td>POST</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>json</td>
+    </tr>
+    <tr>
+        <td>Mandatory parameters:</td>
+        <td>
+            <div>server1, the URL to the first server.</div>
+            <div>server2, the URL to the second server.</div>
+        </td>
+    </tr>
+    <tr>
+        <td>Request method:</td>
+        <td>POST</td>
+    </tr>
+    <tr>
+        <td>Example:</td>
+        <td>curl 127.0.0.1:8889/sailingserver/api/v1/compareservers -d "server1=127.0.0.1:8888" -d "server2=127.0.0.1:8889"<br>
+        produces output:<pre>
+        {
+          "127.0.0.1:8889": [
+            {
+              "name": "EliminationTestEventLeaderboardGroup1"
+            },
+            {
+              "name": "EliminationTestEventLeaderboardGroup2"
+            }
+          ],
+          "127.0.0.1:8888": []
+        }
+        </pre>
+        </td>
+    </tr>
+    <tr>
+        <td>Example:</td>
+        <td>curl 127.0.0.1:8889/sailingserver/api/v1/compareservers -d "server1=127.0.0.1:8888" -d "server2=127.0.0.1:8889"<br>
+        produces output:<pre>
+        {
+          "127.0.0.1:8889": [
+            {
+              "name": "World Cup Series 2019 - Enoshima, Japan",
+              "leaderboards": [
+                {
+                  "name": "WCS 2019 Enoshima - 470 Men",
+                  "series": [
+                    {
+                      "name": "Opening Series",
+                      "fleets": [
+                        {
+                          "name": "Default",
+                          "races": [
+                            {
+                              "name": "R1",
+                              "isMedalRace": false,
+                              "isTracked": false,
+                              "trackedRaceName": null,
+                              "hasGpsData": false,
+                              "hasWindData": false
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "127.0.0.1:8888": [
+            {
+              "name": "World Cup Series 2019 - Enoshima, Japan",
+              "leaderboards": [
+                {
+                  "name": "WCS 2019 Enoshima - 470 Men",
+                  "series": [
+                    {
+                      "name": "Opening Series",
+                      "fleets": [
+                        {
+                          "name": "Default",
+                          "races": [
+                            {
+                              "name": "R1",
+                              "isMedalRace": false,
+                              "isTracked": true,
+                              "regattaName": "WCS 2019 Enoshima - 470 Men",
+                              "trackedRaceName": "R1",
+                              "hasGpsData": true,
+                              "hasWindData": true
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        </pre>
+        </td>
+    </tr>
+</table>
+<div style="height: 1em;"></div>
+<a href="index.html">Back to Web Service Overview</a> 
+</body>
+</html>
