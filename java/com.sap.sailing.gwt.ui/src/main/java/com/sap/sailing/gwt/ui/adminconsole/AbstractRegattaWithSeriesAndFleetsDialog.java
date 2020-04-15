@@ -50,11 +50,9 @@ import com.sap.sse.gwt.client.dialog.DoubleBox;
  * @param <T>
  */
 public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEntryDialogWithDateTimeBox<T> {
-
     protected final SailingServiceAsync sailingService; 
     protected StringMessages stringMessages;
     private final RegattaDTO regatta;
-
     protected final DateAndTimeInput startDateBox;
     protected final DateAndTimeInput endDateBox;
     protected final ListBox scoringSchemeListBox;
@@ -67,11 +65,9 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
     protected final ListEditorComposite<SeriesDTO> seriesEditor;
     private final ListBox rankingMetricListBox;
     protected final ListBox competitorRegistrationTypeListBox;
-
     protected final List<EventDTO> existingEvents;
     private EventDTO defaultEvent;
     private RegistrationLinkWithQRCode registrationLinkWithQRCode;
-
     protected final CaptionPanel secretPanel;
 
     public AbstractRegattaWithSeriesAndFleetsDialog(final SailingServiceAsync sailingService, RegattaDTO regatta,
