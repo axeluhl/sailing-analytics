@@ -27,7 +27,7 @@ public class RaceChangeObserverForAnniversaryDetection extends AbstractTrackedRe
      * Listeners added for {@link TrackedRace}s that need to be cleaned when {@link TrackedRace}s are removed.
      */
     private final Map<TrackedRace, Listener> listeners;
-    private final AnniversaryRaceDeterminator anniversaryRaceDeterminator;
+    private final AnniversaryRaceDeterminatorImpl anniversaryRaceDeterminator;
 
     /**
      * Flag that indicates that the {@link RaceChangeObserverForAnniversaryDetection} is stopped which means that no
@@ -35,7 +35,7 @@ public class RaceChangeObserverForAnniversaryDetection extends AbstractTrackedRe
      */
     private final AtomicBoolean stopped;
 
-    public RaceChangeObserverForAnniversaryDetection(AnniversaryRaceDeterminator anniversaryRaceDeterminator) {
+    public RaceChangeObserverForAnniversaryDetection(AnniversaryRaceDeterminatorImpl anniversaryRaceDeterminator) {
         this.anniversaryRaceDeterminator = anniversaryRaceDeterminator;
         this.listeners = new ConcurrentHashMap<>();
         this.stopped = new AtomicBoolean(false);
@@ -97,7 +97,7 @@ public class RaceChangeObserverForAnniversaryDetection extends AbstractTrackedRe
     }
 
     /**
-     * Updates {@link AnniversaryRaceDeterminator} if not {@link #stopped stopped}.
+     * Updates {@link AnniversaryRaceDeterminatorImpl} if not {@link #stopped stopped}.
      */
     private void fireUpdateIfNotStopped() {
         if (!stopped.get()) {
@@ -107,7 +107,7 @@ public class RaceChangeObserverForAnniversaryDetection extends AbstractTrackedRe
     
     /**
      * Clears all known {@link TrackedRegatta} and {@link TrackedRace} instances and stops to trigger updates of the
-     * given {@link AnniversaryRaceDeterminator}. This is e.g. the case when a server is converted to a replica.
+     * given {@link AnniversaryRaceDeterminatorImpl}. This is e.g. the case when a server is converted to a replica.
      */
     public void stop() {
         stopped.set(true);

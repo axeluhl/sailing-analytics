@@ -1,11 +1,11 @@
 package com.sap.sailing.gwt.ui.client.media.popup;
 
 import com.google.gwt.http.client.URL;
-import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.domain.common.media.MediaTrackWithSecurityDTO;
 
 public class VideoJSWindowPlayer extends PopoutWindowPlayer {
 
-    public VideoJSWindowPlayer(MediaTrack mediaTrack, PlayerCloseListener popupCloseListener) {
+    public VideoJSWindowPlayer(MediaTrackWithSecurityDTO mediaTrack, PlayerCloseListener popupCloseListener) {
         super(mediaTrack, popupCloseListener);
     }
 

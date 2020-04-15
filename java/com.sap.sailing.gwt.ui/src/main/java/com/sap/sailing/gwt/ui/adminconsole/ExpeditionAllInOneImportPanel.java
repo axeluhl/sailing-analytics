@@ -7,7 +7,6 @@ import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.i18n.client.LocaleInfo;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -36,8 +35,11 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
+import com.sap.sse.security.ui.client.UserService;
 
 /**
  * The UI form to upload data for expedition all in one import.
@@ -47,7 +49,7 @@ public class ExpeditionAllInOneImportPanel extends Composite implements Regattas
 
     private final RegattaSuggestOracle regattaOracle;
 
-    public ExpeditionAllInOneImportPanel(final StringMessages stringMessages, final SailingServiceAsync sailingService,
+    public ExpeditionAllInOneImportPanel(final StringMessages stringMessages, final SailingServiceAsync sailingService, final UserService userService,
             final ErrorReporter errorReporter, final RegattaRefresher regattaRefresher) {
         final FormPanel formPanel = new FormPanel();
         final BusyIndicator busyIndicator = new SimpleBusyIndicator();
@@ -153,12 +155,12 @@ public class ExpeditionAllInOneImportPanel extends Composite implements Regattas
             busyIndicator.setBusy(false);
             final ExpeditionDataImportResponse response = ExpeditionDataImportResponse.parse(event.getResults());
             if (response == null) {
-                Window.alert(StringMessages.INSTANCE.unexpectedErrorDuringFileImport());
+                Notification.notify(StringMessages.INSTANCE.unexpectedErrorDuringFileImport(), NotificationType.ERROR);
             } else if (response.hasEventId()) {
                 new ExpeditionAllInOneAfterImportHandler(response.getEventId(), response.getRegattaName(),
                         response.getLeaderboardName(), response.getLeaderboardGroupName(), response.getRaceEntries(),
                         response.getGpsDeviceIds(), response.getSensorDeviceIds(), response.getSensorFixImporterType(),
-                        response.getStartTimes(), sailingService,
+                        response.getStartTimes(), sailingService, userService,
                         errorReporter, stringMessages);
                 regattaRefresher.fillRegattas();
             } else {

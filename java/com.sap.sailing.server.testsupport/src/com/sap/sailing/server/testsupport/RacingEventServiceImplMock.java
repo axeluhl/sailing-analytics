@@ -7,7 +7,7 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.impl.DataImportProgressImpl;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
-import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
+import com.sap.sailing.server.interfaces.DataImportLockWithProgress;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 
 /**

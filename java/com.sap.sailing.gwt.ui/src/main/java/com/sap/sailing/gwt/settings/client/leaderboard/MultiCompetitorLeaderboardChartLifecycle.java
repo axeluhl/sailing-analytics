@@ -42,16 +42,4 @@ public class MultiCompetitorLeaderboardChartLifecycle implements
     public boolean hasSettings() {
         return true;
     }
-
-    @Override
-    public MultiCompetitorLeaderboardChartSettings extractUserSettings(
-            MultiCompetitorLeaderboardChartSettings settings) {
-        return settings;
-    }
-
-    @Override
-    public MultiCompetitorLeaderboardChartSettings extractDocumentSettings(
-            MultiCompetitorLeaderboardChartSettings settings) {
-        return settings;
-    }
 }

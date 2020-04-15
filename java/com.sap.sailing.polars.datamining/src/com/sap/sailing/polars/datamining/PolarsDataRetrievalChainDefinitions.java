@@ -22,7 +22,7 @@ import com.sap.sailing.polars.datamining.data.HasLegPolarContext;
 import com.sap.sailing.polars.datamining.data.HasRaceColumnPolarContext;
 import com.sap.sailing.polars.datamining.shared.PolarDataMiningSettings;
 import com.sap.sailing.polars.datamining.shared.PolarDataMiningSettingsImpl;
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.impl.components.SimpleDataRetrieverChainDefinition;
 import com.sap.sse.datamining.impl.components.SingleDataRetrieverChainDefinition;

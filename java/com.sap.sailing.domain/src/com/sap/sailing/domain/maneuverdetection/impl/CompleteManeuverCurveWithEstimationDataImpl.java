@@ -27,14 +27,15 @@ public class CompleteManeuverCurveWithEstimationDataImpl implements CompleteMane
     private final boolean markPassing;
     private final Position position;
     private final Distance distanceToClosestMark;
-    private final Double deviationOfManeuverAngleFromTargetTackAngleInDegrees;
-    private final Double deviationOfManeuverAngleFromTargetJibeAngleInDegrees;
+    private final Double targetTackAngleInDegrees;
+    private final Double targetJibeAngleInDegrees;
 
     public CompleteManeuverCurveWithEstimationDataImpl(Position position, ManeuverMainCurveWithEstimationData mainCurve,
             ManeuverCurveWithUnstableCourseAndSpeedWithEstimationData curveWithUnstableCourseAndSpeed, Wind wind,
             int tackingCount, int jibingCount, boolean maneuverStartsByRunningAwayFromWind,
             Bearing relativeBearingToNextMarkBeforeManeuver, Bearing relativeBearingToNextMarkAfterManeuver,
-            boolean markPassing, Distance distanceToClosestMark, Double deviationOfManeuverAngleFromTargetTackAngleInDegrees, Double deviationOfManeuverAngleFromTargetJibeAngleInDegrees) {
+            boolean markPassing, Distance distanceToClosestMark, Double targetTackAngleInDegrees,
+            Double targetJibeAngleInDegrees) {
         this.position = position;
         this.mainCurve = mainCurve;
         this.curveWithUnstableCourseAndSpeed = curveWithUnstableCourseAndSpeed;
@@ -46,8 +47,8 @@ public class CompleteManeuverCurveWithEstimationDataImpl implements CompleteMane
         this.relativeBearingToNextMarkAfterManeuver = relativeBearingToNextMarkAfterManeuver;
         this.markPassing = markPassing;
         this.distanceToClosestMark = distanceToClosestMark;
-        this.deviationOfManeuverAngleFromTargetTackAngleInDegrees = deviationOfManeuverAngleFromTargetTackAngleInDegrees;
-        this.deviationOfManeuverAngleFromTargetJibeAngleInDegrees = deviationOfManeuverAngleFromTargetJibeAngleInDegrees;
+        this.targetTackAngleInDegrees = targetTackAngleInDegrees;
+        this.targetJibeAngleInDegrees = targetJibeAngleInDegrees;
     }
 
     @Override
@@ -99,20 +100,20 @@ public class CompleteManeuverCurveWithEstimationDataImpl implements CompleteMane
     public Position getPosition() {
         return position;
     }
-    
+
     @Override
     public Distance getDistanceToClosestMark() {
         return distanceToClosestMark;
     }
-    
+
     @Override
-    public Double getDeviationOfManeuverAngleFromTargetTackAngleInDegrees() {
-        return deviationOfManeuverAngleFromTargetTackAngleInDegrees;
+    public Double getTargetTackAngleInDegrees() {
+        return targetTackAngleInDegrees;
     }
-    
+
     @Override
-    public Double getDeviationOfManeuverAngleFromTargetJibeAngleInDegrees() {
-        return deviationOfManeuverAngleFromTargetJibeAngleInDegrees;
+    public Double getTargetJibeAngleInDegrees() {
+        return targetJibeAngleInDegrees;
     }
 
 }

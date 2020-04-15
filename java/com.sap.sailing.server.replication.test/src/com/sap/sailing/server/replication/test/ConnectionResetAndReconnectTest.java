@@ -21,7 +21,7 @@ import com.rabbitmq.client.ConsumerCancelledException;
 import com.rabbitmq.client.QueueingConsumer;
 import com.rabbitmq.client.ShutdownSignalException;
 import com.sap.sailing.domain.base.Event;
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -58,7 +58,7 @@ public class ConnectionResetAndReconnectTest extends AbstractServerReplicationTe
     static class MasterReplicationDescriptorMock extends ReplicationMasterDescriptorImpl {
 
         public MasterReplicationDescriptorMock(String messagingHost, String hostname, String exchangeName, int servletPort, int messagingPort, Iterable<Replicable<?, ?>> replicables) {
-            super(messagingHost, exchangeName, messagingPort, UUID.randomUUID().toString(), hostname, servletPort, replicables);
+            super(messagingHost, exchangeName, messagingPort, UUID.randomUUID().toString(), hostname, servletPort, /* bearerToken */ null, replicables);
         }
         
         public static MasterReplicationDescriptorMock from(ReplicationMasterDescriptor obj) {

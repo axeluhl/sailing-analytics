@@ -11,6 +11,7 @@ encoding//src/main/java/com/sap/sailing/gwt/ui/client/StringMessages.properties=
 encoding//src/main/java/com/sap/sailing/gwt/ui/client/StringMessages_de.properties=UTF-8
 encoding//src/main/java/com/sap/sailing/gwt/ui/client/StringMessages_es.properties=UTF-8
 encoding//src/main/java/com/sap/sailing/gwt/ui/client/StringMessages_fr.properties=UTF-8
+encoding//src/main/java/com/sap/sailing/gwt/ui/client/StringMessages_it.properties=UTF-8
 encoding//src/main/java/com/sap/sailing/gwt/ui/client/StringMessages_ja.properties=UTF-8
 encoding//src/main/java/com/sap/sailing/gwt/ui/client/StringMessages_pt.properties=UTF-8
 encoding//src/main/java/com/sap/sailing/gwt/ui/client/StringMessages_ru.properties=UTF-8
@@ -18,5 +19,6 @@ encoding//src/main/java/com/sap/sailing/gwt/ui/client/StringMessages_zh.properti
 encoding//src/main/java/com/sap/sailing/gwt/ui/client/media/MediaPlayerManagerComponent.java=utf-8
 encoding//src/main/java/com/sap/sailing/gwt/ui/leaderboard/CompetitorFilterPanel.java=utf-8
 encoding//src/main/java/com/sap/sailing/gwt/ui/leaderboard/LeaderboardEntryPoint.java=utf-8
+encoding//src/main/java/com/sap/sailing/gwt/ui/leaderboard/TagFilterPanel.java=utf-8
 encoding//src/main/java/com/sap/sailing/gwt/ui/raceboard/RaceBoardPanel.java=utf-8
 encoding//src/main/java/com/sap/sailing/gwt/ui/spectator/LeaderboardGroupPanel.java=utf-8

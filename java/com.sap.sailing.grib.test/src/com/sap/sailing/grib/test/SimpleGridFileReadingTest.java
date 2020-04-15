@@ -139,9 +139,9 @@ public class SimpleGridFileReadingTest {
         // alternatively for the 4-6 day forecast: http://tgftp.nws.noaa.gov/SL.us008001/ST.expr/DF.gr2/DC.ndfd/AR.oceanic/VP.004-007/
         // validate graphically at http://tgftp.nws.noaa.gov/SL.us008001/ST.expr/DF.gr2/DC.ndfd/AR.oceanic/VP.004-007/
         final Formatter errorLog = new Formatter(System.err);
-        Files.copy(new URL("http://tgftp.nws.noaa.gov/SL.us008001/ST.expr/DF.gr2/DC.ndfd/AR.conus/VP.001-003/ds.wdir.bin").openStream(),
+        Files.copy(new URL("https://tgftp.nws.noaa.gov/SL.us008001/ST.expr/DF.gr2/DC.ndfd/AR.conus/VP.001-003/ds.wdir.bin").openStream(),
                 new File("resources/ds.wdir.bin").toPath(), StandardCopyOption.REPLACE_EXISTING);
-        Files.copy(new URL("http://tgftp.nws.noaa.gov/SL.us008001/ST.expr/DF.gr2/DC.ndfd/AR.conus/VP.001-003/ds.wspd.bin").openStream(),
+        Files.copy(new URL("https://tgftp.nws.noaa.gov/SL.us008001/ST.expr/DF.gr2/DC.ndfd/AR.conus/VP.001-003/ds.wspd.bin").openStream(),
                 new File("resources/ds.wspd.bin").toPath(), StandardCopyOption.REPLACE_EXISTING);
 
         FeatureDataset dataSetDirection = FeatureDatasetFactoryManager.open(FeatureType.ANY, "resources/ds.wdir.bin", /* task */ null, errorLog);

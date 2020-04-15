@@ -10,6 +10,7 @@ Require-Bundle: com.sap.sailing.domain.common;bundle-version="1.0.0",
  com.sap.sailing.domain.tractracadapter,
  com.sap.sse,
  com.sap.sse.common,
+  com.sap.sse.security.common,
  org.apache.httpcomponents.httpclient;bundle-version="[4.2.6,4.3.0)",
  org.json.simple;bundle-version="1.1.0"
 Bundle-ActivationPolicy: lazy

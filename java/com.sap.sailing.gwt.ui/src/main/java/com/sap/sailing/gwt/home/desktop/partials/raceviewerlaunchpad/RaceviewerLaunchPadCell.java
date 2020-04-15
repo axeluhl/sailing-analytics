@@ -70,10 +70,10 @@ public class RaceviewerLaunchPadCell<T extends RaceMetadataDTO<?>> extends Abstr
                         SharedHomeResources.INSTANCE.launchPlay().getSafeUri(), UriUtils.fromString(launchPadController.getDirectLinkUrl(data))));
                 break;
         case WATCH_LIVE_OR_ANALYZE:
-            sb.append(TEMPLATE.raceviewerLaunchPad(liveStyleNames, iconStyleNames, I18N.raceDetailsToShow(), SharedHomeResources.INSTANCE.launchLoupe().getSafeUri()));
+            sb.append(TEMPLATE.raceviewerLaunchPad(liveStyleNames, iconStyleNames, I18N.tracking(), SharedHomeResources.INSTANCE.launchLoupe().getSafeUri()));
             break;
         case ANALYZE:
-            sb.append(TEMPLATE.raceviewerLaunchPad(analyzeStyleNames, iconStyleNames, I18N.raceDetailsToShow(), SharedHomeResources.INSTANCE.launchLoupe().getSafeUri()));
+            sb.append(TEMPLATE.raceviewerLaunchPad(analyzeStyleNames, iconStyleNames, I18N.tracking(), SharedHomeResources.INSTANCE.launchLoupe().getSafeUri()));
             break;
         case NOT_TRACKED:
             sb.append(TEMPLATE.raceNotTracked(notTrackedStyleNames, showNotTracked ? I18N.eventRegattaRaceNotTracked() : ""));

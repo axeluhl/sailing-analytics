@@ -13,11 +13,11 @@ import java.util.Enumeration;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.content.Context;
-import android.os.AsyncTask;
-
 import com.sap.sailing.android.shared.data.http.HttpRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
+
+import android.content.Context;
+import android.os.AsyncTask;
 
 public class NetworkHelper {
 
@@ -41,9 +41,9 @@ public class NetworkHelper {
     public String[] getLocalIpAddress() {
         ArrayList<String> addresses = new ArrayList<>();
         try {
-            for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements(); ) {
+            for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements();) {
                 NetworkInterface intf = en.nextElement();
-                for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements(); ) {
+                for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements();) {
                     InetAddress inetAddress = enumIpAddr.nextElement();
                     if (!inetAddress.isLoopbackAddress()) {
                         addresses.add(intf.getDisplayName() + " -> " + inetAddress.getHostAddress());
@@ -57,7 +57,7 @@ public class NetworkHelper {
     }
 
     public void executeHttpJsonRequestAsync(HttpRequest request, NetworkHelperSuccessListener successListener,
-        NetworkHelperFailureListener failureListener) {
+            NetworkHelperFailureListener failureListener) {
         NetworkRequestTask task = new NetworkRequestTask(successListener, failureListener);
         task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, request);
     }
@@ -84,7 +84,8 @@ public class NetworkHelper {
         private boolean isSuccess = false;
         private NetworkHelperError error;
 
-        public NetworkRequestTask(NetworkHelperSuccessListener successListener, NetworkHelperFailureListener failureListener) {
+        public NetworkRequestTask(NetworkHelperSuccessListener successListener,
+                NetworkHelperFailureListener failureListener) {
             this.successListener = successListener;
             this.failureListener = failureListener;
         }

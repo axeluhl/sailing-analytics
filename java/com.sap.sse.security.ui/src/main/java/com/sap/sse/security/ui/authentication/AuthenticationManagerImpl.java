@@ -10,7 +10,10 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sse.common.Util;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContextImpl;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
@@ -19,7 +22,6 @@ import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.WithSecurity;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.SuccessInfo;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 /**
  * Default implementation of {@link AuthenticationManager} interface, which delegates to the respective methods of 
@@ -86,7 +88,7 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
         userService.addUserStatusEventHandler(new UserStatusEventHandler() {
             @Override
             public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
-                eventBus.fireEvent(new AuthenticationContextEvent(new AuthenticationContextImpl(user)));
+                eventBus.fireEvent(new AuthenticationContextEvent(new AuthenticationContextImpl(user, userService)));
             }
         });
         eventBus.addHandler(AuthenticationSignOutRequestEvent.TYPE, new AuthenticationSignOutRequestEvent.Handler() {
@@ -155,7 +157,7 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
                     callback.onSuccess(result);
                     if (ExperimentalFeatures.REFRESH_ON_LOCALE_CHANGE_IN_USER_PROFILE) {
                         // when a user logs in we explicitly switch to the user's locale event if a locale is given by the URL
-                        redirectIfLocaleIsSetAndLocaleIsNotGivenInTheURL(result.getUserDTO().getLocale());
+                        redirectIfLocaleIsSetAndLocaleIsNotGivenInTheURL(result.getUserDTO().getA().getLocale());
                     }
                 } else {
                     if (SuccessInfo.FAILED_TO_LOGIN.equals(result.getMessage())) {
@@ -187,29 +189,29 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
     }
     
     @Override
-    public void updateUserProperties(String fullName, String company, String localeName, final AsyncCallback<Void> callback) {
+    public void updateUserProperties(String fullName, String company, String localeName, String defaultTenantIdAsString,
+            final AsyncCallback<UserDTO> callback) {
         final UserDTO currentUser = getAuthenticationContext().getCurrentUser();
         final String username = currentUser.getName();
         final String locale = currentUser.getLocale();
-        userManagementService.updateUserProperties(username, fullName, company, localeName, new AsyncCallback<Void>() {
-
+        userManagementService.updateUserProperties(username, fullName, company, localeName, defaultTenantIdAsString,
+                new AsyncCallback<UserDTO>() {
             @Override
             public void onFailure(Throwable caught) {
                 callback.onFailure(caught);
             }
 
             @Override
-            public void onSuccess(Void result) {
+            public void onSuccess(UserDTO result) {
                 refreshUserInfo();
                 callback.onSuccess(result);
-                
                 if(!Util.equalsWithNull(locale, localeName)) {
                     redirectIfLocaleIsSetAndLocaleIsNotGivenInTheURL(localeName);
                 }
             }
         });
     }
-    
+
     /**
      * Switches to the locale to the current user's locale when a user logs in.
      */
@@ -219,13 +221,13 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
             redirectIfLocaleIsSetAndLocaleIsNotGivenInTheURL(authenticationContext.getCurrentUser().getLocale());
         }
     }
-    
+
     private void redirectIfLocaleIsSetAndLocaleIsNotGivenInTheURL(String locale) {
         if(shouldChangeLocale(locale)) {
             Window.Location.reload();
         }
     }
-    
+
     private boolean shouldChangeLocale(String locale) {
         if(locale == null || locale.isEmpty()) {
             // If the user currently has no locale preference, we do not refresh
@@ -243,7 +245,7 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
 
     @Override
     public AuthenticationContext getAuthenticationContext() {
-        return new AuthenticationContextImpl(userService.getCurrentUser());
+        return new AuthenticationContextImpl(userService.getCurrentUser(), userService);
     }
     
     @Override
@@ -256,14 +258,12 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
                     userService.removeUserStatusEventHandler(this);
                     hideUserHintCallback.run();
                 } else {
-                    if (!userService.wasUserRecentlyLoggedInOrDismissedTheHint()) {
-                        showUserHintCallback.accept(userService::setUserLoginHintToStorage);
-                    }
+                    userService.runIfUserWasNotRecentlyLoggedInOrDismissedTheHint(()->showUserHintCallback.accept(userService::setUserLoginHintToStorage));
                 }
             }
         }, true);
     }
-    
+
     private abstract class AsyncCallbackImpl<T> implements AsyncCallback<T> {
         
         private final SuccessCallback<T> successCallback;
@@ -281,7 +281,7 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
     private class ErrorMessageViewImpl implements ErrorMessageView {
         @Override
         public void setErrorMessage(String errorMessage) {
-            Window.alert(errorMessage);
+            Notification.notify(errorMessage, NotificationType.ERROR);
         }
     }
 }

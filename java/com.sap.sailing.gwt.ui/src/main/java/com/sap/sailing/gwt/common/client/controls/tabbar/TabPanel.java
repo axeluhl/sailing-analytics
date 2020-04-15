@@ -82,7 +82,7 @@ public class TabPanel<PLACE extends Place, PRESENTER, TABVIEW extends TabView<PL
         knownTabs.put(classForActivation, tab);
         knownTabTitles.put(classForActivation, title);
 
-        if(tab.getState() == State.VISIBLE) {
+        if (tab.getState() == State.VISIBLE) {
             String link = "#" + historyMapper.getToken(tab.placeToFire());
             tabBar.addTab(title, classForActivation, link);
         }

@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
@@ -31,7 +32,7 @@ public class WindFinderPollerTest {
         final Object monitor = new Object();
         WindFinderTrackerFactoryImpl factory = new WindFinderTrackerFactoryImpl();
         factory.addReviewedSpotCollection(new ReviewedSpotsCollectionImpl("schilksee"));
-        final List<Pair<Wind, WindSource>> wind = new ArrayList<>();
+        final List<Pair<Wind, WindSource>> wind = Collections.synchronizedList(new ArrayList<>());
         final RaceDefinition mockedRaceDefinition = mock(RaceDefinition.class);
         final DynamicTrackedRegatta mockedTrackedRegatta = mock(DynamicTrackedRegatta.class);
         final DynamicTrackedRace mockedTrackedRace = mock(DynamicTrackedRace.class);
@@ -56,12 +57,15 @@ public class WindFinderPollerTest {
         });
         final WindTracker tracker;
         synchronized (monitor) {
-            tracker = factory.createWindTracker(mockedTrackedRegatta, mockedRaceDefinition, /* correctByDeclination */ false);
+            tracker = factory.createWindTracker(mockedTrackedRegatta, mockedRaceDefinition, /* correctByDeclination */ false,
+                    null);
             monitor.wait(5000);
         }
         tracker.stop();
-        assertFalse(wind.isEmpty()); // at least one latest measurement
-        Pair<Wind, WindSource> firstFix = wind.iterator().next();
-        assertTrue(new HashSet<>(Arrays.asList("de15", "10044N")).contains(((WindSourceWithAdditionalID) firstFix.getB()).getId()));
+        synchronized (wind) {
+            assertFalse(wind.isEmpty()); // at least one latest measurement
+            Pair<Wind, WindSource> firstFix = wind.iterator().next();
+            assertTrue(new HashSet<>(Arrays.asList("de15", "10044N")).contains(((WindSourceWithAdditionalID) firstFix.getB()).getId()));
+        }
     }
 }

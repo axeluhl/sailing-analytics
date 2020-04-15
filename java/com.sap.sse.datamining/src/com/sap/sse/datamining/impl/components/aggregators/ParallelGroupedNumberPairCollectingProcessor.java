@@ -81,6 +81,9 @@ public class ParallelGroupedNumberPairCollectingProcessor
     protected Map<GroupKey, PairWithStats<Number>> aggregateResult() {
         Map<GroupKey, PairWithStats<Number>> result = new HashMap<>();
         for (Entry<GroupKey, HashSet<Pair<Number, Number>>> sumAggregationEntry : individualPairs.entrySet()) {
+            if (isAborted()) {
+                break;
+            }
             GroupKey key = sumAggregationEntry.getKey();
             result.put(key, new PairWithStatsImpl<Number>(null,
                     /* min */ null, 

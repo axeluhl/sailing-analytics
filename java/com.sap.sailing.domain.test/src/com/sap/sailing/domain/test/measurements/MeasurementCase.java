@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.test.measurements;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
@@ -17,7 +17,7 @@ public class MeasurementCase {
     MeasurementCase(String name) {
         super();
         this.name = name;
-        measurements = new HashSet<>();
+        measurements = new LinkedHashSet<>();
     }
     
     String getName() {

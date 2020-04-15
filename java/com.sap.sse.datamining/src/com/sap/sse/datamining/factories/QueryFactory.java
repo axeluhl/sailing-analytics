@@ -56,6 +56,7 @@ public class QueryFactory {
                 Processor<DataType, GroupedDataEntry<DataType>> groupingProcessor = processorFactory
                         .createGroupingProcessor(dataTypeToRetrieve, extractionProcessor, getParameterProvidersFor(
                                 queryDefinition.getDimensionsToGroupBy(), stringMessages, locale));
+                
                 DataRetrieverChainBuilder<DataSourceType> chainBuilder = queryDefinition.getDataRetrieverChainDefinition().startBuilding(executor);
                 Map<DataRetrieverLevel<?, ?>, FilterCriterion<?>> criteriaMappedByRetrieverLevel = createFilterCriteria(
                         queryDefinition.getFilterSelection(), stringMessages, locale);

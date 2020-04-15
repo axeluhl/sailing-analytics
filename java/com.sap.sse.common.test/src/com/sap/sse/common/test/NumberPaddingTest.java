@@ -22,6 +22,11 @@ public class NumberPaddingTest {
     }
 
     @Test
+    public void testValueGreaterThanTenWithOneDigitLeftOfDecimalRequested() {
+        assertEquals("10.1", padPositiveValue(10.1, 1, 1, /* round */ false));
+    }
+
+    @Test
     public void testTruncation() {
         assertEquals("10.1", padPositiveValue(10.179, 0, 1, /* round */ false));
     }

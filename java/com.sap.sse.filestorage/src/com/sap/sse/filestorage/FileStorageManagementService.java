@@ -3,7 +3,7 @@ package com.sap.sse.filestorage;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.filestorage.impl.ReplicableFileStorageManagementService;
 import com.sap.sse.filestorage.operations.FileStorageServiceOperation;
-import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
+import com.sap.sse.replication.ReplicableWithObjectInputStream;
 
 /**
  * OSGi service for managing {@link FileStorageService FileStorageServices}.

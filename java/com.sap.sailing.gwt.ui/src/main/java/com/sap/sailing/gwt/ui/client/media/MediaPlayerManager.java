@@ -6,6 +6,7 @@ import java.util.Set;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.domain.common.media.MediaTrackWithSecurityDTO;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
@@ -18,25 +19,45 @@ public interface MediaPlayerManager {
 
     }
     
+    public enum Status {
+        UNDEFINED('?'), CANNOT_PLAY('-'), NOT_REACHABLE('#'), REACHABLE('+');
+
+        private final char symbol;
+
+        private Status(char symbol) {
+            this.symbol = symbol;
+        }
+
+        public String toString() {
+            return String.valueOf(this.symbol);
+        }
+
+        public boolean isPotentiallyPlayable() {
+            return this == UNDEFINED || this == REACHABLE;
+        }
+    }
+
     void addPlayerChangeListener(PlayerChangeListener playerChangeListener);
     
-    void playAudio(MediaTrack audioTrack);
+    void playAudio(MediaTrackWithSecurityDTO audioTrack);
 
     void muteAudio();
     
-    void playFloatingVideo(MediaTrack videoTrack);
+    void playFloatingVideo(MediaTrackWithSecurityDTO videoTrack);
     
-    void closeFloatingVideo(MediaTrack videoTrack);
+    void closeFloatingPlayer(MediaTrackWithSecurityDTO videoTrack);
     
-    void playDockedVideo(MediaTrack videoTrack);
+    void playDockedVideo(MediaTrackWithSecurityDTO videoTrack);
     
     void closeDockedVideo();
     
     void addMediaTrack();
     
-    boolean deleteMediaTrack(MediaTrack mediaTrack);
+    boolean deleteMediaTrack(MediaTrackWithSecurityDTO mediaTrack);
     
-    boolean allowsEditing();
+    boolean allowsEditing(MediaTrackWithSecurityDTO mediaTrack);
+
+    boolean allowsCreating();
 
     void playDefault();
 
@@ -44,16 +65,16 @@ public interface MediaPlayerManager {
 
     Boolean isPlaying();
 
-    MediaTrack getPlayingAudioTrack();
+    Set<MediaTrackWithSecurityDTO> getPlayingAudioTrack();
 
     Set<MediaTrack> getPlayingVideoTracks();
 
-    Collection<MediaTrack> getAssignedMediaTracks();
+    Collection<MediaTrackWithSecurityDTO> getAssignedMediaTracks();
     
-    Collection<MediaTrack> getOverlappingMediaTracks();
+    Collection<MediaTrackWithSecurityDTO> getOverlappingMediaTracks();
 
     List<MediaTrack> getAudioTracks();
-    
+
     List<MediaTrack> getVideoTracks();
 
     MediaTrack getDockedVideoTrack();
@@ -65,6 +86,8 @@ public interface MediaPlayerManager {
     MediaServiceAsync getMediaService();
 
     ErrorReporter getErrorReporter();
+
+    Status getMediaTrackStatus(MediaTrack track);
 
 }
 

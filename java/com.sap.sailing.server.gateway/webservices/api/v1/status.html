@@ -1,0 +1,76 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <link href='../../../../sailing-fontface-1.0.cache.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+    <title>SAP Sailing Analytics Webservices API Version 1.0</title>
+</head>
+<body>
+<h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
+<h2>URL: /api/v1/status</h2>
+
+<b>Description:</b>
+<p>Gets a status description for the sailing service "RacingEventService".
+Availability will be reported as "true" if all races to be restored have
+appeared. There may still be some data retrieval going on, so for the server
+truly to be available, after having received available:true for the first time,
+add some leeway that corresponds to the typical race load time.</p>
+<p>Furthermore, consider the "replica" attribute in the response. It may start
+out as "false" although initial replication has been requested. See also the
+<tt>/replication/replication?action=STATUS</tt> API which provide comprehensive
+availability information for a replication set-up. If you can be sure that the
+server you're invoking the /status method on is a master, checking for
+available:true and waiting for a typical race load time afterwards will be good
+enough. In case you're launching a replica, check the <tt>/replication/replication?action=STATUS</tt>
+result for available:true. If you're unsure whether the server you're looking at
+is a master or a replica, figure out using <tt>/replication/replication?action=STATUS</tt>
+with the "replica" attribute, and if it is "false" check this endpoint.
+<br/>
+<table>
+    <tr>
+        <td>Webservice Type:</td>
+        <td>REST</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>Json</td>
+    </tr>
+    <tr>
+        <td>Mandatory parameters:</td>
+        <td>None</td>
+    </tr>
+    <tr>
+        <td>Optional parameters:</td>
+        <td>None</td>
+    </tr>
+    <tr>
+        <td>Request method:</td>
+        <td>GET</td>
+    </tr>
+    <tr>
+        <td>Examples:</td>
+        <td>
+            <a href="http://www.sapsailing.com/sailingserver/api/v1/status">http://www.sapsailing.com/sailingserver/api/v1/status</a>
+        </td>
+    </tr>
+    <tr>
+    	<td>Example Response:</td>
+    	<td>
+        <pre>
+         	{
+		  "numberofracestorestore": 12847,
+		  "numberofracesrestored": 12847,
+		  "isreplica": false,
+		  "initialloadrunning": false,
+		  "available": true
+		}
+        </pre>
+        </td>
+    </tr>
+</table>
+<div style="height: 1em;"></div>
+<a href="index.html">Back to Web Service Overview</a> 
+</body>
+</html>

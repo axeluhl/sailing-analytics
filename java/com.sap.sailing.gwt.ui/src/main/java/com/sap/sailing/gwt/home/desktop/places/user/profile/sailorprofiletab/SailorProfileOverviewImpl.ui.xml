@@ -1,0 +1,22 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' xmlns:g='urn:import:com.google.gwt.user.client.ui'
+    xmlns:um="urn:import:com.sap.sailing.gwt.home.shared.usermanagement.decorator"
+    xmlns:c="urn:import:com.google.gwt.user.cellview.client">
+    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:with field="local_res"
+        type="com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.SailorProfileDesktopResources" />
+    <um:AuthorizedContentDecoratorDesktop ui:field="decoratorUi">
+        <um:content>
+            <g:HTMLPanel addStyleNames="{res.mediaCss.grid} {res.mainCss.spacermarginbottommediumsmall}">
+                <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mainCss.spacermargintopmedium}">
+                    <c:CellTable ui:field="sailorProfilesTable" addStyleNames="{local_res.css.overviewTable}">
+                        <c:emptyTableWidget>
+                            <g:Label text="{i18n.noDataFound}" addStyleNames="{local_res.css.overviewTableEmpty}" />
+                        </c:emptyTableWidget>
+                    </c:CellTable>
+                    <g:FlowPanel addStyleNames="{local_res.css.overviewTableFooter}" ui:field="footerUi" />
+                </div>
+            </g:HTMLPanel>
+        </um:content>
+    </um:AuthorizedContentDecoratorDesktop>
+</ui:UiBinder>

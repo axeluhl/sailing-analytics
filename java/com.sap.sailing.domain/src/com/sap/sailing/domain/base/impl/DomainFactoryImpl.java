@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorAndBoatStore;
@@ -58,16 +57,23 @@ import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsEightAndInterp
 import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsFive;
 import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsSix;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
+import com.sap.sailing.domain.leaderboard.impl.LowPointFirstToWinTwoRaces;
 import com.sap.sailing.domain.leaderboard.impl.LowPointForLeagueOverallLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.LowPointTieBreakBasedOnLastSeriesOnly;
 import com.sap.sailing.domain.leaderboard.impl.LowPointWinnerGetsZero;
 import com.sap.sailing.domain.leaderboard.impl.LowPointWithAutomaticRDG;
 import com.sap.sailing.domain.leaderboard.impl.LowPointWithEliminationsAndRoundsWinnerGets07;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
+import com.sap.sailing.domain.tracking.impl.CourseDesignUpdateHandler;
+import com.sap.sailing.domain.tracking.impl.FinishTimeUpdateHandler;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
+import com.sap.sailing.domain.tracking.impl.RaceAbortedHandler;
+import com.sap.sailing.domain.tracking.impl.StartTimeUpdateHandler;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
 import com.sap.sailing.geocoding.ReverseGeocoder;
 import com.sap.sse.common.Distance;
@@ -76,18 +82,19 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
+import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache.ResolveListener;
 
-public class DomainFactoryImpl extends SharedDomainFactoryImpl implements DomainFactory {
+public class DomainFactoryImpl extends SharedDomainFactoryImpl<RaceLogAndTrackedRaceResolver> implements DomainFactory {
     private static Logger logger = Logger.getLogger(DomainFactoryImpl.class.getName());
     
     /**
      * Uses a transient competitor and boat store
      */
-    public DomainFactoryImpl(RaceLogResolver raceLogResolver) {
+    public DomainFactoryImpl(RaceLogAndTrackedRaceResolver raceLogResolver) {
         super(new TransientCompetitorAndBoatStoreImpl(), raceLogResolver);
     }
     
-    public DomainFactoryImpl(CompetitorAndBoatStore competitorStore, RaceLogResolver raceLogResolver) {
+    public DomainFactoryImpl(CompetitorAndBoatStore competitorStore, RaceLogAndTrackedRaceResolver raceLogResolver) {
         super(competitorStore, raceLogResolver);
     }
 
@@ -97,8 +104,9 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
     }
 
     @Override
-    public ObjectInputStreamResolvingAgainstCache<DomainFactory> createObjectInputStreamResolvingAgainstThisFactory(InputStream inputStream) throws IOException {
-        return new ObjectInputStreamResolvingAgainstDomainFactoryImpl(inputStream, this);
+    public ObjectInputStreamResolvingAgainstCache<DomainFactory> createObjectInputStreamResolvingAgainstThisFactory(
+            InputStream inputStream, ResolveListener resolveListener) throws IOException {
+        return new ObjectInputStreamResolvingAgainstDomainFactoryImpl(inputStream, this, resolveListener);
     }
 
     @Override
@@ -144,13 +152,17 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
             return new LowPointTieBreakBasedOnLastSeriesOnly();
         case LOW_POINT_WITH_AUTOMATIC_RDG:
             return new LowPointWithAutomaticRDG();
+        case LOW_POINT_FIRST_TO_WIN_TWO_RACES:
+            return new LowPointFirstToWinTwoRaces();
+        default:
+            break;
         }
         throw new RuntimeException("Unknown scoring scheme type "+scoringSchemeType.name());
     }
 
     @Override
     public CompetitorAndBoatDTO convertToCompetitorAndBoatDTO(Competitor competitor, Boat boat) {
-        return new CompetitorAndBoatDTO(competitorAndBoatStore.convertToCompetitorDTO(competitor), competitorAndBoatStore.convertToBoatDTO(boat));
+        return new CompetitorAndBoatDTO(convertToCompetitorDTO(competitor), competitorAndBoatStore.convertToBoatDTO(boat));
     }
 
     @Override
@@ -185,7 +197,7 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
         PlacemarkOrderDTO racePlaces = withGeoLocationData ? getRacePlaces(trackedRace) : null;
         TrackedRaceDTO trackedRaceDTO = createTrackedRaceDTO(trackedRace); 
         RaceDTO raceDTO = new RaceDTO(raceIdentifier, trackedRaceDTO, trackedRegattaRegistry.isRaceBeingTracked(
-                trackedRace.getTrackedRegatta().getRegatta(), trackedRace.getRace()));
+                trackedRace.getTrackedRegatta().getRegatta(), trackedRace.getRace()), trackedRace.getRankingMetric()==null?null:trackedRace.getRankingMetric().getType());
         raceDTO.places = racePlaces;
         updateRaceDTOWithTrackedRaceData(trackedRace, raceDTO);
         return raceDTO;
@@ -196,11 +208,13 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
         assert trackedRace != null;
         raceDTO.startOfRace = trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace().asDate();
         raceDTO.endOfRace = trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace().asDate();
+        raceDTO.raceFinishingTime = trackedRace.getFinishingTime() == null ? null : trackedRace.getFinishingTime().asDate();
+        raceDTO.raceFinishedTime = trackedRace.getFinishedTime() == null ? null : trackedRace.getFinishedTime().asDate();
         raceDTO.status = new RaceStatusDTO();
         raceDTO.status.status = trackedRace.getStatus() == null ? null : trackedRace.getStatus().getStatus();
         raceDTO.status.loadingProgress = trackedRace.getStatus() == null ? 0.0 : trackedRace.getStatus().getLoadingProgress();
     }
-
+    
     @Override
     public TrackedRaceDTO createTrackedRaceDTO(TrackedRace trackedRace) {
         TrackedRaceDTO trackedRaceDTO = new TrackedRaceDTO();
@@ -389,11 +403,22 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
         return result;
     }
     
+    @Override
     public List<CompetitorAndBoatDTO> getCompetitorDTOList(List<Pair<Competitor, Boat>> competitors) {
         List<CompetitorAndBoatDTO> result = new ArrayList<>();
         for (Pair<Competitor, Boat> competitorAndBoat : competitors) {
             result.add(convertToCompetitorAndBoatDTO(competitorAndBoat.getA(), competitorAndBoat.getB()));
         }
         return result;
+    }
+
+    @Override
+    public void addUpdateHandlers(DynamicTrackedRace trackedRace, CourseDesignUpdateHandler courseDesignHandler,
+            StartTimeUpdateHandler startTimeHandler, RaceAbortedHandler raceAbortedHandler,
+            final FinishTimeUpdateHandler finishTimeUpdateHandler) {
+        trackedRace.addCourseDesignChangedListener(courseDesignHandler);
+        trackedRace.addStartTimeChangedListener(startTimeHandler);
+        trackedRace.addRaceAbortedListener(raceAbortedHandler);
+        trackedRace.addListener(finishTimeUpdateHandler.getListener());
     }
 }

@@ -1,13 +1,13 @@
 package com.sap.sailing.android.tracking.app.ui.activities;
 
+import com.sap.sailing.android.tracking.app.R;
+import com.sap.sailing.android.tracking.app.ui.fragments.LeaderboardFragment;
+
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
-
-import com.sap.sailing.android.tracking.app.R;
-import com.sap.sailing.android.tracking.app.ui.fragments.LeaderboardFragment;
 
 public class LeaderboardWebViewActivity extends BaseActivity {
 

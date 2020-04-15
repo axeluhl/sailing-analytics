@@ -33,6 +33,12 @@ public class QRCodeGenerationUtil {
          hintMap.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
          return create(text, sizeInPixels, hintMap);
     }
+
+    public static InputStream create(String text, int sizeInPixels, String errorCorrectionLevel) throws Exception {
+        Hashtable<EncodeHintType, ErrorCorrectionLevel> hintMap = new Hashtable<EncodeHintType, ErrorCorrectionLevel>();
+        hintMap.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.valueOf(errorCorrectionLevel));
+        return create(text, sizeInPixels, hintMap);
+    }
     
     public static InputStream create(String text, int sizeInPixels,
             Hashtable<EncodeHintType, ErrorCorrectionLevel> hintMap) throws WriterException, IOException {

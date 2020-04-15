@@ -3,6 +3,7 @@ package com.sap.sailing.domain.swisstimingadapter.impl;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.Collection;
@@ -17,7 +18,6 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorAndBoatStore;
@@ -35,6 +35,8 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.TrackingConnectorType;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.swisstimingadapter.Course;
@@ -56,6 +58,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceTracker;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
@@ -63,6 +66,8 @@ import com.sap.sailing.domain.tracking.TrackingDataLoader;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
+import com.sap.sailing.domain.tracking.impl.TrackingConnectorInfoImpl;
+import com.sap.sailing.domain.tracking.impl.UpdateHandler;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -73,6 +78,7 @@ import difflib.PatchFailedException;
 
 public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
         implements SwissTimingRaceTracker, SailMasterListener, TrackingDataLoader {
+
     private static final Logger logger = Logger.getLogger(SwissTimingRaceTrackerImpl.class.getName());
     
     private final SailMasterConnector connector;
@@ -109,54 +115,78 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
      */
     private final TMDMessageQueue tmdMessageQueue;
 
-    private final RaceLogResolver raceLogResolver;
+    private final RaceLogAndTrackedRaceResolver raceLogResolver;
+
+    /**
+     * If set to a non-{@code null}, non-{@link String#isEmpty() empty} value, updates about start time changes, course
+     * changes, etc. will be sent as REST requests to this URL, using the {@link #updateUsername} /
+     * {@link #updatePassword} as credentials.
+     */
+    private final String updateURL;
+
+    private final String updateUsername;
+
+    private final String updatePassword;
+
+    private final RaceTrackingHandler raceTrackingHandler;
+
+    private final TrackedRegattaRegistry trackedRegattaRegistry;
     
-    protected SwissTimingRaceTrackerImpl(String raceID, String raceName, String raceDescription, BoatClass boatClass,
-            String hostname, int port, StartList startList, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
+    protected SwissTimingRaceTrackerImpl(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             WindStore windStore, DomainFactory domainFactory, SwissTimingFactory factory,
-            TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver, long delayToLiveInMillis,
-            boolean useInternalMarkPassingAlgorithm, SwissTimingTrackingConnectivityParameters connectivityParams) throws InterruptedException,
-            UnknownHostException, IOException, ParseException {
-        this(/* regatta */ null, raceID, raceName, raceDescription, boatClass, hostname, port, startList, windStore,
-                domainFactory, factory, trackedRegattaRegistry, raceLogStore, regattaLogStore, raceLogResolver,
-                delayToLiveInMillis, useInternalMarkPassingAlgorithm, connectivityParams);
+            TrackedRegattaRegistry trackedRegattaRegistry, RaceLogAndTrackedRaceResolver raceLogResolver,
+            SwissTimingTrackingConnectivityParameters connectivityParams, RaceTrackingHandler raceTrackingHandler)
+            throws InterruptedException, UnknownHostException, IOException, ParseException, URISyntaxException {
+        this(/* regatta */ null, windStore, domainFactory, factory, trackedRegattaRegistry, raceLogStore,
+                regattaLogStore, raceLogResolver, connectivityParams, raceTrackingHandler);
     }
 
-    protected SwissTimingRaceTrackerImpl(Regatta regatta, String raceID, String raceName, String raceDescription,
-            BoatClass boatClass, String hostname, int port, StartList startList, WindStore windStore,
-            DomainFactory domainFactory, SwissTimingFactory factory, TrackedRegattaRegistry trackedRegattaRegistry,
-            RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, RaceLogResolver raceLogResolver,
-            long delayToLiveInMillis, boolean useInternalMarkPassingAlgorithm, SwissTimingTrackingConnectivityParameters connectivityParams)
-            throws InterruptedException, UnknownHostException, IOException, ParseException {
+    protected SwissTimingRaceTrackerImpl(Regatta regatta, WindStore windStore, DomainFactory domainFactory,
+            SwissTimingFactory factory, TrackedRegattaRegistry trackedRegattaRegistry, RaceLogStore raceLogStore,
+            RegattaLogStore regattaLogStore, RaceLogAndTrackedRaceResolver raceLogResolver,
+            SwissTimingTrackingConnectivityParameters connectivityParams, RaceTrackingHandler raceTrackingHandler)
+            throws InterruptedException, UnknownHostException, IOException, ParseException, URISyntaxException {
         super(connectivityParams);
         this.raceLogResolver = raceLogResolver;
+        this.raceTrackingHandler = raceTrackingHandler;
         this.tmdMessageQueue = new TMDMessageQueue(this);
+        this.trackedRegattaRegistry = trackedRegattaRegistry;
         final Regatta effectiveRegatta;
         // Try to find a pre-associated event based on the Race ID
         if (regatta == null) {
-            effectiveRegatta = trackedRegattaRegistry.getRememberedRegattaForRace(raceID);
+            effectiveRegatta = trackedRegattaRegistry.getRememberedRegattaForRace(connectivityParams.getRaceID());
         } else {
             effectiveRegatta = regatta;
         }
         // if regatta is still null, no previous assignment of any of the races in this TracTrac event to a Regatta was
         // found; in this case, create a default regatta based on the TracTrac event data
         this.regatta = effectiveRegatta == null ? domainFactory.getOrCreateDefaultRegatta(raceLogStore, regattaLogStore,
-                raceID, boatClass, trackedRegattaRegistry) : effectiveRegatta;
-        this.connector = factory.getOrCreateSailMasterConnector(hostname, port, raceID, raceName, raceDescription, boatClass);
-        this.domainFactory = domainFactory;
-        this.raceID = raceID;
-        this.raceName = raceName;
-        this.startList = startList;
-        this.startListFromManage2Sail = startList != null;
-        this.raceDescription = raceDescription;
-        this.boatClass = boatClass;
+                connectivityParams.getRaceID(), connectivityParams.getBoatClass(), trackedRegattaRegistry) : effectiveRegatta;
+                this.domainFactory = domainFactory;
+        this.raceID = connectivityParams.getRaceID();
+        // start out with an empty course, so we don't depend on receiving the CCG message before the timeout
+        this.course = new CourseImpl(this.raceID, /* start with empty marks list */ Collections.emptyList());
+        this.raceName = connectivityParams.getRaceName();
+        this.startList = connectivityParams.getStartList();
+        this.startListFromManage2Sail = connectivityParams.getStartList() != null;
+        this.raceDescription = connectivityParams.getRaceDescription();
+        this.boatClass = connectivityParams.getBoatClass();
         this.windStore = windStore;
-        this.id = createID(raceID, hostname, port);
-        connector.addSailMasterListener(this);
+        this.id = createID(connectivityParams.getRaceID(), connectivityParams.getHostname(), connectivityParams.getPort());
         trackedRegatta = trackedRegattaRegistry.getOrCreateTrackedRegatta(this.regatta);
-        this.delayToLiveInMillis = delayToLiveInMillis;
+        this.delayToLiveInMillis = connectivityParams.getDelayToLiveInMillis();
         this.competitorsByBoatId = new HashMap<String, Competitor>();
-        this.useInternalMarkPassingAlgorithm = useInternalMarkPassingAlgorithm;
+        this.useInternalMarkPassingAlgorithm = connectivityParams.isUseInternalMarkPassingAlgorithm();
+        this.updateURL = connectivityParams.getUpdateURL();
+        this.updateUsername = connectivityParams.getUpdateUsername();
+        this.updatePassword = connectivityParams.getUpdatePassword();
+        if (connectivityParams.getStartList() != null) {
+            createRaceDefinition(course);
+        }
+        // Ensure this is called last, otherwise the connector starts running without having a complete racetracker
+        this.connector = factory.getOrCreateSailMasterConnector(connectivityParams.getHostname(),
+                connectivityParams.getPort(), connectivityParams.getRaceID(), connectivityParams.getRaceName(),
+                connectivityParams.getRaceDescription(), connectivityParams.getBoatClass(), this);
     }
 
     @Override
@@ -406,7 +436,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
     }
 
     @Override
-    public void receivedStartList(String raceID, StartList startList) {
+    public void receivedStartList(String raceID, StartList startList) throws URISyntaxException {
     	// ignore STL messages if the startlist has been already provided by Manage2Sail  
     	if (!startListFromManage2Sail && this.raceID.equals(raceID)) {
             StartList oldStartList = this.startList;
@@ -435,38 +465,68 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
         }
     }
 
-    private void createRaceDefinition(Course course) {
+    private void createRaceDefinition(Course course) throws URISyntaxException {
         assert this.raceID.equals(raceID);
         assert startList != null;
         assert course != null;
         // now we can create the RaceDefinition and most other things
         Race swissTimingRace = new RaceImpl(raceID, raceName, raceDescription, boatClass);
-        synchronized (this) {
-            race = domainFactory.createRaceDefinition(regatta, swissTimingRace, startList, course);
-            this.notifyAll();
-        }
-        // temp
-        CompetitorAndBoatStore competitorStore = domainFactory.getBaseDomainFactory().getCompetitorAndBoatStore();
-        for (com.sap.sailing.domain.swisstimingadapter.Competitor c : startList.getCompetitors()) {
-            Competitor existingCompetitor = competitorStore.getExistingCompetitorByIdAsString(c.getIdAsString());
-            if (existingCompetitor != null) {
-                competitorsByBoatId.put(c.getBoatID(), existingCompetitor);
+        try {
+            synchronized (this) {
+                race = domainFactory.createRaceDefinition(regatta, swissTimingRace, startList, course,
+                        raceTrackingHandler);
+                this.notifyAll();
+            }
+            // temp
+            CompetitorAndBoatStore competitorStore = domainFactory.getBaseDomainFactory().getCompetitorAndBoatStore();
+            for (com.sap.sailing.domain.swisstimingadapter.Competitor c : startList.getCompetitors()) {
+                Competitor existingCompetitor = competitorStore.getExistingCompetitorByIdAsString(c.getIdAsString());
+                if (existingCompetitor != null) {
+                    competitorsByBoatId.put(c.getBoatID(), existingCompetitor);
+                }
+            }
+            trackedRace = raceTrackingHandler.createTrackedRace(getTrackedRegatta(), race, Collections.<Sideline> emptyList(), windStore,
+                    delayToLiveInMillis,
+                    WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND,
+                    /* time over which to average speed */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
+                    new DynamicRaceDefinitionSet() {
+                @Override
+                public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
+                    // we already know our single RaceDefinition
+                    assert SwissTimingRaceTrackerImpl.this.race == race;
+                }
+            }, useInternalMarkPassingAlgorithm, raceLogResolver,
+                    /* Not needed because the RaceTracker is not active on a replica */ Optional.empty(),
+                    new TrackingConnectorInfoImpl(TrackingConnectorType.SwissTiming, /*no api connection to query the webUrl*/ null));
+            addUpdateHandlers();
+            notifyRaceCreationListeners();
+            logger.info("Created SwissTiming RaceDefinition and TrackedRace for "+race.getName());
+        } catch (Exception exception) {
+            logger.log(Level.WARNING,
+                    "Error while creating race " + raceName + " for regatta " + trackedRegatta.getRegatta(), exception);
+            try {
+                if (race == null) {
+                    trackedRegattaRegistry.stopTracker(regatta, this);
+                } else {
+                    trackedRegattaRegistry.stopTracking(regatta, race);
+                }
+            } catch (Exception e) {
+                logger.log(Level.INFO,
+                        "Something else went wrong while trying to notify the TrackedRegattaRegistry that the race "
+                                + " could not be added to the the regatta " + trackedRegatta.getRegatta(),
+                                e);
             }
         }
-        trackedRace = getTrackedRegatta().createTrackedRace(race, Collections.<Sideline> emptyList(), windStore,
-                delayToLiveInMillis,
-                WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND,
-                /* time over which to average speed */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
-                new DynamicRaceDefinitionSet() {
-                    @Override
-                    public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
-                        // we already know our single RaceDefinition
-                        assert SwissTimingRaceTrackerImpl.this.race == race;
-                    }
-                }, useInternalMarkPassingAlgorithm, raceLogResolver,
-                /* Not needed because the RaceTracker is not active on a replica */ Optional.empty());
-        notifyRaceCreationListeners();
-        logger.info("Created SwissTiming RaceDefinition and TrackedRace for "+race.getName());
+    }
+
+    /**
+     * If a non-{@code null}, non-{@link String#isEmpty() empty} {@link #updateURL} is set, adds {@link UpdateHandler}s
+     * to the race that will forward changes to the race such as start time changes or course changes to the URL as REST
+     * requests.
+     */
+    private void addUpdateHandlers() throws URISyntaxException {
+        getDomainFactory().addUpdateHandlers(updateURL, updateUsername, updatePassword,
+                /* TODO using the regatta ID as the "eventId" for now... */ regatta.getId(), trackedRace.getRace(), trackedRace);
     }
     
     /**
@@ -476,12 +536,13 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
      * {@link #trackedRace} with data received from the trackers.
      */
     private boolean isTrackedRaceStillReachable() {
-        return trackedRace != null && Util.contains(getRegatta().getAllRaces(), trackedRace.getRace()) &&
-                getTrackedRegatta().getExistingTrackedRace(trackedRace.getRace()) == trackedRace;
+        return trackedRace != null && Util.contains(getRegatta().getAllRaces(), trackedRace.getRace())
+                && getTrackedRegatta().getExistingTrackedRace(trackedRace.getRace()) == trackedRace;
     }
 
     @Override
-    public void receivedCourseConfiguration(String raceID, Course course) {
+    public void receivedCourseConfiguration(String raceID, Course course) throws URISyntaxException {
+        
         Course oldCourse = this.course;
         if (trackedRace == null) {
             if (oldCourse == null && startList != null) {

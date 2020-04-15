@@ -86,10 +86,12 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends GPSFixTrackImpl<Item
     /**
      * This redefinition packs the <code>gpsFix</code> into a more compact representation that conserves
      * memory compared to the original, "naive" implementation. It gets along with a single object.
+     * 
+     * @return {@code true} if and only if the fix was actually added to the competitor's track
      */
     @Override
-    public void addGPSFix(GPSFixMoving gpsFix) {
-        add(gpsFix, /* replace */ true);
+    public boolean addGPSFix(GPSFixMoving gpsFix) {
+        return add(gpsFix, /* replace */ true);
     }
     
     @Override

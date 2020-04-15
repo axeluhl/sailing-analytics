@@ -19,6 +19,7 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.AbstractTrackedRegattaAndRaceObserver;
+import com.sap.sailing.domain.tracking.AddResult;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -178,12 +179,12 @@ public class TrackedRaceStatisticsCacheImpl extends AbstractTrackedRegattaAndRac
         }
         
         @Override
-        public void competitorPositionChanged(GPSFixMoving fix, Competitor item) {
+        public void competitorPositionChanged(GPSFixMoving fix, Competitor item, AddResult addedOrReplaced) {
             triggerUpdateScheduled(trackedRace);
         }
         
         @Override
-        public void markPositionChanged(GPSFix fix, Mark mark, boolean firstInTrack) {
+        public void markPositionChanged(GPSFix fix, Mark mark, boolean firstInTrack, AddResult addedOrReplaced) {
             triggerUpdateScheduled(trackedRace);
         }
         

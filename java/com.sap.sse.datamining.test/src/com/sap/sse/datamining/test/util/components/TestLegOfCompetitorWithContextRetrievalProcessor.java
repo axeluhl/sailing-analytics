@@ -14,8 +14,11 @@ import com.sap.sse.datamining.test.domain.Test_Leg;
 
 public class TestLegOfCompetitorWithContextRetrievalProcessor extends AbstractRetrievalProcessor<Test_HasRaceContext, Test_HasLegOfCompetitorContext>{
 
-    public TestLegOfCompetitorWithContextRetrievalProcessor(ExecutorService executor, Collection<Processor<Test_HasLegOfCompetitorContext, ?>> resultReceivers, int retrievalLevel) {
-        super(Test_HasRaceContext.class, Test_HasLegOfCompetitorContext.class, executor, resultReceivers, retrievalLevel);
+    public TestLegOfCompetitorWithContextRetrievalProcessor(ExecutorService executor,
+            Collection<Processor<Test_HasLegOfCompetitorContext, ?>> resultReceivers, int retrievalLevel,
+            String retrievedDataTypeMessageKey) {
+        super(Test_HasRaceContext.class, Test_HasLegOfCompetitorContext.class, executor, resultReceivers,
+                retrievalLevel, retrievedDataTypeMessageKey);
     }
 
     @Override

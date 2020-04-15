@@ -58,6 +58,7 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
     protected ImagesListComposite imagesListComposite;
     protected VideosListComposite videosListComposite;
     protected ExternalLinksComposite externalLinksComposite;
+    private final FileStorageServiceConnectionTestObservable storageServiceAvailable;
     
     private final static String BASE_URL_PATTERN = "(https?|ftp)://(www\\.)?(((([a-zA-Z0-9.-]+\\.){1,}[a-zA-Z]{2,4}|localhost))|((\\d{1,3}\\.){3}(\\d{1,3})))(:(\\d+))?(/([a-zA-Z0-9-._~!$&'()*+,;=:@/]|%[0-9A-F]{2})*)?(\\?([a-zA-Z0-9-._~!$&'()*+,;=:/?@]|%[0-9A-F]{2})*)?(#([a-zA-Z0-9._-]|%[0-9A-F]{2})*)?";
     private final static RegExp BASE_URL_REG_EXP  = RegExp.compile(BASE_URL_PATTERN);
@@ -140,6 +141,7 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
             StringMessages stringMessages, List<LeaderboardGroupDTO> availableLeaderboardGroups,
             Iterable<LeaderboardGroupDTO> leaderboardGroupsOfEvent, DialogCallback<EventDTO> callback) {
         super(stringMessages.event(), null, stringMessages.ok(), stringMessages.cancel(), validator, callback);
+        this.storageServiceAvailable = new FileStorageServiceConnectionTestObservable(sailingService);
         this.stringMessages = stringMessages;
         this.availableLeaderboardGroupsByName = new HashMap<>();
         for (final LeaderboardGroupDTO lgDTO : availableLeaderboardGroups) {
@@ -170,8 +172,8 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
                 new StringConstantsListEditorComposite.ExpandedUi(stringMessages, IconResources.INSTANCE.removeIcon(),
                         leaderboardGroupNames, stringMessages.selectALeaderboardGroup()));
         leaderboardGroupList.addValueChangeHandler(valueChangeHandler);
-        imagesListComposite = new ImagesListComposite(sailingService, stringMessages);
-        videosListComposite = new VideosListComposite(stringMessages);
+        imagesListComposite = new ImagesListComposite(sailingService, stringMessages, storageServiceAvailable);
+        videosListComposite = new VideosListComposite(stringMessages, storageServiceAvailable);
         externalLinksComposite = new ExternalLinksComposite(stringMessages);
         final List<String> suggestedWindFinderSpotCollections = AvailableWindFinderSpotCollections
                 .getAllAvailableWindFinderSpotCollectionsInAlphabeticalOrder() == null ? Collections.emptyList()
@@ -236,7 +238,7 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
         formGrid.setWidget(rowIndex++, 1, startDateBox);
         formGrid.setWidget(rowIndex, 0, new Label(stringMessages.endDate() + ":"));
         formGrid.setWidget(rowIndex++, 1, endDateBox);
-        formGrid.setWidget(rowIndex, 0, new Label(stringMessages.isPublic() + ":"));
+        formGrid.setWidget(rowIndex, 0, new Label(stringMessages.isListedOnHomepage() + ":"));
         formGrid.setWidget(rowIndex++, 1, isPublicCheckBox);
         formGrid.setWidget(rowIndex, 0, new Label(stringMessages.eventBaseURL() + ":"));
         formGrid.setWidget(rowIndex++, 1, baseURLEntryField);

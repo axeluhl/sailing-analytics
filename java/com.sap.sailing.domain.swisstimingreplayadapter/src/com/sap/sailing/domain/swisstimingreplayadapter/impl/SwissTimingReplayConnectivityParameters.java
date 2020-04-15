@@ -1,9 +1,9 @@
 package com.sap.sailing.domain.swisstimingreplayadapter.impl;
 
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
@@ -12,23 +12,27 @@ import com.sap.sailing.domain.tracking.AbstractRaceTrackerImpl;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceTracker;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceTrackingConnectivityParameters;
 import com.sap.sse.common.Util;
 
 public class SwissTimingReplayConnectivityParameters extends AbstractRaceTrackingConnectivityParameters {
+
+    private static final long serialVersionUID = -1380661620949638776L;
+
     public static final String TYPE = "SWISS_TIMING_REPLAY";
     
     private final boolean useInternalMarkPassingAlgorithm;
-    private final DomainFactory domainFactory;
+    private final transient DomainFactory domainFactory;
     private final String boatClassName;
-    private final RaceLogStore raceLogStore;
-    private final RegattaLogStore regattaLogStore;
+    private final transient RaceLogStore raceLogStore;
+    private final transient RegattaLogStore regattaLogStore;
     private final String raceName;
     private final String raceID;
     private final String link;
-    private final SwissTimingReplayService replayService;
+    private final transient SwissTimingReplayService replayService;
     
     class SwissTimingReplayRaceTracker extends AbstractRaceTrackerImpl {
         private final WindStore windStore;
@@ -133,22 +137,26 @@ public class SwissTimingReplayConnectivityParameters extends AbstractRaceTrackin
 
     @Override
     public RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry, final WindStore windStore,
-            RaceLogResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, long timeoutInMilliseconds) throws Exception {
+            RaceLogAndTrackedRaceResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver,
+            long timeoutInMilliseconds, RaceTrackingHandler raceTrackingHandler) throws Exception {
         SwissTimingReplayToDomainAdapter listener = new SwissTimingReplayToDomainAdapter(/* regatta */ null, raceName,
                 raceID, domainFactory.getBaseDomainFactory().getOrCreateBoatClass(boatClassName), domainFactory,
                 trackedRegattaRegistry, useInternalMarkPassingAlgorithm, raceLogResolver, raceLogStore,
-                regattaLogStore, l->new SwissTimingReplayRaceTracker(windStore, l, this));
+                regattaLogStore, l->new SwissTimingReplayRaceTracker(windStore, l, this),
+                raceTrackingHandler);
         replayService.loadRaceData(link, listener);
         return listener.getTracker();
     }
 
     @Override
     public RaceTracker createRaceTracker(Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry,
-            WindStore windStore, RaceLogResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, long timeoutInMilliseconds) throws Exception {
+            WindStore windStore, RaceLogAndTrackedRaceResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver,
+            long timeoutInMilliseconds, RaceTrackingHandler raceTrackingHandler) throws Exception {
         SwissTimingReplayToDomainAdapter listener = new SwissTimingReplayToDomainAdapter(regatta, raceName,
                 raceID, domainFactory.getBaseDomainFactory().getOrCreateBoatClass(boatClassName),
                 domainFactory, trackedRegattaRegistry, useInternalMarkPassingAlgorithm, raceLogResolver,
-                raceLogStore, regattaLogStore, l->new SwissTimingReplayRaceTracker(windStore, l, this));
+                raceLogStore, regattaLogStore, l->new SwissTimingReplayRaceTracker(windStore, l, this),
+                raceTrackingHandler);
         replayService.loadRaceData(link, listener);
         return listener.getTracker();
     }
@@ -189,5 +197,10 @@ public class SwissTimingReplayConnectivityParameters extends AbstractRaceTrackin
 
     public String getLink() {
         return link;
+    }
+    
+    @Override
+    public String toString() {
+        return getClass().getSimpleName()+" for "+raceName+"/"+raceID+", link: "+link+", boatClassName: "+boatClassName;
     }
 }

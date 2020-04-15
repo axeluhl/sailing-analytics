@@ -61,7 +61,7 @@ public class EventDetailsComposite extends Composite  {
         venueName = createLabelAndValueWidget(grid, currentRow++, stringMessages.venue(), "VenueLabel");
         startDate = createLabelAndValueWidget(grid, currentRow++, stringMessages.startDate(), "StartDateLabel");
         endDate = createLabelAndValueWidget(grid, currentRow++, stringMessages.endDate(), "EndDateLabel");
-        isPublic = createLabelAndValueWidget(grid, currentRow++, stringMessages.isPublic(), "IsPublicLabel");
+        isPublic = createLabelAndValueWidget(grid, currentRow++, stringMessages.isListedOnHomepage(), "IsPublicLabel");
         officialWebsiteURL = createLabelAndAnchorWidget(grid, currentRow++, stringMessages.eventOfficialWebsiteURL(), "OfficialWebsiteURLLabel");
         baseURL = createLabelAndAnchorWidget(grid, currentRow++, stringMessages.eventBaseURL(), "BaseURLLabel");
         sailorsInfoWebsiteURLList = createLabelAndAnchorListWidget(grid, currentRow++, stringMessages.eventSailorsInfoWebsiteURL(), "SailorsInfoWebsiteURLLabel");

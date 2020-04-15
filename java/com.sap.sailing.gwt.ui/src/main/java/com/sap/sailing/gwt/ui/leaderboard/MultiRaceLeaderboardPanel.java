@@ -1,35 +1,40 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardSettingsDialogComponent;
+import com.sap.sailing.gwt.ui.actions.GetLeaderboardByNameAction;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.controls.AbstractSortableColumnWithMinMax;
 import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorRaceRankFilter;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.BinaryOperator;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.async.AsyncAction;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.celltable.AbstractSortableColumnWithMinMax;
 import com.sap.sse.gwt.client.player.Timer;
+import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
@@ -40,17 +45,6 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
  * not possible to only show a physical race.
  */
 public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderboardSettings> {
-
-    public MultiRaceLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
-            SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
-            MultiRaceLeaderboardSettings settings, boolean isEmbedded,
-            CompetitorSelectionProvider competitorSelectionProvider, String leaderboardGroupName,
-            String leaderboardName, ErrorReporter errorReporter, StringMessages stringMessages, boolean showRaceDetails,
-            LeaderBoardStyle style, FlagImageResolver flagImageResolver, Iterable<DetailType> availableDetailTypes) {
-        super(parent, context, sailingService, asyncActionsExecutor, settings, isEmbedded, competitorSelectionProvider,
-                leaderboardGroupName, leaderboardName, errorReporter, stringMessages, showRaceDetails, style, flagImageResolver, availableDetailTypes);
-        initialize(settings);
-    }
 
     public MultiRaceLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
@@ -108,19 +102,12 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderb
 
     @Override
     protected boolean canShowCompetitorBoatInfo() {
-        boolean isMetaLeaderboard = leaderboard.type == LeaderboardType.FlexibleMetaLeaderboard || leaderboard.type == LeaderboardType.RegattaMetaLeaderboard;
-        return this.leaderboard.canBoatsOfCompetitorsChangePerRace == false && !isMetaLeaderboard;
+        return !this.leaderboard.canBoatsOfCompetitorsChangePerRace && !leaderboard.type.isMetaLeaderboard();
     }
 
     @Override
     public String getCompetitorColor(CompetitorDTO competitor) {
-        // not used for multi
-        return null;
-    }
-
-    @Override
-    public boolean renderBoatColorIfNecessary(CompetitorDTO competitor, SafeHtmlBuilder sb) {
-        return false;
+        return null; // Not used in multi-race leaderboard
     }
 
     @Override
@@ -131,7 +118,7 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderb
     @Override
     protected MultiRaceLeaderboardSettings overrideDefaultsForNamesOfRaceColumns(
             MultiRaceLeaderboardSettings currentSettings, LeaderboardDTO result) {
-        return currentSettings.overrideDefaultsForNamesOfRaceColumns(result.getNamesOfRaceColumns());
+        return currentSettings.withNamesOfRaceColumnsToShowDefaults(result.getNamesOfRaceColumns());
     }
 
     @Override
@@ -170,8 +157,8 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderb
     @Override
     public SettingsDialogComponent<MultiRaceLeaderboardSettings> getSettingsDialogComponent(
             MultiRaceLeaderboardSettings useTheseSettings) {
-        return new MultiRaceLeaderboardSettingsDialogComponent((MultiRaceLeaderboardSettings) useTheseSettings,
-                leaderboard.getNamesOfRaceColumns(), stringMessages, availableDetailTypes, !leaderboard.canBoatsOfCompetitorsChangePerRace);
+        return new MultiRaceLeaderboardSettingsDialogComponent(useTheseSettings, leaderboard.getNamesOfRaceColumns(),
+                stringMessages, availableDetailTypes, canShowCompetitorBoatInfo());
     }
 
     @Override
@@ -238,5 +225,39 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderb
                 autoExpandPerformedOnce = true;
             }
         }
+    }
+
+    @Override
+    protected void updateLeaderboardAndRun(Runnable callWhenExpansionDataIsLoaded) {
+        final LeaderboardDTO previousLeaderboard = getLeaderboard();
+        getSailingService().getLeaderboardByName(getLeaderboardName(),
+                timer.getPlayMode() == PlayModes.Live ? null : getLeaderboardDisplayDate(),
+                /* namesOfRacesForWhichToLoadLegDetails */getNamesOfExpandedRaceColumns(), shallAddOverallDetails(),
+                previousLeaderboard.getId(), /* fillTotalPointsUncorrected */ false,
+                new MarkedAsyncCallback<IncrementalOrFullLeaderboardDTO>(
+                        new AsyncCallback<IncrementalOrFullLeaderboardDTO>() {
+                            @Override
+                            public void onSuccess(IncrementalOrFullLeaderboardDTO result) {
+                                updateLeaderboard(result.getLeaderboardDTO(previousLeaderboard));
+                                callWhenExpansionDataIsLoaded.run();
+                            }
+
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                getErrorReporter().reportError(
+                                        stringMessages.errorTryingToObtainLeaderboardContents(caught.getMessage()),
+                                        true /* silentMode */);
+                            }
+                        }));
+    }
+
+    @Override
+    protected AsyncAction<LeaderboardDTO> getRetrieverAction() {
+        final Date date = getLeaderboardDisplayDate();
+        return new GetLeaderboardByNameAction(getSailingService(), getLeaderboardName(),
+                useNullAsTimePoint() ? null : date,
+                /* namesOfRaceColumnsForWhichToLoadLegDetails */getNamesOfExpandedRaceColumns(),
+                shallAddOverallDetails(), /* previousLeaderboard */
+                getLeaderboard(), isFillTotalPointsUncorrected(), timer, getErrorReporter(), stringMessages);
     }
 }

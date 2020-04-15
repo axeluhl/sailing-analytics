@@ -35,6 +35,7 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
@@ -185,6 +186,7 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
         
         sortByPanel = new HorizontalPanel();
         sortByPanel.setSpacing(5);
+        sortByPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         sortByPanel.add(new Label(getDataMiningStringMessages().sortBy() + ":"));
         keyComparatorListBox = new ValueListBox<>(new AbstractRenderer<Comparator<?>>() {
             @Override
@@ -202,6 +204,7 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
 
         HorizontalPanel decimalsPanel = new HorizontalPanel();
         decimalsPanel.setSpacing(5);
+        decimalsPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         decimalsPanel.add(new Label(getDataMiningStringMessages().shownDecimals() + ":"));
         decimalsListBox = new ValueListBox<Integer>(new SimpleObjectRenderer<Integer>());
         decimalsPanel.add(decimalsListBox);
@@ -216,6 +219,7 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
         
         HorizontalPanel showDataLabelsPanel = new HorizontalPanel();
         showDataLabelsPanel.setSpacing(5);
+        showDataLabelsPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         showDataLabelsPanel.add(new Label(getDataMiningStringMessages().showDataLabels() + ":"));
         showDataLabelsCheckBox = new CheckBox();
         showDataLabelsPanel.add(showDataLabelsCheckBox);
@@ -256,7 +260,6 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
         updateKeyComparatorListBox();
         resetChartSeries();
         updateChartLabels();
-        updateChartSubtitle();
         showResultData();
     }
 
@@ -291,11 +294,6 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
     private void updateChartLabels() {
         chart.getYAxis().setAxisTitleText(getCurrentResult().getResultSignifier());
         chart.setToolTip(new ToolTip().setValueDecimals(decimalsListBox.getValue()));
-    }
-
-    private void updateChartSubtitle() {
-        chart.setChartSubtitle(new ChartSubtitle().setText(getDataMiningStringMessages().queryResultsChartSubtitle(
-                getCurrentResult().getRetrievedDataAmount(), getCurrentResult().getCalculationTimeInSeconds())));
     }
 
     private void showResultData() {
@@ -435,8 +433,8 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
     private Chart createChart() {
         Chart chart = new Chart().setType(Series.Type.COLUMN).setMarginLeft(100).setMarginRight(45).setWidth100()
                 .setHeight100().setBorderColor(new Color("#F0AB00")).setPlotBorderWidth(0)
-                .setCredits(new Credits().setEnabled(false))
-                .setChartTitle(new ChartTitle().setText(getDataMiningStringMessages().dataMiningResult()));
+                .setTitle(new ChartTitle().setText(""), new ChartSubtitle().setText(""))
+                .setCredits(new Credits().setEnabled(false));
         chart.setExporting(new Exporting().setEnabled(false));
         chart.getXAxis().setAllowDecimals(false);
         chart.getYAxis().setAxisTitleText("Result").setLabels(new YAxisLabels().setFormatter(new AxisLabelsFormatter() {

@@ -3,6 +3,7 @@ package com.sap.sse.common;
 import java.io.Serializable;
 
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
+import com.sap.sse.common.impl.SecondsDurationImpl;
 
 /**
  * A time duration that can be converted to various time units and that interoperates with {@link TimePoint}.
@@ -12,7 +13,13 @@ import com.sap.sse.common.impl.MillisecondsDurationImpl;
  */
 public interface Duration extends Serializable, Comparable<Duration> {
     
+    /**
+     * This NULL {@link Duration} is defined as a {@link MillisecondsDurationImpl}, therefore it is only accurate up to
+     * full milliseconds. If a higher accuracy for calculations is needed (like in the case of
+     * {@link ORCPerformanceCurve}), it is recommended to use a new {@link SecondsDurationImpl} object instead.
+     */
     static final Duration NULL = new MillisecondsDurationImpl(0);
+    static final Duration ONE_MILLISECOND = new MillisecondsDurationImpl(1);
     static final Duration ONE_SECOND = new MillisecondsDurationImpl(1000);
     static final Duration ONE_MINUTE = ONE_SECOND.times(60);
     static final Duration ONE_HOUR = ONE_MINUTE.times(60);

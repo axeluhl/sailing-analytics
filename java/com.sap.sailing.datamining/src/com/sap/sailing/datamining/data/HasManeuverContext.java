@@ -26,7 +26,7 @@ public interface HasManeuverContext extends HasManeuver, HasTrackedLegOfCompetit
     Double getAbsoluteDirectionChangeInDegrees();
 
     @Statistic(messageKey = "ManeuverLoss", resultDecimals = 0, ordinal = 4)
-    Distance getManeuverLoss();
+    Distance getManeuverLossDistanceLost();
     
     @Statistic(messageKey = "WindSpeedVsManeuverLoss", resultDecimals = 2, ordinal = 4)
     Pair<Double, Double> getWindSpeedVsManeuverLoss();

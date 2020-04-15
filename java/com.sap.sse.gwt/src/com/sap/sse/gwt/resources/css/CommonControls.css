@@ -167,49 +167,83 @@ body ::-webkit-scrollbar-track {
 	top: 3px;
 }
 
-.gwt-SplitLayoutPanel-EastToggleButton-Panel {
+.gwt-SplitLayoutPanel-EastToggleButton-Panel,
+.gwt-SplitLayoutPanel-WestToggleButton-Panel {
 	position: absolute;
 	bottom: -10px;
 }
 
-.gwt-SplitLayoutPanel-EastToggleButton {
-	height: 40px;
-	background-color: white;
-	border: none;
-	-webkit-transform: rotate(-90deg);
-	-moz-transform: rotate(-90deg);
-	-o-transform: rotate(-90deg);
-	-ms-transform: rotate(-90deg);
-	transform: rotate(-90deg);
-	-webkit-transform-origin: 0 0;
-	-moz-transform-origin: 0 0;
-	-o-transform-origin: 0 0;
-	-ms-transform-origin: 0 0;
-	transform-origin: 0 0;
-	padding-right: 25px;
-	padding-left: 30px;
-	border-bottom: 1px solid #cecece;
-	border-right: 1px solid #cecece;
-	border-left: 1px solid #cecece;
-	border-bottom-right-radius: 10px;
-	border-bottom-left-radius: 10px;
+.gwt-SplitLayoutPanel-WestToggleButton-Panel {
+	right: 0;
 }
 
-.gwt-SplitLayoutPanel-EastToggleButton-Open {
+.gwt-SplitLayoutPanel-EastToggleButton,
+.gwt-SplitLayoutPanel-WestToggleButton {
+	height: 40px;
+    background-color: white;
+    border: none;
+    border-right: 1px solid #cecece;
+    border-left: 1px solid #cecece;
+}
+
+.gwt-SplitLayoutPanel-EastToggleButton {
+	-webkit-transform-origin: 0 0;
+    -moz-transform-origin: 0 0;
+    -o-transform-origin: 0 0;
+    -ms-transform-origin: 0 0;
+    transform-origin: 0 0;
+    -webkit-transform: rotate(-90deg);
+    -moz-transform: rotate(-90deg);
+    -o-transform: rotate(-90deg);
+    -ms-transform: rotate(-90deg);
+    transform: rotate(-90deg);
+    border-bottom: 1px solid #cecece;
+	border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+	padding-right: 25px;
+	padding-left: 30px;
+}
+
+.gwt-SplitLayoutPanel-WestToggleButton {
+	position: absolute;
+	right: -1px;
+	bottom: 0;
+	-webkit-transform-origin: 100% 0;
+    -moz-transform-origin: 100% 0;
+    -o-transform-origin: 100% 0;
+    -ms-transform-origin: 100% 0;
+    transform-origin: 100% 0;
+    -webkit-transform: rotate(-90deg) translate(100%, -100%);
+    -moz-transform: rotate(-90deg) translate(100%, -100%);
+    -o-transform: rotate(-90deg) translate(100%, -100%);
+    -ms-transform: rotate(-90deg) translate(100%, -100%);
+    transform: rotate(-90deg) translate(100%, -100%);
+    border-top: 1px solid #cecece;
+	border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    padding-right: 25px;
+    padding-left: 30px;
+}
+
+.gwt-SplitLayoutPanel-EastToggleButton-Open,
+.gwt-SplitLayoutPanel-WestToggleButton-Closed {
 	background: white url(images/arrows_top_black_small.png) 96% 50%
 		no-repeat;
 }
 
-.gwt-SplitLayoutPanel-EastToggleButton-Closed {
+.gwt-SplitLayoutPanel-EastToggleButton-Closed,
+.gwt-SplitLayoutPanel-WestToggleButton-Open {
 	background: white url(images/arrows_bottom_black_small.png) 96% 50%
 		no-repeat;
 }
 
-.gwt-SplitLayoutPanel-EastToggleButton:hover {
+.gwt-SplitLayoutPanel-EastToggleButton:hover,
+.gwt-SplitLayoutPanel-WestToggleButton:hover {
 	background-color: #ececec;
 }
 
-.gwt-SplitLayoutPanel-EastToggleButton:focus {
+.gwt-SplitLayoutPanel-EastToggleButton:focus,
+.gwt-SplitLayoutPanel-WestToggleButton:focus {
 	outline: 0 !important;
 }
 
@@ -244,19 +278,32 @@ body ::-webkit-scrollbar-track {
 	background-color: #ececec;
 }
 
-.gwt-SplitLayoutPanel-HDragger {
+.gwt-SplitLayoutPanel-HDragger,
+.gwt-SplitLayoutPanel-HDragger-Inverted {
 	position: absolute;
-	height: 60px !important;
-	width: 25px !important;
-	margin-left: 3px;
-	top: 40% !important;
-	background: #ffffff url(images/thumb_vertical.png) 70% 50% no-repeat;
-	border: 2px solid #cecece;
-	border-left: 0px;
-	cursor: col-resize;
+    height: 60px !important;
+    width: 25px !important;
+    margin-left: 3px;
+    top: 40% !important;
+    background: #ffffff url(images/thumb_vertical.png) 70% 50% no-repeat;
+    background-position: center;
+    border: 2px solid #cecece;
+    cursor: col-resize;
+    z-index: 1;
+}
+
+.gwt-SplitLayoutPanel-HDragger {
 	border-top-right-radius: 25px;
 	border-bottom-right-radius: 25px;
-	z-index: 1;
+	border-left: 0;
+}
+
+.gwt-SplitLayoutPanel-HDragger-Inverted {
+    border-top-left-radius: 25px;
+    border-bottom-left-radius: 25px;
+    border-right: 0;
+    /* margin-left needs to be (-1) * width */
+    margin-left: -25px;
 }
 
 .SplitLayoutPanel-Divider-Horizontal {
@@ -682,7 +729,7 @@ body ::-webkit-scrollbar-track {
 }
 
 .gwt-Button, .gwt-Button:visited {
-	font-size: 0, 9rem;
+	font-size: 0.9rem;
 	display: inline-block;
 	color: #fff;
 	border: none;

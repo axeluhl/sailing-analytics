@@ -25,7 +25,7 @@
                         <ui:text from='{i18n.footerPrivacy}' />
                     </a>
                     |
-                    <a href="https://jobs.sapsailing.com" target="_blank">
+                    <a href="https://jobs.sap.com" target="_blank">
 	                   <ui:text from='{i18n.footerJobs}'/>
 	                </a>
                     <br></br>

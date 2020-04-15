@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.ConnectException;
+import java.net.SocketException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -16,10 +17,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Random;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -34,11 +39,17 @@ import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Util;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
+import com.sap.sse.replication.OperationsToMasterSender;
+import com.sap.sse.replication.OperationsToMasterSendingQueue;
+import com.sap.sse.replication.ReplicaDescriptor;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicablesProvider;
 import com.sap.sse.replication.ReplicablesProvider.ReplicableLifeCycleListener;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
+import com.sap.sse.replication.ReplicationReceiver;
 import com.sap.sse.replication.ReplicationService;
+import com.sap.sse.replication.ReplicationStatus;
+import com.sap.sse.replication.persistence.MongoObjectFactory;
 import com.sap.sse.util.HttpUrlConnectionHelper;
 
 import net.jpountz.lz4.LZ4BlockInputStream;
@@ -53,7 +64,7 @@ import net.jpountz.lz4.LZ4BlockOutputStream;
  * 
  * The observers are registered only when there are replicas registered. If the last replica is de-registered, the
  * service stops observing the {@link Replicable}. Operations received that require replication are sent to the
- * {@link Exchange} to which replica queues can bind, using a {@link ReplicationReceiver}. By prefixing each message
+ * {@link Exchange} to which replica queues can bind, using a {@link ReplicationReceiverImpl}. By prefixing each message
  * with the {@link Object#toString()} representation of the {@link Replicable}'s {@link Replicable#getId() ID} the
  * receiver can determine to which {@link Replicable} to forward the operation. As such, this service multiplexes the
  * replication channels for potentially many {@link Replicable}s living in this server instance.
@@ -71,7 +82,7 @@ import net.jpountz.lz4.LZ4BlockOutputStream;
  * @author Frank Mittag, Axel Uhl (d043530)
  * 
  */
-public class ReplicationServiceImpl implements ReplicationService {
+public class ReplicationServiceImpl implements ReplicationService, OperationsToMasterSendingQueue {
     private static final Logger logger = Logger.getLogger(ReplicationServiceImpl.class.getName());
 
     private final ReplicationInstancesManager replicationInstancesManager;
@@ -88,7 +99,7 @@ public class ReplicationServiceImpl implements ReplicationService {
     /**
      * The UUIDs with which this replica is registered by the master identified by the corresponding key
      */
-    private final Map<ReplicationMasterDescriptor, String> replicaUUIDs;
+    private final ConcurrentMap<ReplicationMasterDescriptor, String> replicaUUIDs;
 
     /**
      * Channel used by a master server to publish replication operations; <code>null</code> in servers that don't have
@@ -121,17 +132,19 @@ public class ReplicationServiceImpl implements ReplicationService {
      * For this instance running as a replica, the replicator receives messages from the master's queue and applies them
      * to the local replica.
      */
-    private ReplicationReceiver replicator;
+    private ReplicationReceiverImpl replicator;
 
-    private final Map<String, ReplicationServiceExecutionListener<?>> executionListenersByReplicableIdAsString;
+    private final ConcurrentMap<String, ReplicationServiceExecutionListener<?>> executionListenersByReplicableIdAsString;
 
     private Thread replicatorThread;
 
     /**
      * Used to synchronize write access and replacements of {@link #outboundBuffer}, {@link #outboundObjectBuffer} and
-     * {@link #outboundBufferClasses} when the timer scoops up the messages to send.
+     * {@link #outboundBufferClasses} when the timer scoops up the messages to send. Ensure we get a unique object
+     * by using a random number appended to an empty string; otherwise, string collation may collate different monitors
+     * constructed from equal string literals.
      */
-    private final Object outboundBufferMonitor = "";
+    private final Object outboundBufferMonitor = ""+new Random().nextDouble();
 
     /**
      * Sending operations as serialized Java objects using binary RabbitMQ messages comes at an overhead. To reduce the
@@ -187,6 +200,8 @@ public class ReplicationServiceImpl implements ReplicationService {
      * 
      */
     private TimerTask sendingTask;
+    
+    private final UnsentOperationsSenderJob unsentOperationsSenderJob;
 
     /**
      * Defines for how many milliseconds the {@link #timer} will wait since the first operation has been added to an
@@ -214,6 +229,20 @@ public class ReplicationServiceImpl implements ReplicationService {
      * to replicate from that master should be started.
      */
     private final Map<ReplicationMasterDescriptor, InitialLoadRequest> initialLoadChannels;
+
+    /**
+     * Will be set
+     */
+    private volatile boolean replicationStarting;
+
+    /**
+     * An optional link to a persistence layer that allows this service to record replicas
+     * registered at this server, so that optionally during a re-start those replica
+     * links can be re-established.
+     */
+    private final Optional<MongoObjectFactory> mongoObjectFactory;
+    
+    private final Set<ReplicationStartingListener> replicationStartingListeners;
 
     private static class InitialLoadRequest {
         private final Channel channelForInitialLoad;
@@ -279,11 +308,28 @@ public class ReplicationServiceImpl implements ReplicationService {
     public ReplicationServiceImpl(String exchangeName, String exchangeHost, int exchangePort,
             final ReplicationInstancesManager replicationInstancesManager, ReplicablesProvider replicablesProvider)
             throws IOException {
+        this(/* defaultMongoObjectFactory */ Optional.empty(), exchangeName, exchangeHost, exchangePort,
+                replicationInstancesManager, replicablesProvider);
+    }
+
+    public ReplicationServiceImpl(Optional<MongoObjectFactory> optionalMongoObjectFactory, String exchangeName,
+            String exchangeHost, int exchangePort, ReplicationInstancesManager replicationInstancesManager,
+            ReplicablesProvider replicablesProvider) throws IOException {
+        this(/* replicasToAssumeConnectedToThisMaster */ null, optionalMongoObjectFactory,
+                exchangeName, exchangeHost, exchangePort, replicationInstancesManager, replicablesProvider);
+    }
+
+    public ReplicationServiceImpl(Iterable<ReplicaDescriptor> replicasToAssumeConnectedToThisMaster,
+            Optional<MongoObjectFactory> optionalMongoObjectFactory, String exchangeName, String exchangeHost, int exchangePort,
+            ReplicationInstancesManager replicationInstancesManager, ReplicablesProvider replicablesProvider) throws IOException {
+        this.mongoObjectFactory = optionalMongoObjectFactory;
+        this.replicationStartingListeners = new HashSet<>();
         timer = new Timer("ReplicationServiceImpl timer for delayed task sending", /* isDaemon */ true);
-        executionListenersByReplicableIdAsString = new HashMap<>();
+        unsentOperationsSenderJob = new UnsentOperationsSenderJob();
+        executionListenersByReplicableIdAsString = new ConcurrentHashMap<>();
         initialLoadChannels = new ConcurrentHashMap<>();
         this.replicationInstancesManager = replicationInstancesManager;
-        replicaUUIDs = new HashMap<ReplicationMasterDescriptor, String>();
+        replicaUUIDs = new ConcurrentHashMap<ReplicationMasterDescriptor, String>();
         this.replicablesProvider = replicablesProvider;
         this.exchangeName = exchangeName;
         this.exchangeHost = exchangeHost;
@@ -292,6 +338,11 @@ public class ReplicationServiceImpl implements ReplicationService {
         replicator = null;
         serverUUID = UUID.randomUUID();
         logger.info("Setting " + serverUUID.toString() + " as unique replication identifier.");
+        if (replicasToAssumeConnectedToThisMaster != null) {
+            for (final ReplicaDescriptor replica : replicasToAssumeConnectedToThisMaster) {
+                registerReplica(replica);
+            }
+        }
     }
 
     @Override
@@ -309,7 +360,8 @@ public class ReplicationServiceImpl implements ReplicationService {
         return replicablesProvider;
     }
 
-    protected ReplicationReceiver getReplicator() {
+    @Override
+    public ReplicationReceiver getReplicator() {
         return replicator;
     }
 
@@ -351,8 +403,11 @@ public class ReplicationServiceImpl implements ReplicationService {
     @Override
     public void registerReplica(ReplicaDescriptor replica) throws IOException {
         synchronized (replicationInstancesManager) {
+            // due to different replicables to be replicated for replica, ensure that all
+            // replicables to be replicated to replica are actually observed:
+            addAsListenerToReplicables(replica.getReplicableIdsAsStrings());
+            // need to establish the outbound messaging channel only when this is the first replica to be added:
             if (!replicationInstancesManager.hasReplicas()) {
-                addAsListenerToReplicables(replica.getReplicableIdsAsStrings());
                 synchronized (this) {
                     if (masterChannel == null) {
                         masterChannel = createMasterChannelAndDeclareFanoutExchange();
@@ -360,8 +415,17 @@ public class ReplicationServiceImpl implements ReplicationService {
                 }
             }
             replicationInstancesManager.registerReplica(replica);
+            recordRegisteredReplicaPersistently(replica);
         }
         logger.info("Registered replica " + replica);
+    }
+
+    private void recordRegisteredReplicaPersistently(ReplicaDescriptor replica) {
+        mongoObjectFactory.ifPresent(mof->mof.storeReplicaDescriptor(replica));
+    }
+
+    private void removeRegisteredReplicaPersistently(ReplicaDescriptor replica) {
+        mongoObjectFactory.ifPresent(mof->mof.removeReplicaDescriptor(replica));
     }
 
     private void addAsListenerToReplicables(String[] replicableIdsAsStringForReplicablesToReplicate) {
@@ -387,11 +451,16 @@ public class ReplicationServiceImpl implements ReplicationService {
     public ReplicaDescriptor unregisterReplica(UUID replicaUuid) throws IOException {
         logger.info("Unregistering replica with ID " + replicaUuid);
         synchronized (replicationInstancesManager) {
+            final boolean hadReplicas = replicationInstancesManager.hasReplicas();
             final Iterable<String> oldReplicablesInReplication = replicationInstancesManager.getAllReplicableIdsAtLeastOneReplicaIsReplicating();
+            removeRegisteredReplicaPersistently(replicationInstancesManager.getReplicaDescriptor(replicaUuid));
             final ReplicaDescriptor unregisteredReplica = replicationInstancesManager.unregisterReplica(replicaUuid);
             final Iterable<String> newReplicablesInReplication = replicationInstancesManager.getAllReplicableIdsAtLeastOneReplicaIsReplicating();
             for (final String idAsStringOfReplicableNoReplicaIsInterestedInAnymore : Util.removeAll(newReplicablesInReplication, Util.addAll(oldReplicablesInReplication, new HashSet<>()))) {
                 removeAsListenerFromReplicable(idAsStringOfReplicableNoReplicaIsInterestedInAnymore);
+            }
+            if (hadReplicas && !replicationInstancesManager.hasReplicas()) {
+                logger.info("Last replica got unregistered. Stopping to send out operations and closing outbound queue.");
                 synchronized (this) {
                     if (masterChannel != null) {
                         masterChannel.getConnection().close();
@@ -456,7 +525,7 @@ public class ReplicationServiceImpl implements ReplicationService {
                 outboundBufferClasses = new ArrayList<>();
             }
             outboundObjectBuffer.writeObject(serializedOperation);
-            outboundBufferClasses.add(operation.getClass());
+            outboundBufferClasses.add(operation.getClassForLogging());
             if (outboundBuffer.size() > TRIGGER_MESSAGE_SIZE_IN_BYTES) {
                 logger.info("Triggering replication because buffer holds " + outboundBuffer.size()
                         + " bytes which exceeds trigger size " + TRIGGER_MESSAGE_SIZE_IN_BYTES + " bytes");
@@ -570,7 +639,8 @@ public class ReplicationServiceImpl implements ReplicationService {
     /**
      * The peer for this method is
      * {@link ReplicationServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)}
-     * which implements the initial load sending process.
+     * which implements the initial load sending process. This method will return only after the initial load for all
+     * replicas described in the {@code master} descriptor has completed.
      */
     @Override
     public void startToReplicateFrom(final ReplicationMasterDescriptor master)
@@ -582,7 +652,7 @@ public class ReplicationServiceImpl implements ReplicationService {
             final Iterable<Replicable<?, ?>> replicables = master.getReplicables();
             logger.info("Starting to replicate from " + master);
             try {
-                registerReplicaWithMaster(master, replicables);
+                registerReplicaWithMaster(master);
             } catch (Exception ex) {
                 logger.log(Level.SEVERE, "ERROR", ex);
                 throw ex;
@@ -592,30 +662,44 @@ public class ReplicationServiceImpl implements ReplicationService {
             QueueingConsumer consumer = null;
             // logging exception here because it will not propagate
             // thru the client with all details
+            final Timer timer = new Timer("RabbitMQ Connection Timeout Logger", /* isDaemon */ true);
+            final int LOGGING_TIMEOUT_IN_SECONDS = 10;
+            timer.scheduleAtFixedRate(new TimerTask() {
+                @Override
+                public void run() {
+                    logger.warning("RabbitMQ connection to "+master+
+                            " was not obtained in "+LOGGING_TIMEOUT_IN_SECONDS+"s. Keeping trying...");
+                }
+            }, LOGGING_TIMEOUT_IN_SECONDS*1000, LOGGING_TIMEOUT_IN_SECONDS*1000);
+            logger.info("Connecting to message queue " + master);
             try {
-                logger.info("Connecting to message queue " + master);
                 consumer = master.getConsumer();
             } catch (Exception ex) {
                 logger.log(Level.SEVERE, "ERROR", ex);
                 replicatingFromMaster = null;
                 throw ex;
+            } finally {
+                timer.cancel();
             }
             logger.info("Connection to exchange successful.");
             final URL initialLoadURL = master.getInitialLoadURL(replicables);
             logger.info("Initial load URL is " + initialLoadURL);
             // start receiving messages already now, but start in suspended mode
-            replicator = new ReplicationReceiver(master, replicablesProvider, /* startSuspended */true, consumer);
+            replicator = new ReplicationReceiverImpl(master, replicablesProvider, /* startSuspended */ true, consumer);
             // clear Replicable state here, before starting to receive and de-serialize operations which builds up
             // new state, e.g., in competitor store
             for (Replicable<?, ?> r : replicables) {
                 r.clearReplicaState();
+                r.setUnsentOperationToMasterSender(this);
                 r.startedReplicatingFrom(master);
             }
             replicatorThread = new Thread(replicator, "Replicator receiving from " + master.getMessagingHostname() + "/"
                     + master.getExchangeName());
             replicatorThread.start();
             logger.info("Started replicator thread");
-            final InputStream is = initialLoadURL.openStream();
+            final URLConnection initialLoadConnection = HttpUrlConnectionHelper
+                    .redirectConnectionWithBearerToken(initialLoadURL, master.getBearerToken());
+            final InputStream is = (InputStream) initialLoadConnection.getContent();
             final InputStreamReader queueNameReader = new InputStreamReader(is);
             final String queueName = new BufferedReader(queueNameReader).readLine();
             queueNameReader.close();
@@ -654,27 +738,30 @@ public class ReplicationServiceImpl implements ReplicationService {
     }
 
     /**
-     * @param replicables
-     *            the replica is registered for these {@link Replicable}s. The master sends operations only for
-     *            replicables that at least one replica has registered for. This may mean that operations are received
-     *            for replicables for which no replicable was requested. Replicas shall drop such operations silently.
-     * 
      * @return the UUID that the master generated for this client which is also entered into {@link #replicaUUIDs}
      */
-    private String registerReplicaWithMaster(ReplicationMasterDescriptor master, Iterable<Replicable<?, ?>> replicables) throws IOException,
+    private String registerReplicaWithMaster(ReplicationMasterDescriptor master) throws IOException,
             ClassNotFoundException {
         URL replicationRegistrationRequestURL = master.getReplicationRegistrationRequestURL(getServerIdentifier(),
                 ServerInfo.getBuildVersion());
-        final URLConnection registrationRequestConnection = HttpUrlConnectionHelper.redirectConnection(replicationRegistrationRequestURL);
+        logger.info("Replication registration request URL: "+replicationRegistrationRequestURL);
+        final URLConnection registrationRequestConnection = HttpUrlConnectionHelper
+                .redirectConnectionWithBearerToken(replicationRegistrationRequestURL, master.getBearerToken());
         final InputStream content = (InputStream) registrationRequestConnection.getContent();
         final StringBuilder uuid = new StringBuilder();
         final byte[] buf = new byte[256];
         int read = content.read(buf);
         while (read != -1) {
             uuid.append(new String(buf, 0, read));
-            read = content.read(buf);
+            try {
+                read = content.read(buf);
+            } catch (SocketException e) {
+                // the connection may have been closed already; interpret this as the end of the stream
+                read = -1;
+            }
         }
         final String replicaUUID = uuid.toString();
+        logger.info("Obtained replica UUID "+replicaUUID+" from master");
         registerReplicaUuidForMaster(replicaUUID, master);
         return replicaUUID;
     }
@@ -684,7 +771,8 @@ public class ReplicationServiceImpl implements ReplicationService {
             URL replicationDeRegistrationRequestURL = master
                     .getReplicationDeRegistrationRequestURL(getServerIdentifier());
             logger.info("Unregistering replica from master "+master+" using URL "+replicationDeRegistrationRequestURL);
-            final URLConnection deregistrationRequestConnection = HttpUrlConnectionHelper.redirectConnection(replicationDeRegistrationRequestURL);
+            final URLConnection deregistrationRequestConnection = HttpUrlConnectionHelper
+                    .redirectConnectionWithBearerToken(replicationDeRegistrationRequestURL, master.getBearerToken());
             StringBuilder uuid = new StringBuilder();
             InputStream content = (InputStream) deregistrationRequestConnection.getContent();
             byte[] buf = new byte[256];
@@ -796,4 +884,74 @@ public class ReplicationServiceImpl implements ReplicationService {
         return serverUUID;
     }
 
+    @Override
+    public ReplicationMasterDescriptor createReplicationMasterDescriptor(String messagingHostname, String hostname,
+            String exchangeName, int servletPort, int messagingPort, String queueName, String bearerToken,
+            Iterable<Replicable<?, ?>> replicables) {
+        return new ReplicationMasterDescriptorImpl(messagingHostname, exchangeName, messagingPort, queueName, hostname,
+                servletPort, bearerToken, replicables);
+    }
+
+    
+    @Override
+    public void addReplicationStartingListener(ReplicationStartingListener listener) {
+        synchronized (replicationStartingListeners) {
+            replicationStartingListeners.add(listener);
+        }
+    }
+
+    @Override
+    public void removeReplicationStartingListener(ReplicationStartingListener listener) {
+        synchronized (replicationStartingListeners) {
+            replicationStartingListeners.remove(listener);
+        }
+    }
+
+    @Override
+    public void setReplicationStarting(boolean newReplicationStarting) {
+        synchronized (replicationStartingListeners) {
+            if (this.replicationStarting != newReplicationStarting) {
+                this.replicationStarting = newReplicationStarting;
+                for (final ReplicationStartingListener listener : replicationStartingListeners) {
+                    listener.onReplicationStartingChanged(newReplicationStarting);
+                }
+            }
+        }
+    }
+    
+    @Override
+    public boolean isReplicationStarting() {
+        return this.replicationStarting;
+    }
+
+    @Override
+    public <S, O extends OperationWithResult<S, ?>, T> void scheduleForSending(O operationWithResult, OperationsToMasterSender<S, O> sender) {
+        unsentOperationsSenderJob.scheduleForSending(operationWithResult, sender);
+    }
+
+    @Override
+    public synchronized ReplicationStatus getStatus() {
+        final ReplicationReceiver replicationReceiver = getReplicator();
+        final boolean isReplicationStarting = isReplicationStarting();
+        final boolean isReplica = isReplicationStarting || replicationReceiver != null;
+        final boolean suspended = replicationReceiver == null ? false : replicationReceiver.isSuspended();
+        final boolean stopped = replicationReceiver == null ? false : replicationReceiver.isBeingStopped();
+        long messageQueueLength;
+        if (replicationReceiver == null) {
+            messageQueueLength = 0;
+        } else {
+            try {
+                messageQueueLength = replicationReceiver.getMessageQueueSize();
+            } catch (IllegalAccessException e) {
+                logger.warning("Unable to access replication message queue size: "+e.getMessage()+". Reporting as -1");
+                messageQueueLength = -1;
+            }
+        }
+        final Map<String, Integer> operationQueueLengths = replicationReceiver == null ? new HashMap<>() : replicationReceiver.getOperationQueueSizes();
+        final Map<String, Boolean> isInitialLoadRunning = new HashMap<>();
+        for (final Replicable<?, ?> replicable : getAllReplicables()) {
+            isInitialLoadRunning.put(replicable.getId().toString(), replicable.isCurrentlyFillingFromInitialLoad());
+        }
+        return new ReplicationStatusImpl(isReplica, isReplicationStarting, suspended, stopped, messageQueueLength, isInitialLoadRunning, operationQueueLengths);
+    }
 }

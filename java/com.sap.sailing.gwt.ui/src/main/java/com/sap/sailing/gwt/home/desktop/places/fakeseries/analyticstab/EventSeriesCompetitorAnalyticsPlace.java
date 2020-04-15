@@ -7,10 +7,6 @@ import com.sap.sailing.gwt.home.shared.places.fakeseries.AbstractSeriesPlace;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesContext;
 
 public class EventSeriesCompetitorAnalyticsPlace extends AbstractSeriesTabPlace {
-    public EventSeriesCompetitorAnalyticsPlace(String id) {
-        super(id);
-    }
-
     public EventSeriesCompetitorAnalyticsPlace(SeriesContext context) {
         super(context);
     }

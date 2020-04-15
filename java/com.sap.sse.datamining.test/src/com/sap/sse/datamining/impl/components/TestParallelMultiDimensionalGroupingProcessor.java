@@ -57,7 +57,7 @@ public class TestParallelMultiDimensionalGroupingProcessor {
     
     @Test(expected=IllegalArgumentException.class)
     public void testConstructionWithNullDimensions() {
-        new ParallelMultiDimensionsValueNestingGroupingProcessor<>(Number.class, ConcurrencyTestsUtil.getExecutor(), receivers, null);
+        new ParallelMultiDimensionsValueNestingGroupingProcessor<>(Number.class, ConcurrencyTestsUtil.getSharedExecutor(), receivers, null);
     }
     
     @Test(expected=IllegalArgumentException.class)

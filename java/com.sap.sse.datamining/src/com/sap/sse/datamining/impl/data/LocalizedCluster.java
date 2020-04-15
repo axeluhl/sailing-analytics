@@ -35,5 +35,10 @@ public class LocalizedCluster<ElementType extends Serializable> implements Clust
     public Cluster<ElementType> getInnerCluster() {
         return cluster;
     }
+    
+    @Override
+    public String toString() {
+        return messageKey + ": " + cluster.toString();
+    }
 
 }

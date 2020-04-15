@@ -1,13 +1,10 @@
 package com.sap.sailing.selenium.test.adminconsole;
 
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.Alert;
-import org.openqa.selenium.WebDriver.TargetLocator;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaListCompositePO.RegattaDescriptor;
@@ -66,7 +63,7 @@ public class TestStartAndStopTrackingForTracTracEvents extends AbstractSeleniumT
         RegattaStructureManagementPanelPO regattaStructure = adminConsole.goToRegattaStructure();
         regattaStructure.createRegatta(bmwCupDescriptor);
         TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
-        tracTracEvents.listTrackableRaces(BMW_CUP_JSON_URL);
+        tracTracEvents.addConnectionAndListTrackableRaces(BMW_CUP_JSON_URL);
         tracTracEvents.setReggataForTracking(bmwCupDescriptor);
         tracTracEvents.setTrackSettings(false, false, false);
         tracTracEvents.startTrackingForRace(this.trackableRace);
@@ -84,16 +81,10 @@ public class TestStartAndStopTrackingForTracTracEvents extends AbstractSeleniumT
         RegattaStructureManagementPanelPO regattaStructure = adminConsole.goToRegattaStructure();
         regattaStructure.createRegatta(new RegattaDescriptor(BMW_CUP_EVENT, BMW_CUP_BOAT_CLASS));
         TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
-        tracTracEvents.listTrackableRaces(BMW_CUP_JSON_URL);
+        tracTracEvents.addConnectionAndListTrackableRaces(BMW_CUP_JSON_URL);
         tracTracEvents.setReggataForTracking(DEFAULT_REGATTA);
         tracTracEvents.setTrackSettings(false, false, false);
-        tracTracEvents.startTrackingForRace(this.trackableRace);
-        TargetLocator locator = getWebDriver().switchTo();
-        Alert alert = locator.alert();
-        String text = alert.getText();
-        alert.dismiss();
-        String message = "There is at least one regatta for the selected boat classes.";
-        assertThat(text, containsString(message));
+        tracTracEvents.startTrackingForRacesAndAcceptDefaultRegattaWarning(this.trackableRace);
     }
     
     @Test
@@ -105,16 +96,9 @@ public class TestStartAndStopTrackingForTracTracEvents extends AbstractSeleniumT
         regattaStructure.createRegatta(bmwCupDescriptor);
         regattaStructure.createRegatta(idm2013Descriptor);
         TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
-        tracTracEvents.listTrackableRaces(BMW_CUP_JSON_URL);
+        tracTracEvents.addConnectionAndListTrackableRaces(BMW_CUP_JSON_URL);
         tracTracEvents.setReggataForTracking(idm2013Descriptor);
         tracTracEvents.setTrackSettings(false, false, false);
-        tracTracEvents.startTrackingForRace(this.trackableRace);
-        TargetLocator locator = getWebDriver().switchTo();
-        Alert alert = locator.alert();
-        String text = alert.getText();
-        alert.dismiss();
-        String message = String.format("The selected races contain boat classes which are not the same as " +
-                "the boat class '%s' of the selected regatta.", IDM_2013_BOAT_CLASS);
-        assertThat(text, containsString(message));
+        tracTracEvents.startTrackingForRaceAndAwaitBoatClassError(this.trackableRace, IDM_2013_BOAT_CLASS);
     }
 }

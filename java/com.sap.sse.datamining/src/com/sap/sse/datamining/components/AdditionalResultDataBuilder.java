@@ -17,6 +17,8 @@ public interface AdditionalResultDataBuilder {
     public void setRetrievedDataAmount(int retrievedDataAmount);
     
     public int getRetrievedDataAmount();
+    
+    void setDataTypeMessageKey(String dataTypeMessageKey);
 
     /**
      * Sets the used {@link Function} for the statistic extraction. Also sets the amount of decimals to the values of

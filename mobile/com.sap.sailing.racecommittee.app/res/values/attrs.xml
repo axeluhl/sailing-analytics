@@ -71,6 +71,8 @@
     <attr name="course_updown_48dp" format="reference" />
     <attr name="course_updown_64dp" format="reference" />
     <attr name="dns" format="reference" />
+    <attr name="flag_18dp" format="reference" />
+    <attr name="flag_24dp" format="reference" />
     <attr name="hearing" format="reference" />
     <attr name="link_24dp" format="reference" />
     <attr name="list_24dp" format="reference" />

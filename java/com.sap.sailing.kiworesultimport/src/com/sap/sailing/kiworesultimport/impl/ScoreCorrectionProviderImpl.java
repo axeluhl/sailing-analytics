@@ -2,6 +2,7 @@ package com.sap.sailing.kiworesultimport.impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -54,20 +55,37 @@ public class ScoreCorrectionProviderImpl extends AbstractFileBasedScoreCorrectio
         return result;
     }
 
+    /**
+     * In case the input stream contains more than one regatta summary, only the first one is returned
+     * as a {@link RegattaScoreCorrections} object.
+     */
+    @Override
+    public RegattaScoreCorrections getScoreCorrections(InputStream inputStream) throws Exception {
+        final Iterable<RegattaSummary> regattaSummariesFromInputStream = getRegattaSummaries(inputStream);
+        final RegattaScoreCorrections result;
+        if (regattaSummariesFromInputStream == null || Util.isEmpty(regattaSummariesFromInputStream)) {
+            result = null;
+        } else {
+            result = new RegattaSummaryAsScoreCorrections(regattaSummariesFromInputStream.iterator().next(), this);
+        }
+        return result;
+    }
+
     private Iterable<RegattaSummary> getAllRegattaSummaries() throws IOException, SAXException, ParserConfigurationException {
-        List<RegattaSummary> result = new ArrayList<RegattaSummary>();
-        ZipFileParser zipFileParser = ParserFactory.INSTANCE.createZipFileParser();
+        final List<RegattaSummary> result = new ArrayList<RegattaSummary>();
         for (ResultDocumentDescriptor resultDocDescr : getResultDocumentProvider().getResultDocumentDescriptors()) {
             if (resultDocDescr.getDocumentName().toLowerCase().endsWith(".zip")) {
-                ZipFile zipFile = zipFileParser.parse(resultDocDescr.getInputStream());
-                for (RegattaSummary regattaSummary : zipFile.getRegattaSummaries()) {
-                    result.add(regattaSummary);
-                }
+                Util.addAll(getRegattaSummaries(resultDocDescr.getInputStream()), result);
             }
         }
         return result;
     }
 
+    private Iterable<RegattaSummary> getRegattaSummaries(InputStream inputStream) throws IOException, SAXException, ParserConfigurationException {
+        final ZipFileParser zipFileParser = ParserFactory.INSTANCE.createZipFileParser();
+        final ZipFile zipFile = zipFileParser.parse(inputStream);
+        return zipFile.getRegattaSummaries();
+    }
     @Override
     public RegattaScoreCorrections getScoreCorrections(String eventName, String boatClassName,
             TimePoint timePointPublished) throws IOException, SAXException, ParserConfigurationException {

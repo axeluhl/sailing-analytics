@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.osgi.framework.BundleContext;
 
 import com.sap.sailing.domain.common.HttpMessageSenderServletConstants;
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.common.Base64Utils;
 
 public abstract class HttpMessageSenderServletRequestHandler {

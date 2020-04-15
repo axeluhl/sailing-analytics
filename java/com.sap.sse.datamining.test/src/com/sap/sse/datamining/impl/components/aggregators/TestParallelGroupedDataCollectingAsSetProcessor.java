@@ -37,7 +37,7 @@ public class TestParallelGroupedDataCollectingAsSetProcessor {
 
     @Test
     public void testDataCollecting() throws InterruptedException {
-        Processor<GroupedDataEntry<Double>, Map<GroupKey, HashSet<Double>>> collectingProcessor = new ParallelGroupedDataCollectingAsSetProcessor<Double>(ConcurrencyTestsUtil.getExecutor(), receivers);
+        Processor<GroupedDataEntry<Double>, Map<GroupKey, HashSet<Double>>> collectingProcessor = new ParallelGroupedDataCollectingAsSetProcessor<Double>(ConcurrencyTestsUtil.getSharedExecutor(), receivers);
         Collection<GroupedDataEntry<Double>> elements = createElements();
         
         ConcurrencyTestsUtil.processElements(collectingProcessor, elements);

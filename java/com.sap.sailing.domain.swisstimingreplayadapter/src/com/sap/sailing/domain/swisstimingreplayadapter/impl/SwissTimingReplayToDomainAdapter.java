@@ -13,9 +13,9 @@ import java.util.Map.Entry;
 import java.util.NavigableSet;
 import java.util.Optional;
 import java.util.TimeZone;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -36,7 +36,9 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.TrackingConnectorType;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
@@ -49,6 +51,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceTracker;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.TrackingDataLoader;
@@ -56,6 +59,7 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
+import com.sap.sailing.domain.tracking.impl.TrackingConnectorInfoImpl;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -77,6 +81,7 @@ import difflib.PatchFailedException;
  *
  */
 public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter implements TrackingDataLoader {
+
     private static final int THRESHOLD_FOR_EARLIEST_MARK_PASSING_BEFORE_START_IN_MILLIS = 30000;
 
     private static final Logger logger = Logger.getLogger(SwissTimingReplayToDomainAdapter.class.getName());
@@ -147,7 +152,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
     
     private final boolean useInternalMarkPassingAlgorithm;
     
-    private final RaceLogResolver raceLogResolver;
+    private final RaceLogAndTrackedRaceResolver raceLogResolver;
 
     private final String raceName;
     
@@ -159,6 +164,8 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
     private final DynamicRaceDefinitionSet dynamicRaceDefinitionSet;
     
     private final SwissTimingReplayRaceTracker tracker;
+
+    private final RaceTrackingHandler raceTrackingHandler;
     
     @FunctionalInterface
     public static interface TrackerConstructor {
@@ -179,8 +186,9 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
      */
     public SwissTimingReplayToDomainAdapter(Regatta regatta, String raceName, String raceIdForRaceDefinition,
             BoatClass boatClass, DomainFactory domainFactory,
-            TrackedRegattaRegistry trackedRegattaRegistry, boolean useInternalMarkPassingAlgorithm, RaceLogResolver raceLogResolver,
-            RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, TrackerConstructor trackerConstructor) {
+            TrackedRegattaRegistry trackedRegattaRegistry, boolean useInternalMarkPassingAlgorithm, RaceLogAndTrackedRaceResolver raceLogResolver,
+            RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, TrackerConstructor trackerConstructor,
+            RaceTrackingHandler raceTrackingHandler) {
         this.tracker = trackerConstructor == null ? null : trackerConstructor.createTracker(this);
         this.raceLogResolver = raceLogResolver;
         // when the race is created, notify the tracker's race creation listeners
@@ -211,6 +219,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
         lastNextMark = new HashMap<>();
         this.domainFactory = domainFactory;
         this.useInternalMarkPassingAlgorithm = useInternalMarkPassingAlgorithm;
+        this.raceTrackingHandler = raceTrackingHandler;
     }
 
     public RaceTracker getTracker() {
@@ -299,7 +308,8 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
             short ctPoints_x10_Winner) {
         if (boatType == BoatType.Competitor) {
             Pair<Competitor,Boat> competitorAndBoat = domainFactory.createCompetitorWithoutID(sailNumberOrTrackerID, threeLetterIOCCode.trim(), name.trim(),
-                    currentRaceID, domainFactory.getRaceTypeFromRaceID(currentRaceID).getBoatClass());
+                    currentRaceID, domainFactory.getRaceTypeFromRaceID(currentRaceID).getBoatClass(),
+                    raceTrackingHandler);
             Map<Competitor, Boat> competitorAndBoatsOfCurrentRace = competitorsAndBoatsPerRaceID.get(currentRaceID);
             if (competitorAndBoatsOfCurrentRace == null) {
                 competitorAndBoatsOfCurrentRace = new HashMap<>();
@@ -329,7 +339,8 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
         if (id2 != null && !id2.trim().isEmpty()) {
             markNamesAsIds.add(id2.trim());
         }
-        final ControlPoint controlPoint = domainFactory.getOrCreateControlPoint(name, markNamesAsIds, getMarkType(markType));
+        final ControlPoint controlPoint = domainFactory.getOrCreateControlPoint(name, markNamesAsIds,
+                getMarkType(markType), name);
         if (index == 0) {
             currentCourseDefinition = new ArrayList<>();
         }
@@ -382,7 +393,8 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
                 for (ControlPoint cp : currentCourseDefinition) {
                     courseToUpdate.add(new Pair<ControlPoint, PassingInstruction>(cp, PassingInstruction.None));
                 }
-                course.update(courseToUpdate, domainFactory.getBaseDomainFactory());
+                course.update(courseToUpdate, course.getAssociatedRoles(),
+                        course.getOriginatingCourseTemplateIdOrNull(), domainFactory.getBaseDomainFactory());
             } catch (PatchFailedException e) {
                 throw new RuntimeException(e);
             }
@@ -390,30 +402,46 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
     }
 
     private void createRace() {
-        RaceDefinition race = domainFactory.createRaceDefinition(regatta,
-                currentRaceID, competitorsAndBoatsPerRaceID.get(currentRaceID), currentCourseDefinition, raceName, raceIdForRaceDefinition);
-        synchronized (racePerRaceIdForRaceDefinition) {
-            racePerRaceIdForRaceDefinition.put(raceIdForRaceDefinition, race);
-            racePerRaceIdForRaceDefinition.notifyAll();
-        }
-        DynamicTrackedRace trackedRace = getTrackedRegatta().
-                createTrackedRace(race, Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE,
-                        TrackedRace.DEFAULT_LIVE_DELAY_IN_MILLISECONDS,
-                        WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND, 
-                        /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
-                        /* raceDefinitionSetToUpdate */ null, useInternalMarkPassingAlgorithm, raceLogResolver,
-                        /* Not needed because the RaceTracker is not active on a replica */ Optional.empty());
-        trackedRace.onStatusChanged(this, new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, 0));
-        TimePoint bestStartTimeKnownSoFar = bestStartTimePerRaceID.get(currentRaceID);
-        if (bestStartTimeKnownSoFar != null) {
-            trackedRace.setStartTimeReceived(bestStartTimeKnownSoFar);
-        }
-        trackedRacePerRaceID.put(currentRaceID, trackedRace);
-        if (dynamicRaceDefinitionSet != null) {
-            dynamicRaceDefinitionSet.addRaceDefinition(race, trackedRace);
+        try {
+            RaceDefinition race = domainFactory.createRaceDefinition(regatta,
+                    currentRaceID, competitorsAndBoatsPerRaceID.get(currentRaceID), currentCourseDefinition, raceName, raceIdForRaceDefinition,
+                    raceTrackingHandler);
+            synchronized (racePerRaceIdForRaceDefinition) {
+                racePerRaceIdForRaceDefinition.put(raceIdForRaceDefinition, race);
+                racePerRaceIdForRaceDefinition.notifyAll();
+            }
+            DynamicTrackedRace trackedRace = raceTrackingHandler.createTrackedRace(getTrackedRegatta(),
+                    race, Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE,
+                    TrackedRace.DEFAULT_LIVE_DELAY_IN_MILLISECONDS,
+                    WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND,
+                    /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
+                    /* raceDefinitionSetToUpdate */ null, useInternalMarkPassingAlgorithm, raceLogResolver,
+                    /* Not needed because the RaceTracker is not active on a replica */ Optional.empty(),
+                    new TrackingConnectorInfoImpl(TrackingConnectorType.SwissTiming, /*no api connection to query the webUrl*/ null));
+            trackedRace.onStatusChanged(this, new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, 0));
+            TimePoint bestStartTimeKnownSoFar = bestStartTimePerRaceID.get(currentRaceID);
+            if (bestStartTimeKnownSoFar != null) {
+                trackedRace.setStartTimeReceived(bestStartTimeKnownSoFar);
+            }
+            trackedRacePerRaceID.put(currentRaceID, trackedRace);
+            if (dynamicRaceDefinitionSet != null) {
+                dynamicRaceDefinitionSet.addRaceDefinition(race, trackedRace);
+            }
+        } catch (Exception exception) {
+            logger.log(Level.WARNING, "Error while creating race " + raceName + " for regatta " + regatta, exception);
+            try {
+                if (tracker != null) {
+                    trackedRegattaRegistry.stopTracker(regatta, getTracker());
+                }
+            } catch (Exception e) {
+                logger.log(Level.INFO,
+                        "Something else went wrong while trying to notify the TrackedRegattaRegistry that the race "
+                                + " could not be added to the the regatta " + regatta,
+                                e);
+            }
         }
     }
-
+    
     public DynamicTrackedRegatta getTrackedRegatta() {
         return trackedRegattaRegistry.getOrCreateTrackedRegatta(regatta);
     }

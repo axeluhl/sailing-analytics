@@ -34,6 +34,7 @@ import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlac
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetActivityProxy;
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
+import com.sap.sse.gwt.client.DOMUtils;
 
 public class MobileActivityMapper implements ActivityMapper {
     private final MobileApplicationClientFactory clientFactory;
@@ -52,6 +53,7 @@ public class MobileActivityMapper implements ActivityMapper {
             SwitchingEntryPoint.reloadApp();
             return null;
         }
+        DOMUtils.scrollToTop(clientFactory.getRoot());
         if (place instanceof ErrorPlace) {
             return new ErrorActivityProxy((ErrorPlace) place, clientFactory);
         } else if (place instanceof StartPlace) {

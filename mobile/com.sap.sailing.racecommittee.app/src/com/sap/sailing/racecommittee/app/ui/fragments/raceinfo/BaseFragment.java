@@ -3,19 +3,20 @@ package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-import android.app.FragmentTransaction;
-import android.support.annotation.IdRes;
-import android.support.annotation.IntDef;
-
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 
+import android.support.annotation.IdRes;
+import android.support.annotation.IntDef;
+import android.support.v4.app.FragmentTransaction;
+
 public class BaseFragment extends RaceFragment {
 
-    @IntDef({START_MODE_PRESETUP, START_MODE_PLANNED})
+    @IntDef({ START_MODE_PRESETUP, START_MODE_PLANNED })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface START_MODE_VALUES {}
+    public @interface START_MODE_VALUES {
+    }
 
     /**
      * Argument for new Fragment Instance

@@ -13,6 +13,7 @@ import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanel;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanelPlaceSelectionEvent;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.preferencestab.UserProfilePreferencesTabView;
+import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.SailorProfileTabView;
 import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
@@ -41,6 +42,9 @@ public class TabletAndDesktopUserProfileView extends Composite implements UserPr
     @UiField(provided = true)
     UserProfilePreferencesTabView preferencesTabUi;
 
+    @UiField(provided = true)
+    SailorProfileTabView sailorProfileTabUi;
+
     private final FlagImageResolver flagImageResolver;
 
     public TabletAndDesktopUserProfileView(FlagImageResolver flagImageResolver) {
@@ -56,6 +60,8 @@ public class TabletAndDesktopUserProfileView extends Composite implements UserPr
         
         preferencesTabUi = new UserProfilePreferencesTabView(flagImageResolver);
         
+        sailorProfileTabUi = new SailorProfileTabView(flagImageResolver);
+
         initWidget(uiBinder.createAndBindUi(this));
     }
 

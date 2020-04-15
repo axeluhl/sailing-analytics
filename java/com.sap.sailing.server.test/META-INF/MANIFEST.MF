@@ -23,8 +23,13 @@ Require-Bundle: com.sap.sailing.domain,
  org.eclipse.jetty.server;bundle-version="9.4.8",
  com.sap.sailing.domain.shared.android,
  com.sap.sailing.domain.racelogtrackingadapter.testsupport,
- com.sap.sailing.server.testsupport
+ com.sap.sailing.server.testsupport,
+ com.sun.jersey;bundle-version="1.17.0",
+ com.sap.sse.security.testsupport,
+ com.sap.sailing.domain.racelogtrackingadapter
 Import-Package: com.sap.sailing.server.gateway.jaxrs,
  com.sap.sailing.server.gateway.jaxrs.spi,
- org.json.simple,
- javax.ws.rs.core;version="1.1.1"
+ com.sap.sse.security.userstore.mongodb,
+ com.sun.istack;version="3.0.7",
+ javax.ws.rs.core;version="1.1.1",
+ org.json.simple

@@ -1,22 +1,20 @@
 package com.sap.sailing.gwt.ui.server;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.DateFormat;
@@ -27,36 +25,37 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.UnauthenticatedException;
+import org.mp4parser.AbstractBoxParser;
 import org.mp4parser.IsoFile;
-import org.mp4parser.boxes.UserBox;
-import org.mp4parser.boxes.iso14496.part12.MediaDataBox;
-import org.mp4parser.boxes.iso14496.part12.MovieBox;
-import org.mp4parser.boxes.iso14496.part12.MovieHeaderBox;
-import org.mp4parser.tools.Path;
+import org.mp4parser.PropertyBoxParserImpl;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import com.google.gwt.thirdparty.json.JSONArray;
 import com.google.gwt.thirdparty.json.JSONException;
 import com.google.gwt.thirdparty.json.JSONObject;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.VideoMetadataDTO;
 import com.sap.sailing.domain.common.media.MediaTrack;
-import com.sap.sailing.domain.common.security.Permission;
-import com.sap.sailing.domain.common.security.Permission.Mode;
+import com.sap.sailing.domain.common.media.MediaTrackWithSecurityDTO;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.MediaService;
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.media.mp4.MP4MediaParser;
+import com.sap.sailing.media.mp4.MP4ParserFakeFile;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
+import com.sap.sse.security.Action;
+import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.ui.server.SecurityDTOUtil;
 
 public class MediaServiceImpl extends RemoteServiceServlet implements MediaService {
     private String YOUTUBE_V3_API_KEY = "AIzaSyBzCJ9cxb9_PPzuYfrHIEdSRtR631b64Xs";
@@ -69,7 +68,6 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     private ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
 
 
-    private static final int REQUIRED_SIZE_IN_BYTES = 10000000;
     private static final long serialVersionUID = -8917349579281305977L;
 
     public MediaServiceImpl() {
@@ -85,86 +83,118 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     }
 
     @Override
-    public Iterable<MediaTrack> getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
-        return racingEventService().getMediaTracksForRace(regattaAndRaceIdentifier);
+    public Iterable<MediaTrackWithSecurityDTO> getMediaTracksForRace(
+            RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
+        return mapMediaTracksToDTOsWithSecurityInformationAndFilterByReadPermission(
+                racingEventService().getMediaTracksForRace(regattaAndRaceIdentifier));
     }
 
     @Override
-    public Iterable<MediaTrack> getMediaTracksInTimeRange(RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
-        return racingEventService().getMediaTracksInTimeRange(regattaAndRaceIdentifier);
+    public Iterable<MediaTrackWithSecurityDTO> getMediaTracksInTimeRange(
+            RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
+        return mapMediaTracksToDTOsWithSecurityInformationAndFilterByReadPermission(
+                racingEventService().getMediaTracksInTimeRange(regattaAndRaceIdentifier));
     }
 
     @Override
-    public Iterable<MediaTrack> getAllMediaTracks() {
-        return racingEventService().getAllMediaTracks();
+    public Iterable<MediaTrackWithSecurityDTO> getAllMediaTracks() {
+        return mapMediaTracksToDTOsWithSecurityInformationAndFilterByReadPermission(racingEventService().getAllMediaTracks());
+    }
+
+    private List<MediaTrackWithSecurityDTO> mapMediaTracksToDTOsWithSecurityInformationAndFilterByReadPermission(
+            Iterable<MediaTrack> mediaTracksToFilter) {
+        return racingEventService().getSecurityService().mapAndFilterByReadPermissionForCurrentUser(mediaTracksToFilter,
+                mediaTrack -> {
+                    final MediaTrackWithSecurityDTO securedMediaTrack = new MediaTrackWithSecurityDTO(mediaTrack);
+                    SecurityDTOUtil.addSecurityInformation(racingEventService().getSecurityService(), securedMediaTrack,
+                            mediaTrack.getIdentifier());
+                    return securedMediaTrack;
+                });
     }
     
-    private void ensureUserCanManageMedia() {
-        SecurityUtils.getSubject().checkPermission(Permission.MANAGE_MEDIA.getStringPermissionForObjects(Mode.UPDATE));
-    }
-
     @Override
-    public String addMediaTrack(MediaTrack mediaTrack) {
-        ensureUserCanManageMedia();
+    public MediaTrackWithSecurityDTO addMediaTrack(MediaTrack mediaTrack) {
         if (mediaTrack.dbId != null) {
             throw new IllegalStateException("Property dbId must not be null for newly created media track.");
         }
         racingEventService().mediaTrackAdded(mediaTrack);
-        return mediaTrack.dbId;
+        final SecurityService securityService = racingEventService().getSecurityService();
+        final QualifiedObjectIdentifier identifier = mediaTrack.getIdentifier();
+        securityService.setDefaultOwnershipIfNotSet(identifier);
+        if (!SecurityUtils.getSubject().isPermitted(identifier.getStringPermission(DefaultActions.CREATE))) {
+            // the user was not permitted to create the object; remove it again
+            racingEventService().mediaTrackDeleted(mediaTrack);
+            securityService.deleteOwnership(identifier);
+            throw new UnauthenticatedException("Not authorized to create media track object");
+        } else {
+            final MediaTrackWithSecurityDTO mediaTrackWithSecurity = new MediaTrackWithSecurityDTO(mediaTrack);
+            SecurityDTOUtil.addSecurityInformation(racingEventService().getSecurityService(), mediaTrackWithSecurity,
+                    mediaTrackWithSecurity.getIdentifier());
+            return mediaTrackWithSecurity;
+        }
     }
 
     @Override
     public void deleteMediaTrack(MediaTrack mediaTrack) {
-        ensureUserCanManageMedia();
-        racingEventService().mediaTrackDeleted(mediaTrack);
+        racingEventService().getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(
+                mediaTrack, new Action() {
+
+                    @Override
+                    public void run() throws Exception {
+                        racingEventService().mediaTrackDeleted(mediaTrack);
+                    }
+                });
     }
 
     @Override
     public void updateTitle(MediaTrack mediaTrack) {
-        ensureUserCanManageMedia();
+        ensureUserCanUpdateMediaTrack(mediaTrack);
         racingEventService().mediaTrackTitleChanged(mediaTrack);
     }
 
     @Override
     public void updateUrl(MediaTrack mediaTrack) {
-        ensureUserCanManageMedia();
+        ensureUserCanUpdateMediaTrack(mediaTrack);
         racingEventService().mediaTrackUrlChanged(mediaTrack);
     }
 
     @Override
     public void updateStartTime(MediaTrack mediaTrack) {
-        ensureUserCanManageMedia();
+        ensureUserCanUpdateMediaTrack(mediaTrack);
         racingEventService().mediaTrackStartTimeChanged(mediaTrack);
     }
 
     @Override
     public void updateDuration(MediaTrack mediaTrack) {
-        ensureUserCanManageMedia();
+        ensureUserCanUpdateMediaTrack(mediaTrack);
         racingEventService().mediaTrackDurationChanged(mediaTrack);
+    }
+
+    private void ensureUserCanUpdateMediaTrack(MediaTrack mediaTrack) {
+        SecurityUtils.getSubject().checkPermission(SecuredDomainType.MEDIA_TRACK.getStringPermissionForObject(DefaultActions.UPDATE, mediaTrack));
     }
 
     @Override
     public void updateRace(MediaTrack mediaTrack) {
-        ensureUserCanManageMedia();
+        ensureUserCanUpdateMediaTrack(mediaTrack);
         racingEventService().mediaTrackAssignedRacesChanged(mediaTrack);
     }
 
     @Override
     public VideoMetadataDTO checkMetadata(String url) {
-        ensureUserCanManageMedia();
         VideoMetadataDTO response = null;
         try {
             URL input = new URL(url);
             // check size and do rangerequests if possible
             long fileSize = determineFileSize(input);
-            if (fileSize > 2 * REQUIRED_SIZE_IN_BYTES) {
+            if (fileSize > 2 * MP4MediaParser.REQUIRED_SIZE_IN_BYTES) {
                 response = checkMetadataByPartialDownloads(input, fileSize);
             } else {
                 response = checkMetadataByFullFileDownload(input);
             }
         } catch (Exception e) {
             logger.log(Level.WARNING, "Error in video analysis ", e);
-            response = new VideoMetadataDTO(false, null, false, null, e.getMessage());
+            response = new VideoMetadataDTO(false, null, false, null, "");
         }
         return response;
     }
@@ -197,10 +227,10 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
 
     private VideoMetadataDTO checkMetadataByPartialDownloads(URL input, long fileSize)
             throws IOException, ProtocolException {
-        byte[] start = new byte[REQUIRED_SIZE_IN_BYTES];
-        byte[] end = new byte[REQUIRED_SIZE_IN_BYTES];
-        downloadPartOfFile(input, start, "bytes=0-" + REQUIRED_SIZE_IN_BYTES);
-        downloadPartOfFile(input, end, "bytes=" + (fileSize - REQUIRED_SIZE_IN_BYTES) + "-");
+        byte[] start = new byte[MP4MediaParser.REQUIRED_SIZE_IN_BYTES];
+        byte[] end = new byte[MP4MediaParser.REQUIRED_SIZE_IN_BYTES];
+        downloadPartOfFile(input, start, "bytes=0-" + MP4MediaParser.REQUIRED_SIZE_IN_BYTES);
+        downloadPartOfFile(input, end, "bytes=" + (fileSize - MP4MediaParser.REQUIRED_SIZE_IN_BYTES) + "-");
         long skipped = fileSize - start.length - end.length;
         return checkMetadata(start, end, skipped);
     }
@@ -211,9 +241,10 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
         connection.setConnectTimeout(METADATA_CONNECTION_TIMEOUT);
         connection.setRequestMethod("GET");
         connection.setRequestProperty("Range", range);
-        try (InputStream inStream = connection.getInputStream()) {
-            DataInputStream dataInStream = new DataInputStream(inStream);
+        try (final InputStream inStream = connection.getInputStream()) {
+            try (final DataInputStream dataInStream = new DataInputStream(inStream)) {
             dataInStream.readFully(store);
+            }
         } finally {
             connection.disconnect();
         }
@@ -221,144 +252,62 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
 
     private VideoMetadataDTO checkMetadataByFullFileDownload(URL input)
             throws ParserConfigurationException, SAXException, IOException {
-        try (IsoFile isof = new IsoFile(Channels.newChannel(input.openStream()))) {
-            boolean canDownload = true;
-            Date recordStartedTimer = determineRecordingStart(isof);
-            Duration duration = determineDuration(isof);
-            boolean spherical = determine360(isof);
-            removeTempFiles(isof);
-            return new VideoMetadataDTO(canDownload, duration, spherical, recordStartedTimer, "");
+        final File tmp = File.createTempFile("upload", "metadataCheck");
+        VideoMetadataDTO result;
+        try {
+            try (final ReadableByteChannel rbc = Channels.newChannel(input.openStream())) {
+                try (final FileOutputStream fos = new FileOutputStream(tmp)) {
+                fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+                    try (final MP4ParserFakeFile inputFile = new MP4ParserFakeFile(tmp)) {
+                        Files.delete(tmp.toPath());
+                        result = checkMetadata(inputFile);
+                    } catch (Exception e) {
+                        result = new VideoMetadataDTO(true, null, false, null, e.getMessage());
+                    }
+                } catch (Exception e) {
+                    result = new VideoMetadataDTO(false, null, false, null, e.getMessage());
+                }
+            }
+        } finally {
+            // delete the file if not already deleted in main path
+            tmp.delete();
         }
+        return result;
     }
 
     @Override
     public VideoMetadataDTO checkMetadata(byte[] start, byte[] end, Long skipped) {
-        ensureUserCanManageMedia();
-        File tmp = null;
-        boolean spherical = false;
-        Duration duration = null;
-        Date recordStartedTimer = null;
-        String message = "";
-        try {
-            tmp = createFileFromData(start, end, skipped);
-            try (IsoFile isof = new IsoFile(tmp)) {
-                try {
-                    recordStartedTimer = determineRecordingStart(isof);
-                    spherical = determine360(isof);
-                    duration = determineDuration(isof);
-                } finally {
-                    removeTempFiles(isof);
-                }
-            }
+        VideoMetadataDTO result;
+        try (MP4ParserFakeFile input = new MP4ParserFakeFile(start, end, skipped)) {
+            result = checkMetadata(input);
         } catch (Exception e) {
             logger.log(Level.WARNING, "Error in video analysis ", e);
-            message = e.getMessage();
-        } finally {
-            if (tmp != null) {
-                try {
-                    Files.delete(tmp.toPath());
-                } catch (IOException e) {
-                    logger.log(Level.SEVERE, "Could not delete tmp mp4 file", e);
+            result = new VideoMetadataDTO(true, null, false, null, e.getMessage());
                 }
+        return result;
             }
-        }
-        return new VideoMetadataDTO(true, duration, spherical, recordStartedTimer, message);
-    }
 
-    /**
-     * Some boxes (we don't actually need to read) create internal tempfiles, we delete them here, as the VM could run
-     * quite long
-     */
-    private void removeTempFiles(IsoFile isof) {
-        List<MediaDataBox> boxesWithTempFiles = isof.getBoxes(MediaDataBox.class, true);
-        for (MediaDataBox box : boxesWithTempFiles) {
-            try {
-                Field field = box.getClass().getDeclaredField("dataFile");
-                field.setAccessible(true);
-                File data = (File) field.get(box);
-                data.delete();
-            } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
-                logger.log(Level.WARNING, "Could not delete mp4 temp files", e);
-            }
+    private VideoMetadataDTO checkMetadata(MP4ParserFakeFile input)
+            throws ParserConfigurationException, SAXException, IOException {
+        AbstractBoxParser boxParserImpl = new PropertyBoxParserImpl();
+        boxParserImpl.skippingBoxes(new String[] { "mdat" });
+        try (IsoFile isof = new IsoFile(input, boxParserImpl)) {
+            Date recordStartedTimer = MP4MediaParser.determineRecordingStart(isof);
+            boolean spherical = MP4MediaParser.determine360(isof);
+            Duration duration = new MillisecondsDurationImpl(MP4MediaParser.determineDurationInMillis(isof));
+            return new VideoMetadataDTO(true, duration, spherical, recordStartedTimer, "");
         }
-    }
-
-    /**
-     * Creates a dummy mp4 file, only containing the start and the end, the middle is filled with 0 so that all file
-     * internal pointers from start to end are working
-     */
-    private File createFileFromData(byte[] start, byte[] end, Long skipped) throws IOException, FileNotFoundException {
-        File tmp;
-        tmp = File.createTempFile("upload", "metadataCheck");
-        try (FileOutputStream fw = new FileOutputStream(tmp)) {
-            fw.write(start);
-            while (skipped > 0) {
-                // ensure that no absurd amount of memory is required, and that more then 4gb files can be analysed
-                if (skipped > 10000000) {
-                    byte[] dummy = new byte[10000000];
-                    fw.write(dummy);
-                    skipped = skipped - 10000000;
-                } else {
-                    byte[] dummy = new byte[skipped.intValue()];
-                    fw.write(dummy);
-                    skipped = skipped - skipped.intValue();
-                }
-            }
-            fw.write(end);
-        }
-        return tmp;
-    }
-
-    private boolean determine360(IsoFile isof) throws ParserConfigurationException, SAXException, IOException {
-        boolean spherical = false;
-        UserBox uuidBox = Path.getPath(isof, "moov[0]/trak[0]/uuid");
-        if (uuidBox != null) {
-            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            Document doc = dBuilder.parse(new ByteArrayInputStream(uuidBox.getData()));
-
-            NodeList childs = doc.getDocumentElement().getChildNodes();
-            for (int i = 0; i < childs.getLength(); i++) {
-                Node child = childs.item(i);
-                if (child.getNodeName().toLowerCase().contains(":spherical")) {
-                    spherical = true;
-                }
-            }
-        }
-        return spherical;
-    }
-
-    private Duration determineDuration(IsoFile isof) {
-        Duration duration = null;
-        MovieBox mbox = isof.getMovieBox();
-        if (mbox != null) {
-            MovieHeaderBox mhb = mbox.getMovieHeaderBox();
-            if (mhb != null) {
-                duration = new MillisecondsDurationImpl(mhb.getDuration()*1000 / mhb.getTimescale());
-            }
-        }
-        return duration;
-    }
-    
-    private Date determineRecordingStart(IsoFile isof) {
-        Date creationTime = null;
-        MovieBox mbox = isof.getMovieBox();
-        if (mbox != null) {
-            MovieHeaderBox mhb = mbox.getMovieHeaderBox();
-            if (mhb != null) {
-                creationTime = mhb.getCreationTime();
-            }
-        }
-        return creationTime;
     }
 
     @Override
     public MediaTrack getMediaTrackByUrl(String url) {
         MediaTrack result = null;
         for (MediaTrack mtrack : racingEventService().getAllMediaTracks()) {
-            if (url.equals(mtrack.url)) {
-                result = mtrack;
-                break;
+            if (racingEventService().getSecurityService().hasCurrentUserReadPermission(mtrack)) {
+                if (url.equals(mtrack.url)) {
+                    result = mtrack;
+                    break;
+                }
             }
         }
         return result;
@@ -366,13 +315,13 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
 
     @Override
     public VideoMetadataDTO checkYoutubeMetadata(String videoId) throws UnsupportedEncodingException {
-        ensureUserCanManageMedia();
         boolean canDownload = false;
         String message = "";
         Duration duration = null;
         if (videoId.isEmpty()) {
             message = "Empty id";
         } else {
+            // sanitize, as we inject it into an url with our api key!
             videoId = URLEncoder.encode(videoId, StandardCharsets.UTF_8.name());
             try {
                 URL apiURL = new URL(
@@ -385,10 +334,13 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
                         new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
                     String pageText = reader.lines().collect(Collectors.joining("\n"));
                     JSONObject jsonAnswer = new JSONObject(pageText);
-                    final JSONObject item = jsonAnswer.getJSONArray("items").getJSONObject(0);
+                    final JSONArray dataArray = jsonAnswer.getJSONArray("items");
+                    if (dataArray.length() > 0) {
+                        final JSONObject item = dataArray.getJSONObject(0);
                     message = item.getJSONObject("snippet").getString("title");
                     String rawDuration = item.getJSONObject("contentDetails").getString("duration");
                     duration = new MillisecondsDurationImpl(java.time.Duration.parse(rawDuration).toMillis());
+                    }
                     canDownload = true;
                 } catch (JSONException e) {
                     message = e.getMessage();
@@ -399,9 +351,6 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
                 logger.log(Level.WARNING, "Error in youtube metadata call", e);
             }
         }
-        //sanitize, as we inject it into an url with our api key!
-
-        
         return new VideoMetadataDTO(canDownload, duration, false, null, message);
     }
 }

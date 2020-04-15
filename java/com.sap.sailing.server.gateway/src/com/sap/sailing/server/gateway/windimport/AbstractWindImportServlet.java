@@ -19,7 +19,9 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
+import com.sap.sailing.domain.common.WindImportConstants;
 import com.sap.sailing.server.gateway.SailingServerHttpServlet;
 import com.sap.sailing.server.gateway.windimport.AbstractWindImporter.UploadRequest;
 import com.sap.sailing.server.gateway.windimport.AbstractWindImporter.WindImportResult;
@@ -44,6 +46,9 @@ public abstract class AbstractWindImportServlet extends SailingServerHttpServlet
         WindImportResult windImportResult = new WindImportResult();
         try {
             UploadRequest uploadRequest = readRequest(request);
+            for (RegattaAndRaceIdentifier trackedRace : uploadRequest.races) {
+                getSecurityService().checkCurrentUserUpdatePermission(trackedRace);
+            }
             importer.importWindForUploadRequest(getService(), windImportResult, uploadRequest);
             // Use text/html to prevent browsers from wrapping the response body,
             // see "Handling File Upload Responses in GWT" at http://www.artofsolving.com/node/50
@@ -64,13 +69,13 @@ public abstract class AbstractWindImportServlet extends SailingServerHttpServlet
         List<FileItem> items = upload.parseRequest(req);
         for (FileItem item : items) {
             if (item.isFormField() && (item.getString() != null) && (item.getString().trim().length() > 0)) {
-                if ("boatId".equals(item.getFieldName())) {
+                if (WindImportConstants.EXPEDITON_IMPORT_PARAMETER_BOAT_ID.equals(item.getFieldName())) {
                     result.boatId = item.getString().trim();
-                } else if ("races".equals(item.getFieldName())) {
+                } else if (WindImportConstants.WIND_IMPORT_PARAMETER_RACES.equals(item.getFieldName())) {
                     JSONArray races = (JSONArray) new JSONParser().parse(item.getString().trim());
                     for (Object raceEntry : races) {
-                        result.races.add(new RegattaNameAndRaceName((String) ((JSONObject) raceEntry).get("regatta"),
-                                (String) ((JSONObject) raceEntry).get("race")));
+                        result.races.add(new RegattaNameAndRaceName((String) ((JSONObject) raceEntry).get(WindImportConstants.WIND_IMPORT_PARAMETER_REGATTA_NAME),
+                                (String) ((JSONObject) raceEntry).get(WindImportConstants.WIND_IMPORT_PARAMETER_RACE_NAME)));
                     }
                 }
             } else if (item.getSize() > 0) {

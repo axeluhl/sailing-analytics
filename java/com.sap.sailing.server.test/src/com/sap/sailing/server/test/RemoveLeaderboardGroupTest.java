@@ -23,8 +23,8 @@ import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
-import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.operationaltransformation.AddLeaderboardGroupToEvent;
 import com.sap.sailing.server.operationaltransformation.CreateEvent;
 import com.sap.sailing.server.operationaltransformation.CreateLeaderboardGroup;
@@ -36,16 +36,25 @@ import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardGroup;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.testsupport.SecurityServiceMockFactory;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
 
 public class RemoveLeaderboardGroupTest {
     private RacingEventService server;
     private Event pfingstbusch;
-
+    
     @Before
     public void setUp() {
-        server = new RacingEventServiceImpl();
+        
+        final SecurityService securityService = SecurityServiceMockFactory.mockSecurityService();
+        server = new RacingEventServiceImpl() {
+            @Override
+            public SecurityService getSecurityService() {
+                return securityService;
+            }
+        };
         List<Event> allEvents = new ArrayList<>();
         Util.addAll(server.getAllEvents(), allEvents);
         for (final Event e : allEvents) {
@@ -71,7 +80,9 @@ public class RemoveLeaderboardGroupTest {
                 "Kiel", /* isPublic */ true, UUID.randomUUID(), /* officialWebsiteURLAsString */ null, /*baseURL*/null,
                 /* sailorsInfoWebsiteURLAsString */ null, /* images */Collections.<ImageDescriptor> emptyList(),
                 /* videos */Collections.<VideoDescriptor> emptyList(), /* leaderboardGroupIds */ Collections.<UUID> emptyList()));
-        final LeaderboardGroup pfingstbuschLeaderboardGroup = server.apply(new CreateLeaderboardGroup("Pfingstbusch", "Pfingstbusch", /* displayName */ null,
+        UUID newGroupid = UUID.randomUUID();
+        final LeaderboardGroup pfingstbuschLeaderboardGroup = server
+                .apply(new CreateLeaderboardGroup(newGroupid, "Pfingstbusch", "Pfingstbusch", /* displayName */ null,
                 /* displayGroupsInReverseOrder */ false, /* leaderboard names */ Collections.emptyList(),
                 new int[0], /* overallLeaderboardScoringSchemeType */ ScoringSchemeType.LOW_POINT));
         server.apply(new AddLeaderboardGroupToEvent(pfingstbusch.getId(), pfingstbuschLeaderboardGroup.getId()));
@@ -101,12 +112,17 @@ public class RemoveLeaderboardGroupTest {
         assertNull(pfingstbusch.getLeaderboardGroups().iterator().next().getOverallLeaderboard());
     }
 
+    /**
+     * Unlike earlier versions, the RemoveLeaderboardGroup no longer removes the OverallLeaderboard, because it cannot
+     * ensure proper Ownership handling. This is no handled in the SailingServiceImpl
+     */
     @Test
-    public void testRemovingLeaderboardGroupRemovesOverallLeaderboardAndUnlinksItFromEvent() {
+    public void testRemovingLeaderboardGroupDoesNotRemoveOverallLeaderboard() {
         assertEquals(1, Util.size(pfingstbusch.getLeaderboardGroups()));
         server.apply(new RemoveLeaderboardGroup("Pfingstbusch"));
-        final Leaderboard overallLeaderboard = server.getLeaderboardByName("Pfingstbusch "+LeaderboardNameConstants.OVERALL);
-        assertNull(overallLeaderboard);
+        final Leaderboard overallLeaderboard = server
+                .getLeaderboardByName("Pfingstbusch " + LeaderboardNameConstants.OVERALL);
+        assertNotNull(overallLeaderboard);
         assertFalse(pfingstbusch.getLeaderboardGroups().iterator().hasNext());
     }
 }

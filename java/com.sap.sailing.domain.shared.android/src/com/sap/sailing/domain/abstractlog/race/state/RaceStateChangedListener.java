@@ -17,5 +17,6 @@ public interface RaceStateChangedListener {
     void onFinishingPositionsConfirmed(ReadonlyRaceState state);
     void onCourseDesignChanged(ReadonlyRaceState state);
     void onWindFixChanged(ReadonlyRaceState state);
+    void onTagEventsChanged(ReadonlyRaceState state);
 
 }

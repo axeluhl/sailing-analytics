@@ -1,10 +1,10 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
+import com.sap.sailing.racecommittee.app.R;
+
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
-
-import com.sap.sailing.racecommittee.app.R;
 
 public class SystemInformationActivity extends BaseActivity {
     private SystemInformationActivityHelper helper;
@@ -13,7 +13,7 @@ public class SystemInformationActivity extends BaseActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        helper = new SystemInformationActivityHelper(this, preferences.getDeviceIdentifier());
+        helper = new SystemInformationActivityHelper(this, preferences.getDeviceConfigurationName());
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         if (toolbar != null) {

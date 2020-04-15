@@ -40,6 +40,11 @@ public interface Distance extends Comparable<Distance>, Serializable {
         }
 
         @Override
+        public Duration atSpeed(Speed speed) {
+            return Duration.NULL;
+        }
+
+        @Override
         public double getKilometers() {
             return 0;
         }
@@ -96,7 +101,7 @@ public interface Distance extends Comparable<Distance>, Serializable {
         }
     }
     
-    static final NullDistance NULL = new NullDistance();
+    static NullDistance NULL = new NullDistance();
     
     double getGeographicalMiles();
 
@@ -122,6 +127,11 @@ public interface Distance extends Comparable<Distance>, Serializable {
     Speed inTime(long milliseconds);
     
     Speed inTime(Duration duration);
+    
+    /**
+     * Computes the duration it takes to travel this distance at the given {@code speed}.
+     */
+    Duration atSpeed(Speed speed);
     
     Distance add(Distance d);
 

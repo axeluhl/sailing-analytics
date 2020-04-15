@@ -63,4 +63,9 @@ public abstract class BaseRaceStateChangedListener implements RaceStateChangedLi
         
     }
 
+    @Override
+    public void onTagEventsChanged(ReadonlyRaceState state) {
+        
+    }
+
 }

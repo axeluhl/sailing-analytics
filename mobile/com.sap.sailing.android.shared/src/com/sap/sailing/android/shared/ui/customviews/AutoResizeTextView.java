@@ -20,12 +20,12 @@ package com.sap.sailing.android.shared.ui.customviews;
 
 import android.content.Context;
 import android.graphics.Typeface;
+import android.support.v7.widget.AppCompatTextView;
 import android.text.Layout.Alignment;
 import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.TypedValue;
-import android.widget.TextView;
 
 /**
  * Text view that auto adjusts text size to fit within the view. If the text size equals the minimum text size and still
@@ -34,14 +34,14 @@ import android.widget.TextView;
  * @author Chase Colburn
  * @since Apr 4, 2011
  */
-public class AutoResizeTextView extends TextView {
+public class AutoResizeTextView extends AppCompatTextView {
 
     // Minimum text size for this text view
     public static final float MIN_TEXT_SIZE = 20;
 
     // Interface for resize notifications
     public interface OnTextResizeListener {
-        public void onTextResize(TextView textView, float oldSize, float newSize);
+        public void onTextResize(AppCompatTextView textView, float oldSize, float newSize);
     }
 
     // Our ellipse string

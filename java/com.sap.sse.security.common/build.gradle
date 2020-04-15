@@ -1,4 +1,4 @@
-apply plugin: "java"
+apply plugin: "java-library"
 
 sourceSets {
     main {
@@ -8,5 +8,5 @@ sourceSets {
 
 dependencies {
     /* local dependencies */
-    compile project(":java:com.sap.sse.common")
+    implementation project(":com.sap.sse.common")
 }

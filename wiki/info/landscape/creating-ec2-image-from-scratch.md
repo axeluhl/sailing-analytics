@@ -23,6 +23,29 @@ I then did a `yum update` and added the following packages:
  - xterm
  - sendmail-cf
 
+In order to be able to connect to AWS DocumentDB instances, the corresponding certificate must be installed into the JVM's certificate store:
+
+```
+   wget -O /tmp/rds.pem https://s3.amazonaws.com/rds-downloads/rds-combined-ca-bundle.pem
+   /opt/sapjvm_8/bin/keytool -importcert -alias AWSRDS -file /tmp/rds.pem -keystore /opt/sapjvm_8/jre/lib/security/cacerts -noprompt -storepass changeit
+```
+
+A latest MongoDB shell is installed by the following:
+
+```
+cat << EOF >/etc/yum.repos.d/mongodb-org.3.6.repo
+[mongodb-org-3.6]
+name=MongoDB Repository
+baseurl=https://repo.mongodb.org/yum/amazon/2013.03/mongodb-org/3.6/x86_64/
+gpgcheck=1
+enabled=1
+gpgkey=https://www.mongodb.org/static/pgp/server-3.6.asc
+EOF
+
+yum update
+yum install mongodb-org-shell
+```
+
 Then I created a mount point /home/sailing and copied the following lines from the /etc/fstab file from an existing SL instance:
 
 ```
@@ -52,7 +75,7 @@ PermitRootLogin Yes
 
 to allow root shell login.
 
-I copied the JDK7/JDK8 installations from an existing SL instance to /opt.
+I copied the JDK7/JDK8 installations, particularly the current sapjvm_8 VM, from an existing SL instance to /opt.
 
 I linked /etc/init.d/sailing to /home/sailing/code/configuration/sailing and added the following links to it:
 

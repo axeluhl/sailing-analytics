@@ -56,7 +56,9 @@ public class EventReplicationTest extends AbstractServerReplicationTest {
         regattas.add("Day2");
         final Event masterEvent = master.addEvent(eventName, /* eventDescription */ null, null, null, venueName, isPublic, UUID.randomUUID());
         final String leaderboardGroupName = "LGName";
-        LeaderboardGroup lg = master.apply(new CreateLeaderboardGroup(leaderboardGroupName, "LGDescription", /* displayGroupsInReverseOrder */
+        UUID newGroupid = UUID.randomUUID();
+        LeaderboardGroup lg = master.apply(new CreateLeaderboardGroup(newGroupid, leaderboardGroupName,
+                "LGDescription", /* displayGroupsInReverseOrder */
                 "displayName", /* leaderboardNames */
                 false, Collections.<String> emptyList(), /* overallLeaderboardScoringSchemeType */
                 /* overallLeaderboardDiscardThresholds */null, null));

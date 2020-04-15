@@ -33,6 +33,7 @@ import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.WithValidityCache;
 import com.sap.sailing.domain.common.tracking.impl.CompactPositionHelper;
+import com.sap.sailing.domain.tracking.AddResult;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sailing.domain.tracking.SpeedWithBearingStep;
@@ -624,13 +625,7 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
                 SpeedWithBearingWithConfidence<TimePoint> estimatedSpeed = getEstimatedSpeed(at, getInternalFixes(),
                         ConfidenceFactory.INSTANCE.createExponentialTimeDifferenceWeigher(
                                 // use a minimum confidence to avoid the bearing to flip to 270deg in case all is zero
-                                getMillisecondsOverWhichToAverageSpeed() / 2, /* minimumConfidence */ 0.00000001)); // half
-                                                                                                                    // confidence
-                                                                                                                    // if
-                                                                                                                    // half
-                                                                                                                    // averaging
-                                                                                                                    // interval
-                                                                                                                    // apart
+                                getMillisecondsOverWhichToAverageSpeed() / 2, /* minimumConfidence */ 0.00000001)); // half confidence if half averaging interval apart
                 result = estimatedSpeed == null ? null : estimatedSpeed.getObject();
                 if (estimatedSpeed != null) {
                     if (ceil != null && ceil.getTimePoint().equals(at)) {
@@ -947,6 +942,11 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
         };
     }
 
+    @Override
+    public boolean isValid(FixType e) {
+        return isValid(getInternalFixes(), e);
+    }
+    
     /**
      * When redefining this method, make sure to redefine
      * {@link #invalidateValidityAndEstimatedSpeedAndDistanceCaches(GPSFix)} accordingly. This implementation checks the
@@ -1119,11 +1119,12 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
     @Override
     protected boolean add(FixType fix, boolean replace) {
         final boolean result;
+        final AddResult addResult;
         final boolean firstFixInTrack;
         lockForWrite();
         try {
             firstFixInTrack = getRawFixes().isEmpty();
-            result = addWithoutLocking(fix, replace);
+            addResult = addWithoutLocking(fix, replace);
             if (!validityCachingSuspended) {
                 invalidateValidityAndEstimatedSpeedAndDistanceCaches(fix);
             }
@@ -1145,9 +1146,10 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
                 unlockAfterRead();
             }
         }
+        result = addResult == AddResult.ADDED || addResult == AddResult.REPLACED;
         if (result) {
             for (GPSTrackListener<ItemType, FixType> listener : getListeners()) {
-                listener.gpsFixReceived(fix, getTrackedItem(), firstFixInTrack);
+                listener.gpsFixReceived(fix, getTrackedItem(), firstFixInTrack, addResult);
             }
         }
         return result;

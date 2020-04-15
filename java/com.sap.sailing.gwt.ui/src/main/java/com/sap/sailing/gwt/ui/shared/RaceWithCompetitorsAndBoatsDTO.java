@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.Collection;
 import java.util.Map;
 
+import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
@@ -19,13 +20,8 @@ public class RaceWithCompetitorsAndBoatsDTO extends RaceDTO {
     RaceWithCompetitorsAndBoatsDTO() {}
 
     public RaceWithCompetitorsAndBoatsDTO(RegattaAndRaceIdentifier raceIdentifier, Map<CompetitorDTO, BoatDTO> competitorsAndBoats,
-            TrackedRaceDTO trackedRace, boolean isCurrentlyTracked) {
-        super(raceIdentifier, trackedRace, isCurrentlyTracked);
-        this.competitorsAndBoats = competitorsAndBoats;
-    }
-
-    public RaceWithCompetitorsAndBoatsDTO(RegattaAndRaceIdentifier raceIdentifier, Map<CompetitorDTO, BoatDTO> competitorsAndBoats) {
-        super(raceIdentifier);
+            TrackedRaceDTO trackedRace, boolean isCurrentlyTracked, RankingMetrics rankingMetricType) {
+        super(raceIdentifier, trackedRace, isCurrentlyTracked, rankingMetricType);
         this.competitorsAndBoats = competitorsAndBoats;
     }
 

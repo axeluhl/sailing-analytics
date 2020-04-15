@@ -36,14 +36,4 @@ public class WindChartLifecycle implements ComponentLifecycle<WindChartSettings>
     public String getComponentId() {
         return ID;
     }
-
-    @Override
-    public WindChartSettings extractUserSettings(WindChartSettings settings) {
-        return settings;
-    }
-
-    @Override
-    public WindChartSettings extractDocumentSettings(WindChartSettings settings) {
-        return settings;
-    }
 }

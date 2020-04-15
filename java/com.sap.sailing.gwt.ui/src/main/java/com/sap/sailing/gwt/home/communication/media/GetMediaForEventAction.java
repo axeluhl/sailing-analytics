@@ -9,7 +9,7 @@ import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.communication.event.EventLinkDTO;
 import com.sap.sailing.gwt.home.communication.event.EventReferenceDTO;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
-import com.sap.sailing.gwt.ui.shared.media.MediaConstants;
+import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.common.media.MimeType;
 import com.sap.sse.gwt.dispatch.shared.caching.IsClientCacheable;
 import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
@@ -63,7 +63,7 @@ public class GetMediaForEventAction implements SailingAction<MediaDTO>, IsClient
         }
         for (VideoDescriptor video : event.getVideos()) {
             MimeType type = video.getMimeType();
-            if (MediaConstants.SUPPORTED_VIDEO_TYPES.contains(type)) {
+            if (MediaTagConstants.SUPPORTED_VIDEO_TYPES.contains(type)) {
                 SailingVideoDTO videoDTO = HomeServiceUtil.toSailingVideoDTO(eventRef, video);
                 media.addVideo(videoDTO);
             }

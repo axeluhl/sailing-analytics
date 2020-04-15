@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.util.UUID;
 
 import org.json.simple.JSONObject;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -44,8 +45,6 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.AbstractColor;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-import junit.framework.Assert;
-
 public class RaceLogCourseDesignChangedEventSerializerTest {
 
     private RaceLogCourseDesignChangedEventSerializer serializer;
@@ -56,7 +55,7 @@ public class RaceLogCourseDesignChangedEventSerializerTest {
 
     @Before
     public void setUp() {
-        SharedDomainFactory factory = DomainFactory.INSTANCE;
+        SharedDomainFactory<?> factory = DomainFactory.INSTANCE;
         serializer = new RaceLogCourseDesignChangedEventSerializer(CompetitorJsonSerializer.create(), new CourseBaseJsonSerializer(
                 new WaypointJsonSerializer(new ControlPointJsonSerializer(new MarkJsonSerializer(),
                         new GateJsonSerializer(new MarkJsonSerializer())))));
@@ -89,7 +88,8 @@ public class RaceLogCourseDesignChangedEventSerializerTest {
 
         course.addWaypoint(0, new WaypointImpl(new ControlPointWithTwoMarksImpl(UUID.randomUUID(), new MarkImpl(UUID.randomUUID(), "Black",
                 MarkType.BUOY, AbstractColor.getCssColor("black"), "round", "circle"), new MarkImpl(UUID.randomUUID(), "Green", MarkType.BUOY,
-                        AbstractColor.getCssColor("green"), "round", "circle"), "Upper gate")));
+                                AbstractColor.getCssColor("green"), "round", "circle"),
+                        "Upper gate", "Upper gate")));
         course.addWaypoint(1, new WaypointImpl(new MarkImpl(UUID.randomUUID(), "White", MarkType.BUOY, AbstractColor.getCssColor("white"),
                 "conical", "bold"), PassingInstruction.Port));
 

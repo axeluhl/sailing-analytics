@@ -30,11 +30,14 @@ public class ManeuverCurveBoundariesJsonDeserializer implements JsonDeserializer
         Double directionChangeInDegrees = (Double) object
                 .get(ManeuverCurveBoundariesJsonSerializer.DIRECTION_CHANGE_IN_DEGREES);
         Double lowestSpeedInKnots = (Double) object.get(ManeuverCurveBoundariesJsonSerializer.LOWEST_SPEED_IN_KNOTS);
+        Double highestSpeedInKnots = (Double) object.get(ManeuverCurveBoundariesJsonSerializer.HIGHEST_SPEED_IN_KNOTS);
         return new ManeuverCurveBoundariesImpl(new MillisecondsTimePoint(timePointBeforeMillis),
                 new MillisecondsTimePoint(timePointAfterMillis),
                 new KnotSpeedWithBearingImpl(speedBeforeInKnots, new DegreeBearingImpl(cogBefore)),
                 new KnotSpeedWithBearingImpl(speedAfterInKnots, new DegreeBearingImpl(cogAfter)),
-                directionChangeInDegrees, new KnotSpeedImpl(lowestSpeedInKnots));
+                directionChangeInDegrees, new KnotSpeedImpl(lowestSpeedInKnots),
+                //TODO remove null check after master merge of this branch
+                highestSpeedInKnots == null ? null : new KnotSpeedImpl(highestSpeedInKnots));
     }
 
 }

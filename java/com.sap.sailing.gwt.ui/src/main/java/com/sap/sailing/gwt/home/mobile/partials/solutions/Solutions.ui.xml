@@ -31,16 +31,7 @@
                         </p>
                         <ul>
                             <li>
-                                <ui:text from='{i18n.contentSapInSailing6}' />
-                            </li>
-                            <li>
                                 <ui:text from='{i18n.contentSapInSailing7}' />
-                            </li>
-                            <li>
-                                <ui:text from='{i18n.contentSapInSailing8}' />
-                            </li>
-                            <li>
-                                <ui:text from='{i18n.contentSapInSailing9}' />
                             </li>
                             <li>
                                 <ui:text from='{i18n.contentSapInSailing10}' />
@@ -122,21 +113,6 @@
                         <a class="{res.mainCss.button}" ui:field="buoyPingerAppDetailsAnchor">
                            <ui:text from="{i18n.sapSailingBuoyPingerReadMore}"/>
                         </a>
-                    </g:HTMLPanel>
-                </s:content>
-            </s:SolutionsItem>
-        </a:item>
-        <a:item>
-            <s:SolutionsItem title="{i18n.postRaceAnalytics}"
-                    image="{res_local.postTrimmed}" showInitial="false">
-                <s:content>
-                    <g:HTMLPanel>
-                        <p>
-                            <ui:text from='{i18n.contentPostRaceAnalytics1}' />
-                        </p>
-                        <p>
-                            <ui:text from='{i18n.contentPostRaceAnalytics2}' />
-                        </p>
                     </g:HTMLPanel>
                 </s:content>
             </s:SolutionsItem>

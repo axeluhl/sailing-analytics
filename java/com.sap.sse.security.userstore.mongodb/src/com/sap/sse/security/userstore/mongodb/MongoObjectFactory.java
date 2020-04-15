@@ -2,10 +2,32 @@ package com.sap.sse.security.userstore.mongodb;
 
 import java.util.Map;
 
-import com.mongodb.DB;
-import com.sap.sse.security.User;
+import com.mongodb.client.MongoDatabase;
+import com.sap.sse.security.shared.AccessControlListAnnotation;
+import com.sap.sse.security.shared.OwnershipAnnotation;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.RoleDefinition;
+import com.sap.sse.security.shared.impl.AccessControlList;
+import com.sap.sse.security.shared.impl.Ownership;
+import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.shared.impl.UserGroup;
 
 public interface MongoObjectFactory {
+    public void storeAccessControlList(AccessControlListAnnotation acl);
+
+    public void deleteAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, AccessControlList acl);
+    
+    public void storeOwnership(OwnershipAnnotation owner);
+    
+    public void deleteOwnership(QualifiedObjectIdentifier ownedObjectId, Ownership owner);
+    
+    public void storeRoleDefinition(RoleDefinition role);
+    
+    public void deleteRoleDefinition(RoleDefinition role);
+    
+    public void storeUserGroup(UserGroup group);
+    
+    public void deleteUserGroup(UserGroup userGroup);
 
     public void storeUser(User user);
     
@@ -17,5 +39,5 @@ public interface MongoObjectFactory {
 
     public void storePreferences(String username, Map<String, String> userMap);
 
-    public DB getDatabase();
+    public MongoDatabase getDatabase();
 }

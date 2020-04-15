@@ -59,8 +59,8 @@ public class AnalyticsContract {
     static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
 
     public static class LeaderboardsEventsCompetitorsMarksBoatsJoined {
-        public final static Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
-            .appendPath(AnalyticsProvider.ALL_JOINED).build();
+        public final static Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(AnalyticsProvider.ALL_JOINED)
+                .build();
     }
 
     public static class EventLeaderboardCompetitorJoined {
@@ -69,8 +69,8 @@ public class AnalyticsContract {
     }
 
     public static class EventLeaderboardMarkJoined {
-        public final static Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
-            .appendPath("event_leaderboard_mark_joined").build();
+        public final static Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath("event_leaderboard_mark_joined")
+                .build();
     }
 
     public static class Competitor implements CompetitorColumns, BaseColumns {

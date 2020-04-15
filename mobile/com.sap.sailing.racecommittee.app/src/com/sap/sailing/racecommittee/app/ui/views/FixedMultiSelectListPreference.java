@@ -21,12 +21,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Set;
 
-import android.content.Context;
-import android.preference.MultiSelectListPreference;
-import android.preference.Preference;
-import android.util.AttributeSet;
-
 import com.sap.sailing.android.shared.logging.ExLog;
+
+import android.content.Context;
+import android.preference.Preference;
+import android.support.v14.preference.MultiSelectListPreference;
+import android.util.AttributeSet;
 
 /**
  * Applies the fix of
@@ -95,8 +95,8 @@ public class FixedMultiSelectListPreference extends MultiSelectListPreference {
         super.setValues(values);
     }
 
-    private void fixedSetValues(Set<String> values) throws IllegalArgumentException, IllegalAccessException,
-            InvocationTargetException {
+    private void fixedSetValues(Set<String> values)
+            throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
         mValuesReference.clear();
         mValuesReference.addAll(values);
 

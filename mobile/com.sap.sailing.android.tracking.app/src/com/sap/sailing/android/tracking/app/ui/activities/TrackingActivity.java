@@ -1,13 +1,16 @@
 package com.sap.sailing.android.tracking.app.ui.activities;
 
+import android.Manifest;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -25,6 +28,7 @@ import com.sap.sailing.android.shared.services.sending.MessageSendingService.API
 import com.sap.sailing.android.shared.services.sending.MessageSendingService.APIConnectivityListener;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService.MessageSendingBinder;
 import com.sap.sailing.android.shared.ui.customviews.GPSQuality;
+import com.sap.sailing.android.shared.util.LocationHelper;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.services.TrackingService;
@@ -56,6 +60,8 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
     private final static String SIS_LAST_SPEED_TEXT = "lastSpeedText";
     private final static String SIS_LAST_COMPASS_TEXT = "lastCompassText";
 
+    private final static int REQUEST_PERMISSIONS_REQUEST_CODE = 1119;
+
     private ViewPager mPager;
     private ScreenSlidePagerAdapter mPagerAdapter;
     private AppPreferences prefs;
@@ -76,8 +82,10 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         if (savedInstanceState != null) {
-            lastCompassIndicatorText = savedInstanceState.getString(SIS_LAST_COMPASS_TEXT, getString(R.string.initial_hyphen_degrees));
-            lastSpeedIndicatorTextWithoutUnit = savedInstanceState.getString(SIS_LAST_SPEED_TEXT, getString(R.string.initial_hyphen));
+            lastCompassIndicatorText = savedInstanceState.getString(SIS_LAST_COMPASS_TEXT,
+                    getString(R.string.initial_hyphen_degrees));
+            lastSpeedIndicatorTextWithoutUnit = savedInstanceState.getString(SIS_LAST_SPEED_TEXT,
+                    getString(R.string.initial_hyphen));
         } else {
             lastCompassIndicatorText = getString(R.string.initial_hyphen_degrees);
             lastSpeedIndicatorTextWithoutUnit = getString(R.string.initial_hyphen);
@@ -161,6 +169,11 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
         });
 
         replaceFragment(R.id.tracking_linear_layout, trackingFragment);
+        if (!hasPermissions()) {
+            ActivityCompat.requestPermissions(this, new String[] { Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION }, REQUEST_PERMISSIONS_REQUEST_CODE);
+            return;
+        }
         ServiceHelper.getInstance().startTrackingService(this, checkinDigest);
     }
 
@@ -232,7 +245,8 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
     }
 
     @Override
-    public void gpsQualityAndAccuracyUpdated(final GPSQuality quality, final float accuracy, final Bearing bearing, final Speed speed) {
+    public void gpsQualityAndAccuracyUpdated(final GPSQuality quality, final float accuracy, final Bearing bearing,
+            final Speed speed) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -262,6 +276,21 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
         if (trackingFragment.isAdded()) {
             trackingFragment.setAPIConnectivityStatus(apiConnectivity);
         }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        if (requestCode != REQUEST_PERMISSIONS_REQUEST_CODE) {
+            return;
+        }
+        // If request is cancelled, the result arrays are empty.
+        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            // permission was granted
+            ServiceHelper.getInstance().startTrackingService(this, checkinDigest);
+        } else {
+            LocationHelper.showNoGPSError(this, getString(R.string.enable_gps));
+        }
+        return;
     }
 
     @Override
@@ -342,16 +371,17 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 
         @Override
         public Fragment getItem(int position) {
-            if (position == VIEW_PAGER_FRAGMENT_STOP_BUTTON) {
+            switch (position) {
+            case VIEW_PAGER_FRAGMENT_STOP_BUTTON:
                 trackingTimeFragment = new TrackingTimeFragment();
                 return trackingTimeFragment;
-            } else if (position == VIEW_PAGER_FRAGMENT_COMPASS) {
+            case VIEW_PAGER_FRAGMENT_COMPASS:
                 cFragment = new CompassFragment();
                 return cFragment;
-            } else if (position == VIEW_PAGER_FRAGMENT_SPEED) {
+            case VIEW_PAGER_FRAGMENT_SPEED:
                 sFragment = new SpeedFragment();
                 return sFragment;
-            } else {
+            default:
                 return null;
             }
         }
@@ -376,17 +406,23 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
         }
     }
 
-    public void showStopTrackingConfirmationDialog() {
-        AlertDialog dialog = new AlertDialog.Builder(this, R.style.AppTheme_AlertDialog)
-            .setTitle(R.string.please_confirm)
-            .setMessage(R.string.do_you_really_want_to_stop_tracking)
-            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+    private boolean hasPermissions() {
+        boolean fine = ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+        boolean coarse = ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+        return fine && coarse;
+    }
 
-                public void onClick(DialogInterface dialog, int whichButton) {
-                    stopTracking();
-                }
-            })
-            .setNegativeButton(android.R.string.no, null).create();
+    public void showStopTrackingConfirmationDialog() {
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle(R.string.please_confirm).setMessage(R.string.do_you_really_want_to_stop_tracking)
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        stopTracking();
+                    }
+                }).setNegativeButton(android.R.string.no, null).create();
 
         dialog.show();
     }

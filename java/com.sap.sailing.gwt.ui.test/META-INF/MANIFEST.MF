@@ -16,7 +16,8 @@ Require-Bundle: com.sap.sailing.server,
  com.rabbitmq.client;bundle-version="2.8.4",
  com.sap.sse.filestorage,
  com.google.gwt.user;bundle-version="2.8.2";resolution:=optional,
- org.moxieapps.gwt.highcharts;bundle-version="1.5.0"
+ org.moxieapps.gwt.highcharts;bundle-version="1.5.0",
+ com.sap.sse.replication;bundle-version="1.0.0"
 Bundle-ClassPath: .
 Import-Package: com.sap.sailing.domain.racelogtracking.impl,
  javax.servlet;version="3.1.0",

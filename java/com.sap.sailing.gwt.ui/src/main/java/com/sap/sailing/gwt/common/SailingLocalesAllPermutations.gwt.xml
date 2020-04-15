@@ -14,12 +14,12 @@
         but there can be other i18n bundles.
         
         the build script switches references to *AllPermutations* 
-        to *SinglePermutation* in gwt modules with the "-b" option.
+        to *AllPermutations* in gwt modules with the "-b" option.
                   
     -->
     
-	<extend-property name="locale" values="en,de,zh,ru,ja,es,fr,pt" />
-	<set-property name="locale" value="en,de,zh,ru,ja,es,fr,pt" />
+	<extend-property name="locale" values="en,de,zh,ru,ja,es,fr,pt,it" />
+	<set-property name="locale" value="en,de,zh,ru,ja,es,fr,pt,it" />
 	<set-property-fallback name="locale" value="en" /> 
 	<set-configuration-property name="locale.useragent" value="Y"/>
 	<set-configuration-property name="locale.cookie" value="GWT_LOCALE"/>

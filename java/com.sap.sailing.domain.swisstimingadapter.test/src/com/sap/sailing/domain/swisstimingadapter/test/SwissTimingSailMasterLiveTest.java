@@ -41,7 +41,7 @@ public class SwissTimingSailMasterLiveTest implements SailMasterListener {
 
     @Before
     public void connect() throws InterruptedException, ParseException {
-        connector = SwissTimingFactory.INSTANCE.getOrCreateSailMasterConnector("gps.sportresult.com", 40300, "W4702", "R2", "Women 470 Race 2", null /* boat class*/);
+        connector = SwissTimingFactory.INSTANCE.getOrCreateSailMasterConnector("gps.sportresult.com", 40300, "W4702", "R2", "Women 470 Race 2", null /* boat class*/, /* SwissTimingRaceTracker */ null);
     }
     
     @After

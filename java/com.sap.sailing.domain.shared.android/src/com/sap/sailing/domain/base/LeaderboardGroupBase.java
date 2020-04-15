@@ -4,8 +4,9 @@ import java.util.UUID;
 
 import com.sap.sse.common.NamedWithID;
 import com.sap.sse.common.Renamable;
+import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 
-public interface LeaderboardGroupBase extends Renamable, NamedWithID {
+public interface LeaderboardGroupBase extends Renamable, NamedWithID, WithQualifiedObjectIdentifier {
     UUID getId();
     String getDescription();
     void setDescriptiom(String description);

@@ -10,6 +10,7 @@ public class PairingListDTO implements Serializable {
     
     private static final long serialVersionUID = 102220422437194196L;
     private List<List<List<Pair<CompetitorDTO, BoatDTO>>>> pairingList;
+    private List<BoatDTO> boats;
     private List<String> raceColumnNames;
     
     public PairingListDTO() { }
@@ -28,17 +29,23 @@ public class PairingListDTO implements Serializable {
     }
     
     public List<BoatDTO> getBoats() {
-        List<BoatDTO> boats = new ArrayList<>();
-        for (List<Pair<CompetitorDTO, BoatDTO>> fleet : this.pairingList.get(0)) {
-            for (Pair<CompetitorDTO, BoatDTO> competitorAndBoatPair : fleet) {
-                if (!boats.contains(competitorAndBoatPair.getB())) {
-                    boats.add(competitorAndBoatPair.getB());
+        if (boats == null) {
+            boats = new ArrayList<>();
+            for (List<Pair<CompetitorDTO, BoatDTO>> fleet : this.pairingList.get(0)) {
+                for (Pair<CompetitorDTO, BoatDTO> competitorAndBoatPair : fleet) {
+                    if (!boats.contains(competitorAndBoatPair.getB())) {
+                        boats.add(competitorAndBoatPair.getB());
+                    }
                 }
             }
         }
         return boats;
     }
     
+    public void setBoats(final List<BoatDTO> boats) {
+        this.boats = boats;
+    }
+
     public List<String> getRaceColumnNames() {
         return raceColumnNames;
     }

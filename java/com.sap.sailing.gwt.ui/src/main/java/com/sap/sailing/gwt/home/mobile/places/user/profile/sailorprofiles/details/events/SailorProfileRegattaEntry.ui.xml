@@ -1,0 +1,23 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+    <ui:with field="spr"
+        type="com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedSailorProfileResources" />
+    <ui:with field="spmr"
+        type="com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.SailorProfileMobileResources" />
+
+    <g:HTMLPanel ui:field="contentContainerRegattasUi" addStyleNames="{spmr.css.regattaEntryPanel}">
+        <div ui:field="regattaNameUi" class="{spmr.css.regattaName}" />
+        <div class="{spmr.css.regattaInfoLeft}">
+            <div ui:field="regattaRankUi" class="{spmr.css.regattaRank}" />
+            <g:FlowPanel ui:field="competitorUi" addStyleNames="{spmr.css.competitor}" />
+            <div ui:field="clubNameUi" />
+        </div>
+        <div class="{spmr.css.regattaInfoRight}">
+            <div ui:field="sumPointsUi" class="{spmr.css.sumPoints}" />
+        </div>
+        <g:Button ui:field="showLeaderboardButtonUi" text="{i18n.showLeaderboard}"
+            addStyleNames="{spmr.css.showLeaderboardButton} {spr.css.inverseButton}" />
+        <div class="{spmr.css.regattaSplitter1px}" />
+    </g:HTMLPanel>
+</ui:UiBinder> 

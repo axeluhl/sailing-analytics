@@ -12,11 +12,15 @@ public interface StatisticsBoxResources extends ClientBundle {
     @Source("statistics.svg")
     @MimeType("image/svg+xml")
     DataResource statistics();
-    
+
     @Source("fastest_sailor.svg")
     @MimeType("image/svg+xml")
     DataResource fastestSailor();
     
+    @Source("fastest_sailor_white.svg")
+    @MimeType("image/svg+xml")
+    DataResource fastestSailorWhite();
+
     @Source("icon_averageSpeed.svg")
     @MimeType("image/svg+xml")
     DataResource averageSpeed();
@@ -32,11 +36,15 @@ public interface StatisticsBoxResources extends ClientBundle {
     @Source("icon_trackedCount.svg")
     @MimeType("image/svg+xml")
     DataResource trackedCount();
-    
+
     @Source("max_speed.svg")
     @MimeType("image/svg+xml")
     DataResource maxSpeed();
     
+    @Source("max_speed_white.svg")
+    @MimeType("image/svg+xml")
+    DataResource maxSpeedWhite();
+
     @Source("raw_gps_fixes.svg")
     @MimeType("image/svg+xml")
     DataResource gpsFixes();

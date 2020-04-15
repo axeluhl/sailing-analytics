@@ -6,7 +6,7 @@
 We distinguish two cases: adding a 3rd-party bundle to the target platform and adding a new development bundle as a Java project.
 
 ## Adding a Bundle to the Target Platform
-Add a New Library which can not be found in any SAP Repository
+* Add a New Library which can not be found in any SAP Repository
 * Check if the library is already OSGi-enabled (normally this means there is a MANIFEST.MF file in the META-INF folder of the JAR file containing valid OSGi metadata.
 * In case the library is not OSGi-enabled someone has to create such a OSGi-enabled version (ask the technical lead of the project)
 * Add the library to an appropriate target folder under plugins/ in the project com.sap.sailing.targetplatform.base (e.g. target-base)
@@ -14,6 +14,7 @@ Add a New Library which can not be found in any SAP Repository
 * Go to directory 'java/com.sap.sailing.targetplatform/scripts'
  * Rebuild the base target platform by running the script 'createLocalBaseP2repository.sh'
  * Generate the target definition for this local repository by running the script 'createLocalTargetDef.sh'
+ * Currently this scripts work for the cygwin shell and the git bash, if the path to your files in the target definition is incorrect, this may be the reason.
 * Test the new overall target platform
  * by setting the race-analysis-p2-local.target as target platform in the IDE
  * by running the local maven build via ''buildAndUpdateProduct.sh -v build'' (the ''-v'' switch builds and uses the local p2 repository)

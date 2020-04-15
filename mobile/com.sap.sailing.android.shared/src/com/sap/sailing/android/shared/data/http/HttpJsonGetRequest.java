@@ -16,15 +16,15 @@ public class HttpJsonGetRequest extends HttpRequest {
 
     @Override
     protected BufferedInputStream doRequest(HttpURLConnection connection) throws IOException {
-//        connection.setDoOutput(true);
+        // connection.setDoOutput(true);
         connection.setRequestMethod("GET");
         connection.setChunkedStreamingMode(0);
 
         connection.setRequestProperty("Content-Type", ContentType);
         connection.setRequestProperty("Accept", ContentType);
 
-//        OutputStream outputStream = new BufferedOutputStream(connection.getOutputStream());
-//        outputStream.close();
+        // OutputStream outputStream = new BufferedOutputStream(connection.getOutputStream());
+        // outputStream.close();
 
         return new BufferedInputStream(connection.getInputStream());
     }

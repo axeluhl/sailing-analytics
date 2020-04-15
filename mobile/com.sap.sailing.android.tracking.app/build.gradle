@@ -1,21 +1,41 @@
 apply plugin: "com.android.application"
-apply plugin: 'com.getkeepsafe.dexcount'
-apply from: "../git.gradle"
-
-def packageName="com.sap.sailing.android.tracking.app"
-def verCode=1
+if (!project.hasProperty("xmake")) {
+    apply plugin: "com.getkeepsafe.dexcount"
+}
 
 android {
     buildToolsVersion rootProject.ext.buildTools
     compileSdkVersion rootProject.ext.compileSdk
 
+    compileOptions {
+        sourceCompatibility rootProject.ext.sourceCompatibilityVersion
+        targetCompatibility rootProject.ext.targetCompatibilityVersion
+    }
+
+    /**
+     * Copies apk into www apps directory and create version file
+     */
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            outputFileName = new File(outputFileName.replace("-$variant.buildType.name", ""))
+        }
+        variant.assemble.doLast { assemble ->
+            // Create version file
+            def versionFile = new File(rootProject.ext.destinationFolder, packageName + ".version")
+            versionFile.text = packageName + ".apk=$appVersionCode-$variant.buildType.name"
+            copy {
+                from variant.outputs*.outputFile
+                into rootProject.ext.destinationFolder
+            }
+        }
+    }
+
     defaultConfig {
         applicationId packageName
         minSdkVersion rootProject.ext.minSdk
         targetSdkVersion rootProject.ext.targetSdk
-        versionCode verCode
-        versionName "$verCode - Altitude"
-        useJack false // not working on Windows yet
+        versionCode appVersionCode.toInteger()
+        versionName appVersionName
     }
 
     sourceSets {
@@ -63,42 +83,33 @@ android {
 
     packagingOptions {
         exclude "LICENSE.txt"
-        exclude "META-INF/maven/com.googlecode.json-simple/json-simple/pom.properties"
-        exclude "META-INF/maven/com.googlecode.json-simple/json-simple/pom.xml"
     }
 }
 
 dependencies {
-    /* support libraries */
-    compile "com.android.support:appcompat-v7:${rootProject.ext.support}"
-
     /* Google Play Services */
-    compile "com.google.android.gms:play-services-gcm:${rootProject.ext.play_services}"
-    compile "com.google.android.gms:play-services-location:${rootProject.ext.play_services}"
-
-    /* license dialog */
-    compile("de.psdev.licensesdialog:licensesdialog:${rootProject.ext.license_dialog}")
+    implementation "com.google.android.gms:play-services-gcm:${rootProject.ext.play_services}"
 
     /* local dependencies */
-    compile project(":mobile:com.sap.sailing.android.shared")
+    implementation project(":mobile:com.sap.sailing.android.shared")
 
     /* JVM tests */
-    testCompile "junit:junit:${rootProject.ext.junit}"
-    testCompile "org.mockito:mockito-core:${rootProject.ext.mockito}"
-
-//    /* UI testing with espresso */
-//    androidTestCompile "com.android.support:support-annotations:${rootProject.ext.support}"
-//    androidTestCompile "com.android.support.test:runner:${rootProject.ext.test}"
-//    androidTestCompile "com.android.support.test:rules:${rootProject.ext.test}"
-//    androidTestCompile "com.android.support.test.espresso:espresso-core:${rootProject.ext.espresso}"
-//    androidTestCompile ("com.android.support.test.espresso:espresso-contrib:${rootProject.ext.espresso}") {
-//        exclude group: "com.android.support", module: "appcompat"
-//        exclude group: "com.android.support", module: "support-v4"
-//        exclude module: "recyclerview-v7"
-//    }
+    testImplementation "junit:junit:${rootProject.ext.junit}"
+    testImplementation "org.mockito:mockito-core:${rootProject.ext.mockito}"
 }
 
 // Custom tasks
+preBuild.doLast {
+    // save the combined build info into assets/build.info file
+    def repo = org.ajoberstar.grgit.Grgit.open(dir: System.env.XMAKE_PROJECTDIR)
+    def result_line = "${repo.branch.current().getName()}-${repo.head().abbreviatedId} (${new Date().toString()})\n"
+    def assetsDir = android.sourceSets.main.assets.srcDirs.toArray()[1]
+    delete(assetsDir)
+    mkdir(assetsDir)
+    def buildInfoFile = new File(assetsDir, 'build_gradle.info').getAbsolutePath()
+    new File(buildInfoFile).write(result_line)
+    repo.close()
+}
 
 /**
  * Deletes apk and version from www apps directory
@@ -107,22 +118,4 @@ clean.doLast {
     ant.delete() {
         fileset(dir: file("../../java/com.sap.sailing.www/apps"), includes: "$packageName*")
     }
-}
-
-/**
- * Copies apk into www apps directory and create version file
- */
-build.doLast {
-    // Copy APK file
-    copy {
-        from("build/outputs/apk") {
-            include "**/*debug.apk"
-        }
-        into "../../java/com.sap.sailing.www/apps"
-        rename { String fileName -> fileName.replace("-debug", "") }
-    }
-
-    // Create version file
-    def versionFile = file("../../java/com.sap.sailing.www/apps/$packageName." + "version")
-    versionFile.text = "$packageName" + ".apk=$verCode"
 }

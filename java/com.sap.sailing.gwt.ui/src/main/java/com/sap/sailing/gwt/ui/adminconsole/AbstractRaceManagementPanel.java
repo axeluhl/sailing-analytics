@@ -14,6 +14,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.security.ui.client.UserService;
 
 public abstract class AbstractRaceManagementPanel extends AbstractEventManagementPanel {
     protected RegattaAndRaceIdentifier singleSelectedRace;
@@ -26,10 +27,15 @@ public abstract class AbstractRaceManagementPanel extends AbstractEventManagemen
     
     protected final VerticalPanel selectedRaceContentPanel;
     
-    public AbstractRaceManagementPanel(final SailingServiceAsync sailingService,
-            ErrorReporter errorReporter,
+    public AbstractRaceManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, boolean actionButtonsEnabled, StringMessages stringMessages) {
-        super(sailingService, regattaRefresher, errorReporter, actionButtonsEnabled, stringMessages);
+        this(sailingService, null, errorReporter, regattaRefresher, actionButtonsEnabled, stringMessages);
+    }
+    
+    public AbstractRaceManagementPanel(final SailingServiceAsync sailingService,
+            UserService userService, ErrorReporter errorReporter,
+            RegattaRefresher regattaRefresher, boolean actionButtonsEnabled, StringMessages stringMessages) {
+        super(sailingService, userService, regattaRefresher, errorReporter, actionButtonsEnabled, stringMessages);
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);
         mainPanel.setWidth("100%");

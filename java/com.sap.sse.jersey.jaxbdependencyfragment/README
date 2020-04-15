@@ -1,0 +1,3 @@
+This fragment to the com.sun.jersey bundle is used to declare an additional dependency on
+com.sun.xml.bind.jaxb-impl which contains the javax.xml.bind implementation since it was
+removed from the JDK in Java 11.

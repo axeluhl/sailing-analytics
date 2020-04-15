@@ -22,7 +22,7 @@ import com.sap.sse.datamining.test.domain.impl.Test_TeamImpl;
 
 public final class ComponentTestsUtil {
     
-    private final static ProcessorFactory processorFactory = new ProcessorFactory(ConcurrencyTestsUtil.getExecutor());
+    private final static ProcessorFactory processorFactory = new ProcessorFactory(ConcurrencyTestsUtil.getSharedExecutor());
     
     public static ProcessorFactory getProcessorFactory() {
         return processorFactory;

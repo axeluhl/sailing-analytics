@@ -14,7 +14,6 @@ import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
-import com.sap.sailing.server.gateway.jaxrs.api.CompetitorsResource;
 
 public class CompetitorsResourceTest extends AbstractJaxRsApiTest {
     private final String name = "Heiko KRÖGER";
@@ -27,13 +26,12 @@ public class CompetitorsResourceTest extends AbstractJaxRsApiTest {
     public void setUp() throws Exception {
         super.setUp();
         DynamicTeam team = new TeamImpl(null, Collections.singleton(new PersonImpl(null, new NationalityImpl(nationality), null, null)), null);
-        racingEventService.getBaseDomainFactory().getOrCreateCompetitor(id, name, shortName, null, null, null, team, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+        racingEventService.getBaseDomainFactory().getOrCreateCompetitor(id, name, shortName, null, null, null, team, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null, /* storePersistently */ true);
     }
 
     @Test
     public void testGetCompetitorAsJson() throws Exception {
-        CompetitorsResource resource = spyResource(new CompetitorsResource());
-        String jsonString = resource.getCompetitor(id).getEntity().toString();        
+        String jsonString = competitorsResource.getCompetitor(id, null, null).getEntity().toString();
         JSONObject json = Helpers.toJSONObjectSafe(JSONValue.parse(jsonString));
         assertTrue(json.get("id").equals(id));
         assertTrue(json.get("name").equals(name));

@@ -5,15 +5,15 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
 
-import android.content.AsyncTaskLoader;
-import android.content.Context;
-import android.content.Loader;
-
 import com.sap.sailing.android.shared.data.http.HttpGetRequest;
 import com.sap.sailing.android.shared.data.http.HttpRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.racecommittee.app.data.handlers.DataHandler;
 import com.sap.sailing.racecommittee.app.data.parsers.DataParser;
+
+import android.content.Context;
+import android.support.v4.content.AsyncTaskLoader;
+import android.support.v4.content.Loader;
 
 /**
  * <p>
@@ -30,7 +30,8 @@ import com.sap.sailing.racecommittee.app.data.parsers.DataParser;
  * implementation of {@link DataHandler#onResult(Object, boolean)}.
  * </p>
  *
- * @param <T> result type.
+ * @param <T>
+ *            result type.
  */
 public class OnlineDataLoader<T> extends AsyncTaskLoader<DataLoaderResult<T>> {
     private static final String TAG = OnlineDataLoader.class.getName();
@@ -49,7 +50,8 @@ public class OnlineDataLoader<T> extends AsyncTaskLoader<DataLoaderResult<T>> {
     /**
      * Initializes a new {@link OnlineDataLoader} which executes the given {@link HttpRequest} to load the remote data.
      */
-    public OnlineDataLoader(Context context, HttpRequest request, DataParser<T> dataParser, DataHandler<T> dataHandler) {
+    public OnlineDataLoader(Context context, HttpRequest request, DataParser<T> dataParser,
+            DataHandler<T> dataHandler) {
         super(context);
         this.httpRequest = request;
         this.dataParser = dataParser;
@@ -61,10 +63,12 @@ public class OnlineDataLoader<T> extends AsyncTaskLoader<DataLoaderResult<T>> {
     @Override
     protected void onStartLoading() {
         if (dataHandler.hasCachedResults()) {
-            ExLog.i(getContext(), TAG, String.format("Using cached results... %s", Integer.toHexString(this.hashCode())));
+            ExLog.i(getContext(), TAG,
+                    String.format("Using cached results... %s", Integer.toHexString(this.hashCode())));
             deliverResult(new DataLoaderResult<T>(dataHandler.getCachedResults(), true));
         } else {
-            ExLog.i(getContext(), TAG, String.format("No cached results. Forcing load now %s", Integer.toHexString(this.hashCode())));
+            ExLog.i(getContext(), TAG,
+                    String.format("No cached results. Forcing load now %s", Integer.toHexString(this.hashCode())));
             forceLoad();
         }
     }

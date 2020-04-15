@@ -120,7 +120,7 @@ public class CompassView extends RelativeLayout {
     }
 
     private void generateAndShowAlert() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AppTheme_AlertDialog);
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle(getContext().getString(R.string.error_wrong_degree_value_title));
         builder.setMessage(getContext().getString(R.string.error_wrong_degree_value_message));
         builder.setPositiveButton(android.R.string.ok, null);
@@ -130,7 +130,8 @@ public class CompassView extends RelativeLayout {
             public void onDismiss(DialogInterface dialog) {
                 degreeView.requestFocus();
                 degreeView.selectAll();
-                InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                InputMethodManager imm = (InputMethodManager) getContext()
+                        .getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.showSoftInput(degreeView, InputMethodManager.SHOW_IMPLICIT);
             }
         });

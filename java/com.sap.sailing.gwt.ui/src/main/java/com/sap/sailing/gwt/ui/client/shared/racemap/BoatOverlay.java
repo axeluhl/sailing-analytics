@@ -56,6 +56,7 @@ public class BoatOverlay extends CanvasOverlayV3 {
     private Integer lastHeight;
     private Size lastScale;
     private Color lastColor;
+    private DisplayMode lastDisplayMode;
     
     public static enum DisplayMode { DEFAULT, SELECTED, NOT_SELECTED };
     private DisplayMode displayMode;
@@ -82,18 +83,15 @@ public class BoatOverlay extends CanvasOverlayV3 {
         if (mapProjection != null && boatFix != null) {
             // the possible zoom level range is 0 to 21 (zoom level 0 would show the whole world)
             int zoom = map.getZoom();
-            Util.Pair<Size, Size> boatScaleAndSize = boatScaleAndSizePerZoomCache.get(zoom);
-            if (boatScaleAndSize == null) {
-                boatScaleAndSize = getBoatScaleAndSize(boatClass);
-                boatScaleAndSizePerZoomCache.put(zoom, boatScaleAndSize);
-            }
-            Size boatSizeScaleFactor = boatScaleAndSize.getA();
+            final Util.Pair<Size, Size> boatScaleAndSize = boatScaleAndSizePerZoomCache.computeIfAbsent(zoom, z->getBoatScaleAndSize(boatClass));
+            final Size boatSizeScaleFactor = boatScaleAndSize.getA();
             canvasWidth = (int) (boatScaleAndSize.getB().getWidth());
             canvasHeight = (int) (boatScaleAndSize.getB().getHeight());
             if (lastWidth == null || canvasWidth != lastWidth || lastHeight == null || canvasHeight != lastHeight) {
                 setCanvasSize(canvasWidth, canvasHeight);
             }
-            if (needToDraw(boatFix.legType, boatFix.tack, isSelected(), canvasWidth, canvasHeight, boatSizeScaleFactor, color)) {
+            if (needToDraw(boatFix.legType, boatFix.tack, isSelected(), canvasWidth, canvasHeight, boatSizeScaleFactor,
+                    color, displayMode)) {
                 boatVectorGraphics.drawBoatToCanvas(getCanvas().getContext2d(), boatFix.legType, boatFix.tack, getDisplayMode(), 
                         canvasWidth, canvasHeight, boatSizeScaleFactor, color);
                 lastLegType = boatFix.legType;
@@ -103,6 +101,7 @@ public class BoatOverlay extends CanvasOverlayV3 {
                 lastHeight = canvasHeight;
                 lastScale = boatSizeScaleFactor;
                 lastColor = color;
+                lastDisplayMode = displayMode;
             }
             LatLng latLngPosition = coordinateSystem.toLatLng(boatFix.position);
             Point boatPositionInPx = mapProjection.fromLatLngToDivPixel(latLngPosition);
@@ -123,11 +122,12 @@ public class BoatOverlay extends CanvasOverlayV3 {
      * changed, the result is <code>true</code>.
      */
     private boolean needToDraw(LegType legType, Tack tack, boolean isSelected, double width, double height,
-            Size scaleFactor, Color color) {
+            Size scaleFactor, Color color, DisplayMode displayMode) {
         return lastLegType == null || lastLegType != legType || lastTack == null || lastTack != tack
                 || lastSelected == null || lastSelected != isSelected || lastWidth == null || lastWidth != width
-                || lastHeight == null || lastHeight != height || lastScale == null || lastScale.equals(scaleFactor)
-                || lastColor == null || !lastColor.equals(color);
+                || lastHeight == null || lastHeight != height || lastScale == null || !lastScale.equals(scaleFactor)
+                || lastColor == null || !lastColor.equals(color) || lastDisplayMode == null
+                || !lastDisplayMode.equals(displayMode);
     }
 
     /**
@@ -152,9 +152,9 @@ public class BoatOverlay extends CanvasOverlayV3 {
     }
 
     public Util.Pair<Size, Size> getBoatScaleAndSize(BoatClassDTO boatClass) {
-        Size boatSizeInPixel = getCorrelatedBoatSize(boatClass.getHullLength(), boatClass.getHullBeam());
-        double boatHullScaleFactor = boatSizeInPixel.getWidth() / (boatVectorGraphics.getHullLengthInPx());
-        double boatBeamScaleFactor = boatSizeInPixel.getHeight() / (boatVectorGraphics.getBeamInPx());
+        Size boatSizeInPixels = getCorrelatedBoatSize(boatClass.getHullLength(), boatClass.getHullBeam());
+        double boatHullScaleFactor = boatSizeInPixels.getWidth() / (boatVectorGraphics.getHullLengthInPx());
+        double boatBeamScaleFactor = boatSizeInPixels.getHeight() / (boatVectorGraphics.getBeamInPx());
         // as the canvas contains the whole boat the canvas size relates to the overall length, not the hull length
         double scaledWidthSize = (boatVectorGraphics.getOverallLengthInPx()) * boatHullScaleFactor;
         double scaledBeamSize = (boatVectorGraphics.getOverallLengthInPx()) * boatBeamScaleFactor;
@@ -173,19 +173,19 @@ public class BoatOverlay extends CanvasOverlayV3 {
         // the minimum boat length is related to the hull of the boat, not the overall length
         double minBoatHullLengthInPx = boatVectorGraphics.getMinHullLengthInPx();
         if (boatSizeInPixel.getWidth() < minBoatHullLengthInPx) {
-            double ratioBeanHullLength = hullBeam.divide(hullLength);
-            boatSizeInPixel.setHeight(minBoatHullLengthInPx * ratioBeanHullLength);
+            double ratioBeamHullLength = hullBeam.divide(hullLength);
+            boatSizeInPixel.setHeight(minBoatHullLengthInPx * ratioBeamHullLength);
             boatSizeInPixel.setWidth(minBoatHullLengthInPx);
         }
     }
 
     private void changeBoatSizeIfTooNarrowBeam(Size boatSizeInPixel, Distance hullLength, Distance hullBeam) {
         // if the boat gets too narrow, use the minimum beam and scale the hull length according to aspect
-        double minBoatBeamLengthInPx = boatVectorGraphics.getMinBeamLengthInPx();
-        if (boatSizeInPixel.getHeight() < minBoatBeamLengthInPx) {
-            double ratioHullBeanLength = hullLength.divide(hullBeam);
-            boatSizeInPixel.setWidth(minBoatBeamLengthInPx * ratioHullBeanLength);
-            boatSizeInPixel.setHeight(minBoatBeamLengthInPx);
+        double minBoatBeamInPx = boatVectorGraphics.getMinBeamInPx();
+        if (boatSizeInPixel.getHeight() < minBoatBeamInPx) {
+            double ratioHullBeamLength = hullLength.divide(hullBeam);
+            boatSizeInPixel.setWidth(minBoatBeamInPx * ratioHullBeamLength);
+            boatSizeInPixel.setHeight(minBoatBeamInPx);
         }
     }
 

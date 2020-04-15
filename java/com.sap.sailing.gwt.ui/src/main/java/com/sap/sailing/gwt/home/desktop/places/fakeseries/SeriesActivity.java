@@ -13,6 +13,7 @@ import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.place.event.legacy.SeriesClientFactory;
 import com.sap.sailing.gwt.home.communication.fakeseries.EventSeriesViewDTO;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
+import com.sap.sailing.gwt.home.desktop.places.event.regatta.overviewtab.RegattaOverviewPlace;
 import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
 import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay;
 import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay.NavigationItem;
@@ -120,8 +121,13 @@ public class SeriesActivity extends AbstractActivity implements SeriesView.Prese
     }
     
     @Override
+    public PlaceNavigation<RegattaOverviewPlace> getRegattaNavigation(UUID eventId, String leaderboardName) {
+        return homePlacesNavigator.getRegattaNavigation(eventId.toString(), leaderboardName, null, false);
+    }
+
+    @Override
     public PlaceNavigation<SeriesDefaultPlace> getCurrentEventSeriesNavigation() {
-        return homePlacesNavigator.getEventSeriesNavigation(ctx.getSeriesId(), null, false);
+        return homePlacesNavigator.getEventSeriesNavigation(ctx, null, false);
     }
     
     @Override

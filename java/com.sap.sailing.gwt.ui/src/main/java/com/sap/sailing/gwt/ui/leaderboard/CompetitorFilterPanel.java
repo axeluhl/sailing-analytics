@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -12,7 +13,6 @@ import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
-import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.TextBox;
@@ -43,6 +43,7 @@ import com.sap.sse.common.filter.BinaryOperator;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.xdstorage.CrossDomainStorage;
 
 /**
  * A text box that belongs to a {@link ClassicLeaderboardPanel} and allows the user to search for competitors by sail number
@@ -63,32 +64,26 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
     private final AbstractListFilter<CompetitorDTO> filter;
     private final CompetitorSelectionProvider competitorSelectionProvider;
     private String lastFilterSetNameWithoutThis;
-    private final CompetitorsFilterSets competitorsFilterSets;
+    private CompetitorsFilterSets competitorsFilterSets;
     private FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> lastActiveCompetitorFilterSet;
     private final LeaderboardFetcher leaderboardFetcher;
     private final RaceMap raceMap;
     private final RaceIdentifier selectedRaceIdentifier;
     private final Button settingsButton;
     private final FlowPanel searchBoxPanel;
+    private final CrossDomainStorage storage;
 
     public CompetitorFilterPanel(final CompetitorSelectionProvider competitorSelectionProvider,
             final StringMessages stringMessages, RaceMap raceMap, LeaderboardFetcher leaderboardFetcher,
-            RaceIdentifier selectedRaceIdentifier) {
+            RaceIdentifier selectedRaceIdentifier, CrossDomainStorage storage) {
         css.ensureInjected();
+        this.storage = storage;
         this.stringMessages = stringMessages;
         this.raceMap = raceMap;
         this.leaderboardFetcher = leaderboardFetcher;
         this.selectedRaceIdentifier = selectedRaceIdentifier;
         this.competitorSelectionProvider = competitorSelectionProvider;
         this.setStyleName(css.competitorFilterContainer());
-        CompetitorsFilterSets loadedCompetitorsFilterSets = loadCompetitorsFilterSets();
-        if (loadedCompetitorsFilterSets != null) {
-            competitorsFilterSets = loadedCompetitorsFilterSets;
-            insertSelectedCompetitorsFilter(competitorsFilterSets);
-        } else {
-            competitorsFilterSets = createAndAddDefaultCompetitorsFilter();
-            storeCompetitorsFilterSets(competitorsFilterSets);
-        }
         filter = new AbstractListFilter<CompetitorDTO>() {
             @Override
             public Iterable<String> getStrings(CompetitorDTO competitor) {
@@ -143,6 +138,15 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
         add(searchBoxPanel);
         add(settingsButton);
         add(advancedSettingsButton);
+        loadCompetitorsFilterSets(loadedCompetitorsFilterSets->{
+            if (loadedCompetitorsFilterSets != null) {
+                competitorsFilterSets = loadedCompetitorsFilterSets;
+                insertSelectedCompetitorsFilter(competitorsFilterSets);
+            } else {
+                competitorsFilterSets = createAndAddDefaultCompetitorsFilter();
+                storeCompetitorsFilterSets(competitorsFilterSets);
+            }
+        });
     }
     
     public CompetitorsFilterSets getCompetitorsFilterSets() {
@@ -224,18 +228,16 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
                 competitorsFilterSets.getFilterSets().clear();
                 competitorsFilterSets.getFilterSets().addAll(newCompetitorsFilterSets.getFilterSets());
                 competitorsFilterSets.setActiveFilterSet(newCompetitorsFilterSets.getActiveFilterSet());
-                
                 updateCompetitorsFilterContexts(newCompetitorsFilterSets);
                 competitorSelectionProvider.setCompetitorsFilterSet(newCompetitorsFilterSets.getActiveFilterSetWithGeneralizedType());
                 updateCompetitorsFilterControlState(newCompetitorsFilterSets);
                 storeCompetitorsFilterSets(newCompetitorsFilterSets);
-             }
+            }
 
             @Override
             public void cancel() { 
             }
         });
-        
         competitorsFilterSetsDialog .show();
     }
 
@@ -299,37 +301,30 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
         }
     }
     
-   private CompetitorsFilterSets loadCompetitorsFilterSets() {
-        CompetitorsFilterSets result = null;
-        Storage localStorage = Storage.getLocalStorageIfSupported();
-        if (localStorage != null) {
-            try {
-                String jsonAsLocalStore = localStorage.getItem(LOCAL_STORAGE_COMPETITORS_FILTER_SETS_KEY);
-                if (jsonAsLocalStore != null && !jsonAsLocalStore.isEmpty()) {
-                    CompetitorsFilterSetsJsonDeSerializer deserializer = new CompetitorsFilterSetsJsonDeSerializer();
-                    JSONValue value = JSONParser.parseStrict(jsonAsLocalStore);
-                    if (value.isObject() != null) {
-                        result = deserializer.deserialize((JSONObject) value);
-                    }
+   private void loadCompetitorsFilterSets(Consumer<CompetitorsFilterSets> resultConsumer) {
+        storage.getItem(LOCAL_STORAGE_COMPETITORS_FILTER_SETS_KEY, jsonAsLocalStore -> {
+            if (jsonAsLocalStore != null && !jsonAsLocalStore.isEmpty()) {
+                CompetitorsFilterSetsJsonDeSerializer deserializer = new CompetitorsFilterSetsJsonDeSerializer();
+                JSONValue value = JSONParser.parseStrict(jsonAsLocalStore);
+                if (value.isObject() != null) {
+                    resultConsumer.accept(deserializer.deserialize((JSONObject) value));
+                } else {
+                    resultConsumer.accept(null);
                 }
-            } catch (Exception e) {
-                // exception during loading of competitor filters from local storage
+            } else {
+                resultConsumer.accept(null);
             }
-        }
-        return result;
+        });
     }
 
     private void storeCompetitorsFilterSets(CompetitorsFilterSets newCompetitorsFilterSets) {
-        Storage localStorage = Storage.getLocalStorageIfSupported();
-        if(localStorage != null) {
-            // delete old value
-            localStorage.removeItem(LOCAL_STORAGE_COMPETITORS_FILTER_SETS_KEY);
-            
-            // store the competiors filter set 
+        // delete old value
+        storage.removeItem(LOCAL_STORAGE_COMPETITORS_FILTER_SETS_KEY, e->{
+            // store the competitors filter set 
             CompetitorsFilterSetsJsonDeSerializer serializer = new CompetitorsFilterSetsJsonDeSerializer();
             JSONObject jsonObject = serializer.serialize(newCompetitorsFilterSets);
-            localStorage.setItem(LOCAL_STORAGE_COMPETITORS_FILTER_SETS_KEY, jsonObject.toString());
-        }
+            storage.setItem(LOCAL_STORAGE_COMPETITORS_FILTER_SETS_KEY, jsonObject.toString(), null);
+        });
     }
     
     private CompetitorsFilterSets createAndAddDefaultCompetitorsFilter() {

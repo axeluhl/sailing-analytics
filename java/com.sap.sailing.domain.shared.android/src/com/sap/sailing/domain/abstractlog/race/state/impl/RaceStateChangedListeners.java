@@ -111,4 +111,11 @@ public class RaceStateChangedListeners extends HashSet<RaceStateChangedListener>
             listener.onWindFixChanged(state);
         }
     }
+
+    @Override
+    public void onTagEventsChanged(ReadonlyRaceState state) {
+        for (RaceStateChangedListener listener : getWorkingCopyOfListeners()) {
+            listener.onTagEventsChanged(state);
+        }
+    }
 }

@@ -26,7 +26,9 @@ public class ManeuverWithCoarseGrainedBoundariesImpl extends ManeuverImpl {
 
     public ManeuverWithCoarseGrainedBoundariesImpl(ManeuverType type, Tack newTack, Position position,
             TimePoint timePoint, ManeuverCurveBoundaries maneuverBoundaries) {
-        super(type, newTack, position, null, timePoint, maneuverBoundaries, maneuverBoundaries, Math.abs(maneuverBoundaries.getDirectionChangeInDegrees()), null);
+        super(type, newTack, position, timePoint, maneuverBoundaries, maneuverBoundaries,
+                Math.abs(maneuverBoundaries.getDirectionChangeInDegrees()), /* mark passing */ null,
+                /* maneuver loss */ null);
     }
 
     @Override

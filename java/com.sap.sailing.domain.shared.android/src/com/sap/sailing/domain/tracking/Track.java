@@ -3,13 +3,13 @@ package com.sap.sailing.domain.tracking;
 import java.io.Serializable;
 import java.util.Iterator;
 import java.util.concurrent.locks.ReadWriteLock;
+import java.util.function.Function;
 
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.impl.TimeRangeCache;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Timed;
-import com.sap.sse.common.Util.Function;
 import com.sap.sse.common.scalablevalue.ScalableValue;
 
 /**
@@ -167,8 +167,8 @@ public interface Track<FixType extends Timed> extends Serializable {
 
     /**
      * Returns an iterator starting at the first fix after <code>startingAt</code> (or "at or after" in case
-     * <code>inclusive</code> is <code>true</code>). The fixes returned by the iterator are the smoothened fixes (see
-     * also {@link #getFixes()}, without any smoothening or dampening applied.
+     * <code>inclusive</code> is <code>true</code>). The fixes returned by the iterator exclude outliers (see
+     * also {@link #getFixes()} and returns the remaining fixes without any smoothening or dampening applied.
      * 
      * Callers must have called {@link #lockForRead()} before calling this method. This will be checked, and an exception
      * will be thrown in case the caller has failed to do so.
@@ -200,6 +200,17 @@ public interface Track<FixType extends Timed> extends Serializable {
      * will be thrown in case the caller has failed to do so.
      */
     Iterator<FixType> getRawFixesIterator(TimePoint startingAt, boolean inclusive);
+
+    /**
+     * Returns an iterator starting at the first raw fix after <code>startingAt</code> (or "at or after" in case
+     * <code>startingAtInclusive</code> is <code>true</code>) and ending at the <code>endingAt</code> time point or just before
+     * in case <code>endingAtIncluive</code> is false. The fixes returned by the iterator are the raw fixes (see also
+     * {@link #getRawFixes()}, without any smoothening or dampening applied.
+     * 
+     * Callers must have called {@link #lockForRead()} before calling this method. This will be checked, and an exception
+     * will be thrown in case the caller has failed to do so.
+     */
+    Iterator<FixType> getRawFixesIterator(TimePoint startingAt, boolean startingAtInclusive, TimePoint endingAt, boolean endingAtInclusive);
 
     /**
      * Returns a descending iterator starting at the first fix before <code>startingAt</code> (or "at or before" in case

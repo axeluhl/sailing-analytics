@@ -38,10 +38,9 @@ public class ItemStrokeDecoration extends RecyclerView.ItemDecoration {
 
         for (int i = 0; i < parent.getChildCount(); i++) {
             final View child = parent.getChildAt(i);
-            c.drawRect(
-                layoutManager.getDecoratedLeft(child) + mPadding,
-                layoutManager.getDecoratedTop(child) + mPadding,
-                layoutManager.getDecoratedRight(child) - mPadding, layoutManager.getDecoratedBottom(child) - mPadding, mLinePaint);
+            c.drawRect(layoutManager.getDecoratedLeft(child) + mPadding,
+                    layoutManager.getDecoratedTop(child) + mPadding, layoutManager.getDecoratedRight(child) - mPadding,
+                    layoutManager.getDecoratedBottom(child) - mPadding, mLinePaint);
         }
     }
 }

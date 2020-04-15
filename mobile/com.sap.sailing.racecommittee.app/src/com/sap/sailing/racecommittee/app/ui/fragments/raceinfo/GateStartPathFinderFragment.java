@@ -1,5 +1,13 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
+import com.sap.sailing.android.shared.util.ActivityHelper;
+import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.GateStartRacingProcedure;
+import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
+
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputFilter;
@@ -9,14 +17,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-
-import com.sap.sailing.android.shared.util.ActivityHelper;
-import com.sap.sailing.android.shared.util.ViewHelper;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.GateStartRacingProcedure;
-import com.sap.sailing.racecommittee.app.AppConstants;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class GateStartPathFinderFragment extends BaseFragment {
 
@@ -51,7 +51,8 @@ public class GateStartPathFinderFragment extends BaseFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        final View layout = LayoutInflater.from(getActivity()).inflate(R.layout.race_schedule_procedure_pathfinder, container, false);
+        final View layout = LayoutInflater.from(getActivity()).inflate(R.layout.race_schedule_procedure_pathfinder,
+                container, false);
 
         mNat = ViewHelper.get(layout, R.id.pathfinder_nat);
         mNum = ViewHelper.get(layout, R.id.pathfinder_num);

@@ -1,4 +1,4 @@
-apply plugin: "java"
+apply plugin: "java-library"
 
 sourceSets {
     main {
@@ -8,8 +8,6 @@ sourceSets {
 
 dependencies {
     /* local dependencies */
-    compile project(":java:com.sap.sailing.domain.common")
-    compile project(":java:com.sap.sailing.domain.shared.android")
-    compile project(":java:com.sap.sse.common")
-    compile project(":java:org.json.simple")
+    implementation project(":com.sap.sailing.domain.shared.android")
+    implementation project(":com.sap.sse.shared.android")
 }

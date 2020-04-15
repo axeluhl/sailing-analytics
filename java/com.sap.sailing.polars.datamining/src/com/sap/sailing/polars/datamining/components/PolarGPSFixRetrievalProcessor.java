@@ -38,8 +38,9 @@ public class PolarGPSFixRetrievalProcessor extends AbstractRetrievalProcessor<Ha
     private final PolarDataMiningSettings settings;
 
     public PolarGPSFixRetrievalProcessor(ExecutorService executor, Collection<Processor<HasGPSFixPolarContext, ?>> resultReceivers,
-            PolarDataMiningSettings settings, int retrievalLevel) {
-        super(HasCompetitorPolarContext.class, HasGPSFixPolarContext.class, executor, resultReceivers, retrievalLevel);
+            PolarDataMiningSettings settings, int retrievalLevel, String retrievedDataTypeMessageKey) {
+        super(HasCompetitorPolarContext.class, HasGPSFixPolarContext.class, executor, resultReceivers, retrievalLevel,
+                retrievedDataTypeMessageKey);
         this.settings = settings;
     }
 
@@ -59,6 +60,9 @@ public class PolarGPSFixRetrievalProcessor extends AbstractRetrievalProcessor<Ha
             try {
                 Iterable<GPSFixMoving> fixes = track.getFixes(startTime, true, finishTime, false);
                 for (GPSFixMoving fix : fixes) {
+                    if (isAborted()) {
+                        break;
+                    }
                     WindWithConfidence<Pair<Position, TimePoint>> wind = trackedRace.getWindWithConfidence(
                             fix.getPosition(),
                             fix.getTimePoint(),

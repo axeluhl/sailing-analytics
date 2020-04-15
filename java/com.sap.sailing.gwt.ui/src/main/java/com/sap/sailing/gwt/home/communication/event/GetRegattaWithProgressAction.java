@@ -48,8 +48,11 @@ public class GetRegattaWithProgressAction implements SailingAction<ResultWithTTL
     @Override
     @GwtIncompatible
     public ResultWithTTL<RegattaWithProgressDTO> execute(SailingDispatchContext context) {
+        context.getSecurityService().checkCurrentUserReadPermission(context.getRacingEventService().getEvent(eventId));
+        context.getSecurityService()
+                .checkCurrentUserReadPermission(context.getRacingEventService().getRegattaByName(regattaId));
         return new ResultWithTTL<>(EventActionUtil.getEventStateDependentTTL(context, eventId, Duration.ONE_MINUTE.times(5)),
-                EventActionUtil.getLeaderboardContext(context, eventId, regattaId).getRegattaWithProgress());
+                EventActionUtil.getLeaderboardContextWithReadPermissions(context, eventId, regattaId).getRegattaWithProgress());
     }
 
     @Override

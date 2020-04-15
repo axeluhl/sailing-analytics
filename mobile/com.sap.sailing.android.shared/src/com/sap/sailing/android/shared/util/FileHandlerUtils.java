@@ -6,11 +6,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import android.content.Context;
-import android.os.Environment;
-
 import com.sap.sailing.android.shared.R;
 import com.sap.sailing.android.shared.logging.ExLog;
+
+import android.content.Context;
+import android.os.Environment;
 
 public class FileHandlerUtils {
 
@@ -25,23 +25,25 @@ public class FileHandlerUtils {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         StringBuilder stringBuilder = new StringBuilder();
 
-        String line = null;
+        String line;
         try {
             while ((line = reader.readLine()) != null) {
-                stringBuilder.append(line + "\n");
+                stringBuilder.append(line);
             }
         } catch (IOException e) {
-            ExLog.e(context, TAG, "In Method convertStreamToString while converting stream to string: " + e.getMessage());
+            ExLog.e(context, TAG,
+                    "In Method convertStreamToString while converting stream to string: " + e.getMessage());
         } finally {
             try {
                 inputStream.close();
             } catch (IOException e) {
-                ExLog.e(context, TAG, "In Method convertStreamToString while closing the input stream: " + e.getMessage());
+                ExLog.e(context, TAG,
+                        "In Method convertStreamToString while closing the input stream: " + e.getMessage());
             }
         }
         return stringBuilder.toString();
     }
-    
+
     public static File getExternalApplicationFolder(Context context) {
         String appFolder = context.getResources().getString(R.string.app_folder);
         File dir = new File(Environment.getExternalStorageDirectory() + File.separator + appFolder);

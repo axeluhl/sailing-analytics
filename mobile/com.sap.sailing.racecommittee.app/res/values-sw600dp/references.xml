@@ -5,9 +5,7 @@
     <item name="race_schedule_start_time" type="layout">@layout/race_schedule_start_time_xlarge</item>
     <item name="race_time_picker" type="layout">@layout/race_time_picker_xlarge</item>
 
-    <item name="compass_back_dark" type="drawable">@drawable/compass_back_normal_dark</item>
-    <item name="compass_back_light" type="drawable">@drawable/compass_back_normal_light</item>
-    <item name="compass_needle_dark" type="drawable">@drawable/compass_needle_normal_dark</item>
-    <item name="compass_needle_light" type="drawable">@drawable/compass_needle_normal_light</item>
+    <item name="compass_back" type="drawable">@drawable/compass_back_normal</item>
+    <item name="compass_needle" type="drawable">@drawable/compass_needle_normal</item>
 
 </resources>

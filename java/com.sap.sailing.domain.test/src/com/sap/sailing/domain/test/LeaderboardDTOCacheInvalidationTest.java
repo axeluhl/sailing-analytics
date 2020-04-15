@@ -37,12 +37,12 @@ public class LeaderboardDTOCacheInvalidationTest {
         LeaderboardDTO dto = l.getLeaderboardDTO(now, Collections.<String> emptySet(),
                 /* addOverallDetails */ false, /* trackedRegattaRegistry */ null, DomainFactory.INSTANCE,
                 /* fillTotalPointsUncorrected */ false);
-        assertEquals(oldName, dto.name);
+        assertEquals(oldName, dto.getName());
         l.setName(newName);
         LeaderboardDTO dtoNew = l.getLeaderboardDTO(now, Collections.<String> emptySet(),
                 /* addOverallDetails */ false, /* trackedRegattaRegistry */ null, DomainFactory.INSTANCE,
                 /* fillTotalPointsUncorrected */ false);
-        assertEquals(newName, dtoNew.name);
+        assertEquals(newName, dtoNew.getName());
     }
 
     @Test

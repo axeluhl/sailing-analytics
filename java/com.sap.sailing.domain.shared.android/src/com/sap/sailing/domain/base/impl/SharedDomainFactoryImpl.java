@@ -7,7 +7,6 @@ import java.lang.ref.WeakReference;
 import java.net.URI;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -28,8 +27,6 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
-import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherSingle;
 import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.PassingInstruction;
@@ -37,7 +34,7 @@ import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.WithID;
 
-public class SharedDomainFactoryImpl implements SharedDomainFactory {
+public class SharedDomainFactoryImpl<RLR extends RaceLogResolver> implements SharedDomainFactory<RLR> {
     private static final Logger logger = Logger.getLogger(SharedDomainFactoryImpl.class.getName());
     
     /**
@@ -79,8 +76,6 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     
     private final ReferenceQueue<Waypoint> waypointCacheReferenceQueue;
     
-    private final Map<Serializable, DeviceConfigurationMatcher> configurationMatcherCache;
-
     /**
      * Weak references to {@link Waypoint} objects of this type are registered with
      * {@link DomainFactoryImpl#waypointCacheReferenceQueue} upon construction so that when their referents are no
@@ -110,16 +105,16 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
      */
     private final Set<String> mayStartWithNoUpwindLeg;
     
-    private final RaceLogResolver raceLogResolver;
+    private final RLR raceLogResolver;
     
     /**
      * Uses a transient competitor store
      */
-    public SharedDomainFactoryImpl(RaceLogResolver raceLogResolver) {
+    public SharedDomainFactoryImpl(RLR raceLogResolver) {
         this(new TransientCompetitorAndBoatStoreImpl(), raceLogResolver);
     }
     
-    public SharedDomainFactoryImpl(CompetitorAndBoatStore competitorStore, RaceLogResolver raceLogResolver) {
+    public SharedDomainFactoryImpl(CompetitorAndBoatStore competitorStore, RLR raceLogResolver) {
         this.raceLogResolver = raceLogResolver;
         waypointCacheReferenceQueue = new ReferenceQueue<Waypoint>();
         nationalityCache = new HashMap<String, Nationality>();
@@ -133,7 +128,6 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
         // FIXME ass also bug 3347: mapping to lower case should rather work through a common unification / canonicalization of boat class names
         mayStartWithNoUpwindLeg = Collections.singleton(BoatClassMasterdata.unifyBoatClassName(BoatClassMasterdata.EXTREME_40.getDisplayName()));
         courseAreaCache = new HashMap<Serializable, CourseArea>();
-        configurationMatcherCache = new HashMap<Serializable, DeviceConfigurationMatcher>();
     }
     
     @Override
@@ -153,7 +147,7 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     
     @Override
     public Mark getOrCreateMark(String name) {
-        return getOrCreateMark(name, name);
+        return getOrCreateMark(name, name, name);
     }
     
     @Override
@@ -163,21 +157,29 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     
     @Override
     public Mark getOrCreateMark(Serializable id, String name, MarkType markType) {
-        return getOrCreateMark(id, name, markType, /* color */ null, /* shape */ null, /* pattern */ null);
+        return getOrCreateMark(id, name, /* no separate short name available here */ name, markType, /* color */ null, /* shape */ null, /* pattern */ null);
     }
 
     @Override
-    public Mark getOrCreateMark(Serializable id, String name) {
-        return getOrCreateMark(id, name, /* type */ null, /* color */ null, /* shape */ null, /* pattern */ null);
+    public Mark getOrCreateMark(Serializable id, String name, String shortName) {
+        return getOrCreateMark(id, name, shortName, /* originatingMarkTemplateId */ null,
+                /* originatingMarkPropertiesId */ null);
     }
 
     @Override
-    public Mark getOrCreateMark(String toStringRepresentationOfID, String name) {
-        return getOrCreateMark(toStringRepresentationOfID, name, /* type */ null, /* color */ null, /* shape */ null, /* pattern */ null);
+    public Mark getOrCreateMark(Serializable id, String name, String shortName, UUID originatingMarkTemplateId,
+            UUID originatingMarkPropertiesId) {
+        return getOrCreateMark(id, name, shortName, /* type */ null, /* color */ null, /* shape */ null,
+                /* pattern */ null, originatingMarkTemplateId, originatingMarkPropertiesId);
+    }
+
+    @Override
+    public Mark getOrCreateMark(String toStringRepresentationOfID, String name, String shortName) {
+        return getOrCreateMark(toStringRepresentationOfID, name, shortName, /* type */ null, /* color */ null, /* shape */ null, /* pattern */ null);
     }
     
     @Override
-    public Mark getOrCreateMark(Serializable id, String name, MarkType type, Color color, String shape, String pattern) {
+    public Mark getOrCreateMark(Serializable id, String name, String shortName, MarkType type, Color color, String shape, String pattern) {
         Mark result = markCache.get(id);
         if (result == null) {
             result = new MarkImpl(id, name, type, color, shape, pattern);
@@ -185,37 +187,51 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
         }
         return result;
     }
-    
+
     @Override
-    public Mark getOrCreateMark(String toStringRepresentationOfID, String name, MarkType type,
-            Color color, String shape, String pattern) {
+    public Mark getOrCreateMark(Serializable id, String name, String shortName, MarkType type, Color color,
+            String shape, String pattern, UUID originatingMarkTemplateId,
+            UUID originatingMarkPropertiesId) {
+        Mark result = markCache.get(id);
+        if (result == null) {
+            result = new MarkImpl(id, name, shortName, type, color, shape, pattern, originatingMarkTemplateId,
+                    originatingMarkPropertiesId);
+            cacheMark(id, result);
+        }
+        return result;
+    }
+
+    @Override
+    public Mark getOrCreateMark(String toStringRepresentationOfID, String name, String shortName,
+            MarkType type, Color color, String shape, String pattern) {
         Serializable id = toStringRepresentationOfID;
         if (markIdCache.containsKey(toStringRepresentationOfID)) {
             id = markIdCache.get(toStringRepresentationOfID);
         }
-        return getOrCreateMark(id, name, type, color, shape, pattern);
+        return getOrCreateMark(id, name, shortName, type, color, shape, pattern);
     }
 
     @Override
-    public ControlPointWithTwoMarks getOrCreateControlPointWithTwoMarks(Serializable id, String name, Mark left, Mark right) {
+    public ControlPointWithTwoMarks getOrCreateControlPointWithTwoMarks(Serializable id, String name, Mark left,
+            Mark right, String shortName) {
         final ControlPointWithTwoMarks result;
         final ControlPointWithTwoMarks fromCache = controlPointWithTwoMarksCache.get(id);
         if (fromCache != null) {
             result = fromCache;
         } else {
-            result = createControlPointWithTwoMarks(id, left, right, name);
+            result = createControlPointWithTwoMarks(id, left, right, name, shortName);
         }
         return result;
     }
 
     @Override
     public ControlPointWithTwoMarks getOrCreateControlPointWithTwoMarks(
-            String toStringRepresentationOfID, String name, Mark left, Mark right) {
+            String toStringRepresentationOfID, String name, Mark left, Mark right, String shortName) {
         Serializable id = toStringRepresentationOfID;
         if (controlPointWithTwoMarksIdCache.containsKey(toStringRepresentationOfID)) {
             id = controlPointWithTwoMarksIdCache.get(toStringRepresentationOfID);
         }
-        return getOrCreateControlPointWithTwoMarks(id, name, left, right);
+        return getOrCreateControlPointWithTwoMarks(id, name, left, right, shortName);
     }
 
     private void cacheMark(Serializable id, Mark result) {
@@ -224,13 +240,18 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     }
 
     @Override
-    public ControlPointWithTwoMarks createControlPointWithTwoMarks(Mark left, Mark right, String name) {
-       return createControlPointWithTwoMarks(name, left, right, name);
+    public ControlPointWithTwoMarks createControlPointWithTwoMarks(Mark left, Mark right, String name,
+            String shortName) {
+        return createControlPointWithTwoMarks(name, left, right, name, shortName);
     }
 
     @Override
-    public ControlPointWithTwoMarks createControlPointWithTwoMarks(Serializable id, Mark left, Mark right, String name) {
-        ControlPointWithTwoMarks result = new ControlPointWithTwoMarksImpl(id, left, right, name);
+    public ControlPointWithTwoMarks createControlPointWithTwoMarks(Serializable id, Mark left, Mark right, String name,
+            String shortName) {
+        if (shortName == null || shortName.isEmpty()) {
+            shortName = name;
+        }
+        ControlPointWithTwoMarks result = new ControlPointWithTwoMarksImpl(id, left, right, name, shortName);
         controlPointWithTwoMarksCache.put(id, result);
         controlPointWithTwoMarksIdCache.put(id.toString(), id);
         return result;
@@ -289,12 +310,41 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     private void expungeStaleWaypointCacheEntries() {
         Reference<? extends Waypoint> ref;
         while ((ref=waypointCacheReferenceQueue.poll()) != null) {
-            ((WeakWaypointReference) ref).removeCacheEntry();
+            @SuppressWarnings("unchecked")
+            final SharedDomainFactoryImpl<RLR>.WeakWaypointReference weakWaypointReference = (WeakWaypointReference) ref;
+            weakWaypointReference.removeCacheEntry();
         }
+    }
+    
+    @Override
+    public BoatClass getBoatClass(String name) {
+        return getBoatClassOrCreateIfMasterdataExists(name);
     }
 
     @Override
+    public Iterable<BoatClass> getBoatClasses() {
+        return Collections.unmodifiableCollection(boatClassCache.values());
+    }
+    
+    @Override
     public BoatClass getOrCreateBoatClass(String name, boolean typicallyStartsUpwind) {
+        synchronized (boatClassCache) {
+            BoatClass result = getBoatClassOrCreateIfMasterdataExists(name);
+            if (result == null) {
+                final String unifiedBoatClassName = BoatClassMasterdata.unifyBoatClassNameBasedOnExistingMasterdata(name);
+                result = new BoatClassImpl(unifiedBoatClassName, typicallyStartsUpwind);
+                boatClassCache.put(unifiedBoatClassName, result);
+            }
+            return result;
+        }
+    }
+
+    /**
+     * @return {@code null} if no master data is found for the boat class and the cache doesn't contain a boat class
+     *         with the {@link BoatClassMasterdata#unifyBoatClassNameBasedOnExistingMasterdata(String)} unified /
+     *         canonicalized name.
+     */
+    private BoatClass getBoatClassOrCreateIfMasterdataExists(String name) {
         final BoatClassMasterdata boatClassMasterdata = BoatClassMasterdata.resolveBoatClass(name);
         final String unifiedBoatClassName = BoatClassMasterdata.unifyBoatClassNameBasedOnExistingMasterdata(name);
         BoatClass result;
@@ -303,15 +353,13 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
             if (result == null) {
                 if (unifiedBoatClassName != null && boatClassMasterdata != null) {
                     result = new BoatClassImpl(boatClassMasterdata.getDisplayName(), boatClassMasterdata);
-                } else {
-                    result = new BoatClassImpl(unifiedBoatClassName, typicallyStartsUpwind);
+                    boatClassCache.put(unifiedBoatClassName, result);
                 }
-                boatClassCache.put(unifiedBoatClassName, result);
             }
             return result;
         }
     }
-    
+
     @Override
     public BoatClass getOrCreateBoatClass(final String name) {
         final String unifiedBoatClassName = BoatClassMasterdata.unifyBoatClassNameBasedOnExistingMasterdata(name);
@@ -356,23 +404,23 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     @Override
     public DynamicCompetitor getOrCreateCompetitor(Serializable competitorId, String name, String shortname, Color displayColor, String email,
             URI flagImage, DynamicTeam team, Double timeOnTimeFactor,
-            Duration timeOnDistanceAllowancePerNauticalMile, String searchTag) {
+            Duration timeOnDistanceAllowancePerNauticalMile, String searchTag, boolean storePersistently) {
         if (logger.isLoggable(Level.FINEST)) {
             logger.log(Level.FINEST, "getting or creating competitor "+name+" with ID "+competitorId+" in domain factory "+this);
         }
         return getCompetitorAndBoatStore().getOrCreateCompetitor(competitorId, name, shortname, displayColor, email, flagImage, team,
-                timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag);
+                timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag, storePersistently);
     }
 
     @Override
     public DynamicCompetitorWithBoat getOrCreateCompetitorWithBoat(Serializable competitorId, String name, String shortName,
             Color displayColor, String email, URI flagImageURI, DynamicTeam team, Double timeOnTimeFactor,
-            Duration timeOnDistanceAllowancePerNauticalMile, String searchTag, DynamicBoat boat) {
+            Duration timeOnDistanceAllowancePerNauticalMile, String searchTag, DynamicBoat boat, boolean storePersistently) {
         if (logger.isLoggable(Level.FINEST)) {
             logger.log(Level.FINEST, "getting or creating competitor "+name+" with ID "+competitorId+" in domain factory "+this);
         }
         return getCompetitorAndBoatStore().getOrCreateCompetitorWithBoat(competitorId, name, shortName, displayColor, email, flagImageURI, team,
-                timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag, boat);
+                timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag, boat, storePersistently);
     }
 
     @Override
@@ -386,25 +434,10 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     }
 
     @Override
-    public DynamicBoat getOrCreateBoat(Serializable id, String name, BoatClass boatClass, String sailId, Color color) {
-        return getCompetitorAndBoatStore().getOrCreateBoat(id, name, boatClass, sailId, color);
+    public DynamicBoat getOrCreateBoat(Serializable id, String name, BoatClass boatClass, String sailId, Color color, boolean storePersistently) {
+        return getCompetitorAndBoatStore().getOrCreateBoat(id, name, boatClass, sailId, color, storePersistently);
     }
 
-    @Override
-    public DeviceConfigurationMatcher getOrCreateDeviceConfigurationMatcher(List<String> clientIdentifiers) {
-        DeviceConfigurationMatcher probe = createMatcher(clientIdentifiers);
-        DeviceConfigurationMatcher matcher = configurationMatcherCache.get(probe.getMatcherIdentifier());
-        if (matcher == null) {
-            configurationMatcherCache.put(probe.getMatcherIdentifier(), probe);
-            matcher = probe;
-        }
-        return matcher;
-    }
-    
-    private DeviceConfigurationMatcher createMatcher(List<String> clientIdentifiers) {
-        return new DeviceConfigurationMatcherSingle(clientIdentifiers.get(0));
-    }
-    
     @Override
     public Mark getExistingMarkById(Serializable id) {
         return markCache.get(id);
@@ -416,7 +449,7 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     }
 
     @Override
-    public RaceLogResolver getRaceLogResolver() {
+    public RLR getRaceLogResolver() {
         return raceLogResolver;
     }
 }

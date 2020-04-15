@@ -34,7 +34,7 @@ public class Fleet implements Comparable {
             numRaces++;
         } else {
             Race[] temp = racesOld;
-            racesOld = new Race[temp.length + NUMBEROFRACES];
+            racesOld = new Race[raceNumber];
             for (int i = 0; i < temp.length; i++) {
                 racesOld[i] = temp[i];
             }

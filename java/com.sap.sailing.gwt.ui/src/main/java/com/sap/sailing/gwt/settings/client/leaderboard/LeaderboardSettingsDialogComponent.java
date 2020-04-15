@@ -33,7 +33,7 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
     protected final Map<DetailType, CheckBox> overallDetailCheckboxes;
     protected final StringMessages stringMessages;
     protected LongBox refreshIntervalInSecondsBox;
-    protected final boolean canBoatInfoBeShown;
+    protected final boolean canBoatInfoBeShownAsOverallDetail;
     
     protected RadioButton explicitRaceColumnSelectionRadioBtn;
     protected RadioButton lastNRacesColumnSelectionRadioBtn;
@@ -46,10 +46,11 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
     protected T initialSettings;
     protected Iterable<DetailType> availableDetailTypes;
 
-    public LeaderboardSettingsDialogComponent(T initialSettings, StringMessages stringMessages, Iterable<DetailType> availableDetailTypes, boolean canBoatInfoBeShown) {
+    protected LeaderboardSettingsDialogComponent(T initialSettings, StringMessages stringMessages,
+            Iterable<DetailType> availableDetailTypes, boolean canBoatInfoBeShownAsOverallDetail) {
         this.initialSettings = initialSettings;
         this.stringMessages = stringMessages;
-        this.canBoatInfoBeShown = canBoatInfoBeShown;
+        this.canBoatInfoBeShownAsOverallDetail = canBoatInfoBeShownAsOverallDetail;
         maneuverDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
         legDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
         raceDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
@@ -105,6 +106,10 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         Collection<DetailType> currentRaceDetailSelection = initialSettings.getRaceDetailsToShow();
         FlowPanel raceDetailDialogContent = null;
         for (DetailType type : Util.retainCopy(DetailType.getAllRaceDetailTypes(), availableDetailTypes)) {
+            if (type == DetailType.RACE_DISPLAY_BOATS && canBoatInfoBeShownAsOverallDetail) {
+                // we do not need race level boats, if the boats do not change
+                continue;
+            }
             if (detailCountInCurrentFlowPanel % 8 == 0) {
                 raceDetailDialogContent = new FlowPanel();
                 raceDetailDialogContent.addStyleName("dialogInnerContent");
@@ -161,11 +166,11 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
                     overallDetailCheckboxes);
             overallDetailDialogContent.add(checkbox);
         }
-        
         FlowPanel overallDetailDialogContentSecondLine = new FlowPanel();
         overallDetailDialogContentSecondLine.addStyleName("dialogInnerContent");
         showCompetitorShortNameColumnCheckBox = dialog.createCheckbox(stringMessages.showCompetitorShortNameColumn());
-        showCompetitorShortNameColumnCheckBox.setTitle(stringMessages.showCompetitorShortNameColumnTooltip(stringMessages.alwaysShowCompetitorNationalityColumn()));
+        showCompetitorShortNameColumnCheckBox.setTitle(
+                stringMessages.showCompetitorShortNameColumnTooltip(stringMessages.showCompetitorNationalityColumn()));
         showCompetitorShortNameColumnCheckBox.setValue(initialSettings.isShowCompetitorShortNameColumn());
         overallDetailDialogContentSecondLine.add(showCompetitorShortNameColumnCheckBox);
         showCompetitorFullNameColumnCheckBox = dialog.createCheckbox(stringMessages.showCompetitorFullNameColumn());
@@ -174,12 +179,11 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         showCompetitorBoatInfoColumnCheckBox = dialog.createCheckbox(stringMessages.showCompetitorBoatColumn());
         showCompetitorBoatInfoColumnCheckBox.setValue(initialSettings.isShowCompetitorBoatInfoColumn());
         overallDetailDialogContentSecondLine.add(showCompetitorBoatInfoColumnCheckBox);
-        showCompetitorBoatInfoColumnCheckBox.setVisible(canBoatInfoBeShown);
-        isCompetitorNationalityColumnVisible = dialog.createCheckbox(stringMessages.alwaysShowCompetitorNationalityColumn());
-        isCompetitorNationalityColumnVisible.setTitle(stringMessages.alwaysShowCompetitorNationalityColumnTooltip());
+        showCompetitorBoatInfoColumnCheckBox.setVisible(canBoatInfoBeShownAsOverallDetail);
+        isCompetitorNationalityColumnVisible = dialog.createCheckbox(stringMessages.showCompetitorNationalityColumn());
+        isCompetitorNationalityColumnVisible.setTitle(stringMessages.showCompetitorNationalityColumnTooltip());
         isCompetitorNationalityColumnVisible.setValue(initialSettings.isShowCompetitorNationality());
         overallDetailDialogContentSecondLine.add(isCompetitorNationalityColumnVisible);
-
         overallDetailDialog.add(overallDetailDialogContent);
         overallDetailDialog.add(overallDetailDialogContentSecondLine);
         return overallDetailDialog;

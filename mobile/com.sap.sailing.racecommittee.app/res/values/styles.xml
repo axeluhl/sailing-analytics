@@ -13,32 +13,25 @@
         <item name="android:textColor">@color/dialog_color_text</item>
     </style>
 
-    <style name="AppTheme.Dialog" parent="AppTheme.AlertDialog">
-        <item name="android:windowNoTitle">false</item>
-    </style>
-
     <style name="AppTheme.PickerDialog" parent="Theme.AppCompat.Light.Dialog">
         <item name="colorAccent">@color/dialog_color_button</item>
     </style>
 
     <style name="AlertDialogHeader">
-        <item name="android:textAppearance">@style/TextAppearance.AppCompat.Title</item>﻿
+        <item name="android:textAppearance">@style/TextAppearance.AppCompat.Title</item>
         <item name="android:textColor">@color/dialog_color_header</item>
     </style>
 
-    <style name="PreferenceTheme" parent="PreferenceBase"/>
-
-    <style name="PreferenceBase" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="colorPrimary">@color/light_colorPrimary</item>
-        <item name="colorPrimaryDark">@color/light_colorPrimaryDark</item>
-        <item name="colorAccent">@color/light_colorAccent</item>
-        <item name="android:alertDialogTheme">@style/PreferenceDialogTheme</item>
+    <style name="PreferenceTheme" parent="AppTheme">
+        <item name="alertDialogTheme">@style/PreferenceDialogTheme</item>
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
     </style>
 
-    <style name="PreferenceDialogTheme" parent="Theme.AppCompat.Light.Dialog.Alert">
+    <style name="PreferenceDialogTheme" parent="AppTheme.AlertDialog">
         <item name="android:windowMinWidthMajor">50%</item>
         <item name="android:windowMinWidthMinor">95%</item>
         <item name="android:windowSoftInputMode">adjustPan</item>
+        <item name="colorAccent">@color/colorAccent</item>
     </style>
 
     <style name="ToolBarStyle" parent="@style/ThemeOverlay.AppCompat.Dark">

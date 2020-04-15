@@ -173,6 +173,7 @@
   margin: 0.266666666666667em 0 0.266666666666667em 0.333333333333333em;
   padding-left: 0.666666666666667em;
   color: #666;
+  vertical-align: middle;
 }
 .eventheader_intro_details_itemlink {
   color: inherit;

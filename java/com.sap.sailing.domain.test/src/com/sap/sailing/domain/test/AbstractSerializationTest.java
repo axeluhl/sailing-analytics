@@ -26,7 +26,7 @@ public abstract class AbstractSerializationTest {
             }
         }.start();
         Thread.currentThread().setContextClassLoader(AbstractSerializationTest.class.getClassLoader());
-        ObjectInputStream dis = resolveAgainst.createObjectInputStreamResolvingAgainstThisFactory(pis);
+        ObjectInputStream dis = resolveAgainst.createObjectInputStreamResolvingAgainstThisFactory(pis, null);
         @SuppressWarnings("unchecked")
         T result = (T) dis.readObject();
         dis.close();
@@ -50,7 +50,7 @@ public abstract class AbstractSerializationTest {
                 }
             }
         }.start();
-        ObjectInputStream dis = resolveAgainst.createObjectInputStreamResolvingAgainstThisFactory(pis);
+        ObjectInputStream dis = resolveAgainst.createObjectInputStreamResolvingAgainstThisFactory(pis, null);
         Object[] result = new Object[objects.length];
         for (int i=0; i<objects.length; i++) {
             result[i] = dis.readObject();

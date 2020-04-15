@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.persistence.racelog.tracking;
 
-import com.mongodb.DBObject;
+import org.bson.Document;
+
 import com.sap.sailing.domain.common.racelog.tracking.TransformationHandler;
 import com.sap.sse.common.Timed;
 
@@ -11,5 +12,5 @@ import com.sap.sse.common.Timed;
  * 
  * @author Fredrik Teschke
  */
-public interface FixMongoHandler<T extends Timed> extends TransformationHandler<T, DBObject> {
+public interface FixMongoHandler<T extends Timed> extends TransformationHandler<T, Document> {
 }

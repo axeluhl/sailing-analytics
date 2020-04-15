@@ -11,6 +11,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -21,11 +22,12 @@ import com.sap.sailing.gwt.ui.client.FlagImageRenderer;
 import com.sap.sailing.gwt.ui.client.FlagImageResolverImpl;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.controls.ImagesBarCell;
 import com.sap.sse.common.CountryCode;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
+import com.sap.sse.gwt.client.celltable.ImagesBarCell;
+import com.sap.sse.gwt.client.celltable.ImagesBarColumn;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
@@ -100,7 +102,7 @@ public class CompetitorDescriptorTableWrapper<S extends RefreshableSelectionMode
         this.competitorImportMatcher = competitorImportMatcherParam;
         filterablePanelCompetitorDescriptor = new LabeledAbstractFilterablePanel<CompetitorDescriptor>(
                 new Label(stringMessages.filterImportedCompetitorsByNameSailRaceFleet()),
-                new ArrayList<CompetitorDescriptor>(), table, dataProvider) {
+                new ArrayList<CompetitorDescriptor>(), dataProvider, stringMessages) {
             @Override
             public Iterable<String> getSearchableStrings(CompetitorDescriptor competitorDescriptor) {
                 List<String> string = new ArrayList<String>();
@@ -110,6 +112,11 @@ public class CompetitorDescriptorTableWrapper<S extends RefreshableSelectionMode
                 string.add(competitorDescriptor.getRaceName());
                 string.add(competitorDescriptor.getFleetName());
                 return string;
+            }
+
+            @Override
+            public AbstractCellTable<CompetitorDescriptor> getCellTable() {
+                return CompetitorDescriptorTableWrapper.this.getTable();
             }
         };
         registerSelectionModelOnNewDataProvider(filterablePanelCompetitorDescriptor.getAllListDataProvider());

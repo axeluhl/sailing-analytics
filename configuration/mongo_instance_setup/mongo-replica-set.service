@@ -1,0 +1,14 @@
+[Unit]
+Description=If REPLICA_SET_NAME EC2 user data is provided, add this node to the replica set of REPLICA_SET_PRIMARY
+Requires=mongod.service
+After=mongod.service
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=true
+ExecStart=/usr/local/bin/add-as-replica
+ExecStop=/usr/local/bin/remove-as-replica
+TimeoutStopSpec=120s

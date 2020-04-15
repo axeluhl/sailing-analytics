@@ -49,8 +49,7 @@
                     <RelativeLayout
                         android:id="@+id/start_time_container"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true">
+                        android:layout_height="wrap_content">
 
                         <TextView
                             android:id="@+id/time_start"
@@ -91,7 +90,6 @@
                     <RelativeLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
                         android:layout_marginLeft="@dimen/side_padding"
                         android:layout_toRightOf="@+id/start_time_container">
 
@@ -108,7 +106,22 @@
                             android:visibility="invisible"
                             tools:text="@string/time"
                             tools:visibility="visible" />
+
                     </RelativeLayout>
+
+                    <TextView
+                        android:id="@+id/first_vessel_duration"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/start_time_container"
+                        android:layout_centerHorizontal="true"
+                        android:layout_marginLeft="@dimen/side_padding"
+                        android:drawableLeft="?attr/flag_24dp"
+                        android:drawablePadding="6dp"
+                        android:textAppearance="?attr/textSmall"
+                        android:visibility="gone"
+                        tools:text="0h 23m 14s"
+                        tools:visibility="visible" />
                 </RelativeLayout>
             </RelativeLayout>
 

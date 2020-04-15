@@ -23,8 +23,6 @@
             styleName="{local_res.css.sitenavigation_link}" text="{i18n.events}" />
 	  <g:Anchor ui:field="solutionsPageLink"
             styleName="{local_res.css.sitenavigation_link}" text="{i18n.solutions}" />
-	  <g:Anchor href="https://blog.sapsailing.com"
-            styleName="{local_res.css.sitenavigation_link}" text="{i18n.blog}" />
           <!-- 
           <g:Anchor ui:field="sponsoringPageLink"
             styleName="{local_res.css.sitenavigation_link}" text="{i18n.sponsoring}" />

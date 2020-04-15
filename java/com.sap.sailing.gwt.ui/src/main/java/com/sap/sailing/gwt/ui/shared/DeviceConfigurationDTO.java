@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.shared;
 
 import java.util.List;
+import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.CourseDesignerMode;
@@ -51,6 +52,8 @@ public class DeviceConfigurationDTO implements IsSerializable {
         public LeagueConfigurationDTO leagueConfiguration;
     }
 
+    public String name;
+    public UUID id;
     public List<String> allowedCourseAreaNames;
     public String resultsMailRecipient;
     public List<String> byNameDesignerCourseNames;

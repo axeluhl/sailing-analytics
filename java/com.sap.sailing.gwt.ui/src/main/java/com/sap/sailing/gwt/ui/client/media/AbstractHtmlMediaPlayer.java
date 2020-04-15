@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.ui.client.media;
 
 import com.google.gwt.dom.client.MediaElement;
 import com.google.gwt.media.client.MediaBase;
-import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.domain.common.media.MediaTrackWithSecurityDTO;
 import com.sap.sailing.gwt.ui.client.media.shared.AbstractMediaPlayer;
 
 abstract public class AbstractHtmlMediaPlayer extends AbstractMediaPlayer {
@@ -19,7 +19,7 @@ abstract public class AbstractHtmlMediaPlayer extends AbstractMediaPlayer {
     
     protected final MediaBase mediaElement;
 
-    public AbstractHtmlMediaPlayer(MediaTrack mediaTrack) {
+    public AbstractHtmlMediaPlayer(MediaTrackWithSecurityDTO mediaTrack) {
         super(mediaTrack);
         mediaElement = createMediaElement();
         if (mediaElement != null) {
@@ -38,12 +38,18 @@ abstract public class AbstractHtmlMediaPlayer extends AbstractMediaPlayer {
 
     native void addNativeEventHandlers(MediaElement mediaElement) /*-{
         var that = this;
-        mediaElement.addEventListener('canplay', function() {
-            that.@com.sap.sailing.gwt.ui.client.media.AbstractHtmlMediaPlayer::initPlayState()();
-        });
-        mediaElement.addEventListener('timeupdate', function(event) {
-            that.@com.sap.sailing.gwt.ui.client.media.shared.AbstractMediaPlayer::onMediaTimeUpdate()();
-        });
+        mediaElement
+                .addEventListener(
+                        'canplay',
+                        function() {
+                            that.@com.sap.sailing.gwt.ui.client.media.AbstractHtmlMediaPlayer::initPlayState()();
+                        });
+        mediaElement
+                .addEventListener(
+                        'timeupdate',
+                        function(event) {
+                            that.@com.sap.sailing.gwt.ui.client.media.shared.AbstractMediaPlayer::onMediaTimeUpdate()();
+                        });
     }-*/;
     
     private void initPlayState() {

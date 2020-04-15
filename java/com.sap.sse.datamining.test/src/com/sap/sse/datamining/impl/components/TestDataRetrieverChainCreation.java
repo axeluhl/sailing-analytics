@@ -1,6 +1,6 @@
 package com.sap.sse.datamining.impl.components;
 
-import static com.sap.sse.datamining.test.util.ConcurrencyTestsUtil.getExecutor;
+import static com.sap.sse.datamining.test.util.ConcurrencyTestsUtil.getSharedExecutor;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
@@ -90,12 +90,12 @@ public class TestDataRetrieverChainCreation {
 
         assertThat(chainClone, not(dataRetrieverChainDefinition));
         
-        chainClone.startBuilding(ConcurrencyTestsUtil.getExecutor());
+        chainClone.startBuilding(ConcurrencyTestsUtil.getSharedExecutor());
     }
     
     @Test
     public void testThatTheDataRetrieverChainBuilderHasToBeInitialized() {
-        DataRetrieverChainBuilder<Collection<Test_Regatta>> chainBuilder = dataRetrieverChainDefinition.startBuilding(ConcurrencyTestsUtil.getExecutor());
+        DataRetrieverChainBuilder<Collection<Test_Regatta>> chainBuilder = dataRetrieverChainDefinition.startBuilding(ConcurrencyTestsUtil.getSharedExecutor());
 
         try {
             chainBuilder.getCurrentRetrievedDataType();
@@ -126,7 +126,7 @@ public class TestDataRetrieverChainCreation {
 
     @Test
     public void testStepByStepDataRetrieverChainCreation() throws InterruptedException {
-        DataRetrieverChainBuilder<Collection<Test_Regatta>> chainBuilder = dataRetrieverChainDefinition.startBuilding(ConcurrencyTestsUtil.getExecutor());
+        DataRetrieverChainBuilder<Collection<Test_Regatta>> chainBuilder = dataRetrieverChainDefinition.startBuilding(ConcurrencyTestsUtil.getSharedExecutor());
         chainBuilder.stepFurther(); //Initialization
         
         assertThat(chainBuilder.getCurrentRetrievedDataType().equals(Test_Regatta.class), is(true));
@@ -206,7 +206,7 @@ public class TestDataRetrieverChainCreation {
     
     @Test(expected=IllegalArgumentException.class)
     public void testSettingAFilterWithWrongElementType() {
-        DataRetrieverChainBuilder<Collection<Test_Regatta>> chainBuilder = dataRetrieverChainDefinition.startBuilding(ConcurrencyTestsUtil.getExecutor());
+        DataRetrieverChainBuilder<Collection<Test_Regatta>> chainBuilder = dataRetrieverChainDefinition.startBuilding(ConcurrencyTestsUtil.getSharedExecutor());
         chainBuilder.stepFurther(); //Initialization
         
         chainBuilder.setFilter(raceFilter);
@@ -214,7 +214,7 @@ public class TestDataRetrieverChainCreation {
     
     @Test(expected=IllegalArgumentException.class)
     public void testSettingAResultReceiverWithWrongInputType() {
-        DataRetrieverChainBuilder<Collection<Test_Regatta>> chainBuilder = dataRetrieverChainDefinition.startBuilding(ConcurrencyTestsUtil.getExecutor());
+        DataRetrieverChainBuilder<Collection<Test_Regatta>> chainBuilder = dataRetrieverChainDefinition.startBuilding(ConcurrencyTestsUtil.getSharedExecutor());
         chainBuilder.stepFurther(); //Initialization
         
         chainBuilder.addResultReceiver(legReceiver);
@@ -253,12 +253,12 @@ public class TestDataRetrieverChainCreation {
                                                raceRetrieverClass,
                                                Test_HasRaceContext.class, "race");
         
-        dataRetrieverChainDefinition.startBuilding(ConcurrencyTestsUtil.getExecutor());
+        dataRetrieverChainDefinition.startBuilding(ConcurrencyTestsUtil.getSharedExecutor());
     }
     
     @Test(expected=IllegalStateException.class)
     public void testSteppingToFar() {
-        DataRetrieverChainBuilder<Collection<Test_Regatta>> chainBuilder = dataRetrieverChainDefinition.startBuilding(ConcurrencyTestsUtil.getExecutor());
+        DataRetrieverChainBuilder<Collection<Test_Regatta>> chainBuilder = dataRetrieverChainDefinition.startBuilding(ConcurrencyTestsUtil.getSharedExecutor());
         while (chainBuilder.canStepFurther()) {
             chainBuilder.stepFurther();
         }
@@ -272,7 +272,7 @@ public class TestDataRetrieverChainCreation {
         chainWithSettings.endWith(TestLegOfCompetitorWithContextRetrievalProcessor.class, Test_RetrievalProcessorWithSettings.class, Test_HasLegOfCompetitorContext.class,
                 Test_RetrievalProcessorSettings.class, new Test_RetrievalProcessorSettings("Default Settings"), "legOfCompetitor");
         
-        DataRetrieverChainBuilder<Collection<Test_Regatta>> chainBuilder = chainWithSettings.startBuilding(getExecutor());
+        DataRetrieverChainBuilder<Collection<Test_Regatta>> chainBuilder = chainWithSettings.startBuilding(getSharedExecutor());
         while (chainBuilder.canStepFurther()) {
             chainBuilder.stepFurther();
         }
@@ -311,7 +311,7 @@ public class TestDataRetrieverChainCreation {
         chainWithSettings.endWith(TestLegOfCompetitorWithContextRetrievalProcessor.class, Test_RetrievalProcessorWithSettings.class, Test_HasLegOfCompetitorContext.class,
                 Test_RetrievalProcessorSettings.class, new Test_RetrievalProcessorSettings("Default Settings"), "legOfCompetitor");
         
-        DataRetrieverChainBuilder<Collection<Test_Regatta>> chainBuilder = chainWithSettings.startBuilding(getExecutor());
+        DataRetrieverChainBuilder<Collection<Test_Regatta>> chainBuilder = chainWithSettings.startBuilding(getSharedExecutor());
         while (chainBuilder.canStepFurther()) {
             chainBuilder.stepFurther();
         }
@@ -320,7 +320,7 @@ public class TestDataRetrieverChainCreation {
     
     @Test(expected=IllegalStateException.class)
     public void testRetrieverWithNoSettingsButSettedSettingsCreated() {
-        DataRetrieverChainBuilder<Collection<Test_Regatta>> chainBuilder = dataRetrieverChainDefinition.startBuilding(ConcurrencyTestsUtil.getExecutor());
+        DataRetrieverChainBuilder<Collection<Test_Regatta>> chainBuilder = dataRetrieverChainDefinition.startBuilding(ConcurrencyTestsUtil.getSharedExecutor());
         chainBuilder.stepFurther(); // Initialization
         chainBuilder.setSettings(new WrongSettings());
     }

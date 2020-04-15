@@ -1,25 +1,51 @@
 package com.sap.sailing.gwt.ui.shared;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sse.common.Util;
 
 public class RaceboardDataDTO implements IsSerializable {
     private RaceWithCompetitorsAndBoatsDTO race;
     private boolean isValidLeaderboardGroup;
-    private boolean isValidLeaderboard;
     private boolean isValidEvent;
-    
+    private ArrayList<DetailType> detailTypesForCompetitorChart;
+    private ArrayList<DetailType> availableDetailTypesForLeaderboard;
+    private StrippedLeaderboardDTOWithSecurity leaderboard;
+    private TrackingConnectorInfoDTO trackingConnectorInfo;
+
     // for GWT
     RaceboardDataDTO() {}
     
-    public RaceboardDataDTO(RaceWithCompetitorsAndBoatsDTO race, boolean isValidLeaderboard, boolean isValidLeaderboardGroup, boolean isValidEvent) {
+    public RaceboardDataDTO(RaceWithCompetitorsAndBoatsDTO race,
+            boolean isValidLeaderboardGroup, boolean isValidEvent, Iterable<DetailType> detailTypesForCompetitorChart,
+            Iterable<DetailType> availableDetailTypesForLeaderboard, StrippedLeaderboardDTOWithSecurity leaderboard,
+            TrackingConnectorInfoDTO trackingConnectorInfo) {
         this.race = race;
-        this.isValidLeaderboard = isValidLeaderboard;
         this.isValidLeaderboardGroup = isValidLeaderboardGroup;
         this.isValidEvent = isValidEvent;
+        this.detailTypesForCompetitorChart = new ArrayList<>();
+        Util.addAll(detailTypesForCompetitorChart, this.detailTypesForCompetitorChart);
+        this.availableDetailTypesForLeaderboard = new ArrayList<>();
+        Util.addAll(availableDetailTypesForLeaderboard, this.availableDetailTypesForLeaderboard);
+        this.leaderboard = leaderboard;
+        this.trackingConnectorInfo = trackingConnectorInfo;
+    }
+
+    public StrippedLeaderboardDTOWithSecurity getLeaderboard() {
+        return leaderboard;
+    }
+
+    public Iterable<DetailType> getDetailTypesForCompetitorChart() {
+        return detailTypesForCompetitorChart;
+    }
+
+    public Iterable<DetailType> getAvailableDetailTypesForLeaderboard() {
+        return availableDetailTypesForLeaderboard;
     }
 
     public Map<CompetitorDTO, BoatDTO> getCompetitorAndTheirBoats() {
@@ -38,11 +64,11 @@ public class RaceboardDataDTO implements IsSerializable {
         return isValidLeaderboardGroup;
     }
 
-    public boolean isValidLeaderboard() {
-        return isValidLeaderboard;
-    }
-
     public boolean isValidEvent() {
         return isValidEvent;
+    }
+
+    public TrackingConnectorInfoDTO getTrackingConnectorInfo() {
+        return trackingConnectorInfo;
     }
 }

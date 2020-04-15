@@ -4,7 +4,6 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.Button;
@@ -13,6 +12,9 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.gwt.client.EntryPointHelper;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
+import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.RemoteServiceMappingConstants;
 import com.sap.sse.security.ui.client.UserChangeEventHandler;
 import com.sap.sse.security.ui.client.UserManagementService;
@@ -21,7 +23,6 @@ import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.client.shared.oauthlogin.OAuthLogin;
 import com.sap.sse.security.ui.oauth.client.util.ClientUtils;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 public class OAuthLoginEntryPoint implements EntryPoint, UserChangeEventHandler {
     private final UserManagementServiceAsync userManagementService = GWT.create(UserManagementService.class);
@@ -50,7 +51,7 @@ public class OAuthLoginEntryPoint implements EntryPoint, UserChangeEventHandler 
                 userService.verifySocialUser(new AsyncCallback<UserDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        Window.alert(caught.getMessage());
+                        Notification.notify(caught.getMessage(), NotificationType.ERROR);
                     }
 
                     @Override

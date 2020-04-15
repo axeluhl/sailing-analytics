@@ -1,11 +1,11 @@
 package com.sap.sailing.racecommittee.app.ui.layouts;
 
+import com.sap.sailing.racecommittee.app.ui.utils.TouchEventListener;
+
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.widget.FrameLayout;
-
-import com.sap.sailing.racecommittee.app.ui.utils.TouchEventListener;
 
 public class TimePanelHeaderLayout extends FrameLayout {
 

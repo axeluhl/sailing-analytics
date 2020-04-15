@@ -1,9 +1,5 @@
 package com.sap.sailing.racecommittee.app.utils;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-
-import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Paint;
@@ -21,22 +17,13 @@ import android.widget.TimePicker;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.ViewHelper;
-import com.sap.sailing.racecommittee.app.AppConstants;
-import com.sap.sailing.racecommittee.app.AppPreferences;
-import com.sap.sailing.racecommittee.app.R;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 public class ThemeHelper {
 
     private static final String TAG = ThemeHelper.class.getName();
-
-    public static void setTheme(Activity activity) {
-        String theme = AppPreferences.on(activity).getTheme();
-        if (AppConstants.LIGHT_THEME.equals(theme)) {
-            activity.setTheme(R.style.AppTheme_Light);
-        } else {
-            activity.setTheme(R.style.AppTheme_Dark);
-        }
-    }
 
     public static void positioningPopupMenu(Context context, PopupMenu popupMenu, View anchor) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
@@ -134,12 +121,14 @@ public class ThemeHelper {
         }
     }
 
-    public static void setPickerColor(Context context, TimePicker timePicker, @ColorInt int textColor, @ColorInt int dividerColor) {
+    public static void setPickerColor(Context context, TimePicker timePicker, @ColorInt int textColor,
+            @ColorInt int dividerColor) {
         setPickerTextColor(context, timePicker, textColor);
         setPickerDividerColor(context, timePicker, dividerColor);
     }
 
-    public static void setPickerColor(Context context, NumberPicker numberPicker, @ColorInt int textColor, @ColorInt int dividerColor) {
+    public static void setPickerColor(Context context, NumberPicker numberPicker, @ColorInt int textColor,
+            @ColorInt int dividerColor) {
         setPickerTextColor(context, numberPicker, textColor);
         setPickerDividerColor(context, numberPicker, dividerColor);
     }
@@ -150,7 +139,8 @@ public class ThemeHelper {
             View child = numberPicker.getChildAt(i);
             if (child instanceof EditText) {
                 try {
-                    ((EditText) child).setTextSize(TypedValue.COMPLEX_UNIT_PX, context.getResources().getDimension(dimen));
+                    ((EditText) child).setTextSize(TypedValue.COMPLEX_UNIT_PX,
+                            context.getResources().getDimension(dimen));
                     numberPicker.invalidate();
                 } catch (IllegalArgumentException e) {
                     ExLog.w(context, TAG, "IllegalArgumentException - " + e.getMessage());
@@ -159,9 +149,7 @@ public class ThemeHelper {
         }
     }
 
-    public static
-    @ColorInt
-    int getColor(Context context, @AttrRes int colorId) {
+    public static @ColorInt int getColor(Context context, @AttrRes int colorId) {
         int color = 0;
         TypedValue typedValue = new TypedValue();
         Resources.Theme theme = context.getTheme();

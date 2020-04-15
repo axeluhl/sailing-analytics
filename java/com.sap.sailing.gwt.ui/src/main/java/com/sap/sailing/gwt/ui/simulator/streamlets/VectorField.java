@@ -12,9 +12,6 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
  * A field of vectors to display in a streamlet {@link Swarm}. The {@link Vector}s returned by {@link #getVector(Position, Date)}
  * are used to initialize {@link Particle}s. Their "speed" is the {@link Vector#length() length} of the vector.<p>
  * 
- * This field provides color strings for each possible speed which are then used to style the particles as they fly through
- * the swarm.
- * 
  * @author Christopher Ronnewinkel (D036654)
  * @author Axel Uhl (D043530)
  *
@@ -83,14 +80,4 @@ public interface VectorField {
     LatLngBounds getFieldCorners();
 
     double getParticleFactor();
-
-    /**
-     * Computes a color for a particle flying at a certain speed.
-     * 
-     * @param speed
-     *            a speed as obtained by computing a {@link Vector}'s {@link Vector#length() length}.
-     * @return an RGB color with optional transparency that is a legal color in CSS. Example:
-     *         <code>"rgba(1, 2, 3, 0.4)"</code>
-     */
-    String getColor(double speed);
 }

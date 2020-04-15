@@ -2,14 +2,13 @@ package com.sap.sailing.gwt.ui.client;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
+import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.ServiceRoutingProvider;
 
 /**
  * Set of convenience factory methods that create a {@link SailingServiceAsync} instance. 
  */
 public abstract class SailingServiceHelper {
-    private final static String moduleBaseURL = GWT.getModuleBaseURL();
-
     private SailingServiceHelper() {
     }
 
@@ -41,20 +40,20 @@ public abstract class SailingServiceHelper {
      * @param sameBundle {@code false} if using {@link SailingService} from a different OSGi bundle (e.g. dashboards), {@code true} otherwise
      */
     public static SailingServiceAsync createSailingServiceInstance(boolean sameBundle, ServiceRoutingProvider routingProvider) {
-        SailingServiceAsync service = GWT.create(SailingService.class);
-        ServiceDefTarget serviceToRegister = (ServiceDefTarget) service;
-        StringBuilder baseURL = new StringBuilder();
-        baseURL.append(moduleBaseURL.substring(0, moduleBaseURL.lastIndexOf('/', moduleBaseURL.length() - 2) + 1));
-        if (!sameBundle) {
-            baseURL.append(RemoteServiceMappingConstants.WEB_CONTEXT_PATH).append("/");
-        }
+        final SailingServiceAsync service = GWT.create(SailingService.class);
+        final ServiceDefTarget serviceToRegister = (ServiceDefTarget) service;
         
-        baseURL.append(RemoteServiceMappingConstants.sailingServiceRemotePath);
-        
+        final StringBuilder servicePath = new StringBuilder(RemoteServiceMappingConstants.sailingServiceRemotePath);
         if (routingProvider != null) {
-            baseURL.append(routingProvider.routingSuffixPath());
+            servicePath.append(routingProvider.routingSuffixPath());
         }
-        serviceToRegister.setServiceEntryPoint(baseURL.toString());
+        
+        final String servicePathWithRoutingSuffix = servicePath.toString();
+        if (sameBundle) {
+            EntryPointHelper.registerASyncService(serviceToRegister, servicePathWithRoutingSuffix);
+        } else {
+            EntryPointHelper.registerASyncService(serviceToRegister, RemoteServiceMappingConstants.WEB_CONTEXT_PATH, servicePathWithRoutingSuffix);
+        }
         return service;
     }
 }

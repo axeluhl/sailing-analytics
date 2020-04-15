@@ -7,5 +7,6 @@ import com.sap.sse.common.Distance;
 
 public interface Located extends Positioned {
     Bearing getBearingFrom(Position other);
+
     Distance getDistanceFromPosition(Position other);
 }

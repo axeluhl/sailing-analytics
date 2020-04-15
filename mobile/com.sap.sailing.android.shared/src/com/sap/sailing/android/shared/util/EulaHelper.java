@@ -1,17 +1,12 @@
 package com.sap.sailing.android.shared.util;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.net.Uri;
-import android.support.annotation.StyleRes;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.text.SpannableString;
 import android.text.Spanned;
@@ -24,7 +19,17 @@ import android.widget.TextView;
 
 import com.sap.sailing.android.shared.R;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
 public class EulaHelper {
+
+    public interface OnEulaAcceptedListener {
+        void eulaAccepted();
+    }
+
     private static final String EULA_PREFERENCES = "eula.preferences";
     private static final String EULA_CONFIRMED = "confirmed";
 
@@ -40,21 +45,16 @@ public class EulaHelper {
         return new EulaHelper(context);
     }
 
-    public void showEulaDialog() {
-        showEulaDialog(NO_THEME);
+    public void showEulaDialogIfNotAccepted(OnEulaAcceptedListener acceptedHandler) {
+        if (!this.isEulaAccepted()) {
+            showEulaDialog(acceptedHandler);
+            return;
+        }
+        acceptedHandler.eulaAccepted();
     }
 
-    public void showEulaDialog(@StyleRes int theme) {
-        AlertDialog.Builder builder;
-        switch (theme) {
-            case NO_THEME:
-                builder = new AlertDialog.Builder(mContext);
-                break;
-
-            default:
-                builder = new AlertDialog.Builder(mContext, theme);
-        }
-
+    public void showEulaDialog(@Nullable final OnEulaAcceptedListener acceptedHandler) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
         builder.setTitle(R.string.eula_title);
         builder.setMessage(getSpannableMessage(builder.getContext().getTheme()));
         builder.setCancelable(false);
@@ -62,17 +62,21 @@ public class EulaHelper {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 storeEulaAccepted();
+                if (acceptedHandler != null) {
+                    acceptedHandler.eulaAccepted();
+                }
             }
         });
         AlertDialog alertDialog = builder.show();
-        ((TextView)alertDialog.findViewById(android.R.id.message)).setMovementMethod(LinkMovementMethod.getInstance());
+        alertDialog.setCanceledOnTouchOutside(false);
+        ((TextView) alertDialog.findViewById(android.R.id.message)).setMovementMethod(LinkMovementMethod.getInstance());
     }
 
     private void storeEulaAccepted() {
         SharedPreferences preferences = mContext.getSharedPreferences(EULA_PREFERENCES, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
         editor.putBoolean(EULA_CONFIRMED, true);
-        editor.commit();
+        editor.apply();
     }
 
     public boolean isEulaAccepted() {
@@ -98,10 +102,12 @@ public class EulaHelper {
             }
         };
 
-        spannableString.setSpan(clickableSpan, message.indexOf(clickableText), message.indexOf(clickableText) + clickableText.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        spannableString.setSpan(clickableSpan, message.indexOf(clickableText),
+                message.indexOf(clickableText) + clickableText.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         TypedValue typedValue = new TypedValue();
         theme.resolveAttribute(R.attr.colorAccent, typedValue, true);
-        spannableString.setSpan(new ForegroundColorSpan(typedValue.data), message.indexOf(clickableText), message.indexOf(clickableText) + clickableText.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        spannableString.setSpan(new ForegroundColorSpan(typedValue.data), message.indexOf(clickableText),
+                message.indexOf(clickableText) + clickableText.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
         return spannableString;
     }

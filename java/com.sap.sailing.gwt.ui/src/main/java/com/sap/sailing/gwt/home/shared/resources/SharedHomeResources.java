@@ -3,8 +3,8 @@ package com.sap.sailing.gwt.home.shared.resources;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.DataResource;
 import com.google.gwt.resources.client.DataResource.MimeType;
-import com.google.gwt.resources.client.ImageResource.ImageOptions;
 import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.resources.client.ImageResource.ImageOptions;
 import com.sap.sse.gwt.common.CommonIcons;
 
 public interface SharedHomeResources extends CommonIcons {
@@ -26,10 +26,13 @@ public interface SharedHomeResources extends CommonIcons {
     @Source("default_video_preview.jpg")
     @ImageOptions(preventInlining = true)
     ImageResource defaultVideoPreviewImage();
-    
+
     @Source("arrow-down-grey.png")
     ImageResource arrowDownGrey();
     
+    @Source("arrow-down-white.png")
+    ImageResource arrowDownWhite();
+
     @Source("news-i.png")
     ImageResource news();
     
@@ -61,4 +64,15 @@ public interface SharedHomeResources extends CommonIcons {
     @MimeType("image/svg+xml")
     DataResource launchPlay();
     
+    @Source("icon-audio.png")
+    ImageResource audio();
+
+    @Source("icon-video.png")
+    ImageResource video();
+
+    @Source("icon-wind.png")
+    ImageResource wind();
+
+    @Source("raw_gps_fixes.png")
+    ImageResource gpsFixes();
 }

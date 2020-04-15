@@ -1,9 +1,9 @@
 package com.sap.sailing.android.tracking.app.utils;
 
+import com.sap.sailing.android.tracking.app.ui.activities.AboutActivity;
+
 import android.content.Context;
 import android.content.Intent;
-
-import com.sap.sailing.android.tracking.app.ui.activities.AboutActivity;
 
 public class AboutHelper {
 

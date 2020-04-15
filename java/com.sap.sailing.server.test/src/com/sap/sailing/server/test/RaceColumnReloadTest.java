@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -67,8 +68,6 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.mongodb.MongoDBService;
 
-import junit.framework.Assert;
-
 public class RaceColumnReloadTest {
 
     private MongoRaceLogStoreVisitor mongoStoreVisitor;
@@ -80,7 +79,7 @@ public class RaceColumnReloadTest {
 
     @Before
     public void setUp() {
-        MongoDBService.INSTANCE.getDB().dropDatabase();
+        MongoDBService.INSTANCE.getDB().drop();
         final RacingEventServiceImpl service = new RacingEventServiceImpl();
         // FIXME use master DomainFactory; see bug 592
         final DomainFactory masterDomainFactory = service.getBaseDomainFactory();
@@ -93,7 +92,7 @@ public class RaceColumnReloadTest {
         Boat boat = new BoatImpl("61", "GER 61", boatClass, "GER 61");
         CompetitorWithBoat comp = masterDomainFactory.getOrCreateCompetitorWithBoat("GER 61", "Team", "T", Color.RED, "noone@nowhere.de",
                 null, new TeamImpl("Team", Arrays.asList(sailor), coach),
-                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null, (DynamicBoat) boat);
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null, (DynamicBoat) boat, /* storePersistently */ true);
         service.apply(new CreateFlexibleLeaderboard(leaderboardName, "Test", new int[] { 1, 2 }, new LowPoint(), null));
         raceColumn = service.apply(new AddColumnToLeaderboard("R1", leaderboardName, false));
 
@@ -110,7 +109,7 @@ public class RaceColumnReloadTest {
         service.apply(new TrackRegatta(raceIdentifier));
         trackedRace = service.apply(new CreateTrackedRace(raceIdentifier, EmptyWindStore.INSTANCE,
                 /* delayToLiveInMillis */ 5000, /* millisecondsOverWhichToAverageWind */ 10000,
-                /* millisecondsOverWhichToAverageSpeed */10000));
+                /* millisecondsOverWhichToAverageSpeed */10000, null));
         trackedRace.setStartOfTrackingReceived(MillisecondsTimePoint.now());
         defaultFleet = Util.get(raceColumn.getFleets(), 0);
 
@@ -221,7 +220,6 @@ public class RaceColumnReloadTest {
     }
 
     private class WindFixLoggingRaceLogVisitor extends BaseRaceLogEventVisitor {
-
         private final Set<Wind> loggedWindFixes = ConcurrentHashMap.newKeySet();
 
         private WindFixLoggingRaceLogVisitor(RaceLog raceLog) {

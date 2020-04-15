@@ -51,8 +51,10 @@ public class ViewHelper {
     /**
      * Set the background to the color and tint the text color to be readable
      *
-     * @param view            TextView to colorize
-     * @param backgroundColor background color
+     * @param view
+     *            TextView to colorize
+     * @param backgroundColor
+     *            background color
      */
     public static void setColors(@NonNull TextView view, @Nullable String backgroundColor) {
         com.sap.sse.common.Color color = HSVColor.getCssColor(backgroundColor);

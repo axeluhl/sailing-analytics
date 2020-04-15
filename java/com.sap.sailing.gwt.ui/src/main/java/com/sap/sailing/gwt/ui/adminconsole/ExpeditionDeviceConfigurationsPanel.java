@@ -13,6 +13,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.text.shared.SafeHtmlRenderer;
+import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
@@ -32,12 +33,14 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.controls.ImagesBarCell;
 import com.sap.sse.common.util.NaturalComparator;
+import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
+import com.sap.sse.gwt.client.celltable.ImagesBarCell;
+import com.sap.sse.gwt.client.celltable.ImagesBarColumn;
 import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
@@ -49,7 +52,6 @@ public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
     private final CellTable<ExpeditionDeviceConfiguration> allDeviceConfigurations;
     private final LabeledAbstractFilterablePanel<ExpeditionDeviceConfiguration> filterDeviceConfigurationsPanel;
     private final RefreshableSingleSelectionModel<ExpeditionDeviceConfiguration> refreshableDeviceConfigurationsSelectionModel;
-    private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
 
     public static class DeviceConfigurationImagesBarCell extends ImagesBarCell {
         public static final String ACTION_REMOVE = "ACTION_REMOVE";
@@ -69,7 +71,7 @@ public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
         @Override
         protected Iterable<ImageSpec> getImageSpecs() {
             return Arrays.asList(
-                    new ImageSpec(ACTION_EDIT, stringMessages.actionEdit(), makeImagePrototype(resources.editIcon())),
+                    new ImageSpec(ACTION_EDIT, stringMessages.actionEdit(), makeImagePrototype(IconResources.INSTANCE.editIcon())),
                     new ImageSpec(ACTION_REMOVE, stringMessages.actionRemove(), makeImagePrototype(IconResources.INSTANCE.removeIcon())));
         }
     }
@@ -86,7 +88,7 @@ public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
         filteredDeviceConfigurations.addDataDisplay(allDeviceConfigurations);
         final List<ExpeditionDeviceConfiguration> emptyList = Collections.emptyList();
         filterDeviceConfigurationsPanel = new LabeledAbstractFilterablePanel<ExpeditionDeviceConfiguration>(new Label(stringMessages.expeditionDeviceConfigurations()),
-                emptyList, allDeviceConfigurations, filteredDeviceConfigurations) {
+                emptyList, filteredDeviceConfigurations, stringMessages) {
             @Override
             public Iterable<String> getSearchableStrings(ExpeditionDeviceConfiguration t) {
                 Set<String> strings = new HashSet<>();
@@ -94,6 +96,11 @@ public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
                 strings.add(t.getDeviceUuid().toString());
                 strings.add(""+t.getExpeditionBoatId());
                 return strings;
+            }
+
+            @Override
+            public AbstractCellTable<ExpeditionDeviceConfiguration> getCellTable() {
+                return allDeviceConfigurations;
             }
         };
         refreshableDeviceConfigurationsSelectionModel = new RefreshableSingleSelectionModel<>(new EntityIdentityComparator<ExpeditionDeviceConfiguration>() {

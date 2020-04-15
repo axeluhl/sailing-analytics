@@ -10,7 +10,8 @@ public class ManagedRaceIdentifierImpl extends FleetIdentifierImpl implements Ma
 
     private String raceColumnName;
 
-    public ManagedRaceIdentifierImpl(String raceColumnName, Fleet fleetWithRaceNames, SeriesWithRows series, RaceGroup raceGroup) {
+    public ManagedRaceIdentifierImpl(String raceColumnName, Fleet fleetWithRaceNames, SeriesWithRows series,
+            RaceGroup raceGroup) {
         super(fleetWithRaceNames, series, raceGroup);
         this.raceColumnName = raceColumnName;
     }

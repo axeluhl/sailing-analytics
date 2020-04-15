@@ -13,6 +13,7 @@ import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
@@ -32,9 +33,10 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
     }
     
     public RegattaWithSeriesAndFleetsEditDialog(RegattaDTO regatta, Collection<RegattaDTO> existingRegattas,
-            List<EventDTO> existingEvents, EventDTO correspondingEvent, final StringMessages stringMessages, DialogCallback<RegattaDTO> callback) {
-        super(regatta, regatta.series, existingEvents, correspondingEvent, stringMessages.editRegatta(), stringMessages.ok(), stringMessages,
-                new RegattaParameterValidator(stringMessages), callback);
+            List<EventDTO> existingEvents, EventDTO correspondingEvent, final SailingServiceAsync sailingService,
+            final StringMessages stringMessages, DialogCallback<RegattaDTO> callback) {
+        super(regatta, regatta.series, existingEvents, correspondingEvent, stringMessages.editRegatta(),
+                stringMessages.ok(), sailingService, stringMessages, new RegattaParameterValidator(stringMessages), callback);
         ensureDebugId("RegattaWithSeriesAndFleetsEditDialog");
         currentRegattaConfiguration = regatta.configuration;
 

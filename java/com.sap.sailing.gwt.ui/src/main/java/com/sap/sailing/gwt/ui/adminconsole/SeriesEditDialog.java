@@ -13,7 +13,6 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.resources.client.ImageResource;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
@@ -31,6 +30,8 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sse.gwt.client.IconResources;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.controls.IntegerBox;
 import com.sap.sse.gwt.client.controls.listedit.GenericStringListInlineEditorComposite;
 import com.sap.sse.gwt.client.controls.listedit.StringListEditorComposite;
@@ -263,7 +264,7 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
         private final Label addRacesHintLabel;
         
         public RaceNamesEditorUi(RegattaDTO regatta, StringMessages stringMessages, ImageResource removeImage, String seriesName) {
-            super(stringMessages, removeImage, /* suggest values */ Collections.<String>emptyList(), stringMessages.enterRaceName(), 40);
+            super(stringMessages, removeImage, /* suggest values */ Collections.emptySet(), stringMessages.enterRaceName(), 40);
 
             this.seriesName = seriesName;
             this.regatta = regatta;
@@ -418,7 +419,7 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
                         }
                         validateAndUpdate();
                     } else {
-                        Window.alert(getStringMessages().pleaseSelectASeriesFirst());
+                        Notification.notify(getStringMessages().pleaseSelectASeriesFirst(), NotificationType.ERROR);
                     }
                 }
             });
@@ -441,7 +442,7 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
         }
 
         @Override
-        public void onRowRemoved() {
+        public void onRowRemoved(int rowIndex) {
             updateFromToListboxesSelection();
             updateHintLabel();
         }

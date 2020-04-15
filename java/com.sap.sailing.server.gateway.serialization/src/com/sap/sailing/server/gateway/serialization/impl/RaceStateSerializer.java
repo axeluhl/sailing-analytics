@@ -45,7 +45,7 @@ public class RaceStateSerializer implements JsonSerializer<Pair<RaceColumn, Flee
         result.put("trackedRaceId", raceIdentifier != null ? raceIdentifier.toString() : null);
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         if (raceLog != null && !raceLog.isEmpty()) {
-            ReadonlyRaceState state = ReadonlyRaceStateImpl.create(raceLogResolver, raceLog);
+            ReadonlyRaceState state = ReadonlyRaceStateImpl.getOrCreate(raceLogResolver, raceLog);
             RaceLogRaceStatus status = state.getStatus();
             TimePoint startTime = state.getStartTime();
             TimePoint finishedTime = state.getFinishedTime();

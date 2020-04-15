@@ -16,8 +16,10 @@ import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
 public class PolarRaceColumnRetrievalProcessor extends AbstractRetrievalProcessor<HasLeaderboardPolarContext, HasRaceColumnPolarContext> {
 
     public PolarRaceColumnRetrievalProcessor(ExecutorService executor,
-            Collection<Processor<HasRaceColumnPolarContext, ?>> resultReceivers, int retrievalLevel) {
-        super(HasLeaderboardPolarContext.class, HasRaceColumnPolarContext.class, executor, resultReceivers, retrievalLevel);
+            Collection<Processor<HasRaceColumnPolarContext, ?>> resultReceivers, int retrievalLevel,
+            String retrievedDataTypeMessageKey) {
+        super(HasLeaderboardPolarContext.class, HasRaceColumnPolarContext.class, executor, resultReceivers,
+                retrievalLevel, retrievedDataTypeMessageKey);
     }
 
     @Override
@@ -25,6 +27,9 @@ public class PolarRaceColumnRetrievalProcessor extends AbstractRetrievalProcesso
         Set<HasRaceColumnPolarContext> raceColumnWithContext = new HashSet<>();
         Leaderboard leaderboard = element.getLeaderboard();
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+            if (isAborted()) {
+                break;
+            }
             raceColumnWithContext.add(new RaceColumnWithPolarContext(raceColumn, element));
         }
         return raceColumnWithContext;

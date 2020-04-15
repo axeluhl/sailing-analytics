@@ -129,7 +129,7 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint implements 
         pairingListPanel.getElement().getStyle().setProperty("marginTop", "15px");
         return pairingListPanel;
     }
-    
+
     private native void printPairingListGrid(String pageHTMLContent) /*-{
 		var frameID = '__gwt_historyFrame';
 		var frame = $doc.getElementById(frameID);

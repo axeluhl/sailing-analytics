@@ -4,13 +4,15 @@ Bundle-Name: com.sap.sailing.domain.shared.android
 Bundle-SymbolicName: com.sap.sailing.domain.shared.android
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: com.sap.sailing.domain.common,
  com.sap.sse.common,
  com.sap.sse.shared.android,
  com.sap.sse.datamining.annotations
 Export-Package: com.sap.sailing.domain.abstractlog,
  com.sap.sailing.domain.abstractlog.impl,
+ com.sap.sailing.domain.abstractlog.orc,
+ com.sap.sailing.domain.abstractlog.orc.impl,
  com.sap.sailing.domain.abstractlog.race,
  com.sap.sailing.domain.abstractlog.race.analyzing.impl,
  com.sap.sailing.domain.abstractlog.race.impl,
@@ -48,10 +50,14 @@ Export-Package: com.sap.sailing.domain.abstractlog,
  com.sap.sailing.domain.base.impl,
  com.sap.sailing.domain.base.racegroup,
  com.sap.sailing.domain.base.racegroup.impl,
+ com.sap.sailing.domain.coursetemplate,
+ com.sap.sailing.domain.coursetemplate.impl,
  com.sap.sailing.domain.racelogtracking,
  com.sap.sailing.domain.racelogtracking.impl,
+ com.sap.sailing.domain.resultimport,
  com.sap.sailing.domain.statistics,
  com.sap.sailing.domain.statistics.impl,
  com.sap.sailing.domain.tracking,
  com.sap.sailing.domain.tracking.impl
 Automatic-Module-Name: com.sap.sailing.domain.shared.android
+Import-Package: com.sap.sse.security.shared

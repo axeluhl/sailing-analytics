@@ -3,14 +3,11 @@ package com.sap.sailing.polars.windestimation;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.text.ParseException;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -18,7 +15,6 @@ import java.util.stream.Stream;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.base.CompetitorAndBoat;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.confidence.impl.ScalableDouble;
@@ -26,17 +22,13 @@ import com.sap.sailing.domain.common.confidence.impl.ScalableWind;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.test.OnlineTracTracBasedTest;
-import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.polars.impl.PolarDataServiceImpl;
-import com.sap.sailing.polars.windestimation.ManeuverBasedWindEstimationTrackImpl.ManeuverClassification;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.util.kmeans.Cluster;
 import com.sap.sse.util.kmeans.KMeansMappingClusterer;
-import com.tractrac.model.lib.api.event.CreateModelException;
-import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 
 public class TestWindEstimationFromManeuversOnAFew505Races extends OnlineTracTracBasedTest {
 
@@ -46,8 +38,7 @@ public class TestWindEstimationFromManeuversOnAFew505Races extends OnlineTracTra
         super();
     }
 
-    private void setUp(final String fileBaseName) throws MalformedURLException, IOException, InterruptedException, URISyntaxException,
-            ParseException, SubscriberInitializationException, CreateModelException {
+    private void setUp(final String fileBaseName) throws Exception {
         super.setUp();
         URI storedUri = new URI("file:///"+new File("../com.sap.sailing.domain.test/resources/"+fileBaseName+".mtb").getCanonicalPath().replace('\\', '/'));
         super.setUp(new URL("file:///"+new File("../com.sap.sailing.domain.test/resources/"+fileBaseName+".txt").getCanonicalPath()),
@@ -55,7 +46,7 @@ public class TestWindEstimationFromManeuversOnAFew505Races extends OnlineTracTra
                 new ReceiverType[] { ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS }); // only the tracks; no mark positions, no wind, no mark passings
     }
     
-    private void setUp(final String expectedEventName, final String fileBaseName) throws MalformedURLException, IOException, InterruptedException, URISyntaxException, ParseException, SubscriberInitializationException, CreateModelException {
+    private void setUp(final String expectedEventName, final String fileBaseName) throws Exception {
         setExpectedEventName(expectedEventName);
         setUp(fileBaseName);
     }
@@ -76,53 +67,43 @@ public class TestWindEstimationFromManeuversOnAFew505Races extends OnlineTracTra
     }
 
     @Test
-    public void testWindEstimationFromManeuversOnOBMR2012V2Blue() throws MalformedURLException, IOException,
-            InterruptedException, URISyntaxException, ParseException, SubscriberInitializationException,
-            CreateModelException, NotEnoughDataHasBeenAddedException {
-        setUp("OBMR 2012", "event_20121031_OBMR-OBMR_2012_VR_Fr_Fleet_1_2");
+    public void testWindEstimationFromManeuversOnKW2013470MGoldR5() throws Exception {
+        setUp("Kieler Woche 2013", "event_20130621_KielerWoch-470_M_gold_Race_F5");
         Wind average = getManeuverBasedAverageWind();
-        assertEquals(222, average.getFrom().getDegrees(), 20.0); // wind is shifty in this race and goes from 195..245 (measured)
+        assertEquals(295, average.getFrom().getDegrees(), 30.0); // between 270 and 320
     }
 
     @Test
-    public void testWindEstimationFromManeuversOn505KW2011Race2() throws MalformedURLException, IOException,
-            InterruptedException, URISyntaxException, ParseException, SubscriberInitializationException,
-            CreateModelException, NotEnoughDataHasBeenAddedException {
+    public void testWindEstimationFromManeuversOn505KW2011Race2() throws Exception {
         setUp("event_20110609_KielerWoch-505_Race_2");
         Wind average = getManeuverBasedAverageWind();
-        assertEquals(235, average.getFrom().getDegrees(), 5.0);
+        assertEquals(235, average.getFrom().getDegrees(), 10.0);
     }
 
     @Test
-    public void testWindEstimationFromManeuversOn505KW2011Race3() throws MalformedURLException, IOException,
-            InterruptedException, URISyntaxException, ParseException, SubscriberInitializationException,
-            CreateModelException, NotEnoughDataHasBeenAddedException {
+    public void testWindEstimationFromManeuversOn505KW2011Race3() throws Exception {
         setUp("event_20110609_KielerWoch-505_Race_3");
         Wind average = getManeuverBasedAverageWind();
-        assertEquals(245, average.getFrom().getDegrees(), 8.0);
+        assertEquals(245, average.getFrom().getDegrees(), 30.0); // wind turns from 215 to 270, so be tolerant
     }
 
     @Test
-    public void testWindEstimationFromManeuversOn505KW2011Race4() throws MalformedURLException, IOException,
-            InterruptedException, URISyntaxException, ParseException, SubscriberInitializationException,
-            CreateModelException, NotEnoughDataHasBeenAddedException {
+    public void testWindEstimationFromManeuversOn505KW2011Race4() throws Exception {
         setUp("event_20110609_KielerWoch-505_race_4");
         Wind average = getManeuverBasedAverageWind();
-        assertEquals(270, average.getFrom().getDegrees(), 9.0);
+        assertEquals(265, average.getFrom().getDegrees(), 10.0);
     }
     
     @Test
-    public void testTwoDimensionalClustering() throws NotEnoughDataHasBeenAddedException, MalformedURLException,
-            IOException, InterruptedException, URISyntaxException, ParseException, SubscriberInitializationException,
-            CreateModelException {
+    public void testTwoDimensionalClustering() throws Exception {
         setUp("event_20110609_KielerWoch-505_Race_3");
         ManeuverBasedWindEstimationTrackImpl windTrack = new ManeuverBasedWindEstimationTrackImpl(new PolarDataServiceImpl(),
                 getTrackedRace(), /* millisecondsOverWhichToAverage */ 30000, /* waitForLatest */ true);
-        final Map<Maneuver, CompetitorAndBoat> maneuvers = windTrack.getAllManeuvers(/* waitForLatest */ true);
+//        windTrack.initialize();
         final int numberOfClusters = 16;
         KMeansMappingClusterer<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble> clusterer =
                 new KMeansMappingClusterer<>(numberOfClusters,
-                        windTrack.getManeuverClassifications(maneuvers),
+                        windTrack.getManeuverClassifications(),
                         (mc)->new ScalableBearingAndScalableDouble(mc.getMiddleManeuverCourse(), mc.getManeuverAngleDeg()), // maps maneuver classification to cluster metric
                         // use an evenly distributed set of cluster seeds for clustering wind direction estimations
                         Stream.concat(IntStream.range(0, numberOfClusters/2).mapToObj((i)->
@@ -148,12 +129,13 @@ public class TestWindEstimationFromManeuversOnAFew505Races extends OnlineTracTra
     private double getAverageLikelihood(
             Cluster<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble> cluster,
             ManeuverType maneuverType) {
-        return cluster.stream().mapToDouble((mc)->mc.getLikelihoodAndTWSBasedOnSpeedAndAngle(maneuverType).getA()).average().getAsDouble();
+        return cluster.stream().mapToDouble((mc)->mc.getLikelihoodForManeuverType(maneuverType)).average().getAsDouble();
     }
     
     private Wind getManeuverBasedAverageWind() throws NotEnoughDataHasBeenAddedException {
         ManeuverBasedWindEstimationTrackImpl windTrack = new ManeuverBasedWindEstimationTrackImpl(new PolarDataServiceImpl(),
                 getTrackedRace(), /* millisecondsOverWhichToAverage */ 30000, /* waitForLatest */ true);
+        windTrack.initialize();
         ScalableWind windSum = null;
         int count = 0;
         windTrack.lockForRead();

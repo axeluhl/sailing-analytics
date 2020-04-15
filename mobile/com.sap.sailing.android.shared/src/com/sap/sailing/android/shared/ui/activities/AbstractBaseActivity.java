@@ -14,11 +14,11 @@ public abstract class AbstractBaseActivity extends SendingServiceAwareActivity {
     private static final String TAG = AbstractBaseActivity.class.getSimpleName();
 
     /**
-     * An object used to synchronize access to the {@link #progressDialog} field to avoid concurrency
-     * issues during re-assigning a new dialog.
+     * An object used to synchronize access to the {@link #progressDialog} field to avoid concurrency issues during
+     * re-assigning a new dialog.
      */
     private final Object progressDialogMonitor = new Object();
-    
+
     private ProgressDialog progressDialog;
 
     public void replaceFragment(int view, Fragment fragment) {
@@ -62,14 +62,12 @@ public abstract class AbstractBaseActivity extends SendingServiceAwareActivity {
     }
 
     public void showErrorPopup(String title, String message) {
-        new AlertDialog.Builder(this)
-            .setTitle(title)
-            .setMessage(message)
-            .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+        new AlertDialog.Builder(this).setTitle(title).setMessage(message)
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         dialog.dismiss();
                     }
-            }).show();
+                }).show();
     }
 
     public void showErrorPopup(int title, int message) {

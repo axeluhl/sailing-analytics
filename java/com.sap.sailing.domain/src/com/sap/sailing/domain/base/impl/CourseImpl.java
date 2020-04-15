@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -21,6 +22,7 @@ import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseListener;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Leg;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.util.CourseAsWaypointList;
@@ -42,6 +44,8 @@ public class CourseImpl extends RenamableImpl implements Course {
     private final List<Waypoint> waypoints;
     private final Map<Waypoint, Integer> waypointIndexes;
     private final List<Leg> legs;
+    private UUID originatingCourseTemplateId;
+    private final Map<Mark, UUID> associatedRoles;
     private transient Set<CourseListener> listeners;
     private transient NamedReentrantReadWriteLock lock;
     
@@ -53,7 +57,13 @@ public class CourseImpl extends RenamableImpl implements Course {
     private final Serializable updateMonitor;
     
     public CourseImpl(String name, Iterable<Waypoint> waypoints) {
+        this(name, waypoints, /* originatingCourseTemplateId */ null);
+    }
+
+    public CourseImpl(String name, Iterable<Waypoint> waypoints, UUID originatingCourseTemplateId) {
         super(name);
+        this.associatedRoles = new HashMap<>();
+        this.originatingCourseTemplateId = originatingCourseTemplateId;
         updateMonitor = ""+new Random().nextDouble(); 
         lock = new NamedReentrantReadWriteLock("lock for CourseImpl "+name,
                 /* fair */ true); // if non-fair, course update may need to wait forever for many concurrent readers
@@ -254,23 +264,7 @@ public class CourseImpl extends RenamableImpl implements Course {
 
     @Override
     public String toString() {
-        lockForRead();
-        try {
-            StringBuilder result = new StringBuilder(getName());
-            result.append(": ");
-            boolean first = true;
-            for (Waypoint waypoint : getWaypoints()) {
-                if (!first) {
-                    result.append(" -> ");
-                } else {
-                    first = false;
-                }
-                result.append(waypoint);
-            }
-            return result.toString();
-        } finally {
-            unlockAfterRead();
-        }
+        return internalToString();
     }
 
     @Override
@@ -340,7 +334,9 @@ public class CourseImpl extends RenamableImpl implements Course {
     }
 
     @Override
-    public void update(Iterable<Pair<ControlPoint, PassingInstruction>> newControlPoints, DomainFactory baseDomainFactory) throws PatchFailedException {
+    public void update(Iterable<Pair<ControlPoint, PassingInstruction>> newControlPoints,
+            Map<Mark, UUID> associatedRoles, UUID originatingCouseTemplateIdOrNull, DomainFactory baseDomainFactory)
+            throws PatchFailedException {
         Patch<Waypoint> patch = null;
         synchronized (updateMonitor) {
             lockForRead();
@@ -380,6 +376,9 @@ public class CourseImpl extends RenamableImpl implements Course {
                 lockForWrite();
                 try {
                     logger.info("applying course update " + patch + " to course " + this);
+                    this.getAssociatedRoles().clear();
+                    this.getAssociatedRoles().putAll(associatedRoles);
+                    this.originatingCourseTemplateId = originatingCouseTemplateIdOrNull;
                     CourseAsWaypointList courseAsWaypointList = new CourseAsWaypointList(this);
                     patch.applyToInPlace(courseAsWaypointList);
                 } finally {
@@ -387,5 +386,20 @@ public class CourseImpl extends RenamableImpl implements Course {
                 }
             }
         }
+    }
+
+    @Override
+    public UUID getOriginatingCourseTemplateIdOrNull() {
+        return originatingCourseTemplateId;
+    }
+
+    @Override
+    public Map<Mark, UUID> getAssociatedRoles() {
+        return associatedRoles;
+    }
+
+    @Override
+    public void addRoleMapping(Mark mark, UUID markRoleId) {
+        associatedRoles.put(mark, markRoleId);
     }
 }

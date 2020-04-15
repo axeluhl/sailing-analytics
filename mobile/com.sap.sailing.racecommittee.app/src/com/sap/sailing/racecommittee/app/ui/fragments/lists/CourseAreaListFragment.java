@@ -4,10 +4,6 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
-import android.app.Activity;
-import android.app.LoaderManager.LoaderCallbacks;
-import android.os.Bundle;
-
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
@@ -16,6 +12,10 @@ import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
 import com.sap.sailing.racecommittee.app.ui.adapters.checked.CheckedItem;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.CourseAreaSelectedListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
 
 public class CourseAreaListFragment extends NamedListFragment<CourseArea> {
 
@@ -42,12 +42,13 @@ public class CourseAreaListFragment extends NamedListFragment<CourseArea> {
             return listener.getCourseAreaSelectionListener();
         }
 
-        throw new IllegalStateException(String
-            .format("%s cannot be attached to a instance of %s", CourseAreaListFragment.class.getName(), activity.getClass().getName()));
+        throw new IllegalStateException(String.format("%s cannot be attached to a instance of %s",
+                CourseAreaListFragment.class.getName(), activity.getClass().getName()));
     }
 
     @Override
-    protected LoaderCallbacks<DataLoaderResult<Collection<CourseArea>>> createLoaderCallbacks(ReadonlyDataManager manager) {
+    protected LoaderCallbacks<DataLoaderResult<Collection<CourseArea>>> createLoaderCallbacks(
+            ReadonlyDataManager manager) {
         return manager.createCourseAreasLoader(parentEventId, this);
     }
 

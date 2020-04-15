@@ -20,7 +20,8 @@ public interface SensorFixTrackListener<ItemType, FixType extends SensorFix> ext
      * @param item the item the track is mapped to
      * @param trackName the name of the track
      * @param firstFixInTrack <code>true</code> if the new fix is the first one that's added to the track, <code>false</code> otherwise.
+     * @param addedOrReplaced whether the fix was {@link AddResult#ADDED added} or {@link AddResult#REPLACED replaced}
      */
-    void fixReceived(FixType fix, ItemType item, String trackName, boolean firstFixInTrack);
+    void fixReceived(FixType fix, ItemType item, String trackName, boolean firstFixInTrack, AddResult addedOrReplaced);
 
 }

@@ -5,6 +5,7 @@ import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Iterator;
+import java.util.logging.Logger;
 
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -21,6 +22,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  *
  */
 public class LogEntry {
+    private static final Logger logger = Logger.getLogger(LogEntry.class.getName());
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MMM/yyyy:HH:mm:ss ZZZZZ");
     
     private final String hostname;
@@ -36,7 +38,7 @@ public class LogEntry {
     
     public LogEntry(String logEntry) {
         final Iterator<String> i = Util.splitAlongWhitespaceRespectingDoubleQuotedPhrases(logEntry).iterator();
-        hostname = i.next();
+        hostname = i.next().trim();
         requestorIpString = i.next();
         remoteLogname = i.next();
         remoteUser = i.next();
@@ -79,7 +81,15 @@ public class LogEntry {
      * "15/Dec/2017:16:49:41 +0000" will result in "15/Dec/2017".
      */
     public String getDateString() {
-        return getTimestampString().substring(0, getTimestampString().indexOf(':'));
+        final String result;
+        final int indexOfColon = getTimestampString().indexOf(':');
+        if (indexOfColon < 0) {
+            logger.warning("Couldn't find : as date separator in what was expected to be a date string: "+getTimestampString());
+            result = null;
+        } else {
+            result = getTimestampString().substring(0, indexOfColon);
+        }
+        return result;
     }
     
     public TimePoint getTimepoint() throws ParseException {

@@ -5,12 +5,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Supplier;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
+import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.LeaderboardBase;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -22,18 +24,28 @@ import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.RegattaName;
+import com.sap.sailing.domain.common.RegattaScoreCorrections;
+import com.sap.sailing.domain.common.RegattaScoreCorrections.ScoreCorrectionForCompetitorInRace;
+import com.sap.sailing.domain.common.RegattaScoreCorrections.ScoreCorrectionsForRace;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCache;
+import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.leaderboard.caching.LiveLeaderboardUpdater;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 
 /**
  * A leaderboard is used to display the results of one or more {@link TrackedRace races}. It manages the competitors'
@@ -188,7 +200,31 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * @return The resulting map is guaranteed to have the same iteration order regarding the race columns
      * as {@link #getRaceColumns()}.
      */
-    Map<RaceColumn, List<Competitor>> getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(TimePoint timePoint) throws NoWindException;
+    default Map<RaceColumn, List<Competitor>> getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(
+            TimePoint timePoint) throws NoWindException {
+        return getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(timePoint,
+                new LeaderboardDTOCalculationReuseCache(timePoint));
+    }
+    
+    /**
+     * Computes the competitor's ranks as they were or would have been after each race column (from left to right)
+     * was completed.<p>
+     * 
+     * A leaderboard fills up over time, usually "from left to right" with one race after another finishing.
+     * For split fleets things can vary slightly. There, one fleet may complete a few races before the another fleet
+     * starts with those races. In this case there isn't even any point in time at which all fleets have finished
+     * exactly <i>n</i> races. Still, this method pretends such a time point would have existed, actually ignoring
+     * the <i>times</i> at which a race took place but only looking at the resulting scores and discards.<p>
+     * 
+     * When computing the ranks after all columns up to and including the race column that is the key of the resulting
+     * map, the method applies the discarding and tie breaking rules as they would have had to be applied had the races
+     * in the respective column just completed.
+     * 
+     * @return The resulting map is guaranteed to have the same iteration order regarding the race columns
+     * as {@link #getRaceColumns()}.
+     */
+    Map<RaceColumn, List<Competitor>> getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(TimePoint timePoint,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException;
     
     /**
      * Computes the competitor's net points sum as they were or would have been after each race column (from left to right)
@@ -241,7 +277,28 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      *            a race that is contained in the {@link #getRaceColumns()} result
      * @return a 1-based rank, or 0 if no rank can be determined for the {@code competitor} in {@code race}
      */
-    int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint);
+    default int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint) {
+        return getTrackedRank(competitor, race, timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
+    }
+
+    /**
+     * Shorthand for {@link TrackedRace#getRank(Competitor, com.sap.sse.common.TimePoint)} with the additional logic
+     * that in case the <code>race</code> hasn't {@link TrackedRace#hasStarted(TimePoint) started} yet or no
+     * {@link TrackedRace} exists for <code>race</code>, 0 will be returned for all those competitors. The tracked race
+     * for the correct {@link Fleet} is determined using {@link RaceColumn#getTrackedRace(Competitor)}.
+     * <p>
+     * 
+     * For each competitor tracking-wise ranking better than <code>competitor</code> but with a
+     * {@link #getMaxPointsReason(Competitor, RaceColumn, TimePoint) disqualification reason} given,
+     * <code>competitor</code>'s rank is improved by one.
+     * 
+     * @param competitor
+     *            a competitor contained in the {@link #getCompetitors()} result
+     * @param race
+     *            a race that is contained in the {@link #getRaceColumns()} result
+     * @return a 1-based rank, or 0 if no rank can be determined for the {@code competitor} in {@code race}
+     */
+    int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**
      * A possibly corrected number of points for the race specified. Defaults to the result of calling
@@ -255,7 +312,23 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * @return <code>null</code> if the competitor didn't participate in the race or the race hasn't started yet at
      *         <code>timePoint</code>
      */
-    Double getTotalPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint);
+    default Double getTotalPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) {
+        return getTotalPoints(competitor, raceColumn, timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
+    }
+
+    /**
+     * A possibly corrected number of points for the race specified. Defaults to the result of calling
+     * {@link #getTrackedRank(Competitor, TrackedRace, TimePoint)} but may be corrected by disqualifications or calls by
+     * the jury for the particular race that differ from the tracking results.
+     * 
+     * @param competitor
+     *            a competitor contained in the {@link #getCompetitors()} result
+     * @param raceColumn
+     *            a race that is contained in the {@link #getRaceColumns()} result
+     * @return <code>null</code> if the competitor didn't participate in the race or the race hasn't started yet at
+     *         <code>timePoint</code>
+     */
+    Double getTotalPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**
      * Tells if and why a competitor received "penalty" points for a race (however the scoring rules define the
@@ -316,7 +389,25 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * {@link #getTotalPoints(Competitor, RaceColumn, TimePoint)} and not on
      * {@link #getNetPoints(Competitor, RaceColumn, TimePoint)}.
      */
-    Iterable<Competitor> getCompetitorsFromBestToWorst(RaceColumn raceColumn, TimePoint timePoint) throws NoWindException;
+    default Iterable<Competitor> getCompetitorsFromBestToWorst(RaceColumn raceColumn, TimePoint timePoint) throws NoWindException {
+        return getCompetitorsFromBestToWorst(raceColumn, timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
+    }
+    
+    /**
+     * Sorts the competitors according to their ranking in the race column specified. Only competitors who have a score
+     * are added to the result list. This excludes competitors whose fleet hasn't raced for the <code>raceColumn</code>
+     * yet, and those where no tracked rank is known and no manual score correction was performed.
+     * <p>
+     * 
+     * The sorting order considers this leaderboard's scoring scheme including the semantics of
+     * {@link Fleet#compareTo(Fleet) ordered fleets} and {@link RaceColumn#isMedalRace() medal races}. The ordering
+     * does not consider result discarding because when sorting for a race column it is of interest how the competitor
+     * performed in that race and not how the score affected the overall regatta score. Therefore, it is based on
+     * {@link #getTotalPoints(Competitor, RaceColumn, TimePoint)} and not on
+     * {@link #getNetPoints(Competitor, RaceColumn, TimePoint)}.
+     */
+    Iterable<Competitor> getCompetitorsFromBestToWorst(RaceColumn raceColumn, TimePoint timePoint,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException;
     
     /**
      * Sorts the competitors according to the overall regatta standings, considering the sorting rules for
@@ -324,7 +415,17 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * created per call, so the caller may freely manipulate the result.
      * @throws NoWindException 
      */
-    List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint);
+    default List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
+        return getCompetitorsFromBestToWorst(timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
+    }
+    
+    /**
+     * Sorts the competitors according to the overall regatta standings, considering the sorting rules for
+     * {@link Series}, {@link Fleet}s, medal races, discarding rules and score corrections. A new list is
+     * created per call, so the caller may freely manipulate the result.
+     * @throws NoWindException 
+     */
+    List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
     
     /**
      * Returns the total rank of the given competitor or {@code 0} if no rank can be determined for
@@ -533,6 +634,15 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
     Double getNetPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint,
             Set<RaceColumn> discardedRaceColumns);
 
+    /**
+     * Same as {@link #getNetPoints(Competitor, RaceColumn, TimePoint, Set)}, only that a supplier for
+     * the total points for the {@code competitor} in column {@code raceColumn} at time point {@code timePoint}
+     * is provided. This helps if a caller also needs to determine the total points anyway, saving redundant
+     * calculations.
+     */
+    Double getNetPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint,
+            Set<RaceColumn> discardedRaceColumns, Supplier<Double> totalPointsProvider);
+
     TimePoint getNowMinusDelay();
     
     /**
@@ -583,14 +693,6 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
     NumberOfCompetitorsInLeaderboardFetcher getNumberOfCompetitorsInLeaderboardFetcher();
 
     /**
-     * Looks through all {@link #getRaceColumns() race columns} and their {@link RaceColumn#getFleets() fleets} and checks
-     * if {@code trackedRace} is {@link RaceColumn#getTrackedRace(Fleet) linked} to that combination. If such a slot is found
-     * that "slot" is returned by a pair specifying the non-{@code null} {@link RaceColumn} and {@code Fleet} pair. Otherwise,
-     * {@code null} is returned.
-     */
-    Pair<RaceColumn, Fleet> getRaceColumnAndFleet(TrackedRace trackedRace);
-
-    /**
      * Gets the ("dominant") boat class for this leaderboard. For a {@link RegattaLeaderboard} this is the {@link Regatta}'s boat class.
      * For a {@link FlexibleLeaderboard} the implementation is more complex because no fixed boat class is set for the leaderboard. There,
      * the boat class will be determined based on the most frequently occurring boat class when iterating across the competitors.
@@ -604,4 +706,93 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * leaderboard.
      */
     boolean hasScores(Competitor competitor, TimePoint timePoint);
+
+    /**
+     * Returns true if a racecolumn evaluates to be a win for the given competitor at the given timepoint.
+     * If the competitor is not scored for this race, false is returned 
+     */
+    default boolean isWin(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) {
+        final Double points = getTotalPoints(competitor, raceColumn, timePoint);
+        final boolean result;
+        if (points == null) {
+            result = false;
+        } else if (getScoringScheme().isHigherBetter()) {
+            double competitorCount = Util.size(getCompetitors());
+            result = points >= (competitorCount - 0.05);
+        } else {
+            result = points <= 1.05;
+        }
+        return result;
+    }
+
+    @Override
+    default QualifiedObjectIdentifier getIdentifier() {
+        return getPermissionType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+    }
+
+    default TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return getTypeRelativeObjectIdentifier(getName());
+    }
+
+    static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String name) {
+        return new TypeRelativeObjectIdentifier(name);
+    }
+
+    static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(RegattaName regattaName) {
+        return new TypeRelativeObjectIdentifier(regattaName.getRegattaName());
+    }
+
+    @Override
+    default HasPermissions getPermissionType() {
+        return SecuredDomainType.LEADERBOARD;
+    }
+    
+    default boolean isPartOfEvent(EventBase event) {
+        boolean result = false;
+        if (getDefaultCourseArea() != null) {
+            for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
+                if(courseArea.equals(getDefaultCourseArea())) {
+                    result = true;
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * @return a map whose keys contain different averaging time spans, e.g., 5s, 30s, and 60s, and whose values contain
+     *         a pair with the average leaderboard computation time for all computation requests not older than the time
+     *         given as the key, and as the second pair component the number of computations in that time period.
+     */
+    Map<Duration, Pair<Duration, Integer>> getComputationTimeStatistics();
+    
+    /**
+     * Matches the results in {@code regattaScoreCorrections} to the {@link RaceColumn}s and {@link Competitor}s in this
+     * leaderboard. The race columns are identified in {@code regattaScoreCorrections} by the
+     * {@link ScoreCorrectionsForRace#getRaceNameOrNumber()} result and the ordering of the
+     * {@link ScoreCorrectionsForRace} objects as delivered by
+     * {@link RegattaScoreCorrections#getScoreCorrectionsForRaces()} as compared to the {@link #getRaceColumns()}
+     * ordering of this leaderboard, furthermore the explicit mappings specified in
+     * {@code raceNumberOrNameToRaceColumnMap}. The competitor mapping happens based on the
+     * {@link ScoreCorrectionForCompetitorInRace#getSailID()} result that is compared to the {@link Competitor}'s
+     * {@link Competitor#getShortName() short name} if the boats can change in this leaderboard, or to the
+     * {@link Boat#getSailID()} result of the competitor's boat, overruled by the explicit mappings in
+     * {@code sailIdToCompetitorMap}.
+     * 
+     * @param allowRaceDefaultsByOrder
+     *            if {@code true}, an attempt will be made to map the race names/numbers from the
+     *            {@link RegattaScoreCorrections} to the leaderboard's {@link RaceColumn}s by their ordering, one by
+     *            one, but only for those that are not mapped explicitly by {@code raceNumberOrNameToRaceColumnMap}. If
+     *            there are excess race names/numbers in the {@link RegattaScoreCorrections} objects beyond the number
+     *            of race columns in this leaderboard, no mapping will be inferred for the excess races.
+     * @param allowPartialImport
+     *            if {@code true}, a valid mapping will result even if the mapping is not complete regarding the set of
+     *            races and the set of competitors for which results are provided in {@code regattaScoreCorrections}. If
+     *            {@code false} and if one or more competitors or one or more races cannot be mapped successfully to
+     *            this leaderboard, {@code null} will be returned, implying that no results shall be imported at all.
+     */
+    ScoreCorrectionMapping mapRegattaScoreCorrections(RegattaScoreCorrections regattaScoreCorrections,
+            Map<String, RaceColumn> raceNumberOrNameToRaceColumnMap, Map<String, Competitor> sailIdToCompetitorMap,
+            boolean allowRaceDefaultsByOrder, boolean allowPartialImport);
 }

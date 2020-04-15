@@ -2,6 +2,13 @@ package com.sap.sailing.android.shared.ui.activities;
 
 import java.util.Date;
 
+import com.sap.sailing.android.shared.R;
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.services.sending.MessageSendingService;
+import com.sap.sailing.android.shared.services.sending.MessageSendingService.MessageSendingBinder;
+import com.sap.sailing.android.shared.services.sending.MessageSendingService.MessageSendingServiceLogger;
+import com.sap.sailing.android.shared.util.PrefUtils;
+
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -11,13 +18,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
-
-import com.sap.sailing.android.shared.R;
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.services.sending.MessageSendingService;
-import com.sap.sailing.android.shared.services.sending.MessageSendingService.MessageSendingBinder;
-import com.sap.sailing.android.shared.services.sending.MessageSendingService.MessageSendingServiceLogger;
-import com.sap.sailing.android.shared.util.PrefUtils;
 
 public abstract class SendingServiceAwareActivity extends ResilientActivity {
 
@@ -91,7 +91,8 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity {
         if (errorCount > 0) {
             menuItemLive.setIcon(R.drawable.ic_menu_share_red);
             Date lastSuccessfulSend = this.sendingService.getLastSuccessfulSend();
-            sendingServiceStatus = getString(R.string.sending_waiting, errorCount, lastSuccessfulSend == null ? "never" : lastSuccessfulSend);
+            sendingServiceStatus = getString(R.string.sending_waiting, errorCount,
+                    lastSuccessfulSend == null ? "never" : lastSuccessfulSend);
         } else {
             menuItemLive.setIcon(R.drawable.ic_menu_share);
             sendingServiceStatus = getString(R.string.sending_no_waiting);
@@ -99,8 +100,8 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity {
     }
 
     /**
-     * @return the resource ID for the options menu, {@code 0} if none.
-     * The menu item displaying the connection status is added automatically.
+     * @return the resource ID for the options menu, {@code 0} if none. The menu item displaying the connection status
+     *         is added automatically.
      */
     protected abstract int getOptionsMenuResId();
 
@@ -133,7 +134,8 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity {
     }
 
     private String getLiveIconText() {
-        return String.format("Connected to: %s\n%s", PrefUtils.getString(this, R.string.preference_server_url_key,
-                R.string.preference_server_url_default), sendingServiceStatus);
+        return String.format("Connected to: %s\n%s",
+                PrefUtils.getString(this, R.string.preference_server_url_key, R.string.preference_server_url_default),
+                sendingServiceStatus);
     }
 }

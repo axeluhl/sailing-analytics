@@ -12,7 +12,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.server.operationaltransformation.CreateLeaderboardGroup;
-import com.sap.sse.replication.impl.ReplicaDescriptor;
+import com.sap.sse.replication.ReplicaDescriptor;
+import com.sap.sse.replication.impl.ReplicaDescriptorImpl;
 import com.sap.sse.replication.impl.ReplicationInstancesManager;
 
 public class ReplicationInstancesManagerLoggingPerformanceTest {
@@ -23,9 +24,11 @@ public class ReplicationInstancesManagerLoggingPerformanceTest {
     @Before
     public void setUp() throws UnknownHostException {
         replicationInstanceManager = new ReplicationInstancesManager();
-        replica = new ReplicaDescriptor(InetAddress.getLocalHost(), UUID.randomUUID(), "", /* replicableIds */ new String[] { "Humba" });
+        replica = new ReplicaDescriptorImpl(InetAddress.getLocalHost(), UUID.randomUUID(), "", /* replicableIds */ new String[] { "Humba" });
         replicationInstanceManager.registerReplica(replica);
-        operation = new CreateLeaderboardGroup("Test Leaderboard Group", "Description of Test Leaderboard Group", /* displayName */ null,
+        UUID newGroupid = UUID.randomUUID();
+        operation = new CreateLeaderboardGroup(newGroupid, "Test Leaderboard Group",
+                "Description of Test Leaderboard Group", /* displayName */ null,
                 /* displayGroupsInReverseOrder */ false,
                 Arrays.asList(new String[] { "Default Leaderboard" }), /* overallLeaderboardDiscardThresholds */ null, /* overallLeaderboardScoringSchemeType */ null);
     }

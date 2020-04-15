@@ -36,7 +36,7 @@ public abstract class RegattaLeaderboardDialog extends AbstractLeaderboardDialog
             String errorMessage;
             boolean unique = true;
             for (StrippedLeaderboardDTO dao : existingLeaderboards) {
-                if (dao.name.equals(leaderboardToValidate.getName())) {
+                if (dao.getName().equals(leaderboardToValidate.getName())) {
                     unique = false;
                 }
             }

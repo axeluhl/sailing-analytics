@@ -1,11 +1,11 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-	<link href='../../../../sailing-fontface-1.0.cache.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
-	<link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
-	<link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
-	<title>SAP Sailing Analytics Webservices API Version 1.0</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <link href='../../../../sailing-fontface-1.0.cache.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+    <title>SAP Sailing Analytics Webservices API Version 1.0</title>
 </head>
 <body>
 <h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
@@ -14,101 +14,112 @@
 <b>Description:</b>
 <p>Gets the maneuvers of the race specified, keyed by competitor. The mark passings are computed
 from the start of the race up to the end of the race, or the end of tracking or the current time point,
-whichever is earliest.<p>
-The maneuvers for each competitor are ordered by the time point.<br/>
-All slashes contained within the {regattaname} and {racename} parameters must be replaced by "__" (double underscore).</p>
-<br/>
+whichever is earliest.
+ <p>
+  The maneuvers for each competitor are ordered by the time point.<br />
+  All slashes contained within the {regattaname} and {racename}
+  parameters must be replaced by "__" (double underscore).
+ </p>
+ There are two optional parameters: competitorId and fromTime. 
+ <br> 
+ With competitorId, it is possible to filter the result to include only the given competitor. 
+ <br>
+ With fromTime it is possible to filter based on the maneuvers time. If not given, all maneuvers of a race will be returned.
+ <br/>
 <table>
-	<tr>
-		<td>Webservice Type:</td>
-		<td>REST</td>
-	</tr>
-	<tr>
-		<td>Output format:</td>
-		<td>Json</td>
-	</tr>
-	<tr>
-		<td>Mandatory parameters:</td>
-		<td>None</td>
-	</tr>
-	<tr>
-		<td>Optional parameters:</td>
-		<td>None</td>
-	</tr>
-	<tr>
-		<td>Request method:</td>
-		<td>GET</td>
-	</tr>
-	<tr>
-		<td>Example:</td>
-		<td><a href="http://www.sapsailing.com/sailingserver/api/v1/regattas/TW%202013%20(Finn)/races/Finn%20Race%204/maneuvers">http://www.sapsailing.com/sailingserver/api/v1/regattas/TW%202013%20(Finn)/races/Finn%20Race%204/maneuvers</a></td>
-	</tr>
-	<tr>
-		<td>Example Output:</td>
-		<td><pre>
-{
-"bycompetitor": [
-{
-"competitor": {
-"idtype": "java.util.UUID",
-"id": "acc1c7d1-cb00-44f6-bb8a-33b6386bc444",
-"name": "Agerup/Agerup",
-"displayColor": null,
-"email": null,
-"searchTag": null,
-"sailID": "NOR 888",
-"nationality": "NOR",
-"nationalityISO2": "NO",
-"nationalityISO3": "NOR",
-"timeOnTimeFactor": 1,
-"timeOnDistanceAllowanceInSecondsPerNauticalMile": 0
-},
-"maneuvers": [
-{
-"maneuverType": "TACK",
-"newTack": "PORT",
-"speedBeforeInKnots": 4.890263402216131,
-"cogBeforeInTrueDegrees": 11.910947801778443,
-"speedAfterInKnots": 7.882531591630032,
-"cogAfterInTrueDegrees": 124.81663607363905,
-"directionChangeInDegrees": 112.9056882718606,
-"maneuverLoss": {
-"geographicalMiles": 0.00022784339412441508,
-"seaMiles": 0.0002278338270171018,
-"nauticalMiles": 0.00022787073314458839,
-"meters": 0.4220165977837777,
-"kilometers": 0.0004220165977837777,
-"centralAngleDeg": 0.0000037973899020735846,
-"centralAngleRad": 6.62769567731691e-8
-},
-"positionAndTime": {
-"type": "GPSFix",
-"lat_deg": -34.462334,
-"lon_deg": -58.460133000000006,
-"unixtime": 1447696753000
+    <tr>
+        <td>Webservice Type:</td>
+        <td>REST</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>Json</td>
+    </tr>
+    <tr>
+        <td>Mandatory parameters:</td>
+        <td>None</td>
+    </tr>
+    <tr>
+        <td>Optional parameters:</td>
+        <td>fromTime unixTimeStamp, competitorId UUID</td>
+    </tr>
+    <tr>
+        <td>Request method:</td>
+        <td>GET</td>
+    </tr>
+    <tr>
+        <td>Example:</td>
+        <td><a href="http://www.sapsailing.com/sailingserver/api/v1/regattas/TW%202013%20(Finn)/races/Finn%20Race%204/maneuvers">http://www.sapsailing.com/sailingserver/api/v1/regattas/TW%202013%20(Finn)/races/Finn%20Race%204/maneuvers</a></td>
+    </tr>
+    <tr>
+        <td>Example Output:</td>
+        <td><pre>
+{  
+    "bycompetitor":[  
+        {  
+            "competitor":{  
+                "idtype":"java.util.UUID",
+                "id":"acc1c7d1-cb00-44f6-bb8a-33b6386bc444",
+                "name":"Agerup/Agerup",
+                "displayColor":null,
+                "email":null,
+                "searchTag":null,
+                "sailID":"NOR 888",
+                "nationality":"NOR",
+                "nationalityISO2":"NO",
+                "nationalityISO3":"NOR",
+                "timeOnTimeFactor":1,
+                "timeOnDistanceAllowanceInSecondsPerNauticalMile":0
+            },
+            "maneuvers":[  
+                {  
+                    "maneuverType":"TACK",
+                    "newTack":"PORT",
+                    "speedBeforeInKnots":4.890263402216131,
+                    "cogBeforeInTrueDegrees":11.910947801778443,
+                    "speedAfterInKnots":7.882531591630032,
+                    "cogAfterInTrueDegrees":124.81663607363905,
+                    "directionChangeInDegrees":112.9056882718606,
+                    "maneuverLoss":{  
+                        "geographicalMiles":0.00022784339412441508,
+                        "seaMiles":0.0002278338270171018,
+                        "nauticalMiles":0.00022787073314458839,
+                        "meters":0.4220165977837777,
+                        "kilometers":0.0004220165977837777,
+                        "centralAngleDeg":0.0000037973899020735846,
+                        "centralAngleRad":6.62769567731691e-8
+                    },
+                    "positionAndTime":{  
+                        "type":"GPSFix",
+                        "lat_deg":-34.462334,
+                        "lon_deg":-58.460133000000006,
+                        "unixtime":1447696753000
+                    }
+                },
+                {  
+                    "maneuverType":"HEAD_UP",
+                    "newTack":"PORT",
+                    "speedBeforeInKnots":7.882531591630032,
+                    "cogBeforeInTrueDegrees":124.81663607363905,
+                    "speedAfterInKnots":7.748306094677595,
+                    "cogAfterInTrueDegrees":101.79781832895219,
+                    "directionChangeInDegrees":-23.018817744686856,
+                    "maneuverLoss":null,
+                    "positionAndTime":{  
+                        "type":"GPSFix",
+                        "lat_deg":-34.46242499999999,
+                        "lon_deg":-58.45991099999999,
+                        "unixtime":1447696762000
+                    }
+                },
+                ...
+            ]
+        },
+        ...
+    ]
 }
-},
-{
-"maneuverType": "HEAD_UP",
-"newTack": "PORT",
-"speedBeforeInKnots": 7.882531591630032,
-"cogBeforeInTrueDegrees": 124.81663607363905,
-"speedAfterInKnots": 7.748306094677595,
-"cogAfterInTrueDegrees": 101.79781832895219,
-"directionChangeInDegrees": -23.018817744686856,
-"maneuverLoss": null,
-"positionAndTime": {
-"type": "GPSFix",
-"lat_deg": -34.46242499999999,
-"lon_deg": -58.45991099999999,
-"unixtime": 1447696762000
-}
-},
-...
-]
-}
-		</pre>
-	</tr>
+        </pre>
+    </tr>
 </table>
 <div style="height: 1em;"></div>
 <a href="index.html">Back to Web Service Overview</a> 

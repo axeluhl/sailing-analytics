@@ -26,7 +26,7 @@
             android:numeric="integer"
             android:title="@string/preference_dependent_races_offset_header" />
 
-        <SwitchPreference
+        <SwitchPreferenceCompat
             android:defaultValue="@bool/preference_heading_with_declination_subtracted_default"
             android:key="@string/preference_heading_with_declination_subtracted_key"
             android:summaryOff="@string/preference_heading_with_declination_subtracted_summary_is_disabled"

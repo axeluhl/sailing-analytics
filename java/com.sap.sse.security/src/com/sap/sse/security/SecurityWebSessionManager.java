@@ -1,7 +1,5 @@
 package com.sap.sse.security;
 
-import java.util.WeakHashMap;
-
 import org.apache.shiro.session.InvalidSessionException;
 import org.apache.shiro.session.Session;
 import org.apache.shiro.session.SessionException;
@@ -13,6 +11,8 @@ import org.apache.shiro.web.session.mgt.DefaultWebSessionManager;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.concurrent.ConcurrentWeakHashMap;
+import com.sap.sse.security.impl.Activator;
 import com.sap.sse.util.TimerWithRunnable;
 
 /**
@@ -26,13 +26,42 @@ import com.sap.sse.util.TimerWithRunnable;
  */
 public class SecurityWebSessionManager extends DefaultWebSessionManager {
     private static final TimerWithRunnable timer = new TimerWithRunnable("Timer delaying Session.touch() onChange(s) notifications", /* isDaemon */ true);
+    
     private static final Duration MAX_DURATION_ASSUMED_FOR_MESSAGE_DELIVERY = Duration.ONE_SECOND.times(30);
     
-    private static final WeakHashMap<Session, Void> sessionsAlreadyScheduledForOnChange = new WeakHashMap<>();
+    /**
+     * When {@link SecurityService#getSharedAcrossSubdomainsOf()} returns a non-{@code null}
+     * domain, a different session cookie name is used to avoid collisions with more specific
+     * default session cookies.
+     */
+    private static final String GLOBAL_SESSION_ID_COOKIE_NAME = "JSESSIONID_GLOBAL";
+    
+    /**
+     * Wait no longer than this duration before pinging / bumping the session. The session timeout may be
+     * very long, even compared to the average life span of a server instance. If the server instance dies
+     * before having pinged / bumped the session, the ping/bump goes missing. If this continues to happen
+     * over and over, the session may actually expire although the user had pinged/bumped it once or more.
+     * Therefore, this duration has to be chosen such that in most cases it is shorter than the time a server
+     * can be expected to survive from the point in time on when the ping/bump was received.
+     */
+    private static final Duration MAX_DURATION_AFTER_WHICH_TO_PING_SESSION = Duration.ONE_HOUR;
+    
+    private static final Object DUMMY = new Object(); // for use as dummy value in sessionsAlreadyScheduledForOnChange
+    
+    private static final ConcurrentWeakHashMap<Session, Object> sessionsAlreadyScheduledForOnChange = new ConcurrentWeakHashMap<>();
     
     public SecurityWebSessionManager() {
         super();
         getSessionIdCookie().setPath(Cookie.ROOT_PATH);
+        final Thread backgroundThreadWaitingForSecurityServiceToObtainSharedAcrossSubdomains = new Thread(()->{
+            final String domainForSecurityServiceSharing = Activator.getSecurityService().getSharedAcrossSubdomainsOf();
+            if (domainForSecurityServiceSharing != null) {
+                getSessionIdCookie().setDomain(domainForSecurityServiceSharing);
+                getSessionIdCookie().setName(GLOBAL_SESSION_ID_COOKIE_NAME);
+            }
+        }, "Background thread of "+getClass().getName()+" waiting for security service");
+        backgroundThreadWaitingForSecurityServiceToObtainSharedAcrossSubdomains.setDaemon(true);
+        backgroundThreadWaitingForSecurityServiceToObtainSharedAcrossSubdomains.start();
     }
 
     @Override
@@ -45,9 +74,11 @@ public class SecurityWebSessionManager extends DefaultWebSessionManager {
     private void triggerOnChangeLatestInHalfTimeoutPeriod(Session s) {
         Duration sendDurationLatestIn = new MillisecondsDurationImpl(s.getTimeout()).minus(MAX_DURATION_ASSUMED_FOR_MESSAGE_DELIVERY);
         if (!sessionsAlreadyScheduledForOnChange.containsKey(s)) {
-            sessionsAlreadyScheduledForOnChange.put(s, null);
+            sessionsAlreadyScheduledForOnChange.put(s, DUMMY);
             timer.schedule(()->{ onChange(s); sessionsAlreadyScheduledForOnChange.remove(s); },
-                    MillisecondsTimePoint.now().plus(sendDurationLatestIn).asDate());
+                    MillisecondsTimePoint.now().plus(
+                            sendDurationLatestIn.compareTo(MAX_DURATION_AFTER_WHICH_TO_PING_SESSION) > 0 ?
+                                    MAX_DURATION_AFTER_WHICH_TO_PING_SESSION : sendDurationLatestIn).asDate());
         }
     }
 

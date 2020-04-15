@@ -17,6 +17,7 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackingConnectorInfo;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
@@ -101,5 +102,21 @@ public class EventImpl extends EventBaseImpl implements Event {
         for (final String reviewedSpotsCollectionId : reviewedSpotsCollectionIds) {
             windFinderReviewedSpotsCollectionIds.putIfAbsent(reviewedSpotsCollectionId, true);
         }
+    }
+
+    @Override
+    public Set<TrackingConnectorInfo> getTrackingConnectorInfos() {
+        final Set<TrackingConnectorInfo> result = new HashSet<>();
+        for (LeaderboardGroup lbg : this.getLeaderboardGroups()) {
+            for (Leaderboard lb : lbg.getLeaderboards()) {
+                for (TrackedRace tr : lb.getTrackedRaces()) {
+                    final TrackingConnectorInfo trackingConnectorInfo = tr.getTrackingConnectorInfo();
+                    if (trackingConnectorInfo != null) {
+                        result.add(trackingConnectorInfo);
+                    }
+                }
+            }
+        }
+        return result;
     }
 }

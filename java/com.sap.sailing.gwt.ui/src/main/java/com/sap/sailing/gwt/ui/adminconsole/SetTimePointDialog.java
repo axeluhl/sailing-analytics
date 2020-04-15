@@ -16,6 +16,10 @@ public class SetTimePointDialog extends DataEntryDialogWithDateTimeBox<Date> {
     private final StringMessages stringMessages;
     
     public SetTimePointDialog(final StringMessages stringMessages, String title, DialogCallback<Date> callback) {
+        this(stringMessages, title, new Date(), callback);
+    }
+
+    public SetTimePointDialog(final StringMessages stringMessages, String title, Date date, DialogCallback<Date> callback) {
         super(title, title, stringMessages.ok(), stringMessages.cancel(), new DataEntryDialog.Validator<Date>() {
             @Override
             public String getErrorMessage(Date valueToValidate) {
@@ -26,7 +30,7 @@ public class SetTimePointDialog extends DataEntryDialogWithDateTimeBox<Date> {
         
         this.stringMessages = stringMessages;
         
-        time = createDateTimeBox(new Date(), Accuracy.SECONDS);
+        time = createDateTimeBox(date, Accuracy.SECONDS);
     }
     
     @Override

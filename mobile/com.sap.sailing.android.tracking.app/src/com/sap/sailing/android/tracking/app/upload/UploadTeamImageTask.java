@@ -10,12 +10,12 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.tracking.app.R;
+
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
-
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.tracking.app.R;
 
 /**
  * Uploads an image to the server.

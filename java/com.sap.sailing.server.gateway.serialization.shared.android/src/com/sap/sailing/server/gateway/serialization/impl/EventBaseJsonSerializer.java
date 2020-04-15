@@ -10,6 +10,7 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.LeaderboardGroupBase;
 import com.sap.sailing.domain.base.Venue;
+import com.sap.sailing.domain.tracking.TrackingConnectorInfo;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
@@ -39,6 +40,7 @@ public class EventBaseJsonSerializer implements JsonSerializer<EventBase> {
     public static final String FIELD_CREATEDATDATE = "createdAtDate";
     public static final String FIELD_LOCALE = "locale";
     public static final String FIELD_TAGS = "tags";
+    public static final String FIELD_TRACKING_CONNECTOR_INFOS = "trackingConnectorInfos";
     // specific image fields
     public static final String FIELD_IMAGES = "images";
     public static final String FIELD_IMAGE_WIDTH_IN_PX = "widthInPixel";
@@ -52,10 +54,14 @@ public class EventBaseJsonSerializer implements JsonSerializer<EventBase> {
 
     private final JsonSerializer<Venue> venueSerializer;
     private final JsonSerializer<? super LeaderboardGroupBase> leaderboardGroupBaseSerializer;
+    private final JsonSerializer<TrackingConnectorInfo> trackingConnectorInfoSerializer;
 
-    public EventBaseJsonSerializer(JsonSerializer<Venue> venueSerializer, JsonSerializer<? super LeaderboardGroupBase> leaderboardGroupBaseSerializer) {
+    public EventBaseJsonSerializer(JsonSerializer<Venue> venueSerializer,
+            JsonSerializer<? super LeaderboardGroupBase> leaderboardGroupBaseSerializer,
+            JsonSerializer<TrackingConnectorInfo> trackingConnectorInfoJsonSerializer) {
         this.leaderboardGroupBaseSerializer = leaderboardGroupBaseSerializer;
         this.venueSerializer = venueSerializer;
+        this.trackingConnectorInfoSerializer = trackingConnectorInfoJsonSerializer;
     }
 
     public JSONObject serialize(EventBase event) {
@@ -73,18 +79,23 @@ public class EventBaseJsonSerializer implements JsonSerializer<EventBase> {
         for (LeaderboardGroupBase lg : event.getLeaderboardGroups()) {
             leaderboardGroups.add(leaderboardGroupBaseSerializer.serialize(lg));
         }
+        JSONArray trackingConnectorInfos = new JSONArray();
+        for (TrackingConnectorInfo trackingConnectorInfo : event.getTrackingConnectorInfos()) {
+            trackingConnectorInfos.add(trackingConnectorInfoSerializer.serialize(trackingConnectorInfo));
+        }
+        result.put(FIELD_TRACKING_CONNECTOR_INFOS, trackingConnectorInfos);
         JSONArray imageSizes = new JSONArray();
         result.put(FIELD_IMAGE_SIZES, imageSizes);
         for (ImageDescriptor image : event.getImages()) {
             addImageSize(image, imageSizes);
         }
         JSONArray jsonImages = new JSONArray();
-        for(ImageDescriptor imageDescriptor: event.getImages()) {
+        for (ImageDescriptor imageDescriptor: event.getImages()) {
             addImage(imageDescriptor, jsonImages);
         }
         result.put(FIELD_IMAGES, jsonImages);
         JSONArray jsonVideos = new JSONArray();
-        for(VideoDescriptor videoDescriptor: event.getVideos()) {
+        for (VideoDescriptor videoDescriptor: event.getVideos()) {
             addVideo(videoDescriptor, jsonVideos);
         }
         result.put(FIELD_VIDEOS, jsonVideos);
@@ -141,7 +152,7 @@ public class EventBaseJsonSerializer implements JsonSerializer<EventBase> {
      * JSON object to <code>imageSizes</code>
      */
     private void addImageSize(ImageDescriptor image, JSONArray imageSizes) {
-        if(image.getHeightInPx() != null && image.getWidthInPx() != null) {
+        if (image.getHeightInPx() != null && image.getWidthInPx() != null) {
             JSONObject imageSizeJson = new JSONObject();
             imageSizes.add(imageSizeJson);
             imageSizeJson.put(FIELD_IMAGE_URL, image.getURL().toString());

@@ -10,6 +10,7 @@ import com.google.gwt.typedarrays.shared.Int8Array;
  */
 public class JSDownloadUtils {
     private static final Double REQUIRED_SIZE = 10000000.0;
+    protected static final Double MAX_MEMORY_USAGE_FOR_DL = 1024 * 1024 * 1024 * 2d;
     
     public interface JSDownloadCallback {
         void progress(Double current, Double total);
@@ -43,7 +44,7 @@ public class JSDownloadUtils {
                     getDataFast(url, callback, total, REQUIRED_SIZE);
                 } else {
                     //fallback will always work, if cors is supported, does not require any other server configuration
-                    getDataSlow(url, callback, REQUIRED_SIZE);
+                    getDataSlow(url, callback, REQUIRED_SIZE, MAX_MEMORY_USAGE_FOR_DL);
                 }
             }
         });
@@ -53,75 +54,77 @@ public class JSDownloadUtils {
      * Fast file download method based on range requests, only the first and the last REQUIRED_SIZE is loaded.
      */
     private native static void getDataFast(String url, JSDownloadCallback callback, Double length, Double REQUIRED_SIZE) /*-{
-    try {
-        var xhr = new XMLHttpRequest();
-        xhr.open("GET", url, true);
-        xhr.setRequestHeader("Range", "bytes=0-" + REQUIRED_SIZE);
-        xhr.responseType = "arraybuffer";
-        xhr.onprogress = function(evt) {
-            callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSDownloadCallback::progress(Ljava/lang/Double;Ljava/lang/Double;)(evt.loaded, evt.total);
-        }
-        xhr.error = function(error) {
-            callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSDownloadCallback::error(Ljava/lang/Object;)(error);
-        }
-        
-        xhr.onreadystatechange = function() {
-            var state = xhr.readyState;
-            if (state == 4) {
-                if (xhr.response) {
-                    var startLength = xhr.response.byteLength;
-                    var start = new Int8Array(xhr.response);
+        try {
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", url, true);
+            xhr.setRequestHeader("Range", "bytes=0-" + REQUIRED_SIZE);
+            xhr.responseType = "arraybuffer";
+            xhr.onprogress = function(evt) {
+                callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSDownloadCallback::progress(Ljava/lang/Double;Ljava/lang/Double;)(evt.loaded, evt.total);
+            }
+            xhr.error = function(error) {
+                callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSDownloadCallback::error(Ljava/lang/Object;)(error);
+            }
 
-                    try {
-                        var xhr2 = new XMLHttpRequest();
-                        xhr2.open("GET", url, true);
-                        xhr2.setRequestHeader("Range", "bytes=" + (length - REQUIRED_SIZE));
-                        xhr2.responseType = "arraybuffer";
-                        xhr2.onprogress = function(evt) {
-                            callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSDownloadCallback::progress(Ljava/lang/Double;Ljava/lang/Double;)(evt.loaded, evt.total);
-                        }
-                        xhr2.error = function(error) {
+            xhr.onreadystatechange = function() {
+                var state = xhr.readyState;
+                if (state == 4) {
+                    if (xhr.response) {
+                        var startLength = xhr.response.byteLength;
+                        var start = new Int8Array(xhr.response);
+
+                        try {
+                            var xhr2 = new XMLHttpRequest();
+                            xhr2.open("GET", url, true);
+                            xhr2.setRequestHeader("Range", "bytes="
+                                    + (length - REQUIRED_SIZE) + "-");
+                            xhr2.responseType = "arraybuffer";
+                            xhr2.onprogress = function(evt) {
+                                callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSDownloadCallback::progress(Ljava/lang/Double;Ljava/lang/Double;)(evt.loaded, evt.total);
+                            }
+                            xhr2.error = function(error) {
+                                callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSDownloadCallback::error(Ljava/lang/Object;)(error);
+                            }
+
+                            xhr2.onreadystatechange = function() {
+                                var state = xhr2.readyState;
+                                if (state == 4) {
+                                    if (xhr2.response) {
+                                        var endLength = xhr2.response.byteLength;
+                                        var end = new Int8Array(xhr2.response);
+                                        var sparse = length - startLength
+                                                - endLength;
+                                        callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSDownloadCallback::complete(Lcom/google/gwt/typedarrays/shared/Int8Array;Lcom/google/gwt/typedarrays/shared/Int8Array;Ljava/lang/Double;)(start, end, sparse);
+                                    }
+                                }
+                            };
+                            xhr2.send();
+                        } catch (error) {
                             callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSDownloadCallback::error(Ljava/lang/Object;)(error);
                         }
-                        
-                        xhr2.onreadystatechange = function() {
-                            var state = xhr2.readyState;
-                            if (state == 4) {
-                                if (xhr2.response) {
-                                    var endLength = xhr2.response.byteLength;
-                                    var end = new Int8Array(xhr2.response);
-                                    var sparse = length - startLength - endLength;
-                                    callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSDownloadCallback::complete(Lcom/google/gwt/typedarrays/shared/Int8Array;Lcom/google/gwt/typedarrays/shared/Int8Array;Ljava/lang/Double;)(start, end, sparse);
-                                }
-                            }
-                        };
-                        xhr2.send();
-                    } catch (error) {
-                        callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSDownloadCallback::error(Ljava/lang/Object;)(error);
                     }
                 }
-            }
-        };
-        xhr.send();
-    } catch (error) {
-        callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSDownloadCallback::error(Ljava/lang/Object;)(error);
-    }
-}-*/;
+            };
+            xhr.send();
+        } catch (error) {
+            callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSDownloadCallback::error(Ljava/lang/Object;)(error);
+        }
+    }-*/;
     
     /**
      * Determines if a server can deliver a file with range requests, and if so returns the size of the file
      */
     private native static void getFileSizeIfFastPath(String url, JSSizeCallback callback) /*-{
-                try {
+        try {
             var xhr = new XMLHttpRequest();
             xhr.open("HEAD", url, true);
             xhr.responseType = "arraybuffer";
             xhr.error = function(error) {
                 callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSSizeCallback::size(Ljava/lang/Double;)(-1.0);
             }
-            
+
             xhr.onreadystatechange = function() {
-            var state = xhr.readyState;
+                var state = xhr.readyState;
                 if (state == 4) {
                     if (xhr.response) {
                         var length = xhr.getResponseHeader("Content-Length");
@@ -141,29 +144,36 @@ public class JSDownloadUtils {
     /**
      * If range requests are not possible, the whole file is downloaded and then slices to the required parts 
      */
-    private native static void getDataSlow(String url, JSDownloadCallback callback, Double REQUIRED_SIZE) /*-{
+    private native static void getDataSlow(String url, JSDownloadCallback callback, Double REQUIRED_SIZE,
+            Double maxMemoryUsage) /*-{
         try {
             var xhr = new XMLHttpRequest();
             xhr.open("GET", url, true);
             xhr.responseType = "arraybuffer";
             xhr.onprogress = function(evt) {
+                //ensure not more memory is used by the tab than commonly available in browsers
+                if (evt.total > maxMemoryUsage || evt.loaded > maxMemoryUsage) {
+                    xhr.abort();
+                }
                 callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSDownloadCallback::progress(Ljava/lang/Double;Ljava/lang/Double;)(evt.loaded, evt.total);
             }
             xhr.error = function(error) {
                 callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSDownloadCallback::error(Ljava/lang/Object;)(error);
             }
-            
+
             xhr.onreadystatechange = function() {
-            var state = xhr.readyState;
+                var state = xhr.readyState;
                 if (state == 4) {
                     if (xhr.response) {
                         var length = xhr.response.byteLength;
-                        var start = new Int8Array(xhr.response.slice(0, REQUIRED_SIZE));
-                        var end = new Int8Array(xhr.response.slice(length - REQUIRED_SIZE));
+                        var start = new Int8Array(xhr.response.slice(0,
+                                REQUIRED_SIZE));
+                        var end = new Int8Array(xhr.response.slice(length
+                                - REQUIRED_SIZE));
                         var sparse = length - 2 * REQUIRED_SIZE;
                         callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSDownloadCallback::complete(Lcom/google/gwt/typedarrays/shared/Int8Array;Lcom/google/gwt/typedarrays/shared/Int8Array;Ljava/lang/Double;)(start, end, sparse);
                     } else {
-                         callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSDownloadCallback::error(Ljava/lang/Object;)("No result");
+                        callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSDownloadCallback::error(Ljava/lang/Object;)("No result");
                     }
                 }
             };

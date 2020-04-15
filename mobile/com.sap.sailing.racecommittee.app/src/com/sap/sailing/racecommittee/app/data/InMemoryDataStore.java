@@ -8,12 +8,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
-import android.os.IBinder;
-
 import com.sap.sailing.android.shared.util.CollectionUtils;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.impl.SimpleRaceLogIdentifierImpl;
@@ -30,14 +24,20 @@ import com.sap.sailing.racecommittee.app.domain.impl.FleetIdentifierImpl;
 import com.sap.sailing.racecommittee.app.services.RaceStateService;
 import com.sap.sse.common.Util.Triple;
 
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.IBinder;
+
 public enum InMemoryDataStore implements DataStore {
     INSTANCE;
 
     private Context mContext;
     private LinkedHashMap<Serializable, EventBase> eventsById;
     private LinkedHashMap<SimpleRaceLogIdentifier, ManagedRace> managedRaceById;
-    private LinkedHashMap<Serializable, Mark> marksById;
-    private CourseBase courseData;
+    private LinkedHashMap<RaceGroup, LinkedHashMap<Serializable, Mark>> marksData;
+    private LinkedHashMap<RaceGroup, CourseBase> courseData;
     private SharedDomainFactory domainFactory;
 
     private Serializable eventUUID;
@@ -63,8 +63,8 @@ public enum InMemoryDataStore implements DataStore {
     public void reset() {
         eventsById = new LinkedHashMap<>();
         managedRaceById = new LinkedHashMap<>();
-        marksById = new LinkedHashMap<>();
-        courseData = null;
+        marksData = new LinkedHashMap<>();
+        courseData = new LinkedHashMap<>();
         domainFactory = new SharedDomainFactoryImpl(new AndroidRaceLogResolver());
 
         eventUUID = null;
@@ -82,9 +82,7 @@ public enum InMemoryDataStore implements DataStore {
     }
 
     /*
-     * * * * * *
-     *  EVENTS *
-     * * * * * *
+     * * * * * * EVENTS * * * * * *
      */
 
     @Override
@@ -108,9 +106,7 @@ public enum InMemoryDataStore implements DataStore {
     }
 
     /*
-     * * * * * * * *
-     * COURSE AREA *
-     * * * * * * * *
+     * * * * * * * * COURSE AREA * * * * * * * *
      */
 
     @Override
@@ -165,9 +161,7 @@ public enum InMemoryDataStore implements DataStore {
     }
 
     /*
-     * * * * * * *  *
-     * MANAGED RACE *
-     * * * * * * *  *
+     * * * * * * * * MANAGED RACE * * * * * * * *
      */
 
     @Override
@@ -204,7 +198,8 @@ public enum InMemoryDataStore implements DataStore {
             managedRaceById.putAll(output);
             output.clear();
         } else {
-            throw new IndexOutOfBoundsException("index " + index + " must be greater than zero and less than size of the map");
+            throw new IndexOutOfBoundsException(
+                    "index " + index + " must be greater than zero and less than size of the map");
         }
     }
 
@@ -215,7 +210,8 @@ public enum InMemoryDataStore implements DataStore {
     }
 
     private SimpleRaceLogIdentifier convertManagedRaceIdentifierToSimpleRaceLogIdentifier(ManagedRaceIdentifier id) {
-        return new SimpleRaceLogIdentifierImpl(id.getRaceGroup().getName(), id.getRaceColumnName(), id.getFleet().getName());
+        return new SimpleRaceLogIdentifierImpl(id.getRaceGroup().getName(), id.getRaceColumnName(),
+                id.getFleet().getName());
     }
 
     @Override
@@ -234,17 +230,18 @@ public enum InMemoryDataStore implements DataStore {
     }
 
     /**
-     * Parses a serialized version of a ManagedRaceIdentifier and creates a SimpleRaceLogIdentifier
-     * this is needed as the serialized version is passed around in the bundle context, but the
-     * InMemoryDataStore now has to use SimpleRaceLogIdentifier as key in the managedRaces HashMap in
-     * order to allow for retrieving a managed race with exclusively the information provided by a
-     * SimpleRaceLogIdentifier (which is less than the information provided by a ManagedRaceIdentifier)
+     * Parses a serialized version of a ManagedRaceIdentifier and creates a SimpleRaceLogIdentifier this is needed as
+     * the serialized version is passed around in the bundle context, but the InMemoryDataStore now has to use
+     * SimpleRaceLogIdentifier as key in the managedRaces HashMap in order to allow for retrieving a managed race with
+     * exclusively the information provided by a SimpleRaceLogIdentifier (which is less than the information provided by
+     * a ManagedRaceIdentifier)
      *
-     * @param escapedId serialized version of a ManagedRaceIdentifier
+     * @param escapedId
+     *            serialized version of a ManagedRaceIdentifier
      * @return corresponding SimpleRaceLogIdentifier
      */
     public SimpleRaceLogIdentifier parseManagedRaceLogIdentifier(final String escapedId) {
-        //Undo escaping
+        // Undo escaping
         final Triple<String, String, String> id = FleetIdentifierImpl.unescape(escapedId);
         return new SimpleRaceLogIdentifierImpl(id.getA(), id.getB(), id.getC());
     }
@@ -255,39 +252,50 @@ public enum InMemoryDataStore implements DataStore {
     }
 
     /*
-     * * * * * *
-     *  MARKS  *
-     * * * * * *
+     * * * * * * MARKS * * * * * *
      */
 
-    @Override
-    public Collection<Mark> getMarks() {
-        return marksById.values();
+    private LinkedHashMap<Serializable, Mark> getMarksByRaceGroup(RaceGroup raceGroup) {
+        LinkedHashMap<Serializable, Mark> marks = marksData.get(raceGroup);
+        if (marks == null) {
+            marks = new LinkedHashMap<>();
+            marksData.put(raceGroup, marks);
+        }
+        return marks;
+    }
+
+    private void setMarksByRaceGroup(RaceGroup raceGroup, LinkedHashMap<Serializable, Mark> marks) {
+        marksData.put(raceGroup, marks);
     }
 
     @Override
-    public Mark getMark(Serializable id) {
-        return marksById.get(id);
+    public Collection<Mark> getMarks(RaceGroup raceGroup) {
+        return getMarksByRaceGroup(raceGroup).values();
     }
 
     @Override
-    public boolean hasMark(Serializable id) {
-        return marksById.containsKey(id);
+    public Mark getMark(RaceGroup raceGroup, Serializable id) {
+        return getMarksByRaceGroup(raceGroup).get(id);
     }
 
     @Override
-    public void addMark(Mark mark) {
-        marksById.put(mark.getId(), mark);
+    public boolean hasMark(RaceGroup raceGroup, Serializable id) {
+        return getMarksByRaceGroup(raceGroup).containsKey(id);
     }
 
     @Override
-    public CourseBase getLastPublishedCourseDesign() {
-        return courseData;
+    public void addMark(RaceGroup raceGroup, Mark mark) {
+        getMarksByRaceGroup(raceGroup).put(mark.getId(), mark);
     }
 
     @Override
-    public void setLastPublishedCourseDesign(CourseBase courseData) {
-        this.courseData = courseData;
+    public CourseBase getLastPublishedCourseDesign(RaceGroup raceGroup) {
+        return courseData.get(raceGroup);
+    }
+
+    @Override
+    public void setLastPublishedCourseDesign(RaceGroup raceGroup, CourseBase courseData) {
+        this.courseData.put(raceGroup, courseData);
     }
 
     @Override

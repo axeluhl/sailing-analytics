@@ -33,5 +33,6 @@ public interface RegattaCompetitionResources extends SharedHomeResources {
         String regattacompetition_phase_fleet_raceplanned();
         String regattacompetition_phase_fleet_race_state();
         String regattacompetition_phase_fleet_race_date();
+        String regattacompetition_phase_fleet_race_title_big();
     }
 }

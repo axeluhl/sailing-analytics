@@ -4,16 +4,12 @@ import java.util.List;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.By.ByXPath;
+import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Action;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.interactions.CompositeAction;
-import org.openqa.selenium.interactions.HasInputDevices;
-import org.openqa.selenium.interactions.KeyDownAction;
-import org.openqa.selenium.interactions.KeyUpAction;
-import org.openqa.selenium.interactions.Keyboard;
-import org.openqa.selenium.interactions.Mouse;
 
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.common.AttributeHelper;
@@ -82,11 +78,33 @@ public class DataEntryPO extends CellTableRowPO {
     }
     
     protected Action getSelectAction() {
-        Actions actions = new Actions(this.driver);
-        actions.moveToElement(getElementForSelect(), 1, 1);
+        final Actions actions = new Actions(this.driver);
+        final WebElement elementForSelect = getElementForSelect();
+        moveToUpperLeftCorner(actions, elementForSelect);
         actions.click();
         
-        return actions.build();
+        final CompositeAction compositeAction = new CompositeAction();
+        compositeAction.addAction(new Action() {
+            @Override
+            public void perform() {
+                scrollToView(elementForSelect);
+            }
+        });
+        compositeAction.addAction(actions.build());
+        return compositeAction;
+    }
+    
+    /**
+     * It seems that the JavaDoc of {@link Actions#moveToElement(WebElement, int, int)} is not consistent to the
+     * WebDriver specification. The specification says the int params are relative to the center of the element, while
+     * the JavaDoc says it's relative to the upper-left corner. GeckoDriver implements the specification. This method
+     * ensures consistent behavior no matter if the implementation is a legacy one or one that conforms to the
+     * specification.
+     */
+    private void moveToUpperLeftCorner(Actions actions, WebElement webElement) {
+        actions.moveToElement(webElement);
+        final Dimension size = webElement.getSize();
+        actions.moveByOffset(-size.width / 2 + 1, -size.height / 2 + 1);
     }
     
     /**
@@ -110,35 +128,49 @@ public class DataEntryPO extends CellTableRowPO {
     
     protected Action getModifiedSelectAction() {
         Actions actions = new Actions(this.driver);
+        final WebElement elementToSelect;
+        final boolean controlClick;
         if (table.getColumnHeaders().get(0).equals("\u2713")) {
             // it's a checkbox column
-            actions.moveToElement(this.columns.isEmpty() ? getWebElement() : this.columns.get(0));
-            actions.click();
+            elementToSelect = this.columns.isEmpty() ? getWebElement() : this.columns.get(0);
+            controlClick = false;
         } else {
+            elementToSelect = getElementForSelect();
+            controlClick = true;
+        }
+        if (controlClick) {
             actions.keyDown(Keys.CONTROL);
-            actions.moveToElement(getElementForSelect(), 1, 1);
-            actions.click();
+        }
+        moveToUpperLeftCorner(actions, elementToSelect);
+        actions.moveToElement(elementToSelect, 1, 1);
+        actions.click();
+        if (controlClick) {
             actions.keyUp(Keys.CONTROL);
         }
-        return actions.build();
+        final CompositeAction compositeAction = new CompositeAction();
+        compositeAction.addAction(new Action() {
+            @Override
+            public void perform() {
+                scrollToView(elementToSelect);
+            }
+        });
+        compositeAction.addAction(actions.build());
+        return compositeAction;
     }
     
     protected CompositeAction getModifiedCompositeActionAction() {
-        HasInputDevices devices = (HasInputDevices) this.driver;
-        
-        final Mouse mouse = devices.getMouse();
-        final Keyboard keyboard = devices.getKeyboard();
-        
         return new CompositeAction() {
             @Override
             public void perform() {
-                Action pressControl = new KeyDownAction(keyboard, mouse, Keys.CONTROL);
-                pressControl.perform();
+                Actions actions = new Actions(driver);
+                actions.keyDown(Keys.CONTROL);
+                actions.perform();
                 
                 super.perform();
                 
-                Action releaseControl = new KeyUpAction(keyboard, mouse, Keys.CONTROL);
-                releaseControl.perform();
+                actions = new Actions(driver);
+                actions.keyUp(Keys.CONTROL);
+                actions.perform();
             }
         };
     }

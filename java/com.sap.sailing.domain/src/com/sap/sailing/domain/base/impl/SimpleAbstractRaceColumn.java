@@ -21,13 +21,6 @@ public abstract class SimpleAbstractRaceColumn implements RaceColumn {
     private final RaceColumnListeners raceColumnListeners;
 
     /**
-     * The factor by which a medal race score is multiplied by default in the overall point scheme.
-     * 
-     * @see #getFactor()
-     */
-    private static final double DEFAULT_MEDAL_RACE_FACTOR = 2.0;
-
-    /**
      * If <code>null</code>, the {@link #getFactor() factor} defaults to 1 for non-medal and {@link #DEFAULT_MEDAL_RACE_FACTOR} for
      * medal races. Otherwise, the explicit factor is used.
      */
@@ -66,11 +59,6 @@ public abstract class SimpleAbstractRaceColumn implements RaceColumn {
         return result;
     }
 
-    @Override
-    public double getFactor() {
-        return explicitFactor == null ? (isMedalRace() ? DEFAULT_MEDAL_RACE_FACTOR : 1.) : explicitFactor;
-    }
-    
     @Override
     public void setFactor(Double factor) {
         Double oldExplicitFactor = getExplicitFactor();

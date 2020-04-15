@@ -7,8 +7,9 @@ import javax.mail.MessagingException;
 import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.mail.impl.ReplicableMailService;
+import com.sap.sse.mail.operations.MailServiceOperation;
 import com.sap.sse.replication.Replicable;
-import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
+import com.sap.sse.replication.ReplicableWithObjectInputStream;
 import com.sap.sse.util.ClearStateTestSupport;
 
 
@@ -25,7 +26,7 @@ import com.sap.sse.util.ClearStateTestSupport;
  * @author Fredrik Teschke
  *
  */
-public interface MailService extends ReplicableWithObjectInputStream<ReplicableMailService, MailOperation<?>>, ClearStateTestSupport, IsManagedByCache<MailServiceResolver> {
+public interface MailService extends ReplicableWithObjectInputStream<ReplicableMailService, MailServiceOperation<?>>, ClearStateTestSupport, IsManagedByCache<MailServiceResolver> {
     void sendMail(String toAddress, String subject, String body) throws MailException;
     
     /**

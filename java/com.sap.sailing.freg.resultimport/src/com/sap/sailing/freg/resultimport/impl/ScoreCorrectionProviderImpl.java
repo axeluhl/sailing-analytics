@@ -2,6 +2,7 @@ package com.sap.sailing.freg.resultimport.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Collections;
@@ -11,22 +12,21 @@ import java.util.Set;
 
 import com.sap.sailing.domain.common.RegattaScoreCorrections;
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
+import com.sap.sailing.domain.resultimport.ResultUrlProvider;
+import com.sap.sailing.resultimport.AbstractResultUrlProvider;
 import com.sap.sailing.resultimport.RegattaResults;
-import com.sap.sailing.resultimport.ResultUrlProvider;
 import com.sap.sailing.resultimport.ResultUrlRegistry;
 import com.sap.sailing.resultimport.impl.RegattaScoreCorrectionsImpl;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, ResultUrlProvider {
+public class ScoreCorrectionProviderImpl extends AbstractResultUrlProvider implements ScoreCorrectionProvider, ResultUrlProvider {
     private static final long serialVersionUID = 5853404150107387702L;
     public static final String PROVIDER_NAME = "FREG HTML Score Importer";
     
-    private final ResultUrlRegistry resultUrlRegistry;
-
     public ScoreCorrectionProviderImpl(ResultUrlRegistry resultUrlRegistry) {
-        this.resultUrlRegistry = resultUrlRegistry;
+        super(resultUrlRegistry);
     }
 
     @Override
@@ -38,7 +38,7 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, Res
     public Map<String, Set<Util.Pair<String, TimePoint>>> getHasResultsForBoatClassFromDateByEventName() {
         Map<String, Set<Util.Pair<String, TimePoint>>> result = new HashMap<String, Set<Util.Pair<String,TimePoint>>>();
         FregHtmlParser parser = new FregHtmlParser();
-        for (URL url : getUrls()) {
+        for (URL url : getReadableUrls()) {
             URLConnection conn;
             try {
                 conn = url.openConnection();
@@ -47,8 +47,7 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, Res
                 final String boatClassName = getBoatClassName(regattaResult);
                 result.put(boatClassName, Collections.singleton(new Util.Pair<String, TimePoint>(boatClassName, lastModified)));
             } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                throw new RuntimeException(e);
             }
         }
         return result;
@@ -68,23 +67,28 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, Res
     }
 
     @Override
-    public Iterable<URL> getUrls() {
-        return resultUrlRegistry.getResultUrls(PROVIDER_NAME);
+    public URL resolveUrl(String url) throws MalformedURLException {
+        return new URL(url);
     }
 
     @Override
     public RegattaScoreCorrections getScoreCorrections(String eventName, String boatClassName,
             TimePoint timePoint) throws Exception {
-        FregHtmlParser parser = new FregHtmlParser();
-        for (URL url : getUrls()) {
+        final FregHtmlParser parser = new FregHtmlParser();
+        for (URL url : getReadableUrls()) {
             final URLConnection conn = url.openConnection();
-            RegattaResults regattaResult = parser.getRegattaResults((InputStream) conn.getContent());
+            final RegattaResults regattaResult = parser.getRegattaResults((InputStream) conn.getContent());
             if ((boatClassName == null && getBoatClassName(regattaResult) == null) ||
                     boatClassName.equals(getBoatClassName(regattaResult))) {
                 return new RegattaScoreCorrectionsImpl(this, regattaResult);
             }
         }
         return null;
+    }
+
+    @Override
+    public RegattaScoreCorrections getScoreCorrections(InputStream inputStream) throws Exception {
+        return new RegattaScoreCorrectionsImpl(this, new FregHtmlParser().getRegattaResults(inputStream));
     }
 
     @Override

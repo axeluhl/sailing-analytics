@@ -21,10 +21,15 @@ package com.sap.sse.security.shared;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
+
+import com.sap.sse.security.shared.HasPermissions.Action;
+import com.sap.sse.security.shared.impl.QualifiedObjectIdentifierImpl;
+import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
 
 /**
  * A <code>WildcardPermission</code> is a very flexible permission construct supporting multiple levels of
@@ -104,20 +109,13 @@ import java.util.Set;
  * permission can also be used by a GWT client and an Android implementation.
  */
 public class WildcardPermission implements Serializable {
-
-    //TODO - JavaDoc methods
-
-    /**
-     * 
-     */
     private static final long serialVersionUID = -7136806951296823464L;
     /*--------------------------------------------
     |             C O N S T A N T S             |
     ============================================*/
-    protected static final String WILDCARD_TOKEN = "*";
-    protected static final String PART_DIVIDER_TOKEN = ":";
-    protected static final String SUBPART_DIVIDER_TOKEN = ",";
-    protected static final boolean DEFAULT_CASE_SENSITIVE = false;
+    public static final String WILDCARD_TOKEN = "*";
+    public static final String PART_DIVIDER_TOKEN = ":";
+    public static final String SUBPART_DIVIDER_TOKEN = ",";
 
     /*--------------------------------------------
     |    I N S T A N C E   V A R I A B L E S    |
@@ -127,68 +125,42 @@ public class WildcardPermission implements Serializable {
     /*--------------------------------------------
     |         C O N S T R U C T O R S           |
     ============================================*/
-    /**
-     * Default no-arg constructor for subclasses only - end-user developers instantiating Permission instances must
-     * provide a wildcard string at a minimum, since Permission instances are immutable once instantiated.
-     * <p/>
-     * Note that the WildcardPermission class is very robust and typically subclasses are not necessary unless you
-     * wish to create type-safe Permission objects that would be used in your application, such as perhaps a
-     * {@code UserPermission}, {@code SystemPermission}, {@code PrinterPermission}, etc.  If you want such type-safe
-     * permission usage, consider subclassing the {@link DomainPermission DomainPermission} class for your needs.
-     */
+    @Deprecated // for GWT serialization only
     protected WildcardPermission() {
     }
-
+    
     public WildcardPermission(String wildcardString) {
-        this(wildcardString, DEFAULT_CASE_SENSITIVE);
+        this(createPartsFromString(wildcardString));
     }
-
-    public WildcardPermission(String wildcardString, boolean caseSensitive) {
-        setParts(wildcardString, caseSensitive);
+    
+    private WildcardPermission(List<Set<String>> parts) {
+        this.parts = parts;
     }
-
-    protected void setParts(String wildcardString) {
-        setParts(wildcardString, DEFAULT_CASE_SENSITIVE);
-    }
-
-    protected void setParts(String wildcardString, boolean caseSensitive) {
+    
+    protected static List<Set<String>> createPartsFromString(String wildcardString) {
         if (wildcardString == null || wildcardString.trim().length() == 0) {
             throw new IllegalArgumentException("Wildcard string cannot be null or empty. Make sure permission strings are properly formatted.");
         }
-
         wildcardString = wildcardString.trim();
-
-        List<String> parts = Arrays.asList(wildcardString.split(PART_DIVIDER_TOKEN));
-
-        this.parts = new ArrayList<Set<String>>();
-        for (String part : parts) {
+        List<String> rawParts = Arrays.asList(wildcardString.split(PART_DIVIDER_TOKEN));
+        List<Set<String>> parts = new ArrayList<>();
+        for (String part : rawParts) {
             Set<String> subparts = new HashSet<>(Arrays.asList(part.split(SUBPART_DIVIDER_TOKEN)));
-            if (!caseSensitive) {
-                subparts = lowercase(subparts);
-            }
             if (subparts.isEmpty()) {
                 throw new IllegalArgumentException("Wildcard string cannot contain parts with only dividers. Make sure permission strings are properly formatted.");
             }
-            this.parts.add(subparts);
+            parts.add(subparts);
         }
-
-        if (this.parts.isEmpty()) {
+        if (parts.isEmpty()) {
             throw new IllegalArgumentException("Wildcard string cannot contain only dividers. Make sure permission strings are properly formatted.");
         }
-    }
-
-    private Set<String> lowercase(Set<String> subparts) {
-        Set<String> lowerCasedSubparts = new LinkedHashSet<String>(subparts.size());
-        for (String subpart : subparts) {
-            lowerCasedSubparts.add(subpart.toLowerCase());
-        }
-        return lowerCasedSubparts;
+        return parts;
     }
 
     /*--------------------------------------------
     |  A C C E S S O R S / M O D I F I E R S    |
     ============================================*/
-    protected List<Set<String>> getParts() {
+    public List<Set<String>> getParts() {
         return this.parts;
     }
 
@@ -197,9 +169,13 @@ public class WildcardPermission implements Serializable {
     ============================================*/
 
     public boolean implies(WildcardPermission wp) {
+        return implies(wp, true);
+    }
+    
+    private boolean implies(WildcardPermission wp, boolean checkWildcardPartsIfThisPermissionHasMoreParts) {
         // By default only supports comparisons with other WildcardPermissions
         List<Set<String>> otherParts = wp.getParts();
-
+        
         int i = 0;
         for (Set<String> otherPart : otherParts) {
             // If this permission has fewer parts than the other permission, everything after the number of parts contained
@@ -214,16 +190,22 @@ public class WildcardPermission implements Serializable {
                 i++;
             }
         }
-
-        // If this permission has more parts than the other parts, only imply it if all of the other parts are wildcards
-        for (; i < getParts().size(); i++) {
-            Set<String> part = getParts().get(i);
-            if (!part.contains(WILDCARD_TOKEN)) {
-                return false;
+        
+        if (checkWildcardPartsIfThisPermissionHasMoreParts) {
+            // If this permission has more parts than the other parts, only imply it if all of the other parts are wildcards
+            for (; i < getParts().size(); i++) {
+                Set<String> part = getParts().get(i);
+                if (!part.contains(WILDCARD_TOKEN)) {
+                    return false;
+                }
             }
         }
-
+        
         return true;
+    }
+    
+    public boolean impliesAny(WildcardPermission wp) {
+        return implies(wp, false);
     }
 
     /**
@@ -232,12 +214,13 @@ public class WildcardPermission implements Serializable {
      */
     public String toString() {
         StringBuilder buffer = new StringBuilder();
-        for (Set<String> part : parts) {
+        for (Set<String> unsortedPart : parts) {
+            TreeSet<String> sortedPart = new TreeSet<>(unsortedPart);
             if (buffer.length() > 0) {
                 buffer.append(PART_DIVIDER_TOKEN);
             }
             boolean first = true;
-            for (String subpart : part) {
+            for (String subpart : sortedPart) {
                 if (first) {
                     first = false;
                 } else {
@@ -260,5 +243,81 @@ public class WildcardPermission implements Serializable {
     public int hashCode() {
         return parts.hashCode();
     }
+    
+    /**
+     * For all combinations of first and third part produces a {@link QualifiedObjectIdentifier}. The result is never
+     * {@code null} but may be empty. The third parts of this permission are
+     * {@link PermissionStringEncoder#decodePermissionPart(String) decoded} before combined into the result objects.
+     */
+    public Iterable<QualifiedObjectIdentifier> getQualifiedObjectIdentifiers() {
+        final List<QualifiedObjectIdentifier> result = new ArrayList<>();
+        final WildcardPermissionEncoder encoder = new WildcardPermissionEncoder();
+        if (getParts().size() >= 3) {
+            for (final String typeName : getParts().get(0)) {
+                for (final String encodedRelativeObjectId : getParts().get(2)) {
+                    result.add(new QualifiedObjectIdentifierImpl(typeName,
+                            new TypeRelativeObjectIdentifier(encoder.decodeStringList(encodedRelativeObjectId))));
+                }
+            }
+        }
+        return result;
+    }
+    
+    public static WildcardPermissionBuilder builder() {
+        return new WildcardPermissionBuilder();
+    }
 
+    /**
+     * Builder to create non-primitive {@link WildcardPermission} instances. E.g. it is possible to use multiple types
+     * or wildcard for the type part.
+     */
+    public static class WildcardPermissionBuilder {
+        private Set<String> types = new HashSet<>();
+        private Set<String> actions = new HashSet<>();
+        private Set<String> ids = new HashSet<>();
+        
+        public WildcardPermissionBuilder withTypes(HasPermissions... types) {
+            for (HasPermissions hasPermissions : types) {
+                this.types.add(hasPermissions.getName());
+            }
+            return this;
+        }
+        
+        public WildcardPermissionBuilder withActions(Action... actions) {
+            for (Action action : actions) {
+                this.actions.add(action.name());
+            }
+            return this;
+        }
+        
+        public WildcardPermissionBuilder withIds(String... ids) {
+            this.ids.addAll(Arrays.asList(ids));
+            return this;
+        }
+        
+        public WildcardPermissionBuilder withIds(TypeRelativeObjectIdentifier... typeRelativeObjectIdentifiers) {
+            for (TypeRelativeObjectIdentifier identifier : typeRelativeObjectIdentifiers) {
+                this.ids.add(identifier.toString());
+            }
+            return this;
+        }
+        
+        public WildcardPermission build() {
+            final List<Set<String>> parts = new ArrayList<>(2);
+            if (types.isEmpty()) {
+                parts.add(new HashSet<>(Collections.singleton(WILDCARD_TOKEN)));
+            } else {
+                parts.add(types);
+            }
+            if (!actions.isEmpty()) {
+                parts.add(actions);
+            } else if (!ids.isEmpty()) {
+                parts.add(new HashSet<>(Collections.singleton(WILDCARD_TOKEN)));
+            }
+            if (!ids.isEmpty()) {
+                parts.add(ids);
+            }
+            return new WildcardPermission(parts);
+        }
+    }
 }

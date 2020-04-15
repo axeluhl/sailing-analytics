@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.racelogtracking.test.impl;
 
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 
 import java.net.UnknownHostException;
 import java.util.Arrays;
@@ -30,12 +30,14 @@ import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.DeviceIdentifier;
+import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
 import com.sap.sailing.domain.racelogtracking.impl.fixtracker.FixLoaderAndTracker;
 import com.sap.sailing.domain.racelogtracking.test.AbstractGPSFixStoreTest;
+import com.sap.sailing.domain.tracking.AddResult;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
@@ -51,8 +53,8 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
     private final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("49er");
     private final Mark mark2 = DomainFactory.INSTANCE.getOrCreateMark("mark2");
     private final Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", "c2", null, null, null,
-            null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
-    private final Boat boat2 = DomainFactory.INSTANCE.getOrCreateBoat("boat2", "boat2", boatClass, "USA 123", null);
+            null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null, /* storePersistently */ true);
+    private final Boat boat2 = DomainFactory.INSTANCE.getOrCreateBoat("boat2", "boat2", boatClass, "USA 123", null, /* storePersistently */ true);
     private final Course course =  new CourseImpl("course", Arrays.asList(new WaypointImpl(mark), new WaypointImpl(mark2)));
 
     private RaceDefinition raceDefinition;
@@ -66,7 +68,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
     }
     
     @Rule
-    public Timeout TrackedRaceLoadsFixesTestTimeout = new Timeout(3 * 60 * 1000);
+    public Timeout TrackedRaceLoadsFixesTestTimeout = Timeout.millis(3 * 60 * 1000);
 
     @Test
     public void doesRaceLoadOnlyBetweenStartAndEndOfTracking() throws TransformationException,
@@ -189,7 +191,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
                 }
 
                 @Override
-                public void gpsFixReceived(GPSFixMoving fix, Competitor item, boolean firstFixInTrack) {
+                public void gpsFixReceived(GPSFixMoving fix, Competitor item, boolean firstFixInTrack, AddResult addedOrReplaced) {
                     fixInsertionCount[0]++;
                 }
 
@@ -542,7 +544,8 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
         store.storeFix(device, createFix(100, 10, 20, 30, 40));
         store.storeFix(device, createFix(200, 10, 20, 30, 40));
         assertEquals(2, store.getNumberOfFixes(device));
-        assertEquals(TimeRangeImpl.create(100, 200), store.getTimeRangeCoveredByFixes(device));
+        assertEquals(TimeRangeImpl.create(100, 200, /* toIsInclusive */ true), store.getTimeRangeCoveredByFixes(device));
+        assertEquals(new DegreePosition(10, 20), ((GPSFix) store.getFixLastReceived(Collections.singleton(device)).get(device)).getPosition());
     }
     
     @Test
@@ -550,28 +553,28 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
         store.storeFix(device, createFix(100, 10, 20, 30, 40));
         store.storeFix(device, createFix(1100, 10, 20, 30, 40));
         store.storeFix(device, createFix(2100, 10, 20, 30, 40));
-        final Map<DeviceIdentifier, Timed> lastFixes = store.getLastFix(Collections.singleton(device));
+        final Map<DeviceIdentifier, Timed> lastFixes = store.getFixLastReceived(Collections.singleton(device));
         assertEquals(1, lastFixes.size());
         Timed lastFix = lastFixes.get(device);
         assertEquals(2100, lastFix.getTimePoint().asMillis());
         store.storeFix(device, createFix(2000, 10, 20, 30, 40));
-        final Map<DeviceIdentifier, Timed> lastFixes2 = store.getLastFix(Collections.singleton(device));
+        final Map<DeviceIdentifier, Timed> lastFixes2 = store.getFixLastReceived(Collections.singleton(device));
         assertEquals(1, lastFixes2.size());
         Timed lastFix2 = lastFixes2.get(device);
-        assertEquals(2100, lastFix2.getTimePoint().asMillis());
+        assertEquals(2000, lastFix2.getTimePoint().asMillis()); // not the fix with the latest time point but the fix that was last received by the store
         store.storeFix(device, createFix(2200, 10, 20, 30, 40));
-        final Map<DeviceIdentifier, Timed> lastFixes3 = store.getLastFix(Collections.singleton(device));
+        final Map<DeviceIdentifier, Timed> lastFixes3 = store.getFixLastReceived(Collections.singleton(device));
         assertEquals(1, lastFixes3.size());
         Timed lastFix3 = lastFixes3.get(device);
         assertEquals(2200, lastFix3.getTimePoint().asMillis());
         final DeviceIdentifier device2 = new SmartphoneImeiIdentifier("b");
         store.storeFix(device2, createFix(1200, 10, 20, 30, 40));
         store.storeFix(device2, createFix(1100, 10, 20, 30, 40));
-        final Map<DeviceIdentifier, Timed> lastFixes4 = store.getLastFix(Arrays.asList(device, device2));
+        final Map<DeviceIdentifier, Timed> lastFixes4 = store.getFixLastReceived(Arrays.asList(device, device2));
         assertEquals(2, lastFixes4.size());
         Timed lastFix4 = lastFixes4.get(device);
         assertEquals(2200, lastFix4.getTimePoint().asMillis());
         Timed lastFixDevice2 = lastFixes4.get(device2);
-        assertEquals(1200, lastFixDevice2.getTimePoint().asMillis());
+        assertEquals(1100, lastFixDevice2.getTimePoint().asMillis());  // not the fix with the latest time point but the fix that was last received by the store
     }
 }

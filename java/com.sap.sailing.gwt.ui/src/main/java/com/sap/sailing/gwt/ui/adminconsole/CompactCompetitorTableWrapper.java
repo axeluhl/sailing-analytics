@@ -11,6 +11,7 @@ import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -27,6 +28,8 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.ui.client.UserService;
 
 /**
  * A compact filterable competitor table. The data model is managed by the {@link #getFilterField() filter field}. In
@@ -43,7 +46,7 @@ public class CompactCompetitorTableWrapper<S extends RefreshableSelectionModel<C
     private final Map<CompetitorDTO, BoatDTO> boatsForCompetitors;
     
     public CompactCompetitorTableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages, ErrorReporter errorReporter,
-            boolean multiSelection, boolean enablePager) {
+            boolean multiSelection, boolean enablePager, UserService userService) {
         super(sailingService, stringMessages, errorReporter, multiSelection, enablePager,
                 new EntityIdentityComparator<CompetitorDTO>() {
                     @Override
@@ -132,7 +135,7 @@ public class CompactCompetitorTableWrapper<S extends RefreshableSelectionModel<C
         };
         
         filterField = new LabeledAbstractFilterablePanel<CompetitorDTO>(new Label(stringMessages.filterCompetitors()),
-                new ArrayList<CompetitorDTO>(), table, dataProvider) {
+                new ArrayList<CompetitorDTO>(), dataProvider, stringMessages) {
             @Override
             public Iterable<String> getSearchableStrings(CompetitorDTO t) {
                 List<String> string = new ArrayList<String>();
@@ -141,7 +144,14 @@ public class CompactCompetitorTableWrapper<S extends RefreshableSelectionModel<C
                 string.add(t.getSearchTag());
                 return string;
             }
+
+            @Override
+            public AbstractCellTable<CompetitorDTO> getCellTable() {
+                return table;
+            }
         };
+        filterField.setUpdatePermissionFilterForCheckbox(comp -> userService.hasPermission(comp, DefaultActions.UPDATE));
+
         registerSelectionModelOnNewDataProvider(filterField.getAllListDataProvider());
         mainPanel.insert(filterField, 0);
         table.addColumnSortHandler(competitorColumnListHandler);

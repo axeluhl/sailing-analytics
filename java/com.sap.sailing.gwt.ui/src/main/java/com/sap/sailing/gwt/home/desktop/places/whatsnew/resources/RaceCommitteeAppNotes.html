@@ -4,6 +4,49 @@
 <div id="mainContent">
 	<h4 class="articleHeadline">What's New - SAP Sailing Race Manager</h4>
 	<div class="innerContent">
+		<h5 class="articleSubheadline">March 2020</h5>
+		<ul class="bulletList">
+			<li>Problems with conflicting result entry through multiple devices used for the same race
+			    have been resolved. For more details, see <a href="https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=4232">here</a>.
+			</li>
+		</ul>
+		
+		<h5 class="articleSubheadline">October 2019</h5>
+		<ul class="bulletList">
+			<li>When finishing times are entered, the invisible milliseconds are now set to 0 when
+			    using the time picker. Before, the milliseconds were set to those of the time stamp
+			    when the time picker was initialized which led to imprecise time stamping.
+			</li>
+			<li>The app is now compatible with servers that use the new ORC Performance Curve Scoring (PCS)
+			    ranking metric with its new race log events. It does, however, not yet support capturing
+			    or displaying those new event types, such as setting the scratch boat for corrected time
+			    baselining or defining the leg types and distances for PCS scoring. This will be added in
+			    a future release.
+			</li>
+		</ul>
+
+		<h5 class="articleSubheadline">July 2019</h5>
+		<ul class="bulletList">
+			<li>The app no longer remembers the last entered duration when setting a protest time.
+				The protest duration can now be configured correctly in the app settings.
+				Please consider that a protest duration in the specific regatta configuration is preferred to
+				the protest duration in the default regatta configuration.</li>
+		</ul>
+
+		<h5 class="articleSubheadline">May 2019</h5>
+		<ul class="bulletList">
+			<li>The Course editor now works correctly when managing more than one regatta.
+                The last course design and the defined marks are now cached per race group.</li>
+		</ul>
+
+		<h5 class="articleSubheadline">February 2019</h5>
+		<ul class="bulletList">
+			<li>Now we consider the start mode flags created in your device configuration
+                and will no longer use the default start mode flag if it hasn't been configured.
+            </li>
+            <li>Improved the back navigation at several points.</li>
+		</ul>
+
 		<h5 class="articleSubheadline">February 2018</h5>
 		<ul class="bulletList">
 			<li>The protest time is now configurable in the backend. An empty value means, the RCApp
@@ -59,7 +102,7 @@
 			    "By Marks" course editor in the past.
 			</li>
 		</ul>
-	
+
 		<h5 class="articleSubheadline">January 2017</h5>
 		<ul class="bulletList">
 			<li>Phone only (xhdpi and higher): If the font size (Android display settings) is larger
@@ -76,7 +119,7 @@
 			<li>Support for a new racing procedure for the Sailing World Cup with specific count-down procedure</li>
 			<li>Fixed a bug regarding protest time entry in smartphone version in case of split fleets</li>
 			<li>The "Postpone" button is now hidden once a race has entered the "finishing" phase (after blue
-			    flag up)</li> 
+			    flag up)</li>
 		</ul>
 
 		<h5 class="articleSubheadline">October 2016</h5>
@@ -88,6 +131,11 @@
 		<ul class="bulletList">
 			<li>The wind map is now opened in an external browser, so it is possible to
 			    switch between app and map more easily.</li>
+		</ul>
+
+		<h5 class="articleSubheadline">July 2016</h5>
+		<ul	class="bulletList">
+			<li>Finishing races in the TimePanel show the race duration of the "first ship home."</li>
 		</ul>
 
 		<h5 class="articleSubheadline">June 2016</h5>
@@ -116,7 +164,7 @@
 			<li>Regatta-specific preferences now properly take precedence over the device configuration.
 			    They are updated from the server when the regatta content is refreshed.</li>
 		</ul>
-		
+
 		<h5 class="articleSubheadline">April 2016</h5>
 		<ul class="bulletList">
 			<li>Whether or not result entry during or after the finishing phase is offered is now
@@ -127,7 +175,7 @@
 			    external, official regatta management system is being used to capture and manage
 			    the official scores.</li>
 		</ul>
-		
+
 		<h5 class="articleSubheadline">March 2016</h5>
 		<ul class="bulletList">
 			<li>Added sign in/sign out into the app. The user has to be create in the backend, with leaderboard
@@ -183,11 +231,11 @@
 		<ul class="bulletList">
 			<li>Moved away from using a label to create a course and introduced a big button that
 			eases the input of courses.</li>
-			
+
 			<li>Added a new countdown button for ESS and RRS26 start configurations. Using this
 			button one can easily set the start time of a race to exactly the time the countdown starts.</li>
 		</ul>
-		
+
 		<h5 class="articleSubheadline">January 2014</h5>
 		<ul class="bulletList">
 			<li>Server-based device configuration</li>

@@ -21,7 +21,7 @@ import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.ExpandableSortableColumn;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 import com.sap.sse.common.Util;
 
@@ -95,7 +95,8 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
                 + TracTracConnectionConstants.PORT_TUNNEL_STORED : "tcp://" + TracTracConnectionConstants.HOST_NAME
                 + ":" + TracTracConnectionConstants.PORT_STORED, 
                 COURSE_DESIGN_UPDATE_URI, 
-                false, false, /* offsetToStartTimeOfSimulatedRace */ null, /* ignoreTracTracMarkPassings */ false, TRACTRAC_USERNAME, TRACTRAC_PASSWORD, new AsyncCallback<Void>() {
+                false, false, /* offsetToStartTimeOfSimulatedRace */ null, /* ignoreTracTracMarkPassings */ false,
+                /* useOfficialEventsToUpdateRaceLog */ false, TRACTRAC_USERNAME, TRACTRAC_PASSWORD, new AsyncCallback<Void>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -120,11 +121,12 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
 
             @Override
             public void onSuccess(Void result) {
-                service.createFlexibleLeaderboard(LEADERBOARD_NAME, null, new int[] { 1, 2 }, ScoringSchemeType.LOW_POINT, null,
-                        new AsyncCallback<StrippedLeaderboardDTO>() {
+                service.createFlexibleLeaderboard(LEADERBOARD_NAME, null, new int[] { 1, 2 },
+                        ScoringSchemeType.LOW_POINT, null,
+                        new AsyncCallback<StrippedLeaderboardDTOWithSecurity>() {
                             @Override
-                            public void onSuccess(StrippedLeaderboardDTO result) {
-                                System.out.println("Created Leaderboard "+result.name);
+                            public void onSuccess(StrippedLeaderboardDTOWithSecurity result) {
+                                System.out.println("Created Leaderboard "+result.getName());
                                 addColumnToLeaderboard();
                             }
 

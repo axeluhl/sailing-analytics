@@ -100,10 +100,17 @@ public class PolarBackendDataAggregationProcessor extends AbstractParallelGroupe
         } catch (NotEnoughDataHasBeenAddedException e) {
             hasDownwindAngleData = false;
         }
+        
         for (int angleInDeg = 0; angleInDeg < 360; angleInDeg++) {
+            if (isAborted()) {
+                break;
+            }
             int convertedAngle = angleInDeg  > 180 ? angleInDeg  - 360 : angleInDeg ;
             try {
                 for (int x = 0; x < 30; x++) {
+                    if (isAborted()) {
+                        break;
+                    }
                     SpeedWithConfidence<Void> speed = polarDataService.getSpeed(boatClass, new KnotSpeedImpl(x), new DegreeBearingImpl(convertedAngle));
                     if (speed.getConfidence() > 0.1) {
                         hasDataForAngle[angleInDeg] = true;
@@ -127,6 +134,9 @@ public class PolarBackendDataAggregationProcessor extends AbstractParallelGroupe
     
     private void setArrayValuesForFunction(PolynomialFunction function, double[] yOverWindSpeed) {
         for (int x = 0; x < 30; x++) {
+            if (isAborted()) {
+                break;
+            }
             yOverWindSpeed[x] = function.value(x);
         }
     }

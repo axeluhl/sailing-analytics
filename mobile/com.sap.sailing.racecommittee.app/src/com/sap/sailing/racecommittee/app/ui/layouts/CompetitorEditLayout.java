@@ -1,12 +1,21 @@
 package com.sap.sailing.racecommittee.app.ui.layouts;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.Locale;
+import android.annotation.SuppressLint;
+import android.app.DatePickerDialog;
+import android.content.Context;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.DatePicker;
+import android.widget.EditText;
+import android.widget.FrameLayout;
+import android.widget.ScrollView;
+import android.widget.Spinner;
+import android.widget.TextView;
 
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
@@ -17,24 +26,25 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultWithIdImpl;
 import com.sap.sailing.racecommittee.app.ui.adapters.StringArraySpinnerAdapter;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.FullTimePickerDialog;
+import com.sap.sailing.racecommittee.app.ui.utils.DecimalKeyListener;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-import android.annotation.SuppressLint;
-import android.app.DatePickerDialog;
-import android.content.Context;
-import android.text.TextUtils;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.DatePicker;
-import android.widget.EditText;
-import android.widget.FrameLayout;
-import android.widget.ScrollView;
-import android.widget.Spinner;
-import android.widget.TextView;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.Locale;
 
 @SuppressLint("ViewConstructor")
-public class CompetitorEditLayout extends ScrollView implements DatePickerDialog.OnDateSetListener, FullTimePickerDialog.OnTimeSetListener {
+public class CompetitorEditLayout extends ScrollView
+        implements DatePickerDialog.OnDateSetListener, FullTimePickerDialog.OnTimeSetListener {
+
+    private static final String TAG = CompetitorEditLayout.class.getName();
 
     private CompetitorResultWithIdImpl mCompetitor;
     private GregorianCalendar mCalendar;
@@ -49,12 +59,15 @@ public class CompetitorEditLayout extends ScrollView implements DatePickerDialog
 
     private boolean mRestricted;
 
-    public CompetitorEditLayout(Context context, CompetitorResultWithIdImpl competitor, int maxPos, boolean hasWarning) {
+    private DecimalFormat format = new DecimalFormat();
+
+    public CompetitorEditLayout(Context context, CompetitorResultWithIdImpl competitor, int maxPos,
+                                boolean hasWarning) {
         this(context, null, competitor, maxPos, true, hasWarning);
     }
 
-    public CompetitorEditLayout(final Context context, final TimePoint startTime, CompetitorResultWithIdImpl competitor, int maxPos,
-        boolean restrictedView, boolean hasWarning) {
+    public CompetitorEditLayout(final Context context, final TimePoint startTime, CompetitorResultWithIdImpl competitor,
+                                int maxPos, boolean restrictedView, boolean hasWarning) {
         super(context);
 
         mRestricted = restrictedView;
@@ -80,6 +93,7 @@ public class CompetitorEditLayout extends ScrollView implements DatePickerDialog
         }
 
         mCalendar = (GregorianCalendar) GregorianCalendar.getInstance();
+        mCalendar.set(Calendar.MILLISECOND, 0); // new times to be entered as full seconds only
         if (mCompetitor.getFinishingTime() != null) {
             mCalendar.setTimeInMillis(mCompetitor.getFinishingTime().asMillis());
         }
@@ -107,7 +121,8 @@ public class CompetitorEditLayout extends ScrollView implements DatePickerDialog
                         month = mCalendar.get(Calendar.MONTH);
                         day = mCalendar.get(Calendar.DAY_OF_MONTH);
                     }
-                    DatePickerDialog dialog = new DatePickerDialog(context, R.style.AppTheme_PickerDialog, CompetitorEditLayout.this, year, month, day);
+                    DatePickerDialog dialog = new DatePickerDialog(context, R.style.AppTheme_PickerDialog,
+                            CompetitorEditLayout.this, year, month, day);
                     dialog.getDatePicker().setMinDate(startTime.asMillis());
                     dialog.show();
                 }
@@ -126,7 +141,8 @@ public class CompetitorEditLayout extends ScrollView implements DatePickerDialog
                         minutes = mCalendar.get(Calendar.MINUTE);
                         second = mCalendar.get(Calendar.SECOND);
                     }
-                    FullTimePickerDialog dialog = new FullTimePickerDialog(context, R.style.AppTheme_PickerDialog, CompetitorEditLayout.this, hour, minutes, second, true);
+                    FullTimePickerDialog dialog = new FullTimePickerDialog(context, R.style.AppTheme_PickerDialog,
+                            CompetitorEditLayout.this, hour, minutes, second, true);
                     dialog.show();
                 }
             });
@@ -164,8 +180,34 @@ public class CompetitorEditLayout extends ScrollView implements DatePickerDialog
             mPenalty.setSelection(penaltyAdapter.getPosition(mCompetitor.getMaxPointsReason().toString()));
         }
         mScore = ViewHelper.get(layout, R.id.competitor_score);
-        if (mScore != null && mCompetitor.getScore() != null) {
-            mScore.setText(String.format(Locale.getDefault(), "%f", mCompetitor.getScore()));
+        if (mScore != null) {
+            mScore.setKeyListener(new DecimalKeyListener());
+            final char separator = DecimalFormatSymbols.getInstance().getDecimalSeparator();
+            mScore.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+                    mScore.removeTextChangedListener(this);
+                    for (int i = 0; i < s.length(); i++) {
+                        char c = s.charAt(i);
+                        // If necessary replace '.' with ','
+                        if (c == '.' && separator != '.') {
+                            s.replace(i, i + 1, Character.toString(separator));
+                        }
+                    }
+                    mScore.addTextChangedListener(this);
+                }
+            });
+            if (mCompetitor.getScore() != null) {
+                mScore.setText(format.format(mCompetitor.getScore()));
+            }
         }
         mComment = ViewHelper.get(layout, R.id.competitor_comment);
         if (mComment != null) {
@@ -205,7 +247,11 @@ public class CompetitorEditLayout extends ScrollView implements DatePickerDialog
         }
         Double score = null;
         if (mScore != null && !TextUtils.isEmpty(mScore.getText())) {
-            score = Double.valueOf(mScore.getText().toString());
+            try {
+                score = format.parse(mScore.getText().toString()).doubleValue();
+            } catch (ParseException e) {
+                ExLog.w(getContext(), TAG, "Parsing score failed: " + mScore.getText().toString());
+            }
         }
         TimePoint finishingTime = null;
         if (!mRestricted) {
@@ -219,15 +265,17 @@ public class CompetitorEditLayout extends ScrollView implements DatePickerDialog
         if (mComment != null) {
             comment = mComment.getText().toString();
         }
-        CompetitorResult result = new CompetitorResultImpl(mCompetitor.getCompetitorId(), mCompetitor
-            .getCompetitorDisplayName(), oneBaseRank, maxPointsReason, score, finishingTime, comment, MergeState.OK);
-        return new CompetitorResultWithIdImpl(mCompetitor.getId(), mCompetitor.getBoat(), result);
+        CompetitorResult result = new CompetitorResultImpl(mCompetitor.getCompetitorId(), mCompetitor.getName(),
+                mCompetitor.getShortName(), mCompetitor.getBoatName(), mCompetitor.getBoatSailId(), oneBaseRank,
+                maxPointsReason, score, finishingTime, comment, MergeState.OK);
+        return new CompetitorResultWithIdImpl(mCompetitor.getId(), result);
     }
 
     @Override
     public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
         if (mCalendar == null) {
             mCalendar = (GregorianCalendar) Calendar.getInstance();
+            mCalendar.set(Calendar.MILLISECOND, 0);
         }
         mCalendar.set(Calendar.YEAR, year);
         mCalendar.set(Calendar.MONTH, monthOfYear);
@@ -239,6 +287,7 @@ public class CompetitorEditLayout extends ScrollView implements DatePickerDialog
     public void onTimeSet(FullTimePickerDialog dialog, int hourOfDay, int minute, int second) {
         if (mCalendar == null) {
             mCalendar = (GregorianCalendar) Calendar.getInstance();
+            mCalendar.set(Calendar.MILLISECOND, 0);
         }
         mCalendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
         mCalendar.set(Calendar.MINUTE, minute);

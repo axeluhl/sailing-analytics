@@ -8,3 +8,5 @@ Bundle-Vendor: SAP
 Fragment-Host: com.sap.sailing.domain.deckmanadapter
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.junit;bundle-version="4.8.2"
+Import-Package: com.sun.istack;version="3.0.7",
+ javax.xml.bind

@@ -20,8 +20,8 @@ public class FullTimePickerDialog extends AlertDialog {
     private NumberPicker mMinute;
     private NumberPicker mSecond;
 
-    public FullTimePickerDialog(Context context, int res, @NonNull final OnTimeSetListener listener, int hourOfDay, int minute, int second,
-        boolean is24Hour) {
+    public FullTimePickerDialog(Context context, int res, @NonNull final OnTimeSetListener listener, int hourOfDay,
+            int minute, int second, boolean is24Hour) {
         super(context, resolveDialogTheme(res));
 
         View view = getLayoutInflater().inflate(R.layout.time_picker_hms, null);
@@ -58,8 +58,8 @@ public class FullTimePickerDialog extends AlertDialog {
     }
 
     private void initPicker(NumberPicker picker, int start, int end, int initial) {
-        ThemeHelper.setPickerColor(getContext(), picker, ThemeHelper.getColor(getContext(), R.attr.white), ThemeHelper
-            .getColor(getContext(), R.attr.sap_blue_1));
+        ThemeHelper.setPickerColor(getContext(), picker, ThemeHelper.getColor(getContext(), R.attr.white),
+                ThemeHelper.getColor(getContext(), R.attr.sap_blue_1));
 
         picker.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
             @Override
@@ -79,7 +79,8 @@ public class FullTimePickerDialog extends AlertDialog {
     }
 
     private void updateTitle() {
-        setTitle(String.format(Locale.getDefault(), "%02d:%02d:%02d", mHour.getValue(), mMinute.getValue(), mSecond.getValue()));
+        setTitle(String.format(Locale.getDefault(), "%02d:%02d:%02d", mHour.getValue(), mMinute.getValue(),
+                mSecond.getValue()));
     }
 
     public interface OnTimeSetListener {

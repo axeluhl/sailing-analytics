@@ -12,7 +12,7 @@ import org.junit.Test;
 import com.sap.sse.pairinglist.PairingListTemplate;
 import com.sap.sse.pairinglist.impl.PairingListTemplateFactoryImpl;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 public class PairingListTemplateFactoryTest {
 
@@ -79,9 +79,9 @@ public class PairingListTemplateFactoryTest {
         PairingListTemplate example2 = factoryImpl.createPairingListTemplate(new PairingFrameProviderTest(100, 6, 18));
         PairingListTemplate example3 = factoryImpl.createPairingListTemplate(new PairingFrameProviderTest(10, 3, 30));
         PairingListTemplate example4 = factoryImpl
-                .createPairingListTemplate(new PairingFrameProviderTest(15, 3, 18), 3);
+                .createPairingListTemplate(new PairingFrameProviderTest(15, 3, 18), 3, 0);
         PairingListTemplate example5 = factoryImpl
-                .createPairingListTemplate(new PairingFrameProviderTest(15, 3, 18), 3);
+                .createPairingListTemplate(new PairingFrameProviderTest(15, 3, 18), 3, 0);
         assertNotNull(example1);
         assertNotNull(example2);
         assertNotNull(example3);
@@ -99,7 +99,7 @@ public class PairingListTemplateFactoryTest {
 
         PairingListTemplateFactoryImpl factoryImpl = new PairingListTemplateFactoryImpl();
         PairingListTemplate example = factoryImpl.createPairingListTemplate(
-                new PairingFrameProviderTest(flightCount, groupCount, competitorCount), multiplier);
+                new PairingFrameProviderTest(flightCount, groupCount, competitorCount), multiplier, 0);
 
         for (int groupIndex = 0; groupIndex < flightCount * groupCount; groupIndex = groupIndex
                 + (groupCount * (multiplier))) {

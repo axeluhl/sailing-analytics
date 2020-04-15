@@ -93,4 +93,18 @@ public interface StringMessages extends Messages {
     String explainReplicationServletPort();
 
     String ok();
+    
+    String setUpStorageService();
+
+    String usernameAndPasswordMustBothBeSet();
+
+    String username();
+
+    String explainUserName();
+
+    String password();
+
+    String explainPassword();
+
+    String additionalInformation();
 }

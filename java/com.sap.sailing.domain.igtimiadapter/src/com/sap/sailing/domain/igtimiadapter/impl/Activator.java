@@ -14,12 +14,17 @@ import org.json.simple.parser.ParseException;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
+import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.Client;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
 import com.sap.sailing.domain.igtimiadapter.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.igtimiadapter.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.igtimiadapter.persistence.PersistenceFactory;
 import com.sap.sailing.domain.tracking.WindTrackerFactory;
+import com.sap.sse.replication.FullyInitializedReplicableTracker;
+import com.sap.sse.security.SecurityService;
+import com.sap.sse.util.ClearStateTestSupport;
 import com.sap.sse.util.impl.ThreadFactoryWithPriority;
 
 /**
@@ -49,7 +54,9 @@ public class Activator implements BundleActivator {
     private static final String CLIENT_REDIRECT_PORT_PROPERTY_NAME = "igtimi.client.redirect.port";
     private final Future<IgtimiConnectionFactoryImpl> connectionFactory;
     private final Future<IgtimiWindTrackerFactory> windTrackerFactory;
+    private FullyInitializedReplicableTracker<SecurityService> securityServiceServiceTracker;
     private final ExecutorService executor = Executors.newSingleThreadExecutor(new ThreadFactoryWithPriority(Thread.NORM_PRIORITY, /* daemon */ true));
+    private SecurityService securityServiceTest;
 
     public Activator() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
         logger.info(getClass().getName()+" constructor");
@@ -77,6 +84,11 @@ public class Activator implements BundleActivator {
         });
     }
 
+    /** Only used by tests. */
+    public void setSecurityService(SecurityService securityService) {
+        securityServiceTest = securityService;
+    }
+
     @Override
     public void start(final BundleContext context) throws Exception {
         INSTANCE = this;
@@ -93,6 +105,25 @@ public class Activator implements BundleActivator {
                 }
             }
         });
+        securityServiceServiceTracker = FullyInitializedReplicableTracker.createAndOpen(context, SecurityService.class);
+        new Thread(() -> {
+            try {
+                final SecurityService securityService = securityServiceServiceTracker.getInitializedService(0);
+                IgtimiConnectionFactoryImpl igtimiConnectionFactory = connectionFactory.get();
+                for (Account account : igtimiConnectionFactory.getAllAccounts()) {
+                    securityService.migrateOwnership(account);
+                }
+                securityService.assumeOwnershipMigrated(SecuredDomainType.IGTIMI_ACCOUNT.getName());
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "Exception trying to migrate IgtimiAccounts implementation", e);
+            }
+        }, getClass().getName() + " registering connectivity handler").start();
+        context.registerService(ClearStateTestSupport.class.getName(), new ClearStateTestSupport() {
+            @Override
+            public void clearState() throws Exception {
+                connectionFactory.get().clear();
+            }
+        }, null);
     }
     
     public static Activator getInstance() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
@@ -111,6 +142,14 @@ public class Activator implements BundleActivator {
         }
     }
     
+    public SecurityService getSecurityService() {
+        try {
+            return securityServiceTest == null ? securityServiceServiceTracker.getInitializedService(0) : securityServiceTest;
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public IgtimiWindTrackerFactory getWindTrackerFactory() {
         try {
             return windTrackerFactory.get();
@@ -122,5 +161,7 @@ public class Activator implements BundleActivator {
 
     @Override
     public void stop(BundleContext context) throws Exception {
+        securityServiceServiceTracker.close();
+        securityServiceServiceTracker = null;
     }
 }

@@ -35,7 +35,7 @@ public class JSONServiceImpl implements JSONService {
     private RaceRecord createRaceRecord(URL jsonURL, boolean loadLiveAndStoredURI, JSONObject jsonRaceEntry)
             throws URISyntaxException, IOException {
         RaceRecord raceRecord = new RaceRecord(jsonURL, regattaName,
-                (String) jsonRaceEntry.get("name"), (String) jsonRaceEntry.get("url"),
+                (String) jsonRaceEntry.get("name"), (String) jsonRaceEntry.get("url_html"),
                 (String) jsonRaceEntry.get("params_url"),
                 (String) jsonRaceEntry.get("id"),
                 (String) jsonRaceEntry.get("tracking_starttime"),

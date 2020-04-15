@@ -1,10 +1,13 @@
 package com.sap.sailing.selenium.core;
 
+import java.util.HashSet;
 import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
-import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebDriver.TargetLocator;
 
 /**
  * <p></p>
@@ -13,9 +16,11 @@ import org.openqa.selenium.WebDriver.TargetLocator;
  *   Riccardo Nimser (D049941)
  */
 public class WindowManager {
-    private static final String JAVA_SCRIPT = "window.open('%s', '_blank')";
-    
+    private WebDriverWindow defaultWindow;
+    private final Set<WebDriverWindow> allWindows = new HashSet<>();
     private WebDriver driver;
+
+    private final Supplier<WebDriver> webDriverFactory;
     
     /**
      * <p></p>
@@ -23,115 +28,77 @@ public class WindowManager {
      * @param driver
      *   
      */
-    public WindowManager(WebDriver driver) {
-        this.driver = driver;
+    public WindowManager(Supplier<WebDriver> webDriverFactory) {
+        this.webDriverFactory = webDriverFactory;
     }
     
-    /**
-     * <p></p>
-     * 
-     * @param url
-     */
-    public void switchTo(String url) {
-        WebDriverWindow window = findWindow(url);
-        
-        if(window == null)
-            throw new RuntimeException("Window not found");
-        
-        window.switchToWindow();
-    }
-    
-    /**
-     * <p>Returns a handle to the window witch is currently active.</p>
-     * 
-     * @return
-     *   
-     */
-    public WebDriverWindow getCurrentWindow() {
-        return new WebDriverWindow(this.driver, this.driver.getWindowHandle());
-    }
-    
-    /**
-     * <p></p>
-     * 
-     * <p>Note: If no window is found with the specified URL, </p>
-     * 
-     * @param url
-     *   
-     * @return
-     *   
-     */
-    public WebDriverWindow findWindow(String url) {
-        if(url == null)
-            throw new IllegalArgumentException();
-        
-        TargetLocator locator = this.driver.switchTo();
-        
-        for(String handle : this.driver.getWindowHandles()) {
-            locator.window(handle);
-            
-            if(url.equals(this.driver.getCurrentUrl()))
-                return new WebDriverWindow(this.driver, handle);
+    public WebDriver getDefaultWebDriver() {
+        if (this.driver == null) {
+            this.driver = webDriverFactory.get();
+            this.defaultWindow = new ManagedWebDriverWindow(this.driver, this.driver.getWindowHandle());
+            setWindowMaximized(this.driver);
         }
+        return this.driver;
+    }
+    
+    public void withExtraWindow(BiConsumer<WebDriverWindow, WebDriverWindow> defaultAndExtraWindow) {
+        // ensures that a default window exists
+        getDefaultWebDriver();
         
-        return null;
-    }
-    
-    /**
-     * <p></p>
-     * 
-     * @return
-     */
-    public WebDriverWindow openNewWindow() {
-        return openNewWindow(false);
-    }
-    
-    public WebDriverWindow openNewWindow(boolean focus) {
-        return openNewWindow("", focus);
-    }
-    
-    /**
-     * <p></p>
-     * 
-     * @param url
-     * @return
-     */
-    public WebDriverWindow openNewWindow(String url) {
-        return openNewWindow(url, false);
-    }
-    
-    public WebDriverWindow openNewWindow(String url, boolean focus) {
-        WebDriverWindow window = new WebDriverWindow(this.driver, createWindow(url));
+        final WebDriver extraDriver = webDriverFactory.get();
+        final WebDriverWindow extraWindow = new ManagedWebDriverWindow(extraDriver, extraDriver.getWindowHandle());
         
-        if(focus) {
-            window.switchToWindow();
+        extraWindow.switchToWindow();
+        setWindowMaximized(extraDriver);
+        defaultWindow.switchToWindow();
+        
+        defaultAndExtraWindow.accept(defaultWindow, extraWindow);
+        try {
+            // quit is explicitly not called in a finally block to ensure that both windows are still open
+            // when trying to create screenshots in case an error occurs
+            extraWindow.close();
+            extraDriver.quit();
+        } catch (Exception e) {
+            // This call may fail depending on the WebDriver being used
         }
-        
-        return window;
     }
     
-    private String createWindow(String url) {
-        // Record old handles
-        Set<String> oldHandles = this.driver.getWindowHandles();
-        
-        executeScript(url != null ? url : "");
-        
-        return getNewHandle(oldHandles);
+    private void setWindowMaximized(WebDriver driver) {
+        try {
+            driver.manage().window().maximize();
+        } catch (Exception e) {
+            // Depending on the combination of OS and WebDriver implementation this may fail
+            // e.g. chrome with xvfb can't do this successfully.
+            try {
+                // Trying to set a proper screen size as fallback that should usable with all modern screens
+                driver.manage().window().setSize(new Dimension(1440, 900));
+            } catch (Exception exc) {
+                // In this case we just can't change the window
+            }
+        }
     }
     
-    private void executeScript(String url) {
-        JavascriptExecutor executor = (JavascriptExecutor) this.driver;
-        executor.executeScript(String.format(JAVA_SCRIPT, url));
+    public void forEachOpenedWindow(Consumer<WebDriverWindow> windowConsumer) {
+        new HashSet<>(this.allWindows).forEach(windowConsumer);
     }
     
-    private String getNewHandle(Set<String> oldHandles) {
-        Set<String> newHandles = this.driver.getWindowHandles();
-        newHandles.removeAll(oldHandles);
-
-        // Find the new window
-        for(String handle : newHandles)
-            return handle;
-
-        return null;
+    public void closeAllWindows() {
+        forEachOpenedWindow(WebDriverWindow::close);
+    }
+    
+    private class ManagedWebDriverWindow extends WebDriverWindow {
+        protected ManagedWebDriverWindow(WebDriver driver, String handle) {
+            super(driver, handle);
+            allWindows.add(this);
+        }
+        @Override
+        public void close() {
+            allWindows.remove(this);
+            if (this == defaultWindow) {
+                defaultWindow = null;
+                driver = null;
+            }
+            super.close();
+        }
     }
 }

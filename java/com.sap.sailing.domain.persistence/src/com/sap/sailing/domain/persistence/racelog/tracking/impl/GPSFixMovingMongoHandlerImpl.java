@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.persistence.racelog.tracking.impl;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
+import org.bson.Document;
+
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
@@ -11,6 +11,7 @@ import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.racelog.tracking.FixMongoHandler;
+import static com.sap.sailing.shared.persistence.impl.DomainObjectFactoryImpl.loadPosition;
 import com.sap.sse.common.TimePoint;
 
 public class GPSFixMovingMongoHandlerImpl implements FixMongoHandler<GPSFixMoving> {
@@ -23,8 +24,8 @@ public class GPSFixMovingMongoHandlerImpl implements FixMongoHandler<GPSFixMovin
     }
 
     @Override
-    public DBObject transformForth(GPSFixMoving fix) throws IllegalArgumentException {
-        DBObject result = new BasicDBObject();
+    public Document transformForth(GPSFixMoving fix) throws IllegalArgumentException {
+        Document result = new Document();
         mof.storeTimed(fix, result);
         mof.storePositioned(fix, result);    
         mof.storeSpeedWithBearing(fix.getSpeed(), result);  
@@ -32,9 +33,9 @@ public class GPSFixMovingMongoHandlerImpl implements FixMongoHandler<GPSFixMovin
     }
 
     @Override
-    public GPSFixMoving transformBack(DBObject dbObject) {
+    public GPSFixMoving transformBack(Document dbObject) {
         TimePoint timePoint = dof.loadTimePoint(dbObject);
-        Position position = dof.loadPosition(dbObject);
+        Position position = loadPosition(dbObject);
         SpeedWithBearing speed = dof.loadSpeedWithBearing(dbObject);
         return new GPSFixMovingImpl(position, timePoint, speed);
     }

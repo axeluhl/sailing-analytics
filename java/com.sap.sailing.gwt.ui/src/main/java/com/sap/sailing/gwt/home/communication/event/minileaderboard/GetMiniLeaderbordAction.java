@@ -64,7 +64,7 @@ public class GetMiniLeaderbordAction implements SailingAction<ResultWithTTL<GetM
     @Override
     @GwtIncompatible
     public ResultWithTTL<GetMiniLeaderboardDTO> execute(SailingDispatchContext context) {
-        return EventActionUtil.getLeaderboardContext(context, eventId, leaderboardName).calculateMiniLeaderboard(context.getRacingEventService(), limit);
+        return EventActionUtil.getLeaderboardContextWithReadPermissions(context, eventId, leaderboardName).calculateMiniLeaderboard(context.getRacingEventService(), limit);
     }
 
     @Override

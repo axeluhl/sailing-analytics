@@ -7,8 +7,8 @@ import org.junit.Before;
 import com.mongodb.MongoException;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
-import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
+import com.sap.sailing.server.interfaces.RacingEventService;
 
 public abstract class AbstractConnectivityParamsLoadAndStoreTest extends AbstractMongoDBTest {
     protected MockConnectivityParamsServiceFinderFactory serviceFinderFactory;

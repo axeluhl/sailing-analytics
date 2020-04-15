@@ -31,6 +31,7 @@ import com.sap.sailing.domain.common.TargetTimeInfo;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
+import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
@@ -74,8 +75,9 @@ public class RaceGroupFactory {
         Map<Series, List<RaceColumn>> seriesToRaceColumns = getSeriesToRaceColumns(leaderboard);
         Collection<SeriesWithRows> seriesWithRows = new ArrayList<>();
         for (Series series : getSeriesIterable(leaderboard, seriesToRaceColumns)) {
-            seriesWithRows.add(new SeriesWithRowsImpl(series.getName(), series.isMedal(), series.isFleetsCanRunInParallel(), getRows(series,
-                    seriesToRaceColumns.get(series))));
+            seriesWithRows
+                    .add(new SeriesWithRowsImpl(series.getName(), series.isMedal(), series.isFleetsCanRunInParallel(),
+                            getRows(series, seriesToRaceColumns.get(series), leaderboard.getScoringScheme())));
         }
         return seriesWithRows;
     }
@@ -89,14 +91,16 @@ public class RaceGroupFactory {
     }
 
     /**
-     * @param raceColumns must be provided in the same order in which they appear in the series / leaderboard
+     * @param raceColumns
+     *            must be provided in the same order in which they appear in the series / leaderboard
      */
-    private Collection<RaceRow> getRows(Series series, List<RaceColumn> raceColumns) {
+    private Collection<RaceRow> getRows(Series series, List<RaceColumn> raceColumns, ScoringScheme scoringScheme) {
         Collection<RaceRow> rows = new ArrayList<>();
         for (Fleet fleet : series.getFleets()) {
             // We are taking the fleet name because there might be several "default fleet"
             // objects when TrackedRaces are linked onto this Leaderboard
-                rows.add(new RaceRowImpl(fleet, getCells(fleet.getName(), raceColumns, isFirstRaceColumnVirtual(series))));
+            rows.add(new RaceRowImpl(fleet,
+                    getCells(fleet.getName(), raceColumns, isFirstRaceColumnVirtual(series), scoringScheme)));
         }
         return rows;
     }
@@ -111,7 +115,7 @@ public class RaceGroupFactory {
      * {@link TrackedRace#getEstimatedTimeToComplete(TimePoint) estimation} for the current point in time, when the
      * request is being made, using this time point to determine the wind speed and direction for each leg.
      */
-    private List<RaceCell> getCells(String fleetName, List<RaceColumn> raceColumns, boolean isFirstRaceColumnVirtual) {
+    private List<RaceCell> getCells(String fleetName, List<RaceColumn> raceColumns, boolean isFirstRaceColumnVirtual, ScoringScheme scoringScheme) {
         boolean skippedFirst = false;
         List<RaceCell> cells = new ArrayList<>();
         if (raceColumns != null) {
@@ -131,7 +135,8 @@ public class RaceGroupFactory {
                         targetTime = null;
                     }
                     cells.add(new RaceCellImpl(raceColumn.getName(), raceColumn.getRaceLog(fleet),
-                            raceColumn.getFactor(), raceColumn.getExplicitFactor(), zeroBasedIndexOfRaceInFleet++, targetTime));
+                            scoringScheme.getScoreFactor(raceColumn), raceColumn.getExplicitFactor(),
+                            zeroBasedIndexOfRaceInFleet++, targetTime));
                 }
             }
         }

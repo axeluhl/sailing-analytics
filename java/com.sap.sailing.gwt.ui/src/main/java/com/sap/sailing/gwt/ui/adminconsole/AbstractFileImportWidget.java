@@ -8,7 +8,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -25,6 +24,8 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 
 public abstract class AbstractFileImportWidget extends Composite {
 
@@ -89,7 +90,7 @@ public abstract class AbstractFileImportWidget extends Composite {
     void onFileImportComplete(SubmitCompleteEvent event) {
         SensorDataImportResponse importResponse = SensorDataImportResponse.parse(event.getResults());
         if (importResponse == null) {
-            Window.alert(StringMessages.INSTANCE.unexpectedErrorDuringFileImport());
+            Notification.notify(StringMessages.INSTANCE.unexpectedErrorDuringFileImport(), NotificationType.ERROR);
         } else {
             SensorDataImportResultsDialog.showResults(importResponse);
             if (importResponse.didSucceedImportingAnyFile()) {

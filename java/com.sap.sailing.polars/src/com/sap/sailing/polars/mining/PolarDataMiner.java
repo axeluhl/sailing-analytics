@@ -46,6 +46,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.polars.impl.CubicEquation;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Speed;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.components.Processor;
@@ -255,6 +256,35 @@ public class PolarDataMiner {
             throws NotEnoughDataHasBeenAddedException {
         return speedRegressionPerAngleClusterProcessor.estimateBoatSpeed(boatClass, windSpeed, trueWindAngle);
     }
+    
+    public Pair<List<Speed>, Double> estimateWindSpeeds(BoatClass boatClass, Speed boatSpeed, Bearing trueWindAngle)
+            throws NotEnoughDataHasBeenAddedException {
+        LegType legType;
+        if (trueWindAngle.getDegrees() < 70) {
+            legType = LegType.UPWIND;
+        } else if (trueWindAngle.getDegrees() < 120) {
+            legType = LegType.REACHING;
+        } else {
+            legType = LegType.DOWNWIND;
+        }
+        Set<SpeedWithBearingWithConfidence<Void>> resultSet = cubicRegressionPerCourseProcessor
+                .estimateTrueWindSpeedAndAngleCandidates(boatClass, boatSpeed, legType, Tack.STARBOARD);
+        double referenceTwsKnots = 10;
+        if (!resultSet.isEmpty()) {
+            double bestTwsKnots = Double.MAX_VALUE;
+            for (SpeedWithBearingWithConfidence<Void> speedWithBearingWithConfidence : resultSet) {
+                double twsKnots = speedWithBearingWithConfidence.getObject().getKnots();
+                if (twsKnots > 2 && twsKnots < 20 && Math.abs(10 - twsKnots) < Math.abs(10 - bestTwsKnots)) {
+                    bestTwsKnots = twsKnots;
+                }
+            }
+            if (bestTwsKnots > 2 && bestTwsKnots < 20) {
+                referenceTwsKnots = bestTwsKnots;
+            }
+        }
+        return speedRegressionPerAngleClusterProcessor.estimateWindSpeeds(boatClass, boatSpeed, trueWindAngle,
+                referenceTwsKnots);
+    }
 
     public Set<SpeedWithBearingWithConfidence<Void>> estimateTrueWindSpeedAndAngleCandidates(BoatClass boatClass,
             Speed speedOverGround, LegType legType, Tack tack) {
@@ -288,7 +318,7 @@ public class PolarDataMiner {
         } else if (legType.equals(LegType.DOWNWIND)) {
             CubicEquation downWindEquation = new CubicEquation(0.0003, -0.0373, 1.5213, -2.1309
                     - speedOverGround.getKnots());
-            int angle = 30 * tackFactor;
+            int angle = 150 * tackFactor;
             solveAndAddResults(resultSet, downWindEquation, angle);
         }
         return resultSet;

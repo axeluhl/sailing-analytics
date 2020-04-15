@@ -40,6 +40,7 @@ import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRul
 import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithFixedRank;
 import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithFixedRankAndManyCompetitors;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
+import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sse.common.TimePoint;
@@ -149,6 +150,14 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
             @Override
             public void removeRace(Regatta regatta, RaceDefinition race)
                     throws MalformedURLException, IOException, InterruptedException {
+            }
+            @Override
+            public void stopTracker(Regatta regatta, RaceTracker tracker)
+                    throws MalformedURLException, IOException, InterruptedException {
+            }
+            @Override
+            public Regatta getOrCreateDefaultRegatta(String name, String boatClassName, Serializable id) {
+                return null;
             }
         };
         LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(now, emptySet, /* addOverallDetails */ true, trackedRegattaRegistry, DomainFactory.INSTANCE, /* fillTotalPointsUncorrected */ false);

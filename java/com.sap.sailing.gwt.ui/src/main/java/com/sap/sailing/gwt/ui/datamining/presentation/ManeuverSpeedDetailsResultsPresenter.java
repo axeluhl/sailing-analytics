@@ -40,11 +40,11 @@ public class ManeuverSpeedDetailsResultsPresenter extends AbstractSailingResults
 
     private final DockLayoutPanel dockLayoutPanel;
 
-    private Chart polarChart;
+    private final Chart polarChart;
     private final SimpleLayoutPanel polarChartWrapperPanel;
 
-    private Chart lineChart;
-    private Chart dataCountHistogramChart;
+    private final Chart lineChart;
+    private final Chart dataCountHistogramChart;
     private final DockLayoutPanel rightSideChartsWrapperPanel;
 
     private final ManeuverSpeedDetailsChartConfigurationPanel chartConfigPanel;
@@ -52,39 +52,25 @@ public class ManeuverSpeedDetailsResultsPresenter extends AbstractSailingResults
     private Integer minDataCount;
 
     private Double minValue;
-
     private Double maxValue;
-
-    private boolean zeroTo360AxisLabeling = false;
+    
+    private int xAxisMin;
+    private int xAxisMax;
 
     private QueryResultDTO<?> result;
 
     public ManeuverSpeedDetailsResultsPresenter(Component<?> parent, ComponentContext<?> context,
             StringMessages stringMessages) {
         super(parent, context, stringMessages);
+        xAxisMin = -179;
+        xAxisMax = 180;
 
-        chartConfigPanel = new ManeuverSpeedDetailsChartConfigurationPanel(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                minDataCount = chartConfigPanel.getMinDataCount();
-                minValue = chartConfigPanel.getMinValue();
-                maxValue = chartConfigPanel.getMaxValue();
-                zeroTo360AxisLabeling = chartConfigPanel.isZeroTo360AxisLabeling();
-                if (result != null) {
-                    redrawAllCharts();
-                }
-            }
-
-        }, stringMessages);
-
+        chartConfigPanel = new ManeuverSpeedDetailsChartConfigurationPanel(this::applyConfiguration, stringMessages);
         addControl(chartConfigPanel);
 
         ChartToCsvExporter chartToCsvExporter = new ChartToCsvExporter(stringMessages.csvCopiedToClipboard());
-
         Button exportStatisticsCurveToCsvButton = new Button(stringMessages.exportStatisticsCurveToCsv(),
                 new ClickHandler() {
-
                     @Override
                     public void onClick(ClickEvent event) {
                         chartToCsvExporter.exportChartAsCsvToClipboard(lineChart);
@@ -92,6 +78,8 @@ public class ManeuverSpeedDetailsResultsPresenter extends AbstractSailingResults
                 });
         addControl(exportStatisticsCurveToCsvButton);
 
+        polarChart = ChartFactory.createPolarChart();
+        polarChart.getXAxis().setMin(xAxisMin).setMax(xAxisMax);
         polarChartWrapperPanel = new SimpleLayoutPanel() {
             @Override
             public void onResize() {
@@ -99,11 +87,13 @@ public class ManeuverSpeedDetailsResultsPresenter extends AbstractSailingResults
                 polarChart.redraw();
             }
         };
+        polarChartWrapperPanel.add(polarChart);
 
+        lineChart = ChartFactory.createLineChartForPolarData(stringMessages);
+        lineChart.getXAxis().setMin(xAxisMin).setMax(xAxisMax);
         dataCountHistogramChart = ChartFactory.createDataCountHistogramChart(
                 stringMessages.TWA() + " (" + stringMessages.degreesShort() + ")", stringMessages);
-        dataCountHistogramChart.getXAxis().setMin(-179);
-        dataCountHistogramChart.getXAxis().setMax(180);
+        dataCountHistogramChart.getXAxis().setMin(xAxisMin).setMax(xAxisMax);
         rightSideChartsWrapperPanel = new DockLayoutPanel(Unit.PCT) {
             @Override
             public void onResize() {
@@ -113,40 +103,27 @@ public class ManeuverSpeedDetailsResultsPresenter extends AbstractSailingResults
                 dataCountHistogramChart.redraw();
             }
         };
+        rightSideChartsWrapperPanel.addNorth(lineChart, 50);
+        rightSideChartsWrapperPanel.addSouth(dataCountHistogramChart, 50);
+        
         dockLayoutPanel = new DockLayoutPanel(Unit.PCT);
         dockLayoutPanel.addWest(polarChartWrapperPanel, 40);
         dockLayoutPanel.addEast(rightSideChartsWrapperPanel, 60);
-
-        redrawAllCharts();
-
     }
-
-    private void redrawAllCharts() {
-        if (polarChart != null) {
-            polarChartWrapperPanel.remove(polarChart);
-        }
-        if (lineChart != null) {
-            rightSideChartsWrapperPanel.remove(lineChart);
-        }
-        if (dataCountHistogramChart != null) {
-            rightSideChartsWrapperPanel.remove(dataCountHistogramChart);
-        }
-
-        int xAxisMin = zeroTo360AxisLabeling ? 0 : -179;
-        int xAxisMax = zeroTo360AxisLabeling ? 359 : 180;
-
-        polarChart = ChartFactory.createPolarChart();
-        lineChart = ChartFactory.createLineChartForPolarData(stringMessages);
-        dataCountHistogramChart = ChartFactory.createDataCountHistogramChart(
-                stringMessages.TWA() + " (" + stringMessages.degreesShort() + ")", stringMessages);
+    
+    private void applyConfiguration() {
+        minDataCount = chartConfigPanel.getMinDataCount();
+        minValue = chartConfigPanel.getMinValue();
+        maxValue = chartConfigPanel.getMaxValue();
+        
+        boolean zeroTo360AxisLabeling = chartConfigPanel.isZeroTo360AxisLabeling();
+        xAxisMin = zeroTo360AxisLabeling ? 0 : -179;
+        xAxisMax = zeroTo360AxisLabeling ? 359 : 180;
+        
         polarChart.getXAxis().setMin(xAxisMin).setMax(xAxisMax);
         lineChart.getXAxis().setMin(xAxisMin).setMax(xAxisMax);
         dataCountHistogramChart.getXAxis().setMin(xAxisMin).setMax(xAxisMax);
-
-        polarChartWrapperPanel.add(polarChart);
-        rightSideChartsWrapperPanel.addNorth(lineChart, 50);
-        rightSideChartsWrapperPanel.addSouth(dataCountHistogramChart, 50);
-
+        
         if (result != null) {
             internalShowResults(result);
         }
@@ -159,6 +136,10 @@ public class ManeuverSpeedDetailsResultsPresenter extends AbstractSailingResults
 
     @Override
     protected void internalShowResults(QueryResultDTO<?> result) {
+        polarChart.removeAllSeries(false);
+        lineChart.removeAllSeries(false);
+        dataCountHistogramChart.removeAllSeries(false);
+        
         this.result = result;
         Map<GroupKey, ?> results = result.getResults();
         List<GroupKey> sortedNaturally = new ArrayList<GroupKey>(results.keySet());
@@ -176,8 +157,6 @@ public class ManeuverSpeedDetailsResultsPresenter extends AbstractSailingResults
             Series polarSeries = polarChart.createSeries();
             Series histogramSeries = dataCountHistogramChart.createSeries();
             Series valueSeries = lineChart.createSeries();
-            int xAxisMin = zeroTo360AxisLabeling ? 0 : -179;
-            int xAxisMax = zeroTo360AxisLabeling ? 359 : 180;
             for (int convertedTWA = xAxisMin; convertedTWA <= xAxisMax; convertedTWA++) {
                 int i = convertedTWA < 0 ? convertedTWA + 360 : convertedTWA;
                 double value = valuePerTWA[i];
@@ -199,8 +178,11 @@ public class ManeuverSpeedDetailsResultsPresenter extends AbstractSailingResults
             histogramSeries.setVisible(false, false);
             valueSeries.setVisible(false, false);
             lineChart.addSeries(valueSeries, false, false);
-            dataCountHistogramChart.addSeries(histogramSeries);
+            dataCountHistogramChart.addSeries(histogramSeries, false, false);
         }
+        polarChart.redraw();
+        lineChart.redraw();
+        dataCountHistogramChart.redraw();
         // Initially resize the chart. Otherwise it's too big. FIXME with a better solution
         Timer timer = new Timer() {
 

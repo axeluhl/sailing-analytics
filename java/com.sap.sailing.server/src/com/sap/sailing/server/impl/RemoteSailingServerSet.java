@@ -41,6 +41,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserial
 import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.StatisticsByYearJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.StatisticsJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.TrackingConnectorInfoJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.DetailedRaceInfoJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.SimpleRaceInfoJsonSerializer;
@@ -59,7 +60,7 @@ import com.sap.sse.util.HttpUrlConnectionHelper;
  */
 public class RemoteSailingServerSet {
     private static final int POLLING_INTERVAL_IN_SECONDS = 60;
-    private NamedReentrantReadWriteLock lock = new NamedReentrantReadWriteLock("lock for RemoteSailingServerSet", true);
+    private NamedReentrantReadWriteLock lock = new NamedReentrantReadWriteLock("lock for RemoteSailingServerSet", /* fair */ true);
 
     private static final Logger logger = Logger.getLogger(RemoteSailingServerSet.class.getName());
 
@@ -96,7 +97,7 @@ public class RemoteSailingServerSet {
      * @param scheduler
      *            Used to schedule the periodic updates of the {@link #cachedEventsForRemoteSailingServers event cache}
      */
-    public RemoteSailingServerSet(ScheduledExecutorService scheduler, SharedDomainFactory baseDomainFactory) {
+    public RemoteSailingServerSet(ScheduledExecutorService scheduler, SharedDomainFactory<?> baseDomainFactory) {
         this.statisticsJsonDeserializer = StatisticsJsonDeserializer.create(baseDomainFactory);
         remoteSailingServers = new ConcurrentHashMap<>();
         cachedEventsForRemoteSailingServers = new ConcurrentHashMap<>();
@@ -121,6 +122,9 @@ public class RemoteSailingServerSet {
 
     public void add(RemoteSailingServerReference remoteSailingServerReference) {
         LockUtil.executeWithWriteLock(lock, () -> {
+            if (remoteSailingServers.containsKey(remoteSailingServerReference.getName())) {
+                remove(remoteSailingServerReference.getName());
+            }
             remoteSailingServers.put(remoteSailingServerReference.getName(), remoteSailingServerReference);
             triggerAsynchronousEventCacheUpdate(remoteSailingServerReference);
         });
@@ -249,7 +253,7 @@ public class RemoteSailingServerSet {
                 Object eventsAsObject = parser.parse(bufferedReader);
                 EventBaseJsonDeserializer deserializer = new EventBaseJsonDeserializer(
                         new VenueJsonDeserializer(new CourseAreaJsonDeserializer(DomainFactory.INSTANCE)),
-                        new LeaderboardGroupBaseJsonDeserializer());
+                        new LeaderboardGroupBaseJsonDeserializer(), new TrackingConnectorInfoJsonDeserializer());
                 JSONArray eventsAsJsonArray = (JSONArray) eventsAsObject;
                 final Set<EventBase> events = new HashSet<>();
                 for (Object eventAsObject : eventsAsJsonArray) {

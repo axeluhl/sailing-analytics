@@ -62,12 +62,19 @@ public abstract class UDPReceiver<MessageType extends UDPMessage, ListenerType e
                 message = queue.poll(/* timeout */ 10000, TimeUnit.MILLISECONDS);
                 while (!stopped) {
                     if (message != null) {
-                        listener.received(message);
+                        try {
+                            listener.received(message);
+                        } catch (Exception e) {
+                            logger.log(Level.WARNING, "Exception "+e.getMessage()+
+                                    " while trying to dispaatch UDP message "+message+
+                                    " to listener "+listener, e);
+                        }
                     }
                     message = queue.poll(/* timeout */ 10000, TimeUnit.MILLISECONDS);
                 }
             } catch (InterruptedException e) {
                 // when interrupted, this means we'll terminate
+                logger.warning("Listener thread for "+listener+" got interrupted and will now terminate.");
             }
         }
     }

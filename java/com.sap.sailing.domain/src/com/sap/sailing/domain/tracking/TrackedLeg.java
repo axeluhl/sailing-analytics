@@ -9,11 +9,13 @@ import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TargetTimeInfo.LegTargetTimeInfo;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 
 public interface TrackedLeg extends Serializable {
@@ -51,7 +53,7 @@ public interface TrackedLeg extends Serializable {
      * and bearing data can be passed to avoid redundant calculations during a single
      * round trip.
      */
-    LinkedHashMap<Competitor, Integer> getRanks(TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
+    LinkedHashMap<Competitor, Integer> getRanks(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     Bearing getLegBearing(TimePoint at);
 
@@ -115,7 +117,14 @@ public interface TrackedLeg extends Serializable {
      * for leg types, wind data and leg bearings can be passed to save the effort of redundant calculations of these
      * values.
      */
-    Distance getAbsoluteWindwardDistance(Position pos1, Position pos2, TimePoint at, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache);
+    Distance getAbsoluteWindwardDistance(Position pos1, Position pos2, TimePoint at, WindPositionMode windPositionMode, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
+
+    /**
+     * Same as {@link #getWindwardDistance(Position, Position, TimePoint, WindPositionMode)}, only that a cache
+     * for leg types, wind data and leg bearings can be passed to save the effort of redundant calculations of these
+     * values.
+     */
+    Distance getWindwardDistance(final Position pos1, final Position pos2, TimePoint at, WindPositionMode windPositionMode, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**
      * Same as {@link #getAbsoluteWindwardDistance(Position, Position, TimePoint, WindPositionMode)}, but this method considers the leg's
@@ -129,9 +138,17 @@ public interface TrackedLeg extends Serializable {
      * that competitors need to travel in this leg. Due to the dynamics of the wind direction and the mark positions,
      * the result is time dependent. The wind direction is determined at the leg's middle at the time point <code>at</code>.
      */
-    Distance getWindwardDistance(TimePoint at, WindLegTypeAndLegBearingCache cache);
+    Distance getWindwardDistance(TimePoint at, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
-    Distance getAbsoluteWindwardDistance(TimePoint at, WindLegTypeAndLegBearingCache cache);
+    /**
+     * Like {@link #getWindwardDistance(TimePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache)}, only that
+     * the {@code legType} can optionally be specified explicitly; if not {@code null}, instead of inferring the leg type
+     * from the wind direction, the leg type provided is assumed. This way it is possible to explicitly evaluate the distance
+     * based on rhumb line, namely by providing {@link LegType#REACHING} as {@code legType}. 
+     */
+    Distance getWindwardDistance(LegType legType, TimePoint middle, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
+
+    Distance getAbsoluteWindwardDistance(TimePoint at, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**
      * Computes the windward distance for upwind/downwind legs or the great circle distance between this leg's waypoints
@@ -139,29 +156,51 @@ public interface TrackedLeg extends Serializable {
      * the result is time dependent. As time point, the middle of the interval defined by the first mark passing starting the
      * leg and the last mark passing finishing the leg is used, where both time points default to "now."
      * 
-     * @see #getWindwardDistance(TimePoint, WindLegTypeAndLegBearingCache)
+     * @see #getWindwardDistance(TimePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache)
      */
     Distance getWindwardDistance();
 
     /**
      * Same as {@link #getWindwardDistance()}, but offering the client to use a cache
      */
-    Distance getWindwardDistance(WindLegTypeAndLegBearingCache cache);
+    Distance getWindwardDistance(WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
-    Distance getAbsoluteWindwardDistance(WindLegTypeAndLegBearingCache cache);
+    /**
+     * Same as {@link #getWindwardDistance(WindLegTypeAndLegBearingAndORCPerformanceCurveCache)}, only that
+     * the {@code legType} can optionally be specified explicitly; if not {@code null}, instead of inferring the leg type
+     * from the wind direction, the leg type provided is assumed. This way it is possible to explicitly evaluate the distance
+     * based on rhumb line, namely by providing {@link LegType#REACHING} as {@code legType}.  
+     */
+    Distance getWindwardDistance(LegType legType, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
+
+    Distance getAbsoluteWindwardDistance(WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**
      * The middle (traveling half the length) of the course middle line, connecting the center of gravity of the leg's start
      * waypoint's position at time point <code>at</code> and the position of the leg's end waypoint at time point <code>at</code>.
      */
     Position getMiddleOfLeg(TimePoint at);
+    
+    /**
+     * The positions of the course breaking up of line, connecting the start and the end of leg waypoint's position at
+     * time point <code>at</code> and the position of the leg's end waypoint at time point <code>at</code>.
+     * 
+     * @param numberOfPositions
+     *            number of positions along the way, with the first position being the approximate position of the leg's
+     *            start waypoint and the last position being the approximate position of the leg's end waypoint
+     * @return if the position of at least one of the leg's start/end waypoints cannot be determined, an empty sequence
+     *         of {@link Position}s will be returned
+     */
+    Iterable<Position> getEquidistantSectionsOfLeg(TimePoint at, int numberOfPositions);
 
     /**
-     * @param timepoint Used for positions of marks and wind information
+     * @param timepoint
+     *            Used for positions of marks and wind information
      * @return estimated time it takes to complete the leg
-     * @throws NotEnoughDataHasBeenAddedException thrown if not enough polar data has been added or polar data service
-     * is not available
-     * @throws NoWindException no wind available. unable to determine legtypes for given timepoint
+     * @throws NotEnoughDataHasBeenAddedException
+     *             thrown if not enough polar data has been added or polar data service is not available
+     * @throws NoWindException
+     *             no wind available. unable to determine legtypes for given timepoint
      */
     LegTargetTimeInfo getEstimatedTimeAndDistanceToComplete(PolarDataService polarDataService, TimePoint timepoint, MarkPositionAtTimePointCache markPositionCache)
             throws NotEnoughDataHasBeenAddedException, NoWindException;
@@ -176,9 +215,17 @@ public interface TrackedLeg extends Serializable {
     /**
      * Same as {@link #getAbsoluteWindwardDistanceFromLegStart(Position)}, offering the caller to pass in a cache
      */
-    Distance getAbsoluteWindwardDistanceFromLegStart(Position pos, WindLegTypeAndLegBearingCache cache);
+    Distance getAbsoluteWindwardDistanceFromLegStart(Position pos, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
-    Distance getWindwardDistanceFromLegStart(Position pos, WindLegTypeAndLegBearingCache cache);
+    Distance getWindwardDistanceFromLegStart(Position pos, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
+
+    /**
+     * Like {@link #getWindwardDistanceFromLegStart(Position, WindLegTypeAndLegBearingAndORCPerformanceCurveCache)}, only that
+     * the {@code legType} can optionally be specified explicitly; if not {@code null}, instead of inferring the leg type
+     * from the wind direction, the leg type provided is assumed. This way it is possible to explicitly evaluate the distance
+     * based on rhumb line, namely by providing {@link LegType#REACHING} as {@code legType}. 
+     */
+    Distance getWindwardDistanceFromLegStart(LegType legType, Position pos, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**
      * Determines an average true wind direction for this leg; it does so by querying the tracked race for
@@ -194,12 +241,47 @@ public interface TrackedLeg extends Serializable {
      * "now" is used.
      */
     TimePoint getReferenceTimePoint();
-
+    
+    
+    /**
+     * Computes a set of reference time point for this leg that is the same for all competitors and that is the equidistant 
+     * time points between first leg entry and last leg exit. If no competitor has entered the leg, "now" is used as a
+     * default. If competitors have entered the leg but none has finished it yet, the middle between first entry and
+     * "now" is used. 
+     */
+    Iterable<TimePoint> getEquidistantReferenceTimePoints(int numberOfPoints);
+    
+    /**
+     * Computes a {@link Wind} estimation based on {@link #numParts} x {@link #numParts} wind samples, taken for
+     * {@link #numParts} time points spread equally across the time range between the first boat entering and the last
+     * boat exiting the leg (defaulting to "now" if no boat has exited the leg yet) and across {@link #numParts}
+     * positions along the great circle segment connecting the approximate start waypoint's position and the approximate
+     * end waypoint's position at the respective time point. Those wind samples are averaged based on their original
+     * confidences. The {@link #scale(double) scaling} of this leg does not affect the wind sampling; in all cases, wind
+     * samples will always be taken along the full leg distance, making the result of this method the same for the same
+     * boundary conditions (mark passings etc.) for all competitors.
+     * 
+     * @param numParts
+     *            the number of positions and the number of time points to use for averaging the wind field; the result
+     *            will hence be computed as an average---weighted by the original confidence of each wind estimation at
+     *            any of these positions/time points---of these {@code numParts*numParts} wind estimations.
+     */
+    WindWithConfidence<Util.Pair<Position, TimePoint>> getAverageWind(int numParts);
+    
     /**
      * The leader at the given <code>timePoint</code> in this leg, based on the {@link TrackedRace#getRankingMetric() ranking metric}
      * installed for the race.
      */
     Competitor getLeader(TimePoint timePoint);
 
-    Competitor getLeader(TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
+    Competitor getLeader(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
+
+    Bearing getTWA(TimePoint at) throws NoWindException;
+    
+    /**
+     * Same as {@link #getTWA(TimePoint) getTWA(}{@link #getReferenceTimePoint() getReferenceTimePoint())}.
+     */
+    default Bearing getTWA() throws NoWindException {
+        return getTWA(getReferenceTimePoint());
+    }
 }

@@ -22,18 +22,26 @@ import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
  */
 public class WindTrackRetrievalProcessor extends AbstractRetrievalProcessor<HasTrackedRaceContext, HasWindTrackContext> {
 
-    public WindTrackRetrievalProcessor(ExecutorService executor, Collection<Processor<HasWindTrackContext, ?>> resultReceivers, int retrievalLevel) {
-        super(HasTrackedRaceContext.class, HasWindTrackContext.class, executor, resultReceivers, retrievalLevel);
+    public WindTrackRetrievalProcessor(ExecutorService executor,
+            Collection<Processor<HasWindTrackContext, ?>> resultReceivers, int retrievalLevel,
+            String retrievedDataTypeMessageKey) {
+        super(HasTrackedRaceContext.class, HasWindTrackContext.class, executor, resultReceivers, retrievalLevel,
+                retrievedDataTypeMessageKey);
     }
 
     @Override
     protected Iterable<HasWindTrackContext> retrieveData(HasTrackedRaceContext element) {
         Collection<HasWindTrackContext> windTracksWithContext = new ArrayList<>();
-        final TrackedRace trackedRace = element.getTrackedRace();
-        for (final WindSource windSource : trackedRace.getWindSources()) {
-            if (!trackedRace.getWindSourcesToExclude().contains(windSource)) {
-                final WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
-                windTracksWithContext.add(new WindTrackWithContext(element, windTrack, windSource));
+        if(element != null && element.getTrackedRace() != null) {
+            final TrackedRace trackedRace = element.getTrackedRace();
+            for (final WindSource windSource : trackedRace.getWindSources()) {
+                if (isAborted()) {
+                    break;
+                }
+                if (!trackedRace.getWindSourcesToExclude().contains(windSource)) {
+                    final WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
+                    windTracksWithContext.add(new WindTrackWithContext(element, windTrack, windSource));
+                }
             }
         }
         return windTracksWithContext;

@@ -12,6 +12,7 @@ public class SailingVideoDTO extends VideoDTO {
     private EventReferenceDTO eventRef;
 
     /** for GWT */
+    @Deprecated
     protected SailingVideoDTO() {
     }
 

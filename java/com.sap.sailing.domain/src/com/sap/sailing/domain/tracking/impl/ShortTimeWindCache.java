@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -89,6 +90,31 @@ public class ShortTimeWindCache {
         }
     }
     
+    public void clearCache() {
+        cache.clear();
+        order.clear();
+    }
+
+    public void clearCacheEntriesAtPositionsAndTimePointsWithWindSource(
+            List<Pair<Position, TimePoint>> changedWindMeasurements, WindSource windSourceWithChange) {
+        Triple<Position, TimePoint, Set<WindSource>> cachedKey = order.peekFirst().getB();
+        // Set with excluded wind sources must not include the windSourceWithChange
+        if (!cachedKey.getC().contains(windSourceWithChange)
+                && changedWindMeasurements.contains(new Pair<>(cachedKey.getA(), cachedKey.getB()))) {
+            order.pollFirst();
+            cache.remove(cachedKey);
+        }
+    }
+
+    public void clearCacheEntriesWithWindSource(WindSource windSourceWithChange) {
+        Triple<Position, TimePoint, Set<WindSource>> cachedKey = order.peekFirst().getB();
+        // Set with excluded wind sources must not include the windSourceWithChange
+        if (!cachedKey.getC().contains(windSourceWithChange)) {
+            order.pollFirst();
+            cache.remove(cachedKey);
+        }
+    }
+    
     protected WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> getWindWithConfidence(Position p,
             TimePoint at, Set<WindSource> windSourcesToExclude) {
         WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> wind;
@@ -124,4 +150,5 @@ public class ShortTimeWindCache {
                     scheduleAtFixedRate(new CacheInvalidator(), /* delay */ preserveHowManyMilliseconds, preserveHowManyMilliseconds, TimeUnit.MILLISECONDS);
         }
     }
+
 }

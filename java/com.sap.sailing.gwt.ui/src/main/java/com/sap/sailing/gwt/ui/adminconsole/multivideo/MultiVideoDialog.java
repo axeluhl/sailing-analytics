@@ -24,7 +24,6 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.typedarrays.shared.Int8Array;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
@@ -44,6 +43,7 @@ import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.VideoMetadataDTO;
 import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.domain.common.media.MediaTrackWithSecurityDTO;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -59,6 +59,8 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.MimeType;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.controls.datetime.DateAndTimeInput;
 import com.sap.sse.gwt.client.controls.datetime.DateTimeInput.Accuracy;
 
@@ -338,10 +340,10 @@ public class MultiVideoDialog extends DialogBox {
                 MediaTrack mediaTrack = new MediaTrack(remoteFile.url, remoteFile.url,
                         remoteFile.startTime.plus(offsetTimeInMS), remoteFile.duration, remoteFile.mime,
                         selectedCandidates);
-                mediaService.addMediaTrack(mediaTrack, new AsyncCallback<String>() {
+                mediaService.addMediaTrack(mediaTrack, new AsyncCallback<MediaTrackWithSecurityDTO>() {
 
                     @Override
-                    public void onSuccess(String result) {
+                    public void onSuccess(MediaTrackWithSecurityDTO result) {
                         remoteFile.status = EStatus.DONE;
                         remoteFile.isWorking = false;
                         updateUI();
@@ -617,7 +619,7 @@ public class MultiVideoDialog extends DialogBox {
 
             @Override
             public void noResult() {
-                Window.alert(stringMessages.serverURLInvalid());
+                Notification.notify(stringMessages.serverURLInvalid(), NotificationType.ERROR);
             }
 
             @Override

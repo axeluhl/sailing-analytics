@@ -31,12 +31,10 @@ public class FleetIdentifierImpl implements FleetIdentifier {
     }
 
     public String getId() {
-        return String.format("%s.%s.%s", 
-                escapeIdentifierFragment(getRaceGroup().getName()), 
-                escapeIdentifierFragment(getSeries().getName()), 
-                escapeIdentifierFragment(getFleet().getName()));
+        return String.format("%s.%s.%s", escapeIdentifierFragment(getRaceGroup().getName()),
+                escapeIdentifierFragment(getSeries().getName()), escapeIdentifierFragment(getFleet().getName()));
     }
-    
+
     protected String escapeIdentifierFragment(String fragment) {
         return fragment.replace("\\", "\\\\").replace(".", "\\.");
     }
@@ -48,11 +46,11 @@ public class FleetIdentifierImpl implements FleetIdentifier {
     public static Triple<String, String, String> unescape(String escapedId) {
         int arrayIndex = 0;
         StringBuilder[] split = new StringBuilder[4];
-        for (int i=0; i<split.length; i++) {
+        for (int i = 0; i < split.length; i++) {
             split[i] = new StringBuilder();
         }
         boolean escaped = false;
-        for (int i=0; i<escapedId.length(); i++) {
+        for (int i = 0; i < escapedId.length(); i++) {
             if (escaped) {
                 split[arrayIndex].append(escapedId.charAt(i));
                 escaped = false;

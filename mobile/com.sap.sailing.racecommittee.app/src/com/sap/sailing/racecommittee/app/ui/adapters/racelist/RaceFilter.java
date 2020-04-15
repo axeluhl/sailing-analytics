@@ -19,7 +19,8 @@ import android.widget.Filter;
  */
 public class RaceFilter extends Filter {
     /**
-     * A filter that is updated each time an update for {@link #allRaces} is announced by {@link #refreshRegattaStructures()}.
+     * A filter that is updated each time an update for {@link #allRaces} is announced by
+     * {@link #refreshRegattaStructures()}.
      */
     private CurrentRaceFilter<ManagedRace> currentRaceFilter;
 

@@ -36,6 +36,7 @@ import com.sap.sailing.dashboards.gwt.shared.dto.RaceIdDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.media.ImageDTO;
 
 /**
@@ -88,12 +89,12 @@ public class DashboardPanel extends Composite implements NumberOfWindBotsChangeL
     DashboardClientFactory dashboardClientFactory;
     private static final Logger logger = Logger.getLogger(DashboardPanel.class.getName());
 
-    public DashboardPanel(DashboardClientFactory dashboardClientFactory) {
+    public DashboardPanel(DashboardClientFactory dashboardClientFactory, ErrorReporter errorReporter) {
         DashboardPanelResources.INSTANCE.style().ensureInjected();
         this.dashboardClientFactory = dashboardClientFactory;
         leftWindBotWidget = new WindBotWidget(dashboardClientFactory);
         rightWindBotWidget = new WindBotWidget(dashboardClientFactory);
-        startanalysisComponent = new StartAnalysisWidget(this.dashboardClientFactory);
+        startanalysisComponent = new StartAnalysisWidget(this.dashboardClientFactory, errorReporter);
         startlineAdvantagesByWindComponent = new StartlineAdvantagesByWindWidget(this.dashboardClientFactory);
         startlineAdvantageByGeometryWidget = new StartlineAdvantageByGeometryWidget(this.dashboardClientFactory);
         stringConstants = StringMessages.INSTANCE;

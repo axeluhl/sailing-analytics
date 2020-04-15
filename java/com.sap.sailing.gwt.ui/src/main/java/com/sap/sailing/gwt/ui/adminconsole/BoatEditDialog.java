@@ -50,10 +50,32 @@ public class BoatEditDialog extends DataEntryDialog<BoatDTO> {
                             result = stringMessages.pleaseEnterASailNumberOrABoatName();
                         } else if (valueToValidate.getColor() != null && valueToValidate.getColor() instanceof InvalidColor) {
                             result = valueToValidate.getColor().getAsHtml();
-                        } else if (valueToValidate.getBoatClass().getName() == null || valueToValidate.getBoatClass().getName().isEmpty()) {
+                        } else if (boatClassWasChanged(valueToValidate, boatToEdit)
+                                && (valueToValidate.getBoatClass().getName() == null
+                                        || valueToValidate.getBoatClass().getName().isEmpty())) {
+                            // only validate if boat class changed
                             result = stringMessages.pleaseEnterABoatClass();
                         }
                         return result;
+                    }
+
+                    private boolean boatClassWasChanged(BoatDTO boatToValidate, BoatDTO originalBoat) {
+                        boolean changed = false;
+                        if (boatToValidate.getBoatClass() == null && originalBoat.getBoatClass() != null) {
+                            // boat class has been added
+                            changed = true;
+                        } else if (boatToValidate.getBoatClass() != null && originalBoat.getBoatClass() == null) {
+                            //
+                            changed = true;
+                        } else if (boatToValidate.getBoatClass() == null && originalBoat.getBoatClass() == null) {
+                            // this is a create dialog, the boat class was just created
+                            changed = true;
+                        } else if (originalBoat.getBoatClass().getName()
+                                .equals(boatToValidate.getBoatClass().getName())) {
+                            // boat class exists and stayed the same
+                            changed = false;
+                        }
+                        return changed;
                     }
                 }, /* animationEnabled */true, callback);
         this.ensureDebugId("BoatEditDialog");

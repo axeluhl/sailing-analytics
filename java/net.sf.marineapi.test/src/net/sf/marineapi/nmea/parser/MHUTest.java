@@ -26,7 +26,7 @@ import net.sf.marineapi.nmea.sentence.TalkerId;
 import org.junit.Before;
 import org.junit.Test;
 
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 
 /**
  * MHU parser tests.

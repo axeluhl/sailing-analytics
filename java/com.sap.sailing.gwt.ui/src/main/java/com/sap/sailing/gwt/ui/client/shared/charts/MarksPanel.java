@@ -16,19 +16,19 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
-import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.SortingOrder;
-import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.charts.EditMarkPositionPanel.NotificationType;
-import com.sap.sailing.gwt.ui.client.shared.controls.FlushableSortedCellTableWithStylableHeaders;
-import com.sap.sailing.gwt.ui.client.shared.controls.SortableColumn;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardTableResources;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
+import com.sap.sse.common.InvertibleComparator;
+import com.sap.sse.common.SortingOrder;
+import com.sap.sse.common.impl.InvertibleComparatorAdapter;
 import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
+import com.sap.sse.gwt.client.celltable.FlushableSortedCellTableWithStylableHeaders;
 import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
+import com.sap.sse.gwt.client.celltable.SortableColumn;
 import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
@@ -85,22 +85,27 @@ public class MarksPanel extends AbstractCompositeComponent<AbstractSettings> {
             @Override
             public void update(int index, final MarkDTO mark, String value) {
                 final Date timePoint = parent.timer.getTime();
-                select(mark);
-                if (parent.hasFixAtTimePoint(mark, timePoint)) {
-                    parent.showNotification(stringMessages.pleaseSelectOtherTimepoint(), NotificationType.ERROR);
-                } else {
-                    parent.createFixPositionChooserToAddFixToMark(mark, new Callback<Position, Exception>() {
-                        @Override
-                        public void onFailure(Exception reason) {
-                            parent.resetCurrentFixPositionChooser();
+                parent.retrieveAndSelectMarkIfNecessary(mark, new Runnable() {
+
+                    @Override
+                    public void run() {
+                        if (parent.hasFixAtTimePoint(mark, timePoint)) {
+                            parent.showNotification(stringMessages.pleaseSelectOtherTimepoint(), NotificationType.ERROR);
+                        } else {
+                            parent.createFixPositionChooserToAddFixToMark(mark, new Callback<Position, Exception>() {
+                                @Override
+                                public void onFailure(final Exception reason) {
+                                    parent.resetCurrentFixPositionChooser();
+                                }
+                                @Override
+                                public void onSuccess(Position result) {
+                                    parent.addMarkFix(mark, timePoint, result);
+                                    parent.resetCurrentFixPositionChooser();
+                                }
+                            });
                         }
-                        @Override
-                        public void onSuccess(Position result) {
-                            parent.addMarkFix(mark, timePoint, result);
-                            parent.resetCurrentFixPositionChooser();
-                        }
-                    });
-                }
+                    }
+                });
             }
         });
         markTable.addColumn(addFixColumn);

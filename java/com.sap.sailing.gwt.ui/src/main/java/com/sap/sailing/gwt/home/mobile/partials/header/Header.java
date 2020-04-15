@@ -64,7 +64,6 @@ public class Header extends Composite {
         addNavigation(placeNavigator.getHomeNavigation(), StringMessages.INSTANCE.home());
         addNavigation(placeNavigator.getEventsNavigation(), StringMessages.INSTANCE.events());
         addNavigation(placeNavigator.getSolutionsNavigation(SolutionsNavigationTabs.SailingAnalytics), StringMessages.INSTANCE.solutions());
-        addUrl("https://blog.sapsailing.com", StringMessages.INSTANCE.blog());
         signInNavigationItem = addNavigation(com.sap.sse.security.ui.client.i18n.StringMessages.INSTANCE.signIn(), new Runnable() {
             @Override
             public void run() {
@@ -139,11 +138,6 @@ public class Header extends Composite {
         return navigationItem;
     }
     
-    private void addUrl(String url, String name) {
-        HeaderNavigationItem navigationItem = new HeaderNavigationItem(name, url);
-        dropdownListUi.add(navigationItem);
-    }
-
     public void setLocationTitle(String locationTitle) {
         locationTitleUi.setInnerText(locationTitle);
     }

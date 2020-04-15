@@ -1,5 +1,8 @@
 package com.sap.sse.datamining.impl;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,7 +15,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import com.sap.sse.common.Base64Utils;
 import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.DataSourceProvider;
 import com.sap.sse.datamining.ModifiableDataMiningServer;
@@ -38,7 +44,6 @@ import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.impl.components.DataRetrieverLevel;
 import com.sap.sse.datamining.impl.components.management.AbstractMemoryMonitorAction;
 import com.sap.sse.datamining.impl.components.management.QueryManagerMemoryMonitor;
-import com.sap.sse.datamining.impl.components.management.ReducedDimensions;
 import com.sap.sse.datamining.impl.components.management.RuntimeMemoryInfoProvider;
 import com.sap.sse.datamining.impl.components.management.StrategyPerQueryTypeManager;
 import com.sap.sse.datamining.shared.DataMiningSession;
@@ -48,12 +53,13 @@ import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
-import com.sap.sse.datamining.shared.impl.dto.ModifiableStatisticQueryDefinitionDTO;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.i18n.impl.CompoundResourceBundleStringMessages;
 import com.sap.sse.util.JoinedClassLoader;
+import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
 
 public class DataMiningServerImpl implements ModifiableDataMiningServer {
+    private static final Logger logger = Logger.getLogger(DataMiningServerImpl.class.getName());
     
     private static final long MEMORY_CHECK_PERIOD = 5;
     private static final TimeUnit MEMORY_CHECK_PERIOD_UNIT = TimeUnit.SECONDS;
@@ -92,7 +98,6 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
         this.dataSourceProviderRegistry = dataSourceProviderRegistry;
         this.dataRetrieverChainDefinitionRegistry = dataRetrieverChainDefinitionRegistry;
         this.aggregationProcessorDefinitionRegistry = aggregationProcessorDefinitionRegistry;
-        
         this.queryDefinitionRegistry = queryDefinitionRegistry;
     }
     
@@ -140,17 +145,50 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
         return executorService;
     }
     
-    private JoinedClassLoader getJoinedClassLoader() {
+    @Override
+    public JoinedClassLoader getJoinedClassLoader() {
         return new JoinedClassLoader(dataMiningClassLoaders);
     }
     
+    /**
+     * @return the {@link StatisticQueryDefinitionDTO} from a base 64 string deserialized with java serialization,
+     *         considering the {@link #getJoinedClassLoader() joined class loader} that offers all classes of all
+     *         bundles that currently provide data mining components to this server
+     */
+    @Override
+    public StatisticQueryDefinitionDTO fromBase64String(final String string) {
+        byte[] bytes;
+        try {
+            bytes = Base64Utils.fromBase64(string);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+        final ClassLoader oldThreadContextClassLoader = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(getJoinedClassLoader());
+        try (final ObjectInputStream in = new ObjectInputStreamResolvingAgainstCache<Object>(
+                new ByteArrayInputStream(bytes), /* dummy "cache" */ new Object(), /* resolve listener */ null) {}) {
+            Object o = in.readObject();
+            if (o instanceof StatisticQueryDefinitionDTO) {
+                return (StatisticQueryDefinitionDTO) o;
+            }
+        } catch (IOException | ClassNotFoundException e) {
+            logger.log(Level.SEVERE, "Could not load query", e);
+        } finally {
+            Thread.currentThread().setContextClassLoader(oldThreadContextClassLoader);
+        }
+        return null;
+    }
+
+    
     @Override
     public void addDataMiningBundleClassLoader(ClassLoader classLoader) {
+        logger.info("Adding data mining bundle class loader "+classLoader);
         dataMiningClassLoaders.add(classLoader);
     }
     
     @Override
     public void removeDataMiningBundleClassLoader(ClassLoader classLoader) {
+        logger.info("Removing data mining bundle class loader "+classLoader);
         dataMiningClassLoaders.remove(classLoader);
     }
     
@@ -208,38 +246,7 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     public FunctionProvider getFunctionProvider() {
         return functionRegistry;
     }
-
-    @Override
-    public Iterable<Function<?>> getAllStatistics() {
-        return functionRegistry.getAllStatistics();
-    }
-
-    @Override
-    public Iterable<Function<?>> getFunctionsFor(Class<?> sourceType) {
-        return functionRegistry.getFunctionsFor(sourceType);
-    }
-
-    @Override
-    public Iterable<Function<?>> getStatisticsFor(Class<?> sourceType) {
-        return functionRegistry.getStatisticsFor(sourceType);
-    }
-
-    @Override
-    public Iterable<Function<?>> getDimensionsFor(Class<?> sourceType) {
-        return functionRegistry.getDimensionsFor(sourceType);
-    }
-
-    @Override
-    public Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> getDimensionsMappedByLevelFor(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
-        return functionRegistry.getDimensionsMappedByLevelFor(dataRetrieverChainDefinition);
-    }
     
-    @Override
-    public ReducedDimensions getReducedDimensionsMappedByLevelFor(
-            DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
-        return functionRegistry.getReducedDimensionsMappedByLevelFor(dataRetrieverChainDefinition);
-    }
-
     @Override
     public Function<?> getFunctionForDTO(FunctionDTO functionDTO) {
         return functionRegistry.getFunctionForDTO(functionDTO, getJoinedClassLoader());
@@ -272,11 +279,6 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     }
     
     @Override
-    public Iterable<DataRetrieverChainDefinition<?, ?>> getDataRetrieverChainDefinitions() {
-        return dataRetrieverChainDefinitionRegistry.getAll();
-    }
-    
-    @Override
     public void registerDataRetrieverChainDefinition(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
         boolean componentsChanged = dataRetrieverChainDefinitionRegistry.register(dataRetrieverChainDefinition);
         if (componentsChanged) {
@@ -291,24 +293,6 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
             updateComponentsChangedTimepoint();
         }
     }
-    
-    @Override
-    public <DataSourceType> Iterable<DataRetrieverChainDefinition<DataSourceType, ?>> getDataRetrieverChainDefinitionsBySourceType(
-            Class<DataSourceType> dataSourceType) {
-        return dataRetrieverChainDefinitionRegistry.getBySourceType(dataSourceType);
-    }
-    
-    @Override
-    public <DataType> Iterable<DataRetrieverChainDefinition<?, DataType>> getDataRetrieverChainDefinitionsByDataType(
-            Class<DataType> retrievedDataType) {
-        return dataRetrieverChainDefinitionRegistry.getByDataType(retrievedDataType);
-    }
-
-    @Override
-    public <DataSourceType, DataType> Iterable<DataRetrieverChainDefinition<DataSourceType, DataType>> getDataRetrieverChainDefinitions(
-            Class<DataSourceType> dataSourceType, Class<DataType> retrievedDataType) {
-        return dataRetrieverChainDefinitionRegistry.get(dataSourceType, retrievedDataType);
-    }
 
     @Override
     public <DataSourceType, DataType> DataRetrieverChainDefinition<DataSourceType, DataType> getDataRetrieverChainDefinitionForDTO(DataRetrieverChainDefinitionDTO retrieverChainDTO) {
@@ -318,18 +302,6 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     @Override
     public AggregationProcessorDefinitionProvider getAggregationProcessorProvider() {
         return aggregationProcessorDefinitionRegistry;
-    }
-
-    @Override
-    public <ExtractedType> Iterable<AggregationProcessorDefinition<? super ExtractedType, ?>> getAggregationProcessorDefinitions(
-            Class<ExtractedType> extractedType) {
-        return aggregationProcessorDefinitionRegistry.getByExtractedType(extractedType);
-    }
-    
-    @Override
-    public <ExtractedType> AggregationProcessorDefinition<? super ExtractedType, ?> getAggregationProcessorDefinition(
-            Class<ExtractedType> extractedType, String aggregationNameMessageKey) {
-        return aggregationProcessorDefinitionRegistry.get(extractedType, aggregationNameMessageKey);
     }
 
     @Override
@@ -361,16 +333,6 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     @Override
     public QueryDefinitionDTOProvider getQueryDefinitionDTOProvider() {
         return queryDefinitionRegistry;
-    }
-    
-    @Override
-    public Iterable<PredefinedQueryIdentifier> getPredefinedQueryIdentifiers() {
-        return queryDefinitionRegistry.getIdentifiers();
-    }
-
-    @Override
-    public ModifiableStatisticQueryDefinitionDTO getPredefinedQueryDefinitionDTO(PredefinedQueryIdentifier identifier) {
-        return queryDefinitionRegistry.get(identifier);
     }
     
     @Override

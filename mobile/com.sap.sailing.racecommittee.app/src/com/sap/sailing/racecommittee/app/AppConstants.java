@@ -2,7 +2,7 @@ package com.sap.sailing.racecommittee.app;
 
 public class AppConstants {
 
-    //TODO replace it later with BuildConfig.APPLICATION_ID (Eclipse didn't know it)
+    // TODO replace it later with BuildConfig.APPLICATION_ID (Eclipse didn't know it)
     private final static String PACKAGE_NAME = "com.sap.sailing.racecommittee.app";
 
     // Intent extra fields
@@ -11,7 +11,6 @@ public class AppConstants {
     public final static String INTENT_EXTRA_TIMEPOINT_MILLIS = PACKAGE_NAME + ".timePoint.millis";
     public final static String INTENT_EXTRA_EVENTNAME = PACKAGE_NAME + ".eventName";
     public final static String FLAG_KEY = PACKAGE_NAME + ".raceFlag";
-    public final static String EXTRA_FORCE_REFRESH = PACKAGE_NAME + ".forceRefresh";
 
     public final static String AUTHOR_TYPE_OFFICER_VESSEL = "Race Officer on Vessel";
     public final static String AUTHOR_TYPE_SHORE_CONTROL = "Shore Control";
@@ -27,7 +26,8 @@ public class AppConstants {
     public final static String INTENT_ACTION_CLEANUP_RACES = INTENT_ACTION + ".cleanupRaces";
     public final static String INTENT_ACTION_ALARM_ACTION = INTENT_ACTION + ".alarmAction";
     public final static String INTENT_ACTION_RELOAD_RACES = INTENT_ACTION + ".reloadRaces";
-    public final static String INTENT_ACTION_START_PROCEDURE_SPECIFIC_ACTION = INTENT_ACTION + ".startProcedureSpecificAction";
+    public final static String INTENT_ACTION_START_PROCEDURE_SPECIFIC_ACTION = INTENT_ACTION
+            + ".startProcedureSpecificAction";
 
     public final static String INTENT_ACTION_POLLING_STOP = ".stopPolling";
     public final static String INTENT_ACTION_POLLING_RACE_ADD = ".addRace";

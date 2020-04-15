@@ -8,10 +8,10 @@ import org.json.simple.JSONArray;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.domain.maneuverdetection.ManeuverDetectorWithEstimationDataSupport;
+import com.sap.sailing.domain.maneuverdetection.TrackTimeInfo;
 import com.sap.sailing.domain.maneuverdetection.impl.ManeuverDetectorImpl;
 import com.sap.sailing.domain.maneuverdetection.impl.ManeuverDetectorWithEstimationDataSupportDecoratorImpl;
 import com.sap.sailing.domain.maneuverdetection.impl.ManeuverSpot;
-import com.sap.sailing.domain.maneuverdetection.impl.TrackTimeInfo;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.tracking.CompleteManeuverCurve;
 import com.sap.sailing.domain.tracking.Maneuver;
@@ -50,8 +50,9 @@ public class CompleteManeuverCurvesWithEstimationDataJsonSerializer implements C
     private Iterable<CompleteManeuverCurveWithEstimationData> getCompleteManeuverCurvesWithEstimationData(
             TrackedRace trackedRace, Competitor competitor, TimePoint from, TimePoint to) {
         ManeuverDetectorImpl maneuverDetector = new ManeuverDetectorImpl(trackedRace, competitor);
-        List<ManeuverSpot> maneuverSpots = maneuverDetector.detectManeuvers(from, to);
+        List<ManeuverSpot> maneuverSpots = maneuverDetector.detectManeuverSpots(from, to);
         List<CompleteManeuverCurve> maneuverCurves = maneuverSpots.stream()
+                .filter(maneuverSpot -> maneuverSpot.getManeuverCurve() != null)
                 .map(maneuverSpot -> maneuverSpot.getManeuverCurve()).collect(Collectors.toList());
         ManeuverDetectorWithEstimationDataSupport maneuverDetectorWithEstimationData = new ManeuverDetectorWithEstimationDataSupportDecoratorImpl(
                 maneuverDetector, polarDataService);
@@ -72,5 +73,4 @@ public class CompleteManeuverCurvesWithEstimationDataJsonSerializer implements C
                 .getCompleteManeuverCurvesWithEstimationData(maneuverCurves);
         return maneuversWithEstimationData;
     }
-
 }

@@ -79,7 +79,7 @@ public class GetEventOverviewStageAction implements SailingAction<ResultWithTTL<
     @GwtIncompatible
     public EventOverviewStageContentDTO getStageContent(SailingDispatchContext context, Event event, EventState state, TimePoint now) {
         // P1: Featured video if available
-        List<String> videoTags = Collections.singletonList(MediaTagConstants.FEATURED);
+        List<String> videoTags = Collections.singletonList(MediaTagConstants.FEATURED.getName());
         VideoDescriptor featuredVideo = HomeServiceUtil.getStageVideo(event, context.getClientLocale(), videoTags , false);
         if (featuredVideo != null) {
             return new EventOverviewVideoStageDTO(EventOverviewVideoStageDTO.Type.MEDIA,

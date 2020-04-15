@@ -13,9 +13,9 @@ public class SailMasterLiveSimulatorConnectorImpl extends SailMasterConnectorImp
 
     private long messageDeliveryIntervalInMs = Long.valueOf(System.getProperty("simulateLiveMode.delayInMillis", "250"));
     
-    public SailMasterLiveSimulatorConnectorImpl(String host, int port, String raceId, String raceName, String raceDescription, BoatClass boatClass)
+    public SailMasterLiveSimulatorConnectorImpl(String host, int port, String raceId, String raceName, String raceDescription, BoatClass boatClass, SwissTimingRaceTrackerImpl swissTimingRaceTracker)
             throws InterruptedException, ParseException {
-        super(host, port, raceId, raceName, raceDescription, boatClass);
+        super(host, port, raceId, raceName, raceDescription, boatClass, swissTimingRaceTracker);
         bufferedMessageList = Collections.synchronizedList(new ArrayList<SailMasterMessage>());
         Thread messageDeliveryThread = new Thread("SailMasterLiveSimulatorConnector") {
             public void run() {

@@ -1,7 +1,5 @@
 package com.sap.sailing.android.shared.ui.adapters;
 
-import java.util.List;
-
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,28 +11,32 @@ import android.widget.TextView;
 
 import com.sap.sailing.android.shared.R;
 
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
 public class ArrayRemoveAdapter<T> extends ArrayAdapter<T> {
-    
+
     public interface NotifyDataSetChangedListener<T> {
         void onNotifyDataSetChanged(ArrayRemoveAdapter<T> adapter);
     }
-    
+
     private NotifyDataSetChangedListener<T> listener;
 
     public ArrayRemoveAdapter(Context context, List<T> objects) {
         super(context, R.layout.array_remove_adapter, objects);
     }
-    
+
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         if (convertView == null) {
             LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = inflater.inflate(R.layout.array_remove_adapter, parent, false);
         }
-        
+
         TextView text = (TextView) convertView.findViewById(android.R.id.text1);
         ImageButton button = (ImageButton) convertView.findViewById(R.id.array_remove_adapter_remove);
-        
+
         final T item = getItem(position);
         text.setText(item.toString());
         button.setOnClickListener(new OnClickListener() {
@@ -45,13 +47,21 @@ public class ArrayRemoveAdapter<T> extends ArrayAdapter<T> {
         });
         return convertView;
     }
-    
+
     @Override
     public void notifyDataSetChanged() {
         super.notifyDataSetChanged();
         if (listener != null) {
             listener.onNotifyDataSetChanged(this);
         }
+    }
+
+    public Set<T> getItems() {
+        Set<T> items = new LinkedHashSet<>(getCount());
+        for (int position = 0; position < getCount(); position++) {
+            items.add(getItem(position));
+        }
+        return items;
     }
 
     public NotifyDataSetChangedListener<T> getDataSetChangedListener() {

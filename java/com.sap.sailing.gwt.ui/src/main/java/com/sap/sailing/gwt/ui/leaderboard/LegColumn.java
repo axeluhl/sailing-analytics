@@ -7,18 +7,18 @@ import java.util.function.Function;
 
 import com.google.gwt.cell.client.TextCell;
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.NauticalSide;
-import com.sap.sailing.domain.common.SortingOrder;
 import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.LegEntryDTO;
-import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.controls.AbstractSortableColumnWithMinMax;
 import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.DataExtractor;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.InvertibleComparator;
+import com.sap.sse.common.SortingOrder;
+import com.sap.sse.common.impl.InvertibleComparatorAdapter;
+import com.sap.sse.gwt.client.celltable.AbstractSortableColumnWithMinMax;
 
 /**
  * Displays competitor's rank in leg and makes the column sortable by rank. The leg is
@@ -268,11 +268,11 @@ public class LegColumn extends ExpandableSortableColumn<String> {
                         detailColumnStyle, leaderboardPanel));
         result.put(DetailType.LEG_AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS,
                 new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.LEG_AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS,
-                        new DoubleDetailTypeExtractor(e -> e.averageAbsoluteCrossTrackErrorInMeters), detailHeaderStyle,
+                        new DoubleDetailTypeExtractor(e -> e.currentOrAverageAbsoluteCrossTrackErrorInMeters), detailHeaderStyle,
                         detailColumnStyle, leaderboardPanel));
         result.put(DetailType.LEG_AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS,
                 new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.LEG_AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS,
-                        new DoubleDetailTypeExtractor(e -> e.averageSignedCrossTrackErrorInMeters), detailHeaderStyle,
+                        new DoubleDetailTypeExtractor(e -> e.currentOrAverageSignedCrossTrackErrorInMeters), detailHeaderStyle,
                         detailColumnStyle, leaderboardPanel));
         result.put(DetailType.EXPEDITION_LEG_AWA,
                 new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_LEG_AWA,

@@ -25,9 +25,26 @@ public interface TrackerManager {
      *            regatta is found, it is used to add the races to, and
      *            {@link #setRegattaForRace(Regatta, RaceDefinition)} is called to remember the association
      *            persistently. Otherwise, a default regatta as described above will be created and used.
+     * @param params
+     *            describe the race to be loaded/added and how it is to be loaded
      * @param timeoutInMilliseconds
      *            if -1 then loading doesn't time out; otherwise, if the {@link RaceDefinition} hasn't been received
      *            after so many milliseconds then the tracker will be {@link RaceTracker#stop(boolean) stopped}.
+     * @param raceTrackingHandler
+     *            a mandatory service (must not be {@code null}) that is used to create objects during loading/adding
+     *            the race, such as the {@link RaceDefinition}, {@link Boat} and {@link Competitor} objects, and finally
+     *            the {@link TrackedRace} object. There is a default implementation available at
+     *            {@link RaceTrackingHandler.DefaultRaceTrackingHandler} that simply creates the objects; a more
+     *            specialized implementation exists that can handle the security-related aspects. See
+     *            {@code PermissionAwareRaceTrackingHandler}.
+     */
+    RaceHandle addRace(RegattaIdentifier regattaToAddTo, RaceTrackingConnectivityParameters params, long timeoutInMilliseconds,
+            RaceTrackingHandler raceTrackingHandler)
+            throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
+
+    /**
+     * Same as {@link #addRace(RegattaIdentifier, RaceTrackingConnectivityParameters, long, RaceTrackingHandler)} only that
+     * the implementation can choose the {@link RaceTrackingHandler} according to its preferences.
      */
     RaceHandle addRace(RegattaIdentifier regattaToAddTo, RaceTrackingConnectivityParameters params, long timeoutInMilliseconds)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;

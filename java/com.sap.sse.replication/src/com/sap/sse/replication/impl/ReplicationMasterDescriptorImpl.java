@@ -41,6 +41,7 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
     private final String messagingHostname;
     private final int messagingPort;
     private final String queueName;
+    private final String bearerToken;
     private final Iterable<Replicable<?, ?>> replicables;
 
     private QueueingConsumer consumer;
@@ -68,15 +69,21 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
      *            may mean that the master also sends operations for replicables that a particular replica hasn't
      *            registered for. Replicas shall silently drop operations for such replicables that they haven't
      *            requested replication for.
+     * @param bearerToken
+     *            for servers that do not allow unauthenticated registration of replicas, a valid bearer token needs to
+     *            be given as authentication mechanism. The user associated with the given bearer token needs to have
+     *            all required permissions on the remote server to set up replicas, otherwise the request will fail.
      */
     public ReplicationMasterDescriptorImpl(String messagingHostname, String exchangeName, int messagingPort,
-            String queueName, String masterServletHostname, int servletPort, Iterable<Replicable<?, ?>> replicables) {
+            String queueName, String masterServletHostname, int servletPort, String bearerToken,
+            Iterable<Replicable<?, ?>> replicables) {
         this.masterServletHostname = masterServletHostname;
         this.messagingHostname = messagingHostname;
         this.servletPort = servletPort;
         this.messagingPort = messagingPort;
         this.exchangeName = exchangeName;
         this.queueName = queueName;
+        this.bearerToken = bearerToken;
         this.consumer = null;
         this.replicables = replicables;
     }
@@ -85,7 +92,7 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
     public URL getReplicationRegistrationRequestURL(UUID uuid, String additional) throws MalformedURLException,
             UnsupportedEncodingException {
         final String[] replicableIdsAsString = StreamSupport.stream(replicables.spliterator(), /* parallel */ false).map(r->r.getId()).toArray(i->new String[i]);
-        return new URL("http", getHostname(), servletPort, REPLICATION_SERVLET + "?" + ReplicationServlet.ACTION + "="
+        return new URL(getHttpRequestProtocol(), getHostname(), servletPort, REPLICATION_SERVLET + "?" + ReplicationServlet.ACTION + "="
                 + ReplicationServlet.Action.REGISTER.name() + "&" + ReplicationServlet.SERVER_UUID + "="
                 + java.net.URLEncoder.encode(uuid.toString(), "UTF-8") + "&"
                 + ReplicationServlet.ADDITIONAL_INFORMATION + "="
@@ -94,9 +101,13 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
                 + java.net.URLEncoder.encode(String.join(",", replicableIdsAsString), "UTF-8"));
     }
 
+    private String getHttpRequestProtocol() {
+        return servletPort==443?"https":"http";
+    }
+
     @Override
     public URL getReplicationDeRegistrationRequestURL(UUID uuid) throws MalformedURLException {
-        return new URL("http", getHostname(), servletPort, REPLICATION_SERVLET + "?" + ReplicationServlet.ACTION + "="
+        return new URL(getHttpRequestProtocol(), getHostname(), servletPort, REPLICATION_SERVLET + "?" + ReplicationServlet.ACTION + "="
                 + ReplicationServlet.Action.DEREGISTER.name() + "&" + ReplicationServlet.SERVER_UUID + "="
                 + uuid.toString());
     }
@@ -153,14 +164,14 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
     public URL getInitialLoadURL(Iterable<Replicable<?, ?>> replicables) throws MalformedURLException {
         final String replicablesIdsAsStringSeparatedByCommas = StreamSupport.stream(replicables.spliterator(), /* parallel */ false).
             map(r->r.getId().toString()).collect(Collectors.joining(","));
-        return new URL("http", getHostname(), servletPort, REPLICATION_SERVLET + "?" + ReplicationServlet.ACTION + "="
+        return new URL(getHttpRequestProtocol(), getHostname(), servletPort, REPLICATION_SERVLET + "?" + ReplicationServlet.ACTION + "="
                 + ReplicationServlet.Action.INITIAL_LOAD.name() +
                 "&"+ReplicationServlet.REPLICABLES_IDS_AS_STRINGS_COMMA_SEPARATED+"="+replicablesIdsAsStringSeparatedByCommas);
     }
     
     @Override
     public URL getSendReplicaInitiatedOperationToMasterURL(String replicableIdAsString) throws MalformedURLException {
-        return new URL("http", getHostname(), servletPort, REPLICATION_SERVLET);
+        return new URL(getHttpRequestProtocol(), getHostname(), servletPort, REPLICATION_SERVLET);
     }
 
     @Override
@@ -269,6 +280,11 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
     @Override
     public String getExchangeName() {
         return exchangeName;
+    }
+    
+    @Override
+    public String getBearerToken() {
+        return bearerToken;
     }
 
     public String toString() {

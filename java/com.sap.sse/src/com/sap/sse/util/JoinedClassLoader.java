@@ -13,18 +13,20 @@ public class JoinedClassLoader extends ClassLoader {
     @Override
     protected Class<?> findClass(String name) throws ClassNotFoundException {
         Class<?> result = null;
-        for (ClassLoader classLoader : classLoaders) {
-            try {
-                result = classLoader.loadClass(name);
-            } catch (ClassNotFoundException e) {
-                //Not found, but may be found in other class loader.
+        synchronized (classLoaders) {
+            for (ClassLoader classLoader : classLoaders) {
+                try {
+                    result = classLoader.loadClass(name);
+                } catch (ClassNotFoundException e) {
+                    //Not found, but may be found in other class loader.
+                }
+                if (result != null) {
+                    break;
+                }
             }
-            if (result != null) {
-                break;
+            if (result == null) {
+                throw new ClassNotFoundException(name);
             }
-        }
-        if (result == null) {
-            throw new ClassNotFoundException(name);
         }
         return result;
     }

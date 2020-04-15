@@ -9,9 +9,11 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.mobile.places.user.profile.details.UserProfileDetailsActivity;
 import com.sap.sailing.gwt.home.mobile.places.user.profile.preferences.UserProfilePreferencesActivity;
+import com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.SailorProfilesActivity;
 import com.sap.sailing.gwt.home.mobile.places.user.profile.settings.UserProfileSettingsActivity;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.preferences.UserProfilePreferencesPlace;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfilePlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.settings.UserProfileSettingsPlace;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sse.gwt.client.mvp.AbstractActivityProxy;
@@ -36,6 +38,8 @@ public class UserProfileActivityProxy extends AbstractActivityProxy {
                     withFlagImageResolver(flagImageResolver -> new UserProfilePreferencesActivity(userProfilePrefsPlace, clientFactory, flagImageResolver));
                 } else if(currentPlace instanceof UserProfileSettingsPlace) {
                     super.onSuccess(new UserProfileSettingsActivity((UserProfileSettingsPlace) currentPlace, clientFactory));
+                } else if (currentPlace instanceof SailorProfilePlace) {
+                    super.onSuccess(new SailorProfilesActivity((SailorProfilePlace) currentPlace, clientFactory));
                 } else {
                     super.onSuccess(new UserProfileDetailsActivity(currentPlace, clientFactory));
                 }

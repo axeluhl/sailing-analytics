@@ -7,6 +7,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.MultiTimeRange;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
+import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
 
 public class TimeRangeImpl extends Util.Pair<TimePoint, TimePoint> implements TimeRange {
@@ -21,6 +22,10 @@ public class TimeRangeImpl extends Util.Pair<TimePoint, TimePoint> implements Ti
         return new TimeRangeImpl(new MillisecondsTimePoint(fromMillis), new MillisecondsTimePoint(toMillisExclusive));
     }
 
+    public static TimeRange create(long fromMillis, long toMillis, boolean toIsInclusive) {
+        return new TimeRangeImpl(new MillisecondsTimePoint(fromMillis), new MillisecondsTimePoint(toMillis), toIsInclusive);
+    }
+
     public TimeRangeImpl(TimePoint from, TimePoint to, boolean toIsInclusive) {
         this(from, computeInclusiveOrExclusiveTo(to, toIsInclusive));
     }
@@ -31,7 +36,9 @@ public class TimeRangeImpl extends Util.Pair<TimePoint, TimePoint> implements Ti
             if (to == null) {
                 finalTo = null;
             } else {
-                finalTo = to.plus(1); // add the smallest increment possible with the current time point representation
+                // don't use TimePoint.plus in the following as it will "round" to EndOfTime which is influenced
+                // by JavaScript's short "mantissa" for time stamps.
+                finalTo = new MillisecondsTimePoint(to.asMillis()+1); 
             }
         } else {
             finalTo = to;
@@ -111,13 +118,28 @@ public class TimeRangeImpl extends Util.Pair<TimePoint, TimePoint> implements Ti
     }
 
     @Override
+    public boolean includes(Timed timed) {
+        return timed == null ? false : includes(timed.getTimePoint());
+    }
+
+    @Override
     public boolean startsBefore(TimeRange other) {
         return from().before(other.from());
     }
 
     @Override
+    public boolean startsBefore(TimePoint other) {
+        return from().before(other);
+    }
+
+    @Override
     public boolean startsAtOrAfter(TimePoint timePoint) {
         return !from().before(timePoint);
+    }
+
+    @Override
+    public boolean startsAfter(TimePoint timePoint) {
+        return from().after(timePoint);
     }
 
     @Override
@@ -219,6 +241,34 @@ public class TimeRangeImpl extends Util.Pair<TimePoint, TimePoint> implements Ti
         return new MultiTimeRangeImpl(result);
     }
     
+    @Override
+    public TimeRange extend(TimePoint timePoint) {
+        final TimeRange result;
+        if (this.includes(timePoint)) {
+            result = this;
+        } else {
+            if (this.startsAfter(timePoint)) {
+                result = new TimeRangeImpl(timePoint, to());
+            } else {
+                assert this.endsBefore(timePoint);
+                result = new TimeRangeImpl(from(), computeInclusiveOrExclusiveTo(timePoint, /* isInclusive */ true));
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public TimeRange extend(TimeRange other) {
+        final TimeRange preResult = this.extend(other.from());
+        final TimeRange result;
+        if (preResult.to().before(other.to())) {
+            result = new TimeRangeImpl(preResult.from(), other.to());
+        } else {
+            result = preResult;
+        }
+        return result;
+    }
+
     @Override
     public Duration getDuration() {
         return from().until(to());

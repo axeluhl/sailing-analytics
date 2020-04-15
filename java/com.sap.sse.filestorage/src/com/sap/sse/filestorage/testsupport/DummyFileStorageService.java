@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import org.apache.shiro.authz.UnauthorizedException;
+
 import com.sap.sse.filestorage.FileStorageService;
 import com.sap.sse.filestorage.InvalidPropertiesException;
 import com.sap.sse.filestorage.OperationFailedException;
@@ -19,7 +21,7 @@ public class DummyFileStorageService extends BaseFileStorageServiceImpl implemen
     private static final long serialVersionUID = -3871744982404841496L;
 
     public DummyFileStorageService() {
-        super(NAME, "");
+        super(NAME, "", /* bundleContext */ null);
         addProperties(property);
     }
 
@@ -40,6 +42,10 @@ public class DummyFileStorageService extends BaseFileStorageServiceImpl implemen
 
     @Override
     public void testProperties() throws InvalidPropertiesException {
+    }
+
+    @Override
+    public void doPermissionCheckForGetFile(URI uri) throws UnauthorizedException {
     }
 
 }

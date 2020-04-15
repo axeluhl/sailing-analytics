@@ -3,13 +3,13 @@ package com.sap.sailing.android.shared.logging;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.Date;
 
+import com.sap.sailing.android.shared.R;
+
 import android.content.Context;
 import android.util.Log;
 
-import com.sap.sailing.android.shared.R;
-
 public class LoggingExceptionHandler implements UncaughtExceptionHandler {
-    
+
     private static final String TAG = LoggingExceptionHandler.class.getName();
 
     private UncaughtExceptionHandler defaultHandler;

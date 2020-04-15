@@ -7,6 +7,8 @@ package com.sap.sailing.android.tracking.app.upload;
  */
 public interface UploadResponseHandler {
     void onUploadTaskStarted();
+
     void onUploadCancelled();
+
     void onUploadTaskFinished(UploadResult uploadResult);
 }

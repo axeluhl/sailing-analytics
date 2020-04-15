@@ -6,15 +6,19 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
+import com.sap.sse.ServerInfo;
 import com.sap.sse.mongodb.MongoDBService;
-import com.sap.sse.security.PreferenceConverterRegistrationManager;
-import com.sap.sse.security.UserStore;
+import com.sap.sse.security.interfaces.AccessControlStore;
+import com.sap.sse.security.interfaces.PreferenceConverterRegistrationManager;
+import com.sap.sse.security.interfaces.UserStore;
+import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 
 public class Activator implements BundleActivator {
-
+    private static final Logger logger = Logger.getLogger(Activator.class.getName());
     private static BundleContext context;
-    private ServiceRegistration<?> registration;
+    private ServiceRegistration<?> accessControlStoreRegistration;
+    private ServiceRegistration<?> userStoreRegistration;
     private PreferenceConverterRegistrationManager preferenceConverterRegistrationManager;
 
     static BundleContext getContext() {
@@ -28,11 +32,17 @@ public class Activator implements BundleActivator {
      */
     public void start(BundleContext bundleContext) throws Exception {
         Activator.context = bundleContext;
-        UserStoreImpl userStore = new UserStoreImpl();
-        registration = context.registerService(UserStore.class.getName(),
+        logger.info("Creating user store");
+        final String defaultServerGroupName = System.getProperty(UserStore.DEFAULT_SERVER_GROUP_NAME_PROPERTY_NAME,
+                ServerInfo.getName() + "-server");
+        final UserStoreImpl userStore = new UserStoreImpl(defaultServerGroupName);
+        AccessControlStoreImpl accessControlStore = new AccessControlStoreImpl(userStore);
+        accessControlStoreRegistration = context.registerService(AccessControlStore.class.getName(),
+                accessControlStore, null);
+        userStoreRegistration = context.registerService(UserStore.class.getName(),
                 userStore, null);
         preferenceConverterRegistrationManager = new PreferenceConverterRegistrationManager(bundleContext, userStore);
-        Logger.getLogger(Activator.class.getName()).info("User store registered.");
+        logger.info("User store registered.");
         for (CollectionNames name : CollectionNames.values()) {
             MongoDBService.INSTANCE.registerExclusively(CollectionNames.class, name.name());
         }
@@ -45,7 +55,8 @@ public class Activator implements BundleActivator {
      */
     public void stop(BundleContext bundleContext) throws Exception {
         preferenceConverterRegistrationManager.stop();
-        registration.unregister();
+        accessControlStoreRegistration.unregister();
+        userStoreRegistration.unregister();
         Activator.context = null;
     }
 

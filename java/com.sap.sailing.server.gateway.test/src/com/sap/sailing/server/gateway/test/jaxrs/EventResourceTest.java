@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.net.URI;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.UUID;
 
 import javax.ws.rs.core.Response;
@@ -21,22 +22,16 @@ import org.json.simple.JSONValue;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.NotFoundException;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.RankingMetrics;
+import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.impl.DegreePosition;
-import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.jaxrs.api.AbstractLeaderboardsResource;
-import com.sap.sailing.server.gateway.jaxrs.api.EventsResource;
-import com.sap.sailing.server.gateway.jaxrs.api.LeaderboardGroupsResource;
-import com.sap.sailing.server.gateway.jaxrs.api.LeaderboardsResource;
-import com.sap.sailing.server.gateway.jaxrs.api.RegattasResource;
 import com.sap.sse.InvalidDateException;
 
 public class EventResourceTest extends AbstractJaxRsApiTest {
-    private EventsResource eventsResource;
-    private RegattasResource regattasResource;
-    private LeaderboardGroupsResource leaderboardGroupsResource;
-    private LeaderboardsResource leaderboardsResource;
     private String randomName; 
     private UriInfo uriInfo;
     
@@ -45,10 +40,6 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
         super.setUp();
         uriInfo = mock(UriInfo.class);
         when(uriInfo.getBaseUri()).thenReturn(new URI("http://127.0.0.1:8888/"));
-        eventsResource = createResource(new EventsResource(/* enforce security */ false));
-        regattasResource = createResource(new RegattasResource());
-        leaderboardGroupsResource = createResource(new LeaderboardGroupsResource());
-        leaderboardsResource = createResource(new LeaderboardsResource());
         randomName = randomName();
     }
     
@@ -116,6 +107,36 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
         JSONObject objLeaderboardGroup = getLeaderboardGroup(eventName);
         JSONArray arrLeaderboards = (JSONArray) objLeaderboardGroup.get("leaderboards");
         assertTrue(containsObjectWithAttrbuteNameAndValue(arrLeaderboards, "name", strRegattaName));
+        JSONObject leaderboard = getLeaderboardAsJsonObject(getLeaderboard(eventName));
+        assertEquals("/leaderboard/" + eventName, leaderboard.get("shardingLeaderboardName"));
+    }
+    
+    @Test
+    public void testShardingNameInLeaderboardResponse() throws Exception {
+        String originalRandomName = randomName;
+        String eventName = randomName += "ä$";
+        Response eventResponse = createEventWithLeaderboardGroupAndRegatta();
+        assertTrue(isValidCreateEventResponse(eventResponse));
+        JSONObject leaderboard = getLeaderboardAsJsonObject(getLeaderboard(eventName));
+        assertEquals("/leaderboard/" + originalRandomName + "__", leaderboard.get("shardingLeaderboardName"));
+    }
+    
+    @Test
+    public void testCreateEventWithScoringShemeRankingMetricAndDiscards() throws Exception {
+        String eventName = randomName;
+        Response eventResponse = createEventWithScoringShemeRankingMetricAndDiscards();
+        assertTrue(isValidCreateEventResponse(eventResponse));
+        JSONObject regatta = getRegatta(eventName);
+        String scoringSystem = (String) regatta.get("scoringSystem");
+        assertEquals(ScoringSchemeType.HIGH_POINT.name(), scoringSystem);
+        String rankingMetric = (String) regatta.get("rankingMetric");
+        assertEquals(RankingMetrics.ORC_PERFORMANCE_CURVE.name(), rankingMetric);
+        
+        JSONObject leaderboard = getLeaderboardAsJsonObject(getLeaderboard(eventName));
+        JSONArray discardIndices = (JSONArray) leaderboard.get("discardIndexResultsStartingWithHowManyRaces");
+        assertEquals(2, discardIndices.size());
+        assertEquals(2, ((Number) discardIndices.get(0)).intValue());
+        assertEquals(4, ((Number) discardIndices.get(1)).intValue());
     }
 
     private Response createEventWithLeaderboardGroup() throws ParseException, NotFoundException, NumberFormatException,
@@ -125,7 +146,8 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
                 /* venueNameParam */ randomName, /* venueLat */ null, /* venueLng */ null, /* isPublicParam */ null,
                 /* officialWebsiteURLParam */ null, /* baseURLParam */ null, /* leaderboardGroupIdsListParam */ null,
                 /* createLeaderboardGroupParam */ "true", /* createRegattaParam */ "false",
-                /* boatClassNameParam */ null, /* numberOfRacesParam */ null);
+                /* boatClassNameParam */ null, /* numberOfRacesParam */ null, false, CompetitorRegistrationType.CLOSED.name(), null,
+                /* rankingMetricParam */ null, /* scoringSchemeParam */ null, /* leaderboardDiscardThresholdsParam */ null);
     }
 
     private Response createEvent() throws ParseException, NotFoundException, NumberFormatException, IOException,
@@ -135,7 +157,8 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
                 /* venueNameParam */ randomName, /* venueLat */ null, /* venueLng */ null, /* isPublicParam */ null,
                 /* officialWebsiteURLParam */ null, /* baseURLParam */ null, /* leaderboardGroupIdsListParam */ null,
                 /* createLeaderboardGroupParam */ "false", /* createRegattaParam */ "false",
-                /* boatClassNameParam */ null, /* numberOfRacesParam */ null);
+                /* boatClassNameParam */ null, /* numberOfRacesParam */ null, false, CompetitorRegistrationType.CLOSED.name(), null,
+                /* rankingMetricParam */ null, /* scoringSchemeParam */ null, /* leaderboardDiscardThresholdsParam */ null);
     }
 
     private Response createEventAtLocation(Position location) throws ParseException, NotFoundException,
@@ -146,7 +169,8 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
                 /* venueLng */ "" + location.getLngDeg(), /* isPublicParam */ null, /* officialWebsiteURLParam */ null,
                 /* baseURLParam */ null, /* leaderboardGroupIdsListParam */ null,
                 /* createLeaderboardGroupParam */ "false", /* createRegattaParam */ "false",
-                /* boatClassNameParam */ null, /* numberOfRacesParam */ null);
+                /* boatClassNameParam */ null, /* numberOfRacesParam */ null, false, CompetitorRegistrationType.CLOSED.name(), null,
+                /* rankingMetricParam */ null, /* scoringSchemeParam */ null, /* leaderboardDiscardThresholdsParam */ null);
     }
 
     private Response createEventWithLeaderboardGroupAndRegatta() throws ParseException, NotFoundException,
@@ -156,11 +180,24 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
                 /* venueNameParam */ randomName, /* venueLat */ null, /* venueLng */ null, /* isPublicParam */ null,
                 /* officialWebsiteURLParam */ null, /* baseURLParam */ null, /* leaderboardGroupIdsListParam */ null,
                 /* createLeaderboardGroupParam */ "true", /* createRegattaParam */ "true",
-                /* boatClassNameParam */ "A_CAT", /* numberOfRacesParam */ null);
+                /* boatClassNameParam */ "A_CAT", /* numberOfRacesParam */ null, false, CompetitorRegistrationType.CLOSED.name(), null,
+                /* rankingMetricParam */ null, /* scoringSchemeParam */ null, /* leaderboardDiscardThresholdsParam */ null);
+    }
+    
+    private Response createEventWithScoringShemeRankingMetricAndDiscards() throws ParseException, NotFoundException,
+    NumberFormatException, IOException, org.json.simple.parser.ParseException, InvalidDateException {
+        return eventsResource.createEvent(uriInfo, randomName, randomName, /* startDateParam */ null,
+                /* startDateAsMillis */ null, /* endDateParam */ null, /* endDateAsMillis */ null,
+                /* venueNameParam */ randomName, /* venueLat */ null, /* venueLng */ null, /* isPublicParam */ null,
+                /* officialWebsiteURLParam */ null, /* baseURLParam */ null, /* leaderboardGroupIdsListParam */ null,
+                /* createLeaderboardGroupParam */ "true", /* createRegattaParam */ "true",
+                /* boatClassNameParam */ "TP52", /* numberOfRacesParam */ "6", false, CompetitorRegistrationType.CLOSED.name(), null,
+                /* rankingMetricParam */ RankingMetrics.ORC_PERFORMANCE_CURVE.name(), /* scoringSchemeParam */ ScoringSchemeType.HIGH_POINT.name(), /* leaderboardDiscardThresholdsParam */ Arrays.asList(2, 4));
     }
     
     private Response getLeaderboard(String name) {
-        return leaderboardsResource.getLeaderboard(name, AbstractLeaderboardsResource.ResultStates.Final, null);
+        return leaderboardsResource.getLeaderboard(name, AbstractLeaderboardsResource.ResultStates.Final, null, null,
+                /* competitorAndBoatIdsOnly */ false);
     }
     
     private boolean hasAtLeastOneCourseArea(JSONObject objEvent) {
@@ -187,7 +224,7 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
     }
 
     private JSONObject getRegatta(String eventName) {
-        Response regattasResponse = regattasResource.getRegatta(eventName);
+        Response regattasResponse = regattasResource.getRegatta(eventName, null);
         return toJSONObject((String) regattasResponse.getEntity());
     }
 
@@ -254,12 +291,8 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
         return (String) toJSONObject((String) createEventResponse.getEntity()).get("eventid");
     }
 
-    private <T extends AbstractSailingServerResource> T createResource(T resource){
-        return spyResource(resource);
-    }
-    
     private String getEventAsString(String eventId) {
-        return (String) eventsResource.getEvent(eventId).getEntity();
+        return (String) eventsResource.getEvent(eventId, null).getEntity();
     }
 
 }

@@ -3,12 +3,12 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
 
-interface AdminConsoleResources extends ClientBundle {
+public interface AdminConsoleResources extends ClientBundle {
+    @Source("com/sap/sailing/gwt/ui/client/images/magnifier.png")
+    ImageResource magnifierIcon();
+
     @Source("com/sap/sailing/gwt/ui/client/images/settingsActionIcon.png")
     ImageResource settingsActionIcon();
-
-    @Source("com/sap/sailing/gwt/ui/client/images/edit.png")
-    ImageResource editIcon();
 
     @Source("com/sap/sailing/gwt/ui/client/images/import.png")
     ImageResource importIcon();
@@ -104,6 +104,9 @@ interface AdminConsoleResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/ping.png")
     ImageResource ping();
 
+    @Source("com/sap/sailing/gwt/ui/client/images/remove_ping.png")
+    ImageResource removePing();
+
     @Source("com/sap/sailing/gwt/ui/client/images/copy_course.png")
     ImageResource copyCourse();
 
@@ -121,4 +124,19 @@ interface AdminConsoleResources extends ClientBundle {
     
     @Source("com/sap/sailing/gwt/ui/client/images/transparent.gif")
     ImageResource transparentGif();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/orc_pcs_leg.png")
+    ImageResource orcPcsDefineLegIcon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/orc_pcs_all_legs.png")
+    ImageResource orcPcsDefineAllLegsIcon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/certificates.png")
+    ImageResource updateCertificatesIcon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/scratchBoat.png")
+    ImageResource scratchBoatIcon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/impliedWind.png")
+    ImageResource impliedWindIcon();
 }

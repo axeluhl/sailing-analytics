@@ -60,9 +60,4 @@ public class RegattaRaceStatesComponentLifecycle implements ComponentLifecycle<R
         return settings.createInstanceWithSettings(null, null, settings.isShowOnlyRacesOfSameDay(),
                 settings.isShowOnlyCurrentlyRunningRaces());
     }
-
-    @Override
-    public RegattaRaceStatesSettings extractDocumentSettings(RegattaRaceStatesSettings settings) {
-        return settings;
-    }
 }

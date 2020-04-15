@@ -2,8 +2,11 @@ package com.sap.sailing.domain.common.dto;
 
 import java.util.Date;
 
+import com.sap.sailing.domain.common.RaceTimesCalculationUtil;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.TimingConstants;
+import com.sap.sse.common.Util;
+import com.sap.sse.security.shared.dto.NamedDTO;
 
 /**
  * Master data about a single race that is to be transferred to the client. Holds only timing and a bit
@@ -18,6 +21,8 @@ public class BasicRaceDTO extends NamedDTO {
     
     public Date startOfRace;
     public Date endOfRace;
+    public Date raceFinishingTime;
+    public Date raceFinishedTime;
     public TrackedRaceDTO trackedRace;
 
     public BasicRaceDTO() {} // for GWT serialization only
@@ -35,44 +40,35 @@ public class BasicRaceDTO extends NamedDTO {
      *         point of the "live" interval as defined above.
      */
     public boolean isLive(long serverTimePointAsMillis) {
-        final Date startOfLivePeriod;
-        final Date endOfLivePeriod;
-        if (trackedRace == null || !trackedRace.hasGPSData || !trackedRace.hasWindData) {
-            startOfLivePeriod = null;
-            endOfLivePeriod = null;
-        } else {
-            if (startOfRace == null) {
-                startOfLivePeriod = trackedRace.startOfTracking;
-            } else {
-                startOfLivePeriod = new Date(startOfRace.getTime() - TimingConstants.PRE_START_PHASE_DURATION_IN_MILLIS);
-            }
-            if (endOfRace == null) {
-                if (trackedRace.timePointOfNewestEvent != null) {
-                    endOfLivePeriod = new Date(trackedRace.timePointOfNewestEvent.getTime()
-                            + TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS);
-                } else {
-                    endOfLivePeriod = null;
-                }
-            } else {
-                endOfLivePeriod = new Date(endOfRace.getTime() + TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS);
+        Date timePoint = null;
+        if (serverTimePointAsMillis != 0) {
+            timePoint = new Date(serverTimePointAsMillis);
+        } else if (trackedRace != null && trackedRace.startOfTracking != null) {
+            timePoint = trackedRace.startOfTracking;
+        } else if (startOfRace != null) {
+            timePoint = new Date(startOfRace.getTime() - TimingConstants.PRE_START_PHASE_DURATION_IN_MILLIS + 1);
+        }
+
+        if (trackedRace != null && trackedRace.hasGPSData && trackedRace.hasWindData) {
+            Util.Pair<Date, Date> minMax = RaceTimesCalculationUtil.calculateRaceMinMax(timePoint,
+                    trackedRace.startOfTracking, startOfRace, raceFinishingTime, raceFinishedTime, endOfRace,
+                    trackedRace.endOfTracking);
+            Date min = minMax.getA() != null
+                    ? new Date(minMax.getA().getTime() - TimingConstants.PRE_START_PHASE_DURATION_IN_MILLIS)
+                    : null;
+            Date max = minMax.getB() != null
+                    ? new Date(minMax.getB().getTime() + TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS
+                            + trackedRace.delayToLiveInMs)
+                    : null;
+
+            // We are live if at is in between min and max
+            if (timePoint != null && min != null && max != null) {
+                return !min.after(timePoint) && !timePoint.after(max);
             }
         }
-        
-        // if an empty timepoint is given then take the start of the race
-        if (serverTimePointAsMillis == 0) {
-            serverTimePointAsMillis = startOfLivePeriod.getTime()+1;
-        }
-        
-        // whenLastTrackedRaceWasLive is null if there is no tracked race for fleet, or the tracked race hasn't started yet at the server time
-        // when this DTO was assembled, or there were no GPS or wind data
-        final boolean result =
-                startOfLivePeriod != null &&
-                endOfLivePeriod != null &&
-                startOfLivePeriod.getTime() <= serverTimePointAsMillis &&
-                serverTimePointAsMillis <= endOfLivePeriod.getTime();
-        return result;
+        return false;
     }
-    
+
     @Override
     public int hashCode() {
         final int prime = 31;

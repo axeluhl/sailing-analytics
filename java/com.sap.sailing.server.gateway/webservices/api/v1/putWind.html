@@ -12,12 +12,17 @@
 <h2>URL: /api/v1/wind/putWind</h2>
 
 <b>Description:</b>
-<p>Gets the details of a competitor</p>
+<p>Stores wind data for one or more races.</p>
+Note that while nautically wind is usually specified in the direction it's coming <em>from</em>, for <br>
+computational purposes internally we measure the wind in the direction <em>to</em> which it blows.
+If the <tt>regattaNamesAndRaceNames</tt> parameter is provided, wind data is ingested only into the
+races specified by the regatta/race name combinations. Otherwise, wind is ingested into all races
+into whose tracking interval the fixes fall.<br>
 <br/>
 <table>
     <tr>
         <td>Webservice Type:</td>
-        <td>REST</td>
+        <td>REST PUT</td>
     </tr>
     <tr>
         <td>Output format:</td>
@@ -25,14 +30,20 @@
     </tr>
     <tr>
         <td>Mandatory parameters:</td>
-        <td>windData, regattaName, raceName, windSourceType, windSourceId</td>
+        <td>windData, windSourceType (either "WEB" or "EXPEDITION"), windSourceId (any string identifying the sensor)</td>
     </tr>
     <tr>
         <td>Examples:</td>
         <td>
             Request: <br> {"windData":[{"position":{"latitude_deg":1,"longitude_deg":1},"timepoint":1234,"direction":120,"speedinknots":60}],"regattaNamesAndRaceNames":[{"regattaName":"ESS 2016 Cardiff","raceName":"Race 1"}],"windSourceType":"WEB","windSourceId":"tracker02"} 
             <br>
-            Answer: <br> [{"regattaNameAndRaceName":{"regattaName":"ESS 2016 Cardiff","raceName":"Race 1"},"answer":[true]}]
+            Answer: <br> [{"regattaNameAndRaceName":{"regattaName":"ESS 2016 Cardiff","raceName":"Race 1"},"answer":[true]}]<p>
+            Request to insert a wind fix for the venue of Enoshima for date 9/15/18 7:38:00 AM UTC+2 with 17.4 knots of true wind from geographical
+            direction 300 degrees (blowing to geographical direction 120 degrees):<br>
+            curl -i -X PUT -d '{"windData":[{"position":{"latitude_deg":35.299495,"longitude_deg":139.493689},"timepoint":1536989880000,"direction":120,"speedinknots":17.4}],"regattaNamesAndRaceNames":[{"regattaName":"WCS 2019 Enoshima - 49er","raceName":"M Medal (49er)"}],"windSourceType":"WEB","windSourceId":"tracker02"}' -H 'Content-Type: application/json' http://user:pass@host.sapsailing.com/sailingserver/api/v1/wind/putWind
+            <br>
+            Answer: <br> [{"regattaNameAndRaceName":{"regattaName":"WCS 2019 Enoshima - 49er","raceName":"M Medal (49er)"},"answer":[true]}]
+            
         </td>
     </tr>
 </table>

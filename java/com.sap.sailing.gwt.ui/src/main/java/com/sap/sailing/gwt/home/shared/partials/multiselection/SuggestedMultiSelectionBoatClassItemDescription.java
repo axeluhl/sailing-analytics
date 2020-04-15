@@ -10,7 +10,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.gwt.common.client.BoatClassImageResolver;
 
-class SuggestedMultiSelectionBoatClassItemDescription extends Widget {
+public class SuggestedMultiSelectionBoatClassItemDescription extends Widget {
 
     private static LocalUiBinder uiBinder = GWT.create(LocalUiBinder.class);
 
@@ -20,7 +20,7 @@ class SuggestedMultiSelectionBoatClassItemDescription extends Widget {
     @UiField DivElement imageUi;
     @UiField SpanElement nameUi;
     
-    SuggestedMultiSelectionBoatClassItemDescription(BoatClassDTO boatClass) {
+    public SuggestedMultiSelectionBoatClassItemDescription(BoatClassDTO boatClass) {
         setElement(uiBinder.createAndBindUi(this));
         imageUi.getStyle().setBackgroundImage("url('" + BoatClassImageResolver.getBoatClassIconResource(
                 boatClass.getName()).getSafeUri().asString() + "')");

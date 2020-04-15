@@ -29,7 +29,8 @@ public class LeaderboardGroupDTO extends LeaderboardGroupBaseDTO {
      */
     private Date currentServerTime;
     
-    LeaderboardGroupDTO() {}
+    @SuppressWarnings("unused")
+    private LeaderboardGroupDTO() {}
     
     /**
      * Creates a new LeaderboardGroupDTO with empty but non-null name, description and an empty but non-null list for

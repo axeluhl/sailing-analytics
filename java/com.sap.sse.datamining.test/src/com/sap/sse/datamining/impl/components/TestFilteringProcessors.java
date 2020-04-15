@@ -34,7 +34,7 @@ public class TestFilteringProcessors {
                 return element % 2 == 0;
             }
         };
-        Processor<Integer, Integer> filteringProcessor = new ParallelFilteringProcessor<Integer>(Integer.class, ConcurrencyTestsUtil.getExecutor(), receivers, elementIsEvenCriteria);
+        Processor<Integer, Integer> filteringProcessor = new ParallelFilteringProcessor<Integer>(Integer.class, ConcurrencyTestsUtil.getSharedExecutor(), receivers, elementIsEvenCriteria);
         ConcurrencyTestsUtil.processElements(filteringProcessor, createElementsToProcess());
         ConcurrencyTestsUtil.sleepFor(100); // Giving the processor time to process the instructions
         

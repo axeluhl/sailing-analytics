@@ -27,12 +27,12 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class DeviceMappingsAndSensorFixStoreLockingTest extends AbstractGPSFixStoreTest {
     @Rule
-    public Timeout GPSFixStoreListenerTestTimeout = new Timeout(3 * 1000);
+    public Timeout GPSFixStoreListenerTestTimeout = Timeout.millis(3 * 1000);
     
     @Test
     public void deviceMappingsAndSensorFixStoreShouldNotCauseADeadlock() {
         final Competitor comp = DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", null, null, null,
-                null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
+                null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null, /* storePersistently */ true);
         final AbstractLogEventAuthor author = new LogEventAuthorImpl("author", 0);
         final DeviceIdentifier device = new SmartphoneImeiIdentifier("a");
         
@@ -47,7 +47,9 @@ public class DeviceMappingsAndSensorFixStoreLockingTest extends AbstractGPSFixSt
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
-                store.addListener((device, fix) -> {}, deviceIdentifier);
+                store.addListener((device, fix) -> {
+                    return null;
+                }, deviceIdentifier);
             }
 
             @Override
@@ -66,6 +68,7 @@ public class DeviceMappingsAndSensorFixStoreLockingTest extends AbstractGPSFixSt
                 throw new RuntimeException(e);
             }
             mappings.forEachMappingOfDeviceIncludingTimePoint(device, new MillisecondsTimePoint(1), (mapping) ->{});
+            return null;
         }, device);
         
         new Thread() {

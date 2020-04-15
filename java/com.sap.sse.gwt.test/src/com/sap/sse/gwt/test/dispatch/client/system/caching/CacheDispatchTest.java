@@ -5,7 +5,7 @@ import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 import org.junit.Test;
 

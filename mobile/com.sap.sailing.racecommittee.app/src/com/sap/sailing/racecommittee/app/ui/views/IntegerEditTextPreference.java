@@ -1,7 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.views;
 
 import android.content.Context;
-import android.preference.EditTextPreference;
+import android.support.v7.preference.EditTextPreference;
 import android.util.AttributeSet;
 
 public class IntegerEditTextPreference extends EditTextPreference {
@@ -25,6 +25,10 @@ public class IntegerEditTextPreference extends EditTextPreference {
 
     @Override
     protected boolean persistString(String value) {
-        return persistInt(Integer.valueOf(value));
+        try {
+            return persistInt(Integer.valueOf(value));
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 }

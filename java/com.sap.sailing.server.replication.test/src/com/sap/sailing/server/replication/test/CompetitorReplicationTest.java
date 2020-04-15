@@ -34,6 +34,7 @@ import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
@@ -82,8 +83,10 @@ public class CompetitorReplicationTest extends AbstractServerReplicationTest {
         URI flagImageURI = new URI("http://www.sapsailing.com");
         Iterable<Series> series = Collections.emptyList();
         Regatta masterRegatta = master.createRegatta(RegattaImpl.getDefaultName(baseEventName, boatClassName), boatClassName, 
-                /* canBoatsOfCompetitorsChangePerRace */ true, /*startDate*/ null, /*endDate*/ null, regattaId, series,
-                /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null, /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */ true,
+                /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
+                /* registrationLinkSecret */ null, /* startDate */ null, /* endDate */ null, regattaId, series,
+                /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null,
+                /* buoyZoneRadiusInHullLengths */2.0, /* useStartTimeInference */ true,
                 /* controlTrackingFromStartAndFinishTimes */ false, OneDesignRankingMetric::new);
         Iterable<Waypoint> emptyWaypointList = Collections.emptyList();
         final String competitorName = "Der mit dem Kiel zieht";
@@ -95,7 +98,7 @@ public class CompetitorReplicationTest extends AbstractServerReplicationTest {
                 /* dateOfBirth */null, "This is famous " + competitorName)), new PersonImpl("Rigo van Maas",
                         new NationalityImpl("NED"),
                         /* dateOfBirth */null, "This is Rigo, the coach")),
-                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null, /* storePersistently */ true);
         Boat boat = new BoatImpl(competitor.getId(), competitorName + "'s boat", boatClass, /* sailID */ null);
         Map<Competitor,Boat> competitorsAndBoats = new HashMap<>();
         competitorsAndBoats.put(competitor, boat);
@@ -139,11 +142,11 @@ public class CompetitorReplicationTest extends AbstractServerReplicationTest {
         // modify the competitor on the master "from below" without an UpdateCompetitor operation, only locally:
         master.getBaseDomainFactory().getCompetitorAndBoatStore().updateCompetitor(competitor.getId().toString(), competitorName, competitorShortName, Color.RED, competitor.getEmail(),
                 competitor.getTeam().getNationality(), competitor.getTeam().getImage(), competitor.getFlagImage(), 
-                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null, /* storePersistently */ true);
         final RegattaAndRaceIdentifier raceIdentifier = masterRegatta.getRaceIdentifier(raceDefinition);
         DynamicTrackedRace trackedRace = (DynamicTrackedRace) master.apply(new CreateTrackedRace(raceIdentifier,
                 EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 3000,
-                /* millisecondsOverWhichToAverageWind */ 30000l, /* millisecondsOverWhichToAverageSpeed */ 30000l));
+                /* millisecondsOverWhichToAverageWind */ 30000l, /* millisecondsOverWhichToAverageSpeed */ 30000l, null));
         trackedRace.getTrack(competitor).addGPSFix(new GPSFixMovingImpl(new DegreePosition(49.425, 8.293), MillisecondsTimePoint.now(),
                 new KnotSpeedWithBearingImpl(12.3, new DegreeBearingImpl(242.3))));
         Thread.sleep(1000);
@@ -164,7 +167,7 @@ public class CompetitorReplicationTest extends AbstractServerReplicationTest {
             new TeamImpl("STG", Collections.singleton(new PersonImpl(competitorName, new NationalityImpl("GER"),
                     /* dateOfBirth */null, "This is famous " + competitorName)), new PersonImpl("Rigo van Maas",
                     new NationalityImpl("NED"), /* dateOfBirth */null, "This is Rigo, the coach")),
-                    /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
+                    /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null, /* storePersistently */ true);
         Thread.sleep(1000);
         Competitor[] replicaCompetitor = new Competitor[1];
         StreamSupport.stream(replica.getBaseDomainFactory().getCompetitorAndBoatStore().getAllCompetitors().spliterator(), /* parallel */ false).filter(
@@ -178,13 +181,13 @@ public class CompetitorReplicationTest extends AbstractServerReplicationTest {
         final String competitorName = "Der mit dem Kiel zieht";
         final String shortCcompetitorName = "Kiel";
         URI flagImageURI = new URI("http://www.sapsailing.com");
-        DynamicBoat boat = master.getBaseDomainFactory().getOrCreateBoat(234, "The Boat", master.getBaseDomainFactory().getOrCreateBoatClass("49er"), "234", null);
+        DynamicBoat boat = master.getBaseDomainFactory().getOrCreateBoat(234, "The Boat", master.getBaseDomainFactory().getOrCreateBoatClass("49er"), "234", null, /* storePersistently */ true);
         CompetitorWithBoat competitor = master.getBaseDomainFactory().getOrCreateCompetitorWithBoat(
             123, competitorName, shortCcompetitorName, Color.RED, "someone@nowhere.de", flagImageURI,
             new TeamImpl("STG", Collections.singleton(new PersonImpl(competitorName, new NationalityImpl("GER"),
                     /* dateOfBirth */null, "This is famous " + competitorName)), new PersonImpl("Rigo van Maas",
                     new NationalityImpl("NED"), /* dateOfBirth */null, "This is Rigo, the coach")),
-                    /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null, boat);
+                    /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null, boat, /* storePersistently */ true);
         Thread.sleep(1000);
         Competitor[] replicaCompetitor = new Competitor[1];
         StreamSupport.stream(replica.getBaseDomainFactory().getCompetitorAndBoatStore().getAllCompetitors().spliterator(), /* parallel */ false).filter(

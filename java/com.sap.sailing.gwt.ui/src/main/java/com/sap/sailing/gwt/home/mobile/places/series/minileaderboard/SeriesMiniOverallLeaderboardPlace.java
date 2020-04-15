@@ -9,10 +9,6 @@ import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesContext;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class SeriesMiniOverallLeaderboardPlace extends AbstractSeriesPlace implements HasLocationTitle, HasMobileVersion {
-    public SeriesMiniOverallLeaderboardPlace(String id) {
-        super(id);
-    }
-    
     public SeriesMiniOverallLeaderboardPlace(SeriesContext context) {
         super(context);
     }

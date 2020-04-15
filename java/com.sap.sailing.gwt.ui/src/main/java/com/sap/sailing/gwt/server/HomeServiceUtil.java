@@ -5,6 +5,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -15,6 +16,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -30,6 +32,7 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.gwt.home.communication.event.EventAndLeaderboardReferenceWithStateDTO;
 import com.sap.sailing.gwt.home.communication.event.EventLinkDTO;
 import com.sap.sailing.gwt.home.communication.event.EventMetadataDTO;
 import com.sap.sailing.gwt.home.communication.event.EventReferenceDTO;
@@ -38,8 +41,8 @@ import com.sap.sailing.gwt.home.communication.eventlist.EventListEventDTO;
 import com.sap.sailing.gwt.home.communication.media.SailingVideoDTO;
 import com.sap.sailing.gwt.home.communication.start.EventStageDTO;
 import com.sap.sailing.gwt.home.communication.start.StageEventType;
-import com.sap.sailing.gwt.ui.shared.media.MediaConstants;
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.gwt.ui.shared.TrackingConnectorInfoDTO;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.util.EventUtil;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -50,6 +53,7 @@ import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
 import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 import com.sap.sse.gwt.dispatch.shared.exceptions.ServerDispatchException;
+import com.sap.sse.security.SecurityService;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.MediaDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
@@ -123,11 +127,11 @@ public final class HomeServiceUtil {
     }
     
     private static ImageDescriptor findEventThumbnailImage(EventBase event) {
-        return event.findImageWithTag(MediaTagConstants.TEASER);
+        return event.findImageWithTag(MediaTagConstants.TEASER.getName());
     }
     
     public static ImageDescriptor getFeaturedImage(EventBase event) {
-        return event.findImageWithTag(MediaTagConstants.FEATURED);
+        return event.findImageWithTag(MediaTagConstants.FEATURED.getName());
     }
     
     public static String getFeaturedImageUrlAsString(EventBase event) {
@@ -141,7 +145,7 @@ public final class HomeServiceUtil {
     }
     
     public static ImageDescriptor getStageImage(final EventBase event) {
-        return event.findImageWithTag(MediaTagConstants.STAGE);
+        return event.findImageWithTag(MediaTagConstants.STAGE.getName());
     }
 
     public static List<String> getPhotoGalleryImageURLsAsString(EventBase event) {
@@ -154,14 +158,14 @@ public final class HomeServiceUtil {
     }
 
     public static List<ImageDescriptor> getPhotoGalleryImages(EventBase event) {
-        return event.findImagesWithTag(MediaTagConstants.GALLERY);
+        return event.findImagesWithTag(MediaTagConstants.GALLERY.getName());
     }
     
     public static List<ImageDescriptor> getSailingLovesPhotographyImages(EventBase event) {
         final List<ImageDescriptor> acceptedImages = new LinkedList<>();
         for (ImageDescriptor candidateImageUrl : event.getImages()) {
             if (candidateImageUrl.hasSize() && candidateImageUrl.getHeightInPx() > MINIMUM_IMAGE_HEIGHT_FOR_SAILING_PHOTOGRAPHY_IN_PIXELS) {
-                if (candidateImageUrl.hasTag(MediaTagConstants.STAGE) || candidateImageUrl.hasTag(MediaTagConstants.GALLERY)) {
+                if (candidateImageUrl.hasTag(MediaTagConstants.STAGE.getName()) || candidateImageUrl.hasTag(MediaTagConstants.GALLERY.getName())) {
                     acceptedImages.add(candidateImageUrl);
                 }
             }
@@ -201,20 +205,11 @@ public final class HomeServiceUtil {
     }
     
     public static boolean hasPhotos(Event event) {
-        return event.hasImageWithTag(MediaTagConstants.GALLERY);
+        return event.hasImageWithTag(MediaTagConstants.GALLERY.getName());
     }
     
     public static boolean hasVideos(Event event) {
         return !Util.isEmpty(event.getVideos());
-    }
-
-    public static boolean isPartOfEvent(EventBase event, Leaderboard regattaEntity) {
-        for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
-            if(courseArea.equals(regattaEntity.getDefaultCourseArea())) {
-                return true;
-            }
-        }
-        return false;
     }
     
     public static VideoDescriptor getRandomVideo(Iterable<VideoDescriptor> urls) {
@@ -229,7 +224,7 @@ public final class HomeServiceUtil {
         VideoDescriptor bestMatch = null;
         
         for (VideoDescriptor videoCandidate : event.getVideos()) {
-            if(!MediaConstants.SUPPORTED_VIDEO_TYPES.contains(videoCandidate.getMimeType())) {
+            if(!MediaTagConstants.SUPPORTED_VIDEO_TYPES.contains(videoCandidate.getMimeType())) {
                 continue;
             }
             
@@ -317,6 +312,9 @@ public final class HomeServiceUtil {
         dto.setBaseURL(baseURL.toString());
         dto.setOnRemoteServer(onRemoteServer);
         dto.setStageType(stageType);
+        Set<TrackingConnectorInfoDTO> trackingConnectorInfos = event.getTrackingConnectorInfos().stream()
+                .map(TrackingConnectorInfoDTO::new).collect(Collectors.toSet());
+        dto.setTrackingConnectorInfos(trackingConnectorInfos);
         dto.setStageImageURL(useTeaserImage ? findEventThumbnailImageUrlAsString(event) : getStageImageURLAsString(event));
         return dto;
     }
@@ -388,13 +386,22 @@ public final class HomeServiceUtil {
         if(!(eventBase instanceof Event)) {
             return null;
         }
-        Event event = (Event) eventBase;
+        final Event event = (Event) eventBase;
+        String displayNameOfSingleAssociatedRegatta = null;
         for (Leaderboard leaderboard : event.getLeaderboardGroups().iterator().next().getLeaderboards()) {
-            if(HomeServiceUtil.isPartOfEvent(event, leaderboard)) {
-                return leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : leaderboard.getName();
+            if (leaderboard.isPartOfEvent(event)) {
+                if (displayNameOfSingleAssociatedRegatta != null) {
+                    // more than one Regatta is associated to the specific event
+                    return null;
+                }
+                displayNameOfSingleAssociatedRegatta = getLocation(event, leaderboard);
             }
         }
-        return null;
+        return displayNameOfSingleAssociatedRegatta;
+    }
+    
+    public static String getLocation(Event eventBase, Leaderboard leaderboard) {
+        return leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : leaderboard.getName();
     }
     
     public static ImageDTO convertToImageDTO(ImageDescriptor image) {
@@ -443,11 +450,12 @@ public final class HomeServiceUtil {
         return courseArea == null ? null : courseArea.getId().toString();
     }
     
-    public static void forAllPublicEvents(RacingEventService service, HttpServletRequest request,
+    public static void forAllPublicEventsWithReadPermission(RacingEventService service, HttpServletRequest request,
+            SecurityService securityService,
             EventVisitor... visitors) throws DispatchException {
         URL requestedBaseURL = getRequestBaseURL(request);
         for (Event event : service.getAllEvents()) {
-            if(event.isPublic()) {
+            if (event.isPublic() && securityService.hasCurrentUserReadPermission(event)) {
                 for(EventVisitor visitor : visitors) {
                     visitor.visit(event, false, requestedBaseURL);
                 }
@@ -461,10 +469,12 @@ public final class HomeServiceUtil {
             URL baseURL = getBaseURL(serverRef.getURL());
             if (remoteEvents != null) {
                 for (EventBase remoteEvent : remoteEvents) {
-                    if(remoteEvent.isPublic()) {
-                        for(EventVisitor visitor : visitors) {
-                            visitor.visit(remoteEvent, true, baseURL);
-                        }
+                    // Those events have been publicly advertised and have been received by an unauthenticated
+                    // anonymous call to the /events end point to the remote server. No security checks or filtering
+                    // seems necessary here because we should be seeing only the public remote events anyway.
+                    // See also bug 5000.
+                    for (EventVisitor visitor : visitors) {
+                        visitor.visit(remoteEvent, true, baseURL);
                     }
                 }
             }
@@ -504,7 +514,7 @@ public final class HomeServiceUtil {
                 // for events that are locally available, we can see if there are any leaderboards
                 LeaderboardGroup leaderboardGroup = (LeaderboardGroup) leaderboardGroupBase;
                 for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
-                    if(!fakeSeries || isPartOfEvent(event, leaderboard)) {
+                    if(!fakeSeries || leaderboard.isPartOfEvent(event)) {
                         return true;
                     }
                 }
@@ -541,13 +551,31 @@ public final class HomeServiceUtil {
      */
     public static List<Event> getEventsForSeriesOrdered(LeaderboardGroup overallLeaderboardGroup,
             RacingEventService service) {
+        return getEventsAndLeaderboardsForSeriesOrdered(overallLeaderboardGroup, service).stream()
+                .map(pair -> pair.getA()).distinct().collect(Collectors.toList());
+    }
+    
+    /**
+     * Provides the list of {@link Event Events} and {@link Leaderboard Leaderboards} for a series based on the given
+     * overall {@link LeaderboardGroup} in an order that matches the order of {@link Leaderboard Leaderboards} in the
+     * {@link LeaderboardGroup}.
+     * 
+     * @param overallLeaderboardGroup
+     *            the series overall {@link LeaderboardGroup}
+     * @param service
+     *            {@link RacingEventService}
+     * @return the {@link Event} and {@link Leaderboard} pairs for the series
+     */
+    public static List<Pair<Event, Leaderboard>> getEventsAndLeaderboardsForSeriesOrdered(LeaderboardGroup overallLeaderboardGroup,
+            RacingEventService service) {
         final Iterable<Event> eventsInSeries = getEventsInSeries(overallLeaderboardGroup, service);
-        final Iterable<Leaderboard> orderedLeaderboards = getLeaderboardsForSeriesInOrder(overallLeaderboardGroup);
-        final List<Event> orderedEventsInSeries = new ArrayList<>();
+        final Iterable<Leaderboard> orderedLeaderboards = getLeaderboardsForSeriesInOrderWithReadPermissions(overallLeaderboardGroup,
+                service);
+        final List<Pair<Event, Leaderboard>> orderedEventsInSeries = new ArrayList<>();
         for (Leaderboard leaderboard : orderedLeaderboards) {
             final Event associatedEvent = getAssociatedEventForLeaderboardInSeries(leaderboard, eventsInSeries);
             if (associatedEvent != null) {
-                orderedEventsInSeries.add(associatedEvent);
+                orderedEventsInSeries.add(new Pair<>(associatedEvent, leaderboard));
             }
         }
         return orderedEventsInSeries;
@@ -557,11 +585,23 @@ public final class HomeServiceUtil {
      * The {@link Leaderboard Leaderboards} referenced in the given {@link LeaderboardGroup} have a defined order. If
      * the displayGroupsInReverseOrder flag is set for the {@link LeaderboardGroup}, the order needs to change in the
      * UI. This methods sorts the {@link Leaderboard Leaderboards} using this flag.
+     * @param service 
      */
-    public static Iterable<Leaderboard> getLeaderboardsForSeriesInOrder(LeaderboardGroup overallLeaderboardGroup) {
+    public static Iterable<Leaderboard> getLeaderboardsForSeriesInOrderWithReadPermissions(LeaderboardGroup overallLeaderboardGroup, RacingEventService service) {
         if (overallLeaderboardGroup.isDisplayGroupsInReverseOrder()) {
             List<Leaderboard> leaderboardsInSeries = new ArrayList<>();
-            Util.addAll(overallLeaderboardGroup.getLeaderboards(), leaderboardsInSeries);
+            for(Leaderboard leaderboard: overallLeaderboardGroup.getLeaderboards()) {
+                if (service.getSecurityService().hasCurrentUserReadPermission(leaderboard)) {
+                    if (leaderboard instanceof RegattaLeaderboard) {
+                        if (service.getSecurityService()
+                                .hasCurrentUserReadPermission(((RegattaLeaderboard) leaderboard).getRegatta())) {
+                            leaderboardsInSeries.add(leaderboard);
+                        }
+                    } else {
+                        leaderboardsInSeries.add(leaderboard);
+                    }
+                }
+            }
             Collections.reverse(leaderboardsInSeries);
             return leaderboardsInSeries;
         }
@@ -581,6 +621,24 @@ public final class HomeServiceUtil {
         return null;
     }
 
+    public static List<EventAndLeaderboardReferenceWithStateDTO> getEventAndLeaderboardReferencesForSeriesOrdered(
+            LeaderboardGroup overallLeaderboardGroup, RacingEventService service) {
+        final ArrayList<EventAndLeaderboardReferenceWithStateDTO> eventsOfSeries = new ArrayList<>();
+        for (Pair<Event, Leaderboard> eventAndLeaderboardInSeries : getEventsAndLeaderboardsForSeriesOrdered(
+                overallLeaderboardGroup, service)) {
+            final Event eventInSeries = eventAndLeaderboardInSeries.getA();
+            final Leaderboard leaderboardInSeries = eventAndLeaderboardInSeries.getB();
+            String displayName = HomeServiceUtil.getLocation(eventInSeries, leaderboardInSeries);
+            if (displayName == null) {
+                displayName = eventInSeries.getName();
+            }
+            final EventState eventState = HomeServiceUtil.calculateEventState(eventInSeries);
+            eventsOfSeries.add(new EventAndLeaderboardReferenceWithStateDTO(eventInSeries.getId(),
+                    leaderboardInSeries.getName(), displayName, eventState));
+        }
+        return eventsOfSeries;
+    }
+
     /**
      * The given {@link LeaderboardGroup} needs to be one that is used to define a {@link Event} series (e.g. ESS or
      * Bundesliga). In this case, multiple {@link Event Events} reference the same {@link LeaderboardGroup}. This method
@@ -590,12 +648,47 @@ public final class HomeServiceUtil {
             RacingEventService service) {
         Set<Event> eventsInSeries = new HashSet<>();
         for (Event event : service.getAllEvents()) {
-            for (LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
-                if (overallLeaderboardGroup.equals(leaderboardGroup)) {
-                    eventsInSeries.add(event);
+            if (service.getSecurityService().hasCurrentUserReadPermission(event)) {
+                for (LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
+                    if (service.getSecurityService().hasCurrentUserReadPermission(leaderboardGroup)) {
+                        if (overallLeaderboardGroup.equals(leaderboardGroup)) {
+                            eventsInSeries.add(event);
+                        }
+                    }
                 }
             }
         }
         return eventsInSeries;
+    }
+    
+    /**
+     * Determines the Event for a LeaderboardGroup, if an exact 1-1 match exists this is returned,
+     * else the newes 1-1 is returned. If that does not exist also, the newest n-1 match is returned
+     */
+    public static Event determineBestMatchingEvent(RacingEventService service, LeaderboardGroup leaderBoardGroup) {
+        List<Event> events = new ArrayList<>(
+                HomeServiceUtil.getEventsForSeriesOrdered(leaderBoardGroup, service));
+        Collections.sort(events, new Comparator<Event>() {
+
+            @Override
+            public int compare(Event o1, Event o2) {
+                boolean o1GroupPerfectMatch = Util.size(o1.getLeaderboardGroups()) == 1;
+                boolean o2GroupPerfectMatch = Util.size(o2.getLeaderboardGroups()) == 1;
+                int result = Boolean.compare(o1GroupPerfectMatch, o2GroupPerfectMatch);
+                if (result == 0) {
+                    TimePoint o1Start = o1.getStartDate();
+                    if (o1Start == null) {
+                        o1Start = TimePoint.BeginningOfTime;
+                    }
+                    TimePoint o2Start = o2.getStartDate();
+                    if (o2Start == null) {
+                        o2Start = TimePoint.BeginningOfTime;
+                    }
+                    result = o1Start.compareTo(o2Start);
+                }
+                return result;
+            }
+        });
+        return events.get(0);
     }
 }

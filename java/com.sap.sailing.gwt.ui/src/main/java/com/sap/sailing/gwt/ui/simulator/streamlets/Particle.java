@@ -8,4 +8,12 @@ public class Particle {
     public Vector currentPixelCoordinate;
     public int stepsToLive;
     public Vector v;
+
+    public void clear() {
+        this.currentPixelCoordinate = null;
+        this.previousPixelCoordinate = null;
+        this.currentPosition = null;
+        this.stepsToLive = 0;
+        this.v = null;
+    }
 }

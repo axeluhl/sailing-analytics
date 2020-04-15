@@ -1,10 +1,5 @@
 package com.sap.sailing.racecommittee.app.utils.autoupdate;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
@@ -20,6 +15,11 @@ import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.activities.PreferenceActivity;
 import com.sap.sailing.racecommittee.app.ui.fragments.preference.GeneralPreferenceFragment;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 public class AutoUpdater {
 
@@ -68,7 +68,7 @@ public class AutoUpdater {
     }
 
     protected void showUpdatedNotification() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppTheme_AlertDialog);
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
 
         OnClickListener okListener = new OnClickListener() {
             @Override
@@ -87,16 +87,13 @@ public class AutoUpdater {
             }
         };
 
-        builder.setTitle(R.string.auto_update_completed)
-            .setMessage(R.string.auto_update_completed_text)
-            .setPositiveButton(R.string.auto_update_completed_take_me_there, okListener)
-            .setNegativeButton(android.R.string.cancel, cancelListener)
-            .create()
-            .show();
+        builder.setTitle(R.string.auto_update_completed).setMessage(R.string.auto_update_completed_text)
+                .setPositiveButton(R.string.auto_update_completed_take_me_there, okListener)
+                .setNegativeButton(android.R.string.cancel, cancelListener).create().show();
     }
 
     private void setWasUpdated(SharedPreferences updatedPreferences, boolean wasUpdated) {
-        updatedPreferences.edit().putBoolean(HIDDEN_PREFERENCE_UPDATED_FLAG, wasUpdated).commit();
+        updatedPreferences.edit().putBoolean(HIDDEN_PREFERENCE_UPDATED_FLAG, wasUpdated).apply();
     }
 
     private SharedPreferences getUpdatedPreferences() {
@@ -105,8 +102,7 @@ public class AutoUpdater {
 
     private void clearUpdateCache() {
         for (File file : FileHandlerUtils.getExternalApplicationFolder(context).listFiles()) {
-            if (file.getName().startsWith("auto-update-") &&
-                    file.getName().endsWith(".apk")) {
+            if (file.getName().startsWith("auto-update-") && file.getName().endsWith(".apk")) {
                 boolean result = file.delete();
                 if (result) {
                     ExLog.i(context, TAG, String.format("Deleted old update file %s", file.getName()));

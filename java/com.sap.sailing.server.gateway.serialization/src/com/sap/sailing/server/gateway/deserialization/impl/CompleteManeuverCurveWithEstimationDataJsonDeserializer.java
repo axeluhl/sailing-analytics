@@ -67,16 +67,15 @@ public class CompleteManeuverCurveWithEstimationDataJsonDeserializer
                 CompleteManeuverCurveWithEstimationDataJsonSerializer.RELATIVE_BEARING_TO_NEXT_MARK_AFTER_MANEUVER);
         Double closestDistanceToMarkInMeters = (Double) object
                 .get(CompleteManeuverCurveWithEstimationDataJsonSerializer.CLOSEST_DISTANCE_TO_MARK);
-        Double deviationFromTargetTackAngle = (Double) object
-                .get(CompleteManeuverCurveWithEstimationDataJsonSerializer.DEVIATION_FROM_TARGET_TACK_ANGLE);
-        Double deviationFromTargetJibeAngle = (Double) object
-                .get(CompleteManeuverCurveWithEstimationDataJsonSerializer.DEVIATION_FROM_TARGET_JIBE_ANGLE);
+        Double targetTackAngle = (Double) object
+                .get(CompleteManeuverCurveWithEstimationDataJsonSerializer.TARGET_TACK_ANGLE);
+        Double targetJibeAngle = (Double) object
+                .get(CompleteManeuverCurveWithEstimationDataJsonSerializer.TARGET_JIBE_ANGLE);
         return new CompleteManeuverCurveWithEstimationDataImpl(position, mainCurve, curveWithUnstableCourseAndSpeed,
                 wind, tackingCount, jibingCount, maneuverStartsByRunningAwayFromWind,
                 convertBearing(relativeBearingToNextMarkBeforeManeuver),
                 convertBearing(relativeBearingToNextMarkAfterManeuver), markPassing,
-                convertDistance(closestDistanceToMarkInMeters), deviationFromTargetTackAngle,
-                deviationFromTargetJibeAngle);
+                convertDistance(closestDistanceToMarkInMeters), targetTackAngle, targetJibeAngle);
     }
 
     private Bearing convertBearing(Double degrees) {

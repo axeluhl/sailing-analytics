@@ -1,7 +1,16 @@
 package com.sap.sailing.domain.common.dto;
 
+import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.dto.AccessControlListDTO;
+import com.sap.sse.security.shared.dto.OwnershipDTO;
+import com.sap.sse.security.shared.dto.SecuredDTO;
+import com.sap.sse.security.shared.dto.SecurityInformationDTO;
 
 /**
  * Master data about a single race that is to be transferred to the client.<p>
@@ -9,8 +18,10 @@ import com.sap.sailing.domain.common.RegattaNameAndRaceName;
  * @author Axel Uhl (d043530)
  *
  */
-public class RaceDTO extends BasicRaceDTO {
+public class RaceDTO extends BasicRaceDTO implements SecuredDTO {
     private static final long serialVersionUID = 2613189982608149975L;
+    
+    private SecurityInformationDTO securityInformation = new SecurityInformationDTO();
 
     /**
      * Tells if this race is currently being tracked, meaning that a {@link RaceTracker} is
@@ -28,22 +39,25 @@ public class RaceDTO extends BasicRaceDTO {
     private String regattaName;
     public String boatClass;
     
+    private RankingMetrics rankingMetricType;
+    
     public RaceDTO() {}
 
-    public RaceDTO(RegattaAndRaceIdentifier raceIdentifier) {
-        this(raceIdentifier, null, false);
-    }
-
-    public RaceDTO(RegattaAndRaceIdentifier raceIdentifier, TrackedRaceDTO trackedRace, boolean isCurrentlyTracked) {
+    public RaceDTO(RegattaAndRaceIdentifier raceIdentifier, TrackedRaceDTO trackedRace, boolean isCurrentlyTracked, RankingMetrics rankingMetricType) {
         super(raceIdentifier, trackedRace);
         this.regattaName = raceIdentifier.getRegattaName();
         this.isTracked = isCurrentlyTracked;
+        this.rankingMetricType = rankingMetricType;
     }
 
     public RegattaAndRaceIdentifier getRaceIdentifier() {
         return new RegattaNameAndRaceName(regattaName, getName());
     }
 
+    public RankingMetrics getRankingMetricType() {
+        return rankingMetricType;
+    }
+    
     public String getRegattaName() {
         return regattaName;
     }
@@ -93,4 +107,39 @@ public class RaceDTO extends BasicRaceDTO {
             return false;
         return true;
     }
+    
+    @Override
+    public final AccessControlListDTO getAccessControlList() {
+        return securityInformation.getAccessControlList();
+    }
+
+    @Override
+    public final OwnershipDTO getOwnership() {
+        return securityInformation.getOwnership();
+    }
+
+    @Override
+    public final void setAccessControlList(final AccessControlListDTO accessControlList) {
+        this.securityInformation.setAccessControlList(accessControlList);
+    }
+
+    @Override
+    public final void setOwnership(final OwnershipDTO ownership) {
+        this.securityInformation.setOwnership(ownership);
+    }
+    
+    @Override
+    public HasPermissions getPermissionType() {
+        return SecuredDomainType.TRACKED_RACE;
+    }
+    
+    @Override
+    public QualifiedObjectIdentifier getIdentifier() {
+        return getPermissionType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+    }
+
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return new TypeRelativeObjectIdentifier(regattaName, getName());
+    }
+
 }

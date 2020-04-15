@@ -18,10 +18,10 @@ public class EventReferenceDTO implements DTO {
         this.displayName = event.getName();
     }
 
-    public EventReferenceDTO(UUID id, String name) {
+    public EventReferenceDTO(UUID id, String displayName) {
         super();
         this.id = id;
-        this.displayName = name;
+        this.displayName = displayName;
     }
 
     public UUID getId() {

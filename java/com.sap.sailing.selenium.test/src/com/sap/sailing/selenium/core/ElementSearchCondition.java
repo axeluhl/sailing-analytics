@@ -1,8 +1,8 @@
 package com.sap.sailing.selenium.core;
 
-import org.openqa.selenium.SearchContext;
+import java.util.function.Function;
 
-import com.google.common.base.Function;
+import org.openqa.selenium.SearchContext;
 
 /**
  * <p>Models a condition that might reasonably be expected to eventually evaluate to something that is neither

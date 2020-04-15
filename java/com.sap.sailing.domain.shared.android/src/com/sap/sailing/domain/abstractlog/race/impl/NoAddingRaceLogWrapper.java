@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.NavigableSet;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -18,7 +19,6 @@ import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
 import com.sap.sailing.domain.tracking.impl.TimeRangeCache;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.Util.Function;
 import com.sap.sse.common.scalablevalue.ScalableValue;
 
 /**
@@ -59,7 +59,7 @@ public class NoAddingRaceLogWrapper implements RaceLog {
     }
 
     @Override
-    public void addAllListeners(HashSet<RaceLogEventVisitor> listeners) {
+    public void addAllListeners(Iterable<RaceLogEventVisitor> listeners) {
         innerRaceLog.addAllListeners(listeners);
     }
 
@@ -157,6 +157,12 @@ public class NoAddingRaceLogWrapper implements RaceLog {
     @Override
     public Iterator<RaceLogEvent> getRawFixesIterator(TimePoint startingAt, boolean inclusive) {
         return innerRaceLog.getRawFixesIterator(startingAt, inclusive);
+    }
+
+    @Override
+    public Iterator<RaceLogEvent> getRawFixesIterator(TimePoint startingAt, boolean startingAtInclusive,
+            TimePoint endingAt, boolean endingAtInclusive) {
+        return innerRaceLog.getRawFixesIterator(startingAt, startingAtInclusive, endingAt, endingAtInclusive);
     }
 
     @Override

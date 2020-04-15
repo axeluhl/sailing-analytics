@@ -48,8 +48,9 @@ public class GetRegattaListViewAction implements SailingAction<ResultWithTTL<Sor
     @Override
     @GwtIncompatible
     public ResultWithTTL<SortedSetResult<RegattaWithProgressDTO>> execute(final SailingDispatchContext context) {
+        context.getSecurityService().checkCurrentUserReadPermission(context.getRacingEventService().getEvent(eventId));
         final List<RegattaWithProgressDTO> result = new LinkedList<>();
-        EventActionUtil.forLeaderboardsOfEvent(context, eventId, new LeaderboardCallback() {
+        EventActionUtil.forLeaderboardsOfEventWithReadPermissions(context, eventId, new LeaderboardCallback() {
             @Override
             public void doForLeaderboard(LeaderboardContext leaderboardContext) {
                 result.add(leaderboardContext.getRegattaWithProgress());

@@ -29,9 +29,9 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 
 /**
- * Produces an collection of {@link ManagedRace} objects whose order is determined by the order of the {@link RaceGroup}s
- * as provided by the JSON object, and within each {@link RaceGroup} by the order of the series in the group, and within
- * the series by the order of the "race rows" as provided by the server.
+ * Produces an collection of {@link ManagedRace} objects whose order is determined by the order of the
+ * {@link RaceGroup}s as provided by the JSON object, and within each {@link RaceGroup} by the order of the series in
+ * the group, and within the series by the order of the "race rows" as provided by the server.
  */
 public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace>> {
 
@@ -39,8 +39,8 @@ public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace
     private final ConfigurationLoader<RegattaConfiguration> globalConfigurationLoader;
     private final AbstractLogEventAuthor author;
 
-    public ManagedRacesDataParser(AbstractLogEventAuthor author, ConfigurationLoader<RegattaConfiguration> globalConfiguration,
-            JsonDeserializer<RaceGroup> deserializer) {
+    public ManagedRacesDataParser(AbstractLogEventAuthor author,
+            ConfigurationLoader<RegattaConfiguration> globalConfiguration, JsonDeserializer<RaceGroup> deserializer) {
         this.author = author;
         this.globalConfigurationLoader = globalConfiguration;
         this.deserializer = deserializer;
@@ -71,8 +71,8 @@ public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace
         }
     }
 
-    private ManagedRace createManagedRace(RaceGroup raceGroup, SeriesWithRows series, Fleet fleet, String raceColumnName,
-            RaceLog raceLog, double factor, Double explicitFactor, int zeroBasedIndexInFleet) {
+    private ManagedRace createManagedRace(RaceGroup raceGroup, SeriesWithRows series, Fleet fleet,
+            String raceColumnName, RaceLog raceLog, double factor, Double explicitFactor, int zeroBasedIndexInFleet) {
         ConfigurationLoader<RegattaConfiguration> configurationLoader = globalConfigurationLoader;
         RegattaConfiguration localConfiguration = raceGroup.getRegattaConfiguration();
         if (localConfiguration != null) {
@@ -80,8 +80,8 @@ public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace
         }
         FleetIdentifier fleetIdentifier = new FleetIdentifierImpl(fleet, series, raceGroup);
         ManagedRaceIdentifier identifier = new ManagedRaceIdentifierImpl(raceColumnName, fleetIdentifier);
-        return new ManagedRaceImpl(identifier, new ManagedRaceCalculator(raceLog, author, configurationLoader),
-                factor, explicitFactor, zeroBasedIndexInFleet);
+        return new ManagedRaceImpl(identifier, new ManagedRaceCalculator(raceLog, author, configurationLoader), factor,
+                explicitFactor, zeroBasedIndexInFleet);
     }
 
 }

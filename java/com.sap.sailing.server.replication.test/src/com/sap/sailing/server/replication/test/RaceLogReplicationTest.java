@@ -6,8 +6,7 @@ import static org.junit.Assert.assertNotNull;
 import java.io.IOException;
 import java.util.UUID;
 
-import junit.framework.Assert;
-
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -272,7 +271,7 @@ public class RaceLogReplicationTest extends AbstractLogReplicationTest<RaceLog, 
         course.addWaypoint(0, new WaypointImpl(new ControlPointWithTwoMarksImpl(UUID.randomUUID(), 
                 new MarkImpl(UUID.randomUUID(), "Black", MarkType.BUOY, AbstractColor.getCssColor("black"), "round", "circle"),
                 new MarkImpl(UUID.randomUUID(), "Green", MarkType.BUOY, AbstractColor.getCssColor("green"), "round", "circle"),
-                "Upper gate")));
+                "Upper gate", "Upper gate")));
         course.addWaypoint(1, new WaypointImpl(new MarkImpl(UUID.randomUUID(), "White", MarkType.BUOY, AbstractColor.getCssColor("white"), "conical", "bold"), PassingInstruction.Port));
         
         return course;

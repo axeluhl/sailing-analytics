@@ -1,17 +1,20 @@
 package com.sap.sailing.domain.swisstimingadapter;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.swisstimingadapter.impl.SwissTimingFactoryImpl;
+import com.sap.sailing.domain.swisstimingadapter.impl.SwissTimingRaceTrackerImpl;
 import com.sap.sailing.domain.swisstimingadapter.impl.SwissTimingTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.RaceTracker;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
 
@@ -41,34 +44,32 @@ public interface SwissTimingFactory {
      * {@link MessageType#isRaceSpecific() Race-specific messages} for other races are ignored and not forwarded to any
      * listener.
      */
-    SailMasterConnector getOrCreateSailMasterConnector(String hostname, int port, String raceId, String raceName, String raceDescription, BoatClass boatClass)
+    SailMasterConnector getOrCreateSailMasterConnector(String hostname, int port, String raceId, String raceName,
+            String raceDescription, BoatClass boatClass, SwissTimingRaceTrackerImpl swissTimingRaceTracker)
             throws InterruptedException, ParseException;
 
     SailMasterConnector getOrCreateSailMasterLiveSimulatorConnector(String host, int port, String raceId, String raceName,
-            String raceDescription, BoatClass boatClass) throws InterruptedException, ParseException;
+            String raceDescription, BoatClass boatClass, SwissTimingRaceTrackerImpl swissTimingRaceTracker) throws InterruptedException, ParseException;
 
     SailMasterTransceiver createSailMasterTransceiver();
 
-    SwissTimingConfiguration createSwissTimingConfiguration(String name, String jsonURL, String hostname, Integer port);
+    SwissTimingConfiguration createSwissTimingConfiguration(String name, String jsonURL, String hostname, Integer port,
+            String updateURL, String updateUsername, String updatePassword, String creatorName);
     
-    SwissTimingRaceTracker createRaceTracker(String raceID, String raceName, String raceDescription,
-            BoatClass boatClass, String hostname, int port, StartList startList, long delayToLiveInMillis,
-            RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, WindStore windStore,
-            boolean useInternalMarkPassingAlgorithm, DomainFactory domainFactory,
-            TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver, SwissTimingTrackingConnectivityParameters connectivityParams) throws InterruptedException, UnknownHostException,
-            IOException, ParseException;
+    SwissTimingRaceTracker createRaceTracker(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, WindStore windStore,
+            DomainFactory domainFactory, TrackedRegattaRegistry trackedRegattaRegistry, RaceLogAndTrackedRaceResolver raceLogResolver, SwissTimingTrackingConnectivityParameters connectivityParams,
+            RaceTrackingHandler raceTrackingHandler)
+            throws InterruptedException, UnknownHostException, IOException, ParseException, URISyntaxException;
 
-    RaceTracker createRaceTracker(Regatta regatta, String raceID, String raceName, String raceDescription,
-            BoatClass boatClass, String hostname, int port, StartList startList, long delayToLiveInMillis,
-            WindStore windStore, boolean useInternalMarkPassingAlgorithm, DomainFactory domainFactory,
-            TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver, RaceLogStore raceLogStore,
-            RegattaLogStore regattaLogStore, SwissTimingTrackingConnectivityParameters connectivityParams)
-            throws UnknownHostException, InterruptedException, IOException, ParseException;
+    RaceTracker createRaceTracker(Regatta regatta, WindStore windStore, DomainFactory domainFactory, TrackedRegattaRegistry trackedRegattaRegistry,
+            RaceLogAndTrackedRaceResolver raceLogResolver, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, SwissTimingTrackingConnectivityParameters connectivityParams,
+            RaceTrackingHandler raceTrackingHandler)
+            throws UnknownHostException, InterruptedException, IOException, ParseException, URISyntaxException;
 
     Race createRace(String raceId, String raceName, String description, BoatClass boatClass);
 
     SailMasterMessage createMessage(String message);
 
-    SwissTimingArchiveConfiguration createSwissTimingArchiveConfiguration(String string);
+    SwissTimingArchiveConfiguration createSwissTimingArchiveConfiguration(String jsonUrl, String creatorName);
 
 }

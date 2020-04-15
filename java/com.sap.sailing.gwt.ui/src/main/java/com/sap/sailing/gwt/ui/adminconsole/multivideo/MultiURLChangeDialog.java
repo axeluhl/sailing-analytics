@@ -18,7 +18,6 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
@@ -30,10 +29,13 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.domain.common.media.MediaTrackWithSecurityDTO;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.TimeFormatUtil;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 
 /**
  * This dialog allows to change multiple urls for mediatracks at once. It will determine the longest common prefix, that
@@ -57,7 +59,8 @@ public class MultiURLChangeDialog extends DialogBox {
     private TextBox replacePartIn;
     private TextBox replacePartOut;
 
-    public MultiURLChangeDialog(MediaServiceAsync mediaService, StringMessages stringMessages, Set<MediaTrack> selected,
+    public MultiURLChangeDialog(MediaServiceAsync mediaService, StringMessages stringMessages,
+            Set<MediaTrackWithSecurityDTO> selected,
             ErrorReporter errorReporter, Runnable afterLinking) {
         this.stringMessages = stringMessages;
         setGlassEnabled(true);
@@ -135,7 +138,7 @@ public class MultiURLChangeDialog extends DialogBox {
 
                         @Override
                         public void onFailure(Throwable caught) {
-                            Window.alert(stringMessages.multiUrlChangeCannotSave());
+                            Notification.notify(stringMessages.multiUrlChangeCannotSave(), NotificationType.ERROR);
                         }
                     });
                 }
@@ -150,7 +153,7 @@ public class MultiURLChangeDialog extends DialogBox {
 
         final String maxPrefixForAll = maxPrefixForAll();
         if (maxPrefixForAll.length() == 0) {
-            Window.alert(this.stringMessages.multiUrlNoPrefixWarning());
+            Notification.notify(this.stringMessages.multiUrlNoPrefixWarning(), NotificationType.WARNING);
         }
         replacePartIn.setText(maxPrefixForAll);
         updateUI();

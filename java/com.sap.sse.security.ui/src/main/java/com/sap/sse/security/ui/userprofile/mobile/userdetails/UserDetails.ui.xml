@@ -31,6 +31,12 @@
             </div>
             <g:ValueListBox ui:field="localeUi" styleName="{res.mainCss.input_input}" />
           </div>
+          <div class="{res.mainCss.input}">
+            <div class="{res.mainCss.input_label}">
+              <ui:text from='{i18n_sec.defaultTenant}' />
+            </div>
+            <g:ListBox ui:field="defaultTenantUi" addStyleNames="{res.mainCss.input_input}" />
+          </div>
           <g:Button ui:field="saveChangesUi" addStyleNames="{local_res.css.userdetails_save} {res.mainCss.button} {res.mainCss.buttonprimary}">
             <ui:text from='{i18n_sec.save}' />
           </g:Button>

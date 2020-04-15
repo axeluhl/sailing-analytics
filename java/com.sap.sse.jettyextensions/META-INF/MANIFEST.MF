@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Jettyextensions
+Bundle-SymbolicName: com.sap.sse.jettyextensions
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: SAP
+Fragment-Host: org.eclipse.jetty.osgi.boot
+Automatic-Module-Name: com.sap.sse.jettyextensions
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8

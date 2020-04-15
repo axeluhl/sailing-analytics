@@ -1,34 +1,148 @@
 package com.sap.sse.security;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 import javax.servlet.ServletContext;
 
+import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.cache.CacheManager;
 import org.apache.shiro.mgt.SecurityManager;
+import org.apache.shiro.subject.Subject;
 import org.osgi.framework.BundleContext;
 
 import com.sap.sse.common.mail.MailException;
-import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
+import com.sap.sse.replication.ReplicableWithObjectInputStream;
 import com.sap.sse.security.impl.ReplicableSecurityService;
+import com.sap.sse.security.interfaces.Credential;
+import com.sap.sse.security.interfaces.PreferenceConverter;
+import com.sap.sse.security.interfaces.UserImpl;
+import com.sap.sse.security.interfaces.UserStore;
 import com.sap.sse.security.operations.SecurityOperation;
-import com.sap.sse.security.shared.DefaultRoles;
+import com.sap.sse.security.shared.AccessControlListAnnotation;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.OwnershipAnnotation;
+import com.sap.sse.security.shared.PermissionChecker;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.RoleDefinition;
+import com.sap.sse.security.shared.RolePrototype;
 import com.sap.sse.security.shared.SocialUserAccount;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
+import com.sap.sse.security.shared.impl.AccessControlList;
+import com.sap.sse.security.shared.impl.Ownership;
+import com.sap.sse.security.shared.impl.Role;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
+import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.shared.impl.UserGroup;
 
 /**
  * A service interface for security management. Intended to be used as an OSGi service that can be registered, e.g., by
- * {@link BundleContext#registerService(Class, Object, java.util.Dictionary)} and can be discovered by other bundles.
+ * {@link BundleContext#registerService(Class, Object, java.util.Dictionary)} and can be discovered by other bundles.<p>
+ * 
+ * Permission checks will throw a {@link org.apache.shiro.authz.AuthorizationException} in case the check fails.
  * 
  * @author Axel Uhl (D043530)
  * @author Benjamin Ebling
  *
  */
 public interface SecurityService extends ReplicableWithObjectInputStream<ReplicableSecurityService, SecurityOperation<?>> {
+    interface RoleCopyListener {
+        void onRoleCopy(User a, Role existingRole, Role copyRole);
+    }
+
+    String ALL_USERNAME = "<all>";
+    String TENANT_SUFFIX = "-tenant";
 
     SecurityManager getSecurityManager();
+
+    /**
+     * Return the ownership information for the object identified by {@code idOfOwnedObject}. If there is no ownership
+     * information for that object {@code null} is returned.
+     */
+    OwnershipAnnotation getOwnership(QualifiedObjectIdentifier idOfOwnedObject);
+    
+    OwnershipAnnotation createDefaultOwnershipForNewObject(QualifiedObjectIdentifier idOfNewObject);
+
+    Iterable<AccessControlListAnnotation> getAccessControlLists();
+
+    AccessControlListAnnotation getAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject);
+
+    AccessControlList overrideAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
+            Map<UserGroup, Set<String>> permissionMap);
+
+    AccessControlList overrideAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
+            Map<UserGroup, Set<String>> permissionMap, String displayNameOfAccessControlledObject);
+
+    /**
+     * @param name The name of the user group to add
+     */
+    AccessControlList addToAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, UserGroup userGroup,
+            String action);
+
+    /**
+     * @param name The name of the user group to remove
+     */ 
+    AccessControlList removeFromAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, UserGroup group,
+            String action);
+
+    void deleteAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject);
+
+    /**
+     * Same as {@link #setOwnership(String, UserImpl, Tenant, String)}, leaving the display name
+     * of the object owned undefined.
+     */
+    Ownership setOwnership(QualifiedObjectIdentifier idOfOwnedObject, User userOwner, UserGroup tenantOwner);
+
+    /**
+     * @param idOfOwnedObject
+     *            the ID of the object for which ownership is declared
+     * @param userOwner
+     *            the user to become the owning user of the object with ID
+     *            {@code idOfOwnedObject}
+     * @param tenantOwner
+     *            the tenant to become owning tenant of the object with ID {@code idOfOwnedObject}
+     * @param displayNameOfOwnedObject
+     *            a display name that this store can use to produce a user-readable hint regarding the ownership
+     *            definition that this call creates; there is no guarantee that the display name will remain up to date
+     *            as the object identified by {@link idOfOwnedObject} may change its name without notifying this
+     *            store
+     */
+    Ownership setOwnership(QualifiedObjectIdentifier idOfOwnedObject, User userOwner, UserGroup tenantOwner,
+            String displayNameOfOwnedObject);
+
+    void deleteOwnership(QualifiedObjectIdentifier idOfOwnedObject);
+
+    Iterable<UserGroup> getUserGroupList();
+
+    UserGroup getUserGroup(UUID id);
+
+    UserGroup getUserGroupByName(String name);
+    
+    Iterable<UserGroup> getUserGroupsOfUser(User user);
+
+    UserGroup createUserGroup(UUID id, String name) throws UserGroupManagementException;
+    
+    void addUserToUserGroup(UserGroup group, User user);
+    
+    void removeUserFromUserGroup(UserGroup group, User user);
+
+    void putRoleDefinitionToUserGroup(UserGroup group, RoleDefinition roleDefinition, boolean forAll);
+
+    void removeRoleDefintionFromUserGroup(UserGroup group, RoleDefinition roleDefinition);
+
+    void deleteUserGroup(UserGroup userGroup) throws UserGroupManagementException;
 
     Iterable<User> getUserList();
 
@@ -50,14 +164,14 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     void logout();
 
     /**
-     * @param validationBaseURL if <code>null</code>, no validation will be attempted
+     * This version should only be used for tests, normally the defaultTenand handling should be used
+     * 
+     * @param validationBaseURL
+     *            if <code>null</code>, no validation will be attempted
      */
-    User createSimpleUser(String username, String email, String password, String fullName, String company, String validationBaseURL) throws UserManagementException, MailException;
-    
-    /**
-     * @param validationBaseURL if <code>null</code>, no validation will be attempted
-     */
-    User createSimpleUser(String username, String email, String password, String fullName, String company, Locale locale, String validationBaseURL) throws UserManagementException, MailException;
+    User createSimpleUser(String username, String email, String password, String fullName, String company,
+            Locale locale, String validationBaseURL, UserGroup userOwner)
+            throws UserManagementException, MailException, UserGroupManagementException;
 
     void updateSimpleUserPassword(String name, String newPassword) throws UserManagementException;
 
@@ -65,21 +179,47 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     
     void updateUserProperties(String username, String fullName, String company, Locale locale) throws UserManagementException;
 
-    User createSocialUser(String username, SocialUserAccount socialUserAccount) throws UserManagementException;
+    User createSocialUser(String username, SocialUserAccount socialUserAccount)
+            throws UserManagementException, UserGroupManagementException;
 
     void deleteUser(String username) throws UserManagementException;
 
-    Iterable<String> getRolesFromUser(String username) throws UserManagementException;
-
-    void addRoleForUser(String username, String role);
-
-    void removeRoleFromUser(String username, String role);
-
-    Iterable<String> getPermissionsFromUser(String username) throws UserManagementException;
+    /**
+     * Creates a new role with initially empty {@link RoleDefinition#getPermissions() permissions}.
+     */
+    RoleDefinition createRoleDefinition(UUID id, String name);
     
-    void removePermissionFromUser(String username, String permissionToRemove);
+    /**
+     * Deletes the {@code roleDefinition} from this service persistently.
+     */
+    void deleteRoleDefinition(RoleDefinition roleDefinition);
+    
+    /**
+     * The {@code roleDefinitionWithNewProperties} object represents an updated version, maybe a duplicate, of what we would get
+     * when asking {@link #getRoleDefinition(UUID) this.getRole(roleWithNewProperties.getId())}. It may have changed compared to
+     * what this service has in store. This service's representation (if not the same) and in particular the persistent
+     * representation that this service will load upon its next start-up will be updated to match
+     * {@code roleDefinitionWithNewProperties}'s state.
+     */
+    void updateRoleDefinition(RoleDefinition roleDefinitionWithNewProperties);
+    
+    Iterable<RoleDefinition> getRoleDefinitions();
 
-    void addPermissionForUser(String username, String permissionToAdd);
+    RoleDefinition getRoleDefinition(UUID idOfRoleDefinition);
+    
+    void addRoleForUser(User user, Role role);
+
+    void addRoleForUser(String username, Role role);
+
+    void removeRoleFromUser(User user, Role role);
+    
+    void removeRoleFromUser(String username, Role role);
+
+    Iterable<WildcardPermission> getPermissionsFromUser(String username) throws UserManagementException;
+    
+    void removePermissionFromUser(String username, WildcardPermission permissionToRemove);
+
+    void addPermissionForUser(String username, WildcardPermission permissionToAdd);
 
     /**
      * Registers a settings key together with its type. Calling this method is necessary for {@link #setSetting(String, Object)}
@@ -159,6 +299,12 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     String getPreference(String username, String key);
     
     /**
+     * Gets a preference object. Always returns null if there is no converter associated with the given key -> see
+     * {@link #registerPreferenceConverter(String, PreferenceConverter)}.
+     */
+    <T> T getPreferenceObject(String username, String key);
+
+    /**
      * @return all preferences of the given user
      */
     Map<String, String> getAllPreferences(String username);
@@ -195,5 +341,334 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     void removeAccessToken(String username);
 
     User loginByAccessToken(String accessToken);
+
+    /**
+     * Returns the group owning this server/replicaset {@link UserStore#getServerGroup()}. This group is used as default
+     * owner if default objects such as role definitions or the admin user have to be created outside of any user
+     * session and a default ownership is required. It is the group owner of the {@link SecuredSecurityTypes#SERVER}
+     * object.<p>
+     * 
+     * During replication, a replica's user store contents are replaced by the master's user store contents. However,
+     * a replica's {@link UserStore#getServerGroup()} will be resolved by the server group name provided to the
+     * {@link UserStore} at its construction time. If such a group is not provided by the master, it is created. This
+     * creation will be executed as a replicable operation that hence will be sent back to the master where the group
+     * is then known. This new group is then used to try to set the server's group ownership, after checking that such an
+     * ownership doesn't exist yet.
+     */
+    UserGroup getServerGroup();
+
+    /**
+     * For the current session's {@link Subject} an ownership for an object of type {@code type} and with type-relative
+     * object identifier {@code typeRelativeObjectIdentifier} is created with the subject's default creation group if no
+     * ownership for that object is found yet. Otherwise, the existing ownership is left untouched.
+     * <p>
+     * 
+     * The {@link ServerActions#CREATE_OBJECT} permission is checked for the executing server. Then, the
+     * {@link DefaultActions#CREATE} permission is checked for the {@code type}/{@code typeRelativeObjectIdentifier}
+     * object.
+     * <p>
+     * 
+     * If any of these permission checks fails and the ownership has not been found but created, the ownership is
+     * removed again, and the authorization exception is thrown by this method. Otherwise, the subject is considered to
+     * have the permission to create the object, the {@code actionWithResult} is invoked, and the object returned by the
+     * action is the result of this method.
+     */
+    <T> T setOwnershipCheckPermissionForObjectCreationAndRevertOnError(HasPermissions type,
+            TypeRelativeObjectIdentifier typeRelativeObjectIdentifier,
+            String securityDisplayName, Callable<T> createActionReturningCreatedObject);
+
+    /**
+     * Like
+     * {@link #setOwnershipCheckPermissionForObjectCreationAndRevertOnError(HasPermissions, TypeRelativeObjectIdentifier, String, Callable)},
+     * only that the action does not return an object, so this method does not either.
+     */
+    void setOwnershipCheckPermissionForObjectCreationAndRevertOnError(HasPermissions type,
+            TypeRelativeObjectIdentifier typeRelativeObjectIdentifier, String securityDisplayName, Action actionToCreateObject);
+
+    User getAllUser();
+
+    void checkPermissionAndDeleteOwnershipForObjectRemoval(WithQualifiedObjectIdentifier object,
+            Action actionToDeleteObject);
+
+    <T> T checkPermissionAndDeleteOwnershipForObjectRemoval(WithQualifiedObjectIdentifier object,
+            Callable<T> actionToDeleteObject);
+    
+    void deleteAllDataForRemovedObject(QualifiedObjectIdentifier identifier);
+
+    <T extends WithQualifiedObjectIdentifier> void filterObjectsWithPermissionForCurrentUser(
+            com.sap.sse.security.shared.HasPermissions.Action action, Iterable<T> objectsToFilter,
+            Consumer<T> filteredObjectsConsumer);
+
+    <T extends WithQualifiedObjectIdentifier> void filterObjectsWithPermissionForCurrentUser(
+            com.sap.sse.security.shared.HasPermissions.Action[] actions, Iterable<T> objectsToFilter,
+            Consumer<T> filteredObjectsConsumer);
+
+    /**
+     * Filters objects with any of the given permissions for the current user.
+     */
+    <T extends WithQualifiedObjectIdentifier> void filterObjectsWithAnyPermissionForCurrentUser(
+            com.sap.sse.security.shared.HasPermissions.Action[] actions,
+            Iterable<T> objectsToFilter, Consumer<T> filteredObjectsConsumer);
+
+    <T extends WithQualifiedObjectIdentifier, R> List<R> mapAndFilterByReadPermissionForCurrentUser(
+            Iterable<T> objectsToFilter, Function<T, R> filteredObjectsMapper);
+
+    <T extends WithQualifiedObjectIdentifier, R> List<R> mapAndFilterByExplicitPermissionForCurrentUser(
+            HasPermissions.Action[] actions, Iterable<T> objectsToFilter,
+            Function<T, R> filteredObjectsMapper);
+
+    /**
+     * Maps and filters by any of the given permissions for the current user.
+     */
+    <T extends WithQualifiedObjectIdentifier, R> List<R> mapAndFilterByAnyExplicitPermissionForCurrentUser(
+            HasPermissions permittedObject, HasPermissions.Action[] actions, Iterable<T> objectsToFilter,
+            Function<T, R> filteredObjectsMapper);
+
+    /**
+     * Checks if the current user has the {@link DefaultActions#READ READ} permission on the {@code object} identified.
+     * If {@code object} is {@code null}, the check will always pass.
+     * 
+     * @return {@code true} if and only if the user has the permission or the {@code object} is {@code null}
+     */
+    boolean hasCurrentUserReadPermission(WithQualifiedObjectIdentifier object);
+
+    /**
+     * Checks if the current user has the {@link DefaultActions#UPDATE UPDATE} permission on the {@code object} identified.
+     * If {@code object} is {@code null}, the check will always pass.
+     * 
+     * @return {@code true} if and only if the user has the permission or the {@code object} is {@code null}
+     */
+    boolean hasCurrentUserUpdatePermission(WithQualifiedObjectIdentifier object);
+
+    /**
+     * Checks if the current user has the {@link DefaultActions#DELETE DELETE} permission on the {@code object} identified.
+     * If {@code object} is {@code null}, the check will always pass.
+     * 
+     * @return {@code true} if and only if the user has the permission or the {@code object} is {@code null}
+     */
+    boolean hasCurrentUserDeletePermission(WithQualifiedObjectIdentifier object);
+
+    /**
+     * @return true, if all of the given actions are permitted for the current user; if no action is provided
+     *         ({@code actions} is an empty array), {@code true} is returned because the user always has permission
+     *         "to do nothing."
+     */
+    boolean hasCurrentUserExplicitPermissions(WithQualifiedObjectIdentifier object, HasPermissions.Action... actions);
+
+    /**
+     * @return true, if any of the given actions is permitted for the current user; if no action is provided
+     *         ({@code actions} is an empty array), {@code false} is returned because the user has none of the
+     *         permissions from this empty set.
+     */
+    boolean hasCurrentUserOneOfExplicitPermissions(WithQualifiedObjectIdentifier object, HasPermissions.Action... actions);
+
+    /**
+     * Checks if the current user has the {@link DefaultActions#READ READ} permission on the {@code object} identified.
+     * If {@code object} is {@code null}, the check will always pass.
+     */
+    void checkCurrentUserReadPermission(WithQualifiedObjectIdentifier object);
+
+    /**
+     * Checks if the current user has the {@link DefaultActions#UPDATE UPDATE} permission on the {@code object} identified.
+     * If {@code object} is {@code null}, the check will always pass.
+     * 
+     * @throws AuthorizationException in case the current user is not permitted to update {@code object}
+     */
+    void checkCurrentUserUpdatePermission(WithQualifiedObjectIdentifier object);
+
+    /**
+     * Checks if the current user has the {@link DefaultActions#DELETE DELETE} permission on the {@code object} identified.
+     * If {@code object} is {@code null}, the check will always pass.
+     * 
+     * @throws AuthorizationException in case the current user is not permitted to delete {@code object}
+     */
+    void checkCurrentUserDeletePermission(WithQualifiedObjectIdentifier object);
+
+    /**
+     * Checks if the current user has the {@link DefaultActions#DELETE DELETE} permission on the {@code object} identified.
+     * If {@code object} is {@code null}, the check will always pass.
+     * 
+     * @throws AuthorizationException in case the current user is not permitted to delete {@code object}
+     */
+    void checkCurrentUserDeletePermission(QualifiedObjectIdentifier object);
+
+    /**
+     * Checks if the current user has the permission to perform all {@code actions} requested on the {@code object}
+     * identified. Throws an {@link AuthorizationException} if not. If {@code object} is {@code null}, everything is
+     * allowed. If the list of {@code actions} is empty, the method will return without exception (rationale: doing
+     * nothing is always allowed).
+     */
+    void checkCurrentUserExplicitPermissions(WithQualifiedObjectIdentifier object, HasPermissions.Action... actions);
+
+    /**
+     * Checks if the current user has permission any of the given actions. If the {@code actions} list is empty,
+     * the current user formally has no permission for any action provided, so consequently an {@link AuthorizationException}
+     * results. Checks for a {@code null} value for {@code object} always pass without exception.
+     */
+    void checkCurrentUserHasOneOfExplicitPermissions(WithQualifiedObjectIdentifier object, HasPermissions.Action... actions);
+
+    /**
+     * Since there are some HasPermission objects, that have no Ownership, this method is used to explicitly mention
+     * that they are to be assumed as migrated.
+     */
+    void assumeOwnershipMigrated(String typeName);
+
+    void migrateOwnership(WithQualifiedObjectIdentifier object);
+
+    void migrateOwnership(QualifiedObjectIdentifier object, String displayName);
+
+    void migrateUser(User user);
+
+    void migratePermission(User user, WildcardPermission permissionToMigrate,
+            Function<WildcardPermission, WildcardPermission> permissionReplacement);
+
+    /**
+     * If the {@link SecuredSecurityTypes#SERVER} object has a group ownership. If not, it is set to the
+     * {@link #getServerGroup() server group}. The {@link SecuredSecurityTypes#SERVER} type is then marked
+     * as migrated (see {@link #checkMigration(Iterable)}).
+     */
+    void migrateServerObject();
+    
+    void checkMigration(Iterable<HasPermissions> allInstances);
+
+    <T extends WithQualifiedObjectIdentifier> boolean hasCurrentUserRoleForOwnedObject(HasPermissions type, T object,
+            RoleDefinition roleToCheck);
+
+    boolean hasCurrentUserMetaPermission(WildcardPermission permissionToCheck, Ownership ownership);
+    
+    boolean hasCurrentUserMetaPermissionWithOwnershipLookup(WildcardPermission permissionToCheck);
+
+    void setOwnershipIfNotSet(QualifiedObjectIdentifier identifier, User userOwner, UserGroup defaultTenant);
+
+    UserGroup getDefaultTenantForCurrentUser();
+
+    /**
+     * When a user adds permissions to a role, he needs to hold the permissions for all existing qualifications. This
+     * method checks all given permissions for all existing qualifications of the given role.
+     * 
+     * @return {@code true} if the current user holds all given meta permissions for all existing qualifications of the
+     *         given role.
+     */
+    boolean hasUserAllWildcardPermissionsForAlreadyRealizedQualifications(RoleDefinition role,
+            Iterable<WildcardPermission> permissionsToCheck);
+
+    void setDefaultTenantForCurrentServerForUser(String username, UUID defaultTenantId);
+    
+    void copyUsersAndRoleAssociations(UserGroup source, UserGroup destination, RoleCopyListener callback);
+
+    User checkPermissionForObjectCreationAndRevertOnErrorForUserCreation(String username,
+            Callable<User> createActionReturningCreatedObject);
+
+    /**
+     * Do only use this, if it is not possible to get the actual instance of the object to delete using the
+     * WithQualifiedObjectIdentifier variant
+     */
+    <T> T checkPermissionAndDeleteOwnershipForObjectRemoval(QualifiedObjectIdentifier identifier,
+            Callable<T> actionToDeleteObject);
+    
+    /**
+     * Do only use this, if it is not possible to get the actual instance of the object to delete using the
+     * WithQualifiedObjectIdentifier variant
+     */
+    void checkPermissionAndDeleteOwnershipForObjectRemoval(QualifiedObjectIdentifier identifier,
+            Action actionToDeleteObject);
+    
+    <T> T doWithTemporaryDefaultTenant(UserGroup tenant, Callable<T> action);
+
+    /**
+     * Before using a SecuritySystem, it is necessary to initialize the service, to ensure roles and acls are correctly
+     * setup. CALL THIS AFTER: the role prototypes exist, the default roles exist, users are loaded (in case of stored
+     * default ones)
+     */
+    void initialize();
+
+    boolean hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(RoleDefinition roleDefinition,
+            Ownership qualificationForGrantedPermissions);
+
+    boolean hasCurrentUserMetaPermissionsOfRoleDefinitionsWithQualification(Set<RoleDefinition> roleDefinitions,
+            Ownership qualificationForGrantedPermissions);
+
+    /**
+     * @return {@code true} if the {@link UserStore} is initial or permission vertical migration is necessary.
+     */
+    boolean isInitialOrMigration();
+    
+    /**
+     * @return {@code true} if the server is a newly set up instance. While {@link #isInitialOrMigration()} defines if
+     *         the {@link SecurityService} is initially set up, this method distincts a server connected to a central
+     *         {@link SecurityService}. In case, the {@link SecurityService} is initial (defined by
+     *         {@link #isInitialOrMigration()}) it is also a new server.
+     */
+    boolean isNewServer();
+
+    RoleDefinition getOrCreateRoleDefinitionFromPrototype(RolePrototype rolePrototype);
+
+    /** Sets the default ownership based on the current user. */
+    void setDefaultOwnership(QualifiedObjectIdentifier identifier, String description);
+
+    void setDefaultOwnershipIfNotSet(QualifiedObjectIdentifier identifier);
+
+    /**
+     * Checks if a user has at least one permission implied by the given {@link WildcardPermission}.
+     * 
+     * @see PermissionChecker#hasUserAnyPermission(WildcardPermission, Iterable,
+     *      com.sap.sse.security.shared.SecurityUser, com.sap.sse.security.shared.SecurityUser,
+     *      com.sap.sse.security.shared.AbstractOwnership)
+     */
+    boolean hasCurrentUserAnyPermission(WildcardPermission permissionToCheck);
+
+    /**
+     * Like {@link #setOwnershipCheckPermissionForObjectCreationAndRevertOnError(HasPermissions, TypeRelativeObjectIdentifier, String, Callable)},
+     * only that no check is performed for {@link ServerActions#CREATE_OBJECT} in addition to the {@code type}-specific
+     * {@link DefaultActions#CREATE} check.
+     */
+    <T> T setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(HasPermissions type,
+            TypeRelativeObjectIdentifier typeIdentifier, String securityDisplayName, Callable<T> actionWithResult);
+
+    /**
+     * Like {@link #setOwnershipCheckPermissionForObjectCreationAndRevertOnError(HasPermissions, TypeRelativeObjectIdentifier, String, Action)},
+     * only that no check is performed for {@link ServerActions#CREATE_OBJECT} in addition to the {@code type}-specific
+     * {@link DefaultActions#CREATE} check.
+     */
+    void setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(HasPermissions type,
+            TypeRelativeObjectIdentifier typeRelativeObjectIdentifier, String securityDisplayName,
+            Action actionToCreateObject);
+
+    /**
+     * Returns if the current user is granted the permission defined by the {@link SecuredSecurityTypes#SERVER server
+     * type} and the given {@link ServerActions action}.
+     */
+    boolean hasCurrentUserServerPermission(ServerActions action);
+
+    /**
+     * Checks if the current user is granted the permission defined by the {@link SecuredSecurityTypes#SERVER server
+     * type} and the given {@link ServerActions action}.
+     */
+    void checkCurrentUserServerPermission(ServerActions action);
+
+    /**
+     * In case this security service is shared across multiple replica sets that are published under different
+     * sub-domains, session cookies and the local store shall be arranged such that sessions and content are identified
+     * regardless the sub-domain used. For example, if there are two events, A, and B, published through
+     * {@code a.sapsailing.com} and {@code b.sapsailing.com}, respectively, by default the full sub-domain name will be
+     * used for the {@code JSESSIONID} cookie as well as for the identification of content in the browser's local store.
+     */
+    String getSharedAcrossSubdomainsOf();
+
+    /**
+     * In the browser client, a {@code CrossDomainStorage} implementation is used to either run requests for a local
+     * browser storage against the application's local storage under the URL/origin used to access the application, or a
+     * shared local storage across several sub-domains may be configured so that data stored while in the context of one
+     * sub-domain is also available to the application when loaded from a different sub-domain.
+     * 
+     * @return the base URL where the {@code /gwt-base/StorageMessaging.html} entry point can be found; if {@code null},
+     *         clients should configure their {@code CrossDomainStorage} such that the application's origin is used for
+     *         isolated local storage; otherwise, the result should be used to get a {@code CrossDomainStorage}
+     *         implementation that accesses a local store shared across all application instances that use the same base
+     *         URL for cross-domain storage.
+     */
+    String getBaseUrlForCrossDomainStorage();
+
+    void registerCustomizer(SecurityInitializationCustomizer customizer);
 
 }

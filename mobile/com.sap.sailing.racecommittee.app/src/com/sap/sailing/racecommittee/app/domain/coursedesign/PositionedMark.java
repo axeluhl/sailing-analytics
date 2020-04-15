@@ -4,5 +4,5 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.Positioned;
 
 public interface PositionedMark extends Mark, Positioned, Located {
-    
+
 }

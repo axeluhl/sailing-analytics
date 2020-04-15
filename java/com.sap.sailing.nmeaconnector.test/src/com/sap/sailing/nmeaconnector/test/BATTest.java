@@ -22,7 +22,7 @@ import net.sf.marineapi.nmea.sentence.TalkerId;
 
 public class BATTest {
 
-    @Rule public Timeout AbstractTracTracLiveTestTimeout = new Timeout(10 * 1000);
+    @Rule public Timeout AbstractTracTracLiveTestTimeout = Timeout.millis(10 * 1000);
 
     public static final String EXAMPLE = "$WIBAT,1,5";
     BATSentence empty;

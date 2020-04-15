@@ -7,9 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.bson.Document;
+
 import com.mongodb.BasicDBList;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.swisstimingadapter.Competitor;
@@ -54,6 +54,9 @@ public class SwissTimingConnectivityParamsHandler extends AbstractRaceTrackingCo
     private static final String PORT = "port";
     private static final String BOAT_CLASS_NAME = "boatClassName";
     private static final String HOSTNAME = "hostname";
+    private static final String UPDATE_URL = "updateURL";
+    private static final String UPDATE_USERNAME = "updateUsername";
+    private static final String UPDATE_PASSWORD = "updatePassword";
     private final RaceLogStore raceLogStore;
     private final RegattaLogStore regattaLogStore;
     private final DomainFactory domainFactory;
@@ -78,6 +81,9 @@ public class SwissTimingConnectivityParamsHandler extends AbstractRaceTrackingCo
         result.put(START_LIST, createStartListDBObject(stParams));
         result.put(DELAY_TO_LIVE_IN_MILLIS, stParams.getDelayToLiveInMillis());
         result.put(USE_INTERNAL_MARK_PASSING_ALGORITHM, stParams.isUseInternalMarkPassingAlgorithm());
+        result.put(UPDATE_URL, stParams.getUpdateURL());
+        result.put(UPDATE_USERNAME, stParams.getUpdateUsername());
+        result.put(UPDATE_PASSWORD, stParams.getUpdatePassword());
         addWindTrackingParameters(stParams, result);
         return result;
     }
@@ -87,7 +93,7 @@ public class SwissTimingConnectivityParamsHandler extends AbstractRaceTrackingCo
         if (stParams.getStartList() != null) {
             startListDbObject = new BasicDBList();
             for (final Competitor competitor : stParams.getStartList().getCompetitors()) {
-                DBObject competitorDBObject = createCompetitorDBObject(competitor);
+                Document competitorDBObject = createCompetitorDBObject(competitor);
                 startListDbObject.add(competitorDBObject);
             }
         } else {
@@ -96,17 +102,17 @@ public class SwissTimingConnectivityParamsHandler extends AbstractRaceTrackingCo
         return startListDbObject;
     }
 
-    private StartList createStartListFromDBObject(String raceId, BasicDBList startListDBObject) {
+    private StartList createStartListFromDBObject(String raceId, Iterable<?> startListDBObject) {
         List<Competitor> competitors = new ArrayList<>();
         for (final Object competitorObject : startListDBObject) {
-            final DBObject competitorDBObject = (DBObject) competitorObject;
+            final Document competitorDBObject = (Document) competitorObject;
             competitors.add(createCompetitorFromDBObject(competitorDBObject));
         }
         return new StartListImpl(raceId, competitors);
     }
     
-    private DBObject createCompetitorDBObject(Competitor competitor) {
-        final DBObject result = new BasicDBObject();
+    private Document createCompetitorDBObject(Competitor competitor) {
+        final Document result = new Document();
         result.put(COMPETITOR_ID_AS_STRING, competitor.getIdAsString());
         result.put(COMPETITOR_BOAT_ID, competitor.getBoatID());
         result.put(COMPETITOR_NAME, competitor.getName());
@@ -122,7 +128,7 @@ public class SwissTimingConnectivityParamsHandler extends AbstractRaceTrackingCo
         } else {
             result = new BasicDBList();
             for (final CrewMember crewMember : crew) {
-                final DBObject crewMemberDBObject = new BasicDBObject();
+                final Document crewMemberDBObject = new Document();
                 crewMemberDBObject.put(CREW_MEMBER_NAME, crewMember.getName());
                 crewMemberDBObject.put(CREW_MEMBER_NATIONALITY, crewMember.getNationality());
                 crewMemberDBObject.put(CREW_MEMBER_POSITION, crewMember.getPosition());
@@ -132,14 +138,14 @@ public class SwissTimingConnectivityParamsHandler extends AbstractRaceTrackingCo
         return result;
     }
 
-    private List<CrewMember> createCrewFromDBObject(BasicDBList crewDBObject) {
+    private List<CrewMember> createCrewFromDBObject(Iterable<?> crewDBObject) {
         final List<CrewMember> result;
         if (crewDBObject == null) {
             result = null;
         } else {
             result = new ArrayList<>();
             for (final Object o : crewDBObject) {
-                final DBObject crewMemberDBObject = (DBObject) o;
+                final Document crewMemberDBObject = (Document) o;
                 result.add(new CrewMemberImpl((String) crewMemberDBObject.get(CREW_MEMBER_NAME),
                                               (String) crewMemberDBObject.get(CREW_MEMBER_NATIONALITY),
                                               (String) crewMemberDBObject.get(CREW_MEMBER_POSITION)));
@@ -148,13 +154,13 @@ public class SwissTimingConnectivityParamsHandler extends AbstractRaceTrackingCo
         return result;
     }
 
-    private Competitor createCompetitorFromDBObject(DBObject competitorDBObject) {
+    private Competitor createCompetitorFromDBObject(Document competitorDBObject) {
         final Competitor result;
         final String competitorIdAsString = (String) competitorDBObject.get(COMPETITOR_ID_AS_STRING);
         final String boatID = (String) competitorDBObject.get(COMPETITOR_BOAT_ID);
         final String threeLetterIOCCode = (String) competitorDBObject.get(COMPETITOR_THREE_LETTER_IOC_CODE);
         final String name = (String) competitorDBObject.get(COMPETITOR_NAME);
-        final BasicDBList crewDBObject = (BasicDBList) competitorDBObject.get(COMPETITOR_CREW);
+        final Iterable<?> crewDBObject = (Iterable<?>) competitorDBObject.get(COMPETITOR_CREW);
         if (competitorIdAsString == null) {
             result = new CompetitorWithoutID(boatID, threeLetterIOCCode, name);
         } else {
@@ -172,10 +178,13 @@ public class SwissTimingConnectivityParamsHandler extends AbstractRaceTrackingCo
                 (String) map.get(RACE_NAME),
                 (String) map.get(RACE_DESCRIPTION),
                 domainFactory.getBaseDomainFactory().getOrCreateBoatClass((String) map.get(BOAT_CLASS_NAME)),
-                map.get(START_LIST) == null ? null : createStartListFromDBObject((String) map.get(RACE_ID), (BasicDBList) map.get(START_LIST)),
+                map.get(START_LIST) == null ? null : createStartListFromDBObject((String) map.get(RACE_ID), (Iterable<?>) map.get(START_LIST)),
                 ((Number) map.get(DELAY_TO_LIVE_IN_MILLIS)).longValue(),
                 swissTimingFactory, domainFactory, raceLogStore, regattaLogStore,
-                (boolean) map.get(USE_INTERNAL_MARK_PASSING_ALGORITHM), isTrackWind(map), isCorrectWindDirectionByMagneticDeclination(map));
+                (boolean) map.get(USE_INTERNAL_MARK_PASSING_ALGORITHM), isTrackWind(map), isCorrectWindDirectionByMagneticDeclination(map),
+                (String) map.get(UPDATE_URL),
+                (String) map.get(UPDATE_USERNAME),
+                (String) map.get(UPDATE_PASSWORD));
     }
 
     @Override
@@ -187,6 +196,20 @@ public class SwissTimingConnectivityParamsHandler extends AbstractRaceTrackingCo
         result.put(HOSTNAME, stParams.getHostname());
         result.put(PORT, stParams.getPort());
         result.put(RACE_ID, stParams.getRaceID());
+        return result;
+    }
+
+    @Override
+    public RaceTrackingConnectivityParameters resolve(RaceTrackingConnectivityParameters params) throws Exception {
+        assert params instanceof SwissTimingTrackingConnectivityParameters;
+        final SwissTimingTrackingConnectivityParameters stParams = (SwissTimingTrackingConnectivityParameters) params;
+        SwissTimingTrackingConnectivityParameters result = new SwissTimingTrackingConnectivityParameters(
+                stParams.getHostname(), stParams.getPort(), stParams.getRaceID(), stParams.getRaceName(),
+                stParams.getRaceDescription(), stParams.getBoatClass(), stParams.getStartList(),
+                stParams.getDelayToLiveInMillis(), swissTimingFactory, domainFactory, raceLogStore, regattaLogStore,
+                stParams.isUseInternalMarkPassingAlgorithm(), stParams.isTrackWind(),
+                stParams.isCorrectWindDirectionByMagneticDeclination(), stParams.getUpdateURL(),
+                stParams.getUpdateUsername(), stParams.getUpdatePassword());
         return result;
     }
 }

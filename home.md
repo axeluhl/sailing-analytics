@@ -34,13 +34,15 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[EC2 Backup Strategy|wiki/info/landscape/amazon-ec2-backup-strategy]]
   * [[Creating an EC2 image from scratch|wiki/info/landscape/creating-ec2-image-from-scratch]]
   * [[Creating a webserver EC2 image from scratch|wiki/info/landscape/creating-ec2-image-for-webserver-from-scratch]]
-  * [[EC2 mail relaying|wiki/info/landscape/mail-relaying]]
+  * [[EC2 mail relaying vs. Amazon Simple E-Mail Service (SES)|wiki/info/landscape/mail-relaying]]
+  * [[Creating an EC2 image for a MongoDB Replica Set from scratch|wiki/info/landscape/creating-ec2-mongodb-image-from-scratch]]
   * [[Setting up dedicated S3 buckets|wiki/info/landscape/s3-bucket-setup]]
 * [[Building and Deploying|wiki/info/landscape/building-and-deploying]]
 * [[Data Mining Architecture|wiki/info/landscape/data-mining-architecture]]
 * [[Typical Data Mining Scenarios|wiki/info/landscape/typical-data-mining-scenarios]]
 * [[Create clickable UI prototypes with Axure|wiki/info/landscape/ui-clickable-prototypes]]
 * [[Webdesign|wiki/info/landscape/webdesign]]
+
 
 ### Mobile
 
@@ -73,6 +75,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[Fortify Tests|wiki/info/security/fortify]]
   * [[SSL / HTTPS Support|wiki/info/security/ssl-support]]
   * [[Permission Concept|wiki/info/security/permission-concept]]
+  * [[Permission Vertical Migration|wiki/info/security/permission-migration-tests]]
 
 ### Miscellaneous
 
@@ -91,6 +94,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Onboarding|wiki/howto/onboarding]]
 * [[Importing Sessions from Expedition|wiki/howto/expeditionimport]]
 * [[Checking our DBs for a user record by e-mail|wiki/howto/privacy]]
+* [[Managing ORC Performance Curve Regattas|wiki/howto/setup-orc-regatta]]
 
 ### Development
 
@@ -106,6 +110,8 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[UI Tests with Selenium|wiki/howto/development/selenium-ui-tests]]
 * [[Profiling|wiki/howto/development/profiling]]
 * [[Working with GWT Super Dev Mode|wiki/howto/development/super-dev-mode]]
+* [[Training of internal Wind Estimation models|wiki/howto/windestimation]]
+* [[Whitelabelling|wiki/howto/whitelabelling]]
 
 ### For Event Managers
 
@@ -115,6 +121,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Import official results|wiki/howto/eventmanagers/results-import]]
 * [[Pairing lists|wiki/howto/eventmanagers/pairing-lists]]
 * [[Manage media content|wiki/howto/eventmanagers/Manage-media-content]]
+* [[Import Event into Archive|wiki/howto/eventmanagers/import-into-archive]]
 
 ### Setup
 
@@ -126,6 +133,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 
 * [[Cook Book|wiki/howto/misc/cook-book]]
 * [[Polars|wiki/howto/misc/polars]]
+* [[Wind Estimation - Core concepts|wiki/misc/windestimation-core-concepts]]
 * [[Server Replication|wiki/howto/misc/server-replication]]
 * [[TracTrac|wiki/howto/misc/tractrac-lifecycle]]
 * [[UI Tests|wiki/howto/misc/ui-tests-tutorial]]
@@ -134,6 +142,8 @@ SAP is at the center of today’s technology revolution, developing innovations 
 
 ## Projects
 * [[Analytics on a stick|wiki/projects/analytics-on-a-stick]]
+* [[Consolidating User Stores (bug 4006 / 4018)|wiki/projects/consolidating-user-stores]]
+* [[Cloud Infrastructure Orchestration|wiki/projects/cloud-orchestrator]]
 
 ## Events and Planning
 * [[Project Planning (bigger development)|wiki/events/planning]]

@@ -22,8 +22,11 @@ import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
  */
 public class WindFixRetrievalProcessor extends AbstractRetrievalProcessor<HasWindTrackContext, HasWindFixContext> {
 
-    public WindFixRetrievalProcessor(ExecutorService executor, Collection<Processor<HasWindFixContext, ?>> resultReceivers, int retrievalLevel) {
-        super(HasWindTrackContext.class, HasWindFixContext.class, executor, resultReceivers, retrievalLevel);
+    public WindFixRetrievalProcessor(ExecutorService executor,
+            Collection<Processor<HasWindFixContext, ?>> resultReceivers, int retrievalLevel,
+            String retrievedDataTypeMessageKey) {
+        super(HasWindTrackContext.class, HasWindFixContext.class, executor, resultReceivers, retrievalLevel,
+                retrievedDataTypeMessageKey);
     }
 
     @Override
@@ -33,6 +36,9 @@ public class WindFixRetrievalProcessor extends AbstractRetrievalProcessor<HasWin
         windTrack.lockForRead();
         try {
             for (final Wind wind : windTrack.getFixes()) {
+                if (isAborted()) {
+                    break;
+                }
                 windFixesWithContext.add(new WindFixWithContext(element.getTrackedRaceContext(), wind, element.getWindSourceType()));
             }
         } finally {

@@ -20,6 +20,13 @@ import com.sap.sse.common.Timed;
 public interface Candidate extends Comparable<CandidateImpl>, Timed {
 
     Waypoint getWaypoint();
+    
+    /**
+     * Is this a candidate for a fixed mark passing?
+     */
+    default boolean isFixed() {
+        return false;
+    }
 
     int getOneBasedIndexOfWaypoint();
 
@@ -28,6 +35,6 @@ public interface Candidate extends Comparable<CandidateImpl>, Timed {
      */
     Double getProbability();
 
-    int compareTo(Candidate arg0);
+    int compareTo(Candidate other);
     
 }

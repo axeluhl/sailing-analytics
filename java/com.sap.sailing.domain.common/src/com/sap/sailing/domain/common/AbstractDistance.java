@@ -5,6 +5,7 @@ import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
+import com.sap.sse.common.impl.SecondsDurationImpl;
 
 public abstract class AbstractDistance implements Distance {
 
@@ -27,6 +28,10 @@ public abstract class AbstractDistance implements Distance {
         return meters > otherMeters ? 1 : meters == otherMeters ? 0 : -1;
     }
 
+    private Speed inSeconds(double seconds) {
+        return new KilometersPerHourSpeedImpl(getKilometers() * 3600 / seconds);
+    }
+    
     @Override
     public Speed inTime(long milliseconds) {
         return new KilometersPerHourSpeedImpl(getKilometers() * 1000. * 3600. / milliseconds);
@@ -34,7 +39,12 @@ public abstract class AbstractDistance implements Distance {
     
     @Override
     public Speed inTime(Duration duration) {
-        return inTime(duration.asMillis());
+        return inSeconds(duration.asSeconds());
+    }
+
+    @Override
+    public Duration atSpeed(Speed speed) {
+        return new SecondsDurationImpl(getMeters() / speed.getMetersPerSecond());
     }
 
     @Override

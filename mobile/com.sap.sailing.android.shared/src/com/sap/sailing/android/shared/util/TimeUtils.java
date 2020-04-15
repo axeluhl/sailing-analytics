@@ -4,7 +4,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
-import java.util.TimeZone;
 
 import com.sap.sailing.android.shared.R;
 import com.sap.sse.common.TimePoint;
@@ -30,8 +29,21 @@ public class TimeUtils {
      *
      * @param timePoint timestamp to format
      */
+    public static String formatTime(TimePoint timePoint, boolean includeSeconds) {
+        if (includeSeconds) {
+            return formatTime(timePoint, "kk:mm:ss");
+        } else {
+            return formatTime(timePoint, "kk:mm");
+        }
+    }
+
+    /**
+     * Formats your time to 'kk:mm:ss'.
+     *
+     * @param timePoint timestamp to format
+     */
     public static String formatTime(TimePoint timePoint) {
-        return formatTime(timePoint, "kk:mm:ss");
+        return formatTime(timePoint, true);
     }
 
     /**
@@ -61,11 +73,11 @@ public class TimeUtils {
     }
 
     public static String formatDurationSince(long milliseconds) {
-        return formatDurationSince(milliseconds, true);
+        return formatDurationSince(milliseconds, false);
     }
 
     public static String formatDurationSince(long milliseconds, boolean emptyHours) {
-        int secondsTillStart = (int) Math.floor(milliseconds / 1000f);
+        int secondsTillStart = (int) Math.floor(milliseconds / 1000d);
         return formatDuration(secondsTillStart, emptyHours);
     }
 
@@ -74,7 +86,7 @@ public class TimeUtils {
     }
 
     public static String formatDurationUntil(long milliseconds, boolean emptyHours) {
-        int secondsTillStart = (int) Math.ceil(milliseconds / 1000f);
+        int secondsTillStart = (int) Math.ceil(milliseconds / 1000d);
         return formatDuration(secondsTillStart, emptyHours);
     }
 
@@ -82,10 +94,7 @@ public class TimeUtils {
      * Formats milliseconds to a string like: 01h 23'45"
      */
     public static String formatTimeAgo(Context context, long milliseconds) {
-        Calendar time = Calendar.getInstance();
-        time.setTimeZone(TimeZone.getTimeZone("UTC"));
-        time.setTimeInMillis(milliseconds);
-        return context.getString(R.string.time_ago, time.get(Calendar.HOUR_OF_DAY), time.get(Calendar.MINUTE), time.get(Calendar.SECOND));
+        return formatDurationSince(milliseconds, false);
     }
 
     public static String calcDuration(Calendar from, Calendar to) {
@@ -124,7 +133,7 @@ public class TimeUtils {
             return dayOne.get(Calendar.DAY_OF_YEAR) - dayTwo.get(Calendar.DAY_OF_YEAR);
         } else {
             if (dayTwo.get(Calendar.YEAR) > dayOne.get(Calendar.YEAR)) {
-                //swap them
+                // swap them
                 Calendar temp = dayOne;
                 dayOne = dayTwo;
                 dayTwo = temp;
@@ -146,7 +155,7 @@ public class TimeUtils {
         int minutes = (secondsTillStart % 3600) / 60;
         int seconds = (secondsTillStart % 60);
         boolean negative = (hours < 0 || minutes < 0 || seconds < 0);
-        String timePattern = ((negative) ? "-" : "") + "%s%s:%s";
+        String timePattern = ((negative) ? "-" : "") + "%s%s'%s\"";
         String secondsString = seconds < 10 ? "0" + Math.abs(seconds) : "" + Math.abs(seconds);
         String minutesString = minutes < 10 ? "0" + Math.abs(minutes) : "" + Math.abs(minutes);
         String hoursString = hours < 10 ? "0" + Math.abs(hours) : "" + Math.abs(hours);
@@ -154,11 +163,13 @@ public class TimeUtils {
         return String.format(timePattern, hoursString, minutesString, secondsString);
     }
 
-    public static void initDatePicker(Context context, NumberPicker datePicker, Calendar time, int pastDays, int futureDays) {
+    public static void initDatePicker(Context context, NumberPicker datePicker, Calendar time, int pastDays,
+                                      int futureDays) {
         initDatePicker(context, datePicker, time, pastDays, futureDays, true);
     }
 
-    public static void initDatePicker(Context context, NumberPicker datePicker, Calendar time, int pastDays, int futureDays, boolean useWords) {
+    public static void initDatePicker(Context context, NumberPicker datePicker, Calendar time, int pastDays,
+                                      int futureDays, boolean useWords) {
         java.text.DateFormat dateFormat = java.text.DateFormat.getDateInstance();
         ArrayList<String> dates = new ArrayList<>();
         Calendar calendar = Calendar.getInstance();

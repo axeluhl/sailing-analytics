@@ -61,14 +61,14 @@ public interface ManagedRace extends FilterableRace, ManagedRaceIdentifier, Name
     Collection<Competitor> getCompetitors();
 
     Map<Competitor, Boat> getCompetitorsAndBoats();
-    
+
     CourseBase getCourseOnServer();
 
     void setCourseOnServer(CourseBase course);
 
     /**
-     * sets the list of competitors and boats for a race. As the competitors are retrieved later from the backend, the list of
-     * competitors has to be settable.
+     * sets the list of competitors and boats for a race. As the competitors are retrieved later from the backend, the
+     * list of competitors has to be settable.
      *
      * @param competitors
      *            the retrieved list of competitors for this race
@@ -83,17 +83,21 @@ public interface ManagedRace extends FilterableRace, ManagedRaceIdentifier, Name
     boolean calculateRaceState();
 
     /**
-     * sets the finished time, if the finished time is after the finishing time; check the {@link Result} for error message
+     * sets the finished time, if the finished time is after the finishing time; check the {@link Result} for error
+     * message
      *
-     * @param finishedTime finished time
+     * @param finishedTime
+     *            finished time
      * @return result object
      */
     Result setFinishedTime(TimePoint finishedTime);
 
     /**
-     * sets the finishing time, if the finishing time is after the start time; check the {@link Result} for error message
+     * sets the finishing time, if the finishing time is after the start time; check the {@link Result} for error
+     * message
      *
-     * @param finishingTime finishing time
+     * @param finishingTime
+     *            finishing time
      * @return result object
      */
     Result setFinishingTime(TimePoint finishingTime);

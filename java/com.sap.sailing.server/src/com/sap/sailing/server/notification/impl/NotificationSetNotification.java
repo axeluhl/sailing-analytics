@@ -18,7 +18,7 @@ import com.sap.sse.mail.SerializableFileMimeBodyPartSupplier;
 import com.sap.sse.mail.SerializableMultipartSupplier;
 import com.sap.sse.mail.queue.MailNotification;
 import com.sap.sse.security.PreferenceObjectBasedNotificationSet;
-import com.sap.sse.security.User;
+import com.sap.sse.security.shared.impl.User;
 
 public abstract class NotificationSetNotification<T> implements MailNotification {
     private static final Logger logger = Logger.getLogger(NotificationSetNotification.class.getName());

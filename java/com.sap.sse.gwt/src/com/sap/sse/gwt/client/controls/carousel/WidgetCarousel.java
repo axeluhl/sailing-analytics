@@ -7,6 +7,8 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Style.Overflow;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Command;
@@ -66,6 +68,8 @@ public class WidgetCarousel extends Composite {
     private boolean showArrows = true;
 
     private LinkedList<Widget> items = new LinkedList<Widget>();
+    
+    private boolean initialized;
 
     /**
      * Widget constructor
@@ -74,17 +78,51 @@ public class WidgetCarousel extends Composite {
         initWidget(ourUiBinder.createAndBindUi(this));
         uniqueId = Document.get().createUniqueId();
         sliderMainUi.addStyleName(uniqueId);
+        sliderMainUi.getElement().getStyle().setHeight(0, Unit.PX);
+        sliderMainUi.getElement().getStyle().setOverflowY(Overflow.HIDDEN);
+    }
+    
+    private void initializeIfRequired() {
+        // Slick slider may only get initialized when it is attached to DOM, visible and items are added
+        // Rendering bugs may occur otherwise
+        if (!initialized && !items.isEmpty() && isAttached() && isVisible()) {
+            initialized = true;
+            initAfterReflow();
+        }
+    }
+    
+    private void initAfterReflow() {
+        // Slick slider initialization will produce layout problems when the content widget sizes aren't calculated yet.
+        // Until the initial reflow happened, widget size are reported as 0. If that's the case,
+        // initialization is deferred after the reflow.
+        if (items.getFirst().getElement().getOffsetWidth() > 10
+                && items.getFirst().getElement().getOffsetHeight() > 10) {
+            init();
+            sliderMainUi.getElement().getStyle().setWidth(items.getFirst().getElement().getOffsetWidth(), Unit.PX);
+            sliderMainUi.getElement().getStyle().setHeight(items.getFirst().getElement().getOffsetHeight(), Unit.PX);
+            Scheduler.get().scheduleDeferred(sliderMainUi.getElement().getStyle()::clearOverflowY);
+        } else {
+            Scheduler.get().scheduleDeferred(this::initAfterReflow);
+        }
+    }
+
+    @Override
+    public void setVisible(boolean visible) {
+        super.setVisible(visible);
+        initializeIfRequired();
     }
     
     @Override
     protected void onLoad() {
         super.onLoad();
-        init();
+        // onLoad is called before the element is completely attached to the DOM.
+        // Using scheduleFinally ensures, this is finished before continuing with the initialization.
+        Scheduler.get().scheduleFinally(this::initializeIfRequired);
     }
 
     public void onAfterChange() {
         for (Iterator<Widget> iterator = items.iterator(); iterator.hasNext();) {
-            Widget widget = (Widget) iterator.next();
+            Widget widget = iterator.next();
             final Element parent = widget.getElement();
 
             if (parent != null) {
@@ -116,60 +154,72 @@ public class WidgetCarousel extends Composite {
      * @param uniqueId
      */
     native void setupSlider(WidgetCarousel sliderReference) /*-{
+        $wnd
+                .$(
+                        '.'
+                                + (sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::uniqueId))
+                .on(
+                        'afterChange',
+                        function() {
+                            sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::onAfterChange()();
+                        });
+        $wnd
+                .$(
+                        '.'
+                                + (sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::uniqueId))
+                .on(
+                        'init',
+                        function() {
+                            sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::onAfterChange()();
+                        });
 
-	$wnd
-		.$(
-			'.'
-				+ (sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::uniqueId))
-		.on(
-			'afterChange',
-			function() {
-			    sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::onAfterChange()();
-			});
-	$wnd
-		.$(
-			'.'
-				+ (sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::uniqueId))
-		.on(
-			'init',
-			function() {
-			    sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::onAfterChange()();
-			});
+        $wnd
+                .$(
+                        '.'
+                                + (sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::uniqueId))
+                .slick(
+                        {
+                            dots : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::showDots),
+                            infinite : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::infiniteScrolling),
+                            swipeToSlide : false,
+                            responsive : false,
+                            arrows : sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::showArrows,
+                            prevArrow : "<div class='slick-prev'/>",
+                            nextArrow : "<div class='slick-next'/>"
 
-	$wnd
-		.$(
-			'.'
-				+ (sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::uniqueId))
-		.slick(
-			{
-			    dots : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::showDots),
-			    infinite : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::infiniteScrolling),
-			    swipeToSlide : false,
-			    responsive : false,
-			    arrows : sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::showArrows,
-			    prevArrow : "<div class='slick-prev'/>",
-			    nextArrow : "<div class='slick-next'/>"
-
-			});
+                        });
 
     }-*/;
 
     /**
-     * Add new image to carousel.
+     * Set widgets to be shown by the carousel.
      *
      * @param url
      * 
      */
-    public void addWidget(Widget slide) {
-        if (items.isEmpty()) {
-            if (slide instanceof LazyLoadable) {
-                LazyLoadable lazyLoadable = (LazyLoadable) slide;
-                lazyLoadable.doInitializeLazyComponents();
-            }
+    public void setWidgets(Iterable<Widget> slides) {
+        // May only be called once because items added after the initialization of slick slider are not recognized.
+        // If adding items should be supported, the integration needs to be extended to also update the slider model.
+        assert items.isEmpty();
+        for (Widget slide : slides) {
+            items.add(slide);
+            sliderMainUi.add(slide);
         }
-        items.add(slide);
-        sliderMainUi.add(slide);
-
+        if (!items.isEmpty()) {
+            ensureInitialized(items.getFirst());
+            if (items.size() > 1) {
+                ensureInitialized(items.get(1));
+            }
+            ensureInitialized(items.getLast());
+        }
+        initializeIfRequired();
+    }
+    
+    private void ensureInitialized(Widget slide) {
+        if (slide instanceof LazyLoadable) {
+            LazyLoadable lazyLoadable = (LazyLoadable) slide;
+            lazyLoadable.doInitializeLazyComponents();
+        }
     }
 
     /**

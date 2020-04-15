@@ -33,6 +33,12 @@ public class TracTracIgnoreRandomInParamsURLTest {
                 new URI("tcp://event.tractrac.com:4400"), new URI("tcp://event.tractrac.com:4401"));
         assertEquals(id1, id2);
     }
+    
+    @Test
+    public void testStripper() throws MalformedURLException {
+        assertEquals("http://club.tractrac.com/events/event_20180129_Australian/clientparams.php?event=event_20180129_Australian&race=3b53e970-edca-0135-8676-10bf48d758ce",
+                TracTracRaceTrackerImpl.getParamURLStrippedOfRandomParam(new URL("http://club.tractrac.com/events/event_20180129_Australian/clientparams.php?event=event_20180129_Australian&race=3b53e970-edca-0135-8676-10bf48d758ce&random=2000192849")).toString());
+    }
 
     @Test
     public void testEqualRaceTrackerIDsThatOnlyDifferInRandomParamAndNotLastParameter() throws MalformedURLException, URISyntaxException {

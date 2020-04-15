@@ -1,5 +1,6 @@
 package com.sap.sse.util.impl;
 
+import java.util.Map;
 import java.util.concurrent.ThreadPoolExecutor;
 
 /**
@@ -11,4 +12,5 @@ import java.util.concurrent.ThreadPoolExecutor;
  */
 public interface KnowsExecutor {
     void setExecutorThisTaskIsScheduledFor(ThreadPoolExecutor executorThisTaskIsScheduledFor);
+    Map<InheritableThreadLocal<Object>, Object> getThreadLocalValuesToInherit();
 }

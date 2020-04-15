@@ -3,7 +3,7 @@ package com.sap.sailing.android.tracking.app.valueobjects;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class EventInfo implements Parcelable{
+public class EventInfo implements Parcelable {
 
     public String id;
     public String name;

@@ -15,11 +15,11 @@ import com.sap.sailing.server.gateway.serialization.coursedata.impl.GateJsonSeri
  */
 public class GateDeserializer implements JsonDeserializer<ControlPointWithTwoMarks> {
 
-    private SharedDomainFactory factory;
+    private SharedDomainFactory<?> factory;
     
     private final MarkDeserializer markDeserializer;
 
-    public GateDeserializer(SharedDomainFactory factory, MarkDeserializer markDeserializer) {
+    public GateDeserializer(SharedDomainFactory<?> factory, MarkDeserializer markDeserializer) {
         this.factory = factory;
         this.markDeserializer = markDeserializer;
     }
@@ -31,7 +31,9 @@ public class GateDeserializer implements JsonDeserializer<ControlPointWithTwoMar
         Mark leftMark = markDeserializer.deserialize(jsonLeftMark);
         Mark rightMark = markDeserializer.deserialize(jsonRightMark);
         String gateName = (String) object.get(BaseControlPointJsonSerializer.FIELD_NAME);
-        ControlPointWithTwoMarks controlPoint = factory.createControlPointWithTwoMarks(leftMark, rightMark, gateName);
+        String gateShortName = (String) object.get(BaseControlPointJsonSerializer.FIELD_SHORT_NAME);
+        ControlPointWithTwoMarks controlPoint = factory.createControlPointWithTwoMarks(leftMark, rightMark, gateName,
+                gateShortName);
         return controlPoint;
     }
 

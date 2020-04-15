@@ -15,7 +15,6 @@ import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -23,6 +22,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -35,7 +35,13 @@ import com.sap.sailing.gwt.ui.client.MediaTracksRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.filter.impl.KeywordMatcher;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.controls.progressbar.CustomProgressBar;
+import com.sap.sse.gwt.client.dialog.DialogUtils;
 
 public class MasterDataImportPanel extends VerticalPanel {
 
@@ -52,16 +58,20 @@ public class MasterDataImportPanel extends VerticalPanel {
     private CheckBox overrideSwitch;
     private final RegattaRefresher regattaRefresher;
     private final EventsRefresher eventRefresher;
-    private final LeaderboardsRefresher leaderboardsRefresher;
+    private final LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity> leaderboardsRefresher;
     private final LeaderboardGroupsRefresher leaderboardGroupsRefresher;
     private final MediaTracksRefresher mediaTracksRefresher;
     private CheckBox compressSwitch;
     private CheckBox exportWindSwitch;
     private CheckBox exportDeviceConfigsSwitch;
+    private CheckBox exportTrackedRacesAndStartTrackingSwitch;
     private TextBox filterBox;
+    private TextBox usernameBox;
+    private TextBox passwordBox;
 
     public MasterDataImportPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
-            RegattaRefresher regattaRefresher, EventsRefresher eventsRefresher, LeaderboardsRefresher leaderboardsRefresher,
+            RegattaRefresher regattaRefresher, EventsRefresher eventsRefresher,
+            LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity> leaderboardsRefresher,
             LeaderboardGroupsRefresher leaderboardGroupsRefresher, MediaTracksRefresher mediaTracksRefresher) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
@@ -77,10 +87,31 @@ public class MasterDataImportPanel extends VerticalPanel {
         hostBox.setText("https://www.sapsailing.com/");
         hostBox.setWidth("300px");
         serverAddressPanel.add(hostBox);
+        HorizontalPanel usernamePanel = new HorizontalPanel();
+        usernamePanel.add(new Label(stringMessages.username()));
+        usernameBox = new TextBox();
+        usernameBox.setText("");
+        usernameBox.setWidth("300px");
+        usernamePanel.add(usernameBox);
+        HorizontalPanel passwordPanel = new HorizontalPanel();
+        passwordPanel.add(new Label(stringMessages.password()));
+        passwordBox = new PasswordTextBox();
+        passwordBox.setText("");
+        passwordBox.setWidth("300px");
+        passwordPanel.add(passwordBox);
+        HorizontalPanel userContextInformation = new HorizontalPanel();
+        userContextInformation.setWidth("350px");
+        userContextInformation.add(new Label(stringMessages.keepEmptyForDefaultUserAndPassword(), true));
         fetchIdsButton = new Button(stringMessages.importFetchRemoteLgs());
         fetchIdsButton.ensureDebugId("fetchLeaderboardGroupList");
-        serverAddressPanel.add(fetchIdsButton);
+        DialogUtils.linkEnterToButton(fetchIdsButton, usernameBox);
+        DialogUtils.linkEnterToButton(fetchIdsButton, passwordBox);
+
         this.add(serverAddressPanel);
+        this.add(userContextInformation);
+        this.add(usernamePanel);
+        this.add(passwordPanel);
+        this.add(fetchIdsButton);
 
         ScrollPanel scrollPanel = new ScrollPanel();
         this.add(scrollPanel);
@@ -138,8 +169,9 @@ public class MasterDataImportPanel extends VerticalPanel {
             boolean compress = compressSwitch.getValue();
             boolean exportWind = exportWindSwitch.getValue();
             boolean exportDeviceConfigs = exportDeviceConfigsSwitch.getValue();
+            boolean exportTrackedRacesAndStartTracking = exportTrackedRacesAndStartTrackingSwitch.getValue();
             sailingService.importMasterData(currentHost, groupNames, override, compress, exportWind,
-                    exportDeviceConfigs, new AsyncCallback<UUID>() {
+                    exportDeviceConfigs, usernameBox.getValue(), passwordBox.getValue(), exportTrackedRacesAndStartTracking, new AsyncCallback<UUID>() {
 
                 @Override
                 public void onFailure(Throwable caught) {
@@ -208,6 +240,7 @@ public class MasterDataImportPanel extends VerticalPanel {
         int eventsCreated = creationCount.getEventCount();
         int regattasCreated = creationCount.getRegattaCount();
         int mediaTracksImported = creationCount.getMediaTrackCount();
+        int trackedRacesImported = creationCount.getTrackedRacesCount();
         if (regattasCreated > 0) {
             regattaRefresher.fillRegattas();
         }
@@ -221,11 +254,11 @@ public class MasterDataImportPanel extends VerticalPanel {
             leaderboardsRefresher.fillLeaderboards();
         }
         if (mediaTracksImported > 0) {
-        	mediaTracksRefresher.loadMediaTracks();
+            mediaTracksRefresher.loadMediaTracks();
         }
         Set<String> overwrittenRegattas = creationCount.getOverwrittenRegattaNames();
         showSuccessAlert(leaderboardsCreated, leaderboardGroupsCreated, eventsCreated, regattasCreated,
-                mediaTracksImported, overwrittenRegattas);
+                mediaTracksImported, trackedRacesImported, overwrittenRegattas);
         changeButtonStateAccordingToApplicationState();
     }
 
@@ -258,17 +291,17 @@ public class MasterDataImportPanel extends VerticalPanel {
     }
 
     protected void showSuccessAlert(int leaderboardsCreated, int leaderboardGroupsCreated, int eventsCreated,
-            int regattasCreated, int mediaTracksImported, Set<String> overwrittenRegattas) {
+            int regattasCreated, int mediaTracksImported, int trackedRacesImported, Set<String> overwrittenRegattas) {
         StringBuffer buffer = new StringBuffer();
         buffer.append(stringMessages.importSuccess(leaderboardGroupsCreated, leaderboardsCreated, eventsCreated,
-                regattasCreated, mediaTracksImported));
+                regattasCreated, mediaTracksImported, trackedRacesImported));
         if (overwrittenRegattas.size() > 0) {
             buffer.append("\n\n" + stringMessages.importSuccessOverwriteInfo() + "\n");
             for (String regattaName : overwrittenRegattas) {
                 buffer.append(regattaName + "\n");
             }
         }
-        Window.alert(buffer.toString());
+        Notification.notify(buffer.toString(), NotificationType.SUCCESS);
 
     }
 
@@ -292,7 +325,9 @@ public class MasterDataImportPanel extends VerticalPanel {
     private void fireLgIdRequestAndFillList(final String host) {
         currentHost = host;
         disableAllButtons();
-        sailingService.getLeaderboardGroupNamesFromRemoteServer(host, new AsyncCallback<List<String>>() {
+        // FIXME what about login here?
+        sailingService.getLeaderboardGroupNamesFromRemoteServer(host, usernameBox.getValue(), passwordBox.getValue(),
+                new AsyncCallback<List<String>>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -319,7 +354,7 @@ public class MasterDataImportPanel extends VerticalPanel {
     }
 
     private void showErrorAlert(String string) {
-        Window.alert(string);
+        Notification.notify(string, NotificationType.ERROR);
     }
 
     private void addContentToLeftPanel(VerticalPanel contentPanel) {
@@ -359,6 +394,13 @@ public class MasterDataImportPanel extends VerticalPanel {
         exportDeviceConfigsSwitch.setTitle(stringMessages.importDeviceConfigurationsTooltip());
         exportDeviceConfigsSwitch.setValue(false);
         contentPanel.add(exportDeviceConfigsSwitch);
+        
+        exportTrackedRacesAndStartTrackingSwitch = new CheckBox(stringMessages.exportTrackedRacesAndStartTracking());
+        exportTrackedRacesAndStartTrackingSwitch.setTitle(stringMessages.exportTrackedRacesAndStartTrackingTooltip());
+        exportTrackedRacesAndStartTrackingSwitch.setValue(false);
+        //TODO: Remove after bug5245 is fixed.
+        exportTrackedRacesAndStartTrackingSwitch.setVisible(false);
+        contentPanel.add(exportTrackedRacesAndStartTrackingSwitch);
 
         importLeaderboardGroupsButton = new Button(stringMessages.importSelectedLeaderboardGroups());
         importLeaderboardGroupsButton.ensureDebugId("import");
@@ -395,16 +437,15 @@ public class MasterDataImportPanel extends VerticalPanel {
     private void filterLeaderboardGroupList() {
         clearListBox();
         int visibleNameCount = 0;
-        List<String> filterTexts = Arrays.asList(filterBox.getText().split(" "));
+        Iterable<String> filterTexts = Util.splitAlongWhitespaceRespectingDoubleQuotedPhrases(filterBox.getText());
+        final KeywordMatcher<String> matcher = new KeywordMatcher<String>() {
+            @Override
+            public Iterable<String> getStrings(String t) {
+                return Collections.singleton(t);
+            } 
+        };
         for (String name : allLeaderboardGroupNames) {
-            boolean containsAllFilterTexts = true;
-            for (String filterText : filterTexts) {
-                if (!name.toUpperCase().contains(filterText.toUpperCase())) {
-                    containsAllFilterTexts = false;
-                    break;
-                }
-            }
-            if (containsAllFilterTexts) {
+            if (matcher.matches(filterTexts, name)) {
                 leaderboardgroupListBox.addItem(name);
                 visibleNameCount++;
             }

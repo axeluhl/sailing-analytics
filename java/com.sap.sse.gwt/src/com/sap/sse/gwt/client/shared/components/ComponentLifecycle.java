@@ -40,7 +40,9 @@ public interface ComponentLifecycle<S extends Settings> {
      * @return User Settings extracted from the provided settings
      * @see ComponentContext
      */
-    S extractUserSettings(S settings);
+    default S extractUserSettings(S settings) {
+        return settings;
+    }
 
     /**
      * Extracts Document Settings from provided {@link Settings}.
@@ -49,6 +51,8 @@ public interface ComponentLifecycle<S extends Settings> {
      * @return Document Settings extracted from the provided settings
      * @see ComponentContext
      */
-    S extractDocumentSettings(S settings);
+    default S extractDocumentSettings(S settings) {
+        return settings;
+    }
 
 }

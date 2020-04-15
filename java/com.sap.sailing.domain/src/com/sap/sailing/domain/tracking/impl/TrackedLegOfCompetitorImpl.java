@@ -9,7 +9,6 @@ import java.util.function.BiFunction;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
-import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
@@ -28,7 +27,7 @@ import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
-import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
@@ -218,21 +217,21 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         return track.getMaximumSpeedOverGround(legStart.getTimePoint(), to);
     }
 
+    @Override
+    public Distance getWindwardDistanceToGo(LegType legTypeOrNull, TimePoint timePoint, WindPositionMode windPositionMode, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        final Distance result;
+        if (hasFinishedLeg(timePoint)) {
+            result = Distance.NULL;
+        } else {
+            result = getWindwardDistanceTo(legTypeOrNull, getLeg().getTo(), timePoint, windPositionMode, cache);
+        }
+        return result;
+    }
     
     @Override
-    public Distance getWindwardDistanceToGo(TimePoint timePoint, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
-        if (hasFinishedLeg(timePoint)) {
-            return Distance.NULL;
-        } else {
-            Distance result = null;
-            for (Mark mark : getLeg().getTo().getMarks()) {
-                Distance d = getWindwardDistanceTo(mark, timePoint, windPositionMode, cache);
-                if (result == null || d != null && d.compareTo(result) < 0) {
-                    result = d;
-                }
-            }
-            return result;
-        }
+    public Distance getWindwardDistanceToGo(TimePoint timePoint, WindPositionMode windPositionMode, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return getWindwardDistanceToGo(/* legTypeOrNull == null means infer leg type from wind and leg geometry */ null,
+                timePoint, windPositionMode, cache);
     }
 
     @Override
@@ -241,22 +240,36 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     /**
-     * If the current {@link #getLeg() leg} is +/- {@link LegType#UPWIND_DOWNWIND_TOLERANCE_IN_DEG} degrees collinear with the
-     * wind's bearing, the competitor's position is projected onto the line crossing <code>mark</code> in the wind's
-     * bearing, and the distance from the projection to the <code>mark</code> is returned. Otherwise, it is assumed that
-     * the leg is neither an upwind nor a downwind leg, and hence the true distance to <code>mark</code> is returned. A
-     * cache for wind and leg type / bearing can be passed to avoid their redundant calculation during a single
-     * round-trip.
+     * If the current {@link #getLeg() leg} is +/- {@link LegType#UPWIND_DOWNWIND_TOLERANCE_IN_DEG} degrees collinear
+     * with the wind's bearing, the competitor's position is projected onto the line crossing <code>waypoint</code> (its
+     * approximate position) in the wind's bearing, and the distance from the projection to the <code>waypoint</code> is
+     * returned. Otherwise, it is assumed that the leg is neither an upwind nor a downwind leg, and hence the
+     * along-track distance to <code>waypoint</code> is returned. A cache for wind and leg type / bearing can be passed
+     * to avoid their redundant calculation during a single round-trip.
      * <p>
      * 
-     * If no wind information is available, again the true geometrical distance to <code>mark</code> is returned.
+     * If no wind information is available, again the along-track distance to <code>waypoint</code> is returned.
      * <p>
      * 
-     * If the competitor's position or the mark's position cannot be determined, <code>null</code> is returned.
+     * If the competitor's position or the waypoint's position cannot be determined, <code>null</code> is returned.
      * <code>null</code> is also returned if the leg's bearing cannot be determined because for at least one of its two
      * waypoints no mark has a known position.
+     * <p>
+     * 
+     * The distance returned may turn negative if the competitor sailed past the approximate windward position of the
+     * leg's {@link Leg#getTo() end waypoint} but hasn't finished the leg yet.
+     * 
+     * @param legTypeOrNull
+     *            if {@code null}, the leg type will be determined for the {@code at} time point based on the wind at
+     *            the middle of the leg and the leg's geometry at that time point. Otherwise, the leg type specified
+     *            will be used; in particular, for {@link LegType#UPWIND} and {@link LegType#DOWNWIND}, projection to
+     *            the wind direction at the leg middle will be used; for {@link LegType#REACHING}, projection to the
+     *            rhumb line will be used.
+     * 
      */
-    private Distance getWindwardDistanceTo(Mark mark, TimePoint at, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
+    private Distance getWindwardDistanceTo(LegType legTypeOrNull, Waypoint waypoint, TimePoint at,
+            WindPositionMode windPositionMode, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        final Distance result;
         Position estimatedPosition = getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(at, false);
         if (!hasStartedLeg(at) || estimatedPosition == null) {
             // covers the case with no fixes for this leg yet, also if the mark passing has already been received
@@ -264,13 +277,16 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                     .getEstimatedPosition(at, false);
         }
         if (estimatedPosition == null) { // may happen if mark positions haven't been received yet
-            return null;
+            result = null;
+        } else {
+            final Position approximateWaypointPosition = getTrackedRace().getApproximatePosition(waypoint, at);
+            if (approximateWaypointPosition == null) {
+                result = null;
+            } else {
+                result = getTrackedLeg().getWindwardDistance(legTypeOrNull, estimatedPosition, approximateWaypointPosition, at, windPositionMode, cache);
+            }
         }
-        final Position estimatedMarkPosition = getTrackedRace().getOrCreateTrack(mark).getEstimatedPosition(at, false);
-        if (estimatedMarkPosition == null) {
-            return null;
-        }
-        return getTrackedLeg().getAbsoluteWindwardDistance(estimatedPosition, estimatedMarkPosition, at, windPositionMode, cache);
+        return result;
     }
 
     /**
@@ -287,7 +303,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
      *             in case the wind direction is not known
      */
     private SpeedWithBearing getWindwardSpeed(SpeedWithBearing speed, final TimePoint at, WindPositionMode windPositionMode,
-            WindLegTypeAndLegBearingCache cache) {
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final SpeedWithBearing result;
         if (speed != null) {
             Bearing projectToBearing;
@@ -332,7 +348,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
     
     @Override
-    public int getRank(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+    public int getRank(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         int result = 0;
         if (hasStartedLeg(timePoint)) {
             List<TrackedLegOfCompetitor> competitorTracksByRank = getTrackedLeg().getCompetitorTracksOrderedByRank(timePoint, cache);
@@ -347,7 +363,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Speed getAverageVelocityMadeGood(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+    public Speed getAverageVelocityMadeGood(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         Speed result = null;
         MarkPassing start = getMarkPassingForLegStart();
         if (start != null && start.getTimePoint().compareTo(timePoint) <= 0) {
@@ -443,7 +459,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
     
     @Override
-    public Distance getWindwardDistanceToCompetitorFarthestAhead(TimePoint timePoint, WindPositionMode windPositionMode, final RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache) {
+    public Distance getWindwardDistanceToCompetitorFarthestAhead(TimePoint timePoint, WindPositionMode windPositionMode, final RankingInfo rankingInfo, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         // FIXME bug 607 it seems the following fetches the leader of this leg, not the overall leader; validate!!! Use getTrackedRace().getRanks() instead
         Competitor competitorFarthestAhead = rankingInfo.getCompetitorFarthestAhead();
         TrackedLegOfCompetitor leaderLeg = getTrackedRace().getCurrentLeg(competitorFarthestAhead, timePoint);
@@ -531,6 +547,16 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
+    public Distance getAbsoluteCrossTrackError(TimePoint timePoint) throws NoWindException {
+        return getTrackedLeg().getAbsoluteCrossTrackError(getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(timePoint, /* extrapolate */ true), timePoint);
+    }
+
+    @Override
+    public Distance getSignedCrossTrackError(TimePoint timePoint) throws NoWindException {
+        return getTrackedLeg().getSignedCrossTrackError(getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(timePoint, /* extrapolate */ true), timePoint);
+    }
+
+    @Override
     public Duration getGapToLeader(TimePoint timePoint, final Competitor leaderInLegAtTimePoint,
             final RankingInfo rankingInfo, WindPositionMode windPositionMode) throws NoWindException {
         return getGapToLeader(timePoint, leaderInLegAtTimePoint, windPositionMode, rankingInfo, new LeaderboardDTOCalculationReuseCache(timePoint));
@@ -538,7 +564,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     
     @Override
     public Duration getGapToLeader(TimePoint timePoint, final Competitor leaderInLegAtTimePoint,
-            WindPositionMode windPositionMode, final RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache) {
+            WindPositionMode windPositionMode, final RankingInfo rankingInfo, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return getGapToLeader(timePoint, ()->leaderInLegAtTimePoint, windPositionMode, rankingInfo, cache);
     }
 
@@ -553,12 +579,12 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Duration getGapToLeader(final TimePoint timePoint, WindPositionMode windPositionMode, final RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache) {
+    public Duration getGapToLeader(final TimePoint timePoint, WindPositionMode windPositionMode, final RankingInfo rankingInfo, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return getGapToLeader(timePoint, ()->getTrackedLeg().getLeader(hasFinishedLeg(timePoint) ? getFinishTime() : timePoint),
                 windPositionMode, rankingInfo, new LeaderboardDTOCalculationReuseCache(timePoint));
     }
     
-    private Duration getGapToLeader(TimePoint timePoint, LeaderGetter leaderGetter, WindPositionMode windPositionMode, RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache) {
+    private Duration getGapToLeader(TimePoint timePoint, LeaderGetter leaderGetter, WindPositionMode windPositionMode, RankingInfo rankingInfo, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         // If a competitor already completed this leg, compute the estimated arrival time at the
         // end of this leg and compare to the first mark passing for the end of this leg; if this leg's competitor also already
         // finished the leg, return the difference between this competitor's leg completion time point and the leader's completion
@@ -662,7 +688,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
     
     @Override
-    public SpeedWithBearing getVelocityMadeGood(TimePoint at, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
+    public SpeedWithBearing getVelocityMadeGood(TimePoint at, WindPositionMode windPositionMode, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         if (hasStartedLeg(at)) {
             TimePoint timePoint;
             if (hasFinishedLeg(at)) {
@@ -725,7 +751,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Duration getEstimatedTimeToNextMark(TimePoint timePoint, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
+    public Duration getEstimatedTimeToNextMark(TimePoint timePoint, WindPositionMode windPositionMode, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final Duration result;
         if (hasFinishedLeg(timePoint)) {
             result = Duration.NULL;

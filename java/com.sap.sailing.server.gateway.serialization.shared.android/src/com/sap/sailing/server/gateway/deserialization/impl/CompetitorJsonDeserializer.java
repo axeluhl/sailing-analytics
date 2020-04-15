@@ -27,9 +27,21 @@ public class CompetitorJsonDeserializer implements JsonDeserializer<DynamicCompe
     private final CompetitorFactory competitorWithBoatFactory;
     private final JsonDeserializer<DynamicTeam> teamJsonDeserializer;
     private final BoatJsonDeserializer boatJsonDeserializer;
+    
+    /**
+     * An instance of this deserializer class may be used to load competitors and their boats
+     * from the persistent store. In this case, when creating the {@link Competitor} object,
+     * the new object shall <em>not</em> be stored / updated again to the persistent store
+     * because it just came from there. This behavior can be accomplished by setting this
+     * property to {@code false} by means of using a corresponding constructor.<p>
+     * 
+     * See also bug 5106.
+     */
+    private final boolean storeDeserializedCompetitorsPersistently;
+    
     private static final Logger logger = Logger.getLogger(CompetitorJsonDeserializer.class.getName());
 
-    public static CompetitorJsonDeserializer create(SharedDomainFactory baseDomainFactory) {
+    public static CompetitorJsonDeserializer create(SharedDomainFactory<?> baseDomainFactory) {
         return new CompetitorJsonDeserializer(baseDomainFactory, new TeamJsonDeserializer(new PersonJsonDeserializer(
                 new NationalityJsonDeserializer(baseDomainFactory))), new BoatJsonDeserializer(baseDomainFactory, new BoatClassJsonDeserializer(baseDomainFactory)));
     }
@@ -38,10 +50,23 @@ public class CompetitorJsonDeserializer implements JsonDeserializer<DynamicCompe
         this(competitorWithBoatFactory, null, /* boatDeserializer */ null);
     }
 
-    public CompetitorJsonDeserializer(CompetitorFactory competitorWithBoatFactory, JsonDeserializer<DynamicTeam> teamJsonDeserializer, BoatJsonDeserializer boatDeserializer) {
+    public CompetitorJsonDeserializer(CompetitorFactory competitorWithBoatFactory, boolean storeDeserializedCompetitorsPersistently) {
+        this(competitorWithBoatFactory, null, /* boatDeserializer */ null, storeDeserializedCompetitorsPersistently);
+    }
+
+    public CompetitorJsonDeserializer(CompetitorFactory competitorWithBoatFactory,
+            JsonDeserializer<DynamicTeam> teamJsonDeserializer, BoatJsonDeserializer boatDeserializer) {
+        this(competitorWithBoatFactory, teamJsonDeserializer, boatDeserializer,
+                /* storeDeserializedCompetitorsPersistently */ true);
+    }
+    
+    public CompetitorJsonDeserializer(CompetitorFactory competitorWithBoatFactory,
+            JsonDeserializer<DynamicTeam> teamJsonDeserializer, BoatJsonDeserializer boatDeserializer,
+            boolean storeDeserializedCompetitorsPersistently) {
         this.competitorWithBoatFactory = competitorWithBoatFactory;
         this.teamJsonDeserializer = teamJsonDeserializer;
         this.boatJsonDeserializer = boatDeserializer;
+        this.storeDeserializedCompetitorsPersistently = storeDeserializedCompetitorsPersistently;
     }
 
     @Override
@@ -82,20 +107,23 @@ public class CompetitorJsonDeserializer implements JsonDeserializer<DynamicCompe
                         CompetitorJsonConstants.FIELD_TEAM));
             }
             final DynamicBoat boat = getBoat(object, /* default ID */ competitorId);
-            final Double timeOnTimeFactor = (Double) object.get(CompetitorJsonConstants.FIELD_TIME_ON_TIME_FACTOR);
-            final Double timeOnDistanceAllowanceInSecondsPerNauticalMile = (Double) object
+            final Number timeOnTimeFactorAsNumber = (Number) object.get(CompetitorJsonConstants.FIELD_TIME_ON_TIME_FACTOR);
+            final Double timeOnTimeFactor = timeOnTimeFactorAsNumber != null ? timeOnTimeFactorAsNumber.doubleValue() : 0.0;
+            final Number timeOnDistanceAllowanceInSecondsPerNauticalMileAsNumber = (Number) object
                     .get(CompetitorJsonConstants.FIELD_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE);
+            final Double timeOnDistanceAllowanceInSecondsPerNauticalMile = timeOnDistanceAllowanceInSecondsPerNauticalMileAsNumber != null ? 
+            		timeOnDistanceAllowanceInSecondsPerNauticalMileAsNumber.doubleValue() : 0.0;
             final DynamicCompetitor result;
             if (boat == null) {
                 result = competitorWithBoatFactory.getOrCreateCompetitor(competitorId, name, shortName, displayColor, email,
                         flagImageURI, team, timeOnTimeFactor,
                         timeOnDistanceAllowanceInSecondsPerNauticalMile == null ? null : 
-                            new MillisecondsDurationImpl((long) (timeOnDistanceAllowanceInSecondsPerNauticalMile*1000)), searchTag);
+                            new MillisecondsDurationImpl((long) (timeOnDistanceAllowanceInSecondsPerNauticalMile*1000)), searchTag, storeDeserializedCompetitorsPersistently);
             } else {
                 result = competitorWithBoatFactory.getOrCreateCompetitorWithBoat(competitorId, name, shortName, displayColor, email,
                         flagImageURI, team, timeOnTimeFactor,
                         timeOnDistanceAllowanceInSecondsPerNauticalMile == null ? null : 
-                            new MillisecondsDurationImpl((long) (timeOnDistanceAllowanceInSecondsPerNauticalMile*1000)), searchTag, boat);
+                            new MillisecondsDurationImpl((long) (timeOnDistanceAllowanceInSecondsPerNauticalMile*1000)), searchTag, boat, storeDeserializedCompetitorsPersistently);
             }
             return result;
         } catch (Exception e) {

@@ -6,7 +6,9 @@ import java.util.concurrent.Callable;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.TimePoint;
 
 /**
@@ -57,7 +59,6 @@ public interface ScoreCorrection extends Serializable {
      * @param trackedRankProvider
      *            can provide the tracked rank if needed; will only be called if there is no score correction for the
      *            <code>timePoint</code> specified.
-     * @param leaderboard TODO
      * @param timePoint
      *            the time point for which to get the corrected score; score corrections have a validity time interval.
      *            Only the last score correction valid at <code>timePoint</code> is considered.
@@ -65,8 +66,16 @@ public interface ScoreCorrection extends Serializable {
      *            can determine the number of competitors to use as the basis for penalty score calculation
      *            ("max points") if needed
      */
+    default Result getCorrectedScore(Callable<Integer> trackedRankProvider, Competitor competitor, RaceColumn raceColumn,
+            Leaderboard leaderboard, TimePoint timePoint, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsFetcher, ScoringScheme scoringScheme) {
+        return getCorrectedScore(trackedRankProvider, competitor, raceColumn, leaderboard, timePoint,
+                numberOfCompetitorsFetcher, scoringScheme, new LeaderboardDTOCalculationReuseCache(timePoint));
+    }
+
     Result getCorrectedScore(Callable<Integer> trackedRankProvider, Competitor competitor, RaceColumn raceColumn,
-            Leaderboard leaderboard, TimePoint timePoint, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsFetcher, ScoringScheme scoringScheme);
+            Leaderboard leaderboard, TimePoint timePoint,
+            NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsFetcher, ScoringScheme scoringScheme,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**
      * @param timePoint

@@ -130,7 +130,7 @@ public class AutoPlayStartViewImpl extends Composite implements AutoPlayStartVie
             leaderboardSelectionBox.addItem(StringMessages.INSTANCE.selectALeaderboard());
             for (LeaderboardGroupDTO leaderboardGroup : selectedEvent.getLeaderboardGroups()) {
                 for (StrippedLeaderboardDTO leaderboard : leaderboardGroup.getLeaderboards()) {
-                    leaderboardSelectionBox.addItem(leaderboard.name);
+                    leaderboardSelectionBox.addItem(leaderboard.getName());
                 }
             }
         }
@@ -255,7 +255,7 @@ public class AutoPlayStartViewImpl extends Composite implements AutoPlayStartVie
         String selectedLeaderboardName = getSelectedLeaderboardName();
         for (LeaderboardGroupDTO leaderboardGroup : selectedEvent.getLeaderboardGroups()) {
             for (StrippedLeaderboardDTO leaderboard : leaderboardGroup.getLeaderboards()) {
-                if (leaderboard.name.equals(selectedLeaderboardName)) {
+                if (leaderboard.getName().equals(selectedLeaderboardName)) {
                     return leaderboard;
                 }
             }

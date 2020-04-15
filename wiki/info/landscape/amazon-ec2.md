@@ -12,42 +12,62 @@
 
 #### Starting an instance
 
+To start with, your user account needs to have sufficient permissions to create a new server group ``{NEWSERVERNAME}-server`` up-front so that you have at least the permissions granted by the ``user`` role for all objects owned by that group. Change the group's group ownership so that the new group is its own group owner. Additionally, in order to have the new server participate in the shared security service and shared sailing data service on ``security-service.sapsailing.com`` your user needs ``SERVER:REPLICATE:security-service``. Your user should also have the ``SERVER:*:{NEWSERVERNAME}`` permission (e.g., implied by the more general ``SERVER:*`` permission), e.g., granted by the ``server_admin`` role. The latter permission is helpful in order to be able to configure the resulting server and to set up replication for it. If your user account currently does not have those permissions, find an administrator who has at least ``SERVER:*`` which is implied in particular by having role ``server_admin:*``. Such an administrator will be able to grant you the ``SERVER``-related permissions described here.
 
-- Which instance type to choose:
-  - Archive: m2.2xlarge
-  - Live: c1.xlarge
+Now start by creating the new server group, named ``{NEWSERVERNAME}-server``. So for example, if your server will use ``SERVER_NAME=abc`` then create a user group called ``abc-server``. You will yourself be a member of that new group automatically. Add role ``user`` to the group, enabling it only for the members of the group ("Enabled for all users" set to "No"). This way, all members of the group will gain permissions for objects owned by that server as if they owned them themselves. This also goes for the new ``SERVER`` object, but owners only obtain permissions for default actions, not the dedicated ``SERVER`` actions.
+
+Now choose the instance type to start. For example:
+  - Archive server: i3.2xlarge
+  - Live event: c4.2xlarge
 
 You may need to select "All generations" instead of "Current generation" to see these instance configurations. Of course, you may choose variations of those as you feel is appropriate for your use case.
 
-- Using a release, set the following in the instance's user data, replacing `myspecificevent` by a unique name of the event or series you'll be running on that instance, such as `kielerwoche2014` or similar.
-  <pre>
-  INSTALL_FROM_RELEASE=`name-of-release`
-  USE_ENVIRONMENT=live-server
-  MONGODB_NAME=myspecificevent
-  REPLICATION_CHANNEL=myspecificevent
-  SERVER_NAME=MYSPECIFICEVENT
-  BUILD_COMPLETE_NOTIFY=simon.marcel.pamies@sap.com
-  SERVER_STARTUP_NOTIFY=simon.marcel.pamies@sap.com
-  </pre>
+Using a release, set the following in the instance's user data, replacing `myspecificevent` by a unique name of the event or series you'll be running on that instance, such as `kielerwoche2014` or similar. Note that when you select to install an environment using the `USE_ENVIRONMENT` variable, any other variable that you specify in the user data, such as the `MONGODB_URI` or `REPLICATION_CHANNEL` properties in the example above, these additional user data properties will override whatever comes from the environment specified by the `USE_ENVIRONMENT` parameter.
 
-Note that when you select to install an environment using the `USE_ENVIRONMENT` variable, any other variable that you specify in the user data, such as the `MONGODB_NAME` or `REPLICATION_CHANNEL` properties in the example above, these additional user data properties will override whatever comes from the environment specified by the `USE_ENVIRONMENT` parameter.
+```
+INSTALL_FROM_RELEASE=(name-of-release)
+USE_ENVIRONMENT=live-master-server
+SERVER_NAME=myspecificevent
+REPLICATION_CHANNEL=myspecificevent
+MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/myspecificevent?replicaSet=live&retryWrites=true"
+SERVER_STARTUP_NOTIFY=you@email.com
+# Provide authentication credentials for a user on security-service.sapsailing.com permitted to replicate, either by username/password...
+#REPLICATE_MASTER_USERNAME=(user for replicator login on security-service.sapsailing.com server having SERVER:REPLICATE:&lt;server-name&gt; permission)
+#REPLICATE_MASTER_PASSWORD=(password of the user for replication login on security-service.sapsailing.com)
+# Or by bearer token, obtained, e.g., through
+#   curl -d "username=myuser&password=mysecretpassword" "https://security-service.sapsailing.com/security/api/restsecurity/access_token" | jq .access_token
+# or by logging in to the security-service.sapsailing.com server using your web browser and then navigating to
+#     https://security-service.sapsailing.com/security/api/restsecurity/access_token
+REPLICATE_MASTER_BEARER_TOKEN=(a bearer token allowing this master to replicate from security-service.sapsailing.com)
+```
 
-- To build from git, install and start, set the following in the instance's user data, adjusting the branch name (`BUILD_FROM`), the `myspecificevent` naming and memory settings according to your needs:
-  <pre>
-  BUILD_BEFORE_START=True
-  BUILD_FROM=master
-  RUN_TESTS=False
-  COMPILE_GWT=True
-  BUILD_COMPLETE_NOTIFY=you@email.com
-  SERVER_STARTUP_NOTIFY=
-  SERVER_NAME=MYSPECIFICEVENT
-  MEMORY=2048m
-  REPLICATION_HOST=rabbit.internal.sapsailing.com
-  REPLICATION_CHANNEL=myspecificevent
-  MONGODB_HOST=dbserver.internal.sapsailing.com
-  MONGODB_PORT=10202
-  MONGODB_NAME=myspecificevent
-  </pre>
+Have at least a public-facing target group ready. If you want to expose the master to the public (single-instance scenario or master-replica scenario where the master also handles reading client requests) add the master to the public target group.
+
+If you want to launch one or more replicas, ensure you have a dedicated ``...-master`` target group to which you add your master instance, and a load balancer rule that forwards your replica's requests directed to the master to that ``...-master`` target group, for example, by using a dedicated ``...-master`` hostname rule in your load balancer which then forwards to the ``...-master`` target group.	
+
+After your master server is ready, note the internal IP and configure your replica instances if you'd like to connect using the master's IP address. Alternatively, you may route the replica requests through the load balancer again, using whatever your load balancer requires to route the requests to your master, such as the ``...-master`` hostname with HTTPS as a protocol and 443 for a port. If you don't want to use the credentials of your own user account (which is expected to have permission ``SERVER:REPLICATE:{SERVERNAME}`` already because as described above you need this for configuring the new server), e.g., because you then have to expose an access token in the environment that anyone with SSH access to the instance may be able to see, set up a new user account, such as ``{SERVERNAME}-replicator``, that has the following permission: ``SERVER:REPLICATE:{SERVERNAME}`` where ``{SERVERNAME}`` is what you provided above for the ``SERVER_NAME`` environment variable. You will be able to grant this permission to the new user because your own user account is expected to have this permission. You will need your own or this new user's credentials to authenticate your replicas for replication.
+
+Make sure to use the preconfigured environment from http://releases.sapsailing.com/environments/live-replica-server. Then absolutely make sure to add the line "REPLICATE_MASTER_SERVLET_HOST" to the user-data and adjust the `myspecificevent` master exchange name in the replica's ``REPLICATE_MASTER_EXCHANGE_NAME`` variable to the value of the ``REPLICATION_CHANNEL`` setting you used for the master configuration.  Also ensure that you provide the ``REPLICATE_MASTER_BEARER_TOKEN`` value (or, alternatively ``REPLICATE_MASTER_USERNAME`` and ``REPLICATE_MASTER_PASSWORD``) to grant the replica the permissions it needs to successfully register with the master as a replica.
+
+```
+INSTALL_FROM_RELEASE=(name-of-release)
+USE_ENVIRONMENT=live-replica-server
+REPLICATE_MASTER_SERVLET_HOST=(IP of your master server or external -master hostname)
+REPLICATE_MASTER_SERVLET_PORT=(port your master is listening on for HTTP/HTTPS requests; defaults to 8888; use 443 for -master hostname)
+REPLICATE_MASTER_EXCHANGE_NAME=myspecificevent
+# Provide authentication credentials for a user on the master permitted to replicate, either by username/password...
+#REPLICATE_MASTER_USERNAME=(user for replicator login on master server having SERVER:REPLICATE:&lt;server-name&gt; permission)
+#REPLICATE_MASTER_PASSWORD=(password of the user for replication login on master)
+# Or by bearer token, obtained, e.g., through
+#   curl -d "username=myuser&password=mysecretpassword" "https://master-server.sapsailing.com/security/api/restsecurity/access_token" | jq .access_token
+# or by logging in to the master server using your web browser and then navigating to
+#     https://master-server.sapsailing.com/security/api/restsecurity/access_token
+REPLICATE_MASTER_BEARER_TOKEN=(a bearer token allowing this master to replicate from your master)
+SERVER_NAME=MYSPECIFICEVENT
+MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/myspecificevent-replica?replicaSet=live&retryWrites=true"
+EVENT_ID=&lt;some-uuid-of-an-event-you-want-to-feature&gt;
+SERVER_STARTUP_NOTIFY=you@email.com
+```
 
 #### Setting up a new image (AMI) from scratch (more or less)
 
@@ -57,38 +77,8 @@ See [here](/wiki/creating-ec2-image-from-scratch)
 
 - To receive and forward wind with an Expedition connector, log into webserver as user trac and switch to $HOME/servers/udpmirror. Start the mirror and forward it to the instance you want. In order to receive wind through the Igtimi connector, this step is not required as the wind data is received directly from the Igtimi server.
 
-#### Setting up Master and Replica
-
-- Fire up a master with the following configuration. There is a preconfigured master environment at http://releases.sapsailing.com/environments/live-master-server that you should use.
-
-<pre>
-INSTALL_FROM_RELEASE=(name-of-release)
-USE_ENVIRONMENT=live-master-server
-SERVER_NAME=MYSPECIFICEVENT
-REPLICATION_CHANNEL=myspecificevent
-MONGODB_NAME=myspecificevent
-SERVER_STARTUP_NOTIFY=you@email.com
-</pre>
-
-- After your master server is ready, note the internal IP and configure your replica instances. Make sure to use the preconfigured environment from http://releases.sapsailing.com/environments/live-replica-server. Then absolutely make sure to add the line "REPLICATE_MASTER_SERVLET_HOST" to the user-data and adjust the `myspecificevent` master exchange name to the `REPLICATION_CHANNEL` setting you used for the master configuration. 
-
-<pre>
-INSTALL_FROM_RELEASE=(name-of-release)
-USE_ENVIRONMENT=live-replica-server
-REPLICATE_MASTER_SERVLET_HOST=(IP of your master server)
-REPLICATE_MASTER_EXCHANGE_NAME=myspecificevent
-SERVER_NAME=MYSPECIFICEVENT
-MONGODB_NAME=myspecificevent-replica
-EVENT_ID=&lt;some-uuid-of-an-event-you-want-to-feature&gt;
-SERVER_STARTUP_NOTIFY=you@email.com
-</pre>
-
-
-
 #### Setting up a Multi Instance
 To set up a multi instance for a server with name "SSV", subdomain "ssv.sapsailing.com" and description "Schwartauer Segler-Verein, [www.ssv-net.de](http://www.ssv-net.de), Alexander Probst, [webmaster@alexprobst.de](mailto:webmaster@alexprobst.de)" perform the following steps:
-
-
 
 ##### Instance configuration
 
@@ -184,8 +174,6 @@ To set up a multi instance for a server with name "SSV", subdomain "ssv.sapsaili
 12. Change the admin password now and create a new user with admin role.
 
 13. Your multi instance is now configured and started. It can be reached over ec2-34-250-136-229.eu-west-1.compute.amazonaws.com:8888. 
-
-
 
 
 ##### Reachability
@@ -430,6 +418,12 @@ In a live event scenario, the SAP Sailing Analytics are largely bandwidth bound.
 
 To still get the usual logging and URL re-writing features, replicas need to run their local Apache server with a bit of configuration. Luckily, most of the grunt work is done for you automatically. You simply need to tell the replicas in their instance details to start replicating automatically, provide an `EVENT_ID` and set the `SERVER_NAME` variable properly. The Apache configuration on the replica will then automatically be adjusted such that the lower-case version of $SERVER_NAME.sapsailing.com will re-direct users to the event page for the event with ID $EVENT_ID.
 
+Amazon puts up limits regarding to the maximum number of rules that an Application Load Balancer (ALB) may have. We use one such ALB as the DNS CNAME target for ``*.sapsailing.com`` (Sailing-eu-west-1-135628335.eu-west-1.elb.amazonaws.com). Adding rules to this ALB is especially convenient because no DNS / Route53 manipulation is necessary at all. New sub-domains can be mapped to target groups this way quite flexibly and quickly.
+
+However, as the number of sub-domains we use grows, we also approach the limit of 100 rules for this load balancer. In order to keep this flexibility in particular for event set-ups, we started introducing more ALBs in August 2018 that use dedicated Route 53 DNS CNAME records for sepcific sub-domains. This way, with the current AWS limits for load balancers (see https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-limits.html) we will have up to 20 ALBs per region with 100 rules each, giving us 2000 rules per region which should suffice for the foreseeable future.
+
+The set-up process needs to distinguish now between only adding a rule to an ALB listener targeted by the ``*.sapsailing.com`` DNS entry, and adding a rule to an ALB listener targeted only by DNS rules for specific sub-domains. In the latter case, a DNS record set needs to be created, providing the CNAME of the ALB that maps the sub-domain to the target group.
+
 Here are the steps to create a load balanced setup, assuming there is already an "Application" load balancer defined in the region(s) where you need them:
 
 - Add a master+replica target group for the master and its replicas that external users will be directed to, using HTTP port 80 as the protocol settings. Note: as this target group will also be used for the HTTPS listener, "SSL offloading" will take place here. The re-directing from HTTP to HTTPS that shall occur when the user hits the server with an HTTP request will happen in the central instance's Apache server if and only if the `X-Forwarded-Proto` is `http` (https://stackoverflow.com/questions/26620670/apache-httpx-forwarded-proto-in-htaccess-is-causing-redirect-loop-in-dev-envir explains how a. See also http://docs.aws.amazon.com/elasticloadbalancing/latest/classic/x-forwarded-headers.html#x-forwarded-proto.)
@@ -441,7 +435,22 @@ Here are the steps to create a load balanced setup, assuming there is already an
 - Add a rule to the HTTPS listener for the hostname ${SERVER_NAME}-master.sapsailing.com that forwards traffic to the master-only target group just created.
 - Add the master to the master-only target group.
 - For both target groups configure the health checks, choosing HTTP as the protocol, using the default "traffic port" and setting the path to /index.html. Lower the interval to 10s and the "Healthy threshold" to 2 to ensure that servers are quickly recognized after adding them to the ELB. With the default settings (30 seconds interval, healthy threshold 10) this would last up to 5 minutes.
-- When using the Race Committee App (RCApp), make sure the app is configured to send its data to the ${SERVER_NAME}-master.sapsailing.com URL (otherwise, write requests may end up at replicas which then have to reverse-replicate these to the master which adds significant overhead). 
+- When using the Race Committee App (RCApp), make sure the app is configured to send its data to the ${SERVER_NAME}-master.sapsailing.com URL (otherwise, write requests may end up at replicas which then have to reverse-replicate these to the master which adds significant overhead).
+
+The steps to register such a sub-domain mapping also in Route53 in case you've chosen an ALB that is not the target of ``*.sapsailing.com`` work as follows:
+
+Start by creating a new record set:
+<img src="/wiki/images/amazon/DNS1.png" />
+
+Then enter the sub-domain name you'd like to map. Choose ``CNAME`` for the type, reduce the default TTL to 60s and paste the DNS name of the ALB you'd like to target:
+<img src="/wiki/images/amazon/DNS2.png" />
+
+The DNS name of your load balancer can be copied from the "Basic Configuration" section in the "Description" tab:
+<img src="/wiki/images/amazon/CopyingAlbDnsName.png" />
+
+The insertion of the rule into the ALB that maps your sub-domain's name to the corresponding target group works as usual and as described above:
+<img src="/wiki/images/amazon/DNS3.png" />
+<img src="/wiki/images/amazon/DNS4.png" />
 
 It is important to understand that it wouldn't help to let all traffic run through our central Apache httpd server which usually acts as a reverse proxy with comprehensive URL rewriting rules and macros. This would make the Apache server the bandwidth bottleneck. Instead, the event traffic needs to go straight to the ELB. This is established by the *.sapsailing.com DNS entry pointing to the Application ELB which then applies its filter rules to dispatch to the URL-specific target groups. Other than adding the hostname filter rules in the ELB as described above, no interaction with the Route 53 DNS is generally needed. Neither is it necessary to manually modify any 001-events.conf Apache configuration file.
 
@@ -465,7 +474,7 @@ Click on "Create Record Set" and fill in the subdomain name (`myspecificevent` i
 
 <img src="/wiki/images/amazon/Route53_5.png" />
 
-Amazon ELB is designed to handle unlimited concurrent requests per second with “gradually increasing” load pattern (although it's initial capacity is described to reach 20k requests/secs). It is not designed to handle heavy sudden spike of load or flash traffic because of its internal structure where it needs to fire up more instances when load increases. ELB's can be pre-warmed though by writing to the AWS Support Team.
+Amazon ELB is designed to handle unlimited concurrent requests per second with â€œgradually increasingâ€� load pattern (although it's initial capacity is described to reach 20k requests/secs). It is not designed to handle heavy sudden spike of load or flash traffic because of its internal structure where it needs to fire up more instances when load increases. ELB's can be pre-warmed though by writing to the AWS Support Team.
 
 With this set-up, please keep in mind that administration of the sailing server instance always needs to happen through the master instance. A fat, red warning is displayed in the administration console of the replica instances that shall keep you from making administrative changes there. Change them on the master, and the changes will be replicated to the replicas.
 
@@ -514,6 +523,7 @@ Follow these steps to upgrade the AMI:
 * Check the sizes of the mounted partitions by doing `df; swapon -s`. These will come in handy after creating the new AMI in order to tag the new volume snapshots accordingly
 * Update any keys in `/root/.ssh/authorized_keys` and `/home/sailing/.ssh/authorized_keys`
 * Remove created http rewrite entries in `/etc/httpd/conf.d/001-events.conf`
+* Edit /etc/update-motd.d/30-banner to set the current version
 * In the EC2 administration console go to the "Instances" tab, select your running instance and from the "Actions" drop-down select "Create Image". Give the image the name "SAP Sailing Analytics App x.y" where "x.y" is the updated version number of the image. Just make sure it's greater than the previous one. If you feel like it, you may provide a short description telling the most important features of the image.
 * Once the image creation has completed, go to the Snapshots list in the "Elastic Block Store" category and name the new snapshots appropriately. Now the information about the device sizes obtained earlier from the `df` and `swapon` commands will help you to identify which snapshot is which. Usually, the three snapshots would be something like AMI Analytics Home x.y, AMI Analytics System x.y and AMI Analytics Swap x.y with "x.y" being the version number matching that of your image.
 * Now you can remove any earlier Sailing Server AMI version and the corresponding snapshots.

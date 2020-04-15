@@ -10,7 +10,8 @@ public class SelectionItem {
     private boolean mSwitch;
     private boolean mChecked;
 
-    public SelectionItem(String caption, String value, Drawable drawable, boolean isSwitch, boolean checked, Runnable runnable) {
+    public SelectionItem(String caption, String value, Drawable drawable, boolean isSwitch, boolean checked,
+            Runnable runnable) {
         mCaption = caption;
         mDrawable = drawable;
         mValue = value;

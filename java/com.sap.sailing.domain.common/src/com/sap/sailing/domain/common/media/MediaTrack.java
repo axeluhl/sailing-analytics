@@ -6,10 +6,15 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.media.MediaSubType;
 import com.sap.sse.common.media.MimeType;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 
 /**
  * The {@link #hashCode()} and {@link #equals(Object)} methods are based solely on the {@link #dbId} field.
@@ -21,10 +26,14 @@ import com.sap.sse.common.media.MimeType;
  * @author Jens Rommel (D047974)
  * 
  */
-public class MediaTrack implements Serializable {
+public class MediaTrack implements Serializable, WithQualifiedObjectIdentifier {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Deprecated, as the server only used undefined in all cases. Left in, to not break serialisation/storage
+     */
+    @Deprecated
     public enum Status {
         UNDEFINED('?'), CANNOT_PLAY('-'), NOT_REACHABLE('#'), REACHABLE('+');
 
@@ -45,6 +54,7 @@ public class MediaTrack implements Serializable {
     public TimePoint startTime;
     public Duration duration;
     public MimeType mimeType;
+    @Deprecated
     public Status status = Status.UNDEFINED;
     public Set<RegattaAndRaceIdentifier> assignedRaces;
 
@@ -76,7 +86,7 @@ public class MediaTrack implements Serializable {
     }
 
     public TimePoint deriveEndTime() {
-        if (startTime != null) {
+        if (startTime != null && duration != null) {
             return startTime.plus(duration);
         } else {
             return null;
@@ -154,4 +164,26 @@ public class MediaTrack implements Serializable {
         }
     }
 
+    @Override
+    public String getName() {
+        return title;
+    }
+
+    @Override
+    public QualifiedObjectIdentifier getIdentifier() {
+        return getPermissionType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+    }
+
+    @Override
+    public HasPermissions getPermissionType() {
+        return SecuredDomainType.MEDIA_TRACK;
+    }
+
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return getTypeRelativeObjectIdentifier(dbId);
+    }
+
+    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String dbId) {
+        return new TypeRelativeObjectIdentifier(dbId);
+    }
 }

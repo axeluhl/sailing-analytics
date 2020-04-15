@@ -1,0 +1,191 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+	<link href='../../../../sailing-fontface-1.0.cache.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+	<title>SAP Sailing Analytics Webservices API Version 1.0</title>
+</head>
+<body>
+<h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
+<h2>URL: /api/v1/regattas/{name}/windsummary</h2>
+
+<b>Description:</b>
+<p>Obtains a summary of the wind conditions for one or more races in a regatta. If a tracked
+race exists, wind data is obtained from the tracked race, including all wind sources that were
+available for the tracked race. A wind fix is taken at the beginning, the middle and the end
+of the race, or the current live time point instead of the end if the race is still ongoing.
+If there is no tracked race, the service looks for wind values entered into the race log, e.g.,
+through the Race Management app. Again, the first, the last and one fix from the middle of the
+sequence are used.</p>
+<p>From those wind fixes obtained, the minimum and maximum true wind speed are calculated,
+as well as the averaged wind direction.</p>
+<br/>
+<table>
+	<tr>
+		<td>Webservice Type:</td>
+		<td>REST</td>
+	</tr>
+	<tr>
+		<td>Output format:</td>
+		<td>Json</td>
+	</tr>
+	<tr>
+		<td>Mandatory parameters:</td>
+		<td>None</td>
+	</tr>
+	<tr>
+		<td>Optional parameters:</td>
+		<td>racecolumn: restricts the response to races in that column<br>
+		    fleet: restricts the response to races in that fleet<br>
+		    secret: If the regattasecret is given, further permission checks will be skipped</td>
+	</tr>
+	<tr>
+		<td>Request method:</td>
+		<td>GET</td>
+	</tr>
+	<tr>
+		<td>Example:</td>
+		<td>curl "https://www.sapsailing.com/sailingserver/api/v1/regattas/SWC%202017%20Hyeres%20-%20Nacra%2017/windsummary"</td>
+	</tr>
+	<tr>
+		<td>Example Response:</td>
+		<td><pre>[
+{
+"racecolumn": "R1",
+"fleet": "Default",
+"trueLowerboundWindInKnots": 9.053391259171399,
+"trueUppwerboundWindInKnots": 9.421798855867985,
+"trueWindDirectionInDegrees": 119.37122877603167
+},
+{
+"racecolumn": "R2",
+"fleet": "Default",
+"trueLowerboundWindInKnots": 8.904027552245262,
+"trueUppwerboundWindInKnots": 9.722424412832272,
+"trueWindDirectionInDegrees": 114.83354751696731
+},
+{
+"racecolumn": "R3",
+"fleet": "Default",
+"trueLowerboundWindInKnots": 8.851755790970792,
+"trueUppwerboundWindInKnots": 9.859630897592456,
+"trueWindDirectionInDegrees": 115.81967970160082
+},
+{
+"racecolumn": "R4",
+"fleet": "Default",
+"trueLowerboundWindInKnots": 10.0458887140975,
+"trueUppwerboundWindInKnots": 11.547320662424614,
+"trueWindDirectionInDegrees": 260.6748639171985
+},
+{
+"racecolumn": "R5",
+"fleet": "Default",
+"trueLowerboundWindInKnots": 10.94370818678228,
+"trueUppwerboundWindInKnots": 13.261762976725802,
+"trueWindDirectionInDegrees": 255.03362068909416
+},
+{
+"racecolumn": "R6",
+"fleet": "Default",
+"trueLowerboundWindInKnots": 10.4229250120371,
+"trueUppwerboundWindInKnots": 12.78723203307546,
+"trueWindDirectionInDegrees": 254.1007368841769
+},
+{
+"racecolumn": "R7",
+"fleet": "Default",
+"trueLowerboundWindInKnots": null,
+"trueUppwerboundWindInKnots": null,
+"trueWindDirectionInDegrees": null
+},
+{
+"racecolumn": "R8",
+"fleet": "Default",
+"trueLowerboundWindInKnots": 12.523217980352948,
+"trueUppwerboundWindInKnots": 16.64371113414383,
+"trueWindDirectionInDegrees": 264.190140503733
+},
+{
+"racecolumn": "R9",
+"fleet": "Default",
+"trueLowerboundWindInKnots": 12.303507045385942,
+"trueUppwerboundWindInKnots": 12.315148290578692,
+"trueWindDirectionInDegrees": 284.24146987543463
+},
+{
+"racecolumn": "R10",
+"fleet": "Default",
+"trueLowerboundWindInKnots": 12.264936255331108,
+"trueUppwerboundWindInKnots": 12.326018802055051,
+"trueWindDirectionInDegrees": 311.84602120251395
+},
+{
+"racecolumn": "R11",
+"fleet": "Default",
+"trueLowerboundWindInKnots": null,
+"trueUppwerboundWindInKnots": null,
+"trueWindDirectionInDegrees": null
+},
+{
+"racecolumn": "R12",
+"fleet": "Default",
+"trueLowerboundWindInKnots": null,
+"trueUppwerboundWindInKnots": null,
+"trueWindDirectionInDegrees": null
+},
+{
+"racecolumn": "M",
+"fleet": "Default",
+"trueLowerboundWindInKnots": null,
+"trueUppwerboundWindInKnots": null,
+"trueWindDirectionInDegrees": null
+}
+]</pre></td>
+	</tr>
+	<tr>
+		<td>Example:</td>
+		<td>curl "https://www.sapsailing.com/sailingserver/api/v1/regattas/SWC%202017%20Hyeres%20-%20Formula%20Kite/windsummary?racecolumn=F17"</td>
+	</tr>
+	<tr>
+		<td>Example Response:</td>
+		<td><pre>[
+{
+"racecolumn": "F17",
+"fleet": "Gold",
+"trueLowerboundWindInKnots": 15.108196611910019,
+"trueUppwerboundWindInKnots": 17.96574422669477,
+"trueWindDirectionInDegrees": 308.11458165094757
+},
+{
+"racecolumn": "F17",
+"fleet": "Silver",
+"trueLowerboundWindInKnots": 12.325479116208104,
+"trueUppwerboundWindInKnots": 16.098463261988552,
+"trueWindDirectionInDegrees": 306.5821796351637
+}
+]</pre></td>
+</tr>
+	<tr>
+		<td>Example:</td>
+		<td>curl "https://www.sapsailing.com/sailingserver/api/v1/regattas/SWC%202017%20Hyeres%20-%20Formula%20Kite/windsummary?racecolumn=F17&fleet=Silver"</td>
+	</tr>
+	<tr>
+		<td>Example Response:</td>
+		<td><pre>[
+{
+"racecolumn": "F17",
+"fleet": "Silver",
+"trueLowerboundWindInKnots": 12.325479116208104,
+"trueUppwerboundWindInKnots": 16.098463261988552,
+"trueWindDirectionInDegrees": 306.5821796351637
+}
+]</pre></td>
+</tr>
+</table>
+<div style="height: 1em;"></div>
+<a href="index.html">Back to Web Service Overview</a> 
+</body>
+</html>

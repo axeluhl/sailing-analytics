@@ -1,8 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.sap.sse.shared.android"
-    android:versionCode="1"
-    android:versionName="1.1.0">
+    package="com.sap.sse.shared.android">
 
-    <uses-sdk android:minSdkVersion="14" android:targetSdkVersion="22" />
+    <uses-sdk />
 
 </manifest>

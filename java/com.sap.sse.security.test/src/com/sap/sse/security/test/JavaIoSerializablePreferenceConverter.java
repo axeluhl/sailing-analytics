@@ -7,7 +7,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Base64;
 
-import com.sap.sse.security.PreferenceConverter;
+import com.sap.sse.security.interfaces.PreferenceConverter;
 
 public class JavaIoSerializablePreferenceConverter<T> implements PreferenceConverter<T> {
     @Override

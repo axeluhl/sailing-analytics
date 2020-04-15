@@ -15,10 +15,10 @@ import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceMa
 import com.sap.sailing.domain.abstractlog.regatta.impl.RegattaLogImpl;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.impl.MarkImpl;
-import com.sap.sailing.domain.racelogtracking.PingDeviceIdentifierImpl;
+import com.sap.sailing.domain.racelogtracking.impl.PingDeviceIdentifierImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 public class RevokeDeviceMappingsWithMarkDefinitionTest {
     private RegattaLog regattaLog;

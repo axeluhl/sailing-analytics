@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.sap.sailing.racecommittee.app.R;
+
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-
-import com.sap.sailing.racecommittee.app.R;
 
 public class MailHelper {
 

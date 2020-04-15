@@ -5,7 +5,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.HTML;
@@ -18,6 +17,8 @@ import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.ui.client.QueryDefinitionChangedListener;
 import com.sap.sse.datamining.ui.client.StringMessages;
 import com.sap.sse.datamining.ui.client.developer.QueryDefinitionParser.TypeToCodeStrategy;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentWithoutSettings;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
@@ -36,6 +37,7 @@ public class QueryDefinitionViewer extends ComponentWithoutSettings implements Q
     private final HTML codeHtml;
     private final RadioButton useClassGetNameRadioButton;
     private final RadioButton useStringLiteralsRadioButton;
+    private final Button copyToClipboardButton;
     
     private StatisticQueryDefinitionDTO currentDefinition;
     private boolean active;
@@ -73,21 +75,22 @@ public class QueryDefinitionViewer extends ComponentWithoutSettings implements Q
         codeScrollPanel.getElement().addClassName("queryDefinitionViewerContent");
         codeDockPanel.add(codeScrollPanel);
         
-        Button copyToClipboardButton = new Button(stringMessages.copyToClipboard(), new ClickHandler() {
+        copyToClipboardButton = new Button(stringMessages.copyToClipboard(), new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 switch (contentPanel.getSelectedIndex()) {
                 case 0:
                     TextExporter.exportToClipboard(queryDefinitionParser.parseToDetailsAsText(currentDefinition));
-                    Window.alert(stringMessages.copiedToClipboard());
+                    Notification.notify(stringMessages.copiedToClipboard(), NotificationType.INFO);
                     break;
                 case 1:
                     TextExporter.exportToClipboard(queryDefinitionParser.parseToCodeAsText(currentDefinition, getTypeStrategy()));
-                    Window.alert(stringMessages.copiedToClipboard());
+                    Notification.notify(stringMessages.copiedToClipboard(), NotificationType.INFO);
                     break;
                 }
             }
         });
+        copyToClipboardButton.setEnabled(false);
 
         HorizontalPanel controlsPanel = new HorizontalPanel();
         controlsPanel.setSpacing(5);
@@ -108,6 +111,7 @@ public class QueryDefinitionViewer extends ComponentWithoutSettings implements Q
     @Override
     public void queryDefinitionChanged(StatisticQueryDefinitionDTO newQueryDefinition) {
         currentDefinition = newQueryDefinition;
+        copyToClipboardButton.setEnabled(currentDefinition != null);
         if (active) {
             updateDetails();
             updateCode();
@@ -137,11 +141,11 @@ public class QueryDefinitionViewer extends ComponentWithoutSettings implements Q
     }
 
     public void setActive(boolean active) {
-        if (active && this.active != active) {
-            updateDetails();
-            updateCode();
-        }
+        boolean needsUpdate = !this.active && active;
         this.active = active;
+        if (needsUpdate) {
+            queryDefinitionChanged(currentDefinition);
+        }
     }
 
     @Override

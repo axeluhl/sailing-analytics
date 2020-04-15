@@ -4,7 +4,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -29,8 +28,6 @@ import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.tractrac.model.lib.api.event.CreateModelException;
-import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 
 /**
  * This is a test for bug 2009 (see http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=2009).
@@ -50,7 +47,7 @@ public class PhilippBuhlsDoublePenaltyCircleAtKielerWoche2014Test extends Abstra
     }
 
     @Before
-    public void setUp() throws URISyntaxException, IOException, InterruptedException, ParseException, SubscriberInitializationException, CreateModelException {
+    public void setUp() throws Exception {
         super.setUp();
         URI storedUri = new URI("file:///"+new File("resources/event_20140619_KieleWoche-R1_Blue_Laser.mtb").getCanonicalPath().replace('\\', '/'));
         super.setUp(
@@ -68,11 +65,11 @@ public class PhilippBuhlsDoublePenaltyCircleAtKielerWoche2014Test extends Abstra
      */
     @Test
     public void testDoublePenaltyForPhilippAndTobiasAndMaximAndDharmender() throws ParseException, NoWindException {
-        assertTwoPenalties("Philipp Buhl",        "06/21/2014-13:03:18", "06/21/2014-13:03:47", "06/21/2014-13:03:25", "06/21/2014-13:03:37");
-        assertTwoPenalties("Dharmender SINGH",    "06/21/2014-12:51:40", "06/21/2014-12:52:40", "06/21/2014-12:51:57", "06/21/2014-12:52:12");
+        assertTwoPenalties("Philipp Buhl",        "06/21/2014-13:03:18", "06/21/2014-13:03:47", "06/21/2014-13:03:30", "06/21/2014-13:03:40");
+        assertTwoPenalties("Dharmender SINGH",    "06/21/2014-12:51:40", "06/21/2014-12:52:40", "06/21/2014-12:52:01", "06/21/2014-12:52:10");
         // note the typo in Tobias's name; this is how we get it from TracTrac...
-        assertTwoPenalties("Tolbias SCHADEWALDT", "06/21/2014-12:46:50", "06/21/2014-12:47:30", "06/21/2014-12:47:07", "06/21/2014-12:47:15");
-        assertTwoPenalties("Maxim NIKOLAEV",      "06/21/2014-12:49:22", "06/21/2014-12:50:13", "06/21/2014-12:49:32", "06/21/2014-12:49:48");
+        assertTwoPenalties("Tolbias SCHADEWALDT", "06/21/2014-12:46:50", "06/21/2014-12:47:30", "06/21/2014-12:47:10", "06/21/2014-12:47:19");
+        assertTwoPenalties("Maxim NIKOLAEV",      "06/21/2014-12:49:22", "06/21/2014-12:50:13", "06/21/2014-12:49:37", "06/21/2014-12:49:52");
     }
 
     private void assertTwoPenalties(String competitorName, final String from, final String to,

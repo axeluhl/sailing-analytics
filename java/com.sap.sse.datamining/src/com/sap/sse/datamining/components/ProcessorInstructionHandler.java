@@ -2,9 +2,11 @@ package com.sap.sse.datamining.components;
 
 public interface ProcessorInstructionHandler<ResultType> {
     
-    public void instructionSucceeded(ResultType result);
-    public void instructionFailed(Exception e);
+    boolean isAborted();
     
-    public void afterInstructionFinished();
+    void instructionSucceeded(ResultType result);
+    void instructionFailed(Exception e);
+    
+    void afterInstructionFinished(ProcessorInstruction<ResultType> instruction);
 
 }

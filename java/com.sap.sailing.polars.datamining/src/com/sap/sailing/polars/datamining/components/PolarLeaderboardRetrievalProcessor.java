@@ -15,14 +15,19 @@ import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
 public class PolarLeaderboardRetrievalProcessor extends AbstractRetrievalProcessor<HasLeaderboardGroupPolarContext, HasLeaderboardPolarContext> {
 
     public PolarLeaderboardRetrievalProcessor(ExecutorService executor,
-            Collection<Processor<HasLeaderboardPolarContext, ?>> resultReceivers, int retrievalLevel) {
-        super(HasLeaderboardGroupPolarContext.class, HasLeaderboardPolarContext.class, executor, resultReceivers, retrievalLevel);
+            Collection<Processor<HasLeaderboardPolarContext, ?>> resultReceivers, int retrievalLevel,
+            String retrievedDataTypeMessageKey) {
+        super(HasLeaderboardGroupPolarContext.class, HasLeaderboardPolarContext.class, executor, resultReceivers,
+                retrievalLevel, retrievedDataTypeMessageKey);
     }
 
     @Override
     protected Iterable<HasLeaderboardPolarContext> retrieveData(HasLeaderboardGroupPolarContext element) {
         Set<HasLeaderboardPolarContext> leaderboardsWithContext = new HashSet<>();
         for (Leaderboard leaderboard : element.getLeaderboardGroup().getLeaderboards()) {
+            if (isAborted()) {
+                break;
+            }
             leaderboardsWithContext.add(new LeaderboardWithPolarContext(leaderboard, element));
         }
         return leaderboardsWithContext;

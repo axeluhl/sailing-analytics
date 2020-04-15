@@ -30,3 +30,4 @@ Import-Package: javax.servlet;version="3.1.0",
  org.osgi.framework;version="1.8.0",
  org.osgi.util.tracker;version="1.5.1"
 Automatic-Module-Name: com.sap.sse
+Bundle-Activator: com.sap.sse.impl.Activator

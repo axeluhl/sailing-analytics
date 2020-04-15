@@ -25,12 +25,12 @@ public class MongoStoreTest {
 
     @Before
     public void setup() {
-        config.getService().getDB().dropDatabase();
+        config.getService().getDB().drop();
     }
 
     @After
     public void tearDown() {
-        config.getService().getDB().dropDatabase();
+        config.getService().getDB().drop();
     }
 
     @Test

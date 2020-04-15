@@ -13,6 +13,8 @@ public interface DesignedCellTableResources extends CellTable.Resources {
     
     public interface DesignedCellTableStyle extends CellTable.Style {
         String buttonCell();
+
+        String textCellWordWrap();
     }
 
     @Override

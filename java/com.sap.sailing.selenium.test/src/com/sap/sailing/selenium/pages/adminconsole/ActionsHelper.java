@@ -1,5 +1,7 @@
 package com.sap.sailing.selenium.pages.adminconsole;
 
+import java.util.function.Function;
+
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoAlertPresentException;
@@ -9,25 +11,22 @@ import org.openqa.selenium.WebDriver.TargetLocator;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.FluentWait;
 
-import com.google.common.base.Function;
 import com.sap.sailing.selenium.pages.PageObject;
 
 public class ActionsHelper {
     private static final String ACTION_XPATH = ".//descendant::div[@name='%s']/img";
     
     public static final String EDIT_ACTION = "ACTION_EDIT";
-    
     public static final String REMOVE_ACTION = "ACTION_REMOVE";
-    
     public static final String EDIT_SCORES_ACTION = "ACTION_EDIT_SCORES";
-    
     public static final String CONFIGURE_URL_ACTION = "ACTION_CONFIGURE_URL";
-    
     public static final String UNLINK_RACE_ACTION = "ACTION_UNLINK";
-    
     public static final String REFRESH_RACE_ACTION = "ACTION_REFRESH_RACE";
-    
     public static final String SET_START_TIME_ACTION = "ACTION_SET_STARTTIME";
+    
+    public static final String UPDATE_ACTION = "UPDATE";
+    public static final String DELETE_ACTION = "DELETE";
+    public static final String CHANGE_OWNERSHIP_ACTION = "CHANGE_OWNERSHIP";
     
     public static WebElement findEditAction(SearchContext context) {
         return context.findElement(By.xpath(String.format(ACTION_XPATH, EDIT_ACTION)));
@@ -57,6 +56,18 @@ public class ActionsHelper {
         return context.findElement(By.xpath(String.format(ACTION_XPATH, SET_START_TIME_ACTION)));
     }
     
+    public static WebElement findUpdateAction(SearchContext context) {
+        return context.findElement(By.xpath(String.format(ACTION_XPATH, UPDATE_ACTION)));
+    }
+
+    public static WebElement findDeleteAction(SearchContext context) {
+        return context.findElement(By.xpath(String.format(ACTION_XPATH, DELETE_ACTION)));
+    }
+
+    public static WebElement findChangeOwnershipAction(SearchContext context) {
+        return context.findElement(By.xpath(String.format(ACTION_XPATH, CHANGE_OWNERSHIP_ACTION)));
+    }
+
     public static void acceptAlert(WebDriver driver) {
         Alert alert = getAlert(driver);
         alert.accept();

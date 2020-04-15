@@ -4,15 +4,19 @@ import java.io.Serializable;
 import java.util.Comparator;
 import java.util.function.Function;
 
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCImpliedWindSourceEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
+import com.sap.sailing.domain.common.RankingMetrics;
+import com.sap.sailing.domain.common.orc.ImpliedWindSource;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Timed;
 
@@ -61,7 +65,7 @@ public interface RankingMetric extends Serializable {
          * Usually the difference between {@link #timePoint} and the start of the race; <code>null</code> if the
          * race start time is not known.
          */
-        Duration getActualTime();
+        Duration getActualRaceDuration();
     
         /**
          * The corrected time for the {@link #competitor}, assuming the race ended at {@link #timePoint}. This
@@ -78,7 +82,7 @@ public interface RankingMetric extends Serializable {
         
         default Duration getEstimatedActualDurationFromRaceStartToCompetitorFarthestAhead() {
             final Duration estimatedActualDurationFromTimePointToCompetitorFarthestAhead = getEstimatedActualDurationFromTimePointToCompetitorFarthestAhead();
-            final Duration actualTime = getActualTime();
+            final Duration actualTime = getActualRaceDuration();
             return actualTime == null ? null :
                 estimatedActualDurationFromTimePointToCompetitorFarthestAhead == null ? null :
                     actualTime.plus(estimatedActualDurationFromTimePointToCompetitorFarthestAhead);
@@ -114,6 +118,10 @@ public interface RankingMetric extends Serializable {
          */
         Competitor getLeaderByCorrectedEstimatedTimeToCompetitorFarthestAhead();
 
+        Competitor getCompetitorFarthestAheadInLeg(Leg leg, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
+    }
+    
+    public interface RankingInfoWithLegLeader extends RankingInfo {
         /**
          * Similar to {@link #getLeaderByCorrectedEstimatedTimeToCompetitorFarthestAhead()}, but relative to a
          * {@link Leg}. This will not consider any progress or position beyond the finishing of that <code>leg</code>.
@@ -122,11 +130,7 @@ public interface RankingMetric extends Serializable {
          * is normalized to the {@link TrackedLeg#getWindwardDistance() windward distance of the leg} at the
          * {@link TrackedLeg#getReferenceTimePoint() reference time point}.
          */
-        Competitor getLeaderInLegByCalculatedTime(Leg leg, WindLegTypeAndLegBearingCache cache);
-        
-        Competitor getCompetitorFarthestAheadInLeg(Leg leg, TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
-
-        Duration getActualTimeFromRaceStartToReachFarthestAheadInLeg(Competitor competitor, Leg leg, WindLegTypeAndLegBearingCache cache);
+        Competitor getLeaderInLegByCalculatedTime(Leg leg, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
     }
     
     public interface LegRankingInfo extends Timed, Serializable {
@@ -141,18 +145,24 @@ public interface RankingMetric extends Serializable {
      * @return the tracked race to which this ranking metric is specific
      */
     TrackedRace getTrackedRace();
+    
+    RankingMetrics getType();
 
     default Comparator<Competitor> getRaceRankingComparator(TimePoint timePoint) {
         return getRaceRankingComparator(timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
     }
 
-    Comparator<Competitor> getRaceRankingComparator(TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
+    Comparator<Competitor> getRaceRankingComparator(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
-    default Comparator<TrackedLegOfCompetitor> getLegRankingComparator(TrackedLeg trackedLeg, TimePoint timePoint) {
-        return getLegRankingComparator(trackedLeg, timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
-    }
+    Comparator<TrackedLegOfCompetitor> getLegRankingComparator(TrackedLeg trackedLeg, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
-    Comparator<TrackedLegOfCompetitor> getLegRankingComparator(TrackedLeg trackedLeg, TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
+    /**
+     * Determine the time sailed for the {@code competitor} at {@code timePoint} in this race. This ignores whether or not
+     * the race has recorded a start mark passing for the {@code competitor}. If no finish mark passing is found either, the
+     * duration between the {@link #getStartOfRace() race start time} and {@code timePoint} is returned; otherwise the duration
+     * between the {@link #getStartOfRace() race start time} and the time when the {@code competitor} finished the race.
+     */
+    Duration getActualTimeSinceStartOfRace(Competitor competitor, TimePoint timePoint);
 
     /**
      * How much time did the <code>competitor</code> spend in the {@link TrackedRace#getRace() race} described by
@@ -178,7 +188,7 @@ public interface RankingMetric extends Serializable {
      * Same as {@link #getCorrectedTime(Competitor, TimePoint)}, but allowing the caller to pass a cache that
      * accelerates some calculations.
      */
-    Duration getCorrectedTime(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
+    Duration getCorrectedTime(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**
      * Determines in <code>competitor</code>'s own time how much time earlier she would have had to be where she is at
@@ -189,17 +199,17 @@ public interface RankingMetric extends Serializable {
      * 
      * @param rankingInfo
      *            the pre-calculated ranking info for all competitors for a certain time point, as returned by
-     *            {@link AbstractRankingMetric#getRankingInfo(TimePoint, WindLegTypeAndLegBearingCache)}
+     *            {@link AbstractRankingMetric#getRankingInfo(TimePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache)}
      * @param competitor
      *            the competitor for which to tell the gap to the leader in <code>competitor</code>'s own time
      *            
-     * @see #getLegGapToLegLeaderInOwnTime(TrackedLegOfCompetitor, TimePoint, com.sap.sailing.domain.ranking.RankingMetric.CompetitorRankingInfo.RankingInfo, WindLegTypeAndLegBearingCache)
+     * @see #getLegGapToLegLeaderInOwnTime(TrackedLegOfCompetitor, TimePoint, com.sap.sailing.domain.ranking.RankingMetric.CompetitorRankingInfo.RankingInfo, WindLegTypeAndLegBearingAndORCPerformanceCurveCache)
      */
     default Duration getGapToLeaderInOwnTime(RankingInfo rankingInfo, Competitor competitor) {
         return getGapToLeaderInOwnTime(rankingInfo, competitor, new LeaderboardDTOCalculationReuseCache(rankingInfo.getTimePoint()));
     }
     
-    default Duration getGapToLeaderInOwnTime(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+    default Duration getGapToLeaderInOwnTime(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return getGapToLeaderInOwnTime(getRankingInfo(timePoint, cache), competitor, cache);
     }
     
@@ -211,9 +221,9 @@ public interface RankingMetric extends Serializable {
         return getRankingInfo(timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
     }
     
-    RankingInfo getRankingInfo(TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
+    RankingInfo getRankingInfo(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
-    Duration getGapToLeaderInOwnTime(RankingInfo rankingInfo, Competitor competitor, WindLegTypeAndLegBearingCache cache);
+    Duration getGapToLeaderInOwnTime(RankingInfo rankingInfo, Competitor competitor, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**
      * Computes the <code>competitor</code>'s gap in own time to the leader (or best leg finisher, in corrected time if
@@ -225,5 +235,25 @@ public interface RankingMetric extends Serializable {
      *            tells about leader (by calculated time) and boat farthest ahead
      */
     Duration getLegGapToLegLeaderInOwnTime(TrackedLegOfCompetitor trackedLegOfCompetitor, TimePoint timePoint,
-            RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache);
+            RankingInfo rankingInfo, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
+
+    /**
+     * A so-called "implied wind" speed is determined in ORC Performance Curve Scoring (PCS) by inverting the
+     * performance curve functions of the competitors that maps a wind speed to the time allowance for a course that the
+     * competitor gets for that wind speed. This way, a virtual wind speed can be calculated based on the time the
+     * competitor actually took to complete that course.
+     * <p>
+     * 
+     * For OCS PCS starting in the year 2015, an overall implied wind needs to be determined for a race, and it defaults
+     * to the maximum implied wind across all competitors. However, this default can be overridden, and one approach is
+     * to use the implied wind of another race.
+     * <p>
+     * 
+     * Delivers the implied wind according to the {@link ImpliedWindSource strategy} set in the {@link RaceLog}s
+     * attached to this ranking metric's {@link #getTrackedRace() tracked race}, either by taking the maximum across
+     * their competitors' implied winds, or in case the implied wind was explicitly fixed by a corresponding
+     * {@link RaceLogORCImpliedWindSourceEvent}, that fixed implied wind speed, or by delegating the request to
+     * another race.
+     */
+    Speed getReferenceImpliedWind(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 }

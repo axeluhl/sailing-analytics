@@ -6,9 +6,9 @@ import java.util.NavigableSet;
 import java.util.Set;
 import java.util.SortedSet;
 
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCImpliedWindSourceEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDefineMarkEvent;
@@ -16,15 +16,14 @@ import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMapping
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.DouglasPeucker;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
@@ -42,6 +41,7 @@ import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.SensorFix;
@@ -49,11 +49,13 @@ import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuse
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.tracking.impl.NonCachingMarkPositionAtTimePointCache;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
+import com.sap.sailing.domain.windestimation.IncrementalWindEstimation;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
@@ -62,6 +64,10 @@ import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 
 /**
  * Live tracking data of a single race. The race follows a defined {@link Course} with a sequence of {@link Leg}s. The
@@ -78,7 +84,8 @@ import com.sap.sse.common.Util.Pair;
  * @author Axel Uhl (d043530)
  * 
  */
-public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomainFactory> {
+public interface TrackedRace
+        extends Serializable, IsManagedByCache<DomainFactory>, WithQualifiedObjectIdentifier {
     final Duration START_TRACKING_THIS_MUCH_BEFORE_RACE_START = Duration.ONE_MINUTE.times(5);
     final Duration STOP_TRACKING_THIS_MUCH_AFTER_RACE_FINISH = Duration.ONE_SECOND.times(30);
 
@@ -122,6 +129,12 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      * present.
      */
     TimePoint getStartOfRace(boolean inferred);
+
+    /**
+     * @return the time point taken from a valid, non-revoked {@link RaceLogRaceStatusEvent} that transfers the race
+     * into status {@link RaceLogRaceStatus#FINISHING} or {@code null} if no such event is found.
+     */
+    TimePoint getFinishingTime();
 
     /**
      * @return the time point taken from a valid, non-revoked {@link RaceLogRaceStatusEvent} that transfers the race
@@ -212,6 +225,8 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
     
     /**
      * Precondition: waypoint must still be part of {@link #getRace()}.{@link RaceDefinition#getCourse() getCourse()}.
+     * Returns {@code null} for the first waypoint of the course. If the waypoint is not part of the course, an
+     * {@link IllegalArgumentException} will be thrown.
      */
     TrackedLeg getTrackedLegFinishingAt(Waypoint endOfLeg);
 
@@ -277,7 +292,11 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      * @return <code>0</code> in case the competitor hasn't participated in the race; a rank starting with
      *         <code>1</code> where rank <code>1</code> identifies the leader otherwise
      */
-    int getRank(Competitor competitor, TimePoint timePoint);
+    default int getRank(Competitor competitor, TimePoint timePoint) {
+        return getRank(competitor, timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
+    }
+
+    int getRank(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**
      * For the given waypoint lists the {@link MarkPassing} events that describe which competitor passed the waypoint at
@@ -327,6 +346,8 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
     /**
      * If the <code>waypoint</code> only has one {@link #getMarks() mark}, its position at time <code>timePoint</code>
      * is returned. Otherwise, the center of gravity between the mark positions is computed and returned.
+     * 
+     * @return {@code null} in case no position is found for any of the waypoint's marks
      */
     default Position getApproximatePosition(Waypoint waypoint, TimePoint timePoint) {
         return getApproximatePosition(waypoint, timePoint, new NonCachingMarkPositionAtTimePointCache(this, timePoint));
@@ -340,6 +361,7 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      * @param markPositionCache
      *            a cache for this {@link MarkPositionAtTimePointCache#getTrackedRace() race} and the
      *            {@link MarkPositionAtTimePointCache#getTimePoint() timePoint} passed
+     * @return {@code null} in case no position is found for any of the waypoint's marks
      */
     Position getApproximatePosition(Waypoint waypoint, TimePoint timePoint,
             MarkPositionAtTimePointCache markPositionCache);
@@ -569,10 +591,17 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
     Wind getDirectionFromStartToNextMark(TimePoint at);
 
     /**
-     * Uses a {@link DouglasPeucker Douglas-Peucker} algorithm to approximate this track's fixes starting at time
-     * <code>from</code> until time point <code>to</code> such that the maximum distance between the track's fixes and
-     * the approximation is at most <code>maxDistance</code>. The approximation's fixes are original fixes from
-     * the competitor's {@link GPSFixTrack track}.
+     * Traverses the competitor's {@link GPSFixTrack track} between {@code from} and {@code to} (both inclusive) and
+     * returns those fixes where significant changes in the course over ground (COG) are observed, indicating a possibly
+     * relevant maneuver. The {@link SpeedWithBearing#getBearing() COG} change is calculated over a time window the size
+     * of the typical maneuver duration, but at least covering two fixes in order to also cover the case of low sampling
+     * rates. If in any such window the COG change exceeds the threshold, the window is extended as far as the COG
+     * change grows, then from the extended window the fix with the highest COG change to its successor is returned. The
+     * next window analysis will start after the end of the current window, avoiding duplicates in the result.
+     * <p>
+     * 
+     * If the precondition that the {@code competitor} must be {@link RaceDefinition#getCompetitors() part of} the
+     * {@link #getRace() race} isn't met, a {@code NullPointerException} will result.
      */
     Iterable<GPSFixMoving> approximate(Competitor competitor, Distance maxDistance, TimePoint from, TimePoint to);
 
@@ -670,7 +699,7 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      *            materialized ranking information that is expensive to calculate, avoiding redundant calculations
      */
     Distance getWindwardDistanceToCompetitorFarthestAhead(Competitor competitor, TimePoint timePoint,
-            WindPositionMode windPositionMode, RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache);
+            WindPositionMode windPositionMode, RankingInfo rankingInfo, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**
      * Calls {@link #getWindWithConfidence(Position, TimePoint, Iterable)} and excludes those wind sources listed in
@@ -721,7 +750,7 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      * wind on leg and leg bearing is provided.
      */
     Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalyses,
-            WindLegTypeAndLegBearingCache cache) throws NoWindException;
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException;
     
     Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly,
             boolean waitForLatestAnalyses) throws NoWindException;
@@ -734,7 +763,7 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      * wind direction and leg bearing is provided.
      */
     Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalyses,
-            WindLegTypeAndLegBearingCache cache) throws NoWindException;
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException;
 
     Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly,
             boolean waitForLatestAnalysis) throws NoWindException;
@@ -745,7 +774,7 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
 
     Competitor getOverallLeader(TimePoint timePoint);
     
-    Competitor getOverallLeader(TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
+    Competitor getOverallLeader(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     Boat getBoatOfCompetitor(Competitor competitor);
     
@@ -761,7 +790,7 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      * Same as {@link #getCompetitorsFromBestToWorst(TimePoint)}, using a cache for wind, leg type and leg
      * bearing values.
      */
-    List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
+    List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**
      * When provided with a {@link WindStore} during construction, the tracked race will
@@ -939,10 +968,17 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
     Distance getCourseLength();
     
     /**
-     * The average wind speed with confidence for this race. It uses the timepoint of the race end as
-     * a reference point.
+     * The average wind speed with confidence for this race. It uses the timepoint of the {@link #getEndOfRace race end} as
+     * a reference point, or, if that is {@code null}, the {@link #getTimePointOfNewestEvent()}.
      */
     SpeedWithConfidence<TimePoint> getAverageWindSpeedWithConfidence(long resolutionInMillis);
+    
+    SpeedWithConfidence<TimePoint> getAverageWindSpeedWithConfidenceWithNumberOfSamples(int numberOfSamples);
+    
+    /**
+     * The average wind speed with confidence for this race.
+     */
+    SpeedWithConfidence<TimePoint> getAverageWindSpeedWithConfidence(TimePoint formTimePoint, TimePoint toTimePoint, int numberOfSamples);
     
     /**
      * Computes the center point of the course's marks at the given time point.
@@ -988,6 +1024,18 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
     TargetTimeInfo getEstimatedTimeToComplete(TimePoint timepoint) throws NotEnoughDataHasBeenAddedException, NoWindException;
 
     /**
+     * Determine the time sailed for the {@code competitor} at {@code timePoint} in this race. This ignores whether or
+     * not the race has recorded a start mark passing for the {@code competitor}. If no finish mark passing is found
+     * either, the duration between the {@link #getStartOfRace() race start time} and {@code timePoint} is returned;
+     * otherwise the duration between the {@link #getStartOfRace() race start time} and the time when the
+     * {@code competitor} finished the race. If there is no mark passing for {@code competitor} for the last waypoint or
+     * no {@link TrackedRace#getStartOfRace()} is known, {@code null} is returned.
+     */
+    default Duration getTimeSailedSinceRaceStart(Competitor competitor, TimePoint timePoint) {
+        return null;
+    }
+
+    /**
      * Calculates the estimated distance it takes a competitor to sail the race, from start to finish.
      * 
      * @param timepoint
@@ -1005,7 +1053,7 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
 
     void setPolarDataService(PolarDataService polarDataService);
 
-    default RaceLogResolver getRaceLogResolver() {
+    default RaceLogAndTrackedRaceResolver getRaceLogResolver() {
         return null;
     }
 
@@ -1086,7 +1134,7 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      * it can be added to the boat's course over ground to arrive at the wind's {@link Wind#getFrom() "from"} direction. Example: wind
      * from the north (0deg), boat's course over ground 90deg (moving east), then the bearing returned is -90deg.
      */
-    default Bearing getTWA(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+    default Bearing getTWA(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         Bearing twa = null;
         final GPSFixTrack<Competitor, GPSFixMoving> sogTrack = this.getTrack(competitor);
         if (sogTrack != null) {
@@ -1112,7 +1160,7 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      * Like {@link #getVelocityMadeGood(Competitor, TimePoint)}, but allowing callers to specify a cache that can
      * accelerate requests for wind directions, the leg type and the competitor's current leg's bearing.
      */
-    default SpeedWithBearing getVelocityMadeGood(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+    default SpeedWithBearing getVelocityMadeGood(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return getVelocityMadeGood(competitor, timePoint, WindPositionMode.EXACT, cache);
     }
 
@@ -1124,6 +1172,88 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      * or has already finished), {@code null} is returned.
      */
     SpeedWithBearing getVelocityMadeGood(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode,
-            WindLegTypeAndLegBearingCache cache);
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
+    boolean recordWind(Wind wind, WindSource windSource, boolean applyFilter);
+
+    void removeWind(Wind wind, WindSource windSource);
+
+    /**
+     * Gets polar service which is currently set in this tracked race instance.
+     * @see #setPolarDataService(PolarDataService)
+     */
+    PolarDataService getPolarDataService();
+
+    /**
+     * Sets wind estimation for this tracked race instance. The previous wind estimation with its wind source and wind
+     * track are completely removed from this tracked race instance. If not {@code null}, the wind estimation is set and
+     * configured accordingly so that it gets supplied by maneuver detector with new maneuvers in order to produce a
+     * wind track with estimated wind. An appropriate wind source of type
+     * {@link WindSourceType#MANEUVER_BASED_ESTIMATION} with corresponding wind track is added to the tracked race. If
+     * {@code null}, the wind estimation will be disabled for the tracked race. After the call of this method, maneuver
+     * cache and wind cache will be reset and its recalculation will be triggered.
+     */
+    void setWindEstimation(IncrementalWindEstimation windEstimation);
+
+    /**
+     * Obtains a quick, rough summary of the wind conditions during this race, based on a few wind samples at the
+     * beginning, in the middle and at the end of the race. This is summarized in a min and max wind speed as well
+     * as a single average wind direction.
+     */
+    WindSummary getWindSummary();
+    
+    @Override
+    default QualifiedObjectIdentifier getIdentifier() {
+        return getIdentifier(getRaceIdentifier());
+    }
+    
+    public static QualifiedObjectIdentifier getIdentifier(RegattaAndRaceIdentifier regattaAndRaceId) {
+        return getSecuredDomainType().getQualifiedObjectIdentifier(regattaAndRaceId.getTypeRelativeObjectIdentifier());
+    }
+
+    default TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return getRaceIdentifier().getTypeRelativeObjectIdentifier();
+    }
+
+    @Override
+    default String getName() {
+        return getRaceIdentifier().getRaceName() + "@" + getRaceIdentifier().getRegattaName();
+    }
+
+    @Override
+    default HasPermissions getPermissionType() {
+        return getSecuredDomainType();
+    }
+    
+    public static HasPermissions getSecuredDomainType() {
+        return SecuredDomainType.TRACKED_RACE;
+    }
+
+    /**
+     * A so-called "implied wind" speed is determined in ORC Performance Curve Scoring (PCS) by inverting the
+     * performance curve functions of the competitors that maps a wind speed to the time allowance for a course that the
+     * competitor gets for that wind speed. This way, a virtual wind speed can be calculated based on the time the
+     * competitor actually took to complete that course.
+     * <p>
+     * 
+     * For OCS PCS starting in the year 2015, an overall implied wind needs to be determined for a race, and it defaults
+     * to the maximum implied wind across all competitors. However, this default can be overridden, and one approach is
+     * to use the implied wind of another race.
+     * <p>
+     * 
+     * This method delegates to the {@link #getRankingMetric()} to determine this implied wind. Any non-ORC ranking
+     * metric would be an unusual choice for such a set-up, but it should respond with the average wind speed during the
+     * race (the combined wind). The ORC ranking metrics are expected to deliver their implied wind, either by taking
+     * the maximum across their competitors' implied winds, or in case the implied wind was explicitly fixed by a
+     * corresponding {@link RaceLogORCImpliedWindSourceEvent}, that fixed implied wind speed.
+     */
+    default Speed getReferenceImpliedWind(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return getRankingMetric().getReferenceImpliedWind(timePoint, cache);
+    }
+    
+    /**
+     * gets a {@link TrackingConnectorInfo}, which contains a String representation of the Tracking-Service used to Track the Race and a web-URL for the Event Event; 
+     * may be {@code null}, particularly in test set-ups
+     */
+    TrackingConnectorInfo getTrackingConnectorInfo();
 }

@@ -23,7 +23,7 @@ import com.sap.sse.util.impl.ThreadFactoryWithPriority;
  *
  */
 public class ThreadPoolWithExceptionsTest {
-    @Rule public Timeout threadPoolWithExceptionsTestTimeout = new Timeout(10 * 1000); // 10s timeout
+    @Rule public Timeout threadPoolWithExceptionsTestTimeout = Timeout.millis(10 * 1000); // 10s timeout
     
     private static final Logger logger = Logger.getLogger(ThreadPoolWithExceptionsTest.class.getName());
     

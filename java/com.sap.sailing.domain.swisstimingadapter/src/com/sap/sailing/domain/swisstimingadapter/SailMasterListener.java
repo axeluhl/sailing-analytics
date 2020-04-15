@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.swisstimingadapter;
 
+import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.List;
 
@@ -16,9 +17,9 @@ public interface SailMasterListener {
     
     void receivedClockAtMark(String raceID, List<Util.Triple<Integer, TimePoint, String>> markIndicesTimePointsAndBoatIDs);
     
-    void receivedStartList(String raceID, StartList startList);
+    void receivedStartList(String raceID, StartList startList) throws URISyntaxException;
     
-    void receivedCourseConfiguration(String raceID, Course course);
+    void receivedCourseConfiguration(String raceID, Course course) throws URISyntaxException;
     
     void receivedAvailableRaces(Iterable<Race> races);
     

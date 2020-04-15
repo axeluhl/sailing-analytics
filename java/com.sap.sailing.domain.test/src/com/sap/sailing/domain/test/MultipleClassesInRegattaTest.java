@@ -14,11 +14,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.RaceTracker;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler.DefaultRaceTrackingHandler;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
@@ -37,7 +38,7 @@ public class MultipleClassesInRegattaTest {
     
     @Before
     public void setUp() {
-        domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl((srlid)->null));
+        domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl(com.sap.sailing.domain.base.DomainFactory.TEST_RACE_LOG_RESOLVER));
     }
     
     @Test
@@ -56,26 +57,30 @@ public class MultipleClassesInRegattaTest {
                 .createRaceTracker(
                         EmptyRaceLogStore.INSTANCE,
                         EmptyRegattaLogStore.INSTANCE, EmptyWindStore.INSTANCE, new DummyTrackedRegattaRegistry(),
-                        mock(RaceLogResolver.class), mock(LeaderboardGroupResolver.class), createConnectivityParams(httpAndHost, liveURI, storedURI, courseDesignUpdateURI,
-                                tracTracUsername, tracTracPassword, "cce678c8-97e6-11e0-9aed-406186cbf87c"), RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
+                        mock(RaceLogAndTrackedRaceResolver.class), mock(LeaderboardGroupResolver.class), createConnectivityParams(httpAndHost, liveURI, storedURI, courseDesignUpdateURI,
+                                tracTracUsername, tracTracPassword, "cce678c8-97e6-11e0-9aed-406186cbf87c"), RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS,
+                        new DefaultRaceTrackingHandler());
         kiwotest2 = domainFactory
                 .createRaceTracker(
                         EmptyRaceLogStore.INSTANCE,
                         EmptyRegattaLogStore.INSTANCE, EmptyWindStore.INSTANCE, new DummyTrackedRegattaRegistry(),
-                        mock(RaceLogResolver.class), mock(LeaderboardGroupResolver.class), createConnectivityParams(httpAndHost, liveURI, storedURI, courseDesignUpdateURI,
-                                tracTracUsername, tracTracPassword, "11290bd6-97e7-11e0-9aed-406186cbf87c"), RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
+                        mock(RaceLogAndTrackedRaceResolver.class), mock(LeaderboardGroupResolver.class), createConnectivityParams(httpAndHost, liveURI, storedURI, courseDesignUpdateURI,
+                                tracTracUsername, tracTracPassword, "11290bd6-97e7-11e0-9aed-406186cbf87c"), RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS,
+                        new DefaultRaceTrackingHandler());
         kiwotest3 = domainFactory
                 .createRaceTracker(
                         EmptyRaceLogStore.INSTANCE,
                         EmptyRegattaLogStore.INSTANCE, EmptyWindStore.INSTANCE, new DummyTrackedRegattaRegistry(),
-                        mock(RaceLogResolver.class), mock(LeaderboardGroupResolver.class), createConnectivityParams(httpAndHost, liveURI, storedURI, courseDesignUpdateURI,
-                                tracTracUsername, tracTracPassword, "39635b24-97e7-11e0-9aed-406186cbf87c"), RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
+                        mock(RaceLogAndTrackedRaceResolver.class), mock(LeaderboardGroupResolver.class), createConnectivityParams(httpAndHost, liveURI, storedURI, courseDesignUpdateURI,
+                                tracTracUsername, tracTracPassword, "39635b24-97e7-11e0-9aed-406186cbf87c"), RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS,
+                        new DefaultRaceTrackingHandler());
         weym470may112014_2 = domainFactory
                 .createRaceTracker(
                         EmptyRaceLogStore.INSTANCE,
                         EmptyRegattaLogStore.INSTANCE, EmptyWindStore.INSTANCE, new DummyTrackedRegattaRegistry(),
-                        mock(RaceLogResolver.class), mock(LeaderboardGroupResolver.class), createConnectivityParams(httpAndHost, liveURI, storedURI, courseDesignUpdateURI,
-                                tracTracUsername, tracTracPassword, "04498426-7dfd-11e0-8236-406186cbf87c"), RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
+                        mock(RaceLogAndTrackedRaceResolver.class), mock(LeaderboardGroupResolver.class), createConnectivityParams(httpAndHost, liveURI, storedURI, courseDesignUpdateURI,
+                                tracTracUsername, tracTracPassword, "04498426-7dfd-11e0-8236-406186cbf87c"), RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS,
+                        new DefaultRaceTrackingHandler());
 
         assertEquals("STG", kiwotest1.getRegatta().getBoatClass().getName());
         assertEquals("5O5", kiwotest2.getRegatta().getBoatClass().getName());
@@ -97,7 +102,8 @@ public class MultipleClassesInRegattaTest {
                 /* offsetToStartTimeOfSimulatedRace */ null, /* ignoreTracTracMarkPassings*/
                 false, EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE, domainFactory,
                 tracTracUsername, tracTracPassword, TracTracConnectionConstants.ONLINE_STATUS, TracTracConnectionConstants.ONLINE_VISIBILITY,
-                /* trackWind */ false, /* correctWindDirectionByMagneticDeclination */ true, /* preferReplayIfAvailable */ false, /* timeoutInMillis */ -1);
+                /* trackWind */ false, /* correctWindDirectionByMagneticDeclination */ true, /* preferReplayIfAvailable */ false, /* timeoutInMillis */ -1,
+                /* useOfficialEventsToUpdateRaceLog */ false);
     }
     
     @After

@@ -5,6 +5,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
 import com.sap.sailing.domain.common.DeviceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
@@ -19,7 +20,7 @@ import com.sap.sse.common.Timed;
 public interface SensorFixStore {
     
     /**
-     * Loads fixes for a device in a given time range.
+     * Loads fixes for a device in a given time range in ascending order.
      * 
      * @param consumer
      *            will be called for each loaded fix. Must not be <code>null</code>.
@@ -40,7 +41,7 @@ public interface SensorFixStore {
     TransformationException;
     
     /**
-     * Loads fixes for a device in a given time range.
+     * Loads fixes for a device in a given time range in ascending order.
      * 
      * @param consumer will be called for each loaded fix. Must not be <code>null</code>.
      * @param deviceIdentifier the device to load the fixes for. Must not be <code>null</code>.
@@ -72,8 +73,12 @@ public interface SensorFixStore {
      *            the device to store the fix for. Must not be <code>null</code>.
      * @param fix
      *            The fix to store. Must not be <code>null</code>.
+     * @return An {@link Iterable} with {@link RegattaAndRaceIdentifier}s is returned that will contain races with new
+     *         maneuvers which were not available at the last time the given device stored a fix. The {@link Iterable}
+     *         returned can be empty but is never {@code null}. It can also contain multiple identifiers if the device
+     *         mapping is currently ambiguous.
      */
-    <FixT extends Timed> void storeFixes(DeviceIdentifier device, Iterable<FixT> fixes);
+    <FixT extends Timed> Iterable<RegattaAndRaceIdentifier> storeFixes(DeviceIdentifier device, Iterable<FixT> fixes);
 
     /**
      * Listeners are notified, whenever a {@link GPSFix} submitted by the {@code device}
@@ -96,10 +101,16 @@ public interface SensorFixStore {
     
     long getNumberOfFixes(DeviceIdentifier device) throws TransformationException, NoCorrespondingServiceRegisteredException;
     
-    <FixT extends Timed> Map<DeviceIdentifier, FixT> getLastFix(Iterable<DeviceIdentifier> forDevices) throws TransformationException, NoCorrespondingServiceRegisteredException;
+    /**
+     * Obtains the fixes that were received last for each of the devices specified. For devices that have not delivered
+     * fixes yet, no mapping is created in the resulting map. Note that due to the possibility of out-of-order delivery
+     * the fixes returned may not be the fixes with the latest time stamp for that device.
+     */
+    <FixT extends Timed> Map<DeviceIdentifier, FixT> getFixLastReceived(Iterable<DeviceIdentifier> forDevices)
+            throws TransformationException, NoCorrespondingServiceRegisteredException;
 
     /**
-     * Loads the youngest fix for the given device in the specified {@link TimeRange}.
+     * Loads the oldest fix for the given device in the specified {@link TimeRange}.
      * 
      * @return true if a fix was loaded, false otherwise
      */
@@ -108,7 +119,7 @@ public interface SensorFixStore {
             throws NoCorrespondingServiceRegisteredException, TransformationException;
 
     /**
-     * Loads the oldest fix for the given device in the specified {@link TimeRange}.
+     * Loads the youngest fix for the given device in the specified {@link TimeRange}.
      * 
      * @return true if a fix was loaded, false otherwise
      */

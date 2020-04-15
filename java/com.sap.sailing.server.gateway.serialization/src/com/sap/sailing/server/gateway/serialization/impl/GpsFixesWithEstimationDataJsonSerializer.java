@@ -7,20 +7,22 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.maneuverdetection.TrackTimeInfo;
 import com.sap.sailing.domain.maneuverdetection.impl.ManeuverDetectorImpl;
 import com.sap.sailing.domain.maneuverdetection.impl.ManeuverDetectorWithEstimationDataSupportDecoratorImpl;
-import com.sap.sailing.domain.maneuverdetection.impl.TrackTimeInfo;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
 
+
 /**
  * 
  * @author Vladislav Chumak (D069712)
  *
  */
+
 public class GpsFixesWithEstimationDataJsonSerializer implements CompetitorTrackElementsJsonSerializer {
     public static final String GPS_FIXES = "gpsFixes";
     public static final String BOAT_CLASS = "boatClass";
@@ -60,7 +62,9 @@ public class GpsFixesWithEstimationDataJsonSerializer implements CompetitorTrack
         track.lockForRead();
         try {
             for (GPSFixMoving gpsFix : track.getFixes(from, true, to, true)) {
-                JSONObject serializedGpsFix = gpsFixMovingJsonSerializer.serialize(gpsFix);
+                SpeedWithBearing speedWithBearing = smoothFixes ? track.getEstimatedSpeed(gpsFix.getTimePoint())
+                        : gpsFix.getSpeed();
+                JSONObject serializedGpsFix = gpsFixMovingJsonSerializer.serialize(gpsFix, speedWithBearing);
                 if (addWind) {
                     Wind wind = trackedRace.getWind(gpsFix.getPosition(), gpsFix.getTimePoint());
                     JSONObject serializedWind = wind == null ? null : windJsonSerializer.serialize(wind);
@@ -69,8 +73,6 @@ public class GpsFixesWithEstimationDataJsonSerializer implements CompetitorTrack
                 if (addNextWaypoint) {
                     Distance closestDistanceToMark = estimationDataSupportDecoratorImpl
                             .getClosestDistanceToMark(gpsFix.getTimePoint());
-                    SpeedWithBearing speedWithBearing = smoothFixes ? track.getEstimatedSpeed(gpsFix.getTimePoint())
-                            : gpsFix.getSpeed();
                     Bearing relativeBearingToNextMark = speedWithBearing == null ? null
                             : estimationDataSupportDecoratorImpl.getRelativeBearingToNextMark(gpsFix.getTimePoint(),
                                     speedWithBearing.getBearing());

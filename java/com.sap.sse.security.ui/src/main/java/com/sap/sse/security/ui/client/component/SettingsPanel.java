@@ -26,6 +26,8 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sse.gwt.client.AbstractEntryPoint;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.security.ui.client.IconResources;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
@@ -127,23 +129,23 @@ public class SettingsPanel extends LayoutPanel {
 
                         @Override
                         public void onFailure(Throwable caught) {
-                            Window.alert(caught.getMessage());
+                            Notification.notify(caught.getMessage(), NotificationType.ERROR);
                         }
 
                         @Override
                         public void onSuccess(Void result) {
-                            Window.alert("Added url!");
+                            Notification.notify("Added url!", NotificationType.SUCCESS);
                         }
                     });
                     userManagementService.addSetting("URLS_AUTH_" + key.getText(), String.class.getName(), filter.getText(), new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
-                            Window.alert(caught.getMessage());
+                            Notification.notify(caught.getMessage(), NotificationType.ERROR);
                         }
 
                         @Override
                         public void onSuccess(Void result) {
-                            Window.alert("Added url filter!");
+                            Notification.notify("Added url filter!", NotificationType.SUCCESS);
                         }
                     });
                 }
@@ -173,7 +175,7 @@ public class SettingsPanel extends LayoutPanel {
         
         flexTable.setWidget(row, 2, statusGreen);
         
-        final ImageResource deleteImageResource = IconResources.INSTANCE.delete();
+        final ImageResource deleteImageResource = com.sap.sse.gwt.client.IconResources.INSTANCE.removeIcon();
         HTML delete = new HTML(renderer.render(deleteImageResource));
         delete.addClickHandler(new ClickHandler() {
             
@@ -182,7 +184,7 @@ public class SettingsPanel extends LayoutPanel {
                 boolean deleteS = Window.confirm("Are you sure you want to delete this setting?");
                 
                 if (deleteS){
-                    Window.alert("Not implemented yet");
+                    Notification.notify("Not implemented yet", NotificationType.ERROR);
                 }
             }
         });
@@ -283,7 +285,7 @@ public class SettingsPanel extends LayoutPanel {
         
         flexTable.setWidget(row, 3, statusGreen);
         
-        final ImageResource deleteImageResource = IconResources.INSTANCE.delete();
+        final ImageResource deleteImageResource = com.sap.sse.gwt.client.IconResources.INSTANCE.removeIcon();
         HTML delete = new HTML(renderer.render(deleteImageResource));
         delete.addClickHandler(new ClickHandler() {
             
@@ -292,7 +294,7 @@ public class SettingsPanel extends LayoutPanel {
                 boolean deleteS = Window.confirm("Are you sure you want to delete this setting?");
                 
                 if (deleteS){
-                    Window.alert("Not implemented yet");
+                    Notification.notify("Not implemented yet", NotificationType.ERROR);
                 }
             }
         });

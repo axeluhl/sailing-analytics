@@ -30,6 +30,7 @@ import com.sap.sailing.gwt.home.shared.utils.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.home.shared.utils.LabelTypeUtil;
 import com.sap.sailing.gwt.home.shared.utils.LogoUtil;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.databylogo.DataByLogo;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.LinkUtil;
 
@@ -60,6 +61,7 @@ public class EventHeader extends Composite {
     @UiField DivElement courseAreaUi;
     @UiField FlowPanel dropdownContent;
     @UiField SharingButtons sharing;
+    @UiField DataByLogo dataByLogo;
 
     private EventViewDTO event;
     private Presenter presenter;
@@ -149,11 +151,12 @@ public class EventHeader extends Composite {
             }
             hide(competitors, races, courseAreaUi, eventCategory);
         }
+        dataByLogo.setUp(event.getTrackingConnectorInfos(), /** colorIfPossible **/ true, /** enforceTextColor **/ false);
         initTitleAndSelection(nameToShow);
     }
 
     private void initTitleAndSelection(String nameToShow) {
-        if(!presenter.needsSelectionInHeader()) {
+        if (!presenter.needsSelectionInHeader()) {
             eventName.setInnerText(nameToShow);
             LabelTypeUtil.renderLabelType(eventState, event.getState().getStateMarker());
             UIObject.ensureDebugId(eventState, "EventStateLabelDiv");

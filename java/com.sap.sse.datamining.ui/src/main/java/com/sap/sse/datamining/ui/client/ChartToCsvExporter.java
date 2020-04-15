@@ -5,7 +5,8 @@ import org.moxieapps.gwt.highcharts.client.Point;
 import org.moxieapps.gwt.highcharts.client.Series;
 
 import com.google.gwt.i18n.client.NumberFormat;
-import com.google.gwt.user.client.Window;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.shared.TextExporter;
 
 /**
@@ -32,7 +33,7 @@ public class ChartToCsvExporter {
     public void exportChartAsCsvToClipboard(Chart chartToExport) {
         String csvContentExport = createCsvExportContentForStatisticsCurve(chartToExport);
         TextExporter.exportToClipboard(csvContentExport);
-        Window.alert(exportedMessage);
+        Notification.notify(exportedMessage, NotificationType.INFO);
     }
 
     private static String createCsvExportContentForStatisticsCurve(Chart chartToExport) {

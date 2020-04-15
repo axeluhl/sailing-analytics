@@ -13,7 +13,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
+import com.sap.sse.common.util.MappingIterable;
+import com.sap.sse.common.util.MappingIterator;
 import com.sap.sse.common.util.NaturalComparator;
 
 
@@ -145,20 +153,6 @@ public class Util {
             return "[" + a + ", " + b + ", " + c + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
         }
     }
-    
-    /**
-     * To be replaced with java.util.function.Supplier when we can consistently use Java 8.
-     */
-    public interface Provider<T> {
-        T get();
-    }
-    
-    /**
-     * To be replaced with java.util.function.Function when we can consistently use Java 8.
-     */
-    public interface Function<I, O> {
-        O get(I in);
-    }
 
     /**
      * Adds all elements from <code>what</code> to <code>addTo</code> and returns <code>addTo</code> for chained use.
@@ -242,6 +236,21 @@ public class Util {
             return result;
         }
     }
+    
+    /**
+     * If {@code iter} {@link Iterator#hasNext has a next element}, that element is returned. Otherwise, {@code null} is
+     * the result of this method. If a next element exists, the attempt to fetch it may, as usual, throw a
+     * {@link ConcurrentModificationException}.
+     */
+    public static <T> T nextOrNull(Iterator<T> iter) {
+        final T result;
+        if (iter.hasNext()) {
+            result = iter.next();
+        } else {
+            result = null;
+        }
+        return result;
+    }
 
     public static <T> int indexOf(Iterable<? extends T> i, T t) {
         int result;
@@ -318,6 +327,8 @@ public class Util {
         final T result;
         if (isEmpty(iterable)) {
             result = null;
+        } else if (iterable instanceof SortedSet) {
+            result = ((SortedSet<T>) iterable).last();
         } else {
             result = get(iterable, size(iterable)-1);
         }
@@ -343,14 +354,19 @@ public class Util {
     }
     
     public static interface Mapper<S, T> { T map(S s); }
-    public static <S, T> Iterable<T> map(Iterable<S> iterable, Mapper<S, T> mapper) {
-        List<T> result = new ArrayList<>();
-        for (final S s : iterable) {
-            result.add(mapper.map(s));
-        }
-        return result;
+    public static <S, T> Iterable<T> map(final Iterable<S> iterable, final Mapper<S, T> mapper) {
+        return new MappingIterable<>(iterable, new MappingIterator.MapFunction<S, T>() {
+            @Override
+            public T map(S s) {
+                return mapper.map(s);
+            }
+        });
     }
-
+    
+    public static <T> Iterable<T> filter(final Iterable<T> iterable, final Predicate<T> predicate) {
+        return StreamSupport.stream(iterable.spliterator(), /* parallel */ false).filter(predicate)::iterator;
+    }
+    
     /**
      * A null-safe check whether <code>t</code> is contained in <code>ts</code>. For <code>ts==null</code> the method
      * immediately returns <code>false</code>.
@@ -423,7 +439,7 @@ public class Util {
      * <code>null</code> is permissible for both, <code>o1</code> and <code>o2</code>, where a <code>null</code> value
      * is considered less than a non-null value if <code>nullIsLess</code> is <code>true</code>, greater otherwise.
      */
-    public static <T> int compareToWithNull(Comparable<T> o1, T o2, boolean nullIsLess) {
+    public static <T extends Comparable<T>> int compareToWithNull(T o1, T o2, boolean nullIsLess) {
         final int result;
         if (o1 == null) {
             if (o2 == null) {
@@ -456,40 +472,42 @@ public class Util {
      * then adds {@code value} to that set. No synchronization / concurrency control effort is
      * made. This is the caller's obligation.
      */
-    public static <K, V> void addToValueSet(Map<K, Set<V>> map, K key, V value) {
-        addToValueSet(map, key, value, new ValueSetConstructor<V>() {
+    public static <K, V> boolean addToValueSet(Map<K, Set<V>> map, K key, V value) {
+        return addToValueSet(map, key, value, new ValueCollectionConstructor<V, Set<V>>() {
             @Override
-            public Set<V> createSet() {
+            public Set<V> createValueCollection() {
                 return new HashSet<V>();
             }
         });
     }
 
-    public static interface ValueSetConstructor<T> {
-        Set<T> createSet();
+    public static interface ValueCollectionConstructor<T, C extends Collection<T>> {
+        C createValueCollection();
     }
     
     /**
-     * Ensures that a {@link Set Set&lt;V&gt;} is contained in {@code map} for {@code key} and
-     * then adds {@code value} to that set. No synchronization / concurrency control effort is
-     * made. This is the caller's obligation.
+     * Ensures that a {@link Collection Collection&lt;V&gt;} is contained in {@code map} for {@code key} and then adds {@code value}
+     * to that set. No synchronization / concurrency control effort is made. This is the caller's obligation.
+     * 
+     * @return {@code true} if the {@code value} was not yet contained in the {@code value} collection for {@code key} or if
+     *         the {@code map} did not even contain a value set for {@code key} yet.
      */
-    public static <K, V> void addToValueSet(Map<K, Set<V>> map, K key, V value, ValueSetConstructor<V> setConstructor) {
-        Set<V> set = map.get(key);
-        if (set == null) {
-            set = setConstructor.createSet();
-            map.put(key, set);
+    public static <K, V, C extends Collection<V>> boolean addToValueSet(Map<K, C> map, K key, V value, ValueCollectionConstructor<V, C> setConstructor) {
+        C coll = map.get(key);
+        if (coll == null) {
+            coll = setConstructor.createValueCollection();
+            map.put(key, coll);
         }
-        set.add(value);
+        return coll.add(value);
     }
 
     /**
      * Removes {@code value} from all sets contained as values in {@code map}. If a set is emptied by this removal it is
      * removed from the map. No synchronization / concurrency control effort is made. This is the caller's obligation.
      */
-    public static <K, V> void removeFromAllValueSets(Map<K, Set<V>> map, V value) {
-        for (final Iterator<Entry<K, Set<V>>> i=map.entrySet().iterator(); i.hasNext(); ) {
-            final Entry<K, Set<V>> e = i.next();
+    public static <K, V, S extends Set<V>> void removeFromAllValueSets(Map<K, S> map, V value) {
+        for (final Iterator<Entry<K, S>> i=map.entrySet().iterator(); i.hasNext(); ) {
+            final Entry<K, S> e = i.next();
             e.getValue().remove(value);
             if (e.getValue().isEmpty()) {
                 i.remove();
@@ -501,14 +519,21 @@ public class Util {
      * Removes {@code value} from the set that is the value for {@code key} in {@code map} if that key exists. If the
      * set existed and is emptied by this removal it is removed from the map. No synchronization / concurrency control
      * effort is made. This is the caller's obligation.
+     * 
+     * @return {@code true} if the {@code value} was contained in the set for {@code key} and was removed successfully
      */
-    public static <K, V> void removeFromValueSet(Map<K, Set<V>> map, K key, V value) {
-        final Set<V> valuesPerKey = map.get(key);
+    public static <K, V, S extends Set<V>> boolean removeFromValueSet(Map<K, S> map, K key, V value) {
+        final S valuesPerKey = map.get(key);
+        final boolean removed;
         if (valuesPerKey != null) {
-            if (valuesPerKey.remove(value) && valuesPerKey.isEmpty()) {
+            removed = valuesPerKey.remove(value);
+            if (removed && valuesPerKey.isEmpty()) {
                 map.remove(key);
             }
+        } else {
+            removed = false;
         }
+        return removed;
     }
 
     public static String join(String separator, String... strings) {
@@ -771,10 +796,10 @@ public class Util {
      * @return a map containing all given values in inner collections grouped by a specific criteria
      */
     public static <K, V> Map<K, Iterable<V>> group(Iterable<V> values, Function<V, K> mappingFunction,
-            Provider<? extends Collection<V>> newCollectionProvider) {
+            Supplier<? extends Collection<V>> newCollectionProvider) {
         final Map<K, Iterable<V>> result = new HashMap<>();
         for (V value : values) {
-            final K key = mappingFunction.get(value);
+            final K key = mappingFunction.apply(value);
             Collection<V> groupValues = (Collection<V>) result.get(key);
             if (groupValues == null) {
                 groupValues = newCollectionProvider.get();
@@ -812,6 +837,12 @@ public class Util {
         return toStringOrNull.toString();
     }
     
+    public static boolean equalStringsWithEmptyIsNull(String o1, String o2) {
+        String effectiveO1 = o1 == null || o1.isEmpty() ? null : o1;
+        String effectiveO2 = o2 == null || o2.isEmpty() ? null : o2;
+        return equalsWithNull(effectiveO1, effectiveO2);
+    }
+    
     /**
      * Pads a numerical value with '0' characters up to a number of digits left and right of the decimal point. If the
      * number of digits right of the decimal point is zero, no decimal point will be rendered in the result. The sum of
@@ -819,7 +850,11 @@ public class Util {
      * the integer part of the {@code value}'s magnitude.
      * 
      * @param digitsLeftOfDecimal
-     *            a non-negative number; if zero,
+     *            a non-negative number; if zero, no "0" will be used left of the decimal point if the value is less than 1.
+     *            Padding occurs only if the number of digits requested is greater than the number of digits the value has
+     *            left of the decimal point. If the number of digits requested left of the decimal point is less than what
+     *            the number has, no cropping takes place and the result will have more digits left of the decimal point
+     *            than requested.
      * @param digitsRightOfDecimal
      *            a non-negative number; if zero, no decimal point will appear at all
      * @param round
@@ -857,5 +892,73 @@ public class Util {
         final List<T> returnValue = Util.asList(toFilter);
         returnValue.retainAll(Util.asList(toRetain));
         return returnValue;
+    }
+
+    /**
+     * This method will determine the latest entry in the given Iterable
+     * 
+     * @return The object with the latest time stamp in the input or {@code null} if the input was empty. If multiple
+     *         objects have equal time points and no other object has a later time point, the first object in the
+     *         iteration order with such an equal time stamp is returned.
+     */
+    public static <T extends Timed> T latest(Iterable<T> timedObjects) {
+        T latest = null;
+        for (T timedObject : timedObjects) {
+            if (latest == null || timedObject.getTimePoint().after(latest.getTimePoint())) {
+                latest = timedObject;
+            }
+        }
+        return latest;
+    }
+    
+    /**
+     * Sorts a set of arrays according to the sorting operations to be applied
+     * to the {@code keys} array to sort that in ascending order. Any element
+     * index change in {@code keys} also applies to all {@code values} arrays.
+     */
+    public static void sort(double[] keys, double[]... values) {
+        List<double[]> arrays = new ArrayList<>();
+        for (int i=0; i<keys.length; i++) {
+            double[] array = new double[values.length+1];
+            array[0] = keys[i];
+            for (int j=0; j<values.length; j++) {
+                array[j+1] = values[j][i];
+            }
+            arrays.add(array);
+        }
+        Collections.sort(arrays, (a1, a2)->Double.compare(a1[0], a2[0]));
+        int c=0;
+        for (final double[] array : arrays) {
+            keys[c] = array[0];
+            for (int i=1; i<array.length; i++) {
+                values[i-1][c] = array[i];
+            }
+            c++;
+        }
+    }
+
+    /**
+     * @return a non-parallel stream for the {@link Iterable} passed. Short for
+     * {@code StreamSupport.stream(iterable.spliterator(), false)}.
+     */
+    public static <T> Stream<T> stream(Iterable<T> iterable) {
+        return StreamSupport.stream(iterable.spliterator(), /* parallel */ false);
+    }
+    
+    /**
+     * Checks whether a given String is <code>null</code> or empty.
+     * 
+     * @param str
+     *            String to check
+     * @return <code>false</code> if empty or <code>null</code>, otherwise <code>true</code>.
+     */
+    public static boolean hasLength(String str) {
+        final boolean result;
+        if (str == null) {
+            result = false;
+        } else {
+            result = !str.isEmpty();
+        }
+        return result;
     }
 }

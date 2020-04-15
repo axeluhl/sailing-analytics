@@ -2,15 +2,6 @@ package com.sap.sailing.racecommittee.app.ui.fragments.dialogs;
 
 import java.util.ArrayList;
 
-import android.app.Dialog;
-import android.app.DialogFragment;
-import android.os.Bundle;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.impl.CourseListDataElementWithIdImpl;
@@ -18,6 +9,15 @@ import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseMarkAdap
 import com.sap.sailing.racecommittee.app.ui.utils.ESSMarkImageHelper;
 import com.sap.sailing.racecommittee.app.ui.views.decoration.ItemStrokeDecoration;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
+
+import android.app.Dialog;
+import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 public class CourseMarksDialogFragment extends DialogFragment {
 
@@ -33,7 +33,8 @@ public class CourseMarksDialogFragment extends DialogFragment {
     public CourseMarksDialogFragment() {
     }
 
-    public static CourseMarksDialogFragment newInstance(ArrayList<Mark> marks, CourseListDataElementWithIdImpl element, int type) {
+    public static CourseMarksDialogFragment newInstance(ArrayList<Mark> marks, CourseListDataElementWithIdImpl element,
+            int type) {
         Bundle args = new Bundle();
         args.putSerializable(MARKS, marks);
         args.putInt(TYPE, type);
@@ -66,8 +67,9 @@ public class CourseMarksDialogFragment extends DialogFragment {
                 mMarkGrid.setLayoutManager(layoutManager);
                 mMarkGrid.addItemDecoration(new ItemStrokeDecoration(padding, strokeWidth, color));
 
-                mMarkAdapter = new CourseMarkAdapter(getActivity(), mMarks, ESSMarkImageHelper.getInstance(getActivity()), getArguments()
-                    .getInt(TYPE), (CourseListDataElementWithIdImpl) getArguments().getSerializable(ELEMENT));
+                mMarkAdapter = new CourseMarkAdapter(getActivity(), mMarks,
+                        ESSMarkImageHelper.getInstance(getActivity()), getArguments().getInt(TYPE),
+                        (CourseListDataElementWithIdImpl) getArguments().getSerializable(ELEMENT));
                 mMarkAdapter.setListener(mListener);
                 mMarkGrid.setAdapter(mMarkAdapter);
             }

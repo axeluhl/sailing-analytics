@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.common.Placemark;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -21,22 +23,41 @@ import com.sap.sailing.domain.common.dto.TrackedRaceStatisticsDTO;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
+import com.sap.sailing.domain.tracking.impl.CourseDesignUpdateHandler;
+import com.sap.sailing.domain.tracking.impl.FinishTimeUpdateHandler;
+import com.sap.sailing.domain.tracking.impl.RaceAbortedHandler;
+import com.sap.sailing.domain.tracking.impl.StartTimeUpdateHandler;
 import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
+import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache.ResolveListener;
 
-public interface DomainFactory extends SharedDomainFactory {
+public interface DomainFactory extends SharedDomainFactory<RaceLogAndTrackedRaceResolver> {
+    static RaceLogAndTrackedRaceResolver TEST_RACE_LOG_RESOLVER = new RaceLogAndTrackedRaceResolver() {
+        @Override
+        public RaceLog resolve(SimpleRaceLogIdentifier identifier) {
+            return null;
+        }
+
+        @Override
+        public TrackedRace resolveTrackedRace(SimpleRaceLogIdentifier identifier) {
+            return null;
+        }
+    };
+    
     /**
      * A default domain factory for test purposes only. In a server environment, ensure NOT to use this. Use
      * the <code>RacingEventService.getBaseDomainFactory()</code> instead which should be the single instance used
      * by all other services linked to the <code>RacingEventService</code>.
      */
-    static DomainFactory INSTANCE = new DomainFactoryImpl((srlid)->null);
-
+    static DomainFactory INSTANCE = new DomainFactoryImpl(TEST_RACE_LOG_RESOLVER);
+    
     MarkPassing createMarkPassing(TimePoint timePoint, Waypoint waypoint, Competitor competitor);
 
     /**
@@ -56,7 +77,8 @@ public interface DomainFactory extends SharedDomainFactory {
      *          Thread.currentThread().setContextClassLoader(oldContextClassLoader);
      * </pre>
      */
-    ObjectInputStreamResolvingAgainstCache<DomainFactory> createObjectInputStreamResolvingAgainstThisFactory(InputStream inputStream) throws IOException;
+    ObjectInputStreamResolvingAgainstCache<DomainFactory> createObjectInputStreamResolvingAgainstThisFactory(
+            InputStream inputStream, ResolveListener resolver) throws IOException;
     
     ScoringScheme createScoringScheme(ScoringSchemeType scoringSchemeType);
 
@@ -101,4 +123,11 @@ public interface DomainFactory extends SharedDomainFactory {
      */
     void updateRaceDTOWithTrackedRaceData(TrackedRace trackedRace, RaceDTO raceDTO);
 
+    /**
+     * Adds update handlers to a {@link TrackedRace} which can send updates to a REST service about race status
+     * changes such as a start time change, a course change, or a postponement.
+     */
+    void addUpdateHandlers(DynamicTrackedRace trackedRace, CourseDesignUpdateHandler courseDesignHandler,
+            StartTimeUpdateHandler startTimeHandler, RaceAbortedHandler raceAbortedHandler,
+            final FinishTimeUpdateHandler finishTimeUpdateHandler);
 }

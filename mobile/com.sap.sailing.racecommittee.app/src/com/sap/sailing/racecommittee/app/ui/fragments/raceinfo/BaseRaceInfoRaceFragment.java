@@ -15,10 +15,10 @@ import com.sap.sailing.racecommittee.app.ui.fragments.panels.FlagPanelFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.panels.SetupPanelFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.panels.TimePanelFragment;
 
-import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
+import android.support.v4.app.FragmentTransaction;
 
 public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProcedure> extends RaceFragment {
 
@@ -80,7 +80,7 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
                 args.putAll(fragment.getArguments());
             }
             fragment.setArguments(args);
-            FragmentTransaction transaction = getActivity().getFragmentManager().beginTransaction();
+            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
             transaction.replace(id, fragment);
             transaction.commit();
         }
@@ -98,20 +98,20 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
             super.onStatusChanged(state);
 
             switch (state.getStatus()) {
-                case UNSCHEDULED:
-                case FINISHED:
-                    RacingActivity activity = (RacingActivity) getActivity();
-                    if (activity != null) {
-                        activity.onRaceItemClicked(getRace(), true);
-                    }
-                    break;
+            case UNSCHEDULED:
+            case FINISHED:
+                RacingActivity activity = (RacingActivity) getActivity();
+                if (activity != null) {
+                    activity.onRaceItemClicked(getRace(), true);
+                }
+                break;
 
-                case RUNNING:
-                    break;
+            case RUNNING:
+                break;
 
-                default:
-                    showMainContent();
-                    break;
+            default:
+                showMainContent();
+                break;
             }
         }
 
@@ -146,13 +146,13 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
             setupUi();
 
             switch (getRaceState().getStatus()) {
-                case SCHEDULED:
-                    showMainContent();
-                    break;
+            case SCHEDULED:
+                showMainContent();
+                break;
 
-                default:
-                    // nothing
-                    break;
+            default:
+                // nothing
+                break;
             }
         }
 

@@ -18,7 +18,7 @@ import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
 
 public class WebSocketServerListTest {
-    @Rule public Timeout AbstractTracTracLiveTestTimeout = new Timeout(2 * 60 * 1000);
+    @Rule public Timeout AbstractTracTracLiveTestTimeout = Timeout.millis(2 * 60 * 1000);
 
     @Test
     public void testWebSocketServerList() throws IllegalStateException, ClientProtocolException, IOException, ParseException, URISyntaxException {

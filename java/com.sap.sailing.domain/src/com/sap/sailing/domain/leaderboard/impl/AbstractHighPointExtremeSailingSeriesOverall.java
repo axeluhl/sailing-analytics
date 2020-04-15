@@ -3,6 +3,8 @@ package com.sap.sailing.domain.leaderboard.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -55,7 +57,7 @@ public abstract class AbstractHighPointExtremeSailingSeriesOverall extends HighP
      * Implements rule 13.5 of the Extreme Sailing Series notice of race as of August 2012.
      */
     @Override
-    public int compareByBetterScore(Competitor o1, List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o1Scores, Competitor o2, List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter, TimePoint timePoint, Leaderboard leaderboard) {
+    public int compareByBetterScore(Competitor o1, List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o1Scores, Competitor o2, List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter, TimePoint timePoint, Leaderboard leaderboard, Map<Competitor, Set<RaceColumn>> discardedRaceColumnsPerCompetitor) {
         int o1Wins = getWins(o1Scores);
         int o2Wins = getWins(o2Scores);
         int result = o2Wins - o1Wins;
@@ -72,7 +74,7 @@ public abstract class AbstractHighPointExtremeSailingSeriesOverall extends HighP
     private int getWins(List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> scores) {
         int wins = 0;
         for (com.sap.sse.common.Util.Pair<RaceColumn, Double> score : scores) {
-            if (Math.abs(score.getB() - maxPoints * score.getA().getFactor()) < 0.0000001) {
+            if (Math.abs(score.getB() - maxPoints * getScoreFactor(score.getA())) < 0.0000001) {
                 wins++;
             }
         }

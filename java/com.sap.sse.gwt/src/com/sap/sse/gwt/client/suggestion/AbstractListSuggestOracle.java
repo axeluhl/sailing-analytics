@@ -2,6 +2,7 @@ package com.sap.sse.gwt.client.suggestion;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import com.sap.sse.common.filter.AbstractListFilter;
@@ -18,8 +19,9 @@ public abstract class AbstractListSuggestOracle<C> extends AbstractSuggestOracle
 
     @Override
     protected final void getSuggestions(Request request, Callback callback, Iterable<String> queryTokens) {
-        Iterable<C> filteredList = suggestionMatchingFilter.applyFilter(getKeywordStrings(queryTokens), suggestionObjectList);
-        this.setSuggestions(request, callback, filteredList, queryTokens);
+        Iterable<String> keywords = getKeywordStrings(queryTokens);
+        Iterable<C> filteredList = suggestionMatchingFilter.applyFilter(keywords, suggestionObjectList);
+        this.setSuggestions(request, callback, filteredList, keywords);
     }
     
     protected Iterable<String> getKeywordStrings(Iterable<String> queryTokens) {
@@ -30,7 +32,11 @@ public abstract class AbstractListSuggestOracle<C> extends AbstractSuggestOracle
         return suggestionMatchingFilter;
     }
     
-    public void setSelectableValues(Collection<C> selectableValues) {
+    public Collection<C> getSelectableValues() {
+        return Collections.unmodifiableList(suggestionObjectList);
+    }
+    
+    public void setSelectableValues(Collection<? extends C> selectableValues) {
         suggestionObjectList.clear();
         suggestionObjectList.addAll(selectableValues);
     }

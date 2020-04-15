@@ -11,11 +11,12 @@ import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Mile;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -46,10 +47,8 @@ import com.sap.sse.common.impl.MillisecondsDurationImpl;
  * @author Axel Uhl (D043530)
  *
  */
-public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
+public class TimeOnTimeAndDistanceRankingMetric extends NonPerformanceCurveRankingMetric {
     private static final long serialVersionUID = -2321904208518686420L;
-
-    public final static RankingMetricConstructor CONSTRUCTOR = TimeOnTimeAndDistanceRankingMetric::new;
 
     private final TimeOnTimeFactorMapping timeOnTimeFactor;
 
@@ -78,6 +77,11 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
         this.timeOnDistanceFactorNauticalMile = timeOnDistanceFactorInSecondsPerNauticalMile;
     }
 
+    @Override
+    public RankingMetrics getType() {
+        return RankingMetrics.TIME_ON_TIME_AND_DISTANCE;
+    }
+
     /**
      * Ranks the competitors by their average corrected velocity made good, determined by the following formula:
      * 
@@ -91,7 +95,7 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
      * along-course distance of the {@link #getTrackedRace() race's} course.
      */
     @Override
-    public Comparator<Competitor> getRaceRankingComparator(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+    public Comparator<Competitor> getRaceRankingComparator(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final RankingMetric.RankingInfo rankingInfo = getRankingInfo(timePoint, cache);
         final Comparator<Duration> durationComparatorNullsLast = Comparator.nullsLast(Comparator.naturalOrder());
         return (c1, c2) -> {
@@ -105,14 +109,14 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
     }
 
     @Override
-    public Comparator<TrackedLegOfCompetitor> getLegRankingComparator(TrackedLeg trackedLeg, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+    public Comparator<TrackedLegOfCompetitor> getLegRankingComparator(TrackedLeg trackedLeg, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         // competitors that have not yet started the leg will get a duration based on Long.MAX_VALUE
         final Map<Competitor, Duration> correctedTimesToReachFastestBoatsPositionAtTimePointOrEndOfLegMeasuredFromStartOfRace = new HashMap<>();
         final Competitor fastestCompetitorInLeg = getCompetitorFarthestAheadInLeg(trackedLeg, timePoint, cache);
         final boolean fastestCompetitorHasStartedLeg;
         if (fastestCompetitorInLeg != null) {
             final TrackedLegOfCompetitor trackedLegOfFastestCompetitorInLeg = trackedLeg.getTrackedLeg(fastestCompetitorInLeg);
-            fastestCompetitorHasStartedLeg = trackedLegOfFastestCompetitorInLeg.hasStartedLeg(timePoint);
+            fastestCompetitorHasStartedLeg = isAssumedToHaveStartedLeg(timePoint, trackedLegOfFastestCompetitorInLeg);
             final Distance totalWindwardDistanceLegLeaderTraveledUpToTimePointOrLegEnd;
             final TimePoint startOfRace = getTrackedRace().getStartOfRace();
             final Position positionOfFastestBoatInLegAtTimePointOrLegEnd;
@@ -172,7 +176,7 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
     }
 
     @Override
-    public Duration getCorrectedTime(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+    public Duration getCorrectedTime(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final Duration timeActuallySpent = getActualTimeSinceStartOfRace(competitor, timePoint);
         final Distance windwardDistanceSailed = getWindwardDistanceTraveled(competitor, timePoint, cache);
         return getCalculatedTime(competitor, ()->getTrackedRace().getCurrentLeg(competitor, timePoint).getLeg(),
@@ -207,22 +211,26 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
      * that of <code>to</code>.
      */
     @Override
-    protected Duration getDurationToReachAtEqualPerformance(Competitor who, Competitor to, Waypoint fromWaypoint, TimePoint timePointOfTosPosition, WindLegTypeAndLegBearingCache cache) {
+    protected Duration getDurationToReachAtEqualPerformance(Competitor who, Competitor to, Waypoint fromWaypoint, TimePoint timePointOfTosPosition, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final MarkPassing whenToPassedFromWaypoint = getTrackedRace().getMarkPassing(to, fromWaypoint);
-        validateGetDurationToReachAtEqualPerformanceParameters(to, fromWaypoint, timePointOfTosPosition, whenToPassedFromWaypoint);
-        final Duration t_to = whenToPassedFromWaypoint.getTimePoint().until(timePointOfTosPosition);
-        final Distance d_to = getWindwardDistanceTraveled(to, fromWaypoint, timePointOfTosPosition, cache);
-        final double   f_to = getTimeOnTimeFactor(to);
-        final Duration timeOnDistanceFactorInSecondsPerNauticalMileTo = getTimeOnDistanceFactorInSecondsPerNauticalMile(to);
-        final double   g_to = timeOnDistanceFactorInSecondsPerNauticalMileTo==null?0:timeOnDistanceFactorInSecondsPerNauticalMileTo.asSeconds();
-        final Distance d_who = d_to;
-        final double   f_who = getTimeOnTimeFactor(who);
-        final Duration timeOnDistanceFactorInSecondsPerNauticalMileWho = getTimeOnDistanceFactorInSecondsPerNauticalMile(who);
-        final double   g_who = timeOnDistanceFactorInSecondsPerNauticalMileWho==null?0:timeOnDistanceFactorInSecondsPerNauticalMileWho.asSeconds();
-        
-        final Duration t_who = d_to == null ? null : new MillisecondsDurationImpl(Double.valueOf(
-                (1./(d_to.inTime(t_to.times(f_to)).getMetersPerSecond() / Mile.METERS_PER_NAUTICAL_MILE) - g_to + g_who)
-                              * d_who.getNauticalMiles() / f_who * 1000.).longValue());
+        final Duration t_who;
+        if (whenToPassedFromWaypoint == null) {
+            t_who = null;
+        } else {
+            validateGetDurationToReachAtEqualPerformanceParameters(to, fromWaypoint, timePointOfTosPosition, whenToPassedFromWaypoint);
+            final Duration t_to = whenToPassedFromWaypoint.getTimePoint().until(timePointOfTosPosition);
+            final Distance d_to = getWindwardDistanceTraveled(to, fromWaypoint, timePointOfTosPosition, cache);
+            final double   f_to = getTimeOnTimeFactor(to);
+            final Duration timeOnDistanceFactorInSecondsPerNauticalMileTo = getTimeOnDistanceFactorInSecondsPerNauticalMile(to);
+            final double   g_to = timeOnDistanceFactorInSecondsPerNauticalMileTo==null?0:timeOnDistanceFactorInSecondsPerNauticalMileTo.asSeconds();
+            final Distance d_who = d_to;
+            final double   f_who = getTimeOnTimeFactor(who);
+            final Duration timeOnDistanceFactorInSecondsPerNauticalMileWho = getTimeOnDistanceFactorInSecondsPerNauticalMile(who);
+            final double   g_who = timeOnDistanceFactorInSecondsPerNauticalMileWho==null?0:timeOnDistanceFactorInSecondsPerNauticalMileWho.asSeconds();
+            t_who = d_to == null ? null : new MillisecondsDurationImpl(Double.valueOf(
+                    (1./(d_to.inTime(t_to.times(f_to)).getMetersPerSecond() / Mile.METERS_PER_NAUTICAL_MILE) - g_to + g_who)
+                                  * d_who.getNauticalMiles() / f_who * 1000.).longValue());
+        }
         return t_who;
     }
 
@@ -264,7 +272,7 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
      * </pre>
      */
     @Override
-    public Duration getGapToLeaderInOwnTime(RankingMetric.RankingInfo rankingInfo, Competitor competitor, WindLegTypeAndLegBearingCache cache) {
+    public Duration getGapToLeaderInOwnTime(RankingMetric.RankingInfo rankingInfo, Competitor competitor, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final Duration result;
         // actual times and common distance:
         final Competitor leaderByCorrectedEstimatedTimeToCompetitorFarthestAhead = rankingInfo.getLeaderByCorrectedEstimatedTimeToCompetitorFarthestAhead();
@@ -337,7 +345,9 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
 
     @Override
     public Duration getLegGapToLegLeaderInOwnTime(TrackedLegOfCompetitor trackedLegOfCompetitor, TimePoint timePoint,
-            RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache) {
+            RankingInfo rankingInfo, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        assert rankingInfo instanceof NonPerformanceCurveRankingInfo;
+        final NonPerformanceCurveRankingInfo npcRankingInfo = (NonPerformanceCurveRankingInfo) rankingInfo;
         final Duration result;
         final Leg leg = trackedLegOfCompetitor.getLeg();
         if (getTrackedRace().getStartOfRace() == null || !trackedLegOfCompetitor.hasStartedLeg(timePoint)) {
@@ -355,10 +365,10 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
                 // leg may well be the race leader. However, if a competitor has finished the leg already, use the finishing time
                 // point for that competitor.
                 // leader in the leg is now the competitor with the least corrected time to reach the competitor farthest ahead in the leg
-                final Competitor legLeader = rankingInfo.getLeaderInLegByCalculatedTime(trackedLegOfCompetitor.getTrackedLeg().getLeg(), cache);
+                final Competitor legLeader = npcRankingInfo.getLeaderInLegByCalculatedTime(trackedLegOfCompetitor.getTrackedLeg().getLeg(), cache);
                 result = getGapToCompetitorInOwnTime(trackedLegOfCompetitor.getCompetitor(), legLeader,
-                        rankingInfo.getActualTimeFromRaceStartToReachFarthestAheadInLeg(trackedLegOfCompetitor.getCompetitor(), leg, cache),
-                        rankingInfo.getActualTimeFromRaceStartToReachFarthestAheadInLeg(legLeader, leg, cache),
+                        npcRankingInfo.getActualTimeFromRaceStartToReachFarthestAheadInLeg(trackedLegOfCompetitor.getCompetitor(), leg, cache),
+                        npcRankingInfo.getActualTimeFromRaceStartToReachFarthestAheadInLeg(legLeader, leg, cache),
                         windwardDistanceFarthestTraveledUntilFinishingLeg);
             }
         }

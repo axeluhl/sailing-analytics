@@ -7,6 +7,7 @@ import java.net.UnknownHostException;
 import java.util.Iterator;
 import java.util.UUID;
 
+import org.junit.Assert;
 import org.junit.Before;
 
 import com.mongodb.MongoException;
@@ -40,8 +41,6 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.AbstractColor;
 import com.sap.sse.common.impl.DegreeBearingImpl;
-
-import junit.framework.Assert;
 
 public abstract class RaceLogMongoDBTest extends AbstractMongoDBTest {
 
@@ -104,7 +103,8 @@ public abstract class RaceLogMongoDBTest extends AbstractMongoDBTest {
         course.addWaypoint(0,
                 new WaypointImpl(new ControlPointWithTwoMarksImpl(UUID.randomUUID(), new MarkImpl(UUID.randomUUID(),
                         "Black", MarkType.BUOY, AbstractColor.getCssColor("black"), "round", "circle"), new MarkImpl(UUID.randomUUID(), "Green",
-                        MarkType.BUOY, AbstractColor.getCssColor("green"), "round", "circle"), "Upper gate")));
+                                MarkType.BUOY, AbstractColor.getCssColor("green"), "round", "circle"),
+                        "Upper gate", "Upper gate")));
         course.addWaypoint(1, new WaypointImpl(new MarkImpl(UUID.randomUUID(), "White", MarkType.BUOY, AbstractColor.getCssColor("white"),
                 "conical", "bold"), PassingInstruction.Port));
 

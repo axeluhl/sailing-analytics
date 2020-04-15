@@ -73,15 +73,7 @@ public abstract class GenericStringListEditorComposite<ValueType> extends ListEd
 
         @Override
         protected String getCollapsedValueText(Iterable<ValueType> value) {
-            StringBuilder valuesText = new StringBuilder();
-            for (int i = 0; i < Util.size(value); i++) {
-                if (i > 0) {
-                    valuesText.append(',');
-                }
-                valuesText.append(Util.get(value, i));
-            }
-            String condensedValue = valuesText.toString();
-            return condensedValue;
+            return String.join(",", Util.map(value, v->v.toString()));
         }
     }
 
@@ -89,10 +81,13 @@ public abstract class GenericStringListEditorComposite<ValueType> extends ListEd
         protected final MultiWordSuggestOracle inputOracle;
         protected final String placeholderTextForAddTextbox;
         protected final Integer inputBoxSize;
+        private Button addButton;
+        private SuggestBox suggestBox;
+
         public ExpandedUi(StringMessages stringMessages, ImageResource removeImage, Iterable<String> suggestValues) {
             this(stringMessages, removeImage, suggestValues, /* placeholderTextForAddTextbox */ null);
         }
-        
+
         /**
          * @param suggestValues must not be null but may be empty
          * @param placeholderTextForAddTextbox may be null
@@ -102,6 +97,15 @@ public abstract class GenericStringListEditorComposite<ValueType> extends ListEd
             this(stringMessages, removeImage, suggestValues, placeholderTextForAddTextbox, /* inputBoxSize */ null);
             
         }
+
+        public void setEnabled(boolean enabled) {
+            // #5059 only disabled mode, enabling of button will be handled by internal logic of this component
+            if (!enabled) { 
+                this.addButton.setEnabled(false);
+            }
+            this.suggestBox.setEnabled(enabled);
+        }
+
         /**
          * @param inputBoxSize The size of the input box in EM Unit.
          */
@@ -132,11 +136,11 @@ public abstract class GenericStringListEditorComposite<ValueType> extends ListEd
         }
 
         protected SuggestBox createSuggestBox() {
-            final SuggestBox result = new SuggestBox(inputOracle);
+            suggestBox = new SuggestBox(inputOracle);
             if (placeholderTextForAddTextbox != null) {
-                result.getElement().setAttribute("placeholder", placeholderTextForAddTextbox);
+                suggestBox.getElement().setAttribute("placeholder", placeholderTextForAddTextbox);
             }
-            return result;
+            return suggestBox;
         }
 
         @Override
@@ -146,7 +150,7 @@ public abstract class GenericStringListEditorComposite<ValueType> extends ListEd
             if (inputBoxSize != null) {
                 inputBox.setWidth(Integer.toString(inputBoxSize) + Unit.EM);
             }
-            final Button addButton = new Button(getStringMessages().add());
+            addButton = new Button(getStringMessages().add());
             addButton.ensureDebugId("AddButton");
             addButton.setEnabled(false);
             addButton.addClickHandler(new ClickHandler() {

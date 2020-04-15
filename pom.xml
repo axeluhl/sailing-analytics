@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-    xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    xsi:schemaLocation="https://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"
+    xmlns="https://maven.apache.org/POM/4.0.0" xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.sap.sailing</groupId>
@@ -50,7 +50,7 @@
             <module>install-android-sdk</module>
         </modules>
         <properties>
-            <!-- By default, the Android API *.jar is hosted in MAven repositories under "android:android".
+            <!-- By default, the Android API *.jar is hosted in Maven repositories under "android:android".
                  On Lean DI, the deviant coordinates "com.google.download.android:android".
                  To make this work without the need of a duplicate definition of the dependencies by profile,
                  the groupId of this artifact is defined by a property so that we can easily change it for Lean DI. -->
@@ -91,9 +91,9 @@
           <repository>
               <id>equinox-sdk-3.9</id>
               <layout>p2</layout>
-              <url>http://download.eclipse.org/releases/luna/</url>
+              <url>https://download.eclipse.org/releases/luna/</url>
           </repository>
-  <!--        
+  <!--
           <repository>
               <id>sap-nexus</id>
               <url>http://nexus.wdf.sap.corp:8081/nexus/content/groups/build.snapshots</url>
@@ -106,12 +106,12 @@
   
           <repository>
               <id>central</id>
-              <url>http://repo1.maven.org/maven2</url>
+              <url>https://repo1.maven.org/maven2</url>
           </repository>
    
           <repository>
               <id>uni-luebeck</id>
-              <url>http://www.itm.uni-luebeck.de/projects/maven/releases</url>
+              <url>https://www.itm.uni-luebeck.de/projects/maven/releases</url>
           </repository>
         </repositories>
       </profile>

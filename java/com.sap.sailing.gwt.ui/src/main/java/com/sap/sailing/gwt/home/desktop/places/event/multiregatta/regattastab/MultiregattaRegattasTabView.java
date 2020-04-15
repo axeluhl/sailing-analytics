@@ -8,7 +8,6 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
-import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.communication.event.GetLiveRacesForEventAction;
 import com.sap.sailing.gwt.home.communication.event.GetRegattaListViewAction;
 import com.sap.sailing.gwt.home.communication.regatta.RegattaWithProgressDTO;
@@ -52,11 +51,6 @@ public class MultiregattaRegattasTabView extends Composite implements Multiregat
         this.currentPresenter = currentPresenter;
     }
     
-    @Override
-    public TabView.State getState() {
-        return TabView.State.VISIBLE;
-    }
-
     @Override
     public void start(final MultiregattaRegattasPlace myPlace, final AcceptsOneWidget contentArea) {
         liveRacesListUi = new LiveRacesList(currentPresenter, true);

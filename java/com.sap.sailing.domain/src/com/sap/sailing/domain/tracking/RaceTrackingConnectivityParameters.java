@@ -1,10 +1,12 @@
 package com.sap.sailing.domain.tracking;
 
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import java.io.Serializable;
+
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 
 /**
  * Different tracking providers require different sets of arguments to start tracking a race.
@@ -20,7 +22,7 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
  * @author Axel Uhl (d043530)
  *
  */
-public interface RaceTrackingConnectivityParameters {
+public interface RaceTrackingConnectivityParameters extends Serializable {
     /**
      * Starts a {@link RaceTracker} using the connectivity parameters provided by this object. As no specific
      * {@link Regatta} is provided, this will first look up a regatta for the race from
@@ -40,7 +42,8 @@ public interface RaceTrackingConnectivityParameters {
      *            tracker.
      */
     RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore,
-            RaceLogResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, long timeoutInMilliseconds) throws Exception;
+            RaceLogAndTrackedRaceResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, long timeoutInMilliseconds,
+            RaceTrackingHandler raceTrackingHandler) throws Exception;
     
     /**
      * Starts a {@link RaceTracker}, associating the resulting races with the {@link Regatta} passed as argument instead
@@ -54,7 +57,8 @@ public interface RaceTrackingConnectivityParameters {
      * {@link TrackedRegattaRegistry#removeRace(Regatta, com.sap.sailing.domain.base.RaceDefinition)}.
      */
     RaceTracker createRaceTracker(Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore,
-            RaceLogResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, long timeoutInMilliseconds) throws Exception;
+            RaceLogAndTrackedRaceResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, long timeoutInMilliseconds,
+            RaceTrackingHandler raceTrackingHandler) throws Exception;
     
     /**
      * Deliver an ID object equal to that of the {@link RaceTracker#getID()} delivered by the {@link RaceTracker}

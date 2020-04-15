@@ -48,16 +48,6 @@ public class MultiCompetitorRaceChartLifecycle implements ComponentLifecycle<Mul
         return true;
     }
 
-    @Override
-    public MultiCompetitorRaceChartSettings extractUserSettings(MultiCompetitorRaceChartSettings settings) {
-        return settings;
-    }
-
-    @Override
-    public MultiCompetitorRaceChartSettings extractDocumentSettings(MultiCompetitorRaceChartSettings settings) {
-        return settings;
-    }
-
     public Iterable<DetailType> getAllowedDetailTypes() {
         return allowedDetailTypes;
     }

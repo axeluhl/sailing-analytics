@@ -13,10 +13,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import org.bson.Document;
+import org.json.simple.parser.ParseException;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.mongodb.DBObject;
 import com.mongodb.MongoException;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
@@ -47,6 +48,7 @@ import com.sap.sailing.domain.persistence.impl.FieldNames;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockSmartphoneImeiServiceFinderFactory;
+import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -93,7 +95,7 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
         RaceLogFlagEvent expectedEvent = new RaceLogFlagEventImpl(MillisecondsTimePoint.now(), expectedEventTime, null,
                 expectedId, expectedPassId, Flags.NONE, Flags.NONE, true);
 
-        DBObject dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
+        Document dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
         RaceLogFlagEvent actualEvent = loadEvent(dbObject);
 
         assertNull(expectedEvent.getAuthor());
@@ -111,7 +113,7 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
         RaceLogFlagEvent expectedEvent = new RaceLogFlagEventImpl(MillisecondsTimePoint.now(), expectedEventTime,
                 author, expectedId, expectedPassId, upperFlag, lowerFlag, isDisplayed);
 
-        DBObject dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
+        Document dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
         RaceLogFlagEvent actualEvent = loadEvent(dbObject);
 
         assertBaseFields(expectedEvent, actualEvent);
@@ -125,7 +127,7 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
         RaceLogPassChangeEvent expectedEvent = new RaceLogPassChangeEventImpl(MillisecondsTimePoint.now(),
                 expectedEventTime, author, expectedId, expectedPassId);
 
-        DBObject dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
+        Document dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
         RaceLogPassChangeEvent actualEvent = loadEvent(dbObject);
 
         assertBaseFields(expectedEvent, actualEvent);
@@ -137,7 +139,7 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
         RaceLogRaceStatusEvent expectedEvent = new RaceLogRaceStatusEventImpl(MillisecondsTimePoint.now(),
                 expectedEventTime, author, expectedId, expectedPassId, status);
 
-        DBObject dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
+        Document dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
         RaceLogRaceStatusEvent actualEvent = loadEvent(dbObject);
 
         assertBaseFields(expectedEvent, actualEvent);
@@ -150,7 +152,7 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
         RaceLogStartTimeEvent expectedEvent = new RaceLogStartTimeEventImpl(MillisecondsTimePoint.now(),
                 expectedEventTime, author, expectedId, expectedPassId, startTime, RaceLogRaceStatus.SCHEDULED);
 
-        DBObject dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
+        Document dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
         RaceLogStartTimeEvent actualEvent = loadEvent(dbObject);
 
         assertBaseFields(expectedEvent, actualEvent);
@@ -166,7 +168,7 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
                 expectedEventTime, expectedEventTime, author, expectedId, expectedPassId,
                 raceName, boatClass, raceId);
 
-        DBObject dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
+        Document dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
         RaceLogDenoteForTrackingEvent actualEvent = loadEvent(dbObject);
 
         assertBaseFields(expectedEvent, actualEvent);
@@ -184,7 +186,7 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
         RaceLogRevokeEvent expectedEvent = new RaceLogRevokeEventImpl(expectedEventTime, expectedEventTime, author,
                 expectedId, expectedPassId, revokedEventId, revokedEventType, revokedEventShortInfo, reason);
 
-        DBObject dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
+        Document dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
         RaceLogRevokeEvent actualEvent = loadEvent(dbObject);
 
         assertBaseFields(expectedEvent, actualEvent);
@@ -199,10 +201,10 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
         RaceLogRegisterCompetitorEvent expectedEvent = new RaceLogRegisterCompetitorEventImpl(expectedEventTime,
                 expectedEventTime, author, expectedId, expectedPassId, DomainFactory.INSTANCE.getOrCreateCompetitor(
                         "comp", "comp", "c", null, null, null, null,
-                        /* timeOnTimeFactor */null, /* timeOnDistanceAllowancePerNauticalMile */null, null),
-                DomainFactory.INSTANCE.getOrCreateBoat("boat", "b", boatClass, null, null));
+                        /* timeOnTimeFactor */null, /* timeOnDistanceAllowancePerNauticalMile */null, null, /* storePersistently */ true),
+                DomainFactory.INSTANCE.getOrCreateBoat("boat", "b", boatClass, null, null, /* storePersistently */ true));
 
-        DBObject dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
+        Document dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
         RaceLogRegisterCompetitorEvent actualEvent = loadEvent(dbObject);
 
         assertBaseFields(expectedEvent, actualEvent);
@@ -213,13 +215,18 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
      * Will always wait a couple of milliseconds to ensure that {@link RaceLogEvent#getCreatedAt()} has passed.
      */
     @SuppressWarnings("unchecked")
-    private <T extends RaceLogEvent> T loadEvent(DBObject dbObject) {
+    private <T extends RaceLogEvent> T loadEvent(Document dbObject) {
         try {
             Thread.sleep(2);
         } catch (InterruptedException ie) {
             fail(ie.toString());
         }
-        RaceLogEvent dbEvent = domainFactory.loadRaceLogEvent((DBObject) dbObject.get(FieldNames.RACE_LOG_EVENT.name())).getA();
+        RaceLogEvent dbEvent;
+        try {
+            dbEvent = domainFactory.loadRaceLogEvent((Document) dbObject.get(FieldNames.RACE_LOG_EVENT.name())).getA();
+        } catch (JsonDeserializationException | ParseException e) {
+            throw new RuntimeException(e);
+        }
         T actualEvent = (T) dbEvent;
         return actualEvent;
     }

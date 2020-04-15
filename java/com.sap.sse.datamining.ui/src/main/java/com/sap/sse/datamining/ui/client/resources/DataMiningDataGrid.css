@@ -9,6 +9,12 @@
 
 .dataGridHoveredRow {
     cursor: default;
+    background: #d5e2ff;
+}
+
+.dataGridSelectedRow {
+	background: #628cd5;
+	color: white;
 }
 
 .dataGridSubHeader {
@@ -20,6 +26,8 @@
 .dataGridSubHeaderLabel {
 	position: relative;
 	left: -20px;
+	font-weight: 600;
+	text-shadow: none;
 }
 
 .dataGridSpacedSubHeader {

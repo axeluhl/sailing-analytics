@@ -9,6 +9,7 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -26,7 +27,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
  * 
  * @author Axel Uhl (d043530)
  */
-public class WindSourcesToExcludeSelectorPanel extends VerticalPanel {
+public class WindSourcesToExcludeSelectorPanel extends VerticalPanel implements HasEnabled {
     private final LinkedHashMap<WindSource, CheckBox> checkboxesByWindSource;
     private final StringMessages stringMessages;
     private final SailingServiceAsync service;
@@ -94,6 +95,16 @@ public class WindSourcesToExcludeSelectorPanel extends VerticalPanel {
             }
         }
         return result;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return checkboxesByWindSource.values().stream().allMatch(CheckBox::isEnabled);
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        checkboxesByWindSource.values().forEach(checkBox -> checkBox.setEnabled(enabled));
     }
 
 }

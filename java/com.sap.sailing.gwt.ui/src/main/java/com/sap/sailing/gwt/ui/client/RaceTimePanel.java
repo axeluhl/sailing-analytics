@@ -6,14 +6,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.sap.sailing.domain.common.RaceTimesCalculationUtil;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.security.Permission;
-import com.sap.sailing.domain.common.security.SailingPermissionsForRoleProvider;
+import com.sap.sailing.domain.common.security.SecuredDomainType.TrackedRaceActions;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.MarkPassingTimesDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
+import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsAndBoatsDTO;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
@@ -21,9 +23,9 @@ import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
+import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 /**
  * A specific {@link TimePanel} that shows and manages a time slider for a race. Receives {@link RaceTimesInfoDTO}
@@ -56,12 +58,14 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
      * timer to be set to a reasonable value.
      */
     private final Set<RaceTimesInfoProviderListener> listeners;
-    
+
+    private final RaceWithCompetitorsAndBoatsDTO raceDTO;
+
     private final UserStatusEventHandler userStatusEventHandler = new UserStatusEventHandler() {
         @Override
         public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
-            RaceTimePanel.this.hasCanReplayDuringLiveRacesPermission = user != null && user.hasPermission(
-                    Permission.CAN_REPLAY_DURING_LIVE_RACES.getStringPermission(), SailingPermissionsForRoleProvider.INSTANCE);
+            RaceTimePanel.this.hasCanReplayDuringLiveRacesPermission = userService.hasPermission(raceDTO,
+                    TrackedRaceActions.CAN_REPLAY_DURING_LIVE_RACES);
         }
     };
 
@@ -78,9 +82,11 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
             UserService userService,
             Timer timer, TimeRangeWithZoomProvider timeRangeProvider, StringMessages stringMessages,
             RaceTimesInfoProvider raceTimesInfoProvider, boolean canReplayWhileLiveIsPossible, boolean forcePaddingRightToAlignToCharts,
-            RegattaAndRaceIdentifier selectedRaceIdentifier, Duration initialTimeAfterRaceStartInReplayMode) {
+            RegattaAndRaceIdentifier selectedRaceIdentifier, Duration initialTimeAfterRaceStartInReplayMode,
+            final RaceWithCompetitorsAndBoatsDTO raceDTO) {
         super(parent, context, timer, timeRangeProvider, stringMessages, canReplayWhileLiveIsPossible,
-                forcePaddingRightToAlignToCharts, userService);
+                forcePaddingRightToAlignToCharts, userService, raceDTO);
+        this.raceDTO = raceDTO;
         this.componentLifecycle = componentLifecycle;
         this.userService = userService;
         this.raceTimesInfoProvider = raceTimesInfoProvider;
@@ -229,43 +235,34 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
      */
     @Override
     protected boolean isLiveModeToBeMadePossible() {
-        long liveTimePointInMillis = timer.getLiveTimePointInMillis();
-        RaceTimesInfoDTO lastRaceTimesInfo = raceTimesInfoProvider != null ? raceTimesInfoProvider.getRaceTimesInfo(selectedRace) : null;
-        final boolean isLiveModeToBeMadePossible;
-        if (lastRaceTimesInfo != null &&
-                // check that we're after startOfTracking or startOfRace minus some leeway:
-                ((lastRaceTimesInfo.startOfTracking != null && liveTimePointInMillis > lastRaceTimesInfo.startOfTracking.getTime()) ||
-                 (lastRaceTimesInfo.startOfRace != null && liveTimePointInMillis > lastRaceTimesInfo.startOfRace.getTime() - RaceTimesCalculationUtil.MIN_TIME_BEFORE_RACE_START))) {
-            // now check that we cannot know about an end time or are reasonably before it;
-            // we don't know about the end time if startOfTracking is valid but endOfTracking is not;
-            // neither do we know about the end time if both, startOfTracking and endOfTracking are null
-            // and we have neither a valid newestTrackingEvent nor an endOfRace value; if we do, we would
-            // have to be before the later one plus some leeway.
-            Date endTimeOfLivePeriod;
-            if (lastRaceTimesInfo.startOfTracking == null && lastRaceTimesInfo.endOfTracking == null) {
-                Date latestOfNewestTrackingEventAndEndOfRace = lastRaceTimesInfo.newestTrackingEvent;
-                if (latestOfNewestTrackingEventAndEndOfRace == null || (lastRaceTimesInfo.endOfRace != null && lastRaceTimesInfo.endOfRace.after(latestOfNewestTrackingEventAndEndOfRace))) {
-                    latestOfNewestTrackingEventAndEndOfRace = lastRaceTimesInfo.endOfRace;
-                }
-                endTimeOfLivePeriod = latestOfNewestTrackingEventAndEndOfRace == null ? null :
-                    new Date(latestOfNewestTrackingEventAndEndOfRace.getTime() + RaceTimesCalculationUtil.TIME_AFTER_LIVE);
-            } else {
-                endTimeOfLivePeriod = lastRaceTimesInfo.endOfTracking == null ? null : lastRaceTimesInfo.endOfTracking;
-                if (lastRaceTimesInfo.endOfRace != null) {
-                    // this is a failsafe, if the tracking was never finsihed, the race was always assumed to be live.
-                    Date latestAllowedTime = new Date(
-                            lastRaceTimesInfo.endOfRace.getTime() + RaceTimesCalculationUtil.MAX_TIME_AFTER_RACE_END);
-                    if (endTimeOfLivePeriod == null || endTimeOfLivePeriod.after(latestAllowedTime)) {
-                        endTimeOfLivePeriod = latestAllowedTime;
-                    }
-                }
-            }
-            isLiveModeToBeMadePossible = endTimeOfLivePeriod == null /* meaning we don't know an end time */ ||
-                                         endTimeOfLivePeriod.getTime() >= liveTimePointInMillis;
-        } else {
-            isLiveModeToBeMadePossible = false;
+        RaceTimesInfoDTO lastRaceTimesInfo = raceTimesInfoProvider != null
+                ? raceTimesInfoProvider.getRaceTimesInfo(selectedRace)
+                : null;
+        if (lastRaceTimesInfo == null) return false;
+
+        Date timePoint = timer.getLiveTimePointAsDate();
+        Pair<Date, Date> minMax = RaceTimesCalculationUtil.calculateRaceMinMax(timer.getLiveTimePointAsDate(),
+                lastRaceTimesInfo.startOfTracking, lastRaceTimesInfo.startOfRace, lastRaceTimesInfo.raceFinishingTime,
+                lastRaceTimesInfo.raceFinishedTime, lastRaceTimesInfo.endOfRace, lastRaceTimesInfo.endOfTracking);
+        Date min = minMax.getA();
+        Date max = minMax.getB();
+
+        // Bug 3482: try to determine a value for max if max is null
+        if (max == null && lastRaceTimesInfo.newestTrackingEvent != null) {
+            max = new Date(lastRaceTimesInfo.newestTrackingEvent.getTime() + RaceTimesCalculationUtil.TIME_AFTER_LIVE);
         }
-        return isLiveModeToBeMadePossible;
+
+        // Assume we are live (no end known as of now)
+        boolean beforeEnd = true;
+        if (max != null) {
+            beforeEnd = !timePoint.after(max);
+        }
+
+        if (min != null) {
+            // min < timePoint < max; max might be unknown as of now
+            return !timePoint.before(min) && beforeEnd;
+        }
+        return beforeEnd;
     }
     
     @Override
@@ -287,7 +284,9 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
      * was <code>null</code> before, or extended to a later point in time.
      */
     private void updateMinMax(RaceTimesInfoDTO newRaceTimesInfo) {
-        Util.Pair<Date, Date> raceMinMax = RaceTimesCalculationUtil.calculateRaceMinMax(timer, newRaceTimesInfo);
+        Util.Pair<Date, Date> raceMinMax = RaceTimesCalculationUtil.calculateRaceMinMax(timer.getLiveTimePointAsDate(),
+                newRaceTimesInfo.startOfTracking, newRaceTimesInfo.startOfRace, newRaceTimesInfo.raceFinishingTime,
+                newRaceTimesInfo.raceFinishedTime, newRaceTimesInfo.endOfRace, newRaceTimesInfo.endOfTracking);
         
         Date min = raceMinMax.getA();
         Date max = raceMinMax.getB();
@@ -402,6 +401,10 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         }
         if (newRaceTimesInfo.endOfRace != null) {
             long markerTime = newRaceTimesInfo.endOfRace.getTime();
+            // If there is a "blue flag down" event after endOfRace use it instead to show the E marker
+            if (newRaceTimesInfo.getFinishedTime() != null) {
+                markerTime = newRaceTimesInfo.getFinishedTime().getTime();
+            }
             if (!timeSlider.isZoomed() || (timeSlider.isZoomed() && markerTime > timeSlider.getMinValue() && markerTime < timeSlider.getMaxValue())) {
                 timeSlider.addMarker("E", new Double(markerTime));
             }

@@ -151,9 +151,11 @@ load_from_release_file ()
         wget http://releases.sapsailing.com/$INSTALL_FROM_RELEASE/$INSTALL_FROM_RELEASE.tar.gz
         mv env.sh env.sh.preserved
 	mv configuration/mail.properties configuration/mail.properties.preserved
+	mv configuration/debug.properties configuration/debug.properties.preserved
         tar xvzf $INSTALL_FROM_RELEASE.tar.gz
         mv env.sh.preserved env.sh
 	mv configuration/mail.properties.preserved configuration/mail.properties
+	mv configuration/debug.properties.preserved configuration/debug.properties
         echo "Configuration for this server is unchanged - just binaries have been changed."
     else
         echo "The variable INSTALL_FROM_RELEASE has not been set therefore no release file will be installed!"
@@ -168,9 +170,11 @@ load_from_local_release_file ()
         echo "Loading from release file $INSTALL_FROM_RELEASE"
         mv env.sh env.sh.preserved
 	mv configuration/mail.properties configuration/mail.properties.preserved
+	mv configuration/debug.properties configuration/debug.properties.preserved
         tar xvzf $INSTALL_FROM_RELEASE
         mv env.sh.preserved env.sh
 	mv configuration/mail.properties.preserved configuration/mail.properties
+	mv configuration/debug.properties.preserved configuration/debug.properties
         echo "Configuration for this server is unchanged - just binaries have been changed."
     else
         echo "The variable INSTALL_FROM_RELEASE has not been set therefore no release file will be installed!"
@@ -284,8 +288,8 @@ if [[ $OPERATION == "auto-install" ]]; then
 elif [[ $OPERATION == "install-release" ]]; then
     INSTALL_FROM_RELEASE=$PARAM
     if [[ $INSTALL_FROM_RELEASE == "" ]]; then
-        echo "You need to provide the name of a release from http://releases.sapsailing.com/"
-        exit 1
+	INSTALL_FROM_RELEASE=$(wget -O - http://releases.sapsailing.com/ 2>/dev/null | grep build- | tail -1 | sed -e 's/^.*\(build-[0-9]*\).*$/\1/')
+        echo "You didn't provide a release. Picking latest master build from http://releases.sapsailing.com/$INSTALL_FROM_RELEASE"
     fi
 
     # Honor the no-overrite setting if there is one

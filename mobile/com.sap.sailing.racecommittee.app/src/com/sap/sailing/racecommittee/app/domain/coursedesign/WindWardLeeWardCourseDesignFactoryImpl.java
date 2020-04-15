@@ -29,8 +29,8 @@ public class WindWardLeeWardCourseDesignFactoryImpl extends AbstractCourseDesign
                 numberOfRounds, targetTime);
         this.finalizeCourseDesign(startBoatPosition, windSpeed, windDirection, boatClass, courseLayout, numberOfRounds,
                 targetTime);
-        setCourseDesignDescription(startBoatPosition, windSpeed, windDirection, boatClass, courseLayout,
-                numberOfRounds, targetTime);
+        setCourseDesignDescription(startBoatPosition, windSpeed, windDirection, boatClass, courseLayout, numberOfRounds,
+                targetTime);
         return this.product;
     }
 
@@ -41,16 +41,19 @@ public class WindWardLeeWardCourseDesignFactoryImpl extends AbstractCourseDesign
         Set<PositionedMark> result = new HashSet<PositionedMark>();
 
         // gate calculation
-        result.add(new PositionedMarkImpl("4S", GeoUtils.getPositionForGivenPointDistanceAndBearing(this.product
-                .getReferencePoint(), boatClass.getHullLength().scale(GATE_LENGTH_TO_HULL_LENGTH_FACTOR / 2),
-                windDirection.add(new DegreeBearingImpl(GATE_4S_WIND_ANGLE)))));
-        result.add(new PositionedMarkImpl("4P", GeoUtils.getPositionForGivenPointDistanceAndBearing(this.product
-                .getReferencePoint(), boatClass.getHullLength().scale(GATE_LENGTH_TO_HULL_LENGTH_FACTOR / 2),
-                windDirection.add(new DegreeBearingImpl(GATE_4P_WIND_ANGLE)))));
+        result.add(new PositionedMarkImpl("4S",
+                GeoUtils.getPositionForGivenPointDistanceAndBearing(this.product.getReferencePoint(),
+                        boatClass.getHullLength().scale(GATE_LENGTH_TO_HULL_LENGTH_FACTOR / 2),
+                        windDirection.add(new DegreeBearingImpl(GATE_4S_WIND_ANGLE)))));
+        result.add(new PositionedMarkImpl("4P",
+                GeoUtils.getPositionForGivenPointDistanceAndBearing(this.product.getReferencePoint(),
+                        boatClass.getHullLength().scale(GATE_LENGTH_TO_HULL_LENGTH_FACTOR / 2),
+                        windDirection.add(new DegreeBearingImpl(GATE_4P_WIND_ANGLE)))));
 
         // luv buoy calculation
         Map<PointOfSail, Float> speedTable = null;
-        for (Entry<WindRange, Map<PointOfSail, Float>> windRangeToSpeedTable : boatClass.getBoatSpeedTable().entrySet()) {
+        for (Entry<WindRange, Map<PointOfSail, Float>> windRangeToSpeedTable : boatClass.getBoatSpeedTable()
+                .entrySet()) {
             if (windRangeToSpeedTable.getKey().isInRange(windSpeed)) {
                 speedTable = windRangeToSpeedTable.getValue();
                 break;
@@ -62,13 +65,13 @@ public class WindWardLeeWardCourseDesignFactoryImpl extends AbstractCourseDesign
         }
         double legLength;
         if (((WindWardLeeWardCourseLayouts) courseLayout).isUpWindFinish()) {
-            legLength = (targetTime.getTimeInMinutes() / (speedTable.get(PointOfSail.Downwind)
-                    * (numberOfRounds.getNumberOfRounds() - 1) + (speedTable.get(PointOfSail.Upwind)
-                    * numberOfRounds.getNumberOfRounds())));
+            legLength = (targetTime.getTimeInMinutes()
+                    / (speedTable.get(PointOfSail.Downwind) * (numberOfRounds.getNumberOfRounds() - 1)
+                            + (speedTable.get(PointOfSail.Upwind) * numberOfRounds.getNumberOfRounds())));
         } else {
-            legLength = (targetTime.getTimeInMinutes() / (speedTable.get(PointOfSail.Downwind)
-                    * (numberOfRounds.getNumberOfRounds()) + (speedTable.get(PointOfSail.Upwind)
-                    * numberOfRounds.getNumberOfRounds())));
+            legLength = (targetTime.getTimeInMinutes()
+                    / (speedTable.get(PointOfSail.Downwind) * (numberOfRounds.getNumberOfRounds())
+                            + (speedTable.get(PointOfSail.Upwind) * numberOfRounds.getNumberOfRounds())));
         }
         legDistance = new NauticalMileDistance(legLength);
         Position luvBuoyPosition = GeoUtils.getPositionForGivenPointDistanceAndBearing(this.product.getReferencePoint(),
@@ -84,7 +87,7 @@ public class WindWardLeeWardCourseDesignFactoryImpl extends AbstractCourseDesign
     @Override
     protected void setCourseDesignDescription(Position startBoatPosition, Double windSpeed, Bearing windDirection,
             BoatClassType boatClass, CourseLayouts courseLayout, NumberOfRounds numberOfRounds, TargetTime targetTime) {
-        StringBuffer courseDesignDescription = new StringBuffer();
+        StringBuilder courseDesignDescription = new StringBuilder();
         courseDesignDescription.append(boatClass.toString());
         courseDesignDescription.append(", course: ");
         courseDesignDescription.append(courseLayout.getShortName());

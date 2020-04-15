@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.home.desktop.partials.multiregattalist;
 
-import static com.sap.sailing.domain.common.LeaderboardNameConstants.DEFAULT_SERIES_NAME;
-
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -42,17 +40,17 @@ public class MultiRegattaListStepsBody extends UIObject implements RequiresResiz
     private final String seriesName, seriesNameMedium, seriesNameShort;
     private int seriesNameLength, seriesNameMediumLength;
 
-    public MultiRegattaListStepsBody(RegattaProgressSeriesDTO seriesProgress) {
+    MultiRegattaListStepsBody(RegattaProgressSeriesDTO seriesProgress, boolean showName) {
         setElement(uiBinder.createAndBindUi(this));
         textContainerUi.getStyle().setVisibility(Visibility.HIDDEN);
-        longNameDummyUi.setInnerText(seriesName = caculateSeriesName(seriesProgress));
+        longNameDummyUi.setInnerText(seriesName = caculateSeriesName(seriesProgress, showName));
         mediumNameDummyUi.setInnerText(seriesNameMedium = caculateSeriesNameMedium());
         seriesNameShort = caculateSeriesNameShort();
         if (seriesProgress.isCompleted()) {
-            progressUi.setInnerText(String.valueOf(seriesProgress.getTotalRaceCount()));
+            progressUi.setInnerText(I18N.racesCount(seriesProgress.getTotalRaceCount()));
         } else {
             checkUi.getStyle().setDisplay(Display.NONE);
-            progressUi.setInnerText(I18N.currentOfTotal(
+            progressUi.setInnerText(I18N.currentOfTotalRaces(
                     seriesProgress.getProgressRaceCount(), seriesProgress.getTotalRaceCount()));
         }
         addFleetProgresses(seriesProgress.getFleetState(), seriesProgress.getMaxRacesPerFleet());
@@ -93,9 +91,9 @@ public class MultiRegattaListStepsBody extends UIObject implements RequiresResiz
         }
     }
     
-    private String caculateSeriesName(RegattaProgressSeriesDTO seriesProgress) {
-        if (seriesProgress.getName() == null || seriesProgress.getName().isEmpty()
-                || DEFAULT_SERIES_NAME.equals(seriesProgress.getName())) {
+    private String caculateSeriesName(RegattaProgressSeriesDTO seriesProgress, boolean showName) {
+        if (!showName || seriesProgress.getName() == null || seriesProgress.getName().isEmpty()) {
+            nameUi.getStyle().setDisplay(Display.NONE);
             return I18N.races();
         } else {
             return seriesProgress.getName();

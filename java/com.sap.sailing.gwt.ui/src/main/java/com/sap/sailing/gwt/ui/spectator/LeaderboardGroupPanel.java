@@ -229,7 +229,7 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
                 leaderboardNameCell) {
             @Override
             public SafeHtml getValue(StrippedLeaderboardDTO strippedLeaderboardDTO) {
-                String text = strippedLeaderboardDTO.displayName != null ? strippedLeaderboardDTO.displayName : strippedLeaderboardDTO.name; 
+                String text = strippedLeaderboardDTO.displayName != null ? strippedLeaderboardDTO.displayName : strippedLeaderboardDTO.getName(); 
                 SafeHtmlBuilder b = new SafeHtmlBuilder();
                 b.append(TEXTTEMPLATE.textWithClass(text, STYLE_BOATCLASS));
                 return b.toSafeHtml();
@@ -242,7 +242,7 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
             @Override
             public SafeHtml getValue(StrippedLeaderboardDTO leaderboard) {
                 final String link = EntryPointWithSettingsLinkFactory.createLeaderboardLink(
-                        new LeaderboardContextDefinition(leaderboard.name, leaderboard.displayName,
+                        new LeaderboardContextDefinition(leaderboard.getName(), leaderboard.displayName,
                                 leaderboardGroup.getName()),
                         new LeaderboardPerspectiveOwnSettings(showRaceDetails, isEmbedded));
                 return getAnchor(link, stringMessages.leaderboard(),
@@ -334,7 +334,7 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
                                     STYLE_TABLE_TEXT));
                             fleetGridsFormatter.setVerticalAlignment(fleetRow, 1, HasVerticalAlignment.ALIGN_MIDDLE);
                             List<RaceColumnDTO> raceColumnsOfSeries = getRacesOfFleet(leaderboard, series, fleet);
-                            fleetsGrid.setHTML(fleetRow, 2, renderRacesToHTml(leaderboard.name, raceColumnsOfSeries, fleet));
+                            fleetsGrid.setHTML(fleetRow, 2, renderRacesToHTml(leaderboard.getName(), raceColumnsOfSeries, fleet));
                             fleetRow++;
                         }                        
                         seriesGrid.setWidget(seriesRow, 1, fleetsGrid);
@@ -349,10 +349,10 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
                             fleetsGrid.setHTML(0, 0, TEXTTEMPLATE.textWithClass(displayName, 50,
                                     STYLE_TABLE_TEXT));
                             fleetGridsFormatter.setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_MIDDLE);
-                            fleetsGrid.setHTML(0, 1, renderRacesToHTml(leaderboard.name, raceColumnsOfSeries, fleet));
+                            fleetsGrid.setHTML(0, 1, renderRacesToHTml(leaderboard.getName(), raceColumnsOfSeries, fleet));
                             seriesGrid.setWidget(seriesRow, 1, fleetsGrid);
                         } else {
-                            seriesGrid.setHTML(seriesRow, 1, renderRacesToHTml(leaderboard.name, raceColumnsOfSeries, fleet));
+                            seriesGrid.setHTML(seriesRow, 1, renderRacesToHTml(leaderboard.getName(), raceColumnsOfSeries, fleet));
                         }
                     }
                     seriesRow++;
@@ -361,7 +361,7 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
             }
         } else {
             List<RaceColumnDTO> raceColumns = leaderboard.getRaceList();
-            b.append(renderRacesToHTml(leaderboard.name, raceColumns, new FleetDTO(LeaderboardNameConstants.DEFAULT_FLEET_NAME, 0, null)));
+            b.append(renderRacesToHTml(leaderboard.getName(), raceColumns, new FleetDTO(LeaderboardNameConstants.DEFAULT_FLEET_NAME, 0, null)));
         }
         return b.toSafeHtml();
     }

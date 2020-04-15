@@ -37,7 +37,7 @@ extends Track<EventT>, WithID {
     boolean add(EventT event);
 
     /**
-     * Add a {@link VisitorT} as a listener for additions.
+     * Add a {@link VisitorT} as a listener for additions. Listeners won't be serialized together with this log.
      */
     void addListener(VisitorT listener);
 
@@ -61,7 +61,7 @@ extends Track<EventT>, WithID {
 
     Iterable<EventT> getFixesDescending();
 
-    void addAllListeners(HashSet<VisitorT> listeners);
+    void addAllListeners(Iterable<VisitorT> listeners);
 
     Iterable<VisitorT> getAllListeners();
 
