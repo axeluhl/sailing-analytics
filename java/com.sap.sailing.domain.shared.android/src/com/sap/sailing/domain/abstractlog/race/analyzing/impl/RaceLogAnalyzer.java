@@ -6,6 +6,9 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public abstract class RaceLogAnalyzer<ResultType> extends BaseLogAnalyzer
         <RaceLog, RaceLogEvent, RaceLogEventVisitor, ResultType> {
 
@@ -22,10 +25,14 @@ public abstract class RaceLogAnalyzer<ResultType> extends BaseLogAnalyzer
     }
 
     protected Iterable<RaceLogEvent> getPassUnrevokedEvents() {
-        return new AbstractLogImpl.FilteredPartialNavigableSetView<>(log.getUnrevokedEvents(), new RaceLog.PassValidator(log.getCurrentPassId()));
+        final List<AbstractLogImpl.NavigableSetViewValidator<RaceLogEvent>> validators = new ArrayList<>();
+        validators.add(new RaceLog.PassValidator(log.getCurrentPassId()));
+        return new AbstractLogImpl.FilteredPartialNavigableSetView<>(log.getUnrevokedEvents(), validators);
     }
 
     protected Iterable<RaceLogEvent> getPassUnrevokedEventsDescending() {
-        return new AbstractLogImpl.FilteredPartialNavigableSetView<>(log.getUnrevokedEventsDescending(), new RaceLog.PassValidator(log.getCurrentPassId()));
+        final List<AbstractLogImpl.NavigableSetViewValidator<RaceLogEvent>> validators = new ArrayList<>();
+        validators.add(new RaceLog.PassValidator(log.getCurrentPassId()));
+        return new AbstractLogImpl.FilteredPartialNavigableSetView<>(log.getUnrevokedEventsDescending(), validators);
     }
 }

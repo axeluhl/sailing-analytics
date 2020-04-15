@@ -3,7 +3,7 @@ package com.sap.sailing.domain.abstractlog.impl;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -41,9 +41,10 @@ import com.sap.sse.util.impl.ArrayListNavigableSet;
  * {@link RaceLogEventComparator} for sorting when interface methods like
  * {@link Track#getFirstFixAfter(com.sap.sailing.domain.common.TimePoint)} are used.
  * </p>
+ *
  */
 public abstract class AbstractLogImpl<EventT extends AbstractLogEvent<VisitorT>, VisitorT>
-        extends TrackImpl<EventT> implements AbstractLog<EventT, VisitorT> {
+extends TrackImpl<EventT> implements AbstractLog<EventT, VisitorT> {
     private static final long serialVersionUID = -176745401321893502L;
     private static final String DefaultLockName = AbstractLogImpl.class.getName() + ".lock";
     private final static Logger logger = Logger.getLogger(AbstractLogImpl.class.getName());
@@ -69,7 +70,8 @@ public abstract class AbstractLogImpl<EventT extends AbstractLogEvent<VisitorT>,
     /**
      * Initializes a new {@link RaceLogImpl}.
      *
-     * @param nameForReadWriteLock name of lock.
+     * @param nameForReadWriteLock
+     *            name of lock.
      */
     public AbstractLogImpl(String nameForReadWriteLock, Serializable identifier, Comparator<Timed> comparator) {
         super(new ArrayListNavigableSet<Timed>(comparator), nameForReadWriteLock);
@@ -147,9 +149,9 @@ public abstract class AbstractLogImpl<EventT extends AbstractLogEvent<VisitorT>,
             // it can happen that the event that has been revoked is not yet loaded - as we assume
             // that race log events never get removed we can safely continue and assume that
             // the event will be loaded later
-            logger.warning("RevokeEvent for " + revokeEvent.getShortInfo() + " added, that refers to non-existent event to be revoked. Could also happen that the revoke event is before the event to be revoked.");
+            logger.warning("RevokeEvent for "+revokeEvent.getShortInfo()+" added, that refers to non-existent event to be revoked. Could also happen that the revoke event is before the event to be revoked.");
         } else {
-            if (!(revokedEvent instanceof Revokable)) {
+            if (! (revokedEvent instanceof Revokable)) {
                 throw new NotRevokableException("RevokeEvent trying to revoke non-revokable event");
             }
 
@@ -253,7 +255,7 @@ public abstract class AbstractLogImpl<EventT extends AbstractLogEvent<VisitorT>,
             try {
                 for (EventT event : getRawFixes()) {
                     if (event instanceof RevokeEvent) {
-                        revokedEventIds.add(((RevokeEvent<?>) event).getRevokedEventId());
+                        revokedEventIds.add(((RevokeEvent<?>)event).getRevokedEventId());
                     }
                 }
             } finally {
@@ -314,12 +316,16 @@ public abstract class AbstractLogImpl<EventT extends AbstractLogEvent<VisitorT>,
 
     @Override
     public NavigableSet<EventT> getUnrevokedEvents() {
-        return new FilteredPartialNavigableSetView<EventT>(super.getInternalFixes(), new RevokedValidator(revokedEventIds));
+        final List<NavigableSetViewValidator<EventT>> validators = new ArrayList<>();
+        validators.add(new RevokedValidator<>(revokedEventIds));
+        return new FilteredPartialNavigableSetView<>(super.getInternalFixes(), validators);
     }
 
     @Override
     public NavigableSet<EventT> getUnrevokedEventsDescending() {
-        return new FilteredPartialNavigableSetView<EventT>(super.getInternalFixes().descendingSet(), new RevokedValidator(revokedEventIds));
+        final List<NavigableSetViewValidator<EventT>> validators = new ArrayList<>();
+        validators.add(new RevokedValidator<>(revokedEventIds));
+        return new FilteredPartialNavigableSetView<EventT>(super.getInternalFixes().descendingSet(), validators);
     }
 
     @Override
@@ -406,11 +412,6 @@ public abstract class AbstractLogImpl<EventT extends AbstractLogEvent<VisitorT>,
         public FilteredPartialNavigableSetView(NavigableSet<T> set, final List<NavigableSetViewValidator<T>> validators) {
             super(set);
             this.validators = validators;
-        }
-
-        public FilteredPartialNavigableSetView(NavigableSet<T> set, final NavigableSetViewValidator<T>... validators) {
-            super(set);
-            this.validators = Arrays.asList(validators);
         }
 
         @Override
