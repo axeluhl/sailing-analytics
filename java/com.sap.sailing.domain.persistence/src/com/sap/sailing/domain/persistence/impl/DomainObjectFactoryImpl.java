@@ -1292,6 +1292,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                     .get(FieldNames.REGATTA_USE_START_TIME_INFERENCE.name());
             final Boolean controlTrackingFromStartAndFinishTimes = (Boolean) dbRegatta
                     .get(FieldNames.REGATTA_CONTROL_TRACKING_FROM_START_AND_FINISH_TIMES.name());
+            final Boolean autoRestartTrackingUponCompetitorSetChange = (Boolean) dbRegatta
+                    .get(FieldNames.REGATTA_AUTO_RESTART_TRACKING_UPON_COMPETITOR_SET_CHANGE.name());
             Boolean canBoatsOfCompetitorsChangePerRace = (Boolean) dbRegatta
                     .get(FieldNames.REGATTA_CAN_BOATS_OF_COMPETITORS_CHANGE_PER_RACE.name());
             // for backward compatibility
@@ -1313,7 +1315,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                                 : buoyZoneRadiusInHullLengths,
                         useStartTimeInference == null ? true : useStartTimeInference,
                         controlTrackingFromStartAndFinishTimes == null ? false : controlTrackingFromStartAndFinishTimes,
-                        rankingMetricConstructor, new MongoObjectFactoryImpl(database), registrationLinkSecret);
+                        autoRestartTrackingUponCompetitorSetChange, rankingMetricConstructor, new MongoObjectFactoryImpl(database), registrationLinkSecret);
             } else {
                 result = new RegattaImpl(getRaceLogStore(), getRegattaLogStore(), name, boatClass,
                         canBoatsOfCompetitorsChangePerRace, competitorRegistrationType, startDate, endDate, series, /* persistent */true,
@@ -1322,7 +1324,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                                 : buoyZoneRadiusInHullLengths,
                         useStartTimeInference == null ? true : useStartTimeInference,
                         controlTrackingFromStartAndFinishTimes == null ? false : controlTrackingFromStartAndFinishTimes,
-                        rankingMetricConstructor, registrationLinkSecret);
+                        autoRestartTrackingUponCompetitorSetChange, rankingMetricConstructor, registrationLinkSecret);
             }
             result.setRegattaConfiguration(configuration);
         }

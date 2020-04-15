@@ -306,7 +306,6 @@ public class RegattasResource extends AbstractSailingServerResource {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
             getSecurityService().checkCurrentUserUpdatePermission(regatta);
-
             final JSONObject requestObject;
             try {
                 Object requestBody = JSONValue.parseWithException(jsonBody);
@@ -316,41 +315,35 @@ public class RegattasResource extends AbstractSailingServerResource {
                 return Response.status(Status.BAD_REQUEST).entity("Invalid JSON body in request")
                         .type(MediaType.TEXT_PLAIN).build();
             }
-
             final Number startTimePointAsMillis = (Number) requestObject.get("startTimePointAsMillis");
             final TimePoint startTimePoint = startTimePointAsMillis == null ? null
                     : new MillisecondsTimePoint(startTimePointAsMillis.longValue());
             final Number endTimePointAsMillis = (Number) requestObject.get("endTimePointAsMillis");
             final TimePoint endTimePoint = endTimePointAsMillis == null ? null
                     : new MillisecondsTimePoint(endTimePointAsMillis.longValue());
-
             final String defaultCourseAreaUuidString = (String) requestObject.get("defaultCourseAreaUuid");
             final UUID defaultCourseAreaUuid = defaultCourseAreaUuidString == null ? null
                     : UUID.fromString(defaultCourseAreaUuidString);
-
             final Number buoyZoneRadiusInHullLengthsNumber = (Number) requestObject.get("buoyZoneRadiusInHullLengths");
             final Double buoyZoneRadiusInHullLengths = buoyZoneRadiusInHullLengthsNumber == null ? null
                     : buoyZoneRadiusInHullLengthsNumber.doubleValue();
             final boolean useStartTimeInference = Boolean.TRUE.equals(requestObject.get("useStartTimeInference"));
             final boolean controlTrackingFromStartAndFinishTimes = Boolean.TRUE
                     .equals(requestObject.get("controlTrackingFromStartAndFinishTimes"));
-
+            final boolean autoRestartTrackingUponCompetitorSetChange = Boolean.TRUE.equals(requestObject.get("autoRestartTrackingUponCompetitorSetChange"));
             String registrationLinkSecret = (String) requestObject.get("registrationLinkSecret");
             if (registrationLinkSecret == null) {
                 registrationLinkSecret = regatta.getRegistrationLinkSecret();
             }
-
             final String competitorRegistrationTypeString = (String) requestObject.get("competitorRegistrationType");
             final CompetitorRegistrationType competitorRegistrationType = competitorRegistrationTypeString == null
                     ? regatta.getCompetitorRegistrationType()
                     : CompetitorRegistrationType.valueOf(competitorRegistrationTypeString);
-
             getService().apply(new UpdateSpecificRegatta(new RegattaName(regattaName), startTimePoint, endTimePoint,
                     defaultCourseAreaUuid,
                     /* TODO updating the configuration is currently not supported */ regatta.getRegattaConfiguration(),
                     buoyZoneRadiusInHullLengths, useStartTimeInference, controlTrackingFromStartAndFinishTimes,
-                    registrationLinkSecret, competitorRegistrationType));
-
+                    autoRestartTrackingUponCompetitorSetChange, registrationLinkSecret, competitorRegistrationType));
             SeriesJsonSerializer seriesJsonSerializer = new SeriesJsonSerializer(
                     new FleetJsonSerializer(new ColorJsonSerializer()));
             JsonSerializer<Regatta> regattaSerializer = new RegattaJsonSerializer(seriesJsonSerializer, null, null,

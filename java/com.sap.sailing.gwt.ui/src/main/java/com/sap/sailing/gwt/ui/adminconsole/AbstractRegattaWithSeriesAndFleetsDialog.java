@@ -62,6 +62,7 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
     protected final ListBox sailingEventsListBox;
     protected final CheckBox useStartTimeInferenceCheckBox;
     protected final CheckBox controlTrackingFromStartAndFinishTimesCheckBox;
+    protected final CheckBox autoRestartTrackingUponCompetitorSetChangeCheckBox;
     protected final DoubleBox buoyZoneRadiusInHullLengthsDoubleBox;
     protected final ListEditorComposite<SeriesDTO> seriesEditor;
     private final ListBox rankingMetricListBox;
@@ -110,22 +111,20 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         controlTrackingFromStartAndFinishTimesCheckBox = createCheckbox(stringMessages.controlTrackingFromStartAndFinishTimes());
         controlTrackingFromStartAndFinishTimesCheckBox.ensureDebugId("ControlTrackingFromStartAndFinishTimesCheckBox");
         controlTrackingFromStartAndFinishTimesCheckBox.setValue(regatta.controlTrackingFromStartAndFinishTimes);
-
+        autoRestartTrackingUponCompetitorSetChangeCheckBox = createCheckbox(stringMessages.autoRestartTrackingUponCompetitorSetChange());
+        autoRestartTrackingUponCompetitorSetChangeCheckBox.ensureDebugId("AutoRestartTrackingUponCompetitorSetChangeCheckBox");
+        autoRestartTrackingUponCompetitorSetChangeCheckBox.setValue(regatta.autoRestartTrackingUponCompetitorSetChange);
         buoyZoneRadiusInHullLengthsDoubleBox = createDoubleBox(regatta.buoyZoneRadiusInHullLengths, 10);
         buoyZoneRadiusInHullLengthsDoubleBox.ensureDebugId("BuoyZoneRadiusInHullLengthsDoubleBox");
-
         courseAreaListBox = createListBox(false);
         courseAreaListBox.ensureDebugId("CourseAreaListBox");
         courseAreaListBox.setEnabled(false);
         this.seriesEditor = createSeriesEditor(series);
         setupEventAndCourseAreaListBoxes(stringMessages);
-
         competitorRegistrationTypeListBox = createListBox(false);
         competitorRegistrationTypeListBox.ensureDebugId("CompetitorRegistrationTypeListBox");
         EnumSet.allOf(CompetitorRegistrationType.class).forEach(t->competitorRegistrationTypeListBox.addItem(t.getLabel(stringMessages), t.name()));
         competitorRegistrationTypeListBox.setSelectedIndex(regatta.competitorRegistrationType.ordinal());
-
-
         // Registration Link
         registrationLinkWithQRCode = new RegistrationLinkWithQRCode();
         if (regatta.registrationLinkSecret == null) {
@@ -135,7 +134,6 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         } else {
             registrationLinkWithQRCode.setSecret(regatta.registrationLinkSecret);
         }
-
         // secret panel
         final TextBox secretTextBox = createTextBox(regatta.registrationLinkSecret, 30);
         secretPanel = new CaptionPanel(stringMessages.registrationLinkSecret());
@@ -146,23 +144,18 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
             final TextBox secretTextBox) {
         final VerticalPanel secretPanelContent = new VerticalPanel();
         secretPanel.add(secretPanelContent);
-
         // explain Label with description of secret
         final Label secretExplainLabel = new Label(stringMessages.registrationLinkSecretExplain());
         secretPanelContent.add(secretExplainLabel);
         secretExplainLabel.setWordWrap(true);
-
         // Label
         Label secretLabel = new Label(stringMessages.registrationLinkSecret() + ":");
-
         // Textbox
         secretTextBox.ensureDebugId("SecretTextBox");
         secretTextBox.addChangeHandler(e -> validateSecret(stringMessages, secretTextBox));
-
         // Generate-Button
         final Button generateSecretButton = new Button(stringMessages.registrationLinkSecretGenerate(),
                 new ClickHandler() {
-
                     @Override
                     public void onClick(ClickEvent event) {
                         final String randomString = RandomString.createRandomSecret(20);
@@ -172,13 +165,11 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
                     }
                 });
         generateSecretButton.ensureDebugId("GenerateSecretButton");
-
         // add all to grid
         final Grid secretPanelFormGrid = new Grid(1, 3);
         secretPanelFormGrid.setWidget(0, 0, secretLabel);
         secretPanelFormGrid.setWidget(0, 1, secretTextBox);
         secretPanelFormGrid.setWidget(0, 2, generateSecretButton);
-
         secretPanelContent.add(secretPanelFormGrid);
     }
 
@@ -235,7 +226,7 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         if (additionalWidget != null) {
             panel.add(additionalWidget);
         }
-        Grid formGrid = new Grid(11, 2);
+        Grid formGrid = new Grid(12, 2);
         panel.add(formGrid);
 
         formGrid.setWidget(0, 0, new Label(stringMessages.timeZone() + ":"));
@@ -254,10 +245,12 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         formGrid.setWidget(6, 1, useStartTimeInferenceCheckBox);
         formGrid.setWidget(7, 0, new Label(stringMessages.controlTrackingFromStartAndFinishTimes() + ":"));
         formGrid.setWidget(7, 1, controlTrackingFromStartAndFinishTimesCheckBox);
-        formGrid.setWidget(8, 0, new Label(stringMessages.buoyZoneRadiusInHullLengths() + ":"));
-        formGrid.setWidget(8, 1, buoyZoneRadiusInHullLengthsDoubleBox);
-        formGrid.setWidget(9, 0, new Label(stringMessages.competitorRegistrationType() + ":"));
-        formGrid.setWidget(9, 1, competitorRegistrationTypeListBox);
+        formGrid.setWidget(8, 0, new Label(stringMessages.autoRestartTrackingUponCompetitorSetChange() + ":"));
+        formGrid.setWidget(8, 1, autoRestartTrackingUponCompetitorSetChangeCheckBox);
+        formGrid.setWidget(9, 0, new Label(stringMessages.buoyZoneRadiusInHullLengths() + ":"));
+        formGrid.setWidget(9, 1, buoyZoneRadiusInHullLengthsDoubleBox);
+        formGrid.setWidget(10, 0, new Label(stringMessages.competitorRegistrationType() + ":"));
+        formGrid.setWidget(10, 1, competitorRegistrationTypeListBox);
 
         panel.add(secretPanel);
         setupAdditionalWidgetsOnPanel(panel, formGrid);
@@ -384,6 +377,7 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         result.scoringScheme = getSelectedScoringSchemeType();
         result.useStartTimeInference = useStartTimeInferenceCheckBox.getValue();
         result.controlTrackingFromStartAndFinishTimes = controlTrackingFromStartAndFinishTimesCheckBox.getValue();
+        result.autoRestartTrackingUponCompetitorSetChange = autoRestartTrackingUponCompetitorSetChangeCheckBox.getValue();
         result.buoyZoneRadiusInHullLengths = buoyZoneRadiusInHullLengthsDoubleBox.getValue();
         setCourseAreaInRegatta(result);
         result.series = getSeriesEditor().getValue();

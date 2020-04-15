@@ -103,7 +103,7 @@ public class CreateAndTrackWithRaceLogTest extends RaceLogTrackingTestHelper {
                 /* registrationLinkSecret */ null, /* startDate */null, /* endDate */null, UUID.randomUUID(),
                 Collections.<Series> singletonList(series), /* persistent */ true, new HighPoint(), UUID.randomUUID(),
                 /* buoyZoneRadiusInHullLengths */2.0, /* useStartTimeInference */true,
-                /* controlTrackingFromStartAndFinishTimes */ false, OneDesignRankingMetric::new);
+                /* controlTrackingFromStartAndFinishTimes */ false, /* autoRestartTrackingUponCompetitorSetChange */ false, OneDesignRankingMetric::new);
         series.addRaceColumn(columnName, /* trackedRegattaRegistry */null);
         leaderboard = service.addRegattaLeaderboard(regatta.getRegattaIdentifier(), "RegattaLeaderboard", new int[] {});
         adapter = RaceLogTrackingAdapterFactory.INSTANCE.getAdapter(DomainFactory.INSTANCE);
