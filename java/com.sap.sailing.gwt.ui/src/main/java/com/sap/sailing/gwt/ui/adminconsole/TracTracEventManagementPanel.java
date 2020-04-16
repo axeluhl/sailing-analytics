@@ -175,9 +175,8 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         listRacesButton.setEnabled(false);
         buttonPanel.addUnsecuredWidget(loadingMessageLabel);
         connectionsTable.getSelectionModel().addSelectionChangeHandler(e -> {
-            final boolean objectSelected = connectionsTable.getSelectionModel().getSelectedObject() != null;
+            final boolean objectSelected = connectionsTable.getSelectionModel().getSelectedSet().size() == 1;
             listRacesButton.setEnabled(objectSelected);
-            removeButton.setEnabled(objectSelected);
         });
 
         tableAndConfigurationPanel.add(buttonPanel);
@@ -353,7 +352,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         final Button startTrackingButton = new Button(stringMessages.startTracking());
         startTrackingButton.setEnabled(false);
         connectionsTable.getSelectionModel().addSelectionChangeHandler(
-                e -> startTrackingButton.setEnabled(connectionsTable.getSelectionModel().getSelectedObject() != null));
+                e -> startTrackingButton.setEnabled(connectionsTable.getSelectionModel().getSelectedSet().size() == 1));
         startTrackingButton.ensureDebugId("StartTrackingButton");
         startTrackingButton.addClickHandler(new ClickHandler() {
             @Override
@@ -449,10 +448,11 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     }
 
     private void fillRaces(final SailingServiceAsync sailingService, boolean listHiddenRaces) {
-        final TracTracConfigurationWithSecurityDTO selectedConnection = connectionsTable.getSelectionModel()
-                .getSelectedObject();
-        if (selectedConnection != null) {
+        final Set<TracTracConfigurationWithSecurityDTO> selectedConnections = connectionsTable.getSelectionModel()
+                .getSelectedSet();
+        if (selectedConnections.size() == 1) {
 
+            TracTracConfigurationWithSecurityDTO selectedConnection = selectedConnections.iterator().next();
             sailingService.listTracTracRacesInEvent(selectedConnection.getJsonUrl(), listHiddenRaces,
                     new MarkedAsyncCallback<com.sap.sse.common.Util.Pair<String, List<TracTracRaceRecordDTO>>>(
                             new AsyncCallback<com.sap.sse.common.Util.Pair<String, List<TracTracRaceRecordDTO>>>() {
@@ -504,7 +504,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
             final Duration offsetToStartTimeOfSimulatedRace, boolean ignoreTracTracMarkPassings,
             boolean useOfficialResultsToUpdateRaceLogs) {
         final TracTracConfigurationWithSecurityDTO selectedConnection = connectionsTable.getSelectionModel()
-                .getSelectedObject();
+                .getSelectedSet().iterator().next();
         String liveURI = selectedConnection.getLiveDataURI();
         String storedURI = selectedConnection.getStoredDataURI();
         String courseDesignUpdateURI = selectedConnection.getCourseDesignUpdateURI();
