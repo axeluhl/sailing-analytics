@@ -13,7 +13,6 @@ import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 public class RemoteServerInstancesManagementTableWrapper extends
         TableWrapper<RemoteSailingServerReferenceDTO, RefreshableMultiSelectionModel<RemoteSailingServerReferenceDTO>, StringMessages, CellTableWithCheckboxResources> {
-
     public RemoteServerInstancesManagementTableWrapper(StringMessages stringMessages, ErrorReporter errorReporter,
             ListDataProvider<RemoteSailingServerReferenceDTO> dataProvider) {
         super(stringMessages, errorReporter, true, true,
@@ -39,5 +38,4 @@ public class RemoteServerInstancesManagementTableWrapper extends
     public void setEmptyTableWidget(Widget widget) {
         getTable().setEmptyTableWidget(widget);
     }
-
 }
