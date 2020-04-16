@@ -189,9 +189,10 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
             boolean useOfficialEventsToUpdateRaceLog, String tracTracUsername,
             String tracTracPassword, AsyncCallback<Void> callback);
 
-    void trackWithSwissTiming(RegattaIdentifier regattaToAddTo, Iterable<SwissTimingRaceRecordDTO> rrs,
-            String hostname, int port, boolean trackWind, boolean correctWindByDeclination,
-            boolean useInternalMarkPassingAlgorithm, String updateURL, String updateUsername, String updatePassword, AsyncCallback<Void> asyncCallback);
+    void trackWithSwissTiming(RegattaIdentifier regattaToAddTo, Iterable<SwissTimingRaceRecordDTO> rrs, String hostname,
+            int port, boolean trackWind, boolean correctWindByDeclination, boolean useInternalMarkPassingAlgorithm,
+            String updateURL, String updateUsername, String updatePassword, String eventName,
+            String manage2SailEventUrl, AsyncCallback<Void> asyncCallback);
 
     void replaySwissTimingRace(RegattaIdentifier regattaIdentifier, Iterable<SwissTimingReplayRaceDTO> replayRaces,
             boolean trackWind, boolean correctWindByDeclination, boolean useInternalMarkPassingAlgorithm,

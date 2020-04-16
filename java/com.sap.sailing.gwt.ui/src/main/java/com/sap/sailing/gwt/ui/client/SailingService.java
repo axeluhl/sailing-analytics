@@ -190,7 +190,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     void trackWithSwissTiming(RegattaIdentifier regattaToAddTo, Iterable<SwissTimingRaceRecordDTO> rrs, String hostname,
             int port, boolean trackWind, boolean correctWindByDeclination, boolean useInternalMarkPassingAlgorithm,
-            String updateURL, String updateUsername, String updatePassword) throws UnauthorizedException, Exception;
+            String updateURL, String updateUsername, String updatePassword, String eventName, String manage2SailEventUrl) throws UnauthorizedException, Exception;
 
     void replaySwissTimingRace(RegattaIdentifier regattaIdentifier, Iterable<SwissTimingReplayRaceDTO> replayRaces,
             boolean trackWind, boolean correctWindByDeclination, boolean useInternalMarkPassingAlgorithm)

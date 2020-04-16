@@ -76,12 +76,9 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         VerticalPanel verticalPanel = new VerticalPanel();
         captionPanelConnections.setContentWidget(verticalPanel);
         captionPanelConnections.setStyleName("bold");
-
         connectionsTable = new SwissTimingConnectionTableWrapper(userService, sailingService, stringConstants,
-                errorReporter, true, tableResources, () -> {
-                });
+                errorReporter, true, tableResources, () -> {});
         connectionsTable.refreshSwissTimingConnectionList();
-
         // Add button panel
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService,
                 SecuredDomainType.TRACKED_RACE);
@@ -113,6 +110,19 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                                 }));
                     }
 
+                            @Override
+                            public void cancel() {
+                            }
+                        }, userService, errorReporter).show());
+        // Remove SwissTiming Connection
+        final Button removeButton = buttonPanel.addRemoveAction(stringMessages.remove(), () -> {
+            sailingService.deleteSwissTimingConfiguration(connectionsTable.getSelectionModel().getSelectedObject(),
+                    new AsyncCallback<Void>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError(
+                                    "Exception trying to delete configuration in DB: " + caught.getMessage());
+                        }
                     @Override
                     public void cancel() {
                     }
@@ -129,12 +139,12 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                                                     + caught.getMessage());
                                         }
 
-                                        @Override
-                                        public void onSuccess(Void result) {
-                                            connectionsTable.refreshSwissTimingConnectionList();
-                                        }
-                                    });
-                        });
+                        @Override
+                        public void onSuccess(Void result) {
+                            connectionsTable.refreshSwissTimingConnectionList();
+                        }
+                    });
+        });
 
         // List Races in SwissTiming Connection
         final Button listRacesButton = buttonPanel.addUnsecuredAction(stringMessages.listRaces(), () -> {
@@ -292,7 +302,6 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         raceTable.addColumn(regattaNameColumn, stringConstants.regatta());
         raceTable.addColumn(seriesNameColumn, stringConstants.series());
         raceTable.addColumn(raceNameColumn, stringConstants.name());
-        //raceTable.addColumn(raceIdColumn, stringConstants.id());
         raceTable.addColumn(raceStatusColumn, stringConstants.status());
         raceTable.addColumn(boatClassColumn, stringConstants.boatClass());
         raceTable.addColumn(genderColumn, stringConstants.gender());
@@ -307,7 +316,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         filterPanel.add(filterablePanelEvents);
         HorizontalPanel racesButtonPanel = new HorizontalPanel();
         trackableRacesPanel.add(racesButtonPanel);
-        final Button btnTrack = new Button(stringConstants.startTracking());
+        Button btnTrack = new Button(stringConstants.startTracking());
         racesButtonPanel.add(btnTrack);
         racesButtonPanel.setSpacing(10);
         btnTrack.addClickHandler(new ClickHandler() {
@@ -322,14 +331,11 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                 e -> btnTrack.setEnabled(connectionsTable.getSelectionModel().getSelectedSet().size() == 1));
     }
 
-
-
     private ListHandler<SwissTimingRaceRecordDTO> getRaceTableColumnSortHandler(List<SwissTimingRaceRecordDTO> raceRecords,
     		Column<SwissTimingRaceRecordDTO, ?> regattaNameColumn, Column<SwissTimingRaceRecordDTO, ?> seriesNameColumn, 
     		Column<SwissTimingRaceRecordDTO, ?> nameColumn, Column<SwissTimingRaceRecordDTO, ?> trackingStartColumn,
             Column<SwissTimingRaceRecordDTO, ?> raceIdColumn, Column<SwissTimingRaceRecordDTO, ?> boatClassColumn,
             Column<SwissTimingRaceRecordDTO, ?> genderColumn, Column<SwissTimingRaceRecordDTO, ?> statusColumn) {
-           
         ListHandler<SwissTimingRaceRecordDTO> result = new ListHandler<SwissTimingRaceRecordDTO>(raceRecords);
         result.setComparator(regattaNameColumn, new Comparator<SwissTimingRaceRecordDTO>() {
             @Override
@@ -387,7 +393,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
 
     private void fillRaces(final SailingServiceAsync sailingService) {
         final SwissTimingConfigurationWithSecurityDTO selectedObject = connectionsTable.getSelectionModel()
-                .getSelectedSet().iterator().next();;
+                .getSelectedSet().iterator().next();
         sailingService.getRacesOfSwissTimingEvent(selectedObject.getJsonUrl(),
                 new AsyncCallback<SwissTimingEventRecordDTO>() {
                     @Override
@@ -448,21 +454,20 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         
         // Check if the assigned regatta makes sense
         if (checkBoatClassOK(selectedRegatta, selectedRaces)) {
-            sailingService.trackWithSwissTiming(
-                /* regattaToAddTo */ regattaIdentifier,
-                selectedRaces, hostname, port, trackWind, correctWindByDeclination,
-                useInternalMarkPassingAlgorithm, updateURL, updateUsername, updatePassword, new AsyncCallback<Void>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Error trying to register races " + selectedRaces + " for tracking: "
-                                + caught.getMessage());
-                    }
+            sailingService.trackWithSwissTiming(/* regattaToAddTo */ regattaIdentifier, selectedRaces, hostname, port,
+                    trackWind, correctWindByDeclination, useInternalMarkPassingAlgorithm, updateURL, updateUsername,
+                    updatePassword, selectedObject.getName(), selectedObject.getJsonUrl(), new AsyncCallback<Void>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError("Error trying to register races " + selectedRaces
+                                    + " for tracking: " + caught.getMessage());
+                        }
 
-                    @Override
-                    public void onSuccess(Void result) {
-                        regattaRefresher.fillRegattas();
-                    }
-                });
+                        @Override
+                        public void onSuccess(Void result) {
+                            regattaRefresher.fillRegattas();
+                        }
+                    });
         }
     }
 }

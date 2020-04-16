@@ -582,7 +582,7 @@ public class ImportMasterDataOperation extends
     }
 
     private void ensureOwnership(QualifiedObjectIdentifier identifier, SecurityService securityService) {
-        logger.info("Trying to adopting " + identifier + " from Masterdataimport to " + user.getName() +
+        logger.info("Trying to adopt " + identifier + " from Masterdataimport to " + user.getName() +
                 " and group " + (tenant==null?"null":tenant.getName())+" if orphaned");
         securityService.setOwnershipIfNotSet(identifier, user, tenant);
     }
