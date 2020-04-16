@@ -310,7 +310,7 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
             if (races == null)
                 continue;
             final int index = races.indexOf(managedRace);
-            if (index > 1) {
+            if (index >= 1) {
                 return races.get(index - 1);
             }
         }
