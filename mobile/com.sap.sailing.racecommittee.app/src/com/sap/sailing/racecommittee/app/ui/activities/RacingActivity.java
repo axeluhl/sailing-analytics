@@ -64,7 +64,6 @@ import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesRegattaConfigurationLoader;
-import com.sap.sailing.racecommittee.app.domain.coursedesign.CourseDesign;
 import com.sap.sailing.racecommittee.app.logging.LogEvent;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataType;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeHeader;
@@ -303,24 +302,39 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
         this.startTime = startTime;
     }
 
+    @Nullable
+    ManagedRace findPreviousRace(@NonNull final ManagedRace managedRace) {
+        final LinkedHashMap<RaceGroupSeriesFleet, List<ManagedRace>> fleetRaces = mRaceList.getRacesByGroup();
+        for (RaceGroupSeriesFleet fleet : fleetRaces.keySet()) {
+            final List<ManagedRace> races = fleetRaces.get(fleet);
+            if (races == null)
+                continue;
+            final int index = races.indexOf(managedRace);
+            if (index > 1) {
+                return races.get(index - 1);
+            }
+        }
+        return null;
+    }
+
     @Override
-    public void onRaceListItemSelected(RaceListDataType selectedItem, RaceListDataTypeRace prevRaceItem) {
+    public void onRaceListItemSelected(RaceListDataType selectedItem) {
 
         if (selectedItem instanceof RaceListDataTypeRace) {
             RaceListDataTypeRace selectedElement = (RaceListDataTypeRace) selectedItem;
             selectedElement.setUpdateIndicatorVisible(false);
 
             ManagedRace managedRace = selectedElement.getRace();
+            ManagedRace prevRace = findPreviousRace(managedRace);
             ExLog.i(this, LogEvent.RACE_SELECTED_ELEMENT, managedRace.getId() + " " + managedRace.getStatus());
-            if (prevRaceItem != null && managedRace.getStatus() == RaceLogRaceStatus.UNSCHEDULED) {
-                final ManagedRace prevRace = prevRaceItem.getRace();
+            if (prevRace != null && managedRace.getStatus() == RaceLogRaceStatus.UNSCHEDULED) {
                 final RaceState currentRaceState = managedRace.getState();
                 final RacingProcedure racingProcedure = prevRace.getState().getRacingProcedure();
                 currentRaceState.setRacingProcedure(MillisecondsTimePoint.now(), racingProcedure.getType());
                 final RacingProcedure newRacingProcedure = currentRaceState.getRacingProcedure();
-                if (racingProcedure instanceof ConfigurableStartModeFlagRacingProcedure && newRacingProcedure instanceof ConfigurableStartModeFlagRacingProcedure){
-                    ConfigurableStartModeFlagRacingProcedure configurableFlag = (ConfigurableStartModeFlagRacingProcedure)racingProcedure;
-                    ((ConfigurableStartModeFlagRacingProcedure)newRacingProcedure).setStartModeFlag(MillisecondsTimePoint.now(), configurableFlag.getStartModeFlag());
+                if (racingProcedure instanceof ConfigurableStartModeFlagRacingProcedure && newRacingProcedure instanceof ConfigurableStartModeFlagRacingProcedure) {
+                    ConfigurableStartModeFlagRacingProcedure configurableFlag = (ConfigurableStartModeFlagRacingProcedure) racingProcedure;
+                    ((ConfigurableStartModeFlagRacingProcedure) newRacingProcedure).setStartModeFlag(MillisecondsTimePoint.now(), configurableFlag.getStartModeFlag());
                 }
                 final CourseBase courseDesign = prevRace.getCourseDesign();
                 if (courseDesign != null) {

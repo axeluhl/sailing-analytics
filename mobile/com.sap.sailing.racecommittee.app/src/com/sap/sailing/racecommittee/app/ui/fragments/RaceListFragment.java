@@ -291,11 +291,9 @@ public class RaceListFragment extends LoggableFragment
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         final RaceListDataType selectedItem = mAdapter.getItem(position);
         ExLog.i(getActivity(), TAG, "Touched " + selectedItem.toString());
-        RaceListDataTypeRace prevRace = mAdapter.getPreviousRaceInSeries(selectedItem);
-
         mDrawerLayout.closeDrawers();
         mAdapter.setSelectedRace(selectedItem);
-        mCallbacks.onRaceListItemSelected(selectedItem, prevRace);
+        mCallbacks.onRaceListItemSelected(selectedItem);
     }
 
     @Override
@@ -555,7 +553,7 @@ public class RaceListFragment extends LoggableFragment
     }
 
     public interface RaceListCallbacks {
-        void onRaceListItemSelected(RaceListDataType selectedItem, RaceListDataTypeRace prevRace);
+        void onRaceListItemSelected(RaceListDataType selectedItem);
     }
 
     private class IntentReceiver extends BroadcastReceiver {

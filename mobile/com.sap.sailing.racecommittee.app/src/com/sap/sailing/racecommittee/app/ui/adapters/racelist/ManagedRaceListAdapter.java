@@ -292,25 +292,6 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         }
     }
 
-
-    public RaceListDataTypeRace getPreviousRaceInSeries(RaceListDataType selectedItem) {
-        List<RaceListDataType> races = getShownViewItems(new ArrayList<>(mAllRaces));
-        int index = races.indexOf(selectedItem);
-        if (index >= 1 && selectedItem instanceof RaceListDataTypeRace) {
-            RaceListDataTypeRace currentRace = (RaceListDataTypeRace) selectedItem;
-            for (int i = index; i >= 0; i--) {
-                final RaceListDataType prevItem = races.get(i);
-                if (prevItem instanceof RaceListDataTypeRace) {
-                    RaceListDataTypeRace prevRace = (RaceListDataTypeRace) prevItem;
-                    if (prevRace.getFleet() == currentRace.getFleet()) {
-                        return prevRace;
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
     /**
      * For the {@code filteredRaces} ensure that exactly the required view items are in {@link #mShownViewItems}. This
      * encompasses the header items for all non-empty series and the race items for all races in their series.
