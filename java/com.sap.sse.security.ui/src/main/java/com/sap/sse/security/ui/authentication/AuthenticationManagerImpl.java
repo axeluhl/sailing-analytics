@@ -112,10 +112,9 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
     }
 
     @Override
-    public void createAccount(final String name, String email, String password, String fullName, 
-            String company, SuccessCallback<UserDTO> callback) {
-        userManagementService.createSimpleUser(name, email, password, fullName, company,
-                LocaleInfo.getCurrentLocale().getLocaleName(), emailConfirmationUrl,
+    public void createAccount(final String name, final String email, final String password, final String fullName,
+            final String locale, final String company, SuccessCallback<UserDTO> callback) {
+        userManagementService.createSimpleUser(name, email, password, fullName, company, locale, emailConfirmationUrl,
                 new AsyncCallbackImpl<UserDTO>(callback) {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -127,7 +126,7 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
                             view.setErrorMessage(i18n.errorCreatingUser(name, caught.getMessage()));
                         }
                     }
-        });
+                });
     }
     
     @Override

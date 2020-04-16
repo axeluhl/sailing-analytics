@@ -479,8 +479,8 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         return new SuccessInfo(true, "Logged out.", /* redirectURL */ null, null);
     }
 
-    public UserDTO createSimpleUser(String username, String email, String password, String fullName, String company,
-            String localeName, String validationBaseURL)
+    public UserDTO createSimpleUser(final String username, final String email, final String password,
+            final String fullName, final String company, final String localeName, final String validationBaseURL)
             throws UserManagementException, MailException, UnauthorizedException {
 
         User user = getSecurityService().checkPermissionForObjectCreationAndRevertOnErrorForUserCreation(username,
@@ -489,12 +489,11 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                     public User call() throws Exception {
                         if (userGroupExists(username + SecurityService.TENANT_SUFFIX)) {
                             throw new UserManagementException(
-                                    "User "+username+" already exists, please chose a different username!");
+                                    "User " + username + " already exists, please chose a different username!");
                         }
                         try {
                             User newUser = getSecurityService().createSimpleUser(username, email, password, fullName,
-                                    company,
-                                    getLocaleFromLocaleName(localeName), validationBaseURL,
+                                    company, getLocaleFromLocaleName(localeName), validationBaseURL,
                                     getSecurityService().getDefaultTenantForCurrentUser());
                             return newUser;
                         } catch (UserManagementException | UserGroupManagementException e) {
