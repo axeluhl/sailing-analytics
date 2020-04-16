@@ -80,6 +80,7 @@ public class CompareServersResource extends AbstractSailingServerResource {
                 final int length = lgdetailpath.length();
                 if (Util.equals(leaderboardgroupList1, leaderboardgroupList2)) {
                     for (Object lg1 : leaderboardgroupList1) {
+//                        String lg1encoded = lg1.toString().replaceAll("/", "%2F");
                         URI uri = new URI(null, null, lg1.toString(), null, null);
                         lgdetailpath.replace(length, lgdetailpath.length(), uri.toASCIIString());
                         if (lg1.equals(leaderboardgroupList2.get(leaderboardgroupList1.indexOf(lg1)))) {
@@ -117,14 +118,14 @@ public class CompareServersResource extends AbstractSailingServerResource {
                         }
                     }
                 }
+                JSONObject json = new JSONObject();
+                for (Entry<String, TreeSet<JSONObject>> entry : result.entrySet()) {
+                    json.put(entry.getKey(), entry.getValue());
+                }
+                response = Response.ok(json.toJSONString()).build();
             } catch (Exception e) {
                 response = returnInternalServerError(e);
             }
-            JSONObject json = new JSONObject();
-            for (Entry<String, TreeSet<JSONObject>> entry : result.entrySet()) {
-                json.put(entry.getKey(), entry.getValue());
-            }
-            response = Response.ok(json.toJSONString()).build();
         }
         return response;
     }
