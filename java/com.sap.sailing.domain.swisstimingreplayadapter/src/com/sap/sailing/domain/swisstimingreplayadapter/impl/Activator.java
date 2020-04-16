@@ -19,6 +19,8 @@ import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayServiceF
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParametersHandler;
 import com.sap.sse.MasterDataImportClassLoaderService;
 import com.sap.sse.common.TypeBasedServiceFinder;
+import com.sap.sse.replication.FullyInitializedReplicableTracker;
+import com.sap.sse.security.SecurityService;
 import com.sap.sse.util.ServiceTrackerFactory;
 
 public class Activator implements BundleActivator {
@@ -40,11 +42,13 @@ public class Activator implements BundleActivator {
             final ServiceTracker<DomainObjectFactory, DomainObjectFactory> domainObjectFactoryServiceTracker = ServiceTrackerFactory.createAndOpen(context, DomainObjectFactory.class);
             final ServiceTracker<SwissTimingAdapterFactory, SwissTimingAdapterFactory> swissTimingAdapterFactoryServiceTracker = ServiceTrackerFactory.createAndOpen(context, SwissTimingAdapterFactory.class);
             final ServiceTracker<RaceLogResolver, RaceLogResolver> raceLogResolverServiceTracker = ServiceTrackerFactory.createAndOpen(context, RaceLogResolver.class);
+            final FullyInitializedReplicableTracker<SecurityService> securityServiceTracker = FullyInitializedReplicableTracker.createAndOpen(context, SecurityService.class);
             try {
                 final MongoObjectFactory mongoObjectFactory = mongoObjectFactoryServiceTracker.waitForService(0);
                 final DomainObjectFactory domainObjectFactory = domainObjectFactoryServiceTracker.waitForService(0);
                 final SwissTimingAdapterFactory swissTimingAdapterFactory = swissTimingAdapterFactoryServiceTracker.waitForService(0);
                 final RaceLogResolver raceLogResolver = raceLogResolverServiceTracker.waitForService(0);
+                final SecurityService securityService = securityServiceTracker.getInitializedService(0);
                 final Dictionary<String, Object> properties = new Hashtable<String, Object>();
                 final com.sap.sailing.domain.swisstimingadapter.DomainFactory domainFactory = swissTimingAdapterFactory
                         .getOrCreateSwissTimingAdapter(domainObjectFactory.getBaseDomainFactory())
@@ -52,7 +56,8 @@ public class Activator implements BundleActivator {
                 final SwissTimingReplayConnectivityParamsHandler paramsHandler = new SwissTimingReplayConnectivityParamsHandler(
                         MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory),
                         MongoRegattaLogStoreFactory.INSTANCE.getMongoRegattaLogStore(mongoObjectFactory, domainObjectFactory),
-                        domainFactory, swissTimingReplayServiceFactory.createSwissTimingReplayService(domainFactory, raceLogResolver));
+                        domainFactory, swissTimingReplayServiceFactory.createSwissTimingReplayService(domainFactory, raceLogResolver),
+                        securityService);
                 properties.put(TypeBasedServiceFinder.TYPE, SwissTimingReplayConnectivityParameters.TYPE);
                 context.registerService(RaceTrackingConnectivityParametersHandler.class, paramsHandler, properties);
             } catch (Exception e) {
