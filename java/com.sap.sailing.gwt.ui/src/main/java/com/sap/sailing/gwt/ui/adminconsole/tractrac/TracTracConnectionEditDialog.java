@@ -26,10 +26,10 @@ public class TracTracConnectionEditDialog extends TracTracConnectionDialog {
     private void setData(final TracTracConfigurationWithSecurityDTO dtotoEdit) {
         name = dtotoEdit.getName();
         creatorName = dtotoEdit.getCreatorName();
-        storedURITextBox.setText(dtotoEdit.getStoredDataURI());
-        liveURITextBox.setText(dtotoEdit.getLiveDataURI());
+        storedURITextBox.setText(dtotoEdit.getStoredDataURI()==null?"":dtotoEdit.getStoredDataURI());
+        liveURITextBox.setText(dtotoEdit.getLiveDataURI()==null?"":dtotoEdit.getLiveDataURI());
         jsonURLTextBox.setText(dtotoEdit.getJsonUrl());
-        tracTracUpdateURITextBox.setText(dtotoEdit.getCourseDesignUpdateURI());
+        tracTracUpdateURITextBox.setText(dtotoEdit.getCourseDesignUpdateURI()==null?"":dtotoEdit.getCourseDesignUpdateURI());
         tractracUsernameTextBox.setText(dtotoEdit.getTracTracUsername());
         tractracPasswordTextBox.setText(dtotoEdit.getTracTracPassword());
         super.getOkButton().setEnabled(!jsonURLTextBox.getText().isEmpty());

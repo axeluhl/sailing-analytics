@@ -50,7 +50,7 @@ public class Activator implements BundleActivator {
                 final SwissTimingConnectivityParamsHandler paramsHandler = new SwissTimingConnectivityParamsHandler(
                         MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory),
                         MongoRegattaLogStoreFactory.INSTANCE.getMongoRegattaLogStore(mongoObjectFactory, domainObjectFactory),
-                        domainFactory);
+                        domainFactory, securityService);
                 properties.put(TypeBasedServiceFinder.TYPE, SwissTimingTrackingConnectivityParameters.TYPE);
                 context.registerService(RaceTrackingConnectivityParametersHandler.class, paramsHandler, properties);
                 for (SwissTimingArchiveConfiguration swissTimingArchive : SwissTimingAdapterPersistence.INSTANCE

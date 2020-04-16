@@ -1827,7 +1827,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public void setDefaultOwnershipIfNotSet(QualifiedObjectIdentifier identifier) {
         final OwnershipAnnotation preexistingOwnership = getOwnership(identifier);
-        if (preexistingOwnership == null) {
+        if (preexistingOwnership == null || (preexistingOwnership.getAnnotation() == null ||
+                (preexistingOwnership.getAnnotation().getTenantOwner() == null && preexistingOwnership.getAnnotation().getUserOwner() == null))) {
             setDefaultOwnership(identifier, identifier.toString());
         }
     }
@@ -1857,7 +1858,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public void setOwnershipIfNotSet(QualifiedObjectIdentifier identifier, User user, UserGroup tenantOwner) {
         final OwnershipAnnotation preexistingOwnership = getOwnership(identifier);
-        if (preexistingOwnership == null) {
+        if (preexistingOwnership == null || (preexistingOwnership.getAnnotation() == null ||
+                (preexistingOwnership.getAnnotation().getTenantOwner() == null && preexistingOwnership.getAnnotation().getUserOwner() == null))) {
             setOwnership(identifier, user, tenantOwner, identifier.toString());
         }
     }
@@ -2255,13 +2257,13 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public void migrateOwnership(WithQualifiedObjectIdentifier identifier) {
-        migrateOwnership(identifier.getIdentifier(), identifier.getName());
+    public boolean migrateOwnership(WithQualifiedObjectIdentifier identifier) {
+        return migrateOwnership(identifier.getIdentifier(), identifier.getName());
     }
 
     @Override
-    public void migrateOwnership(final QualifiedObjectIdentifier identifier, final String displayName) {
-        this.migrateOwnership(identifier, null, /* setServerGroupAsOwner */ true, displayName);
+    public boolean migrateOwnership(final QualifiedObjectIdentifier identifier, final String displayName) {
+        return this.migrateOwnership(identifier, null, /* setServerGroupAsOwner */ true, displayName);
     }
     
     @Override
