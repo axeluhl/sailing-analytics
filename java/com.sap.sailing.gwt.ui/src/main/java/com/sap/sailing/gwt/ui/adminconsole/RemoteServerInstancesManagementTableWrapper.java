@@ -7,7 +7,6 @@ import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
-import com.sap.sse.gwt.client.celltable.FlushableCellTable;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.celltable.TableWrapper;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
@@ -31,11 +30,6 @@ public class RemoteServerInstancesManagementTableWrapper extends
                     }
                 });
         registerSelectionModelOnNewDataProvider(dataProvider);
-    }
-
-    @Override
-    public FlushableCellTable<RemoteSailingServerReferenceDTO> getTable() {
-        return (FlushableCellTable<RemoteSailingServerReferenceDTO>) super.getTable();
     }
 
     public <T> void addColumn(Column<RemoteSailingServerReferenceDTO, T> column, String header) {
