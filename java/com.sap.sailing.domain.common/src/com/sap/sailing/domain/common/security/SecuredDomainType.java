@@ -92,4 +92,5 @@ public class SecuredDomainType extends HasPermissionsImpl {
     public static final HasPermissions MARK_TEMPLATE = new SecuredDomainType("MARK_TEMPLATE");
     public static final HasPermissions COURSE_TEMPLATE = new SecuredDomainType("COURSE_TEMPLATE");
     public static final HasPermissions MARK_ROLE = new SecuredDomainType("MARK_ROLE");
+    public static final HasPermissions REMOTE_SAILING_SERVER_REFERENCE_DTO = new SecuredDomainType("REMOTE_SAILING_SERVER_REFERENCE_DTO");
 }
