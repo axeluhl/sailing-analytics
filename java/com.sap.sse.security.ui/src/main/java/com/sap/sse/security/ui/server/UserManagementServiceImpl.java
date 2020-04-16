@@ -482,7 +482,6 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     public UserDTO createSimpleUser(final String username, final String email, final String password,
             final String fullName, final String company, final String localeName, final String validationBaseURL)
             throws UserManagementException, MailException, UnauthorizedException {
-
         User user = getSecurityService().checkPermissionForObjectCreationAndRevertOnErrorForUserCreation(username,
                 new Callable<User>() {
                     @Override

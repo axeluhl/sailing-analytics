@@ -64,11 +64,9 @@ public class CreateAccountViewImpl extends Composite implements CreateAccountVie
         this.res = resources;
         UserManagementResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
-        
         StringMessages i18n = StringMessages.INSTANCE;
         setPlaceholder(passwordUi, i18n.newPasswordPlaceholder());
         setPlaceholder(passwordConfirmationUi, i18n.passwordRepeatPlaceholder());
-        
         emailUi.addKeyUpHandler(new FieldKeyUpHandler() {
             @Override
             void updateFieldValue() {
@@ -87,10 +85,8 @@ public class CreateAccountViewImpl extends Composite implements CreateAccountVie
                 presenter.onChangeFullName(nameUi.getValue());
             }
         });
-        
         localeListBox.setAcceptableValues(GWTLocaleUtil.getAvailableLocalesAndDefault());
         localeListBox.addValueChangeHandler(event -> presenter.onChangeLocale(localeListBox.getValue()));
-        
         companyUi.addKeyUpHandler(new FieldKeyUpHandler() {
             @Override
             void updateFieldValue() {
