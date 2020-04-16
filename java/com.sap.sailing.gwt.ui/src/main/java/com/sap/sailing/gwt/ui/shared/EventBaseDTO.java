@@ -135,7 +135,16 @@ public class EventBaseDTO extends NamedDTO implements WithID, IsSerializable {
         return baseURL;
     }
 
+    /**
+     * Assign the event's base URL.
+     *
+     * NOTE: <code>https://</code> will be assumed if no protocol has been provided.
+     *
+     * @param baseURL
+     */
     public void setBaseURL(String baseURL) {
+        if (baseURL != null && !baseURL.contains("://"))
+            baseURL = "https://" + baseURL;
         this.baseURL = baseURL;
     }
 
