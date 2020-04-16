@@ -158,12 +158,13 @@
                     android:scaleX="@integer/picker_scale"
                     android:scaleY="@integer/picker_scale">
 
-                    <NumberPicker
-                        android:id="@+id/start_date_picker"
+                    <Button
+                        android:id="@+id/start_date_button"
+                        style="@style/Widget.AppCompat.Button.Borderless.Colored"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
-                        android:descendantFocusability="blocksDescendants" />
+                        android:text="@string/today" />
 
                     <include
                         android:id="@+id/start_time_picker"

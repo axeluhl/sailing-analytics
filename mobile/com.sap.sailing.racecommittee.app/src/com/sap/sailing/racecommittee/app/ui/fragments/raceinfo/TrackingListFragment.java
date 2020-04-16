@@ -243,8 +243,8 @@ public class TrackingListFragment extends BaseFragment
         mComparator = mComparators.get(SORT_SAIL_NUMBER);
 
         Util.addAll(getRace().getCompetitorsAndBoats().entrySet(), mCompetitorData);
-        mFilteredCompetitorData.clear();
         mFilteredCompetitorData.addAll(mCompetitorData);
+        sortCompetitors();
 
         initializeFinishList();
 
