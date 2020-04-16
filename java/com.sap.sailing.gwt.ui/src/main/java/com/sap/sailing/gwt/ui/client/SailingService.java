@@ -169,7 +169,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     void updateTracTracConfiguration(TracTracConfigurationWithSecurityDTO tracTracConfiguration)
             throws UnauthorizedException, Exception;
 
-    void deleteTracTracConfiguration(TracTracConfigurationWithSecurityDTO tracTracConfiguration)
+    void deleteTracTracConfigurations(Collection<TracTracConfigurationWithSecurityDTO> tracTracConfigurations)
             throws UnauthorizedException, Exception;
 
     List<RegattaDTO> getRegattas() throws UnauthorizedException;
@@ -392,7 +392,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     void createSwissTimingConfiguration(String configName, String jsonURL, String hostname, Integer port,
             String updateURL, String updateUsername, String updatePassword) throws UnauthorizedException, Exception;
 
-    void deleteSwissTimingConfiguration(SwissTimingConfigurationWithSecurityDTO configuration)
+    void deleteSwissTimingConfigurations(Collection<SwissTimingConfigurationWithSecurityDTO> configurations)
             throws UnauthorizedException, Exception;
 
     void updateSwissTimingConfiguration(SwissTimingConfigurationWithSecurityDTO configuration)
@@ -542,7 +542,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     void updateSwissTimingArchiveConfiguration(SwissTimingArchiveConfigurationWithSecurityDTO dto)
             throws UnauthorizedException, Exception;
 
-    void deleteSwissTimingArchiveConfiguration(SwissTimingArchiveConfigurationWithSecurityDTO dto)
+    void deleteSwissTimingArchiveConfigurations(Collection<SwissTimingArchiveConfigurationWithSecurityDTO> dtos)
             throws UnauthorizedException, Exception;
 
     void createCourseAreas(UUID eventId, String[] courseAreaNames) throws UnauthorizedException;
@@ -1297,8 +1297,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     CourseTemplateDTO createOrUpdateCourseTemplate(CourseTemplateDTO courseTemplate);
 
-    void removeCourseTemplate(UUID uuid);
-
     /**
      * Removes course templates list
      * 
@@ -1306,8 +1304,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
      *            list of course templates to remove
      */
     void removeCourseTemplates(Collection<UUID> courseTemplatesUuids);
-
-    void removeMarkProperties(UUID uuid);
 
     List<MarkRoleDTO> getMarkRoles();
 

@@ -151,13 +151,13 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                             }
                         }, userService, errorReporter).show());
         addCreateAction.ensureDebugId("AddConnectionButton");
-        final Button removeButton = buttonPanel.addRemoveAction(stringMessages.remove(), () -> {
-            sailingService.deleteTracTracConfiguration(connectionsTable.getSelectionModel().getSelectedObject(),
+        buttonPanel.addRemoveAction(stringMessages.remove(), connectionsTable.getSelectionModel(), false, () -> {
+            sailingService.deleteTracTracConfigurations(connectionsTable.getSelectionModel().getSelectedSet(),
                     new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
                             errorReporter.reportError(
-                                    "Exception trying to delete configuration in DB: " + caught.getMessage());
+                                    "Exception trying to delete configuration(s) in DB: " + caught.getMessage());
                         }
 
                         @Override
@@ -173,7 +173,6 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         });
         listRacesButton.ensureDebugId("ListRacesButton");
         listRacesButton.setEnabled(false);
-        removeButton.setEnabled(false);
         buttonPanel.addUnsecuredWidget(loadingMessageLabel);
         connectionsTable.getSelectionModel().addSelectionChangeHandler(e -> {
             final boolean objectSelected = connectionsTable.getSelectionModel().getSelectedObject() != null;
@@ -456,47 +455,48 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
 
             sailingService.listTracTracRacesInEvent(selectedConnection.getJsonUrl(), listHiddenRaces,
                     new MarkedAsyncCallback<com.sap.sse.common.Util.Pair<String, List<TracTracRaceRecordDTO>>>(
-                new AsyncCallback<com.sap.sse.common.Util.Pair<String, List<TracTracRaceRecordDTO>>>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        loadingMessageLabel.setText("");
-                        reportError("Error trying to list races: " + caught.getMessage());
-                    }
-        
-                    @Override
-                    public void onSuccess(final com.sap.sse.common.Util.Pair<String, List<TracTracRaceRecordDTO>> result) {
-                        loadingMessageLabel.setText("Building resultset and saving configuration...");
-                        TracTracEventManagementPanel.this.availableTracTracRaces.clear();
-                                    final TracTracConfigurationWithSecurityDTO updatedConnection = new TracTracConfigurationWithSecurityDTO(
-                                            selectedConnection,
-                                            result.getA());
-                        final List<TracTracRaceRecordDTO> eventRaces = result.getB();
-                        if (eventRaces != null) {
-                            TracTracEventManagementPanel.this.availableTracTracRaces.addAll(eventRaces);
-                            racesFilterablePanel.updateAll(availableTracTracRaces);
-                        }
-                        List<TracTracRaceRecordDTO> races = TracTracEventManagementPanel.this.raceList.getList();
-                        races.clear();
-                        races.addAll(TracTracEventManagementPanel.this.availableTracTracRaces);
-                        TracTracEventManagementPanel.this.racesFilterablePanel.getTextBox().setText("");
-                        TracTracEventManagementPanel.this.racesTable.setPageSize(races.size());
-                        loadingMessageLabel.setText("");
-                        // store a successful configuration in the database for later retrieval
-                        sailingService.updateTracTracConfiguration(updatedConnection,
-                                new MarkedAsyncCallback<Void>(
-                            new AsyncCallback<Void>() {
+                            new AsyncCallback<com.sap.sse.common.Util.Pair<String, List<TracTracRaceRecordDTO>>>() {
                                 @Override
                                 public void onFailure(Throwable caught) {
-                                    reportError("Exception trying to store configuration in DB: "  + caught.getMessage());
+                                    loadingMessageLabel.setText("");
+                                    reportError("Error trying to list races: " + caught.getMessage());
                                 }
-    
+
                                 @Override
-                                public void onSuccess(Void voidResult) {
-                                    connectionsTable.refreshTracTracConnectionList();
+                                public void onSuccess(
+                                        final com.sap.sse.common.Util.Pair<String, List<TracTracRaceRecordDTO>> result) {
+                                    loadingMessageLabel.setText("Building resultset and saving configuration...");
+                                    TracTracEventManagementPanel.this.availableTracTracRaces.clear();
+                                    final TracTracConfigurationWithSecurityDTO updatedConnection = new TracTracConfigurationWithSecurityDTO(
+                                            selectedConnection, result.getA());
+                                    final List<TracTracRaceRecordDTO> eventRaces = result.getB();
+                                    if (eventRaces != null) {
+                                        TracTracEventManagementPanel.this.availableTracTracRaces.addAll(eventRaces);
+                                        racesFilterablePanel.updateAll(availableTracTracRaces);
+                                    }
+                                    List<TracTracRaceRecordDTO> races = TracTracEventManagementPanel.this.raceList
+                                            .getList();
+                                    races.clear();
+                                    races.addAll(TracTracEventManagementPanel.this.availableTracTracRaces);
+                                    TracTracEventManagementPanel.this.racesFilterablePanel.getTextBox().setText("");
+                                    TracTracEventManagementPanel.this.racesTable.setPageSize(races.size());
+                                    loadingMessageLabel.setText("");
+                                    // store a successful configuration in the database for later retrieval
+                                    sailingService.updateTracTracConfiguration(updatedConnection,
+                                            new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
+                                                @Override
+                                                public void onFailure(Throwable caught) {
+                                                    reportError("Exception trying to store configuration in DB: "
+                                                            + caught.getMessage());
+                                                }
+
+                                                @Override
+                                                public void onSuccess(Void voidResult) {
+                                                    connectionsTable.refreshTracTracConnectionList();
+                                                }
+                                            }));
                                 }
                             }));
-                    }
-                }));
         }
     }
 

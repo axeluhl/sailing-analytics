@@ -389,7 +389,7 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
     void updateSwissTimingConfiguration(SwissTimingConfigurationWithSecurityDTO configuration,
             AsyncCallback<Void> asyncCallback);
 
-    void deleteSwissTimingConfiguration(SwissTimingConfigurationWithSecurityDTO configuration,
+    void deleteSwissTimingConfigurations(Collection<SwissTimingConfigurationWithSecurityDTO> configurations,
             AsyncCallback<Void> asyncCallback);
 
     void getCountryCodes(AsyncCallback<String[]> callback);
@@ -602,7 +602,7 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
     void updateSwissTimingArchiveConfiguration(SwissTimingArchiveConfigurationWithSecurityDTO dto,
             AsyncCallback<Void> asyncCallback);
 
-    void deleteSwissTimingArchiveConfiguration(SwissTimingArchiveConfigurationWithSecurityDTO dto,
+    void deleteSwissTimingArchiveConfigurations(Collection<SwissTimingArchiveConfigurationWithSecurityDTO> dtos,
             AsyncCallback<Void> asyncCallback);
 
     void updateRegatta(RegattaIdentifier regattaIdentifier, Date startDate, Date endDate, UUID defaultCourseAreaUuid,
@@ -1236,8 +1236,6 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
 
     void createOrUpdateCourseTemplate(CourseTemplateDTO courseTemplate, AsyncCallback<CourseTemplateDTO> asyncCallback);
 
-    void removeCourseTemplate(UUID uuid, AsyncCallback<Void> asyncCallback);
-
     /**
      * Remove course templates by UUIDs
      * 
@@ -1247,8 +1245,6 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
      *            {@link AsyncCallback} object
      */
     void removeCourseTemplates(Collection<UUID> courseTemplatesUuids, AsyncCallback<Void> asyncCallback);
-
-    void removeMarkProperties(UUID uuid, AsyncCallback<Void> asyncCallback);
 
     /**
      * Remove mark properties by UUIDs

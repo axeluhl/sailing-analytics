@@ -11,6 +11,7 @@ import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCe
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
@@ -340,7 +341,7 @@ public class MarkPropertiesPanel extends FlowPanel {
                 stringMessages);
         actionsColumn.addAction(ACTION_DELETE, DELETE, e -> {
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveMarkProperties(e.getName()))) {
-                sailingService.removeMarkProperties(e.getUuid(), new AsyncCallback<Void>() {
+                sailingService.removeMarkProperties(Collections.singletonList(e.getUuid()), new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError(stringMessages.couldNotRemoveMarkProperties(caught.getMessage()));

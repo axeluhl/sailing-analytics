@@ -10,6 +10,7 @@ import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCe
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
@@ -320,7 +321,7 @@ public class CourseTemplatePanel extends FlowPanel {
                 stringMessages);
         actionsColumn.addAction(ACTION_DELETE, DELETE, e -> {
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveCourseTemplate(e.getName()))) {
-                sailingService.removeCourseTemplate(e.getUuid(), new AsyncCallback<Void>() {
+                sailingService.removeCourseTemplates(Collections.singletonList(e.getUuid()), new AsyncCallback<Void>() {
 
                     @Override
                     public void onFailure(Throwable caught) {
