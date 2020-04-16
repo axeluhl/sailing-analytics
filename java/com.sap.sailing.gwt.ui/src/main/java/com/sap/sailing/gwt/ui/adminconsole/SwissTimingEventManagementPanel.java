@@ -110,42 +110,26 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                                 }));
                     }
 
-                            @Override
-                            public void cancel() {
-                            }
-                        }, userService, errorReporter).show());
-        // Remove SwissTiming Connection
-        final Button removeButton = buttonPanel.addRemoveAction(stringMessages.remove(), () -> {
-            sailingService.deleteSwissTimingConfiguration(connectionsTable.getSelectionModel().getSelectedObject(),
-                    new AsyncCallback<Void>() {
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            errorReporter.reportError(
-                                    "Exception trying to delete configuration in DB: " + caught.getMessage());
-                        }
                     @Override
                     public void cancel() {
                     }
                 }, userService, errorReporter).show());
-
-                // Remove SwissTiming Connection
-                buttonPanel.addRemoveAction(stringMessages.remove(), connectionsTable.getSelectionModel(), false,
-                        () -> {
-                            sailingService.deleteSwissTimingConfigurations(
-                                    connectionsTable.getSelectionModel().getSelectedSet(), new AsyncCallback<Void>() {
-                                        @Override
-                                        public void onFailure(Throwable caught) {
-                                            errorReporter.reportError("Exception trying to delete configuration in DB: "
-                                                    + caught.getMessage());
-                                        }
+        // Remove SwissTiming Connection
+        buttonPanel.addRemoveAction(stringMessages.remove(), connectionsTable.getSelectionModel(), false, () -> {
+            sailingService.deleteSwissTimingConfigurations(
+                    connectionsTable.getSelectionModel().getSelectedSet(), new AsyncCallback<Void>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError("Exception trying to delete configuration in DB: "
+                                    + caught.getMessage());
+                        }
 
                         @Override
                         public void onSuccess(Void result) {
                             connectionsTable.refreshSwissTimingConnectionList();
                         }
-                    });
+            });
         });
-
         // List Races in SwissTiming Connection
         final Button listRacesButton = buttonPanel.addUnsecuredAction(stringMessages.listRaces(), () -> {
             fillRaces(sailingService);
