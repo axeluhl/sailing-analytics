@@ -9,6 +9,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     public static final StringMessages INSTANCE = GWT.create(StringMessages.class);
 
     String name();
+    String locale();
     String company();
     String password();
     String passwordRepeat();
