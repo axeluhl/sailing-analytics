@@ -513,9 +513,20 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      */
     void assumeOwnershipMigrated(String typeName);
 
-    void migrateOwnership(WithQualifiedObjectIdentifier object);
+    /**
+     * 
+     * @param object
+     * @return {@code true} if the object required ownership migration
+     */
+    boolean migrateOwnership(WithQualifiedObjectIdentifier object);
 
-    void migrateOwnership(QualifiedObjectIdentifier object, String displayName);
+    /**
+     * 
+     * @param object
+     * @param displayName
+     * @return {@code true} if the object required ownership migration
+     */
+    boolean migrateOwnership(QualifiedObjectIdentifier object, String displayName);
 
     void migrateUser(User user);
 
