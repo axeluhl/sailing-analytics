@@ -1,6 +1,7 @@
 package com.sap.sailing.racecommittee.app.domain.impl;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,7 +45,7 @@ public class ManagedRaceImpl implements ManagedRace {
      *            doesn't tell anything about the "horizontal" position in the "grid" or in other words what the index
      *            is of the race column in which this cell lies.
      *            <p>
-     * 
+     *
      *            Indices returned by this method start with zero, meaning the first race column in the series. This
      *            corresponds to what one would get by asking {@link Util#indexOf(Iterable, Object)
      *            Util.indexOf(series.getRaceColumns(), thisCellsRaceColumn)}, except in case the first race column is a
@@ -134,7 +135,7 @@ public class ManagedRaceImpl implements ManagedRace {
 
     @Override
     public Map<Competitor, Boat> getCompetitorsAndBoats() {
-        return competitorsAndBoats;
+        return Collections.unmodifiableMap(new HashMap<>(competitorsAndBoats));
     }
 
     @Override
