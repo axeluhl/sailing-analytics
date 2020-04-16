@@ -52,11 +52,9 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
     private FlushableCellTable<RemoteSailingServerReferenceDTO> remoteServersTable;
-
     private final ListDataProvider<RemoteSailingServerReferenceDTO> serverDataProvider;
     private MultiSelectionModel<RemoteSailingServerReferenceDTO> refreshableServerSelectionModel;
     private LabeledAbstractFilterablePanel<RemoteSailingServerReferenceDTO> filteredServerTablePanel;
-
     private final CaptionPanel remoteServersPanel;
 
     public RemoteServerInstancesManagementPanel(SailingServiceAsync sailingService, final UserService userService,
@@ -79,7 +77,6 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
         remoteServersContentPanel.add(filteredServerTablePanel);
         remoteServersContentPanel.add(remoteServersTable);
         remoteServersContentPanel.add(createButtonToolbar());
-
         refreshSailingServerList();
     }
 
@@ -128,14 +125,11 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
     private FlushableCellTable<RemoteSailingServerReferenceDTO> createRemoteServersTable() {
         RemoteServerInstancesManagementTableWrapper wrapper = new RemoteServerInstancesManagementTableWrapper(
                 stringMessages, errorReporter, serverDataProvider);
-
         wrapper.addColumn(createTextColumn(RemoteSailingServerReferenceDTO::getName), stringMessages.name());
         wrapper.addColumn(createTextColumn(RemoteSailingServerReferenceDTO::getUrl), stringMessages.url());
         wrapper.addColumn(createEventsColumn(), stringMessages.events());
         wrapper.addColumn(createActionsColumn(), stringMessages.actions());
-
         wrapper.setEmptyTableWidget(new Label(stringMessages.noSailingServerInstancesYet()));
-
         refreshableServerSelectionModel = wrapper.getSelectionModel();
         return wrapper.getTable();
     }
@@ -173,20 +167,16 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
     private AccessControlledActionsColumn<RemoteSailingServerReferenceDTO, DefaultActionsImagesBarCell> createActionsColumn() {
         final AccessControlledActionsColumn<RemoteSailingServerReferenceDTO, DefaultActionsImagesBarCell> actionsColumn = create(
                 new DefaultActionsImagesBarCell(stringMessages), userService);
-
         actionsColumn.addAction(ACTION_DELETE, DELETE, e -> {
             Set<String> toDelete = new HashSet<>();
             toDelete.add(e.getName());
             removeSailingServers(toDelete);
         });
-
         final EditACLDialog.DialogConfig<RemoteSailingServerReferenceDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementService(), SecuredDomainType.REMOTE_SAILING_SERVER_REFERENCE_DTO,
                 RemoteSailingServerReferenceDTO::getAccessControlList, stringMessages);
-
         actionsColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 configACL::openDialog);
-
         return actionsColumn;
     }
 
