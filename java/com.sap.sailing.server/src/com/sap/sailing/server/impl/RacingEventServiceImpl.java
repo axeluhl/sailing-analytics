@@ -2102,11 +2102,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             TrackedRaceReplicatorAndNotifier trackedRaceReplicator = new TrackedRaceReplicatorAndNotifier(trackedRace);
             trackedRaceReplicators.put(trackedRace, trackedRaceReplicator);
             trackedRace.addListener(trackedRaceReplicator, /* fire wind already loaded */true, /* notifyAboutGPSFixesAlreadyLoaded */ true);
-
             PolarFixCacheUpdater polarFixCacheUpdater = new PolarFixCacheUpdater(trackedRace);
             polarFixCacheUpdaters.put(trackedRace, polarFixCacheUpdater);
             trackedRace.addListener(polarFixCacheUpdater);
-            
             if (polarDataService != null) {
                 trackedRace.setPolarDataService(polarDataService);
             }
@@ -2743,6 +2741,35 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             mongoObjectFactory.storeRegatta(regatta);
         }
         return regatta;
+    }
+    
+    /**
+     * The current implementation uses {@link #removeRace(Regatta, RaceDefinition)} to remove the {@link TrackedRace}
+     * and the {@link RaceDefinition} and based on the {@link #connectivityParametersByRace} uses the connectivity
+     * parameters of the previously existing tracked race to restore the race by tracking it again after
+     * {@link #removeRace(Regatta, RaceDefinition)} has completed.
+     * 
+     * @return {@code null} if it was not possible to re-load the race, either because the regatta doesn't allow for it,
+     *         or because the connectivity parameters were not found; a {@link RaceHandle} for the re-started race
+     *         otherwise.
+     */
+    @Override
+    public RaceHandle updateRaceCompetitors(Regatta regatta, RaceDefinition race) throws Exception {
+        final RaceHandle result;
+        if (regatta.isAutoRestartTrackingUponCompetitorSetChange()) {
+            final RaceTrackingConnectivityParameters connectivityParams = connectivityParametersByRace.get(race);
+            if (connectivityParams != null) {
+                removeRace(regatta, race);
+                result = addRace(regatta.getRegattaIdentifier(), connectivityParams, RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
+            } else {
+                result = null;
+                logger.warning("Unable to update race competitors for race "+race+" in regatta "+regatta+
+                        " because no connectivity params were found that we could use to start tracking again for that race.");
+            }
+        } else {
+            result = null;
+        }
+        return result;
     }
 
     @Override

@@ -6,6 +6,7 @@ import java.net.URISyntaxException;
 
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.RegattaListener;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 
 public interface TrackerManager {
@@ -14,7 +15,13 @@ public interface TrackerManager {
      * Creates a {@link RaceTracker} based on the {@code params}. If the {@code params} request
      * {@link RaceTrackingConnectivityParameters#isTrackWind() wind tracking}, a callback is
      * {@link RaceTracker#add(com.sap.sailing.domain.tracking.RaceTracker.RaceCreationListener) registered} with the
-     * {@link RaceTracker} that, when the race has been created by the tracker, will start wind tracking.
+     * {@link RaceTracker} that, when the race has been created by the tracker, will start wind tracking.<p>
+     * 
+     * The effects of calling this operation will be replicated by means of a listener that is notified when the connector
+     * has successfully loaded and installed the race. {@code RacingEventServiceImpl.raceAdded(...)} which is notified
+     * when the race definition has been added to the regatta (implementing {@link RegattaListener#raceAdded(Regatta, RaceDefinition)}),
+     * and {@code RacingEventServiceImpl.RaceAdditionListener.raceAdded(...)} which is called when the {@link TrackedRace}
+     * is added to the {@link TrackedRegatta}.
      * 
      * @param regattaToAddTo
      *            if <code>null</code> or no regatta by that identifier is found, the regatta into which the race has
