@@ -146,7 +146,7 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
             }
         });
     }
-    
+
     @Override
     public void login(String username, String password, final SuccessCallback<SuccessInfo> callback) {
         userService.login(username, password, new AsyncCallback<SuccessInfo>() {
@@ -154,8 +154,9 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
             public void onSuccess(SuccessInfo result) {
                 if (result.isSuccessful()) {
                     callback.onSuccess(result);
-                    if (ExperimentalFeatures.REFRESH_ON_LOCALE_CHANGE_IN_USER_PROFILE) {
-                        // when a user logs in we explicitly switch to the user's locale event if a locale is given by the URL
+                    if (isUserLocaleChanged(result) || ExperimentalFeatures.REFRESH_ON_LOCALE_CHANGE_IN_USER_PROFILE) {
+                        // when a user logs in we explicitly switch to the user's locale event if a locale is given by
+                        // the URL
                         redirectIfLocaleIsSetAndLocaleIsNotGivenInTheURL(result.getUserDTO().getA().getLocale());
                     }
                 } else {
@@ -166,14 +167,18 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
                     }
                 }
             }
-            
+
+            private boolean isUserLocaleChanged(SuccessInfo result) {
+                return !LocaleInfo.getCurrentLocale().getLocaleName().equals(result.getUserDTO().getA().getLocale());
+            }
+
             @Override
             public void onFailure(Throwable caught) {
                 view.setErrorMessage(StringMessages.INSTANCE.failedToSignIn());
             }
         });
     }
-    
+
     @Override
     public void logout() {
         userService.logout();
