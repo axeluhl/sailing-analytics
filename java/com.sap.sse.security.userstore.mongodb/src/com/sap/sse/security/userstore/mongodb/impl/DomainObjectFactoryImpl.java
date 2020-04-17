@@ -130,20 +130,20 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
         return result;
     }
-    
+
     @SuppressWarnings("unchecked")
     private RoleDefinition loadRoleDefinition(Document roleDefinitionDBObject) {
         final String id = (String) roleDefinitionDBObject.get(FieldNames.Role.ID.name());
         final String displayName = (String) roleDefinitionDBObject.get(FieldNames.Role.NAME.name());
-        final String transitive = (String) roleDefinitionDBObject.get(FieldNames.Role.TRANSITIVE.name());
+        final Boolean transitive = (Boolean) roleDefinitionDBObject.get(FieldNames.Role.TRANSITIVE.name());
         final Set<WildcardPermission> permissions = new HashSet<>();
         for (Object o : (List<Object>) (roleDefinitionDBObject.get(FieldNames.Role.PERMISSIONS.name()))) {
             permissions.add(new WildcardPermission(o.toString()));
         }
         return new RoleDefinitionImpl(UUID.fromString(id), displayName, permissions,
-                transitive != null ? Boolean.parseBoolean(transitive) : true);
+                transitive != null ? transitive : true);
     }
-    
+
     @Override
     public Iterable<UserGroup> loadAllUserGroupsAndTenantsWithProxyUsers(
             Map<UUID, RoleDefinition> roleDefinitionsById) {
