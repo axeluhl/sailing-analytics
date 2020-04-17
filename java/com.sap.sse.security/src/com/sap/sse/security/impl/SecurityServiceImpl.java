@@ -1139,13 +1139,13 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public RoleDefinition createRoleDefinition(UUID roleId, String name) {
-        return apply(new CreateRoleDefinitionOperation(roleId, name));
+    public RoleDefinition createRoleDefinition(UUID roleId, String name, boolean transitive) {
+        return apply(new CreateRoleDefinitionOperation(roleId, name, transitive));
     }
 
     @Override
-    public RoleDefinition internalCreateRoleDefinition(UUID roleId, String name) {
-        return store.createRoleDefinition(roleId, name, Collections.emptySet());
+    public RoleDefinition internalCreateRoleDefinition(UUID roleId, String name, boolean transitive) {
+        return store.createRoleDefinition(roleId, name, Collections.emptySet(), transitive);
     }
     
     @Override
@@ -2111,7 +2111,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         final RoleDefinition result;
         if (potentiallyExistingRoleDefinition == null) {
             result = store.createRoleDefinition(rolePrototype.getId(), rolePrototype.getName(),
-                    rolePrototype.getPermissions());
+                    rolePrototype.getPermissions(), /* transitive */ true);
             setOwnership(result.getIdentifier(), null, getServerGroup());
         } else {
             result = potentiallyExistingRoleDefinition;

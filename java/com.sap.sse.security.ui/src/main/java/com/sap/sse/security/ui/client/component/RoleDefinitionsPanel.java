@@ -120,7 +120,9 @@ public class RoleDefinitionsPanel extends VerticalPanel {
         new RoleDefinitionCreationDialog(stringMessages, getAllPermissions(), getAllRoleDefinitions(), new DialogCallback<RoleDefinitionDTO>() {
             @Override
             public void ok(RoleDefinitionDTO editedObject) {
-                userManagementService.createRoleDefinition(editedObject.getId().toString(), editedObject.getName(), new AsyncCallback<RoleDefinitionDTO>() {
+                        userManagementService.createRoleDefinition(editedObject.getId().toString(),
+                                editedObject.getName(), editedObject.isTransitive(),
+                                new AsyncCallback<RoleDefinitionDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError(stringMessages.errorCreatingRole(editedObject.getName(), caught.getMessage()));

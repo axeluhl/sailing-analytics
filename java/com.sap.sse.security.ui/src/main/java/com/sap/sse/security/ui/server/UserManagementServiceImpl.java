@@ -122,14 +122,14 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public RoleDefinitionDTO createRoleDefinition(String roleDefinitionIdAsString, String name) {
+    public RoleDefinitionDTO createRoleDefinition(String roleDefinitionIdAsString, String name, boolean transitive) {
         RoleDefinition role = getSecurityService().setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredSecurityTypes.ROLE_DEFINITION, new TypeRelativeObjectIdentifier(roleDefinitionIdAsString), name,
                 new Callable<RoleDefinition>() {
                     @Override
                     public RoleDefinition call() throws Exception {
                         return getSecurityService().createRoleDefinition(UUID.fromString(roleDefinitionIdAsString),
-                                name);
+                                name, transitive);
                     }
                 });
         return securityDTOFactory.createRoleDefinitionDTO(role, getSecurityService());

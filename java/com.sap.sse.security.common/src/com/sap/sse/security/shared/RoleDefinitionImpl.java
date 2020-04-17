@@ -20,22 +20,32 @@ public class RoleDefinitionImpl implements RoleDefinition {
     private UUID id;
     private String name;
     private Set<WildcardPermission> permissions;
+    private boolean transitive;
 
     protected RoleDefinitionImpl() {} // for GWT serialization only
 
     public RoleDefinitionImpl(UUID id, String name) {
-        this(id, name, new HashSet<WildcardPermission>());
+        this(id, name, /* transitive */ true);
+    }
+
+    public RoleDefinitionImpl(UUID id, String name, boolean transitive) {
+        this(id, name, new HashSet<WildcardPermission>(), transitive);
     }
 
     public RoleDefinitionImpl(UUID id, String name, Iterable<WildcardPermission> permissions) {
+        this(id, name, new HashSet<WildcardPermission>(), /* transitive */ true);
+    }
+
+    public RoleDefinitionImpl(UUID id, String name, Iterable<WildcardPermission> permissions, boolean transitive) {
         this.id = id;
         this.name = name;
         this.permissions = new HashSet<>();
         Util.addAll(permissions, this.permissions);
+        this.transitive = transitive;
     }
 
-    public static RoleDefinition create(UUID id, String name, Iterable<WildcardPermission> permissions) {
-        return new RoleDefinitionImpl(id, name, permissions);
+    public static RoleDefinition create(UUID id, String name, Iterable<WildcardPermission> permissions, boolean transitive) {
+        return new RoleDefinitionImpl(id, name, permissions, transitive);
     }
 
     @Override
@@ -62,6 +72,17 @@ public class RoleDefinitionImpl implements RoleDefinition {
     public void setPermissions(Iterable<WildcardPermission> permissions) {
         this.permissions = new HashSet<>();
         Util.addAll(permissions, this.permissions);
+    }
+
+    @Override
+    public boolean isTransitive() {
+        return transitive;
+    }
+    
+
+    @Override
+    public void setTransitive(boolean transitive) {
+        this.transitive = transitive;
     }
 
     @Override

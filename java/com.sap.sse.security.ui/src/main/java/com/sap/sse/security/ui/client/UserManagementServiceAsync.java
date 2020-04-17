@@ -105,7 +105,8 @@ public interface UserManagementServiceAsync {
     void updateUserProperties(String username, String fullName, String company, String localeName,
             String defaultTenantIdAsString, AsyncCallback<UserDTO> callback);
 
-    void createRoleDefinition(String roleDefinitionIdAsString, String name, AsyncCallback<RoleDefinitionDTO> callback);
+    void createRoleDefinition(String roleDefinitionIdAsString, String name, boolean transitive,
+            AsyncCallback<RoleDefinitionDTO> callback);
 
     void deleteRoleDefinition(String roleDefinitionIdAsString, AsyncCallback<Void> callback);
 

@@ -276,7 +276,7 @@ public class UserStoreImpl implements UserStore {
                 for (final String stringPermission : otherPredefinedRole.getPermissions()) {
                     permissions.add(new WildcardPermission(stringPermission));
                 }
-                createRoleDefinition(otherPredefinedRole.getId(), otherPredefinedRole.name(), permissions);
+                createRoleDefinition(otherPredefinedRole.getId(), otherPredefinedRole.name(), permissions, /* transitive */ true);
             }
         }
     }
@@ -286,7 +286,8 @@ public class UserStoreImpl implements UserStore {
         if (roleDefinition == null) {
             logger.info("No " + rolePrototype.getName() + " role found. Creating default role \""
                     + rolePrototype.getName() + "\" with permission \"" + rolePrototype.getPermissions() + "\"");
-            roleDefinition = createRoleDefinition(rolePrototype.getId(), rolePrototype.getName(), rolePrototype.getPermissions());
+            roleDefinition = createRoleDefinition(rolePrototype.getId(), rolePrototype.getName(),
+                    rolePrototype.getPermissions(), /* transitive */ true);
         }
         return roleDefinition;
     }
@@ -452,8 +453,8 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public RoleDefinition createRoleDefinition(UUID roleDefinitionId, String displayName,
-            Iterable<WildcardPermission> permissions) {
-        final RoleDefinition roleDefinition = RoleDefinitionImpl.create(roleDefinitionId, displayName, permissions);
+            Iterable<WildcardPermission> permissions, boolean transitive) {
+        final RoleDefinition roleDefinition = RoleDefinitionImpl.create(roleDefinitionId, displayName, permissions, transitive);
         for (RoleDefinition value : roleDefinitions.values()) {
             if (value.getName().equals(roleDefinition.getName())) {
                 throw new IllegalArgumentException("Role Definition with same name already exists");

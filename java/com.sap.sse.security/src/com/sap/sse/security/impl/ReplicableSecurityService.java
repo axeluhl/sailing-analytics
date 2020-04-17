@@ -94,7 +94,7 @@ public interface ReplicableSecurityService extends SecurityService {
 
     Void internalDeleteUser(String username) throws UserManagementException;
 
-    RoleDefinition internalCreateRoleDefinition(UUID roleDefinitionId, String name);
+    RoleDefinition internalCreateRoleDefinition(UUID roleDefinitionId, String name, boolean transitive);
     
     Void internalDeleteRoleDefinition(UUID roleDefinitionId);
     

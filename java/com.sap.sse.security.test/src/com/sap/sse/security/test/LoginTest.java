@@ -137,7 +137,8 @@ public class LoginTest {
     @Test
     public void rolesTest() throws UserManagementException, UserGroupManagementException {
         userStore.createUser("me", "me@sap.com");
-        RoleDefinition testRoleDefinition = userStore.createRoleDefinition(UUID.randomUUID(), "testRole", Collections.emptySet());
+        RoleDefinition testRoleDefinition = userStore.createRoleDefinition(UUID.randomUUID(), "testRole",
+                Collections.emptySet(), /* transitive */ true);
         final Role testRole = new Role(testRoleDefinition);
         userStore.addRoleForUser("me", testRole);
         UserStoreImpl store2 = createAndLoadUserStore();
@@ -148,7 +149,8 @@ public class LoginTest {
     public void roleWithQualifiersTest() throws UserManagementException, UserGroupManagementException {
         UserGroupImpl userDefaultTenant = userStore.createUserGroup(UUID.randomUUID(), "me-tenant");
         User meUser = userStore.createUser("me", "me@sap.com");
-        RoleDefinition testRoleDefinition = userStore.createRoleDefinition(UUID.randomUUID(), "testRole", Collections.emptySet());
+        RoleDefinition testRoleDefinition = userStore.createRoleDefinition(UUID.randomUUID(), "testRole",
+                Collections.emptySet(), /* transitive */ true);
         final Role testRole = new Role(testRoleDefinition, userDefaultTenant, meUser);
         userStore.addRoleForUser("me", testRole);
         UserStoreImpl store2 = createAndLoadUserStore();

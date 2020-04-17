@@ -135,11 +135,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private RoleDefinition loadRoleDefinition(Document roleDefinitionDBObject) {
         final String id = (String) roleDefinitionDBObject.get(FieldNames.Role.ID.name());
         final String displayName = (String) roleDefinitionDBObject.get(FieldNames.Role.NAME.name());
+        final String transitive = (String) roleDefinitionDBObject.get(FieldNames.Role.TRANSITIVE.name());
         final Set<WildcardPermission> permissions = new HashSet<>();
         for (Object o : (List<Object>) (roleDefinitionDBObject.get(FieldNames.Role.PERMISSIONS.name()))) {
             permissions.add(new WildcardPermission(o.toString()));
         }
-        return new RoleDefinitionImpl(UUID.fromString(id), displayName, permissions);
+        return new RoleDefinitionImpl(UUID.fromString(id), displayName, permissions,
+                transitive != null ? Boolean.parseBoolean(transitive) : true);
     }
     
     @Override

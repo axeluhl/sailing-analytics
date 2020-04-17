@@ -80,7 +80,7 @@ public interface UserManagementService extends RemoteService {
 
     UserDTO getUserByName(String username) throws UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;
 
-    RoleDefinitionDTO createRoleDefinition(String roleDefinitionIdAsString, String name)
+    RoleDefinitionDTO createRoleDefinition(String roleDefinitionIdAsString, String name, boolean transitive)
             throws org.apache.shiro.authz.UnauthorizedException;
 
     void deleteRoleDefinition(String roleDefinitionIdAsString) throws org.apache.shiro.authz.UnauthorizedException;
@@ -217,4 +217,5 @@ public interface UserManagementService extends RemoteService {
     Boolean userGroupExists(String userGroupName) throws org.apache.shiro.authz.UnauthorizedException;
 
     SecurityServiceSharingDTO getSharingConfiguration();
+
 }
