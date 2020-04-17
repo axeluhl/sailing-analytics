@@ -31,8 +31,6 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-import java.util.function.Function;
-
 public class ManagedRaceImpl implements ManagedRace {
     private static final long serialVersionUID = -4936566684992524001L;
     private final ManagedRaceIdentifier identifier;
@@ -45,28 +43,22 @@ public class ManagedRaceImpl implements ManagedRace {
     private final int zeroBasedIndexInFleet;
 
     /**
-     * @param zeroBasedIndexInFleet A Series offers a sequence of RaceColumns, each of them split
-     *                              according to the Fleets modeled for the
-     *                              Series. A {@link RaceCell} describes a "slot" in this grid, defined by the series, the fleet
-     *                              and the
-     *                              race column. While this object's {@link #getName() name} represents the race column's name,
-     *                              this
-     *                              doesn't tell anything about the "horizontal" position in the "grid" or in other words what
-     *                              the index
-     *                              is of the race column in which this cell lies.
-     *                              <p>
+     * @param zeroBasedIndexInFleet
+     *            A Series offers a sequence of RaceColumns, each of them split according to the Fleets modeled for the
+     *            Series. A {@link RaceCell} describes a "slot" in this grid, defined by the series, the fleet and the
+     *            race column. While this object's {@link #getName() name} represents the race column's name, this
+     *            doesn't tell anything about the "horizontal" position in the "grid" or in other words what the index
+     *            is of the race column in which this cell lies.
+     *            <p>
      *
-     *                              Indices returned by this method start with zero, meaning the first race column in the series.
-     *                              This
-     *                              corresponds to what one would get by asking {@link Util#indexOf(Iterable, Object)
-     *                              Util.indexOf(series.getRaceColumns(), thisCellsRaceColumn)}, except in case the first race
-     *                              column is a
-     *                              "virtual" one that holds a non-discardable carry-forward result. In this case, the second
-     *                              Race Column,
-     *                              which is the first "non-virtual" one, receives index 0.
+     *            Indices returned by this method start with zero, meaning the first race column in the series. This
+     *            corresponds to what one would get by asking {@link Util#indexOf(Iterable, Object)
+     *            Util.indexOf(series.getRaceColumns(), thisCellsRaceColumn)}, except in case the first race column is a
+     *            "virtual" one that holds a non-discardable carry-forward result. In this case, the second Race Column,
+     *            which is the first "non-virtual" one, receives index 0.
      */
     private ManagedRaceImpl(ManagedRaceIdentifier identifier, double factor, Double explicitFactor,
-                            int zeroBasedIndexInFleet) {
+            int zeroBasedIndexInFleet) {
         this.identifier = identifier;
         this.competitorsAndBoats = new HashMap<>();
         this.courseOnServer = null;
@@ -81,7 +73,7 @@ public class ManagedRaceImpl implements ManagedRace {
     }
 
     public ManagedRaceImpl(ManagedRaceIdentifier identifier, ManagedRaceCalculator calculator, double factor,
-                           Double explicitFactor, int zeroBasedIndexInFleet) {
+            Double explicitFactor, int zeroBasedIndexInFleet) {
         this(identifier, factor, explicitFactor, zeroBasedIndexInFleet);
         this.calculator = calculator;
     }
@@ -178,7 +170,7 @@ public class ManagedRaceImpl implements ManagedRace {
     }
 
     @Override
-    public Result revokeFinish(AbstractLogEventAuthor author) {
+    public Result revokeFinished(AbstractLogEventAuthor author) {
         final Result result = new Result();
 
         final FinishedTimeFinder ftf = new FinishedTimeFinder(getRaceLog());

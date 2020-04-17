@@ -1,6 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import java.util.Calendar;
@@ -105,7 +104,7 @@ public class RaceSummaryFragment extends BaseFragment {
             revokeFinish.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    getRace().revokeFinish(preferences.getAuthor());
+                    getRace().revokeFinished(preferences.getAuthor());
                 }
             });
         }

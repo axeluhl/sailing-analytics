@@ -120,5 +120,5 @@ public interface ManagedRace extends FilterableRace, ManagedRaceIdentifier, Name
 
     Result revokeFinishing(AbstractLogEventAuthor author);
 
-    Result revokeFinish(AbstractLogEventAuthor author);
+    Result revokeFinished(AbstractLogEventAuthor author);
 }
