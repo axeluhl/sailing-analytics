@@ -70,18 +70,17 @@ public class TracTracConnectionTableWrapper extends
         final TextColumn<TracTracConfigurationWithSecurityDTO> tracTracAccountNameColumn = new AbstractSortableTextColumn<TracTracConfigurationWithSecurityDTO>(
                 dto -> dto.getName(), tracTracAccountColumnListHandler);
         final TextColumn<TracTracConfigurationWithSecurityDTO> tracTracAccountLiveUriColumn = new AbstractSortableTextColumn<TracTracConfigurationWithSecurityDTO>(
-                dto -> dto.getLiveDataURI(), tracTracAccountColumnListHandler);
+                dto -> dto.getLiveDataURI()==null?"":dto.getLiveDataURI(), tracTracAccountColumnListHandler);
         final TextColumn<TracTracConfigurationWithSecurityDTO> tracTracAccountStoredUriColumn = new AbstractSortableTextColumn<TracTracConfigurationWithSecurityDTO>(
-                dto -> dto.getStoredDataURI(), tracTracAccountColumnListHandler);
+                dto -> dto.getStoredDataURI()==null?"":dto.getStoredDataURI(), tracTracAccountColumnListHandler);
         final TextColumn<TracTracConfigurationWithSecurityDTO> tracTracAccountJsonUrlColumn = new AbstractSortableTextColumn<TracTracConfigurationWithSecurityDTO>(
                 dto -> dto.getJsonUrl(), tracTracAccountColumnListHandler);
         final TextColumn<TracTracConfigurationWithSecurityDTO> tracTracAccountTracTracServerUpdateUriColumn = new AbstractSortableTextColumn<TracTracConfigurationWithSecurityDTO>(
-                dto -> dto.getCourseDesignUpdateURI(), tracTracAccountColumnListHandler);
+                dto -> dto.getCourseDesignUpdateURI()==null?"":dto.getCourseDesignUpdateURI(), tracTracAccountColumnListHandler);
         final TextColumn<TracTracConfigurationWithSecurityDTO> tracTracAccountUsernameColumn = new AbstractSortableTextColumn<TracTracConfigurationWithSecurityDTO>(
                 dto -> dto.getTracTracUsername(), tracTracAccountColumnListHandler);
         final TextColumn<TracTracConfigurationWithSecurityDTO> tracTracAccountCreatorNameColumn = new AbstractSortableTextColumn<TracTracConfigurationWithSecurityDTO>(
                 dto -> dto.getCreatorName(), tracTracAccountColumnListHandler);
-
         final HasPermissions type = SecuredDomainType.TRACTRAC_ACCOUNT;
         final AccessControlledActionsColumn<TracTracConfigurationWithSecurityDTO, DefaultActionsImagesBarCell> actionColumn = create(
                 new DefaultActionsImagesBarCell(stringMessages), userService);

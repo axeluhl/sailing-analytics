@@ -112,10 +112,9 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
     }
 
     @Override
-    public void createAccount(final String name, String email, String password, String fullName, 
-            String company, SuccessCallback<UserDTO> callback) {
-        userManagementService.createSimpleUser(name, email, password, fullName, company,
-                LocaleInfo.getCurrentLocale().getLocaleName(), emailConfirmationUrl,
+    public void createAccount(final String name, final String email, final String password, final String fullName,
+            final String locale, final String company, SuccessCallback<UserDTO> callback) {
+        userManagementService.createSimpleUser(name, email, password, fullName, company, locale, emailConfirmationUrl,
                 new AsyncCallbackImpl<UserDTO>(callback) {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -127,7 +126,7 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
                             view.setErrorMessage(i18n.errorCreatingUser(name, caught.getMessage()));
                         }
                     }
-        });
+                });
     }
     
     @Override
@@ -147,7 +146,7 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
             }
         });
     }
-    
+
     @Override
     public void login(String username, String password, final SuccessCallback<SuccessInfo> callback) {
         userService.login(username, password, new AsyncCallback<SuccessInfo>() {
@@ -155,8 +154,9 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
             public void onSuccess(SuccessInfo result) {
                 if (result.isSuccessful()) {
                     callback.onSuccess(result);
-                    if (ExperimentalFeatures.REFRESH_ON_LOCALE_CHANGE_IN_USER_PROFILE) {
-                        // when a user logs in we explicitly switch to the user's locale event if a locale is given by the URL
+                    if (isUserLocaleChanged(result) || ExperimentalFeatures.REFRESH_ON_LOCALE_CHANGE_IN_USER_PROFILE) {
+                        // when a user logs in we explicitly switch to the user's locale event if a locale is given by
+                        // the URL
                         redirectIfLocaleIsSetAndLocaleIsNotGivenInTheURL(result.getUserDTO().getA().getLocale());
                     }
                 } else {
@@ -167,14 +167,18 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
                     }
                 }
             }
-            
+
+            private boolean isUserLocaleChanged(SuccessInfo result) {
+                return !LocaleInfo.getCurrentLocale().getLocaleName().equals(result.getUserDTO().getA().getLocale());
+            }
+
             @Override
             public void onFailure(Throwable caught) {
                 view.setErrorMessage(StringMessages.INSTANCE.failedToSignIn());
             }
         });
     }
-    
+
     @Override
     public void logout() {
         userService.logout();
