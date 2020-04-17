@@ -7,7 +7,6 @@ import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sse.common.TimePoint;
 
 public class FinishedTimeFinder extends RaceLogAnalyzer<TimePoint> {
-
     public FinishedTimeFinder(RaceLog raceLog) {
         super(raceLog);
     }

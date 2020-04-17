@@ -40,11 +40,16 @@ public class RaceLogImpl extends AbstractLogImpl<RaceLogEvent, RaceLogEventVisit
 
     @Override
     public int getCurrentPassId() {
-        //return pass id of last event, as pass is the top-level sorting criterion in RaceLogEventComparator
-        if (! getUnrevokedEvents().isEmpty()) {
-            return getUnrevokedEvents().last().getPassId();
-        } else {
-            return DefaultPassId;
+        lockForRead();
+        try {
+            // return pass id of last event, as pass is the top-level sorting criterion in RaceLogEventComparator
+            if (!getUnrevokedEvents().isEmpty()) {
+                return getUnrevokedEvents().last().getPassId();
+            } else {
+                return DefaultPassId;
+            }
+        } finally {
+            unlockAfterRead();
         }
     }
 
