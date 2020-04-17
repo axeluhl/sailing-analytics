@@ -42,7 +42,7 @@ public class RoleDefinitionSuggestOracle extends MultiWordSuggestOracle {
                 allRoles.clear();
                 for (RoleDefinitionDTO role : result) {
                     allRoles.put(role.getName(),
-                            new StrippedRoleDefinitionDTO(role.getId(), role.getName(), role.getPermissions()));
+                            new StrippedRoleDefinitionDTO(role.getId(), role.getName(), role.getPermissions(), role.isTransitive()));
                 }
                 RoleDefinitionSuggestOracle.super.clear();
                 RoleDefinitionSuggestOracle.super.setDefaultSuggestionsFromText(allRoles.keySet());

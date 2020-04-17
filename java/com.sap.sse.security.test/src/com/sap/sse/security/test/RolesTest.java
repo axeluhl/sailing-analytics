@@ -17,7 +17,8 @@ import com.sap.sse.security.shared.impl.UserGroupImpl;
 public class RolesTest {
     @Test
     public void testRoleToString() {
-        final StrippedRoleDefinitionDTO roleDefinition = new StrippedRoleDefinitionDTO(UUID.randomUUID(), "role", new ArrayList<>());
+        final StrippedRoleDefinitionDTO roleDefinition = new StrippedRoleDefinitionDTO(UUID.randomUUID(), "role",
+                new ArrayList<>(), /* transitive */ true);
         final Role role = new Role(roleDefinition);
         final UserGroupImpl tenant = new UserGroupImpl(UUID.randomUUID(), "tenant");
         final StrippedUserGroupDTO tenantDTO = new StrippedUserGroupDTO(UUID.randomUUID(), "tenant");

@@ -152,7 +152,7 @@ public class SecurityDTOFactory {
     private StrippedRoleDefinitionDTO createStrippedRoleDefinitionDTO(final RoleDefinition roleDefinition,
             final Map<UserGroup, StrippedUserGroupDTO> fromOriginalToStrippedDownUserGroup) {
         return new StrippedRoleDefinitionDTO(roleDefinition.getId(), roleDefinition.getName(),
-                roleDefinition.getPermissions());
+                roleDefinition.getPermissions(), roleDefinition.isTransitive());
     }
 
     private RoleDefinitionDTO createRoleDefinitionDTO(final RoleDefinition roleDefinition,
