@@ -43,7 +43,7 @@ public class RoleResource extends AbstractSecurityResource {
     @POST
     @Produces("application/json;charset=UTF-8")
     public Response createRole(@FormParam(KEY_ROLE_NAME) String roleName,
-            @QueryParam("KEY_TRANSITIVE") @DefaultValue("true") boolean transitive) {
+            @QueryParam(KEY_TRANSITIVE) @DefaultValue("true") boolean transitive) {
         final String roleDefinitionIdAsString = UUID.randomUUID().toString();
         final RoleDefinition role = getService().setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredSecurityTypes.ROLE_DEFINITION, new TypeRelativeObjectIdentifier(roleDefinitionIdAsString),
@@ -141,6 +141,10 @@ public class RoleResource extends AbstractSecurityResource {
                     final String roleName = (String) body.get(KEY_ROLE_NAME);
                     if (roleName != null) {
                         roleDefinition.setName(roleName);
+                    }
+                    final Boolean transitive = (Boolean) body.get(KEY_TRANSITIVE);
+                    if (transitive != null) {
+                        roleDefinition.setTransitive(transitive);
                     }
                     getService().updateRoleDefinition(roleDefinition);
                     resp = Response.ok().build();

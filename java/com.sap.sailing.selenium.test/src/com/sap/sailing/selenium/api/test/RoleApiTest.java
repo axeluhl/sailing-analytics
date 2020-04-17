@@ -3,6 +3,7 @@ package com.sap.sailing.selenium.api.test;
 import static com.sap.sailing.selenium.api.core.ApiContext.SECURITY_CONTEXT;
 import static com.sap.sailing.selenium.api.core.ApiContext.createAdminApiContext;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -90,7 +91,8 @@ public class RoleApiTest extends AbstractSeleniumTest {
         permissions.add("BOAT:READ");
 
         final String updatedRoleName = roleCreated.getName() + "_changed";
-        final String roleUpdate = roleApi.updateRole(adminCtx, roleCreated.getId(), permissions, updatedRoleName);
+        final String roleUpdate = roleApi.updateRole(adminCtx, roleCreated.getId(), permissions, updatedRoleName,
+                roleCreated.isTransitive());
 
         assertNull("Empty string expected.", roleUpdate);
 
@@ -106,5 +108,31 @@ public class RoleApiTest extends AbstractSeleniumTest {
         }
 
         roleApi.deleteRole(adminCtx, roleCreated.getId());
+    }
+
+    @Test
+    public void testUpdateRoleTransitive() {
+        final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
+        final String testRoleName1 = "test role transitive_1";
+        final Role roleCreated1 = roleApi.createRole(adminCtx, testRoleName1);
+        assertTrue("role1 should be transitive by default", roleCreated1.isTransitive());
+
+        final String testRoleName2 = "test role transitive_2";
+        final Role roleCreated2 = roleApi.createRole(adminCtx, testRoleName2, /* transitive */ true);
+        assertTrue("role2 should be transitive by parameter", roleCreated2.isTransitive());
+
+        final String testRoleName3 = "test role transitive_3";
+        final Role roleCreated3 = roleApi.createRole(adminCtx, testRoleName3, /* transitive */ false);
+        assertFalse("role3 should be not transitive by parameter", roleCreated3.isTransitive());
+
+        assertNull("updateRole shouldn't return something", roleApi.updateRole(adminCtx, roleCreated1.getId(),
+                roleCreated1.getPermissions(), roleCreated1.getName(), false));
+        final Role roleUpdated1 = roleApi.getRole(adminCtx, roleCreated1.getId());
+        assertFalse("role1 should be non-transitive after update", roleUpdated1.isTransitive());
+
+        assertNull("updateRole shouldn't return something", roleApi.updateRole(adminCtx, roleCreated3.getId(),
+                roleCreated3.getPermissions(), roleCreated3.getName(), true));
+        final Role roleUpdated3 = roleApi.getRole(adminCtx, roleCreated3.getId());
+        assertTrue("role3 should be transitive after update", roleUpdated3.isTransitive());
     }
 }

@@ -92,7 +92,7 @@ public class UserGroupApiTest extends AbstractSeleniumTest {
 
         // add new role to group with admin user
         final Role createdRole = roleApi.createRole(adminCtx, "My-Epic-Role");
-        roleApi.updateRole(adminCtx, createdRole.getId(), Arrays.asList("*"), createdRole.getName());
+        roleApi.updateRole(adminCtx, createdRole.getId(), Arrays.asList("*"), createdRole.getName(), createdRole.isTransitive());
         userGroupApi.addRoleToGroup(adminCtx, userGroupCreated.getGroupId(), createdRole.getId(), false);
 
         try {

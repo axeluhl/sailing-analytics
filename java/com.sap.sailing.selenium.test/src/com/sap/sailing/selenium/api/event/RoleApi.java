@@ -21,24 +21,33 @@ public class RoleApi {
     private static final String KEY_ROLE_NAME = "roleName";
     private static final String KEY_PERMISSIONS = "permissions";
     private static final String KEY_ID = "roleId";
+    private static final String KEY_TRANSITIVE = "transitive";
 
     public Role getRole(ApiContext ctx, UUID roleId) {
         return new Role(ctx.get(ROLE_URL + roleId.toString()));
     }
 
     public Role createRole(ApiContext ctx, String roleName) {
+        return createRole(ctx, roleName, /* transitive */ true);
+    }
+
+    public Role createRole(ApiContext ctx, String roleName, boolean transitive) {
         final Map<String, String> formParams = new HashMap<>();
         formParams.put(KEY_ROLE_NAME, roleName);
-        return new Role(ctx.post(ROLE_URL, new HashMap<>(), formParams));
+        final Map<String, String> queryParams = new HashMap<>();
+        queryParams.put(KEY_TRANSITIVE, Boolean.toString(transitive));
+        return new Role(ctx.post(ROLE_URL, queryParams, formParams));
     }
 
     public void deleteRole(ApiContext ctx, UUID roleId) {
         ctx.delete(ROLE_URL + roleId.toString());
     }
 
-    public String updateRole(ApiContext ctx, UUID roleId, Iterable<String> permissionStrings, String roleName) {
+    public String updateRole(ApiContext ctx, UUID roleId, Iterable<String> permissionStrings, String roleName,
+            boolean transitive) {
         final JSONObject json = new JSONObject();
         json.put(KEY_ROLE_NAME, roleName);
+        json.put(KEY_TRANSITIVE, transitive);
         final JSONArray permissionArray = new JSONArray();
         for (String permission : permissionStrings) {
             permissionArray.add(permission);
@@ -59,6 +68,10 @@ public class RoleApi {
 
         public UUID getId() {
             return UUID.fromString(get(KEY_ID));
+        }
+
+        public boolean isTransitive() {
+            return get(KEY_TRANSITIVE);
         }
 
         public Iterable<String> getPermissions() {
