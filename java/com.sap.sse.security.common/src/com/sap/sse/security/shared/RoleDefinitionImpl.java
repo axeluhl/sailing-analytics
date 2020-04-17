@@ -78,7 +78,6 @@ public class RoleDefinitionImpl implements RoleDefinition {
     public boolean isTransitive() {
         return transitive;
     }
-    
 
     @Override
     public void setTransitive(boolean transitive) {
@@ -112,7 +111,7 @@ public class RoleDefinitionImpl implements RoleDefinition {
 
     @Override
     public String toString() {
-        return name + " (permissions: " + permissions + ")";
+        return name + " (permissions: " + permissions + ", transitive: " + transitive + ")";
     }
 
     @Override
