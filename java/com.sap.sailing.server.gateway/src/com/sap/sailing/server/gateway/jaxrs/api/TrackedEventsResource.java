@@ -57,29 +57,22 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
     @GET
     @Produces("application/json;charset=UTF-8")
     public Response getTrackedEvents(@QueryParam(KEY_QUERY_INCLUDE_ARCHIVED) String includeArchivedStr) {
-
         final User currentUser = getSecurityService().getCurrentUser();
         final ResponseBuilder builder;
-
         // check if user logged in
         if (currentUser != null) {
-
             // load tracked events from storage
             final TrackedEventPreferences prefs = getSecurityService().getPreferenceObject(currentUser.getName(),
                     SailingPreferences.TRACKED_EVENTS_PREFERENCES);
-
             final JSONArray result = new JSONArray();
             final boolean includeArchived = Boolean.parseBoolean(includeArchivedStr);
-
             if (prefs != null) {
                 // iterate all stored tracked events
                 for (final TrackedEventPreference pref : prefs.getTrackedEvents()) {
-
                     if (!includeArchived && pref.getIsArchived()) {
                         // skip, if event is archived and should be filtered out
                         continue;
                     }
-
                     final JSONObject jsonEvent = new JSONObject();
                     jsonEvent.put(KEY_EVENT_ID, pref.getEventId().toString());
                     jsonEvent.put(KEY_EVENT_REGATTA_SECRET, pref.getRegattaSecret());
@@ -90,7 +83,6 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
                     result.add(jsonEvent);
                 }
             }
-
             // storage was empty -> respond with empty list
             final JSONObject resultEvents = new JSONObject();
             resultEvents.put(KEY_TRACKED_EVENTS, result);
@@ -127,9 +119,7 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
             @PathParam(KEY_LEADERBOARD_NAME) String leaderboardName, String jsonBody) {
         ResponseBuilder responseBuilder = null;
         final User currentUser = getSecurityService().getCurrentUser();
-
         if (currentUser != null) {
-
             try {
                 final Object requestBody = JSONValue.parseWithException(jsonBody);
                 final JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
@@ -139,75 +129,53 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
                 try {
                     final UUID uuidEvent = UUID.fromString(eventId);
                     final boolean isArchived = archived;
-
                     TrackedEventPreferences prefs = getSecurityService().getPreferenceObject(currentUser.getName(),
                             SailingPreferences.TRACKED_EVENTS_PREFERENCES);
-
                     if (prefs == null) {
                         prefs = new TrackedEventPreferences();
                     }
-
                     final JSONArray trackedElementsJson = (JSONArray) requestObject.get(KEY_EVENT_TRACKED_ELEMENTS);
-
-                    // check that exactly one trackedElement is in JSON
-                    if (trackedElementsJson == null || trackedElementsJson.size() == 0) {
-                        // too few children
-                        responseBuilder = Response.status(Status.BAD_REQUEST)
-                                .entity("Invalid JSON body in request: Tracked element is missing.");
-                    } else {
-
-                        // Copy tracked event preference objects to new list while removing the changed
-                        // event/leaderboard node
-                        final Collection<TrackedEventPreference> prefsNew = //
-                                StreamSupport.stream(prefs.getTrackedEvents().spliterator(), false)
-                                        .filter(pref -> !(pref.getEventId().equals(uuidEvent)
-                                                && pref.getLeaderboardName().equals(leaderboardName)))
-                                        .collect(Collectors.toList());
-
-                        // Create new tracked elements for this event/leaderboard from JSON body
-                        final Collection<TrackedElementWithDeviceId> trackedElements = new ArrayList<>();
-
-                        for (int i = 0; i < trackedElementsJson.size(); i++) {
-                            final JSONObject jsonTrackedElement = (JSONObject) trackedElementsJson.get(i);
-
+                    // Copy tracked event preference objects to new list while removing the changed
+                    // event/leaderboard node
+                    final Collection<TrackedEventPreference> prefsNew = //
+                            StreamSupport.stream(prefs.getTrackedEvents().spliterator(), false)
+                                    .filter(pref -> !(pref.getEventId().equals(uuidEvent)
+                                            && pref.getLeaderboardName().equals(leaderboardName)))
+                                    .collect(Collectors.toList());
+                    // Create new tracked elements for this event/leaderboard from JSON body
+                    final Collection<TrackedElementWithDeviceId> trackedElements = new ArrayList<>();
+                    if (trackedElementsJson != null) {
+                        for (final Object trackedElementObject : trackedElementsJson) {
+                            final JSONObject jsonTrackedElement = (JSONObject) trackedElementObject;
                             // parse IDs
                             final String deviceId = (String) jsonTrackedElement.get(KEY_TRACKED_ELEMENT_DEVICE_ID);
                             final String competitorIdStr = (String) jsonTrackedElement
                                     .get(KEY_TRACKED_ELEMENT_COMPETITOR_ID);
                             final String boatIdStr = (String) jsonTrackedElement.get(KEY_TRACKED_ELEMENT_BOAT_ID);
                             final String markIdStr = (String) jsonTrackedElement.get(KEY_TRACKED_ELEMENT_MARK_ID);
-
                             // parse UUIDs of tracked element
                             final UUID competitorId = parseUUID(competitorIdStr);
                             final UUID boatId = parseUUID(boatIdStr);
                             final UUID markId = parseUUID(markIdStr);
-
                             if (boatId != null ^ markId != null ^ competitorId != null) {
-
                                 // create TrackedElementWithID holder
                                 final TrackedElementWithDeviceId newPrefElem = new TrackedElementWithDeviceId(deviceId,
                                         boatId, competitorId, markId);
                                 trackedElements.add(newPrefElem);
-
                             } else {
                                 // no boatId, competitorId or markId were specified
                                 responseBuilder = Response.status(Status.BAD_REQUEST)
                                         .entity("Invalid JSON body in request.");
                             }
-
                         }
-
-                        final TrackedEventPreference newPreference = new TrackedEventPreference(uuidEvent,
-                                leaderboardName, trackedElements, baseUrl, isArchived, regattaSecret);
-                        prefsNew.add(newPreference);
-
-                        prefs.setTrackedEvents(prefsNew);
-
-                        getSecurityService().setPreferenceObject(currentUser.getName(),
-                                SailingPreferences.TRACKED_EVENTS_PREFERENCES, prefs);
-                        responseBuilder = Response.status(Status.ACCEPTED);
                     }
-
+                    final TrackedEventPreference newPreference = new TrackedEventPreference(uuidEvent,
+                            leaderboardName, trackedElements, baseUrl, isArchived, regattaSecret);
+                    prefsNew.add(newPreference);
+                    prefs.setTrackedEvents(prefsNew);
+                    getSecurityService().setPreferenceObject(currentUser.getName(),
+                            SailingPreferences.TRACKED_EVENTS_PREFERENCES, prefs);
+                    responseBuilder = Response.status(Status.ACCEPTED);
                 } catch (IllegalArgumentException | ClassCastException e) {
                     responseBuilder = Response.status(Status.BAD_REQUEST)
                             .entity("Invalid or missing attributes in JSON body.");
@@ -258,21 +226,17 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
             Function<TrackedEventPreference, TrackedEventPreference> function) {
         ResponseBuilder responseBuilder;
         final User currentUser = getSecurityService().getCurrentUser();
-
         if (currentUser != null) {
-
             final TrackedEventPreferences prefs = getSecurityService().getPreferenceObject(currentUser.getName(),
                     SailingPreferences.TRACKED_EVENTS_PREFERENCES);
             try {
                 // parse tracked event UUID
                 final UUID eventUuid = UUID.fromString(eventId);
-
                 if (prefs == null) {
                     // storage is empty
                     responseBuilder = Response.status(Status.NOT_FOUND)
                             .entity("No tracked events with this eventId found.");
                 } else {
-
                     // iterate stored preferences until tracked event with corresponding eventId is found
                     boolean found = false;
                     final Collection<TrackedEventPreference> newPrefs = new HashSet<>();
@@ -300,7 +264,6 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
                                 SailingPreferences.TRACKED_EVENTS_PREFERENCES, prefs);
                         responseBuilder = Response.status(Status.ACCEPTED);
                     }
-
                 }
             } catch (IllegalArgumentException e) {
                 // eventId parameter could not be parsed
