@@ -283,25 +283,22 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
                             public void cancel() {
                             }
                         }, userService, errorReporter).show());
-                        // Remove action
-                        buttonPanel.addRemoveAction(stringMessages.remove(), connectionsTable.getSelectionModel(),
-                                false, () -> {
-                                    sailingService.deleteSwissTimingArchiveConfigurations(
-                                            connectionsTable.getSelectionModel().getSelectedSet(),
-                                            new AsyncCallback<Void>() {
-                                                @Override
-                                                public void onFailure(Throwable caught) {
-                                                    errorReporter.reportError(
-                                                            "Exception trying to delete configuration(s) in DB: "
-                                                                    + caught.getMessage());
-                                                }
+        // Remove action
+        buttonPanel.addRemoveAction(stringMessages.remove(), connectionsTable.getSelectionModel(), false, () -> {
+            sailingService.deleteSwissTimingArchiveConfigurations(connectionsTable.getSelectionModel().getSelectedSet(),
+                    new AsyncCallback<Void>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError(
+                                    "Exception trying to delete configuration(s) in DB: " + caught.getMessage());
+                        }
 
-                                                @Override
-                                                public void onSuccess(Void result) {
-                                                    connectionsTable.refreshConnectionList();
-                                                }
-                                            });
-                                });
+                        @Override
+                        public void onSuccess(Void result) {
+                            connectionsTable.refreshConnectionList();
+                        }
+                    });
+        });
         // List Race action
         final Button listRacesButton = buttonPanel.addUnsecuredAction(stringMessages.listRaces(), () -> {
             fillRaces(sailingService);

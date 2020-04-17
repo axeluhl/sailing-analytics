@@ -111,7 +111,8 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         connectionsPanel.setStyleName("bold");
         VerticalPanel tableAndConfigurationPanel = new VerticalPanel();
         connectionsTable = new TracTracConnectionTableWrapper(userService, sailingService, stringMessages,
-                errorReporter, true, tableResources, () -> {});
+                errorReporter, true, tableResources, () -> {
+                });
         connectionsTable.refreshTracTracConnectionList();
 
         final Grid grid = new Grid(1, 2);
@@ -120,36 +121,37 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         showHiddenRacesCheckbox.ensureDebugId("ShowHiddenRacesCheckBox");
         grid.setWidget(0, 1, showHiddenRacesCheckbox);
         // Add TracTrac Connection
-        final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, SecuredDomainType.TRACKED_RACE);
-        buttonPanel.addUnsecuredAction(stringMessages.refresh(), () -> connectionsTable.refreshTracTracConnectionList());
+        final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService,
+                SecuredDomainType.TRACKED_RACE);
+        buttonPanel.addUnsecuredAction(stringMessages.refresh(),
+                () -> connectionsTable.refreshTracTracConnectionList());
         Button addCreateAction = buttonPanel.addCreateAction(stringMessages.addTracTracConnection(),
-                () -> new TracTracConnectionDialog(
-                        new DialogCallback<TracTracConfigurationWithSecurityDTO>() {
-                            @Override
-                            public void ok(TracTracConfigurationWithSecurityDTO editedConnection) {
-                                sailingService.createTracTracConfiguration(editedConnection.getName(),
-                                        editedConnection.getJsonUrl(), editedConnection.getLiveDataURI(),
-                                        editedConnection.getStoredDataURI(),
-                                        editedConnection.getCourseDesignUpdateURI(),
-                                        editedConnection.getTracTracUsername(), editedConnection.getTracTracPassword(),
-                                        new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
-                                            @Override
-                                            public void onFailure(Throwable caught) {
-                                                reportError("Exception trying to create configuration in DB: "
-                                                        + caught.getMessage());
-                                            }
+                () -> new TracTracConnectionDialog(new DialogCallback<TracTracConfigurationWithSecurityDTO>() {
+                    @Override
+                    public void ok(TracTracConfigurationWithSecurityDTO editedConnection) {
+                        sailingService.createTracTracConfiguration(editedConnection.getName(),
+                                editedConnection.getJsonUrl(), editedConnection.getLiveDataURI(),
+                                editedConnection.getStoredDataURI(), editedConnection.getCourseDesignUpdateURI(),
+                                editedConnection.getTracTracUsername(), editedConnection.getTracTracPassword(),
+                                new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        reportError("Exception trying to create configuration in DB: "
+                                                + caught.getMessage());
+                                    }
 
-                                            @Override
-                                            public void onSuccess(Void voidResult) {
-                                                connectionsTable.refreshTracTracConnectionList(/* selectWhenDone */ editedConnection);
-                                            }
-                                        }));
-                            }
+                                    @Override
+                                    public void onSuccess(Void voidResult) {
+                                        connectionsTable
+                                                .refreshTracTracConnectionList(/* selectWhenDone */ editedConnection);
+                                    }
+                                }));
+                    }
 
-                            @Override
-                            public void cancel() {
-                            }
-                        }, userService, errorReporter).show());
+                    @Override
+                    public void cancel() {
+                    }
+                }, userService, errorReporter).show());
         addCreateAction.ensureDebugId("AddConnectionButton");
         buttonPanel.addRemoveAction(stringMessages.remove(), connectionsTable.getSelectionModel(), false, () -> {
             sailingService.deleteTracTracConfigurations(connectionsTable.getSelectionModel().getSelectedSet(),

@@ -115,21 +115,22 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                     }
                 }, userService, errorReporter).show());
         // Remove SwissTiming Connection
-        buttonPanel.addRemoveAction(stringMessages.remove(), connectionsTable.getSelectionModel(), /* with confirmation: */ false, () -> {
-            sailingService.deleteSwissTimingConfigurations(
-                    connectionsTable.getSelectionModel().getSelectedSet(), new AsyncCallback<Void>() {
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            errorReporter.reportError("Exception trying to delete configuration in DB: "
-                                    + caught.getMessage());
-                        }
+        buttonPanel.addRemoveAction(stringMessages.remove(), connectionsTable.getSelectionModel(),
+                /* with confirmation: */ false, () -> {
+                    sailingService.deleteSwissTimingConfigurations(
+                            connectionsTable.getSelectionModel().getSelectedSet(), new AsyncCallback<Void>() {
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    errorReporter.reportError(
+                                            "Exception trying to delete configuration in DB: " + caught.getMessage());
+                                }
 
-                        @Override
-                        public void onSuccess(Void result) {
-                            connectionsTable.refreshSwissTimingConnectionList();
-                        }
-            });
-        });
+                                @Override
+                                public void onSuccess(Void result) {
+                                    connectionsTable.refreshSwissTimingConnectionList();
+                                }
+                            });
+                });
         // List Races in SwissTiming Connection
         final Button listRacesButton = buttonPanel.addUnsecuredAction(stringMessages.listRaces(), () -> {
             fillRaces(sailingService);
