@@ -26,9 +26,9 @@ To run Selenium Integration UI Tests please do the following:
 
 * in local-test-environment.xml file adjust the properties according to which browser and driver you'll be using (chromedriver, geckodriver) and what their file system locations are;
 * make sure no "Sailing Server ..." launch configuration is currently running;
-* start the "Sailing Server (No Proxy, winddbTest).launch" config, it will use a test database in MongoDB so as to not overwrite anything in your local "production" ("winddb") database; it furthermore includes a bundle in the OSGi configuration that enables massive "clear" operations that we don't want to deploy to our production landscape otherwise but which is used by the tests to ensure a clean fresh state when tests start to execute;
-* start the "GWT Sailing SDM.launch";
-* start the "Sailing Domain Test (No Proxy" JUnit test launch configuration;
+* start the "Sailing Server (No Proxy, winddbTest)" config, it will use a test database in MongoDB so as to not overwrite anything in your local "production" ("winddb") database; it furthermore includes a bundle in the OSGi configuration that enables massive "clear" operations that we don't want to deploy to our production landscape otherwise but which is used by the tests to ensure a clean fresh state when tests start to execute;
+* start the "GWT Sailing SDM" launch configuration;
+* start the "Sailing Domain Test (No Proxy)" JUnit test launch configuration;
 
 ## Tracking and Wind Sensor Connectors
 To receive GPS and wind data in near real time, some network programming becomes necessary. Depending on the technology and provider used, a combination of HTTP, TCP and UDP connections is required to obtain live data. Particularly the UDP connectivity was the reason why deploying our solution to SAP NetWeaver Cloud was and still is difficult.
