@@ -145,13 +145,7 @@ public class TracTracConnectivityParamsHandler extends AbstractRaceTrackingConne
 
     private void updatePersistentTracTracConfiguration(RaceTrackingConnectivityParametersImpl params)
             throws MalformedURLException, IOException, ParseException {
-        final String EVENT_MANAGER_HOSTNAME_PREFIX = "em.";
-        final URL paramsJsonUrl = new URL(params.getParamURL().getProtocol(),
-                params.getParamURL().getHost().startsWith(EVENT_MANAGER_HOSTNAME_PREFIX) ? params.getParamURL().getHost() : EVENT_MANAGER_HOSTNAME_PREFIX+params.getParamURL().getHost(),
-                        "/events/"+params.getTractracRace().getEvent().getId().toString()+"/races/"+params.getTractracRace().getId().toString()+".json");
-        final URLConnection conn = HttpUrlConnectionHelper.redirectConnection(paramsJsonUrl);
-        final JSONObject paramsJson = (JSONObject) new JSONParser().parse(new InputStreamReader(conn.getInputStream()));
-        final String jsonURL = (String) paramsJson.get("eventJSON");
+        final String jsonURL = params.getTractracRace().getParameterSet().getParameter("eventJSON");
         final String creatorName = SessionUtils.getPrincipal().toString();
         final TracTracConfigurationImpl tracTracConfiguration = new TracTracConfigurationImpl(creatorName, params.getTractracRace().getEvent().getName(), jsonURL,
                 /* live URI */ null, /* stored URI */ null, // we mainly want to enable the user to list the event's races again in case they are removed; live/stored stuff comes from the tracking params
