@@ -1,16 +1,12 @@
 package com.sap.sailing.domain.tractracadapter.persistence.impl;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.racelog.RaceLogStore;
@@ -28,7 +24,6 @@ import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionUtils;
-import com.sap.sse.util.HttpUrlConnectionHelper;
 
 /**
  * Handles mapping TracTrac connectivity parameters from and to a map with {@link String} keys. The
