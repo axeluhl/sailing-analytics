@@ -388,6 +388,10 @@ extends TrackImpl<EventT> implements AbstractLog<EventT, VisitorT> {
         boolean isValid(T item);
     }
 
+    /**
+     * Considers an event valid if it is not a {@link RevokeEvent} and is not contained in the set of events passed to
+     * the constructor that have been revoked.
+     */
     public static class RevokedValidator<EventT extends AbstractLogEvent<VisitorT>, VisitorT> implements NavigableSetViewValidator<EventT> {
         final Set<Serializable> revokedEventIds;
 
