@@ -3,13 +3,11 @@ package com.sap.sailing.domain.abstractlog.impl;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
@@ -316,16 +314,12 @@ extends TrackImpl<EventT> implements AbstractLog<EventT, VisitorT> {
 
     @Override
     public NavigableSet<EventT> getUnrevokedEvents() {
-        final List<NavigableSetViewValidator<EventT>> validators = new ArrayList<>();
-        validators.add(new RevokedValidator<>(revokedEventIds));
-        return new FilteredPartialNavigableSetView<>(super.getInternalFixes(), validators);
+        return new FilteredPartialNavigableSetView<>(super.getInternalFixes(), new RevokedValidator<>(revokedEventIds));
     }
 
     @Override
     public NavigableSet<EventT> getUnrevokedEventsDescending() {
-        final List<NavigableSetViewValidator<EventT>> validators = new ArrayList<>();
-        validators.add(new RevokedValidator<>(revokedEventIds));
-        return new FilteredPartialNavigableSetView<EventT>(super.getInternalFixes().descendingSet(), validators);
+        return new FilteredPartialNavigableSetView<EventT>(super.getInternalFixes().descendingSet(), new RevokedValidator<>(revokedEventIds));
     }
 
     @Override
@@ -389,6 +383,7 @@ extends TrackImpl<EventT> implements AbstractLog<EventT, VisitorT> {
         add(revokeEvent);
     }
 
+    @FunctionalInterface
     public interface NavigableSetViewValidator<T> {
         boolean isValid(T item);
     }
@@ -407,21 +402,19 @@ extends TrackImpl<EventT> implements AbstractLog<EventT, VisitorT> {
     }
 
     public static class FilteredPartialNavigableSetView<T> extends PartialNavigableSetView<T> {
-        private final List<NavigableSetViewValidator<T>> validators;
+        private final NavigableSetViewValidator<T> validator;
 
-        public FilteredPartialNavigableSetView(NavigableSet<T> set, final List<NavigableSetViewValidator<T>> validators) {
+        public FilteredPartialNavigableSetView(NavigableSet<T> set, final NavigableSetViewValidator<T> validator) {
             super(set);
-            this.validators = validators;
+            if (validator == null) {
+                throw new NullPointerException();
+            }
+            this.validator = validator;
         }
 
         @Override
         protected boolean isValid(T t) {
-            for (NavigableSetViewValidator<T> validator : validators) {
-                if (!validator.isValid(t)) {
-                    return false;
-                }
-            }
-            return true;
+            return validator.isValid(t);
         }
     }
 }

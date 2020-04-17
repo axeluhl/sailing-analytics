@@ -1,8 +1,6 @@
 package com.sap.sailing.domain.abstractlog.race.impl;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.NavigableSet;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
@@ -54,21 +52,12 @@ public class RaceLogImpl extends AbstractLogImpl<RaceLogEvent, RaceLogEventVisit
     }
 
     @Override
-    protected void onSuccessfulAdd(RaceLogEvent event, boolean notifyListeners) {
-        super.onSuccessfulAdd(event, notifyListeners);
-    }
-
-    @Override
     protected RaceLogEvent createRevokeEvent(AbstractLogEventAuthor author, RaceLogEvent toRevoke, String reason) {
         return new RaceLogRevokeEventImpl(author, getCurrentPassId(), toRevoke, reason);
     }
 
     @Override
     protected NavigableSet<RaceLogEvent> getInternalFixes() {
-        final List<NavigableSetViewValidator<RaceLogEvent>> validators = new ArrayList<>();
-        validators.add(new PassValidator(getCurrentPassId()));
-        return new FilteredPartialNavigableSetView<>(super.getInternalFixes(), validators);
+        return new FilteredPartialNavigableSetView<>(super.getInternalFixes(), new PassValidator(getCurrentPassId()));
     }
-
-
 }
