@@ -34,7 +34,7 @@ import com.sap.sse.util.HttpUrlConnectionHelper;
 @Path("/v1/compareservers")
 public class CompareServersResource extends AbstractSailingServerResource {
     private static final Logger logger = Logger.getLogger(CompareServersResource.class.getName());
-    
+
     private static final String LEADERBOARDGROUPSPATH = "/sailingserver/api/v1/leaderboardgroups";
     private static final String[] KEYLIST = new String[] { "id", "description", "events", "leaderboards", "displayName",
             "isMetaLeaderboard", "isRegattaLeaderboard", "scoringComment", "lastScoringUpdate", "scoringScheme",
@@ -46,10 +46,10 @@ public class CompareServersResource extends AbstractSailingServerResource {
             return o1.toString().compareTo(o2.toString());
         }
     };
-    
+
     public CompareServersResource() {
     }
-    
+
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces("application/json;charset=UTF-8")
@@ -80,9 +80,14 @@ public class CompareServersResource extends AbstractSailingServerResource {
                 final int length = lgdetailpath.length();
                 if (Util.equals(leaderboardgroupList1, leaderboardgroupList2)) {
                     for (Object lg1 : leaderboardgroupList1) {
-//                        String lg1encoded = lg1.toString().replaceAll("/", "%2F");
                         URI uri = new URI(null, null, lg1.toString(), null, null);
-                        lgdetailpath.replace(length, lgdetailpath.length(), uri.toASCIIString());
+                        // filter for / in path
+                        if (uri.getRawPath().contains("/")) {
+                            lgdetailpath.replace(length, lgdetailpath.length(),
+                                    uri.getRawPath().replaceAll("/", "%2F"));
+                        } else {
+                            lgdetailpath.replace(length, lgdetailpath.length(), uri.toASCIIString());
+                        }
                         if (lg1.equals(leaderboardgroupList2.get(leaderboardgroupList1.indexOf(lg1)))) {
                             final URLConnection lgdetailc1 = HttpUrlConnectionHelper.redirectConnection(
                                     RemoteServerUtil.createRemoteServerUrl(base1, lgdetailpath.toString(), null));
@@ -129,24 +134,24 @@ public class CompareServersResource extends AbstractSailingServerResource {
         }
         return response;
     }
-    
+
     private JSONObject removeUnnecessaryFields(JSONObject json) {
         JSONArray lbdetailsArray = (JSONArray) json.get("leaderboards");
         for (Object lb : lbdetailsArray) {
-           JSONObject lbjson = (JSONObject) lb;
-           JSONArray seriesArray = (JSONArray) lbjson.get("series");
-           for (Object series : seriesArray) {
-               JSONObject seriesjson = (JSONObject) series;
-               JSONArray fleetsArray = (JSONArray) seriesjson.get("fleets");
-               for (Object fleet : fleetsArray) {
-                   JSONObject fleetjson = (JSONObject) fleet;
-                   JSONArray racesArray = (JSONArray) fleetjson.get("races");
-                   for (Object race : racesArray) {
-                       JSONObject racejson = (JSONObject) race;
-                       racejson.remove("raceViewerUrls");
-                   }
-               }
-           }
+            JSONObject lbjson = (JSONObject) lb;
+            JSONArray seriesArray = (JSONArray) lbjson.get("series");
+            for (Object series : seriesArray) {
+                JSONObject seriesjson = (JSONObject) series;
+                JSONArray fleetsArray = (JSONArray) seriesjson.get("fleets");
+                for (Object fleet : fleetsArray) {
+                    JSONObject fleetjson = (JSONObject) fleet;
+                    JSONArray racesArray = (JSONArray) fleetjson.get("races");
+                    for (Object race : racesArray) {
+                        JSONObject racejson = (JSONObject) race;
+                        racejson.remove("raceViewerUrls");
+                    }
+                }
+            }
         }
         json.remove("timepoint");
         return json;
@@ -182,13 +187,13 @@ public class CompareServersResource extends AbstractSailingServerResource {
         }
         return new Pair<JSONObject, JSONObject>(json1, json2);
     }
-    
+
     private Response returnInternalServerError(Throwable e) {
         final Response response = Response.status(Status.INTERNAL_SERVER_ERROR).build();
         logger.severe(e.toString());
         return response;
     }
-    
+
     private Response badRequest() {
         final Response response = Response.status(Status.BAD_REQUEST).build();
         return response;
