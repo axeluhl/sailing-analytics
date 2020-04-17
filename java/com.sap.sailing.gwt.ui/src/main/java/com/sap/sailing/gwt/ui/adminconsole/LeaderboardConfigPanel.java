@@ -326,7 +326,8 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                             });
                     editCompetitorsDialog.show();
                 });
-        leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_CONFIGURE_URL, READ, leaderboardDTO -> {
+        leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_CONFIGURE_URL, READ,
+                leaderboardDTO -> {
             sailingService.getAvailableDetailTypesForLeaderboard(leaderboardDTO.getName(), null,
                     new AsyncCallback<Iterable<DetailType>>() {
 
@@ -850,8 +851,8 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
             raceColumnTable.getDataProvider().getList().clear();
             for (RaceColumnDTO raceColumn : selectedLeaderboard.getRaceList()) {
                 for (FleetDTO fleet : raceColumn.getFleets()) {
-                    raceColumnTable.getDataProvider().getList().add(
-                            new RaceColumnDTOAndFleetDTOWithNameBasedEquality(raceColumn, fleet, selectedLeaderboard));
+                    raceColumnTable.getDataProvider().getList().add(new RaceColumnDTOAndFleetDTOWithNameBasedEquality(
+                            raceColumn, fleet, selectedLeaderboard));
                 }
             }
             selectedLeaderBoardPanel.setVisible(true);

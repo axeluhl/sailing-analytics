@@ -178,6 +178,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                     }
                 }
                 remove.setEnabled(!selectedEvents.isEmpty() && canDeleteAll);
+
             }
         });
         panel.add(filterTextbox);

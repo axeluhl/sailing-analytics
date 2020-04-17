@@ -209,6 +209,7 @@ public class MarkPropertiesPanel extends FlowPanel {
                         return columnIndex == 0;
                     }
                 }));
+
         // Initialize the columns.
         initTableColumns(sortHandler, userService);
         markPropertiesListDataProvider.addDataDisplay(markPropertiesTable);
@@ -232,6 +233,7 @@ public class MarkPropertiesPanel extends FlowPanel {
         };
         markPropertiesTable.addColumn(checkColumn, SafeHtmlUtils.fromSafeConstant("<br/>"));
         markPropertiesTable.setColumnWidth(checkColumn, 40, Unit.PX);
+
         // id
         Column<MarkPropertiesDTO, String> idColumn = new Column<MarkPropertiesDTO, String>(new TextCell()) {
             @Override
@@ -329,13 +331,17 @@ public class MarkPropertiesPanel extends FlowPanel {
         markPropertiesTable.addColumn(typeColumn, stringMessages.type());
         markPropertiesTable.addColumn(positioningColumn, stringMessages.position());
         markPropertiesTable.addColumn(tagsColumn, stringMessages.tags());
+
         SecuredDTOOwnerColumn.configureOwnerColumns(markPropertiesTable, sortHandler, stringMessages);
+
         final HasPermissions type = SecuredDomainType.MARK_PROPERTIES;
+
         final AccessControlledActionsColumn<MarkPropertiesDTO, MarkPropertiesImagesbarCell> actionsColumn = create(
                 new MarkPropertiesImagesbarCell(stringMessages), userService);
         final EditOwnershipDialog.DialogConfig<MarkPropertiesDTO> configOwnership = EditOwnershipDialog
                 .create(userService.getUserManagementService(), type, markProperties -> {
                     /* no refresh action */}, stringMessages);
+
         final EditACLDialog.DialogConfig<MarkPropertiesDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementService(), type, markProperties -> markProperties.getAccessControlList(),
                 stringMessages);

@@ -99,19 +99,17 @@ public class SwissTimingArchivedConnectionTableWrapper extends
             }, userService, errorReporter).show();
         });
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_DELETE, DefaultActions.DELETE, dto -> {
-            sailingServiceAsync.deleteSwissTimingArchiveConfigurations(Collections.singletonList(dto),
-                    new AsyncCallback<Void>() {
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            errorReporter.reportError(
-                                    "Exception trying to delete configuration(s) in DB: " + caught.getMessage());
-                        }
+            sailingServiceAsync.deleteSwissTimingArchiveConfigurations(Collections.singletonList(dto), new AsyncCallback<Void>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    errorReporter.reportError("Exception trying to delete configuration in DB: " + caught.getMessage());
+                }
 
-                        @Override
-                        public void onSuccess(Void result) {
-                            refreshConnectionList();
-                        }
-                    });
+                @Override
+                public void onSuccess(Void result) {
+                    refreshConnectionList();
+                }
+            });
         });
         final EditOwnershipDialog.DialogConfig<SwissTimingArchiveConfigurationWithSecurityDTO> configOwnership = EditOwnershipDialog
                 .create(userService.getUserManagementService(), type, dto -> refreshConnectionList(),

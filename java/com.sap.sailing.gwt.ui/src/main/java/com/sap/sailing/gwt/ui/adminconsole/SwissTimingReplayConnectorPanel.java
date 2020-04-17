@@ -349,22 +349,22 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
             SwissTimingArchiveConfigurationWithSecurityDTO selectedObject = selectedObjects.iterator().next();
             sailingService.listSwissTiminigReplayRaces(selectedObject.getJsonUrl(),
                     new AsyncCallback<List<SwissTimingReplayRaceDTO>>() {
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            SwissTimingReplayConnectorPanel.this.errorReporter
-                                    .reportError("Error trying to list SwissTiming races: " + caught.getMessage());
-                        }
+            @Override
+            public void onFailure(Throwable caught) {
+                SwissTimingReplayConnectorPanel.this.errorReporter.reportError("Error trying to list SwissTiming races: "
+                        + caught.getMessage());
+            }
 
-                        @Override
-                        public void onSuccess(final List<SwissTimingReplayRaceDTO> races) {
-                            availableSwissTimingRaces.clear();
-                            availableSwissTimingRaces.addAll(races);
-                            raceList.getList().clear();
-                            raceList.getList().addAll(availableSwissTimingRaces);
-                            filterablePanelEvents.getTextBox().setText(null);
-                            filterablePanelEvents.updateAll(races);
-                        }
-                    });
+            @Override
+            public void onSuccess(final List<SwissTimingReplayRaceDTO> races) {
+                availableSwissTimingRaces.clear();
+                availableSwissTimingRaces.addAll(races);
+                raceList.getList().clear();
+                raceList.getList().addAll(availableSwissTimingRaces);
+                filterablePanelEvents.getTextBox().setText(null);
+                filterablePanelEvents.updateAll(races);
+            }
+        });
         }
     }
 
