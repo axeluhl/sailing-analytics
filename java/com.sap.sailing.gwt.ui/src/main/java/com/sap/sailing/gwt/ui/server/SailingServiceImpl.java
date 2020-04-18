@@ -1531,12 +1531,13 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public void deleteTracTracConfiguration(TracTracConfigurationWithSecurityDTO tracTracConfiguration) {
-        getSecurityService().checkCurrentUserDeletePermission(tracTracConfiguration);
-        getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(tracTracConfiguration,
-                () ->
-        tractracMongoObjectFactory.deleteTracTracConfiguration(tracTracConfiguration.getCreatorName(),
-                tracTracConfiguration.getJsonUrl()));
+    public void deleteTracTracConfigurations(Collection<TracTracConfigurationWithSecurityDTO> tracTracConfigurations) {
+        for (TracTracConfigurationWithSecurityDTO tracTracConfiguration : tracTracConfigurations) {
+            getSecurityService().checkCurrentUserDeletePermission(tracTracConfiguration);
+            getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(tracTracConfiguration,
+                    () -> tractracMongoObjectFactory.deleteTracTracConfiguration(tracTracConfiguration.getCreatorName(),
+                            tracTracConfiguration.getJsonUrl()));
+        }
     }
 
     @Override
@@ -3371,11 +3372,14 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public void deleteSwissTimingConfiguration(SwissTimingConfigurationWithSecurityDTO configuration) {
-        getSecurityService().checkCurrentUserDeletePermission(configuration);
-        getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(configuration,
-                () -> swissTimingAdapterPersistence.deleteSwissTimingConfiguration(configuration.getCreatorName(),
-                        configuration.getJsonUrl()));
+    public void deleteSwissTimingConfigurations(
+            final Collection<SwissTimingConfigurationWithSecurityDTO> configurations) {
+        for (SwissTimingConfigurationWithSecurityDTO dto : configurations) {
+            getSecurityService().checkCurrentUserDeletePermission(dto);
+            getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(dto,
+                    () -> swissTimingAdapterPersistence.deleteSwissTimingConfiguration(dto.getCreatorName(),
+                            dto.getJsonUrl()));
+        }
     }
 
     @Override
@@ -5443,11 +5447,13 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public void deleteSwissTimingArchiveConfiguration(SwissTimingArchiveConfigurationWithSecurityDTO dto)
+    public void deleteSwissTimingArchiveConfigurations(Collection<SwissTimingArchiveConfigurationWithSecurityDTO> dtos)
             throws Exception {
-        getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(dto.getIdentifier(),
-                () -> swissTimingAdapterPersistence.deleteSwissTimingArchiveConfiguration(swissTimingFactory
-                        .createSwissTimingArchiveConfiguration(dto.getJsonUrl(), dto.getCreatorName())));
+        for (SwissTimingArchiveConfigurationWithSecurityDTO dto : dtos) {
+            getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(dto.getIdentifier(),
+                    () -> swissTimingAdapterPersistence.deleteSwissTimingArchiveConfiguration(swissTimingFactory
+                            .createSwissTimingArchiveConfiguration(dto.getJsonUrl(), dto.getCreatorName())));
+        }
     }
 
     protected com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory() {
@@ -10005,8 +10011,10 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public void removeCourseTemplate(UUID uuid) {
-        getSharedSailingData().deleteCourseTemplate(getSharedSailingData().getCourseTemplateById(uuid));
+    public void removeCourseTemplates(Collection<UUID> courseTemplateUuids) {
+        for (UUID uuid : courseTemplateUuids) {
+            getSharedSailingData().deleteCourseTemplate(getSharedSailingData().getCourseTemplateById(uuid));
+        }
     }
 
     private WaypointTemplate convertToWaypointTemplate(WaypointTemplateDTO waypointTemplate, final MarkRolePairFactory markRolePairFactory) {
@@ -10074,8 +10082,10 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public void removeMarkProperties(UUID uuid) {
-        getSharedSailingData().deleteMarkProperties(getSharedSailingData().getMarkPropertiesById(uuid));
+    public void removeMarkProperties(Collection<UUID> markPropertiesUuids) {
+        for (UUID uuid : markPropertiesUuids) {
+            getSharedSailingData().deleteMarkProperties(getSharedSailingData().getMarkPropertiesById(uuid));
+        }
     }
 
     private MarkRoleDTO convertToMarkRoleDTO(final MarkRole markRole) {
