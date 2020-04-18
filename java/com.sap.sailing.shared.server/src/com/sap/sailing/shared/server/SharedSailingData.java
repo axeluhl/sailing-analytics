@@ -145,7 +145,7 @@ public interface SharedSailingData extends ReplicableWithObjectInputStream<Repli
     Map<MarkProperties, TimePoint> getUsedMarkProperties(MarkRole roleName);
     
     void deleteMarkProperties(MarkProperties markProperties);
-    
+
     void deleteCourseTemplate(CourseTemplate courseTemplate);
 
     Iterable<MarkProperties> getAllMarkProperties();
