@@ -537,7 +537,7 @@
     <string name="hello_call_error_neutral">Server ändern</string>
 
     <string name="competitor_merge_error_message">Dieser Teilnehmer wurde an einem anderen Gerät verändert und hat überschneidende Änderungen. Bitte stellen Sie sicher, dass die Daten korrekt sind.</string>
-    <string name="finishing_revoke">Revoke</string>
-    <string name="error_revoke_finished">Cannot revoke finished time</string>
-    <string name="error_revoke_finishing">Cannot revoke finishing time</string>
+    <string name="finishing_revoke">Widerrufen</string>
+    <string name="error_revoke_finished">Widerruf des Zeitpunktes des Rennendes nicht möglich</string>
+    <string name="error_revoke_finishing">Widerruf des Zeitpunktes des Beginns des Zieleinlaufs nicht möglich</string>
 </resources>
