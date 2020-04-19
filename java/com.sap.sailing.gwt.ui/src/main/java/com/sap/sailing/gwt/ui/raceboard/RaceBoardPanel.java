@@ -248,7 +248,7 @@ public class RaceBoardPanel
         regattaAndRaceTimeInformationHeader.setStyleName("RegattaAndRaceTime-Header");
         final Runnable shareLinkAction = () -> {
                 ShareLinkDialog shareLinkDialog = new ShareLinkDialog("/gwt/RaceBoard.html", raceboardContextDefinition, lifecycle,
-                        getSettings(), stringMessages);
+                        getSettings(), sailingService, stringMessages);
                 shareLinkDialog.show();
         };
         this.userManagementMenuView = new AuthenticationMenuViewImpl(new Anchor(), mainCss.usermanagement_loggedin(), mainCss.usermanagement_open());

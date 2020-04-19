@@ -1,15 +1,20 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceboardContextDefinition;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.settings.generic.support.SettingsUtil;
@@ -23,7 +28,7 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
     private final PerspectiveLifecycle<RaceBoardPerspectiveOwnSettings> lifecycle;
     private final PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> perspectiveCompositeSettings;
     private final LinkWithSettingsGenerator<Settings> linkWithSettingsGenerator;
-    private VerticalPanel verticalPanel;
+    private final SailingServiceAsync sailingService;
     private CheckBox timeStampCheckbox;
     private CheckBox windChartCheckBox;
     private CheckBox leaderBoardPanelCheckBox;
@@ -32,16 +37,39 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
     private CheckBox competitorSelectionCheckBox;
     private Label linkFieldLabel;
     private TextBox linkField;
+    private Image qrCodeImage;
 
     public ShareLinkDialog(String path, RaceboardContextDefinition raceboardContextDefinition,
             PerspectiveLifecycle<RaceBoardPerspectiveOwnSettings> lifecycle,
             PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> perspectiveCompositeSettings,
-            StringMessages stringMessages) {
-        super(stringMessages.shareTheLink(), "", "ok", stringMessages.cancel(), null, null);
+            SailingServiceAsync sailingService, StringMessages stringMessages) {
+        super(stringMessages.shareTheLink(), "", stringMessages.ok(), stringMessages.cancel(), null, null);
         this.lifecycle = lifecycle;
         this.perspectiveCompositeSettings = perspectiveCompositeSettings;
+        this.sailingService = sailingService;
         this.linkWithSettingsGenerator = new LinkWithSettingsGenerator<>(path, raceboardContextDefinition);
         this.stringMessages = stringMessages;
+    }
+    
+    void updateLink(){
+        String url = assembleLink();
+        linkField.setText(url);
+        createQrCode(url);
+    }
+
+    private void createQrCode(String url) {
+        sailingService.createRaceBoardLinkQrCode(url, new AsyncCallback<String>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                GWT.log("Qrcode generation failed: ", caught);
+            }
+
+            @Override
+            public void onSuccess(String result) {
+                GWT.log("Qrcode generated for url: " + url);
+                qrCodeImage.setUrl("data:image/png;base64, " + result);
+            }
+        });
     }
     
     private String assembleLink() {
@@ -90,7 +118,7 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
 
             @Override
             public void onClick(ClickEvent event) {
-                linkField.setText(assembleLink());
+                updateLink();
             }
         });
         windChartCheckBox = createCheckbox(stringMessages.windChartCheckBoxLabel());
@@ -99,7 +127,7 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
             
             @Override
             public void onClick(ClickEvent event) {
-                linkField.setText(assembleLink());
+                updateLink();
             }
         });
         leaderBoardPanelCheckBox = createCheckbox(stringMessages.leaderBoardCheckBoxLabel());
@@ -108,7 +136,7 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
             
             @Override
             public void onClick(ClickEvent event) {
-                linkField.setText(assembleLink());
+                updateLink();
             }
         });
         competitorChartCheckBox = createCheckbox(stringMessages.competitorChartCheckBoxLabel());
@@ -117,7 +145,7 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
             
             @Override
             public void onClick(ClickEvent event) {
-                linkField.setText(assembleLink());
+                updateLink();
             }
         });
         filterSetNameCheckBox = createCheckbox(stringMessages.filterSetNameCheckBoxLabel());
@@ -126,7 +154,7 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
             
             @Override
             public void onClick(ClickEvent event) {
-                linkField.setText(assembleLink());
+                updateLink();
             }
         });
         competitorSelectionCheckBox = createCheckbox(stringMessages.competitorSelectionCheckBoxLabel());
@@ -135,19 +163,47 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
             
             @Override
             public void onClick(ClickEvent event) {
-                linkField.setText(assembleLink());
+                updateLink();
             }
         });
         linkFieldLabel = createLabel(stringMessages.linkSharingAnchorText());
         linkField = createTextBox(assembleLink());
-        verticalPanel = new VerticalPanel();
-        verticalPanel.add(timeStampCheckbox);
-        verticalPanel.add(windChartCheckBox);
-        verticalPanel.add(leaderBoardPanelCheckBox);
-        verticalPanel.add(competitorChartCheckBox);
-        verticalPanel.add(filterSetNameCheckBox);
-        verticalPanel.add(competitorSelectionCheckBox);
-        verticalPanel.add(linkField);
-        return verticalPanel;
+        Anchor copyToClipBoardAnchor = new Anchor(stringMessages.copyToClipBoard());
+        copyToClipBoardAnchor.addClickHandler(new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+                linkField.setFocus(true);
+                linkField.selectAll();
+                copyToClipBoard();
+            }
+        });
+        qrCodeImage = new Image();
+        qrCodeImage.ensureDebugId("regattaSharingQrCode");
+        qrCodeImage.setPixelSize(400, 400);
+        VerticalPanel mainPanel = new VerticalPanel();
+        mainPanel.setSpacing(30);
+        mainPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        VerticalPanel settingsPanel = new VerticalPanel();
+        settingsPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        settingsPanel.add(timeStampCheckbox);
+        settingsPanel.add(windChartCheckBox);
+        settingsPanel.add(leaderBoardPanelCheckBox);
+        settingsPanel.add(competitorChartCheckBox);
+        settingsPanel.add(filterSetNameCheckBox);
+        settingsPanel.add(competitorSelectionCheckBox);
+        mainPanel.add(settingsPanel);
+        VerticalPanel linkContentPanel = new VerticalPanel();
+        linkContentPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        linkContentPanel.add(linkField);
+        linkContentPanel.add(copyToClipBoardAnchor);
+        linkContentPanel.add(qrCodeImage);
+        mainPanel.add(linkContentPanel);
+        updateLink();
+        return mainPanel;
     }
+    
+    private native void copyToClipBoard() /*-{
+        return $doc.execCommand('copy');
+    }-*/;
 }
