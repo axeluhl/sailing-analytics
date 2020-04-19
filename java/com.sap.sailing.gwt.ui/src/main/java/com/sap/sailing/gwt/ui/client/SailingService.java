@@ -1160,6 +1160,15 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
      * @return base64 encoded string containg a png-image of the genrated qrcode
      */
     String openRegattaRegistrationQrCode(String url) throws UnauthorizedException;
+    
+    /**
+     * Generates a base64-encoded qrcode.
+     * 
+     * @param url
+     *            complete url for a race with settings on the RaceBoard
+     * @return base64 encoded string containg a png-image of the genrated qrcode
+     */
+    String createRaceBoardLinkQrCode(String url);
 
     List<String> getPossibleTennants() throws UnauthorizedException;
 

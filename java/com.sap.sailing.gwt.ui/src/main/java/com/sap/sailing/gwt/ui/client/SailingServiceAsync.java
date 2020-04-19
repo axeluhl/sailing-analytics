@@ -1095,6 +1095,13 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
      * @param asyncCallback
      */
     void openRegattaRegistrationQrCode(String url, AsyncCallback<String> asyncCallback);
+    
+    /**
+     * @see SailingService#createRaceBoardLinkQrCode(String url)
+     * @param url
+     * @param asyncCallback
+     */
+    void createRaceBoardLinkQrCode(String url, AsyncCallback<String> asyncCallback);
 
     /**
      * gets a (possibly imcomplete) list of available tennants to choose from.
