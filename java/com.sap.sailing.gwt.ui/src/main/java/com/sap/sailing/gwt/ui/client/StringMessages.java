@@ -1214,7 +1214,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String registrationLinkSecretExplain();
     String registrationLinkSecretGenerate();
     String registrationLinkUrl();
-    String registrationLinkUrlCopy();
     String registrationLinkUrlExplain();
     String registrationLinkShare();
     String explainRegistrationLinkDialog();
@@ -2387,4 +2386,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String filterSetNameCheckBoxLabel();
     String competitorSelectionCheckBoxLabel();
     String linkSharingAnchorText();
+    String copyToClipBoard();
 }
