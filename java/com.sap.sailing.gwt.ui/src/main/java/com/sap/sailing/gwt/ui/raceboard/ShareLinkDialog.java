@@ -4,6 +4,8 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
@@ -28,7 +30,8 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
     private CheckBox competitorChartCheckBox;
     private CheckBox filterSetNameCheckBox;
     private CheckBox competitorSelectionCheckBox;
-    private Anchor linkAnchor;
+    private Label linkFieldLabel;
+    private TextBox linkField;
 
     public ShareLinkDialog(String path, RaceboardContextDefinition raceboardContextDefinition,
             PerspectiveLifecycle<RaceBoardPerspectiveOwnSettings> lifecycle,
@@ -87,7 +90,7 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
 
             @Override
             public void onClick(ClickEvent event) {
-                linkAnchor.setHref(assembleLink());
+                linkField.setText(assembleLink());
             }
         });
         windChartCheckBox = createCheckbox(stringMessages.windChartCheckBoxLabel());
@@ -96,7 +99,7 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
             
             @Override
             public void onClick(ClickEvent event) {
-                linkAnchor.setHref(assembleLink());
+                linkField.setText(assembleLink());
             }
         });
         leaderBoardPanelCheckBox = createCheckbox(stringMessages.leaderBoardCheckBoxLabel());
@@ -105,7 +108,7 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
             
             @Override
             public void onClick(ClickEvent event) {
-                linkAnchor.setHref(assembleLink());
+                linkField.setText(assembleLink());
             }
         });
         competitorChartCheckBox = createCheckbox(stringMessages.competitorChartCheckBoxLabel());
@@ -114,7 +117,7 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
             
             @Override
             public void onClick(ClickEvent event) {
-                linkAnchor.setHref(assembleLink());
+                linkField.setText(assembleLink());
             }
         });
         filterSetNameCheckBox = createCheckbox(stringMessages.filterSetNameCheckBoxLabel());
@@ -123,7 +126,7 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
             
             @Override
             public void onClick(ClickEvent event) {
-                linkAnchor.setHref(assembleLink());
+                linkField.setText(assembleLink());
             }
         });
         competitorSelectionCheckBox = createCheckbox(stringMessages.competitorSelectionCheckBoxLabel());
@@ -132,10 +135,11 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
             
             @Override
             public void onClick(ClickEvent event) {
-                linkAnchor.setHref(assembleLink());
+                linkField.setText(assembleLink());
             }
         });
-        linkAnchor = new Anchor(stringMessages.linkSharingAnchorText(), assembleLink());
+        linkFieldLabel = createLabel(stringMessages.linkSharingAnchorText());
+        linkField = createTextBox(assembleLink());
         verticalPanel = new VerticalPanel();
         verticalPanel.add(timeStampCheckbox);
         verticalPanel.add(windChartCheckBox);
@@ -143,7 +147,7 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
         verticalPanel.add(competitorChartCheckBox);
         verticalPanel.add(filterSetNameCheckBox);
         verticalPanel.add(competitorSelectionCheckBox);
-        verticalPanel.add(linkAnchor);
+        verticalPanel.add(linkField);
         return verticalPanel;
     }
 }
