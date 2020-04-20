@@ -180,10 +180,10 @@ public class UserGroupDetailPanel extends Composite
                             new AsyncCallback<Void>() {
                                 @Override
                                 public void onFailure(Throwable caught) {
-                                    Window.alert(stringMessages.couldNotRemoveUserFromUserGroup(username, selectedUserGroup.getName(),
-                                            caught.getMessage()));
+                                    Window.alert(stringMessages.couldNotRemoveUserFromUserGroup(username,
+                                            selectedUserGroup.getName(), caught.getMessage()));
                                 }
-    
+
                                 @Override
                                 public void onSuccess(Void result) {
                                     StrippedUserDTO userToRemoveFromTenant = null;

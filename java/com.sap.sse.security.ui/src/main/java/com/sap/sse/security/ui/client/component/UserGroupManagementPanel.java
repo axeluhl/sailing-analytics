@@ -8,7 +8,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -65,18 +64,19 @@ public class UserGroupManagementPanel extends Composite {
     /** Creates the button bar with add/remove/refresh buttons. 
      * @param userGroupSelectionModel */
     private Widget createButtonPanel(final UserService userService, final StringMessages stringMessages,
-            final UserManagementServiceAsync userManagementService, RefreshableSelectionModel<UserGroupDTO> userGroupSelectionModel) {
+            final UserManagementServiceAsync userManagementService,
+            RefreshableSelectionModel<UserGroupDTO> userGroupSelectionModel) {
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, USER_GROUP);
         buttonPanel.addUnsecuredAction(stringMessages.refresh(), () -> updateUserGroups());
         buttonPanel.addCreateActionWithoutServerCreateObjectPermissionCheck(stringMessages.createUserGroup(),
-                () -> new CreateUserGroupDialog(stringMessages,
-                userService, userManagementService, userGroupListDataProvider, () -> updateUserGroups()).show());
-        final Button removeButton = buttonPanel.addRemoveAction(stringMessages.removeUserGroup(), () -> {
+                () -> new CreateUserGroupDialog(stringMessages, userService, userManagementService,
+                        userGroupListDataProvider, () -> updateUserGroups()).show());
+        buttonPanel.addRemoveAction(stringMessages.removeUserGroup(), userGroupSelectionModel, false, () -> {
             Set<UserGroupDTO> userGroups = userGroupTableWrapper.getSelectionModel().getSelectedSet();
             if (userGroups == null || userGroups.isEmpty()) {
                 Window.alert(stringMessages.youHaveToSelectAUserGroup());
             } else {
-                final String userGroupNames = String.join(", ", Util.map(userGroups, g->g.getName()));
+                final String userGroupNames = String.join(", ", Util.map(userGroups, g -> g.getName()));
                 if (Window.confirm(stringMessages.doYouReallyWantToRemoveUserGroup(userGroupNames))) {
                     final Map<UserGroupDTO, ParallelExecutionCallback<SuccessInfo>> callbacks = new HashMap<>();
                     for (final UserGroupDTO userGroup : userGroups) {
@@ -95,15 +95,13 @@ public class UserGroupManagementPanel extends Composite {
                             Window.alert(stringMessages.couldNotDeleteUserGroup());
                         }
                     };
-                    for (final Entry<UserGroupDTO, ParallelExecutionCallback<SuccessInfo>> groupAndCallback : callbacks.entrySet()) {
-                        userManagementService.deleteUserGroup(groupAndCallback.getKey().getId().toString(), groupAndCallback.getValue());
+                    for (final Entry<UserGroupDTO, ParallelExecutionCallback<SuccessInfo>> groupAndCallback : callbacks
+                            .entrySet()) {
+                        userManagementService.deleteUserGroup(groupAndCallback.getKey().getId().toString(),
+                                groupAndCallback.getValue());
                     }
                 }
             }
-        });
-        userGroupSelectionModel.addSelectionChangeHandler(event -> {
-            removeButton.setText(stringMessages.remove() + " (" + userGroupSelectionModel.getSelectedSet().size() + ")");
-            removeButton.setEnabled(userGroupSelectionModel.getSelectedSet().size() >= 1);
         });
         return buttonPanel;
     }
