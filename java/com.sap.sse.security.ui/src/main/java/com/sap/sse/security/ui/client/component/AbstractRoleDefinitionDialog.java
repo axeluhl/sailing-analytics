@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
@@ -49,6 +50,7 @@ public abstract class AbstractRoleDefinitionDialog extends DataEntryDialog<RoleD
 
     protected final TextBox roleDefinitionNameField;
     protected final GenericStringListInlineEditorComposite<WildcardPermission> permissionsList;
+    protected final CheckBox transitiveCheckBox;
     private final StringMessages stringMessages;
 
     public AbstractRoleDefinitionDialog(StringMessages stringMessages, Iterable<WildcardPermission> allExistingPermissions,
@@ -76,15 +78,18 @@ public abstract class AbstractRoleDefinitionDialog extends DataEntryDialog<RoleD
                     }
         };
         permissionsList.addValueChangeHandler(e->validateAndUpdate());
+        transitiveCheckBox = createCheckbox("");
     }
 
     @Override
     protected Widget getAdditionalWidget() {
-        final Grid result = new Grid(2, 2);
+        final Grid result = new Grid(3, 2);
         result.setWidget(0,  0, new Label(stringMessages.name()));
         result.setWidget(0, 1, roleDefinitionNameField);
         result.setWidget(1, 0, new Label(stringMessages.permissions()));
         result.setWidget(1, 1, permissionsList);
+        result.setWidget(2, 0, new Label(stringMessages.transitive()));
+        result.setWidget(2, 1, transitiveCheckBox);
         return result;
     }
 
@@ -92,8 +97,8 @@ public abstract class AbstractRoleDefinitionDialog extends DataEntryDialog<RoleD
     protected RoleDefinitionDTO getResult() {
         final String newName = roleDefinitionNameField.getText();
         final List<WildcardPermission> permissions = permissionsList.getValue();
-        return new RoleDefinitionDTO(getRoleDefinitionId(), newName, permissions);
+        return new RoleDefinitionDTO(getRoleDefinitionId(), newName, permissions, transitiveCheckBox.getValue());
     }
-    
+
     protected abstract UUID getRoleDefinitionId();
 }

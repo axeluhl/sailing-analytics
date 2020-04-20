@@ -180,6 +180,7 @@ public class RoleDefinitionsPanel extends VerticalPanel {
         final TextColumn<RoleDefinitionDTO> roleDefinitionUUidColumn = new AbstractSortableTextColumn<RoleDefinitionDTO>(
                 role -> role.getId() == null ? "<null>" : role.getId().toString(), columnSortHandler);
         TextColumn<RoleDefinitionDTO> roleDefinitionNameColumn = new AbstractSortableTextColumn<RoleDefinitionDTO>(role->role.getName(), columnSortHandler);
+        TextColumn<RoleDefinitionDTO> roleDefinitionTransitiveColumn = new AbstractSortableTextColumn<RoleDefinitionDTO>(role -> role.isTransitive() ? stringMessages.yes() : stringMessages.no(), columnSortHandler); 
         Column<RoleDefinitionDTO, SafeHtml> permissionsColumn = new Column<RoleDefinitionDTO, SafeHtml>(new SafeHtmlCell()) {
             @Override
             public SafeHtml getValue(RoleDefinitionDTO role) {
@@ -223,6 +224,7 @@ public class RoleDefinitionsPanel extends VerticalPanel {
         table.addColumn(roleSelectionCheckboxColumn, roleSelectionCheckboxColumn.getHeader());
         table.addColumn(roleDefinitionNameColumn, stringMessages.name());
         table.addColumn(permissionsColumn, stringMessages.permissions());
+        table.addColumn(roleDefinitionTransitiveColumn, stringMessages.transitive());
         SecuredDTOOwnerColumn.configureOwnerColumns(table, columnSortHandler, stringMessages);
         table.addColumn(roleDefinitionUUidColumn, stringMessages.id());
         table.addColumn(roleActionColumn, stringMessages.actions());

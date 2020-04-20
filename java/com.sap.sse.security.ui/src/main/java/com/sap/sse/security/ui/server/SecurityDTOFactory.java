@@ -159,7 +159,7 @@ public class SecurityDTOFactory {
             final SecurityService securityService, final Map<User, StrippedUserDTO> fromOriginalToStrippedDownUser,
             final Map<UserGroup, StrippedUserGroupDTO> fromOriginalToStrippedDownUserGroup) {
         final RoleDefinitionDTO roleDefDTO = new RoleDefinitionDTO(roleDefinition.getId(), roleDefinition.getName(),
-                roleDefinition.getPermissions());
+                roleDefinition.getPermissions(), roleDefinition.isTransitive());
         SecurityDTOUtil.addSecurityInformation(this, securityService, roleDefDTO, roleDefinition.getIdentifier(),
                 fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup);
         return roleDefDTO;
