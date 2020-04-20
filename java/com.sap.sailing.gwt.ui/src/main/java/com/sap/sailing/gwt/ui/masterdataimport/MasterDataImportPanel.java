@@ -398,8 +398,6 @@ public class MasterDataImportPanel extends VerticalPanel {
         exportTrackedRacesAndStartTrackingSwitch = new CheckBox(stringMessages.exportTrackedRacesAndStartTracking());
         exportTrackedRacesAndStartTrackingSwitch.setTitle(stringMessages.exportTrackedRacesAndStartTrackingTooltip());
         exportTrackedRacesAndStartTrackingSwitch.setValue(false);
-        //TODO: Remove after bug5245 is fixed.
-        exportTrackedRacesAndStartTrackingSwitch.setVisible(false);
         contentPanel.add(exportTrackedRacesAndStartTrackingSwitch);
 
         importLeaderboardGroupsButton = new Button(stringMessages.importSelectedLeaderboardGroups());
