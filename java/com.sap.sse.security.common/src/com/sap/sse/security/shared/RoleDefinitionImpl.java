@@ -33,7 +33,7 @@ public class RoleDefinitionImpl implements RoleDefinition {
     }
 
     public RoleDefinitionImpl(UUID id, String name, Iterable<WildcardPermission> permissions) {
-        this(id, name, new HashSet<WildcardPermission>(), /* transitive */ true);
+        this(id, name, permissions, /* transitive */ true);
     }
 
     public RoleDefinitionImpl(UUID id, String name, Iterable<WildcardPermission> permissions, boolean transitive) {
