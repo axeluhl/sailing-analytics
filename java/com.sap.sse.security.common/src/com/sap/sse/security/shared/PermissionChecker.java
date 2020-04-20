@@ -484,6 +484,9 @@ public class PermissionChecker {
        boolean result;
        // It is possible that we have an ownership with null tenantOwner and null userOwner. This should be handled like no ownership was given.
        final boolean ownershipIsGiven = ownership != null && (ownership.getTenantOwner() != null || ownership.getUserOwner() != null);
+       if (!role.isTransitive()) {
+           return false;
+       }
        if (roleIsTenantQualified || roleIsUserQualified) {
            if (!ownershipIsGiven) {
                permissionsApply = !matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven; // qualifications cannot be verified as no ownership info is provided; permissions do not apply

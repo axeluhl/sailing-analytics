@@ -50,6 +50,10 @@ public abstract class AbstractRole<RD extends RoleDefinition, G extends Security
         return roleDefinition.getPermissions();
     }
 
+    public boolean isTransitive() {
+        return roleDefinition.isTransitive();
+    }
+
     public G getQualifiedForTenant() {
         return qualifiedForTenant;
     }
