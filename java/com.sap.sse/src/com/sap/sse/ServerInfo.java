@@ -30,7 +30,11 @@ public class ServerInfo {
     public static String getName() {
         return ServerStartupConstants.SERVER_NAME;
     }
-    
+    /**
+     * Retrieve event management base URL from server startup configuration.
+     * @return the base URL.
+     * @see ServerStartupConstants#MANAGE_EVENTS_URL
+     */
     public static String getManageEventsBaseUrl() {
         return ServerStartupConstants.MANAGE_EVENTS_URL;
     }

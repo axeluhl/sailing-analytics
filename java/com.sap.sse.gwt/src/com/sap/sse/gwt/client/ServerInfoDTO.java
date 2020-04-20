@@ -13,6 +13,9 @@ public class ServerInfoDTO extends NamedSecuredObjectDTO implements IsSerializab
 
     private String buildVersion;
 
+    /**
+     * Eventmanagement base URL.
+     */
     private String manageEventsBaseUrl;
     
     // for GWT
