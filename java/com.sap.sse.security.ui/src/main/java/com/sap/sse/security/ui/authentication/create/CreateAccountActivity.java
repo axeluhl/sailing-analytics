@@ -2,9 +2,9 @@ package com.sap.sse.security.ui.authentication.create;
 
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.authentication.AuthenticationClientFactory;
 import com.sap.sse.security.ui.authentication.AuthenticationManager.SuccessCallback;
 import com.sap.sse.security.ui.authentication.confirm.ConfirmationInfoPlace;
@@ -39,18 +39,17 @@ public class CreateAccountActivity extends AbstractActivity implements CreateAcc
     @Override
     public void createAccount() {
         if (values.validate()) {
-            clientFactory.getAuthenticationManager().createAccount(values.username, values.email, 
-                    values.password, values.fullName, values.company, new SuccessCallback<UserDTO>() {
-                @Override
-                public void onSuccess(final UserDTO result) {
-                    clientFactory.getAuthenticationManager().login(result.getName(), values.password, 
-                            new LoginAfterCreatingAccountSuccessCallback());
-                    placeController.goTo(new ConfirmationInfoPlace(Action.ACCOUNT_CREATED, result.getName()));
-                }
-            });
+            clientFactory.getAuthenticationManager().createAccount(values.username, values.email, values.password,
+                    values.fullName,
+                    values.locale == null ? LocaleInfo.getCurrentLocale().getLocaleName() : values.locale,
+                    values.company, result -> {
+                        clientFactory.getAuthenticationManager().login(result.getName(), values.password,
+                                new LoginAfterCreatingAccountSuccessCallback());
+                        placeController.goTo(new ConfirmationInfoPlace(Action.ACCOUNT_CREATED, result.getName()));
+                    });
         }
     }
-    
+
     @Override
     public void onChangeEmail(String newValue) {
         values.email = newValue;
@@ -65,6 +64,11 @@ public class CreateAccountActivity extends AbstractActivity implements CreateAcc
     @Override
     public void onChangeFullName(String newValue) {
         values.fullName = newValue;
+    }
+
+    @Override
+    public void onChangeLocale(String newValue) {
+        values.locale = newValue;
     }
 
     @Override
@@ -91,7 +95,7 @@ public class CreateAccountActivity extends AbstractActivity implements CreateAcc
     
     private class CreateAccountFormValues {
         private final NewAccountValidator validator = new NewAccountValidator(i18n_sec);
-        private String username, fullName, company, email, password, passwordConfirmation;
+        private String username, fullName, locale, company, email, password, passwordConfirmation;
         
         private boolean validate() {
             String errorMessage = validator.validateUsernameAndPassword(username, password, passwordConfirmation);

@@ -109,7 +109,7 @@ public class ORCCertificatesRmsImporter extends AbstractORCCertificatesImporter 
             } else {
                 int right = left+1;
                 // expand left:
-                while (left > 0 && Character.isWhitespace(line.charAt(left-1))) {
+                while (left > 0 && !Character.isWhitespace(line.charAt(left-1))) {
                     left--;
                 }
                 // expand right:

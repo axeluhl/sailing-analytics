@@ -75,7 +75,6 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import java.lang.ref.WeakReference;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -223,9 +222,8 @@ public class WindFragment extends BaseFragment
         super.onActivityCreated(savedInstanceState);
         if (mHeaderWindSensor != null && getRace() != null && getRaceState() != null
                 && getRaceState().getWindFix() != null) {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm", getResources().getConfiguration().locale);
             Wind wind = getRaceState().getWindFix();
-            mHeaderWindSensor.setText(getString(R.string.wind_sensor, dateFormat.format(wind.getTimePoint().asDate()),
+            mHeaderWindSensor.setText(getString(R.string.wind_sensor, TimeUtils.formatTime(wind.getTimePoint(), false),
                     wind.getFrom().getDegrees(), wind.getKnots()));
         }
         setupButtons();

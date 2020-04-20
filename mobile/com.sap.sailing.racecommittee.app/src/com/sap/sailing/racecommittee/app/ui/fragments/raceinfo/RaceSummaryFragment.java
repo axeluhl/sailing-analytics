@@ -1,6 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import java.text.SimpleDateFormat;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
+
 import java.util.Calendar;
 
 import com.sap.sailing.android.shared.util.AppUtils;
@@ -21,7 +22,6 @@ import android.widget.TextView;
 public class RaceSummaryFragment extends BaseFragment {
 
     private RaceStateListener mRaceStateListener;
-    private SimpleDateFormat mDateFormat;
     private TextView mStartTime;
     private TextView mFinishStartTime;
     private TextView mFinishStartDuration;
@@ -53,7 +53,6 @@ public class RaceSummaryFragment extends BaseFragment {
         View layout = inflater.inflate(resId, container, false);
 
         mRaceStateListener = new RaceStateListener();
-        mDateFormat = new SimpleDateFormat("HH:mm:ss", getResources().getConfiguration().locale);
 
         mStartTime = ViewHelper.get(layout, R.id.race_start_time);
         mFinishStartTime = ViewHelper.get(layout, R.id.race_finish_begin_time);
@@ -100,7 +99,15 @@ public class RaceSummaryFragment extends BaseFragment {
                 }
             });
         }
-
+        final View revokeFinish = ViewHelper.get(layout, R.id.flag_finishing_revoke);
+        if (revokeFinish != null) {
+            revokeFinish.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    getRace().revokeFinished(preferences.getAuthor());
+                }
+            });
+        }
         return layout;
     }
 
@@ -143,10 +150,10 @@ public class RaceSummaryFragment extends BaseFragment {
         }
         Calendar finishedTime = TimeUtils.floorTime(finished);
         if (mStartTime != null && getRaceState().getStartTime() != null) {
-            mStartTime.setText(mDateFormat.format(startTime.getTime()));
+            mStartTime.setText(TimeUtils.formatTime(new MillisecondsTimePoint(startTime.getTimeInMillis())));
         }
         if (mFinishStartTime != null && getRaceState().getFinishingTime() != null) {
-            mFinishStartTime.setText(mDateFormat.format(finishingTime.getTime()));
+            mFinishStartTime.setText(TimeUtils.formatTime(new MillisecondsTimePoint(finishingTime.getTime())));
         }
         if (mFinishStartDuration != null && getRaceState().getStartTime() != null
                 && getRaceState().getFinishingTime() != null) {
@@ -154,7 +161,7 @@ public class RaceSummaryFragment extends BaseFragment {
                     finishingTime.getTimeInMillis() - startTime.getTimeInMillis()));
         }
         if (mFinishEndTime != null && getRaceState().getFinishedTime() != null) {
-            mFinishEndTime.setText(mDateFormat.format(finishedTime.getTime()));
+            mFinishEndTime.setText(TimeUtils.formatTime(new MillisecondsTimePoint(finishedTime.getTime())));
         }
         if (mFinishEndDuration != null && getRaceState().getStartTime() != null
                 && getRaceState().getFinishedTime() != null) {
@@ -173,10 +180,10 @@ public class RaceSummaryFragment extends BaseFragment {
 
                 TimeRange protestTime = getRaceState().getProtestTime();
                 if (mProtestTimeStart != null) {
-                    mProtestTimeStart.setText(mDateFormat.format(protestTime.from().asDate()));
+                    mProtestTimeStart.setText(TimeUtils.formatTime(protestTime.from()));
                 }
                 if (mProtestTimeEnd != null) {
-                    mProtestTimeEnd.setText(mDateFormat.format(protestTime.to().asDate()));
+                    mProtestTimeEnd.setText(TimeUtils.formatTime(protestTime.to()));
                 }
                 if (mProtestTimeDuration != null) {
                     mProtestTimeDuration.setText(TimeUtils.formatTimeAgo(getActivity(),

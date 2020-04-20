@@ -4,11 +4,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
-
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -29,6 +26,7 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.component.SelectedElementsCountingButton;
 
 /**
  * Shows the currently tracked events/races in a table. Updated if subscribed as an {@link RegattasDisplayer}, e.g., with
@@ -145,27 +143,11 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
             });
             btnExport.setEnabled(false);
             trackedRacesButtonPanel.add(btnExport);
-            
-            btnRemoveRace = new Button(stringMessages.remove());
-            btnRemoveRace.ensureDebugId("RemoveRaceButton");
-            btnRemoveRace.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    if(askUserForConfirmation()){
-                        removeAndUntrackRaces(refreshableSelectionModel.getSelectedSet());
-                    }
-                }
 
-                private boolean askUserForConfirmation() {
-                    if(refreshableSelectionModel.itemIsSelectedButNotVisible(raceTable.getVisibleItems())){
-                        final String trackedRaceNames =  refreshableSelectionModel.getSelectedSet().stream().map(e -> e.getRegattaName()+" - "+e.getName()).collect(Collectors.joining("\n"));
-                        return Window.confirm(stringMessages.doYouReallyWantToRemoveNonVisibleTrackedRaces(trackedRaceNames));
-                    }
-                    return true;
-                }
-                    
-            });
-            btnRemoveRace.setEnabled(false);
+            btnRemoveRace = new SelectedElementsCountingButton<RaceDTO>(stringMessages.remove(),
+                    refreshableSelectionModel, e -> e.getRegattaName() + " - " + e.getName(),
+                    (event) -> removeAndUntrackRaces(refreshableSelectionModel.getSelectedSet()));
+            btnRemoveRace.ensureDebugId("RemoveRaceButton");
             trackedRacesButtonPanel.add(btnRemoveRace);
         }
     }

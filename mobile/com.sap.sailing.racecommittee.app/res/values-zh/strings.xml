@@ -566,4 +566,7 @@
 
     <string name="competitor_merge_error_message">"此参赛队已从其他设备更改，您已更改相同的数据。请确保，此数据现在正确无误。"</string>
 
+    <string name="finishing_revoke">Revoke</string>
+    <string name="error_revoke_finished">Cannot revoke finished time</string>
+    <string name="error_revoke_finishing">Cannot revoke finishing time</string>
 </resources>
