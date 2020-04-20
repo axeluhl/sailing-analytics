@@ -30,6 +30,9 @@ public abstract class BaseLogAnalyzer<LogT extends AbstractLog<EventT, VisitorT>
         }
     }
 
+    /**
+     * Always called under the {@link #getLog() log's} read lock
+     */
     protected abstract ResultT performAnalysis();
 
     protected Iterable<EventT> getAllEvents() {

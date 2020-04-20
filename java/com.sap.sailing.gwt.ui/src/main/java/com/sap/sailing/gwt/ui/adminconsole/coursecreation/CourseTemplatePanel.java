@@ -9,8 +9,12 @@ import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCe
 import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell.ACTION_UPDATE;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
@@ -22,7 +26,6 @@ import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
-import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -78,24 +81,8 @@ public class CourseTemplatePanel extends FlowPanel {
                 SecuredDomainType.MARK_TEMPLATE);
         add(buttonAndFilterPanel);
         allCourseTemplates = new ArrayList<>();
-        buttonAndFilterPanel.addUnsecuredAction(stringMessages.refresh(), new Command() {
-
-            @Override
-            public void execute() {
-                loadCourseTemplates();
-            }
-        });
-        buttonAndFilterPanel.addCreateAction(stringMessages.add(), new Command() {
-            @Override
-            public void execute() {
-                openEditCourseTemplateDialog(new CourseTemplateDTO(), userService, true);
-            }
-        });
-
         Label lblFilterRaces = new Label(stringMessages.filterCourseTemplateByName() + ":");
         lblFilterRaces.setWordWrap(false);
-        buttonAndFilterPanel.addUnsecuredWidget(lblFilterRaces);
-
         this.filterableCourseTemplatePanel = new LabeledAbstractFilterablePanel<CourseTemplateDTO>(lblFilterRaces,
                 allCourseTemplates, courseTemplateListDataProvider, stringMessages) {
             @Override
@@ -111,12 +98,36 @@ public class CourseTemplatePanel extends FlowPanel {
                 return courseTemplateTable;
             }
         };
-        createCourseTemplateTable(userService);
         filterableCourseTemplatePanel.getTextBox().ensureDebugId("CourseTemplateFilterTextBox");
+        createCourseTemplateTable(userService);
+        buttonAndFilterPanel.addUnsecuredAction(stringMessages.refresh(), this::loadCourseTemplates);
+        buttonAndFilterPanel.addCreateAction(stringMessages.add(),
+                () -> openEditCourseTemplateDialog(new CourseTemplateDTO(), userService, true));
+        buttonAndFilterPanel.addRemoveAction(stringMessages.remove(), refreshableSelectionModel, true,
+                () -> removeCourseTemplates(refreshableSelectionModel.getSelectedSet().stream()
+                        .map(courseTemplateDTO -> courseTemplateDTO.getUuid()).collect(Collectors.toList())));
+
+        buttonAndFilterPanel.addUnsecuredWidget(lblFilterRaces);
         buttonAndFilterPanel.addUnsecuredWidget(filterableCourseTemplatePanel);
         filterableCourseTemplatePanel
                 .setUpdatePermissionFilterForCheckbox(event -> userService.hasPermission(event, DefaultActions.UPDATE));
 
+    }
+
+    private void removeCourseTemplates(Collection<UUID> courseTemplatesUuids) {
+        if (!courseTemplatesUuids.isEmpty()) {
+            sailingService.removeCourseTemplates(courseTemplatesUuids, new AsyncCallback<Void>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    errorReporter.reportError("Error trying to remove course teamplates:" + caught.getMessage());
+                }
+
+                @Override
+                public void onSuccess(Void result) {
+                    refreshCourseTemplates();
+                }
+            });
+        }
     }
 
     public void loadCourseTemplates() {
@@ -310,7 +321,7 @@ public class CourseTemplatePanel extends FlowPanel {
                 stringMessages);
         actionsColumn.addAction(ACTION_DELETE, DELETE, e -> {
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveCourseTemplate(e.getName()))) {
-                sailingService.removeCourseTemplate(e.getUuid(), new AsyncCallback<Void>() {
+                sailingService.removeCourseTemplates(Collections.singletonList(e.getUuid()), new AsyncCallback<Void>() {
 
                     @Override
                     public void onFailure(Throwable caught) {

@@ -21,6 +21,15 @@ We try to keep important styling information separate in CSS resources which can
 
 Java code can be shared between back-end and front-end. This is not only possible by using the com.sap.sailing.gwt.ui.shared package. GWT enables the sharing of an entire OSGi bundle between client and server. As a starting point for this powerful construct we have introduced the bundle com.sap.sailing.domain.common. It has a GWT module descriptor (SailingDomain.gwt.xml) which inside the <module> element has to list the packages to expose, e.g., <source path='common'/> and currently (with GWT 2.4) has to adhere to the JDK 1.6 language capabilities, in particular disallowing multi-catch clauses and inferred generics. Also, it has to adhere to the rules for GWT's JRE emulation (see, e.g., https://developers.google.com/web-toolkit/doc/latest/DevGuide). The bundle at the same time is a regular OSGi Java bundle, with a regular manifest. Other GWT bundles can use it by including an inherits clause in their <module> specification, as in <inherits name="com.sap.sailing.domain.SailingDomain"/>. With this mechanism, code can easily be shared across client and back-end.
 
+## Running Selenium Tests
+To run Selenium Integration UI Tests please do the following:
+
+* in local-test-environment.xml file adjust the properties according to which browser and driver you'll be using (chromedriver, geckodriver) and what their file system locations are;
+* make sure no "Sailing Server ..." launch configuration is currently running;
+* start the "Sailing Server (No Proxy, winddbTest)" config, it will use a test database in MongoDB so as to not overwrite anything in your local "production" ("winddb") database; it furthermore includes a bundle in the OSGi configuration that enables massive "clear" operations that we don't want to deploy to our production landscape otherwise but which is used by the tests to ensure a clean fresh state when tests start to execute;
+* start the "GWT Sailing SDM" launch configuration;
+* start the "Sailing Domain Test (No Proxy)" JUnit test launch configuration;
+
 ## Tracking and Wind Sensor Connectors
 To receive GPS and wind data in near real time, some network programming becomes necessary. Depending on the technology and provider used, a combination of HTTP, TCP and UDP connections is required to obtain live data. Particularly the UDP connectivity was the reason why deploying our solution to SAP NetWeaver Cloud was and still is difficult.
 

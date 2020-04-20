@@ -566,4 +566,7 @@
 
     <string name="competitor_merge_error_message">"Este competidor foi modificado a partir de outro dispositivo e você modificou os mesmos dados. Certifique-se de que estes dados estão corretos agora."</string>
 
+    <string name="finishing_revoke">Revoke</string>
+    <string name="error_revoke_finished">Cannot revoke finished time</string>
+    <string name="error_revoke_finishing">Cannot revoke finishing time</string>
 </resources>
