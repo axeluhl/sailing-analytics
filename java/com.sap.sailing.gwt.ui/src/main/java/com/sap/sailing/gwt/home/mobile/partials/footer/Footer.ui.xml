@@ -9,7 +9,7 @@
         <!-- Footer mobile -->
         <footer class="{local_res.css.sitefooter}">
             <div class="{res.mediaCss.grid}">
-                <l:LanguageSelector labelText="{i18n.footerLanguage}"
+                <l:LanguageSelector  ui:field="languageSelector" labelText="{i18n.footerLanguage}"
                     addStyleNames="{local_res.css.sitefooter_language} {res.mediaCss.small12} {res.mediaCss.columns}"/>
                 <div class="{local_res.css.sitefooter_links} {res.mediaCss.small12} {res.mediaCss.columns}">
                     <a ui:field="imprintAnchorLink"> 
@@ -25,11 +25,11 @@
                         <ui:text from='{i18n.footerPrivacy}' />
                     </a>
                     |
-                    <a href="https://jobs.sap.com" target="_blank">
+                    <a ui:field="sapJobsAnchor" href="https://jobs.sap.com" target="_blank">
 	                   <ui:text from='{i18n.footerJobs}'/>
 	                </a>
                     <br></br>
-                    <a href="mailto:sailing_analytics%40sap.com?subject=[SAP Sailing] Feedback"
+                    <a ui:field="feedbackAnchor" href="mailto:sailing_analytics%40sap.com?subject=[SAP Sailing] Feedback"
                         title="{i18n.footerFeedback}">
                         <ui:text from='{i18n.footerFeedback}' />
                     </a>
@@ -42,7 +42,7 @@
                         <ui:text from='{i18n.whatsNew}' />
                     </g:Anchor>
                 </div>
-                <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
+                <div ui:field="copyrightDiv" class="{res.mediaCss.small12} {res.mediaCss.columns}">
                     <ui:text from='{i18n.footerCopyright}' />
                 </div>
             </div>

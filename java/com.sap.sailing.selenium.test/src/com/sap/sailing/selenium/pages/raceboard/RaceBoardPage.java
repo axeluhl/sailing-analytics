@@ -22,6 +22,10 @@ public class RaceBoardPage extends HostPageWithAuthentication {
     
     @FindBy(how = BySeleniumId.class, using = "raceMapSettingsButton")
     private WebElement raceMapSettingsButton;
+    
+    @FindBy(how=BySeleniumId.class, using = "dataByContainer")
+    private WebElement dataByContainer;
+    
     private boolean doneInit;
     
     /**
@@ -137,14 +141,22 @@ public class RaceBoardPage extends HostPageWithAuthentication {
         return new LeaderboardSettingsDialogPO(driver, findElementBySeleniumId("LeaderboardSettingsDialog"));
     }
     
+    public boolean isRaceBoardLogoExisting() {
+        return !driver.findElements(new BySeleniumId("raceBoardSapLogo")).isEmpty();
+    }
+    
+    public WebElement getDataByContainer() {
+        return dataByContainer;
+    }
+    
     public static RaceBoardPage goToRaceboardUrl(WebDriver webDriver,String context, String leaderboardName, String regattaName,
-            String raceName) throws UnsupportedEncodingException {
-        return goToRaceboardUrl(webDriver, context, leaderboardName, regattaName, raceName, null);
+            String raceName, boolean whitelabel) throws UnsupportedEncodingException {
+        return goToRaceboardUrl(webDriver, context, leaderboardName, regattaName, raceName, null, whitelabel);
     }
 
     public static RaceBoardPage goToRaceboardUrl(WebDriver webDriver,String context, String leaderboardName, String regattaName,
-            String raceName, String raceMode) throws UnsupportedEncodingException {
-//        private static final String EVENT_LINK = "gwt/RaceBoard.html?leaderboardName=BMW+Cup+(J80)&regattaName=BMW+Cup+(J80)&raceName=BMW+Cup+Race+1&canReplayDuringLiveRaces=true";
+            String raceName, String raceMode, boolean whitelabel) throws UnsupportedEncodingException {
+        // structure of an event link: "gwt/RaceBoard.html?leaderboardName=BMW+Cup+(J80)&regattaName=BMW+Cup+(J80)&raceName=BMW+Cup+Race+1&canReplayDuringLiveRaces=true"
         String escapedLeaderBoardName = URLEncoder.encode(leaderboardName,"UTF-8");
         String escapedRegattaName = URLEncoder.encode(regattaName, "UTF-8");
         String escapedRaceName = URLEncoder.encode(raceName, "UTF-8");
@@ -152,6 +164,9 @@ public class RaceBoardPage extends HostPageWithAuthentication {
                 + escapedRegattaName + "&raceName=" + escapedRaceName;
         if(raceMode != null) {
             url += "&mode=" + URLEncoder.encode(raceMode, "UTF-8");
+        }
+        if (whitelabel) {
+            url += "&whitelabel";
         }
         return goToRaceboardUrl(webDriver, url);
     }
