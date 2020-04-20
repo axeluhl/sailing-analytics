@@ -35,6 +35,8 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
     private CheckBox competitorChartCheckBox;
     private CheckBox filterSetNameCheckBox;
     private CheckBox competitorSelectionCheckBox;
+    private CheckBox tagsCheckBox;
+    private CheckBox maneuverCheckBox;
     private Label linkFieldLabel;
     private TextBox linkField;
     private Image qrCodeImage;
@@ -93,6 +95,12 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
         }
         if(!windChartCheckBox.getValue()) {
             patchedPerspectiveOwnSettings.resetShowWindChart();
+        }
+        if(!tagsCheckBox.getValue()) {
+            patchedPerspectiveOwnSettings.resetShowTags();;;
+        }
+        if(!maneuverCheckBox.getValue()) {
+            patchedPerspectiveOwnSettings.resetShowManeuver();;
         }
         if(!filterSetNameCheckBox.getValue()) {
             patchedPerspectiveOwnSettings.resetActiveCompetitorsFilterSetName();;
@@ -157,6 +165,24 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
                 updateLink();
             }
         });
+        tagsCheckBox = createCheckbox(stringMessages.tagsCheckBoxLabel());
+        tagsCheckBox.setValue(true);
+        tagsCheckBox.addClickHandler(new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+                updateLink();
+            }
+        });
+        maneuverCheckBox = createCheckbox(stringMessages.maneuverCheckBoxLabel());
+        maneuverCheckBox.setValue(true);
+        maneuverCheckBox.addClickHandler(new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+                updateLink();
+            }
+        });
         competitorSelectionCheckBox = createCheckbox(stringMessages.competitorSelectionCheckBoxLabel());
         competitorSelectionCheckBox.setValue(true);
         competitorSelectionCheckBox.addClickHandler(new ClickHandler() {
@@ -191,6 +217,8 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
         settingsPanel.add(leaderBoardPanelCheckBox);
         settingsPanel.add(competitorChartCheckBox);
         settingsPanel.add(filterSetNameCheckBox);
+        settingsPanel.add(tagsCheckBox);
+        settingsPanel.add(maneuverCheckBox);
         settingsPanel.add(competitorSelectionCheckBox);
         mainPanel.add(settingsPanel);
         VerticalPanel linkContentPanel = new VerticalPanel();
