@@ -428,7 +428,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
                 dynamicRaceDefinitionSet.addRaceDefinition(race, trackedRace);
             }
         } catch (Exception exception) {
-            logger.log(Level.WARNING, "Error while creating race " + raceName + " for retatta " + regatta, exception);
+            logger.log(Level.WARNING, "Error while creating race " + raceName + " for regatta " + regatta, exception);
             try {
                 if (tracker != null) {
                     trackedRegattaRegistry.stopTracker(regatta, getTracker());

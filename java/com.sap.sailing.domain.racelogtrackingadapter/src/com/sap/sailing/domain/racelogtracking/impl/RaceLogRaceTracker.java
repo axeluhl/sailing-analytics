@@ -322,7 +322,7 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
             // this wakes up all waiting race handles
         } catch (Exception exception) {
             logger.log(Level.WARNING,
-                    "Error while creating race " + raceName + " for retatta " + trackedRegatta.getRegatta(), exception);
+                    "Error while creating race " + raceName + " for regatta " + trackedRegatta.getRegatta(), exception);
             try {
                 trackedRegattaRegistry.stopTracker(trackedRegatta.getRegatta(), this);
             } catch (Exception e) {

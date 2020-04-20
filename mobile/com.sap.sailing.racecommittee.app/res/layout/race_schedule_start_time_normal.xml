@@ -126,12 +126,13 @@
                     android:scaleX="@integer/picker_scale"
                     android:scaleY="@integer/picker_scale">
 
-                    <NumberPicker
-                        android:id="@+id/start_date_picker"
+                    <Button
+                        android:id="@+id/start_date_button"
+                        style="@style/Widget.AppCompat.Button.Borderless.Colored"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
-                        android:descendantFocusability="blocksDescendants" />
+                        android:text="@string/today" />
 
                     <include
                         android:id="@+id/start_time_picker"
@@ -157,8 +158,8 @@
                 android:layout_height="@dimen/default_button_height"
                 android:layout_alignParentBottom="true"
                 android:layout_centerInParent="true"
-                android:layout_marginBottom="@dimen/side_padding"
                 android:layout_marginTop="@dimen/side_padding"
+                android:layout_marginBottom="@dimen/side_padding"
                 android:maxWidth="400dp"
                 android:text="@string/race_set_time"
                 android:textSize="@dimen/textSize_18" />
@@ -183,8 +184,8 @@
                 style="?attr/textSmall"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
                 android:layout_alignParentLeft="true"
+                android:layout_alignParentBottom="true"
                 android:visibility="gone"
                 tools:text="12:12:12" />
         </RelativeLayout>
@@ -213,9 +214,9 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
-                        android:layout_marginBottom="@dimen/default_margin"
                         android:layout_marginLeft="@dimen/default_margin"
                         android:layout_marginTop="@dimen/default_margin"
+                        android:layout_marginBottom="@dimen/default_margin"
                         android:scaleX="@integer/picker_scale"
                         android:scaleY="@integer/picker_scale" />
 
@@ -278,8 +279,8 @@
                 android:layout_height="@dimen/default_button_height"
                 android:layout_alignParentBottom="true"
                 android:layout_centerInParent="true"
-                android:layout_marginBottom="@dimen/side_padding"
                 android:layout_marginTop="@dimen/side_padding"
+                android:layout_marginBottom="@dimen/side_padding"
                 android:maxWidth="400dp"
                 android:text="@string/race_set_time"
                 android:textSize="@dimen/textSize_18" />

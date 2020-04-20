@@ -169,7 +169,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     void updateTracTracConfiguration(TracTracConfigurationWithSecurityDTO tracTracConfiguration)
             throws UnauthorizedException, Exception;
 
-    void deleteTracTracConfiguration(TracTracConfigurationWithSecurityDTO tracTracConfiguration)
+    void deleteTracTracConfigurations(Collection<TracTracConfigurationWithSecurityDTO> tracTracConfigurations)
             throws UnauthorizedException, Exception;
 
     List<RegattaDTO> getRegattas() throws UnauthorizedException;
@@ -185,12 +185,12 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     void trackWithTracTrac(RegattaIdentifier regattaToAddTo, Iterable<TracTracRaceRecordDTO> rrs, String liveURI,
             String storedURI, String courseDesignUpdateURI, boolean trackWind, boolean correctWindByDeclination,
-            Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm, String tracTracUsername,
-            String tracTracPassword) throws UnauthorizedException, Exception;
+            Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm, boolean useOfficialEventsToUpdateRaceLog,
+            String tracTracUsername, String tracTracPassword) throws UnauthorizedException, Exception;
 
     void trackWithSwissTiming(RegattaIdentifier regattaToAddTo, Iterable<SwissTimingRaceRecordDTO> rrs, String hostname,
             int port, boolean trackWind, boolean correctWindByDeclination, boolean useInternalMarkPassingAlgorithm,
-            String updateURL, String updateUsername, String updatePassword) throws UnauthorizedException, Exception;
+            String updateURL, String updateUsername, String updatePassword, String eventName, String manage2SailEventUrl) throws UnauthorizedException, Exception;
 
     void replaySwissTimingRace(RegattaIdentifier regattaIdentifier, Iterable<SwissTimingReplayRaceDTO> replayRaces,
             boolean trackWind, boolean correctWindByDeclination, boolean useInternalMarkPassingAlgorithm)
@@ -392,7 +392,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     void createSwissTimingConfiguration(String configName, String jsonURL, String hostname, Integer port,
             String updateURL, String updateUsername, String updatePassword) throws UnauthorizedException, Exception;
 
-    void deleteSwissTimingConfiguration(SwissTimingConfigurationWithSecurityDTO configuration)
+    void deleteSwissTimingConfigurations(Collection<SwissTimingConfigurationWithSecurityDTO> configurations)
             throws UnauthorizedException, Exception;
 
     void updateSwissTimingConfiguration(SwissTimingConfigurationWithSecurityDTO configuration)
@@ -542,7 +542,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     void updateSwissTimingArchiveConfiguration(SwissTimingArchiveConfigurationWithSecurityDTO dto)
             throws UnauthorizedException, Exception;
 
-    void deleteSwissTimingArchiveConfiguration(SwissTimingArchiveConfigurationWithSecurityDTO dto)
+    void deleteSwissTimingArchiveConfigurations(Collection<SwissTimingArchiveConfigurationWithSecurityDTO> dtos)
             throws UnauthorizedException, Exception;
 
     void createCourseAreas(UUID eventId, String[] courseAreaNames) throws UnauthorizedException;
@@ -1285,13 +1285,25 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     List<MarkPropertiesDTO> getMarkProperties();
 
+    /**
+     * Removes mark properties list
+     * 
+     * @param markPropertiesDTOS
+     *            list of mark properties to remove
+     */
+    void removeMarkProperties(Collection<UUID> markPropertiesUuids);
+
     List<CourseTemplateDTO> getCourseTemplates();
 
     CourseTemplateDTO createOrUpdateCourseTemplate(CourseTemplateDTO courseTemplate);
 
-    void removeCourseTemplate(UUID uuid);
-
-    void removeMarkProperties(UUID uuid);
+    /**
+     * Removes course templates list
+     * 
+     * @param courseTemplateDTOs
+     *            list of course templates to remove
+     */
+    void removeCourseTemplates(Collection<UUID> courseTemplatesUuids);
 
     List<MarkRoleDTO> getMarkRoles();
 

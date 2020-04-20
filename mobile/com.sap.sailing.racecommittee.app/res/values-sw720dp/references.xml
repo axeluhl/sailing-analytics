@@ -10,6 +10,7 @@
     <item name="photo_list_button" type="layout">@layout/photo_list_button_xlarge</item>
     <item name="photo_list_item" type="layout">@layout/photo_list_item_xlarge</item>
     <item name="race_finishing_button" type="layout">@layout/race_finishing_button_xlarge</item>
+    <item name="race_finishing_revoke_button" type="layout">@layout/race_revoke_finishing_button_xlarge</item>
     <item name="race_individual_recall" type="layout">@layout/race_individual_recall_xlarge</item>
     <item name="race_panel_time" type="layout">@layout/race_panel_time_xlarge</item>
     <item name="race_penalty_button_bar" type="layout">@layout/race_penalty_button_bar_xlarge</item>

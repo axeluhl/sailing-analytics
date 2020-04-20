@@ -338,6 +338,7 @@ public enum InMemoryDataStore implements DataStore {
     }
 
     public void registerRaces(Collection<ManagedRace> races) {
+        //TODO Log
         if (mBound) {
             for (ManagedRace race : races) {
                 mService.registerRace(race);
@@ -355,6 +356,7 @@ public enum InMemoryDataStore implements DataStore {
 
         @Override
         public void onServiceConnected(ComponentName className, IBinder service) {
+            //TODO Log
             RaceStateService.RaceStateServiceBinder binder = (RaceStateService.RaceStateServiceBinder) service;
             mService = binder.getService();
             mBound = true;

@@ -1,13 +1,16 @@
 package com.sap.sailing.server.impl;
 
 import java.io.BufferedReader;
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.lang.management.ManagementFactory;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URL;
@@ -42,6 +45,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.zip.GZIPInputStream;
 
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
@@ -235,6 +239,7 @@ import com.sap.sailing.server.interfaces.DataImportLockWithProgress;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.interfaces.SimulationService;
 import com.sap.sailing.server.interfaces.TaggingService;
+import com.sap.sailing.server.masterdata.MasterDataImporter;
 import com.sap.sailing.server.notification.EmptySailingNotificationService;
 import com.sap.sailing.server.notification.SailingNotificationService;
 import com.sap.sailing.server.operationaltransformation.AddCourseAreas;
@@ -324,6 +329,9 @@ import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.shared.impl.UserGroup;
+import com.sap.sse.security.util.RemoteServerUtil;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
 import com.sap.sse.util.ClearStateTestSupport;
@@ -4848,5 +4856,154 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public TypeBasedServiceFinder<RaceTrackingConnectivityParametersHandler> getRaceTrackingConnectivityParamsServiceFinder() {
         return domainObjectFactory.getRaceTrackingConnectivityParamsServiceFinder();
+    }
+
+    @Override
+    public void importMasterData(final String urlAsString, final String[] groupNames, final boolean override,
+            final boolean compress, final boolean exportWind, final boolean exportDeviceConfigurations,
+            final String targetServerUsername, final String targetServerPassword, final String targetServerBearerToken,
+            final boolean exportTrackedRacesAndStartTracking, final UUID importOperationId) throws IllegalArgumentException {
+        if (dataImportLock.getProgress(importOperationId) != null) {
+            IllegalArgumentException e = new IllegalArgumentException(
+                    "The UUID for the importOperationId already exists.");
+            logger.log(Level.SEVERE, e.getMessage(), e);
+            throw e;
+        }
+        if (Util.hasLength(targetServerUsername) && Util.hasLength(targetServerPassword)
+                && Util.hasLength(targetServerBearerToken)) {
+            IllegalArgumentException e = new IllegalArgumentException(
+                    "Please use either username/password or bearer token, not both.");
+            logger.log(Level.WARNING, e.getMessage(), e);
+            throw e;
+        }
+        final User user = getSecurityService().getCurrentUser();
+        // Default to current user's token
+        final String effectiveTargetServerBearerToken;
+        if (!Util.hasLength(targetServerUsername) && !Util.hasLength(targetServerPassword)
+                && !Util.hasLength(targetServerBearerToken)) {
+            effectiveTargetServerBearerToken = getSecurityService().getOrCreateAccessToken(user.getName());
+        } else {
+            effectiveTargetServerBearerToken = targetServerBearerToken;
+        }
+        final String token = (!Util.hasLength(effectiveTargetServerBearerToken)
+                ? RemoteServerUtil.resolveBearerTokenForRemoteServer(urlAsString, targetServerUsername,
+                        targetServerPassword) : effectiveTargetServerBearerToken);
+        createOrUpdateDataImportProgressWithReplication(importOperationId, 0.0, DataImportSubProgress.INIT, 0.0);
+        final UserGroup tenant = getSecurityService().getDefaultTenantForCurrentUser();
+        // Create a progress indicator for as long as the server gets data from the other server.
+        // As soon as the server starts the import operation, a progress object will be built on every server
+        long startTime = System.currentTimeMillis();
+        createOrUpdateDataImportProgressWithReplication(importOperationId, 0.01, DataImportSubProgress.CONNECTION_SETUP,
+                0.5);
+        final String query;
+        try {
+            query = createLeaderboardQuery(groupNames, compress, exportWind, exportDeviceConfigurations,
+                    exportTrackedRacesAndStartTracking);
+        } catch (UnsupportedEncodingException e1) {
+            throw new RuntimeException(e1);
+        }
+        URLConnection connection = null;
+        URL serverAddress = null;
+        InputStream inputStream = null;
+        try {
+            final String masterDataPath = "/sailingserver/spi/v1/masterdata/leaderboardgroups";
+            final URL base = RemoteServerUtil.createBaseUrl(urlAsString);
+            serverAddress = RemoteServerUtil.createRemoteServerUrl(base, masterDataPath, query);
+            // the response can take a very long time for MDI that include foiling data or such
+            connection = HttpUrlConnectionHelper.redirectConnectionWithBearerToken(serverAddress,
+                    Duration.ONE_HOUR.times(2), token);
+            createOrUpdateDataImportProgressWithReplication(importOperationId, 0.02,
+                    DataImportSubProgress.CONNECTION_ESTABLISH, 0.5);
+            if (compress) {
+                InputStream timeoutExtendingInputStream = new TimeoutExtendingInputStream(connection.getInputStream(),
+                        connection);
+                inputStream = new GZIPInputStream(timeoutExtendingInputStream);
+            } else {
+                inputStream = new TimeoutExtendingInputStream(connection.getInputStream(), connection);
+            }
+            final MasterDataImporter importer = new MasterDataImporter(baseDomainFactory, this, user, tenant);
+            importer.importFromStream(inputStream, importOperationId, override);
+        } catch (Throwable e) {
+            // do not assume that RuntimeException is logged properly
+            String message = e.getMessage();
+            if (connection instanceof HttpURLConnection) {
+                // try to obtain an error message from the connection's error stream:
+                try {
+                    message = new BufferedReader(
+                            new InputStreamReader(((HttpURLConnection) connection).getErrorStream())).readLine();
+                } catch (Exception exceptionTryingToReadErrorStream) {
+                    // in this case we just stay with the exception's message
+                }
+            }
+            logger.log(Level.SEVERE, message, e);
+            setDataImportFailedWithReplication(importOperationId, message + "\n\nHave you checked if the"
+                    + " versions (commit-wise) of the importing and exporting servers are compatible with each other? "
+                    + "If the error still occurs, when both servers are running the same version, please report the problem.");
+            throw new RuntimeException(e);
+        } finally {
+            // close the connection, set all objects to null
+            setDataImportDeleteProgressFromMapTimerWithReplication(importOperationId);
+            if (connection != null && connection instanceof HttpURLConnection) {
+                ((HttpURLConnection) connection).disconnect();
+            }
+            connection = null;
+            long timeToImport = System.currentTimeMillis() - startTime;
+            logger.info(String.format("Took %s ms overall to import master data.", timeToImport));
+            try {
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+            } catch (IOException e) {
+                logger.log(Level.INFO, "Couldn't close input stream", e);
+            }
+        }
+    }
+    
+    private String createLeaderboardQuery(String[] groupNames, boolean compress, boolean exportWind,
+            boolean exportDeviceConfigurations, boolean exportTrackedRacesAndStartTracking)
+            throws UnsupportedEncodingException {
+        StringBuffer queryStringBuffer = new StringBuffer("");
+        for (int i = 0; i < groupNames.length; i++) {
+            String encodedGroupName = URLEncoder.encode(groupNames[i], "UTF-8");
+            queryStringBuffer.append("names[]=" + encodedGroupName + "&");
+        }
+        queryStringBuffer.append(String.format("compress=%s&exportWind=%s&exportDeviceConfigs=%s&exportTrackedRacesAndStartTracking=%s", compress,
+                exportWind, exportDeviceConfigurations, exportTrackedRacesAndStartTracking));
+        return queryStringBuffer.toString();
+    }
+
+    private class TimeoutExtendingInputStream extends FilterInputStream {
+
+        // default timeout is high to ensure that long running client operations
+        // such as compressing data will not have the server run into a timeout.
+        // this especially applies to foiling data where compression on slower machines
+        // can take up to two hours.
+        private static final int DEFAULT_TIMEOUT_IN_SECONDS = 60*60*2;
+
+        private final URLConnection connection;
+
+        protected TimeoutExtendingInputStream(InputStream in, URLConnection connection) {
+            super(in);
+            this.connection = connection;
+        }
+
+        @Override
+        public int read() throws IOException {
+            connection.setReadTimeout(DEFAULT_TIMEOUT_IN_SECONDS*1000);
+            return super.read();
+        }
+
+        @Override
+        public int read(byte[] b) throws IOException {
+            connection.setReadTimeout(DEFAULT_TIMEOUT_IN_SECONDS*1000);
+            return super.read(b);
+        }
+
+        @Override
+        public int read(byte[] b, int off, int len) throws IOException {
+            connection.setReadTimeout(DEFAULT_TIMEOUT_IN_SECONDS*1000);
+            return super.read(b, off, len);
+        }
+
     }
 }

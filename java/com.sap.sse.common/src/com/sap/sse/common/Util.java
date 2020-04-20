@@ -757,10 +757,16 @@ public class Util {
         return result;
     }
 
-    public static <T> List<T> asList(Iterable<T> visibleCourseAreas) {
-        ArrayList<T> list = new ArrayList<T>();
-        addAll(visibleCourseAreas, list);
+    public static <T> List<T> asList(Iterable<T> iterable) {
+        final List<T> list = new ArrayList<>();
+        addAll(iterable, list);
         return list;
+    }
+    
+    public static <T> Set<T> asSet(Iterable<T> iterable) {
+        final Set<T> result = new HashSet<>();
+        addAll(iterable, result);
+        return result;
     }
 
     public static <T> List<T> cloneListOrNull(List<T> list) {
@@ -943,5 +949,22 @@ public class Util {
      */
     public static <T> Stream<T> stream(Iterable<T> iterable) {
         return StreamSupport.stream(iterable.spliterator(), /* parallel */ false);
+    }
+    
+    /**
+     * Checks whether a given String is <code>null</code> or empty.
+     * 
+     * @param str
+     *            String to check
+     * @return <code>false</code> if empty or <code>null</code>, otherwise <code>true</code>.
+     */
+    public static boolean hasLength(String str) {
+        final boolean result;
+        if (str == null) {
+            result = false;
+        } else {
+            result = !str.isEmpty();
+        }
+        return result;
     }
 }
