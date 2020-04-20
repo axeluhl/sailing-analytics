@@ -442,7 +442,6 @@ public class RaceBoardPanel
                     true);
             windChart.setVisible(false);
             componentsForSideBySideViewer.add(windChart);
-            
         }
         maneuverTablePanel = new ManeuverTablePanel(this, getComponentContext(), sailingService, asyncActionsExecutor,
                 selectedRaceIdentifier, stringMessages, competitorSelectionProvider, errorReporter, timer,
@@ -512,6 +511,8 @@ public class RaceBoardPanel
         if (showChartMarkEditMediaButtonsAndVideo) {
             setWindChartVisible(initialPerspectiveOwnSettings.isShowWindChart());
             setCompetitorChartVisible(initialPerspectiveOwnSettings.isShowCompetitorsChart());
+            setTagPanelVisible(initialPerspectiveOwnSettings.isShowTags());
+            setManeuverTableVisible(initialPerspectiveOwnSettings.isShowManeuver());
         }
         // make sure to load leaderboard data for filtering to work
         if (!showLeaderboard) {
@@ -659,6 +660,14 @@ public class RaceBoardPanel
      */
     public void setCompetitorChartVisible(boolean visible) {
         setComponentVisible(mapViewer, competitorChart, visible);
+    }
+    
+    public void setTagPanelVisible(boolean visible) {
+        setComponentVisible(mapViewer, taggingPanel, visible);
+    }
+    
+    public void setManeuverTableVisible(boolean visible) {
+        setComponentVisible(mapViewer, maneuverTablePanel, visible);
     }
     
     protected SailingServiceAsync getSailingService() {
@@ -848,8 +857,8 @@ public class RaceBoardPanel
         RaceBoardPerspectiveOwnSettings raceBoardPerspectiveOwnSettings = new RaceBoardPerspectiveOwnSettings(
                 activeCompetitorsFilterSetName, leaderboardPanel.isVisible(), windChart.isVisible(),
                 competitorChart.isVisible(), initialSettings.isCanReplayDuringLiveRaces(),
-                newInitialDurationAfterRaceStartInReplay, /* legacy single selectedCompetitor */ null,
-                selectedCompetitorIds, initialSettings.getJumpToTag());
+                newInitialDurationAfterRaceStartInReplay, /* legacy single selectedCompetitor */ null, selectedCompetitorIds, 
+                taggingPanel.isVisible(), maneuverTablePanel.isVisible(), initialSettings.getJumpToTag());
         return raceBoardPerspectiveOwnSettings;
     }
     

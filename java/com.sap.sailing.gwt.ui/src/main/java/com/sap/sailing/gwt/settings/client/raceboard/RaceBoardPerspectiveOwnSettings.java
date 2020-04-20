@@ -31,6 +31,8 @@ public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializable
     private transient DurationSetting initialDurationAfterRaceStartInReplay;
     private transient StringSetting selectedCompetitor;
     private transient StringSetSetting selectedCompetitors;
+    private transient BooleanSetting showTags;
+    private transient BooleanSetting showManeuverTable;
     private transient StringSetting jumpToTag;
     
     public static final String PARAM_VIEW_MODE = "viewMode";
@@ -44,8 +46,10 @@ public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializable
     public static final String PARAM_TIME_AFTER_RACE_START_AS_HOURS_COLON_MILLIS_COLON_SECONDS = "t";
     public static final String PARAM_SELECTED_COMPETITOR = "c";
     public static final String PARAM_SELECTED_COMPETITORS = "selectedCompetitors";
+    public static final String PARAM_VIEW_SHOW_TAGS = "viewShowTags";
+    public static final String PARAM_VIEW_SHOW_MANEUVER_TABLE = "viewShowManeuverTable";
     public static final String PARAM_JUMP_TO_TAG = TagDTO.TAG_URL_PARAMETER;
-   
+
     public RaceBoardPerspectiveOwnSettings() {
     }
 
@@ -70,12 +74,17 @@ public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializable
         this.initialDurationAfterRaceStartInReplay = new DurationSetting(PARAM_TIME_AFTER_RACE_START_AS_HOURS_COLON_MILLIS_COLON_SECONDS, this, null);
         this.selectedCompetitor = new StringSetting(PARAM_SELECTED_COMPETITOR, this, null);
         this.selectedCompetitors = new StringSetSetting(PARAM_SELECTED_COMPETITORS, this, null);
+        this.showTags = new BooleanSetting(PARAM_VIEW_SHOW_TAGS, this, false);
+        this.showManeuverTable = new BooleanSetting(PARAM_VIEW_SHOW_MANEUVER_TABLE, this, false);
         this.jumpToTag = new StringSetting(PARAM_JUMP_TO_TAG, this, null);
     }
 
     public RaceBoardPerspectiveOwnSettings(String activeCompetitorsFilterSetName, Boolean showLeaderboard,
             Boolean showWindChart, Boolean showCompetitorsChart, Boolean canReplayDuringLiveRaces,
-            Duration initialDurationAfterRaceStartInReplay, String selectedCompetitor, Iterable<String> selectedCompetitors, String jumpToTag) {
+            Duration initialDurationAfterRaceStartInReplay, String selectedCompetitor, Iterable<String> selectedCompetitors, 
+            Boolean showTags, Boolean showManeuverTable, String jumpToTag) {
+        this.showTags.setValue(showTags);
+        this.showManeuverTable.setValue(showManeuverTable);
         this.activeCompetitorsFilterSetName.setValue(activeCompetitorsFilterSetName);
         this.showLeaderboard.setValue(showLeaderboard);
         this.showWindChart.setValue(showWindChart);
@@ -101,13 +110,33 @@ public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializable
     public String getActiveCompetitorsFilterSetName() {
         return activeCompetitorsFilterSetName.getValue();
     }
+    
+    public Duration getInitialDurationAfterRaceStartInReplay() {
+        return initialDurationAfterRaceStartInReplay.getValue();
+    }
 
     public boolean isCanReplayDuringLiveRaces() {
         return canReplayDuringLiveRaces.getValue();
     }
 
+    public boolean isShowTags() {
+        return showTags.getValue();
+    }
+
+    public boolean isShowManeuver() {
+        return showManeuverTable.getValue();
+    }
+
     public String getJumpToTag() {
         return jumpToTag.getValue();
+    }
+    
+    public void resetShowTags() {
+        showTags.resetToDefault();
+    }
+
+    public void resetShowManeuver() {
+        showManeuverTable.resetToDefault();
     }
     
     public void resetShowLeaderBoard() {
@@ -148,7 +177,8 @@ public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializable
 
     public static RaceBoardPerspectiveOwnSettings readSettingsFromURL(boolean defaultForViewShowLeaderboard,
             boolean defaultForViewShowWindchart, boolean defaultForViewShowCompetitorsChart,
-            String defaultForViewCompetitorFilter, boolean defaultForCanReplayDuringLiveRaces, String defaultForJumpToTag) {
+            String defaultForViewCompetitorFilter, boolean defaultForCanReplayDuringLiveRaces, boolean defaultForViewShowTags,
+            boolean defaultForViewShowManeuverTable, String defaultForJumpToTag) {
         final boolean showLeaderboard = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_LEADERBOARD, defaultForViewShowLeaderboard /* default */);
         final boolean showWindChart = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_WINDCHART, defaultForViewShowWindchart /* default */);
         final boolean showCompetitorsChart = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_COMPETITORSCHART, defaultForViewShowCompetitorsChart /* default */);
@@ -159,14 +189,12 @@ public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializable
         final Set<String> selectedCompetitors = new HashSet<>(Arrays.asList(GwtHttpRequestUtils.getStringParameters(PARAM_SELECTED_COMPETITORS)));
         final String selectedCompetitor = GwtHttpRequestUtils.getStringParameter(PARAM_SELECTED_COMPETITOR,
                 null /* default */);
+        final boolean showTags = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_TAGS, defaultForViewShowTags);
+        final boolean showManeuverTable = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_MANEUVER_TABLE, defaultForViewShowManeuverTable);
         final String jumpToTag = GwtHttpRequestUtils.getStringParameter(PARAM_JUMP_TO_TAG, defaultForJumpToTag /* default */);
         return new RaceBoardPerspectiveOwnSettings(activeCompetitorsFilterSetName, showLeaderboard, showWindChart,
                 showCompetitorsChart, canReplayWhileLiveIsPossible, initialDurationAfterRaceStartInReplay,
-                selectedCompetitor, selectedCompetitors, jumpToTag);
-    }
-
-    public Duration getInitialDurationAfterRaceStartInReplay() {
-        return initialDurationAfterRaceStartInReplay.getValue();
+                selectedCompetitor, selectedCompetitors, showTags, showManeuverTable, jumpToTag);
     }
 
     /**
