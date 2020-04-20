@@ -1,9 +1,9 @@
 #!/bin/bash
 # Call like this:    analyzeProduct.sh <my.product> [<my.launch> ...]
-# Updates Eclipse .launch files with the needed bundles for starting a SAP sailing server based on the current feature.xml.
-# The .launch files must be in der workspace format that is introduced since Eclipse 2019-12. Script prints an error when no matching
-# replacment section could be found.
-# Will output two lines in format
+# Updates Eclipse .launch files with the bundles needed for starting an SAP Sailing server based on the current feature.xml.
+# The .launch files must be in the workspace format that was introduced with Eclipse 2019-12. The script prints an error when no matching
+# replacement section could be found.
+# Will output two sections in format
 #     <setAttribute key="selected_target_bundles">
 #          <setEntry value="com.fasterxml.jackson.core.jackson-annotations@default:default"/>
 #          <setEntry value=".....
