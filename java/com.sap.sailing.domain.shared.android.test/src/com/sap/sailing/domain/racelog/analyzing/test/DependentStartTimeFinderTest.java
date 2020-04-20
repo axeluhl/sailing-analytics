@@ -41,13 +41,10 @@ public class DependentStartTimeFinderTest {
     @Before
     public void setUp() {
         author = new LogEventAuthorImpl("Test", 1);
-
         raceLogA = new RaceLogImpl("raceLogA");
         raceLogB = new RaceLogImpl("raceLogB");
         raceLogC = new RaceLogImpl("raceLogC");
-
         nowMock = mock(TimePoint.class);
-
         raceLogResolver = new RaceLogResolver() {
             @Override
             public RaceLog resolve(SimpleRaceLogIdentifier identifier) {

@@ -13,9 +13,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import com.sap.sse.common.util.MappingIterable;
@@ -325,6 +327,8 @@ public class Util {
         final T result;
         if (isEmpty(iterable)) {
             result = null;
+        } else if (iterable instanceof SortedSet) {
+            result = ((SortedSet<T>) iterable).last();
         } else {
             result = get(iterable, size(iterable)-1);
         }
@@ -753,10 +757,16 @@ public class Util {
         return result;
     }
 
-    public static <T> List<T> asList(Iterable<T> visibleCourseAreas) {
-        ArrayList<T> list = new ArrayList<T>();
-        addAll(visibleCourseAreas, list);
+    public static <T> List<T> asList(Iterable<T> iterable) {
+        final List<T> list = new ArrayList<>();
+        addAll(iterable, list);
         return list;
+    }
+    
+    public static <T> Set<T> asSet(Iterable<T> iterable) {
+        final Set<T> result = new HashSet<>();
+        addAll(iterable, result);
+        return result;
     }
 
     public static <T> List<T> cloneListOrNull(List<T> list) {
@@ -846,7 +856,11 @@ public class Util {
      * the integer part of the {@code value}'s magnitude.
      * 
      * @param digitsLeftOfDecimal
-     *            a non-negative number; if zero,
+     *            a non-negative number; if zero, no "0" will be used left of the decimal point if the value is less than 1.
+     *            Padding occurs only if the number of digits requested is greater than the number of digits the value has
+     *            left of the decimal point. If the number of digits requested left of the decimal point is less than what
+     *            the number has, no cropping takes place and the result will have more digits left of the decimal point
+     *            than requested.
      * @param digitsRightOfDecimal
      *            a non-negative number; if zero, no decimal point will appear at all
      * @param round
@@ -927,5 +941,30 @@ public class Util {
             }
             c++;
         }
+    }
+
+    /**
+     * @return a non-parallel stream for the {@link Iterable} passed. Short for
+     * {@code StreamSupport.stream(iterable.spliterator(), false)}.
+     */
+    public static <T> Stream<T> stream(Iterable<T> iterable) {
+        return StreamSupport.stream(iterable.spliterator(), /* parallel */ false);
+    }
+    
+    /**
+     * Checks whether a given String is <code>null</code> or empty.
+     * 
+     * @param str
+     *            String to check
+     * @return <code>false</code> if empty or <code>null</code>, otherwise <code>true</code>.
+     */
+    public static boolean hasLength(String str) {
+        final boolean result;
+        if (str == null) {
+            result = false;
+        } else {
+            result = !str.isEmpty();
+        }
+        return result;
     }
 }

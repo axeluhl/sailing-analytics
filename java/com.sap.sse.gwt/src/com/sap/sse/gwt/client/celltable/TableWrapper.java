@@ -9,6 +9,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.HasRows;
 import com.google.gwt.view.client.ListDataProvider;
+import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.Range;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -155,5 +156,14 @@ public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>, SM
 
     protected TR getTableRes() {
         return tableRes;
+    }
+    
+    /**
+     * @return {@code null} if no or multiple objects are currently selected; the single selected object otherwise; this
+     *         can be useful if certain actions are enabled with this table only if a single object is selected.
+     */
+    public static <X> X getSingleSelectedUserGroup(MultiSelectionModel<X> selectionModel) {
+        return selectionModel.getSelectedSet() != null && selectionModel.getSelectedSet().size() == 1 ?
+                selectionModel.getSelectedSet().iterator().next() : null;
     }
 }

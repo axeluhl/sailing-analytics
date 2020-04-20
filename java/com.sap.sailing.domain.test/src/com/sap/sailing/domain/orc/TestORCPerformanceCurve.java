@@ -17,7 +17,6 @@ import org.apache.commons.math.MaxIterationsExceededException;
 import org.json.simple.parser.ParseException;
 import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
@@ -28,7 +27,6 @@ import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveCourse;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLeg;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
-import com.sap.sailing.domain.common.orc.impl.ORCCertificateImpl;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveCourseImpl;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
 import com.sap.sailing.domain.orc.impl.ORCCertificatesJsonImporter;
@@ -46,7 +44,6 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
  *
  */
 public class TestORCPerformanceCurve {
-
     // set true to see all the differences i
     private final boolean collectErrors = true;
     
@@ -56,6 +53,9 @@ public class TestORCPerformanceCurve {
     private static ORCCertificatesCollection importerOnline;
     
     private static final String RESOURCES = "resources/orc/";
+    
+    @Rule
+    public FailIfNoValidOrcCertificateRule customFailRule = new FailIfNoValidOrcCertificateRule();
 
     @Rule
     public ErrorCollector collector = new ErrorCollector();
@@ -97,42 +97,42 @@ public class TestORCPerformanceCurve {
         File fileWithSpecificBins = new File(RESOURCES + "newFormatCertificate.json");
         importerWithSpecificBins = new ORCCertificatesJsonImporter().read(new FileInputStream(fileWithSpecificBins));
         // Online File:
-        importerOnline = new ORCCertificatesJsonImporter().read(new URL("https://data.orc.org/public/WPub.dll?action=DownRMS&CountryId=GER&ext=json").openStream());
+        importerOnline = new ORCCertificatesJsonImporter().read(new URL("https://data.orc.org/public/WPub.dll?action=DownBoatRMS&CountryId=GER&ext=json").openStream());
     }
     
     @Test
     public void testLagrangeInterpolation60() throws FunctionEvaluationException {
-        ORCCertificate certificate = importerLocal.getCertificateById("GER140772GER5549");
+        ORCCertificate certificate = importerLocal.getCertificateById("GER20040783");
         testAllowancePerLeg(certificate, 60.0, 498.4);
     }
     
     @Test
     public void testLagrangeInterpolation62_5() throws FunctionEvaluationException {
-        ORCCertificate certificate = importerLocal.getCertificateById("GER140772GER5549");
+        ORCCertificate certificate = importerLocal.getCertificateById("GER20040783");
         testAllowancePerLeg(certificate, 62.5, 492.2, 425.0, 403.6, 393.1, 386.7, 382.6, 371.4);
     }
     
     @Test
     public void testLagrangeInterpolation98_3() throws FunctionEvaluationException {
-        ORCCertificate certificate = importerLocal.getCertificateById("GER140772GER5549");
+        ORCCertificate certificate = importerLocal.getCertificateById("GER20040783");
         testAllowancePerLeg(certificate, 98.3, 483.6, 418.7, 394.8, 377.9, 360.2, 345.0, 321.7);
     }
     
     @Test
     public void testLagrangeInterpolation120() throws FunctionEvaluationException {
-        ORCCertificate certificate = importerLocal.getCertificateById("GER140772GER5549");
+        ORCCertificate certificate = importerLocal.getCertificateById("GER20040783");
         testAllowancePerLeg(certificate, 120.0, 506);
     }
     
     @Test
     public void testLagrangeInterpolation138_7() throws FunctionEvaluationException {
-        ORCCertificate certificate = importerLocal.getCertificateById("GER140772GER5549");
+        ORCCertificate certificate = importerLocal.getCertificateById("GER20040783");
         testAllowancePerLeg(certificate, 138.7, 588.1, 468.4, 413.8, 382.6, 355.1, 326.4, 275.4);
     }
     
     private void testAllowancePerLeg(ORCCertificate certificate, double twa, double... expectedAllowancesPerTrueWindSpeed) throws FunctionEvaluationException {
         Double accuracy = 0.1;
-        final ORCPerformanceCurveCourse course = new ORCPerformanceCurveCourseImpl(Arrays.asList(new ORCPerformanceCurveLegImpl(ORCCertificateImpl.NAUTICAL_MILE, new DegreeBearingImpl(twa))));
+        final ORCPerformanceCurveCourse course = new ORCPerformanceCurveCourseImpl(Arrays.asList(new ORCPerformanceCurveLegImpl(ORCCertificate.NAUTICAL_MILE, new DegreeBearingImpl(twa))));
         final ORCPerformanceCurve performanceCurve = new ORCPerformanceCurveImpl(certificate, course);
         for (int i=0; i<expectedAllowancesPerTrueWindSpeed.length; i++) {
             assertEquals(expectedAllowancesPerTrueWindSpeed[i], performanceCurve.getAllowancePerCourse(ORCCertificate.ALLOWANCES_TRUE_WIND_SPEEDS[i]).asSeconds(), accuracy);
@@ -141,7 +141,7 @@ public class TestORCPerformanceCurve {
     
     @Test
     public void testSimpleConstructedCourse() throws FunctionEvaluationException {
-        ORCCertificate certificate = (ORCCertificate) importerLocal.getCertificateById("GER140772GER5549");
+        ORCCertificate certificate = (ORCCertificate) importerLocal.getCertificateById("GER20040783");
         List<ORCPerformanceCurveLeg> legs = new ArrayList<>();
         legs.add(new ORCPerformanceCurveLegImpl(new NauticalMileDistance(1.0), new DegreeBearingImpl(0)));
         legs.add(new ORCPerformanceCurveLegImpl(new NauticalMileDistance(1.0), new DegreeBearingImpl(30)));
@@ -164,7 +164,7 @@ public class TestORCPerformanceCurve {
     @Test
     public void testPerformanceCurveInversion() throws MaxIterationsExceededException, FunctionEvaluationException {
         Double accuracy = 0.1;
-        ORCCertificate certificate = (ORCCertificate) importerLocal.getCertificateById("GER140772GER5549");
+        ORCCertificate certificate = (ORCCertificate) importerLocal.getCertificateById("GER20040783");
         ORCPerformanceCurveImpl performanceCurve = (ORCPerformanceCurveImpl) new ORCPerformanceCurveImpl(certificate, alturaCourse);
         testBackwardForward(accuracy, performanceCurve, 11.5);
         testBackwardForward(accuracy, performanceCurve, 17.23);
@@ -193,12 +193,12 @@ public class TestORCPerformanceCurve {
     @Test
     public void testImpliedWind() throws MaxIterationsExceededException, FunctionEvaluationException {
        double accuracy = 0.0001;
-       ORCCertificate certificateMoana          = importerLocal.getCertificateById("GER140772GER5549");
-       ORCCertificate certificateMilan          = importerLocal.getCertificateById("GER166844GER7323");
-       ORCCertificate certificateTutima         = importerLocal.getCertificateById("GER140618GER5609");
-       ORCCertificate certificateBank           = importerLocal.getCertificateById("GER140755GER5555");
-       ORCCertificate certificateHaspa          = importerLocal.getCertificateById("GER141411GER6300");
-       ORCCertificate certificateHalbtrocken    = importerLocal.getCertificateById("GER141432GER5564");
+       ORCCertificate certificateMoana          = importerLocal.getCertificateById("GER20040783");
+       ORCCertificate certificateMilan          = importerLocal.getCertificateById("GER20041179");
+       ORCCertificate certificateTutima         = importerLocal.getCertificateById("GER30010194");
+       ORCCertificate certificateBank           = importerLocal.getCertificateById("GER20040647");
+       ORCCertificate certificateHaspa          = importerLocal.getCertificateById("GER30010167");
+       ORCCertificate certificateHalbtrocken    = importerLocal.getCertificateById("GER20040632");
        ORCPerformanceCurve performanceCurveMoana        = new ORCPerformanceCurveImpl(certificateMoana, alturaCourse);
        ORCPerformanceCurve performanceCurveMilan        = new ORCPerformanceCurveImpl(certificateMilan, alturaCourse);
        ORCPerformanceCurve performanceCurveTutima       = new ORCPerformanceCurveImpl(certificateTutima, alturaCourse);
@@ -230,12 +230,12 @@ public class TestORCPerformanceCurve {
     @Test
     public void testAllowances() throws FunctionEvaluationException {
         double accuracy = 0.00001;
-        ORCCertificate certificateMoana          = importerLocal.getCertificateById("GER140772GER5549");
-        ORCCertificate certificateMilan          = importerLocal.getCertificateById("GER166844GER7323");
-        ORCCertificate certificateTutima         = importerLocal.getCertificateById("GER140618GER5609");
-        ORCCertificate certificateBank           = importerLocal.getCertificateById("GER140755GER5555");
-        ORCCertificate certificateHaspa          = importerLocal.getCertificateById("GER141411GER6300");
-        ORCCertificate certificateHalbtrocken    = importerLocal.getCertificateById("GER141432GER5564");
+        ORCCertificate certificateMoana          = importerLocal.getCertificateById("GER20040783");
+        ORCCertificate certificateMilan          = importerLocal.getCertificateById("GER20041179");
+        ORCCertificate certificateTutima         = importerLocal.getCertificateById("GER30010194");
+        ORCCertificate certificateBank           = importerLocal.getCertificateById("GER20040647");
+        ORCCertificate certificateHaspa          = importerLocal.getCertificateById("GER30010167");
+        ORCCertificate certificateHalbtrocken    = importerLocal.getCertificateById("GER20040632");
         ORCPerformanceCurve performanceCurveMoana        = new ORCPerformanceCurveImpl(certificateMoana, alturaCourse);
         ORCPerformanceCurve performanceCurveMilan        = new ORCPerformanceCurveImpl(certificateMilan, alturaCourse);
         ORCPerformanceCurve performanceCurveTutima       = new ORCPerformanceCurveImpl(certificateTutima, alturaCourse);
@@ -253,7 +253,7 @@ public class TestORCPerformanceCurve {
     /**
      * Tests to make sure, that the structure of the certificate files didn't change and performance curves can be built
      */
-    @Ignore("Certificate used for testing no longer valid after 2019")
+    @FailIfNoValidOrcCertificates
     @Test
     public void testOnlineImport() throws FunctionEvaluationException {
         assertFalse(Util.isEmpty(importerOnline.getCertificateIds()));
@@ -267,7 +267,7 @@ public class TestORCPerformanceCurve {
         final double highAccuracy = 0.01;
         final double allowanceAccuracy = 0.1;
         final Distance ONE_NAUTICAL_MILE = new NauticalMileDistance(1.0);
-        final ORCCertificate certificateWithSpecificBins = importerWithSpecificBins.getCertificateById("GRA00073GR317");
+        final ORCCertificate certificateWithSpecificBins = importerWithSpecificBins.getCertificateById("N/A");
         for (final Bearing twa : certificateWithSpecificBins.getTrueWindAngles()) {
             final ORCPerformanceCurveCourse singleLegOneMileCourseWithTwa = createSingleLegCourseWithTwa(twa);
             final ORCPerformanceCurve performanceCurveSpecificBins = new ORCPerformanceCurveImpl(certificateWithSpecificBins, singleLegOneMileCourseWithTwa);
@@ -298,13 +298,13 @@ public class TestORCPerformanceCurve {
         ORCPerformanceCurveCourse complexCourse = new ORCPerformanceCurveCourseImpl(list);
         
         final double accuracy = 0.0001;
-        ORCCertificate certificateMoana          = importerLocal.getCertificateById("GER140772GER5549");
-        ORCCertificate certificateMilan          = importerLocal.getCertificateById("GER166844GER7323");
-        ORCCertificate certificateTutima         = importerLocal.getCertificateById("GER140618GER5609");
-        ORCCertificate certificateBank           = importerLocal.getCertificateById("GER140755GER5555");
-        ORCCertificate certificateHaspa          = importerLocal.getCertificateById("GER141411GER6300");
-        ORCCertificate certificateHalbtrocken    = importerLocal.getCertificateById("GER141432GER5564");
-        ORCCertificate certificateWithSpecificBins=importerWithSpecificBins.getCertificateById("GRA00073GR317");
+        ORCCertificate certificateMoana          = importerLocal.getCertificateById("GER20040783");
+        ORCCertificate certificateMilan          = importerLocal.getCertificateById("GER20041179");
+        ORCCertificate certificateTutima         = importerLocal.getCertificateById("GER30010194");
+        ORCCertificate certificateBank           = importerLocal.getCertificateById("GER20040647");
+        ORCCertificate certificateHaspa          = importerLocal.getCertificateById("GER30010167");
+        ORCCertificate certificateHalbtrocken    = importerLocal.getCertificateById("GER20040632");
+        ORCCertificate certificateWithSpecificBins=importerWithSpecificBins.getCertificateById("N/A");
         ORCPerformanceCurve performanceCurveMoana        = new ORCPerformanceCurveImpl(certificateMoana, complexCourse);
         ORCPerformanceCurve performanceCurveMilan        = new ORCPerformanceCurveImpl(certificateMilan, complexCourse);
         ORCPerformanceCurve performanceCurveTutima       = new ORCPerformanceCurveImpl(certificateTutima, complexCourse);
@@ -333,13 +333,13 @@ public class TestORCPerformanceCurve {
         ORCPerformanceCurveCourse complexCourse = new ORCPerformanceCurveCourseImpl(list);
         
         double accuracy = 0.00001;
-        ORCCertificate certificateMoana          = importerLocal.getCertificateById("GER140772GER5549");
-        ORCCertificate certificateMilan          = importerLocal.getCertificateById("GER166844GER7323");
-        ORCCertificate certificateTutima         = importerLocal.getCertificateById("GER140618GER5609");
-        ORCCertificate certificateBank           = importerLocal.getCertificateById("GER140755GER5555");
-        ORCCertificate certificateHaspa          = importerLocal.getCertificateById("GER141411GER6300");
-        ORCCertificate certificateHalbtrocken    = importerLocal.getCertificateById("GER141432GER5564");
-        ORCCertificate certificateWithSpecificBins=importerWithSpecificBins.getCertificateById("GRA00073GR317");
+        ORCCertificate certificateMoana          = importerLocal.getCertificateById("GER20040783");
+        ORCCertificate certificateMilan          = importerLocal.getCertificateById("GER20041179");
+        ORCCertificate certificateTutima         = importerLocal.getCertificateById("GER30010194");
+        ORCCertificate certificateBank           = importerLocal.getCertificateById("GER20040647");
+        ORCCertificate certificateHaspa          = importerLocal.getCertificateById("GER30010167");
+        ORCCertificate certificateHalbtrocken    = importerLocal.getCertificateById("GER20040632");
+        ORCCertificate certificateWithSpecificBins=importerWithSpecificBins.getCertificateById("N/A");
         ORCPerformanceCurve performanceCurveMoana        = new ORCPerformanceCurveImpl(certificateMoana, complexCourse);
         ORCPerformanceCurve performanceCurveMilan        = new ORCPerformanceCurveImpl(certificateMilan, complexCourse);
         ORCPerformanceCurve performanceCurveTutima       = new ORCPerformanceCurveImpl(certificateTutima, complexCourse);

@@ -303,11 +303,17 @@ public class ReplicationServlet extends AbstractHttpServlet {
      *             not try sending the operation again, and in particular not at the expense of later operations that
      *             otherwise may keep queued forever (see also bug 5117). 
      */
-    private <S, R> void applyOperationToReplicable(Replicable<S, ?> replicable, InputStream is)
+    private <S, R, O extends OperationWithResult<S, ?>> void applyOperationToReplicable(Replicable<S, O> replicable, InputStream is)
             throws ClassNotFoundException, IOException, InvocationTargetException {
         ClassLoader oldContextClassLoader = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(replicable.getClass().getClassLoader());
-        OperationWithResult<S, ?> operation = replicable.readOperation(is);
+        final O operation;
+        try {
+            operation = replicable.readOperation(is);
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error trying to de-serialize an operation for replicable "+replicable.getId(), e);
+            throw e;
+        }
         Thread.currentThread().setContextClassLoader(oldContextClassLoader);
         logger.info("Applying operation of type " + operation.getClass().getName()
                 + " received from replica to replicable " + replicable.toString());
@@ -340,9 +346,12 @@ public class ReplicationServlet extends AbstractHttpServlet {
     }
 
     private ReplicaDescriptor getReplicaDescriptor(HttpServletRequest req) throws UnknownHostException {
-        InetAddress ipAddress = InetAddress.getByName(req.getRemoteAddr());
-        UUID uuid = UUID.fromString(req.getParameter(SERVER_UUID));
-        String additional = req.getParameter(ADDITIONAL_INFORMATION);
+        final String forwardedFor = req.getHeader("X-Forwarded-For"); // could have come through a load balancer / reverse proxy
+        final InetAddress ipAddress = forwardedFor != null && !forwardedFor.trim().isEmpty()
+                ? InetAddress.getByName(forwardedFor.split(",")[0].trim())
+                : InetAddress.getByName(req.getRemoteAddr());
+        final UUID uuid = UUID.fromString(req.getParameter(SERVER_UUID));
+        final String additional = req.getParameter(ADDITIONAL_INFORMATION);
         final String[] replicableIdsAsStrings = req.getParameter(REPLICABLES_IDS_AS_STRINGS_COMMA_SEPARATED).split(",");
         return new ReplicaDescriptorImpl(ipAddress, uuid, additional, replicableIdsAsStrings);
     }

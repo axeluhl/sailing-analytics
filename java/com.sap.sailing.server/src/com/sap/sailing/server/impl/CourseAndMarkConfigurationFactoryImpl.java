@@ -18,8 +18,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import org.osgi.util.tracker.ServiceTracker;
-
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
@@ -88,22 +86,23 @@ import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceMappingWithRegattaLogEvent;
 import com.sap.sailing.domain.racelogtracking.PingDeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.impl.PingDeviceIdentifierImpl;
-import com.sap.sailing.domain.sharedsailingdata.SharedSailingData;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseConfigurationBuilder;
 import com.sap.sailing.server.interfaces.CourseAndMarkConfigurationFactory;
+import com.sap.sailing.shared.server.SharedSailingData;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.replication.FullyInitializedReplicableTracker;
 import com.sap.sse.security.shared.impl.UserGroup;
 
 public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfigurationFactory {
 
     private static final Logger logger = Logger.getLogger(CourseAndMarkConfigurationFactoryImpl.class.getName());
     
-    private final ServiceTracker<SharedSailingData, SharedSailingData> sharedSailingDataTracker;
+    private final FullyInitializedReplicableTracker<SharedSailingData> sharedSailingDataTracker;
     private final SensorFixStore sensorFixStore;
     
     /**
@@ -117,7 +116,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
     private final DomainFactory domainFactory;
 
     public CourseAndMarkConfigurationFactoryImpl(
-            ServiceTracker<SharedSailingData, SharedSailingData> sharedSailingDataTracker,
+            FullyInitializedReplicableTracker<SharedSailingData> sharedSailingDataTracker,
             SensorFixStore sensorFixStore, RaceLogResolver raceLogResolver, DomainFactory domainFactory) {
         this.sharedSailingDataTracker = sharedSailingDataTracker;
         this.domainFactory = domainFactory;
@@ -139,7 +138,15 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
     }
     
     private SharedSailingData getSharedSailingData() {
-        return sharedSailingDataTracker.getService();
+        SharedSailingData result;
+        try {
+            result = sharedSailingDataTracker.getInitializedService(0);
+        } catch (InterruptedException e) {
+            logger.log(Level.SEVERE, "Interrupted while waiting for a fully initialized SharedSailingData service; "
+                    + "continuing with null, probably causing a NullPointerException along the way", e);
+            result = null;
+        }
+        return result;
     }
 
     private CourseTemplate resolveCourseTemplateSafe(CourseBase course) {

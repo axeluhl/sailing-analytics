@@ -78,7 +78,7 @@ public class RaceStateTest {
         assertNotNull(state.getRacingProcedure());
         assertEquals(defaultRacingProcedureType, state.getRacingProcedure().getType());
         assertEquals(RaceLogRaceStatus.UNSCHEDULED, state.getStatus());
-        assertNull(state.getConfirmedFinishPositioningList());
+        assertNull(state.getConfirmedFinishPositioningList().getCompetitorResults());
     }
     
     @Test

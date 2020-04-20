@@ -2,6 +2,7 @@ package com.sap.sse.security.ui.client.component.editacl;
 
 import static com.sap.sse.gwt.client.Notification.NotificationType.ERROR;
 import static com.sap.sse.gwt.client.Notification.NotificationType.SUCCESS;
+import static com.sap.sse.gwt.shared.DebugConstants.DEBUG_ID_ATTRIBUTE;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -57,9 +58,11 @@ import com.sap.sse.security.ui.client.i18n.StringMessages;
 public class AclEditPanel extends Composite {
 
     private static AclEditPanelUiBinder uiBinder = GWT.create(AclEditPanelUiBinder.class);
-
+    
     interface AclEditPanelUiBinder extends UiBinder<Widget, AclEditPanel> {
     }
+    
+    private static final boolean showDeniedActions = false;
 
     @UiField
     FlowPanel userGroupCellListPanelUi;
@@ -104,12 +107,14 @@ public class AclEditPanel extends Composite {
         initWidget(uiBinder.createAndBindUi(this));
         final CellList<StrippedUserGroupDTO> userGroupList = createUserGroupCellList();
         userGroupDataProvider.addDataDisplay(userGroupList);
+        
         userGroupCellListPanelUi.add(wrapIntoCaptionPanel(userGroupList, stringMessages.userGroups(),
                 suggestUserGroupUi, addUserGroupButtonUi, removeUserGroupButtonUi));
 
         // retrieve set of available action names
         final List<String> actionNames = Stream.of(availableActions).map(Action::name).collect(Collectors.toList());
 
+        
         // create action editor for allowed actions
         allowedActionsEditor = new StringListEditorComposite(new ArrayList<>(), stringMessages,
                 IconResources.INSTANCE.removeIcon(), actionNames, stringMessages.allowedActionName());
@@ -123,11 +128,24 @@ public class AclEditPanel extends Composite {
                 IconResources.INSTANCE.removeIcon(), actionNames, stringMessages.deniedActionName());
         deniedActionsEditor.addValueChangeHandler(e -> userGroupsWithDeniedActions
                 .put(userGroupSelectionModel.getSelectedObject(), toDeniedActionSet(e.getValue())));
-        permissionsCellListPanelUi.add(deniedActionsContainer = createActionsContainer(stringMessages.deniedActions(),
-                deniedActionsEditor, AclDialogResources.INSTANCE.css().deniedActionsTable()));
+        deniedActionsContainer = createActionsContainer(stringMessages.deniedActions(),
+                deniedActionsEditor, AclDialogResources.INSTANCE.css().deniedActionsTable());
+        if (showDeniedActions) {
+            permissionsCellListPanelUi.add(deniedActionsContainer);
+        }
+
+        userGroupSelectionModel.addSelectionChangeHandler(event -> {
+            StrippedUserGroupDTO userGroup = userGroupSelectionModel.getSelectedObject();
+            deniedActionsEditor.setEnabled(userGroup != null && userGroup.getId() != null);
+        });
 
         lblId.setText(id);
         lblType.setText(typeIdentifier);
+        
+        addUserGroupButtonUi.getElement().setAttribute(DEBUG_ID_ATTRIBUTE, "AddUserGroupButton");
+        suggestUserGroupUi.getElement().setAttribute(DEBUG_ID_ATTRIBUTE, "SuggestUserGroupInput");
+        allowedActionsContainer.getElement().setAttribute(DEBUG_ID_ATTRIBUTE, "allowedActionsContainer");
+        deniedActionsContainer.getElement().setAttribute(DEBUG_ID_ATTRIBUTE, "deniedActionsContainer");
     }
 
     private CaptionPanel createActionsContainer(final SafeHtml caption, final Widget content, final String styleName) {
@@ -190,8 +208,10 @@ public class AclEditPanel extends Composite {
         deniedActionsContainer.setVisible(userGroupSelected);
         if (userGroupSelected) {
             allowedActionsEditor.setValue(userGroupsWithAllowedActions.get(selectedUserGroup), false);
-            deniedActionsEditor.setValue(
-                    removeExclamationMarkFromStrings(userGroupsWithDeniedActions.get(selectedUserGroup)), false);
+            if (showDeniedActions) {
+                deniedActionsEditor.setValue(
+                        removeExclamationMarkFromStrings(userGroupsWithDeniedActions.get(selectedUserGroup)), false);
+            }
         }
     }
 

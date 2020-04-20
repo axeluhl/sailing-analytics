@@ -16,12 +16,13 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
-import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
+import com.sap.sse.gwt.client.celltable.TableWrapper;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.dto.StrippedRoleDefinitionDTO;
@@ -37,7 +38,7 @@ public class UserGroupRoleDefinitionPanel extends Composite
         implements Handler, ChangeHandler, KeyUpHandler, UserGroupListDataProviderChangeHandler {
 
     private final RoleDefinitionTableWrapper roleDefinitionTableWrapper;
-    private final SingleSelectionModel<UserGroupDTO> userGroupSelectionModel;
+    private final MultiSelectionModel<UserGroupDTO> userGroupSelectionModel;
     private final SuggestBox suggestRole;
     private final UserGroupRoleResources userGroupRoleResources = GWT.create(UserGroupRoleResources.class);
     private final RoleDefinitionSuggestOracle oracle;
@@ -45,29 +46,25 @@ public class UserGroupRoleDefinitionPanel extends Composite
     public UserGroupRoleDefinitionPanel(final UserService userService, final StringMessages stringMessages,
             Iterable<HasPermissions> additionalPermissions, ErrorReporter errorReporter,
             CellTableWithCheckboxResources tableResources,
-            final SingleSelectionModel<UserGroupDTO> userGroupSelectionModel,
+            final MultiSelectionModel<UserGroupDTO> userGroupSelectionModel,
             UserGroupListDataProvider userGroupListDataProvider) {
         this.userGroupSelectionModel = userGroupSelectionModel;
         final VerticalPanel mainPanel = new VerticalPanel();
-
         oracle = new RoleDefinitionSuggestOracle(userService.getUserManagementService(), stringMessages);
         suggestRole = new SuggestBox(
                 oracle);
         userGroupRoleResources.css().ensureInjected();
         suggestRole.addStyleName(userGroupRoleResources.css().roleDefinitionSuggest());
         suggestRole.getElement().setPropertyString("placeholder", stringMessages.enterRoleName());
-
-
         // create UserGroup Table
         userGroupListDataProvider.addChangeHandler(this);
         roleDefinitionTableWrapper = new RoleDefinitionTableWrapper(userService, additionalPermissions, stringMessages,
                 errorReporter, /* enablePager */ true, tableResources, () -> updateUserGroups(),
                 userGroupSelectionModel);
-
         // create button bar
         final Widget buttonPanel = createButtonPanel(userService, stringMessages);
         this.userGroupSelectionModel.addSelectionChangeHandler(event -> {
-            final UserGroupDTO selectedUserGroup = this.userGroupSelectionModel.getSelectedObject();
+            final UserGroupDTO selectedUserGroup = TableWrapper.getSingleSelectedUserGroup(userGroupSelectionModel);
             buttonPanel.setVisible(userService.hasPermission(selectedUserGroup, UPDATE));
         });
         mainPanel.add(buttonPanel);
@@ -90,7 +87,7 @@ public class UserGroupRoleDefinitionPanel extends Composite
      * has changed.
      */
     private void updateOracle() {
-        UserGroupDTO selectedObject = this.userGroupSelectionModel.getSelectedObject();
+        UserGroupDTO selectedObject = TableWrapper.getSingleSelectedUserGroup(userGroupSelectionModel);
         if (selectedObject != null) {
             ((RoleDefinitionSuggestOracle) suggestRole.getSuggestOracle())
                     .resetAndRemoveExistingRoles(selectedObject.getRoleDefinitionMap().keySet());
@@ -106,7 +103,7 @@ public class UserGroupRoleDefinitionPanel extends Composite
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, USER_GROUP);
         final UserManagementServiceAsync userManagementService = userService.getUserManagementService();
         buttonPanel.addUpdateAction(stringMessages.addRole(), () -> {
-            final UserGroupDTO selectedObject = userGroupSelectionModel.getSelectedObject();
+            final UserGroupDTO selectedObject = TableWrapper.getSingleSelectedUserGroup(userGroupSelectionModel);
             if (selectedObject != null) {
                 StrippedRoleDefinitionDTO role = ((RoleDefinitionSuggestOracle) suggestRole.getSuggestOracle())
                         .fromString(suggestRole.getValue());
@@ -136,7 +133,7 @@ public class UserGroupRoleDefinitionPanel extends Composite
             if (selectedRole == null) {
                 Window.alert(stringMessages.youHaveToSelectAUserGroup());
             } else if (Window.confirm(stringMessages.doYouReallyWantToRemoveRole(selectedRole.getA().getName()))) {
-                UserGroupDTO selectedObject = userGroupSelectionModel.getSelectedObject();
+                UserGroupDTO selectedObject = TableWrapper.getSingleSelectedUserGroup(userGroupSelectionModel);
                 if (selectedObject != null) {
                     userManagementService.removeRoleDefinitionFromUserGroup(selectedObject.getId().toString(),
                             selectedRole.getA().getId().toString(), new AsyncCallback<Void>() {

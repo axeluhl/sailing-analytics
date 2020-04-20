@@ -52,6 +52,7 @@ import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
@@ -63,8 +64,8 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.RaceLogStore;
-import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
+import com.sap.sailing.domain.ranking.RankingMetricsFactory;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -455,7 +456,10 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public Regatta getOrCreateDefaultRegatta(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             IRace race, TrackedRegattaRegistry trackedRegattaRegistry) {
-        return getOrCreateDefaultRegatta(raceLogStore, regattaLogStore, race, trackedRegattaRegistry, OneDesignRankingMetric::new);
+        return getOrCreateDefaultRegatta(raceLogStore, regattaLogStore, race, trackedRegattaRegistry,
+                // delegate the construction of the lambda to a bundle that the serialization classloaders
+                // for replication can see:
+                RankingMetricsFactory.getRankingMetricConstructor(RankingMetrics.ONE_DESIGN));
     }
     
     @Override
@@ -520,7 +524,9 @@ public class DomainFactoryImpl implements DomainFactory {
             TrackedRegattaRegistry trackedRegattaRegistry, RaceLogAndTrackedRaceResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, 
             URI courseDesignUpdateURI, String tracTracUsername, String tracTracPassword,
             IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber, boolean useInternalMarkPassingAlgorithm,
-            long timeoutInMilliseconds, RaceTrackingHandler raceTrackingHandler, ReceiverType... types) {
+            long timeoutInMilliseconds, RaceTrackingHandler raceTrackingHandler,
+            RaceAndCompetitorStatusWithRaceLogReconciler raceAndCompetitorStatusWithRaceLogReconciler,
+            ReceiverType... types) {
         IEvent tractracEvent = tractracRace.getEvent();
         Collection<Receiver> result = new ArrayList<Receiver>();
         for (ReceiverType type : types) {
@@ -554,6 +560,10 @@ public class DomainFactoryImpl implements DomainFactory {
                 result.add(new SensorDataReceiver(
                         trackedRegatta, tractracEvent, simulator, this, eventSubscriber, raceSubscriber, timeoutInMilliseconds));
                 break;
+            case COMPETITOR:
+                result.add(new CompetitorChangeReceiver(
+                        trackedRegatta, tractracEvent, tractracRace, simulator, this, eventSubscriber, raceSubscriber, timeoutInMilliseconds, raceAndCompetitorStatusWithRaceLogReconciler));
+                break;
             }                
         }
         return result;
@@ -563,15 +573,17 @@ public class DomainFactoryImpl implements DomainFactory {
     public Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedRegatta,
             long delayToLiveInMillis, Simulator simulator, WindStore windStore,
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry, RaceLogAndTrackedRaceResolver raceLogResolver,
-            LeaderboardGroupResolver leaderboardGroupResolver, IRace tractracRace, URI courseDesignUpdateURI, 
-            String tracTracUsername, String tracTracPassword, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber,
-            boolean useInternalMarkPassingAlgorithm, long timeoutInMilliseconds, RaceTrackingHandler raceTrackingHandler) {
+            LeaderboardGroupResolver leaderboardGroupResolver, IRace tractracRace, URI courseDesignUpdateURI,
+            String tracTracUsername, String tracTracPassword, IEventSubscriber eventSubscriber,
+            IRaceSubscriber raceSubscriber, boolean useInternalMarkPassingAlgorithm, long timeoutInMilliseconds,
+            RaceTrackingHandler raceTrackingHandler,
+            RaceAndCompetitorStatusWithRaceLogReconciler raceAndCompetitorStatusWithRaceLogReconciler) {
         return getUpdateReceivers(trackedRegatta, tractracRace, windStore, delayToLiveInMillis, simulator,
                 raceDefinitionSetToUpdate, trackedRegattaRegistry, raceLogResolver, leaderboardGroupResolver, courseDesignUpdateURI,
                 tracTracUsername, tracTracPassword, eventSubscriber, raceSubscriber,
-                useInternalMarkPassingAlgorithm, timeoutInMilliseconds, raceTrackingHandler, ReceiverType.RACECOURSE,
-                ReceiverType.MARKPASSINGS, ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS,
-                ReceiverType.SENSORDATA);
+                useInternalMarkPassingAlgorithm, timeoutInMilliseconds, raceTrackingHandler, raceAndCompetitorStatusWithRaceLogReconciler,
+                ReceiverType.RACECOURSE, ReceiverType.MARKPASSINGS, ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH,
+                ReceiverType.RAWPOSITIONS, ReceiverType.SENSORDATA);
     }
     
     @Override
@@ -1051,11 +1063,11 @@ public class DomainFactoryImpl implements DomainFactory {
             URI storedURI, URI courseDesignUpdateURI, TimePoint startOfTracking, TimePoint endOfTracking,
             long delayToLiveInMillis, Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore,
             RegattaLogStore regattaLogStore, String tracTracUsername, String tracTracPassword, String raceStatus,
-            String raceVisibility, boolean trackWind, boolean correctWindDirectionByMagneticDeclination, boolean preferReplayIfAvailable, int timeoutInMillis) throws Exception {
+            String raceVisibility, boolean trackWind, boolean correctWindDirectionByMagneticDeclination, boolean preferReplayIfAvailable, int timeoutInMillis, boolean useOfficialEventsToUpdateRaceLog) throws Exception {
         return new RaceTrackingConnectivityParametersImpl(paramURL, liveURI, storedURI, courseDesignUpdateURI,
                 startOfTracking, endOfTracking, delayToLiveInMillis, offsetToStartTimeOfSimulatedRace, useInternalMarkPassingAlgorithm, raceLogStore,
                 regattaLogStore, this, tracTracUsername, tracTracPassword, raceStatus, raceVisibility, trackWind, correctWindDirectionByMagneticDeclination,
-                preferReplayIfAvailable, timeoutInMillis);
+                preferReplayIfAvailable, timeoutInMillis, useOfficialEventsToUpdateRaceLog);
     }
 
     @Override

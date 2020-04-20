@@ -382,19 +382,19 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
 
-    private void ensureIndicesOnWindTracks(MongoCollection<Document> windTracks) {
-        windTracks.createIndex(new Document(FieldNames.RACE_ID.name(), 1), new IndexOptions().name("windbyrace")); // for new programmatic access
-        windTracks.createIndex(new Document(FieldNames.REGATTA_NAME.name(), 1), new IndexOptions().name("windbyregatta")); // for export or human look-up
+    static void ensureIndicesOnWindTracks(MongoCollection<Document> windTracks) {
+        windTracks.createIndex(new Document(FieldNames.RACE_ID.name(), 1), new IndexOptions().name("windbyrace").background(false)); // for new programmatic access
+        windTracks.createIndex(new Document(FieldNames.REGATTA_NAME.name(), 1), new IndexOptions().name("windbyregatta").background(false)); // for export or human look-up
         // for legacy access to not yet migrated fixes
         windTracks.createIndex(new Document().append(FieldNames.EVENT_NAME.name(), 1)
-                .append(FieldNames.RACE_NAME.name(), 1), new IndexOptions().name("windbyeventandrace"));
+                .append(FieldNames.RACE_NAME.name(), 1), new IndexOptions().name("windbyeventandrace").background(false));
         // Unique index
         try {
             windTracks.createIndex(
                     new Document().append(FieldNames.RACE_ID.name(), 1)
                             .append(FieldNames.WIND_SOURCE_NAME.name(), 1).append(FieldNames.WIND_SOURCE_ID.name(), 1)
                             .append(FieldNames.WIND.name() + "." + FieldNames.TIME_AS_MILLIS.name(), 1),
-                            new IndexOptions().name("windByRaceSourceAndTime").unique(true));
+                            new IndexOptions().name("windByRaceSourceAndTime").unique(true).background(false));
         } catch (MongoException exception) {
             if (exception.getCode() == 10092) {
                 logger.warning(String.format(
@@ -1968,8 +1968,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             // server restarts and the timepoint of loading
             // competitors by tracking providers.
             final Integer rank = (Integer) dbObject.get(FieldNames.LEADERBOARD_RANK.name());
-            final MaxPointsReason maxPointsReason = MaxPointsReason
-                    .valueOf((String) dbObject.get(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name()));
+            final String maxPointsReasonString = (String) dbObject.get(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name());
+            final MaxPointsReason maxPointsReason = maxPointsReasonString == null ? MaxPointsReason.NONE : MaxPointsReason.valueOf(maxPointsReasonString);
             final Number scoreAsNumber = (Number) dbObject.get(FieldNames.LEADERBOARD_CORRECTED_SCORE.name());
             final Double score = scoreAsNumber == null ? null : scoreAsNumber.doubleValue();
             final Number finishingTimePointAsMillisAsNumber = (Number) dbObject
@@ -3061,6 +3061,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             fromDb.put(anniversary, new Pair<>(loadedAnniversary, AnniversaryType.valueOf(type)));
         }
         return fromDb;
+    }
+
+    @Override
+    public TypeBasedServiceFinder<RaceTrackingConnectivityParametersHandler> getRaceTrackingConnectivityParamsServiceFinder() {
+        return raceTrackingConnectivityParamsServiceFinder;
     }
 
 }

@@ -29,6 +29,7 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RacingProcedureTyp
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.TagFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AbstractFinishPositioningListFinder.CompetitorResultsAndTheirCreationTimePoints;
 import com.sap.sailing.domain.abstractlog.race.impl.WeakRaceLogChangedVisitor;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateEvent;
@@ -209,7 +210,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     private TimePoint cachedFinishedTime;
     private TimeRange cachedProtest;
     private CompetitorResults cachedPositionedCompetitors;
-    private CompetitorResults cachedConfirmedPositionedCompetitors;
+    private CompetitorResultsAndTheirCreationTimePoints cachedConfirmedPositionedCompetitors;
     private CourseBase cachedCourseDesign;
     private Wind cachedWindFix;
     private RaceLogResolver raceLogResolver;
@@ -413,7 +414,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     }
 
     @Override
-    public CompetitorResults getConfirmedFinishPositioningList() {
+    public CompetitorResultsAndTheirCreationTimePoints getConfirmedFinishPositioningList() {
         return cachedConfirmedPositionedCompetitors;
     }
 
@@ -552,12 +553,12 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
             cachedProtest = protest;
             changedListeners.onProtestTimeChanged(this);
         }
-        CompetitorResults positionedCompetitors = finishPositioningListAnalyzer.analyze();
+        CompetitorResults positionedCompetitors = finishPositioningListAnalyzer.analyze().getCompetitorResults();
         if (!Util.equalsWithNull(cachedPositionedCompetitors, positionedCompetitors)) {
             cachedPositionedCompetitors = positionedCompetitors;
             changedListeners.onFinishingPositioningsChanged(this);
         }
-        CompetitorResults confirmedPositionedCompetitors = confirmedFinishPositioningListAnalyzer.analyze();
+        CompetitorResultsAndTheirCreationTimePoints confirmedPositionedCompetitors = confirmedFinishPositioningListAnalyzer.analyze();
         if (!Util.equalsWithNull(cachedConfirmedPositionedCompetitors, confirmedPositionedCompetitors)) {
             cachedConfirmedPositionedCompetitors = confirmedPositionedCompetitors;
             if (cachedConfirmedPositionedCompetitors != null) {

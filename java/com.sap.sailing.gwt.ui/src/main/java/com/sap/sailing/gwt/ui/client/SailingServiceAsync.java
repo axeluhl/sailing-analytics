@@ -185,12 +185,14 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
      */
     void trackWithTracTrac(RegattaIdentifier regattaToAddTo, Iterable<TracTracRaceRecordDTO> rrs, String liveURI,
             String storedURI, String courseDesignUpdateURI, boolean trackWind, boolean correctWindByDeclination,
-            Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm, String tracTracUsername,
+            Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm, 
+            boolean useOfficialEventsToUpdateRaceLog, String tracTracUsername,
             String tracTracPassword, AsyncCallback<Void> callback);
 
-    void trackWithSwissTiming(RegattaIdentifier regattaToAddTo, Iterable<SwissTimingRaceRecordDTO> rrs,
-            String hostname, int port, boolean trackWind, boolean correctWindByDeclination,
-            boolean useInternalMarkPassingAlgorithm, String updateURL, String updateUsername, String updatePassword, AsyncCallback<Void> asyncCallback);
+    void trackWithSwissTiming(RegattaIdentifier regattaToAddTo, Iterable<SwissTimingRaceRecordDTO> rrs, String hostname,
+            int port, boolean trackWind, boolean correctWindByDeclination, boolean useInternalMarkPassingAlgorithm,
+            String updateURL, String updateUsername, String updatePassword, String eventName,
+            String manage2SailEventUrl, AsyncCallback<Void> asyncCallback);
 
     void replaySwissTimingRace(RegattaIdentifier regattaIdentifier, Iterable<SwissTimingReplayRaceDTO> replayRaces,
             boolean trackWind, boolean correctWindByDeclination, boolean useInternalMarkPassingAlgorithm,
@@ -201,7 +203,7 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
     void createTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI,
             String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword, AsyncCallback<Void> callback);
 
-    void deleteTracTracConfiguration(TracTracConfigurationWithSecurityDTO tracTracConfiguration,
+    void deleteTracTracConfigurations(Collection<TracTracConfigurationWithSecurityDTO> tracTracConfigurations,
             AsyncCallback<Void> callback);
 
     void updateTracTracConfiguration(TracTracConfigurationWithSecurityDTO tracTracConfiguration,
@@ -388,7 +390,7 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
     void updateSwissTimingConfiguration(SwissTimingConfigurationWithSecurityDTO configuration,
             AsyncCallback<Void> asyncCallback);
 
-    void deleteSwissTimingConfiguration(SwissTimingConfigurationWithSecurityDTO configuration,
+    void deleteSwissTimingConfigurations(Collection<SwissTimingConfigurationWithSecurityDTO> configurations,
             AsyncCallback<Void> asyncCallback);
 
     void getCountryCodes(AsyncCallback<String[]> callback);
@@ -601,7 +603,7 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
     void updateSwissTimingArchiveConfiguration(SwissTimingArchiveConfigurationWithSecurityDTO dto,
             AsyncCallback<Void> asyncCallback);
 
-    void deleteSwissTimingArchiveConfiguration(SwissTimingArchiveConfigurationWithSecurityDTO dto,
+    void deleteSwissTimingArchiveConfigurations(Collection<SwissTimingArchiveConfigurationWithSecurityDTO> dtos,
             AsyncCallback<Void> asyncCallback);
 
     void updateRegatta(RegattaIdentifier regattaIdentifier, Date startDate, Date endDate, UUID defaultCourseAreaUuid,
@@ -647,7 +649,7 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
 
     void importMasterData(String host, String[] names, boolean override, boolean compress, boolean exportWind,
             boolean exportDeviceConfigurations, String targetServerUsername, String targetServerPassword,
-            AsyncCallback<UUID> asyncCallback);
+            boolean exportTrackedRacesAndStartTracking, AsyncCallback<UUID> asyncCallback);
 
     void getImportOperationProgress(UUID id, AsyncCallback<DataImportProgress> asyncCallback);
 
@@ -1235,9 +1237,25 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
 
     void createOrUpdateCourseTemplate(CourseTemplateDTO courseTemplate, AsyncCallback<CourseTemplateDTO> asyncCallback);
 
-    void removeCourseTemplate(UUID uuid, AsyncCallback<Void> asyncCallback);
+    /**
+     * Remove course templates by UUIDs
+     * 
+     * @param courseTemplatesUuids
+     *            the {@link Collection} of course templates' UUIDs which will be remove
+     * @param asyncCallback
+     *            {@link AsyncCallback} object
+     */
+    void removeCourseTemplates(Collection<UUID> courseTemplatesUuids, AsyncCallback<Void> asyncCallback);
 
-    void removeMarkProperties(UUID uuid, AsyncCallback<Void> asyncCallback);
+    /**
+     * Remove mark properties by UUIDs
+     * 
+     * @param markPropertiesUuids
+     *            the {@link Collection} of mark properties' UUIDs which will be remove
+     * @param asyncCallback
+     *            {@link AsyncCallback} object
+     */
+    void removeMarkProperties(Collection<UUID> markPropertiesUuids, AsyncCallback<Void> asyncCallback);
 
     void getMarkRoles(AsyncCallback<List<MarkRoleDTO>> callback);
 

@@ -162,6 +162,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.WithID;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -542,15 +543,20 @@ public class RegattasResource extends AbstractSailingServerResource {
         // Check regattalog if device has been already registered to this regatta
         boolean duplicateDeviceId = false;
         if (checkInCompetitor) {
-            RegattaLog regattaLog = regatta.getRegattaLog();
-            duplicateDeviceId = regattaLog.getUnrevokedEvents().stream().anyMatch(event -> {
-                if (event instanceof RegattaLogDeviceCompetitorMappingEvent) {
-                    return deviceUuid.equals(
-                            ((RegattaLogDeviceCompetitorMappingEvent) event).getDevice().getStringRepresentation());
-                } else {
-                    return false;
-                }
-            });
+            final RegattaLog regattaLog = regatta.getRegattaLog();
+            regattaLog.lockForRead();
+            try {
+                duplicateDeviceId = regattaLog.getUnrevokedEvents().stream().anyMatch(event -> {
+                    if (event instanceof RegattaLogDeviceCompetitorMappingEvent) {
+                        return deviceUuid.equals(
+                                ((RegattaLogDeviceCompetitorMappingEvent) event).getDevice().getStringRepresentation());
+                    } else {
+                        return false;
+                    }
+                });
+            } finally {
+                regattaLog.unlockAfterRead();
+            }
         }
         if (duplicateDeviceId) {
             response = this.getAlreadyRegisteredDeviceErrorResponse(regattaName, deviceUuid);
@@ -739,18 +745,28 @@ public class RegattasResource extends AbstractSailingServerResource {
             if (!regatta.getRegistrationLinkSecret().equals(registrationLinkSecret)) {
                 return getBadRegattaRegistrationTypeErrorResponse(regattaName);
             }
-            for (RegattaLogEvent event : regatta.getRegattaLog().getUnrevokedEvents()) {
-                if (event instanceof RegattaLogDeviceCompetitorMappingEvent) {
-                    try {
-                        regatta.getRegattaLog().revokeEvent(
-                                new LogEventAuthorImpl(user == null ? "anonymous" : user.getFullName(), 0), event,
-                                "deregister device " + ((RegattaLogDeviceCompetitorMappingEvent) event).getDevice()
-                                        .getStringRepresentation());
-                    } catch (NotRevokableException e) {
-                        return getDeregisterCompetitorErrorResponse(regattaName, competitorIdAsString, e.getMessage());
+            final RegattaLog regattaLog = regatta.getRegattaLog();
+            final Set<RegattaLogDeviceCompetitorMappingEvent> eventsToRevoke = new HashSet<>();
+            regattaLog.lockForRead();
+            try {
+                for (RegattaLogEvent event : regattaLog.getUnrevokedEvents()) {
+                    if (event instanceof RegattaLogDeviceCompetitorMappingEvent) {
+                        eventsToRevoke.add((RegattaLogDeviceCompetitorMappingEvent) event);
                     }
                 }
-            };
+            } finally {
+                regattaLog.unlockAfterRead();
+            }
+            for (final RegattaLogDeviceCompetitorMappingEvent eventToRevoke : eventsToRevoke) {
+                try {
+                    regattaLog.revokeEvent(
+                            new LogEventAuthorImpl(user == null ? "anonymous" : user.getFullName(), 0), eventToRevoke,
+                            "deregister device " + eventToRevoke.getDevice()
+                            .getStringRepresentation());
+                } catch (NotRevokableException e) {
+                    return getDeregisterCompetitorErrorResponse(regattaName, competitorIdAsString, e.getMessage());
+                }
+            }
         } else {
             subject.checkPermission(
                     SecuredDomainType.REGATTA.getStringPermissionForObject(DefaultActions.UPDATE, regatta));
@@ -1142,7 +1158,11 @@ public class RegattasResource extends AbstractSailingServerResource {
             jsonCourse = new CourseBaseJsonSerializer(waypointSerializer).serialize(course);
         } else {
             final CourseGeometry geometry = getCourseGeometry(optionalTrackedRace);
-            jsonCourse = new CourseBaseWithGeometryJsonSerializer(waypointSerializer).serialize(new Pair<>(course, geometry));
+            final TimePoint timePointForStartLine = optionalTrackedRace.getStartOfRace() != null ?
+                    optionalTrackedRace.getStartOfRace() : optionalTrackedRace.getStartOfTracking() != null ?
+                            optionalTrackedRace.getStartOfTracking() : MillisecondsTimePoint.now();
+            final LineDetails startLineDetails = optionalTrackedRace.getStartLine(timePointForStartLine);
+            jsonCourse = new CourseBaseWithGeometryJsonSerializer(waypointSerializer).serialize(new Triple<>(course, geometry, startLineDetails));
         }
         String json = jsonCourse.toJSONString();
         response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();

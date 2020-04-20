@@ -38,6 +38,7 @@ import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
+import com.sap.sse.security.ui.client.component.SelectedElementsCountingButton;
 
 public class RemoteServerInstancesManagementPanel extends SimplePanel {
     private final SailingServiceAsync sailingService;
@@ -112,14 +113,8 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
             }
         });
 
-        Button removeButton = new Button(stringMessages.remove());
-        buttonPanel.add(removeButton);
-        removeButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                removeSelectedSailingServers();
-            }
-        });
+        buttonPanel.add(new SelectedElementsCountingButton<RemoteSailingServerReferenceDTO>(stringMessages.remove(),
+                refreshableServerSelectionModel, true, (event) -> removeSelectedSailingServers()));
 
         Button refreshButton = new Button(stringMessages.refresh());
         buttonPanel.add(refreshButton);

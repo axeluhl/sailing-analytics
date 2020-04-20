@@ -2,8 +2,12 @@ package com.sap.sse.security.ui.client.component;
 
 import static com.sap.sse.security.shared.impl.SecuredSecurityTypes.USER_GROUP;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -11,8 +15,13 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.async.ParallelExecutionCallback;
+import com.sap.sse.gwt.client.async.ParallelExecutionHolder;
 import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
+import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
+import com.sap.sse.gwt.client.celltable.TableWrapper;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
@@ -39,64 +48,73 @@ public class UserGroupManagementPanel extends Composite {
             CellTableWithCheckboxResources tableResources) {
         final UserManagementServiceAsync userManagementService = userService.getUserManagementService();
         final VerticalPanel mainPanel = new VerticalPanel();
-        mainPanel.add(createButtonPanel(userService, stringMessages, userManagementService));
-
         userGroupListDataProvider = new UserGroupListDataProvider(userManagementService, new TextBox());
         userGroupTableWrapper = new UserGroupTableWrapper(userService, additionalPermissions, stringMessages,
                 errorReporter, /* enablePager */ true, tableResources, () -> updateUserGroups());
-
+        mainPanel.add(createButtonPanel(userService, stringMessages, userManagementService, userGroupTableWrapper.getSelectionModel()));
         final LabeledAbstractFilterablePanel<UserGroupDTO> userGroupfilterBox = userGroupTableWrapper.getFilterField();
         userGroupfilterBox.getElement().setPropertyString("placeholder", stringMessages.filterUserGroups());
         mainPanel.add(userGroupfilterBox);
         mainPanel.add(new ScrollPanel(userGroupTableWrapper.asWidget()));
-
         mainPanel.add(createUserGroupDetailsPanel(stringMessages, userManagementService,
                 userService, additionalPermissions, errorReporter, tableResources));
         initWidget(mainPanel);
     }
 
-    /** Creates the button bar with add/remove/refresh buttons. */
+    /** Creates the button bar with add/remove/refresh buttons. 
+     * @param userGroupSelectionModel */
     private Widget createButtonPanel(final UserService userService, final StringMessages stringMessages,
-            final UserManagementServiceAsync userManagementService) {
+            final UserManagementServiceAsync userManagementService,
+            RefreshableSelectionModel<UserGroupDTO> userGroupSelectionModel) {
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, USER_GROUP);
         buttonPanel.addUnsecuredAction(stringMessages.refresh(), () -> updateUserGroups());
         buttonPanel.addCreateActionWithoutServerCreateObjectPermissionCheck(stringMessages.createUserGroup(),
-                () -> new CreateUserGroupDialog(stringMessages,
-                userService, userManagementService, userGroupListDataProvider, () -> updateUserGroups()).show());
-        buttonPanel.addRemoveAction(stringMessages.removeUserGroup(), () -> {
-            UserGroupDTO userGroup = userGroupTableWrapper.getSelectionModel().getSelectedObject();
-            if (userGroup == null) {
+                () -> new CreateUserGroupDialog(stringMessages, userService, userManagementService,
+                        userGroupListDataProvider, () -> updateUserGroups()).show());
+        buttonPanel.addRemoveAction(stringMessages.removeUserGroup(), userGroupSelectionModel, false, () -> {
+            Set<UserGroupDTO> userGroups = userGroupTableWrapper.getSelectionModel().getSelectedSet();
+            if (userGroups == null || userGroups.isEmpty()) {
                 Window.alert(stringMessages.youHaveToSelectAUserGroup());
-            } else if (Window.confirm(stringMessages.doYouReallyWantToRemoveUserGroup(userGroup.getName()))) {
-                userManagementService.deleteUserGroup(userGroup.getId().toString(), new AsyncCallback<SuccessInfo>() {
-                    @Override
-                    public void onSuccess(SuccessInfo result) {
-                        userGroupListDataProvider.updateDisplays();
-                        Window.alert(result.getMessage());
-                        updateUserGroups();
+            } else {
+                final String userGroupNames = String.join(", ", Util.map(userGroups, g -> g.getName()));
+                if (Window.confirm(stringMessages.doYouReallyWantToRemoveUserGroup(userGroupNames))) {
+                    final Map<UserGroupDTO, ParallelExecutionCallback<SuccessInfo>> callbacks = new HashMap<>();
+                    for (final UserGroupDTO userGroup : userGroups) {
+                        callbacks.put(userGroup, new ParallelExecutionCallback<>());
                     }
+                    new ParallelExecutionHolder(callbacks.values().toArray(new ParallelExecutionCallback<?>[0])) {
+                        @Override
+                        public void handleSuccess() {
+                            userGroupListDataProvider.updateDisplays();
+                            Window.alert(stringMessages.successMessageRemovedUserGroup(userGroupNames));
+                            updateUserGroups();
+                        }
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        Window.alert(stringMessages.couldNotDeleteUserGroup());
+                        @Override
+                        public void handleFailure(Throwable caught) {
+                            Window.alert(stringMessages.couldNotDeleteUserGroup());
+                        }
+                    };
+                    for (final Entry<UserGroupDTO, ParallelExecutionCallback<SuccessInfo>> groupAndCallback : callbacks
+                            .entrySet()) {
+                        userManagementService.deleteUserGroup(groupAndCallback.getKey().getId().toString(),
+                                groupAndCallback.getValue());
                     }
-                });
+                }
             }
         });
         return buttonPanel;
     }
 
-    /** Creates the UserGroupDetailsPanel which contains details about the selected user group 
-     * @param userService 
-     * @param additionalPermissions 
-     * @param errorReporter 
-     * @param tableResources */
+    /**
+     * Creates the UserGroupDetailsPanel which contains details about the selected user group
+     */
     private HorizontalPanel createUserGroupDetailsPanel(final StringMessages stringMessages,
-            final UserManagementServiceAsync userManagementService, UserService userService, Iterable<HasPermissions> additionalPermissions, ErrorReporter errorReporter, CellTableWithCheckboxResources tableResources) {
+            final UserManagementServiceAsync userManagementService, UserService userService,
+            Iterable<HasPermissions> additionalPermissions, ErrorReporter errorReporter,
+            CellTableWithCheckboxResources tableResources) {
         userGroupDetailPanel = new UserGroupDetailPanel(userGroupTableWrapper.getSelectionModel(),
                 userGroupListDataProvider, userService, stringMessages, errorReporter, tableResources);
-
-        
         userGroupRoleDefinitionPanel = new UserGroupRoleDefinitionPanel(userService,
                 stringMessages, additionalPermissions, errorReporter, tableResources,
                 userGroupTableWrapper.getSelectionModel(), userGroupListDataProvider);
@@ -116,7 +134,7 @@ public class UserGroupManagementPanel extends Composite {
         listsWrapper.add(roleCaption);
         listsWrapper.setVisible(false);
         userGroupTableWrapper.getSelectionModel().addSelectionChangeHandler(
-                h -> listsWrapper.setVisible(userGroupTableWrapper.getSelectionModel().getSelectedObject() != null));
+                h -> listsWrapper.setVisible(TableWrapper.getSingleSelectedUserGroup(userGroupTableWrapper.getSelectionModel()) != null));
         return listsWrapper;
     }
 

@@ -1,6 +1,10 @@
 package com.sap.sailing.domain.orc;
 
+import java.time.format.DateTimeParseException;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Future;
@@ -15,8 +19,14 @@ import com.sap.sse.common.Util;
 /**
  * An interface to {@code data.orc.org}, mostly the search functionality at
  * {@code https://data.orc.org/public/WPub.dll?action=SrchCert&xslp=scert.php}. It can search for certificates by a
- * number of criteria, among them the issuing country, sail number, ORC reference number, or boat name.
- * &lt;p&gt;
+ * number of criteria, among them the issuing country, sail number, ORC reference number, or boat name. Those search
+ * results are represented as {@link CertificateHandle} objects. Such handles can also be obtained for certificates that
+ * are not currently valid. See the {@code includeInvalid} parameter of the
+ * {@link #search(CountryCode, Integer, String, String, String, String, boolean)} method. However, handles for
+ * {@link CertificateHandle#isValid() invalid} certificates cannot be resolved into {@link ORCCertificate} objects
+ * through {@link #getCertificates(Iterable)} or {@link #getCertificates(CertificateHandle...)} because the database
+ * returns full certificates only if they are valid.
+ * <p>
  * 
  * As the web site emits XML documents as search results, those can be parsed and turned into handles to certificates.
  * An example output (excerpt):
@@ -78,8 +88,8 @@ import com.sap.sse.common.Util;
 &lt;/DATA&gt;
  * </pre>
  * 
- * This also shows that some query results do not provide a valid link to a downloadable copy of the certificate. Those are
- * automatically removed from the results here.
+ * This also shows that some query results do not provide a valid link to a downloadable copy of the certificate. Those
+ * are automatically removed from the results here.
  * 
  * @author Axel Uhl (D043530)
  *
@@ -87,6 +97,37 @@ import com.sap.sse.common.Util;
 public interface ORCPublicCertificateDatabase {
     ORCPublicCertificateDatabase INSTANCE = new ORCPublicCertificateDatabaseImpl();
     
+    public enum CertificateFamily {
+        UNKNOWN(0, ""), ORC(1, "ORC"), SUPER_YACHT(2, "SY"), DOUBLE_HANDED(3, "DH"), MULTI_HULL(4, "Mu");
+        
+        private final int familyId;
+        private final String familyQueryParamValue;
+        private final static Map<Integer, CertificateFamily> familyById;
+        
+        static {
+            familyById = new HashMap<>();
+            for (final CertificateFamily family : values()) {
+                familyById.put(family.getFamilyId(), family);
+            }
+        }
+        
+        private CertificateFamily(int familyId, String familyQueryParamValue) {
+            this.familyId = familyId;
+            this.familyQueryParamValue = familyQueryParamValue;
+        }
+
+        public int getFamilyId() {
+            return familyId;
+        }
+
+        public String getFamilyQueryParamValue() {
+            return familyQueryParamValue;
+        }
+        
+        public static CertificateFamily fromId(int familyId) {
+            return familyById.get(familyId);
+        }
+    }
     /**
      * Equality and hash code of such handles is based on the {@link #getReferenceNumber() reference number} only.
      * 
@@ -95,10 +136,12 @@ public interface ORCPublicCertificateDatabase {
      */
     public interface CertificateHandle {
         CountryCode getIssuingCountry();
+        String getFileId();
         Double getGPH();
         String getSSSID();
         UUID getDatInGID();
         String getReferenceNumber();
+        CertificateFamily getFamily();
         String getYachtName();
         String getSailNumber();
         String getBoatClassName();
@@ -109,6 +152,7 @@ public interface ORCPublicCertificateDatabase {
         Integer getCertType();
         Boolean isOd();
         Boolean isProvisional();
+        Boolean isValid();
     }
     
     /**
@@ -117,31 +161,48 @@ public interface ORCPublicCertificateDatabase {
      * {@code boatClassName} parameters.
      * <p>
      * 
-     * @return an always valid, never {@code null} object which may be {@link Util#isEmpty() empty}.
+     * @param includeInvalid
+     *            If {@code true}, handles may have {@link CertificateHandle#isValid()}{@code == false}, meaning that
+     *            such a handle cannot be resolved to a {@link ORCCertificate} using any of
+     *            {@link #getCertificate(String)}, {@link #getCertificates(Iterable)} and
+     *            {@link #getCertificates(CertificateHandle...)}. If {@code false}, only valid certificate handles
+     *            will be returned that should all be resolvable into an {@link ORCCertificate} with any of the methods
+     *            listed above.
+     * 
+     * @return never {@code null}; an object which may be {@link Util#isEmpty() empty}.
      */
     Iterable<CertificateHandle> search(CountryCode country, Integer yearOfIssuance, String referenceNumber,
-            String yachtName, String sailNumber, String boatClassName) throws Exception;
+            String yachtName, String sailNumber, String boatClassName, boolean includeInvalid) throws Exception;
     
-    default Iterable<ORCCertificate> getCertificates(Iterable<CertificateHandle> handles) throws Exception {
-        return Util.map(handles, handle->{
-            try {
-                return getCertificate(handle.getReferenceNumber());
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        });
-    }
+    Iterable<ORCCertificate> getCertificates(Iterable<CertificateHandle> handles) throws Exception;
     
     default Iterable<ORCCertificate> getCertificates(CertificateHandle... handles) throws Exception {
         return getCertificates(Arrays.asList(handles));
     }
     
     default CertificateHandle getCertificateHandle(String referenceNumber) throws Exception {
-        return search(null, null, referenceNumber, null, null, null).iterator().next();
+        return search(null, null, referenceNumber, null, null, null, /* includeInvalid */ true).iterator().next();
     }
     
-    ORCCertificate getCertificate(String referenceNumber) throws Exception;
+    ORCCertificate searchForUpdate(ORCCertificate certificate) throws Exception;
     
+    ORCCertificate searchForUpdate(CertificateHandle certificateHandle) throws Exception;
+    
+    /**
+     * Searches for a default {@link CertificateFamily#ORC} certificate by the given {@code referenceNumber}.
+     * Note that this may not find certificates of other families.
+     */
+    default ORCCertificate getCertificate(String referenceNumber) throws Exception {
+        return getCertificate(referenceNumber, CertificateFamily.ORC);
+    }
+
+    ORCCertificate getCertificate(String referenceNumber, CertificateFamily family) throws Exception;
+
+    default ORCCertificate getCertificate(CertificateHandle certificateHandle) throws Exception {
+        final Iterable<ORCCertificate> certificates = getCertificates(certificateHandle);
+        return certificates.iterator().hasNext() ? certificates.iterator().next() : null;
+    }
+
     /**
      * Creates a lookup job that is forked into the background. The job will first try an exact lookup
      * with the parameters as specified. If one or more results are obtained this way, they are returned. If no
@@ -166,4 +227,6 @@ public interface ORCPublicCertificateDatabase {
      *         parameters.
      */
     Future<Set<ORCCertificate>> search(String yachtName, String sailNumber, BoatClass boatClass);
+    
+    Date parseDate(final String dateString) throws DateTimeParseException;
 }

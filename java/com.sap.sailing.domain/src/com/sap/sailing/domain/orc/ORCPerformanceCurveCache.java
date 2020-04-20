@@ -5,6 +5,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.orc.AverageWindOnLegCache;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveCourse;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
@@ -14,7 +15,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 
-public interface ORCPerformanceCurveCache {
+public interface ORCPerformanceCurveCache extends AverageWindOnLegCache {
     /**
      * If not yet computed, computes a copy of the total course supplied by the {@code totalCourseSupplier} where
      * any adapted leg that would query a live {@link TrackedLeg} for TWA and distance is replaced by a leg of

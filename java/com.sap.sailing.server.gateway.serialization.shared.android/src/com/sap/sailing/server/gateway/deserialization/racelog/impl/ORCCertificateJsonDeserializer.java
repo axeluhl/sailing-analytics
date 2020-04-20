@@ -17,6 +17,8 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializationExcepti
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.ORCCertificateJsonSerializer;
 import com.sap.sse.common.Bearing;
+import com.sap.sse.common.CountryCode;
+import com.sap.sse.common.CountryCodeFactory;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
@@ -29,6 +31,9 @@ public class ORCCertificateJsonDeserializer implements JsonDeserializer<ORCCerti
 
     @Override
     public ORCCertificate deserialize(JSONObject json) throws JsonDeserializationException {
+        String fileId = (String) json.get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_FILE_ID);
+        CountryCode issuingCountry = CountryCodeFactory.INSTANCE.getFromThreeLetterIOCName(
+                ((String) json.get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_ISSUING_COUNTRY_IOC)));
         String sailnumber = (String) json.get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_SAILNUMBER);
         String boatName = (String) json.get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_BOATNAME);
         String boatclass = (String) json.get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_BOATCLASS);
@@ -103,13 +108,14 @@ public class ORCCertificateJsonDeserializer implements JsonDeserializer<ORCCerti
             velocityPredictionsPerTrueWindSpeedAndAngle.put(tws,
                     velocityPredictionAtCurrentTrueWindSpeedPerTrueWindAngle);
         }
-        final String idConsistingOfNatAuthCertNoAndBIN = json.get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_ID).toString();
-        final ORCCertificate certificate = new ORCCertificateImpl(trueWindSpeeds,trueWindAngles,idConsistingOfNatAuthCertNoAndBIN, sailnumber,
-                boatName, boatclass, length, gph, cdl, issueDate, velocityPredictionsPerTrueWindSpeedAndAngle,
-                beatAngles, beatVMGPredictionPerTrueWindSpeed, beatAllowancePerTrueWindSpeed, runAngles,
-                runVMGPredictionPerTrueWindSpeed, runAllowancePerTrueWindSpeed,
-                windwardLeewardSpeedPredictionPerTrueWindSpeed, longDistanceSpeedPredictionPerTrueWindSpeed,
-                circularRandomSpeedPredictionPerTrueWindSpeed, nonSpinnakerSpeedPredictionPerTrueWindSpeed);
+        final String referenceNumber = json.get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_ID).toString();
+        final ORCCertificate certificate = new ORCCertificateImpl(trueWindSpeeds, trueWindAngles, referenceNumber,
+                fileId, sailnumber, boatName, boatclass, length, gph, cdl, issueDate, issuingCountry,
+                velocityPredictionsPerTrueWindSpeedAndAngle, beatAngles, beatVMGPredictionPerTrueWindSpeed,
+                beatAllowancePerTrueWindSpeed, runAngles, runVMGPredictionPerTrueWindSpeed,
+                runAllowancePerTrueWindSpeed, windwardLeewardSpeedPredictionPerTrueWindSpeed,
+                longDistanceSpeedPredictionPerTrueWindSpeed, circularRandomSpeedPredictionPerTrueWindSpeed,
+                nonSpinnakerSpeedPredictionPerTrueWindSpeed);
         return certificate;
     }
 
