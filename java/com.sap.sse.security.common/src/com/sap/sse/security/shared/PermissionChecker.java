@@ -104,14 +104,15 @@ public class PermissionChecker {
         // anonymous can only grant it if not already decided by acl
         if (result == PermissionState.NONE) {
             PermissionState anonymous = checkUserPermissions(permission, allUser, groupsOfWhichAllUserIsMember,
-                    ownership, impliesChecker, /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true);
+                    ownership, impliesChecker, /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true,
+                    /* matchOnlyNonTransitiveRoles */ false);
             if (anonymous == PermissionState.GRANTED) {
                 result = anonymous;
             }
         }
         if (result == PermissionState.NONE) {
             result = checkUserPermissions(permission, user, groupsOfWhichUserIsMember, ownership, impliesChecker,
-                    /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true);
+                    /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true, /* matchOnlyNonTransitiveRoles */ false);
         }
         return result == PermissionState.GRANTED;
     }
@@ -228,9 +229,11 @@ public class PermissionChecker {
         for (WildcardPermission effectiveWildcardPermissionToCheck : effectivePermissionsToCheck) {
             final O ownership = ownershipResolver.apply(effectiveWildcardPermissionToCheck);
             if (checkUserPermissions(effectiveWildcardPermissionToCheck, user, getGroupsOfUser(user), ownership,
-                    impliesChecker, /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true) != PermissionState.GRANTED
+                    impliesChecker, /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true,
+                    /* matchOnlyNonTransitiveRoles */ true) != PermissionState.GRANTED
                     && checkUserPermissions(effectiveWildcardPermissionToCheck, allUser, getGroupsOfUser(allUser),
-                            ownership, impliesChecker, /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true) != PermissionState.GRANTED) {
+                            ownership, impliesChecker, /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true,
+                            /* matchOnlyNonTransitiveRoles */ false) != PermissionState.GRANTED) {
                 return false;
             }
         }
@@ -363,10 +366,12 @@ public class PermissionChecker {
         final Set<WildcardPermission> effectivePermissionsToCheck = expandSingleWildcardPermissionToDistinctPermissions(permission, allPermissionTypes, false);
         
         for (WildcardPermission effectiveWildcardPermissionToCheck : effectivePermissionsToCheck) {
-            if (checkUserPermissions(effectiveWildcardPermissionToCheck, user, getGroupsOfUser(user), ownership, impliesAnyChecker,
-                    /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ false) == PermissionState.GRANTED
-                    || checkUserPermissions(effectiveWildcardPermissionToCheck, allUser, getGroupsOfUser(allUser), ownership, impliesAnyChecker,
-                            /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ false) == PermissionState.GRANTED) {
+            if (checkUserPermissions(effectiveWildcardPermissionToCheck, user, getGroupsOfUser(user), ownership,
+                    impliesAnyChecker, /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ false,
+                    /* matchOnlyNonTransitiveRoles */ false) == PermissionState.GRANTED
+                    || checkUserPermissions(effectiveWildcardPermissionToCheck, allUser, getGroupsOfUser(allUser),
+                            ownership, impliesAnyChecker, /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ false,
+                            /* matchOnlyNonTransitiveRoles */ false) == PermissionState.GRANTED) {
                 return true;
             }
         }
@@ -387,7 +392,8 @@ public class PermissionChecker {
      */
     private static <RD extends RoleDefinition, R extends AbstractRole<RD, G, UR>, O extends AbstractOwnership<G, UR>, UR extends UserReference, U extends SecurityUser<RD, R, G>, G extends SecurityUserGroup<RD>, A extends SecurityAccessControlList<G>> PermissionState checkUserPermissions(
             WildcardPermission permission, U user, Iterable<G> groupsOfWhichUserIsMember, O ownership,
-            BiFunction<WildcardPermission, WildcardPermission, Boolean> permissionChecker, boolean matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven) {
+            BiFunction<WildcardPermission, WildcardPermission, Boolean> permissionChecker,
+            boolean matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven, boolean matchOnlyNonTransitiveRoles) {
         PermissionState result = PermissionState.NONE;
         // 2. check direct permissions
         if (result == PermissionState.NONE && user != null) { // no direct permissions for anonymous users
@@ -423,7 +429,7 @@ public class PermissionChecker {
         if (result == PermissionState.NONE && user != null) { // an anonymous user does not have any roles
             for (R role : user.getRoles()) {
                 if (implies(role, permission, ownership, permissionChecker,
-                        matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven)) {
+                        matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven, matchOnlyNonTransitiveRoles)) {
                     result = PermissionState.GRANTED;
                     break;
                 }
@@ -477,14 +483,15 @@ public class PermissionChecker {
     private static <RD extends RoleDefinition, R extends AbstractRole<RD, G, UR>, O extends AbstractOwnership<G, UR>, UR extends UserReference, U extends SecurityUser<RD, R, G>, G extends SecurityUserGroup<RD>, A extends SecurityAccessControlList<G>> boolean implies(
             R role, WildcardPermission permission, O ownership,
             BiFunction<WildcardPermission, WildcardPermission, Boolean> permissionChecker,
-           boolean matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven) {
+           boolean matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven,
+           boolean matchOnlyNonTransitiveRoles) {
        final boolean roleIsTenantQualified = role.getQualifiedForTenant() != null;
        final boolean roleIsUserQualified = role.getQualifiedForUser() != null;
        final boolean permissionsApply;
        boolean result;
        // It is possible that we have an ownership with null tenantOwner and null userOwner. This should be handled like no ownership was given.
        final boolean ownershipIsGiven = ownership != null && (ownership.getTenantOwner() != null || ownership.getUserOwner() != null);
-       if (!role.isTransitive()) {
+       if (matchOnlyNonTransitiveRoles && !role.isTransitive()) {
            return false;
        }
        if (roleIsTenantQualified || roleIsUserQualified) {

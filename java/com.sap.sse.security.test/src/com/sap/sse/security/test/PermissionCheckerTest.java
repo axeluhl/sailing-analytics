@@ -463,6 +463,18 @@ public class PermissionCheckerTest {
                 type1.getPermission(DefaultActions.READ), type2.getPermission(DefaultActions.DELETE)));
     }
 
+    @Test
+    public void testPermissionCheckWithTransientRole() {
+        final WildcardPermission permissionToCheck = new WildcardPermission("a:b:c");
+        final RoleDefinition transientRoleDefinition = new RoleDefinitionImpl(UUID.randomUUID(), "transientRole", Collections.singleton(permissionToCheck), false);
+        final Role transientRole = new Role(transientRoleDefinition);
+        user.addRole(transientRole);
+        boolean metaPermitted = PermissionChecker.checkMetaPermission(permissionToCheck, allHasPermissions, user, null, null);
+        assertFalse(metaPermitted);
+        boolean permitted = PermissionChecker.isPermitted(permissionToCheck, user, null, ownership, acl);
+        assertTrue(permitted);
+    }
+
     private boolean checkAnyPermissionWithGrantedUserPermissions(WildcardPermission permissionToCheck,
             WildcardPermission... grantedPermissions) {
         for (WildcardPermission p : grantedPermissions) {
