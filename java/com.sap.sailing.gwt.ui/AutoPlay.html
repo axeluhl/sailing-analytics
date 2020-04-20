@@ -13,13 +13,13 @@
     <!--                                                               -->
     <!-- Consider inlining CSS to reduce the number of requested files -->
     <!--                                                               -->
-	<link rel="shortcut icon" type="image/x-icon" href="images/sap.ico" />
-	<link href='images/sap-sailing-app-icon.png' rel='apple-touch-icon'>
+    <link rel="shortcut icon" type="image/x-icon" href="images/sap${whitelabeled}.ico" />
+    <link href='sap-sailing-app-icon${whitelabeled}.png' rel='apple-touch-icon'>
 
     <!--                                           -->
     <!-- Any title is fine                         -->
     <!--                                           -->
-    <title>SAP Sailing Analytics AutoPlay</title>
+    <title>${SAP}Sailing Analytics AutoPlay</title>
 
     <link rel="stylesheet" type="text/css" href="/sailing-reset-2.0.cache.css">
     <link rel="stylesheet" type="text/css" href="/sailing-normalize-3.0.2.cache.css">
@@ -39,7 +39,11 @@
     <script>
         videojs.options.techOrder = ['vimeo', 'youtube',  'html5'];
     </script>
-
+    <script>
+       document.clientConfigurationContext = {
+            debrandingActive: ${debrandingActive}
+       };
+    </script>
     <script type="text/javascript" src="com.sap.sailing.gwt.autoplay.AutoPlay/com.sap.sailing.gwt.autoplay.AutoPlay.nocache.js"></script>
     <script type="text/javascript" src="js/jquery-3.3.1.min.js"></script>
 
