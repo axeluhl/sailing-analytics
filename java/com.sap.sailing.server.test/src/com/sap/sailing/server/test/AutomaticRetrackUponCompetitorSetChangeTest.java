@@ -1,0 +1,183 @@
+package com.sap.sailing.server.test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.net.URI;
+import java.net.URL;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
+import java.util.UUID;
+
+import org.mockito.Matchers;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.osgi.framework.BundleContext;
+
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorAndBoatStore;
+import com.sap.sailing.domain.base.DomainFactory;
+import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaName;
+import com.sap.sailing.domain.common.dto.FleetDTO;
+import com.sap.sailing.domain.leaderboard.impl.LowPoint;
+import com.sap.sailing.domain.persistence.DomainObjectFactory;
+import com.sap.sailing.domain.persistence.MongoObjectFactory;
+import com.sap.sailing.domain.persistence.PersistenceFactory;
+import com.sap.sailing.domain.persistence.media.MediaDBFactory;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
+import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
+import com.sap.sailing.domain.racelog.tracking.EmptySensorFixStore;
+import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
+import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
+import com.sap.sailing.domain.test.AbstractTracTracLiveTest;
+import com.sap.sailing.domain.tracking.RaceHandle;
+import com.sap.sailing.domain.tracking.RaceTracker;
+import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler.DefaultRaceTrackingHandler;
+import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
+import com.sap.sailing.server.impl.RacingEventServiceImpl;
+import com.sap.sailing.server.impl.RacingEventServiceImpl.ConstructorParameters;
+import com.sap.sailing.server.interfaces.RacingEventService;
+import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
+import com.sap.sailing.server.operationaltransformation.UpdateSeries;
+import com.sap.sailing.server.testsupport.SecurityBundleTestWrapper;
+import com.sap.sse.common.Color;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.mongodb.MongoDBService;
+import com.sap.sse.replication.FullyInitializedReplicableTracker;
+import com.sap.sse.replication.OperationExecutionListener;
+import com.sap.sse.replication.OperationWithResult;
+import com.sap.sse.security.SecurityService;
+
+/**
+ * See also bug 5219 (https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=5219).
+ * 
+ * @author Axel Uhl (D043530)
+ *
+ */
+public class AutomaticRetrackUponCompetitorSetChangeTest {
+    private TrackedRace trackedRace;
+    private RegattaAndRaceIdentifier raceIdentifier;
+    private RaceHandle racesHandle;
+    private final boolean[] notifier = new boolean[1];
+    private RaceTrackingConnectivityParameters trackingParams;
+    private RacingEventServiceImpl service;
+    private MongoDBService mongoDBService;
+    private MongoObjectFactory mongoObjectFactory;
+
+    @Before
+    public void setUp() throws Exception {
+        final BundleContext contextMock = mock(BundleContext.class);
+        when(contextMock.createFilter(Matchers.anyObject())).thenReturn(null);
+        mongoDBService = MongoDBService.INSTANCE;
+        mongoDBService.getDB().drop();
+        mongoObjectFactory = PersistenceFactory.INSTANCE.getMongoObjectFactory(mongoDBService);
+        final SecurityService securityService = new SecurityBundleTestWrapper().initializeSecurityServiceForTesting();
+        service = new RacingEventServiceImpl((final RaceLogAndTrackedRaceResolver raceLogResolver)-> {
+            return new ConstructorParameters() {
+                private final DomainFactory baseDomainFactory = new DomainFactoryImpl(raceLogResolver);
+                @Override public DomainObjectFactory getDomainObjectFactory() { return PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoDBService, baseDomainFactory); }
+                @Override public MongoObjectFactory getMongoObjectFactory() { return mongoObjectFactory; }
+                @Override public DomainFactory getBaseDomainFactory() { return baseDomainFactory; }
+                @Override public CompetitorAndBoatStore getCompetitorAndBoatStore() { return getBaseDomainFactory().getCompetitorAndBoatStore(); }
+            };
+        }, MediaDBFactory.INSTANCE.getMediaDB(mongoDBService), EmptyWindStore.INSTANCE,
+                EmptySensorFixStore.INSTANCE, null, null, /* sailingNotificationService */ null,
+                /* trackedRaceStatisticsCache */ null, /* restoreTrackedRaces */ false,
+                /* security service tracker */ new FullyInitializedReplicableTracker<SecurityService>(contextMock, (String) "class", null, null) {
+                    @Override
+                    public SecurityService getInitializedService(long timeoutInMillis) throws InterruptedException {
+                        return securityService;
+                    }
+        }, /* sharedSailingData */ null, /* replicationServiceTracker */ null,
+                /* scoreCorrectionProviderServiceTracker */ null, /* resultUrlRegistryServiceTracker */ null);
+        URL paramURL = new URL("http://event.tractrac.com/events/event_20150818_Bundesliga/4c54e750-27c2-0133-5064-60a44ce903c3.txt");
+        URI liveURI = AbstractTracTracLiveTest.getLiveURI();
+        URI storedURI = new URI("http://event.tractrac.com/events/event_20150818_Bundesliga/datafiles/4c54e750-27c2-0133-5064-60a44ce903c3.mtb");
+        URI courseDesignUpdateURI = AbstractTracTracLiveTest.getCourseDesignUpdateURI();
+        String tracTracUsername = AbstractTracTracLiveTest.getTracTracUsername();
+        String tracTracPassword = AbstractTracTracLiveTest.getTracTracPassword();
+        GregorianCalendar cal = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+        cal.set(2015, 8, 22, 9, 23, 57);
+        MillisecondsTimePoint startOfTracking = new MillisecondsTimePoint(cal.getTimeInMillis());
+        cal.set(2015, 8, 22, 15, 26, 34);
+        MillisecondsTimePoint endOfTracking = new MillisecondsTimePoint(cal.getTimeInMillis());
+        service.addOperationExecutionListener(new OperationExecutionListener<RacingEventService>() {
+            @Override
+            public <T> void executed(OperationWithResult<RacingEventService, T> operation) {
+                if (operation instanceof CreateTrackedRace) {
+                    synchronized (notifier) {
+                        notifier[0] = true;
+                        notifier.notifyAll();
+                    }
+                }
+            }
+        });
+        trackingParams = new com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl(service.getBaseDomainFactory())
+                .createTrackingConnectivityParameters(paramURL, liveURI, storedURI, courseDesignUpdateURI,
+                        startOfTracking, endOfTracking, /* delayToLiveInMillis */
+                        0l, /* offsetToStartTimeOfSimulatedRace */null, /*ignoreTracTracMarkPassings*/ false, EmptyRaceLogStore.INSTANCE,
+                        EmptyRegattaLogStore.INSTANCE, tracTracUsername, tracTracPassword, "", "", /* trackWind */ false, /* correctWindDirectionByMagneticDeclination */ false,
+                        /* preferReplayIfAvailable */ false, /* timeoutInMillis */ (int) RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, /* useOfficialEventsToUpdateRaceLog */ false);
+    }
+
+    private void startTracking() throws Exception {
+        final Regatta regatta = service.createRegatta("Test regatta", "J/70",
+                /* canBoatsOfCompetitorsChangePerRace==true because it's a league race we're using for this test */ true,
+                CompetitorRegistrationType.CLOSED, /* registrationLinkSecret */ null,
+                /* startDate */ null, /* endDate */ null, UUID.randomUUID(),
+                /* start with no series */ Collections.emptySet(),
+                /* persistent */ true, new LowPoint(), /* defaultCourseAreaId */ UUID.randomUUID(),
+                /* buoyZoneRadiusInHullLengths */ 2., /* useStartTimeInference */ false, /* controlTrackingFromStartAndFinishTimes */ false,
+                /* autoRestartTrackingUponCompetitorSetChange */ true, /* rankingMetricConstructor */ OneDesignRankingMetric::new);
+        final RegattaName regattaIdentifier = new RegattaName(regatta.getName());
+        service.apply(new UpdateSeries(regattaIdentifier, "Default", "Default", /* isMedal */ false, /* isFleetsCanRunInParallel */ false,
+                /* resultDiscardingThresholds */ null, /* startsWithZeroScore */ false, /* firstColumnIsNonDiscardableCarryForward */ false,
+                /* hasSplitFleetContiguousScoring */ false, /* maximumNumberOfDiscards */ null,
+                Arrays.asList(new FleetDTO("Red", 0, Color.RED), new FleetDTO("Green", 0, Color.GREEN), new FleetDTO("Blue", 0, Color.BLUE))));
+        racesHandle = service.addRace(/* regattaToAddTo */ regattaIdentifier, trackingParams, /* timeoutInMilliseconds */ 60000,
+                new DefaultRaceTrackingHandler());
+        // wait for the race to show up
+        RaceDefinition race = racesHandle.getRace(RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
+        if (race == null) {
+            fail("Waiting for tracked race timed out");
+        }
+        raceIdentifier = racesHandle.getRaceTracker().getRaceIdentifier();
+        trackedRace = service.getTrackedRace(raceIdentifier);
+    }
+
+    @Test
+    public void testStartTrackingAndRetrack() throws Exception {
+        startTracking();
+        final RaceDefinition race = trackedRace.getRace();
+        Iterable<Competitor> masterCompetitors = race.getCompetitors();
+        assertEquals(Util.size(masterCompetitors), 6);
+        final RaceHandle newHandle = service.updateRaceCompetitors(trackedRace.getTrackedRegatta().getRegatta(), race);
+        final RaceDefinition newRace = newHandle.getRace(RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
+        assertNotNull(newRace);
+        assertEquals(race.getId(), newRace.getId());
+        assertNotSame(race, newRace);
+        racesHandle = newHandle; // ensure that tearDown tears down the correct tracker
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        if (racesHandle != null) {
+            racesHandle.getRaceTracker().stop(/* preemptive */ false);
+        }
+    }
+}

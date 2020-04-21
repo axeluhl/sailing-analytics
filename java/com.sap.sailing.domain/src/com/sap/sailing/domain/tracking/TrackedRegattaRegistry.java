@@ -102,11 +102,15 @@ public interface TrackedRegattaRegistry {
      * example, if tracking for a regatta shall be started early, so as to enable race officials to see the course
      * geometry and wind data for the first race of the day, then especially in self-service scenarios there may be late
      * competitors registrations that happen after tracking has been started. These competitors, depending on how the
-     * connector in use works, may make it into the regatta's leaderboard, but not into the {@link RaceDefinition}.
-     * This would be unfortunate as those competitors then would remain invisible until the race is reloaded.<p>
+     * connector in use works, may make it into the regatta's leaderboard, but not into the {@link RaceDefinition}. This
+     * would be unfortunate as those competitors then would remain invisible until the race is reloaded.
+     * <p>
      * 
      * See also <a href="https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=5219">bug 5219</a> for a discussion.
-     * @return 
+     * 
+     * @return {@code null} if it was not possible to re-load the race, either because the regatta doesn't allow for it,
+     *         or because the connectivity parameters were not found; a {@link RaceHandle} for the re-started race
+     *         otherwise.
      */
     RaceHandle updateRaceCompetitors(Regatta regatta, RaceDefinition race) throws Exception;
 }

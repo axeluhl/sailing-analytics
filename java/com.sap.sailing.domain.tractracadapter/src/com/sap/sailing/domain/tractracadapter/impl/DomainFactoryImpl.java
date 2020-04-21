@@ -116,6 +116,7 @@ import com.tractrac.model.lib.api.route.IControlPoint;
 import com.tractrac.subscription.lib.api.IEventSubscriber;
 import com.tractrac.subscription.lib.api.IRaceSubscriber;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;
+import com.tractrac.util.lib.api.exceptions.TimeOutException;
 
 import difflib.PatchFailedException;
 
@@ -645,7 +646,8 @@ public class DomainFactoryImpl implements DomainFactory {
                 try {
                     raceDefinition = raceTrackingHandler.createRaceDefinition(trackedRegatta.getRegatta(), raceName, course, boatClass, competitorsAndBoats, raceId);
                 } catch (RuntimeException exception) {
-                    final String reasonForNotAddingRaceToRegatta = "Error while creating race " + raceDefinition + " for regatta " + trackedRegatta.getRegatta();
+                    final String reasonForNotAddingRaceToRegatta = "Error while creating race " + raceDefinition
+                            + " for regatta " + trackedRegatta.getRegatta() + ": " + exception.getMessage();
                     errorWhileTryingToTrackRace(trackedRegatta, raceDefinitionSetToUpdate, raceDefinition, reasonForNotAddingRaceToRegatta);
                 }
             } else {
@@ -1029,7 +1031,7 @@ public class DomainFactoryImpl implements DomainFactory {
             LeaderboardGroupResolver leaderboardGroupResolver,
             RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds,
             RaceTrackingHandler raceTrackingHandler)
-            throws URISyntaxException, SubscriberInitializationException, IOException, InterruptedException {
+            throws URISyntaxException, SubscriberInitializationException, IOException, InterruptedException, CreateModelException, TimeOutException {
         return new TracTracRaceTrackerImpl(this, raceLogStore, regattaLogStore, windStore, trackedRegattaRegistry,
                 raceLogResolver, leaderboardGroupResolver, connectivityParams, timeoutInMilliseconds, raceTrackingHandler);
     }
@@ -1040,7 +1042,7 @@ public class DomainFactoryImpl implements DomainFactory {
             LeaderboardGroupResolver leaderboardGroupResolver,
             RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds,
             RaceTrackingHandler raceTrackingHandler) throws URISyntaxException, CreateModelException,
-            SubscriberInitializationException, IOException, InterruptedException {
+            SubscriberInitializationException, IOException, InterruptedException, TimeOutException {
         return new TracTracRaceTrackerImpl(regatta, this, raceLogStore, regattaLogStore, windStore, trackedRegattaRegistry,
                 raceLogResolver, leaderboardGroupResolver, connectivityParams, timeoutInMilliseconds, raceTrackingHandler);
     }

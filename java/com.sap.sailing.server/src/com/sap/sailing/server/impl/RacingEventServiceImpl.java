@@ -2760,7 +2760,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             final RaceTrackingConnectivityParameters connectivityParams = connectivityParametersByRace.get(race);
             if (connectivityParams != null) {
                 removeRace(regatta, race);
-                result = addRace(regatta.getRegattaIdentifier(), connectivityParams, RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
+                result = addRace(regatta.getRegattaIdentifier(), connectivityParams, RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS,
+                        new DefaultRaceTrackingHandler()); // no need for ownership setting here because we're only "re-tracking" an existing race
             } else {
                 result = null;
                 logger.warning("Unable to update race competitors for race "+race+" in regatta "+regatta+

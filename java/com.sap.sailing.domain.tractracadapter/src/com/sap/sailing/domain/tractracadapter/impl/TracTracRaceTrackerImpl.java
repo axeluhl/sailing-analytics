@@ -56,6 +56,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.util.impl.ThreadFactoryWithPriority;
+import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.model.lib.api.event.DataSource;
 import com.tractrac.model.lib.api.event.ICompetitor;
 import com.tractrac.model.lib.api.event.IEvent;
@@ -71,6 +72,7 @@ import com.tractrac.subscription.lib.api.event.IConnectionStatusListener;
 import com.tractrac.subscription.lib.api.event.ILiveDataEvent;
 import com.tractrac.subscription.lib.api.event.IStoredDataEvent;
 import com.tractrac.subscription.lib.api.race.IRacesListener;
+import com.tractrac.util.lib.api.exceptions.TimeOutException;
 
 public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
         implements IConnectionStatusListener, TracTracRaceTracker, DynamicRaceDefinitionSet, TrackingDataLoader {
@@ -270,11 +272,12 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
      *            you expect things to have loaded; see also
      *            {@link RaceTracker#TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS}.
      */
-    TracTracRaceTrackerImpl(DomainFactory domainFactory, RaceLogStore raceLogStore,
-            RegattaLogStore regattaLogStore, WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry,
-            RaceLogAndTrackedRaceResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds,
-            RaceTrackingHandler raceTrackingHandler)
-            throws URISyntaxException, SubscriberInitializationException, IOException, InterruptedException {
+    TracTracRaceTrackerImpl(DomainFactory domainFactory, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
+            WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry,
+            RaceLogAndTrackedRaceResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver,
+            RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds,
+            RaceTrackingHandler raceTrackingHandler) throws URISyntaxException, SubscriberInitializationException,
+            IOException, InterruptedException, CreateModelException, TimeOutException {
         this(/* regatta */ null, domainFactory, raceLogStore, regattaLogStore, windStore, trackedRegattaRegistry,
                 raceLogResolver, leaderboardGroupResolver, connectivityParams, timeoutInMilliseconds,
                 raceTrackingHandler);
@@ -299,7 +302,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
             RaceLogAndTrackedRaceResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver,
             RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds,
             RaceTrackingHandler raceTrackingHandler)
-            throws URISyntaxException, SubscriberInitializationException, IOException, InterruptedException {
+            throws URISyntaxException, SubscriberInitializationException, IOException, InterruptedException, CreateModelException, TimeOutException {
         super(connectivityParams);
         final URL paramURL = connectivityParams.getParamURL();
         final URI liveURI = connectivityParams.getLiveURI();
