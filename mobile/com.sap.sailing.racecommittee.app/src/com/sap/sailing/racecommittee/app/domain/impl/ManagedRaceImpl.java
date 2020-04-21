@@ -1,6 +1,12 @@
 package com.sap.sailing.racecommittee.app.domain.impl;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishedTimeFinder;
+import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
+
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,7 +50,7 @@ public class ManagedRaceImpl implements ManagedRace {
      *            doesn't tell anything about the "horizontal" position in the "grid" or in other words what the index
      *            is of the race column in which this cell lies.
      *            <p>
-     * 
+     *
      *            Indices returned by this method start with zero, meaning the first race column in the series. This
      *            corresponds to what one would get by asking {@link Util#indexOf(Iterable, Object)
      *            Util.indexOf(series.getRaceColumns(), thisCellsRaceColumn)}, except in case the first race column is a
@@ -134,7 +140,7 @@ public class ManagedRaceImpl implements ManagedRace {
 
     @Override
     public Map<Competitor, Boat> getCompetitorsAndBoats() {
-        return competitorsAndBoats;
+        return Collections.unmodifiableMap(new HashMap<>(competitorsAndBoats));
     }
 
     @Override
@@ -161,6 +167,42 @@ public class ManagedRaceImpl implements ManagedRace {
             calculated = true;
         }
         return calculated;
+    }
+
+    @Override
+    public Result revokeFinished(AbstractLogEventAuthor author) {
+        final Result result = new Result();
+
+        final FinishedTimeFinder ftf = new FinishedTimeFinder(getRaceLog());
+        final RaceLogRaceStatusEvent event = ftf.findFinishedEvent();
+        if (event != null) {
+            try {
+                getRaceLog().revokeEvent(author, event);
+            } catch (NotRevokableException e) {
+                result.setError(R.string.error_revoke_finished);
+            }
+        } else {
+            result.setError(R.string.error_revoke_finished);
+        }
+        return result;
+    }
+
+    @Override
+    public Result revokeFinishing(AbstractLogEventAuthor author) {
+        final Result result = new Result();
+
+        final FinishingTimeFinder ftf = new FinishingTimeFinder(getRaceLog());
+        final RaceLogRaceStatusEvent event = ftf.findFinishingEvent();
+        if (event != null) {
+            try {
+                getRaceLog().revokeEvent(author, event);
+            } catch (NotRevokableException e) {
+                result.setError(R.string.error_revoke_finishing);
+            }
+        } else {
+            result.setError(R.string.error_revoke_finishing);
+        }
+        return result;
     }
 
     @Override

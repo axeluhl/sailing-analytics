@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.home.desktop.partials.sharing;
 
+import static com.google.gwt.dom.client.Style.Display.NONE;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.http.client.UrlBuilder;
@@ -7,7 +9,9 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.gwt.shared.ClientConfiguration;
 
 public class SharingButtons extends Composite {
 
@@ -16,6 +20,7 @@ public class SharingButtons extends Composite {
     interface SharingButtonsUiBinder extends UiBinder<Widget, SharingButtons> {
     }
     
+    @UiField HTMLPanel htmlPanel;
     @UiField AnchorElement mail;
     @UiField AnchorElement twitter;
     @UiField AnchorElement facebook;
@@ -23,9 +28,16 @@ public class SharingButtons extends Composite {
     public SharingButtons() {
         SharingButtonsResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
+        if (!ClientConfiguration.getInstance().isBrandingActive()) {
+            htmlPanel.getElement().getStyle().setDisplay(NONE);
+        } 
     }
     
     public void setUp(SharingMetadataProvider provider) {
+        if (!ClientConfiguration.getInstance().isBrandingActive()) {
+            return;
+        }
+        
         String shortText = provider.getShortText();
         String longText = provider.getLongText(Window.Location.getHref());
         

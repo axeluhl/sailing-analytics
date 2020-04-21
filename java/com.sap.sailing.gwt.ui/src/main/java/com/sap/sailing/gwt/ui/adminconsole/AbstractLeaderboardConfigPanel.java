@@ -182,7 +182,6 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
 
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, LEADERBOARD);
         Label lblFilterEvents = new Label(stringMessages.filterLeaderboardsByName() + ": ");
-        addLeaderboardControls(buttonPanel);
         leaderboardsPanel.add(buttonPanel);
 
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
@@ -225,6 +224,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
                 raceColumnTable.setSelectedLeaderboardName(getSelectedLeaderboardName());
             }
         });
+        addLeaderboardControls(buttonPanel);
         filteredLeaderboardList.addDataDisplay(leaderboardTable);
         leaderboardsPanel.add(leaderboardTable);
         mainPanel.add(new Grid(1, 1));

@@ -1,0 +1,28 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "VisualEditor0",
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogStream",
+        "logs:CreateLogGroup",
+        "logs:PutLogEvents"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "VisualEditor1",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "ses:SendRawEmail"
+      ],
+      "Resource": [
+        "arn:aws:s3:::support-emails-sapsailing-com/*",
+        "arn:aws:ses:eu-west-1:017363970217:identity/*"
+      ]
+    }
+  ]
+}
+
