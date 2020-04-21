@@ -1,9 +1,14 @@
 package com.sap.sailing.gwt.home.desktop.partials.header;
 
+import static com.sap.sse.gwt.shared.DebugConstants.DEBUG_ID_ATTRIBUTE;
+
 import java.util.Arrays;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.AnchorElement;
+import com.google.gwt.dom.client.ImageElement;
+import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyPressEvent;
@@ -32,6 +37,8 @@ import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.Solutions
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.mvp.PlaceChangedEvent;
+import com.sap.sse.gwt.shared.ClientConfiguration;
+import com.sap.sse.gwt.shared.DebugConstants;
 import com.sap.sse.security.ui.authentication.view.AuthenticationMenuView;
 import com.sap.sse.security.ui.authentication.view.AuthenticationMenuViewImpl;
 
@@ -39,12 +46,15 @@ public class Header extends Composite {
     @UiField Anchor startPageLink;
     @UiField Anchor eventsPageLink;
     @UiField Anchor solutionsPageLink;
+    @UiField AnchorElement logoAnchor;
 //    @UiField Anchor sponsoringPageLink;
     
     @UiField TextBox searchText;
     @UiField Button searchButton;
     
     @UiField Anchor usermenu;
+    
+    @UiField ImageElement logoImage;
 
     private static final HyperlinkImpl HYPERLINK_IMPL = GWT.create(HyperlinkImpl.class);
     
@@ -96,6 +106,17 @@ public class Header extends Composite {
         });
         
         authenticationMenuView = new AuthenticationMenuViewImpl(usermenu, HeaderResources.INSTANCE.css().loggedin(), HeaderResources.INSTANCE.css().open());
+        
+        if (!ClientConfiguration.getInstance().isBrandingActive()) {
+            logoImage.getStyle().setDisplay(Display.NONE);
+            solutionsPageLink.getElement().getStyle().setDisplay(Display.NONE);
+            logoAnchor.setHref("");
+        }
+        
+        logoImage.setAttribute(DebugConstants.DEBUG_ID_ATTRIBUTE, "logoImage");
+        solutionsPageLink.getElement().setAttribute(DEBUG_ID_ATTRIBUTE, "solutionsPageLink");
+        logoAnchor.setAttribute(DEBUG_ID_ATTRIBUTE, "logoAnchor");
+        eventsPageLink.getElement().setAttribute(DEBUG_ID_ATTRIBUTE, "eventsPage");
     }
 
     @UiHandler("startPageLink")

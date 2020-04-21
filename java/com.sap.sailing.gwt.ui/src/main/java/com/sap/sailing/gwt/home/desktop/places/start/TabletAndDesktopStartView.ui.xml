@@ -7,6 +7,6 @@
         <!-- <s:mainsponsors.MainSponsors ui:field='mainSponsors'/> -->
         <dp:mainevents.MainEvents ui:field='mainEvents'/>
         <dp:mainmedia.MainMedia ui:field='mainMedia'/>
-        <dp:socialfooter.SocialFooter/>
+        <dp:socialfooter.SocialFooter ui:field="socialFooter"/>
     </g:HTMLPanel>
 </ui:UiBinder>

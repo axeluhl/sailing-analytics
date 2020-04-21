@@ -16,7 +16,7 @@ else
   echo Instance $instanceid seems running now
   private_ip=`$AWS ec2 describe-instances --region $REGION --instance-ids $instanceid | jq .Reservations[0].Instances[0].PrivateIpAddress | sed -e 's/"//g'`
   echo Probing for SSH on private IP $private_ip
-  while su - hudson -c "ssh -o ConnectTimeout=10,StrictHostKeyChecking=no hudson@$private_ip ls >/dev/null"; do
+  while su - hudson -c "ssh -o ConnectTimeout=10 -o StrictHostKeyChecking=no hudson@$private_ip ls >/dev/null"; do
     echo SSH daemon not reachable yet. Trying again...
   done
   echo SSH daemon reached. State should be ready to connect to now.

@@ -1,7 +1,12 @@
 package com.sap.sailing.gwt.home.desktop.partials.footer;
 
+import static com.google.gwt.dom.client.Style.Display.NONE;
+import static com.sap.sse.gwt.shared.DebugConstants.DEBUG_ID_ATTRIBUTE;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;
+import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.DOM;
@@ -15,14 +20,24 @@ import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
 import com.sap.sailing.gwt.home.shared.SwitchingEntryPoint;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.client.controls.languageselect.LanguageSelector;
+import com.sap.sse.gwt.shared.ClientConfiguration;
+import com.sap.sse.gwt.shared.DebugConstants;
 
 public class Footer extends Composite {
     private static FooterPanelUiBinder uiBinder = GWT.create(FooterPanelUiBinder.class);
 
     interface FooterPanelUiBinder extends UiBinder<Widget, Footer> {
     }
-
+    
+    @UiField AnchorElement whatsNewAnchor;
+    @UiField AnchorElement sapJobsAnchor;
+    @UiField AnchorElement feedbackAnchor;
+    @UiField LanguageSelector languageSelector;
+    @UiField DivElement copyrightDiv;
     @UiField AnchorElement imprintAnchorLink;
+    @UiField AnchorElement privacyAnchorLink;
     @UiField AnchorElement mobileUi;
     @UiField(provided = true)
     final PlaceNavigation<WhatsNewPlace> releaseNotesNavigation;
@@ -44,6 +59,23 @@ public class Footer extends Composite {
                 }
             }
         });
+
+        if (!ClientConfiguration.getInstance().isBrandingActive()) {
+            copyrightDiv.getStyle().setDisplay(NONE);
+            languageSelector.setLabelText(StringMessages.INSTANCE.whitelabelFooterLanguage());
+            sapJobsAnchor.getStyle().setDisplay(Display.NONE);
+            feedbackAnchor.getStyle().setDisplay(Display.NONE);
+            whatsNewAnchor.getStyle().setDisplay(Display.NONE);
+            imprintAnchorLink.getStyle().setDisplay(Display.NONE);
+            privacyAnchorLink.getStyle().setDisplay(Display.NONE);
+        }
+        copyrightDiv.setAttribute(DebugConstants.DEBUG_ID_ATTRIBUTE, "copyrightDiv");
+        sapJobsAnchor.setAttribute(DEBUG_ID_ATTRIBUTE, "sapJobsAnchor");
+        feedbackAnchor.setAttribute(DEBUG_ID_ATTRIBUTE, "feedbackAnchor");
+        whatsNewAnchor.setAttribute(DEBUG_ID_ATTRIBUTE, "whatsNewAnchor");
+        imprintAnchorLink.setAttribute(DEBUG_ID_ATTRIBUTE, "imprintAnchorLink");
+        privacyAnchorLink.setAttribute(DEBUG_ID_ATTRIBUTE, "privacyAnchorLink");
+        languageSelector.getElement().setAttribute(DEBUG_ID_ATTRIBUTE, "languageSelector");
     }
     
 }

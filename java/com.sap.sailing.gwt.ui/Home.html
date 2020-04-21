@@ -1,111 +1,115 @@
 <!doctype html>
 <html>
 <head>
-	<meta name="apple-mobile-web-app-capable" content="yes" />
-	<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-	<link rel="shortcut icon" type="image/x-icon" href="images/sap.ico" />
-	<link href='images/sap-sailing-app-icon.png' rel='apple-touch-icon'>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <link rel="shortcut icon" type="image/x-icon" href="images/sap${whitelabeled}.ico" selenium-id="shortcutIcon"/>
+    <link href='sap-sailing-app-icon${whitelabeled}.png' rel='apple-touch-icon' selenium-id="appIcon">
 
-	<title>SAP Sailing - Homepage</title>
+    <title>${SAP}Sailing - Homepage</title>
 
-	<link rel="stylesheet" type="text/css"
-		href="/sailing-normalize-3.0.2.cache.css">
-	<link rel="stylesheet" type="text/css"
-		href="/sailing-fontface-1.0.cache.css">
-	<script src="js/jquery-3.3.1.min.js"></script>
-	<link rel="stylesheet" type="text/css" href="js/jquery.slick/slick-1.8.1.css"/>
-	<script type="text/javascript"          src="js/jquery.slick/slick-1.8.1.min.js"></script>
+    <link rel="stylesheet" type="text/css"
+        href="/sailing-normalize-3.0.2.cache.css">
+    <link rel="stylesheet" type="text/css"
+        href="/sailing-fontface-1.0.cache.css">
+    <script src="js/jquery-3.3.1.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="js/jquery.slick/slick-1.8.1.css"/>
+    <script type="text/javascript"          src="js/jquery.slick/slick-1.8.1.min.js"></script>
      
     <link  href="js/video-js/video-js.min.css" rel="stylesheet">
     <link  href="js/video-js/video-js-sapsailing.css" rel="stylesheet">
     <script src="js/video-js/video.min.js"></script>
     <link rel="stylesheet" type="text/css" href="js/videojs-panorama.min.css"/>
-    <script src="js/videojs-panorama.v5.min.js"></script>	
+    <script src="js/videojs-panorama.v5.min.js"></script>
     <script src="js/Youtube.min.js"></script>
-	<script src="js/Vimeo.js"></script>
-	<script>
-  		videojs.options.techOrder = ['vimeo', 'youtube',  'html5'];
-	</script>
-	
-	<script src="com.sap.sailing.gwt.home.Home/com.sap.sailing.gwt.home.Home.nocache.js"></script>
-	<style type="text/css">
-	.loading {
-		position: absolute;
-		top: 80px;
-		bottom: 0;
-		left: 0;
-		right: 0;
-		font-size: 120%;
-	}
-	.loading > .sapsailing {
-		margin: 40px;
-		color: #008fcc;
-		font-weight: bold;
-	}
-	.loading > .waitmessage {
-		margin: 60px 40px;
-	}
-	
-	.signal {
-	    border:3px solid #6a6a6a;
-	    border-radius: 50%;
-	    position: relative;
-	    height:300px;
-	    width:300px;
-	    margin: 0px auto;
-	    opacity:0;	 
-	    -webkit-animation: pulsate 2s ease-out;
-	            animation: pulsate 2s ease-out;
-	    -webkit-animation-iteration-count:infinite;
-	            animation-iteration-count:infinite;
-	    -webkit-transform: translate(-50%, -50%);
-	}
+    <script src="js/Vimeo.js"></script>
+    <script>
+       videojs.options.techOrder = ['vimeo', 'youtube',  'html5'];
+    </script>
+    <script>
+       document.clientConfigurationContext = {
+            debrandingActive: ${debrandingActive}
+       };
+    </script>
+    <script src="com.sap.sailing.gwt.home.Home/com.sap.sailing.gwt.home.Home.nocache.js"></script>
+    <style type="text/css">
+    .loading {
+        position: absolute;
+        top: 80px;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        font-size: 120%;
+    }
+    .loading > .sapsailing {
+        margin: 40px;
+        color: #008fcc;
+        font-weight: bold;
+    }
+    .loading > .waitmessage {
+        margin: 60px 40px;
+    }
+    
+    .signal {
+        border:3px solid #6a6a6a;
+        border-radius: 50%;
+        position: relative;
+        height:300px;
+        width:300px;
+        margin: 0px auto;
+        opacity:0;
+        -webkit-animation: pulsate 2s ease-out;
+                animation: pulsate 2s ease-out;
+        -webkit-animation-iteration-count:infinite;
+                animation-iteration-count:infinite;
+        -webkit-transform: translate(-50%, -50%);
+    }
 
-	@-webkit-keyframes pulsate {
-	    0% {
-	      -webkit-transform:scale(.1);
-	              transform:scale(.1);
-	      opacity: 0.0;
-	    }
-	    50% {
-	      opacity:1;
-	    }
-	    100% {
-	      -webkit-transform:scale(1.2);
-	              transform:scale(1.2);
-	      opacity:0;
-	    }
-	}
-	
-	@keyframes pulsate {
-	    0% {
-	      -webkit-transform:scale(.1);
-	              transform:scale(.1);
-	      opacity: 0.0;
-	    }
-	    50% {
-	      opacity:1;
-	    }
-	    100% {
-	      -webkit-transform:scale(1.2);
-	              transform:scale(1.2);
-	      opacity:0;
-	    }
-	}
-	</style>
+    @-webkit-keyframes pulsate {
+        0% {
+          -webkit-transform:scale(.1);
+                  transform:scale(.1);
+          opacity: 0.0;
+        }
+        50% {
+          opacity:1;
+        }
+        100% {
+          -webkit-transform:scale(1.2);
+                  transform:scale(1.2);
+          opacity:0;
+        }
+    }
+    
+    @keyframes pulsate {
+        0% {
+          -webkit-transform:scale(.1);
+                  transform:scale(.1);
+          opacity: 0.0;
+        }
+        50% {
+          opacity:1;
+        }
+        100% {
+          -webkit-transform:scale(1.2);
+                  transform:scale(1.2);
+          opacity:0;
+        }
+    }
+    </style>
 </head>
 <body>
-	<iframe src="javascript:''" id="__gwt_historyFrame" tabIndex='-1' style="position:absolute;width:0;height:0;border:0"></iframe>
-	<noscript>
-		<div
-			style="width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif">
-			Your web browser must have JavaScript enabled in order for this
-			application to display correctly.</div>
-	</noscript>
-	<div id="loading" class="loading">
-		<p class="sapsailing">SAP Sailing Analytics</p>
-		<p class="waitmessage">Loading, please wait...</p>
-		<div class="signal"></div>
-	</div>
+    <iframe src="javascript:''" id="__gwt_historyFrame" tabIndex='-1' style="position:absolute;width:0;height:0;border:0"></iframe>
+    <noscript>
+        <div
+            style="width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif">
+            Your web browser must have JavaScript enabled in order for this
+            application to display correctly.</div>
+    </noscript>
+    <div id="loading" class="loading">
+        <p class="sapsailing">${SAP}Sailing Analytics</p>
+        <p class="waitmessage">Loading, please wait...</p>
+        <div class="signal"></div>
+    </div>
 </body>
 </html>
