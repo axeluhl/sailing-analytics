@@ -3,6 +3,8 @@ package com.sap.sailing.server.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -14,16 +16,24 @@ import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
-import org.mockito.Matchers;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Matchers;
 import org.osgi.framework.BundleContext;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorEventImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorAndBoatStore;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.DomainFactory;
+import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
@@ -31,6 +41,8 @@ import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.dto.FleetDTO;
+import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
@@ -39,9 +51,12 @@ import com.sap.sailing.domain.persistence.media.MediaDBFactory;
 import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.EmptySensorFixStore;
+import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
+import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.test.AbstractTracTracLiveTest;
+import com.sap.sailing.domain.test.TrackBasedTest;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
@@ -50,8 +65,8 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.impl.RacingEventServiceImpl.ConstructorParameters;
-import com.sap.sailing.server.interfaces.RacingEventService;
-import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
+import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
+import com.sap.sailing.server.operationaltransformation.CreateRegattaLeaderboard;
 import com.sap.sailing.server.operationaltransformation.UpdateSeries;
 import com.sap.sailing.server.testsupport.SecurityBundleTestWrapper;
 import com.sap.sse.common.Color;
@@ -59,8 +74,6 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.replication.FullyInitializedReplicableTracker;
-import com.sap.sse.replication.OperationExecutionListener;
-import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.security.SecurityService;
 
 /**
@@ -70,14 +83,17 @@ import com.sap.sse.security.SecurityService;
  *
  */
 public class AutomaticRetrackUponCompetitorSetChangeTest {
+    private static final String FIRST_RACE_COLUMN_NAME = "R1";
+    private static final String BLUE_FLEET_NAME = "Blue";
+    private static final String GREEN_FLEET_NAME = "Green";
+    private static final String RED_FLEET_NAME = "Red";
     private TrackedRace trackedRace;
     private RegattaAndRaceIdentifier raceIdentifier;
     private RaceHandle racesHandle;
-    private final boolean[] notifier = new boolean[1];
-    private RaceTrackingConnectivityParameters trackingParams;
     private RacingEventServiceImpl service;
     private MongoDBService mongoDBService;
     private MongoObjectFactory mongoObjectFactory;
+    private RegattaName regattaIdentifier;
 
     @Before
     public void setUp() throws Exception {
@@ -105,6 +121,25 @@ public class AutomaticRetrackUponCompetitorSetChangeTest {
                     }
         }, /* sharedSailingData */ null, /* replicationServiceTracker */ null,
                 /* scoreCorrectionProviderServiceTracker */ null, /* resultUrlRegistryServiceTracker */ null);
+        final Regatta regatta = service.createRegatta("Test regatta", "J/70",
+                /* canBoatsOfCompetitorsChangePerRace==true because it's a league race we're using for this test */ true,
+                CompetitorRegistrationType.CLOSED, /* registrationLinkSecret */ null,
+                /* startDate */ null, /* endDate */ null, UUID.randomUUID(),
+                /* start with no series */ Collections.emptySet(),
+                /* persistent */ true, new LowPoint(), /* defaultCourseAreaId */ UUID.randomUUID(),
+                /* buoyZoneRadiusInHullLengths */ 2., /* useStartTimeInference */ false, /* controlTrackingFromStartAndFinishTimes */ false,
+                /* autoRestartTrackingUponCompetitorSetChange */ true, /* rankingMetricConstructor */ OneDesignRankingMetric::new);
+        regattaIdentifier = new RegattaName(regatta.getName());
+        final String seriesName = "Default";
+        service.apply(new UpdateSeries(regattaIdentifier, seriesName, seriesName, /* isMedal */ false, /* isFleetsCanRunInParallel */ false,
+                /* resultDiscardingThresholds */ null, /* startsWithZeroScore */ false, /* firstColumnIsNonDiscardableCarryForward */ false,
+                /* hasSplitFleetContiguousScoring */ false, /* maximumNumberOfDiscards */ null,
+                Arrays.asList(new FleetDTO(RED_FLEET_NAME, 0, Color.RED), new FleetDTO(GREEN_FLEET_NAME, 0, Color.GREEN), new FleetDTO(BLUE_FLEET_NAME, 0, Color.BLUE))));
+        service.apply(new CreateRegattaLeaderboard(regattaIdentifier, /* leaderboardDisplayName */ null, new int[0]));
+        service.apply(new AddColumnToSeries(regattaIdentifier, seriesName, FIRST_RACE_COLUMN_NAME));
+    }
+
+    private void startTrackingTracTrac() throws Exception {
         URL paramURL = new URL("http://event.tractrac.com/events/event_20150818_Bundesliga/4c54e750-27c2-0133-5064-60a44ce903c3.txt");
         URI liveURI = AbstractTracTracLiveTest.getLiveURI();
         URI storedURI = new URI("http://event.tractrac.com/events/event_20150818_Bundesliga/datafiles/4c54e750-27c2-0133-5064-60a44ce903c3.mtb");
@@ -116,41 +151,21 @@ public class AutomaticRetrackUponCompetitorSetChangeTest {
         MillisecondsTimePoint startOfTracking = new MillisecondsTimePoint(cal.getTimeInMillis());
         cal.set(2015, 8, 22, 15, 26, 34);
         MillisecondsTimePoint endOfTracking = new MillisecondsTimePoint(cal.getTimeInMillis());
-        service.addOperationExecutionListener(new OperationExecutionListener<RacingEventService>() {
-            @Override
-            public <T> void executed(OperationWithResult<RacingEventService, T> operation) {
-                if (operation instanceof CreateTrackedRace) {
-                    synchronized (notifier) {
-                        notifier[0] = true;
-                        notifier.notifyAll();
-                    }
-                }
-            }
-        });
-        trackingParams = new com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl(service.getBaseDomainFactory())
+        final RaceTrackingConnectivityParameters trackingParams = new com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl(service.getBaseDomainFactory())
                 .createTrackingConnectivityParameters(paramURL, liveURI, storedURI, courseDesignUpdateURI,
                         startOfTracking, endOfTracking, /* delayToLiveInMillis */
                         0l, /* offsetToStartTimeOfSimulatedRace */null, /*ignoreTracTracMarkPassings*/ false, EmptyRaceLogStore.INSTANCE,
                         EmptyRegattaLogStore.INSTANCE, tracTracUsername, tracTracPassword, "", "", /* trackWind */ false, /* correctWindDirectionByMagneticDeclination */ false,
                         /* preferReplayIfAvailable */ false, /* timeoutInMillis */ (int) RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, /* useOfficialEventsToUpdateRaceLog */ false);
-    }
-
-    private void startTracking() throws Exception {
-        final Regatta regatta = service.createRegatta("Test regatta", "J/70",
-                /* canBoatsOfCompetitorsChangePerRace==true because it's a league race we're using for this test */ true,
-                CompetitorRegistrationType.CLOSED, /* registrationLinkSecret */ null,
-                /* startDate */ null, /* endDate */ null, UUID.randomUUID(),
-                /* start with no series */ Collections.emptySet(),
-                /* persistent */ true, new LowPoint(), /* defaultCourseAreaId */ UUID.randomUUID(),
-                /* buoyZoneRadiusInHullLengths */ 2., /* useStartTimeInference */ false, /* controlTrackingFromStartAndFinishTimes */ false,
-                /* autoRestartTrackingUponCompetitorSetChange */ true, /* rankingMetricConstructor */ OneDesignRankingMetric::new);
-        final RegattaName regattaIdentifier = new RegattaName(regatta.getName());
-        service.apply(new UpdateSeries(regattaIdentifier, "Default", "Default", /* isMedal */ false, /* isFleetsCanRunInParallel */ false,
-                /* resultDiscardingThresholds */ null, /* startsWithZeroScore */ false, /* firstColumnIsNonDiscardableCarryForward */ false,
-                /* hasSplitFleetContiguousScoring */ false, /* maximumNumberOfDiscards */ null,
-                Arrays.asList(new FleetDTO("Red", 0, Color.RED), new FleetDTO("Green", 0, Color.GREEN), new FleetDTO("Blue", 0, Color.BLUE))));
         racesHandle = service.addRace(/* regattaToAddTo */ regattaIdentifier, trackingParams, /* timeoutInMilliseconds */ 60000,
                 new DefaultRaceTrackingHandler());
+        waitForRace();
+    }
+
+    /**
+     * Waits for the race to show up and initializes {@link #raceIdentifier} and {@link #trackedRace}.
+     */
+    private void waitForRace() {
         // wait for the race to show up
         RaceDefinition race = racesHandle.getRace(RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
         if (race == null) {
@@ -161,8 +176,8 @@ public class AutomaticRetrackUponCompetitorSetChangeTest {
     }
 
     @Test
-    public void testStartTrackingAndRetrack() throws Exception {
-        startTracking();
+    public void testStartTracTracTrackingAndRetrack() throws Exception {
+        startTrackingTracTrac();
         final RaceDefinition race = trackedRace.getRace();
         Iterable<Competitor> masterCompetitors = race.getCompetitors();
         assertEquals(Util.size(masterCompetitors), 6);
@@ -172,6 +187,37 @@ public class AutomaticRetrackUponCompetitorSetChangeTest {
         assertEquals(race.getId(), newRace.getId());
         assertNotSame(race, newRace);
         racesHandle = newHandle; // ensure that tearDown tears down the correct tracker
+    }
+    
+    @Test
+    public void testStartRaceLogTrackingAndAddCompetitor() throws NotDenotedForRaceLogTrackingException, Exception {
+        final RaceLog raceLog = service.getRaceLog(regattaIdentifier.getRegattaName(), FIRST_RACE_COLUMN_NAME, RED_FLEET_NAME);
+        assertNotNull(raceLog);
+        final RegattaLog regattaLog = service.getRegatta(regattaIdentifier).getRegattaLog();
+        final CompetitorWithBoat firstCompetitor = TrackBasedTest.createCompetitorWithBoat("First Competitor");
+        final CompetitorWithBoat secondCompetitor = TrackBasedTest.createCompetitorWithBoat("Second Competitor");
+        regattaLog.add(new RegattaLogRegisterCompetitorEventImpl(MillisecondsTimePoint.now(), service.getServerAuthor(), firstCompetitor));
+        final RaceLogTrackingAdapter factory = RaceLogTrackingAdapterFactory.INSTANCE.getAdapter(service.getBaseDomainFactory());
+        final Leaderboard leaderboard = service.getLeaderboardByName(regattaIdentifier.getRegattaName());
+        final RaceColumn raceColumn = leaderboard.getRaceColumnByName(FIRST_RACE_COLUMN_NAME);
+        final Fleet redFleet = raceColumn.getFleetByName(RED_FLEET_NAME);
+        factory.denoteAllRacesForRaceLogTracking(service, leaderboard, /* prefix */ "R");
+        racesHandle = factory.startTracking(service, leaderboard, raceColumn, redFleet, /* trackWind */ false,
+                /* correctWindDirectionByMagneticDeclination */ true, new DefaultRaceTrackingHandler());
+        waitForRace();
+        final RegattaAndRaceIdentifier raceIdentifier = trackedRace.getRaceIdentifier();
+        assertEquals(1, Util.size(trackedRace.getRace().getCompetitors()));
+        assertSame(firstCompetitor, trackedRace.getRace().getCompetitors().iterator().next());
+        regattaLog.add(new RegattaLogRegisterCompetitorEventImpl(MillisecondsTimePoint.now(), service.getServerAuthor(), firstCompetitor));
+        // Now add a second competitor registration ("late-comer") to the regatta log and expect the race to reload:
+        regattaLog.add(new RegattaLogRegisterCompetitorEventImpl(MillisecondsTimePoint.now(), service.getServerAuthor(), secondCompetitor));
+        final CompletableFuture<RaceTracker> raceTrackerFuture = new CompletableFuture<>();
+        service.getRaceTrackerByRegattaAndRaceIdentifier(raceIdentifier, raceTracker->raceTrackerFuture.complete(raceTracker));
+        final RaceTracker raceTracker = raceTrackerFuture.get(RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, TimeUnit.MILLISECONDS);
+        final RaceDefinition newRace = raceTracker.getRace();
+        assertEquals(2, Util.size(newRace.getCompetitors()));
+        assertTrue(Util.contains(newRace.getCompetitors(), firstCompetitor));
+        assertTrue(Util.contains(newRace.getCompetitors(), secondCompetitor));
     }
 
     @After
