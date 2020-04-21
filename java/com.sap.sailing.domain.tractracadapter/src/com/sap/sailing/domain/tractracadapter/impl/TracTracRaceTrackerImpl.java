@@ -361,10 +361,20 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
             
             @Override
             public void deleteCompetitor(UUID competitorId) {
+                try {
+                    trackedRegattaRegistry.updateRaceCompetitors(getRegatta(), getRace());
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             }
             
             @Override
             public void addCompetitor(ICompetitor competitor) {
+                try {
+                    trackedRegattaRegistry.updateRaceCompetitors(getRegatta(), getRace());
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             }
         };
         eventSubscriber.subscribeCompetitors(competitorsListener);
