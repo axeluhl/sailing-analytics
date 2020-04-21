@@ -2352,6 +2352,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String wayPointMarkInSequenceMissing();
     String defaultNumberOfLaps();
     String invalidImageURL();
+    String invalidURL();
     String setDeviceIdentifier();
     String setPosition();
     String spareMarksAndTheirOptionalDefaultMarkRoles();
