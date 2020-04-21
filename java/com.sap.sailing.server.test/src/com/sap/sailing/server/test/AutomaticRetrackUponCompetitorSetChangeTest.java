@@ -1,6 +1,7 @@
 package com.sap.sailing.server.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
@@ -17,7 +18,9 @@ import java.util.GregorianCalendar;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.junit.After;
 import org.junit.Before;
@@ -196,7 +199,8 @@ public class AutomaticRetrackUponCompetitorSetChangeTest {
         final RegattaLog regattaLog = service.getRegatta(regattaIdentifier).getRegattaLog();
         final CompetitorWithBoat firstCompetitor = TrackBasedTest.createCompetitorWithBoat("First Competitor");
         final CompetitorWithBoat secondCompetitor = TrackBasedTest.createCompetitorWithBoat("Second Competitor");
-        regattaLog.add(new RegattaLogRegisterCompetitorEventImpl(MillisecondsTimePoint.now(), service.getServerAuthor(), firstCompetitor));
+        final RegattaLogRegisterCompetitorEventImpl firstCompetitorRegistrationEvent = new RegattaLogRegisterCompetitorEventImpl(MillisecondsTimePoint.now(), service.getServerAuthor(), firstCompetitor);
+        regattaLog.add(firstCompetitorRegistrationEvent);
         final RaceLogTrackingAdapter factory = RaceLogTrackingAdapterFactory.INSTANCE.getAdapter(service.getBaseDomainFactory());
         final Leaderboard leaderboard = service.getLeaderboardByName(regattaIdentifier.getRegattaName());
         final RaceColumn raceColumn = leaderboard.getRaceColumnByName(FIRST_RACE_COLUMN_NAME);
@@ -208,15 +212,27 @@ public class AutomaticRetrackUponCompetitorSetChangeTest {
         final RegattaAndRaceIdentifier raceIdentifier = trackedRace.getRaceIdentifier();
         assertEquals(1, Util.size(trackedRace.getRace().getCompetitors()));
         assertSame(firstCompetitor, trackedRace.getRace().getCompetitors().iterator().next());
-        // Now add a second competitor registration ("late-comer") to the regatta log and expect the race to reload:
         regattaLog.add(new RegattaLogRegisterCompetitorEventImpl(MillisecondsTimePoint.now(), service.getServerAuthor(), secondCompetitor));
-        final CompletableFuture<RaceTracker> raceTrackerFuture = new CompletableFuture<>();
-        service.getRaceTrackerByRegattaAndRaceIdentifier(raceIdentifier, raceTracker->raceTrackerFuture.complete(raceTracker));
-        final RaceTracker raceTracker = raceTrackerFuture.get(RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, TimeUnit.MILLISECONDS);
+        final RaceTracker raceTracker = getRaceTracker(raceIdentifier);
         final RaceDefinition newRace = raceTracker.getRace();
         assertEquals(2, Util.size(newRace.getCompetitors()));
         assertTrue(Util.contains(newRace.getCompetitors(), firstCompetitor));
         assertTrue(Util.contains(newRace.getCompetitors(), secondCompetitor));
+        // now revoke the registration of the first competitor and verify that it disappears:
+        regattaLog.revokeEvent(service.getServerAuthor(), firstCompetitorRegistrationEvent);
+        final RaceTracker newRaceTracker = getRaceTracker(raceIdentifier);
+        final RaceDefinition newNewRace = newRaceTracker.getRace();
+        assertEquals(1, Util.size(newNewRace.getCompetitors()));
+        assertFalse(Util.contains(newNewRace.getCompetitors(), firstCompetitor));
+        assertTrue(Util.contains(newNewRace.getCompetitors(), secondCompetitor));
+    }
+
+    private RaceTracker getRaceTracker(final RegattaAndRaceIdentifier raceIdentifier)
+            throws InterruptedException, ExecutionException, TimeoutException {
+        final CompletableFuture<RaceTracker> raceTrackerFuture = new CompletableFuture<>();
+        service.getRaceTrackerByRegattaAndRaceIdentifier(raceIdentifier, raceTracker->raceTrackerFuture.complete(raceTracker));
+        final RaceTracker raceTracker = raceTrackerFuture.get(RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, TimeUnit.MILLISECONDS);
+        return raceTracker;
     }
 
     @After
