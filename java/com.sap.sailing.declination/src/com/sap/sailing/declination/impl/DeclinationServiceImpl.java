@@ -29,13 +29,6 @@ public class DeclinationServiceImpl implements DeclinationService {
      */
     private final Map<Integer, QuadTree<Declination>> importerCache;
     
-    /**
-     * Constructs a service that has a default position tolerance of <code>defaultMaxDistance</code>.
-     */
-    public DeclinationServiceImpl(Distance defaultMaxDistance) {
-        this(defaultMaxDistance, new NOAAImporter());
-    }
-    
     public DeclinationServiceImpl(Distance defaultMaxDistance, DeclinationImporter declinationImporter) {
         this.declinationImporter = declinationImporter;
         this.defaultMaxDistance = defaultMaxDistance;

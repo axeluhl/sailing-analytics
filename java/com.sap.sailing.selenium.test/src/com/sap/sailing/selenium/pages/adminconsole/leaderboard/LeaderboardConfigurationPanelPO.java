@@ -133,6 +133,7 @@ public class LeaderboardConfigurationPanelPO extends PageArea {
     }
     
     public LeaderboardDetailsPanelPO getLeaderboardDetails(String leaderboard) {
+        waitForAjaxRequests();
         LeaderboardEntryPO entry = findLeaderboard(leaderboard);
         if (entry == null) {
             return null;

@@ -8,6 +8,7 @@ import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -80,6 +81,7 @@ import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.mail.MailException;
+import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
 import com.sap.sse.mail.MailService;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
@@ -153,6 +155,7 @@ import com.sap.sse.security.shared.PredefinedRoles;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RolePrototype;
+import com.sap.sse.security.shared.SecurityAccessControlList;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.UserGroupManagementException;
@@ -176,11 +179,19 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     private static final Logger logger = Logger.getLogger(SecurityServiceImpl.class.getName());
 
     private static final String ADMIN_DEFAULT_PASSWORD = "admin";
+    
+    // TODO remove, once we allow denied ACLs again
+    private static final boolean supportDeniedActions = false;
 
     private final Set<String> migratedHasPermissionTypes = new ConcurrentSkipListSet<>();;
 
     private CachingSecurityManager securityManager;
     
+    private static final String STRING_MESSAGES_BASE_NAME = "stringmessages/StringMessages";
+    private static final ResourceBundleStringMessagesImpl messages = new ResourceBundleStringMessagesImpl(
+            SecurityServiceImpl.STRING_MESSAGES_BASE_NAME, SecurityServiceImpl.class.getClassLoader(),
+            StandardCharsets.UTF_8.name());
+
     /**
      * A cache manager that the {@link SessionCacheManager} delegates to. This way, multiple Shiro configurations can
      * share the cache manager provided as a singleton within this bundle instance. The cache manager is replicating,
@@ -537,13 +548,17 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         return accessControlStore.getAccessControlList(idOfAccessControlledObjectAsString);
     }
 
-    @Override
-    public SecurityService setEmptyAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObjectAsString) {
+    /**
+     * @param id Has to be globally unique
+     */
+    private SecurityService setEmptyAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObjectAsString) {
         return setEmptyAccessControlList(idOfAccessControlledObjectAsString, /* display name of access-controlled object */ null);
     }
 
-    @Override
-    public SecurityService setEmptyAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObjectAsString, String displayNameOfAccessControlledObject) {
+    /**
+     * @param id Has to be globally unique
+     */
+    private SecurityService setEmptyAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObjectAsString, String displayNameOfAccessControlledObject) {
         apply(new SetEmptyAccessControlListOperation(idOfAccessControlledObjectAsString, displayNameOfAccessControlledObject));
         return this;
     }
@@ -557,38 +572,43 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public AccessControlList overrideAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
             Map<UserGroup, Set<String>> permissionMap) {
-        accessControlStore.removeAccessControlList(idOfAccessControlledObject);
-        return updateAccessControlList(idOfAccessControlledObject, permissionMap);
+        return overrideAccessControlList(idOfAccessControlledObject, permissionMap, /* displayNameOfAccessControlledObject */ null);
     }
 
     @Override
     public AccessControlList overrideAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
             Map<UserGroup, Set<String>> permissionMap, String displayNameOfAccessControlledObject) {
-        accessControlStore.removeAccessControlList(idOfAccessControlledObject);
-        accessControlStore.setEmptyAccessControlList(idOfAccessControlledObject, displayNameOfAccessControlledObject);
-        return updateAccessControlList(idOfAccessControlledObject, permissionMap);
-    }
-
-    @Override
-    public AccessControlList updateAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
-            Map<UserGroup, Set<String>> permissionMap) {
-        if (getAccessControlList(idOfAccessControlledObject) == null) {
-            setEmptyAccessControlList(idOfAccessControlledObject);
+        // TODO remove, once we allow denied ACLs again
+        if (!supportDeniedActions) {
+            for (Set<String> actions : permissionMap.values()) {
+                for (String action : actions) {
+                    if (SecurityAccessControlList.isDeniedAction(action)) {
+                        throw new IllegalArgumentException("Adding denied actions to an ACL is not allowed");
+                    }
+                }
+            }
         }
+        setEmptyAccessControlList(idOfAccessControlledObject, displayNameOfAccessControlledObject);
+        
         for (Map.Entry<UserGroup, Set<String>> entry : permissionMap.entrySet()) {
             final UserGroup userGroup = entry.getKey();
-            // filter any denied action for anonymous user 
-            Set<String> filteredActions = entry.getValue().stream()
-                    .filter(action -> !(entry.getKey() == null && action != null && action.startsWith("!")))
-                    .collect(Collectors.toSet());
+            final Set<String> actionsToSet;
+            if (userGroup == null) {
+                // filter any denied action for anonymous user
+                actionsToSet = entry.getValue().stream()
+                        .filter(action -> !SecurityAccessControlList.isDeniedAction(action))
+                        .collect(Collectors.toSet());
+            } else {
+                actionsToSet = entry.getValue();
+            }
             
             final UUID userGroupId = userGroup == null ? null : userGroup.getId();
             // avoid the UserGroup object having to be serialized with the operation by using the ID
-            apply(new AclPutPermissionsOperation(idOfAccessControlledObject, userGroupId, filteredActions));
+            apply(new AclPutPermissionsOperation(idOfAccessControlledObject, userGroupId, actionsToSet));
         }
         return accessControlStore.getAccessControlList(idOfAccessControlledObject).getAnnotation();
     }
-
+    
     @Override
     public Void internalAclPutPermissions(QualifiedObjectIdentifier idOfAccessControlledObject, UUID groupId, Set<String> actions) {
         accessControlStore.setAclPermissions(idOfAccessControlledObject, getUserGroup(groupId), actions);
@@ -601,6 +621,10 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public AccessControlList addToAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
             UserGroup group, String action) {
+        // TODO remove, once we allow denied ACLs again
+        if (!supportDeniedActions && SecurityAccessControlList.isDeniedAction(action)) {
+            throw new IllegalArgumentException("Adding denied actions to an ACL is not allowed");
+        }
         if (getAccessControlList(idOfAccessControlledObject) == null) {
             setEmptyAccessControlList(idOfAccessControlledObject);
         }
@@ -1082,12 +1106,13 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             urlParameters.put("u", URLEncoder.encode(user.getName(), "UTF-8"));
             urlParameters.put("v", URLEncoder.encode(validationSecret, "UTF-8"));
             StringBuilder url = buildURL(baseURL, urlParameters);
-            sendMail(user.getName(), "e-Mail Validation",
-                    "Please click on the link below to validate your e-mail address for user "+user.getName()+".\n   "+url.toString());
+            sendMail(user.getName(), messages.get(user.getLocaleOrDefault(), "emailValidationSubject"),
+                    new StringBuilder()
+                            .append(messages.get(user.getLocaleOrDefault(), "emailValidationMessage", user.getName()))
+                            .append("\n").append("   ").append(url.toString()).toString());
         } catch (UnsupportedEncodingException e) {
-            logger.log(Level.SEVERE,
-                    "Internal error: encoding UTF-8 not found. Couldn't send e-mail to user " + user.getName()
-                            + " at e-mail address " + user.getEmail(), e);
+            logger.log(Level.SEVERE, "Internal error: encoding UTF-8 not found. Couldn't send e-mail to user "
+                    + user.getName() + " at e-mail address " + user.getEmail(), e);
         }
     }
 
@@ -1802,7 +1827,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public void setDefaultOwnershipIfNotSet(QualifiedObjectIdentifier identifier) {
         final OwnershipAnnotation preexistingOwnership = getOwnership(identifier);
-        if (preexistingOwnership == null) {
+        if (preexistingOwnership == null || (preexistingOwnership.getAnnotation() == null ||
+                (preexistingOwnership.getAnnotation().getTenantOwner() == null && preexistingOwnership.getAnnotation().getUserOwner() == null))) {
             setDefaultOwnership(identifier, identifier.toString());
         }
     }
@@ -1832,7 +1858,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public void setOwnershipIfNotSet(QualifiedObjectIdentifier identifier, User user, UserGroup tenantOwner) {
         final OwnershipAnnotation preexistingOwnership = getOwnership(identifier);
-        if (preexistingOwnership == null) {
+        if (preexistingOwnership == null || (preexistingOwnership.getAnnotation() == null ||
+                (preexistingOwnership.getAnnotation().getTenantOwner() == null && preexistingOwnership.getAnnotation().getUserOwner() == null))) {
             setOwnership(identifier, user, tenantOwner, identifier.toString());
         }
     }
@@ -2230,13 +2257,13 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public void migrateOwnership(WithQualifiedObjectIdentifier identifier) {
-        migrateOwnership(identifier.getIdentifier(), identifier.getName());
+    public boolean migrateOwnership(WithQualifiedObjectIdentifier identifier) {
+        return migrateOwnership(identifier.getIdentifier(), identifier.getName());
     }
 
     @Override
-    public void migrateOwnership(final QualifiedObjectIdentifier identifier, final String displayName) {
-        this.migrateOwnership(identifier, null, /* setServerGroupAsOwner */ true, displayName);
+    public boolean migrateOwnership(final QualifiedObjectIdentifier identifier, final String displayName) {
+        return this.migrateOwnership(identifier, null, /* setServerGroupAsOwner */ true, displayName);
     }
     
     @Override

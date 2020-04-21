@@ -1,7 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.adapters.racelist;
 
+import com.sap.sailing.racecommittee.app.ui.views.FlagTimeView;
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -48,7 +48,6 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.text.TextUtils;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -67,7 +66,6 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
     private final List<RaceListDataType> mShownViewItems;
     private final Map<ManagedRace, RaceListDataTypeRace> viewItemsRaces;
     private final Map<SeriesBase, RaceListDataTypeHeader> viewItemsSeriesHeaders;
-    private SimpleDateFormat dateFormat;
     private RaceListDataType mSelectedRace;
     private int flag_size;
     private DecimalFormat factor_format;
@@ -83,7 +81,6 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         mFilter = new RaceFilter(allRaces, this);
         mInflater = LayoutInflater.from(getContext());
         mResources = getContext().getResources();
-        dateFormat = new SimpleDateFormat("kk:mm", getContext().getResources().getConfiguration().locale);
         flag_size = getContext().getResources().getInteger(R.integer.flag_size);
         factor_format = new DecimalFormat(context.getString(R.string.race_factor_format));
     }
@@ -95,10 +92,11 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             viewItemsRaces.put(race, new RaceListDataTypeRace(race, mInflater));
             final SeriesBase series = race.getSeries();
             RaceState state = race.getState();
-            boolean draft = state.getFinishPositioningList() != null && state.getFinishPositioningList().hasConflicts();
-            boolean confirmed = state.getConfirmedFinishPositioningList() != null
-                    && state.getConfirmedFinishPositioningList().getCompetitorResults().hasConflicts();
-            boolean hasConflict = draft || confirmed;
+            CompetitorResults draft = state.getFinishPositioningList();
+            CompetitorResults confirmed = state.getConfirmedFinishPositioningList().getCompetitorResults();
+            boolean draftHasConflict = draft != null && draft.hasConflicts();
+            boolean confirmedHasConflict = confirmed != null && confirmed.hasConflicts();
+            boolean hasConflict = draftHasConflict || confirmedHasConflict;
             if (!viewItemsSeriesHeaders.containsKey(series)) {
                 viewItemsSeriesHeaders.put(series,
                         new RaceListDataTypeHeader(new RaceGroupSeries(race), mInflater, hasConflict));
@@ -218,14 +216,14 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                     if (state.getFinishedTime() == null) {
                         startRes = R.string.race_start;
                     }
-                    String startTime = mResources.getString(startRes, dateFormat.format(state.getStartTime().asDate()));
+                    String startTime = mResources.getString(startRes, TimeUtils.formatTime(state.getStartTime(), false));
                     holder.race_started.setText(startTime);
                 }
                 if (state.getFinishedTime() != null) {
                     holder.time.setVisibility(View.GONE);
                     holder.race_finished.setVisibility(View.VISIBLE);
                     holder.race_finished.setText(mResources.getString(R.string.race_finished,
-                            dateFormat.format(state.getFinishedTime().asDate())));
+                            TimeUtils.formatTime(state.getFinishedTime(), false)));
                 }
                 setDependingText(holder, race);
                 if (state.getStartTime() == null && state.getFinishedTime() == null) {
@@ -476,7 +474,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                     flag = null;
                 }
                 arrow = null;
-                timer = TimeUtils.formatDurationSince(now.minus(state.getFinishingTime().asMillis()).asMillis());
+                timer = TimeUtils.formatDurationSince(now.minus(state.getFinishingTime().asMillis()).asMillis(), false);
             }
         } else {
             TimePoint flagDown = procedure.getIndividualRecallRemovalTime();
@@ -489,7 +487,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         if (timer != null) {
             timer = timer.replace("-", "");
         }
-        holder.showFlag(flag, arrow, timer);
+        holder.showFlag(flag, arrow, timer, state);
     }
 
     private boolean isNextFlag(Flags flag, FlagPole pole) {
@@ -527,7 +525,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         /* package */ TextView race_started;
         /* package */ LinearLayout race_scheduled;
         /* package */ TextView race_unscheduled;
-        /* package */ TextView flag_timer;
+        /* package */ FlagTimeView flag_timer;
         /* package */ View protest_layout;
         /* package */ ImageView protest_image;
         /* package */ ImageView protest_warning_image;
@@ -563,10 +561,11 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             warning_sign = ViewHelper.get(layout, R.id.panel_additional_image);
         }
 
-        /* package */ void showFlag(LayerDrawable flag, Drawable arrow, String timer) {
+        /* package */ void showFlag(final LayerDrawable flag, final Drawable arrow, final String timer, final RaceState state) {
             if (flag != null && timer != null) {
                 current_flag.setImageDrawable(flag);
-                flag_timer.setText(timer);
+                flag_timer.setRaceState(state);
+                flag_timer.setTimer(timer);
                 flag_timer.setCompoundDrawablesWithIntrinsicBounds(arrow, null, null, null);
                 race_flag.setVisibility(View.VISIBLE);
             }

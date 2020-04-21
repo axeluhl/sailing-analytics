@@ -13,6 +13,8 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.SetSelectionModel;
+import com.sap.sse.common.Named;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.ui.client.UserService;
 
@@ -104,7 +106,7 @@ public class AccessControlledButtonPanel extends Composite {
      * Adds a secured action button, which is only visible if the current user has any
      * {@link UserService#hasCurrentUserPermissionToDeleteAnyObjectOfType(HasPermissions) delete permission} for the
      * {@link HasPermissions type} provided in this {@link AccessControlledButtonPanel}'s constructor.
-     * 
+     *
      * @param text
      *            the {@link String text} to show on the button
      * @param callback
@@ -114,7 +116,35 @@ public class AccessControlledButtonPanel extends Composite {
     public Button addRemoveAction(final String text, final Command callback) {
         return addAction(text, removePermissionCheck, callback);
     }
-    
+
+    /**
+     * Adds a secured action button, which is only visible if the current user has any
+     * {@link UserService#hasCurrentUserPermissionToDeleteAnyObjectOfType(HasPermissions) delete permission} for the
+     * {@link HasPermissions type} provided in this {@link AccessControlledButtonPanel}'s constructor.
+     *
+     * @param text
+     *            the {@link String text} to show on the button
+     * @param selectionModel
+     *            the {@link SetSelectionModel<T> selection model} of the table; used to enable/disable the remove
+     *            button when the selection becomes non-empty/empty, respectively and to display the number of elements
+     *            selected in case the selection contains more than one element
+     * @param withConfirmation
+     *            the {@link Boolean} flag indicates whether to show confirmation or not
+     * @param callback
+     *            the {@link Command callback} to execute on button click, if permission is granted
+     *
+     * @return the created {@link SelectedElementsCountingButton} instance with optional confirmation
+     */
+    public <T extends Named> Button addRemoveAction(final String text, final SetSelectionModel<T> selectionModel,
+            boolean withConfirmation, final Command callback) {
+        if (selectionModel == null) {
+            throw new IllegalArgumentException("Selection model for a remove action must not be null");
+        }
+        ClickHandler handler = wrap(removePermissionCheck, callback);
+        Button button = new SelectedElementsCountingButton<T>(text, selectionModel, withConfirmation, handler);
+        return resolveButtonVisibility(removePermissionCheck, button);
+    }
+
     /**
      * Adds a secured action button, which is only visible if the current user has any
      * {@link UserService#hasCurrentUserPermissionToUpdateAnyObjectOfType(HasPermissions) update permission} for the
@@ -142,16 +172,23 @@ public class AccessControlledButtonPanel extends Composite {
      * @return the created {@link Button} instance
      */
     public Button addAction(final String text, final Supplier<Boolean> permissionCheck, final Command callback) {
-        final Button button = new Button(text, (ClickHandler) event -> {
-            if (permissionCheck.get()) {
-                callback.execute();
-            }
-        });
+        return resolveButtonVisibility(permissionCheck, new Button(text, wrap(permissionCheck, callback)));
+    }
+
+    private Button resolveButtonVisibility(final Supplier<Boolean> permissionCheck, final Button button) {
         this.buttonToPermissions.put(button, permissionCheck);
         button.getElement().getStyle().setMarginRight(5, Unit.PX);
         this.panel.add(button);
         this.visibilityUpdater.accept(button, permissionCheck);
         return button;
+    }
+
+    private ClickHandler wrap(final Supplier<Boolean> permissionCheck, final Command callback) {
+        return event -> {
+            if (permissionCheck.get()) {
+                callback.execute();
+            }
+        };
     }
 
     /**

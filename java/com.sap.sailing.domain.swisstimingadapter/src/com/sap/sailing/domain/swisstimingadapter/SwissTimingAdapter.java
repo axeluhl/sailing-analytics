@@ -29,7 +29,10 @@ public interface SwissTimingAdapter {
      */
     RaceHandle addSwissTimingRace(TrackerManager trackerManager, RegattaIdentifier regattaToAddTo, String raceID,
             String raceName, String raceDescription, BoatClass boatClass, String hostname, int port,
-            StartList startList, RaceLogStore logStore, RegattaLogStore regattaLogStore, long timeoutInMilliseconds, boolean useInternalMarkPassingAlgorithm, boolean trackWind, boolean correctWindDirectionByMagneticDeclination, String updateURL, String updateUsername, String updatePassword)
+            StartList startList, RaceLogStore logStore, RegattaLogStore regattaLogStore, long timeoutInMilliseconds,
+            boolean useInternalMarkPassingAlgorithm, boolean trackWind,
+            boolean correctWindDirectionByMagneticDeclination, String updateURL, String updateUsername,
+            String updatePassword, String eventName, String manage2SailEventUrl)
             throws InterruptedException, UnknownHostException, IOException, ParseException, Exception;
 
     StartList readStartListForRace(String raceId, RegattaResults regattaResults);

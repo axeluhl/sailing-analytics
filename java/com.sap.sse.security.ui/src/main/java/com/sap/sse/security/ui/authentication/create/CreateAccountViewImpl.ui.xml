@@ -12,6 +12,8 @@
         <g:TextBox addStyleNames="{local_res.css.form_input}" ui:field="usernameUi"/>
         <label class="{local_res.css.form_label}"><ui:text from="{i18n_sec.name}" /></label>
         <g:TextBox addStyleNames="{local_res.css.form_input}" ui:field="nameUi"/>
+        <label class="{local_res.css.form_label}"><ui:text from="{i18n_sec.locale}" /></label>
+        <g:ValueListBox ui:field="localeListBox" styleName="{local_res.css.form_input}" />
         <label class="{local_res.css.form_label}"><ui:text from="{i18n_sec.company}" /></label>
         <g:TextBox addStyleNames="{local_res.css.form_input}" ui:field="companyUi"/>
         <label class="{local_res.css.form_label}"><ui:text from="{i18n_sec.password}" /></label>
