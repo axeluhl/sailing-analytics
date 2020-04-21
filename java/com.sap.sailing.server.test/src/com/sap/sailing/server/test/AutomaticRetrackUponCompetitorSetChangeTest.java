@@ -208,7 +208,6 @@ public class AutomaticRetrackUponCompetitorSetChangeTest {
         final RegattaAndRaceIdentifier raceIdentifier = trackedRace.getRaceIdentifier();
         assertEquals(1, Util.size(trackedRace.getRace().getCompetitors()));
         assertSame(firstCompetitor, trackedRace.getRace().getCompetitors().iterator().next());
-        regattaLog.add(new RegattaLogRegisterCompetitorEventImpl(MillisecondsTimePoint.now(), service.getServerAuthor(), firstCompetitor));
         // Now add a second competitor registration ("late-comer") to the regatta log and expect the race to reload:
         regattaLog.add(new RegattaLogRegisterCompetitorEventImpl(MillisecondsTimePoint.now(), service.getServerAuthor(), secondCompetitor));
         final CompletableFuture<RaceTracker> raceTrackerFuture = new CompletableFuture<>();
