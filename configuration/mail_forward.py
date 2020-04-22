@@ -41,8 +41,7 @@ def create_message(file):
     for x in toHeader['to'].addresses:
         if x.addr_spec in recipientMap:
             recipientList = recipientMap.get(x.addr_spec)
-            sender = senderMap.get(x.addr_spec, mailobject['To'])
-            correctEmailAddress = True
+            sender = senderMap.get(x.addr_spec, x.addr_spec)
     mailobject['X-From'] = mailobject['From']
     if not mailobject['Reply-To']:
         mailobject['Reply-To'] = mailobject['From']
