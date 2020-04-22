@@ -16,10 +16,8 @@ import email
 import re
 import json
 from botocore.exceptions import ClientError
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from email.mime.application import MIMEApplication
-
+from email.parser import Parser
+from email.policy import default
 
 region = os.environ['Region']
 
@@ -33,18 +31,24 @@ def get_message_from_s3(bucket_name, object_key):
     return file
 
 def create_message(file):
-    sender = os.environ['MailSender']
-    recipientList = json.loads(os.environ["MailRecipientsJSON"])
+    senderMap = json.loads(os.environ["MailSenderJSON"])
+    recipientMap = json.loads(os.environ["MailRecipientsJSON"])
     mailobject = email.message_from_string(file.decode('utf-8'))
     # Uncomment the following to print all available headers, if needed:
     # print(mailobject.keys())
+    # Get values for sender and recipient(s)
+    toHeader = Parser(policy=default).parsestr('To: ' + mailobject['To'])
+    toAddressSpec = toHeader['to'].addresses[0].addr_spec
+    recipientList = recipientMap[toAddressSpec]
+    sender = senderMap[toAddressSpec]
     # Set all X- headers
     mailobject['X-From'] = mailobject['From']
     if not mailobject['Reply-To']:
         mailobject['Reply-To'] = mailobject['From']
     mailobject['X-To'] = mailobject['To']
     mailobject['X-Return-Path'] = mailobject['Return-Path']
-    # Remove original headers and set to SES Value
+    # Replace original headers and set to SES Value
+    del mailobject['DKIM-Signature']
     mailobject.replace_header('From', sender)
     mailobject.replace_header('Return-Path', sender)
     mailobject.replace_header('To', ','.join(recipientList))
@@ -75,7 +79,7 @@ def send_email(message):
     except ClientError as e:
         output = e.response['Error']['Message']
     else:
-        output = "Email sent! Message ID: " + response['MessageId']
+        output = "Email for: " + ','.join(re.findall(r'\<(.*?)\>', message['Source'])) + " forwarded to: " + ','.join(message['Destinations']) + "! Message ID: " + response['MessageId']
     return output
 
 def lambda_handler(event, context):
