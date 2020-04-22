@@ -36,11 +36,12 @@ def create_message(file):
     mailobject = email.message_from_string(file.decode('utf-8'))
     # Uncomment the following to print all available headers, if needed:
     # print(mailobject.keys())
-    # Get values for sender and recipient(s)
+    # Get values for recipient(s)
     toHeader = Parser(policy=default).parsestr('To: ' + mailobject['To'])
     toAddressSpec = toHeader['to'].addresses[0].addr_spec
-    recipientList = recipientMap[toAddressSpec]
-    sender = senderMap[toAddressSpec]
+    recipientList = recipientMap.get(toAddressSpec)
+    # Set sender according to provided value or use received mail header field
+    sender = senderMap.get(toAddressSpec, mailobject['To'])
     # Set all X- headers
     mailobject['X-From'] = mailobject['From']
     if not mailobject['Reply-To']:
@@ -75,11 +76,16 @@ def send_email(message):
                 'Data':message['Data']
             }
         )
+    # Modify output message
+    if re.search(r'\<(.*?)\>', message['Source']):
+        fromString = ','.join(re.findall(r'\<(.*?)\>', message['Source']))
+    else: 
+        fromString = message['Source']
     # Display an error if something goes wrong.
     except ClientError as e:
         output = e.response['Error']['Message']
     else:
-        output = "Email for: " + ','.join(re.findall(r'\<(.*?)\>', message['Source'])) + " forwarded to: " + ','.join(message['Destinations']) + "! Message ID: " + response['MessageId']
+        output = "Email for: " + fromString + " forwarded to: " + ','.join(message['Destinations']) + "! Message ID: " + response['MessageId']
     return output
 
 def lambda_handler(event, context):
