@@ -26,6 +26,7 @@ import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.component.SelectedElementsCountingButton;
 
 public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfigurationDetailComposite.DeviceConfigurationFactory {
     private final SailingServiceAsync sailingService;
@@ -47,12 +48,15 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
         this.userService = userService;
         this.stringMessages = stringMessages;
         this.errorReporter = reporter;
-        setupUi();
+        listComposite = new DeviceConfigurationListComposite(sailingService, errorReporter, stringMessages,
+                userService);
         refreshableMultiSelectionModel = listComposite.getSelectionModel();
+        setupUi();
         refreshableMultiSelectionModel.addSelectionChangeHandler(new Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                Set<DeviceConfigurationWithSecurityDTO> selectedConfigurations = refreshableMultiSelectionModel.getSelectedSet();
+                Set<DeviceConfigurationWithSecurityDTO> selectedConfigurations = refreshableMultiSelectionModel
+                        .getSelectedSet();
                 if (selectedConfigurations.size() == 1 && selectedConfigurations.iterator().hasNext()) {
                     detailComposite.setConfiguration(selectedConfigurations.iterator().next());
                 } else {
@@ -60,7 +64,7 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
                 }
                 removeConfigurationButton.setEnabled(!selectedConfigurations.isEmpty());
             }
-        }); 
+        });
     }
     
     protected UserService getUserService() {
@@ -88,14 +92,8 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
         if (userService.hasCreatePermission(SecuredDomainType.RACE_MANAGER_APP_DEVICE_CONFIGURATION)) {
             deviceManagementControlPanel.add(addConfigurationButton);
         }
-        removeConfigurationButton = new Button(stringMessages.remove());
-        removeConfigurationButton.setEnabled(false);
-        removeConfigurationButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                removeConfiguration();
-            }
-        });
+        removeConfigurationButton = new SelectedElementsCountingButton<DeviceConfigurationWithSecurityDTO>(
+                stringMessages.remove(), refreshableMultiSelectionModel, true, (event) -> removeConfiguration());
         deviceManagementControlPanel.add(removeConfigurationButton);
         refreshConfigurationsButton = new Button(stringMessages.refresh());
         refreshConfigurationsButton.addClickHandler(new ClickHandler() {
@@ -111,7 +109,6 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
     private void setupConfigurationPanels(VerticalPanel mainPanel) {
         Grid grid = new Grid(1 ,2);
         mainPanel.add(grid);
-        listComposite = new DeviceConfigurationListComposite(sailingService, errorReporter, stringMessages, userService);
         grid.setWidget(0, 0, listComposite);
         grid.getRowFormatter().setVerticalAlign(0, HasVerticalAlignment.ALIGN_TOP);
         grid.getColumnFormatter().getElement(1).getStyle().setPaddingTop(2.0, Unit.EM);
