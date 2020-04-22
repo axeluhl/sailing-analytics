@@ -1530,12 +1530,13 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public void deleteTracTracConfiguration(TracTracConfigurationWithSecurityDTO tracTracConfiguration) {
-        getSecurityService().checkCurrentUserDeletePermission(tracTracConfiguration);
-        getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(tracTracConfiguration,
-                () ->
-        tractracMongoObjectFactory.deleteTracTracConfiguration(tracTracConfiguration.getCreatorName(),
-                tracTracConfiguration.getJsonUrl()));
+    public void deleteTracTracConfigurations(Collection<TracTracConfigurationWithSecurityDTO> tracTracConfigurations) {
+        for (TracTracConfigurationWithSecurityDTO tracTracConfiguration : tracTracConfigurations) {
+            getSecurityService().checkCurrentUserDeletePermission(tracTracConfiguration);
+            getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(tracTracConfiguration,
+                    () -> tractracMongoObjectFactory.deleteTracTracConfiguration(tracTracConfiguration.getCreatorName(),
+                            tracTracConfiguration.getJsonUrl()));
+        }
     }
 
     @Override
@@ -3370,11 +3371,14 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public void deleteSwissTimingConfiguration(SwissTimingConfigurationWithSecurityDTO configuration) {
-        getSecurityService().checkCurrentUserDeletePermission(configuration);
-        getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(configuration,
-                () -> swissTimingAdapterPersistence.deleteSwissTimingConfiguration(configuration.getCreatorName(),
-                        configuration.getJsonUrl()));
+    public void deleteSwissTimingConfigurations(
+            final Collection<SwissTimingConfigurationWithSecurityDTO> configurations) {
+        for (SwissTimingConfigurationWithSecurityDTO dto : configurations) {
+            getSecurityService().checkCurrentUserDeletePermission(dto);
+            getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(dto,
+                    () -> swissTimingAdapterPersistence.deleteSwissTimingConfiguration(dto.getCreatorName(),
+                            dto.getJsonUrl()));
+        }
     }
 
     @Override
@@ -5442,11 +5446,13 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public void deleteSwissTimingArchiveConfiguration(SwissTimingArchiveConfigurationWithSecurityDTO dto)
+    public void deleteSwissTimingArchiveConfigurations(Collection<SwissTimingArchiveConfigurationWithSecurityDTO> dtos)
             throws Exception {
-        getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(dto.getIdentifier(),
-                () -> swissTimingAdapterPersistence.deleteSwissTimingArchiveConfiguration(swissTimingFactory
-                        .createSwissTimingArchiveConfiguration(dto.getJsonUrl(), dto.getCreatorName())));
+        for (SwissTimingArchiveConfigurationWithSecurityDTO dto : dtos) {
+            getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(dto.getIdentifier(),
+                    () -> swissTimingAdapterPersistence.deleteSwissTimingArchiveConfiguration(swissTimingFactory
+                            .createSwissTimingArchiveConfiguration(dto.getJsonUrl(), dto.getCreatorName())));
+        }
     }
 
     protected com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory() {
@@ -6165,15 +6171,20 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public boolean unlinkBoatFromCompetitorForRace(String leaderboardName, String raceColumnName, String fleetName,
             String competitorIdAsString) throws NotFoundException {
         getSecurityService().checkCurrentUserUpdatePermission(getLeaderboardByName(leaderboardName));
-        boolean result = false;
-        Competitor existingCompetitor = getService().getCompetitorAndBoatStore().getExistingCompetitorByIdAsString(competitorIdAsString);
-        RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnName, fleetName);
+        final boolean result;
+        final Competitor existingCompetitor = getService().getCompetitorAndBoatStore().getExistingCompetitorByIdAsString(competitorIdAsString);
+        final RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnName, fleetName);
         if (raceLog != null && existingCompetitor != null) {
-            List<RaceLogRegisterCompetitorEvent> linkEventsToRevoke = new ArrayList<>();
-            for (RaceLogEvent event : raceLog.getUnrevokedEventsDescending()) {
-                if (event instanceof RaceLogRegisterCompetitorEvent) {
-                    linkEventsToRevoke.add((RaceLogRegisterCompetitorEvent) event);
+            final List<RaceLogRegisterCompetitorEvent> linkEventsToRevoke = new ArrayList<>();
+            raceLog.lockForRead();
+            try {
+                for (RaceLogEvent event : raceLog.getUnrevokedEventsDescending()) {
+                    if (event instanceof RaceLogRegisterCompetitorEvent) {
+                        linkEventsToRevoke.add((RaceLogRegisterCompetitorEvent) event);
+                    }
                 }
+            } finally {
+                raceLog.unlockAfterRead();
             }
             try {
                 for (RaceLogRegisterCompetitorEvent eventToRevoke : linkEventsToRevoke) {
@@ -6182,9 +6193,10 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             } catch (NotRevokableException e) {
                 logger.log(Level.WARNING, "Could not unlink competitor from boat by adding RevokeEvent", e);
             }
-
             result = true;
-        }        
+        } else {
+            result = false;
+        }
         return result;
     }
 
@@ -7411,16 +7423,21 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public void updateFixedMarkPassing(String leaderboardName, String raceColumnName, String fleetName, Integer indexOfWaypoint,
             Date dateOfMarkPassing, CompetitorDTO competitorDTO) throws NotFoundException {
         getSecurityService().checkCurrentUserUpdatePermission(getLeaderboardByName(leaderboardName));
-        RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnName, fleetName);
-        Competitor competitor = getCompetitor(competitorDTO);
+        final RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnName, fleetName);
+        final Competitor competitor = getCompetitor(competitorDTO);
         RaceLogFixedMarkPassingEvent oldFixedMarkPassingEvent = null;
-        for (RaceLogEvent event : raceLog.getUnrevokedEvents()) {
-            if (event instanceof RaceLogFixedMarkPassingEventImpl && event.getInvolvedCompetitors().contains(competitor)) {
-                RaceLogFixedMarkPassingEvent fixedEvent = (RaceLogFixedMarkPassingEvent) event;
-                if (Util.equalsWithNull(fixedEvent.getZeroBasedIndexOfPassedWaypoint(), indexOfWaypoint)) {
-                    oldFixedMarkPassingEvent = fixedEvent;
+        raceLog.lockForRead();
+        try {
+            for (RaceLogEvent event : raceLog.getUnrevokedEvents()) {
+                if (event instanceof RaceLogFixedMarkPassingEventImpl && event.getInvolvedCompetitors().contains(competitor)) {
+                    RaceLogFixedMarkPassingEvent fixedEvent = (RaceLogFixedMarkPassingEvent) event;
+                    if (Util.equalsWithNull(fixedEvent.getZeroBasedIndexOfPassedWaypoint(), indexOfWaypoint)) {
+                        oldFixedMarkPassingEvent = fixedEvent;
+                    }
                 }
             }
+        } finally {
+            raceLog.unlockAfterRead();
         }
         if (oldFixedMarkPassingEvent != null) {
             try {
@@ -7441,16 +7458,20 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             Integer newZeroBasedIndexOfSuppressedMarkPassing, CompetitorDTO competitorDTO) throws NotFoundException {
         getSecurityService().checkCurrentUserUpdatePermission(getLeaderboardByName(leaderboardName));
         RaceLogSuppressedMarkPassingsEvent oldSuppressedMarkPassingEvent = null;
-        RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnName, fleetName);
-        Competitor competitor = getCompetitor(competitorDTO);
-        NavigableSet<RaceLogEvent> unrevokedEvents = raceLog.getUnrevokedEvents();
-        for (RaceLogEvent event : unrevokedEvents) {
-            if (event instanceof RaceLogSuppressedMarkPassingsEvent && event.getInvolvedCompetitors().contains(competitor)) {
-                oldSuppressedMarkPassingEvent = (RaceLogSuppressedMarkPassingsEvent) event;
-                break;
+        final RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnName, fleetName);
+        final Competitor competitor = getCompetitor(competitorDTO);
+        raceLog.lockForRead();
+        try {
+            final NavigableSet<RaceLogEvent> unrevokedEvents = raceLog.getUnrevokedEvents();
+            for (RaceLogEvent event : unrevokedEvents) {
+                if (event instanceof RaceLogSuppressedMarkPassingsEvent && event.getInvolvedCompetitors().contains(competitor)) {
+                    oldSuppressedMarkPassingEvent = (RaceLogSuppressedMarkPassingsEvent) event;
+                    break;
+                }
             }
+        } finally {
+            raceLog.unlockAfterRead();
         }
-        
         final boolean create;
         final boolean revoke;
         if (oldSuppressedMarkPassingEvent == null) {
@@ -7476,6 +7497,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             try {
                 raceLog.revokeEvent(getService().getServerAuthor(), oldSuppressedMarkPassingEvent);
             } catch (NotRevokableException e) {
+                logger.log(Level.SEVERE, "Unable to revoke event "+oldSuppressedMarkPassingEvent, e);
             }
         }
         if (create) {
@@ -8458,13 +8480,19 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         result.clear();
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             for (Fleet fleet: raceColumn.getFleets()) {
-                NavigableSet<RaceLogEvent> set=raceColumn.getRaceLog(fleet).getUnrevokedEvents();
-                for (RaceLogEvent raceLogEvent : set) {
-                    if (raceLogEvent instanceof RaceLogDenoteForTrackingEvent) {
-                        RaceLogDenoteForTrackingEvent denoteEvent = (RaceLogDenoteForTrackingEvent) raceLogEvent;
-                        result.add(denoteEvent.getRaceName());
-                        break;
+                final RaceLog raceLog = raceColumn.getRaceLog(fleet);
+                raceLog.lockForRead();
+                try {
+                    final NavigableSet<RaceLogEvent> set = raceLog.getUnrevokedEvents();
+                    for (RaceLogEvent raceLogEvent : set) {
+                        if (raceLogEvent instanceof RaceLogDenoteForTrackingEvent) {
+                            RaceLogDenoteForTrackingEvent denoteEvent = (RaceLogDenoteForTrackingEvent) raceLogEvent;
+                            result.add(denoteEvent.getRaceName());
+                            break;
+                        }
                     }
+                } finally {
+                    raceLog.unlockAfterRead();
                 }
             }
         }
@@ -10004,8 +10032,10 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public void removeCourseTemplate(UUID uuid) {
-        getSharedSailingData().deleteCourseTemplate(getSharedSailingData().getCourseTemplateById(uuid));
+    public void removeCourseTemplates(Collection<UUID> courseTemplateUuids) {
+        for (UUID uuid : courseTemplateUuids) {
+            getSharedSailingData().deleteCourseTemplate(getSharedSailingData().getCourseTemplateById(uuid));
+        }
     }
 
     private WaypointTemplate convertToWaypointTemplate(WaypointTemplateDTO waypointTemplate, final MarkRolePairFactory markRolePairFactory) {
@@ -10073,8 +10103,10 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public void removeMarkProperties(UUID uuid) {
-        getSharedSailingData().deleteMarkProperties(getSharedSailingData().getMarkPropertiesById(uuid));
+    public void removeMarkProperties(Collection<UUID> markPropertiesUuids) {
+        for (UUID uuid : markPropertiesUuids) {
+            getSharedSailingData().deleteMarkProperties(getSharedSailingData().getMarkPropertiesById(uuid));
+        }
     }
 
     private MarkRoleDTO convertToMarkRoleDTO(final MarkRole markRole) {

@@ -18,8 +18,8 @@
     <div class="{res.mediaCss.grid}">
       <header class="{local_res.css.header} {res.mediaCss.small12} {res.mediaCss.columns}">
         <div class="{local_res.css.header_logo}">
-          <a href="https://www.sap.com/sponsorships" title="SAP sponsorships">
-            <img src="images/mobile/logo-small@2x.png" alt="{i18n.headerLogo}" class="{local_res.css.header_logo_image}"></img>
+          <a ui:field="logoAnchor" href="https://www.sap.com/sponsorships" title="SAP sponsorships">
+            <img ui:field="logoImage"  src="images/mobile/logo-small@2x.png" alt="{i18n.headerLogo}" class="{local_res.css.header_logo_image}"></img>
           </a>
         </div>
         <div class="{local_res.css.header_navigation}">
