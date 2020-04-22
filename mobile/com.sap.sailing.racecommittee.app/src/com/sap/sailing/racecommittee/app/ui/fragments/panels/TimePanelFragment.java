@@ -290,8 +290,8 @@ public class TimePanelFragment extends BasePanelFragment {
         }
 
         @Override
-        public void onFinishingPositioningsChanged(ReadonlyRaceState state) {
-            super.onFinishingPositioningsChanged(state);
+        public void onFinishingPositionsChanged(ReadonlyRaceState state) {
+            super.onFinishingPositionsChanged(state);
 
             checkWarnings(state);
         }

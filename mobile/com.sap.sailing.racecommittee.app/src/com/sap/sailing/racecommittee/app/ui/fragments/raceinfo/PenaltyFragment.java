@@ -854,8 +854,8 @@ public class PenaltyFragment extends BaseFragment
         }
 
         @Override
-        public void onFinishingPositioningsChanged(ReadonlyRaceState state) {
-            super.onFinishingPositioningsChanged(state);
+        public void onFinishingPositionsChanged(ReadonlyRaceState state) {
+            super.onFinishingPositionsChanged(state);
 
             PenaltyFragment fragment = mReference.get();
             if (fragment != null) {

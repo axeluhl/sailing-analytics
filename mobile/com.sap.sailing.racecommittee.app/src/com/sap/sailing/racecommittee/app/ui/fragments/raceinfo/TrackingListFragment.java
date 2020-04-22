@@ -1259,8 +1259,8 @@ public class TrackingListFragment extends BaseFragment
         }
 
         @Override
-        public void onFinishingPositioningsChanged(ReadonlyRaceState state) {
-            super.onFinishingPositioningsChanged(state);
+        public void onFinishingPositionsChanged(ReadonlyRaceState state) {
+            super.onFinishingPositionsChanged(state);
 
             TrackingListFragment fragment = mReference.get();
             if (fragment != null) {
