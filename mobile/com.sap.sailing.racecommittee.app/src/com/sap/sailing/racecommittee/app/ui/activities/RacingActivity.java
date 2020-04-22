@@ -65,9 +65,6 @@ import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesRegattaConfigurationLoader;
 import com.sap.sailing.racecommittee.app.logging.LogEvent;
-import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataType;
-import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeHeader;
-import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeRace;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceInfoFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment;
@@ -303,12 +300,11 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
     }
 
     @Nullable
-    ManagedRace findPreviousRace(@NonNull final ManagedRace managedRace) {
-        final LinkedHashMap<RaceGroupSeriesFleet, List<ManagedRace>> fleetRaces = mRaceList.getRacesByGroup();
-        for (RaceGroupSeriesFleet fleet : fleetRaces.keySet()) {
-            final List<ManagedRace> races = fleetRaces.get(fleet);
-            if (races == null)
-                continue;
+    private ManagedRace findPreviousRace(@NonNull final ManagedRace managedRace) {
+        final LinkedHashMap<RaceGroupSeriesFleet, List<ManagedRace>> racesByGroup = mRaceList.getRacesByGroup();
+        final RaceGroupSeriesFleet group = new RaceGroupSeriesFleet(managedRace);
+        final List<ManagedRace> races = racesByGroup.get(group);
+        if (races != null) {
             final int index = races.indexOf(managedRace);
             if (index >= 1) {
                 return races.get(index - 1);
@@ -318,40 +314,29 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
     }
 
     @Override
-    public void onRaceListItemSelected(RaceListDataType selectedItem) {
-
-        if (selectedItem instanceof RaceListDataTypeRace) {
-            RaceListDataTypeRace selectedElement = (RaceListDataTypeRace) selectedItem;
-            selectedElement.setUpdateIndicatorVisible(false);
-
-            ManagedRace managedRace = selectedElement.getRace();
-            ManagedRace prevRace = findPreviousRace(managedRace);
-            ExLog.i(this, LogEvent.RACE_SELECTED_ELEMENT, managedRace.getId() + " " + managedRace.getStatus());
-            if (prevRace != null && managedRace.getStatus() == RaceLogRaceStatus.UNSCHEDULED) {
-                final RaceState currentRaceState = managedRace.getState();
-                final RacingProcedure racingProcedure = prevRace.getState().getRacingProcedure();
-                currentRaceState.setRacingProcedure(MillisecondsTimePoint.now(), racingProcedure.getType());
-                final RacingProcedure newRacingProcedure = currentRaceState.getRacingProcedure();
-                if (racingProcedure instanceof ConfigurableStartModeFlagRacingProcedure && newRacingProcedure instanceof ConfigurableStartModeFlagRacingProcedure) {
-                    ConfigurableStartModeFlagRacingProcedure configurableFlag = (ConfigurableStartModeFlagRacingProcedure) racingProcedure;
-                    ((ConfigurableStartModeFlagRacingProcedure) newRacingProcedure).setStartModeFlag(MillisecondsTimePoint.now(), configurableFlag.getStartModeFlag());
-                }
-                final CourseBase courseDesign = prevRace.getCourseDesign();
-                if (courseDesign != null) {
-                    currentRaceState.setCourseDesign(MillisecondsTimePoint.now(), courseDesign, CourseDesignerMode.BY_NAME);
-                }
-
-                final Wind windFix = prevRace.getState().getWindFix();
-                if (windFix != null) {
-                    currentRaceState.setWindFix(MillisecondsTimePoint.now(), windFix, preferences.isMagnetic());
-                }
+    public void onRaceSelected(ManagedRace race) {
+        ManagedRace previousRace = findPreviousRace(race);
+        ExLog.i(this, LogEvent.RACE_SELECTED_ELEMENT, race.getId() + " " + race.getStatus());
+        if (previousRace != null && race.getStatus() == RaceLogRaceStatus.UNSCHEDULED) {
+            final RaceState currentRaceState = race.getState();
+            final RacingProcedure racingProcedure = previousRace.getState().getRacingProcedure();
+            currentRaceState.setRacingProcedure(MillisecondsTimePoint.now(), racingProcedure.getType());
+            final RacingProcedure newRacingProcedure = currentRaceState.getRacingProcedure();
+            if (racingProcedure instanceof ConfigurableStartModeFlagRacingProcedure && newRacingProcedure instanceof ConfigurableStartModeFlagRacingProcedure) {
+                ConfigurableStartModeFlagRacingProcedure configurableFlag = (ConfigurableStartModeFlagRacingProcedure) racingProcedure;
+                ((ConfigurableStartModeFlagRacingProcedure) newRacingProcedure).setStartModeFlag(MillisecondsTimePoint.now(), configurableFlag.getStartModeFlag());
             }
-            onRaceItemClicked(managedRace);
-        } else if (selectedItem instanceof RaceListDataTypeHeader) {
-            // This is for logging purposes only!
-            RaceListDataTypeHeader selectedTitle = (RaceListDataTypeHeader) selectedItem;
-            ExLog.i(this, LogEvent.RACE_SELECTED_TITLE, selectedTitle.toString());
+            final CourseBase courseDesign = previousRace.getCourseDesign();
+            if (courseDesign != null) {
+                currentRaceState.setCourseDesign(MillisecondsTimePoint.now(), courseDesign, CourseDesignerMode.BY_NAME);
+            }
+
+            final Wind windFix = previousRace.getState().getWindFix();
+            if (windFix != null) {
+                currentRaceState.setWindFix(MillisecondsTimePoint.now(), windFix, preferences.isMagnetic());
+            }
         }
+        onRaceItemClicked(race);
     }
 
     private void onRaceItemClicked(ManagedRace managedRace) {
