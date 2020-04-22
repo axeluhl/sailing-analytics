@@ -16,8 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Consumer;
-
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.cell.client.ValueUpdater;
@@ -160,6 +158,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         final RefreshableMultiSelectionModel<EventDTO> selectionModel = (RefreshableMultiSelectionModel<EventDTO>) eventTable.getSelectionModel();
         refreshableEventSelectionModel = selectionModel;
         eventTable.setVisible(false);
+
         final Button refresh = buttonPanel.addUnsecuredAction(stringMessages.refresh(), this::fillEvents);
         refresh.ensureDebugId("RefreshEventsButton");
         final Button create = buttonPanel.addCreateAction(stringMessages.actionAddEvent(), this::openCreateEventDialog);
@@ -167,6 +166,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         final Button remove = buttonPanel.addRemoveAction(stringMessages.remove(), refreshableEventSelectionModel, true,
                 () -> removeEvents(refreshableEventSelectionModel.getSelectedSet()));
         remove.ensureDebugId("RemoveEventsButton");
+
         this.refreshableEventSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
@@ -196,6 +196,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         FlushableCellTable<EventDTO> table = new FlushableCellTable<EventDTO>(/* pageSize */10000, tableRes);
         eventListDataProvider.addDataDisplay(table);
         table.setWidth("100%");
+
         SelectionCheckboxColumn<EventDTO> eventSelectionCheckboxColumn = new SelectionCheckboxColumn<EventDTO>(
                 tableRes.cellTableStyle().cellTableCheckboxSelected(),
                 tableRes.cellTableStyle().cellTableCheckboxDeselected(),
@@ -209,9 +210,11 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                         return t.id.hashCode();
                     }
                 },filterTextbox.getAllListDataProvider(),table);
+        
         AnchorCell anchorCell = new AnchorCell();
         final TextColumn<EventDTO> eventUUidColumn = new AbstractSortableTextColumn<EventDTO>(
                 event -> event.getId() == null ? "<null>" : event.getId().toString());
+
         Column<EventDTO, SafeHtml> eventNameColumn = new Column<EventDTO, SafeHtml>(anchorCell) {
             @Override
             public SafeHtml getValue(EventDTO event) {
@@ -222,12 +225,14 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                 return ANCHORTEMPLATE.cell(UriUtils.fromString(link), event.getName());
             }
         };
+
         TextColumn<EventDTO> venueNameColumn = new TextColumn<EventDTO>() {
             @Override
             public String getValue(EventDTO event) {
                 return event.venue != null ? event.venue.getName() : "";
             }
         };
+
         TextColumn<EventDTO> startEndDateColumn = new TextColumn<EventDTO>() {
             @Override
             public String getValue(EventDTO event) {
@@ -241,6 +246,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                 return event.isPublic ? stringMessages.yes() : stringMessages.no();
             }
         };
+
         SafeHtmlCell courseAreasCell = new SafeHtmlCell();
         Column<EventDTO, SafeHtml> courseAreasColumn = new Column<EventDTO, SafeHtml>(courseAreasCell) {
             @Override
@@ -262,6 +268,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                 return builder.toSafeHtml();
             }
         };
+
         MultipleLinkCell leaderboardGroupsCell = new MultipleLinkCell(true);
         Column<EventDTO, List<MultipleLinkCell.CellLink>> leaderboardGroupsColumn = new Column<EventDTO, List<MultipleLinkCell.CellLink>>(
                 leaderboardGroupsCell) {
@@ -274,6 +281,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                 return links;
             }
         };
+
         leaderboardGroupsCell.setOnLinkClickHandler(new ValueUpdater<String>() {
             @Override
             public void update(String value) {
@@ -283,6 +291,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                         params);
             }
         });
+
         TextColumn<EventDTO> imagesColumn = new TextColumn<EventDTO>() {
             @Override
             public String getValue(EventDTO event) {
@@ -294,6 +303,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                 return result;
             }
         };
+
         TextColumn<EventDTO> videosColumn = new TextColumn<EventDTO>() {
             @Override
             public String getValue(EventDTO event) {
@@ -305,6 +315,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                 return result;
             }
         };
+        
         final SecuredDTOOwnerColumn<EventDTO> groupColumn = SecuredDTOOwnerColumn.getGroupOwnerColumn();
         final SecuredDTOOwnerColumn<EventDTO> userColumn = SecuredDTOOwnerColumn.getUserOwnerColumn();
 
@@ -319,10 +330,12 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         final DialogConfig<EventDTO> config = EditOwnershipDialog.create(userService.getUserManagementService(), EVENT,
                 event -> fillEvents(), stringMessages);
         actionsColumn.addAction(EventConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, config::openDialog);
+        
         final EditACLDialog.DialogConfig<EventDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementService(), EVENT, event -> fillEvents(), stringMessages);
         actionsColumn.addAction(EventConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 e -> configACL.openDialog(e));
+
         final MigrateGroupOwnershipDialog.DialogConfig<EventDTO> migrateDialogConfig = MigrateGroupOwnershipDialog
                 .create(userService.getUserManagementService(), (event, dto) -> {
                     sailingService.updateGroupOwnerForEventHierarchy(event.id, dto, new AsyncCallback<Void>() {
@@ -338,12 +351,8 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                     });
                 });
         actionsColumn.addAction(EventConfigImagesBarCell.ACTION_MIGRATE_GROUP_OWNERSHIP_HIERARCHY, CHANGE_OWNERSHIP,
-                new Consumer<EventDTO>() {
-                    @Override
-                    public void accept(EventDTO t) {
-                        migrateDialogConfig.openDialog(t);
-                    }
-                });
+                migrateDialogConfig::openDialog);
+
         eventNameColumn.setSortable(true);
         venueNameColumn.setSortable(true);
         isPublicColumn.setSortable(true);
@@ -352,9 +361,11 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         leaderboardGroupsColumn.setSortable(true);
         groupColumn.setSortable(true);
         userColumn.setSortable(true);
+
         final ListHandler<EventDTO> columnSortHandler = getEventTableColumnSortHandler(eventListDataProvider.getList(),
                 eventSelectionCheckboxColumn, eventNameColumn, venueNameColumn, startEndDateColumn, isPublicColumn,
                 courseAreasColumn, leaderboardGroupsColumn, groupColumn, userColumn);
+
         table.addColumn(eventSelectionCheckboxColumn, eventSelectionCheckboxColumn.getHeader());
         table.addColumn(eventNameColumn, stringMessages.event());
         table.addColumn(venueNameColumn, stringMessages.venue());
@@ -369,8 +380,10 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         table.addColumn(eventUUidColumn, stringMessages.id());
         table.addColumn(actionsColumn, stringMessages.actions());
         table.setSelectionModel(eventSelectionCheckboxColumn.getSelectionModel(), eventSelectionCheckboxColumn.getSelectionManager());
+
         table.addColumnSortHandler(columnSortHandler);
         table.getColumnSortList().push(startEndDateColumn);
+
         return table;
     }
     
