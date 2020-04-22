@@ -45,12 +45,9 @@ def create_message(file):
     mailobject['X-To'] = mailobject['To']
     mailobject['X-Return-Path'] = mailobject['Return-Path']
     # Remove original headers and set to SES Value
-    del mailobject['From']
-    mailobject['From'] = sender
-    del mailobject['To']
-    mailobject['To'] = ','.join(recipientList)
-    del mailobject['Return-Path']
-    mailobject['Return-Path'] = sender
+    mailobject.replace_header('From', sender)
+    mailobject.replace_header('Return-Path', sender)
+    mailobject.replace_header('To', ','.join(recipientList))
     message = {
         "Source": sender,
         "Destinations": recipientList,
