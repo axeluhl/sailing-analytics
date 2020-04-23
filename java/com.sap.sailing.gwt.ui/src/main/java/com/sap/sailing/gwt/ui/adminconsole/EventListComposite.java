@@ -329,12 +329,12 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         });
         final DialogConfig<EventDTO> config = EditOwnershipDialog.create(userService.getUserManagementService(), EVENT,
                 event -> fillEvents(), stringMessages);
-        actionsColumn.addAction(EventConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, config::openDialog);
+        actionsColumn.addAction(EventConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, config::openOwnershipDialog);
         
         final EditACLDialog.DialogConfig<EventDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementService(), EVENT, event -> fillEvents(), stringMessages);
         actionsColumn.addAction(EventConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                e -> configACL.openDialog(e));
+                e -> configACL.openACLDialog(e));
 
         final MigrateGroupOwnershipDialog.DialogConfig<EventDTO> migrateDialogConfig = MigrateGroupOwnershipDialog
                 .create(userService.getUserManagementService(), (event, dto) -> {

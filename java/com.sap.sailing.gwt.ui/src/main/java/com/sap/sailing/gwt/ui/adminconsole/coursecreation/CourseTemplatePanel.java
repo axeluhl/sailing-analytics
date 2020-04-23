@@ -336,9 +336,9 @@ public class CourseTemplatePanel extends FlowPanel {
             }
         });
         actionsColumn.addAction(ACTION_UPDATE, UPDATE, e -> openEditCourseTemplateDialog(e, userService, false));
-        actionsColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, configOwnership::openDialog);
+        actionsColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, configOwnership::openOwnershipDialog);
         actionsColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                courseTemplate -> configACL.openDialog(courseTemplate));
+                courseTemplate -> configACL.openACLDialog(courseTemplate));
         courseTemplateTable.addColumn(idColumn, stringMessages.id());
         courseTemplateTable.addColumn(actionsColumn, stringMessages.actions());
     }
