@@ -34,23 +34,29 @@ def create_message(file):
     senderMap = json.loads(os.environ["MailSenderJSON"])
     recipientMap = json.loads(os.environ["MailRecipientsJSON"])
     mailobject = email.message_from_string(file.decode('utf-8'))
-    # Uncomment the following to print all available headers, if needed:
-    # print(mailobject.keys())
+    # Define sender, either from 'To'-Header or from 'Cc'-Header
     sender = None
-    # Check to header
+    # Check 'To'-Header
     toHeader = Parser(policy=default).parsestr('To: ' + mailobject['To'])
     for x in toHeader['to'].addresses:
         if x.addr_spec in recipientMap:
             recipientList = recipientMap.get(x.addr_spec)
             sender = senderMap.get(x.addr_spec, x.addr_spec)
-    # Check cc header
+    # Check 'Cc'-Header
     if sender is None:
-        ccHeader = Parser(policy=default).parsestr('Cc: ' + mailobject['Cc'])
-        for x in ccHeader['cc'].addresses:
-            if x.addr_spec in recipientMap:
-                recipientList = recipientMap.get(x.addr_spec)
-                sender = senderMap.get(x.addr_spec, x.addr_spec)
-
+        if mailobject['Cc']:
+            ccHeader = Parser(policy=default).parsestr('Cc: ' + mailobject['Cc'])
+            for x in ccHeader['cc'].addresses:
+                if x.addr_spec in recipientMap:
+                    recipientList = recipientMap.get(x.addr_spec)
+                    sender = senderMap.get(x.addr_spec, x.addr_spec)
+        # Bcc mail, there is no header so find address from 'Received'-Header
+        else:
+            receivedString = re.search(r'\<(.*?)\>', ''.join(mailobject.get_all('Received'))).group(1)
+            if receivedString in recipientMap:
+                recipientList = recipientMap.get(receivedString)
+                sender = senderMap.get(receivedString, receivedString)
+    # Change original headers to X-
     mailobject['X-From'] = mailobject['From']
     if not mailobject['Reply-To']:
         mailobject['Reply-To'] = mailobject['From']
@@ -69,7 +75,6 @@ def create_message(file):
     return message
 
 def send_email(message):
-    aws_region = os.environ['Region']
     # Create a new SES client.
     client_ses = boto3.client('ses', region)
     # Send the email.
@@ -97,8 +102,7 @@ def send_email(message):
     return output
 
 def lambda_handler(event, context):
-    # Get the unique ID of the message. This corresponds to the name of the file
-    # in S3.
+    # Get the unique ID of the message. This corresponds to the name of the file in S3.
     sns = event['Records'][0]['Sns']
     message = json.loads(sns['Message'])
     bucket_name = message['receipt']['action']['bucketName']
@@ -111,4 +115,3 @@ def lambda_handler(event, context):
     # Send the email and print the result.
     result = send_email(message)
     print(result)
-
