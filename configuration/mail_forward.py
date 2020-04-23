@@ -75,7 +75,6 @@ def create_message(file):
     return message
 
 def send_email(message):
-    aws_region = os.environ['Region']
     # Create a new SES client.
     client_ses = boto3.client('ses', region)
     # Send the email.
