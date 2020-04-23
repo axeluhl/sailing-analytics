@@ -36,12 +36,21 @@ def create_message(file):
     mailobject = email.message_from_string(file.decode('utf-8'))
     # Uncomment the following to print all available headers, if needed:
     # print(mailobject.keys())
-    # Get values for recipient(s)
+    sender = None
+    # Check to header
     toHeader = Parser(policy=default).parsestr('To: ' + mailobject['To'])
     for x in toHeader['to'].addresses:
         if x.addr_spec in recipientMap:
             recipientList = recipientMap.get(x.addr_spec)
             sender = senderMap.get(x.addr_spec, x.addr_spec)
+    # Check cc header
+    if sender is None:
+        ccHeader = Parser(policy=default).parsestr('Cc: ' + mailobject['Cc'])
+        for x in ccHeader['cc'].addresses:
+            if x.addr_spec in recipientMap:
+                recipientList = recipientMap.get(x.addr_spec)
+                sender = senderMap.get(x.addr_spec, x.addr_spec)
+
     mailobject['X-From'] = mailobject['From']
     if not mailobject['Reply-To']:
         mailobject['Reply-To'] = mailobject['From']
