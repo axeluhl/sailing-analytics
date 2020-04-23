@@ -749,8 +749,8 @@ public class SmartphoneTrackingEventManagementPanel
         sailingService.updateRegatta(regattaIdentifier, regatta.startDate, regatta.endDate,
                 regatta.defaultCourseAreaUuid, configuration, regatta.buoyZoneRadiusInHullLengths,
                 regatta.useStartTimeInference, regatta.controlTrackingFromStartAndFinishTimes,
-                regatta.registrationLinkSecret, regatta.competitorRegistrationType,
-                new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
+                regatta.autoRestartTrackingUponCompetitorSetChange, regatta.registrationLinkSecret,
+                regatta.competitorRegistrationType, new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError(

@@ -268,10 +268,12 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
             ExLog.i(getActivity(), TAG, "Touched " + item.toString());
 
             mAdapter.setSelectedRace(item);
-            mAdapter.notifyDataSetChanged();
-            mRunnable = () -> mCallbacks.onRaceListItemSelected(mAdapter.getItem(position));
+            if (item instanceof RaceListDataTypeRace) {
+                final ManagedRace race = ((RaceListDataTypeRace) item).getRace();
+                mRunnable = () -> mCallbacks.onRaceSelected(race);
+            }
         }
-        mDrawerLayout.closeDrawers();
+        closeDrawer();
     }
 
     @Override
@@ -514,7 +516,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
     }
 
     public interface RaceListCallbacks {
-        void onRaceListItemSelected(RaceListDataType selectedItem);
+        void onRaceSelected(ManagedRace race);
     }
 
     private class IntentReceiver extends BroadcastReceiver {
@@ -525,7 +527,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
                 String raceGroupSeriesDisplayName = intent.getStringExtra(AppConstants.INTENT_ACTION_EXTRA);
                 if (raceGroupSeriesDisplayName != null) {
                     mRunnable = () -> showProtestTimeDialog(raceGroupSeriesDisplayName);
-                    mDrawerLayout.closeDrawers();
+                    closeDrawer();
                 } else {
                     ExLog.e(getActivity(), TAG,
                             "INTENT_ACTION_SHOW_PROTEST does not carry an INTENT_ACTION_EXTRA with the race group name!");

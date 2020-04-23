@@ -16,10 +16,8 @@ import email
 import re
 import json
 from botocore.exceptions import ClientError
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from email.mime.application import MIMEApplication
-
+from email.parser import Parser
+from email.policy import default
 
 region = os.environ['Region']
 
@@ -33,24 +31,36 @@ def get_message_from_s3(bucket_name, object_key):
     return file
 
 def create_message(file):
-    sender = os.environ['MailSender']
-    recipientList = json.loads(os.environ["MailRecipientsJSON"])
+    senderMap = json.loads(os.environ["MailSenderJSON"])
+    recipientMap = json.loads(os.environ["MailRecipientsJSON"])
     mailobject = email.message_from_string(file.decode('utf-8'))
     # Uncomment the following to print all available headers, if needed:
     # print(mailobject.keys())
-    # Set all X- headers
+    sender = None
+    # Check to header
+    toHeader = Parser(policy=default).parsestr('To: ' + mailobject['To'])
+    for x in toHeader['to'].addresses:
+        if x.addr_spec in recipientMap:
+            recipientList = recipientMap.get(x.addr_spec)
+            sender = senderMap.get(x.addr_spec, x.addr_spec)
+    # Check cc header
+    if sender is None:
+        ccHeader = Parser(policy=default).parsestr('Cc: ' + mailobject['Cc'])
+        for x in ccHeader['cc'].addresses:
+            if x.addr_spec in recipientMap:
+                recipientList = recipientMap.get(x.addr_spec)
+                sender = senderMap.get(x.addr_spec, x.addr_spec)
+
     mailobject['X-From'] = mailobject['From']
     if not mailobject['Reply-To']:
         mailobject['Reply-To'] = mailobject['From']
     mailobject['X-To'] = mailobject['To']
     mailobject['X-Return-Path'] = mailobject['Return-Path']
-    # Remove original headers and set to SES Value
-    del mailobject['From']
-    mailobject['From'] = sender
-    del mailobject['To']
-    mailobject['To'] = ','.join(recipientList)
-    del mailobject['Return-Path']
-    mailobject['Return-Path'] = sender
+    # Replace original headers and set to SES Value
+    del mailobject['DKIM-Signature']
+    mailobject.replace_header('From', sender)
+    mailobject.replace_header('Return-Path', sender)
+    mailobject.replace_header('To', ','.join(recipientList))
     message = {
         "Source": sender,
         "Destinations": recipientList,
@@ -78,7 +88,12 @@ def send_email(message):
     except ClientError as e:
         output = e.response['Error']['Message']
     else:
-        output = "Email sent! Message ID: " + response['MessageId']
+        # Modify output message
+        if re.search(r'\<(.*?)\>', message['Source']):
+            fromString = ','.join(re.findall(r'\<(.*?)\>', message['Source']))
+        else: 
+            fromString = message['Source']
+        output = "Email for: " + fromString + " forwarded to: " + ', '.join(message['Destinations']) + "! Message ID: " + response['MessageId']
     return output
 
 def lambda_handler(event, context):
@@ -96,3 +111,4 @@ def lambda_handler(event, context):
     # Send the email and print the result.
     result = send_email(message)
     print(result)
+

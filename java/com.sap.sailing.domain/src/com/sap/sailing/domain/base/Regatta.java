@@ -238,11 +238,26 @@ public interface Regatta
      * show_bug.cgi?id=3588</a>.
      */
     boolean isControlTrackingFromStartAndFinishTimes();
-
+    
     /**
      * @see #isControlTrackingFromStartAndFinishTimes()
      */
     void setControlTrackingFromStartAndFinishTimes(boolean controlTrackingFromStartAndFinishTimes);
+    
+    /**
+     * Tells whether in the scope of this regatta tracking of a race shall automatically be re-started if the competitor
+     * registrations change. Removing the {@link TrackedRace tracked races} and {@link RaceDefinition}s affected is then
+     * required because the {@link RaceDefinition#getCompetitors() set of competitors of a race} is modeled to be
+     * immutable. As the set of competitors that are part of a tracked race is provided by the tracking connector, the
+     * responsibility for adhering to this flag, which rather expresses a request than describes a fact, lies with the
+     * respective connectors.
+     */
+    boolean isAutoRestartTrackingUponCompetitorSetChange();
+    
+    /**
+     * @see #isAutoRestartTrackingUponCompetitorSetChange()
+     */
+    void setAutoRestartTrackingUponCompetitorSetChange(boolean autoRestartTrackingUponCompetitorSetChange);
 
     @Override
     default QualifiedObjectIdentifier getIdentifier() {

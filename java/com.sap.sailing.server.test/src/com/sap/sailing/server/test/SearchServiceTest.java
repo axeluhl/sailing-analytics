@@ -180,7 +180,7 @@ public class SearchServiceTest {
                 new RegattaCreationParametersDTO(seriesCreationParams), /* persistent */
                 true, new LowPoint(), kielAlpha.getId(), /* buoyZoneRadiusInHullLengths */2.0,
                 /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false,
-                RankingMetrics.ONE_DESIGN));
+                /* autoRestartTrackingUponCompetitorSetChange */ false, RankingMetrics.ONE_DESIGN));
         server.apply(new AddColumnToSeries(pfingstbusch29er.getRegattaIdentifier(), "Default", "R1"));
         server.apply(new AddColumnToSeries(pfingstbusch29er.getRegattaIdentifier(), "Default", "R2"));
         server.apply(new AddColumnToSeries(pfingstbusch29er.getRegattaIdentifier(), "Default", "R3"));
@@ -193,7 +193,7 @@ public class SearchServiceTest {
                 new RegattaCreationParametersDTO(seriesCreationParams), /* persistent */
                 true, new LowPoint(), kielBravo.getId(), /* buoyZoneRadiusInHullLengths */2.0,
                 /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false,
-                RankingMetrics.ONE_DESIGN));
+                /* autoRestartTrackingUponCompetitorSetChange */ false, RankingMetrics.ONE_DESIGN));
         server.apply(new AddColumnToSeries(pfingstbusch470.getRegattaIdentifier(), "Default", "R1"));
         server.apply(new AddColumnToSeries(pfingstbusch470.getRegattaIdentifier(), "Default", "R2"));
         server.apply(new AddColumnToSeries(pfingstbusch470.getRegattaIdentifier(), "Default", "R3"));
@@ -222,7 +222,7 @@ public class SearchServiceTest {
                 new RegattaCreationParametersDTO(seriesCreationParams), /* persistent */
                 true, new LowPoint(), flensburgStandard.getId(), /* buoyZoneRadiusInHullLengths */2.0,
                 /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false,
-                RankingMetrics.ONE_DESIGN));
+                /* autoRestartTrackingUponCompetitorSetChange */ false, RankingMetrics.ONE_DESIGN));
         server.apply(new AddColumnToSeries(aalRegatta.getRegattaIdentifier(), "Default", "R1"));
         server.apply(new AddColumnToSeries(aalRegatta.getRegattaIdentifier(), "Default", "R2"));
         RegattaLeaderboard aalRegattaLeaderboard = server.apply(new CreateRegattaLeaderboard(aalRegatta.getRegattaIdentifier(),
