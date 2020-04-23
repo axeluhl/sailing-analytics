@@ -56,7 +56,7 @@ def create_message(file):
             if receivedString in recipientMap:
                 recipientList = recipientMap.get(receivedString)
                 sender = senderMap.get(receivedString, receivedString)
-    # Change original headers to X-headers
+    # Change original headers to X-
     mailobject['X-From'] = mailobject['From']
     if not mailobject['Reply-To']:
         mailobject['Reply-To'] = mailobject['From']
