@@ -12,13 +12,13 @@
     <!--                                                               -->
     <!-- Consider inlining CSS to reduce the number of requested files -->
     <!--                                                               -->
-	<link rel="shortcut icon" type="image/x-icon" href="images/sap.ico" />
+    <link rel="shortcut icon" type="image/x-icon" href="images/sap${whitelabeled}.ico" />
 
 
     <!--                                           -->
     <!-- Any title is fine                         -->
     <!--                                           -->
-    <title>SAP Sailing Analytics Administration Console</title>
+    <title>${SAP}Sailing Analytics Administration Console</title>
     
     <!-- AdminConsole is not prepared to work with nomalize. -->
     <!-- <link rel="stylesheet" type="text/css" href="/sailing-normalize-3.0.2.cache.css"> -->
@@ -27,12 +27,16 @@
     <link rel="stylesheet" type="text/css" href="SettingsDialog.css">
     <link rel="stylesheet" type="text/css" href="AdminConsole.css">
     
-  <script type="text/javascript" src="js/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript" src="js/jquery-3.3.1.min.js"></script>
 
   
-   <!-- Client-side QR code generation -->
-   <script type="text/javascript" src="qrcode/qrcode.min.js"></script>
-    
+    <!-- Client-side QR code generation -->
+    <script type="text/javascript" src="qrcode/qrcode.min.js"></script>
+    <script>
+       document.clientConfigurationContext = {
+            debrandingActive: ${debrandingActive}
+       };
+    </script>
     <!--                                           -->
     <!-- This script loads your compiled module.   -->
     <!-- If you add any GWT meta tags, they must   -->
@@ -40,72 +44,72 @@
     <!--                                           -->
     <script type="text/javascript" language="javascript" src="com.sap.sailing.gwt.ui.AdminConsole/com.sap.sailing.gwt.ui.AdminConsole.nocache.js"></script>
 
-	<!-- Loading Indicator -->
-    	<style type="text/css">
-	.loading {
-		position: absolute;
-		top: 80px;
-		bottom: 0;
-		left: 0;
-		right: 0;
-		font-size: 120%;
-	}
-	.loading > .sapsailing {
-		margin: 40px;
-		color: #008fcc;
-		font-weight: bold;
-	}
-	.loading > .waitmessage {
-		margin: 60px 40px;
-	}
-	
-	.signal {
-	    border:3px solid #6a6a6a;
-	    border-radius: 50%;
-	    position: relative;
-	    height:300px;
-	    width:300px;
-	    margin: 0px auto;
-	    opacity:0;	 
-	    -webkit-animation: pulsate 2s ease-out;
-	            animation: pulsate 2s ease-out;
-	    -webkit-animation-iteration-count:infinite;
-	            animation-iteration-count:infinite;
-	    -webkit-transform: translate(-50%, -50%);
-	}
+    <!-- Loading Indicator -->
+        <style type="text/css">
+    .loading {
+        position: absolute;
+        top: 80px;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        font-size: 120%;
+    }
+    .loading > .sapsailing {
+        margin: 40px;
+        color: #008fcc;
+        font-weight: bold;
+    }
+    .loading > .waitmessage {
+        margin: 60px 40px;
+    }
+    
+    .signal {
+        border:3px solid #6a6a6a;
+        border-radius: 50%;
+        position: relative;
+        height:300px;
+        width:300px;
+        margin: 0px auto;
+        opacity:0;
+        -webkit-animation: pulsate 2s ease-out;
+                animation: pulsate 2s ease-out;
+        -webkit-animation-iteration-count:infinite;
+                animation-iteration-count:infinite;
+        -webkit-transform: translate(-50%, -50%);
+    }
 
-	@-webkit-keyframes pulsate {
-	    0% {
-	      -webkit-transform:scale(.1);
-	              transform:scale(.1);
-	      opacity: 0.0;
-	    }
-	    50% {
-	      opacity:1;
-	    }
-	    100% {
-	      -webkit-transform:scale(1.2);
-	              transform:scale(1.2);
-	      opacity:0;
-	    }
-	}
-	
-	@keyframes pulsate {
-	    0% {
-	      -webkit-transform:scale(.1);
-	              transform:scale(.1);
-	      opacity: 0.0;
-	    }
-	    50% {
-	      opacity:1;
-	    }
-	    100% {
-	      -webkit-transform:scale(1.2);
-	              transform:scale(1.2);
-	      opacity:0;
-	    }
-	}
-	</style>
+    @-webkit-keyframes pulsate {
+        0% {
+          -webkit-transform:scale(.1);
+                  transform:scale(.1);
+          opacity: 0.0;
+        }
+        50% {
+          opacity:1;
+        }
+        100% {
+          -webkit-transform:scale(1.2);
+                  transform:scale(1.2);
+          opacity:0;
+        }
+    }
+    
+    @keyframes pulsate {
+        0% {
+          -webkit-transform:scale(.1);
+                  transform:scale(.1);
+          opacity: 0.0;
+        }
+        50% {
+          opacity:1;
+        }
+        100% {
+          -webkit-transform:scale(1.2);
+                  transform:scale(1.2);
+          opacity:0;
+        }
+    }
+    </style>
   </head>
 
   <!--                                           -->
@@ -126,10 +130,10 @@
       </div>
     </noscript>
 
-    	<div id="loading" class="loading">
-		<p class="sapsailing">SAP Sailing Analytics</p>
-		<p class="waitmessage">Loading, please wait...</p>
-		<div class="signal"></div>
-	</div>
+        <div id="loading" class="loading">
+        <p class="sapsailing">${SAP}Sailing Analytics</p>
+        <p class="waitmessage">Loading, please wait...</p>
+        <div class="signal"></div>
+    </div>
   </body>
 </html>

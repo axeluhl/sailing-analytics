@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -244,7 +245,9 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
                         useInternalMarkPassingAlgorithmCheckbox.getValue());
             }
         });
-
+        btnTrack.setEnabled(false);
+        connectionsTable.getSelectionModel().addSelectionChangeHandler(
+                e -> btnTrack.setEnabled(connectionsTable.getSelectionModel().getSelectedSet().size() == 1));
     }
 
     private AccessControlledButtonPanel createButtonPanel(final SailingServiceAsync sailingService,
@@ -281,13 +284,13 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
                             }
                         }, userService, errorReporter).show());
         // Remove action
-        final Button removeButton = buttonPanel.addRemoveAction(stringMessages.remove(), () -> {
-            sailingService.deleteSwissTimingArchiveConfiguration(
-                    connectionsTable.getSelectionModel().getSelectedObject(), new AsyncCallback<Void>() {
+        buttonPanel.addRemoveAction(stringMessages.remove(), connectionsTable.getSelectionModel(), false, () -> {
+            sailingService.deleteSwissTimingArchiveConfigurations(connectionsTable.getSelectionModel().getSelectedSet(),
+                    new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
                             errorReporter.reportError(
-                                    "Exception trying to delete configuration in DB: " + caught.getMessage());
+                                    "Exception trying to delete configuration(s) in DB: " + caught.getMessage());
                         }
 
                         @Override
@@ -301,12 +304,10 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
             fillRaces(sailingService);
         });
         listRacesButton.setEnabled(false);
-        removeButton.setEnabled(false);
         // add change handlers to enable and disable List Races and Remove
         connectionsTable.getSelectionModel().addSelectionChangeHandler(e -> {
-            final boolean objectSelected = connectionsTable.getSelectionModel().getSelectedObject() != null;
+            final boolean objectSelected = connectionsTable.getSelectionModel().getSelectedSet().size() == 1;
             listRacesButton.setEnabled(objectSelected);
-            removeButton.setEnabled(objectSelected);
         });
         return buttonPanel;
     }
@@ -342,9 +343,10 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
     }
 
     private void fillRaces(final SailingServiceAsync sailingService) {
-        final SwissTimingArchiveConfigurationWithSecurityDTO selectedObject = connectionsTable.getSelectionModel()
-                .getSelectedObject();
-        if (selectedObject != null) {
+        final Set<SwissTimingArchiveConfigurationWithSecurityDTO> selectedObjects = connectionsTable.getSelectionModel()
+                .getSelectedSet();
+        if (selectedObjects.size() == 1) {
+            SwissTimingArchiveConfigurationWithSecurityDTO selectedObject = selectedObjects.iterator().next();
             sailingService.listSwissTiminigReplayRaces(selectedObject.getJsonUrl(),
                     new AsyncCallback<List<SwissTimingReplayRaceDTO>>() {
             @Override

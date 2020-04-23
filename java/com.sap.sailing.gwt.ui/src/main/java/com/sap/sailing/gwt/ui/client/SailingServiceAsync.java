@@ -203,7 +203,7 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
     void createTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI,
             String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword, AsyncCallback<Void> callback);
 
-    void deleteTracTracConfiguration(TracTracConfigurationWithSecurityDTO tracTracConfiguration,
+    void deleteTracTracConfigurations(Collection<TracTracConfigurationWithSecurityDTO> tracTracConfigurations,
             AsyncCallback<Void> callback);
 
     void updateTracTracConfiguration(TracTracConfigurationWithSecurityDTO tracTracConfiguration,
@@ -390,7 +390,7 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
     void updateSwissTimingConfiguration(SwissTimingConfigurationWithSecurityDTO configuration,
             AsyncCallback<Void> asyncCallback);
 
-    void deleteSwissTimingConfiguration(SwissTimingConfigurationWithSecurityDTO configuration,
+    void deleteSwissTimingConfigurations(Collection<SwissTimingConfigurationWithSecurityDTO> configurations,
             AsyncCallback<Void> asyncCallback);
 
     void getCountryCodes(AsyncCallback<String[]> callback);
@@ -499,8 +499,8 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
             CompetitorRegistrationType competitorRegistrationType, String registrationLinkSecret, Date startDate, Date endDate,
             RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedal, boolean persistent,
             ScoringSchemeType scoringSchemeType, UUID defaultCourseAreaId, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
-            boolean controlTrackingFromStartAndFinishTimes, RankingMetrics rankingMetricType,
-            AsyncCallback<RegattaDTO> callback);
+            boolean controlTrackingFromStartAndFinishTimes, boolean autoRestartTrackingUponCompetitorSetChange,
+            RankingMetrics rankingMetricType, AsyncCallback<RegattaDTO> callback);
 
     void addRaceColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName,
             List<Pair<String, Integer>> columnNames, AsyncCallback<List<RaceColumnInSeriesDTO>> callback);
@@ -603,13 +603,13 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
     void updateSwissTimingArchiveConfiguration(SwissTimingArchiveConfigurationWithSecurityDTO dto,
             AsyncCallback<Void> asyncCallback);
 
-    void deleteSwissTimingArchiveConfiguration(SwissTimingArchiveConfigurationWithSecurityDTO dto,
+    void deleteSwissTimingArchiveConfigurations(Collection<SwissTimingArchiveConfigurationWithSecurityDTO> dtos,
             AsyncCallback<Void> asyncCallback);
 
     void updateRegatta(RegattaIdentifier regattaIdentifier, Date startDate, Date endDate, UUID defaultCourseAreaUuid,
             RegattaConfigurationDTO regattaConfiguration, Double buoyZoneRadiusInHullLengths,
             boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes,
-            String registrationLinkSecret, CompetitorRegistrationType registrationType, AsyncCallback<Void> callback);
+            boolean autoRestartTrackingUponCompetitorSetChange, String registrationLinkSecret, CompetitorRegistrationType registrationType, AsyncCallback<Void> callback);
 
     /**
      * @param detailType
@@ -1237,9 +1237,25 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
 
     void createOrUpdateCourseTemplate(CourseTemplateDTO courseTemplate, AsyncCallback<CourseTemplateDTO> asyncCallback);
 
-    void removeCourseTemplate(UUID uuid, AsyncCallback<Void> asyncCallback);
+    /**
+     * Remove course templates by UUIDs
+     * 
+     * @param courseTemplatesUuids
+     *            the {@link Collection} of course templates' UUIDs which will be remove
+     * @param asyncCallback
+     *            {@link AsyncCallback} object
+     */
+    void removeCourseTemplates(Collection<UUID> courseTemplatesUuids, AsyncCallback<Void> asyncCallback);
 
-    void removeMarkProperties(UUID uuid, AsyncCallback<Void> asyncCallback);
+    /**
+     * Remove mark properties by UUIDs
+     * 
+     * @param markPropertiesUuids
+     *            the {@link Collection} of mark properties' UUIDs which will be remove
+     * @param asyncCallback
+     *            {@link AsyncCallback} object
+     */
+    void removeMarkProperties(Collection<UUID> markPropertiesUuids, AsyncCallback<Void> asyncCallback);
 
     void getMarkRoles(AsyncCallback<List<MarkRoleDTO>> callback);
 

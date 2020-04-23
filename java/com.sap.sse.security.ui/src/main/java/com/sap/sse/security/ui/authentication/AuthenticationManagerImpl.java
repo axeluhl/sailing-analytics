@@ -209,7 +209,7 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
             public void onSuccess(UserDTO result) {
                 refreshUserInfo();
                 callback.onSuccess(result);
-                if(!Util.equalsWithNull(locale, localeName)) {
+                if (!Util.equalsWithNull(locale, localeName)) {
                     redirectIfLocaleIsSetAndLocaleIsNotGivenInTheURL(localeName);
                 }
             }
@@ -221,19 +221,19 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
      */
     private void redirectWithLocaleForAuthenticatedUser() {
         final AuthenticationContext authenticationContext = getAuthenticationContext();
-        if(authenticationContext.isLoggedIn()) {
+        if (authenticationContext.isLoggedIn()) {
             redirectIfLocaleIsSetAndLocaleIsNotGivenInTheURL(authenticationContext.getCurrentUser().getLocale());
         }
     }
 
     private void redirectIfLocaleIsSetAndLocaleIsNotGivenInTheURL(String locale) {
-        if(shouldChangeLocale(locale)) {
+        if (shouldChangeLocale(locale)) {
             Window.Location.reload();
         }
     }
 
     private boolean shouldChangeLocale(String locale) {
-        if(locale == null || locale.isEmpty()) {
+        if (locale == null || locale.isEmpty()) {
             // If the user currently has no locale preference, we do not refresh
             return false;
         }

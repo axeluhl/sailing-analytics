@@ -27,6 +27,7 @@ public class RegattaJsonSerializer implements JsonSerializer<Regatta> {
     public static final String FIELD_COMPETITOR_REGISTRATION_TYPE = "competitorRegistrationType";
     public static final String FIELD_USE_START_TIME_INFERENCE = "useStartTimeInference";
     public static final String FIELD_CONTROL_TRACKING_FROM_START_AND_FINISH_TIMES = "controlTrackingFromStartAndFinishTimes";
+    public static final String FIELD_AUTO_RESTART_TRACKING_UPON_COMPETITOR_SET_CHANGE = "autoRestartTrackingUponCompetitorSetChange";
 
     private final JsonSerializer<Series> seriesSerializer;
     private final JsonSerializer<Competitor> competitorSerializer;
@@ -60,6 +61,7 @@ public class RegattaJsonSerializer implements JsonSerializer<Regatta> {
         result.put(FIELD_COMPETITOR_REGISTRATION_TYPE, regatta.getCompetitorRegistrationType().name());
         result.put(FIELD_USE_START_TIME_INFERENCE, regatta.useStartTimeInference());
         result.put(FIELD_CONTROL_TRACKING_FROM_START_AND_FINISH_TIMES, regatta.isControlTrackingFromStartAndFinishTimes());
+        result.put(FIELD_AUTO_RESTART_TRACKING_UPON_COMPETITOR_SET_CHANGE, regatta.isAutoRestartTrackingUponCompetitorSetChange());
         if (seriesSerializer != null) {
             JSONArray seriesJson = new JSONArray();
             for (Series series : regatta.getSeries()) {

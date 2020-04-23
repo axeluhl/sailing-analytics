@@ -11,6 +11,8 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.gwt.shared.ClientConfiguration;
+import com.sap.sse.gwt.shared.DebugConstants;
 
 /**
  * Generic header widget that is designed with a SAP logo and SAP color scheme.
@@ -52,6 +54,13 @@ public class SAPHeader extends Composite {
         logoAnchor.setHref(LOGO_URL);
         String sapSailingUrl = applicationBaseUrl + "?locale=" + LocaleInfo.getCurrentLocale().getLocaleName();
         applicationNameAnchor.setHref(sapSailingUrl);
+
+        if (!ClientConfiguration.getInstance().isBrandingActive()) {
+            logoAnchor.getStyle().setDisplay(Display.NONE);
+            applicationNameAnchor.setHref("");
+        }
+        logoAnchor.setAttribute(DebugConstants.DEBUG_ID_ATTRIBUTE, "logoAnchor");
+        applicationNameAnchor.setAttribute(DEBUG_ID_PREFIX, "applicationNameAnchor");
     }
 
     public void setHeaderTitle(String title) {
