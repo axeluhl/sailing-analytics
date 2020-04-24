@@ -58,9 +58,9 @@ for feature in $features; do
         if [ "$?" == "0" ]; then
             # found a configuration for the bundle
             echo ' *** Found a non-default configuration for bundle '${bundle}' ***'
-            bundle_spec_for_launch=$(echo "$autostart_bundles" | grep '^'${bundle}' [^ ]* [^ ]*$' | sed -e 's/^\([^ ]*\) \([^ ]*\) \([^ ]*\)$/\1@\2:\3/')
+            bundle_spec_for_launch=$(echo "$autostart_bundles" | grep '^'${bundle}' [^ ]* [^ ]*$' | sed -e 's/^\([^ ]*\) \([^ ]*\) \([^ ]*\)$/\1\\@\2:\3/')
         else
-            bundle_spec_for_launch="${bundle}@default:default"
+            bundle_spec_for_launch="${bundle}\@default:default"
         fi
         if [[ $feature =~ .runtime$ ]]; then
             # contribute to target_bundles
@@ -96,7 +96,7 @@ while [ "$2" != "" ]; do
         perl -i -p0e "s/<setAttribute key=\"selected_target_bundles\">.*?<\/setAttribute>/${selected_target_bundles}/s" "$2"
         perl -i -p0e "s/<setAttribute key=\"selected_workspace_bundles\">.*?<\/setAttribute>/${patched_workspace_bundles}/s" "$2"
 		# remove eventuelly created bak files (this happens at least on windows platform)
-		rm "$2.bak"
+		rm -f "$2.bak"
     fi
     shift
 done
