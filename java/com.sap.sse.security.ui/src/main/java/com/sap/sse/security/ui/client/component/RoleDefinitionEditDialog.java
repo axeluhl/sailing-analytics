@@ -9,11 +9,11 @@ import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 public class RoleDefinitionEditDialog extends AbstractRoleDefinitionDialog {
     private final UUID roleDefinitionId;
-    
+
     public RoleDefinitionEditDialog(RoleDefinition roleDefinition, StringMessages stringMessages,
             Iterable<WildcardPermission> allExistingPermissions, Iterable<RoleDefinitionDTO> allOtherRoles,
             DialogCallback<RoleDefinitionDTO> callback) {
-        super(stringMessages, allExistingPermissions, allOtherRoles, callback);
+        super(stringMessages, allExistingPermissions, new RoleValidator(stringMessages, allOtherRoles), callback);
         roleDefinitionId = roleDefinition.getId();
         roleDefinitionNameField.setText(roleDefinition.getName());
         permissionsList.setValue(roleDefinition.getPermissions());
