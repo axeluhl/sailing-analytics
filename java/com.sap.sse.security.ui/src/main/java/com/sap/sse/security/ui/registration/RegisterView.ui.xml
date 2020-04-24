@@ -7,7 +7,7 @@
     <ui:with field="local_res" type="com.sap.sse.security.ui.registration.RegisterViewResources" />
 	<g:HTMLPanel styleName="{local_res.css.registrationform}">
 	    <div class="{local_res.css.registrationform_header}">
-			<img src="{icon_res.sapLogo.getSafeUri}" />
+			<img ui:field="logoImage" src="{icon_res.sapLogo.getSafeUri}" />
 			<g:Label styleName="{local_res.css.registrationform_header_appname}" ui:field="appNameLabel" />
 	    </div>
 	    <div class="{local_res.css.registrationform_content}">

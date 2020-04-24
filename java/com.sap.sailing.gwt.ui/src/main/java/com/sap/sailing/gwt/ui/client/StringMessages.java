@@ -2352,6 +2352,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String wayPointMarkInSequenceMissing();
     String defaultNumberOfLaps();
     String invalidImageURL();
+    String invalidURL();
     String setDeviceIdentifier();
     String setPosition();
     String spareMarksAndTheirOptionalDefaultMarkRoles();
@@ -2376,4 +2377,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String confirmUnsettingPositionForMarkProperties(String name);
     String useOfficialResultsForAutomaticUpdates();
     String keepEmptyForDefaultUserAndPassword();
+    String autoRestartTrackingUponCompetitorSetChange();
+    String whitelabelFooterLanguage();
+    String whitelabelSailing();
 }

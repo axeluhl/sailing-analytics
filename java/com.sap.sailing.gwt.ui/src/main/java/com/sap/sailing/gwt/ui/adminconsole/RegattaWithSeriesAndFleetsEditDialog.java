@@ -39,14 +39,12 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
                 stringMessages.ok(), sailingService, stringMessages, new RegattaParameterValidator(stringMessages), callback);
         ensureDebugId("RegattaWithSeriesAndFleetsEditDialog");
         currentRegattaConfiguration = regatta.configuration;
-
         nameEntryField.setEnabled(false);
         boatClassEntryField.setEnabled(false);
         canBoatsOfCompetitorsChangePerRaceCheckBox.setEnabled(false);
         scoringSchemeListBox.setEnabled(false);
         sailingEventsListBox.setEnabled(true);
         courseAreaListBox.setEnabled(true);
-
         regattaConfigurationCheckbox = createCheckbox(stringMessages.setRacingProcedureConfiguration());
         regattaConfigurationCheckbox.ensureDebugId("RacingProcedureConfigurationCheckBox");
         regattaConfigurationCheckbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
@@ -92,14 +90,11 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
     protected void setupAdditionalWidgetsOnPanel(VerticalPanel panel, Grid formGrid) {
         super.setupAdditionalWidgetsOnPanel(panel, formGrid);
         VerticalPanel content = new VerticalPanel();
-
         Grid proceduresGrid = new Grid(1, 2);
         proceduresGrid.setWidget(0, 0, regattaConfigurationCheckbox);
         proceduresGrid.setWidget(0, 1, regattaConfigurationButton);
-
         content.add(proceduresGrid);
         panel.add(content);
-
         TabPanel tabPanel = new TabPanel();
         tabPanel.setWidth("100%");
         tabPanel.add(getSeriesEditor(), stringMessages.series());

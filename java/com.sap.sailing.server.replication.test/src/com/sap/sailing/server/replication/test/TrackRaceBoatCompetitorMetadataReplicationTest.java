@@ -104,7 +104,7 @@ public class TrackRaceBoatCompetitorMetadataReplicationTest extends AbstractServ
                 /* start with no series */ Collections.emptySet(),
                 /* persistent */ true, new LowPoint(), /* defaultCourseAreaId */ UUID.randomUUID(),
                 /* buoyZoneRadiusInHullLengths */ 2., /* useStartTimeInference */ false, /* controlTrackingFromStartAndFinishTimes */ false,
-                /* rankingMetricConstructor */ OneDesignRankingMetric::new);
+                /* autoRestartTrackingUponCompetitorSetChange */ false, /* rankingMetricConstructor */ OneDesignRankingMetric::new);
         final RegattaName regattaIdentifier = new RegattaName(regatta.getName());
         master.apply(new UpdateSeries(regattaIdentifier, "Default", "Default", /* isMedal */ false, /* isFleetsCanRunInParallel */ false,
                 /* resultDiscardingThresholds */ null, /* startsWithZeroScore */ false, /* firstColumnIsNonDiscardableCarryForward */ false,

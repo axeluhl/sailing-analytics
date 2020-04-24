@@ -33,6 +33,7 @@ public class AddSpecificRegatta extends AbstractAddRegattaOperation {
     private final Double buoyZoneRadiusInHullLengths;
     private final boolean useStartTimeInference;
     private final boolean controlTrackingFromStartAndFinishTimes;
+    private final boolean autoRestartTrackingUponCompetitorSetChange;
     private final boolean canBoatsOfCompetitorsChangePerRace;
     private final CompetitorRegistrationType competitorRegistrationType;
     private final RankingMetrics rankingMetricType;
@@ -42,7 +43,7 @@ public class AddSpecificRegatta extends AbstractAddRegattaOperation {
             CompetitorRegistrationType competitorRegistrationType, String registrationLinkSecret, TimePoint startDate, TimePoint endDate, Serializable id,
             RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedalAndDiscardingThresholds,
             boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
-            boolean controlTrackingFromStartAndFinishTimes, RankingMetrics rankingMetricType) {
+            boolean controlTrackingFromStartAndFinishTimes, boolean autoRestartTrackingUponCompetitorSetChange, RankingMetrics rankingMetricType) {
         super(regattaName, boatClassName, startDate, endDate, id);
         this.canBoatsOfCompetitorsChangePerRace = canBoatsOfCompetitorsChangePerRace;
         this.competitorRegistrationType = competitorRegistrationType;
@@ -52,6 +53,7 @@ public class AddSpecificRegatta extends AbstractAddRegattaOperation {
         this.defaultCourseAreaId = defaultCourseAreaId;
         this.useStartTimeInference = useStartTimeInference;
         this.controlTrackingFromStartAndFinishTimes = controlTrackingFromStartAndFinishTimes;
+        this.autoRestartTrackingUponCompetitorSetChange = autoRestartTrackingUponCompetitorSetChange;
         this.rankingMetricType = rankingMetricType;
         this.buoyZoneRadiusInHullLengths = buoyZoneRadiusInHullLengths;
         this.registrationLinkSecret = registrationLinkSecret;
@@ -59,9 +61,11 @@ public class AddSpecificRegatta extends AbstractAddRegattaOperation {
 
     @Override
     public Regatta internalApplyTo(RacingEventService toState) throws Exception {
-        Regatta regatta = toState.createRegatta(getRegattaName(), getBoatClassName(), canBoatsOfCompetitorsChangePerRace, 
-                competitorRegistrationType, registrationLinkSecret, getStartDate(), getEndDate(), getId(), createSeries(toState),
-                persistent, scoringScheme, defaultCourseAreaId, buoyZoneRadiusInHullLengths, useStartTimeInference, controlTrackingFromStartAndFinishTimes, RankingMetricsFactory.getRankingMetricConstructor(rankingMetricType));
+        Regatta regatta = toState.createRegatta(getRegattaName(), getBoatClassName(),
+                canBoatsOfCompetitorsChangePerRace, competitorRegistrationType, registrationLinkSecret, getStartDate(),
+                getEndDate(), getId(), createSeries(toState), persistent, scoringScheme, defaultCourseAreaId,
+                buoyZoneRadiusInHullLengths, useStartTimeInference, controlTrackingFromStartAndFinishTimes,
+                autoRestartTrackingUponCompetitorSetChange, RankingMetricsFactory.getRankingMetricConstructor(rankingMetricType));
         return regatta;
     }
 
