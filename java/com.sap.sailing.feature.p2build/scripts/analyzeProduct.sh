@@ -88,8 +88,15 @@ while [ "$2" != "" ]; do
         fi
         selected_target_bundles="<setAttribute key=\"selected_target_bundles\">${target_bundles}${NL}<\/setAttribute>"
         patched_workspace_bundles="<setAttribute key=\"selected_workspace_bundles\">${patched_workspace_bundles}${NL}<\/setAttribute>"
-        perl -i -p0e "s/<setAttribute key=\"selected_target_bundles\">(.*?)<\/setAttribute>/${selected_target_bundles}/sg" "$2"
-        perl -i -p0e "s/<setAttribute key=\"selected_workspace_bundles\">(.*?)<\/setAttribute>/${patched_workspace_bundles}/sg" "$2"
+		# Used Perl CLI options:
+		#0 -> specifies the record separator, as you alread found out, it defaults to \0 so it does not terminate before the end of the text file. Ensures that the regular expression is applied over the whole file.
+		#p -> apply looping wrapper, see perl man page
+		#e -> denotes the (regular) expression that is goint ot be applied.
+		#i -> inplace editing of files
+        perl -i -p0e "s/<setAttribute key=\"selected_target_bundles\">.*?<\/setAttribute>/${selected_target_bundles}/s" "$2"
+        perl -i -p0e "s/<setAttribute key=\"selected_workspace_bundles\">.*?<\/setAttribute>/${patched_workspace_bundles}/s" "$2"
+		# remove eventuelly created bak files (this happens at least on windows platform)
+		rm "$2.bak"
     fi
     shift
 done
