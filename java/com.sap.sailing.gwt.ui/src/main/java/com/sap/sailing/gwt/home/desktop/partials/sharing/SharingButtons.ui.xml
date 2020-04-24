@@ -3,7 +3,7 @@
 	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
 	<ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.partials.sharing.SharingButtonsResources" />
-  	<g:HTMLPanel addStyleNames="{local_res.css.eventheader_sharing}">
+  	<g:HTMLPanel addStyleNames="{local_res.css.eventheader_sharing}" ui:field="htmlPanel">
     	<a ui:field="mail" title="{i18n.sharingMailTooltip}" 
     			class="{local_res.css.eventheader_sharing_item} {local_res.css.eventheader_sharing_itememail}"></a>
     	<a ui:field="twitter" title="{i18n.sharingTwitterTooltip}" target="_blank"

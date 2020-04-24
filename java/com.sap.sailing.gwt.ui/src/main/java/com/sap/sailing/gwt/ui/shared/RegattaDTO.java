@@ -42,6 +42,7 @@ public class RegattaDTO extends NamedSecuredObjectDTO implements SecuredDTO {
     public DeviceConfigurationDTO.RegattaConfigurationDTO configuration;
     public boolean useStartTimeInference = true;
     public boolean controlTrackingFromStartAndFinishTimes = false;
+    public boolean autoRestartTrackingUponCompetitorSetChange = false;
     public boolean canBoatsOfCompetitorsChangePerRace = false;
     public CompetitorRegistrationType competitorRegistrationType = CompetitorRegistrationType.CLOSED;
     public RankingMetrics rankingMetricType;
@@ -77,6 +78,7 @@ public class RegattaDTO extends NamedSecuredObjectDTO implements SecuredDTO {
         this.configuration = other.configuration;
         this.useStartTimeInference = other.useStartTimeInference;
         this.controlTrackingFromStartAndFinishTimes = other.controlTrackingFromStartAndFinishTimes;
+        this.autoRestartTrackingUponCompetitorSetChange = other.autoRestartTrackingUponCompetitorSetChange;
         this.canBoatsOfCompetitorsChangePerRace = other.canBoatsOfCompetitorsChangePerRace;
         this.competitorRegistrationType = other.competitorRegistrationType;
         this.buoyZoneRadiusInHullLengths = other.buoyZoneRadiusInHullLengths;

@@ -187,9 +187,9 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
         final EditACLDialog.DialogConfig<UserDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementService(), type,
                 user -> user.getAccessControlList(), stringMessages);
-        userActionColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, configOwnership::openDialog);
+        userActionColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, configOwnership::openOwnershipDialog);
         userActionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                u -> configACL.openDialog(u));
+                u -> configACL.openACLDialog(u));
         filterField = new LabeledAbstractFilterablePanel<UserDTO>(new Label(stringMessages.filterUsers()),
                 new ArrayList<UserDTO>(), dataProvider, stringMessages) {
             @Override

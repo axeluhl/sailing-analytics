@@ -180,12 +180,12 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
         final DialogConfig<BoatDTO> editOwnerShipDialog = EditOwnershipDialog.create(
                 userService.getUserManagementService(), SecuredDomainType.BOAT, null, stringMessages);
         boatActionColumn.addAction(BoatConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
-                editOwnerShipDialog::openDialog);
+                editOwnerShipDialog::openOwnershipDialog);
 
         final EditACLDialog.DialogConfig<BoatDTO> configACL = EditACLDialog
                 .create(userService.getUserManagementService(), type, null, stringMessages);
         boatActionColumn.addAction(BoatConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                configACL::openDialog);
+                configACL::openACLDialog);
 
         mainPanel.insert(filterField, 0);
         table.addColumnSortHandler(boatColumnListHandler);

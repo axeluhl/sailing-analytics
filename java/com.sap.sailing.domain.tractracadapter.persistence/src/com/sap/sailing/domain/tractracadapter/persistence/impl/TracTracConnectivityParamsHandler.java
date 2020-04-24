@@ -3,6 +3,7 @@ package com.sap.sailing.domain.tractracadapter.persistence.impl;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,6 +25,8 @@ import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionUtils;
+import com.tractrac.model.lib.api.event.CreateModelException;
+import com.tractrac.util.lib.api.exceptions.TimeOutException;
 
 /**
  * Handles mapping TracTrac connectivity parameters from and to a map with {@link String} keys. The
@@ -139,7 +142,7 @@ public class TracTracConnectivityParamsHandler extends AbstractRaceTrackingConne
     }
 
     private void updatePersistentTracTracConfiguration(RaceTrackingConnectivityParametersImpl params)
-            throws MalformedURLException, IOException, ParseException {
+            throws MalformedURLException, IOException, ParseException, CreateModelException, URISyntaxException, TimeOutException {
         final String jsonURL = params.getTractracRace().getParameterSet().getParameter("eventJSON");
         final String creatorName = SessionUtils.getPrincipal().toString();
         final TracTracConfigurationImpl tracTracConfiguration = new TracTracConfigurationImpl(creatorName, params.getTractracRace().getEvent().getName(), jsonURL,

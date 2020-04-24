@@ -152,6 +152,8 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
      * show_bug.cgi?id=3588</a>.
      */
     private boolean controlTrackingFromStartAndFinishTimes;
+    
+    private boolean autoRestartTrackingUponCompetitorSetChange;
 
     private boolean canBoatsOfCompetitorsChangePerRace;
 
@@ -169,7 +171,8 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     
     /**
      * Constructs a regatta with an empty {@link RaceLogStore} and with
-     * {@link Regatta#isControlTrackingFromStartAndFinishTimes()} set to {@code false}.
+     * {@link Regatta#isControlTrackingFromStartAndFinishTimes()} and
+     * {@link #isAutoRestartTrackingUponCompetitorSetChange()} set to {@code false}.
      */
     public RegattaImpl(String name, BoatClass boatClass, boolean canBoatsOfCompetitorsChangePerRace, CompetitorRegistrationType competitorRegistrationType,
             TimePoint startDate, TimePoint endDate,
@@ -178,13 +181,14 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         this(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE, name, boatClass, canBoatsOfCompetitorsChangePerRace, competitorRegistrationType,
                 startDate, endDate, series,
                 persistent, scoringScheme, id, courseArea, 0.0, /* useStartTimeInference */true, /* controlTrackingFromStartAndFinishTimes */ false,
-                rankingMetricConstructor, registrationLinkSecret);
+                /* autoRestartTrackingUponCompetitorSetChange */ false, rankingMetricConstructor, registrationLinkSecret);
     }
 
     /**
      * Constructs a regatta with a single default series with empty race column list, and a single default fleet which
      * is not {@link #isPersistent() marked for persistence}. The regatta is created with
-     * {@link Regatta#isControlTrackingFromStartAndFinishTimes()} set to {@code false}.
+     * {@link Regatta#isControlTrackingFromStartAndFinishTimes()} and
+     * {@link #isAutoRestartTrackingUponCompetitorSetChange()} set to {@code false}.
      * 
      * @param trackedRegattaRegistry
      *            used to find the {@link TrackedRegatta} for this column's series' {@link Series#getRegatta() regatta}
@@ -199,8 +203,8 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
             ScoringScheme scoringScheme, Serializable id, CourseArea courseArea, String registrationLinkSecret) {
         this(raceLogStore, regattaLogStore, name, boatClass, canBoatsOfCompetitorsChangePerRace, competitorRegistrationType,
                 startDate, endDate, trackedRegattaRegistry, scoringScheme,
-                id, courseArea, /* controlTrackingFromStartAndFinishTimes */ false, OneDesignRankingMetric::new,
-                registrationLinkSecret);
+                id, courseArea, /* controlTrackingFromStartAndFinishTimes */ false, /* autoRestartTrackingUponCompetitorSetChange */ false,
+                OneDesignRankingMetric::new, registrationLinkSecret);
     }
 
     /**
@@ -217,15 +221,15 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
             boolean canBoatsOfCompetitorsChangePerRace, CompetitorRegistrationType competitorRegistrationType,
             TimePoint startDate, TimePoint endDate, TrackedRegattaRegistry trackedRegattaRegistry,
             ScoringScheme scoringScheme, Serializable id, CourseArea courseArea,
-            boolean controlTrackingFromStartAndFinishTimes, RankingMetricConstructor rankingMetricConstructor,
-            String registrationLinkSecret) {
+            boolean controlTrackingFromStartAndFinishTimes, boolean autoRestartTrackingUponCompetitorSetChange,
+            RankingMetricConstructor rankingMetricConstructor, String registrationLinkSecret) {
         this(raceLogStore, regattaLogStore, name, boatClass, canBoatsOfCompetitorsChangePerRace, competitorRegistrationType,
                 startDate, endDate, Collections.singletonList(new SeriesImpl(LeaderboardNameConstants.DEFAULT_SERIES_NAME,
                 /* isMedal */false, /* isFleetsCanRunInParallel */ true, Collections
                         .singletonList(new FleetImpl(LeaderboardNameConstants.DEFAULT_FLEET_NAME)),
                 /* race column names */new ArrayList<String>(), trackedRegattaRegistry)), /* persistent */false,
                 scoringScheme, id, courseArea, /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */true, controlTrackingFromStartAndFinishTimes,
-                rankingMetricConstructor, registrationLinkSecret);
+                autoRestartTrackingUponCompetitorSetChange, rankingMetricConstructor, registrationLinkSecret);
     }
 
     /**
@@ -237,13 +241,14 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
             BoatClass boatClass, boolean canBoatsOfCompetitorsChangePerRace, CompetitorRegistrationType competitorRegistrationType,
             TimePoint startDate, TimePoint endDate, Iterable<S> series, boolean persistent,
             ScoringScheme scoringScheme, Serializable id, CourseArea courseArea, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
-            boolean controlTrackingFromStartAndFinishTimes, RankingMetricConstructor rankingMetricConstructor,
-            String registrationLinkSecret) {
+            boolean controlTrackingFromStartAndFinishTimes, boolean autoRestartTrackingUponCompetitorSetChange,
+            RankingMetricConstructor rankingMetricConstructor, String registrationLinkSecret) {
         super(name);
         this.registrationLinkSecret = registrationLinkSecret;
         this.rankingMetricConstructor = rankingMetricConstructor;
         this.useStartTimeInference = useStartTimeInference;
         this.controlTrackingFromStartAndFinishTimes = controlTrackingFromStartAndFinishTimes;
+        this.autoRestartTrackingUponCompetitorSetChange = autoRestartTrackingUponCompetitorSetChange;
         this.id = id;
         this.raceLogStore = raceLogStore;
         races = new ConcurrentHashMap<>();
@@ -672,8 +677,18 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     }
     
     @Override
+    public boolean isAutoRestartTrackingUponCompetitorSetChange() {
+        return autoRestartTrackingUponCompetitorSetChange;
+    }
+
+    @Override
     public void setControlTrackingFromStartAndFinishTimes(boolean controlTrackingFromStartAndFinishTimes) {
         this.controlTrackingFromStartAndFinishTimes = controlTrackingFromStartAndFinishTimes;
+    }
+    
+    @Override
+    public void setAutoRestartTrackingUponCompetitorSetChange(boolean autoRestartTrackingUponCompetitorSetChange) {
+        this.autoRestartTrackingUponCompetitorSetChange = autoRestartTrackingUponCompetitorSetChange;
     }
 
     @Override

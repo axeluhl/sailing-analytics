@@ -129,9 +129,9 @@ public class TracTracConnectionTableWrapper extends
         final EditACLDialog.DialogConfig<TracTracConfigurationWithSecurityDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementService(), type, dto -> dto.getAccessControlList(), stringMessages);
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_OWNERSHIP, DefaultActions.CHANGE_OWNERSHIP,
-                configOwnership::openDialog);
+                configOwnership::openOwnershipDialog);
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                u -> configACL.openDialog(u));
+                u -> configACL.openACLDialog(u));
         filterField = new LabeledAbstractFilterablePanel<TracTracConfigurationWithSecurityDTO>(
                 new Label(stringMessages.filterTracTracConnections()),
                 new ArrayList<TracTracConfigurationWithSecurityDTO>(), dataProvider, stringMessages) {

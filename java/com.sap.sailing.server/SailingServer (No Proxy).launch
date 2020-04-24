@@ -11,6 +11,7 @@
 <booleanAttribute key="default" value="true"/>
 <booleanAttribute key="default_auto_start" value="false"/>
 <intAttribute key="default_start_level" value="4"/>
+<setAttribute key="deselected_workspace_bundles"/>
 <booleanAttribute key="includeOptional" value="false"/>
 <stringAttribute key="org.eclipse.debug.core.source_locator_id" value="org.eclipse.pde.ui.launcher.PDESourceLookupDirector"/>
 <stringAttribute key="org.eclipse.debug.core.source_locator_memento" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot;?&gt;&#13;&#10;&lt;sourceLookupDirector&gt;&#13;&#10;&lt;sourceContainers duplicates=&quot;false&quot;&gt;&#13;&#10;&lt;container memento=&quot;&amp;lt;?xml version=&amp;quot;1.0&amp;quot; encoding=&amp;quot;UTF-8&amp;quot; standalone=&amp;quot;no&amp;quot;?&amp;gt;&amp;#13;&amp;#10;&amp;lt;classpathContainer path=&amp;quot;com.google.gwt.eclipse.core.GWT_CONTAINER&amp;quot;/&amp;gt;&amp;#13;&amp;#10;&quot; typeId=&quot;org.eclipse.jdt.launching.sourceContainer.classpathContainer&quot;/&gt;&#13;&#10;&lt;container memento=&quot;&amp;lt;?xml version=&amp;quot;1.0&amp;quot; encoding=&amp;quot;UTF-8&amp;quot; standalone=&amp;quot;no&amp;quot;?&amp;gt;&amp;#13;&amp;#10;&amp;lt;default/&amp;gt;&amp;#13;&amp;#10;&quot; typeId=&quot;org.eclipse.debug.core.containerType.default&quot;/&gt;&#13;&#10;&lt;/sourceContainers&gt;&#13;&#10;&lt;/sourceLookupDirector&gt;&#13;&#10;"/>
@@ -111,7 +112,7 @@
 <setEntry value="org.objectweb.asm@default:default"/>
 <setEntry value="routeconverter@default:default"/>
 <setEntry value="slf4j.api@default:default"/>
-<setEntry value="slf4j.jdk14@default:false"/>
+<setEntry value="slf4j.jdk14@default:default"/>
 </setAttribute>
 <setAttribute key="selected_workspace_bundles">
 <setEntry value="com.google.gwt.servlet@default:default"/>
@@ -158,7 +159,7 @@
 <setEntry value="com.sap.sailing.polars.datamining@5:true"/>
 <setEntry value="com.sap.sailing.polars@5:true"/>
 <setEntry value="com.sap.sailing.resultimport@4:true"/>
-<setEntry value="com.sap.sailing.routeconverterjava11extension@default:false"/>
+<setEntry value="com.sap.sailing.routeconverterjava11extension@default:default"/>
 <setEntry value="com.sap.sailing.sailwave.resultimport@4:true"/>
 <setEntry value="com.sap.sailing.server.gateway.serialization.shared.android@default:default"/>
 <setEntry value="com.sap.sailing.server.gateway.serialization@default:default"/>
@@ -184,11 +185,12 @@
 <setEntry value="com.sap.sse.datamining.shared@default:default"/>
 <setEntry value="com.sap.sse.datamining.ui@default:default"/>
 <setEntry value="com.sap.sse.datamining@default:default"/>
+<setEntry value="com.sap.sse.debranding@default:default"/>
 <setEntry value="com.sap.sse.filestorage@4:true"/>
 <setEntry value="com.sap.sse.gwt.adminconsole@default:default"/>
 <setEntry value="com.sap.sse.gwt@default:default"/>
-<setEntry value="com.sap.sse.jersey.jaxbdependencyfragment@default:false"/>
-<setEntry value="com.sap.sse.jettyextensions@default:false"/>
+<setEntry value="com.sap.sse.jersey.jaxbdependencyfragment@default:default"/>
+<setEntry value="com.sap.sse.jettyextensions@default:default"/>
 <setEntry value="com.sap.sse.mail@5:true"/>
 <setEntry value="com.sap.sse.mongodb@default:default"/>
 <setEntry value="com.sap.sse.operationaltransformation@default:default"/>

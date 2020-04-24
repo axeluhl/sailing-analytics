@@ -18,6 +18,7 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorAndBoatStore;
@@ -65,6 +66,7 @@ import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.TrackingDataLoader;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler.DefaultRaceTrackingHandler;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
 import com.sap.sailing.domain.tracking.impl.TrackingConnectorInfoImpl;
 import com.sap.sailing.domain.tracking.impl.UpdateHandler;
@@ -443,6 +445,15 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
             this.startList = startList;
             if (oldStartList == null && course != null) {
                 createRaceDefinition(course);
+            } else if (trackedRace != null) {
+                final Map<Competitor, Boat> competitorsAndTheirBoats = domainFactory.createCompetitorsAndBoats(startList, raceID, boatClass, new DefaultRaceTrackingHandler());
+                if (!Util.setEquals(competitorsAndTheirBoats.keySet(), getRace().getCompetitors())) {
+                    try {
+                        trackedRegattaRegistry.updateRaceCompetitors(getRegatta(), getRace());
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
             }
         }
     }
@@ -470,7 +481,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
         assert startList != null;
         assert course != null;
         // now we can create the RaceDefinition and most other things
-        Race swissTimingRace = new RaceImpl(raceID, raceName, raceDescription, boatClass);
+        final Race swissTimingRace = new RaceImpl(raceID, raceName, raceDescription, boatClass);
         try {
             synchronized (this) {
                 race = domainFactory.createRaceDefinition(regatta, swissTimingRace, startList, course,

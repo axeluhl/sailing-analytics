@@ -588,9 +588,9 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
 
         final EditACLDialog.DialogConfig<MediaTrackWithSecurityDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementService(), type, mediaTrack -> mediaTrack.getAccessControlList(), stringMessages);
-        actionsColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, configOwnership::openDialog);
+        actionsColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, configOwnership::openOwnershipDialog);
         actionsColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                mediaTrack -> configACL.openDialog(mediaTrack));
+                mediaTrack -> configACL.openACLDialog(mediaTrack));
         mediaTracksTable.addColumn(actionsColumn, stringMessages.actions());
 
     }
