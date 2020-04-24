@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.ui.shared;
 
 import java.util.Collections;
 
-import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.dto.NamedDTO;
 
 public class RemoteSailingServerReferenceDTO extends NamedDTO {
@@ -55,13 +54,5 @@ public class RemoteSailingServerReferenceDTO extends NamedDTO {
 
     public void setLastErrorMessage(String lastErrorMessage) {
         this.lastErrorMessage = lastErrorMessage;
-    }
-
-    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
-        return getTypeRelativeObjectIdentifier(getUrl());
-    }
-
-    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String dbId) {
-        return new TypeRelativeObjectIdentifier(dbId);
     }
 }

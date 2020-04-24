@@ -14,8 +14,8 @@ import com.sap.sse.security.ui.client.i18n.StringMessages;
 public class RemoteServerInstancesManagementTableWrapper extends
         TableWrapper<RemoteSailingServerReferenceDTO, RefreshableMultiSelectionModel<RemoteSailingServerReferenceDTO>, StringMessages, CellTableWithCheckboxResources> {
     public RemoteServerInstancesManagementTableWrapper(StringMessages stringMessages, ErrorReporter errorReporter,
-            ListDataProvider<RemoteSailingServerReferenceDTO> dataProvider) {
-        super(stringMessages, errorReporter, true, true,
+            ListDataProvider<RemoteSailingServerReferenceDTO> dataProvider, CellTableWithCheckboxResources tableResources) {
+        super(stringMessages, errorReporter, /* multiSelection */ true, /* pager */ true,
                 new EntityIdentityComparator<RemoteSailingServerReferenceDTO>() {
                     @Override
                     public boolean representSameEntity(RemoteSailingServerReferenceDTO dto1,
@@ -27,12 +27,12 @@ public class RemoteServerInstancesManagementTableWrapper extends
                     public int hashCode(RemoteSailingServerReferenceDTO t) {
                         return t.getUrl().hashCode();
                     }
-                });
+                }, tableResources);
         registerSelectionModelOnNewDataProvider(dataProvider);
     }
 
     public <T> void addColumn(Column<RemoteSailingServerReferenceDTO, T> column, String header) {
-        super.getTable().addColumn(column, header);
+        getTable().addColumn(column, header);
     }
 
     public void setEmptyTableWidget(Widget widget) {

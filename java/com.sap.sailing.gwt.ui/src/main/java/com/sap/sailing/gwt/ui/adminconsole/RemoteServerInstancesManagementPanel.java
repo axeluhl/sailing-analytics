@@ -34,6 +34,7 @@ import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
+import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
 import com.sap.sse.gwt.client.celltable.FlushableCellTable;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
@@ -53,7 +54,7 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
     private final CaptionPanel remoteServersPanel;
 
     public RemoteServerInstancesManagementPanel(SailingServiceAsync sailingService, final UserService userService,
-            ErrorReporter errorReporter, StringMessages stringMessages) {
+            ErrorReporter errorReporter, StringMessages stringMessages, CellTableWithCheckboxResources tableResources) {
         this.sailingService = sailingService;
         this.userService = userService;
         this.errorReporter = errorReporter;
@@ -65,9 +66,9 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
         mainPanel.add(remoteServersPanel);
         VerticalPanel remoteServersContentPanel = new VerticalPanel();
         remoteServersPanel.setContentWidget(remoteServersContentPanel);
-        serverDataProvider = new ListDataProvider<RemoteSailingServerReferenceDTO>();
+        serverDataProvider = new ListDataProvider<>();
         filteredServerTablePanel = createFilteredServerTablePanel();
-        remoteServersTable = createRemoteServersTable();
+        remoteServersTable = createRemoteServersTable(tableResources);
         serverDataProvider.addDataDisplay(remoteServersTable);
         remoteServersContentPanel.add(filteredServerTablePanel);
         remoteServersContentPanel.add(remoteServersTable);
@@ -117,9 +118,9 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
         return button;
     }
 
-    private FlushableCellTable<RemoteSailingServerReferenceDTO> createRemoteServersTable() {
+    private FlushableCellTable<RemoteSailingServerReferenceDTO> createRemoteServersTable(CellTableWithCheckboxResources tableResources) {
         RemoteServerInstancesManagementTableWrapper wrapper = new RemoteServerInstancesManagementTableWrapper(
-                stringMessages, errorReporter, serverDataProvider);
+                stringMessages, errorReporter, serverDataProvider, tableResources);
         wrapper.addColumn(createTextColumn(RemoteSailingServerReferenceDTO::getName), stringMessages.name());
         wrapper.addColumn(createTextColumn(RemoteSailingServerReferenceDTO::getUrl), stringMessages.url());
         wrapper.addColumn(createEventsColumn(), stringMessages.events());
