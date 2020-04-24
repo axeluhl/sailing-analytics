@@ -173,6 +173,7 @@
 <setEntry value="com.sap.sailing.shared.server@5:true"/>
 <setEntry value="com.sap.sailing.shared.server.gateway@5:true"/>
 <setEntry value="com.sap.sailing.shared.persistence@default:default"/>
+<setEntry value="com.sap.sse.debranding@default:default"/>
 <setEntry value="com.tractrac.clientmodule@default:default"/>
 <setEntry value="com.sap.sse.gwt@default:default"/>
 <setEntry value="com.google.gwt.servlet@default:default"/>
