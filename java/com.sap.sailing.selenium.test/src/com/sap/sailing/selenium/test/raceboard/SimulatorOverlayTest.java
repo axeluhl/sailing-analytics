@@ -102,7 +102,7 @@ public class SimulatorOverlayTest extends AbstractSeleniumTest {
         }
         {
             RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), REGATTA_49ER_WITH_SUFFIX,
-                    REGATTA_49ER_WITH_SUFFIX, String.format(RACE_N_49ER, 1));
+                    REGATTA_49ER_WITH_SUFFIX, String.format(RACE_N_49ER, 1), false);
             MapSettingsPO mapSettings = raceboard.openMapSettings();
             // Simulator overlay option must not be available without wind data
             Assert.assertFalse(mapSettings.isShowSimulationOverlayCheckBoxVisible());
@@ -116,7 +116,7 @@ public class SimulatorOverlayTest extends AbstractSeleniumTest {
         }
         {
             RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), REGATTA_49ER_WITH_SUFFIX,
-                    REGATTA_49ER_WITH_SUFFIX, String.format(RACE_N_49ER, 1));
+                    REGATTA_49ER_WITH_SUFFIX, String.format(RACE_N_49ER, 1), false);
             MapSettingsPO mapSettings = raceboard.openMapSettings();
             // Simulator overlay option must be available with the wind data being available
             Assert.assertTrue(mapSettings.isShowSimulationOverlayCheckBoxVisible());

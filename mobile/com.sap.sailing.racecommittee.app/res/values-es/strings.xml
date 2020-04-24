@@ -565,5 +565,7 @@
     <string name="hello_call_error_neutral">"Modificar servidor"</string>
 
     <string name="competitor_merge_error_message">"Este competidor se ha modificado desde otro dispositivo y ha modificado los mismos datos. Asegúrese de que estos datos son ahora correctos."</string>
-
+    <string name="finishing_revoke">Revoke</string>
+    <string name="error_revoke_finished">Cannot revoke finished time</string>
+    <string name="error_revoke_finishing">Cannot revoke finishing time</string>
 </resources>

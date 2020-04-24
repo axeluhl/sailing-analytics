@@ -67,8 +67,8 @@ public abstract class AbstractTestStoringAndRetrievingRaceLogInRegatta extends R
                 /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
                 /*startDate*/ null, /*endDate*/ null, series, persistent, scoringScheme, "123",
                 courseArea, /* buoyZoneRadiusInHullLengths */2.0, /* useStartTimeInference */ true,
-                /* controlTrackingFromStartAndFinishTimes */ false, OneDesignRankingMetric::new,
-                /* registrationLinkSecret */ UUID.randomUUID().toString());
+                /* controlTrackingFromStartAndFinishTimes */ false, /* autoRestartTrackingUponCompetitorSetChange */ false,
+                OneDesignRankingMetric::new, /* registrationLinkSecret */ UUID.randomUUID().toString());
         return regatta;
     }
 

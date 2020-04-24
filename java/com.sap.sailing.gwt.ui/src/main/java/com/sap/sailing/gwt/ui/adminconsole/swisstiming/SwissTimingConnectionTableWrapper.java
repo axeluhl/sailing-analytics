@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.adminconsole.swisstiming;
 import static com.sap.sse.security.ui.client.component.AccessControlledActionsColumn.create;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.google.gwt.user.cellview.client.AbstractCellTable;
@@ -18,7 +19,7 @@ import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.AbstractSortableTextColumn;
 import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
-import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
+import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.celltable.TableWrapper;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
@@ -40,7 +41,7 @@ import com.sap.sse.security.ui.client.i18n.StringMessages;
  * instance of {@link SwissTimingConnectionDialog}.
  */
 public class SwissTimingConnectionTableWrapper extends
-        TableWrapper<SwissTimingConfigurationWithSecurityDTO, RefreshableSingleSelectionModel<SwissTimingConfigurationWithSecurityDTO>, StringMessages, CellTableWithCheckboxResources> {
+        TableWrapper<SwissTimingConfigurationWithSecurityDTO, RefreshableMultiSelectionModel<SwissTimingConfigurationWithSecurityDTO>, StringMessages, CellTableWithCheckboxResources> {
     private final LabeledAbstractFilterablePanel<SwissTimingConfigurationWithSecurityDTO> filterField;
     private final SailingServiceAsync sailingServiceAsync;
     private final com.sap.sailing.gwt.ui.client.StringMessages stringMessagesClient;
@@ -48,7 +49,7 @@ public class SwissTimingConnectionTableWrapper extends
     public SwissTimingConnectionTableWrapper(final UserService userService, final SailingServiceAsync sailingServiceAsync,
             final com.sap.sailing.gwt.ui.client.StringMessages stringMessages, final ErrorReporter errorReporter,
             final boolean enablePager, final CellTableWithCheckboxResources tableResources, final Runnable refresher) {
-        super(stringMessages, errorReporter, false, enablePager,
+        super(stringMessages, errorReporter, true, enablePager,
                 new EntityIdentityComparator<SwissTimingConfigurationWithSecurityDTO>() {
                     @Override
                     public boolean representSameEntity(SwissTimingConfigurationWithSecurityDTO dto1,
@@ -113,7 +114,7 @@ public class SwissTimingConnectionTableWrapper extends
         });
 
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_DELETE, DefaultActions.DELETE, dto -> {
-            sailingServiceAsync.deleteSwissTimingConfiguration(dto, new AsyncCallback<Void>() {
+            sailingServiceAsync.deleteSwissTimingConfigurations(Collections.singletonList(dto), new AsyncCallback<Void>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError("Exception trying to delete configuration in DB: " + caught.getMessage());
@@ -134,9 +135,9 @@ public class SwissTimingConnectionTableWrapper extends
                 userService.getUserManagementService(), type, dto -> dto.getAccessControlList(), stringMessages);
 
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_OWNERSHIP, DefaultActions.CHANGE_OWNERSHIP,
-                configOwnership::openDialog);
+                configOwnership::openOwnershipDialog);
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                u -> configACL.openDialog(u));
+                u -> configACL.openACLDialog(u));
 
         filterField = new LabeledAbstractFilterablePanel<SwissTimingConfigurationWithSecurityDTO>(
                 new Label(stringMessagesClient.filterSwissTimingConnections()),

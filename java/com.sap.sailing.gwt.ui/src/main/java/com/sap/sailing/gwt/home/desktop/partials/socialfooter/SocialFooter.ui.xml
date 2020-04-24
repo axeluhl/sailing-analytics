@@ -6,7 +6,7 @@
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="shr" type="com.sap.sailing.gwt.home.shared.resources.SharedHomeResources" />
   <ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.partials.socialfooter.SocialFooterResources" />
-  <g:HTMLPanel>
+  <g:HTMLPanel ui:field="htmlPanel">
     <!-- The search/social media page footer-->
     <div class="{local_res.css.socialfooter}">
       <div class="{res.mediaCss.grid}">
