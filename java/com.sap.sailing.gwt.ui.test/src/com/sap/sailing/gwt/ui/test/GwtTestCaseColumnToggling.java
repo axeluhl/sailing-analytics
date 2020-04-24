@@ -29,7 +29,7 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     
     //These objects should be created by calling GWT.create(Class c);
     private LeaderboardPanelMock leaderboardPanel;
-    private MyTestSailingServiceAsync service;
+    private MyTestSailingServiceWriteAsync service;
     private StringMessages stringMessages;
     
     //Test data.
@@ -54,7 +54,7 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     @Override
     protected void gwtSetUp() throws Exception {
         super.gwtSetUp();
-        service = GWT.create(MyTestSailingService.class);
+        service = GWT.create(MyTestSailingServiceWrite.class);
         stringMessages = GWT.create(StringMessages.class);
     }
 

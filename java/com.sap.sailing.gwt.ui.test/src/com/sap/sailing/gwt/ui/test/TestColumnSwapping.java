@@ -21,7 +21,6 @@ import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
-import com.sap.sailing.gwt.ui.server.SailingServiceImpl;
 import com.sap.sailing.gwt.ui.server.SailingServiceWriteImpl;
 
 public class TestColumnSwapping {
@@ -35,7 +34,7 @@ public class TestColumnSwapping {
     private LeaderboardDTO leaderboardDTO;
     private Collection<String> leglist;
     private Date leaderboardCreationDate;
-    private SailingServiceImpl sailingService = null;
+    private SailingServiceWriteImpl sailingService = null;
 
     // Test-Data
     private final String TEST_LEADERBOARD_NAME = "test_board";
@@ -44,7 +43,7 @@ public class TestColumnSwapping {
 
     @Before
     public void prepareColumnSwapping() {
-        service = new SailingServiceImplMock();
+        service = new SailingServiceWriteImplMock();
         int[] disc = { 5, 8, 9, 0, 7, 5, 43 };
         service.removeLeaderboard(LEADERBOARDNAME);
         service.createFlexibleLeaderboard(LEADERBOARDNAME, null, disc, ScoringSchemeType.LOW_POINT, null);
@@ -81,7 +80,7 @@ public class TestColumnSwapping {
 
     @Test
     public void testSailingService() {
-        sailingService = new SailingServiceImplMock();
+        sailingService = new SailingServiceWriteImplMock();
         assertNotNull("Sailingservice != NULL", sailingService);
         int td[] = { 5, 8 };
         sailingService.removeLeaderboard(TEST_LEADERBOARD_NAME);

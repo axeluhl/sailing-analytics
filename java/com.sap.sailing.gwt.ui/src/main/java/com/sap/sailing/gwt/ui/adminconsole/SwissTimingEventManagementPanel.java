@@ -27,7 +27,7 @@ import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.adminconsole.swisstiming.SwissTimingConnectionDialog;
 import com.sap.sailing.gwt.ui.adminconsole.swisstiming.SwissTimingConnectionTableWrapper;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationWithSecurityDTO;
@@ -63,10 +63,10 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
     private final List<SwissTimingRaceRecordDTO> availableSwissTimingRaces = new ArrayList<SwissTimingRaceRecordDTO>();
     private final SwissTimingConnectionTableWrapper connectionsTable;
 
-    public SwissTimingEventManagementPanel(final SailingServiceAsync sailingService, UserService userService,
+    public SwissTimingEventManagementPanel(final SailingServiceWriteAsync sailingServiceWrite, UserService userService,
             ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, StringMessages stringConstants, final CellTableWithCheckboxResources tableResources) {
-        super(sailingService, userService, regattaRefresher, errorReporter, true, stringConstants);
+        super(sailingServiceWrite, userService, regattaRefresher, errorReporter, true, stringConstants);
         this.errorReporter = errorReporter;
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);
@@ -77,7 +77,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         captionPanelConnections.setContentWidget(verticalPanel);
         captionPanelConnections.setStyleName("bold");
 
-        connectionsTable = new SwissTimingConnectionTableWrapper(userService, sailingService, stringConstants,
+        connectionsTable = new SwissTimingConnectionTableWrapper(userService, sailingServiceWrite, stringConstants,
                 errorReporter, true, tableResources, () -> {
                 });
         connectionsTable.refreshSwissTimingConnectionList();
@@ -95,7 +95,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                         new DialogCallback<SwissTimingConfigurationWithSecurityDTO>() {
                             @Override
                             public void ok(SwissTimingConfigurationWithSecurityDTO editedConnection) {
-                                sailingService.createSwissTimingConfiguration(editedConnection.getName(),
+                                sailingServiceWrite.createSwissTimingConfiguration(editedConnection.getName(),
                                         editedConnection.getJsonUrl(), editedConnection.getHostname(),
                                         editedConnection.getPort(), editedConnection.getUpdateURL(),
                                         editedConnection.getUpdateUsername(), editedConnection.getUpdatePassword(),
@@ -122,7 +122,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
 
         // Remove SwissTiming Connection
         final Button removeButton = buttonPanel.addRemoveAction(stringMessages.remove(), () -> {
-            sailingService.deleteSwissTimingConfiguration(connectionsTable.getSelectionModel().getSelectedObject(),
+            sailingServiceWrite.deleteSwissTimingConfiguration(connectionsTable.getSelectionModel().getSelectedObject(),
                     new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
@@ -139,7 +139,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
 
         // List Races in SwissTiming Connection
         final Button listRacesButton = buttonPanel.addUnsecuredAction(stringMessages.listRaces(), () -> {
-            fillRaces(sailingService);
+            fillRaces(sailingServiceWrite);
         });
         listRacesButton.setEnabled(false);
         removeButton.setEnabled(false);
@@ -386,10 +386,10 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
     }
 
 
-    private void fillRaces(final SailingServiceAsync sailingService) {
+    private void fillRaces(final SailingServiceWriteAsync sailingServiceWrite) {
         final SwissTimingConfigurationWithSecurityDTO selectedObject = connectionsTable.getSelectionModel()
                 .getSelectedObject();
-        sailingService.getRacesOfSwissTimingEvent(selectedObject.getJsonUrl(),
+        sailingServiceWrite.getRacesOfSwissTimingEvent(selectedObject.getJsonUrl(),
                 new AsyncCallback<SwissTimingEventRecordDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -411,7 +411,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                         final SwissTimingConfigurationWithSecurityDTO updatedDTO = new SwissTimingConfigurationWithSecurityDTO(
                                 selectedObject, result.trackingDataHost, result.trackingDataPort, result.eventName);
 
-                        sailingService.updateSwissTimingConfiguration(updatedDTO, new AsyncCallback<Void>() {
+                        sailingServiceWrite.updateSwissTimingConfiguration(updatedDTO, new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 errorReporter.reportError(

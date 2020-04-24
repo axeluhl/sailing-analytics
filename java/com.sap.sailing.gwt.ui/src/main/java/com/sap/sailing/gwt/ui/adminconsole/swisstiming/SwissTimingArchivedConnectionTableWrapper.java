@@ -12,6 +12,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationWithSecurityDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
@@ -43,7 +44,7 @@ public class SwissTimingArchivedConnectionTableWrapper extends
     private final SailingServiceAsync sailingServiceAsync;
     private final com.sap.sailing.gwt.ui.client.StringMessages stringMessagesClient;
 
-    public SwissTimingArchivedConnectionTableWrapper(final UserService userService, final SailingServiceAsync sailingServiceAsync,
+    public SwissTimingArchivedConnectionTableWrapper(final UserService userService, final SailingServiceWriteAsync sailingServiceAsyncWrite,
             final com.sap.sailing.gwt.ui.client.StringMessages stringMessages, final ErrorReporter errorReporter,
             final boolean enablePager, final CellTableWithCheckboxResources tableResources, final Runnable refresher) {
         super(stringMessages, errorReporter, false, enablePager,
@@ -60,7 +61,7 @@ public class SwissTimingArchivedConnectionTableWrapper extends
                     }
                 }, tableResources);
         this.stringMessagesClient = stringMessages;
-        this.sailingServiceAsync = sailingServiceAsync;
+        this.sailingServiceAsync = sailingServiceAsyncWrite;
         final ListHandler<SwissTimingArchiveConfigurationWithSecurityDTO> swissTimingAccountColumnListHandler = getColumnSortHandler();
 
         // table
@@ -77,7 +78,7 @@ public class SwissTimingArchivedConnectionTableWrapper extends
                     new DialogCallback<SwissTimingArchiveConfigurationWithSecurityDTO>() {
                 @Override
                         public void ok(final SwissTimingArchiveConfigurationWithSecurityDTO editedObject) {
-                            sailingServiceAsync.updateSwissTimingArchiveConfiguration(editedObject,
+                            sailingServiceAsyncWrite.updateSwissTimingArchiveConfiguration(editedObject,
                             new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                                 @Override
                                 public void onFailure(Throwable caught) {
@@ -98,7 +99,7 @@ public class SwissTimingArchivedConnectionTableWrapper extends
             }, userService, errorReporter).show();
         });
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_DELETE, DefaultActions.DELETE, dto -> {
-            sailingServiceAsync.deleteSwissTimingArchiveConfiguration(dto, new AsyncCallback<Void>() {
+            sailingServiceAsyncWrite.deleteSwissTimingArchiveConfiguration(dto, new AsyncCallback<Void>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError("Exception trying to delete configuration in DB: " + caught.getMessage());

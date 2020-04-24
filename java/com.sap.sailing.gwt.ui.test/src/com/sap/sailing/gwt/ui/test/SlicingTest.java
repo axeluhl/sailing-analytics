@@ -62,14 +62,14 @@ public class SlicingTest {
             "test1", "test", "test", null, CountryCodeFactoryImpl.INSTANCE.getFromTwoLetterISOName("de"), 
             1.0, null, null, "B1", boatClassName, "GER 123");
 
-    private SailingServiceImplMock sailingService;
+    private SailingServiceWriteImplMock sailingService;
     
     private ThreadState threadState;
     protected Subject subject;
 
     @Before
     public void setUp() throws Exception {
-        sailingService = new SailingServiceImplMock();
+        sailingService = new SailingServiceWriteImplMock();
         ((ClearStateTestSupport)(sailingService.getRacingEventService())).clearState();
         
         subject = Mockito.mock(Subject.class);
@@ -86,7 +86,7 @@ public class SlicingTest {
     @Test
     @Ignore
     /**
-     * Currently non functional test case for race slicing. Should be finished when SailingServiceImplMock is fixed to
+     * Currently non functional test case for race slicing. Should be finished when SailingServiceWriteImplMock is fixed to
      * work properly for test cases. See bug 4418 for details.
      */
     public void testSliceRace() throws Exception {

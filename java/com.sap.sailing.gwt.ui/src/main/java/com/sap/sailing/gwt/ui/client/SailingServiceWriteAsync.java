@@ -17,7 +17,6 @@ import com.sap.sailing.domain.common.CompetitorDescriptor;
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sailing.domain.common.NotFoundException;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -39,8 +38,6 @@ import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
-import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogException;
-import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
 import com.sap.sailing.gwt.ui.adminconsole.RaceLogSetTrackingTimesDTO;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
@@ -69,7 +66,6 @@ import com.sap.sailing.gwt.ui.shared.courseCreation.MarkPropertiesDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkRoleDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkTemplateDTO;
 import com.sap.sse.common.Duration;
-import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -91,14 +87,14 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
             GPSFixDTO newFix, AsyncCallback<Void> callback) throws UnauthorizedException;
 
     void addMarkToRegattaLog(String leaderboardName, MarkDTO mark, AsyncCallback<Void> callback)
-            throws UnauthorizedException, DoesNotHaveRegattaLogException;
+            throws UnauthorizedException/*, DoesNotHaveRegattaLogException*/;
 
     void addOrReplaceExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration expeditionDeviceConfiguration, AsyncCallback<Void> callback)
             throws UnauthorizedException;
 
     void addOrUpdateBoat(BoatDTO boat, AsyncCallback<BoatDTO> callback) throws UnauthorizedException;
 
-    void addOrUpdateCompetitors(List<CompetitorDTO> competitors, AsyncCallback<List<CompetitorDTO>> callback) throws UnauthorizedException, Exception;
+    void addOrUpdateCompetitors(List<CompetitorDTO> competitors, AsyncCallback<List<CompetitorDTO>> callback) throws UnauthorizedException;
 
     void addOrUpdateCompetitorWithBoat(CompetitorWithBoatDTO competitor, AsyncCallback<CompetitorWithBoatDTO> callback)
             throws UnauthorizedException;
@@ -112,14 +108,14 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void addRaceColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName,
             List<Pair<String, Integer>> columnNames, AsyncCallback<List<RaceColumnInSeriesDTO>> callback) throws UnauthorizedException;
 
-    void addResultImportUrl(String resultProviderName, UrlDTO url, AsyncCallback<Void> callback) throws UnauthorizedException, Exception;
+    void addResultImportUrl(String resultProviderName, UrlDTO url, AsyncCallback<Void> callback) throws UnauthorizedException/*, Exception*/;
 
     void addTag(String leaderboardName, String raceColumnName, String fleetName, String tag, String comment,
             String imageURL, String resizedImageURL, boolean visibleForPublic, TimePoint raceTimepoint,
             AsyncCallback<SuccessInfo> callback) throws UnauthorizedException;
 
     void addCompetitors(List<CompetitorDescriptor> competitorsForSaving, String searchTag, AsyncCallback<List<CompetitorWithBoatDTO>> callback)
-            throws UnauthorizedException, Exception;
+            throws UnauthorizedException;
     
     void addColumnsToLeaderboard(String leaderboardName, List<Util.Pair<String, Boolean>> columnsToAdd, AsyncCallback<Void> callback)
             throws UnauthorizedException;
@@ -128,11 +124,11 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
             throws UnauthorizedException;
     
     void addTypedDeviceMappingToRegattaLog(String leaderboardName, TypedDeviceMappingDTO dto, AsyncCallback<Void> callback)
-            throws NoCorrespondingServiceRegisteredException, TransformationException, DoesNotHaveRegattaLogException,
-            NotFoundException;
+    /*throws NoCorrespondingServiceRegisteredException, TransformationException, DoesNotHaveRegattaLogException,
+            NotFoundException*/;
 
     void addDeviceMappingToRegattaLog(String leaderboardName, DeviceMappingDTO dto, AsyncCallback<Void> callback)
-            throws NoCorrespondingServiceRegisteredException, TransformationException, DoesNotHaveRegattaLogException;
+            /*throws NoCorrespondingServiceRegisteredException, TransformationException, DoesNotHaveRegattaLogException*/;
 
     
     void allowBoatResetToDefaults(Iterable<BoatDTO> boats, AsyncCallback<Void> callback) throws UnauthorizedException;

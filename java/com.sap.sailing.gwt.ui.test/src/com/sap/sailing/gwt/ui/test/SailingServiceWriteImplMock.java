@@ -35,7 +35,7 @@ import com.sap.sse.replication.impl.AbstractReplicablesProvider;
 import com.sap.sse.replication.impl.ReplicationInstancesManager;
 import com.sap.sse.replication.impl.ReplicationServiceImpl;
 
-public class SailingServiceImplMock extends SailingServiceWriteImpl {
+public class SailingServiceWriteImplMock extends SailingServiceWriteImpl {
     private static final long serialVersionUID = 8564037671550730455L;
 
     private final RacingEventService service;
@@ -46,7 +46,7 @@ public class SailingServiceImplMock extends SailingServiceWriteImpl {
     private final SwissTimingReplayService swissTimingReplayService = null;
     private final RaceLogTrackingAdapterFactory raceLogTrackingAdapterFactory = RaceLogTrackingAdapterFactory.INSTANCE;
 
-    public SailingServiceImplMock() {
+    public SailingServiceWriteImplMock() {
         super();
         service = new RacingEventServiceImpl(/* clearPersistentCompetitorStore */ true, new MockSmartphoneImeiServiceFinderFactory(), /* restoreTrackedRaces */ false);
         try {

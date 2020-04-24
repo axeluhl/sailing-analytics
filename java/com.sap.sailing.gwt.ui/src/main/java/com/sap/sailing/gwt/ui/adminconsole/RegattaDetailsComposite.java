@@ -35,7 +35,7 @@ import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.RankingMetricTypeFormatter;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
@@ -57,7 +57,7 @@ public class RegattaDetailsComposite extends Composite {
 
     private final CaptionPanel mainPanel;
 
-    private final SailingServiceAsync sailingService;
+    private final SailingServiceWriteAsync sailingServiceWrite;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
     private final RegattaRefresher regattaRefresher;
@@ -84,10 +84,10 @@ public class RegattaDetailsComposite extends Composite {
 
     private static AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
 
-    public RegattaDetailsComposite(final SailingServiceAsync sailingService, final UserService userService,
+    public RegattaDetailsComposite(final SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
             final RegattaRefresher regattaRefresher, final ErrorReporter errorReporter,
             final StringMessages stringMessages) {
-        this.sailingService = sailingService;
+        this.sailingServiceWrite = sailingServiceWrite;
         this.regattaRefresher = regattaRefresher;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
@@ -146,7 +146,7 @@ public class RegattaDetailsComposite extends Composite {
             public void onClick(ClickEvent event) {
                 RegistrationLinkWithQRCode registrationLinkWithQRCode = new RegistrationLinkWithQRCode();
                 registrationLinkWithQRCode.setSecret(regatta.registrationLinkSecret);
-                sailingService.getMailType(new AsyncCallback<MailInvitationType>() {
+                sailingServiceWrite.getMailType(new AsyncCallback<MailInvitationType>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         logger.log(Level.SEVERE, "Could not determine MailInvitationType", caught);
@@ -154,7 +154,7 @@ public class RegattaDetailsComposite extends Composite {
 
                     @Override
                     public void onSuccess(MailInvitationType result) {
-                        RegistrationLinkWithQRCodeDialog dialog = new RegistrationLinkWithQRCodeDialog(sailingService,
+                        RegistrationLinkWithQRCodeDialog dialog = new RegistrationLinkWithQRCodeDialog(sailingServiceWrite,
                                 stringMessages, regatta.getName(), registrationLinkWithQRCode,
                                 new DialogCallback<RegistrationLinkWithQRCode>() {
                                     @Override
@@ -290,7 +290,7 @@ public class RegattaDetailsComposite extends Composite {
         actionsColumn.addAction(SeriesConfigImagesBarCell.ACTION_REMOVE, UPDATE, series -> {
             RegattaIdentifier identifier = new RegattaName(regatta.getName());
             if (Window.confirm(stringMessages.reallyRemoveSeries(series.getName()))) {
-                sailingService.removeSeries(identifier, series.getName(),
+                sailingServiceWrite.removeSeries(identifier, series.getName(),
                         new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable cause) {
@@ -387,7 +387,7 @@ public class RegattaDetailsComposite extends Composite {
         }
         if (raceColumnsToRemove.isEmpty() || Window.confirm(stringMessages.reallyRemoveRace(racesToRemove.toString()))) {
             // first remove:
-            sailingService.removeRaceColumnsFromSeries(regattaIdentifier, series.getName(), raceColumnsToRemove,
+            sailingServiceWrite.removeRaceColumnsFromSeries(regattaIdentifier, series.getName(), raceColumnsToRemove,
                     new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
@@ -398,7 +398,7 @@ public class RegattaDetailsComposite extends Composite {
                         @Override
                         public void onSuccess(Void v) {
                             // when successfully removed, insert:
-                            sailingService.addRaceColumnsToSeries(regattaIdentifier, series.getName(), raceColumnNamesToAddWithInsertIndex,
+                            sailingServiceWrite.addRaceColumnsToSeries(regattaIdentifier, series.getName(), raceColumnNamesToAddWithInsertIndex,
                                     new AsyncCallback<List<RaceColumnInSeriesDTO>>() {
                                         @Override
                                         public void onFailure(Throwable caught) {
@@ -416,7 +416,7 @@ public class RegattaDetailsComposite extends Composite {
             if (isMedalChanged || isFleetsCanRunInParallelChanged || seriesResultDiscardingThresholdsChanged || isStartsWithZeroScoreChanged
                     || isFirstColumnIsNonDiscardableCarryForwardChanged || hasSplitFleetContiguousScoringChanged
                     || seriesNameChanged || maximumNumberOfDiscardsChanged) {
-                sailingService.updateSeries(regattaIdentifier, series.getName(), seriesDescriptor.getSeriesName(),
+                sailingServiceWrite.updateSeries(regattaIdentifier, series.getName(), seriesDescriptor.getSeriesName(),
                         seriesDescriptor.isMedal(), seriesDescriptor.isFleetsCanRunInParallel(), seriesDescriptor.getResultDiscardingThresholds(),
                         seriesDescriptor.isStartsWithZeroScore(),
                         seriesDescriptor.isFirstColumnIsNonDiscardableCarryForward(),
