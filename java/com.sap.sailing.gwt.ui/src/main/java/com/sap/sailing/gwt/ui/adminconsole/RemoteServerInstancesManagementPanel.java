@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import static com.sap.sse.security.shared.HasPermissions.DefaultActions.DELETE;
-import static com.sap.sse.security.ui.client.component.AccessControlledActionsColumn.create;
 import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell.ACTION_DELETE;
 
 import java.util.ArrayList;
@@ -29,7 +27,6 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
-import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
@@ -40,11 +37,9 @@ import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.celltable.FlushableCellTable;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
-import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.ui.client.UserService;
-import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
 import com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell;
-import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
 public class RemoteServerInstancesManagementPanel extends SimplePanel {
     private final SailingServiceAsync sailingService;
@@ -164,19 +159,14 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
         };
     }
 
-    private AccessControlledActionsColumn<RemoteSailingServerReferenceDTO, DefaultActionsImagesBarCell> createActionsColumn() {
-        final AccessControlledActionsColumn<RemoteSailingServerReferenceDTO, DefaultActionsImagesBarCell> actionsColumn = create(
+    private ServerActionsColumn<RemoteSailingServerReferenceDTO, DefaultActionsImagesBarCell> createActionsColumn() {
+        final ServerActionsColumn<RemoteSailingServerReferenceDTO, DefaultActionsImagesBarCell> actionsColumn = ServerActionsColumn.create(
                 new DefaultActionsImagesBarCell(stringMessages), userService);
-        actionsColumn.addAction(ACTION_DELETE, DELETE, e -> {
+        actionsColumn.addAction(ACTION_DELETE, ServerActions.CONFIGURE_REMOTE_INSTANCES, e -> {
             Set<String> toDelete = new HashSet<>();
             toDelete.add(e.getName());
             removeSailingServers(toDelete);
         });
-        final EditACLDialog.DialogConfig<RemoteSailingServerReferenceDTO> configACL = EditACLDialog.create(
-                userService.getUserManagementService(), SecuredDomainType.REMOTE_SAILING_SERVER_REFERENCE_DTO,
-                RemoteSailingServerReferenceDTO::getAccessControlList, stringMessages);
-        actionsColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                configACL::openDialog);
         return actionsColumn;
     }
 
