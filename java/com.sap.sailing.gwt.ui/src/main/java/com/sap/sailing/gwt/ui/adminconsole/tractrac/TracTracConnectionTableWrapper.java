@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.adminconsole.tractrac;
 import static com.sap.sse.security.ui.client.component.AccessControlledActionsColumn.create;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.google.gwt.core.client.Scheduler;
@@ -19,7 +20,7 @@ import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.AbstractSortableTextColumn;
 import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
-import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
+import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.celltable.TableWrapper;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
@@ -41,7 +42,7 @@ import com.sap.sse.security.ui.client.i18n.StringMessages;
  * {@link TracTracConnectionDialog}.
  */
 public class TracTracConnectionTableWrapper extends
-        TableWrapper<TracTracConfigurationWithSecurityDTO, RefreshableSingleSelectionModel<TracTracConfigurationWithSecurityDTO>, StringMessages, CellTableWithCheckboxResources> {
+        TableWrapper<TracTracConfigurationWithSecurityDTO, RefreshableMultiSelectionModel<TracTracConfigurationWithSecurityDTO>, StringMessages, CellTableWithCheckboxResources> {
     private final LabeledAbstractFilterablePanel<TracTracConfigurationWithSecurityDTO> filterField;
     private final SailingServiceAsync sailingServiceAsync;
     private final com.sap.sailing.gwt.ui.client.StringMessages stringMessagesClient;
@@ -49,7 +50,7 @@ public class TracTracConnectionTableWrapper extends
     public TracTracConnectionTableWrapper(final UserService userService, final SailingServiceAsync sailingServiceAsync,
             final com.sap.sailing.gwt.ui.client.StringMessages stringMessages, final ErrorReporter errorReporter,
             final boolean enablePager, final CellTableWithCheckboxResources tableResources, final Runnable refresher) {
-        super(stringMessages, errorReporter, false, enablePager,
+        super(stringMessages, errorReporter, true, enablePager,
                 new EntityIdentityComparator<TracTracConfigurationWithSecurityDTO>() {
                     @Override
                     public boolean representSameEntity(TracTracConfigurationWithSecurityDTO dto1,
@@ -110,7 +111,7 @@ public class TracTracConnectionTableWrapper extends
         });
 
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_DELETE, DefaultActions.DELETE, dto -> {
-            sailingServiceAsync.deleteTracTracConfiguration(dto, new AsyncCallback<Void>() {
+            sailingServiceAsync.deleteTracTracConfigurations(Collections.singletonList(dto), new AsyncCallback<Void>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError("Exception trying to delete configuration in DB: " + caught.getMessage());
