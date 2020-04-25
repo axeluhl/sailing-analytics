@@ -13,10 +13,10 @@
     <meta content='yes' name='apple-mobile-web-app-capable'>
     <meta content='black' name='apple-mobile-web-app-status-bar-style'>
     <!-- <link href='iphone-splash-screen.png' rel='apple-touch-startup-image'> -->
-    <link href='images/sap-sailing-app-icon.png' rel='apple-touch-icon'>
-	<link rel="shortcut icon" type="image/x-icon" href="images/sap.ico" />
+    <link href='sap-sailing-app-icon${whitelabeled}.png' rel='apple-touch-icon'>
+    <link rel="shortcut icon" type="image/x-icon" href="images/sap${whitelabeled}.ico" />
     
-	<!--<link href='http://fonts.googleapis.com/css?family=Ubuntu:300,400,500,700,300italic,400italic,500italic,700italic' rel='stylesheet' type='text/css'>-->
+    <!--<link href='http://fonts.googleapis.com/css?family=Ubuntu:300,400,500,700,300italic,400italic,500italic,700italic' rel='stylesheet' type='text/css'>-->
     <!--                                                               -->
     <!-- Consider inlining CSS to reduce the number of requested files -->
     <!--                                                               -->
@@ -24,13 +24,17 @@
     <!--                                           -->
     <!-- Any title is fine                         -->
     <!--                                           -->
-    <title>SAP Sailing Analytics Spectator Vision</title>
+    <title>${SAP}Sailing Analytics Spectator Vision</title>
     
     <link rel="stylesheet" type="text/css" href="/sailing-normalize-3.0.2.cache.css">
     <link rel="stylesheet" type="text/css" href="/clean/sailing-clean-1.0.cache.css">
     <link rel="stylesheet" type="text/css" href="/sailing-fontface-1.0.cache.css">
     <link rel="stylesheet" type="text/css" href="Spectator.css">
-    
+    <script>
+       document.clientConfigurationContext = {
+            debrandingActive: ${debrandingActive}
+       };
+    </script>
     <!--                                           -->
     <!-- This script loads your compiled module.   -->
     <!-- If you add any GWT meta tags, they must   -->

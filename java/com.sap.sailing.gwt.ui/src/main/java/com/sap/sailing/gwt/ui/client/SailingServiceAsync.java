@@ -499,8 +499,8 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
             CompetitorRegistrationType competitorRegistrationType, String registrationLinkSecret, Date startDate, Date endDate,
             RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedal, boolean persistent,
             ScoringSchemeType scoringSchemeType, UUID defaultCourseAreaId, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
-            boolean controlTrackingFromStartAndFinishTimes, RankingMetrics rankingMetricType,
-            AsyncCallback<RegattaDTO> callback);
+            boolean controlTrackingFromStartAndFinishTimes, boolean autoRestartTrackingUponCompetitorSetChange,
+            RankingMetrics rankingMetricType, AsyncCallback<RegattaDTO> callback);
 
     void addRaceColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName,
             List<Pair<String, Integer>> columnNames, AsyncCallback<List<RaceColumnInSeriesDTO>> callback);
@@ -609,7 +609,7 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
     void updateRegatta(RegattaIdentifier regattaIdentifier, Date startDate, Date endDate, UUID defaultCourseAreaUuid,
             RegattaConfigurationDTO regattaConfiguration, Double buoyZoneRadiusInHullLengths,
             boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes,
-            String registrationLinkSecret, CompetitorRegistrationType registrationType, AsyncCallback<Void> callback);
+            boolean autoRestartTrackingUponCompetitorSetChange, String registrationLinkSecret, CompetitorRegistrationType registrationType, AsyncCallback<Void> callback);
 
     /**
      * @param detailType

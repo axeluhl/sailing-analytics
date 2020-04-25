@@ -92,4 +92,6 @@ public interface DomainFactory {
      */
     void addUpdateHandlers(String updateURL, String username, String password, Serializable eventId,
             RaceDefinition raceDefinition, DynamicTrackedRace trackedRace) throws URISyntaxException;
+
+    Map<Competitor, Boat> createCompetitorsAndBoats(StartList startList, String raceId, BoatClass boatClass, RaceTrackingHandler raceTrackHandler);
 }

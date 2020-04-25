@@ -79,7 +79,7 @@ public class BoatReplicationTest extends AbstractServerReplicationTest {
                 /* registrationLinkSecret */ null, /* startDate */ null, /* endDate */ null, regattaId, series,
                 /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null,
                 /* buoyZoneRadiusInHullLengths */2.0, /* useStartTimeInference */ true,
-                /* controlTrackingFromStartAndFinishTimes */ false, OneDesignRankingMetric::new);
+                /* controlTrackingFromStartAndFinishTimes */ false, /* autoRestartTrackingUponCompetitorSetChange */ false, OneDesignRankingMetric::new);
         Iterable<Waypoint> emptyWaypointList = Collections.emptyList();
         final String boatName = "Kielboat Harry";
         final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("505", /* typicallyStartsUpwind */true);

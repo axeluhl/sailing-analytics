@@ -40,6 +40,7 @@ import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRul
 import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithFixedRank;
 import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithFixedRankAndManyCompetitors;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
@@ -157,6 +158,10 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
             }
             @Override
             public Regatta getOrCreateDefaultRegatta(String name, String boatClassName, Serializable id) {
+                return null;
+            }
+            @Override
+            public RaceHandle updateRaceCompetitors(Regatta regatta, RaceDefinition race) throws Exception {
                 return null;
             }
         };
