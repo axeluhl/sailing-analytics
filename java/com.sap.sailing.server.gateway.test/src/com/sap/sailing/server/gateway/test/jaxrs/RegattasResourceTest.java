@@ -95,7 +95,7 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
                                 /* persistent */ true,
                                 DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null,
                                 /* buoyZoneRadiusInHullLengths */2.0, /* useStartTimeInference */ true,
-                                /* controlTrackingFromStartAndFinishTimes */ false, OneDesignRankingMetric::new);
+                                /* controlTrackingFromStartAndFinishTimes */ false, /* autoRestartTrackingUponCompetitorSetChange */ false, OneDesignRankingMetric::new);
                     }
                 });
         getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(SecuredDomainType.REGATTA,
@@ -108,7 +108,7 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
                                 UUID.randomUUID(), series, /* persistent */ true,
                                 DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null,
                                 /* buoyZoneRadiusInHullLengths */2.0, /* useStartTimeInference */ true,
-                                /* controlTrackingFromStartAndFinishTimes */ false, OneDesignRankingMetric::new);
+                                /* controlTrackingFromStartAndFinishTimes */ false, /* autoRestartTrackingUponCompetitorSetChange */ false, OneDesignRankingMetric::new);
                     }
                 });
         testSeries.addRaceColumn("R1", /* trackedRegattaRegistry */ null);

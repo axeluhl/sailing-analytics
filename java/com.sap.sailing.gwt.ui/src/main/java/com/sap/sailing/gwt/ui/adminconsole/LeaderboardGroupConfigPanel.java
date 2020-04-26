@@ -596,13 +596,13 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
                 userService.getUserManagementService(), type,
                 group -> leaderboardGroupsRefresher.fillLeaderboardGroups(), stringMessages);
         actionsColumn.addAction(LeaderboardGroupConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
-                e -> config.openDialog(e));
+                e -> config.openOwnershipDialog(e));
         
         final EditACLDialog.DialogConfig<LeaderboardGroupDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementService(), type,
                 group -> leaderboardGroupsRefresher.fillLeaderboardGroups(), stringMessages);
         actionsColumn.addAction(LeaderboardGroupConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                e -> configACL.openDialog(e));
+                e -> configACL.openACLDialog(e));
         
         final MigrateGroupOwnershipDialog.DialogConfig<LeaderboardGroupDTO> migrateDialogConfig = MigrateGroupOwnershipDialog
                 .create(userService.getUserManagementService(), (lg, dto) -> {

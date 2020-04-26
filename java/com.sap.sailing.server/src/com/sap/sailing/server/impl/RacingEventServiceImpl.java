@@ -1696,13 +1696,15 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             CompetitorRegistrationType competitorRegistrationType, String registrationLinkSecret, TimePoint startDate, TimePoint endDate,
             Serializable id, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme,
             Serializable defaultCourseAreaId, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes,
-            RankingMetricConstructor rankingMetricConstructor) {
+            boolean autoRestartTrackingUponCompetitorSetChange, RankingMetricConstructor rankingMetricConstructor) {
         if (useStartTimeInference && controlTrackingFromStartAndFinishTimes) {
             throw new IllegalArgumentException("Cannot set both of useStartTimeInference and controlTrackingFromStartAndFinishTimes to true");
         }
         com.sap.sse.common.Util.Pair<Regatta, Boolean> regattaWithCreatedFlag = getOrCreateRegattaWithoutReplication(
-                fullRegattaName, boatClassName, canBoatsOfCompetitorsChangePerRace, competitorRegistrationType, registrationLinkSecret, startDate, endDate, id, series, persistent, scoringScheme,
-                defaultCourseAreaId, buoyZoneRadiusInHullLengths, useStartTimeInference, controlTrackingFromStartAndFinishTimes, rankingMetricConstructor);
+                fullRegattaName, boatClassName, canBoatsOfCompetitorsChangePerRace, competitorRegistrationType,
+                registrationLinkSecret, startDate, endDate, id, series, persistent, scoringScheme, defaultCourseAreaId,
+                buoyZoneRadiusInHullLengths, useStartTimeInference, controlTrackingFromStartAndFinishTimes,
+                autoRestartTrackingUponCompetitorSetChange, rankingMetricConstructor);
         Regatta regatta = regattaWithCreatedFlag.getA();
         if (regattaWithCreatedFlag.getB()) {
             onRegattaLikeAdded(regatta);
@@ -1738,12 +1740,13 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             TimePoint endDate, Serializable id, Iterable<? extends Series> series, boolean persistent,
             ScoringScheme scoringScheme, Serializable defaultCourseAreaId, Double buoyZoneRadiusInHullLengths,
             boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes,
-            RankingMetricConstructor rankingMetricConstructor) {
+            boolean autoRestartTrackingUponCompetitorSetChange, RankingMetricConstructor rankingMetricConstructor) {
         CourseArea courseArea = getCourseArea(defaultCourseAreaId);
         Regatta regatta = new RegattaImpl(getRaceLogStore(), getRegattaLogStore(), fullRegattaName,
-                getBaseDomainFactory().getOrCreateBoatClass(boatClassName), canBoatsOfCompetitorsChangePerRace, competitorRegistrationType, startDate, endDate, series, persistent,
-                scoringScheme, id, courseArea, buoyZoneRadiusInHullLengths, useStartTimeInference,
-                controlTrackingFromStartAndFinishTimes, rankingMetricConstructor, registrationLinkSecret);
+                getBaseDomainFactory().getOrCreateBoatClass(boatClassName), canBoatsOfCompetitorsChangePerRace,
+                competitorRegistrationType, startDate, endDate, series, persistent, scoringScheme, id, courseArea,
+                buoyZoneRadiusInHullLengths, useStartTimeInference, controlTrackingFromStartAndFinishTimes,
+                autoRestartTrackingUponCompetitorSetChange, rankingMetricConstructor, registrationLinkSecret);
         boolean wasCreated = addAndConnectRegatta(persistent, defaultCourseAreaId, regatta);
         if (wasCreated) {
             logger.info("Created regatta " + regatta.getName() + " (" + hashCode() + ") on " + this);
@@ -1963,7 +1966,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 getSeriesWithoutRaceColumnsConstructionParametersAsMap(regatta), regatta.isPersistent(),
                 regatta.getScoringScheme(), courseAreaId, regatta.getBuoyZoneRadiusInHullLengths(),
                 regatta.useStartTimeInference(), regatta.isControlTrackingFromStartAndFinishTimes(),
-                regatta.getRankingMetricType()));
+                regatta.isAutoRestartTrackingUponCompetitorSetChange(), regatta.getRankingMetricType()));
         RegattaIdentifier regattaIdentifier = regatta.getRegattaIdentifier();
         for (RaceDefinition race : regatta.getAllRaces()) {
             replicate(new AddRaceDefinition(regattaIdentifier, race));
@@ -2099,11 +2102,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             TrackedRaceReplicatorAndNotifier trackedRaceReplicator = new TrackedRaceReplicatorAndNotifier(trackedRace);
             trackedRaceReplicators.put(trackedRace, trackedRaceReplicator);
             trackedRace.addListener(trackedRaceReplicator, /* fire wind already loaded */true, /* notifyAboutGPSFixesAlreadyLoaded */ true);
-
             PolarFixCacheUpdater polarFixCacheUpdater = new PolarFixCacheUpdater(trackedRace);
             polarFixCacheUpdaters.put(trackedRace, polarFixCacheUpdater);
             trackedRace.addListener(polarFixCacheUpdater);
-            
             if (polarDataService != null) {
                 trackedRace.setPolarDataService(polarDataService);
             }
@@ -2696,7 +2697,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     public Regatta updateRegatta(RegattaIdentifier regattaIdentifier, TimePoint startDate, TimePoint endDate,
             Serializable newDefaultCourseAreaId, RegattaConfiguration newRegattaConfiguration,
             Iterable<? extends Series> series, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes,
-            String registrationLinkSecret, CompetitorRegistrationType registrationType) {
+            boolean autoRestartTrackingUponCompetitorSetChange, String registrationLinkSecret, CompetitorRegistrationType registrationType) {
         if (useStartTimeInference && controlTrackingFromStartAndFinishTimes) {
             throw new IllegalArgumentException("Cannot set both of useStartTimeInference and controlTrackingFromStartAndFinishTimes to true");
         }
@@ -2710,6 +2711,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         regatta.setEndDate(endDate);
         regatta.setBuoyZoneRadiusInHullLengths(buoyZoneRadiusInHullLengths);
         regatta.setControlTrackingFromStartAndFinishTimes(controlTrackingFromStartAndFinishTimes);
+        regatta.setAutoRestartTrackingUponCompetitorSetChange(autoRestartTrackingUponCompetitorSetChange);
         regatta.setRegistrationLinkSecret(registrationLinkSecret);
         regatta.setCompetitorRegistrationType(registrationType);
         if (regatta.useStartTimeInference() != useStartTimeInference) {
@@ -2739,6 +2741,36 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             mongoObjectFactory.storeRegatta(regatta);
         }
         return regatta;
+    }
+    
+    /**
+     * The current implementation uses {@link #removeRace(Regatta, RaceDefinition)} to remove the {@link TrackedRace}
+     * and the {@link RaceDefinition} and based on the {@link #connectivityParametersByRace} uses the connectivity
+     * parameters of the previously existing tracked race to restore the race by tracking it again after
+     * {@link #removeRace(Regatta, RaceDefinition)} has completed.
+     * 
+     * @return {@code null} if it was not possible to re-load the race, either because the regatta doesn't allow for it,
+     *         or because the connectivity parameters were not found; a {@link RaceHandle} for the re-started race
+     *         otherwise.
+     */
+    @Override
+    public RaceHandle updateRaceCompetitors(Regatta regatta, RaceDefinition race) throws Exception {
+        final RaceHandle result;
+        if (regatta.isAutoRestartTrackingUponCompetitorSetChange()) {
+            final RaceTrackingConnectivityParameters connectivityParams = connectivityParametersByRace.get(race);
+            if (connectivityParams != null) {
+                removeRace(regatta, race);
+                result = addRace(regatta.getRegattaIdentifier(), connectivityParams, RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS,
+                        new DefaultRaceTrackingHandler()); // no need for ownership setting here because we're only "re-tracking" an existing race
+            } else {
+                result = null;
+                logger.warning("Unable to update race competitors for race "+race+" in regatta "+regatta+
+                        " because no connectivity params were found that we could use to start tracking again for that race.");
+            }
+        } else {
+            result = null;
+        }
+        return result;
     }
 
     @Override

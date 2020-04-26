@@ -55,7 +55,7 @@ public class RaceLogConnectivityParamsLoadAndStoreTest extends AbstractConnectiv
                 MillisecondsTimePoint.now().plus(Duration.ONE_DAY), UUID.randomUUID(), series, /* persistent */ true,
                 new LowPoint(), new CourseAreaImpl("Default", UUID.randomUUID()), /* buoyZoneRadiusInHullLengths */ 2.0,
                 /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false,
-                OneDesignRankingMetric::new);
+                /* autoRestartTrackingUponCompetitorSetChange */ false, OneDesignRankingMetric::new);
         theSeries.addRaceColumn("R1", racingEventService);
         theSeries.addRaceColumn("R2", racingEventService);
         theSeries.addRaceColumn("R3", racingEventService);
