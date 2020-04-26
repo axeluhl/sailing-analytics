@@ -819,7 +819,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 response = getBadRaceErrorResponse(regattaName, raceName);
             } else {
                 TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
-
+                getSecurityService().checkCurrentUserExplicitPermissions(trackedRace, SecuredDomainType.TrackedRaceActions.EXPORT);
                 TimePoint from;
                 TimePoint to;
                 try {
@@ -837,7 +837,6 @@ public class RegattasResource extends AbstractSailingServerResource {
                     return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Could not parse the 'to' time.")
                             .type(MediaType.TEXT_PLAIN).build();
                 }
-
                 JSONObject jsonRace = new JSONObject();
                 jsonRace.put("name", trackedRace.getRace().getName());
                 jsonRace.put("regatta", regatta.getName());
@@ -976,6 +975,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             return getBadRaceErrorResponse(regattaName, raceName);
         }
         TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
+        getSecurityService().checkCurrentUserExplicitPermissions(trackedRace, SecuredDomainType.TrackedRaceActions.EXPORT);
         TimePoint from;
         TimePoint to;
         try {
@@ -1591,6 +1591,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                             .type(MediaType.TEXT_PLAIN).build();
                 } else {
                     TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
+                    getSecurityService().checkCurrentUserExplicitPermissions(trackedRace, SecuredDomainType.TrackedRaceActions.EXPORT);
                     TimePoint from;
                     TimePoint to;
                     try {
