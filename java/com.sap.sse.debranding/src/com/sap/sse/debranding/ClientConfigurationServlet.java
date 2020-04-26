@@ -82,6 +82,7 @@ public class ClientConfigurationServlet extends HttpServlet {
         final String servletPath = req.getServletPath();
         final byte[] cachedPage;
         final String pageKey = generateKey(servletPath, deBrandingActive);
+        resp.setContentType("text/html;charset=UTF-8");
         if ((cachedPage = cache.get(pageKey)) != null) {
             IOUtils.write(cachedPage, resp.getOutputStream());
         } else {
