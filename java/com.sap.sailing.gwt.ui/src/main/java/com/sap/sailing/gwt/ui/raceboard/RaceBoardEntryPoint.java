@@ -1,6 +1,8 @@
 
 package com.sap.sailing.gwt.ui.raceboard;
 
+import static com.sap.sailing.gwt.ui.client.SailingServiceHelper.createSailingServiceWriteInstance;
+
 import java.util.Collections;
 
 import com.google.gwt.core.client.GWT;
@@ -154,7 +156,7 @@ public class RaceBoardEntryPoint extends AbstractSailingReadEntryPoint implement
                 raceboardContextDefinition.getLeaderboardName(), raceboardContextDefinition.getLeaderboardGroupName(),
                 raceboardContextDefinition.getEventId(), RaceBoardEntryPoint.this, getStringMessages(), userAgent,
                 raceTimesInfoProvider, showChartMarkEditMediaButtonsAndVideo, true, availableDetailTypes,
-                raceboardData.getLeaderboard(), selectedRace, raceboardData.getTrackingConnectorInfo());
+                raceboardData.getLeaderboard(), selectedRace, raceboardData.getTrackingConnectorInfo(), createSailingServiceWriteInstance() /* create write instance for later admin usage*/);
         RootLayoutPanel.get().add(raceBoardPerspective.getEntryWidget());
 
         if (raceBoardMode != null) {
