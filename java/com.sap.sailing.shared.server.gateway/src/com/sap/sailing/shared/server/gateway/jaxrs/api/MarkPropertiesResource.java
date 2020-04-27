@@ -1,5 +1,8 @@
 package com.sap.sailing.shared.server.gateway.jaxrs.api;
 
+import java.io.BufferedWriter;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -15,6 +18,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.json.simple.JSONArray;
@@ -77,9 +81,8 @@ public class MarkPropertiesResource extends AbstractSailingServerResource {
         if (markProperties == null) {
             return getMarkPropertiesNotFoundErrorResponse();
         }
-        final JSONObject serializedMarkedProperties = getMarkPropertiesSerializer().serialize(markProperties);
-        final String json = serializedMarkedProperties.toJSONString();
-        return Response.ok(json).build();
+        final JSONObject serializedMarkProperties = getMarkPropertiesSerializer().serialize(markProperties);
+        return Response.ok((StreamingOutput) (OutputStream output)->serializedMarkProperties.writeJSONString(new BufferedWriter(new OutputStreamWriter(output)))).build();
     }
 
     @POST
@@ -129,9 +132,8 @@ public class MarkPropertiesResource extends AbstractSailingServerResource {
             final Position fixedPosition = new DegreePosition(latDeg, lonDeg);
             getSharedSailingData().setFixedPositionForMarkProperties(createdMarkProperties, fixedPosition);
         }
-        final JSONObject serializedMarkedProperties = getMarkPropertiesSerializer().serialize(createdMarkProperties);
-        final String json = serializedMarkedProperties.toJSONString();
-        return Response.ok(json).build();
+        final JSONObject serializedMarkProperties = getMarkPropertiesSerializer().serialize(createdMarkProperties);
+        return Response.ok((StreamingOutput) (OutputStream output)->serializedMarkProperties.writeJSONString(new BufferedWriter(new OutputStreamWriter(output)))).build();
     }
 
     @PUT
@@ -153,9 +155,8 @@ public class MarkPropertiesResource extends AbstractSailingServerResource {
         } else {
             getSharedSailingData().clearPositioningForMarkProperties(markProperties);
         }
-        final JSONObject serializedMarkedProperties = getMarkPropertiesSerializer().serialize(markProperties);
-        final String json = serializedMarkedProperties.toJSONString();
-        return Response.ok(json).build();
+        final JSONObject serializedMarkProperties = getMarkPropertiesSerializer().serialize(markProperties);
+        return Response.ok((StreamingOutput) (OutputStream output)->serializedMarkProperties.writeJSONString(new BufferedWriter(new OutputStreamWriter(output)))).build();
     }
 
     @PUT
@@ -206,9 +207,8 @@ public class MarkPropertiesResource extends AbstractSailingServerResource {
             positioningInformation = null;
         }
         getSharedSailingData().updateMarkProperties(markPropertiesUUID, markPropertiesBuilder.build(), positioningInformation, tags);
-        final JSONObject serializedMarkedProperties = getMarkPropertiesSerializer().serialize(markProperties);
-        final String json = serializedMarkedProperties.toJSONString();
-        return Response.ok(json).build();
+        final JSONObject serializedMarkProperties = getMarkPropertiesSerializer().serialize(markProperties);
+        return Response.ok((StreamingOutput) (OutputStream output)->serializedMarkProperties.writeJSONString(new BufferedWriter(new OutputStreamWriter(output)))).build();
     }
 
     @DELETE

@@ -1,5 +1,8 @@
 package com.sap.sailing.shared.server.gateway.jaxrs.api;
 
+import java.io.BufferedWriter;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.List;
 import java.util.UUID;
 
@@ -13,6 +16,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.json.simple.JSONArray;
@@ -71,9 +75,8 @@ public class CourseTemplateResource extends AbstractSailingServerResource {
             return getCourseTemplateNotFoundErrorResponse();
         }
         
-        final JSONObject serializedMarkedProperties = courseTemplateSerializer.serialize(courseTemplate);
-        final String json = serializedMarkedProperties.toJSONString();
-        return Response.ok(json).build();
+        final JSONObject serializedMarkProperties = courseTemplateSerializer.serialize(courseTemplate);
+        return Response.ok((StreamingOutput) (OutputStream output)->serializedMarkProperties.writeJSONString(new BufferedWriter(new OutputStreamWriter(output)))).build();
     }
 
     @POST
@@ -95,9 +98,8 @@ public class CourseTemplateResource extends AbstractSailingServerResource {
                 deserializedCourseTemplate.getDefaultMarkRolesForMarkTemplates(),
                 deserializedCourseTemplate.getDefaultMarkTemplatesForMarkRoles(), deserializedCourseTemplate.getRepeatablePart(),
                 deserializedCourseTemplate.getTags(), deserializedCourseTemplate.getOptionalImageURL(), deserializedCourseTemplate.getDefaultNumberOfLaps());
-        final JSONObject serializedMarkedProperties = courseTemplateSerializer.serialize(createdCourseTemplate);
-        final String jsonResult = serializedMarkedProperties.toJSONString();
-        return Response.ok(jsonResult).build();
+        final JSONObject serializedMarkProperties = courseTemplateSerializer.serialize(createdCourseTemplate);
+        return Response.ok((StreamingOutput) (OutputStream output)->serializedMarkProperties.writeJSONString(new BufferedWriter(new OutputStreamWriter(output)))).build();
     }
 
     @DELETE

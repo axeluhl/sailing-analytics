@@ -1,5 +1,8 @@
 package com.sap.sailing.server.gateway.jaxrs;
 
+import java.io.BufferedWriter;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -9,7 +12,10 @@ import java.util.stream.StreamSupport;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.StreamingOutput;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -194,5 +200,13 @@ public abstract class AbstractSailingServerResource {
     
     public RaceLogTrackingAdapter getRaceLogTrackingAdapter() {
         return getService(RaceLogTrackingAdapterFactory.class).getAdapter(getService().getBaseDomainFactory());
+    }
+
+    protected StreamingOutput streamingOutput(JSONObject jsonObject) {
+        return (StreamingOutput) (OutputStream output)->jsonObject.writeJSONString(new BufferedWriter(new OutputStreamWriter(output)));
+    }
+
+    protected StreamingOutput streamingOutput(JSONArray jsonArray) {
+        return (StreamingOutput) (OutputStream output)->jsonArray.writeJSONString(new BufferedWriter(new OutputStreamWriter(output)));
     }
 }

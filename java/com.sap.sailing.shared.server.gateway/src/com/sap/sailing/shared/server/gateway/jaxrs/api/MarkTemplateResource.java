@@ -1,5 +1,8 @@
 package com.sap.sailing.shared.server.gateway.jaxrs.api;
 
+import java.io.BufferedWriter;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.UUID;
 
 import javax.ws.rs.FormParam;
@@ -10,6 +13,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.json.simple.JSONArray;
@@ -59,9 +63,8 @@ public class MarkTemplateResource extends AbstractSailingServerResource {
             return getMarkTemplateNotFoundErrorResponse();
         }
         JsonSerializer<MarkTemplate> markTemplateSerializer = new MarkTemplateJsonSerializer();
-        final JSONObject serializedMarkedTemplate = markTemplateSerializer.serialize(markTemplate);
-        final String json = serializedMarkedTemplate.toJSONString();
-        return Response.ok(json).build();
+        final JSONObject serializedMarkTemplate = markTemplateSerializer.serialize(markTemplate);
+        return Response.ok((StreamingOutput) (OutputStream output)->serializedMarkTemplate.writeJSONString(new BufferedWriter(new OutputStreamWriter(output)))).build();
     }
 
     @POST
@@ -91,9 +94,8 @@ public class MarkTemplateResource extends AbstractSailingServerResource {
         final MarkTemplate markTemplate = new MarkTemplateImpl(name, effectiveShortName, color, shape, pattern, type);
         final MarkTemplate createdMarkTemplate = getSharedSailingData().createMarkTemplate(markTemplate);
         JsonSerializer<MarkTemplate> markTemplateSerializer = new MarkTemplateJsonSerializer();
-        final JSONObject serializedMarkedTemplate = markTemplateSerializer.serialize(createdMarkTemplate);
-        final String json = serializedMarkedTemplate.toJSONString();
-        return Response.ok(json).build();
+        final JSONObject serializedMarkTemplate = markTemplateSerializer.serialize(createdMarkTemplate);
+        return Response.ok((StreamingOutput) (OutputStream output)->serializedMarkTemplate.writeJSONString(new BufferedWriter(new OutputStreamWriter(output)))).build();
     }
 
 }

@@ -178,7 +178,6 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
                     if (!userService.hasPermission(race, SecuredDomainType.TrackedRaceActions.EXPORT)) {
                         canExportAll = false;
                     }
-
                 }
                 btnSetDelayToLive.setEnabled(canUpdateAll);
                 btnRemoveRace.setEnabled(canDeleteAll);
