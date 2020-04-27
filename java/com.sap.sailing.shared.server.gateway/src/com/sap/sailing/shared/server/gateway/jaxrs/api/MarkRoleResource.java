@@ -1,8 +1,5 @@
 package com.sap.sailing.shared.server.gateway.jaxrs.api;
 
-import java.io.BufferedWriter;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.util.UUID;
 
 import javax.ws.rs.FormParam;
@@ -13,7 +10,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.json.simple.JSONArray;
@@ -22,11 +18,11 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.coursetemplate.MarkRole;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.MarkRoleJsonSerializer;
-import com.sap.sailing.shared.server.gateway.jaxrs.AbstractSailingServerResource;
+import com.sap.sailing.shared.server.gateway.jaxrs.SharedAbstractSailingServerResource;
 import com.sun.jersey.api.client.ClientResponse.Status;
 
 @Path("/v1/markroles")
-public class MarkRoleResource extends AbstractSailingServerResource {
+public class MarkRoleResource extends SharedAbstractSailingServerResource {
 
     private final JsonSerializer<MarkRole> markRoleSerializer;
 
@@ -51,8 +47,7 @@ public class MarkRoleResource extends AbstractSailingServerResource {
         for (MarkRole markRole : markRolesList) {
             result.add(markRoleSerializer.serialize(markRole));
         }
-        final String json = result.toJSONString();
-        return Response.ok(json).build();
+        return Response.ok(streamingOutput(result)).build();
     }
 
     @GET
@@ -64,7 +59,7 @@ public class MarkRoleResource extends AbstractSailingServerResource {
             return getMarkRoleNotFoundErrorResponse();
         }
         final JSONObject serializedMarkRole = markRoleSerializer.serialize(markRole);
-        return Response.ok((StreamingOutput) (OutputStream output)->serializedMarkRole.writeJSONString(new BufferedWriter(new OutputStreamWriter(output)))).build();
+        return Response.ok(streamingOutput(serializedMarkRole)).build();
     }
 
     @POST
@@ -75,6 +70,6 @@ public class MarkRoleResource extends AbstractSailingServerResource {
         }
         final MarkRole markRole = getSharedSailingData().createMarkRole(name, shortName);
         final JSONObject serializedMarkRole = markRoleSerializer.serialize(markRole);
-        return Response.ok((StreamingOutput) (OutputStream output)->serializedMarkRole.writeJSONString(new BufferedWriter(new OutputStreamWriter(output)))).build();
+        return Response.ok(streamingOutput(serializedMarkRole)).build();
     }
 }

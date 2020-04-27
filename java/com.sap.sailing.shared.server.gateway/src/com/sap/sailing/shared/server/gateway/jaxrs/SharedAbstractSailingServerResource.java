@@ -1,11 +1,19 @@
 package com.sap.sailing.shared.server.gateway.jaxrs;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 import javax.servlet.ServletContext;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.StreamingOutput;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -27,7 +35,7 @@ import com.sap.sse.security.SecurityService;
 import com.sap.sse.util.DateParser;
 import com.sun.jersey.api.core.ResourceContext;
 
-public abstract class AbstractSailingServerResource {
+public abstract class SharedAbstractSailingServerResource {
     private static final String SLASH_ENCODING = "__";
     @Context ServletContext servletContext;
     @Context ResourceContext resourceContext;
@@ -145,5 +153,27 @@ public abstract class AbstractSailingServerResource {
         BigDecimal bigDecimal = new BigDecimal(value);
         bigDecimal = bigDecimal.setScale(places, RoundingMode.HALF_UP);
         return bigDecimal.doubleValue();
+    }
+
+    protected StreamingOutput streamingOutput(JSONObject jsonObject) {
+        return new StreamingOutput() {
+            @Override
+            public void write(OutputStream output) throws IOException, WebApplicationException {
+                BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(output));
+                jsonObject.writeJSONString(bufferedWriter);
+                bufferedWriter.flush();
+            }
+        };
+    }
+
+    protected StreamingOutput streamingOutput(JSONArray jsonArray) {
+        return new StreamingOutput() {
+            @Override
+            public void write(OutputStream output) throws IOException, WebApplicationException {
+                BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(output));
+                jsonArray.writeJSONString(bufferedWriter);
+                bufferedWriter.flush();
+            }
+        };
     }
 }

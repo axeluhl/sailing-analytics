@@ -1,8 +1,5 @@
 package com.sap.sailing.shared.server.gateway.jaxrs.api;
 
-import java.io.BufferedWriter;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.util.List;
 import java.util.UUID;
 
@@ -16,7 +13,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.json.simple.JSONArray;
@@ -28,11 +24,11 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseTemplateJsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CourseTemplateJsonSerializer;
-import com.sap.sailing.shared.server.gateway.jaxrs.AbstractSailingServerResource;
+import com.sap.sailing.shared.server.gateway.jaxrs.SharedAbstractSailingServerResource;
 import com.sun.jersey.api.client.ClientResponse.Status;
 
 @Path("/v1/coursetemplates")
-public class CourseTemplateResource extends AbstractSailingServerResource {
+public class CourseTemplateResource extends SharedAbstractSailingServerResource {
     
     private final JsonSerializer<CourseTemplate> courseTemplateSerializer;
     
@@ -62,8 +58,7 @@ public class CourseTemplateResource extends AbstractSailingServerResource {
         for (CourseTemplate courseTemplate : courseTemplateList) {
             result.add(courseTemplateSerializer.serialize(courseTemplate));
         }
-        final String json = result.toJSONString();
-        return Response.ok(json).build();
+        return Response.ok(streamingOutput(result)).build();
     }
 
     @GET
@@ -74,9 +69,8 @@ public class CourseTemplateResource extends AbstractSailingServerResource {
         if (courseTemplate == null) {
             return getCourseTemplateNotFoundErrorResponse();
         }
-        
         final JSONObject serializedMarkProperties = courseTemplateSerializer.serialize(courseTemplate);
-        return Response.ok((StreamingOutput) (OutputStream output)->serializedMarkProperties.writeJSONString(new BufferedWriter(new OutputStreamWriter(output)))).build();
+        return Response.ok(streamingOutput(serializedMarkProperties)).build();
     }
 
     @POST
@@ -99,7 +93,7 @@ public class CourseTemplateResource extends AbstractSailingServerResource {
                 deserializedCourseTemplate.getDefaultMarkTemplatesForMarkRoles(), deserializedCourseTemplate.getRepeatablePart(),
                 deserializedCourseTemplate.getTags(), deserializedCourseTemplate.getOptionalImageURL(), deserializedCourseTemplate.getDefaultNumberOfLaps());
         final JSONObject serializedMarkProperties = courseTemplateSerializer.serialize(createdCourseTemplate);
-        return Response.ok((StreamingOutput) (OutputStream output)->serializedMarkProperties.writeJSONString(new BufferedWriter(new OutputStreamWriter(output)))).build();
+        return Response.ok(streamingOutput(serializedMarkProperties)).build();
     }
 
     @DELETE
