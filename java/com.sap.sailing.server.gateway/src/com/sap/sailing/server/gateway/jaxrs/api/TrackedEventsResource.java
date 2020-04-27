@@ -86,8 +86,7 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
             // storage was empty -> respond with empty list
             final JSONObject resultEvents = new JSONObject();
             resultEvents.put(KEY_TRACKED_EVENTS, result);
-            final String jsonString = resultEvents.toJSONString();
-            builder = Response.ok(jsonString).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8");
+            builder = Response.ok(streamingOutput(resultEvents));
         } else {
             builder = Response.status(Status.UNAUTHORIZED);
         }

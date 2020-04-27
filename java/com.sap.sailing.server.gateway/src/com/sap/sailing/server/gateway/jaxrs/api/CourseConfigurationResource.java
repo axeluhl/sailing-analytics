@@ -47,13 +47,13 @@ import com.sap.sailing.domain.coursetemplate.ControlPointWithMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.CourseConfiguration;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.FreestyleMarkConfiguration;
-import com.sap.sailing.domain.coursetemplate.MarkRole;
 import com.sap.sailing.domain.coursetemplate.MarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkConfigurationRequestAnnotation;
 import com.sap.sailing.domain.coursetemplate.MarkConfigurationResponseAnnotation;
 import com.sap.sailing.domain.coursetemplate.MarkConfigurationVisitor;
 import com.sap.sailing.domain.coursetemplate.MarkPairWithConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkPropertiesBasedMarkConfiguration;
+import com.sap.sailing.domain.coursetemplate.MarkRole;
 import com.sap.sailing.domain.coursetemplate.MarkTemplateBasedMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.RegattaMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.WaypointWithMarkConfiguration;
@@ -175,7 +175,7 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
                 .createCourseConfigurationFromRegatta(courseBase, regatta, raceColumnByName.getTrackedRace(fleetByName),
                         tags);
         final JSONObject jsonResult = getCourseConfigurationJsonSerializer().serialize(courseConfiguration);
-        return Response.ok(jsonResult.toJSONString()).build();
+        return Response.ok(streamingOutput(jsonResult)).build();
     }
 
     @GET
@@ -199,8 +199,7 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
         }
         final CourseConfiguration<MarkConfigurationResponseAnnotation> courseConfiguration = getService().getCourseAndMarkConfigurationFactory()
                 .createCourseConfigurationFromTemplate(courseTemplate, regatta, tags, optionalNumberOfLaps);
-        String jsonString = getCourseConfigurationJsonSerializer().serialize(courseConfiguration).toJSONString();
-        return Response.ok(jsonString).build();
+        return Response.ok(streamingOutput(getCourseConfigurationJsonSerializer().serialize(courseConfiguration))).build();
 
     }
 
@@ -236,8 +235,8 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
                 regatta, getService().getCourseAndMarkConfigurationFactory()
                     .createCourseTemplateAndUpdatedConfiguration(courseConfiguration, tags,
                         optionalUserGroupForNonDefaultMarkPropertiesOwnership));
-        final String jsonString = getCourseConfigurationJsonSerializer().serialize(courseTemplate).toJSONString();
-        return Response.ok(jsonString).build();
+        return Response
+                .ok(streamingOutput(getCourseConfigurationJsonSerializer().serialize(courseTemplate))).build();
     }
 
     private CourseConfiguration<MarkConfigurationResponseAnnotation> annotateWithLastKnownPositionInformation(
@@ -401,8 +400,7 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
         final CourseConfiguration<MarkConfigurationResponseAnnotation> courseConfigurationResult = getService().getCourseAndMarkConfigurationFactory()
                 .createCourseConfigurationFromRegatta(course, regatta, raceColumnByName.getTrackedRace(fleetByName),
                         /* tagsToFilterMarkProperties */ null);
-        final String jsonString = getCourseConfigurationJsonSerializer().serialize(courseConfigurationResult).toJSONString();
-        return Response.ok(jsonString).build();
+        return Response.ok(streamingOutput(getCourseConfigurationJsonSerializer().serialize(courseConfigurationResult))).build();
     }
 
     private synchronized JsonSerializer<CourseConfiguration<MarkConfigurationResponseAnnotation>> getCourseConfigurationJsonSerializer() {
