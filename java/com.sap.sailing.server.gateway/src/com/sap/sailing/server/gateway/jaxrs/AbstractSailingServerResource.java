@@ -1,6 +1,7 @@
 package com.sap.sailing.server.gateway.jaxrs;
 
 import java.io.BufferedWriter;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.lang.reflect.Array;
@@ -11,6 +12,7 @@ import java.util.Optional;
 import java.util.stream.StreamSupport;
 
 import javax.servlet.ServletContext;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.StreamingOutput;
 
@@ -203,10 +205,24 @@ public abstract class AbstractSailingServerResource {
     }
 
     protected StreamingOutput streamingOutput(JSONObject jsonObject) {
-        return (StreamingOutput) (OutputStream output)->jsonObject.writeJSONString(new BufferedWriter(new OutputStreamWriter(output)));
+        return new StreamingOutput() {
+            @Override
+            public void write(OutputStream output) throws IOException, WebApplicationException {
+                BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(output));
+                jsonObject.writeJSONString(bufferedWriter);
+                bufferedWriter.flush();
+            }
+        };
     }
 
     protected StreamingOutput streamingOutput(JSONArray jsonArray) {
-        return (StreamingOutput) (OutputStream output)->jsonArray.writeJSONString(new BufferedWriter(new OutputStreamWriter(output)));
+        return new StreamingOutput() {
+            @Override
+            public void write(OutputStream output) throws IOException, WebApplicationException {
+                BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(output));
+                jsonArray.writeJSONString(bufferedWriter);
+                bufferedWriter.flush();
+            }
+        };
     }
 }
