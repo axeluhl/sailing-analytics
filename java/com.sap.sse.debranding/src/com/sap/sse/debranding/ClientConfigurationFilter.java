@@ -35,7 +35,6 @@ public class ClientConfigurationFilter implements Filter {
         chain.doFilter(wrappedRequest, wrappedResponse);
         String body = wrappedResponse.toString();
         String replaced = new String(body);
-        System.setProperty(ClientConfigurationServlet.DEBRANDING_PROPERTY_NAME, "true");
         final boolean deBrandingActive = Boolean
                 .valueOf(System.getProperty(ClientConfigurationServlet.DEBRANDING_PROPERTY_NAME, "false"));
         for (Map.Entry<String, String> item : createReplacementMap(deBrandingActive).entrySet()) {
