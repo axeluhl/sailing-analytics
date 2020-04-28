@@ -28,7 +28,6 @@ import java.util.stream.Collectors;
 
 import org.json.JSONException;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
@@ -473,29 +472,58 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
             }
             assertTrue(hasPingDevice);
         }
-
-        // TODO: how to add mark template to mark properties?
-        final String regattaName2 = "Regatta2";
-        eventApi.createEvent(ctx, regattaName2, "", CompetitorRegistrationType.CLOSED, "");
-        final RaceColumn race2 = regattaApi.addRaceColumn(ctx, regattaName2, null, 1)[0];
-        final MarkTemplate mt = markTemplateApi.createMarkTemplate(sharedServerCtx, "mt2", "mt2", "#ffffff", "shape",
-                "pattern", MarkType.LANDMARK.name());
-        final MarkConfiguration mc2 = MarkConfiguration.createMarkPropertiesBased(mp1.getId(),
-                markRoleApi.createMarkRole(sharedServerCtx, "role_mc2_1", /* shortName */ null).getId());
-
-        final WaypointWithMarkConfiguration wp2 = new WaypointWithMarkConfiguration("landmark", "landmark",
-                PassingInstruction.Single_Unknown, Arrays.asList(mc2.getId()));
-        final CourseConfiguration ctConfiguration = new CourseConfiguration("ctConfiguration", Arrays.asList(mc2),
-                Arrays.asList(wp2));
-        final CourseConfiguration ct = courseConfigurationApi.createCourseTemplate(ctx, ctConfiguration, regattaName2);
-        final CourseConfiguration courseConfiguration2 = courseConfigurationApi
-                .createCourseConfigurationFromCourseTemplate(ctx, ct.getOptionalCourseTemplateId(), null,
-                        Collections.emptyList(), null);
-        CourseConfiguration course2 = courseConfigurationApi.createCourse(ctx, courseConfiguration2, regattaName2,
-                race2.getRaceName(), "Default");
     }
 
-    @Test @Ignore
+    @Test
+    public void testMarkPropertiesWithPositiongWithMarkTemplateUsage() throws JSONException {
+        final double MP_LAT_DEG = 49.097487;
+        final double MP_LNG_DEG = 8.648631;
+        final String regattaName2 = "Regatta2";
+        eventApi.createEvent(ctx, regattaName2, "", CompetitorRegistrationType.CLOSED, "");
+        final RaceColumn race = regattaApi.addRaceColumn(ctx, regattaName2, null, 1)[0];
+
+        // Creating a mark configuration based on a new mark template
+        final MarkTemplate mtb2 = markTemplateApi.createMarkTemplate(sharedServerCtx, "mark template 1", "mt1",
+                "#FFFFFF", "Cylinder", "Checkered", MarkType.BUOY.name());
+        final MarkConfiguration b2 = MarkConfiguration.createMarkTemplateBased(mtb2.getId(),
+                markRoleApi.createMarkRole(sharedServerCtx, "role_b2", /* shortName */ "mc1").getId());
+        b2.setStoreToInventory(true);
+
+        // Creating a new course configuration with the created mark configuration
+        final WaypointWithMarkConfiguration wp3 = new WaypointWithMarkConfiguration(null, null,
+                PassingInstruction.Single_Unknown, Arrays.asList(b2.getId()));
+        final CourseConfiguration courseConfiguration = new CourseConfiguration("my-course", Arrays.asList(b2),
+                Arrays.asList(wp3));
+
+        // Creating a course template and set mark properties position
+        final CourseConfiguration courseTemplate = courseConfigurationApi.createCourseTemplate(ctx, courseConfiguration,
+                regattaName2);
+        for (MarkProperties mp : markPropertiesApi.getAllMarkProperties(sharedServerCtx, Collections.emptyList())) {
+            if (mp.getShortName().equals("mt1")) {
+                markPropertiesApi.updateMarkPropertiesPositioning(sharedServerCtx, mp.getId(), /* deviceUuid */ null,
+                        MP_LAT_DEG, MP_LNG_DEG);
+            }
+        }
+
+        // Creating a course from the course template
+        final CourseConfiguration course = courseConfigurationApi.createCourse(ctx, courseTemplate, regattaName2,
+                race.getRaceName(), "Default");
+
+        final MarkConfiguration mc1_1 = course.getMarkConfigurationByEffectiveName("mark template 1");
+        assertEquals(MP_LAT_DEG, mc1_1.getLastKnownPosition().getLatDeg(), .1);
+        assertEquals(MP_LNG_DEG, mc1_1.getLastKnownPosition().getLngDeg(), .1);
+        for (final DeviceMapping dm : mc1_1.getDeviceMappings()) {
+            boolean hasPingDevice = false;
+            if ("PING".equals(dm.getType())) {
+                hasPingDevice = true;
+                assertEquals(MP_LAT_DEG, dm.getLastKnownPosition().getLatDeg(), .1);
+                assertEquals(MP_LNG_DEG, dm.getLastKnownPosition().getLngDeg(), .1);
+            }
+            assertTrue(hasPingDevice);
+        }
+    }
+
+    @Test
     //TODO: Need to clarify this test. The two course template don't seem to get merged by
     // MarkRole. Perhaps the cause is, that the MarkTemplate/MarkRole-map of the first
     // MarkTemplate is passed to the creation of the second one, so the MarkTemplate-IDs are
