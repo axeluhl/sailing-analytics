@@ -12,6 +12,7 @@ import java.text.ParseException;
 import java.util.Arrays;
 import java.util.UUID;
 
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
@@ -223,44 +224,44 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
         return array.stream().filter(o -> ((JSONObject) o).get(attributeName).equals(value)).findFirst().isPresent();
     }
 
-    private JSONObject getRegatta(String eventName) {
+    private JSONObject getRegatta(String eventName) throws WebApplicationException, IOException {
         Response regattasResponse = regattasResource.getRegatta(eventName, null);
-        return toJSONObject((String) regattasResponse.getEntity());
+        return toJSONObject(getEntityAsString(regattasResponse.getEntity()));
     }
 
-    private boolean isValidCreateEventResponse(Response response) {
+    private boolean isValidCreateEventResponse(Response response) throws WebApplicationException, IOException {
         String id = getIdFromCreateEventResponse(response);
         return validateUUID(id);
     }
     
-    private JSONArray getCourseAreasOfEvent(String strEventId) {
+    private JSONArray getCourseAreasOfEvent(String strEventId) throws WebApplicationException, IOException {
         JSONObject objEvent = getEvent(strEventId);
         JSONArray arrCourseAreas = getCourseAreas(objEvent);
         return arrCourseAreas;
     }
 
-    private JSONObject getEvent(String strEventId) {
+    private JSONObject getEvent(String strEventId) throws WebApplicationException, IOException {
         String jsonEvent = getEventAsString(strEventId);
         JSONObject objEvent = toJSONObject(jsonEvent);
         return objEvent;
     }
 
-    private boolean leaderBoardWithNameExists(String name) {
+    private boolean leaderBoardWithNameExists(String name) throws WebApplicationException, IOException {
         Response leaderboardResponse = getLeaderboard(name);
         JSONObject objLeaderboard = getLeaderboardAsJsonObject(leaderboardResponse);
         String strLeaderboardName = (String) objLeaderboard.get("name");
         return strLeaderboardName.equals(name);
     }
 
-    private JSONObject getLeaderboardAsJsonObject(Response leaderboardResponse) {
-        String strLeaderboardGroup = (String) leaderboardResponse.getEntity();
+    private JSONObject getLeaderboardAsJsonObject(Response leaderboardResponse) throws WebApplicationException, IOException {
+        String strLeaderboardGroup = getEntityAsString(leaderboardResponse.getEntity());
         JSONObject objLeaderboardGroup = toJSONObject(strLeaderboardGroup);
         return objLeaderboardGroup;
     }
 
-    private JSONObject getLeaderboardGroup(String strDefaultLeaderboardGroupName) {
+    private JSONObject getLeaderboardGroup(String strDefaultLeaderboardGroupName) throws WebApplicationException, IOException {
         Response leaderboardGroupsResponse = leaderboardGroupsResource.getLeaderboardGroup(strDefaultLeaderboardGroupName);
-        return toJSONObject(leaderboardGroupsResponse.getEntity().toString());
+        return toJSONObject(getEntityAsString(leaderboardGroupsResponse.getEntity()));
     }
 
     private JSONArray getLeaderboardGroups(JSONObject objEvent) {
@@ -287,12 +288,12 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
     }
     
 
-    private String getIdFromCreateEventResponse(Response createEventResponse) {
-        return (String) toJSONObject((String) createEventResponse.getEntity()).get("eventid");
+    private String getIdFromCreateEventResponse(Response createEventResponse) throws WebApplicationException, IOException {
+        return (String) toJSONObject(getEntityAsString(createEventResponse.getEntity())).get("eventid");
     }
 
-    private String getEventAsString(String eventId) {
-        return (String) eventsResource.getEvent(eventId, null).getEntity();
+    private String getEventAsString(String eventId) throws WebApplicationException, IOException {
+        return getEntityAsString(eventsResource.getEvent(eventId, null).getEntity());
     }
 
 }

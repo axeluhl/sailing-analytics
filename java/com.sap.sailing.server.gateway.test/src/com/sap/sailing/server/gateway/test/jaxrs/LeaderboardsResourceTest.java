@@ -87,7 +87,7 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
         Response leaderboardReponse = leaderboardsResource.getLeaderboard(regatta.getName(),
                 AbstractLeaderboardsResource.ResultStates.Final, null, null,
                 /* competitorAndBoatIdsOnly */ false);
-        String jsonString = (String) leaderboardReponse.getEntity();
+        String jsonString = getEntityAsString(leaderboardReponse.getEntity());
         Object obj= JSONValue.parse(jsonString);
         JSONObject jsonObject = (JSONObject) obj;
         String jsonLeaderboardName = (String) jsonObject.get("name");
@@ -106,7 +106,7 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
         Response leaderboardReponse = leaderboardsResource.getLeaderboard(regatta.getName(),
                 AbstractLeaderboardsResource.ResultStates.Final, null, null,
                 /* competitorAndBoatIdsOnly */ false);
-        String jsonString = (String) leaderboardReponse.getEntity();
+        String jsonString = getEntityAsString(leaderboardReponse.getEntity());
         Object obj= JSONValue.parse(jsonString);
         JSONObject jsonObject = (JSONObject) obj;
         String jsonLeaderboardName = (String) jsonObject.get("name");
@@ -119,7 +119,7 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
         Response leaderboardReponse2 = leaderboardsResource.getLeaderboard(regatta.getName(),
                 AbstractLeaderboardsResource.ResultStates.Final, null, null,
                 /* competitorAndBoatIdsOnly */ false);
-        String jsonString2 = (String) leaderboardReponse2.getEntity();        
+        String jsonString2 = getEntityAsString(leaderboardReponse2.getEntity());        
         obj= JSONValue.parse(jsonString2);
         jsonObject = (JSONObject) obj;
         resultTimePoint = parseTimepointFromJsonNumber((Long) jsonObject.get("resultTimepoint"));
@@ -131,7 +131,7 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
         Response leaderboardReponse = leaderboardsResource.getLeaderboard(regatta.getName(),
                 AbstractLeaderboardsResource.ResultStates.Live, null, null,
                 /* competitorAndBoatIdsOnly */ false);
-        String jsonString = (String) leaderboardReponse.getEntity();
+        String jsonString = getEntityAsString(leaderboardReponse.getEntity());
         Object obj= JSONValue.parse(jsonString);
         JSONObject jsonObject = (JSONObject) obj;
         String jsonLeaderboardName = (String) jsonObject.get("name");
@@ -153,7 +153,7 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
         Response leaderboardReponse = leaderboardsResource.getLeaderboard(regatta.getName(),
                 AbstractLeaderboardsResource.ResultStates.Final, null, null,
                 /* competitorAndBoatIdsOnly */ false);
-        String jsonString = (String) leaderboardReponse.getEntity();
+        String jsonString = getEntityAsString(leaderboardReponse.getEntity());
         Object obj= JSONValue.parse(jsonString);
         JSONObject jsonObject = (JSONObject) obj;
         String jsonLeaderboardName = (String) jsonObject.get("name");
@@ -167,7 +167,7 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
         Response leaderboardReponse2 = leaderboardsResource.getLeaderboard(regatta.getName(),
                 AbstractLeaderboardsResource.ResultStates.Final, null, null,
                 /* competitorAndBoatIdsOnly */ false);
-        String jsonString2 = (String) leaderboardReponse2.getEntity();
+        String jsonString2 = getEntityAsString(leaderboardReponse2.getEntity());
         Object obj2= JSONValue.parse(jsonString2);
         JSONObject jsonObject2 = (JSONObject) obj2;
         String jsonLeaderboardName2 = (String) jsonObject2.get("name");
@@ -185,7 +185,7 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
         Response leaderboardResponse = leaderboardsResource.getLeaderboard(regatta.getName(),
                 AbstractLeaderboardsResource.ResultStates.Final, null, null,
                 /* competitorAndBoatIdsOnly */ false);
-        String jsonString = (String) leaderboardResponse.getEntity();
+        String jsonString = getEntityAsString(leaderboardResponse.getEntity());
         Object obj = JSONValue.parse(jsonString);
         JSONObject jsonObject = (JSONObject) obj;
         String jsonLeaderboardName = (String) jsonObject.get("name");
@@ -199,7 +199,7 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
         Response leaderboardReponse2 = leaderboardsResource.getLeaderboard(regatta.getName(),
                 AbstractLeaderboardsResource.ResultStates.Final, null, null,
                 /* competitorAndBoatIdsOnly */ false);
-        jsonString = (String) leaderboardReponse2.getEntity();
+        jsonString = getEntityAsString(leaderboardReponse2.getEntity());
         obj= JSONValue.parse(jsonString);
         jsonObject = (JSONObject) obj;
         JSONArray jsonCompetitors = (JSONArray) jsonObject.get("competitors");
@@ -209,7 +209,7 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
         Response leaderboardReponse3 = leaderboardsResource.getLeaderboard(regatta.getName(),
                 AbstractLeaderboardsResource.ResultStates.Final, maxCompetitorsCount, null,
                 /* competitorAndBoatIdsOnly */ false);
-        jsonString = (String) leaderboardReponse3.getEntity();
+        jsonString = getEntityAsString(leaderboardReponse3.getEntity());
         obj= JSONValue.parse(jsonString);
         jsonObject = (JSONObject) obj;
         jsonCompetitors = (JSONArray) jsonObject.get("competitors");
@@ -219,7 +219,7 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
         Response leaderboardReponse4 = leaderboardsResource.getLeaderboard(regatta.getName(),
                 AbstractLeaderboardsResource.ResultStates.Final, null, null,
                 /* competitorAndBoatIdsOnly */ false);
-        jsonString = (String) leaderboardReponse4.getEntity();
+        jsonString = getEntityAsString(leaderboardReponse4.getEntity());
         obj= JSONValue.parse(jsonString);
         jsonObject = (JSONObject) obj;
         jsonCompetitors = (JSONArray) jsonObject.get("competitors");
@@ -234,7 +234,7 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
         final boolean allowPartialImport = true;
         Response leaderboardResponse = importScores(validityTimePoint, comment, allowRaceDefaultsByOrder, allowPartialImport);
         assertEquals(Status.OK.getStatusCode(), leaderboardResponse.getStatus());
-        final JSONObject jsonObject = (JSONObject) JSONValue.parse((String) leaderboardResponse.getEntity());
+        final JSONObject jsonObject = (JSONObject) JSONValue.parse(getEntityAsString(leaderboardResponse.getEntity()));
         assertNotNull(jsonObject);
         assertFalse((Boolean) jsonObject.get("complete"));
         assertEquals(comment, regattaLeaderboard.getScoreCorrection().getComment());
@@ -252,7 +252,7 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
         final boolean allowPartialImport = false;
         Response leaderboardResponse = importScores(validityTimePoint, comment, allowRaceDefaultsByOrder, allowPartialImport);
         assertEquals(Status.CONFLICT.getStatusCode(), leaderboardResponse.getStatus());
-        final JSONObject jsonObject = (JSONObject) JSONValue.parse((String) leaderboardResponse.getEntity());
+        final JSONObject jsonObject = (JSONObject) JSONValue.parse(getEntityAsString(leaderboardResponse.getEntity()));
         assertNotNull(jsonObject);
         assertFalse((Boolean) jsonObject.get("complete"));
         assertEquals(null, regattaLeaderboard.getScoreCorrection().getComment());

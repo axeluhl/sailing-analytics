@@ -31,12 +31,11 @@ public class CompetitorsResourceTest extends AbstractJaxRsApiTest {
 
     @Test
     public void testGetCompetitorAsJson() throws Exception {
-        String jsonString = competitorsResource.getCompetitor(id, null, null).getEntity().toString();
+        String jsonString = getEntityAsString(competitorsResource.getCompetitor(id, null, null).getEntity());
         JSONObject json = Helpers.toJSONObjectSafe(JSONValue.parse(jsonString));
         assertTrue(json.get("id").equals(id));
         assertTrue(json.get("name").equals(name));
         assertTrue(json.get("nationality").equals(nationality));
         assertTrue(json.get("countryCode").equals(countryCode));
     }
-
 }
