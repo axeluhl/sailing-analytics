@@ -198,7 +198,7 @@ public class EventsResource extends AbstractSailingServerResource {
                         eventAndLeaderboardGroupAndLeaderboard.getC().getRegatta().getRegistrationLinkSecret());
                 jsonResponse.put("leaderboard", eventAndLeaderboardGroupAndLeaderboard.getC().getName());
             }
-            response = ok(jsonResponse.toJSONString(), MediaType.APPLICATION_JSON);
+            response = Response.ok(streamingOutput(jsonResponse)).build();
         }
         return response;
     }
@@ -334,9 +334,7 @@ public class EventsResource extends AbstractSailingServerResource {
                     new VenueJsonSerializer(new CourseAreaJsonSerializer()), new LeaderboardGroupBaseJsonSerializer(),
                     new TrackingConnectorInfoJsonSerializer());
             JSONObject eventJson = eventSerializer.serialize(event);
-
-            String json = eventJson.toJSONString();
-            response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+            response = Response.ok(streamingOutput(eventJson)).build();
         }
         return response;
     }
@@ -375,9 +373,7 @@ public class EventsResource extends AbstractSailingServerResource {
                         filterByLeaderboard, filterByDayOffset, clientTimeZoneOffset, getService());
                 JSONObject raceStatesJson = eventRaceStatesSerializer.serialize(
                         new Pair<Event, Iterable<Leaderboard>>(event, getService().getLeaderboards().values()));
-                String json = raceStatesJson.toJSONString();
-                response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8")
-                        .build();
+                response = Response.ok(streamingOutput(raceStatesJson)).build();
             } else {
                 response = Response.status(Status.FORBIDDEN).build();
             }
@@ -708,10 +704,6 @@ public class EventsResource extends AbstractSailingServerResource {
                 .apply(new CreateRegattaLeaderboard(new RegattaName(regattaName), regattaName, discardThresholds));
                     }
                 });
-    }
-
-    private Response ok(String message, String mediaType) {
-        return Response.ok(message).header("Content-Type", mediaType + ";charset=UTF-8").build();
     }
 
     private Response getBadEventErrorResponse(String eventId) {
