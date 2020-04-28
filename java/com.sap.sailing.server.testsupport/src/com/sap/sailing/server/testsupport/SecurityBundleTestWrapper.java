@@ -32,7 +32,7 @@ public class SecurityBundleTestWrapper {
             logger.info("Creating dummy UserStoreImpl to trigger loading of userstore mongodb bundle");
             new UserStoreImpl("defaultTenant"); // only to trigger bundle loading and activation so that security service can find the bundle and its original user store
             logger.info("Setup for TaggingServiceTest in an OSGi environment");
-            // Note: This timeout of 2 minutes is just for debugging purposes and should not be used in production!
+            // Note: This timeout of 3 minutes is just for debugging purposes and should not be used in production!
             securityService = FullyInitializedReplicableTracker.createAndOpen(Activator.getContext(), SecurityService.class).getInitializedService(180 * 1000);
         }
         return securityService;
