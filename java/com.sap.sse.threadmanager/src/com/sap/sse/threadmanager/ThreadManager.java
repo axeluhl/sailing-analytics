@@ -13,7 +13,7 @@ import javax.ws.rs.core.Response.Status;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import com.sap.sse.shared.rest.StreamingOutputUtil;
+import com.sap.sse.rest.StreamingOutputUtil;
 
 @Path("/threads")
 public class ThreadManager extends StreamingOutputUtil {

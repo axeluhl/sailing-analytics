@@ -1,4 +1,4 @@
-package com.sap.sse.shared.rest;
+package com.sap.sse.rest;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
