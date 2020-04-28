@@ -16,7 +16,8 @@ public class StreamingOutputUtil {
         return new StreamingOutput() {
             @Override
             public void write(OutputStream output) throws IOException {
-                BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(output));
+                BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(
+                        output, "UTF8"));
                 jsonObject.writeJSONString(bufferedWriter);
                 bufferedWriter.flush();
             }
@@ -27,7 +28,8 @@ public class StreamingOutputUtil {
         return new StreamingOutput() {
             @Override
             public void write(OutputStream output) throws IOException {
-                BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(output));
+                BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(
+                        output, "UTF8"));
                 jsonArray.writeJSONString(bufferedWriter);
                 bufferedWriter.flush();
             }
