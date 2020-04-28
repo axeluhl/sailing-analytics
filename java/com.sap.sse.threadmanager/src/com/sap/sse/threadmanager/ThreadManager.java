@@ -13,8 +13,10 @@ import javax.ws.rs.core.Response.Status;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import com.sap.sse.shared.rest.StreamingOutputUtil;
+
 @Path("/threads")
-public class ThreadManager {
+public class ThreadManager extends StreamingOutputUtil {
     @Context ServletContext servletContext; 
 
     @Path("")
@@ -56,12 +58,11 @@ public class ThreadManager {
                 found = true;
             }
         }
-        String json = result.toJSONString();
         if (!found) {
             result.put("status", "Not found");
-            response = Response.status(Status.NOT_FOUND).entity(json).build();
+            response = Response.status(Status.NOT_FOUND).entity(streamingOutput(result)).build();
         } else {
-            response = Response.ok(json, MediaType.APPLICATION_JSON).build();
+            response = Response.ok(streamingOutput(result), MediaType.APPLICATION_JSON).build();
         }
         return response;
     }
@@ -83,12 +84,11 @@ public class ThreadManager {
                 found = true;
             }
         }
-        String json = result.toJSONString();
         if (!found) {
             result.put("status", "Not found");
-            response = Response.status(Status.NOT_FOUND).entity(json).build();
+            response = Response.status(Status.NOT_FOUND).entity(streamingOutput(result)).build();
         } else {
-            response = Response.ok(json, MediaType.APPLICATION_JSON).build();
+            response = Response.ok(streamingOutput(result), MediaType.APPLICATION_JSON).build();
         }
         return response;
     }
@@ -109,12 +109,11 @@ public class ThreadManager {
                 found = true;
             }
         }
-        String json = result.toJSONString();
         if (!found) {
             result.put("status", "Not found");
-            response = Response.status(Status.NOT_FOUND).entity(json).build();
+            response = Response.status(Status.NOT_FOUND).entity(streamingOutput(result)).build();
         } else {
-            response = Response.ok(json, MediaType.APPLICATION_JSON).build();
+            response = Response.ok(streamingOutput(result), MediaType.APPLICATION_JSON).build();
         }
         return response;
     }
@@ -136,12 +135,11 @@ public class ThreadManager {
                 found = true;
             }
         }
-        String json = result.toJSONString();
         if (!found) {
             result.put("status", "Not found");
-            response = Response.status(Status.NOT_FOUND).entity(json).build();
+            response = Response.status(Status.NOT_FOUND).entity(streamingOutput(result)).build();
         } else {
-            response = Response.ok(json, MediaType.APPLICATION_JSON).build();
+            response = Response.ok(streamingOutput(result), MediaType.APPLICATION_JSON).build();
         }
         return response;
     }

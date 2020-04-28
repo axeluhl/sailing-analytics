@@ -10,6 +10,7 @@ Require-Bundle: com.sap.sse.common,
 Export-Package: com.sap.sse.concurrent,
  com.sap.sse.shared.media,
  com.sap.sse.shared.media.impl,
+ com.sap.sse.shared.rest,
  com.sap.sse.shared.settings,
  com.sap.sse.util,
  com.sap.sse.util.impl
@@ -17,5 +18,6 @@ Import-Package: com.sap.sse.common.settings,
  com.sap.sse.common.settings.generic,
  com.sap.sse.common.settings.generic.base,
  com.sap.sse.common.settings.generic.converter,
- com.sap.sse.common.settings.serializer
+ com.sap.sse.common.settings.serializer,
+ javax.ws.rs.core;version="1.1.1"
 Automatic-Module-Name: com.sap.sse.shared.android
