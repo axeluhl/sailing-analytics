@@ -31,6 +31,7 @@ import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.server.gateway.jaxrs.api.AbstractLeaderboardsResource;
 import com.sap.sse.InvalidDateException;
+import com.sap.sse.rest.StreamingOutputUtil;
 
 public class EventResourceTest extends AbstractJaxRsApiTest {
     private String randomName; 
@@ -226,7 +227,7 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
 
     private JSONObject getRegatta(String eventName) throws WebApplicationException, IOException {
         Response regattasResponse = regattasResource.getRegatta(eventName, null);
-        return toJSONObject(getEntityAsString(regattasResponse.getEntity()));
+        return toJSONObject(StreamingOutputUtil.getEntityAsString(regattasResponse.getEntity()));
     }
 
     private boolean isValidCreateEventResponse(Response response) throws WebApplicationException, IOException {
@@ -254,14 +255,14 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
     }
 
     private JSONObject getLeaderboardAsJsonObject(Response leaderboardResponse) throws WebApplicationException, IOException {
-        String strLeaderboardGroup = getEntityAsString(leaderboardResponse.getEntity());
+        String strLeaderboardGroup = StreamingOutputUtil.getEntityAsString(leaderboardResponse.getEntity());
         JSONObject objLeaderboardGroup = toJSONObject(strLeaderboardGroup);
         return objLeaderboardGroup;
     }
 
     private JSONObject getLeaderboardGroup(String strDefaultLeaderboardGroupName) throws WebApplicationException, IOException {
         Response leaderboardGroupsResponse = leaderboardGroupsResource.getLeaderboardGroup(strDefaultLeaderboardGroupName);
-        return toJSONObject(getEntityAsString(leaderboardGroupsResponse.getEntity()));
+        return toJSONObject(StreamingOutputUtil.getEntityAsString(leaderboardGroupsResponse.getEntity()));
     }
 
     private JSONArray getLeaderboardGroups(JSONObject objEvent) {
@@ -289,11 +290,11 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
     
 
     private String getIdFromCreateEventResponse(Response createEventResponse) throws WebApplicationException, IOException {
-        return (String) toJSONObject(getEntityAsString(createEventResponse.getEntity())).get("eventid");
+        return (String) toJSONObject(StreamingOutputUtil.getEntityAsString(createEventResponse.getEntity())).get("eventid");
     }
 
     private String getEventAsString(String eventId) throws WebApplicationException, IOException {
-        return getEntityAsString(eventsResource.getEvent(eventId, null).getEntity());
+        return StreamingOutputUtil.getEntityAsString(eventsResource.getEvent(eventId, null).getEntity());
     }
 
 }

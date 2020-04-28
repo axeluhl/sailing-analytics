@@ -4,8 +4,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -15,9 +13,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.mgt.SecurityManager;
@@ -156,23 +152,6 @@ public abstract class AbstractJaxRsApiTest {
                                             /* dateOfBirth */null, "This is Rigo, the coach")), 
                                     /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null); 
             result.add(competitor);
-        }
-        return result;
-    }
-    
-    /**
-     * If the {@code entity} is a {@link StreamingOutput}, the stream will first be read and then converted to a
-     * {@link String}. Otherwise, the {@link Object#toString()} method is used to convert the {@code entity} into a
-     * string.
-     */
-    protected String getEntityAsString(Object entity) throws WebApplicationException, IOException {
-        final String result;
-        if (entity instanceof StreamingOutput) {
-            final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            ((StreamingOutput) entity).write(bos);
-            return bos.toString("UTF8");
-        } else {
-            result = entity.toString();
         }
         return result;
     }
