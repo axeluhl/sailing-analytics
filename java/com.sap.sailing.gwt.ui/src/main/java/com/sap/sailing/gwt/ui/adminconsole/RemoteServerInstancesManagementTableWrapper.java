@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -29,13 +27,5 @@ public class RemoteServerInstancesManagementTableWrapper extends
                     }
                 }, tableResources);
         registerSelectionModelOnNewDataProvider(dataProvider);
-    }
-
-    public <T> void addColumn(Column<RemoteSailingServerReferenceDTO, T> column, String header) {
-        getTable().addColumn(column, header);
-    }
-
-    public void setEmptyTableWidget(Widget widget) {
-        getTable().setEmptyTableWidget(widget);
     }
 }

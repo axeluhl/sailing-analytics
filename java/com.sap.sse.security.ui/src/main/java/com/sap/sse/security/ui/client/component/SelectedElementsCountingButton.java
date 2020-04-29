@@ -43,7 +43,7 @@ public class SelectedElementsCountingButton<T extends Named> extends Button {
     private void addSelectionEventHandler(final String html, final SetSelectionModel<T> selectionModel) {
         selectionModel.addSelectionChangeHandler(event -> {
             Set<T> selectedSet = selectionModel.getSelectedSet();
-            setText(selectedSet.size() <= 1 ? html : html + " (" + selectedSet.size() + ")");
+            setText(selectedSet.isEmpty() ? html : html + " (" + selectedSet.size() + ")");
             setEnabled(!selectedSet.isEmpty());
         });
     }

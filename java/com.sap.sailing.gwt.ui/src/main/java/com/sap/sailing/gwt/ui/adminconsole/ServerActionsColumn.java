@@ -11,6 +11,11 @@ import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.ui.client.UserService;
 
+/**
+ * Implementation of actions column for actions that requires checking only server permissions 
+ * 
+ * @author Aleksandr Lukyanchik
+ */
 public class ServerActionsColumn<T, S extends ImagesBarCell> extends ImagesBarColumn<T, S> {
 
     /**
@@ -53,21 +58,11 @@ public class ServerActionsColumn<T, S extends ImagesBarCell> extends ImagesBarCo
         final ArrayList<String> allowedActions = new ArrayList<>();
         for (final String name : nameToCallbackMap.keySet()) {
             final Action action = nameToActionMap.get(name);
-            if (isNotRestrictedOrHasPermission(action)) {
+            if (action == null || userService.hasServerPermission(action)) {
                 final String escapedName = name.replace("\\", "\\\\").replace(",", "\\,");
                 allowedActions.add(escapedName);
             }
         }
         return String.join(",", allowedActions);
-    }
-
-    private boolean isNotRestrictedOrHasPermission(final Action action) {
-        final boolean result;
-        if (action == null) {
-            result = true;
-        } else {
-            result = userService.hasServerPermission(action);
-        }
-        return result;
     }
 }

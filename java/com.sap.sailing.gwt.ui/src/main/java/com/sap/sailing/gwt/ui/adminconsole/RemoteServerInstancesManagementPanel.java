@@ -17,6 +17,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
@@ -41,6 +42,7 @@ import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell;
+import com.sap.sse.security.ui.client.component.SelectedElementsCountingButton;
 
 public class RemoteServerInstancesManagementPanel extends SimplePanel {
     private final SailingServiceAsync sailingService;
@@ -110,17 +112,14 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
     }
 
     private Button createRemoveButton(HorizontalPanel buttonPanel, ClickHandler handler) {
-        Button button = new Button(stringMessages.remove(), (ClickHandler) event -> removeSelectedSailingServers());
-        refreshableServerSelectionModel.addSelectionChangeHandler(event -> {
-            Set<RemoteSailingServerReferenceDTO> set = refreshableServerSelectionModel.getSelectedSet();
-            button.setText(set.size() <= 1 ? stringMessages.remove() : stringMessages.removeNumber(set.size()));
-        });
-        return button;
+        return new SelectedElementsCountingButton<RemoteSailingServerReferenceDTO>(stringMessages.remove(),
+                refreshableServerSelectionModel, true, (ClickHandler) event -> removeSelectedSailingServers());
     }
 
-    private FlushableCellTable<RemoteSailingServerReferenceDTO> createRemoteServersTable(CellTableWithCheckboxResources tableResources) {
+    private FlushableCellTable<RemoteSailingServerReferenceDTO> createRemoteServersTable(
+            CellTableWithCheckboxResources tableResources) {
         RemoteServerInstancesManagementTableWrapper wrapper = new RemoteServerInstancesManagementTableWrapper(
-                stringMessages, errorReporter, serverDataProvider, tableResources);
+                stringMessages, errorReporter, filteredServerTablePanel.getAllListDataProvider(), tableResources);
         wrapper.addColumn(createTextColumn(RemoteSailingServerReferenceDTO::getName), stringMessages.name());
         wrapper.addColumn(createTextColumn(RemoteSailingServerReferenceDTO::getUrl), stringMessages.url());
         wrapper.addColumn(createEventsColumn(), stringMessages.events());
@@ -161,12 +160,14 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
     }
 
     private ServerActionsColumn<RemoteSailingServerReferenceDTO, DefaultActionsImagesBarCell> createActionsColumn() {
-        final ServerActionsColumn<RemoteSailingServerReferenceDTO, DefaultActionsImagesBarCell> actionsColumn = ServerActionsColumn.create(
-                new DefaultActionsImagesBarCell(stringMessages), userService);
+        final ServerActionsColumn<RemoteSailingServerReferenceDTO, DefaultActionsImagesBarCell> actionsColumn = ServerActionsColumn
+                .create(new DefaultActionsImagesBarCell(stringMessages), userService);
         actionsColumn.addAction(ACTION_DELETE, ServerActions.CONFIGURE_REMOTE_INSTANCES, e -> {
-            Set<String> toDelete = new HashSet<>();
-            toDelete.add(e.getName());
-            removeSailingServers(toDelete);
+            if (Window.confirm(StringMessages.INSTANCE.doYouReallyWantToRemoveSelectedElements(e.getName()))) {
+                Set<String> toDelete = new HashSet<>();
+                toDelete.add(e.getName());
+                removeSailingServers(toDelete);
+            }
         });
         return actionsColumn;
     }
