@@ -3,7 +3,6 @@ package com.sap.sailing.server.gateway.jaxrs.api;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -186,8 +185,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                 jsonLeaderboards.add(leaderboardName.getKey());
             }
         }
-        String json = jsonLeaderboards.toJSONString();
-        return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+        return Response.ok(streamingOutput(jsonLeaderboards)).build();
     }
 
     @GET
@@ -218,12 +216,8 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                     jsonLeaderboard = getLeaderboardJson(resultState, maxCompetitorsCount, requestTimePoint,
                             leaderboard, timePoint, /* race column names */ null, /* race detail names */ null, competitorAndBoatIdsOnly,
                             /* showOnlyActiveRacesForCompetitorIds */ null, skip);
-                    StringWriter sw = new StringWriter();
-                    jsonLeaderboard.writeJSONString(sw);
-                    String json = sw.getBuffer().toString();
-                    response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8")
-                            .build();
-                } catch (NoWindException | InterruptedException | ExecutionException | IOException e) {
+                    response = Response.ok(streamingOutput(jsonLeaderboard)).build();
+                } catch (NoWindException | InterruptedException | ExecutionException e) {
                     response = Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage())
                             .type(MediaType.TEXT_PLAIN).build();
                 }
