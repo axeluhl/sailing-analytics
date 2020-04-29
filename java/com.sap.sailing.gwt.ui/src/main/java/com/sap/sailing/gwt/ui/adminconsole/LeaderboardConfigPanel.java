@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -356,12 +357,22 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                 userService.getUserManagementService(), type,
                 leaderboardDTO -> reloadLeaderboardForTable(leaderboardDTO.getName()), stringMessages);
         leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
-                config::openOwnershipDialog);
+                new Consumer<StrippedLeaderboardDTOWithSecurity>() {
+                    @Override
+                    public void accept(StrippedLeaderboardDTOWithSecurity t) {
+                        config.openOwnershipDialog(t);
+                    }
+        });
         final EditACLDialog.DialogConfig<StrippedLeaderboardDTOWithSecurity> configACL = EditACLDialog.create(
                 userService.getUserManagementService(), type,
                 leaderboardDTO -> reloadLeaderboardForTable(leaderboardDTO.getName()), stringMessages);
         leaderboardActionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                configACL::openACLDialog);
+                new Consumer<StrippedLeaderboardDTOWithSecurity>() {
+                    @Override
+                    public void accept(StrippedLeaderboardDTOWithSecurity t) {
+                        configACL.openACLDialog(t);
+                    }
+        });
         leaderboardTable.addColumn(selectionCheckboxColumn, selectionCheckboxColumn.getHeader());
         leaderboardTable.addColumn(linkColumn, stringMessages.name());
         leaderboardTable.addColumn(leaderboardDisplayNameColumn, stringMessages.displayName());

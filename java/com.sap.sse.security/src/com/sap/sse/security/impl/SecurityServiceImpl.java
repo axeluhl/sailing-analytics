@@ -296,9 +296,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         this.mailServiceTracker = mailServiceTracker;
         this.hasPermissionsProvider = hasPermissionsProvider;
         cacheManager = loadReplicationCacheManagerContents();
-        Factory<SecurityManager> factory = new WebIniSecurityManagerFactory(shiroConfiguration);
+        final Factory<SecurityManager> factory = new WebIniSecurityManagerFactory(shiroConfiguration);
         logger.info("Loaded shiro.ini file from: classpath:shiro.ini");
-        StringBuilder logMessage = new StringBuilder("[urls] section from Shiro configuration:");
+        final StringBuilder logMessage = new StringBuilder("[urls] section from Shiro configuration:");
         final Section urlsSection = shiroConfiguration.getSection("urls");
         if (urlsSection != null) {
             for (Entry<String, String> e : urlsSection.entrySet()) {
@@ -310,7 +310,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         }
         logger.info(logMessage.toString());
         System.setProperty("java.net.useSystemProxies", "true");
-        CachingSecurityManager securityManager = (CachingSecurityManager) factory.getInstance();
+        final CachingSecurityManager securityManager = (CachingSecurityManager) factory.getInstance();
         logger.info("Created: " + securityManager);
         SecurityUtils.setSecurityManager(securityManager);
         this.securityManager = securityManager;
@@ -366,7 +366,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     private void initEmptyStore() {
         final AdminRole adminRolePrototype = AdminRole.getInstance();
         RoleDefinition adminRoleDefinition = getRoleDefinition(adminRolePrototype.getId());
-        adminRoleDefinition = getRoleDefinition(adminRolePrototype.getId());
         assert adminRoleDefinition != null;
         try {
             isInitialOrMigration = false;

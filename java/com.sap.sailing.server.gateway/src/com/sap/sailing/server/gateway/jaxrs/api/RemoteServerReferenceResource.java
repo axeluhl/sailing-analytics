@@ -53,7 +53,7 @@ public class RemoteServerReferenceResource extends AbstractSailingServerResource
                 jsonResponse.put("remoteServerNameAdded", serverRef.getName());
                 jsonResponse.put("remoteServerUrlAdded", serverRef.getURL().toString());
                 jsonResponse.put("remoteServerEventsAdded", getRemoteEventsList(serverRef));
-                response = Response.ok(jsonResponse.toJSONString())
+                response = Response.ok(streamingOutput(jsonResponse))
                         .header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
             } catch (UnauthorizedException e) {
                 response = returnUnauthorized(e);
@@ -91,7 +91,7 @@ public class RemoteServerReferenceResource extends AbstractSailingServerResource
                     jsonResponse.put("remoteServerNameRemoved", serverRef.getName());
                     jsonResponse.put("remoteServerUrlRemoved", serverRef.getURL().toString());
                     jsonResponse.put("remoteServerEventsRemoved", remoteEventList);
-                    response = Response.ok(jsonResponse.toJSONString())
+                    response = Response.ok(streamingOutput(jsonResponse))
                             .header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
                 }
             } catch (UnauthorizedException e) {
