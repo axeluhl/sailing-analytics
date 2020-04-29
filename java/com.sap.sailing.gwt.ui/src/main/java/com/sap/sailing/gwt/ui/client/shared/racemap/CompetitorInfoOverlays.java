@@ -10,15 +10,15 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.gwt.ui.client.NumberFormatterFactory;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.racemap.QuickRanksDTOProvider.QuickRanksListener;
+import com.sap.sailing.gwt.ui.client.shared.racemap.QuickFlagDataProvider.QuickFlagDataListener;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegType;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 
 /**
  * Manages the collection of all {@link CompetitorInfoOverlay} objects shown in the {@link RaceMap}. In particular, it
  * keeps track of the information used for the text in the overlays and allows for incremental updates, e.g., if a
- * competitor's rank has been updated. It can act as a {@link QuickRanksListener} and as such be subscribed for rank
- * changes, e.g., with a {@link QuickRanksDTOProvider}. It will track all rank updates for any competitor whose info
+ * competitor's rank has been updated. It can act as a {@link QuickFlagDataListener} and as such be subscribed for rank
+ * changes, e.g., with a {@link QuickFlagDataProvider}. It will track all rank updates for any competitor whose info
  * overlay is managed by this instance.
  * <p>
  * 
@@ -29,7 +29,7 @@ import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
  * @author Axel Uhl (d043530)
  *
  */
-public class CompetitorInfoOverlays implements QuickRanksListener {
+public class CompetitorInfoOverlays implements QuickFlagDataListener {
     private final RaceMap raceMap;
     
     /**
@@ -45,7 +45,7 @@ public class CompetitorInfoOverlays implements QuickRanksListener {
     /**
      * keys are the competitor IDs as strings
      */
-    private final Map<String, GPSFixDTOWithSpeedWindTackAndLegType> lastPositions;
+    private final Map<String, Double> lastPositions;
 
     private final StringMessages stringMessages;
     
@@ -58,14 +58,14 @@ public class CompetitorInfoOverlays implements QuickRanksListener {
     }
     
     public CompetitorInfoOverlay createCompetitorInfoOverlay(int zIndex, final CompetitorDTO competitorDTO,
-            GPSFixDTOWithSpeedWindTackAndLegType gpsFixDTO, Integer rank, long timeForPositionTransitionMillis) {
+            GPSFixDTOWithSpeedWindTackAndLegType gpsFixDTO, Integer rank, Double speed, long timeForPositionTransitionMillis) {
         CompetitorInfoOverlay result = new CompetitorInfoOverlay(raceMap.getMap(), zIndex,
                 raceMap.getCompetitorSelection().getColor(competitorDTO, raceMap.getRaceIdentifier()),
                 /* info text */ "", raceMap.getCoordinateSystem());
         competitorInfoOverlays.put(competitorDTO.getIdAsString(), result);
         updatePosition(competitorDTO, gpsFixDTO, timeForPositionTransitionMillis);
         result.setInfoText(createInfoText(competitorDTO));
-        updateRank(competitorDTO, rank);
+        updateFlagData(competitorDTO, rank, speed);
         return result;
     }
     
@@ -95,18 +95,19 @@ public class CompetitorInfoOverlays implements QuickRanksListener {
     }
     
     /**
-     * Updates {@link #ranks} and re-draws the corresponding overlay
+     * Updates {@link #ranks} and {@link speed} and re-draws the corresponding overlay
      */
-    public void updateRank(CompetitorDTO competitorDTO, Integer rank) {
+    public void updateFlagData(CompetitorDTO competitorDTO, Integer rank, Double speed) {
         CompetitorInfoOverlay overlay = competitorInfoOverlays.get(competitorDTO.getIdAsString());
         if (overlay != null) {
             ranks.put(competitorDTO.getIdAsString(), rank);
+            lastPositions.put(competitorDTO.getIdAsString(), speed);
             overlay.setInfoText(createInfoText(competitorDTO));
             overlay.draw();
         }
     }
     
-    private GPSFixDTOWithSpeedWindTackAndLegType getLastPosition(CompetitorDTO competitorDTO) {
+    private Double getLastSpeed(CompetitorDTO competitorDTO) {
         return lastPositions.get(competitorDTO.getIdAsString());
     }
 
@@ -121,8 +122,8 @@ public class CompetitorInfoOverlays implements QuickRanksListener {
      * adjusts the overlay's position on the map using the transition timeout specified by
      * {@code timeForPositionTransitionMillis}.
      */
-    public void updatePosition(CompetitorDTO competitorDTO, GPSFixDTOWithSpeedWindTackAndLegType gpsFixDTO, long timeForPositionTransitionMillis) {
-        lastPositions.put(competitorDTO.getIdAsString(), gpsFixDTO);
+    public void updatePosition(CompetitorDTO competitorDTO, GPSFixDTOWithSpeedWindTackAndLegType gpsFixDTO,
+            long timeForPositionTransitionMillis) {
         CompetitorInfoOverlay overlay = competitorInfoOverlays.get(competitorDTO.getIdAsString());
         if (overlay != null) {
             overlay.setPosition(gpsFixDTO.position, timeForPositionTransitionMillis);
@@ -138,8 +139,8 @@ public class CompetitorInfoOverlays implements QuickRanksListener {
     private String createInfoText(CompetitorDTO competitorDTO) {
         StringBuilder infoText = new StringBuilder();
         infoText.append(competitorDTO.getShortInfo()).append("\n");
-        infoText.append(NumberFormatterFactory.getDecimalFormat(1).format(getLastPosition(competitorDTO).speedWithBearing.speedInKnots))
-                .append(" ").append(stringMessages.knotsUnit()).append("\n");
+        infoText.append(NumberFormatterFactory.getDecimalFormat(1).format(getLastSpeed(competitorDTO))).append(" ")
+                .append(stringMessages.knotsUnit()).append("\n");
         final Integer rank = ranks.get(competitorDTO.getIdAsString());
         if (rank != null && rank != 0) {
             infoText.append(stringMessages.rank()).append(" : ").append(rank);
@@ -177,4 +178,16 @@ public class CompetitorInfoOverlays implements QuickRanksListener {
             competitorInfoOverlay.draw();
         }
     }
+
+    @Override
+    public void speedChanged(CompetitorDTO competitorDTO, Double quickSpeed) {
+        String competitorId = competitorDTO.getIdAsString();
+        lastPositions.put(competitorId, quickSpeed);
+        final CompetitorInfoOverlay competitorInfoOverlay = competitorInfoOverlays.get(competitorId);
+        if (competitorInfoOverlay != null) {
+            competitorInfoOverlay.setInfoText(createInfoText(competitorDTO));
+            competitorInfoOverlay.draw();
+        }
+    }
+
 }
