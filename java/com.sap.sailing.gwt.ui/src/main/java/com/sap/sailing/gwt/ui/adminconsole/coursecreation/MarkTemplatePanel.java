@@ -292,9 +292,9 @@ public class MarkTemplatePanel extends FlowPanel {
         final EditACLDialog.DialogConfig<MarkTemplateDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementService(), type, markTemplate -> markTemplate.getAccessControlList(),
                 stringMessages);
-        actionsColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, configOwnership::openDialog);
+        actionsColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, configOwnership::openOwnershipDialog);
         actionsColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                markTemplate -> configACL.openDialog(markTemplate));
+                markTemplate -> configACL.openACLDialog(markTemplate));
         markTemplateTable.addColumn(idColumn, stringMessages.id());
         markTemplateTable.addColumn(actionsColumn, stringMessages.actions());
 

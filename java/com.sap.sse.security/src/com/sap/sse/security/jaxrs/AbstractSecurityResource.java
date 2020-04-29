@@ -5,9 +5,10 @@ import javax.ws.rs.core.Context;
 
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.sap.sse.rest.StreamingOutputUtil;
 import com.sap.sse.security.SecurityService;
 
-public abstract class AbstractSecurityResource {
+public abstract class AbstractSecurityResource extends StreamingOutputUtil {
     @Context
     ServletContext servletContext;
 

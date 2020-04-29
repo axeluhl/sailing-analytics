@@ -114,6 +114,7 @@ The primary Git repository for the project is hosted on sapsailing.com. It is mi
 4. On clear workspace additional steps should be performed once:
   1. Run "GWT Dashboards SDM" launch configuration. After successful start, launch configuration can be stopped.
   2. Run "GWT Security SDM" launch configuration. After successful start, launch configuration can be stopped.
+  3. Run "GWT xdStorage Sample SDM" launch configuration. After successful start, launch configuration can be stopped.
 5. Run the Race Analysis Suite
   * Start the MongoDB (cd /somePathTo MongoDB/mongodb/bin; rm c:/data/SAP/sailing/mongodb/mongod.lock; ./mongod --dbpath c:/data/SAP/sailing/mongodb)  
   * Start the appropriate Eclipse launch configuration (e.g. 'Sailing Server (no Proxy)') You´ll find this in the debug dropdown

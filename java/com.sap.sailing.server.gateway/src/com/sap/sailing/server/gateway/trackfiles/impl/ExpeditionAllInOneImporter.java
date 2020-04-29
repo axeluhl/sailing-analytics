@@ -762,8 +762,9 @@ public class ExpeditionAllInOneImporter {
                 /* can boats of competitors change */ false, CompetitorRegistrationType.CLOSED,
                 /* registrationLinkSecret */ UUID.randomUUID().toString(), /* start date */ null, /* end date */ null,
                 UUID.randomUUID(),
-                regattaCreationParameters, true, scoringScheme, courseAreaId, buoyZoneRadiusInHullLengths, true, false,
-                rankingMetric));
+                regattaCreationParameters, true, scoringScheme, courseAreaId, buoyZoneRadiusInHullLengths, /* use start time inference */ true,
+                /* control tracking from start and finish times */ false,
+                /* autoRestartTrackingUponCompetitorSetChange */ false, rankingMetric));
         this.ensureBoatClassDetermination(regatta);
         service.apply(new AddColumnToSeries(regattaIdentifier, seriesName, raceColumnName));
         return regatta;

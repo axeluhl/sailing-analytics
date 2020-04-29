@@ -99,9 +99,7 @@ public class CompetitorsResource extends AbstractSailingServerResource {
                 getSecurityService().checkCurrentUserHasOneOfExplicitPermissions(competitor,
                         SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS);
             }
-            String jsonString = getCompetitorJSON(competitor).toJSONString();
-            response = Response.ok(jsonString).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8")
-                    .build();
+            response = Response.ok(streamingOutput(getCompetitorJSON(competitor))).build();
         }
         return response;
     }
@@ -125,8 +123,7 @@ public class CompetitorsResource extends AbstractSailingServerResource {
         TeamJsonSerializer teamJsonSerializer = new TeamJsonSerializer(new PersonJsonSerializer(
                 new NationalityJsonSerializer()));
         JSONObject teamJson = teamJsonSerializer.serialize(team);
-        String json = teamJson.toJSONString();
-        return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+        return Response.ok(streamingOutput(teamJson)).build();
     }
 
     /**

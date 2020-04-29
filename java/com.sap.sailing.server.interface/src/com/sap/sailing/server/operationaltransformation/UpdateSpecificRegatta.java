@@ -19,6 +19,7 @@ public class UpdateSpecificRegatta extends AbstractRacingEventServiceOperation<R
     private final Double buoyZoneRadiusInHullLengths;
     private final boolean useStartTimeInference;
     private final boolean controlTrackingFromStartAndFinishTimes;
+    private final boolean autoRestartTrackingUponCompetitorSetChange;
     private final TimePoint startDate;
     private final TimePoint endDate;
     private final String registrationLinkSecret;
@@ -27,7 +28,7 @@ public class UpdateSpecificRegatta extends AbstractRacingEventServiceOperation<R
     public UpdateSpecificRegatta(RegattaIdentifier regattaIdentifier, TimePoint startDate, TimePoint endDate,
             UUID newDefaultCourseAreaId, RegattaConfiguration newConfiguration, Double buoyZoneRadiusInHullLengths,
             boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes,
-            String registrationLinkSecret, CompetitorRegistrationType registrationType) {
+            boolean autoRestartTrackingUponCompetitorSetChange, String registrationLinkSecret, CompetitorRegistrationType registrationType) {
         this.regattaIdentifier = regattaIdentifier;
         this.startDate = startDate;
         this.endDate = endDate;
@@ -35,6 +36,7 @@ public class UpdateSpecificRegatta extends AbstractRacingEventServiceOperation<R
         this.newConfiguration = newConfiguration;
         this.useStartTimeInference = useStartTimeInference;
         this.controlTrackingFromStartAndFinishTimes = controlTrackingFromStartAndFinishTimes;
+        this.autoRestartTrackingUponCompetitorSetChange = autoRestartTrackingUponCompetitorSetChange;
         this.buoyZoneRadiusInHullLengths = buoyZoneRadiusInHullLengths;
         this.registrationLinkSecret = registrationLinkSecret;
         this.registrationType = registrationType;
@@ -44,7 +46,7 @@ public class UpdateSpecificRegatta extends AbstractRacingEventServiceOperation<R
     public Regatta internalApplyTo(RacingEventService toState) throws Exception {
         Regatta regatta = toState.updateRegatta(regattaIdentifier, startDate, endDate, newDefaultCourseAreaId,
                 newConfiguration, null, buoyZoneRadiusInHullLengths, useStartTimeInference,
-                controlTrackingFromStartAndFinishTimes, registrationLinkSecret, registrationType);
+                controlTrackingFromStartAndFinishTimes, autoRestartTrackingUponCompetitorSetChange, registrationLinkSecret, registrationType);
         return regatta;
     }
 

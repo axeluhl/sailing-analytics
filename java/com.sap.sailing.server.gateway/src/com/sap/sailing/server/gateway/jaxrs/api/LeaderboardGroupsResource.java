@@ -220,9 +220,7 @@ public class LeaderboardGroupsResource extends AbstractSailingServerResource {
                         }
                     }
                 }
-                String json = jsonLeaderboardGroup.toJSONString();
-                response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8")
-                        .build();
+                response = Response.ok(streamingOutput(jsonLeaderboardGroup)).build();
             } else {
                 response = Response.status(Status.FORBIDDEN).build();
             }

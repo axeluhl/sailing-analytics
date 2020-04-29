@@ -102,8 +102,8 @@ public class TestFarthestAheadWithSkippedMarkPassing {
                 /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
                 /*startDate*/ null, /*endDate*/ null, /* trackedRegattaRegistry */ null,
                 DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), "123", /* courseArea */ null,
-                /* controlTrackingFromStartAndFinishTimes */ false, OneDesignRankingMetric::new,
-                /* registrationLinkSecret */ UUID.randomUUID().toString());
+                /* controlTrackingFromStartAndFinishTimes */ false, /* autoRestartTrackingUponCompetitorSetChange */ false,
+                OneDesignRankingMetric::new, /* registrationLinkSecret */ UUID.randomUUID().toString());
         TrackedRegatta trackedRegatta = new DynamicTrackedRegattaImpl(regatta);
         List<Waypoint> waypoints = new ArrayList<Waypoint>();
         // create a two-lap upwind/downwind course:
