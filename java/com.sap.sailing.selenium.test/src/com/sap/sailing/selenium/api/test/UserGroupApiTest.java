@@ -28,7 +28,7 @@ public class UserGroupApiTest extends AbstractSeleniumTest {
 
     @Before
     public void setUp() {
-        clearState(getContextRoot());
+        clearState(getContextRoot(), /* headless */ true);
     }
 
     @Test
