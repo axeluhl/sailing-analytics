@@ -36,7 +36,7 @@ import com.sap.sse.common.Util;
  */
 public class QuickFlagDataFromLeaderboardDTOProvider extends AbstractQuickFlagDataProvider {
     private final Map<String, QuickRankDTO> quickRanks = new LinkedHashMap<>();
-    private final Map<CompetitorDTO, Double> quickSpeeds = new LinkedHashMap<>();
+    private final Map<CompetitorDTO, Double> quickSpeedsInKnots = new LinkedHashMap<>();
     private final RaceCompetitorSet raceCompetitorSet;
     private final RaceIdentifier selectedRace;
     private boolean lastLeaderboardProvidedLegNumbers;
@@ -153,8 +153,8 @@ public class QuickFlagDataFromLeaderboardDTOProvider extends AbstractQuickFlagDa
                         }
                     }
                     if (speed != null) {
-                        quickSpeeds.put(competitor, speed);
-                        notifyListenersSpeedChanged(competitor, speed);
+                        quickSpeedsInKnots.put(competitor, speed);
+                        notifyListenersSpeedInKnotsChanged(competitor, speed);
                     }
                 }
             }
@@ -169,17 +169,17 @@ public class QuickFlagDataFromLeaderboardDTOProvider extends AbstractQuickFlagDa
     }
 
     @Override
-    public void quickSpeedsReceivedFromServer(Map<CompetitorDTO, Double> quickSpeedsFromServer) {
-        if (quickSpeeds.isEmpty() || leaderboardNotCurrentlyUpdating) {
-            for (final Entry<CompetitorDTO, Double> e : quickSpeedsFromServer.entrySet()) {
-                quickSpeeds.put(e.getKey(), e.getValue());
-                notifyListenersSpeedChanged(e.getKey(), e.getValue());
+    public void quickSpeedsInKnotsReceivedFromServer(Map<CompetitorDTO, Double> quickSpeedsFromServerInKnots) {
+        if (quickSpeedsInKnots.isEmpty() || leaderboardNotCurrentlyUpdating) {
+            for (final Entry<CompetitorDTO, Double> e : quickSpeedsFromServerInKnots.entrySet()) {
+                quickSpeedsInKnots.put(e.getKey(), e.getValue());
+                notifyListenersSpeedInKnotsChanged(e.getKey(), e.getValue());
             }
         } else {
-            for (final Entry<CompetitorDTO, Double> e : quickSpeeds.entrySet()) {
-                final Double speed = quickSpeedsFromServer.get(e.getKey());
+            for (final Entry<CompetitorDTO, Double> e : quickSpeedsInKnots.entrySet()) {
+                final Double speed = quickSpeedsFromServerInKnots.get(e.getKey());
                 if (speed != null) {
-                    quickSpeeds.put(e.getKey(), speed);
+                    quickSpeedsInKnots.put(e.getKey(), speed);
                 }
             }
         }
@@ -187,8 +187,8 @@ public class QuickFlagDataFromLeaderboardDTOProvider extends AbstractQuickFlagDa
     }
 
     @Override
-    public Map<CompetitorDTO, Double> getQuickSpeeds() {
-        return quickSpeeds;
+    public Map<CompetitorDTO, Double> getQuickSpeedsInKnots() {
+        return quickSpeedsInKnots;
     }
 
     private String getRaceColumnName(LeaderboardDTO leaderboard, RaceIdentifier selectedRace) {

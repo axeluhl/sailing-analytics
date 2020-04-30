@@ -30,7 +30,7 @@ public interface QuickFlagDataProvider {
     public interface QuickFlagDataListener {
         void rankChanged(String competitorIdAsString, QuickRankDTO oldQuickRank, QuickRankDTO quickRanks);
 
-        void speedChanged(CompetitorDTO competitor, Double quickSpeed);
+        void speedInKnotsChanged(CompetitorDTO competitor, Double quickSpeedInKnots);
     }
 
     void addQuickFlagDataListener(QuickFlagDataListener listener);
@@ -63,10 +63,10 @@ public interface QuickFlagDataProvider {
      * {@link LeaderboardDTO leaderboard} should ignore this call if it already has quick ranks information available
      * from a leaderboard.
      * 
-     * @param quickSpeedsFromServer
-     *            keys are the competitors, values are current speeds of competitors
+     * @param quickSpeedsFromServerInKnots
+     *            keys are the competitors, values are current speeds of competitors provided in knots (nautical miles per hour)
      */
-    void quickSpeedsReceivedFromServer(Map<CompetitorDTO, Double> quickSpeedsFromServer);
+    void quickSpeedsInKnotsReceivedFromServer(Map<CompetitorDTO, Double> quickSpeedsFromServerInKnots);
 
     /**
      * @return keys are the {@link CompetitorWithBoatDTO#getIdAsString() competitor IDs are string}, values are the
@@ -77,5 +77,5 @@ public interface QuickFlagDataProvider {
     /**
      * @return keys are the {@link CompetitorWithBoatDTO}, values are the quick speeds pertaining to the competitors
      */
-    Map<CompetitorDTO, Double> getQuickSpeeds();
+    Map<CompetitorDTO, Double> getQuickSpeedsInKnots();
 }

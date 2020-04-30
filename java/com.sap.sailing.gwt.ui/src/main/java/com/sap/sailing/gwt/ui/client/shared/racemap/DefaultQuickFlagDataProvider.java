@@ -11,7 +11,7 @@ import com.sap.sse.common.Util;
 
 public class DefaultQuickFlagDataProvider extends AbstractQuickFlagDataProvider {
     private Map<String, QuickRankDTO> currentQuickRanksFromServer = Collections.emptyMap();
-    private Map<CompetitorDTO, Double> currentQuickSpeedsFromServer = Collections.emptyMap();
+    private Map<CompetitorDTO, Double> currentQuickSpeedsInKnotsFromServer = Collections.emptyMap();
 
     @Override
     public void quickRanksReceivedFromServer(Map<String, QuickRankDTO> receivedQuickRanksFromServer) {
@@ -31,21 +31,21 @@ public class DefaultQuickFlagDataProvider extends AbstractQuickFlagDataProvider 
     }
 
     @Override
-    public void quickSpeedsReceivedFromServer(Map<CompetitorDTO, Double> quickSpeedsFromServer) {
-        final Map<CompetitorDTO, Double> oldQuickSpeedsFromServer = this.currentQuickSpeedsFromServer;
-        this.currentQuickSpeedsFromServer = Util.nullToEmptyMap(quickSpeedsFromServer);
-        for (final Entry<CompetitorDTO, Double> e : currentQuickSpeedsFromServer.entrySet()) {
-            final Double oldQuickSpeed = oldQuickSpeedsFromServer.get(e.getKey());
-            if (Util.equalsWithNull(oldQuickSpeed, e.getValue())) {
-                notifyListenersSpeedChanged(e.getKey(), e.getValue());
+    public void quickSpeedsInKnotsReceivedFromServer(Map<CompetitorDTO, Double> quickSpeedsFromServerInKnots) {
+        final Map<CompetitorDTO, Double> oldQuickSpeedsFromServerInKnots = this.currentQuickSpeedsInKnotsFromServer;
+        this.currentQuickSpeedsInKnotsFromServer = Util.nullToEmptyMap(quickSpeedsFromServerInKnots);
+        for (final Entry<CompetitorDTO, Double> e : currentQuickSpeedsInKnotsFromServer.entrySet()) {
+            final Double oldQuickSpeedInKnots = oldQuickSpeedsFromServerInKnots.get(e.getKey());
+            if (Util.equalsWithNull(oldQuickSpeedInKnots, e.getValue())) {
+                notifyListenersSpeedInKnotsChanged(e.getKey(), e.getValue());
             }
         }
 
     }
 
     @Override
-    public Map<CompetitorDTO, Double> getQuickSpeeds() {
-        return currentQuickSpeedsFromServer;
+    public Map<CompetitorDTO, Double> getQuickSpeedsInKnots() {
+        return currentQuickSpeedsInKnotsFromServer;
     }
 
 }

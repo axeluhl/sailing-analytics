@@ -546,7 +546,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         }
 
         @Override
-        public void speedChanged(CompetitorDTO competitor, Double quickSpeed) {
+        public void speedInKnotsChanged(CompetitorDTO competitor, Double quickSpeedInKnots) {
             // empty body
         }
     }
@@ -579,11 +579,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             ErrorReporter errorReporter, Timer timer, RaceCompetitorSelectionProvider competitorSelection, RaceCompetitorSet raceCompetitorSet,
             StringMessages stringMessages, RegattaAndRaceIdentifier raceIdentifier, RaceMapResources raceMapResources, boolean showHeaderPanel,
-            QuickFlagDataProvider quickRanksDTOProvider, Consumer<WindSource> showWindChartForProvider, String leaderboardName, String leaderboardGroupName) {
+            QuickFlagDataProvider quickFlagDataProvider, Consumer<WindSource> showWindChartForProvider, String leaderboardName, String leaderboardGroupName) {
         super(parent, context);
         this.maneuverMarkersAndLossIndicators = new ManeuverMarkersAndLossIndicators(this, sailingService, errorReporter, stringMessages);
         this.showHeaderPanel = showHeaderPanel;
-        this.quickFlagDataProvider = quickRanksDTOProvider;
+        this.quickFlagDataProvider = quickFlagDataProvider;
         this.raceMapLifecycle = raceMapLifecycle;
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
@@ -603,8 +603,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         infoOverlaysForLinesForCourseGeometry = new HashMap<>();
         boatOverlays = new HashMap<>();
         competitorInfoOverlays = new CompetitorInfoOverlays(this, stringMessages);
-        quickRanksDTOProvider.addQuickFlagDataListener(competitorInfoOverlays);
-        quickRanksDTOProvider.addQuickFlagDataListener(new AdvantageLineUpdater());
+        quickFlagDataProvider.addQuickFlagDataListener(competitorInfoOverlays);
+        quickFlagDataProvider.addQuickFlagDataListener(new AdvantageLineUpdater());
         windSensorOverlays = new HashMap<WindSource, WindSensorOverlay>();
         courseMarkOverlays = new HashMap<String, CourseMarkOverlay>();
         courseMarkClickHandlers = new HashMap<String, HandlerRegistration>();
@@ -1297,8 +1297,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                                 simulationOverlay.updateLeg(Math.max(lastLegNumber, 1), /* clearCanvas */ false, raceMapDataDTO.simulationResultVersion);
                         }
                         Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatData = raceMapDataDTO.boatPositions;
-                        Map<CompetitorDTO, Double> quickSpeedsFromServer = getCompetitorsSpeedMap(boatData);
-                        quickFlagDataProvider.quickSpeedsReceivedFromServer(quickSpeedsFromServer);
+                        Map<CompetitorDTO, Double> quickSpeedsFromServerInKnots = getCompetitorsSpeedInKnotsMap(boatData);
+                        quickFlagDataProvider.quickSpeedsInKnotsReceivedFromServer(quickSpeedsFromServerInKnots);
                         // Do boat specific actions
                         updateBoatPositions(newTime, transitionTimeInMillis, hasTailOverlapForCompetitor,
                                 competitorsToShow, boatData, /* updateTailsOnly */ false, detailTypeChanged);
@@ -1351,20 +1351,20 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 }
             }
 
-            private Map<CompetitorDTO, Double> getCompetitorsSpeedMap(
+            private Map<CompetitorDTO, Double> getCompetitorsSpeedInKnotsMap(
                     Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatData) {
-                Map<CompetitorDTO, Double> quickSpeedsFromServer = new HashMap<>();
+                Map<CompetitorDTO, Double> quickSpeedsFromServerInKnots = new HashMap<>();
                 for (CompetitorDTO competitor : boatData.keySet()) {
                     List<GPSFixDTOWithSpeedWindTackAndLegType> fixesList = boatData.get(competitor);
                     if (!fixesList.isEmpty()) {
                         SpeedWithBearingDTO speedWithBearing = fixesList.get(fixesList.size() - 1).speedWithBearing;
                         if (speedWithBearing != null) {
-                            Double speed = speedWithBearing.speedInKnots;
-                            quickSpeedsFromServer.put(competitor, speed);
+                            Double speedInKnots = speedWithBearing.speedInKnots;
+                            quickSpeedsFromServerInKnots.put(competitor, speedInKnots);
                         }
                     }
                 }
-                return quickSpeedsFromServer;
+                return quickSpeedsFromServerInKnots;
             }
         });
     }
@@ -3224,12 +3224,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     
     @Override
     public Double getSpeed(CompetitorDTO competitor) {
-        Double result = null;
-        Double quickSpeed = quickFlagDataProvider.getQuickSpeeds().get(competitor);
-        if (quickSpeed != null) {
-            result = quickSpeed;
-        }
-        return result;
+        return quickFlagDataProvider.getQuickSpeedsInKnots().get(competitor);
     }
     
     private Image createSAPLogo() {

@@ -180,9 +180,9 @@ public class CompetitorInfoOverlays implements QuickFlagDataListener {
     }
 
     @Override
-    public void speedChanged(CompetitorDTO competitorDTO, Double quickSpeed) {
+    public void speedInKnotsChanged(CompetitorDTO competitorDTO, Double quickSpeedInKnots) {
         String competitorId = competitorDTO.getIdAsString();
-        lastPositions.put(competitorId, quickSpeed);
+        lastPositions.put(competitorId, quickSpeedInKnots);
         final CompetitorInfoOverlay competitorInfoOverlay = competitorInfoOverlays.get(competitorId);
         if (competitorInfoOverlay != null) {
             competitorInfoOverlay.setInfoText(createInfoText(competitorDTO));

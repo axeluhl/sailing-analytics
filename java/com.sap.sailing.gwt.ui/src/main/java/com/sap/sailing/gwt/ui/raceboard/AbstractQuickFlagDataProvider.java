@@ -38,9 +38,9 @@ public abstract class AbstractQuickFlagDataProvider implements QuickFlagDataProv
         }
     }
 
-    protected void notifyListenersSpeedChanged(CompetitorDTO competitor, Double newSpeed) {
+    protected void notifyListenersSpeedInKnotsChanged(CompetitorDTO competitor, Double newSpeedInKnots) {
         for (QuickFlagDataListener listener : listeners) {
-            listener.speedChanged(competitor, newSpeed);
+            listener.speedInKnotsChanged(competitor, newSpeedInKnots);
         }
     }
 }
