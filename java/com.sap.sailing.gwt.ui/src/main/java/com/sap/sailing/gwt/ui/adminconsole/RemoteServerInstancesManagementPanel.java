@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell.ACTION_DELETE;
+import static com.sap.sse.security.ui.client.component.SelectedElementsCountingButton.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -113,7 +114,8 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
 
     private Button createRemoveButton(HorizontalPanel buttonPanel, ClickHandler handler) {
         return new SelectedElementsCountingButton<RemoteSailingServerReferenceDTO>(stringMessages.remove(),
-                refreshableServerSelectionModel, true, (ClickHandler) event -> removeSelectedSailingServers());
+                refreshableServerSelectionModel, createRemoveAsker(refreshableServerSelectionModel),
+                (ClickHandler) event -> removeSelectedSailingServers());
     }
 
     private FlushableCellTable<RemoteSailingServerReferenceDTO> createRemoteServersTable(

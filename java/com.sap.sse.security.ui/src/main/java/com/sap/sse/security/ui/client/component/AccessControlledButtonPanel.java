@@ -18,6 +18,8 @@ import com.sap.sse.common.Named;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.ui.client.UserService;
 
+import static com.sap.sse.security.ui.client.component.SelectedElementsCountingButton.*;
+
 /**
  * Panel where several buttons can be added which are either {@link #addUnsecuredAction(String, Command) unsecured} or
  * restricted for users with {@link #addCreateAction(String, Command) create} and /or
@@ -141,7 +143,10 @@ public class AccessControlledButtonPanel extends Composite {
             throw new IllegalArgumentException("Selection model for a remove action must not be null");
         }
         ClickHandler handler = wrap(removePermissionCheck, callback);
-        Button button = new SelectedElementsCountingButton<T>(text, selectionModel, withConfirmation, handler);
+        Button button = withConfirmation
+                ? new SelectedElementsCountingButton<T>(text, selectionModel, createRemoveAsker(selectionModel),
+                        handler)
+                : new SelectedElementsCountingButton<T>(text, selectionModel, handler);
         return resolveButtonVisibility(removePermissionCheck, button);
     }
 

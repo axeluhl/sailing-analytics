@@ -3,6 +3,7 @@ package com.sap.sse.security.ui.client.component;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SetSelectionModel;
 import com.sap.sse.common.Named;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
@@ -21,15 +22,10 @@ import java.util.stream.Collectors;
  */
 
 public class SelectedElementsCountingButton<T extends Named> extends Button {
-
+    
     public SelectedElementsCountingButton(final String html, final SetSelectionModel<T> selectionModel,
-            boolean withConfirmation, final ClickHandler clickHandler) {
-        this(html, selectionModel, withConfirmation ? Named::getName : null, clickHandler);
-    }
-
-    public SelectedElementsCountingButton(final String html, final SetSelectionModel<T> selectionModel,
-            final Function<T, String> nameMapper, final ClickHandler clickHandler) {
-        this(html, selectionModel, nameMapper == null ? null : createAsker(selectionModel, nameMapper), clickHandler);
+            final ClickHandler clickHandler ) {
+        this(html, selectionModel, null, clickHandler);
     }
 
     public SelectedElementsCountingButton(final String html, final SetSelectionModel<T> selectionModel,
@@ -58,8 +54,25 @@ public class SelectedElementsCountingButton<T extends Named> extends Button {
             });
         }
     }
+    
+    /**
+     * Helper method for creating asker for remove action using objects implementing {@link Named} interface
+     * 
+     * @param selectionModel    {@link SelectionModel} model for collecting removing element names
+     * @return
+     */
+    public static <T extends Named> Supplier<Boolean> createRemoveAsker(SetSelectionModel<T> selectionModel) {
+        return createRemoveAsker(selectionModel, Named:: getName);
+    }
 
-    private static <T> Supplier<Boolean> createAsker(SetSelectionModel<T> selectionModel, Function<T, String> mapper) {
+    /**
+     * Helper method for creating asker for remove action
+     * 
+     * @param selectionModel    {@link SelectionModel} model for collecting removing element names
+     * @param mapper            {@link Function} mapper for extracting element names
+     * @return
+     */
+    public static <T> Supplier<Boolean> createRemoveAsker(SetSelectionModel<T> selectionModel, Function<T, String> mapper) {
         return () -> {
             final String names = selectionModel.getSelectedSet().stream().map(mapper).collect(Collectors.joining("\n"));
             return Window.confirm(StringMessages.INSTANCE.doYouReallyWantToRemoveSelectedElements(names));
