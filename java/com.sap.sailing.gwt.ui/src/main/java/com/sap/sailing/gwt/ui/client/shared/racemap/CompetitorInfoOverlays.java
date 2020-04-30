@@ -97,11 +97,11 @@ public class CompetitorInfoOverlays implements QuickFlagDataListener {
     /**
      * Updates {@link #ranks} and {@link speed} and re-draws the corresponding overlay
      */
-    public void updateFlagData(CompetitorDTO competitorDTO, Integer rank, Double speed) {
+    public void updateFlagData(CompetitorDTO competitorDTO, Integer rank, Double speedInKnots) {
         CompetitorInfoOverlay overlay = competitorInfoOverlays.get(competitorDTO.getIdAsString());
         if (overlay != null) {
             ranks.put(competitorDTO.getIdAsString(), rank);
-            lastPositions.put(competitorDTO.getIdAsString(), speed);
+            lastPositions.put(competitorDTO.getIdAsString(), speedInKnots);
             overlay.setInfoText(createInfoText(competitorDTO));
             overlay.draw();
         }
@@ -125,6 +125,7 @@ public class CompetitorInfoOverlays implements QuickFlagDataListener {
     public void updatePosition(CompetitorDTO competitorDTO, GPSFixDTOWithSpeedWindTackAndLegType gpsFixDTO,
             long timeForPositionTransitionMillis) {
         CompetitorInfoOverlay overlay = competitorInfoOverlays.get(competitorDTO.getIdAsString());
+        lastPositions.put(competitorDTO.getIdAsString(), gpsFixDTO.speedWithBearing.speedInKnots);
         if (overlay != null) {
             overlay.setPosition(gpsFixDTO.position, timeForPositionTransitionMillis);
             overlay.draw();
