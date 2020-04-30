@@ -1356,13 +1356,12 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 Map<CompetitorDTO, Double> quickSpeedsFromServer = new HashMap<>();
                 for (CompetitorDTO competitor : boatData.keySet()) {
                     List<GPSFixDTOWithSpeedWindTackAndLegType> fixesList = boatData.get(competitor);
-                    if (fixesList.isEmpty()) {
-                        continue;
-                    }
-                    SpeedWithBearingDTO speedWithBearing = fixesList.get(fixesList.size() - 1).speedWithBearing;
-                    if (speedWithBearing != null) {
-                        Double speed = speedWithBearing.speedInKnots;
-                        quickSpeedsFromServer.put(competitor, speed);
+                    if (!fixesList.isEmpty()) {
+                        SpeedWithBearingDTO speedWithBearing = fixesList.get(fixesList.size() - 1).speedWithBearing;
+                        if (speedWithBearing != null) {
+                            Double speed = speedWithBearing.speedInKnots;
+                            quickSpeedsFromServer.put(competitor, speed);
+                        }
                     }
                 }
                 return quickSpeedsFromServer;
