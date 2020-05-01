@@ -13,6 +13,7 @@ import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.LegEntryDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceCompetitorSet;
+import com.sap.sailing.gwt.ui.leaderboard.AbstractLastLegDetailField;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sse.common.Util;
 
@@ -56,8 +57,8 @@ public class QuickFlagDataFromLeaderboardDTOProvider extends AbstractQuickFlagDa
     public void quickRanksReceivedFromServer(Map<String, QuickRankDTO> quickRanksFromServer) {
         if (quickRanks.isEmpty() || leaderboardNotCurrentlyUpdating) {
             for (final Entry<String, QuickRankDTO> e : quickRanksFromServer.entrySet()) {
-                quickRanks.put(e.getKey(), e.getValue());
-                notifyListenersRankChanged(e.getKey(), /* oldQuickRank */ null, e.getValue());
+                final QuickRankDTO oldQuickRank = quickRanks.put(e.getKey(), e.getValue());
+                notifyListenersRankChanged(e.getKey(), oldQuickRank, e.getValue());
             }
         } else if (!lastLeaderboardProvidedLegNumbers) {
             // extract at least the leg numbers and update existing quick ranks accordingly in place
@@ -86,6 +87,22 @@ public class QuickFlagDataFromLeaderboardDTOProvider extends AbstractQuickFlagDa
                 }
             } else {
                 int oneBasedRank = 1;
+                final AbstractLastLegDetailField<Double> sogProvider = new AbstractLastLegDetailField<Double>() {
+                    @Override
+                    protected String getRaceColumnName() {
+                        return raceColumnName;
+                    }
+
+                    @Override
+                    protected Double getBeforeLastLegFinished(LegEntryDTO currentLegDetail) {
+                        return currentLegDetail.currentSpeedOverGroundInKnots;
+                    }
+
+                    @Override
+                    protected Double getAfterLastLegFinished(LeaderboardRowDTO row) {
+                        return 0.0;
+                    }
+                };
                 for (final CompetitorDTO c : competitorsFromBestToWorst) {
                     if (Util.contains(raceCompetitorSet.getIdsOfCompetitorsParticipatingInRaceAsStrings(),
                             c.getIdAsString())) {
@@ -99,7 +116,7 @@ public class QuickFlagDataFromLeaderboardDTOProvider extends AbstractQuickFlagDa
                             if (raceEntryForCompetitor != null && legDetailsList != null) {
                                 oneBasedLegNumber = raceEntryForCompetitor.getOneBasedCurrentLegNumber();
                                 lastLeaderboardProvidedLegNumbers = true;
-                                speedInKnots = getQuickSpeedInKnots(speedInKnots, legDetailsList);
+                                speedInKnots = sogProvider.get(row);
                             } else {
                                 oneBasedLegNumber = 0;
                                 lastLeaderboardProvidedLegNumbers = false;
@@ -122,7 +139,6 @@ public class QuickFlagDataFromLeaderboardDTOProvider extends AbstractQuickFlagDa
                             notifyListenersRankChanged(c.getIdAsString(), oldQuickRank, quickRankToUpdate);
                         }
                         oneBasedRank++;
-
                         if (speedInKnots != null) {
                             quickSpeedsInKnots.put(c, speedInKnots);
                             notifyListenersSpeedInKnotsChanged(c, speedInKnots);
@@ -131,16 +147,6 @@ public class QuickFlagDataFromLeaderboardDTOProvider extends AbstractQuickFlagDa
                 }
             }
         }
-    }
-
-    private Double getQuickSpeedInKnots(Double speedInKnots, List<LegEntryDTO> legDetailsList) {
-        if (!legDetailsList.isEmpty()) {
-            LegEntryDTO legEntryDTO = legDetailsList.get(0);
-            if (legEntryDTO != null) {
-                speedInKnots = legEntryDTO.currentSpeedOverGroundInKnots;
-            } 
-        }
-        return speedInKnots;
     }
 
     @Override
