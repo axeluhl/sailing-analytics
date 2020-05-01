@@ -45,14 +45,14 @@ public class CompetitorInfoOverlays implements QuickFlagDataListener {
     /**
      * keys are the competitor IDs as strings
      */
-    private final Map<String, Double> lastPositions;
+    private final Map<String, Double> speedsInKnots;
 
     private final StringMessages stringMessages;
     
     public CompetitorInfoOverlays(RaceMap raceMap, final StringMessages stringMessages) {
         competitorInfoOverlays = new HashMap<>();
         ranks = new HashMap<>();
-        lastPositions = new HashMap<>();
+        speedsInKnots = new HashMap<>();
         this.stringMessages = stringMessages;
         this.raceMap = raceMap;
     }
@@ -83,7 +83,7 @@ public class CompetitorInfoOverlays implements QuickFlagDataListener {
             overlay.removeFromMap();
         }
         ranks.remove(competitorIdAsString);
-        lastPositions.remove(competitorIdAsString);
+        speedsInKnots.remove(competitorIdAsString);
     }
     
     public CompetitorInfoOverlay get(final CompetitorDTO competitorDTO) {
@@ -101,14 +101,14 @@ public class CompetitorInfoOverlays implements QuickFlagDataListener {
         CompetitorInfoOverlay overlay = competitorInfoOverlays.get(competitorDTO.getIdAsString());
         if (overlay != null) {
             ranks.put(competitorDTO.getIdAsString(), rank);
-            lastPositions.put(competitorDTO.getIdAsString(), speedInKnots);
+            speedsInKnots.put(competitorDTO.getIdAsString(), speedInKnots);
             overlay.setInfoText(createInfoText(competitorDTO));
             overlay.draw();
         }
     }
     
-    private Double getLastSpeed(CompetitorDTO competitorDTO) {
-        return lastPositions.get(competitorDTO.getIdAsString());
+    private Double getLastSpeedInKnots(CompetitorDTO competitorDTO) {
+        return speedsInKnots.get(competitorDTO.getIdAsString());
     }
 
     public void removeTransitions() {
@@ -125,7 +125,7 @@ public class CompetitorInfoOverlays implements QuickFlagDataListener {
     public void updatePosition(CompetitorDTO competitorDTO, GPSFixDTOWithSpeedWindTackAndLegType gpsFixDTO,
             long timeForPositionTransitionMillis) {
         CompetitorInfoOverlay overlay = competitorInfoOverlays.get(competitorDTO.getIdAsString());
-        lastPositions.put(competitorDTO.getIdAsString(), gpsFixDTO.speedWithBearing.speedInKnots);
+        speedsInKnots.put(competitorDTO.getIdAsString(), gpsFixDTO.speedWithBearing.speedInKnots);
         if (overlay != null) {
             overlay.setPosition(gpsFixDTO.position, timeForPositionTransitionMillis);
             overlay.draw();
@@ -134,13 +134,13 @@ public class CompetitorInfoOverlays implements QuickFlagDataListener {
 
     /**
      * Produces a text for the competitor info window for competitor {@code competitorDTO} based on the contents
-     * of {@link #ranks} and {@link #lastPositions}. If no {@link #ranks} entry exists, no rank is shown. However,
-     * a {@link #lastPosition} is required in order to produce the speed/course information.
+     * of {@link #ranks} and {@link #speedsInKnots}. If no {@link #ranks} entry exists, no rank is shown. However,
+     * a {@link #speedsInKnots} is required in order to produce the speed/course information.
      */
     private String createInfoText(CompetitorDTO competitorDTO) {
         StringBuilder infoText = new StringBuilder();
         infoText.append(competitorDTO.getShortInfo()).append("\n");
-        infoText.append(NumberFormatterFactory.getDecimalFormat(1).format(getLastSpeed(competitorDTO))).append(" ")
+        infoText.append(NumberFormatterFactory.getDecimalFormat(1).format(getLastSpeedInKnots(competitorDTO))).append(" ")
                 .append(stringMessages.knotsUnit()).append("\n");
         final Integer rank = ranks.get(competitorDTO.getIdAsString());
         if (rank != null && rank != 0) {
@@ -162,7 +162,7 @@ public class CompetitorInfoOverlays implements QuickFlagDataListener {
             e.getValue().removeFromMap();
             i.remove();
         }
-        lastPositions.clear();
+        speedsInKnots.clear();
         ranks.clear();
     }
 
@@ -183,7 +183,7 @@ public class CompetitorInfoOverlays implements QuickFlagDataListener {
     @Override
     public void speedInKnotsChanged(CompetitorDTO competitorDTO, Double quickSpeedInKnots) {
         String competitorId = competitorDTO.getIdAsString();
-        lastPositions.put(competitorId, quickSpeedInKnots);
+        speedsInKnots.put(competitorId, quickSpeedInKnots);
         final CompetitorInfoOverlay competitorInfoOverlay = competitorInfoOverlays.get(competitorId);
         if (competitorInfoOverlay != null) {
             competitorInfoOverlay.setInfoText(createInfoText(competitorDTO));

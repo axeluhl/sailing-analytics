@@ -23,7 +23,7 @@ import com.sap.sse.common.Util;
  * detail information about the race, only the order "from best to worst" is used, and ranks are determined based on it,
  * whereas the {@link QuickRankDTO#legNumberOneBased leg numbers} will continue to be accepted from the quick ranks
  * coming from the server.
- * For Speeds populates <code>quickSpeeds</code> with <code>currentSpeedOverGroundInKnots</code> values of 
+ * For Speeds populates <code>quickSpeedsInKnots</code> with <code>currentSpeedOverGroundInKnots</code> values of 
  * {@link LegEntryDTO}  
  * <p>
  * 
@@ -71,18 +71,14 @@ public class QuickFlagDataFromLeaderboardDTOProvider extends AbstractQuickFlagDa
     }
 
     public void updateFlagData(final LeaderboardDTO leaderboard) {
-        updateQuickRanks(leaderboard);
-        updateQuickSpeeds(leaderboard);
-    }
-
-    private void updateQuickRanks(final LeaderboardDTO leaderboard) {
         determineRaceColumnName(leaderboard);
         if (raceColumnName != null) {
             final List<CompetitorDTO> competitorsFromBestToWorst = leaderboard
                     .getCompetitorsFromBestToWorst(raceColumnName);
             if (competitorsFromBestToWorst.isEmpty()) {
                 for (CompetitorDTO c : leaderboard.competitors) {
-                    final QuickRankDTO quickRank = new QuickRankDTO(c, /* oneBasedRank */ 0, /* leg number ignored */ 0);
+                    final QuickRankDTO quickRank = new QuickRankDTO(c, /* oneBasedRank */ 0,
+                            /* leg number ignored */ 0);
                     QuickRankDTO oldQuickRank = quickRanks.put(c.getIdAsString(), quickRank);
                     if (Util.equalsWithNull(oldQuickRank, quickRank)) {
                         notifyListenersRankChanged(c.getIdAsString(), oldQuickRank, quickRank);
@@ -91,14 +87,19 @@ public class QuickFlagDataFromLeaderboardDTOProvider extends AbstractQuickFlagDa
             } else {
                 int oneBasedRank = 1;
                 for (final CompetitorDTO c : competitorsFromBestToWorst) {
-                    if (Util.contains(raceCompetitorSet.getIdsOfCompetitorsParticipatingInRaceAsStrings(), c.getIdAsString())) {
+                    if (Util.contains(raceCompetitorSet.getIdsOfCompetitorsParticipatingInRaceAsStrings(),
+                            c.getIdAsString())) {
                         final LeaderboardRowDTO row = leaderboard.rows.get(c);
                         final int oneBasedLegNumber;
+                        Double speedInKnots = 0d;
                         if (row != null) {
-                            final LeaderboardEntryDTO raceEntryForCompetitor = row.fieldsByRaceColumnName.get(raceColumnName);
-                            if (raceEntryForCompetitor != null && raceEntryForCompetitor.legDetails != null) {
+                            final LeaderboardEntryDTO raceEntryForCompetitor = row.fieldsByRaceColumnName
+                                    .get(raceColumnName);
+                            List<LegEntryDTO> legDetailsList = raceEntryForCompetitor.legDetails;
+                            if (raceEntryForCompetitor != null && legDetailsList != null) {
                                 oneBasedLegNumber = raceEntryForCompetitor.getOneBasedCurrentLegNumber();
                                 lastLeaderboardProvidedLegNumbers = true;
+                                speedInKnots = getQuickSpeedInKnots(speedInKnots, legDetailsList);
                             } else {
                                 oneBasedLegNumber = 0;
                                 lastLeaderboardProvidedLegNumbers = false;
@@ -112,7 +113,8 @@ public class QuickFlagDataFromLeaderboardDTOProvider extends AbstractQuickFlagDa
                             quickRanks.put(c.getIdAsString(), quickRankDTO);
                             notifyListenersRankChanged(c.getIdAsString(), /* oldQuickRank */ null, quickRankDTO);
                         } else {
-                            final QuickRankDTO oldQuickRank = new QuickRankDTO(quickRankToUpdate.competitor, quickRankToUpdate.oneBasedRank, quickRankToUpdate.legNumberOneBased);
+                            final QuickRankDTO oldQuickRank = new QuickRankDTO(quickRankToUpdate.competitor,
+                                    quickRankToUpdate.oneBasedRank, quickRankToUpdate.legNumberOneBased);
                             quickRankToUpdate.oneBasedRank = oneBasedRank;
                             if (lastLeaderboardProvidedLegNumbers) {
                                 quickRankToUpdate.legNumberOneBased = oneBasedLegNumber;
@@ -120,45 +122,30 @@ public class QuickFlagDataFromLeaderboardDTOProvider extends AbstractQuickFlagDa
                             notifyListenersRankChanged(c.getIdAsString(), oldQuickRank, quickRankToUpdate);
                         }
                         oneBasedRank++;
+
+                        if (speedInKnots != null) {
+                            quickSpeedsInKnots.put(c, speedInKnots);
+                            notifyListenersSpeedInKnotsChanged(c, speedInKnots);
+                        }
                     }
                 }
             }
         }
+    }
+
+    private Double getQuickSpeedInKnots(Double speedInKnots, List<LegEntryDTO> legDetailsList) {
+        if (!legDetailsList.isEmpty()) {
+            LegEntryDTO legEntryDTO = legDetailsList.get(0);
+            if (legEntryDTO != null) {
+                speedInKnots = legEntryDTO.currentSpeedOverGroundInKnots;
+            } 
+        }
+        return speedInKnots;
     }
 
     @Override
     public Map<String, QuickRankDTO> getQuickRanks() {
         return quickRanks;
-    }
-
-    private void updateQuickSpeeds(final LeaderboardDTO leaderboard) {
-        determineRaceColumnName(leaderboard);
-        if (raceColumnName != null) {
-            final List<CompetitorDTO> competitorsFromBestToWorst = leaderboard
-                    .getCompetitorsFromBestToWorst(raceColumnName);
-            for (final CompetitorDTO competitor : competitorsFromBestToWorst) {
-                if (Util.contains(raceCompetitorSet.getIdsOfCompetitorsParticipatingInRaceAsStrings(),
-                        competitor.getIdAsString())) {
-                    final LeaderboardRowDTO row = leaderboard.rows.get(competitor);
-                    Double speed = 0d;
-                    if (row != null) {
-                        final LeaderboardEntryDTO raceEntryForCompetitor = row.fieldsByRaceColumnName
-                                .get(raceColumnName);
-                        List<LegEntryDTO> legDetailsList = raceEntryForCompetitor.legDetails;
-                        if (legDetailsList != null && !legDetailsList.isEmpty()) {
-                            LegEntryDTO legEntryDTO = legDetailsList.get(0);
-                            if (legEntryDTO != null) {
-                                speed = legEntryDTO.currentSpeedOverGroundInKnots;
-                            }
-                        }
-                    }
-                    if (speed != null) {
-                        quickSpeedsInKnots.put(competitor, speed);
-                        notifyListenersSpeedInKnotsChanged(competitor, speed);
-                    }
-                }
-            }
-        }
     }
 
     private void determineRaceColumnName(final LeaderboardDTO leaderboard) {
@@ -177,9 +164,9 @@ public class QuickFlagDataFromLeaderboardDTOProvider extends AbstractQuickFlagDa
             }
         } else {
             for (final Entry<CompetitorDTO, Double> e : quickSpeedsInKnots.entrySet()) {
-                final Double speed = quickSpeedsFromServerInKnots.get(e.getKey());
-                if (speed != null) {
-                    quickSpeedsInKnots.put(e.getKey(), speed);
+                final Double speedInKnots = quickSpeedsFromServerInKnots.get(e.getKey());
+                if (speedInKnots != null) {
+                    quickSpeedsInKnots.put(e.getKey(), speedInKnots);
                 }
             }
         }

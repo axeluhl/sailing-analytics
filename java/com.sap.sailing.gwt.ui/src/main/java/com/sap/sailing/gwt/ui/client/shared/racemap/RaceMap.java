@@ -1598,7 +1598,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         if (lastBoatFix != null) {
                             CompetitorInfoOverlay competitorInfoOverlay = competitorInfoOverlays.get(competitorDTO);
                             final Integer rank = getRank(competitorDTO);
-                            final Double speed = getSpeed(competitorDTO);
+                            final Double speed = getSpeedInKnots(competitorDTO);
                             if (competitorInfoOverlay == null) {
                                 competitorInfoOverlay = competitorInfoOverlays.createCompetitorInfoOverlay(RaceMapOverlaysZIndexes.INFO_OVERLAY_ZINDEX, competitorDTO,
                                         lastBoatFix, rank, speed, timeForPositionTransitionMillis);
@@ -3223,7 +3223,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     }
     
     @Override
-    public Double getSpeed(CompetitorDTO competitor) {
+    public Double getSpeedInKnots(CompetitorDTO competitor) {
         return quickFlagDataProvider.getQuickSpeedsInKnots().get(competitor);
     }
     

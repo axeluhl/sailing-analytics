@@ -18,7 +18,7 @@ public interface QuickFlagDataValuesProvider {
      * 
      * @param the
      *            {@link CompetitorDTO} for which speed values is provided
-     * @return the speed of the <code>competitor</code if found, or <code>null</code> otherwise
+     * @return the speedInKnots of the <code>competitor</code if found, or <code>null</code> otherwise
      */
-    Double getSpeed(CompetitorDTO competitor);
+    Double getSpeedInKnots(CompetitorDTO competitor);
 }
