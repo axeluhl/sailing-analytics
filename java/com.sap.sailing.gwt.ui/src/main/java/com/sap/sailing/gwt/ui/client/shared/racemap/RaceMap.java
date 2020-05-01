@@ -1302,7 +1302,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         // Do boat specific actions
                         updateBoatPositions(newTime, transitionTimeInMillis, hasTailOverlapForCompetitor,
                                 competitorsToShow, boatData, /* updateTailsOnly */ false, detailTypeChanged);
-                        
                         if (!isRedraw) {
                             // only remove markers if the time is actually changed
                             if (douglasMarkers != null) {
@@ -1318,12 +1317,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         showCourseSidelinesOnMap(raceMapDataDTO.courseSidelines);
                         showStartAndFinishAndCourseMiddleLines(raceMapDataDTO.coursePositions);
                         showStartLineToFirstMarkTriangle(raceMapDataDTO.coursePositions);
-
                         // Rezoom the map
                         LatLngBounds zoomToBounds = null;
                         if (!settings.getZoomSettings().containsZoomType(ZoomTypes.NONE)) {
                             // Auto zoom if setting is not manual
-
                             zoomToBounds = settings.getZoomSettings().getNewBounds(RaceMap.this);
                             if (zoomToBounds == null && !mapFirstZoomDone) {
                                 // the user-specified zoom couldn't find what it was looking for; try defaults once
@@ -1425,7 +1422,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             if (!updateTailsOnly) {
                 showCompetitorInfoOnMap(newTime, transitionTimeInMillis,
                         competitorSelection.getSelectedFilteredCompetitors());
-
                 // even though the wind data is retrieved by a separate call, re-draw the advantage line because it
                 // needs to adjust to new boat positions
                 showAdvantageLine(competitorsToShow, newTime, transitionTimeInMillis);
