@@ -17,6 +17,19 @@ It contains also some files:
  - Manifest.txt -> manifest used to create the test.jar file
 
 ********************************************
+      TracAPI 3.13.3
+********************************************
+This is a final version. The only difference with the previous version is the JDK used to compile the sources.
+It keeps the backward compatibility.
+
+ Release date: 01/05/2020
+ Build number: dfa0d7732ebb374236628868810547d28a357f92
+
+ 1) Bugs
+
+  - The previous version was compiled using Java 13 (Reported by Axel Uhl, 01/05/2020)
+
+********************************************
      TracAPI 3.13.2
 ********************************************
 This is a final version. It adds fixes some features. It keeps the backward compatibility.
@@ -26,7 +39,7 @@ Build number: 242936347afa7ec28fc8b61996caf92693ab11af
 
 1) Bugs
 
- - Checking is a control exists before to add it to the route (Reported by Axel Uhl, 24/03/2020)
+ - Checking if a control exists before to add it to the route (Reported by Axel Uhl, 24/03/2020)
  - The EventFactory has to synchronize the access to the "Map of IControls" (Reported by Axel Uhl, 30/04/2020)
 
 ********************************************
