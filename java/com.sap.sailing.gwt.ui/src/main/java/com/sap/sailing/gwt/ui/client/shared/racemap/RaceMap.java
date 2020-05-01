@@ -3220,7 +3220,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     
     @Override
     public Double getSpeedInKnots(CompetitorDTO competitor) {
-        return quickFlagDataProvider.getQuickSpeedsInKnots().get(competitor);
+        return quickFlagDataProvider.getQuickSpeedsInKnots(competitor);
     }
     
     private Image createSAPLogo() {

@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -18,14 +18,15 @@ import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sse.common.Util;
 
 /**
- * Computes flag data maps based on data coming from Leaderboard or delivered asynchronously from server.
- * For Ranks Computes a map of {@link QuickRankDTO}s from a {@link LeaderboardDTO} and a {@link RaceCompetitorSet}, restricting
+ * Computes flag data maps based on data coming from Leaderboard or delivered asynchronously from server. For Ranks
+ * Computes a map of {@link QuickRankDTO}s from a {@link LeaderboardDTO} and a {@link RaceCompetitorSet}, restricting
  * the calculation to those competitors actually taking part in a race. If the {@link LeaderboardDTO} does not contain
  * detail information about the race, only the order "from best to worst" is used, and ranks are determined based on it,
  * whereas the {@link QuickRankDTO#legNumberOneBased leg numbers} will continue to be accepted from the quick ranks
- * coming from the server.
- * For Speeds populates <code>quickSpeedsInKnots</code> with <code>currentSpeedOverGroundInKnots</code> values of 
- * {@link LegEntryDTO}  
+ * coming from the server. Likewise, if the leaderboard does not provide the current speed over ground value, e.g.,
+ * because the leaderboard contains no leg details, the speed value is taken from the GPS fix, through
+ * {@link #quickSpeedsInKnotsReceivedFromServer(Map)}. IF the leaderboard contains the SOG values,
+ * {@link #quickSpeedsInKnots} is filled from the leaderboard.
  * <p>
  * 
  * When the leaderboard DTO is still empty of {@link #leaderboardNotCurrentlyUpdating not currently being updated}, the
@@ -36,8 +37,19 @@ import com.sap.sse.common.Util;
  *
  */
 public class QuickFlagDataFromLeaderboardDTOProvider extends AbstractQuickFlagDataProvider {
-    private final Map<String, QuickRankDTO> quickRanks = new LinkedHashMap<>();
-    private final Map<CompetitorDTO, Double> quickSpeedsInKnots = new LinkedHashMap<>();
+    private final Map<String, QuickRankDTO> quickRanks = new HashMap<>();
+    
+    /**
+     * Fallback in case {@link #speedsFromLeaderboardInKnots} does not have the competitor as key
+     */
+    private final Map<CompetitorDTO, Double> quickSpeedsInKnots = new HashMap<>();
+    
+    /**
+     * Cleared when leaderboard is no longer updating; if it contains a competitor as key, the
+     * value takes precedence over {@link #quickSpeedsInKnots}.
+     */
+    private final Map<CompetitorDTO, Double> speedsFromLeaderboardInKnots = new HashMap<>();
+    
     private final RaceCompetitorSet raceCompetitorSet;
     private final RaceIdentifier selectedRace;
     private boolean lastLeaderboardProvidedLegNumbers;
@@ -51,6 +63,9 @@ public class QuickFlagDataFromLeaderboardDTOProvider extends AbstractQuickFlagDa
 
     public void setLeaderboardNotCurrentlyUpdating(boolean leaderboardNotCurrentlyUpdating) {
         this.leaderboardNotCurrentlyUpdating = leaderboardNotCurrentlyUpdating;
+        if (leaderboardNotCurrentlyUpdating) {
+            speedsFromLeaderboardInKnots.clear();
+        }
     }
 
     @Override
@@ -100,7 +115,7 @@ public class QuickFlagDataFromLeaderboardDTOProvider extends AbstractQuickFlagDa
 
                     @Override
                     protected Double getAfterLastLegFinished(LeaderboardRowDTO row) {
-                        return 0.0;
+                        return null; // try to get the speed info from the GPSFixDTO instead
                     }
                 };
                 for (final CompetitorDTO c : competitorsFromBestToWorst) {
@@ -108,7 +123,7 @@ public class QuickFlagDataFromLeaderboardDTOProvider extends AbstractQuickFlagDa
                             c.getIdAsString())) {
                         final LeaderboardRowDTO row = leaderboard.rows.get(c);
                         final int oneBasedLegNumber;
-                        Double speedInKnots = 0d;
+                        Double speedInKnots = null;
                         if (row != null) {
                             final LeaderboardEntryDTO raceEntryForCompetitor = row.fieldsByRaceColumnName
                                     .get(raceColumnName);
@@ -139,8 +154,8 @@ public class QuickFlagDataFromLeaderboardDTOProvider extends AbstractQuickFlagDa
                             notifyListenersRankChanged(c.getIdAsString(), oldQuickRank, quickRankToUpdate);
                         }
                         oneBasedRank++;
+                        speedsFromLeaderboardInKnots.put(c, speedInKnots);
                         if (speedInKnots != null) {
-                            quickSpeedsInKnots.put(c, speedInKnots);
                             notifyListenersSpeedInKnotsChanged(c, speedInKnots);
                         }
                     }
@@ -163,25 +178,24 @@ public class QuickFlagDataFromLeaderboardDTOProvider extends AbstractQuickFlagDa
 
     @Override
     public void quickSpeedsInKnotsReceivedFromServer(Map<CompetitorDTO, Double> quickSpeedsFromServerInKnots) {
-        if (quickSpeedsInKnots.isEmpty() || leaderboardNotCurrentlyUpdating) {
-            for (final Entry<CompetitorDTO, Double> e : quickSpeedsFromServerInKnots.entrySet()) {
-                quickSpeedsInKnots.put(e.getKey(), e.getValue());
+        for (final Entry<CompetitorDTO, Double> e : quickSpeedsFromServerInKnots.entrySet()) {
+            quickSpeedsInKnots.put(e.getKey(), e.getValue());
+            // pass the quick speed info on in case we have no speed info from the leaderboard
+            if (speedsFromLeaderboardInKnots.get(e.getKey()) == null) {
                 notifyListenersSpeedInKnotsChanged(e.getKey(), e.getValue());
             }
-        } else {
-            for (final Entry<CompetitorDTO, Double> e : quickSpeedsInKnots.entrySet()) {
-                final Double speedInKnots = quickSpeedsFromServerInKnots.get(e.getKey());
-                if (speedInKnots != null) {
-                    quickSpeedsInKnots.put(e.getKey(), speedInKnots);
-                }
-            }
         }
-
     }
 
     @Override
-    public Map<CompetitorDTO, Double> getQuickSpeedsInKnots() {
-        return quickSpeedsInKnots;
+    public Double getQuickSpeedsInKnots(CompetitorDTO competitor) {
+        final Double result;
+        if (speedsFromLeaderboardInKnots.containsKey(competitor)) {
+            result = speedsFromLeaderboardInKnots.get(competitor);
+        } else {
+            result = quickSpeedsInKnots.get(competitor);
+        }
+        return result;
     }
 
     private String getRaceColumnName(LeaderboardDTO leaderboard, RaceIdentifier selectedRace) {

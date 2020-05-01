@@ -75,7 +75,7 @@ public interface QuickFlagDataProvider {
     Map<String, QuickRankDTO> getQuickRanks();
 
     /**
-     * @return keys are the {@link CompetitorWithBoatDTO}, values are the quick speeds pertaining to the competitors
+     * @return the latest known speed over ground value for {@code competitor} in knots
      */
-    Map<CompetitorDTO, Double> getQuickSpeedsInKnots();
+    Double getQuickSpeedsInKnots(CompetitorDTO competitor);
 }

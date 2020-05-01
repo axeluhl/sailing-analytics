@@ -44,8 +44,8 @@ public class DefaultQuickFlagDataProvider extends AbstractQuickFlagDataProvider 
     }
 
     @Override
-    public Map<CompetitorDTO, Double> getQuickSpeedsInKnots() {
-        return currentQuickSpeedsInKnotsFromServer;
+    public Double getQuickSpeedsInKnots(CompetitorDTO competitor) {
+        return currentQuickSpeedsInKnotsFromServer.get(competitor);
     }
 
 }
