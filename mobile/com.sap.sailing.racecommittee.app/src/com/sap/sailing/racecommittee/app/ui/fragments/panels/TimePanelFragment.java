@@ -45,6 +45,8 @@ import android.widget.TextView;
 public class TimePanelFragment extends BasePanelFragment {
 
     private final static String TOGGLED = "toggled";
+    private final static String COMPETITOR_TOGGLE_STATE_ON = "competitor-toggle-state-on";
+
 
     private RaceStateChangedListener mStateListener;
     private IntentReceiver mReceiver;
@@ -62,7 +64,7 @@ public class TimePanelFragment extends BasePanelFragment {
 
     private CompetitorPanelClick mClickListener;
     private TimePoint mLastFinishingTime = null;
-
+    private boolean mCompetitorToggleOn;
     public TimePanelFragment() {
         mReceiver = new IntentReceiver();
     }
@@ -113,6 +115,9 @@ public class TimePanelFragment extends BasePanelFragment {
             mCompetitorList.setVisibility(View.VISIBLE);
             checkWarnings(getRaceState());
         }
+        if (savedInstanceState != null) {
+            mCompetitorToggleOn = savedInstanceState.getBoolean(COMPETITOR_TOGGLE_STATE_ON, false);
+        }
     }
 
     @Override
@@ -132,7 +137,11 @@ public class TimePanelFragment extends BasePanelFragment {
         filter.addAction(AppConstants.INTENT_ACTION_ON_LIFECYCLE);
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, filter);
 
-        sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
+        if (mCompetitorToggleOn) {
+            mCompetitorList.setMarkerLevel(PanelButton.LEVEL_TOGGLED);
+        }else {
+            sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
+        }
     }
 
     @Override
@@ -418,11 +427,13 @@ public class TimePanelFragment extends BasePanelFragment {
                         String data = intent.getStringExtra(AppConstants.INTENT_ACTION_EXTRA);
                         if (AppConstants.INTENT_ACTION_EXTRA_START.equals(event)) {
                             if (AppConstants.INTENT_ACTION_TOGGLE_COMPETITOR.equals(data)) {
+                                mCompetitorToggleOn = true;
                                 mCompetitorList.setMarkerLevel(PanelButton.LEVEL_TOGGLED);
                             }
                         }
                         if (AppConstants.INTENT_ACTION_EXTRA_STOP.equals(event)) {
                             if (AppConstants.INTENT_ACTION_TOGGLE_COMPETITOR.equals(data)) {
+                                mCompetitorToggleOn = false;
                                 mCompetitorList.setMarkerLevel(PanelButton.LEVEL_NORMAL);
                             }
                         }
@@ -441,5 +452,11 @@ public class TimePanelFragment extends BasePanelFragment {
                 }
             }
         }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(COMPETITOR_TOGGLE_STATE_ON, mCompetitorToggleOn);
     }
 }
