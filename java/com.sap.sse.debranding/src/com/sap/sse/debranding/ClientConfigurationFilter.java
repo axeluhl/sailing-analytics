@@ -3,7 +3,6 @@ package com.sap.sse.debranding;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,8 +14,6 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.WriteListener;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
@@ -24,15 +21,14 @@ public class ClientConfigurationFilter implements Filter {
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-     // intentionally left blank
+        // intentionally left blank
     }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
         HttpServletResponseWrapper wrappedResponse = new CharResponseWrapper((HttpServletResponse) response);
-        HttpServletRequestWrapper wrappedRequest = new HeadersRequestWrapper((HttpServletRequest) request);
-        chain.doFilter(wrappedRequest, wrappedResponse);
+        chain.doFilter(request, wrappedResponse);
         String body = wrappedResponse.toString();
         String replaced = new String(body);
         final boolean deBrandingActive = Boolean
@@ -65,63 +61,6 @@ public class ClientConfigurationFilter implements Filter {
         // intentionally left blank
     }
 
-    private static class HeadersRequestWrapper extends HttpServletRequestWrapper {
-        private HeadersRequestWrapper(HttpServletRequest request) {
-            super(request);
-        }
-
-        @Override
-        public String getHeader(String name) {
-            if (name.equalsIgnoreCase("Cache-Control")) {
-                return "no-cache";
-            }
-            if (name.equalsIgnoreCase("If-Modified-Since")) {
-                return "Thu, 1. Jan 1970 00:00:00 GMT";
-            }
-            return super.getHeader(name);
-        }
-
-        @Override
-        public Enumeration<String> getHeaders(String name) {
-            if (name.equalsIgnoreCase("Cache-Control")) {
-                return new OneElementEnum("no-cache");
-            }
-            if (name.equalsIgnoreCase("If-Modified-Since")) {
-                return new OneElementEnum("Thu, 1. Jan 1970 00:00:00 GMT");
-            }
-            return super.getHeaders(name);
-        }
-
-        @Override
-        public long getDateHeader(String name) {
-            if (name.equalsIgnoreCase("If-Modified-Since")) {
-                return 0;
-            }
-            return super.getDateHeader(name);
-        }
-        
-    }
-
-     private static class OneElementEnum implements Enumeration<String> {
-            private boolean delivered = false;
-            private String value;
-            
-            public OneElementEnum(String value) {
-                this.value = value;
-            }
-
-            @Override
-            public boolean hasMoreElements() {
-                return !delivered;
-            }
-
-            @Override
-            public String nextElement() {
-                delivered = true;
-                return value;
-            }
-    }
-        
     private static class CharResponseWrapper extends HttpServletResponseWrapper {
         private ByteArrayOutputStream output;
 
@@ -156,40 +95,39 @@ public class ClientConfigurationFilter implements Filter {
 
         @Override
         public void flushBuffer() throws IOException {
-//            super.flushBuffer();
+            // intentionally left blank, not supporting buffering here
         }
 
         @Override
         public void reset() {
-//            super.reset();
+            // intentionally left blank, not supporting buffering here
         }
 
         @Override
         public void resetBuffer() {
-//            super.resetBuffer();
+            // intentionally left blank, not supporting buffering here
         }
 
         @Override
         public ServletOutputStream getOutputStream() throws IOException {
             return new ServletOutputStream() {
-                
+
                 @Override
-                public void write(int arg0) throws IOException {
-                    output.write(arg0);
+                public void write(int octet) throws IOException {
+                    output.write(octet);
                 }
-                
+
                 @Override
                 public void setWriteListener(WriteListener writeListener) {
+                    // disable asynchronous writing, not needed for static pages
                     throw new IllegalStateException("not supported by ClientConfigurationServlet");
                 }
-                
+
                 @Override
                 public boolean isReady() {
                     return true;
                 }
             };
         }
-
     }
-
 }
