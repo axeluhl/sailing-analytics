@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -27,8 +28,6 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.SelectedElementsCountingButton;
-
-import static com.sap.sse.security.ui.client.component.SelectedElementsCountingButton.*;
 
 /**
  * Shows the currently tracked events/races in a table. Updated if subscribed as an {@link RegattasDisplayer}, e.g., with
@@ -147,8 +146,8 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
             trackedRacesButtonPanel.add(btnExport);
 
             btnRemoveRace = new SelectedElementsCountingButton<RaceDTO>(stringMessages.remove(),
-                    refreshableSelectionModel,
-                    createRemoveAsker(refreshableSelectionModel, e -> e.getRegattaName() + " - " + e.getName()),
+                    refreshableSelectionModel, /* element name mapper */ e -> e.getRegattaName() + " - " + e.getName(),
+                    StringMessages.INSTANCE::doYouReallyWantToRemoveSelectedElements,
                     (event) -> removeAndUntrackRaces(refreshableSelectionModel.getSelectedSet()));
             btnRemoveRace.ensureDebugId("RemoveRaceButton");
             trackedRacesButtonPanel.add(btnRemoveRace);

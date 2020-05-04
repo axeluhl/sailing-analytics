@@ -17,8 +17,7 @@ import com.google.gwt.view.client.SetSelectionModel;
 import com.sap.sse.common.Named;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.ui.client.UserService;
-
-import static com.sap.sse.security.ui.client.component.SelectedElementsCountingButton.*;
+import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 /**
  * Panel where several buttons can be added which are either {@link #addUnsecuredAction(String, Command) unsecured} or
@@ -144,7 +143,7 @@ public class AccessControlledButtonPanel extends Composite {
         }
         ClickHandler handler = wrap(removePermissionCheck, callback);
         Button button = withConfirmation
-                ? new SelectedElementsCountingButton<T>(text, selectionModel, createRemoveAsker(selectionModel),
+                ? new SelectedElementsCountingButton<T>(text, selectionModel, StringMessages.INSTANCE::doYouReallyWantToRemoveSelectedElements,
                         handler)
                 : new SelectedElementsCountingButton<T>(text, selectionModel, handler);
         return resolveButtonVisibility(removePermissionCheck, button);

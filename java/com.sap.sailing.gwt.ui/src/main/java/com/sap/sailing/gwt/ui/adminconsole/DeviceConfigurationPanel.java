@@ -28,8 +28,6 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.SelectedElementsCountingButton;
 
-import static com.sap.sse.security.ui.client.component.SelectedElementsCountingButton.*;
-
 public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfigurationDetailComposite.DeviceConfigurationFactory {
     private final SailingServiceAsync sailingService;
     private final UserService userService;
@@ -96,7 +94,7 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
         }
         removeConfigurationButton = new SelectedElementsCountingButton<DeviceConfigurationWithSecurityDTO>(
                 stringMessages.remove(), refreshableMultiSelectionModel,
-                createRemoveAsker(refreshableMultiSelectionModel), (event) -> removeConfiguration());
+                StringMessages.INSTANCE::doYouReallyWantToRemoveSelectedElements, (event) -> removeConfiguration());
         deviceManagementControlPanel.add(removeConfigurationButton);
         refreshConfigurationsButton = new Button(stringMessages.refresh());
         refreshConfigurationsButton.addClickHandler(new ClickHandler() {
