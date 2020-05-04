@@ -103,7 +103,6 @@ public class TaggingServiceTest {
         threadState = new SubjectThreadState(subject);
         // setup tagging service
         taggingService = Mockito.spy(new TaggingServiceImpl(racingService));
-
         Mockito.doReturn(securityService).when(racingService).getSecurityService();
         Mockito.doReturn(taggingService).when(racingService).getTaggingService();
     }

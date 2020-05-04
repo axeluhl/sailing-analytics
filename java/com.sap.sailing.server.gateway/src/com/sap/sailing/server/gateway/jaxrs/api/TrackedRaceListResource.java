@@ -16,9 +16,9 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.StreamingOutput;
 
 import org.json.simple.JSONArray;
-import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.anniversary.DetailedRaceInfo;
@@ -51,7 +51,7 @@ public class TrackedRaceListResource extends AbstractSailingServerResource {
         if (detailedRaceInfo == null) {
             return Response.status(Status.NOT_FOUND).header(HEADER_NAME_CONTENT_TYPE, CONTENT_TYPE_JSON_UTF8).build();
         }
-        return getJsonResponse(detailedRaceListJsonSerializer.serialize(detailedRaceInfo));
+        return getJsonResponse(streamingOutput(detailedRaceListJsonSerializer.serialize(detailedRaceInfo)));
     }
 
     /**
@@ -88,7 +88,7 @@ public class TrackedRaceListResource extends AbstractSailingServerResource {
             remote.put(DetailedRaceInfoJsonSerializer.FIELD_RACES, list);
             json.add(remote);
         }
-        return getJsonResponse(json);
+        return getJsonResponse(streamingOutput(json));
     }
 
     /**
@@ -120,7 +120,7 @@ public class TrackedRaceListResource extends AbstractSailingServerResource {
             raceInfo.put("raceinfo", simpleRaceListJsonSerializer.serialize(current));
             json.add(raceInfo);
         }
-        return getJsonResponse(json);
+        return getJsonResponse(streamingOutput(json));
     }
 
     private Map<RegattaAndRaceIdentifier, SimpleRaceInfo> getDistinctRaces(boolean includeRemotes) {
@@ -132,7 +132,7 @@ public class TrackedRaceListResource extends AbstractSailingServerResource {
         return distinctRaces;
     }
 
-    private Response getJsonResponse(JSONAware json) {
-        return Response.ok(json.toJSONString()).header(HEADER_NAME_CONTENT_TYPE, CONTENT_TYPE_JSON_UTF8).build();
+    private Response getJsonResponse(StreamingOutput json) {
+        return Response.ok(json).header(HEADER_NAME_CONTENT_TYPE, CONTENT_TYPE_JSON_UTF8).build();
     }
 }
