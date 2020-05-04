@@ -30,9 +30,11 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.html5.WebStorage;
 import org.openqa.selenium.remote.Augmenter;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.sap.sailing.selenium.core.Managed;
 import com.sap.sailing.selenium.core.SeleniumRunner;
@@ -150,6 +152,13 @@ public abstract class AbstractSeleniumTest {
         } catch (IOException exception) {
             throw new RuntimeException(exception);
         }
+        clearBrowserCache(getWebDriver());
+    }
+    
+    public void clearBrowserCache(WebDriver driver) {
+        WebDriverWait webDriverWait = new WebDriverWait(driver, 1L);
+        WebElement clearBrowsingButon = webDriverWait.until(d -> d.findElement(By.cssSelector("* /deep/ #clearBrowsingDataConfirm")));
+        clearBrowsingButon.click();
     }
     
     protected boolean getWhitelabel(String contextRoot) {
