@@ -84,7 +84,6 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
                 }, tableResources);
         this.userService = userService;
         ListHandler<UserDTO> userColumnListHandler = getColumnSortHandler();
-        
         // users table
         TextColumn<UserDTO> usernameColumn = new AbstractSortableTextColumn<UserDTO>(user->user.getName(), userColumnListHandler);
         TextColumn<UserDTO> fullNameColumn = new AbstractSortableTextColumn<UserDTO>(user->user.getFullName(), userColumnListHandler);
@@ -155,7 +154,6 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
                 return new NaturalComparator().compare(r1.getRoles().toString(), r2.getRoles().toString());
             }
         });
-
         final HasPermissions type = SecuredSecurityTypes.USER;
         final AccessControlledActionsColumn<UserDTO, DefaultActionsImagesBarCell> userActionColumn = create(
                 new DefaultActionsImagesBarCell(stringMessages), userService);
@@ -186,14 +184,12 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
         final EditOwnershipDialog.DialogConfig<UserDTO> configOwnership = EditOwnershipDialog.create(
                 userService.getUserManagementService(), type,
                 user -> refreshUserList((Callback<Iterable<UserDTO>, Throwable>) null), stringMessages);
-        
         final EditACLDialog.DialogConfig<UserDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementService(), type,
                 user -> user.getAccessControlList(), stringMessages);
         userActionColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, configOwnership::openOwnershipDialog);
         userActionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 u -> configACL.openACLDialog(u));
-        
         filterField = new LabeledAbstractFilterablePanel<UserDTO>(new Label(stringMessages.filterUsers()),
                 new ArrayList<UserDTO>(), dataProvider, stringMessages) {
             @Override
@@ -214,7 +210,6 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
         };
         registerSelectionModelOnNewDataProvider(filterField.getAllListDataProvider());
         filterField.setUpdatePermissionFilterForCheckbox(user -> userService.hasPermission(user, DefaultActions.UPDATE));
-        
         mainPanel.insert(filterField, 0);
         table.addColumnSortHandler(userColumnListHandler);
         table.addColumn(usernameColumn, getStringMessages().username());
