@@ -1,8 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.text.ParseException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -10,7 +8,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import org.apache.http.client.ClientProtocolException;
 import org.apache.shiro.authz.UnauthorizedException;
 
 import com.sap.sailing.domain.abstractlog.Revokable;
@@ -250,7 +247,7 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
 
     Map<RegattaAndRaceIdentifier, Integer> importWindFromIgtimi(List<RaceDTO> selectedRaces,
             boolean correctByDeclination)
-            throws IllegalStateException, ClientProtocolException, IOException, org.json.simple.parser.ParseException;
+            throws IllegalStateException, IOException;
 
     void removeIgtimiAccount(String eMailOfAccountToRemove);
 
@@ -303,7 +300,7 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
 
     void removeRegattas(Collection<RegattaIdentifier> selectedRegattas);
 
-    EventDTO getEventById(UUID id, boolean withStatisticalData) throws MalformedURLException, UnauthorizedException;
+    EventDTO getEventById(UUID id, boolean withStatisticalData) throws UnauthorizedException;
 
     void renameEvent(UUID eventId, String newName) throws UnauthorizedException;
 
@@ -319,13 +316,13 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
             boolean isPublic, List<String> courseAreaNames, String officialWebsiteURLAsString, String baseURLAsString,
             Map<String, String> sailorsInfoWebsiteURLsByLocaleName, Iterable<ImageDTO> images,
             Iterable<VideoDTO> videos, Iterable<UUID> leaderboardGroupIds)
-            throws MalformedURLException, UnauthorizedException;
+            throws UnauthorizedException;
 
     EventDTO updateEvent(UUID eventId, String eventName, String eventDescription, Date startDate, Date endDate,
             VenueDTO venue, boolean isPublic, Iterable<UUID> leaderboardGroupIds, String officialWebsiteURLString,
             String baseURLAsString, Map<String, String> sailorsInfoWebsiteURLsByLocaleName, Iterable<ImageDTO> images,
             Iterable<VideoDTO> videos, Iterable<String> windFinderReviewedSpotCollectionIds)
-            throws MalformedURLException, UnauthorizedException;
+            throws UnauthorizedException;
 
     void updateLeaderboardGroup(UUID leaderboardGroupId, String oldName, String newName, String newDescription,
             String newDisplayName, List<String> leaderboardNames, int[] overallLeaderboardDiscardThresholds,
@@ -338,7 +335,7 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
     void trackWithSwissTiming(RegattaIdentifier regattaToAddTo, Iterable<SwissTimingRaceRecordDTO> rrs, String hostname,
             int port, boolean trackWind, final boolean correctWindByDeclination,
             boolean useInternalMarkPassingAlgorithm, String updateURL, String updateUsername, String updatePassword)
-            throws InterruptedException, ParseException, Exception;
+            throws InterruptedException, Exception;
 
     void updateSwissTimingConfiguration(SwissTimingConfigurationWithSecurityDTO configuration) throws Exception;
 
@@ -415,8 +412,7 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
 
     void createSwissTimingArchiveConfiguration(final String jsonURL) throws Exception;
 
-    void createRegattaStructure(final Iterable<RegattaDTO> regattas, final EventDTO newEvent)
-            throws MalformedURLException;
+    void createRegattaStructure(final Iterable<RegattaDTO> regattas, final EventDTO newEvent);
 
     void removeWind(RegattaAndRaceIdentifier raceIdentifier, WindDTO windDTO);
 
