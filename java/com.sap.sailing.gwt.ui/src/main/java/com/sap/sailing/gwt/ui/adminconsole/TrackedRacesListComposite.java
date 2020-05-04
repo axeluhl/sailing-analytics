@@ -28,6 +28,8 @@ import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.SelectedElementsCountingButton;
 
+import static com.sap.sse.security.ui.client.component.SelectedElementsCountingButton.*;
+
 /**
  * Shows the currently tracked events/races in a table. Updated if subscribed as an {@link RegattasDisplayer}, e.g., with
  * the {@link AdminConsoleEntryPoint}.
@@ -145,7 +147,8 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
             trackedRacesButtonPanel.add(btnExport);
 
             btnRemoveRace = new SelectedElementsCountingButton<RaceDTO>(stringMessages.remove(),
-                    refreshableSelectionModel, e -> e.getRegattaName() + " - " + e.getName(),
+                    refreshableSelectionModel,
+                    createRemoveAsker(refreshableSelectionModel, e -> e.getRegattaName() + " - " + e.getName()),
                     (event) -> removeAndUntrackRaces(refreshableSelectionModel.getSelectedSet()));
             btnRemoveRace.ensureDebugId("RemoveRaceButton");
             trackedRacesButtonPanel.add(btnRemoveRace);
