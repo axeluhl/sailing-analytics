@@ -8,7 +8,7 @@ To create a controller we can use kubebuilder[2].
 
 
 ## Gardener Cluster
-Provisioned Gardener with AWS secret. Use region eu-west-3. You might extend the shoot.yaml in the editor within the dashboard using [9] as reference. E.g. the clusterautoscaler. 
+Provisioned Gardener with AWS secret. Use region eu-west-3. You might extend the ```shoot.yaml``` in the editor within the dashboard using [9] as reference. E.g. the clusterautoscaler. 
 
 ### Create a storage class that allows volume expansion
 We need to create a storage class to allow volume expansion, in case we want to upgrade our mongo diskspace. Therefore created ```gp2-allow-volume-expansion-storageclass.yaml```, which is a copy of the Gardener gp2 storageclass with an additional property ```allowVolumeExpansion: true```. See also[10].
@@ -55,6 +55,26 @@ mongo "mongodb://mongo-live-rs-client.default.svc.cluster.local/?replicaSet=<rep
 Now you can look for the primary executing ``db.isMaster()`` in the mongo shell. Delete that pod with ``kubectl delete pod <name>``, and watch for the mongo shell to reconnect to the newly elected primary.
 
 ## Sailing Analytics
+
+
+### Tips:
+[install kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 
+
+[install helm](https://helm.sh/docs/intro/install/)
+
+Add alias and bash completion for the above mentioned, append to .bashrc:
+```
+# kubectl bash comletion
+source <(kubectl completion bash)
+# kubectl bash alias
+alias k=kubectl
+complete -F __start_kubectl k
+# helm bash completion
+source <(helm completion bash)
+# helm alias
+alias h=helm
+complete -F __start_helm h
+```
 
 
 ### Resources:
