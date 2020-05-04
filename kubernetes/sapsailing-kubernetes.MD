@@ -63,7 +63,7 @@ Now you can look for the primary executing ``db.isMaster()`` in the mongo shell.
 [install helm](https://helm.sh/docs/intro/install/)
 
 Add alias and bash completion for the above mentioned, append to .bashrc:
-```
+```bash
 # kubectl bash comletion
 source <(kubectl completion bash)
 # kubectl bash alias
@@ -78,13 +78,27 @@ complete -F __start_helm h
 
 
 ### Resources:
-[1][https://cloud.google.com/blog/products/containers-kubernetes/best-practices-for-building-kubernetes-operators-and-stateful-apps]
-[2][https://book.kubebuilder.io/quick-start.html]
-[3][https://www.mongodb.com/blog/post/introducing-the-mongodb-enterprise-operator-for-kubernetes]
-[4][https://github.com/helm/charts/tree/master/stable/mongodb-replicaset]
-[5][https://helm.sh/docs/faq/#removal-of-tiller]
-[6][https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/#create-a-secret-by-providing-credentials-on-the-command-line]
-[7][https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/#create-a-pod-that-uses-your-secret]
-[8][https://github.com/helm/charts/tree/master/stable/mongodb-replicaset#configuration]
-[9][https://github.com/gardener/gardener/blob/master/example/90-shoot.yaml]
-[10][https://kubernetes.io/docs/concepts/storage/storage-classes/#the-storageclass-resource]
+
+[1] https://cloud.google.com/blog/products/containers-kubernetes/best-practices-for-building-kubernetes-operators-and-stateful-apps    
+[2] https://book.kubebuilder.io/quick-start.html    
+[3] https://www.mongodb.com/blog/post/introducing-the-mongodb-enterprise-operator-for-kubernetes     
+[4] https://github.com/helm/charts/tree/master/stable/mongodb-replicaset    
+[5] https://helm.sh/docs/faq/#removal-of-tiller    
+[6] https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/#create-a-secret-by-providing-credentials-on-the-command-line    
+[7] https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/#create-a-pod-that-uses-your-secret    
+[8] https://github.com/helm/charts/tree/master/stable/mongodb-replicaset#configuration    
+[9] https://github.com/gardener/gardener/blob/master/example/90-shoot.yaml    
+[10] https://kubernetes.io/docs/concepts/storage/storage-classes/#the-storageclass-resource
+
+
+[1]: https://cloud.google.com/blog/products/containers-kubernetes/best-practices-for-building-kubernetes-operators-and-stateful-apps
+[2]: https://book.kubebuilder.io/quick-start.html
+[3]: https://www.mongodb.com/blog/post/introducing-the-mongodb-enterprise-operator-for-kubernetes
+[4]: https://github.com/helm/charts/tree/master/stable/mongodb-replicaset
+[5]: https://helm.sh/docs/faq/#removal-of-tiller
+[6]: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/#create-a-secret-by-providing-credentials-on-the-command-line
+[7]: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/#create-a-pod-that-uses-your-secret
+[8]: https://github.com/helm/charts/tree/master/stable/mongodb-replicaset#configuration
+[9]: https://github.com/gardener/gardener/blob/master/example/90-shoot.yaml
+[10]: https://kubernetes.io/docs/concepts/storage/storage-classes/#the-storageclass-resource
+
