@@ -4,19 +4,45 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 import com.sap.sse.security.shared.HasPermissions.Action;
 
+/**
+ * A special image bar column that can assign security-related {@link com.sap.sse.security.Action} objects
+ * to the otherwise name-based actions managed by the {@link ImagedBarCell} used to render the actions.
+ */
 public abstract class ActionsColumn<T, S extends ImagesBarCell> extends ImagesBarColumn<T, S> {
 
     protected final Map<String, Consumer<T>> nameToCallbackMap = new HashMap<>();
     protected final Map<String, Action> nameToActionMap = new HashMap<>();
+    
+    /**
+     * Checks whether the user has permission to execute the action that is the second argument to the function
+     * on the object that is the first argument of the function; the result of the check is returned by the function.
+     * It is the basis for the {@link #getValue(Object)} implementation, currying this function with the object
+     * parameter of the value function to obtain a function to pass to the {@link #mapActions(Function)} method.
+     */
+    private final BiFunction<T, Action, Boolean> permissionChecker;
 
-    protected ActionsColumn(final S imagesBarCell) {
+    /**
+     * @param permissionChecker
+     *            the function that returns for a given object (passed as its first parameter) whether the action
+     *            (passed as the second parameter) is considered permitted by the current user on that object. The output
+     *            of this function decides whether name-based actions linked to a non-{@code null} {@link Action} using
+     *            the {@link #addAction(String, Action, Consumer)} method shall be displayed to the user.
+     */
+    protected ActionsColumn(final S imagesBarCell, BiFunction<T, Action, Boolean> permissionChecker) {
         super(imagesBarCell);
+        this.permissionChecker = permissionChecker;
         this.setFieldUpdater((index, object, value) -> nameToCallbackMap.get(value).accept(object));
+    }
+
+    @Override
+    public final String getValue(final T object) {
+        return mapActions(action->permissionChecker.apply(object, action));
     }
 
     /**
