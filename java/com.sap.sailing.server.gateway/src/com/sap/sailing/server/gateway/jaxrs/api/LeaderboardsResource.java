@@ -3,7 +3,6 @@ package com.sap.sailing.server.gateway.jaxrs.api;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -186,8 +185,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                 jsonLeaderboards.add(leaderboardName.getKey());
             }
         }
-        String json = jsonLeaderboards.toJSONString();
-        return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+        return Response.ok(streamingOutput(jsonLeaderboards)).build();
     }
 
     @GET
@@ -218,12 +216,8 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                     jsonLeaderboard = getLeaderboardJson(resultState, maxCompetitorsCount, requestTimePoint,
                             leaderboard, timePoint, /* race column names */ null, /* race detail names */ null, competitorAndBoatIdsOnly,
                             /* showOnlyActiveRacesForCompetitorIds */ null, skip);
-                    StringWriter sw = new StringWriter();
-                    jsonLeaderboard.writeJSONString(sw);
-                    String json = sw.getBuffer().toString();
-                    response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8")
-                            .build();
-                } catch (NoWindException | InterruptedException | ExecutionException | IOException e) {
+                    response = Response.ok(streamingOutput(jsonLeaderboard)).build();
+                } catch (NoWindException | InterruptedException | ExecutionException e) {
                     response = Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage())
                             .type(MediaType.TEXT_PLAIN).build();
                 }
@@ -567,8 +561,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             }
             JSONObject json = CompetitorsResource.getCompetitorJSON(competitor);
             json.put("displayName", leaderboard.getDisplayName(competitor));
-            response = Response.ok(json.toJSONString())
-                    .header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+            response = Response.ok(streamingOutput(json)).build();
         }
         return response;
     }
@@ -676,7 +669,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                 raceLog.add(new RaceLogEndOfTrackingEventImpl(endOfTracking, author, raceLog.getCurrentPassId()));
                 jsonResult.put("endoftracking", endOfTracking == null ? null : endOfTracking.asMillis());
             }           
-            result = Response.ok(jsonResult.toJSONString()).build();
+            result = Response.ok(streamingOutput(jsonResult)).build();
         } else {
             result = leaderboardAndRaceColumnAndFleetAndResponse.getResponse();
         }
@@ -717,7 +710,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                                 correctWindDirectionByMagneticDeclination == null ? true : correctWindDirectionByMagneticDeclination,
                                         getService().getPermissionAwareRaceTrackingHandler());
                 jsonResult.put("regatta", raceHandle.getRegatta().getName());
-                result = Response.ok(jsonResult.toJSONString()).build();
+                result = Response.ok(streamingOutput(jsonResult)).build();
             } else {
                 result = leaderboardAndRaceColumnAndFleetAndResponse.getResponse();
             }
@@ -817,7 +810,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                                         new ControlPointJsonSerializer(
                                                 new MarkJsonSerializer(), 
                                                 new GateJsonSerializer(new MarkJsonSerializer()))))).serialize(autoCourse));
-                result = Response.ok(jsonResult.toJSONString()).build();
+                result = Response.ok(streamingOutput(jsonResult)).build();
             }
         } else {
             result = leaderboardAndRaceColumnAndFleetAndResponse.getResponse();
@@ -1107,7 +1100,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
     }
     
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
     @Path("{leaderboardName}/marks")
     public Response getMarksForRace(@PathParam("leaderboardName") String leaderboardName,
             @QueryParam(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME) String raceColumnName,
@@ -1176,7 +1169,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         }
         JSONObject result = new JSONObject();
         result.put("marks", array);
-        return Response.ok(result.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+        return Response.ok(streamingOutput(result)).build();
     }
     
     @GET
@@ -1213,8 +1206,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             responseJson.put("passId", result.getB());
             responseJson.put("racingProcedureType", result.getC()==null?null:result.getC().name());
         }
-        return Response.status(Status.OK)
-                .entity(responseJson.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+        return Response.ok(streamingOutput(responseJson)).build();
     }
     
     @PUT
@@ -1255,8 +1247,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                 racingProcedure==null?null:RacingProcedureType.valueOf(racingProcedure));
         final JSONObject responseJson = new JSONObject();
         responseJson.put("startTimeAsMillis", effectiveStartTime.asMillis());
-        return Response.status(Status.OK)
-                .entity(responseJson.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+        return Response.ok(streamingOutput(responseJson)).build();
     }
     
     /**
@@ -1379,7 +1370,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces("application/json;charset=UTF-8")
     @Path("{leaderboardName}/marks/{markId}")
     public Response getMark(@PathParam("leaderboardName") String leaderboardName,
             @PathParam("markId") String markId,
@@ -1416,7 +1407,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         final TimePoint now = MillisecondsTimePoint.now();
         Position lastKnownPosition = getService().getMarkPosition(mark, (LeaderboardThatHasRegattaLike) leaderboard, now);
         final JSONObject result = markWithPositionSerializer.serialize(new Pair<>(mark, lastKnownPosition));
-        return Response.ok(result.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+        return Response.ok(streamingOutput(result)).build();
     }
 
     private final MarkJsonSerializer markSerializer = new MarkJsonSerializer();
@@ -1479,7 +1470,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
      * @param raceColumnName optional; if omitted, all race column factors in the leaderboard will be reported, otherwise only the one requested
      */
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
     @Path("{leaderboardName}/racecolumnfactors")
     public Response getRaceColumnFactors(@PathParam("leaderboardName") String leaderboardName, @QueryParam(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME) String raceColumnName) {
         final Response response;
@@ -1505,7 +1496,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                         .type(MediaType.TEXT_PLAIN).build();
             } else {
                 final JSONObject json = getJsonForColumnFactors(leaderboard, raceColumns);
-                response = Response.ok(json.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+                response = Response.ok(streamingOutput(json)).build();
             }
         }
         return response;
@@ -1538,7 +1529,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
      *         after the change. This may be useful to validate the impact the change had on the resulting column factor
      */
     @POST
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
     @Path("{leaderboardName}/racecolumnfactors")
     public Response setExplicitRaceColumnFactor(@PathParam("leaderboardName") String leaderboardName, @QueryParam(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME) String raceColumnName,
             @QueryParam("explicit_factor") Double explicitFactor) {
@@ -1559,7 +1550,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             } else {
                 raceColumn.setFactor(explicitFactor);
                 final JSONObject json = getJsonForColumnFactors(leaderboard, Collections.singleton(raceColumn));
-                response = Response.ok(json.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+                response = Response.ok(streamingOutput(json)).build();
             }
         }
         return response;
@@ -1767,7 +1758,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                 response = Response.status(Status.BAD_REQUEST);
             }
         }
-        return response.entity(result.toJSONString()).build();
+        return response.entity(streamingOutput(result)).build();
     }
 
     private JSONArray applyMatchedEntriesToLeaderboardScoreCorrections(Leaderboard leaderboard,

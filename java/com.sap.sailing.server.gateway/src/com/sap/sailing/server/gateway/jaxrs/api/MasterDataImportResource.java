@@ -63,7 +63,7 @@ public class MasterDataImportResource extends AbstractSailingServerResource {
                 jsonResponse.put("exportWind", exportWind);
                 jsonResponse.put("exportDeviceConfigs", exportDeviceConfigs);
                 jsonResponse.put("exportTrackedRacesAndStartTracking", exportTrackedRacesAndStartTracking);
-                response = Response.ok(jsonResponse.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+                response = Response.ok(streamingOutput(jsonResponse)).build();
             } catch (UnauthorizedException e) {
                 response = Response.status(Status.UNAUTHORIZED).build();
                 logger.warning(e.getMessage() + " for user: " + getSecurityService().getCurrentUser());
