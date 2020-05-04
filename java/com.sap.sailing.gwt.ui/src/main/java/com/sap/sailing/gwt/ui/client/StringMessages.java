@@ -2387,6 +2387,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String tagsCheckBoxLabel();
     String useOfficialResultsForAutomaticUpdates();
     String keepEmptyForDefaultUserAndPassword();
+    String autoRestartTrackingUponCompetitorSetChange();
     String whitelabelFooterLanguage();
     String whitelabelSailing();
 }

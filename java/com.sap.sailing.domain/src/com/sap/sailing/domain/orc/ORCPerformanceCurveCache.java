@@ -17,11 +17,15 @@ import com.sap.sse.common.TimePoint;
 
 public interface ORCPerformanceCurveCache extends AverageWindOnLegCache {
     /**
-     * If not yet computed, computes a copy of the total course supplied by the {@code totalCourseSupplier} where
-     * any adapted leg that would query a live {@link TrackedLeg} for TWA and distance is replaced by a leg of
-     * type {@link ORCPerformanceCurveLegImpl} of type {@link ORCPerformanceCurveLegTypes#TWA} with its TWA and
-     * distance set to the values obtained for this cache's time point, computed once when this call is made
-     * and no total course has been cached in this object yet.
+     * If not yet computed, computes a copy of the total course supplied by the {@code totalCourseSupplier} where any
+     * adapted leg that would query a live {@link TrackedLeg} for TWA and distance is replaced by a leg of type
+     * {@link ORCPerformanceCurveLegImpl} of type {@link ORCPerformanceCurveLegTypes#TWA} with its TWA and distance set
+     * to the values obtained for this cache's time point, computed once when this call is made and no total course for
+     * the {@code raceContext} has been cached in this object yet.
+     * 
+     * @param totalCourseSupplier
+     *            computes the {@link ORCPerformanceCurveCourse} representing the total course for race represented by
+     *            {@code raceContext}.
      */
     ORCPerformanceCurveCourse getTotalCourse(TrackedRace raceContext, Supplier<ORCPerformanceCurveCourse> totalCourseSupplier);
     

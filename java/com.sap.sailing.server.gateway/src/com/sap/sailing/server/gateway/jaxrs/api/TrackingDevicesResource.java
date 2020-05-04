@@ -8,7 +8,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.json.simple.JSONArray;
@@ -32,8 +31,7 @@ public class TrackingDevicesResource extends AbstractSailingServerResource {
                 new DeviceIdentifierJsonSerializer(
                         getServiceFinderFactory().createServiceFinder(DeviceIdentifierJsonHandler.class)));
         final JSONObject result = serializer.serialize(calculateDeviceStatus(deviceUUID));
-        return Response.ok(result.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8")
-                .build();
+        return Response.ok(streamingOutput(result)).build();
     }
 
     @GET
@@ -46,8 +44,7 @@ public class TrackingDevicesResource extends AbstractSailingServerResource {
         for (UUID deviceUUID : deviceUUIDs) {
             result.add(serializer.serialize(calculateDeviceStatus(deviceUUID)));
         }
-        return Response.ok(result.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8")
-                .build();
+        return Response.ok(streamingOutput(result)).build();
     }
 
     private TrackingDeviceStatus calculateDeviceStatus(UUID deviceUUID) {

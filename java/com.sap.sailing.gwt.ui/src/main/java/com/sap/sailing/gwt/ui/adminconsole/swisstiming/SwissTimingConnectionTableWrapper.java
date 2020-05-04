@@ -135,9 +135,9 @@ public class SwissTimingConnectionTableWrapper extends
                 userService.getUserManagementService(), type, dto -> dto.getAccessControlList(), stringMessages);
 
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_OWNERSHIP, DefaultActions.CHANGE_OWNERSHIP,
-                configOwnership::openDialog);
+                configOwnership::openOwnershipDialog);
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                u -> configACL.openDialog(u));
+                u -> configACL.openACLDialog(u));
 
         filterField = new LabeledAbstractFilterablePanel<SwissTimingConfigurationWithSecurityDTO>(
                 new Label(stringMessagesClient.filterSwissTimingConnections()),
