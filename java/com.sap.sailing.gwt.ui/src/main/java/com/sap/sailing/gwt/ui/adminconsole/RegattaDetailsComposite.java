@@ -72,6 +72,7 @@ public class RegattaDetailsComposite extends Composite {
     private final Label defaultCourseArea;
     private final Label useStartTimeInference;
     private final Label controlTrackingFromStartAndFinishTimes;
+    private final Label autoRestartTrackingUponCompetitorSetChange;
     private final Label canBoatsOfCompetitorsChangePerRace;
     private final Label competitorRegistrationType;
     private final Label configuration;
@@ -95,11 +96,9 @@ public class RegattaDetailsComposite extends Composite {
         mainPanel = new CaptionPanel(stringMessages.regatta());
         VerticalPanel vPanel = new VerticalPanel();
         mainPanel.add(vPanel);
-
-        int rows = 15;
+        int rows = 16;
         Grid grid = new Grid(rows, 2);
         vPanel.add(grid);
-        
         int currentRow = 0;
         regattaId = createLabelAndValueWidget(grid, currentRow++, stringMessages.id(), "RegattaIdLabel");
         regattaName = createLabelAndValueWidget(grid, currentRow++, stringMessages.regattaName(), "NameLabel");
@@ -108,7 +107,8 @@ public class RegattaDetailsComposite extends Composite {
         boatClassName = createLabelAndValueWidget(grid, currentRow++, stringMessages.boatClass(), "BoatClassLabel");
         defaultCourseArea = createLabelAndValueWidget(grid, currentRow++, stringMessages.courseArea(), "CourseAreaLabel");
         useStartTimeInference = createLabelAndValueWidget(grid, currentRow++, stringMessages.useStartTimeInference(), "UseStartTimeInferenceLabel");
-        controlTrackingFromStartAndFinishTimes = createLabelAndValueWidget(grid, currentRow++, stringMessages.controlTrackingFromStartAndFinishTimes(), "UseStartTimeInferenceLabel");
+        controlTrackingFromStartAndFinishTimes = createLabelAndValueWidget(grid, currentRow++, stringMessages.controlTrackingFromStartAndFinishTimes(), "ControlTrackingFromStartAndFinishTimesLabel");
+        autoRestartTrackingUponCompetitorSetChange = createLabelAndValueWidget(grid, currentRow++, stringMessages.autoRestartTrackingUponCompetitorSetChange(), "AutoRestartTrackingUponCompetitorSetChange");
         canBoatsOfCompetitorsChangePerRace = createLabelAndValueWidget(grid, currentRow++, stringMessages.canBoatsOfCompetitorsChangePerRace(), "CanBoatsOfCompetitorsChangePerRaceLabel");
         competitorRegistrationType = createLabelAndValueWidget(grid, currentRow++, stringMessages.competitorRegistrationType(), "CompetitorRegistrationTypeLabel");
         buoyZoneRadiusInHullLengths = createLabelAndValueWidget(grid, currentRow++, stringMessages.buoyZoneRadiusInHullLengths(), "BuoyZoneRadiusInHullLengthsLabel");
@@ -448,6 +448,7 @@ public class RegattaDetailsComposite extends Composite {
             defaultCourseArea.setText(regatta.defaultCourseAreaUuid == null ? "" : regatta.defaultCourseAreaName);
             useStartTimeInference.setText(regatta.useStartTimeInference ? stringMessages.yes() : stringMessages.no());
             controlTrackingFromStartAndFinishTimes.setText(regatta.controlTrackingFromStartAndFinishTimes ? stringMessages.yes() : stringMessages.no());
+            autoRestartTrackingUponCompetitorSetChange.setText(regatta.autoRestartTrackingUponCompetitorSetChange ? stringMessages.yes() : stringMessages.no());
             canBoatsOfCompetitorsChangePerRace.setText(regatta.canBoatsOfCompetitorsChangePerRace ? stringMessages.yes() : stringMessages.no());
             competitorRegistrationType.setText(regatta.competitorRegistrationType.getLabel(stringMessages));
 

@@ -159,9 +159,9 @@ public class DeviceConfigurationListComposite extends Composite  {
         final EditACLDialog.DialogConfig<DeviceConfigurationWithSecurityDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementService(), type, user -> user.getAccessControlList(), stringMessages);
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_OWNERSHIP, DefaultActions.CHANGE_OWNERSHIP,
-                configOwnership::openDialog);
+                configOwnership::openOwnershipDialog);
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                u -> configACL.openDialog(u));
+                u -> configACL.openACLDialog(u));
         SecuredDTOOwnerColumn.configureOwnerColumns(table, columnSortHandler, stringMessages);
         table.addColumn(deviceConfigurationUUidColumn, stringMessages.id());
         table.addColumn(actionColumn, stringMessages.actions());

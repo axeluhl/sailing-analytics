@@ -57,12 +57,12 @@ public class ResultImportUrlsTableWrapper<S extends RefreshableSelectionModel<Ur
         DialogConfig<UrlDTO> config = EditOwnershipDialog.create(userService.getUserManagementService(),
                 SecuredDomainType.RESULT_IMPORT_URL, event -> update(), stringMessages);
         actionsColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_OWNERSHIP, DefaultActions.CHANGE_OWNERSHIP,
-                config::openDialog);
+                config::openOwnershipDialog);
 
         EditACLDialog.DialogConfig<UrlDTO> configACL = EditACLDialog.create(userService.getUserManagementService(),
                 SecuredDomainType.RESULT_IMPORT_URL, event -> update(), stringMessages);
         actionsColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                e -> configACL.openDialog(e));
+                e -> configACL.openACLDialog(e));
 
         super.table.addColumn(urlColumn, stringMessages.url());
         SecuredDTOOwnerColumn.configureOwnerColumns(super.table, listHandler, stringMessages);

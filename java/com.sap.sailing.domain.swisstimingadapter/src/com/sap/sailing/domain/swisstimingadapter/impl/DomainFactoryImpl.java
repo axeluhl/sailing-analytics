@@ -291,7 +291,8 @@ public class DomainFactoryImpl implements DomainFactory {
         return result;
     }
 
-    private Map<Competitor, Boat> createCompetitorsAndBoats(StartList startList, String raceId, BoatClass boatClass,
+    @Override
+    public Map<Competitor, Boat> createCompetitorsAndBoats(StartList startList, String raceId, BoatClass boatClass,
             RaceTrackingHandler raceTrackHandler) {
         Map<Competitor, Boat> result = new LinkedHashMap<>();
         for (com.sap.sailing.domain.swisstimingadapter.Competitor swissTimingCompetitor : startList.getCompetitors()) {
@@ -429,11 +430,11 @@ public class DomainFactoryImpl implements DomainFactory {
             long delayToLiveInMillis, SwissTimingFactory swissTimingFactory, DomainFactory domainFactory,
             RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, boolean useInternalMarkPassingAlgorithm,
             boolean trackWind, boolean correctWindDirectionByMagneticDeclination, String updateURL,
-            String updateUsername, String updatePassword) {
+            String updateUsername, String updatePassword, String eventName, String manage2SailEventUrl) {
         return new SwissTimingTrackingConnectivityParameters(hostname, port, raceID, raceName, raceDescription,
                 boatClass, startList, delayToLiveInMillis, swissTimingFactory, domainFactory, raceLogStore,
                 regattaLogStore, useInternalMarkPassingAlgorithm, trackWind, correctWindDirectionByMagneticDeclination,
-                updateURL, updateUsername, updatePassword);
+                updateURL, updateUsername, updatePassword, eventName, manage2SailEventUrl);
     }
 
     @Override

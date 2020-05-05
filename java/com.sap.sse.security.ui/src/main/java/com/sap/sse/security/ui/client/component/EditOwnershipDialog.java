@@ -244,7 +244,7 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
 
     /**
      * Creates a new {@link DialogConfig dialog configuration} instance which can be (re-)used to
-     * {@link DialogConfig#openDialog(Named) open} a {@link EditOwnershipDialog dialog}.
+     * {@link DialogConfig#openOwnershipDialog(Named) open} a {@link EditOwnershipDialog dialog}.
      * 
      * @param userManagementService
      *            {@link UserManagementServiceAsync} to use to set the secured object's ownership
@@ -285,7 +285,7 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
          * @param securedObject
          *            {@link Named} {@link SecuredObject} instance to edit ownerships for
          */
-        public void openDialog(final T securedObject) {
+        public void openOwnershipDialog(final T securedObject) {
             final QualifiedObjectIdentifier identifier = securedObject.getIdentifier();
             final String permissionType = identifier.getTypeIdentifier();
             final String id = identifier.getTypeRelativeObjectIdentifier().toString();

@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.abstractlog;
 
 import java.io.Serializable;
+import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import java.util.NavigableSet;
 import java.util.UUID;
@@ -57,8 +58,16 @@ extends Track<EventT>, WithID {
      */
     boolean isEmpty();
 
+    /**
+     * Callers that want to iterate over the collection returned need to use {@link #lockForRead()} and
+     * {@link #unlockAfterRead()} to avoid {@link ConcurrentModificationException}s.
+     */
     Iterable<EventT> getRawFixesDescending();
 
+    /**
+     * Callers that want to iterate over the collection returned need to use {@link #lockForRead()} and
+     * {@link #unlockAfterRead()} to avoid {@link ConcurrentModificationException}s.
+     */
     Iterable<EventT> getFixesDescending();
 
     void addAllListeners(Iterable<VisitorT> listeners);
@@ -103,14 +112,17 @@ extends Track<EventT>, WithID {
     EventT getEventById(Serializable id);
     
     /**
-     * Get a {@link NavigableSet} of unrevoked events regardless of the {@code pass}. Events are sorted by
-     * their {@link TimePoint} and the oldest is returned first.
-     * @return
+     * Get a {@link NavigableSet} of unrevoked events regardless of the {@code pass}. Events are sorted by their
+     * {@link TimePoint} and the oldest is returned first. Callers that want to iterate over the collection returned
+     * need to use {@link #lockForRead()} and {@link #unlockAfterRead()} to avoid
+     * {@link ConcurrentModificationException}s.
      */
     NavigableSet<EventT> getUnrevokedEvents();
     
     /**
-     * Get a {@link NavigableSet} of unrevoked events regardless of the {@code pass}.
+     * Get a {@link NavigableSet} of unrevoked events regardless of the {@code pass}. Callers that want to iterate over
+     * the collection returned need to use {@link #lockForRead()} and {@link #unlockAfterRead()} to avoid
+     * {@link ConcurrentModificationException}s.
      */
     NavigableSet<EventT> getUnrevokedEventsDescending();
 

@@ -1,5 +1,10 @@
 package com.sap.sailing.racecommittee.app.domain.impl;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishedTimeFinder;
+import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -162,6 +167,42 @@ public class ManagedRaceImpl implements ManagedRace {
             calculated = true;
         }
         return calculated;
+    }
+
+    @Override
+    public Result revokeFinished(AbstractLogEventAuthor author) {
+        final Result result = new Result();
+
+        final FinishedTimeFinder ftf = new FinishedTimeFinder(getRaceLog());
+        final RaceLogRaceStatusEvent event = ftf.findFinishedEvent();
+        if (event != null) {
+            try {
+                getRaceLog().revokeEvent(author, event);
+            } catch (NotRevokableException e) {
+                result.setError(R.string.error_revoke_finished);
+            }
+        } else {
+            result.setError(R.string.error_revoke_finished);
+        }
+        return result;
+    }
+
+    @Override
+    public Result revokeFinishing(AbstractLogEventAuthor author) {
+        final Result result = new Result();
+
+        final FinishingTimeFinder ftf = new FinishingTimeFinder(getRaceLog());
+        final RaceLogRaceStatusEvent event = ftf.findFinishingEvent();
+        if (event != null) {
+            try {
+                getRaceLog().revokeEvent(author, event);
+            } catch (NotRevokableException e) {
+                result.setError(R.string.error_revoke_finishing);
+            }
+        } else {
+            result.setError(R.string.error_revoke_finishing);
+        }
+        return result;
     }
 
     @Override

@@ -757,10 +757,21 @@ public class Util {
         return result;
     }
 
-    public static <T> List<T> asList(Iterable<T> visibleCourseAreas) {
-        ArrayList<T> list = new ArrayList<T>();
-        addAll(visibleCourseAreas, list);
+    public static <T> List<T> asList(Iterable<T> iterable) {
+        final List<T> list = new ArrayList<>();
+        addAll(iterable, list);
         return list;
+    }
+    
+    public static <T> Set<T> asSet(Iterable<T> iterable) {
+        final Set<T> result;
+        if (iterable instanceof Set<?>) {
+            result = (Set<T>) iterable;
+        } else {
+            result = new HashSet<>();
+            addAll(iterable, result);
+        }
+        return result;
     }
 
     public static <T> List<T> cloneListOrNull(List<T> list) {
@@ -960,5 +971,14 @@ public class Util {
             result = !str.isEmpty();
         }
         return result;
+    }
+
+    /**
+     * Compares two iterable sequences based on {@link Set} semantics. If both objects turn out to be {@link Set}s,
+     * the {@link Set#equals(Object)} method will be used. Otherwise, non-{@link Set} objects will be filled into
+     * temporary {@link Set} objects and then compared as sets.
+     */
+    public static <T> boolean setEquals(Iterable<T> a, Iterable<T> b) {
+        return asSet(a).equals(asSet(b));
     }
 }
