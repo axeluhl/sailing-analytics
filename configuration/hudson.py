@@ -1,4 +1,4 @@
-#!/bin/env python3
+#!/usr/bin/env python3
 #
 # Fetches and analyzes build and test data from the Hudson API
 # Run with -h or --help for usage information
