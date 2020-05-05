@@ -1,29 +1,49 @@
 # SAP Sailing Analytics on Kubernetes
-## First objectives
-Create a cluster with a running Sailing Analytics Master Replica Set and all needed central services: rabbitMq, MongoDB
+## 1. Objectives
+Create a cluster with a running Sailing Analytics Master Replica Set and all needed central services: rabbitMQ, MongoDB.
 
-After that think of a CustomResourceDefinition to model an event accordingly and implement a controller that handles those CRDs accordingly by creating deployments.
+After that think of a CustomResourceDefinition to model an event accordingly and implement a controller that handles those CRDs accordingly by creating/modifying deployments/resources.
 
 To create a controller we can use kubebuilder[2].
 
+### a) Mongodb
+Create a mongodb replicaset, with the following key features:
+- reproducable deployments
+- Smooth handling of node and pod failures
+- Antiaffinity
+- (custom metrics for autoscaling PVCs)
+- (try to replicate current AWS setup, using different storage types for fast access and persistent storage)
 
-## Gardener Cluster
+### b) Sailing Analytics
+Create a application server deployment that represents the current AWS configuration and has some of the features described in: [https://wiki.sapsailing.com/wiki/projects/cloud-orchestrator](https://wiki.sapsailing.com/wiki/projects/cloud-orchestrator)
+- reproducable deployments
+- Smooth handling of node and pod failures (antiaffinity)
+- horizontal pod autoscaler defined on custom metrics
+- ALB ingress controller, adding rules for each deployment
+
+### c) CustomResource
+Define a custom resource and controller to eventually reach an Kubernetes operator that has the full capacity of the cloud orchestration requirements.
+
+## 2. Gardener Cluster
 Provisioned Gardener with AWS secret. Use region eu-west-3. You might extend the ```shoot.yaml``` in the editor within the dashboard using [9] as reference. E.g. the clusterautoscaler. 
 
 ### Create a storage class that allows volume expansion
 We need to create a storage class to allow volume expansion, in case we want to upgrade our mongo diskspace. Therefore created ```gp2-allow-volume-expansion-storageclass.yaml```, which is a copy of the Gardener gp2 storageclass with an additional property ```allowVolumeExpansion: true```. See also[10].
 
-## Helm
-A short update on helm, after the confusion about Tiller and Helm Classic Tiller has been removed in Helm 3.See[5]
+### Hibernation
+Don't forget to hibernate the cluster if you don't need anymore. This will save costs on the AWS bill.
 
-## Docker registry secret
+## 3. Helm
+A short update on helm, after the confusion about Tiller and Helm Classic Tiller has been removed in Helm 3. See[5]
+
+## 4. Docker registry secret
 To pull an image from a private repository you need a secret for that: 
 >kubectl create secret docker-registry <secret-name> --docker-server=https://index.docker.io/v1/ --docker-username=<your-name> --docker-password=<your-pword> --docker-email=<your-email>
 [6]. You might use the createDockerRegistrySecret script provided within /docker.
 
 After that you may use that secret as follows[7]
 
-## Mongodb-replicaset
+## 5. Mongodb-replicaset
 
 ### Install the replicaset in the Kubernetes cluster
 I use the helm chart provided in [4]. So first add the repository with:
@@ -58,9 +78,9 @@ Now you can look for the primary executing ``db.isMaster()`` in the mongo shell.
 
 
 ### Tips:
-[install kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 
+- [install kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 
 
-[install helm](https://helm.sh/docs/intro/install/)
+- [install helm](https://helm.sh/docs/intro/install/)
 
 Add alias and bash completion for the above mentioned, append to .bashrc:
 ```bash
