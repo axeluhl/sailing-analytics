@@ -854,11 +854,14 @@ public class RaceBoardPanel
         for (CompetitorDTO competitorDTO : getCompetitorSelectionProvider().getSelectedCompetitors()) {
             selectedCompetitorIds.add(competitorDTO.getIdAsString());
         }
+        boolean isCompetitorChartVisible = competitorChart == null ? false : competitorChart.isVisible();
+        boolean isWindChartVisible = windChart == null ? false : windChart.isVisible();
+        boolean isManeuverTableVisible = maneuverTablePanel == null ? false : maneuverTablePanel.isVisible();
         RaceBoardPerspectiveOwnSettings raceBoardPerspectiveOwnSettings = new RaceBoardPerspectiveOwnSettings(
-                activeCompetitorsFilterSetName, leaderboardPanel.isVisible(), windChart.isVisible(),
-                competitorChart.isVisible(), initialSettings.isCanReplayDuringLiveRaces(),
+                activeCompetitorsFilterSetName, leaderboardPanel.isVisible(), isWindChartVisible,
+                isCompetitorChartVisible, initialSettings.isCanReplayDuringLiveRaces(),
                 newInitialDurationAfterRaceStartInReplay, /* legacy single selectedCompetitor */ null, selectedCompetitorIds, 
-                taggingPanel.isVisible(), maneuverTablePanel.isVisible(), initialSettings.getJumpToTag());
+                taggingPanel.isVisible(), isManeuverTableVisible, initialSettings.getJumpToTag());
         return raceBoardPerspectiveOwnSettings;
     }
     
