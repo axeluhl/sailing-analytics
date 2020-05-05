@@ -107,7 +107,6 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
         if(!filterSetNameCheckBox.getValue()) {
             patchedPerspectiveOwnSettings.resetActiveCompetitorsFilterSetName();;
         }
-        
         if(!competitorSelectionCheckBox.getValue()) {
             patchedPerspectiveOwnSettings.resetSelectedCompetitor();
             patchedPerspectiveOwnSettings.resetSelectedCompetitors();
@@ -140,7 +139,6 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
         leaderBoardPanelCheckBox = createCheckbox(stringMessages.leaderBoardCheckBoxLabel());
         leaderBoardPanelCheckBox.setValue(true);
         leaderBoardPanelCheckBox.addClickHandler(new ClickHandler() {
-            
             @Override
             public void onClick(ClickEvent event) {
                 updateLink();
@@ -150,7 +148,6 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
         filterSetNameCheckBox = createCheckbox(stringMessages.filterSetNameCheckBoxLabel());
         filterSetNameCheckBox.setValue(true);
         filterSetNameCheckBox.addClickHandler(new ClickHandler() {
-            
             @Override
             public void onClick(ClickEvent event) {
                 updateLink();
@@ -160,7 +157,6 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
         tagsCheckBox = createCheckbox(stringMessages.tagsCheckBoxLabel());
         tagsCheckBox.setValue(true);
         tagsCheckBox.addClickHandler(new ClickHandler() {
-            
             @Override
             public void onClick(ClickEvent event) {
                 updateLink();
@@ -170,7 +166,6 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
         competitorSelectionCheckBox = createCheckbox(stringMessages.competitorSelectionCheckBoxLabel());
         competitorSelectionCheckBox.setValue(true);
         competitorSelectionCheckBox.addClickHandler(new ClickHandler() {
-            
             @Override
             public void onClick(ClickEvent event) {
                 updateLink();
@@ -191,7 +186,6 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
             competitorChartCheckBox = createCheckbox(stringMessages.competitorChartCheckBoxLabel());
             competitorChartCheckBox.setValue(true);
             competitorChartCheckBox.addClickHandler(new ClickHandler() {
-                
                 @Override
                 public void onClick(ClickEvent event) {
                     updateLink();
@@ -213,7 +207,6 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
         linkField = createTextBox(assembleLink());
         Anchor copyToClipBoardAnchor = new Anchor(stringMessages.copyToClipBoard());
         copyToClipBoardAnchor.addClickHandler(new ClickHandler() {
-            
             @Override
             public void onClick(ClickEvent event) {
                 linkField.setFocus(true);
