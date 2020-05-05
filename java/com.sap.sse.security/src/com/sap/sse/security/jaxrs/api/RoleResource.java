@@ -57,7 +57,7 @@ public class RoleResource extends AbstractSecurityResource {
             jsonResult.put(KEY_PERMISSIONS, new JSONArray());
             jsonResult.put(KEY_ROLE_ID, role.getId().toString());
             jsonResult.put(KEY_ROLE_NAME, role.getName());
-            resp = Response.status(Status.CREATED).entity(jsonResult.toJSONString()).build();
+            resp = Response.status(Status.CREATED).entity(streamingOutput(jsonResult)).build();
         }
         return resp;
     }
@@ -175,7 +175,7 @@ public class RoleResource extends AbstractSecurityResource {
                 jsonResult.put(KEY_PERMISSIONS, jsonPermissions);
                 jsonResult.put(KEY_ROLE_ID, roleId);
                 jsonResult.put(KEY_ROLE_NAME, roleDefinition.getName());
-                resp = Response.ok(jsonResult.toJSONString()).build();
+                resp = Response.ok(streamingOutput(jsonResult)).build();
             }
         } catch (IllegalArgumentException e) {
             resp = Response.status(Status.BAD_REQUEST).entity("Invalid roleId.").build();

@@ -12,6 +12,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpStatus;
@@ -82,6 +83,7 @@ public class ClientConfigurationServlet extends HttpServlet {
         final String servletPath = req.getServletPath();
         final byte[] cachedPage;
         final String pageKey = generateKey(servletPath, deBrandingActive);
+        resp.setContentType(MediaType.TEXT_HTML);
         if ((cachedPage = cache.get(pageKey)) != null) {
             IOUtils.write(cachedPage, resp.getOutputStream());
         } else {

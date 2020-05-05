@@ -93,7 +93,8 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
             deviceManagementControlPanel.add(addConfigurationButton);
         }
         removeConfigurationButton = new SelectedElementsCountingButton<DeviceConfigurationWithSecurityDTO>(
-                stringMessages.remove(), refreshableMultiSelectionModel, true, (event) -> removeConfiguration());
+                stringMessages.remove(), refreshableMultiSelectionModel,
+                StringMessages.INSTANCE::doYouReallyWantToRemoveSelectedElements, (event) -> removeConfiguration());
         deviceManagementControlPanel.add(removeConfigurationButton);
         refreshConfigurationsButton = new Button(stringMessages.refresh());
         refreshConfigurationsButton.addClickHandler(new ClickHandler() {

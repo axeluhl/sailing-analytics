@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -145,7 +146,8 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
             trackedRacesButtonPanel.add(btnExport);
 
             btnRemoveRace = new SelectedElementsCountingButton<RaceDTO>(stringMessages.remove(),
-                    refreshableSelectionModel, e -> e.getRegattaName() + " - " + e.getName(),
+                    refreshableSelectionModel, /* element name mapper */ e -> e.getRegattaName() + " - " + e.getName(),
+                    StringMessages.INSTANCE::doYouReallyWantToRemoveSelectedElements,
                     (event) -> removeAndUntrackRaces(refreshableSelectionModel.getSelectedSet()));
             btnRemoveRace.ensureDebugId("RemoveRaceButton");
             trackedRacesButtonPanel.add(btnRemoveRace);
@@ -178,7 +180,6 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
                     if (!userService.hasPermission(race, SecuredDomainType.TrackedRaceActions.EXPORT)) {
                         canExportAll = false;
                     }
-
                 }
                 btnSetDelayToLive.setEnabled(canUpdateAll);
                 btnRemoveRace.setEnabled(canDeleteAll);

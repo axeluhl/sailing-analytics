@@ -215,9 +215,9 @@ public class SmartphoneTrackingEventManagementPanel
         leaderboardActionColumn.addAction(RaceLogTrackingEventManagementImagesBarCell.ACTION_SHOW_REGATTA_LOG,
                 DefaultActions.UPDATE, t -> showRegattaLog());
         leaderboardActionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_OWNERSHIP, DefaultActions.UPDATE,
-                configOwnership::openDialog);
+                configOwnership::openOwnershipDialog);
         leaderboardActionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.UPDATE,
-                configACL::openDialog);
+                configACL::openACLDialog);
         leaderboardTable.addColumn(selectionCheckboxColumn, selectionCheckboxColumn.getHeader());
         leaderboardTable.addColumn(leaderboardNameColumn, stringMessages.name());
         leaderboardTable.addColumn(leaderboardDisplayNameColumn, stringMessages.displayName());

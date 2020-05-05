@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -207,7 +208,6 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                 return sortList.size() > 0 & sortList.get(0).isAscending();
             }
         });
-
         TextColumn<StrippedLeaderboardDTOWithSecurity> leaderboardDisplayNameColumn = new TextColumn<StrippedLeaderboardDTOWithSecurity>() {
             @Override
             public String getValue(StrippedLeaderboardDTOWithSecurity leaderboard) {
@@ -233,7 +233,6 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
         leaderboardColumnListHandler.setComparator(leaderboardCanBoatsOfCompetitorsChangePerRaceColumn,
                 (l1, l2) -> Boolean.valueOf(l1.canBoatsOfCompetitorsChangePerRace)
                         .compareTo(Boolean.valueOf(l2.canBoatsOfCompetitorsChangePerRace)));
-
         TextColumn<StrippedLeaderboardDTOWithSecurity> discardingOptionsColumn = new TextColumn<StrippedLeaderboardDTOWithSecurity>() {
             @Override
             public String getValue(StrippedLeaderboardDTOWithSecurity leaderboard) {
@@ -262,7 +261,6 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
             }
             return new NaturalComparator().compare(s1, s2);
         });
-
         TextColumn<StrippedLeaderboardDTOWithSecurity> leaderboardTypeColumn = new TextColumn<StrippedLeaderboardDTOWithSecurity>() {
             @Override
             public String getValue(StrippedLeaderboardDTOWithSecurity leaderboard) {
@@ -271,7 +269,6 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
         };
         leaderboardTypeColumn.setSortable(true);
         leaderboardColumnListHandler.setComparator(leaderboardTypeColumn, (o1, o2) -> o1.type.compareTo(o2.type));
-
         TextColumn<StrippedLeaderboardDTOWithSecurity> scoringSystemColumn = new TextColumn<StrippedLeaderboardDTOWithSecurity>() {
             @Override
             public String getValue(StrippedLeaderboardDTOWithSecurity leaderboard) {
@@ -285,7 +282,6 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
             String s2 = o2.scoringScheme == null ? null : o2.scoringScheme.toString();
             return new NaturalComparator().compare(s1, s2);
         });
-
         TextColumn<StrippedLeaderboardDTOWithSecurity> courseAreaColumn = new TextColumn<StrippedLeaderboardDTOWithSecurity>() {
             @Override
             public String getValue(StrippedLeaderboardDTOWithSecurity leaderboard) {
@@ -330,7 +326,6 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                 leaderboardDTO -> {
             sailingService.getAvailableDetailTypesForLeaderboard(leaderboardDTO.getName(), null,
                     new AsyncCallback<Iterable<DetailType>>() {
-
                         @Override
                         public void onFailure(Throwable caught) {
                             logger.log(Level.WARNING, "Could not load detailtypes for leaderboard", caught);
@@ -358,19 +353,26 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                 this::createPairingListTemplate);
         leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_PRINT_PAIRINGLIST, READ,
                 this::openPairingListEntryPoint);
-
         final DialogConfig<StrippedLeaderboardDTOWithSecurity> config = EditOwnershipDialog.create(
                 userService.getUserManagementService(), type,
                 leaderboardDTO -> reloadLeaderboardForTable(leaderboardDTO.getName()), stringMessages);
         leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
-                config::openDialog);
-
+                new Consumer<StrippedLeaderboardDTOWithSecurity>() {
+                    @Override
+                    public void accept(StrippedLeaderboardDTOWithSecurity t) {
+                        config.openOwnershipDialog(t);
+                    }
+        });
         final EditACLDialog.DialogConfig<StrippedLeaderboardDTOWithSecurity> configACL = EditACLDialog.create(
                 userService.getUserManagementService(), type,
                 leaderboardDTO -> reloadLeaderboardForTable(leaderboardDTO.getName()), stringMessages);
         leaderboardActionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                configACL::openDialog);
-
+                new Consumer<StrippedLeaderboardDTOWithSecurity>() {
+                    @Override
+                    public void accept(StrippedLeaderboardDTOWithSecurity t) {
+                        configACL.openACLDialog(t);
+                    }
+        });
         leaderboardTable.addColumn(selectionCheckboxColumn, selectionCheckboxColumn.getHeader());
         leaderboardTable.addColumn(linkColumn, stringMessages.name());
         leaderboardTable.addColumn(leaderboardDisplayNameColumn, stringMessages.displayName());

@@ -277,12 +277,12 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         final DialogConfig<RegattaDTO> config = EditOwnershipDialog.create(userService.getUserManagementService(), type,
                 regatta -> regattaRefresher.fillRegattas(), stringMessages);
         actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
-                regattaDTO -> config.openDialog(regattaDTO));
+                regattaDTO -> config.openOwnershipDialog(regattaDTO));
         final EditACLDialog.DialogConfig<RegattaDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementService(), type, regatta -> regattaRefresher.fillRegattas(),
                 stringMessages);
         actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                regattaDTO -> configACL.openDialog(regattaDTO));
+                regattaDTO -> configACL.openACLDialog(regattaDTO));
         table.addColumn(regattaSelectionCheckboxColumn, regattaSelectionCheckboxColumn.getHeader());
         table.addColumn(regattaNameColumn, stringMessages.regattaName());
         table.addColumn(regattaCanBoatsOfCompetitorsChangePerRaceColumn, stringMessages.canBoatsChange());
