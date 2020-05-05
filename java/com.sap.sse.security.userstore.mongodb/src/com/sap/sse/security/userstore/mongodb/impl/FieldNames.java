@@ -55,7 +55,8 @@ public class FieldNames {
         PASSWORD_RESET_SECRET,
         VALIDATION_SECRET,
         DEFAULT_TENANT_SERVER,
-        DEFAULT_TENANT_GROUP;
+        DEFAULT_TENANT_GROUP,
+        SUBSCRIPTION;
     }
     
     public static enum Settings {
@@ -82,5 +83,15 @@ public class FieldNames {
         SALT;
     }
     
-    
+    public static enum Subscription {
+        HOSTED_PAGE_ID,
+        SUBSCRIPTION_ID,
+        CUSTOMER_ID,
+        PLAN_ID,
+        TRIAL_START,
+        TRIAL_END,
+        TRANSACTION_STATUS,
+        SUBSCRIPTION_CREATED_AT,
+        SUBSCRIPTION_UPDATED_AT;
+    }
 }

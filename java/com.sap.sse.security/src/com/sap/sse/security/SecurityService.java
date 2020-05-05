@@ -34,6 +34,7 @@ import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RolePrototype;
 import com.sap.sse.security.shared.SocialUserAccount;
+import com.sap.sse.security.shared.Subscription;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
@@ -681,5 +682,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     String getBaseUrlForCrossDomainStorage();
 
     void registerCustomizer(SecurityInitializationCustomizer customizer);
+    
+    void updateUserSubscription(String username, Subscription subscription) throws UserManagementException;
 
 }

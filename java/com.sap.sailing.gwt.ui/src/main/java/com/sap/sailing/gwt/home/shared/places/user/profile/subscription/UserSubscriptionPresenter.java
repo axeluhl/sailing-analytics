@@ -1,0 +1,120 @@
+package com.sap.sailing.gwt.home.shared.places.user.profile.subscription;
+
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithDispatch;
+import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
+import com.sap.sailing.gwt.ui.client.subscription.Chargebee;
+import com.sap.sailing.gwt.ui.client.subscription.ChargebeeInstance;
+import com.sap.sailing.gwt.ui.client.subscription.CheckoutOption;
+import com.sap.sailing.gwt.ui.client.subscription.SubscriptionConfiguration;
+import com.sap.sailing.gwt.ui.client.subscription.WithSubscriptionService;
+import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionDTO;
+import com.sap.sse.security.ui.authentication.WithAuthenticationManager;
+import com.sap.sse.security.ui.authentication.WithUserService;
+
+public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & ErrorAndBusyClientFactory & WithAuthenticationManager & WithUserService & WithSubscriptionService>
+    implements UserSubscriptionView.Presenter {
+    
+    private final C clientFactory;
+    private UserSubscriptionView view;
+    
+    private CheckoutOption.SuccessCallback onCheckoutSuccessCallback = 
+            new CheckoutOption.SuccessCallback() {
+        
+                @Override
+                public void call(String hostedPageId) {
+                    requestFinishingPlanUpgrading(hostedPageId);
+                }
+            };
+    private CheckoutOption.ErrorCallback onCheckoutErrorCallback =
+            new CheckoutOption.ErrorCallback() {
+        
+                @Override
+                public void call(String error) {
+                    Window.alert("Checkout error : " + error);
+                }
+            };
+    private CheckoutOption.CloseCallback onCheckoutCloseCallback =
+            new CheckoutOption.CloseCallback() {
+        
+                @Override
+                public void call() {
+                    Window.alert("Close");
+                }
+            };
+    
+    
+    public UserSubscriptionPresenter(C clientFactory) {
+        this.clientFactory = clientFactory;
+    }
+    
+    @Override
+    public void init() {
+        Chargebee.init(Chargebee.InitOption.create(SubscriptionConfiguration.CHARGEBEE_SITE));
+    }
+
+    @Override
+    public void loadSubscription() {
+        clientFactory.getSubscriptionService().getSubscription(new AsyncCallback<SubscriptionDTO>() {
+            
+            @Override
+            public void onSuccess(SubscriptionDTO result) {
+                if (result.error != null && !result.error.isEmpty()) {
+                    Window.alert("Get user subscription error: " + result.error);
+                    return;
+                }
+                
+                Window.alert("Plan: " + result.planId + ", status: " + result.transactionStatus);
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                Window.alert("Get user subscription failed: " + caught.getMessage());
+            }
+        });
+    }
+
+    @Override
+    public void setView(UserSubscriptionView view) {
+        this.view = view;        
+    }
+
+    @Override
+    public void openCheckout() {
+        clientFactory.getSubscriptionService().generateHostedPageObject(new AsyncCallback<String>() {
+            
+            @Override
+            public void onSuccess(String hostedPage) {
+                Chargebee.getInstance().openCheckout(
+                    CheckoutOption.create(
+                        hostedPage,
+                        onCheckoutSuccessCallback,
+                        onCheckoutErrorCallback,
+                        onCheckoutCloseCallback
+                    ));;
+            }
+            
+            @Override
+            public void onFailure(Throwable caught) {
+                Window.alert("Checkout error: " + caught.getMessage());
+            }
+        });
+    }
+    
+    private void requestFinishingPlanUpgrading(String hostedPageId) {
+        clientFactory.getSubscriptionService().upgradePlanSuccess(hostedPageId, new AsyncCallback<SubscriptionDTO>() {
+
+            @Override
+            public void onSuccess(SubscriptionDTO result) {
+                Window.alert("Plan: " + result.planId + ", transaction status: " + result.transactionStatus);
+            }
+            
+            @Override
+            public void onFailure(Throwable caught) {
+                Window.alert("Saving subscription data error: " + caught.getMessage());
+            }
+            
+        });
+    }
+}

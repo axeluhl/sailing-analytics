@@ -24,6 +24,7 @@ import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.SocialUserAccount;
+import com.sap.sse.security.shared.Subscription;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.AccessControlList;
@@ -215,6 +216,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             defaultTennants.add(tenant);
         }
         dbUser.put(FieldNames.User.DEFAULT_TENANT_IDS.name(), defaultTennants);
+        dbUser.put(FieldNames.User.SUBSCRIPTION.name(), createSubscriptionObject(user.getSubscription()));
         usersCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, dbUser, new UpdateOptions().upsert(true));
     }
     
@@ -302,5 +304,24 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             dbSettingTypes.put(e.getKey(), e.getValue().getName());
         }
         return dbSettingTypes;
+    }
+    
+    private Document createSubscriptionObject(Subscription subscription) {
+        if (subscription == null) {
+            return null;
+        }
+        
+        Document doc = new Document();
+        doc.put(FieldNames.Subscription.HOSTED_PAGE_ID.name(), subscription.hostedPageId);
+        doc.put(FieldNames.Subscription.SUBSCRIPTION_ID.name(), subscription.subscriptionId);
+        doc.put(FieldNames.Subscription.PLAN_ID.name(), subscription.planId);
+        doc.put(FieldNames.Subscription.CUSTOMER_ID.name(), subscription.customerId);
+        doc.put(FieldNames.Subscription.TRIAL_START.name(), subscription.trialStart);
+        doc.put(FieldNames.Subscription.TRIAL_END.name(), subscription.trialEnd);
+        doc.put(FieldNames.Subscription.TRANSACTION_STATUS.name(), subscription.transactionStatus);
+        doc.put(FieldNames.Subscription.SUBSCRIPTION_CREATED_AT.name(), subscription.subsciptionCreatedAt);
+        doc.put(FieldNames.Subscription.SUBSCRIPTION_UPDATED_AT.name(), subscription.subsciptionUpdatedAt);
+        
+        return doc;
     }
 }

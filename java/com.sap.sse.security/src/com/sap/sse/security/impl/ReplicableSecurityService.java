@@ -10,6 +10,7 @@ import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
+import com.sap.sse.security.shared.Subscription;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
@@ -109,5 +110,7 @@ public interface ReplicableSecurityService extends SecurityService {
     Void internalSetDefaultTenantForServerForUser(String username, UUID defaultTenantId, String serverName);
 
     Void internalResetPassword(String username, String passwordResetSecret);
+    
+    Void internalUpdateSubscription(String username, Subscription subscription);
 
 }

@@ -8,6 +8,7 @@ import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.Subscription;
 import com.sap.sse.security.shared.UserGroupProvider;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.Role;
@@ -205,6 +206,16 @@ public class UserProxy implements User {
 
     @Override
     public String createRandomSecret() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setSubscription(Subscription subscription) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Subscription getSubscription() {
         throw new UnsupportedOperationException();
     }
 }

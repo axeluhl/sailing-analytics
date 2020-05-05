@@ -9,6 +9,7 @@ import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.SecurityUser;
+import com.sap.sse.security.shared.Subscription;
 import com.sap.sse.security.shared.UserGroupProvider;
 import com.sap.sse.security.shared.WildcardPermission;
 
@@ -111,4 +112,8 @@ public interface User extends SecurityUser<RoleDefinition, Role, UserGroup> {
     UserGroupProvider getUserGroupProvider();
 
     String createRandomSecret();
+    
+    void setSubscription(Subscription subscription);
+    
+    Subscription getSubscription();
 }

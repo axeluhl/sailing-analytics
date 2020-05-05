@@ -150,6 +150,16 @@
 		<servlet-name>UserManagementService</servlet-name>
 		<url-pattern>/service/usermanagement</url-pattern>
 	</servlet-mapping>
+	
+	<servlet>
+        <display-name>Subscription Service</display-name>
+        <servlet-name>SubscriptionService</servlet-name>
+        <servlet-class>com.sap.sailing.gwt.ui.server.subscription.SubscriptionServiceImpl</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>SubscriptionService</servlet-name>
+        <url-pattern>/service/subscription</url-pattern>
+    </servlet-mapping>
 
 	<!-- enabling remote logging -->
 	<servlet>

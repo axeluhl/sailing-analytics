@@ -21,6 +21,9 @@
       <c:tabcontent title="{i18n.settings}">
         <s:settingstab.UserProfileSettingsTabView ui:field="settingsTabUi" />
       </c:tabcontent>
+      <c:tabcontent title="{i18n.subscription}">
+        <s:subscriptiontab.UserProfileSubscriptionTabView ui:field="subscriptionTabUi" />
+      </c:tabcontent>
     </c:TabPanel>
   </g:HTMLPanel>
 </ui:UiBinder> 

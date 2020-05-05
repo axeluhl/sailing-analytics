@@ -140,6 +140,7 @@ import com.sap.sse.security.operations.UpdateRoleDefinitionOperation;
 import com.sap.sse.security.operations.UpdateSimpleUserEmailOperation;
 import com.sap.sse.security.operations.UpdateSimpleUserPasswordOperation;
 import com.sap.sse.security.operations.UpdateUserPropertiesOperation;
+import com.sap.sse.security.operations.UpdateUserSubscriptionOperation;
 import com.sap.sse.security.operations.ValidateEmailOperation;
 import com.sap.sse.security.persistence.PersistenceFactory;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
@@ -157,6 +158,7 @@ import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RolePrototype;
 import com.sap.sse.security.shared.SecurityAccessControlList;
 import com.sap.sse.security.shared.SocialUserAccount;
+import com.sap.sse.security.shared.Subscription;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
@@ -2599,5 +2601,22 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public void registerCustomizer(SecurityInitializationCustomizer customizer) {
         customizers.add(customizer);
         customizer.customizeSecurityService(this);
+    }
+
+    @Override
+    public void updateUserSubscription(String username, Subscription subscription) throws UserManagementException {
+        final User user = store.getUserByName(username);
+        if (user == null) {
+            throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
+        }
+        apply(new UpdateUserSubscriptionOperation(username, subscription));
+    }
+
+    @Override
+    public Void internalUpdateSubscription(String username, Subscription subscription) {
+        User user = getUserByName(username);
+        user.setSubscription(subscription);
+        store.updateUser(user);
+        return null;
     }
 }

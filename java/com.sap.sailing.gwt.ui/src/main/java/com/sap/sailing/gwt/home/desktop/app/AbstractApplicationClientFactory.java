@@ -13,6 +13,8 @@ import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceHelper;
+import com.sap.sailing.gwt.ui.client.subscription.SubscriptionService;
+import com.sap.sailing.gwt.ui.client.subscription.SubscriptionServiceAsync;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.security.ui.client.SecureClientFactoryImpl;
 
@@ -21,6 +23,7 @@ public abstract class AbstractApplicationClientFactory<ATLV extends ApplicationT
     private final SailingServiceAsync sailingService;
     private final MediaServiceAsync mediaService;
     private final DesktopPlacesNavigator navigator;
+    private final SubscriptionServiceAsync subscriptionService;
 
     public AbstractApplicationClientFactory(ATLV root, EventBus eventBus,
             PlaceController placeController, final DesktopPlacesNavigator navigator) {
@@ -28,7 +31,9 @@ public abstract class AbstractApplicationClientFactory<ATLV extends ApplicationT
         this.navigator = navigator;
         sailingService = SailingServiceHelper.createSailingServiceInstance();
         mediaService = GWT.create(MediaService.class);
+        subscriptionService = GWT.create(SubscriptionService.class);
         EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService, RemoteServiceMappingConstants.mediaServiceRemotePath);
+        EntryPointHelper.registerASyncService((ServiceDefTarget) subscriptionService, RemoteServiceMappingConstants.subscriptionServiceRemotePath);
         getUserService().addKnownHasPermissions(SecuredDomainType.getAllInstances());
     }
     
@@ -59,5 +64,10 @@ public abstract class AbstractApplicationClientFactory<ATLV extends ApplicationT
     @Override
     public DesktopPlacesNavigator getHomePlacesNavigator() {
         return navigator;
+    }
+    
+    @Override
+    public SubscriptionServiceAsync getSubscriptionService() {
+        return subscriptionService;
     }
 }

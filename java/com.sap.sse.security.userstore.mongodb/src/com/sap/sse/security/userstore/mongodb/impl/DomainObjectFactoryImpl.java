@@ -30,6 +30,7 @@ import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RoleDefinitionImpl;
 import com.sap.sse.security.shared.SocialUserAccount;
+import com.sap.sse.security.shared.Subscription;
 import com.sap.sse.security.shared.UserGroupProvider;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
@@ -342,6 +343,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             // is also only interested in the object's ID
             new MongoObjectFactoryImpl(db).storeUser(result);
         }
+        
+        Document subscriptionDoc = (Document)userDBObject.get(FieldNames.User.SUBSCRIPTION.name());
+        result.setSubscription(loadSubscription(subscriptionDoc));
+        
         return result;
     }
 
@@ -484,5 +489,24 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             result.put(key, value);
         }
         return result;
+    }
+    
+    private Subscription loadSubscription(Document subscriptionDoc) {
+        if (subscriptionDoc == null) {
+            return null;
+        }
+        
+        Subscription subscription = new Subscription();
+        subscription.hostedPageId = subscriptionDoc.getString(FieldNames.Subscription.HOSTED_PAGE_ID.name());
+        subscription.customerId = subscriptionDoc.getString(FieldNames.Subscription.CUSTOMER_ID.name());
+        subscription.planId = subscriptionDoc.getString(FieldNames.Subscription.PLAN_ID.name());
+        subscription.transactionStatus = subscriptionDoc.getString(FieldNames.Subscription.TRANSACTION_STATUS.name());
+        subscription.subscriptionId = subscriptionDoc.getString(FieldNames.Subscription.SUBSCRIPTION_ID.name());
+        subscription.trialStart = subscriptionDoc.getLong(FieldNames.Subscription.TRIAL_START.name());
+        subscription.trialEnd = subscriptionDoc.getLong(FieldNames.Subscription.TRIAL_END.name());
+        subscription.subsciptionCreatedAt = subscriptionDoc.getLong(FieldNames.Subscription.SUBSCRIPTION_CREATED_AT.name());
+        subscription.subsciptionUpdatedAt = subscriptionDoc.getLong(FieldNames.Subscription.SUBSCRIPTION_UPDATED_AT.name());
+        
+        return subscription;
     }
 }

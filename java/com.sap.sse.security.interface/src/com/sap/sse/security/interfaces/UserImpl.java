@@ -22,6 +22,7 @@ import org.apache.shiro.crypto.hash.Sha256Hash;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.RoleDefinition;
+import com.sap.sse.security.shared.Subscription;
 import com.sap.sse.security.shared.UserGroupProvider;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.Ownership;
@@ -87,6 +88,8 @@ public class UserImpl extends SecurityUserImpl<RoleDefinition, Role, UserGroup, 
     private transient Set<Role> roles;
     
     private List<Role> roleListForSerialization;
+    
+    private Subscription subscription;
 
     public UserImpl(String name, String email, Map<String, UserGroup> defaultTenantForServer,
             UserGroupProvider userGroupProvider, Account... accounts) {
@@ -374,5 +377,15 @@ public class UserImpl extends SecurityUserImpl<RoleDefinition, Role, UserGroup, 
     @Override
     public Map<String, UserGroup> getDefaultTenantMap() {
         return defaultTenantForServer;
+    }
+
+    @Override
+    public Subscription getSubscription() {
+        return subscription;
+    }
+
+    @Override
+    public void setSubscription(Subscription subscription) {
+        this.subscription = subscription;
     }
 }
