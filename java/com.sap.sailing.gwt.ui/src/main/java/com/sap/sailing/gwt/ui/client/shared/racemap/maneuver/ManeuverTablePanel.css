@@ -1,6 +1,7 @@
 .maneuverPanel {
     padding-top: 1em;
     padding-right: 3em;
+    height: 200px;
     overflow: auto;
 }
 .contentContainer {
