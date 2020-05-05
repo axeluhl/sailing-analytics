@@ -292,10 +292,10 @@ class FailedCasesModule(AbstractModule):
 		return self.p_builds / self.n_builds
 
 	def result(self):
-		out = "sum of case fails across all builds, name of case\n"
+		out = "sum of case fails across all builds divided by number of builds, name of case\n"
 		s = [(k, self.case_counter.get(k)) for k in sorted(self.case_counter, key=self.case_counter.get, reverse=True)]
 		for case, fails in s:
-			out += "{0:>5}, {1}\n".format(fails, case)
+			out += "  {0:.2f}, {1}\n".format(fails / self.n_builds, case)
 		return out[:-1]
 
 class FailedSuitesModule(FailedCasesModule):
