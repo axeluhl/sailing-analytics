@@ -10,7 +10,8 @@ except ImportError:
 	print("Missing package: aiohttp\nInstall with: pip3 install aiohttp\npip3 debian package: python3-pip")
 	exit(1)
 import asyncio, logging, random
-from typing import List, Tuple, Dict
+#from typing import List, Tuple, Dict
+from sys import version_info
 from argparse import ArgumentParser
 from getpass import getpass
 
@@ -388,6 +389,19 @@ class ProgressBar:
 			await self.__task
 			self.__task = None
 
+def asyncio_run(aw): #https://stackoverflow.com/questions/55590343/asyncio-run-or-run-until-complete
+    if version_info >= (3, 7):
+        return asyncio.run(aw)
+
+    # Emulate asyncio.run() on older versions
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    try:
+        return loop.run_until_complete(aw)
+    finally:
+        loop.close()
+        asyncio.set_event_loop(None)
+
 def parse_args():
 	parser = ArgumentParser(description="Fetches and analyzes build and test data from the Hudson API")
 	parser.add_argument("username", help="Hudson account username")
@@ -441,4 +455,4 @@ async def main(args):
 	a.print_results()
 
 if __name__ == "__main__":
-	asyncio.run(main(parse_args()))
+	asyncio_run(main(parse_args()))
