@@ -127,7 +127,7 @@ public class CompareServersResource extends AbstractSailingServerResource {
                 for (Entry<String, TreeSet<JSONObject>> entry : result.entrySet()) {
                     json.put(entry.getKey(), entry.getValue());
                 }
-                response = Response.ok(json.toJSONString()).build();
+                response = Response.ok(streamingOutput(json)).build();
             } catch (Exception e) {
                 response = returnInternalServerError(e);
             }
