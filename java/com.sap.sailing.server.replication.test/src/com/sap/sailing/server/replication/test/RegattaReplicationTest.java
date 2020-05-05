@@ -58,7 +58,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         assertNotNull(replicatedRegatta);
         assertTrue(replicatedRegatta.isPersistent());
         assertTrue(Util.isEmpty((replicatedRegatta.getSeries())));
-        assertNull(replicatedRegatta.getDefaultCourseArea());        
+        assertNull(replicatedRegatta.getCourseAreas());        
         assertTrue(regattaId.equals(replicatedRegatta.getId()));
         assertNull(replicatedRegatta.getRegattaConfiguration());
     }
@@ -122,7 +122,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         Thread.sleep(1000);
         replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
-        assertNull(replicatedRegatta.getDefaultCourseArea());
+        assertNull(replicatedRegatta.getCourseAreas());
         // Test for 'alpha'
         currentCourseAreaId = alphaCourseAreaId;
         master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), /*startDate*/ null, /*endDate*/ null, 
@@ -131,7 +131,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         Thread.sleep(1000);
         replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
-        assertEquals(currentCourseAreaId, replicatedRegatta.getDefaultCourseArea().getId());
+        assertEquals(currentCourseAreaId, replicatedRegatta.getCourseAreas().getId());
         // Test for 'tv'
         currentCourseAreaId = tvCourseAreaId;
         master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), /*startDate*/ null, /*endDate*/ null,
@@ -140,7 +140,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         Thread.sleep(1000);
         replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
-        assertEquals(currentCourseAreaId, replicatedRegatta.getDefaultCourseArea().getId());
+        assertEquals(currentCourseAreaId, replicatedRegatta.getCourseAreas().getId());
         // Test back to 'null'
         currentCourseAreaId = null;
         master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), /*startDate*/ null, /*endDate*/ null, currentCourseAreaId, null,
@@ -149,7 +149,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         Thread.sleep(1000);
         replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
-        assertNull(replicatedRegatta.getDefaultCourseArea());
+        assertNull(replicatedRegatta.getCourseAreas());
     }
     
     public void testUpdateSpecificRegattaReplicationForProcedureAndCourseDesignerAndConfig() throws InterruptedException {
@@ -241,7 +241,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         assertEquals("Medal", replicatedMedal.getName());
         assertEquals(1, Util.size(replicatedMedal.getFleets()));
         assertNotNull(replicatedMedal.getFleetByName("Medal"));
-        assertNull(replicatedRegatta.getDefaultCourseArea());
+        assertNull(replicatedRegatta.getCourseAreas());
     }
     
     @Test
@@ -354,8 +354,8 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         assertNotNull(replicatedRegatta);
         assertTrue(replicatedRegatta.isPersistent());
         assertTrue(Util.isEmpty((replicatedRegatta.getSeries())));
-        assertNotNull(replicatedRegatta.getDefaultCourseArea());
-        assertEquals(masterCourseArea.getId(), replicatedRegatta.getDefaultCourseArea().getId());
-        assertEquals(masterCourseArea.getName(), replicatedRegatta.getDefaultCourseArea().getName());
+        assertNotNull(replicatedRegatta.getCourseAreas());
+        assertEquals(masterCourseArea.getId(), replicatedRegatta.getCourseAreas().getId());
+        assertEquals(masterCourseArea.getName(), replicatedRegatta.getCourseAreas().getName());
     }
 }

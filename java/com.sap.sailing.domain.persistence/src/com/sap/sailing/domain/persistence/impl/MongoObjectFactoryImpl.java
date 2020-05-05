@@ -360,8 +360,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
                 // at least store the scoring scheme
                 dbLeaderboard.put(FieldNames.SCORING_SCHEME_TYPE.name(), leaderboard.getScoringScheme().getType().name());
             }
-            if (leaderboard.getDefaultCourseArea() != null) {
-                dbLeaderboard.put(FieldNames.COURSE_AREA_ID.name(), leaderboard.getDefaultCourseArea().getId().toString());
+            if (leaderboard.getCourseAreas() != null) {
+                dbLeaderboard.put(FieldNames.COURSE_AREA_ID.name(), leaderboard.getCourseAreas().getId().toString());
             } else {
                 dbLeaderboard.put(FieldNames.COURSE_AREA_ID.name(), null);
             }
@@ -715,8 +715,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         }
         dbRegatta.put(FieldNames.REGATTA_SERIES.name(), storeSeries(regatta.getSeries()));
 
-        if (regatta.getDefaultCourseArea() != null) {
-            dbRegatta.put(FieldNames.COURSE_AREA_ID.name(), regatta.getDefaultCourseArea().getId().toString());
+        if (regatta.getCourseAreas() != null) {
+            dbRegatta.put(FieldNames.COURSE_AREA_ID.name(), regatta.getCourseAreas().getId().toString());
         } else {
             dbRegatta.put(FieldNames.COURSE_AREA_ID.name(), null);
         }

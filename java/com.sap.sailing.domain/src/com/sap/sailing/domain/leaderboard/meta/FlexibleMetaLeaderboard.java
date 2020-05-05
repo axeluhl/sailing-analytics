@@ -59,7 +59,7 @@ public class FlexibleMetaLeaderboard extends AbstractMetaLeaderboard {
     }
 
     @Override
-    public CourseArea getDefaultCourseArea() {
+    public Iterable<CourseArea> getCourseAreas() {
         return null;
     }
     

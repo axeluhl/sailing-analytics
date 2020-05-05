@@ -1716,8 +1716,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public void addRegattaWithoutReplication(Regatta regatta) {
         UUID defaultCourseAreaId = null;
-        if (regatta.getDefaultCourseArea() != null) {
-            defaultCourseAreaId = regatta.getDefaultCourseArea().getId();
+        if (regatta.getCourseAreas() != null) {
+            defaultCourseAreaId = regatta.getCourseAreas().getId();
         }
         boolean wasAdded = addAndConnectRegatta(regatta.isPersistent(), defaultCourseAreaId, regatta);
         if (!wasAdded) {
@@ -1955,8 +1955,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      */
     private void replicateSpecificRegattaWithoutRaceColumns(Regatta regatta) {
         Serializable courseAreaId = null;
-        if (regatta.getDefaultCourseArea() != null) {
-            courseAreaId = regatta.getDefaultCourseArea().getId();
+        if (regatta.getCourseAreas() != null) {
+            courseAreaId = regatta.getCourseAreas().getId();
         }
         replicate(new AddSpecificRegatta(regatta.getName(),
                 regatta.getBoatClass() == null ? null : regatta.getBoatClass().getName(),
@@ -2704,7 +2704,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         // We're not doing any renaming of the regatta itself, therefore we don't have to sync on the maps.
         Regatta regatta = getRegatta(regattaIdentifier);
         CourseArea newCourseArea = getCourseArea(newDefaultCourseAreaId);
-        if (newCourseArea != regatta.getDefaultCourseArea()) {
+        if (newCourseArea != regatta.getCourseAreas()) {
             regatta.setDefaultCourseArea(newCourseArea);
         }
         regatta.setStartDate(startDate);
@@ -4661,7 +4661,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                                 // check if the race matches the RegattaAndRaceIdentifier
                                 if (trackedRaceIdentifier.equals(raceIdentifier)
                                         && trackedRace.getStartOfRace() != null) {
-                                    final CourseArea defaultCourseArea = leaderboard.getDefaultCourseArea();
+                                    final CourseArea defaultCourseArea = leaderboard.getCourseAreas();
                                     boolean leaderboardLinkedToEventThroughCourseArea = (defaultCourseArea != null
                                             && Util.contains(event.getVenue().getCourseAreas(), defaultCourseArea));
                                     boolean nameOfRegattaAndLeaderboardMatch = leaderboard.getName().equals(trackedRaceIdentifier.getRegattaName());

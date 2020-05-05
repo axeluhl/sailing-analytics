@@ -64,7 +64,7 @@ public class EventRaceStatesSerializer implements JsonSerializer<Pair<Event, Ite
                 for (Leaderboard leaderboard : leaderboards) {
                     RaceStateSerializer raceStateSerializer = new RaceStateSerializer(raceLogResolver);
                     if (filterByLeaderboardName == null || leaderboard.getName().equals(filterByLeaderboardName)) {
-                        if (leaderboard.getDefaultCourseArea() != null && leaderboard.getDefaultCourseArea().equals(courseArea)) {
+                        if (leaderboard.getCourseAreas() != null && leaderboard.getCourseAreas().equals(courseArea)) {
                             String leaderboardName = leaderboard.getName();
                             String leaderboardDisplayName = leaderboard.getDisplayName();
                             for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {

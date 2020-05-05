@@ -113,7 +113,7 @@ public class SailingNotificationServiceImpl implements SailingNotificationServic
             // could be a series
             for (final LeaderboardGroup leaderboardGroup : foundLeaderboardGroups) {
                 if (leaderboardGroup.hasOverallLeaderboard()) {
-                    CourseArea defaultCourseArea = leaderboard.getDefaultCourseArea();
+                    CourseArea defaultCourseArea = leaderboard.getCourseAreas();
                     if (defaultCourseArea != null) {
                         for (Event event : foundEvents) {
                             if (Util.contains(event.getVenue().getCourseAreas(), defaultCourseArea)) {

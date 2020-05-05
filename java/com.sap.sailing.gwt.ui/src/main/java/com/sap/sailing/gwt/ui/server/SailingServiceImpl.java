@@ -1136,9 +1136,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         if (boatClass != null) {
             regattaDTO.boatClass = convertToBoatClassDTO(boatClass);
         }
-        if (regatta.getDefaultCourseArea() != null) {
-            regattaDTO.defaultCourseAreaUuid = regatta.getDefaultCourseArea().getId();
-            regattaDTO.defaultCourseAreaName = regatta.getDefaultCourseArea().getName();
+        if (regatta.getCourseAreas() != null) {
+            regattaDTO.defaultCourseAreaUuid = regatta.getCourseAreas().getId();
+            regattaDTO.defaultCourseAreaName = regatta.getCourseAreas().getName();
         }
         regattaDTO.buoyZoneRadiusInHullLengths = regatta.getBuoyZoneRadiusInHullLengths();
         regattaDTO.useStartTimeInference = regatta.useStartTimeInference();
@@ -2997,9 +2997,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             leaderboardDTO.scoringScheme = leaderboard.getScoringScheme().getType();
             leaderboardDTO.canBoatsOfCompetitorsChangePerRace = false;
         }
-        if (leaderboard.getDefaultCourseArea() != null) {
-            leaderboardDTO.defaultCourseAreaId = leaderboard.getDefaultCourseArea().getId();
-            leaderboardDTO.defaultCourseAreaName = leaderboard.getDefaultCourseArea().getName();
+        if (leaderboard.getCourseAreas() != null) {
+            leaderboardDTO.defaultCourseAreaId = leaderboard.getCourseAreas().getId();
+            leaderboardDTO.defaultCourseAreaName = leaderboard.getCourseAreas().getName();
         }
         leaderboardDTO.setDelayToLiveInMillisForLatestRace(delayToLiveInMillisForLatestRace);
         leaderboardDTO.hasCarriedPoints = leaderboard.hasCarriedPoints();
@@ -4885,8 +4885,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
                 for (Leaderboard leaderboard : getService().getLeaderboards().values()) {
                     if (getSecurityService().hasCurrentUserReadPermission(leaderboard)) {
-                        if (leaderboard.getDefaultCourseArea() != null
-                                && leaderboard.getDefaultCourseArea() == courseArea) {
+                        if (leaderboard.getCourseAreas() != null
+                                && leaderboard.getCourseAreas() == courseArea) {
                             RaceGroupDTO raceGroup = new RaceGroupDTO(leaderboard.getName());
                             raceGroup.courseAreaIdAsString = courseArea.getId().toString();
                             raceGroup.displayName = getRegattaNameFromLeaderboard(leaderboard);
@@ -4946,8 +4946,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                     if (getSecurityService().hasCurrentUserReadPermission(leaderboard)) {
                         RaceGroupDTO raceGroup = new RaceGroupDTO(leaderboard.getName());
                         for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
-                            if (leaderboard.getDefaultCourseArea() != null
-                                    && leaderboard.getDefaultCourseArea() == courseArea) {
+                            if (leaderboard.getCourseAreas() != null
+                                    && leaderboard.getCourseAreas() == courseArea) {
                                 raceGroup.courseAreaIdAsString = courseArea.getId().toString();
                                 break;
                             }
@@ -5478,7 +5478,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         List<RegattaOverviewEntryDTO> result = new ArrayList<RegattaOverviewEntryDTO>();
         Calendar dayToCheck = Calendar.getInstance();
         dayToCheck.setTime(new Date());
-        CourseArea usedCourseArea = leaderboard.getDefaultCourseArea();
+        CourseArea usedCourseArea = leaderboard.getCourseAreas();
         if (leaderboard != null) {
             if (visibleRegattas != null && !visibleRegattas.contains(leaderboard.getName())) {
                 return result;
@@ -5642,7 +5642,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
                 if (visibleCourseAreaIds.contains(courseArea.getId())) {
                     for (Leaderboard leaderboard : getService().getLeaderboards().values()) {
-                        final CourseArea leaderboardDefaultCourseArea = leaderboard.getDefaultCourseArea();
+                        final CourseArea leaderboardDefaultCourseArea = leaderboard.getCourseAreas();
                         if (getSecurityService().hasCurrentUserReadPermission(leaderboard)) {
                             if (leaderboardDefaultCourseArea != null
                                     && leaderboardDefaultCourseArea.equals(courseArea)) {

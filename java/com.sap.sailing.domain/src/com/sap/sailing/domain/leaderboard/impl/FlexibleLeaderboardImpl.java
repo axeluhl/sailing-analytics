@@ -41,6 +41,7 @@ import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Util;
 
 /**
  * A leaderboard implementation that allows users to flexibly configure which columns exist. No constraints need to be
@@ -72,7 +73,11 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     private final ScoringScheme scoringScheme;
     private String name;
     private transient RaceLogStore raceLogStore;
-    private CourseArea courseArea;
+    
+    /**
+     * A synchronized list; obtain the object monitor in order to iterate over the contents!
+     */
+    private List<CourseArea> courseAreas;
     private RaceExecutionOrderProvider raceExecutionOrderProvider;
     
     /**
@@ -97,7 +102,10 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         this.name = name;
         this.races = new ArrayList<>();
         this.raceLogStore = raceLogStore;
-        this.courseArea = courseArea;
+        this.courseAreas = Collections.synchronizedList(new ArrayList<>());
+        if (courseArea != null) {
+            courseAreas.add(courseArea);
+        }
         this.regattaLikeHelper = new BaseRegattaLikeImpl(new FlexibleLeaderboardAsRegattaLikeIdentifier(this), regattaLogStore) {
             private static final long serialVersionUID = 4082392360832548953L;
 
@@ -307,14 +315,21 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         return scoringScheme;
     }
 
+    /**
+     * Callers need to {@code synchronize} on the result when iterating the elements in order to
+     * be safe regarding concurrent modifications through {@link #setCourseAreas(Iterable)}.
+     */
     @Override
-    public CourseArea getDefaultCourseArea() {
-        return courseArea;
+    public Iterable<CourseArea> getCourseAreas() {
+        return courseAreas;
     }
 
     @Override
-    public void setDefaultCourseArea(CourseArea newCourseArea) {
-        this.courseArea = newCourseArea;
+    public void setCourseAreas(Iterable<CourseArea> newCourseAreas) {
+        synchronized (this.courseAreas) {
+            this.courseAreas.clear();
+            Util.addAll(newCourseAreas, this.courseAreas);
+        }
     }
     
     @Override

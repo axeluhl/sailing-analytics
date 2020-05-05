@@ -646,10 +646,13 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
     TimePoint getNowMinusDelay();
     
     /**
-     * Get the default {@link CourseArea} of this leaderboard.
-     * @return the default {@link CourseArea} for all races of this leaderboard.
+     * Gets the course areas that the races of this leaderboard are expected to be run on. This can, e.g., be used to
+     * implement a filter when retrieving leaderboards from an event.
+     * 
+     * @return the {@link CourseArea} objects on which races of this leaderboard may run; always valid, never
+     *         {@code null}, but may be empty
      */
-    CourseArea getDefaultCourseArea();
+    Iterable<CourseArea> getCourseAreas();
 
     /**
      * Must be called when the leaderboard is removed from its server, becoming inaccessible. This will give the leaderboard
@@ -749,9 +752,9 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
     
     default boolean isPartOfEvent(EventBase event) {
         boolean result = false;
-        if (getDefaultCourseArea() != null) {
+        if (getCourseAreas() != null) {
             for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
-                if(courseArea.equals(getDefaultCourseArea())) {
+                if(courseArea.equals(getCourseAreas())) {
                     result = true;
                     break;
                 }

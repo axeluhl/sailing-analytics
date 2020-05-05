@@ -74,7 +74,7 @@ public class RaceGroupJsonExportServlet extends AbstractJsonHttpServlet {
         RaceGroupFactory raceGroupFactory = new RaceGroupFactory();
         final Set<Regatta> regattasForWhichRegattaLeaderboardsWereAdded = new HashSet<>();
         for (Leaderboard leaderboard : getService().getLeaderboards().values()) {
-            if (filterCourseArea.equals(leaderboard.getDefaultCourseArea())) {
+            if (filterCourseArea.equals(leaderboard.getCourseAreas())) {
                 SecurityUtils.getSubject()
                         .checkPermission(leaderboard.getIdentifier().getStringPermission(DefaultActions.READ));
                 if (leaderboard instanceof RegattaLeaderboard && !(leaderboard instanceof RegattaLeaderboardWithEliminations)) {
@@ -93,7 +93,7 @@ public class RaceGroupJsonExportServlet extends AbstractJsonHttpServlet {
         // now add only those RegattaLeaderboardWithEliminations for which the original RegattaLeaderboard hasn't been added
         for (Leaderboard leaderboard : getService().getLeaderboards().values()) {
             if (leaderboard instanceof RegattaLeaderboardWithEliminations &&
-                    filterCourseArea.equals(leaderboard.getDefaultCourseArea()) && 
+                    filterCourseArea.equals(leaderboard.getCourseAreas()) && 
                     !regattasForWhichRegattaLeaderboardsWereAdded.contains(((RegattaLeaderboardWithEliminations) leaderboard).getRegatta())) {
                 result.add(serializer.serialize(raceGroupFactory.convert((RegattaLeaderboardWithEliminations) leaderboard)));
             }

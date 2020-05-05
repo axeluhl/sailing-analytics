@@ -60,7 +60,7 @@ public class TrackedRaceWithContext implements HasTrackedRaceContext {
     @Override
     public CourseArea getCourseArea() {
         if(getRegatta()!=null) {
-            return getRegatta().getDefaultCourseArea();
+            return getRegatta().getCourseAreas();
         }
         return null;
     }

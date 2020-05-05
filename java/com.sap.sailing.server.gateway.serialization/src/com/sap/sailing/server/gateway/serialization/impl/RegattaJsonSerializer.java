@@ -56,7 +56,7 @@ public class RegattaJsonSerializer implements JsonSerializer<Regatta> {
         result.put(FIELD_RANKINGMETRIC, regatta.getRankingMetricType().name());
         result.put(FIELD_BOATCLASS, regatta.getBoatClass() != null ? regatta.getBoatClass().getName() : null);
         result.put(FIELD_COURSE_AREA_ID,
-                regatta.getDefaultCourseArea() != null ? regatta.getDefaultCourseArea().getId().toString() : null);
+                regatta.getCourseAreas() != null ? regatta.getCourseAreas().getId().toString() : null);
         result.put(FIELD_CAN_BOATS_OF_COMPETITORS_CHANGE_PER_RACE, regatta.canBoatsOfCompetitorsChangePerRace());
         result.put(FIELD_COMPETITOR_REGISTRATION_TYPE, regatta.getCompetitorRegistrationType().name());
         result.put(FIELD_USE_START_TIME_INFERENCE, regatta.useStartTimeInference());

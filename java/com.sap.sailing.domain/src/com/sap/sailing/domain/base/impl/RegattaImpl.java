@@ -122,7 +122,11 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     private final RankingMetricConstructor rankingMetricConstructor;
     private Double buoyZoneRadiusInHullLengths;
 
-    private CourseArea defaultCourseArea;
+    /**
+     * A synchronized list; synchronize on the object monitor before iterating or modifying
+     */
+    private List<CourseArea> courseAreas;
+    
     private RegattaConfiguration configuration;
     private RaceExecutionOrderCache raceExecutionOrderCache;
     
@@ -268,7 +272,10 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         }
         this.persistent = persistent;
         this.scoringScheme = scoringScheme;
-        this.defaultCourseArea = courseArea;
+        this.courseAreas = Collections.synchronizedList(new ArrayList<>());
+        if (courseArea != null) {
+            this.courseAreas.add(courseArea);
+        }
         this.configuration = null;
         this.buoyZoneRadiusInHullLengths = buoyZoneRadiusInHullLengths;
         this.regattaLikeHelper = new BaseRegattaLikeImpl(new RegattaAsRegattaLikeIdentifier(this), regattaLogStore) {
@@ -662,13 +669,16 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     }
 
     @Override
-    public CourseArea getDefaultCourseArea() {
-        return defaultCourseArea;
+    public Iterable<CourseArea> getCourseAreas() {
+        return courseAreas;
     }
 
     @Override
-    public void setDefaultCourseArea(CourseArea newCourseArea) {
-        this.defaultCourseArea = newCourseArea;
+    public void setDefaultCourseArea(Iterable<CourseArea> newCourseAreas) {
+        synchronized (this.courseAreas) {
+            this.courseAreas.clear();
+            Util.addAll(newCourseAreas, this.courseAreas);
+        }
     }
     
     @Override

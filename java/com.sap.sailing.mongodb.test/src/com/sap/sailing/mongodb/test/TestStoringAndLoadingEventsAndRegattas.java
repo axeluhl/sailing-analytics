@@ -219,26 +219,23 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         final Venue venue = new VenueImpl(venueName);
         CourseArea courseArea = DomainFactory.INSTANCE.getOrCreateCourseArea(UUID.randomUUID(), courseAreaName);
         venue.addCourseArea(courseArea);
-
         MongoObjectFactory mof = PersistenceFactory.INSTANCE.getMongoObjectFactory(getMongoService());
         Event event = new EventImpl(eventName, eventStartDate, eventEndDate, venue, /*isPublic*/ true, UUID.randomUUID());
         mof.storeEvent(event);
-        
         final String regattaBaseName = "Kieler Woche";
         BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("29erXX", /* typicallyStartsUpwind */ true);
         Regatta regatta = createRegatta(RegattaImpl.getDefaultName(regattaBaseName, boatClass.getName()), boatClass, 
                 /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED, regattaStartDate, regattaEndDate, /* persistent */ true,
                 DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), courseArea, OneDesignRankingMetric::new);
         mof.storeRegatta(regatta);
-        
         DomainObjectFactory dof = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE);
         Regatta loadedRegatta = dof.loadRegatta(regatta.getName(), /* trackedRegattaRegistry */ null);
         assertNotNull(loadedRegatta);
         assertEquals(regatta.getName(), loadedRegatta.getName());
         assertEquals(Util.size(regatta.getSeries()), Util.size(loadedRegatta.getSeries()));
-        assertNotNull(loadedRegatta.getDefaultCourseArea());
-        assertEquals(loadedRegatta.getDefaultCourseArea().getId(), courseArea.getId());
-        assertEquals(loadedRegatta.getDefaultCourseArea().getName(), courseArea.getName());
+        assertFalse(Util.isEmpty(loadedRegatta.getCourseAreas()));
+        assertTrue(Util.contains(Util.map(loadedRegatta.getCourseAreas(), CourseArea::getId), courseArea.getId()));
+        assertTrue(Util.contains(Util.map(loadedRegatta.getCourseAreas(), CourseArea::getName), courseArea.getName()));
         assertEquals(loadedRegatta.getStartDate(), regattaStartDate);
         assertEquals(loadedRegatta.getEndDate(), regattaEndDate);
         assertTrue(loadedRegatta.getCompetitorRegistrationType() == CompetitorRegistrationType.CLOSED);

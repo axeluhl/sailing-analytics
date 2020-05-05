@@ -427,11 +427,11 @@ public final class HomeServiceUtil {
         }
         CourseArea courseArea = null;
         if (leaderboard instanceof FlexibleLeaderboard) {
-            courseArea = ((FlexibleLeaderboard) leaderboard).getDefaultCourseArea();
+            courseArea = ((FlexibleLeaderboard) leaderboard).getCourseAreas();
         } else if(leaderboard instanceof RegattaLeaderboard) {
             Regatta regatta = ((RegattaLeaderboard) leaderboard).getRegatta();
             if (regatta != null) {
-                courseArea = regatta.getDefaultCourseArea();
+                courseArea = regatta.getCourseAreas();
             }
         }
         return courseArea == null ? null : courseArea.getName();
@@ -440,11 +440,11 @@ public final class HomeServiceUtil {
     public static String getCourseAreaIdForRegatta(EventBase event, Leaderboard leaderboard) {
         CourseArea courseArea = null;
         if (leaderboard instanceof FlexibleLeaderboard) {
-            courseArea = ((FlexibleLeaderboard) leaderboard).getDefaultCourseArea();
+            courseArea = ((FlexibleLeaderboard) leaderboard).getCourseAreas();
         } else if(leaderboard instanceof RegattaLeaderboard) {
             Regatta regatta = ((RegattaLeaderboard) leaderboard).getRegatta();
             if (regatta != null) {
-                courseArea = regatta.getDefaultCourseArea();
+                courseArea = regatta.getCourseAreas();
             }
         }
         return courseArea == null ? null : courseArea.getId().toString();
@@ -610,7 +610,7 @@ public final class HomeServiceUtil {
 
     private static Event getAssociatedEventForLeaderboardInSeries(Leaderboard leaderboard,
             Iterable<Event> eventsInSeries) {
-        final CourseArea defaultCourseArea = leaderboard.getDefaultCourseArea();
+        final CourseArea defaultCourseArea = leaderboard.getCourseAreas();
         if (defaultCourseArea != null) {
             for (Event event : eventsInSeries) {
                 if (Util.contains(event.getVenue().getCourseAreas(), defaultCourseArea)) {

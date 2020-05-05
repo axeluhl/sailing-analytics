@@ -313,7 +313,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             getService().apply(new UpdateLeaderboard(/* leaderboardName */ leaderboard.getName(),
                     /* newLeaderboardName */ leaderboard.getName(), newLeaderboardDisplayName,
                     resultDiscardingThresholds,
-                    leaderboard.getDefaultCourseArea() != null ? leaderboard.getDefaultCourseArea().getId() : null));
+                    leaderboard.getCourseAreas() != null ? leaderboard.getCourseAreas().getId() : null));
         } else {
             return Response.status(Status.NOT_FOUND).entity(
                     "Could not find a leaderboard with name '" + StringEscapeUtils.escapeHtml(leaderboardName) + "'.")

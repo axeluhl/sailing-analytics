@@ -386,6 +386,15 @@ public class Util {
             return false;
         }
     }
+    
+    public static <T> boolean containsAny(Iterable<T> ts, Iterable<T> isAnyOfTheseContained) {
+        for (final T t : isAnyOfTheseContained) {
+            if (contains(ts, t)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     /**
      * Checks whether for all elements from {@code what} the method {@link #contains(Iterable, Object)}

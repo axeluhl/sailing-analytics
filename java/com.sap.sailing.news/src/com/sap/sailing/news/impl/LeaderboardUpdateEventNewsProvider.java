@@ -62,7 +62,7 @@ public class LeaderboardUpdateEventNewsProvider implements EventNewsProvider {
     
     // TODO duplicate code taken from HomeServiceUtil
     private boolean isPartOfEvent(EventBase event, Leaderboard regattaEntity) {
-        final CourseArea defaultCourseArea = regattaEntity.getDefaultCourseArea();
+        final CourseArea defaultCourseArea = regattaEntity.getCourseAreas();
         if(defaultCourseArea == null) {
             return true;
         }

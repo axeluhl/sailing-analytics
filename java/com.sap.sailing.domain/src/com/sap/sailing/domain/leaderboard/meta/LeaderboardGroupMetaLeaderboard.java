@@ -87,7 +87,7 @@ public class LeaderboardGroupMetaLeaderboard extends AbstractMetaLeaderboard imp
     }
 
     @Override
-    public CourseArea getDefaultCourseArea() {
+    public Iterable<CourseArea> getCourseAreas() {
         return null;
     }
     

@@ -50,7 +50,7 @@ public class RaceGroupFactory {
      */
     public RaceGroup convert(RegattaLeaderboard leaderboard) {
         String name = leaderboard.getName();
-        CourseArea courseArea = leaderboard.getDefaultCourseArea();
+        CourseArea courseArea = leaderboard.getCourseAreas();
         Regatta regatta = ((RegattaLeaderboard) leaderboard).getRegatta();
         Iterable<SeriesWithRows> series = getSeries(leaderboard);
         return new RaceGroupImpl(name, leaderboard.getDisplayName(), regatta.getBoatClass(), regatta.canBoatsOfCompetitorsChangePerRace(), 
@@ -64,7 +64,7 @@ public class RaceGroupFactory {
      */
     public RaceGroup convert(FlexibleLeaderboard leaderboard) {
         String name = leaderboard.getName();
-        CourseArea courseArea = leaderboard.getDefaultCourseArea();
+        CourseArea courseArea = leaderboard.getCourseAreas();
         BoatClass boatClass = null;
         RegattaConfiguration configuration = null;
         Iterable<SeriesWithRows> series = getSeries(leaderboard);
