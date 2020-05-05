@@ -17,13 +17,13 @@ from getpass import getpass
 # ---------- Model ----------
 
 class WithUrl:
-	url: str
+	url = ""#: str
 
 	def __init__(self, url):
 		self.url = url
 
 class NamedWithUrl(WithUrl):
-	name: str
+	name = ""#: str
 
 	def __init__(self, name, url):
 		super(NamedWithUrl, self).__init__(url)
@@ -31,51 +31,52 @@ class NamedWithUrl(WithUrl):
 
 
 class Case:
-	name: str
-	status: str
-	duration: int
-	fail_age: int
+	name = ""#: str
+	status = ""#: str
+	duration = -1#: int
+	fail_age = -1#: int
 
-	def __init__(self, name: str, status: str, duration: int, fail_age: int):
+	def __init__(self, name, status, duration, fail_age):
 		self.name = name
 		self.status = status
 		self.duration = duration
 		self.fail_age = fail_age
 
 class Suite:
-	name: str
-	cases: List[Case] = []
-	duration: float
+	name = ""#: str
+	cases = None#: List[Case] = []
+	duration = -1.0#: float
 
-	def __init__(self, name: str, duration: float):
+	def __init__(self, name, duration):
 		self.name = name
+		self.cases = []
 		self.duration = duration
 
 class Build(NamedWithUrl):
-	suites: List[Suite] = []
+	suites = []#: List[Suite]
 
 class Job(NamedWithUrl):
-	builds: List[Build] = []
-	color: str
+	builds = []#: List[Build]
+	color = ""#: str
 
 class Root(WithUrl):
-	jobs: List[Job] = []
+	jobs = []#: List[Job]
 
 # ---------- Donwloader ---------
 
 class Downloader:
-	__session: aiohttp.ClientSession
-	__lock: asyncio.Semaphore
-	__all_job_urls: Dict[str, str] = None
-	base_url: str
-	api_suffix: str
+	__session = None#: aiohttp.ClientSession
+	__lock = None#: asyncio.Semaphore
+	__all_job_urls = None#: Dict[str, str]
+	base_url = ""#: str
+	api_suffix = ""#: str
 
 	logger = logging.getLogger(__name__)
 
 	n_builds = 0
 	p_builds = 0
 
-	def __init__(self, base_url: str, auth: Tuple[str, str], max_concurrent_connections, api_suffix="api/json"):
+	def __init__(self, base_url, auth, max_concurrent_connections, api_suffix="api/json"):
 		self.base_url = base_url
 		self.__session = aiohttp.ClientSession(auth=aiohttp.BasicAuth(auth[0], auth[1]))
 		self.__lock = asyncio.Semaphore(max_concurrent_connections)
@@ -85,7 +86,7 @@ class Downloader:
 		if self.__session != None:
 			await self.__session.close()
 	
-	async def build_tree(self, jobs: List[str], build_limit: int = 0) -> Root:
+	async def build_tree(self, jobs, build_limit):
 		if self.__all_job_urls == None:
 			# Very first request; Test connection and get all existing jobs to compare against
 			try:
@@ -107,13 +108,13 @@ class Downloader:
 		await asyncio.gather(*[self.__populate_builds_in_job(job, build_limit) for job in root.jobs])
 		return root
 	
-	async def __get_job_list(self) -> None:
+	async def __get_job_list(self):
 		self.__all_job_urls = {}
 		json = await self.get_json(self.base_url)
 		for job in json["jobs"]:
 			self.__all_job_urls[job["name"]] = job["url"]
 	
-	async def __populate_builds_in_job(self, job: Job, build_limit: int) -> None:
+	async def __populate_builds_in_job(self, job, build_limit):
 		try:
 			json = await self.get_json(job.url)
 		except aiohttp.ClientResponseError:
@@ -128,7 +129,7 @@ class Downloader:
 		self.n_builds += len(job.builds)
 		await asyncio.gather(*[self.__populate_suites_in_build(build) for build in job.builds])
 	
-	async def __populate_suites_in_build(self, build: Build) -> None:
+	async def __populate_suites_in_build(self, build):
 		try:
 			json = await self.get_json(build.url + "testReport/api/json", append_api_suffix=False)
 		except aiohttp.ClientResponseError:
@@ -136,14 +137,13 @@ class Downloader:
 		build.suites = await asyncio.gather(*[self.__parse_suite_with_cases(suite) for suite in json["suites"]])
 		self.p_builds += 1
 	
-	async def __parse_suite_with_cases(self, json: str) -> Suite:
+	async def __parse_suite_with_cases(self, json):
 		suite = Suite(json.get("name"), json.get("duration"))
-		suite.cases = [] # For some reason new Suite instances all share the same list
 		for case_json in json["cases"]:
 			suite.cases.append(Case(case_json["className"], case_json["status"], case_json["duration"], case_json["age"]))
 		return suite
 	
-	async def get_json(self, url: str, append_api_suffix=True):
+	async def get_json(self, url, append_api_suffix=True):
 		if append_api_suffix == True:
 			if not url.endswith("/"):
 				url += "/"
@@ -172,21 +172,21 @@ class Downloader:
 # ---------- Analysis ----------
 
 class AbstractModule:
-	def process(self, root: Root):
+	def process(self, root):
 		raise NotImplementedError
 	def progress(self):
 		raise NotImplementedError
-	def result(self) -> str:
+	def result(self):
 		return None
 
 class Analyzer:
 	__tasks = []
-	modules: List[AbstractModule]
+	modules = None#: List[AbstractModule]
 
-	def __init__(self, *modules: AbstractModule):
+	def __init__(self, *modules):
 		self.modules = list(modules)
 	
-	async def analyze_tree(self, root: Root):
+	async def analyze_tree(self, root):
 		loop = asyncio.get_event_loop()
 		await asyncio.gather(*[loop.run_in_executor(None, m.process, root) for m in self.modules])
 	
@@ -204,20 +204,20 @@ class Analyzer:
 			if r != None:
 				print(f"Results from {m.__class__.__name__}:\n{r}")
 
-	def add_module(self, module: AbstractModule):
+	def add_module(self, module):
 		self.modules.append(module)
 	
-	def remove_module(self, module: AbstractModule):
+	def remove_module(self, module):
 		self.modules.remove(module)
 
 
 class ModelVisualizerModule(AbstractModule):
-	__root: Root
-	level: int
-	def __init__(self, level: int = 1):
+	__root = None#: Root
+	level = -1#: int
+	def __init__(self, level = 1):
 		super(ModelVisualizerModule, self).__init__()
 		self.level = level
-	def process(self, root: Root):
+	def process(self, root):
 		self.__root = root
 	def progress(self):
 		return 1
@@ -234,16 +234,16 @@ class ModelVisualizerModule(AbstractModule):
 		return out[:-1]
 
 class FlakyCasesModule(AbstractModule):
-	threshold_div: int
-	case_counter: Dict[str, int] = {}
+	threshold_div = -1#: int
+	case_counter = {}#: Dict[str, int]
 	n_builds = 0
 	p_builds = 0
 
-	def __init__(self, threshold_div: int = 4):
+	def __init__(self, threshold_div = 4):
 		super(FlakyCasesModule, self).__init__()
 		self.threshold_div = threshold_div
 	
-	def process(self, root: Root):
+	def process(self, root):
 		for job in root.jobs:
 			self.n_builds += len(job.builds)
 		
@@ -270,14 +270,14 @@ class FlakyCasesModule(AbstractModule):
 		return out[:-1]
 
 class FailedCasesModule(AbstractModule):
-	case_counter: Dict[str, int] = {}
+	case_counter = {}#: Dict[str, int]
 	n_builds = 0
 	p_builds = 0
 
 	def __init__(self):
 		super(FailedCasesModule, self).__init__()
 
-	def process(self, root: Root):
+	def process(self, root):
 		for job in root.jobs:
 			self.n_builds += len(job.builds)
 
@@ -305,7 +305,7 @@ class FailedSuitesModule(FailedCasesModule):
 	def __init__(self):
 		super(FailedSuitesModule, self).__init__()
 
-	def process(self, root: Root):
+	def process(self, root):
 		for job in root.jobs:
 			self.n_builds += len(job.builds)
 
@@ -326,7 +326,7 @@ class CaseDurationModule(AbstractModule):
 	def __init__(self):
 		super(CaseDurationModule, self).__init__()
 
-	def process(self, root: Root):
+	def process(self, root):
 		for job in root.jobs:
 			self.n_builds += len(job.builds)
 
