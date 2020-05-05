@@ -9,6 +9,7 @@ import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTOImpl;
 import com.sap.sailing.gwt.common.client.suggestion.BoatClassMasterdataSuggestOracle;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.client.ColorTextBox;
 
 /**
  * An abstract base class for dialogs which can handle a competitor AND a boat together 
@@ -19,7 +20,7 @@ public abstract class AbstractCompetitorWithBoatDialog extends CompetitorEditDia
     protected final SuggestBox boatClassNameTextBox;
     protected final TextBox sailIdTextBox;
     protected final TextBox boatNameTextBox;
-    protected final TextBox boatDisplayColorTextBox;
+    protected final ColorTextBox boatDisplayColorTextBox;
     
     protected static class CompetitorWithBoatValidator extends CompetitorWithoutBoatValidator<CompetitorWithBoatDTO> {
         protected final StringMessages stringMessages;
@@ -27,7 +28,6 @@ public abstract class AbstractCompetitorWithBoatDialog extends CompetitorEditDia
 
         public CompetitorWithBoatValidator(StringMessages stringMessages, BoatDTO originalBoat) {
             super(stringMessages);
-            
             this.stringMessages = stringMessages;
             this.originalBoat = originalBoat;
         }
@@ -104,7 +104,7 @@ public abstract class AbstractCompetitorWithBoatDialog extends CompetitorEditDia
         }
         this.boatNameTextBox = createTextBox(boatToEdit.getName());
         boatNameTextBox.ensureDebugId("BoatNameTextBox");
-        this.boatDisplayColorTextBox = createTextBox(boatToEdit.getColor() == null ? "" : boatToEdit.getColor().getAsHtml()); 
+        this.boatDisplayColorTextBox = createColorTextBox(boatToEdit.getColor()); 
         this.sailIdTextBox = createTextBox(boatToEdit.getSailId());
         sailIdTextBox.ensureDebugId("SailIdTextBox");
     }

@@ -16,8 +16,8 @@ import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTOImpl;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
-import com.sap.sse.common.impl.RGBColor;
 import com.sap.sse.gwt.adminconsole.URLFieldWithFileUpload;
+import com.sap.sse.gwt.client.ColorTextBox;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DialogUtils;
 import com.sap.sse.gwt.client.dialog.DoubleBox;
@@ -35,7 +35,7 @@ public abstract class CompetitorEditDialog<CompetitorType extends CompetitorDTO>
     private final CompetitorType competitorToEdit;
     private final TextBox name;
     private final TextBox shortName;
-    private final TextBox displayColorTextBox;
+    private final ColorTextBox displayColorTextBox;
     private final ListBox threeLetterIocCountryCode;
     private final TextBox email;
     private final TextBox searchTag;
@@ -109,7 +109,7 @@ public abstract class CompetitorEditDialog<CompetitorType extends CompetitorDTO>
         shortName.ensureDebugId("ShortNameTextBox");
         this.email = createTextBox(competitorToEdit.getEmail());
         this.searchTag = createTextBox(competitorToEdit.getSearchTag());
-        this.displayColorTextBox = createTextBox(competitorToEdit.getColor() == null ? "" : competitorToEdit.getColor().getAsHtml()); 
+        this.displayColorTextBox = createColorTextBox(competitorToEdit.getColor()); 
         this.threeLetterIocCountryCode = createListBox(/* isMultipleSelect */ false);
         DialogUtils.makeCountrySelection(this.threeLetterIocCountryCode, competitorToEdit.getThreeLetterIocCountryCode());
         this.flagImageURL = new URLFieldWithFileUpload(stringMessages);
@@ -197,14 +197,10 @@ public abstract class CompetitorEditDialog<CompetitorType extends CompetitorDTO>
     
     protected CompetitorDTO getBaseResult() {
         Color color;
-        if (displayColorTextBox.getText() == null || displayColorTextBox.getText().isEmpty()) {
-            color = null;
+        if (displayColorTextBox.isValid()) {
+            color = displayColorTextBox.getColor();
         } else {
-            try {
-                color = new RGBColor(displayColorTextBox.getText());
-            } catch (IllegalArgumentException iae) {
-                color = new InvalidColor(iae, stringMessages);
-            }
+            color = new InvalidColor(new IllegalArgumentException(displayColorTextBox.getValue()), stringMessages);
         }
         CompetitorWithBoatDTO result = new CompetitorWithBoatDTOImpl(name.getText(),
                 shortName.getText().trim().isEmpty() ? null : shortName.getText(), color,
