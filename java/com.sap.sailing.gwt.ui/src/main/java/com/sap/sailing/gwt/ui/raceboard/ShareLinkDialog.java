@@ -29,6 +29,7 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
     private final PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> perspectiveCompositeSettings;
     private final LinkWithSettingsGenerator<Settings> linkWithSettingsGenerator;
     private final SailingServiceAsync sailingService;
+    private final boolean showChartMarkEditMediaButtonsAndVideo;
     private CheckBox timeStampCheckbox;
     private CheckBox windChartCheckBox;
     private CheckBox leaderBoardPanelCheckBox;
@@ -44,12 +45,13 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
     public ShareLinkDialog(String path, RaceboardContextDefinition raceboardContextDefinition,
             PerspectiveLifecycle<RaceBoardPerspectiveOwnSettings> lifecycle,
             PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> perspectiveCompositeSettings,
-            SailingServiceAsync sailingService, StringMessages stringMessages) {
+            SailingServiceAsync sailingService, boolean showChartMarkEditMediaButtonsAndVideo, StringMessages stringMessages) {
         super(stringMessages.shareTheLink(), "", stringMessages.ok(), stringMessages.cancel(), null, null);
         this.lifecycle = lifecycle;
         this.perspectiveCompositeSettings = perspectiveCompositeSettings;
         this.sailingService = sailingService;
         this.linkWithSettingsGenerator = new LinkWithSettingsGenerator<>(path, raceboardContextDefinition);
+        this.showChartMarkEditMediaButtonsAndVideo = showChartMarkEditMediaButtonsAndVideo;
         this.stringMessages = stringMessages;
     }
     
@@ -87,19 +89,19 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
         if(!timeStampCheckbox.getValue()) {
             patchedPerspectiveOwnSettings.resetInitialDurationAfterRaceStartInReplay();
         }
-        if(!competitorChartCheckBox.getValue()) {
+        if(showChartMarkEditMediaButtonsAndVideo && !competitorChartCheckBox.getValue()) {
             patchedPerspectiveOwnSettings.resetShowCompetitorsChart();
         }
         if(!leaderBoardPanelCheckBox.getValue()) {
             patchedPerspectiveOwnSettings.resetShowLeaderBoard();
         }
-        if(!windChartCheckBox.getValue()) {
+        if(showChartMarkEditMediaButtonsAndVideo && !windChartCheckBox.getValue()) {
             patchedPerspectiveOwnSettings.resetShowWindChart();
         }
         if(!tagsCheckBox.getValue()) {
             patchedPerspectiveOwnSettings.resetShowTags();;;
         }
-        if(!maneuverCheckBox.getValue()) {
+        if(showChartMarkEditMediaButtonsAndVideo && !maneuverCheckBox.getValue()) {
             patchedPerspectiveOwnSettings.resetShowManeuver();;
         }
         if(!filterSetNameCheckBox.getValue()) {
@@ -120,24 +122,21 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
 
     @Override
     protected Widget getAdditionalWidget() {
+        VerticalPanel mainPanel = new VerticalPanel();
+        mainPanel.setSpacing(30);
+        mainPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        VerticalPanel settingsPanel = new VerticalPanel();
+        settingsPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        mainPanel.add(settingsPanel);
         timeStampCheckbox = createCheckbox(stringMessages.timeStampCheckBoxLabel());
         timeStampCheckbox.setValue(true);
         timeStampCheckbox.addClickHandler(new ClickHandler() {
-
             @Override
             public void onClick(ClickEvent event) {
                 updateLink();
             }
         });
-        windChartCheckBox = createCheckbox(stringMessages.windChartCheckBoxLabel());
-        windChartCheckBox.setValue(true);
-        windChartCheckBox.addClickHandler(new ClickHandler() {
-            
-            @Override
-            public void onClick(ClickEvent event) {
-                updateLink();
-            }
-        });
+        settingsPanel.add(timeStampCheckbox);
         leaderBoardPanelCheckBox = createCheckbox(stringMessages.leaderBoardCheckBoxLabel());
         leaderBoardPanelCheckBox.setValue(true);
         leaderBoardPanelCheckBox.addClickHandler(new ClickHandler() {
@@ -147,15 +146,7 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
                 updateLink();
             }
         });
-        competitorChartCheckBox = createCheckbox(stringMessages.competitorChartCheckBoxLabel());
-        competitorChartCheckBox.setValue(true);
-        competitorChartCheckBox.addClickHandler(new ClickHandler() {
-            
-            @Override
-            public void onClick(ClickEvent event) {
-                updateLink();
-            }
-        });
+        settingsPanel.add(leaderBoardPanelCheckBox);
         filterSetNameCheckBox = createCheckbox(stringMessages.filterSetNameCheckBoxLabel());
         filterSetNameCheckBox.setValue(true);
         filterSetNameCheckBox.addClickHandler(new ClickHandler() {
@@ -165,6 +156,7 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
                 updateLink();
             }
         });
+        settingsPanel.add(filterSetNameCheckBox);
         tagsCheckBox = createCheckbox(stringMessages.tagsCheckBoxLabel());
         tagsCheckBox.setValue(true);
         tagsCheckBox.addClickHandler(new ClickHandler() {
@@ -174,15 +166,7 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
                 updateLink();
             }
         });
-        maneuverCheckBox = createCheckbox(stringMessages.maneuverCheckBoxLabel());
-        maneuverCheckBox.setValue(true);
-        maneuverCheckBox.addClickHandler(new ClickHandler() {
-            
-            @Override
-            public void onClick(ClickEvent event) {
-                updateLink();
-            }
-        });
+        settingsPanel.add(tagsCheckBox);
         competitorSelectionCheckBox = createCheckbox(stringMessages.competitorSelectionCheckBoxLabel());
         competitorSelectionCheckBox.setValue(true);
         competitorSelectionCheckBox.addClickHandler(new ClickHandler() {
@@ -192,6 +176,39 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
                 updateLink();
             }
         });
+        settingsPanel.add(competitorSelectionCheckBox);
+        if(showChartMarkEditMediaButtonsAndVideo) {
+            windChartCheckBox = createCheckbox(stringMessages.windChartCheckBoxLabel());
+            windChartCheckBox.setValue(true);
+            windChartCheckBox.addClickHandler(new ClickHandler() {
+                
+                @Override
+                public void onClick(ClickEvent event) {
+                    updateLink();
+                }
+            });
+            settingsPanel.add(windChartCheckBox);
+            competitorChartCheckBox = createCheckbox(stringMessages.competitorChartCheckBoxLabel());
+            competitorChartCheckBox.setValue(true);
+            competitorChartCheckBox.addClickHandler(new ClickHandler() {
+                
+                @Override
+                public void onClick(ClickEvent event) {
+                    updateLink();
+                }
+            });
+            settingsPanel.add(competitorChartCheckBox);
+            maneuverCheckBox = createCheckbox(stringMessages.maneuverCheckBoxLabel());
+            maneuverCheckBox.setValue(true);
+            maneuverCheckBox.addClickHandler(new ClickHandler() {
+                
+                @Override
+                public void onClick(ClickEvent event) {
+                    updateLink();
+                }
+            });
+            settingsPanel.add(maneuverCheckBox);
+        }
         linkFieldLabel = createLabel(stringMessages.linkSharingAnchorText());
         linkField = createTextBox(assembleLink());
         Anchor copyToClipBoardAnchor = new Anchor(stringMessages.copyToClipBoard());
@@ -207,20 +224,6 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
         qrCodeImage = new Image();
         qrCodeImage.ensureDebugId("regattaSharingQrCode");
         qrCodeImage.setPixelSize(400, 400);
-        VerticalPanel mainPanel = new VerticalPanel();
-        mainPanel.setSpacing(30);
-        mainPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-        VerticalPanel settingsPanel = new VerticalPanel();
-        settingsPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-        settingsPanel.add(timeStampCheckbox);
-        settingsPanel.add(windChartCheckBox);
-        settingsPanel.add(leaderBoardPanelCheckBox);
-        settingsPanel.add(competitorChartCheckBox);
-        settingsPanel.add(filterSetNameCheckBox);
-        settingsPanel.add(tagsCheckBox);
-        settingsPanel.add(maneuverCheckBox);
-        settingsPanel.add(competitorSelectionCheckBox);
-        mainPanel.add(settingsPanel);
         VerticalPanel linkContentPanel = new VerticalPanel();
         linkContentPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
         linkContentPanel.add(linkField);
