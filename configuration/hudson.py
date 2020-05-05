@@ -141,7 +141,7 @@ class Downloader:
 	async def __parse_suite_with_cases(self, json):
 		suite = Suite(json.get("name"), json.get("duration"))
 		for case_json in json["cases"]:
-			suite.cases.append(Case(case_json["className"], case_json["status"], case_json["duration"], case_json["age"]))
+			suite.cases.append(Case(case_json["className"] + "." + case_json["name"], case_json["status"], case_json["duration"], case_json["age"]))
 		return suite
 	
 	async def get_json(self, url, append_api_suffix=True):
@@ -260,7 +260,7 @@ class FlakyCasesModule(AbstractModule):
 		return self.p_builds / self.n_builds
 	
 	def result(self):
-		out = ""
+		out = "sum of case first fail across all builds divided by number of builds, name of case\n"
 		s = [(k, self.case_counter.get(k)) for k in sorted(self.case_counter, key=self.case_counter.get, reverse=True)]
 		for case, new_fails in s:
 			out += "  {0:.2f}, {1}\n".format(new_fails / self.n_builds, case)
@@ -292,10 +292,10 @@ class FailedCasesModule(AbstractModule):
 		return self.p_builds / self.n_builds
 
 	def result(self):
-		out = ""
+		out = "sum of case fails across all builds divided by number of builds, name of case\n"
 		s = [(k, self.case_counter.get(k)) for k in sorted(self.case_counter, key=self.case_counter.get, reverse=True)]
 		for case, fails in s:
-			out += "{0:>5}, {1}\n".format(fails, case)
+			out += "  {0:.2f}, {1}\n".format(fails / self.n_builds, case)
 		return out[:-1]
 
 class FailedSuitesModule(FailedCasesModule):
@@ -342,7 +342,7 @@ class CaseDurationModule(AbstractModule):
 		return self.p_builds / self.n_builds
 	
 	def result(self):
-		out = ""
+		out = "avg duration of passed case across all builds, name of case\n"
 		s = [(case, total / self.run_counter.get(case), total) for case, total in self.dur_counter.items()]
 		s = sorted(s, key=lambda x: x[1], reverse=True)
 		for case, duration, total in s:
