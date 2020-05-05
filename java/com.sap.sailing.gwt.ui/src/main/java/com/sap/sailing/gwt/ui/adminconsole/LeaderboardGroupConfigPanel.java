@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -596,13 +597,25 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
                 userService.getUserManagementService(), type,
                 group -> leaderboardGroupsRefresher.fillLeaderboardGroups(), stringMessages);
         actionsColumn.addAction(LeaderboardGroupConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
-                e -> config.openOwnershipDialog(e));
+                // Explicitly using an anonymous inner class. Using a method reference caused problems with the GWT compiler (see bug 5269)
+                new Consumer<LeaderboardGroupDTO>() {
+                    @Override
+                    public void accept(LeaderboardGroupDTO e) {
+                        config.openOwnershipDialog(e);
+                    }
+                });
         
         final EditACLDialog.DialogConfig<LeaderboardGroupDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementService(), type,
                 group -> leaderboardGroupsRefresher.fillLeaderboardGroups(), stringMessages);
         actionsColumn.addAction(LeaderboardGroupConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                e -> configACL.openACLDialog(e));
+                // Explicitly using an anonymous inner class. Using a method reference caused problems with the GWT compiler (see bug 5269)
+                new Consumer<LeaderboardGroupDTO>() {
+                    @Override
+                    public void accept(LeaderboardGroupDTO e) {
+                        configACL.openACLDialog(e);
+                    }
+                });
         
         final MigrateGroupOwnershipDialog.DialogConfig<LeaderboardGroupDTO> migrateDialogConfig = MigrateGroupOwnershipDialog
                 .create(userService.getUserManagementService(), (lg, dto) -> {
@@ -620,7 +633,13 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
                             });
                 });
         actionsColumn.addAction(EventConfigImagesBarCell.ACTION_MIGRATE_GROUP_OWNERSHIP_HIERARCHY, CHANGE_OWNERSHIP,
-                e -> migrateDialogConfig.openDialog(e));
+                // Explicitly using an anonymous inner class. Using a method reference caused problems with the GWT compiler (see bug 5269)
+                new Consumer<LeaderboardGroupDTO>() {
+                    @Override
+                    public void accept(LeaderboardGroupDTO e) {
+                        migrateDialogConfig.openDialog(e);
+                    }
+                });
 
         SelectionCheckboxColumn<LeaderboardGroupDTO> leaderboardTableSelectionColumn =
                 new SelectionCheckboxColumn<LeaderboardGroupDTO>(
