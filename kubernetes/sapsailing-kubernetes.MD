@@ -13,6 +13,7 @@ Create a mongodb replicaset, with the following key features:
 - Antiaffinity
 - (custom metrics for autoscaling PVCs)
 - (try to replicate current AWS setup, using different storage types for fast access and persistent storage)
+- (mongo backups and/or storage snapshots)
 
 ### b) Sailing Analytics
 Create a application server deployment that represents the current AWS configuration and has some of the features described in: [https://wiki.sapsailing.com/wiki/projects/cloud-orchestrator](https://wiki.sapsailing.com/wiki/projects/cloud-orchestrator)
@@ -37,9 +38,11 @@ Don't forget to hibernate the cluster if you don't need anymore. This will save 
 A short update on helm, after the confusion about Tiller and Helm Classic Tiller has been removed in Helm 3. See[5]
 
 ## 4. Docker registry secret
-To pull an image from a private repository you need a secret for that: 
->kubectl create secret docker-registry <secret-name> --docker-server=https://index.docker.io/v1/ --docker-username=<your-name> --docker-password=<your-pword> --docker-email=<your-email>
-[6]. You might use the createDockerRegistrySecret script provided within /docker.
+To pull an image from a private repository you need a secret for that[6]: 
+```
+kubectl create secret docker-registry <secret-name> --docker-server=https://index.docker.io/v1/ --docker-username=<your-name> --docker-password=<your-pword> --docker-email=<your-email>   
+```
+You might use the createDockerRegistrySecret script provided within /docker.
 
 After that you may use that secret as follows[7]
 
