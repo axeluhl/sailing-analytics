@@ -7,7 +7,7 @@
 try:
 	import aiohttp
 except ImportError:
-	print("Missing package: aiohttp\nInstall with: pip3 install aiohttp")
+	print("Missing package: aiohttp\nInstall with: pip3 install aiohttp\npip3 debian package: python3-pip")
 	exit(1)
 import asyncio, logging, random
 from typing import List, Tuple, Dict
