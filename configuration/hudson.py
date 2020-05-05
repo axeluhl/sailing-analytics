@@ -358,7 +358,7 @@ class ProgressBar:
 	__spin = -1
 	def start(self, progress_function):
 		if self.__task == None:
-			self.__task = asyncio.create_task(self.show(progress_function))
+			self.__task = asyncio_create_task(self.show(progress_function))
 	async def show(self, progress_function):
 		if not self.enabled:
 			return
@@ -388,6 +388,12 @@ class ProgressBar:
 		if self.__task != None:
 			await self.__task
 			self.__task = None
+
+def asyncio_create_task(coro):
+	if version_info >= (3, 7):
+		return asyncio.create_task(coro)
+	loop = asyncio.get_event_loop()
+	return loop.create_task(coro)
 
 def asyncio_run(aw): #https://stackoverflow.com/questions/55590343/asyncio-run-or-run-until-complete
     if version_info >= (3, 7):
