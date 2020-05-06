@@ -45,9 +45,9 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
     public ShareLinkDialog(String path, RaceboardContextDefinition raceboardContextDefinition,
             PerspectiveLifecycle<RaceBoardPerspectiveOwnSettings> lifecycle,
             PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> perspectiveCompositeSettings,
-            SailingServiceAsync sailingService, boolean isSmallScreen,
-            StringMessages stringMessages) {
-        super(stringMessages.shareTheLink(), "", stringMessages.ok(), stringMessages.cancel(), /* validator */ null, /* callback */ null);
+            SailingServiceAsync sailingService, boolean isSmallScreen, StringMessages stringMessages) {
+        super(stringMessages.shareTheLink(), "", stringMessages.ok(), stringMessages.cancel(), /* validator */ null,
+                /* callback */ null);
         this.lifecycle = lifecycle;
         this.perspectiveCompositeSettings = perspectiveCompositeSettings;
         this.sailingService = sailingService;
@@ -105,7 +105,7 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
         if (isScreenBigEnough && !windChartCheckBox.getValue()) {
             patchedPerspectiveOwnSettings.resetShowWindChart();
         }
-        if (!tagsCheckBox.getValue()) {
+        if (isScreenBigEnough && !tagsCheckBox.getValue()) {
             patchedPerspectiveOwnSettings.resetShowTags();
         }
         if (isScreenBigEnough && !maneuverCheckBox.getValue()) {
@@ -143,7 +143,7 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
             }
         });
         settingsPanel.add(timeStampCheckbox);
-        if(isScreenBigEnough) {
+        if (isScreenBigEnough) {
             leaderBoardPanelCheckBox = createCheckbox(stringMessages.leaderboardCheckBoxLabel());
             leaderBoardPanelCheckBox.setValue(true);
             leaderBoardPanelCheckBox.addClickHandler(new ClickHandler() {
@@ -153,6 +153,15 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
                 }
             });
             settingsPanel.add(leaderBoardPanelCheckBox);
+            tagsCheckBox = createCheckbox(stringMessages.tagsCheckBoxLabel());
+            tagsCheckBox.setValue(true);
+            tagsCheckBox.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    updateLink();
+                }
+            });
+            settingsPanel.add(tagsCheckBox);
         }
         filterSetNameCheckBox = createCheckbox(stringMessages.filterSetNameCheckBoxLabel());
         filterSetNameCheckBox.setValue(true);
@@ -163,15 +172,6 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
             }
         });
         settingsPanel.add(filterSetNameCheckBox);
-        tagsCheckBox = createCheckbox(stringMessages.tagsCheckBoxLabel());
-        tagsCheckBox.setValue(true);
-        tagsCheckBox.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                updateLink();
-            }
-        });
-        settingsPanel.add(tagsCheckBox);
         competitorSelectionCheckBox = createCheckbox(stringMessages.competitorSelectionCheckBoxLabel());
         competitorSelectionCheckBox.setValue(true);
         competitorSelectionCheckBox.addClickHandler(new ClickHandler() {
