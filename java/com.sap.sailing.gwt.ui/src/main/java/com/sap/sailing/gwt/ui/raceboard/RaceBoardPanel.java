@@ -246,11 +246,14 @@ public class RaceBoardPanel
         raceInformationHeader.setStyleName("RegattaRaceInformation-Header");
         regattaAndRaceTimeInformationHeader = new FlowPanel();
         regattaAndRaceTimeInformationHeader.setStyleName("RegattaAndRaceTime-Header");
-        final Runnable shareLinkAction = () -> {
+        Runnable shareLinkAction = null;
+        if(raceboardContextDefinition != null) {
+            shareLinkAction = () -> {
                 ShareLinkDialog shareLinkDialog = new ShareLinkDialog("/gwt/RaceBoard.html", raceboardContextDefinition, lifecycle,
-                        getSettings(), sailingService,  showChartMarkEditMediaButtonsAndVideo, stringMessages);
+                        getSettings(), sailingService, showChartMarkEditMediaButtonsAndVideo, stringMessages);
                 shareLinkDialog.show();
-        };
+            };
+        }
         this.userManagementMenuView = new AuthenticationMenuViewImpl(new Anchor(), mainCss.usermanagement_loggedin(), mainCss.usermanagement_open());
         this.userManagementMenuView.asWidget().setStyleName(mainCss.usermanagement_icon());
         timeRangeWithZoomModel = new TimeRangeWithZoomModel();
