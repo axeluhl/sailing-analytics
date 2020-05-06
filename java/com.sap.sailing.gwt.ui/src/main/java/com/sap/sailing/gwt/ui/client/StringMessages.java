@@ -2377,7 +2377,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String shareTheLink();
     String timeStampCheckBoxLabel();
     String windChartCheckBoxLabel();
-    String leaderBoardCheckBoxLabel();
+    String leaderboardCheckBoxLabel();
     String competitorChartCheckBoxLabel();
     String filterSetNameCheckBoxLabel();
     String competitorSelectionCheckBoxLabel();
