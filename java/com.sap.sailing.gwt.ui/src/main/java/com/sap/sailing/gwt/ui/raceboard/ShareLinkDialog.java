@@ -142,8 +142,8 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
                 updateLink();
             }
         });
+        settingsPanel.add(timeStampCheckbox);
         if(!isSmallScreen) {
-            settingsPanel.add(timeStampCheckbox);
             leaderBoardPanelCheckBox = createCheckbox(stringMessages.leaderboardCheckBoxLabel());
             leaderBoardPanelCheckBox.setValue(true);
             leaderBoardPanelCheckBox.addClickHandler(new ClickHandler() {
@@ -152,8 +152,8 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
                     updateLink();
                 }
             });
+            settingsPanel.add(leaderBoardPanelCheckBox);
         }
-        settingsPanel.add(leaderBoardPanelCheckBox);
         filterSetNameCheckBox = createCheckbox(stringMessages.filterSetNameCheckBoxLabel());
         filterSetNameCheckBox.setValue(true);
         filterSetNameCheckBox.addClickHandler(new ClickHandler() {
