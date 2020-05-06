@@ -29,7 +29,7 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
     private final PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> perspectiveCompositeSettings;
     private final LinkWithSettingsGenerator<Settings> linkWithSettingsGenerator;
     private final SailingServiceAsync sailingService;
-    private final boolean isSmallScreen;
+    private final boolean isScreenBigEnough;
     private CheckBox timeStampCheckbox;
     private CheckBox windChartCheckBox;
     private CheckBox leaderBoardPanelCheckBox;
@@ -56,7 +56,7 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
                 raceboardContextDefinition.getLeaderboardName(), raceboardContextDefinition.getLeaderboardGroupName(),
                 raceboardContextDefinition.getEventId(), /* mode */ null);
         this.linkWithSettingsGenerator = new LinkWithSettingsGenerator<>(path, newRaceBoardContextDefinition);
-        this.isSmallScreen = isSmallScreen;
+        this.isScreenBigEnough = isSmallScreen;
         this.stringMessages = stringMessages;
     }
 
@@ -96,19 +96,19 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
         if (!timeStampCheckbox.getValue()) {
             patchedPerspectiveOwnSettings.resetInitialDurationAfterRaceStartInReplay();
         }
-        if (isSmallScreen && !competitorChartCheckBox.getValue()) {
+        if (isScreenBigEnough && !competitorChartCheckBox.getValue()) {
             patchedPerspectiveOwnSettings.resetShowCompetitorsChart();
         }
-        if (isSmallScreen && !leaderBoardPanelCheckBox.getValue()) {
+        if (isScreenBigEnough && !leaderBoardPanelCheckBox.getValue()) {
             patchedPerspectiveOwnSettings.resetShowLeaderBoard();
         }
-        if (isSmallScreen && !windChartCheckBox.getValue()) {
+        if (isScreenBigEnough && !windChartCheckBox.getValue()) {
             patchedPerspectiveOwnSettings.resetShowWindChart();
         }
         if (!tagsCheckBox.getValue()) {
             patchedPerspectiveOwnSettings.resetShowTags();
         }
-        if (isSmallScreen && !maneuverCheckBox.getValue()) {
+        if (isScreenBigEnough && !maneuverCheckBox.getValue()) {
             patchedPerspectiveOwnSettings.resetShowManeuver();
         }
         if (!filterSetNameCheckBox.getValue()) {
@@ -143,7 +143,7 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
             }
         });
         settingsPanel.add(timeStampCheckbox);
-        if(!isSmallScreen) {
+        if(isScreenBigEnough) {
             leaderBoardPanelCheckBox = createCheckbox(stringMessages.leaderboardCheckBoxLabel());
             leaderBoardPanelCheckBox.setValue(true);
             leaderBoardPanelCheckBox.addClickHandler(new ClickHandler() {
@@ -181,7 +181,7 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
             }
         });
         settingsPanel.add(competitorSelectionCheckBox);
-        if (isSmallScreen) {
+        if (isScreenBigEnough) {
             windChartCheckBox = createCheckbox(stringMessages.windChartCheckBoxLabel());
             windChartCheckBox.setValue(true);
             windChartCheckBox.addClickHandler(new ClickHandler() {
