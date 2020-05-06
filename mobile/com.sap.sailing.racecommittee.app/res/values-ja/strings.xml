@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="no"?><resources xmlns:tools="http://schemas.android.com/tools">
+<?xml version="1.0" encoding="UTF-8"?><resources xmlns:tools="http://schemas.android.com/tools">
 
     <string-array name="empty_array" tools:ignore="UnusedResources"/>
     <string name="empty"/>
@@ -9,7 +9,7 @@
     
     
     <string name="url_google_geocoder">"http://maps.googleapis.com/maps/api/geocode/json?address="</string>
-    <string name="urlpart_google_geocoder_sensor">"?sensor=true"</string>
+    <string name="urlpart_google_geocoder_sensor">"\?sensor=true"</string>
     <string name="running_on_course">"(コース %s 上)"</string>
     <string name="course_design_number_waypoints">"コースに %d の変針点があります"</string>
     
@@ -385,7 +385,6 @@
     <string name="finishing_started">"最初のフィニッシュが %1$s"</string>
     <string name="finishing_started_since">"(%s)"</string>
     <string name="finishing_done">"ただちにダウン"</string>
-
     <string name="finished_recording">"録音"</string>
     <string name="finished_replay">"音声を再生"</string>
     <string name="finished_list">"フィニッシュ一覧"</string>
@@ -566,7 +565,7 @@
 
     <string name="competitor_merge_error_message">"この競技者は別のデバイスから変更されており、自分でも同じデータを変更しています。このデータが現在正しいことを確認してください。"</string>
 
-    <string name="finishing_revoke">Revoke</string>
-    <string name="error_revoke_finished">Cannot revoke finished time</string>
-    <string name="error_revoke_finishing">Cannot revoke finishing time</string>
+    <string name="finishing_revoke">"取消"</string>
+    <string name="error_revoke_finished">"フィニッシュ時刻の取消ができません"</string>
+    <string name="error_revoke_finishing">"フィニッシュ予定時刻の取消ができません"</string>
 </resources>

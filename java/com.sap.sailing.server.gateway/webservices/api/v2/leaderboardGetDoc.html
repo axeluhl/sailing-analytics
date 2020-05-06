@@ -51,7 +51,8 @@ There is also the 'ALL' shortcut constant which can be used to get all available
 	</tr>
     <tr>
         <td>&nbsp;</td>
-        <td>columnNames [Default = all columns or what showOnlyActiveRacesForCompetitorIds specifies]</td>
+        <td>columnNames [Default = all columns or what showOnlyActiveRacesForCompetitorIds specifies]: can be specified multiple times
+            to request more than one column; columns specified with this parameter are added to the ones inferred from <tt>showOnlyActiveRacesForCompetitorIds</tt>.</td>
     </tr>
     <tr>
         <td>&nbsp;</td>
@@ -68,6 +69,14 @@ There is also the 'ALL' shortcut constant which can be used to get all available
                  this parameter is used but columnNames is not, only the columns specified by this parameter
                  will be delivered.</div>
         </td>
+    </tr>
+    <tr>
+    	<td>&nbsp;</td>
+    	<td>
+    		<div>showOnlyCompetitorsWithIdsProvided: if <tt>true</tt>, only the competitors whose stringified IDs have been
+    		     provided by one of the <tt>showOnlyActiveRacesForCompetitorIds</tt> parameters will be added to the result
+    		     document; otherwise, all competitors in the fleets selected will be represented in the result.</div>
+    	</td>
     </tr>
     <tr>
         <td>&nbsp;</td>
