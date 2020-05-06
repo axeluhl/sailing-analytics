@@ -215,7 +215,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                     JSONObject jsonLeaderboard;
                     jsonLeaderboard = getLeaderboardJson(resultState, maxCompetitorsCount, requestTimePoint,
                             leaderboard, timePoint, /* race column names */ null, /* race detail names */ null, competitorAndBoatIdsOnly,
-                            /* showOnlyActiveRacesForCompetitorIds */ null, skip);
+                            /* showOnlyActiveRacesForCompetitorIds */ null, skip, /* showOnlyCompetitorsWithIdsProvided */ false);
                     response = Response.ok(streamingOutput(jsonLeaderboard)).build();
                 } catch (NoWindException | InterruptedException | ExecutionException e) {
                     response = Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage())
@@ -231,7 +231,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
     @Override
     protected JSONObject getLeaderboardJson(Leaderboard leaderboard,
             TimePoint resultTimePoint, ResultStates resultState, Integer maxCompetitorsCount, List<String> raceColumnNames,
-            List<String> raceDetailNames, boolean competitorIdsOnly, List<String> showOnlyActiveRacesForCompetitorIds, boolean userPresentedValidRegattaSecret)
+            List<String> raceDetailNames, boolean competitorIdsOnly, List<String> showOnlyActiveRacesForCompetitorIds, boolean userPresentedValidRegattaSecret, boolean showOnlyCompetitorsWithIdsProvided)
             throws NoWindException, InterruptedException, ExecutionException {
         LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(
                 resultTimePoint, Collections.<String> emptyList(), /* addOverallDetails */

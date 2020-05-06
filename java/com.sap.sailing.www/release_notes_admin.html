@@ -23,6 +23,16 @@
             <div class="mainContent">
                 <h2 class="releaseHeadline">Release Notes - Administration Console</h2>
                 <div class="innerContent">
+                    <h2 class="articleSubheadline">May 2020</h2>
+                    <ul class="bulletList">
+                        <li>There are new Java Management Beans (MX Beans) for the thread pool executors
+                            that run various tasks inside the server. Find them at object name
+                            <tt>com.sap.sse.ThreadPool.{thread-pool-name}</tt> with {thread-pool-name}
+                            being something like "Default background executor" or "Default foreground executor".
+                            Particularly attributes such as <tt>QueuedTasks</tt> and <tt>CompletedTaskCount</tt>
+                            can help JMX clients such as JConsole to understand the state of the server.
+                        </li>
+                    </ul>
                     <h2 class="articleSubheadline">April 2020</h2>
                     <ul class="bulletList">
                         <li>There is a new switch for the TracTrac connector you can use to automatically receive

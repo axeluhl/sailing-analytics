@@ -5319,7 +5319,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         if (sailingServer.getUrl().contains("//")) {
             expandedURL = sailingServer.getUrl();
         } else {
-            expandedURL = "http://" + sailingServer.getUrl();
+            expandedURL = "https://" + sailingServer.getUrl();
         }
         URL serverURL = new URL(expandedURL);
         RemoteSailingServerReference serverRef = getService().apply(new AddRemoteSailingServerReference(sailingServer.getName(), serverURL));

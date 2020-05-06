@@ -32,7 +32,7 @@ import com.sap.sailing.gwt.ui.client.shared.filter.FilterUIFactory;
 import com.sap.sailing.gwt.ui.client.shared.filter.FilterWithUI;
 import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardFetcher;
 import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardFilterContext;
-import com.sap.sailing.gwt.ui.client.shared.filter.QuickRankProvider;
+import com.sap.sailing.gwt.ui.client.shared.filter.QuickFlagDataValuesProvider;
 import com.sap.sailing.gwt.ui.client.shared.filter.SelectedCompetitorsFilter;
 import com.sap.sailing.gwt.ui.client.shared.filter.SelectedRaceFilterContext;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
@@ -370,9 +370,9 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
     }
     
     /**
-     * @return the {@link QuickRankProvider} if set or <code>null</code> if there is none
+     * @return the {@link QuickFlagDataValuesProvider} if set or <code>null</code> if there is none
      */
-    public QuickRankProvider getQuickRankProvider() {
+    public QuickFlagDataValuesProvider getQuickRankProvider() {
         return this.raceMap;
     }
 

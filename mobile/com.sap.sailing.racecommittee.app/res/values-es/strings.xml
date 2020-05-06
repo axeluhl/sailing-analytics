@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="no"?><resources xmlns:tools="http://schemas.android.com/tools">
+<?xml version="1.0" encoding="UTF-8"?><resources xmlns:tools="http://schemas.android.com/tools">
 
     <string-array name="empty_array" tools:ignore="UnusedResources"/>
     <string name="empty"/>
@@ -9,7 +9,7 @@
     
     
     <string name="url_google_geocoder">"http://maps.googleapis.com/maps/api/geocode/json?address="</string>
-    <string name="urlpart_google_geocoder_sensor">"?sensor=true"</string>
+    <string name="urlpart_google_geocoder_sensor">"\?sensor=true"</string>
     <string name="running_on_course">"(En regata %s)"</string>
     <string name="course_design_number_waypoints">"La regata tiene %d puntos de ruta"</string>
     
@@ -385,7 +385,6 @@
     <string name="finishing_started">"Primero en meta a %1$s"</string>
     <string name="finishing_started_since">"(%s)"</string>
     <string name="finishing_done">"Ahora arriada"</string>
-
     <string name="finished_recording">"Grabación"</string>
     <string name="finished_replay">"Contestar voz"</string>
     <string name="finished_list">"Lista de meta"</string>
@@ -565,7 +564,8 @@
     <string name="hello_call_error_neutral">"Modificar servidor"</string>
 
     <string name="competitor_merge_error_message">"Este competidor se ha modificado desde otro dispositivo y ha modificado los mismos datos. Asegúrese de que estos datos son ahora correctos."</string>
-    <string name="finishing_revoke">Revoke</string>
-    <string name="error_revoke_finished">Cannot revoke finished time</string>
-    <string name="error_revoke_finishing">Cannot revoke finishing time</string>
+
+    <string name="finishing_revoke">"Revocar"</string>
+    <string name="error_revoke_finished">"No se puede revocar el tiempo finalizado"</string>
+    <string name="error_revoke_finishing">"No se puede revocar el tiempo de finalización"</string>
 </resources>
