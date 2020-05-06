@@ -29,7 +29,7 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
     private final PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> perspectiveCompositeSettings;
     private final LinkWithSettingsGenerator<Settings> linkWithSettingsGenerator;
     private final SailingServiceAsync sailingService;
-    private final boolean showChartMarkEditMediaButtonsAndVideo;
+    private final boolean isSmallScreen;
     private CheckBox timeStampCheckbox;
     private CheckBox windChartCheckBox;
     private CheckBox leaderBoardPanelCheckBox;
@@ -45,8 +45,9 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
     public ShareLinkDialog(String path, RaceboardContextDefinition raceboardContextDefinition,
             PerspectiveLifecycle<RaceBoardPerspectiveOwnSettings> lifecycle,
             PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> perspectiveCompositeSettings,
-            SailingServiceAsync sailingService, boolean showChartMarkEditMediaButtonsAndVideo, StringMessages stringMessages) {
-        super(stringMessages.shareTheLink(), "", stringMessages.ok(), stringMessages.cancel(), null, null);
+            SailingServiceAsync sailingService, boolean isSmallScreen,
+            StringMessages stringMessages) {
+        super(stringMessages.shareTheLink(), "", stringMessages.ok(), stringMessages.cancel(), /* validator */ null, /* callback */ null);
         this.lifecycle = lifecycle;
         this.perspectiveCompositeSettings = perspectiveCompositeSettings;
         this.sailingService = sailingService;
@@ -58,8 +59,8 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
         this.isSmallScreen = isSmallScreen;
         this.stringMessages = stringMessages;
     }
-    
-    void updateLink(){
+
+    void updateLink() {
         String url = assembleLink();
         linkField.setText(url);
         createQrCode(url);
@@ -79,7 +80,7 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
             }
         });
     }
-    
+
     private String assembleLink() {
         PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> patchedSettings = patchSettings();
         String url = this.linkWithSettingsGenerator.createUrl(patchedSettings);
@@ -87,31 +88,33 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
     }
 
     private PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> patchSettings() {
-        PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> patchedSettings = lifecycle.createDefaultSettings();
+        PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> patchedSettings = lifecycle
+                .createDefaultSettings();
         SettingsUtil.copyValues(perspectiveCompositeSettings, patchedSettings);
-        final RaceBoardPerspectiveOwnSettings patchedPerspectiveOwnSettings = patchedSettings.getPerspectiveOwnSettings();
-        if(!timeStampCheckbox.getValue()) {
+        final RaceBoardPerspectiveOwnSettings patchedPerspectiveOwnSettings = patchedSettings
+                .getPerspectiveOwnSettings();
+        if (!timeStampCheckbox.getValue()) {
             patchedPerspectiveOwnSettings.resetInitialDurationAfterRaceStartInReplay();
         }
-        if(showChartMarkEditMediaButtonsAndVideo && !competitorChartCheckBox.getValue()) {
+        if (isSmallScreen && !competitorChartCheckBox.getValue()) {
             patchedPerspectiveOwnSettings.resetShowCompetitorsChart();
         }
-        if(!leaderBoardPanelCheckBox.getValue()) {
+        if (!leaderBoardPanelCheckBox.getValue()) {
             patchedPerspectiveOwnSettings.resetShowLeaderBoard();
         }
-        if(showChartMarkEditMediaButtonsAndVideo && !windChartCheckBox.getValue()) {
+        if (isSmallScreen && !windChartCheckBox.getValue()) {
             patchedPerspectiveOwnSettings.resetShowWindChart();
         }
-        if(!tagsCheckBox.getValue()) {
-            patchedPerspectiveOwnSettings.resetShowTags();;;
+        if (!tagsCheckBox.getValue()) {
+            patchedPerspectiveOwnSettings.resetShowTags();
         }
-        if(showChartMarkEditMediaButtonsAndVideo && !maneuverCheckBox.getValue()) {
-            patchedPerspectiveOwnSettings.resetShowManeuver();;
+        if (isSmallScreen && !maneuverCheckBox.getValue()) {
+            patchedPerspectiveOwnSettings.resetShowManeuver();
         }
-        if(!filterSetNameCheckBox.getValue()) {
-            patchedPerspectiveOwnSettings.resetActiveCompetitorsFilterSetName();;
+        if (!filterSetNameCheckBox.getValue()) {
+            patchedPerspectiveOwnSettings.resetActiveCompetitorsFilterSetName();
         }
-        if(!competitorSelectionCheckBox.getValue()) {
+        if (!competitorSelectionCheckBox.getValue()) {
             patchedPerspectiveOwnSettings.resetSelectedCompetitor();
             patchedPerspectiveOwnSettings.resetSelectedCompetitors();
         }
@@ -139,15 +142,17 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
                 updateLink();
             }
         });
-        settingsPanel.add(timeStampCheckbox);
-        leaderBoardPanelCheckBox = createCheckbox(stringMessages.leaderBoardCheckBoxLabel());
-        leaderBoardPanelCheckBox.setValue(true);
-        leaderBoardPanelCheckBox.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                updateLink();
-            }
-        });
+        if(!isSmallScreen) {
+            settingsPanel.add(timeStampCheckbox);
+            leaderBoardPanelCheckBox = createCheckbox(stringMessages.leaderboardCheckBoxLabel());
+            leaderBoardPanelCheckBox.setValue(true);
+            leaderBoardPanelCheckBox.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    updateLink();
+                }
+            });
+        }
         settingsPanel.add(leaderBoardPanelCheckBox);
         filterSetNameCheckBox = createCheckbox(stringMessages.filterSetNameCheckBoxLabel());
         filterSetNameCheckBox.setValue(true);
@@ -176,11 +181,11 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
             }
         });
         settingsPanel.add(competitorSelectionCheckBox);
-        if(showChartMarkEditMediaButtonsAndVideo) {
+        if (isSmallScreen) {
             windChartCheckBox = createCheckbox(stringMessages.windChartCheckBoxLabel());
             windChartCheckBox.setValue(true);
             windChartCheckBox.addClickHandler(new ClickHandler() {
-                
+
                 @Override
                 public void onClick(ClickEvent event) {
                     updateLink();
@@ -199,7 +204,7 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
             maneuverCheckBox = createCheckbox(stringMessages.maneuverCheckBoxLabel());
             maneuverCheckBox.setValue(true);
             maneuverCheckBox.addClickHandler(new ClickHandler() {
-                
+
                 @Override
                 public void onClick(ClickEvent event) {
                     updateLink();
@@ -230,7 +235,7 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
         updateLink();
         return mainPanel;
     }
-    
+
     private native void copyToClipBoard() /*-{
         return $doc.execCommand('copy');
     }-*/;
