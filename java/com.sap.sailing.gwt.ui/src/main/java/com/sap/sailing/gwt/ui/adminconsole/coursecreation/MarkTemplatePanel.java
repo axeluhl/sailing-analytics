@@ -287,7 +287,7 @@ public class MarkTemplatePanel extends FlowPanel {
                 new DefaultActionsImagesBarCell(stringMessages), userService);
         final EditOwnershipDialog.DialogConfig<MarkTemplateDTO> configOwnership = EditOwnershipDialog
                 .create(userService.getUserManagementService(), type, markTemplate -> {
-                    /* no refresh action */}, stringMessages);
+                    refreshMarkTemplates();}, stringMessages);
 
         final EditACLDialog.DialogConfig<MarkTemplateDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementService(), type, markTemplate -> markTemplate.getAccessControlList(),
