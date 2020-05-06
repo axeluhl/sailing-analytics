@@ -99,7 +99,7 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
         if (isSmallScreen && !competitorChartCheckBox.getValue()) {
             patchedPerspectiveOwnSettings.resetShowCompetitorsChart();
         }
-        if (!leaderBoardPanelCheckBox.getValue()) {
+        if (isSmallScreen && !leaderBoardPanelCheckBox.getValue()) {
             patchedPerspectiveOwnSettings.resetShowLeaderBoard();
         }
         if (isSmallScreen && !windChartCheckBox.getValue()) {
