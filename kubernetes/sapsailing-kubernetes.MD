@@ -75,6 +75,12 @@ kubectl run -i --tty --rm debug0 --image=ubuntu --restart=Never -- bash -c "apt-
 ```
 mongo "mongodb://mongo-live-rs-client.default.svc.cluster.local/?replicaSet=<replicaSetName-from-mongo.yaml>"
 ```
+Optionally you can just use the service name defined in the mongo.yaml:
+```
+mongo "mongodb://<name-in-mongo.yaml>-client/?replicaSet=<replicaSetName-from-mongo.yaml>
+```
+
+
 Now you can look for the primary executing ``db.isMaster()`` in the mongo shell. Delete that pod with ``kubectl delete pod <name>``, and watch for the mongo shell to reconnect to the newly elected primary.
 
 ## Sailing Analytics
