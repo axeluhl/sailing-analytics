@@ -50,8 +50,12 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
         this.lifecycle = lifecycle;
         this.perspectiveCompositeSettings = perspectiveCompositeSettings;
         this.sailingService = sailingService;
-        this.linkWithSettingsGenerator = new LinkWithSettingsGenerator<>(path, raceboardContextDefinition);
-        this.showChartMarkEditMediaButtonsAndVideo = showChartMarkEditMediaButtonsAndVideo;
+        RaceboardContextDefinition newRaceBoardContextDefinition = new RaceboardContextDefinition(
+                raceboardContextDefinition.getRegattaName(), raceboardContextDefinition.getRaceName(),
+                raceboardContextDefinition.getLeaderboardName(), raceboardContextDefinition.getLeaderboardGroupName(),
+                raceboardContextDefinition.getEventId(), /* mode */ null);
+        this.linkWithSettingsGenerator = new LinkWithSettingsGenerator<>(path, newRaceBoardContextDefinition);
+        this.isSmallScreen = isSmallScreen;
         this.stringMessages = stringMessages;
     }
     
