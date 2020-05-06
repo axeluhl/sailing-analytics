@@ -100,7 +100,7 @@ public class RegistrationLinkWithQRCodeDialog extends DataEntryDialog<Registrati
         urlTextBox = createTextBox("URL", 100);
         urlTextBox.ensureDebugId("RegistrationLinkUrl");
         registrationLinkPanelContent.add(urlTextBox);
-        Anchor copyAnchor = new Anchor(stringMessages.copyToClipBoard());
+        Anchor copyAnchor = new Anchor(stringMessages.copyToClipboard());
         copyAnchor.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {

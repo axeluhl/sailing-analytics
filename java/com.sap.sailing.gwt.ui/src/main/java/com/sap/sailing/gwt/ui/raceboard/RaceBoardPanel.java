@@ -209,8 +209,8 @@ public class RaceBoardPanel
      * @param availableDetailTypes
      *            A list of all Detailtypes, that will be offered in the Settingsdialog. Can be used to hide settings no
      *            data exists for, eg Bravo, Expdition ect.
-     * @param trackingConnectorInfo 
-     * @param raceboardContextDefinition 
+     * @param trackingConnectorInfo
+     *            Information about the tracking technology provider, that was used to track the race.
      */
     public RaceBoardPanel(Component<?> parent,
             ComponentContext<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>> componentContext,
@@ -223,7 +223,8 @@ public class RaceBoardPanel
             UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider,
             boolean showChartMarkEditMediaButtonsAndVideo, boolean showHeaderPanel,
             Iterable<DetailType> availableDetailTypes, StrippedLeaderboardDTOWithSecurity leaderboardDTO,
-            final RaceWithCompetitorsAndBoatsDTO raceDTO, TrackingConnectorInfoDTO trackingConnectorInfo, RaceboardContextDefinition raceboardContextDefinition) {
+            final RaceWithCompetitorsAndBoatsDTO raceDTO, TrackingConnectorInfoDTO trackingConnectorInfo,
+            RaceboardContextDefinition raceboardContextDefinition) {
         super(parent, componentContext, lifecycle, settings);
         this.sailingService = sailingService;
         this.mediaService = mediaService;
@@ -837,21 +838,22 @@ public class RaceBoardPanel
         final RaceBoardPerspectiveOwnSettings initialSettings = super.getPerspectiveSettings();
         final CompetitorsFilterSets leaderboardFiterPanelFilterSets = competitorSearchTextBox
                 .getCompetitorsFilterSets();
-        FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> activeFilterSet = leaderboardFiterPanelFilterSets.getActiveFilterSet();
+        FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> activeFilterSet = leaderboardFiterPanelFilterSets
+                .getActiveFilterSet();
         String activeCompetitorsFilterSetName;
-        if(activeFilterSet != null) {
-            activeCompetitorsFilterSetName  = activeFilterSet.getName();
-        }else {
+        if (activeFilterSet != null) {
+            activeCompetitorsFilterSetName = activeFilterSet.getName();
+        } else {
             activeCompetitorsFilterSetName = initialSettings.getActiveCompetitorsFilterSetName();
         }
         final Set<String> selectedCompetitorIds = new HashSet<>();
         Duration newInitialDurationAfterRaceStartInReplay;
-        if(timer != null && racetimePanel != null) {
+        if (timer != null && racetimePanel != null) {
             final Date currentTimerDate = timer.getTime();
             final Date startOfRace = racetimePanel.getLastRaceTimesInfo().startOfRace;
-            newInitialDurationAfterRaceStartInReplay  = new MillisecondsDurationImpl(
+            newInitialDurationAfterRaceStartInReplay = new MillisecondsDurationImpl(
                     currentTimerDate.getTime() - startOfRace.getTime());
-        }else {
+        } else {
             newInitialDurationAfterRaceStartInReplay = initialSettings.getInitialDurationAfterRaceStartInReplay();
         }
         for (CompetitorDTO competitorDTO : getCompetitorSelectionProvider().getSelectedCompetitors()) {
@@ -863,8 +865,9 @@ public class RaceBoardPanel
         RaceBoardPerspectiveOwnSettings raceBoardPerspectiveOwnSettings = new RaceBoardPerspectiveOwnSettings(
                 activeCompetitorsFilterSetName, leaderboardPanel.isVisible(), isWindChartVisible,
                 isCompetitorChartVisible, initialSettings.isCanReplayDuringLiveRaces(),
-                newInitialDurationAfterRaceStartInReplay, /* legacy single selectedCompetitor */ null, selectedCompetitorIds, 
-                taggingPanel.isVisible(), isManeuverTableVisible, initialSettings.getJumpToTag());
+                newInitialDurationAfterRaceStartInReplay, /* legacy single selectedCompetitor */ null,
+                selectedCompetitorIds, taggingPanel.isVisible(), isManeuverTableVisible,
+                initialSettings.getJumpToTag());
         return raceBoardPerspectiveOwnSettings;
     }
     

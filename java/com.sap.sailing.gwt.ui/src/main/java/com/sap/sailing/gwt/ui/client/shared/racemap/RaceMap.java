@@ -14,7 +14,6 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
@@ -637,7 +636,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         topLeftControlsWrapperPanel = new FlowPanel();
         topLeftControlsWrapperPanel.add(combinedWindPanel);
         topLeftControlsWrapperPanel.add(trueNorthIndicatorPanel);
-        
         orientationChangeInProgress = false;
         mapFirstZoomDone = false;
         // TODO bug 494: reset zoom settings to user preferences
@@ -773,7 +771,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
 
                 map.setControls(ControlPosition.LEFT_TOP, topLeftControlsWrapperPanel);
                 adjustLeftControlsIndent();
-
                 RaceMap.this.raceMapImageManager.loadMapIcons(map);
                 map.setSize("100%", "100%");
                 map.addZoomChangeHandler(new ZoomChangeMapHandler() {
@@ -904,7 +901,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 if (settings.isShowWindStreamletOverlay()) {
                     streamletOverlay.setVisible(true);
                 }
-
                 if (isSimulationEnabled) {
                     // determine availability of polar diagram
                     setHasPolar();
@@ -927,8 +923,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     final Button settingsButton = createSettingsButton(map);
                     settingsCotrolFlowPanel.add(settingsButton);
                 }
-                final Button shareLinkButton = createShareLinkButton(map);
-                settingsCotrolFlowPanel.add(shareLinkButton);
+                if(shareLinkAction != null) {
+                    final Button shareLinkButton = createShareLinkButton(map);
+                    settingsCotrolFlowPanel.add(shareLinkButton);
+                }
                 map.setControls(ControlPosition.RIGHT_TOP, settingsCotrolFlowPanel);
                 // Data has been initialized
                 RaceMap.this.redraw();
@@ -1012,20 +1010,17 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     }
     
     private Button createShareLinkButton(MapWidget map) {
-        if(shareLinkAction != null) {
-            Button shareLinkButton = new Button();
-            shareLinkButton.setStyleName("gwt-ShareLinkButton");
-            shareLinkButton.ensureDebugId("raceMapShareLink");
-            shareLinkButton.setTitle(stringMessages.shareTheLink());
-            shareLinkButton.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    shareLinkAction.run();
-                }
-            });
-            return shareLinkButton;
-        }
-        return null;
+        Button shareLinkButton = new Button();
+        shareLinkButton.setStyleName("gwt-ShareLinkButton");
+        shareLinkButton.ensureDebugId("raceMapShareLink");
+        shareLinkButton.setTitle(stringMessages.shareTheLink());
+        shareLinkButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                shareLinkAction.run();
+            }
+        });
+        return shareLinkButton;
     }
 
     private void removeTransitions() {
@@ -1329,7 +1324,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         // Do boat specific actions
                         updateBoatPositions(newTime, transitionTimeInMillis, hasTailOverlapForCompetitor,
                                 competitorsToShow, boatData, /* updateTailsOnly */ false, detailTypeChanged);
-                        
                         if (!isRedraw) {
                             // only remove markers if the time is actually changed
                             if (douglasMarkers != null) {
@@ -1345,12 +1339,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         showCourseSidelinesOnMap(raceMapDataDTO.courseSidelines);
                         showStartAndFinishAndCourseMiddleLines(raceMapDataDTO.coursePositions);
                         showStartLineToFirstMarkTriangle(raceMapDataDTO.coursePositions);
-
                         // Rezoom the map
                         LatLngBounds zoomToBounds = null;
                         if (!settings.getZoomSettings().containsZoomType(ZoomTypes.NONE)) {
                             // Auto zoom if setting is not manual
-
                             zoomToBounds = settings.getZoomSettings().getNewBounds(RaceMap.this);
                             if (zoomToBounds == null && !mapFirstZoomDone) {
                                 // the user-specified zoom couldn't find what it was looking for; try defaults once
@@ -1452,7 +1444,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             if (!updateTailsOnly) {
                 showCompetitorInfoOnMap(newTime, transitionTimeInMillis,
                         competitorSelection.getSelectedFilteredCompetitors());
-
                 // even though the wind data is retrieved by a separate call, re-draw the advantage line because it
                 // needs to adjust to new boat positions
                 showAdvantageLine(competitorsToShow, newTime, transitionTimeInMillis);

@@ -214,7 +214,7 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
         }
         linkFieldLabel = createLabel(stringMessages.linkSharingAnchorText());
         linkField = createTextBox(assembleLink());
-        Anchor copyToClipBoardAnchor = new Anchor(stringMessages.copyToClipBoard());
+        Anchor copyToClipBoardAnchor = new Anchor(stringMessages.copyToClipboard());
         copyToClipBoardAnchor.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {

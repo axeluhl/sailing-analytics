@@ -2382,7 +2382,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String filterSetNameCheckBoxLabel();
     String competitorSelectionCheckBoxLabel();
     String linkSharingAnchorText();
-    String copyToClipBoard();
+    String copyToClipboard();
     String maneuverCheckBoxLabel();
     String tagsCheckBoxLabel();
     String useOfficialResultsForAutomaticUpdates();

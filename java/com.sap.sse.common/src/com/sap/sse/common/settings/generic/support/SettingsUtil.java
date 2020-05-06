@@ -143,7 +143,7 @@ public final class SettingsUtil {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private static <T extends GenericSerializableSettings> T copyDefaultsForGenericSerializableSettings(
             T settingsWithDefaults, T settingsToSetDefaults, ValuesExtractor defaultValuesExtractor, ValuesSetter valuesSetter) {
-        if(settingsWithDefaults == null) {
+        if (settingsWithDefaults == null) {
             return null;
         }
         Map<String, Setting> childSettingsWithDefaults = settingsWithDefaults.getChildSettings();
