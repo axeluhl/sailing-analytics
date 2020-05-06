@@ -225,7 +225,9 @@ public class TimePanelFragment extends BasePanelFragment {
             if (!mCompetitorList.equals(view)) {
                 resetFragment(mCompetitorList.isLocked(),
                         getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false), PenaltyFragment.class);
-                mCompetitorList.setMarkerLevel(PanelButton.LEVEL_NORMAL);
+                if (!mCompetitorToggleOn) {
+                    mCompetitorList.setMarkerLevel(PanelButton.LEVEL_NORMAL);
+                }
             }
         }
     }
