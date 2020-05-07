@@ -87,7 +87,8 @@ public class AutoplayHelper {
             }
         }
         if (raceTimesInfoProvider.getRaceIdentifiers().isEmpty()) {
-            LOGGER.severe("No raceidentifier was found, cannot determine currently LifeRace, check event configuration");
+            LOGGER.warning(
+                    "No raceidentifier was found. Can not determine current live race. Check event configuration in case you expect a race to be in live state.");
             callback.onSuccess(null);
         }
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(new RaceTimesInfoProviderListener() {
