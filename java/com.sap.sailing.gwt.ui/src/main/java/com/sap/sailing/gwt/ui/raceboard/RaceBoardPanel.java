@@ -577,7 +577,7 @@ public class RaceBoardPanel
     }
 
     private void setComponentVisible(SideBySideComponentViewer componentViewer, Component<?> component, boolean visible) {
-        component.setVisible(visible);      
+        component.setVisible(visible);
         componentViewer.forceLayout();
     }
     
