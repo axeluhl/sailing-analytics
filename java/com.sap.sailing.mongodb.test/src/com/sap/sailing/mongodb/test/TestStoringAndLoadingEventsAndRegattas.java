@@ -421,7 +421,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
                 /* canBoatsOfCompetitorsChangePerRace */ false, CompetitorRegistrationType.CLOSED,
                 /* registrationLinkSecret */ null, regattaStartDate, regattaEndDate, "123", regattaProxy.getSeries(),
                 regattaProxy.isPersistent(), DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT),
-                /* defaultCourseAreaId */ null, /* buoyZoneRadiusInHullLengths */ 2.0, /* useStartTimeInference */ true,
+                /* courseAreaIds */ Collections.emptySet(), /* buoyZoneRadiusInHullLengths */ 2.0, /* useStartTimeInference */ true,
                 /* controlTrackingFromStartAndFinishTimes */ false, /* autoRestartTrackingUponCompetitorSetChange */ false, OneDesignRankingMetric::new);
         DynamicCompetitorWithBoat competitorWithBoat1 = AbstractLeaderboardTest.createCompetitorWithBoat("Humba1");
         DynamicCompetitorWithBoat competitorWithBoat2 = AbstractLeaderboardTest.createCompetitorWithBoat("Humba2");
@@ -494,7 +494,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
                 regattaProxy.canBoatsOfCompetitorsChangePerRace(), regattaProxy.getCompetitorRegistrationType(),
                 /* registrationLinkSecret */ null, regattaProxy.getStartDate(), regattaProxy.getEndDate(), "123",
                 regattaProxy.getSeries(), regattaProxy.isPersistent(),
-                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null,
+                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), /* courseAreaIds */ Collections.emptySet(),
                 /* buoyZoneRadiusInHullLengths */2.0, /* useStartTimeInference */ true,
                 /* controlTrackingFromStartAndFinishTimes */ false, /* autoRestartTrackingUponCompetitorSetChange */ false, OneDesignRankingMetric::new);
         trackedRegatta[0] = new DynamicTrackedRegattaImpl(regatta);

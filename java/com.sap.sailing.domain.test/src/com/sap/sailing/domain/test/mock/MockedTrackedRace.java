@@ -419,7 +419,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     }
 
                     @Override
-                    public void setDefaultCourseArea(Iterable<CourseArea> newCourseAreas) {
+                    public void setCourseAreas(Iterable<CourseArea> newCourseAreas) {
                     }
 
                     @Override

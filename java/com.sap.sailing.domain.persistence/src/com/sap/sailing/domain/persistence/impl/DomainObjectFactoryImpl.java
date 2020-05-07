@@ -613,25 +613,16 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             result = null;
         } else {
             final ScoringScheme scoringScheme = loadScoringScheme(dbLeaderboard);
-
-            Serializable courseAreaId = (Serializable) dbLeaderboard.get(FieldNames.COURSE_AREA_ID.name());
-            CourseArea courseArea = null;
-            if (courseAreaId != null) {
-                UUID courseAreaUuid = UUID.fromString(courseAreaId.toString());
-                courseArea = baseDomainFactory.getExistingCourseAreaById(courseAreaUuid);
-            }
-
+            final Iterable<CourseArea> courseAreas = loadCourseAreas(dbLeaderboard);
             result = new FlexibleLeaderboardImpl(getRaceLogStore(), getRegattaLogStore(),
                     (String) dbLeaderboard.get(FieldNames.LEADERBOARD_NAME.name()), resultDiscardingRule, scoringScheme,
-                    courseArea);
+                    courseAreas);
             // For a FlexibleLeaderboard, there should be only the default fleet for any race column
             for (Object dbRaceColumnAsObject : dbRaceColumns) {
                 Document dbRaceColumn = (Document) dbRaceColumnAsObject;
                 String columnName = (String) dbRaceColumn.get(FieldNames.LEADERBOARD_COLUMN_NAME.name());
-
                 RaceColumn raceColumn = result.addRaceColumn(columnName,
                         (Boolean) dbRaceColumn.get(FieldNames.LEADERBOARD_IS_MEDAL_RACE_COLUMN.name()));
-
                 Map<String, RaceIdentifier> raceIdentifiers = loadRaceIdentifiers(dbRaceColumn);
                 RaceIdentifier defaultFleetRaceIdentifier = raceIdentifiers.get(result.getFleet(null).getName());
                 if (defaultFleetRaceIdentifier == null) {
@@ -641,7 +632,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 if (defaultFleetRaceIdentifier != null) {
                     Fleet defaultFleet = result.getFleet(null);
                     if (defaultFleet != null) {
-
                         raceColumn.setRaceIdentifier(defaultFleet, defaultFleetRaceIdentifier);
                     } else {
                         // leaderboard has no default fleet; don't know what to do with default RaceIdentifier
@@ -650,10 +640,41 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                                 + " because no default fleet was found in leaderboard");
                     }
                 }
-
             }
         }
         return result;
+    }
+
+    /**
+     * Loads no, one, or several course areas from the {@link FieldNames#COURSE_AREA_ID} and the
+     * {@link FieldNames#COURSE_AREA_IDS} fields of the document passed. For backward compatibility, {@code null} or a
+     * single course area ID are accepted in {@link FieldNames#COURSE_AREA_ID}. If a non-{@code null} value is found
+     * there, it is looked up as a course area and dded to the result. The default way of representing the course areas
+     * now is in the {@link FieldNames#COURSE_AREA_IDS} field where a list is expected.
+     * 
+     * @return an always valid, non-{@code null} sequence which may be empty
+     */
+    private Iterable<CourseArea> loadCourseAreas(Document documentContainingCourseAreaIds) {
+        final Set<CourseArea> courseAreas = new HashSet<>();
+        String courseAreaId = (String) documentContainingCourseAreaIds.get(FieldNames.COURSE_AREA_ID.name());
+        if (courseAreaId != null) {
+            lookupCourseAreaAndAddIfFound(courseAreas, courseAreaId);
+        }
+        List<?> courseAreaIds = (List<?>) documentContainingCourseAreaIds.get(FieldNames.COURSE_AREA_ID.name());
+        if (courseAreaIds != null) {
+            for (final Object courseAreaIdAsString : courseAreaIds) {
+                lookupCourseAreaAndAddIfFound(courseAreas, courseAreaIdAsString.toString());
+            }
+        }
+        return courseAreas;
+    }
+
+    private void lookupCourseAreaAndAddIfFound(final Set<CourseArea> courseAreas, String courseAreaIdAsString) {
+        UUID courseAreaUuid = UUID.fromString(courseAreaIdAsString);
+        final CourseArea lookupResult = baseDomainFactory.getExistingCourseAreaById(courseAreaUuid);
+        if (lookupResult != null) {
+            courseAreas.add(lookupResult);
+        }
     }
 
     private ScoringScheme loadScoringScheme(Document dbLeaderboard) {
@@ -1268,12 +1289,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             @SuppressWarnings("unchecked")
             Iterable<Document> dbSeries = (Iterable<Document>) dbRegatta.get(FieldNames.REGATTA_SERIES.name());
             Iterable<Series> series = loadSeries(dbSeries, trackedRegattaRegistry);
-            Serializable courseAreaId = (Serializable) dbRegatta.get(FieldNames.COURSE_AREA_ID.name());
-            CourseArea courseArea = null;
-            if (courseAreaId != null) {
-                UUID courseAreaUuid = UUID.fromString(courseAreaId.toString());
-                courseArea = baseDomainFactory.getExistingCourseAreaById(courseAreaUuid);
-            }
+            final Iterable<CourseArea> courseAreas = loadCourseAreas(dbRegatta);
             RegattaConfiguration configuration = null;
             if (dbRegatta.containsKey(FieldNames.REGATTA_REGATTA_CONFIGURATION.name())) {
                 final JsonWriterSettings writerSettings = JsonWriterSettings.builder().outputMode(JsonMode.RELAXED).build();
@@ -1309,7 +1325,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             if (createMigratableRegatta) {
                 result = new MigratableRegattaImpl(getRaceLogStore(), getRegattaLogStore(), name, boatClass,
                         canBoatsOfCompetitorsChangePerRace, competitorRegistrationType, startDate, endDate, series, /* persistent */true,
-                        loadScoringScheme(dbRegatta), id, courseArea,
+                        loadScoringScheme(dbRegatta), id, courseAreas,
                         buoyZoneRadiusInHullLengths == null ? Regatta.DEFAULT_BUOY_ZONE_RADIUS_IN_HULL_LENGTHS
                                 : buoyZoneRadiusInHullLengths,
                         useStartTimeInference == null ? true : useStartTimeInference,
@@ -1318,7 +1334,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             } else {
                 result = new RegattaImpl(getRaceLogStore(), getRegattaLogStore(), name, boatClass,
                         canBoatsOfCompetitorsChangePerRace, competitorRegistrationType, startDate, endDate, series, /* persistent */true,
-                        loadScoringScheme(dbRegatta), id, courseArea,
+                        loadScoringScheme(dbRegatta), id, courseAreas,
                         buoyZoneRadiusInHullLengths == null ? Regatta.DEFAULT_BUOY_ZONE_RADIUS_IN_HULL_LENGTHS
                                 : buoyZoneRadiusInHullLengths,
                         useStartTimeInference == null ? true : useStartTimeInference,

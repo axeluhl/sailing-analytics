@@ -289,11 +289,11 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     List<StrippedLeaderboardDTOWithSecurity> getLeaderboardsWithSecurity() throws UnauthorizedException;
 
     StrippedLeaderboardDTOWithSecurity updateLeaderboard(String leaderboardName, String newLeaderboardName,
-            String newLeaderboardDisplayName, int[] newDiscardingThreasholds, UUID newCourseAreaId)
+            String newLeaderboardDisplayName, int[] newDiscardingThreasholds, Iterable<UUID> newCourseAreaIds)
             throws UnauthorizedException;
 
     StrippedLeaderboardDTOWithSecurity createFlexibleLeaderboard(String leaderboardName, String leaderboardDisplayName,
-            int[] discardThresholds, ScoringSchemeType scoringSchemeType, UUID courseAreaId)
+            int[] discardThresholds, ScoringSchemeType scoringSchemeType, Iterable<UUID> courseAreaIds)
             throws UnauthorizedException;
 
     StrippedLeaderboardDTOWithSecurity createRegattaLeaderboard(RegattaName regattaIdentifier,
@@ -323,7 +323,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     RegattaDTO createRegatta(String regattaName, String boatClassName, boolean canBoatsOfCompetitorsChangePerRace,
             CompetitorRegistrationType competitorRegistrationType, String registrationLinkSecret, Date startDate,
             Date endDate, RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
-            boolean persistent, ScoringSchemeType scoringSchemeType, UUID defaultCourseAreaId,
+            boolean persistent, ScoringSchemeType scoringSchemeType, Iterable<UUID> courseAreaIds,
             Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
             boolean controlTrackingFromStartAndFinishTimes, boolean autoRestartTrackingUponCompetitorSetChange, RankingMetrics rankingMetricType)
             throws UnauthorizedException;
@@ -334,7 +334,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     void removeRegattas(Collection<RegattaIdentifier> regattas) throws UnauthorizedException;
 
-    void updateRegatta(RegattaIdentifier regattaIdentifier, Date startDate, Date endDate, UUID defaultCourseAreaUuid,
+    void updateRegatta(RegattaIdentifier regattaIdentifier, Date startDate, Date endDate, Iterable<UUID> courseAreaUuids,
             RegattaConfigurationDTO regattaConfiguration, Double buoyZoneRadiusInHullLengths,
             boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes,
             boolean autoRestartTrackingUponCompetitorSetChange, String registrationLinkSecret, CompetitorRegistrationType registrationType) throws UnauthorizedException;

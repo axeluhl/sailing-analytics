@@ -178,7 +178,7 @@ public class SearchServiceTest {
                 /* registrationLinkSecret */ UUID.randomUUID().toString(), /* startDate */ null, /* endDate */ null,
                 UUID.randomUUID(),
                 new RegattaCreationParametersDTO(seriesCreationParams), /* persistent */
-                true, new LowPoint(), kielAlpha.getId(), /* buoyZoneRadiusInHullLengths */2.0,
+                true, new LowPoint(), Collections.singleton(kielAlpha.getId()), /* buoyZoneRadiusInHullLengths */2.0,
                 /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false,
                 /* autoRestartTrackingUponCompetitorSetChange */ false, RankingMetrics.ONE_DESIGN));
         server.apply(new AddColumnToSeries(pfingstbusch29er.getRegattaIdentifier(), "Default", "R1"));
@@ -191,7 +191,7 @@ public class SearchServiceTest {
                 /* registrationLinkSecret */ UUID.randomUUID().toString(), /* startDate */ null, /* endDate */ null,
                 UUID.randomUUID(),
                 new RegattaCreationParametersDTO(seriesCreationParams), /* persistent */
-                true, new LowPoint(), kielBravo.getId(), /* buoyZoneRadiusInHullLengths */2.0,
+                true, new LowPoint(), Collections.singleton(kielBravo.getId()), /* buoyZoneRadiusInHullLengths */2.0,
                 /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false,
                 /* autoRestartTrackingUponCompetitorSetChange */ false, RankingMetrics.ONE_DESIGN));
         server.apply(new AddColumnToSeries(pfingstbusch470.getRegattaIdentifier(), "Default", "R1"));
@@ -220,7 +220,7 @@ public class SearchServiceTest {
                 /* registrationLinkSecret */ UUID.randomUUID().toString(), /* startDate */ null, /* endDate */ null,
                 UUID.randomUUID(),
                 new RegattaCreationParametersDTO(seriesCreationParams), /* persistent */
-                true, new LowPoint(), flensburgStandard.getId(), /* buoyZoneRadiusInHullLengths */2.0,
+                true, new LowPoint(), Collections.singleton(flensburgStandard.getId()), /* buoyZoneRadiusInHullLengths */2.0,
                 /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false,
                 /* autoRestartTrackingUponCompetitorSetChange */ false, RankingMetrics.ONE_DESIGN));
         server.apply(new AddColumnToSeries(aalRegatta.getRegattaIdentifier(), "Default", "R1"));

@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.leaderboard.meta;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.sap.sailing.domain.base.CourseArea;
@@ -60,7 +61,7 @@ public class FlexibleMetaLeaderboard extends AbstractMetaLeaderboard {
 
     @Override
     public Iterable<CourseArea> getCourseAreas() {
-        return null;
+        return Collections.emptySet();
     }
     
     @Override

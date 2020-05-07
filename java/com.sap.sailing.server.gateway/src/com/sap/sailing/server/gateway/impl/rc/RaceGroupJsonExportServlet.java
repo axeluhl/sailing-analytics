@@ -26,7 +26,6 @@ import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.BoatClassJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.ColorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.CourseAreaJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.FleetJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.PositionJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.RegattaConfigurationJsonSerializer;
@@ -40,6 +39,7 @@ import com.sap.sailing.server.gateway.serialization.racegroup.impl.SeriesWithRow
 import com.sap.sailing.server.gateway.serialization.racegroup.impl.SeriesWithRowsOfRaceGroupSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogSerializer;
+import com.sap.sse.common.Util;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 
 public class RaceGroupJsonExportServlet extends AbstractJsonHttpServlet {
@@ -74,7 +74,7 @@ public class RaceGroupJsonExportServlet extends AbstractJsonHttpServlet {
         RaceGroupFactory raceGroupFactory = new RaceGroupFactory();
         final Set<Regatta> regattasForWhichRegattaLeaderboardsWereAdded = new HashSet<>();
         for (Leaderboard leaderboard : getService().getLeaderboards().values()) {
-            if (filterCourseArea.equals(leaderboard.getCourseAreas())) {
+            if (Util.contains(leaderboard.getCourseAreas(), filterCourseArea)) {
                 SecurityUtils.getSubject()
                         .checkPermission(leaderboard.getIdentifier().getStringPermission(DefaultActions.READ));
                 if (leaderboard instanceof RegattaLeaderboard && !(leaderboard instanceof RegattaLeaderboardWithEliminations)) {
@@ -83,7 +83,6 @@ public class RaceGroupJsonExportServlet extends AbstractJsonHttpServlet {
                     final Regatta regatta = ((RegattaLeaderboard) leaderboard).getRegatta();
                     SecurityUtils.getSubject()
                             .checkPermission(regatta.getIdentifier().getStringPermission(DefaultActions.READ));
-
                     regattasForWhichRegattaLeaderboardsWereAdded.add(regatta);
                 } else if (leaderboard instanceof FlexibleLeaderboard) {
                     result.add(serializer.serialize(raceGroupFactory.convert((FlexibleLeaderboard) leaderboard)));
@@ -93,7 +92,7 @@ public class RaceGroupJsonExportServlet extends AbstractJsonHttpServlet {
         // now add only those RegattaLeaderboardWithEliminations for which the original RegattaLeaderboard hasn't been added
         for (Leaderboard leaderboard : getService().getLeaderboards().values()) {
             if (leaderboard instanceof RegattaLeaderboardWithEliminations &&
-                    filterCourseArea.equals(leaderboard.getCourseAreas()) && 
+                    Util.contains(leaderboard.getCourseAreas(), filterCourseArea) && 
                     !regattasForWhichRegattaLeaderboardsWereAdded.contains(((RegattaLeaderboardWithEliminations) leaderboard).getRegatta())) {
                 result.add(serializer.serialize(raceGroupFactory.convert((RegattaLeaderboardWithEliminations) leaderboard)));
             }
@@ -111,8 +110,7 @@ public class RaceGroupJsonExportServlet extends AbstractJsonHttpServlet {
     }
 
     private static JsonSerializer<RaceGroup> createSerializer(UUID clientUuid) {
-        return new RaceGroupJsonSerializer(new BoatClassJsonSerializer(), new CourseAreaJsonSerializer(),
-                RegattaConfigurationJsonSerializer.create(),
+        return new RaceGroupJsonSerializer(new BoatClassJsonSerializer(), RegattaConfigurationJsonSerializer.create(),
                 new SeriesWithRowsOfRaceGroupSerializer(new SeriesWithRowsJsonSerializer(
                         new RaceRowsOfSeriesWithRowsSerializer(new RaceRowJsonSerializer(new FleetJsonSerializer(
                                 new ColorJsonSerializer()), new RaceCellJsonSerializer(createRaceLogSerializer(clientUuid), 

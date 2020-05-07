@@ -16,9 +16,10 @@ public class UpdateLeaderboard extends AbstractLeaderboardOperation<Leaderboard>
     private final String newLeaderboardName;
     private final String newLeaderboardDisplayName;
     private final int[] newDiscardingThresholds;
-    private final Iterable<Serializable> newCourseAreaIds;
+    private final Iterable<? extends Serializable> newCourseAreaIds;
     
-    public UpdateLeaderboard(String leaderboardName, String newLeaderboardName, String newLeaderboardDisplayName, int[] newDiscardingThresholds, Iterable<Serializable> newCourseAreaIds) {
+    public UpdateLeaderboard(String leaderboardName, String newLeaderboardName, String newLeaderboardDisplayName,
+            int[] newDiscardingThresholds, Iterable<? extends Serializable> newCourseAreaIds) {
         super(leaderboardName);
         this.newLeaderboardName = newLeaderboardName;
         this.newLeaderboardDisplayName = newLeaderboardDisplayName;

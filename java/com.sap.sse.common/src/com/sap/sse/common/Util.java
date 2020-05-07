@@ -387,10 +387,17 @@ public class Util {
         }
     }
     
+    /**
+     * @return {@code true} if {@code ts} {@link #contains(Iterable, Object) contains} at least one of the elements in
+     *         {@code isAnyOfTheseContained}. This means in particular that if {@code isAnyOfTheseContained} is
+     *         {@code null} or is empty, {@code false} will result.
+     */
     public static <T> boolean containsAny(Iterable<T> ts, Iterable<T> isAnyOfTheseContained) {
-        for (final T t : isAnyOfTheseContained) {
-            if (contains(ts, t)) {
-                return true;
+        if (isAnyOfTheseContained != null) {
+            for (final T t : isAnyOfTheseContained) {
+                if (contains(ts, t)) {
+                    return true;
+                }
             }
         }
         return false;

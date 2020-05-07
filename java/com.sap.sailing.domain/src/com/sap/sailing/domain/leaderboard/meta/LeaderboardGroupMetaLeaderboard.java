@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.leaderboard.meta;
 
+import java.util.Collections;
+
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -88,7 +90,7 @@ public class LeaderboardGroupMetaLeaderboard extends AbstractMetaLeaderboard imp
 
     @Override
     public Iterable<CourseArea> getCourseAreas() {
-        return null;
+        return Collections.emptySet();
     }
     
     @Override

@@ -8,8 +8,8 @@ import static com.sap.sailing.gwt.ui.adminconsole.LeaderboardRaceConfigImagesBar
 import static com.sap.sailing.gwt.ui.adminconsole.LeaderboardRaceConfigImagesBarCell.ACTION_REFRESH_RACELOG;
 import static com.sap.sailing.gwt.ui.adminconsole.LeaderboardRaceConfigImagesBarCell.ACTION_REMOVE;
 import static com.sap.sailing.gwt.ui.adminconsole.LeaderboardRaceConfigImagesBarCell.ACTION_SCRATCH_BOAT_SELECTION;
-import static com.sap.sailing.gwt.ui.adminconsole.LeaderboardRaceConfigImagesBarCell.ACTION_SET_IMPLIED_WIND;
 import static com.sap.sailing.gwt.ui.adminconsole.LeaderboardRaceConfigImagesBarCell.ACTION_SET_FINISHING_AND_FINISH_TIME;
+import static com.sap.sailing.gwt.ui.adminconsole.LeaderboardRaceConfigImagesBarCell.ACTION_SET_IMPLIED_WIND;
 import static com.sap.sailing.gwt.ui.adminconsole.LeaderboardRaceConfigImagesBarCell.ACTION_SET_STARTTIME;
 import static com.sap.sailing.gwt.ui.adminconsole.LeaderboardRaceConfigImagesBarCell.ACTION_SHOW_RACELOG;
 import static com.sap.sailing.gwt.ui.adminconsole.LeaderboardRaceConfigImagesBarCell.ACTION_UNLINK;
@@ -32,6 +32,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
@@ -57,6 +58,7 @@ import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.PairingListTemplateDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
@@ -282,15 +284,16 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
             String s2 = o2.scoringScheme == null ? null : o2.scoringScheme.toString();
             return new NaturalComparator().compare(s1, s2);
         });
-        TextColumn<StrippedLeaderboardDTOWithSecurity> courseAreaColumn = new TextColumn<StrippedLeaderboardDTOWithSecurity>() {
+        TextColumn<StrippedLeaderboardDTOWithSecurity> courseAreasColumn = new TextColumn<StrippedLeaderboardDTOWithSecurity>() {
             @Override
             public String getValue(StrippedLeaderboardDTOWithSecurity leaderboard) {
-                return leaderboard.defaultCourseAreaId == null ? "" : leaderboard.defaultCourseAreaName;
+                return Util.join(", ", Util.map(leaderboard.courseAreas, CourseAreaDTO::getName));
             }
         };
-        courseAreaColumn.setSortable(true);
-        leaderboardColumnListHandler.setComparator(courseAreaColumn,
-                (o1, o2) -> new NaturalComparator().compare(o1.defaultCourseAreaName, o2.defaultCourseAreaName));
+        courseAreasColumn.setSortable(true);
+        leaderboardColumnListHandler.setComparator(courseAreasColumn,
+                (o1, o2) -> new NaturalComparator().compare(Util.join(", ", Util.map(o1.courseAreas, CourseAreaDTO::getName)),
+                        Util.join(", ", Util.map(o2.courseAreas, CourseAreaDTO::getName))));
 
         final HasPermissions type = SecuredDomainType.LEADERBOARD;
         final AccessControlledActionsColumn<StrippedLeaderboardDTOWithSecurity, LeaderboardConfigImagesBarCell> leaderboardActionColumn = create(
@@ -381,7 +384,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
         leaderboardTable.addColumn(discardingOptionsColumn, stringMessages.discarding());
         leaderboardTable.addColumn(leaderboardTypeColumn, stringMessages.type());
         leaderboardTable.addColumn(scoringSystemColumn, stringMessages.scoringSystem());
-        leaderboardTable.addColumn(courseAreaColumn, stringMessages.courseArea());
+        leaderboardTable.addColumn(courseAreasColumn, stringMessages.courseAreas());
         SecuredDTOOwnerColumn.configureOwnerColumns(leaderboardTable, leaderboardColumnListHandler, stringMessages);
         leaderboardTable.addColumn(leaderboardActionColumn, stringMessages.actions());
         leaderboardTable.addColumnSortHandler(leaderboardColumnListHandler);
@@ -465,7 +468,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
     private LeaderboardDescriptor createLeaderboardDescriptor(StrippedLeaderboardDTO leaderboardDTO,
             ScoringSchemeType scoringScheme) {
         return new LeaderboardDescriptor(leaderboardDTO.getName(), leaderboardDTO.displayName, scoringScheme,
-                leaderboardDTO.discardThresholds, leaderboardDTO.regattaName, leaderboardDTO.defaultCourseAreaId);
+                leaderboardDTO.discardThresholds, leaderboardDTO.regattaName, Util.map(leaderboardDTO.courseAreas, CourseAreaDTO::getId));
     }
 
     @Override
@@ -903,7 +906,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                     public void ok(final LeaderboardDescriptor newLeaderboard) {
                         sailingService.createFlexibleLeaderboard(newLeaderboard.getName(),
                                 newLeaderboard.getDisplayName(), newLeaderboard.getDiscardThresholds(),
-                                newLeaderboard.getScoringScheme(), newLeaderboard.getCourseAreaId(),
+                                newLeaderboard.getScoringScheme(), newLeaderboard.getCourseAreaIds(),
                                 new MarkedAsyncCallback<StrippedLeaderboardDTOWithSecurity>(
                                         new AsyncCallback<StrippedLeaderboardDTOWithSecurity>() {
                                             @Override
@@ -1013,7 +1016,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
     private void updateLeaderboard(final String oldLeaderboardName, final LeaderboardDescriptor leaderboardToUpdate) {
         sailingService.updateLeaderboard(oldLeaderboardName, leaderboardToUpdate.getName(),
                 leaderboardToUpdate.getDisplayName(), leaderboardToUpdate.getDiscardThresholds(),
-                leaderboardToUpdate.getCourseAreaId(), new AsyncCallback<StrippedLeaderboardDTOWithSecurity>() {
+                leaderboardToUpdate.getCourseAreaIds(), new AsyncCallback<StrippedLeaderboardDTOWithSecurity>() {
                     @Override
                     public void onFailure(Throwable t) {
                         errorReporter.reportError(

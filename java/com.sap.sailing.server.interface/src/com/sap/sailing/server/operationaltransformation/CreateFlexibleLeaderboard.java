@@ -14,21 +14,22 @@ public class CreateFlexibleLeaderboard extends AbstractLeaderboardOperation<Flex
     private final int[] discardThresholds;
     private final ScoringScheme scoringScheme;
     private final String leaderboardDisplayName;
-    private final Serializable courseAreaId;
+    private final Iterable<? extends Serializable> courseAreaIds;
 
-    public CreateFlexibleLeaderboard(String leaderboardName, String leaderboardDisplayName, int[] discardThresholds, ScoringScheme scoringScheme, Serializable courseAreaId) {
+    public CreateFlexibleLeaderboard(String leaderboardName, String leaderboardDisplayName, int[] discardThresholds,
+            ScoringScheme scoringScheme, Iterable<? extends Serializable> courseAreaIds) {
         super(leaderboardName);
         this.leaderboardDisplayName = leaderboardDisplayName;
         this.discardThresholds = discardThresholds;
         this.scoringScheme = scoringScheme;
-        this.courseAreaId = courseAreaId;
+        this.courseAreaIds = courseAreaIds;
     }
 
     @Override
     public FlexibleLeaderboard internalApplyTo(RacingEventService toState) {
         FlexibleLeaderboard result = null;
         if (toState.getLeaderboardByName(getLeaderboardName()) == null) {
-            result = toState.addFlexibleLeaderboard(getLeaderboardName(), leaderboardDisplayName, discardThresholds, scoringScheme, courseAreaId);
+            result = toState.addFlexibleLeaderboard(getLeaderboardName(), leaderboardDisplayName, discardThresholds, scoringScheme, courseAreaIds);
         } else {
             logger.warning("Cannot replicate creation of flexible leaderboard "+getLeaderboardName()+" because it already exists in the replica");
         }

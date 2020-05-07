@@ -2,6 +2,7 @@ package com.sap.sailing.server.test;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.bson.Document;
@@ -50,19 +51,16 @@ public class LeaderboardStorageTest extends TestCase {
         RacingEventService service = new RacingEventServiceImpl();
         int[] dicardingThresholds = {};
         Leaderboard leaderboard = service.addFlexibleLeaderboard(LEADERBOARD_NAME, "testIt", dicardingThresholds,
-                new LowPoint(), "maaap");
-
+                new LowPoint(), Collections.singleton("maaap"));
         List<DynamicPerson> sailorList = new ArrayList<DynamicPerson>();
         sailorList.add(new PersonImpl("sailor", new NationalityImpl("GER"), null, ""));
         DynamicTeam team = new TeamImpl("team", sailorList, null);
         String competitorId = "testC";
         Competitor competitor = service.getBaseDomainFactory().getOrCreateCompetitor(competitorId, "Test C", null, null,
                 null, null, team, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null, /* storePersistently */ true);
-
         double carriedPoints = 2.0;
         leaderboard.setCarriedPoints(competitor, carriedPoints);
         service.getMongoObjectFactory().storeLeaderboard(leaderboard);
-
         // Test in db
         MongoCollection<Document> leaderboardCollection = MongoDBService.INSTANCE.getDB().getCollection("LEADERBOARDS");
         BasicDBObject query = new BasicDBObject();

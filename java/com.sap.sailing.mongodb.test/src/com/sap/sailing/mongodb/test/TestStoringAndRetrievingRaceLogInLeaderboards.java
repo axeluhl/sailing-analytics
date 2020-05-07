@@ -8,6 +8,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.net.UnknownHostException;
+import java.util.Collections;
 import java.util.UUID;
 
 import org.bson.Document;
@@ -105,7 +106,7 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoD
                 DomainFactory.INSTANCE);
         leaderboard = new FlexibleLeaderboardImpl(getRaceLogStore(), getRegattaLogStore(), leaderboardName,
                 new ThresholdBasedResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces),
-                new LowPoint(), null);
+                new LowPoint(), /* courseAreaIds */ Collections.emptySet());
         leaderboard.addRaceColumn(raceColumnName, /* medalRace */false);
     }
 

@@ -94,7 +94,15 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     public FlexibleLeaderboardImpl(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             String name, ThresholdBasedResultDiscardingRule resultDiscardingRule,
             ScoringScheme scoringScheme, CourseArea courseArea) {
+        this(raceLogStore, regattaLogStore, name, resultDiscardingRule, scoringScheme,
+                courseArea == null ? Collections.emptySet() : Collections.singleton(courseArea));
+    }
+    
+    public FlexibleLeaderboardImpl(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
+            String name, ThresholdBasedResultDiscardingRule resultDiscardingRule,
+            ScoringScheme scoringScheme, Iterable<CourseArea> courseAreas) {
         super(resultDiscardingRule);
+        assert courseAreas != null;
         this.scoringScheme = scoringScheme;
         if (name == null) {
             throw new IllegalArgumentException("A leaderboard's name must not be null");
@@ -103,9 +111,7 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         this.races = new ArrayList<>();
         this.raceLogStore = raceLogStore;
         this.courseAreas = Collections.synchronizedList(new ArrayList<>());
-        if (courseArea != null) {
-            courseAreas.add(courseArea);
-        }
+        Util.addAll(courseAreas, this.courseAreas);
         this.regattaLikeHelper = new BaseRegattaLikeImpl(new FlexibleLeaderboardAsRegattaLikeIdentifier(this), regattaLogStore) {
             private static final long serialVersionUID = 4082392360832548953L;
 

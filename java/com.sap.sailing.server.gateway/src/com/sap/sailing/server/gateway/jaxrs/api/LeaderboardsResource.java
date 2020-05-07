@@ -64,6 +64,7 @@ import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
+import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
@@ -313,7 +314,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             getService().apply(new UpdateLeaderboard(/* leaderboardName */ leaderboard.getName(),
                     /* newLeaderboardName */ leaderboard.getName(), newLeaderboardDisplayName,
                     resultDiscardingThresholds,
-                    leaderboard.getCourseAreas() != null ? leaderboard.getCourseAreas().getId() : null));
+                    Util.map(leaderboard.getCourseAreas(), CourseArea::getId)));
         } else {
             return Response.status(Status.NOT_FOUND).entity(
                     "Could not find a leaderboard with name '" + StringEscapeUtils.escapeHtml(leaderboardName) + "'.")

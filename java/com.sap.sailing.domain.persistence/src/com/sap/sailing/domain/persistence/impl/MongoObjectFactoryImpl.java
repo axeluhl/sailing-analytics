@@ -360,11 +360,9 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
                 // at least store the scoring scheme
                 dbLeaderboard.put(FieldNames.SCORING_SCHEME_TYPE.name(), leaderboard.getScoringScheme().getType().name());
             }
-            if (leaderboard.getCourseAreas() != null) {
-                dbLeaderboard.put(FieldNames.COURSE_AREA_ID.name(), leaderboard.getCourseAreas().getId().toString());
-            } else {
-                dbLeaderboard.put(FieldNames.COURSE_AREA_ID.name(), null);
-            }
+            final BasicDBList courseAreaIdsAsStrings = new BasicDBList();
+            Util.addAll(Util.map(leaderboard.getCourseAreas(), ca->ca.getId().toString()), courseAreaIdsAsStrings);
+            dbLeaderboard.put(FieldNames.COURSE_AREA_IDS.name(), courseAreaIdsAsStrings);
             storeColumnFactors(leaderboard, dbLeaderboard);
             storeLeaderboardCorrectionsAndDiscards(leaderboard, dbLeaderboard);
         }
@@ -714,12 +712,9 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             dbRegatta.put(FieldNames.BOAT_CLASS_TYPICALLY_STARTS_UPWIND.name(), regatta.getBoatClass().typicallyStartsUpwind());
         }
         dbRegatta.put(FieldNames.REGATTA_SERIES.name(), storeSeries(regatta.getSeries()));
-
-        if (regatta.getCourseAreas() != null) {
-            dbRegatta.put(FieldNames.COURSE_AREA_ID.name(), regatta.getCourseAreas().getId().toString());
-        } else {
-            dbRegatta.put(FieldNames.COURSE_AREA_ID.name(), null);
-        }
+        final BasicDBList courseAreaIdsAsStrings = new BasicDBList();
+        Util.addAll(Util.map(regatta.getCourseAreas(), ca->ca.getId().toString()), courseAreaIdsAsStrings);
+        dbRegatta.put(FieldNames.COURSE_AREA_IDS.name(), courseAreaIdsAsStrings);
         if (regatta.getRegattaConfiguration() != null) {
             JsonSerializer<RegattaConfiguration> serializer = RegattaConfigurationJsonSerializer.create();
             JSONObject json = serializer.serialize(regatta.getRegattaConfiguration());

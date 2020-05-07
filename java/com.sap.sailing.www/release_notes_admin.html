@@ -32,6 +32,12 @@
                             Particularly attributes such as <tt>QueuedTasks</tt> and <tt>CompletedTaskCount</tt>
                             can help JMX clients such as JConsole to understand the state of the server.
                         </li>
+                        <li>An incompatible change has been applied to the JSON output format of the
+                            <tt>sailingserver/api/v1/regattas/{regatta-name}</tt> end point. Instead of delivering
+                            the ID of the single "default" course area in the field <tt>courseAreaId</tt> now a list
+                            of such IDs is provided in the <tt>courseAreaIds</tt> field as an array that is always present
+                            but may be empty.
+                        </li>
                     </ul>
                     <h2 class="articleSubheadline">April 2020</h2>
                     <ul class="bulletList">

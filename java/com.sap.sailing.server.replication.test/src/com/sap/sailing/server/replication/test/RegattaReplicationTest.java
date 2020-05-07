@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -48,7 +49,8 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         Regatta masterRegatta = master.createRegatta(RegattaImpl.getDefaultName(baseEventName, boatClassName),
                 boatClassName, /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
                 /* registrationLinkSecret */ null, /* startDate */ null, /* endDate */ null, regattaId, series,
-                /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null,
+                /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT),
+                /* course area ID */ (Serializable) null,
                 /* buoyZoneRadiusInHullLengths */2.0, /* useStartTimeInference */ true,
                 /* controlTrackingFromStartAndFinishTimes */ false, /* autoRestartTrackingUponCompetitorSetChange */ false, OneDesignRankingMetric::new);
 
@@ -76,13 +78,15 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         Regatta masterRegatta1 = master.createRegatta(RegattaImpl.getDefaultName(baseEventName, boatClass1Name),
                 boatClass1Name, canBoatsOfCompetitorsChangePerRaceRegatta1, CompetitorRegistrationType.CLOSED,
                 /* registrationLinkSecret */ null, /* startDate */ null, /* endDate */ null, regattaId1, series,
-                /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null,
+                /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT),
+                /* course area ID */ (Serializable) null,
                 /* buoyZoneRadiusInHullLengths */2.0, /* useStartTimeInference */ true,
                 /* controlTrackingFromStartAndFinishTimes */ false, /* autoRestartTrackingUponCompetitorSetChange */ false, OneDesignRankingMetric::new);
         Regatta masterRegatta2 = master.createRegatta(RegattaImpl.getDefaultName(baseEventName, boatClass2Name),
                 boatClass2Name, canBoatsOfCompetitorsChangePerRaceRegatta2, CompetitorRegistrationType.CLOSED,
                 /* registrationLinkSecret */ null, /* startDate */ null, /* endDate */ null, regattaId2, series,
-                /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null,
+                /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT),
+                /* course area ID */ (Serializable) null,
                 /* buoyZoneRadiusInHullLengths */2.0, /* useStartTimeInference */ true,
                 /* controlTrackingFromStartAndFinishTimes */ false, /* autoRestartTrackingUponCompetitorSetChange */ false, OneDesignRankingMetric::new);
         
@@ -131,7 +135,8 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         Thread.sleep(1000);
         replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
-        assertEquals(currentCourseAreaId, replicatedRegatta.getCourseAreas().getId());
+        assertEquals(1, Util.size(replicatedRegatta.getCourseAreas()));
+        assertEquals(currentCourseAreaId, replicatedRegatta.getCourseAreas().iterator().next().getId());
         // Test for 'tv'
         currentCourseAreaId = tvCourseAreaId;
         master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), /*startDate*/ null, /*endDate*/ null,
@@ -140,7 +145,8 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         Thread.sleep(1000);
         replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
-        assertEquals(currentCourseAreaId, replicatedRegatta.getCourseAreas().getId());
+        assertEquals(1, Util.size(replicatedRegatta.getCourseAreas()));
+        assertEquals(currentCourseAreaId, replicatedRegatta.getCourseAreas().iterator().next().getId());
         // Test back to 'null'
         currentCourseAreaId = null;
         master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), /*startDate*/ null, /*endDate*/ null, currentCourseAreaId, null,
@@ -215,7 +221,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
                 boatClassName, /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
                 /* registrationLinkSecret */ null, /* startDate */ null, /* endDate */ null, UUID.randomUUID(),
                 Arrays.asList(new Series[] { qualification, finals, medal }), /* persistent */ true,
-                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null,
+                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), /* course area ID */ (Serializable) null,
                 /* buoyZoneRadiusInHullLengths */2.0, /* useStartTimeInference */ true,
                 /* controlTrackingFromStartAndFinishTimes */ false, /* autoRestartTrackingUponCompetitorSetChange */ false, OneDesignRankingMetric::new);
         Thread.sleep(1000);
@@ -255,7 +261,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
                 boatClassName, /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
                 /* registrationLinkSecret */ null, /* startDate */ null, /* endDate */ null, UUID.randomUUID(),
                 Arrays.asList(new Series[] { qualification }), /* persistent */ true,
-                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null,
+                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), /* course area ID */ (Serializable) null,
                 /* buoyZoneRadiusInHullLengths */2.0, /* useStartTimeInference */ true,
                 /* controlTrackingFromStartAndFinishTimes */ false, /* autoRestartTrackingUponCompetitorSetChange */ false, OneDesignRankingMetric::new);
         Thread.sleep(1000);
@@ -303,7 +309,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
                 boatClassName, /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
                 /* registrationLinkSecret */ null, /* startDate */ null, /* endDate */ null, UUID.randomUUID(),
                 Arrays.asList(new Series[] { qualification }), /* persistent */ true,
-                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null,
+                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), /* course area ID */ (Serializable) null,
                 /* buoyZoneRadiusInHullLengths */2.0, /* useStartTimeInference */ true,
                 /* controlTrackingFromStartAndFinishTimes */ false, /* autoRestartTrackingUponCompetitorSetChange */ false, OneDesignRankingMetric::new);
         Thread.sleep(1000);
@@ -355,7 +361,8 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         assertTrue(replicatedRegatta.isPersistent());
         assertTrue(Util.isEmpty((replicatedRegatta.getSeries())));
         assertNotNull(replicatedRegatta.getCourseAreas());
-        assertEquals(masterCourseArea.getId(), replicatedRegatta.getCourseAreas().getId());
-        assertEquals(masterCourseArea.getName(), replicatedRegatta.getCourseAreas().getName());
+        assertEquals(1, Util.size(replicatedRegatta.getCourseAreas()));
+        assertEquals(masterCourseArea.getId(), replicatedRegatta.getCourseAreas().iterator().next().getId());
+        assertEquals(masterCourseArea.getName(), replicatedRegatta.getCourseAreas().iterator().next().getName());
     }
 }

@@ -6,6 +6,7 @@ import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URI;
 import java.net.URL;
+import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Locale;
@@ -226,7 +227,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * 
      * @return the leaderboard created
      */
-    FlexibleLeaderboard addFlexibleLeaderboard(String leaderboardName, String leaderboardDisplayName, int[] discardThresholds, ScoringScheme scoringScheme, Serializable courseAreaId);
+    FlexibleLeaderboard addFlexibleLeaderboard(String leaderboardName, String leaderboardDisplayName,
+            int[] discardThresholds, ScoringScheme scoringScheme, Iterable<? extends Serializable> courseAreaIds);
 
     RegattaLeaderboard addRegattaLeaderboard(RegattaIdentifier regattaIdentifier, String leaderboardDisplayName, int[] discardThresholds);
 
@@ -337,20 +339,29 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *            the series must not have any {@link RaceColumn}s yet
      * @param controlTrackingFromStartAndFinishTimes
      *            cannot be {@code true} if {@link useStartTimeInference} is also {@code true}
-     * @param autoRestartTrackingUponCompetitorSetChange TODO
      */
+    default Regatta createRegatta(String regattaName, String boatClassName, boolean canBoatsOfCompetitorsChangePerRace,
+            CompetitorRegistrationType competitorRegistrationType, String registrationLinkSecret, TimePoint startDate, TimePoint endDate, Serializable id, Iterable<? extends Series> series,
+            boolean persistent, ScoringScheme scoringScheme, Serializable courseAreaId, Double buoyZoneRadiusInHullLengths,
+            boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes, boolean autoRestartTrackingUponCompetitorSetChange, RankingMetricConstructor rankingMetricConstructor) {
+        return createRegatta(regattaName, boatClassName, canBoatsOfCompetitorsChangePerRace, competitorRegistrationType,
+                registrationLinkSecret, startDate, endDate, courseAreaId, series, persistent, scoringScheme,
+                courseAreaId==null?Collections.emptySet():Collections.singleton(courseAreaId), buoyZoneRadiusInHullLengths, useStartTimeInference,
+                controlTrackingFromStartAndFinishTimes, autoRestartTrackingUponCompetitorSetChange,
+                rankingMetricConstructor);
+    }
+
     Regatta createRegatta(String regattaName, String boatClassName, boolean canBoatsOfCompetitorsChangePerRace,
             CompetitorRegistrationType competitorRegistrationType, String registrationLinkSecret, TimePoint startDate, TimePoint endDate, Serializable id, Iterable<? extends Series> series,
-            boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId, Double buoyZoneRadiusInHullLengths,
+            boolean persistent, ScoringScheme scoringScheme, Iterable<? extends Serializable> courseAreaIds, Double buoyZoneRadiusInHullLengths,
             boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes, boolean autoRestartTrackingUponCompetitorSetChange, RankingMetricConstructor rankingMetricConstructor);
-    
+
     /**
      * @param controlTrackingFromStartAndFinishTimes
      *            cannot be {@code true} if {@link useStartTimeInference} is also {@code true}
-     * @param autoRestartTrackingUponCompetitorSetChange TODO
      */
     Regatta updateRegatta(RegattaIdentifier regattaIdentifier, TimePoint startDate, TimePoint endDate,
-            Serializable newDefaultCourseAreaId, RegattaConfiguration regattaConfiguration,
+            Iterable<? extends Serializable> newCourseAreaIds, RegattaConfiguration regattaConfiguration,
             Iterable<? extends Series> series, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
             boolean controlTrackingFromStartAndFinishTimes, boolean autoRestartTrackingUponCompetitorSetChange,
             String registrationLinkSecret, CompetitorRegistrationType registrationType);
@@ -505,7 +516,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     Map<Competitor, Boat> getCompetitorToBoatMappingsForRace(String leaderboardName, String raceColumnName, String fleetName);
     
     /**
-     * @param autoRestartTrackingUponCompetitorSetChange TODO
      * @return a pair with the found or created regatta, and a boolean that tells whether the regatta was created during
      *         the call
      */
@@ -513,8 +523,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
             boolean canBoatsOfCompetitorsChangePerRace, CompetitorRegistrationType competitorRegistrationType,
             String registrationLinkSecret, TimePoint startDate, TimePoint endDate, Serializable id,
             Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme,
-            Serializable defaultCourseAreaId, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
-            boolean controlTrackingFromStartAndFinishTimes, boolean autoRestartTrackingUponCompetitorSetChange, RankingMetricConstructor rankingMetricConstructor);
+            Iterable<? extends Serializable> courseAreaIds, Double buoyZoneRadiusInHullLengths,
+            boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes,
+            boolean autoRestartTrackingUponCompetitorSetChange, RankingMetricConstructor rankingMetricConstructor);
 
     /**
      * @return map where keys are the toString() representation of the {@link RaceDefinition#getId() IDs} of races passed to

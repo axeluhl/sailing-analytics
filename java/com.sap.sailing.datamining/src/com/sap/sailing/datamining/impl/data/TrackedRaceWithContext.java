@@ -7,6 +7,7 @@ import java.util.stream.StreamSupport;
 
 import com.sap.sailing.datamining.data.HasLeaderboardContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
@@ -59,10 +60,20 @@ public class TrackedRaceWithContext implements HasTrackedRaceContext {
     
     @Override
     public CourseArea getCourseArea() {
-        if(getRegatta()!=null) {
-            return getRegatta().getCourseAreas();
+        final CourseArea result;
+        if (getRegatta() != null) {
+            final Fleet fleetOfTrackedRace = raceColumn.getFleetOfTrackedRace(trackedRace);
+            if (fleetOfTrackedRace != null) {
+                final RaceLog raceLog = getRegatta().getRacelog(raceColumn.getName(), fleetOfTrackedRace.getName());
+                // TODO bug3465: try to find the single course area based on the last race log entry
+                result = null;
+            } else {
+                result = null;
+            }
+        } else {
+            result = null;
         }
-        return null;
+        return result;
     }
     
     @Override

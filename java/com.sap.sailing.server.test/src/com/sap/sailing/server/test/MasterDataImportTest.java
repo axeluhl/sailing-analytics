@@ -2107,13 +2107,11 @@ public class MasterDataImportTest {
     public void testMasterDataImportWithFlexibleLeaderboard() throws MalformedURLException, IOException,
             InterruptedException, ClassNotFoundException {
         UUID courseAreaUUID = UUID.randomUUID();
-
         List<String> raceColumnNames = new ArrayList<String>();
         String raceColumnName = "T1";
         raceColumnNames.add(raceColumnName);
         raceColumnNames.add("T2");
         final List<String> emptyRaceColumnNamesList = Collections.emptyList();
-
         List<Series> seriesOnSource = new ArrayList<>();
         List<Series> seriesOnTarget = new ArrayList<>();
         List<Fleet> fleets = new ArrayList<Fleet>();
@@ -2141,7 +2139,7 @@ public class MasterDataImportTest {
         ScoringScheme scoringScheme = new LowPoint();
         String flexLeaderboardName = "FlexName";
         FlexibleLeaderboard leaderboard = sourceService.addFlexibleLeaderboard(flexLeaderboardName, "TestFlex",
-                discardRule, scoringScheme, courseAreaUUID);
+                discardRule, scoringScheme, Collections.singleton(courseAreaUUID));
         List<String> leaderboardNames = new ArrayList<String>();
         leaderboardNames.add(leaderboard.getName());
         LeaderboardGroup group = sourceService.addLeaderboardGroup(UUID.randomUUID(), TEST_GROUP_NAME, "testGroupDesc",

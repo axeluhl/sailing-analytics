@@ -3,6 +3,7 @@ package com.sap.sailing.server.replication.test;
 import static org.junit.Assert.assertTrue;
 
 import java.net.URISyntaxException;
+import java.util.Collections;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -41,7 +42,7 @@ public class PostingOperationFromReplicaToMasterTest extends AbstractServerRepli
         final String leaderboardName = "My Leaderboard";
         final CreateFlexibleLeaderboard operation = new CreateFlexibleLeaderboard(/* leaderboardName */ leaderboardName,
                 /* leaderboardDisplayName */ null, /* discardThresholds */ new int[0], /* scoringScheme */ new LowPoint(),
-                /* courseAreaId */ UUID.randomUUID());
+                /* courseAreaId */ Collections.singleton(UUID.randomUUID()));
         replica.apply(operation);
         Thread.sleep(1000);
         assertTrue(master.getLeaderboards().containsKey(leaderboardName));

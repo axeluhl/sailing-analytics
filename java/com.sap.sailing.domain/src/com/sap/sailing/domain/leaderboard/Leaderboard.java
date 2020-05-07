@@ -751,16 +751,7 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
     }
     
     default boolean isPartOfEvent(EventBase event) {
-        boolean result = false;
-        if (getCourseAreas() != null) {
-            for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
-                if(courseArea.equals(getCourseAreas())) {
-                    result = true;
-                    break;
-                }
-            }
-        }
-        return result;
+        return Util.containsAny(event.getVenue().getCourseAreas(), getCourseAreas());
     }
 
     /**

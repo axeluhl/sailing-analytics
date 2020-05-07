@@ -423,7 +423,8 @@ public class EventsResource extends AbstractSailingServerResource {
                     public Regatta call() throws Exception {
                         return getService().apply(new AddSpecificRegatta(regattaName, boatClassName,
                                 canBoatsOfCompetitorsChangePerRace, competitorRegistrationType, competitorRegistrationSecret, null, null, regattaId, regattaCreationParametersDTO,
-                                /* isPersistent */ true, scoringScheme, courseAreaId, buoyZoneRadiusInHullLengths,
+                                /* isPersistent */ true, scoringScheme,
+                                courseAreaId==null?Collections.emptySet():Collections.singleton(courseAreaId), buoyZoneRadiusInHullLengths,
                                 useStartTimeInterference, controlTrackingFromStartAndFinishTimes, autoRestartTrackingUponCompetitorSetChange, rankingMetric));
                     }
                 });
