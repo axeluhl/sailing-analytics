@@ -918,16 +918,18 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 if (showHeaderPanel) {
                     createHeaderPanel(map);
                 }
-                final VerticalPanel settingsCotrolFlowPanel = new VerticalPanel();
-                if (showMapControls) {
-                    final Button settingsButton = createSettingsButton(map);
-                    settingsCotrolFlowPanel.add(settingsButton);
+                if (showMapControls || shareLinkAction != null) {
+                    final VerticalPanel settingsCotrolFlowPanel = new VerticalPanel();
+                    if (showMapControls) {
+                        final Button settingsButton = createSettingsButton(map);
+                        settingsCotrolFlowPanel.add(settingsButton);
+                    }
+                    if(shareLinkAction != null) {
+                        final Button shareLinkButton = createShareLinkButton(map);
+                        settingsCotrolFlowPanel.add(shareLinkButton);
+                    }
+                    map.setControls(ControlPosition.RIGHT_TOP, settingsCotrolFlowPanel);
                 }
-                if(shareLinkAction != null) {
-                    final Button shareLinkButton = createShareLinkButton(map);
-                    settingsCotrolFlowPanel.add(shareLinkButton);
-                }
-                map.setControls(ControlPosition.RIGHT_TOP, settingsCotrolFlowPanel);
                 // Data has been initialized
                 RaceMap.this.redraw();
                 trueNorthIndicatorPanel.redraw();
