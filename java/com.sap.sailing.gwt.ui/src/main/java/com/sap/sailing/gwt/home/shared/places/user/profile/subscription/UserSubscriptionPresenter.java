@@ -5,7 +5,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithDispatch;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 import com.sap.sailing.gwt.ui.client.subscription.Chargebee;
-import com.sap.sailing.gwt.ui.client.subscription.ChargebeeInstance;
 import com.sap.sailing.gwt.ui.client.subscription.CheckoutOption;
 import com.sap.sailing.gwt.ui.client.subscription.SubscriptionConfiguration;
 import com.sap.sailing.gwt.ui.client.subscription.WithSubscriptionService;
@@ -40,7 +39,7 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
         
                 @Override
                 public void call() {
-                    Window.alert("Close");
+                    view.onCloseCheckoutModal();
                 }
             };
     
@@ -56,16 +55,18 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
 
     @Override
     public void loadSubscription() {
+        view.onStartLoadSubscription();
+        
         clientFactory.getSubscriptionService().getSubscription(new AsyncCallback<SubscriptionDTO>() {
             
             @Override
             public void onSuccess(SubscriptionDTO result) {
-                if (result.error != null && !result.error.isEmpty()) {
+                if (result != null && result.error != null && !result.error.isEmpty()) {
                     Window.alert("Get user subscription error: " + result.error);
                     return;
                 }
                 
-                Window.alert("Plan: " + result.planId + ", status: " + result.transactionStatus);
+                view.updateView(result);
             }
 
             @Override
@@ -107,11 +108,13 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
 
             @Override
             public void onSuccess(SubscriptionDTO result) {
-                Window.alert("Plan: " + result.planId + ", transaction status: " + result.transactionStatus);
+                view.updateView(result);
+                Chargebee.getInstance().closeAll();
             }
             
             @Override
             public void onFailure(Throwable caught) {
+                Chargebee.getInstance().closeAll();
                 Window.alert("Saving subscription data error: " + caught.getMessage());
             }
             

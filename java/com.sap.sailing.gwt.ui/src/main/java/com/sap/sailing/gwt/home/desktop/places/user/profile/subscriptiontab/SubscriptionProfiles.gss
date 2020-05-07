@@ -1,3 +1,15 @@
-.upgradeButton {
+.bottomButton {
 	margin-top: 20px;
+}
+.textRow {
+	margin-top: 5px;
+}
+.trialText {
+    color: #ff0000;
+}
+.errorText{
+	color: #ff0000;
+}
+.blueText {
+	color: #0000ff;
 }

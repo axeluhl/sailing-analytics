@@ -80,6 +80,7 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
             String locale = user.getLocaleOrDefault().getLanguage();
             
             Result result = HostedPage.checkoutNew()
+                            .customerId(user.getName())
                             .customerEmail(user.getEmail())
                             .customerFirstName(firstName)
                             .customerLastName(lastName)
@@ -107,25 +108,25 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
             User user = getCurrentUser();
             
             Result result = HostedPage.acknowledge(hostedPageId).request();
-            logger.log(Level.INFO, "ACKRESULT " + result.jsonResponse().toString());
             Content content = result.hostedPage().content();
             Subscription subscription = new Subscription();
-            subscription.hostedPageId = hostedPageId;
             subscription.subscriptionId = content.subscription().id();
             subscription.customerId = content.customer().id();
             subscription.planId = content.subscription().planId();
-            subscription.trialStart = content.subscription().trialStart().getTime();
-            subscription.trialEnd = content.subscription().trialEnd().getTime();
-            subscription.transactionStatus = content.subscription().status().name();
-            subscription.subsciptionCreatedAt = content.subscription().createdAt().getTime();
-            subscription.subsciptionUpdatedAt = content.subscription().updatedAt().getTime();
+            subscription.trialStart = Math.round(content.subscription().trialStart().getTime() / 1000);
+            subscription.trialEnd = Math.round(content.subscription().trialEnd().getTime() / 1000);
+            subscription.subscriptionStatus = content.subscription().status().name().toLowerCase();
+            subscription.subsciptionCreatedAt = Math.round(content.subscription().createdAt().getTime() / 1000);
+            subscription.subsciptionUpdatedAt = Math.round(content.subscription().updatedAt().getTime() / 1000);
+            subscription.latestEventTime = 0;
             
             getSecurityService().updateUserSubscription(user.getName(), subscription);
             
             subscriptionDto.planId = subscription.planId;
             subscriptionDto.trialStart = subscription.trialStart;
             subscriptionDto.trialEnd = subscription.trialEnd;
-            subscriptionDto.transactionStatus = subscription.transactionStatus;
+            subscriptionDto.subscriptionStatus = subscription.subscriptionStatus;
+            subscriptionDto.paymentStatus = subscription.paymentStatus;
             
             return subscriptionDto;
         } catch (Exception e) {
@@ -149,7 +150,8 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
             }
             
             subscriptionDto.planId = subscription.planId;
-            subscriptionDto.transactionStatus = subscription.transactionStatus;
+            subscriptionDto.subscriptionStatus = subscription.subscriptionStatus;
+            subscriptionDto.paymentStatus = subscription.paymentStatus;
             subscriptionDto.trialStart = subscription.trialStart;
             subscriptionDto.trialEnd = subscription.trialEnd;
         } catch (Exception e) {

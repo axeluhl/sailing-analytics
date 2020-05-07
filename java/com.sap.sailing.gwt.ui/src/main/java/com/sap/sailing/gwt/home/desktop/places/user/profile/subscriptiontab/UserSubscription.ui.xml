@@ -7,10 +7,18 @@
     <ui:with field="local_res"
         type="com.sap.sailing.gwt.home.desktop.places.user.profile.subscriptiontab.SubscriptionProfileDesktopResources" />
     <g:HTMLPanel addStyleNames="{res.mediaCss.grid} {res.mainCss.spacermarginbottommediumsmall}">
-      <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mainCss.spacermargintopmedium}">
-        <div>You're in free plan</div>
-        <g:Button ui:field="upgradeButton" addStyleNames="{res.mainCss.button} {res.mainCss.buttonprimary} {local_res.css.upgradeButton}">
+      <div ui:field="rootUi" class="{res.mediaCss.column} {res.mediaCss.small12} {res.mainCss.spacermargintopmedium}">
+        <div>Subscription plan: <span ui:field="planNameSpanUi"></span></div>
+        <div ui:field="subscriptionGroupUi">
+            <div class="{local_res.css.textRow}">Subscription status: <span ui:field="subscriptionStatusSpanUi"></span></div>
+            <div ui:field="trialDivUi" class="{local_res.css.textRow} {local_res.css.trialText}"></div>
+            <div ui:field="paymentStatusDivUi" class="{local_res.css.textRow}">Payment charge status: <span ui:field="paymentStatusSpanUi"></span></div>
+        </div>
+        <g:Button ui:field="upgradeButtonUi" addStyleNames="{res.mainCss.button} {res.mainCss.buttonprimary} {local_res.css.bottomButton}">
           <ui:text from="{i18n.upgradePremium}" />
+        </g:Button>
+        <g:Button ui:field="cancelSubscriptionButtonUi" addStyleNames="{res.mainCss.button} {res.mainCss.buttonprimary} {local_res.css.bottomButton}">
+          <ui:text from="{i18n.cancelSubscription}" />
         </g:Button>
       </div>
     </g:HTMLPanel>

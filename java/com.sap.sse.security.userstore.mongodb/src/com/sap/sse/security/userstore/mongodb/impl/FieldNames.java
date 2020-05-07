@@ -84,14 +84,15 @@ public class FieldNames {
     }
     
     public static enum Subscription {
-        HOSTED_PAGE_ID,
         SUBSCRIPTION_ID,
         CUSTOMER_ID,
         PLAN_ID,
         TRIAL_START,
         TRIAL_END,
-        TRANSACTION_STATUS,
+        SUBSCRIPTION_STATUS,
+        PAYMENT_STATUS,
         SUBSCRIPTION_CREATED_AT,
-        SUBSCRIPTION_UPDATED_AT;
+        SUBSCRIPTION_UPDATED_AT,
+        LATEST_EVENT_TIME;
     }
 }

@@ -260,5 +260,14 @@
     	<servlet-name>Jersey REST SPI</servlet-name>
     	<url-pattern>/spi/*</url-pattern>
   </servlet-mapping>
+  
+    <servlet>
+        <servlet-name>SubscriptionWebhookServlet</servlet-name>
+        <servlet-class>com.sap.sailing.server.gateway.subscription.SubscriptionWebhookServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>SubscriptionWebhookServlet</servlet-name>
+        <url-pattern>/subscription/hooks</url-pattern>
+    </servlet-mapping>
  </web-app>
  
