@@ -166,16 +166,13 @@ public class TimePanelFragment extends BasePanelFragment {
             }
 
             if (mHeaderTime != null && startTime != null) {
-                String time;
-                int resId;
+                String duration;
                 if (startTime.after(now)) {
-                    resId = R.string.race_start_time_in;
-                    time = TimeUtils.formatDurationUntil(startTime.minus(now.asMillis()).asMillis(), false);
+                    duration = "-" + TimeUtils.formatDurationUntil(startTime.minus(now.asMillis()).asMillis(), false);
                 } else {
-                    resId = R.string.race_start_time_ago;
-                    time = TimeUtils.formatDurationSince(now.minus(startTime.asMillis()).asMillis(), false);
+                    duration = TimeUtils.formatDurationSince(now.minus(startTime.asMillis()).asMillis(), false);
                 }
-                mHeaderTime.setText(getString(resId, time));
+                mHeaderTime.setText(duration);
             }
         }
 

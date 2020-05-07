@@ -7,20 +7,19 @@
         string the getter on AppPreferences will return the device's unique identifier
         -->
         <EditTextPreference
-            android:defaultValue="@string/empty"
             android:key="@string/preference_identifier_key"
-            android:title="@string/device_identifier"/>
+            android:title="@string/device_identifier" />
         <com.sap.sailing.racecommittee.app.ui.views.UrlEditTextPreference
             android:key="@string/preference_server_url_key"
-            android:title="@string/settings_advanced_service_header"/>
+            android:title="@string/settings_advanced_service_header" />
         <Preference
             android:key="@string/preference_sync_key"
             android:summary="@string/synchronize_connection_settings_description"
-            android:title="@string/synchronize_connection_settings_header"/>
+            android:title="@string/synchronize_connection_settings_header" />
         <Preference
             android:key="@string/preference_update_key"
             android:summary="@string/update_app_description"
-            android:title="@string/update_app_header"/>
+            android:title="@string/update_app_header" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/settings_category_polling">
@@ -28,48 +27,48 @@
             android:defaultValue="@bool/preference_polling_active_default"
             android:key="@string/preference_polling_active_key"
             android:summary="@string/settings_polling_active_description"
-            android:title="@string/settings_polling_active_header"/>
+            android:title="@string/settings_polling_active_header" />
 
         <com.sap.sailing.racecommittee.app.ui.views.IntegerEditTextPreference
             android:defaultValue="@integer/preference_polling_interval_default"
             android:key="@string/preference_polling_interval_key"
             android:numeric="integer"
-            android:title="@string/settings_polling_interval_header"/>
+            android:title="@string/settings_polling_interval_header" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/settings_category_general">
         <Preference
             android:key="languagePref"
             android:summary="@string/settings_general_language_description"
-            android:title="@string/settings_general_language_header"/>
+            android:title="@string/settings_general_language_header" />
 
         <com.sap.sailing.android.shared.ui.views.EditSetPreference
             android:defaultValue="@array/preference_course_areas_default"
             android:key="@string/preference_course_areas_key"
-            android:title="@string/settings_general_manageareas_header"/>
+            android:title="@string/settings_general_manageareas_header" />
 
         <EditTextPreference
             android:defaultValue="@string/preference_mail_default"
             android:key="@string/preference_mail_key"
-            android:title="@string/settings_advanced_mail_header"/>
+            android:title="@string/settings_advanced_mail_header" />
 
         <CheckBoxPreference
             android:defaultValue="@bool/preference_non_public_events_default"
             android:key="@string/preference_non_public_events_key"
             android:summary="@string/preference_non_public_events_summary"
-            android:title="@string/preference_non_public_events_header"/>
+            android:title="@string/preference_non_public_events_header" />
 
         <CheckBoxPreference
             android:defaultValue="@bool/preference_allow_demo_default"
             android:key="@string/preference_allow_demo_key"
             android:summary="@string/preference_allow_demo_summary"
-            android:title="@string/preference_allow_demo_header"/>
+            android:title="@string/preference_allow_demo_header" />
 
         <CheckBoxPreference
             android:defaultValue="@bool/preference_wakelock_default"
             android:key="@string/preference_wakelock_key"
             android:summary="@string/preference_wakelock_summary"
-            android:title="@string/preference_wakelock_header"/>
+            android:title="@string/preference_wakelock_header" />
     </PreferenceCategory>
 
     <PreferenceCategory
@@ -79,6 +78,6 @@
             android:defaultValue="@bool/preference_offline_default"
             android:key="@string/preference_offline_key"
             android:summary="@string/preference_offline_summary"
-            android:title="@string/preference_offline_header"/>
+            android:title="@string/preference_offline_header" />
     </PreferenceCategory>
 </PreferenceScreen>

@@ -586,23 +586,18 @@ public class StartTimeFragment extends BaseFragment
         super.notifyTick(now);
 
         if (mAbsolute.getVisibility() == View.VISIBLE) {
-            int resId;
             TimePoint timePoint;
-            String time;
+            String duration;
             if (mStartTime.after(now)) {
-                resId = R.string.race_start_time_in;
                 timePoint = mStartTime.minus(now.asMillis());
-                time = TimeUtils.formatDurationUntil(timePoint.asMillis());
+                duration = "-" + TimeUtils.formatDurationUntil(timePoint.asMillis());
             } else {
-                resId = R.string.race_start_time_ago;
                 timePoint = now.minus(mStartTime.asMillis());
-                time = TimeUtils.formatDurationSince(timePoint.asMillis());
+                duration = TimeUtils.formatDurationSince(timePoint.asMillis());
             }
 
             if (mCountdown != null) {
-                String countdown = getString(resId, time);
-                mCountdown.setText(countdown);
-                mCountdown.setTag(resId);
+                mCountdown.setText(duration);
             }
 
             if (mDebugTime != null) {
