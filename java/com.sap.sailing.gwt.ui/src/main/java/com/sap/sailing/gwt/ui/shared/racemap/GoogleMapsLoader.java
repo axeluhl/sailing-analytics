@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.shared.racemap;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.ScriptElement;
 
@@ -46,7 +47,7 @@ public class GoogleMapsLoader {
      */
     public static void load(Runnable callback) {
         if (loaded) {
-            callback.run();
+            Scheduler.get().scheduleDeferred(() -> callback.run());
         } else {
             callbacks.add(callback);
             if (!loading) {
