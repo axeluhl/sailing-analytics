@@ -463,7 +463,7 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoD
     @Test
     public void testStoreAndRetrieveSimpleLeaderboardWithRaceLogStartTimeEvent() {
 
-        RaceLogStartTimeEvent event = new RaceLogStartTimeEventImpl(now, author, 0, now);
+        RaceLogStartTimeEvent event = new RaceLogStartTimeEventImpl(now, author, 0, now, /* courseAreaId */ null);
 
         addAndStoreRaceLogEvent(leaderboard, raceColumnName, event);
 
@@ -559,7 +559,7 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoD
         final String FLEET = "fleet";
         final SimpleRaceLogIdentifier srli = new SimpleRaceLogIdentifierImpl(PARENT, COLUMN, FLEET);
         RaceLogDependentStartTimeEvent event = new RaceLogDependentStartTimeEventImpl(
-                now, author, 0, srli, Duration.ONE_MINUTE);
+                now, author, 0, srli, Duration.ONE_MINUTE, /* courseAreaId */ null);
         addAndStoreRaceLogEvent(leaderboard, raceColumnName, event);
         RaceLog loadedRaceLog = retrieveRaceLog();
         loadedRaceLog.lockForRead();

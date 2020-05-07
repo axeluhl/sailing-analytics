@@ -2039,10 +2039,17 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private RaceLogStartTimeEvent loadRaceLogStartTimeEvent(TimePoint createdAt, AbstractLogEventAuthor author,
             TimePoint logicalTimePoint, Serializable id, Integer passId, List<Competitor> competitors,
             Document dbObject) {
-        TimePoint startTime = loadTimePoint(dbObject, FieldNames.RACE_LOG_EVENT_START_TIME);
-        RaceLogRaceStatus nextStatus = RaceLogRaceStatus
+        final TimePoint startTime = loadTimePoint(dbObject, FieldNames.RACE_LOG_EVENT_START_TIME);
+        final UUID courseAreaId = loadCourseAreaId(dbObject);
+        final RaceLogRaceStatus nextStatus = RaceLogRaceStatus
                 .valueOf((String) dbObject.get(FieldNames.RACE_LOG_EVENT_NEXT_STATUS.name()));
-        return new RaceLogStartTimeEventImpl(createdAt, logicalTimePoint, author, id, passId, startTime, nextStatus);
+        return new RaceLogStartTimeEventImpl(createdAt, logicalTimePoint, author, id, passId, startTime, nextStatus, courseAreaId);
+    }
+
+    private UUID loadCourseAreaId(Document dbObject) {
+        final String courseAreaIdAsString = (String) dbObject.get(FieldNames.RACE_LOG_EVENT_COURSE_AREA_ID_AS_STRING.name());
+        final UUID courseAreaId = courseAreaIdAsString == null ? null : UUID.fromString(courseAreaIdAsString);
+        return courseAreaId;
     }
 
     private RaceLogStartOfTrackingEvent loadRaceLogStartOfTrackingEvent(TimePoint createdAt,
@@ -2071,10 +2078,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final Object startTimeDifferenceObject = dbObject.get(FieldNames.RACE_LOG_START_TIME_DIFFERENCE_IN_MS.name());
         final Duration startTimeDifference = startTimeDifferenceObject == null ? null
                 : new MillisecondsDurationImpl(((Number) startTimeDifferenceObject).longValue());
-        RaceLogRaceStatus nextStatus = RaceLogRaceStatus
+        final RaceLogRaceStatus nextStatus = RaceLogRaceStatus
                 .valueOf((String) dbObject.get(FieldNames.RACE_LOG_EVENT_NEXT_STATUS.name()));
+        final UUID courseAreaId = loadCourseAreaId(dbObject);
         return new RaceLogDependentStartTimeEventImpl(createdAt, logicalTimePoint, author, id, passId, dependentRaceLog,
-                startTimeDifference, nextStatus);
+                startTimeDifference, nextStatus, courseAreaId);
     }
 
     private RaceLogRaceStatusEvent loadRaceLogRaceStatusEvent(TimePoint createdAt, AbstractLogEventAuthor author,

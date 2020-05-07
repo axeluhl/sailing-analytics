@@ -328,7 +328,7 @@ public class MasterDataImportTest {
         TimePoint logTimePoint = new MillisecondsTimePoint(1372489200000L);
         TimePoint logTimePoint2 = new MillisecondsTimePoint(1372489201000L);
         RaceLogStartTimeEvent logEvent = new RaceLogStartTimeEventImpl(logTimePoint, logTimePoint, author, 1,
-                0, logTimePoint, RaceLogRaceStatus.SCHEDULED);
+                0, logTimePoint, RaceLogRaceStatus.SCHEDULED, /* courseAreaId */ null);
         raceColumn.getRaceLog(testFleet1).add(logEvent);
         Position p = new DegreePosition(3, 3);
         Wind wind = new WindImpl(p, logTimePoint2, new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(12)));
@@ -470,7 +470,7 @@ public class MasterDataImportTest {
         TimePoint logTimePoint5 = new MillisecondsTimePoint(1372489310000L);
         UUID postImportEventId = UUID.randomUUID();
         RaceLogStartTimeEventImpl postImportLogEvent = new RaceLogStartTimeEventImpl(logTimePoint5, logTimePoint5,
-                author, postImportEventId, 3, logTimePoint5, RaceLogRaceStatus.SCHEDULED);
+                author, postImportEventId, 3, logTimePoint5, RaceLogRaceStatus.SCHEDULED, /* courseAreaId */ null);
         raceColumnOnTarget.getRaceLog(fleet1OnTarget).add(postImportLogEvent);
         // Check for regatta log event
         RegattaLogRegisterCompetitorEvent registerEventOnTarget = (RegattaLogRegisterCompetitorEvent) regattaOnTarget
@@ -611,7 +611,7 @@ public class MasterDataImportTest {
 
         // Set log event
         TimePoint logTimePoint = new MillisecondsTimePoint(1372489200000L);
-        RaceLogStartTimeEvent logEvent = new RaceLogStartTimeEventImpl(logTimePoint, author, 1, logTimePoint);
+        RaceLogStartTimeEvent logEvent = new RaceLogStartTimeEventImpl(logTimePoint, author, 1, logTimePoint, /* courseAreaId */ null);
         raceColumn.getRaceLog(testFleet1).add(logEvent);
         storedLogUUIDs.add(logEvent.getId());
 
@@ -941,7 +941,7 @@ public class MasterDataImportTest {
         raceColumn.setTrackedRace(testFleet1, trackedRace);
         // Set log event
         TimePoint logTimePoint = new MillisecondsTimePoint(1372489200000L);
-        RaceLogStartTimeEvent logEvent = new RaceLogStartTimeEventImpl(logTimePoint, author, 1, logTimePoint);
+        RaceLogStartTimeEvent logEvent = new RaceLogStartTimeEventImpl(logTimePoint, author, 1, logTimePoint, /* courseAreaId */ null);
         raceColumn.getRaceLog(testFleet1).add(logEvent);
         storedLogUUIDs.add(logEvent.getId());
         // Add a competitor-related race log event to ensure that no competitor resolution is attempted while receiving
@@ -1086,7 +1086,7 @@ public class MasterDataImportTest {
         raceColumn.setTrackedRace(testFleet1, trackedRace);
         // Set log event
         TimePoint logTimePoint = new MillisecondsTimePoint(1372489200000L);
-        RaceLogStartTimeEvent logEvent = new RaceLogStartTimeEventImpl(logTimePoint, author, 1, logTimePoint);
+        RaceLogStartTimeEvent logEvent = new RaceLogStartTimeEventImpl(logTimePoint, author, 1, logTimePoint, /* courseAreaId */ null);
         raceColumn.getRaceLog(testFleet1).add(logEvent);
         storedLogUUIDs.add(logEvent.getId());
         // Set score correction
@@ -1276,7 +1276,7 @@ public class MasterDataImportTest {
 
         // Set log event
         TimePoint logTimePoint = new MillisecondsTimePoint(1372489200000L);
-        RaceLogStartTimeEvent logEvent = new RaceLogStartTimeEventImpl(logTimePoint, author, 1, logTimePoint);
+        RaceLogStartTimeEvent logEvent = new RaceLogStartTimeEventImpl(logTimePoint, author, 1, logTimePoint, /* courseAreaId */ null);
         raceColumn.getRaceLog(testFleet1).add(logEvent);
         storedLogUUIDs.add(logEvent.getId());
 
@@ -1573,7 +1573,7 @@ public class MasterDataImportTest {
 
         // Set log event
         TimePoint logTimePoint = new MillisecondsTimePoint(1372489200000L);
-        RaceLogStartTimeEvent logEvent = new RaceLogStartTimeEventImpl(logTimePoint, author, 1, logTimePoint);
+        RaceLogStartTimeEvent logEvent = new RaceLogStartTimeEventImpl(logTimePoint, author, 1, logTimePoint, /* courseAreaId */ null);
         raceColumn.getRaceLog(testFleet1).add(logEvent);
         storedLogUUIDs.add(logEvent.getId());
 
@@ -1706,7 +1706,7 @@ public class MasterDataImportTest {
 
         // Set log event
         TimePoint logTimePoint = new MillisecondsTimePoint(1372489200000L);
-        RaceLogStartTimeEvent logEvent = new RaceLogStartTimeEventImpl(logTimePoint, author, 1, logTimePoint);
+        RaceLogStartTimeEvent logEvent = new RaceLogStartTimeEventImpl(logTimePoint, author, 1, logTimePoint, /* courseAreaId */ null);
         raceColumn.getRaceLog(testFleet1).add(logEvent);
         storedLogUUIDs.add(logEvent.getId());
 
@@ -2177,7 +2177,7 @@ public class MasterDataImportTest {
         // Set log event
         TimePoint logTimePoint = new MillisecondsTimePoint(1372489200000L);
         TimePoint logTimePoint2 = new MillisecondsTimePoint(1372489201000L);
-        RaceLogStartTimeEvent logEvent = new RaceLogStartTimeEventImpl(logTimePoint, author, 1, logTimePoint);
+        RaceLogStartTimeEvent logEvent = new RaceLogStartTimeEventImpl(logTimePoint, author, 1, logTimePoint, /* courseAreaId */ null);
         Fleet defaultFleet = leaderboard.getFleet(null);
         raceColumnOnLeaderboard.getRaceLog(defaultFleet).add(logEvent);
         Position p = new DegreePosition(3, 3);

@@ -572,7 +572,7 @@ public class ExpeditionAllInOneImporter {
                 startOfTracking, endOfTracking, regatta, regattaLeaderboard, raceColumn, fleet);
         if (startTime != null) {
             final RaceLog raceLog = raceColumn.getRaceLog(raceColumn.getFleets().iterator().next());
-            raceLog.add(new RaceLogStartTimeEventImpl(startTime, service.getServerAuthor(), /* priority */ 0, startTime));
+            raceLog.add(new RaceLogStartTimeEventImpl(startTime, service.getServerAuthor(), /* priority */ 0, startTime, /* courseAreaId */ null));
         }
         return new Triple<>(trackedRace, raceColumnName, fleetName);
     }

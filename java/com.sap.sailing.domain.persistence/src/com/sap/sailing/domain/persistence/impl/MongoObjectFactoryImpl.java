@@ -37,6 +37,7 @@ import com.sap.sailing.domain.abstractlog.orc.RaceLogORCScratchBoatEvent;
 import com.sap.sailing.domain.abstractlog.orc.RegattaLogORCCertificateAssignmentEvent;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
+import com.sap.sailing.domain.abstractlog.race.RaceLogCourseAreaSpecification;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
@@ -1227,8 +1228,14 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         storeRaceLogEventProperties(startTimeEvent, result);
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogStartTimeEvent.class.getSimpleName());
         storeTimePoint(startTimeEvent.getStartTime(), result, FieldNames.RACE_LOG_EVENT_START_TIME);
+        storeCourseAreaToStartTimeEvent(startTimeEvent, result);
         result.put(FieldNames.RACE_LOG_EVENT_NEXT_STATUS.name(), startTimeEvent.getNextStatus().name());
         return result;
+    }
+
+    private void storeCourseAreaToStartTimeEvent(RaceLogCourseAreaSpecification startTimeEvent, Document result) {
+        result.put(FieldNames.RACE_LOG_EVENT_COURSE_AREA_ID_AS_STRING.name(),
+                startTimeEvent.getCourseAreaId()==null?null:startTimeEvent.getCourseAreaId().toString());
     }
     
     private void storeRaceLogEventProperties(RaceLogEvent event, Document result) {
@@ -1265,6 +1272,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.RACE_LOG_DEPDENDENT_ON_RACECOLUMN.name(), dependentStartTimeEvent.getDependentOnRaceIdentifier().getRaceColumnName());
         result.put(FieldNames.RACE_LOG_DEPDENDENT_ON_FLEET.name(), dependentStartTimeEvent.getDependentOnRaceIdentifier().getFleetName());
         storeDuration(dependentStartTimeEvent.getStartTimeDifference(), result, FieldNames.RACE_LOG_START_TIME_DIFFERENCE_IN_MS);
+        storeCourseAreaToStartTimeEvent(dependentStartTimeEvent, result);
         result.put(FieldNames.RACE_LOG_EVENT_NEXT_STATUS.name(), dependentStartTimeEvent.getNextStatus().name());
         return result;
     }
