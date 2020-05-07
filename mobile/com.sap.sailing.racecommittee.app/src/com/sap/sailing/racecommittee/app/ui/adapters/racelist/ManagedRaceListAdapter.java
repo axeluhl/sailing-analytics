@@ -200,38 +200,36 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                 RaceState state = race.getRace().getState();
                 holder.race_flag_new.setRaceState(state);
                 holder.time.setRaceState(state);
-                if (state != null) {
-                    CompetitorResults draft = state.getFinishPositioningList();
-                    CompetitorResults confirmed = state.getConfirmedFinishPositioningList().getCompetitorResults();
-                    holder.warning_sign.setVisibility(
-                            ((draft != null && draft.hasConflicts()) || confirmed != null && confirmed.hasConflicts())
-                                    ? View.VISIBLE
-                                    : View.GONE);
-                    if (state.getStartTime() != null) {
-                        int startRes = R.string.race_started;
-                        if (state.getFinishedTime() == null) {
-                            startRes = R.string.race_start;
-                        }
-                        String startTime = mResources.getString(startRes, TimeUtils.formatTime(state.getStartTime(), false));
-                        holder.race_started.setText(startTime);
+                CompetitorResults draft = state.getFinishPositioningList();
+                CompetitorResults confirmed = state.getConfirmedFinishPositioningList().getCompetitorResults();
+                holder.warning_sign.setVisibility(
+                        ((draft != null && draft.hasConflicts()) || confirmed != null && confirmed.hasConflicts())
+                                ? View.VISIBLE
+                                : View.GONE);
+                if (state.getStartTime() != null) {
+                    int startRes = R.string.race_started;
+                    if (state.getFinishedTime() == null) {
+                        startRes = R.string.race_start;
                     }
-                    if (state.getFinishedTime() != null) {
-                        holder.race_flag_new.setVisibility(View.GONE);
-                        holder.time.setVisibility(View.GONE);
-                        holder.race_finished.setVisibility(View.VISIBLE);
-                        holder.race_finished.setText(mResources.getString(R.string.race_finished,
-                                TimeUtils.formatTime(state.getFinishedTime(), false)));
-                    }
-                    setDependingText(holder, race);
-                    if (state.getStartTime() == null && state.getFinishedTime() == null) {
-                        if (race.getRace().getStatus() == RaceLogRaceStatus.PRESCHEDULED) {
-                            holder.panel_right.setVisibility(View.GONE);
-                            holder.race_scheduled.setVisibility(View.GONE);
-                            holder.race_unscheduled.setVisibility(View.GONE);
-                        } else {
-                            holder.race_scheduled.setVisibility(View.GONE);
-                            holder.race_unscheduled.setVisibility(View.VISIBLE);
-                        }
+                    String startTime = mResources.getString(startRes, TimeUtils.formatTime(state.getStartTime(), false));
+                    holder.race_started.setText(startTime);
+                }
+                if (state.getFinishedTime() != null) {
+                    holder.race_flag_new.setVisibility(View.GONE);
+                    holder.time.setVisibility(View.GONE);
+                    holder.race_finished.setVisibility(View.VISIBLE);
+                    holder.race_finished.setText(mResources.getString(R.string.race_finished,
+                            TimeUtils.formatTime(state.getFinishedTime(), false)));
+                }
+                setDependingText(holder, race);
+                if (state.getStartTime() == null && state.getFinishedTime() == null) {
+                    if (race.getRace().getStatus() == RaceLogRaceStatus.PRESCHEDULED) {
+                        holder.panel_right.setVisibility(View.GONE);
+                        holder.race_scheduled.setVisibility(View.GONE);
+                        holder.race_unscheduled.setVisibility(View.GONE);
+                    } else {
+                        holder.race_scheduled.setVisibility(View.GONE);
+                        holder.race_unscheduled.setVisibility(View.VISIBLE);
                     }
                 }
 
