@@ -495,7 +495,7 @@ public class RaceBoardPanel
         };
         mapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, taggingPanel, mediaPlayerManagerComponent,
                 componentsForSideBySideViewer, stringMessages, userService, editMarkPassingPanel, editMarkPositionPanel,
-                maneuverTablePanel, asyncFetcher);
+                asyncFetcher);
         
         mediaPlayerManagerComponent.addPlayerChangeListener(new PlayerChangeListener() {
             
