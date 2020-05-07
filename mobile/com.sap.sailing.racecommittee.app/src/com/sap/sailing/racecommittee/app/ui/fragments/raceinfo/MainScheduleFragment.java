@@ -58,7 +58,6 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
     private TimePoint mStartTime;
     private Duration mStartTimeDiff;
     private RacingProcedure mRacingProcedure;
-    private TimePoint lastTick;
 
     private RaceStateChangedListener mStateListener;
 
@@ -102,7 +101,6 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
         initStartMode();
         initCourse();
         initWind();
-        lastTick = MillisecondsTimePoint.now().minus(2000);
     }
 
     @Override
@@ -246,36 +244,33 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
     public void notifyTick(TimePoint now) {
         super.notifyTick(now);
 
-        if (!now.minus(1000).before(lastTick)) {
-            if (mItemStartTime != null && !TextUtils.isEmpty(mStartTimeString)) {
-                if (mRaceId == null && mStartTimeDiff == null) {
-                    String startTimeValue = getString(R.string.start_time_value, mStartTimeString, calcCountdown(now));
-                    mItemStartTime.setValue(startTimeValue);
-                } else {
-                    mItemStartTime.setValue(mStartTimeString);
-                }
+        if (mItemStartTime != null && !TextUtils.isEmpty(mStartTimeString)) {
+            if (mRaceId == null && mStartTimeDiff == null) {
+                String startTimeValue = getString(R.string.start_time_value, mStartTimeString, calcCountdown(now));
+                mItemStartTime.setValue(startTimeValue);
+            } else {
+                mItemStartTime.setValue(mStartTimeString);
             }
+        }
 
-            if (getRace() != null && getRaceState() != null && getRaceState().getWindFix() != null) {
-                Wind wind = getRaceState().getWindFix();
-                String sensorData = getString(R.string.wind_sensor, TimeUtils.formatTime(wind.getTimePoint()),
-                        wind.getFrom().getDegrees(), wind.getKnots());
-                mItemStartWind.setValue(sensorData);
-            }
+        if (getRace() != null && getRaceState() != null && getRaceState().getWindFix() != null) {
+            Wind wind = getRaceState().getWindFix();
+            String sensorData = getString(R.string.wind_sensor, TimeUtils.formatTime(wind.getTimePoint()),
+                    wind.getFrom().getDegrees(), wind.getKnots());
+            mItemStartWind.setValue(sensorData);
+        }
 
-            if (mAdapter != null) {
-                mAdapter.notifyDataSetChanged();
-            }
-            lastTick = now;
+        if (mAdapter != null) {
+            mAdapter.notifyDataSetChanged();
         }
     }
 
     private String calcCountdown(TimePoint timePoint) {
-        RacingActivity activity = (RacingActivity) getActivity();
-        if (activity != null) {
-            return TimeUtils.formatDuration(activity.getStartTime(), timePoint, true);
+        if (mStartTime.before(timePoint)) {
+            final String duration = TimeUtils.formatDurationSince(timePoint.minus(mStartTime.asMillis()).asMillis());
+            return "-" + duration;
         }
-        return "";
+        return TimeUtils.formatDurationUntil(mStartTime.minus(timePoint.asMillis()).asMillis());
     }
 
     private void openFragment(RaceFragment fragment) {
