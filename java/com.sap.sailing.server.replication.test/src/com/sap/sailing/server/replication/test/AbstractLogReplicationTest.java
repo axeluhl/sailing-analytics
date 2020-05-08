@@ -115,7 +115,8 @@ public abstract class AbstractLogReplicationTest<LogT extends AbstractLog<EventT
     }
 
     protected FlexibleLeaderboard setupFlexibleLeaderboard(final String leaderboardName) {
-        CreateFlexibleLeaderboard createTestLeaderboard = new CreateFlexibleLeaderboard(leaderboardName, leaderboardName, new int[] { 19, 44 }, new LowPoint(), null);
+        CreateFlexibleLeaderboard createTestLeaderboard = new CreateFlexibleLeaderboard(leaderboardName,
+                leaderboardName, new int[] { 19, 44 }, new LowPoint(), Collections.emptySet());
         FlexibleLeaderboard masterLeaderboard = master.apply(createTestLeaderboard);
         return masterLeaderboard;
     }

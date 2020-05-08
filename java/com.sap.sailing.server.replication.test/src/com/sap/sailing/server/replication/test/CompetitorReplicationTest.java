@@ -112,7 +112,7 @@ public class CompetitorReplicationTest extends AbstractServerReplicationTest {
         assertNotNull(replicatedRegatta);
         assertTrue(replicatedRegatta.isPersistent());
         assertTrue(Util.isEmpty((replicatedRegatta.getSeries())));
-        assertNull(replicatedRegatta.getCourseAreas());        
+        assertTrue(Util.isEmpty(replicatedRegatta.getCourseAreas()));        
         assertTrue(regattaId.equals(replicatedRegatta.getId()));
         RaceDefinition replicatedRace = replicatedRegatta.getRaceByName(raceName);
         assertNotNull(replicatedRace);
