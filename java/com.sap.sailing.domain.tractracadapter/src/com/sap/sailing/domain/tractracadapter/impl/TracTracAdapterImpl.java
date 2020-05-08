@@ -51,7 +51,7 @@ public class TracTracAdapterImpl implements TracTracAdapter {
             URI courseDesignUpdateURI, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             long timeoutInMilliseconds, String tracTracUsername, String tracTracPassword, String raceStatus,
             String raceVisibility, boolean trackWind, boolean correctWindDirectionByMagneticDeclination, int timeoutInMillis,
-            RaceTrackingHandler raceTrackingHandler) throws Exception {
+            boolean useOfficialEventsToUpdateRaceLog, RaceTrackingHandler raceTrackingHandler) throws Exception {
         return trackerManager.addRace(
                 /* regattaToAddTo */null,
                 getTracTracDomainFactory().createTrackingConnectivityParameters(paramURL, liveURI, storedURI,
@@ -59,7 +59,7 @@ public class TracTracAdapterImpl implements TracTracAdapter {
                         /* startOfTracking */null,
                         /* endOfTracking */null, delayToLiveInMillis, /* offsetToStartTimeOfSimulatedRace */null, /* ignoreTracTracMarkPassings */ false,
                         raceLogStore, regattaLogStore, tracTracUsername, tracTracPassword, raceStatus, raceVisibility, trackWind, correctWindDirectionByMagneticDeclination,
-                        /* preferReplayIfAvailable */ false, timeoutInMillis),
+                        /* preferReplayIfAvailable */ false, timeoutInMillis, useOfficialEventsToUpdateRaceLog),
                 timeoutInMilliseconds, raceTrackingHandler);
     }
 
@@ -69,14 +69,14 @@ public class TracTracAdapterImpl implements TracTracAdapter {
             RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, long timeoutInMilliseconds,
             Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm, String tracTracUsername,
             String tracTracPassword, String raceStatus, String raceVisibility, boolean trackWind,
-            boolean correctWindDirectionByMagneticDeclination,RaceTrackingHandler raceTrackingHandler) throws Exception {
+            boolean correctWindDirectionByMagneticDeclination, boolean useOfficialEventsToUpdateRaceLog) throws Exception {
         return trackerManager.addRace(
                 regattaToAddTo,
                 getTracTracDomainFactory().createTrackingConnectivityParameters(paramURL, liveURI, storedURI,
                         courseDesignUpdateURI, startOfTracking, endOfTracking, delayToLiveInMillis,
                         offsetToStartTimeOfSimulatedRace, useInternalMarkPassingAlgorithm, raceLogStore, regattaLogStore, tracTracUsername, tracTracPassword,
                         raceStatus, raceVisibility, trackWind, correctWindDirectionByMagneticDeclination, /* preferReplayIfAvailable */ false,
-                        (int) timeoutInMilliseconds), timeoutInMilliseconds, raceTrackingHandler);
+                        (int) timeoutInMilliseconds, useOfficialEventsToUpdateRaceLog), timeoutInMilliseconds);
     }
 
     @Override

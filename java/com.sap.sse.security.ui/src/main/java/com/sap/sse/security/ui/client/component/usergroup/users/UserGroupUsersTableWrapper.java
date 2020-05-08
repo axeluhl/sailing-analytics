@@ -5,7 +5,7 @@ import static com.sap.sse.security.shared.HasPermissions.DefaultActions.UPDATE;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.view.client.SingleSelectionModel;
+import com.google.gwt.view.client.MultiSelectionModel;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.AbstractSortableTextColumn;
@@ -24,7 +24,7 @@ public class UserGroupUsersTableWrapper extends
 
     public UserGroupUsersTableWrapper(StringMessages stringMessages, ErrorReporter errorReporter,
             CellTableWithCheckboxResources tableResources, UserService userService,
-            SingleSelectionModel<UserGroupDTO> userGroupSelectionModel, Runnable refresher) {
+            MultiSelectionModel<UserGroupDTO> userGroupSelectionModel, Runnable refresher) {
         super(stringMessages, errorReporter, true, true, new EntityIdentityComparator<StrippedUserDTO>() {
             @Override
             public boolean representSameEntity(StrippedUserDTO user1, StrippedUserDTO user2) {
@@ -41,38 +41,38 @@ public class UserGroupUsersTableWrapper extends
                 StrippedUserDTO::getName, getColumnSortHandler());
         final AccessControlledActionsColumn<StrippedUserDTO, UserGroupUsersImagesBarCell> actionColumns = AccessControlledActionsColumn
                 .create(new UserGroupUsersImagesBarCell(stringMessages), userService,
-                        user -> userGroupSelectionModel.getSelectedObject());
+                        user -> getSingleSelectedUserGroup(userGroupSelectionModel));
         actionColumns.addAction(UserGroupUsersImagesBarCell.ACTION_DELETE, UPDATE, user -> {
-            final UserGroupDTO tenant = userGroupSelectionModel.getSelectedObject();
-            final String username = user.getName();
-            userService.getUserManagementService().removeUserFromUserGroup(tenant.getId().toString(), username,
-                    new AsyncCallback<Void>() {
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            Window.alert(stringMessages.couldNotRemoveUserFromUserGroup(username, tenant.getName(),
-                                    caught.getMessage()));
-                        }
-
-                        @Override
-                        public void onSuccess(Void result) {
-                            StrippedUserDTO userToRemoveFromTenant = null;
-                            for (final StrippedUserDTO userInTenant : tenant.getUsers()) {
-                                if (Util.equalsWithNull(userInTenant.getName(), username)) {
-                                    userToRemoveFromTenant = userInTenant;
-                                    break;
+            final UserGroupDTO tenant = getSingleSelectedUserGroup(userGroupSelectionModel);
+            if (tenant != null) {
+                final String username = user.getName();
+                userService.getUserManagementService().removeUserFromUserGroup(tenant.getId().toString(), username,
+                        new AsyncCallback<Void>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                Window.alert(stringMessages.couldNotRemoveUserFromUserGroup(username, tenant.getName(),
+                                        caught.getMessage()));
+                            }
+    
+                            @Override
+                            public void onSuccess(Void result) {
+                                StrippedUserDTO userToRemoveFromTenant = null;
+                                for (final StrippedUserDTO userInTenant : tenant.getUsers()) {
+                                    if (Util.equalsWithNull(userInTenant.getName(), username)) {
+                                        userToRemoveFromTenant = userInTenant;
+                                        break;
+                                    }
                                 }
+                                if (userToRemoveFromTenant != null) {
+                                    tenant.remove(userToRemoveFromTenant);
+                                }
+                                refresher.run();
                             }
-                            if (userToRemoveFromTenant != null) {
-                                tenant.remove(userToRemoveFromTenant);
-                            }
-                            refresher.run();
-                        }
-                    });
+                        });
+            }
         });
-        
         table.addColumn(usernameColumn, stringMessages.username());
         table.addColumn(actionColumns);
     }
-
 
 }

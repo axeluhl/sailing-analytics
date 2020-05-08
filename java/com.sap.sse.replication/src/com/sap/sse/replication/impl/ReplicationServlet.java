@@ -235,7 +235,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
         result.put("replicables", replicablesJSON);
         result.put("available", status.isAvailable());
         resp.setContentType("application/json;charset=UTF-8");
-        resp.getWriter().print(result.toJSONString());
+        result.writeJSONString(resp.getWriter());
         if (status.isAvailable()) {
             resp.setStatus(HttpServletResponse.SC_OK);
         } else {
@@ -303,11 +303,17 @@ public class ReplicationServlet extends AbstractHttpServlet {
      *             not try sending the operation again, and in particular not at the expense of later operations that
      *             otherwise may keep queued forever (see also bug 5117). 
      */
-    private <S, R> void applyOperationToReplicable(Replicable<S, ?> replicable, InputStream is)
+    private <S, R, O extends OperationWithResult<S, ?>> void applyOperationToReplicable(Replicable<S, O> replicable, InputStream is)
             throws ClassNotFoundException, IOException, InvocationTargetException {
         ClassLoader oldContextClassLoader = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(replicable.getClass().getClassLoader());
-        OperationWithResult<S, ?> operation = replicable.readOperation(is);
+        final O operation;
+        try {
+            operation = replicable.readOperation(is);
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error trying to de-serialize an operation for replicable "+replicable.getId(), e);
+            throw e;
+        }
         Thread.currentThread().setContextClassLoader(oldContextClassLoader);
         logger.info("Applying operation of type " + operation.getClass().getName()
                 + " received from replica to replicable " + replicable.toString());

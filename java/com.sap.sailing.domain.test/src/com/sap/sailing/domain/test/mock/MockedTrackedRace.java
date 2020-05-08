@@ -618,6 +618,16 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     @Override
                     public void setCompetitorRegistrationType(CompetitorRegistrationType competitorRegistrationType) {
                     }
+
+                    @Override
+                    public boolean isAutoRestartTrackingUponCompetitorSetChange() {
+                        return false;
+                    }
+
+                    @Override
+                    public void setAutoRestartTrackingUponCompetitorSetChange(
+                            boolean autoRestartTrackingUponCompetitorSetChange) {
+                    }
                 };
             }
 
@@ -1291,5 +1301,4 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public TrackingConnectorInfo getTrackingConnectorInfo() {
         return null;
     }
-
 }

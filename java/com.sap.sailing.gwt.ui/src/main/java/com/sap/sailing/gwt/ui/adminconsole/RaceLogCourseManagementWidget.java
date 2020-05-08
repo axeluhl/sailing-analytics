@@ -119,7 +119,7 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
                 }
             }
         });
-        marks.getTable().addColumn(actionColumn);
+        marks.addColumn(actionColumn);
     }
 
     @Override

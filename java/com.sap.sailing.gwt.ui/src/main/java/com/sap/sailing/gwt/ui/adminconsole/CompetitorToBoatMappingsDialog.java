@@ -79,7 +79,7 @@ public class CompetitorToBoatMappingsDialog extends DataEntryDialog<Map<Competit
                 }
             }
         });
-        competitorTable.getTable().addColumn(competitorActionColumn, stringMessages.actions());
+        competitorTable.addColumn(competitorActionColumn, stringMessages.actions());
         refreshableBoatSelectionModel = boatTable.getSelectionModel();
         refreshableCompetitorSelectionModel = competitorTable.getSelectionModel();
         boatListHandler = new SelectionChangeEvent.Handler() {

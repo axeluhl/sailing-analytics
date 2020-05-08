@@ -64,6 +64,7 @@ public class MasterDataImportPanel extends VerticalPanel {
     private CheckBox compressSwitch;
     private CheckBox exportWindSwitch;
     private CheckBox exportDeviceConfigsSwitch;
+    private CheckBox exportTrackedRacesAndStartTrackingSwitch;
     private TextBox filterBox;
     private TextBox usernameBox;
     private TextBox passwordBox;
@@ -89,7 +90,7 @@ public class MasterDataImportPanel extends VerticalPanel {
         HorizontalPanel usernamePanel = new HorizontalPanel();
         usernamePanel.add(new Label(stringMessages.username()));
         usernameBox = new TextBox();
-        usernameBox.setText("admin");
+        usernameBox.setText("");
         usernameBox.setWidth("300px");
         usernamePanel.add(usernameBox);
         HorizontalPanel passwordPanel = new HorizontalPanel();
@@ -98,12 +99,16 @@ public class MasterDataImportPanel extends VerticalPanel {
         passwordBox.setText("");
         passwordBox.setWidth("300px");
         passwordPanel.add(passwordBox);
+        HorizontalPanel userContextInformation = new HorizontalPanel();
+        userContextInformation.setWidth("350px");
+        userContextInformation.add(new Label(stringMessages.keepEmptyForDefaultUserAndPassword(), true));
         fetchIdsButton = new Button(stringMessages.importFetchRemoteLgs());
         fetchIdsButton.ensureDebugId("fetchLeaderboardGroupList");
         DialogUtils.linkEnterToButton(fetchIdsButton, usernameBox);
         DialogUtils.linkEnterToButton(fetchIdsButton, passwordBox);
 
         this.add(serverAddressPanel);
+        this.add(userContextInformation);
         this.add(usernamePanel);
         this.add(passwordPanel);
         this.add(fetchIdsButton);
@@ -164,8 +169,9 @@ public class MasterDataImportPanel extends VerticalPanel {
             boolean compress = compressSwitch.getValue();
             boolean exportWind = exportWindSwitch.getValue();
             boolean exportDeviceConfigs = exportDeviceConfigsSwitch.getValue();
+            boolean exportTrackedRacesAndStartTracking = exportTrackedRacesAndStartTrackingSwitch.getValue();
             sailingServiceWrite.importMasterData(currentHost, groupNames, override, compress, exportWind,
-                    exportDeviceConfigs, usernameBox.getValue(), passwordBox.getValue(), new AsyncCallback<UUID>() {
+                    exportDeviceConfigs, usernameBox.getValue(), passwordBox.getValue(), exportTrackedRacesAndStartTracking, new AsyncCallback<UUID>() {
 
                 @Override
                 public void onFailure(Throwable caught) {
@@ -234,6 +240,7 @@ public class MasterDataImportPanel extends VerticalPanel {
         int eventsCreated = creationCount.getEventCount();
         int regattasCreated = creationCount.getRegattaCount();
         int mediaTracksImported = creationCount.getMediaTrackCount();
+        int trackedRacesImported = creationCount.getTrackedRacesCount();
         if (regattasCreated > 0) {
             regattaRefresher.fillRegattas();
         }
@@ -247,11 +254,11 @@ public class MasterDataImportPanel extends VerticalPanel {
             leaderboardsRefresher.fillLeaderboards();
         }
         if (mediaTracksImported > 0) {
-        	mediaTracksRefresher.loadMediaTracks();
+            mediaTracksRefresher.loadMediaTracks();
         }
         Set<String> overwrittenRegattas = creationCount.getOverwrittenRegattaNames();
         showSuccessAlert(leaderboardsCreated, leaderboardGroupsCreated, eventsCreated, regattasCreated,
-                mediaTracksImported, overwrittenRegattas);
+                mediaTracksImported, trackedRacesImported, overwrittenRegattas);
         changeButtonStateAccordingToApplicationState();
     }
 
@@ -284,10 +291,10 @@ public class MasterDataImportPanel extends VerticalPanel {
     }
 
     protected void showSuccessAlert(int leaderboardsCreated, int leaderboardGroupsCreated, int eventsCreated,
-            int regattasCreated, int mediaTracksImported, Set<String> overwrittenRegattas) {
+            int regattasCreated, int mediaTracksImported, int trackedRacesImported, Set<String> overwrittenRegattas) {
         StringBuffer buffer = new StringBuffer();
         buffer.append(stringMessages.importSuccess(leaderboardGroupsCreated, leaderboardsCreated, eventsCreated,
-                regattasCreated, mediaTracksImported));
+                regattasCreated, mediaTracksImported, trackedRacesImported));
         if (overwrittenRegattas.size() > 0) {
             buffer.append("\n\n" + stringMessages.importSuccessOverwriteInfo() + "\n");
             for (String regattaName : overwrittenRegattas) {
@@ -387,6 +394,11 @@ public class MasterDataImportPanel extends VerticalPanel {
         exportDeviceConfigsSwitch.setTitle(stringMessages.importDeviceConfigurationsTooltip());
         exportDeviceConfigsSwitch.setValue(false);
         contentPanel.add(exportDeviceConfigsSwitch);
+        
+        exportTrackedRacesAndStartTrackingSwitch = new CheckBox(stringMessages.exportTrackedRacesAndStartTracking());
+        exportTrackedRacesAndStartTrackingSwitch.setTitle(stringMessages.exportTrackedRacesAndStartTrackingTooltip());
+        exportTrackedRacesAndStartTrackingSwitch.setValue(false);
+        contentPanel.add(exportTrackedRacesAndStartTrackingSwitch);
 
         importLeaderboardGroupsButton = new Button(stringMessages.importSelectedLeaderboardGroups());
         importLeaderboardGroupsButton.ensureDebugId("import");

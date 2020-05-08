@@ -3,6 +3,8 @@ package com.sap.sailing.domain.swisstimingadapter.impl;
 import com.sap.sailing.domain.swisstimingadapter.Competitor;
 
 public abstract class AbstractCompetitor implements Competitor {
+
+    private static final long serialVersionUID = 4273115087075492127L;
     private final String boatID;
     private final String threeLetterIOCCode;
     private final String name;

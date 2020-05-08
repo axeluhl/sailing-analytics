@@ -42,7 +42,7 @@ public class UserGroupsResource extends AbstractSailingServerResource {
                 groupJson.put("name", group.getName());
                 groups.add(groupJson);
             }
-            response = Response.ok(root.toJSONString()).build();
+            response = Response.ok(streamingOutput(root)).build();
         } else {
             response = Response.status(401).build();
         }
@@ -70,7 +70,7 @@ public class UserGroupsResource extends AbstractSailingServerResource {
                 roles.add(role);
             }
             root.put("roles", roles);
-            response = Response.ok(root.toJSONString()).build();
+            response = Response.ok(streamingOutput(root)).build();
         } else {
             response = Response.status(401).build();
         }

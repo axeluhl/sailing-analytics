@@ -237,11 +237,11 @@ public class IgtimiAccountsPanel extends FlowPanel {
         });
         final DialogConfig<AccountWithSecurityDTO> config = EditOwnershipDialog
                 .create(userService.getUserManagementService(), type, roleDefinition -> refresh(), stringMessages);
-        roleActionColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, config::openDialog);
+        roleActionColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, config::openOwnershipDialog);
         final EditACLDialog.DialogConfig<AccountWithSecurityDTO> configACL = EditACLDialog
                 .create(userService.getUserManagementService(), type, roleDefinition -> refresh(), stringMessages);
         roleActionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                configACL::openDialog);
+                configACL::openACLDialog);
 
         table.addColumn(accountSelectionCheckboxColumn, accountSelectionCheckboxColumn.getHeader());
         table.addColumn(accountNameColumn, stringMessages.name());

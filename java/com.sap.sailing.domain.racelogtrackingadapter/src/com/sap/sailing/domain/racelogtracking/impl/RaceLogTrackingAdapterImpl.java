@@ -118,7 +118,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
         assert !isRaceLogRaceTrackerAttached(service, raceLog) : new RaceLogRaceTrackerExistsException(
                 leaderboard.getName() + " - " + raceColumn.getName() + " - " + fleet.getName());
         Regatta regatta = regattaToAddTo == null ? null : service.getRegatta(regattaToAddTo);
-        RaceLogConnectivityParams params = new RaceLogConnectivityParams(service, regatta, raceColumn, fleet,
+        RaceLogConnectivityParams params = new RaceLogConnectivityParams(service.getServerAuthor(), regatta, raceColumn, fleet,
                 leaderboard, delayToLiveInMillis, domainFactory, trackWind, correctWindDirectionByMagneticDeclination);
         return service.addRace(regattaToAddTo, params, timeoutInMilliseconds, raceTrackingHandler);
     }

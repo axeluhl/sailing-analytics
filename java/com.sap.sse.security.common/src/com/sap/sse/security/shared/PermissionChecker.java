@@ -166,8 +166,9 @@ public class PermissionChecker {
      * permission. This is fine when checking for a specific permission like USER:UPDATE:my_user. If one user grants a
      * meta permission like USER:*:* for another user this would mean the current user needs an equivalent meta
      * permission or one that is even more general like *:*:* or USER,USER_GROUP:*:*. In contrast to that, a user who
-     * owns the permissions USER:*:* and USER_GROUP:*:* may not grant USER,USER_GROUP:*:* because this meta permission
-     * is not implied by a single permission held by the current user.<br>
+     * owns the permissions USER:*:* and USER_GROUP:*:* would---with the <em>regular</em> permission check---not be able
+     * to grant USER,USER_GROUP:*:* because this meta permission would not be implied by a single permission held by the
+     * current user.<br>
      * To solve this we use the given {@link HasPermissions} instances to resolve wildcards for the type and action
      * parts and construct distinct permissions to check. This means the given {@link HasPermissions} need to be a
      * complete list for the running system. Otherwise we potentially do not check for all required types if the given

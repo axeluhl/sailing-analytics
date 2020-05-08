@@ -24,6 +24,10 @@ public abstract class AbstractORCCertificatesCollection implements ORCCertificat
         }
         return null;
     }
+    
+    protected String canonicalizeId(String certificateId) {
+        return certificateId.replaceAll(" ", "").replaceAll("\t", "");
+    }
 
     @Override
     public Iterable<ORCCertificate> getCertificates() {

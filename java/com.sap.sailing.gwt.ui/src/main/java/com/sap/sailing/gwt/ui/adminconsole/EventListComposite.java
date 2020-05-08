@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
+import java.util.function.Consumer;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.SafeHtmlCell;
@@ -32,7 +32,6 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -133,29 +132,6 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         final VerticalPanel panel = new VerticalPanel();
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, EVENT);
         panel.add(buttonPanel);
-        final Button refresh = buttonPanel.addUnsecuredAction(stringMessages.refresh(), this::fillEvents);
-        refresh.ensureDebugId("RefreshEventsButton");
-        final Button create = buttonPanel.addCreateAction(stringMessages.actionAddEvent(), this::openCreateEventDialog);
-        create.ensureDebugId("CreateEventButton");
-        final Button remove = buttonPanel.addRemoveAction(stringMessages.remove(), new Command() {
-            @Override
-            public void execute() {
-                if(askUserForConfirmation()){
-                    removeEvents(refreshableEventSelectionModel.getSelectedSet());
-                }
-            }
-
-            private boolean askUserForConfirmation() {
-                if (refreshableEventSelectionModel.itemIsSelectedButNotVisible(eventTable.getVisibleItems())){
-                    final String eventNames = refreshableEventSelectionModel.getSelectedSet().stream()
-                            .map(EventDTO::getName).collect(Collectors.joining("\n"));
-                    return Window.confirm(stringMessages.doYouReallyWantToRemoveNonVisibleEvents(eventNames));
-                }
-                return Window.confirm(stringMessages.doYouReallyWantToRemoveEvents());
-            }
-        });
-        remove.setEnabled(false);
-        remove.ensureDebugId("RemoveEventsButton");
         eventListDataProvider = new ListDataProvider<EventDTO>();
         filterTextbox = new LabeledAbstractFilterablePanel<EventDTO>(new Label(stringMessages.filterEventsByName()),
                 allEvents, eventListDataProvider, stringMessages) {
@@ -185,13 +161,18 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         refreshableEventSelectionModel = selectionModel;
         eventTable.setVisible(false);
 
+        final Button refresh = buttonPanel.addUnsecuredAction(stringMessages.refresh(), this::fillEvents);
+        refresh.ensureDebugId("RefreshEventsButton");
+        final Button create = buttonPanel.addCreateAction(stringMessages.actionAddEvent(), this::openCreateEventDialog);
+        create.ensureDebugId("CreateEventButton");
+        final Button remove = buttonPanel.addRemoveAction(stringMessages.remove(), refreshableEventSelectionModel, true,
+                () -> removeEvents(refreshableEventSelectionModel.getSelectedSet()));
+        remove.ensureDebugId("RemoveEventsButton");
+
         this.refreshableEventSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 final Set<EventDTO> selectedEvents = refreshableEventSelectionModel.getSelectedSet();
-                final int numberOfItemsSelected = selectedEvents.size();
-                remove.setText(numberOfItemsSelected <= 1 ? stringMessages.remove()
-                        : stringMessages.removeNumber(numberOfItemsSelected));
                 boolean canDeleteAll = true;
                 for (EventDTO eventDTO : selectedEvents) {
                     if (!userService.hasPermission(eventDTO, DefaultActions.DELETE)) {
@@ -350,12 +331,25 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         });
         final DialogConfig<EventDTO> config = EditOwnershipDialog.create(userService.getUserManagementService(), EVENT,
                 event -> fillEvents(), stringMessages);
-        actionsColumn.addAction(EventConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, config::openDialog);
+        actionsColumn.addAction(EventConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
+                // Explicitly using an anonymous inner class. Using a method reference caused problems with the GWT compiler (see bug 5269)
+                new Consumer<EventDTO>() {
+                    @Override
+                    public void accept(EventDTO t) {
+                        config.openOwnershipDialog(t);
+                    }
+                });
         
         final EditACLDialog.DialogConfig<EventDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementService(), EVENT, event -> fillEvents(), stringMessages);
         actionsColumn.addAction(EventConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                e -> configACL.openDialog(e));
+                // Explicitly using an anonymous inner class. Using a method reference caused problems with the GWT compiler (see bug 5269)
+                new Consumer<EventDTO>() {
+                    @Override
+                    public void accept(EventDTO e) {
+                        configACL.openACLDialog(e);
+                    }
+                });
 
         final MigrateGroupOwnershipDialog.DialogConfig<EventDTO> migrateDialogConfig = MigrateGroupOwnershipDialog
                 .create(userService.getUserManagementService(), (event, dto) -> {
@@ -372,7 +366,13 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                     });
                 });
         actionsColumn.addAction(EventConfigImagesBarCell.ACTION_MIGRATE_GROUP_OWNERSHIP_HIERARCHY, CHANGE_OWNERSHIP,
-                migrateDialogConfig::openDialog);
+                // Explicitly using an anonymous inner class. Using a method reference caused problems with the GWT compiler (see bug 5269)
+                new Consumer<EventDTO>() {
+                    @Override
+                    public void accept(EventDTO t) {
+                        migrateDialogConfig.openDialog(t);
+                    }
+                });
 
         eventNameColumn.setSortable(true);
         venueNameColumn.setSortable(true);

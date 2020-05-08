@@ -656,9 +656,23 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
 
     List<MarkPropertiesDTO> getMarkProperties();
 
+    /**
+     * Removes mark properties list
+     * 
+     * @param markPropertiesDTOS
+     *            list of mark properties to remove
+     */
+    void removeMarkProperties(Collection<UUID> markPropertiesUuids);
+
     List<CourseTemplateDTO> getCourseTemplates();
 
-    void removeCourseTemplate(UUID uuid);
+    /**
+     * Removes course templates list
+     * 
+     * @param courseTemplateDTOs
+     *            list of course templates to remove
+     */
+    void removeCourseTemplates(Collection<UUID> courseTemplatesUuids);
 
     List<MarkRoleDTO> getMarkRoles();
 

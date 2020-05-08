@@ -38,6 +38,8 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.masterdataimport.TopLevelMasterData;
+import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.PublicReadableActions;
@@ -52,7 +54,9 @@ public class MasterDataResource extends AbstractSailingServerResource {
     @GET
     @Produces("application/x-java-serialized-object")
     public Response getMasterDataByLeaderboardGroups(@QueryParam("names[]") List<String> requestedLeaderboardGroups,
-            @QueryParam("compress") Boolean compress, @QueryParam("exportWind") Boolean exportWind, @QueryParam("exportDeviceConfigs") Boolean exportDeviceConfigs)
+            @QueryParam("compress") Boolean compress, @QueryParam("exportWind") Boolean exportWind,
+            @QueryParam("exportDeviceConfigs") Boolean exportDeviceConfigs,
+            @QueryParam("exportTrackedRacesAndStartTracking") Boolean exportTrackedRacesAndStartTracking)
             throws UnsupportedEncodingException {
         final SecurityService securityService = getSecurityService();
         User user = securityService.getCurrentUser();
@@ -67,6 +71,9 @@ public class MasterDataResource extends AbstractSailingServerResource {
         }
         if (exportDeviceConfigs == null) {
             exportDeviceConfigs = false;
+        }
+        if (exportTrackedRacesAndStartTracking == null) {
+            exportTrackedRacesAndStartTracking = false;
         }
         logger.info(String.format("Masterdataexport gzip compression is turned %s", compress ? "on" : "off"));
         Map<String, LeaderboardGroup> allLeaderboardGroups = getService().getLeaderboardGroups();
@@ -93,6 +100,7 @@ public class MasterDataResource extends AbstractSailingServerResource {
             }
         }
         final List<Serializable> competitorIds = new ArrayList<Serializable>();
+        Set<RaceTrackingConnectivityParameters> connectivityParametersToRestore = new HashSet<>();
         for (LeaderboardGroup lg : groupsToExport) {
             for (Leaderboard leaderboard : lg.getLeaderboards()) {
                 // All Leaderboards/Regattas contained in the LeaderboardGroup need to be visible
@@ -125,6 +133,12 @@ public class MasterDataResource extends AbstractSailingServerResource {
                                 + " for leaderboard '" + leaderboard.getName() + "'");
                     }
                 }
+                if (exportTrackedRacesAndStartTracking) {
+                    for (TrackedRace trackedRace : leaderboard.getTrackedRaces()) {
+                        securityService.checkCurrentUserReadPermission(trackedRace);
+                        connectivityParametersToRestore.add(getService().getConnectivityParametersByRace(trackedRace.getRace()));
+                    }
+                }
             }
         }
         Set<DeviceConfiguration> raceManagerDeviceConfigurations = new HashSet<>();
@@ -152,7 +166,7 @@ public class MasterDataResource extends AbstractSailingServerResource {
         }
         final TopLevelMasterData masterData = new TopLevelMasterData(groupsToExport,
                 events, regattaRaceIds, mediaTracks,
-                getService().getSensorFixStore(), exportWind, raceManagerDeviceConfigurations);
+                getService().getSensorFixStore(), exportWind, raceManagerDeviceConfigurations, connectivityParametersToRestore);
         // Checking permissions after filtering of Events to be transferred.
         for (Event event: masterData.getAllEvents()) {
             if (!securityService.hasCurrentUserReadPermission(event)) {
@@ -191,7 +205,8 @@ public class MasterDataResource extends AbstractSailingServerResource {
         private final long startTime;
         private final SecurityService securityService;
 
-        protected AbstractStreamingOutput(TopLevelMasterData masterData, List<Serializable> competitorIds, long startTime, SecurityService securityService) {
+        protected AbstractStreamingOutput(TopLevelMasterData masterData, List<Serializable> competitorIds,
+                long startTime, SecurityService securityService) {
             super();
             this.masterData = masterData;
             this.competitorIds = competitorIds;
@@ -228,7 +243,7 @@ public class MasterDataResource extends AbstractSailingServerResource {
             });
         }
     }
-    
+
     private class NonCompressingStreamingOutput extends AbstractStreamingOutput {
         protected NonCompressingStreamingOutput(TopLevelMasterData masterData, List<Serializable> competitorIds,
                 long startTime, SecurityService securityService) {
@@ -240,7 +255,7 @@ public class MasterDataResource extends AbstractSailingServerResource {
             return outputStream;
         }
     }
-    
+
     private class CompressingStreamingOutput extends AbstractStreamingOutput {
         protected CompressingStreamingOutput(TopLevelMasterData masterData, List<Serializable> competitorIds,
                 long startTime, SecurityService securityService) {

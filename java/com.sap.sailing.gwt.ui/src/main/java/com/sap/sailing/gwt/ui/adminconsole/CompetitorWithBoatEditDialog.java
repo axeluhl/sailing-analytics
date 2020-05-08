@@ -10,7 +10,6 @@ import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Distance;
-import com.sap.sse.common.impl.RGBColor;
 
 /**
  * An edit for a competitor with a boat
@@ -36,16 +35,11 @@ public class CompetitorWithBoatEditDialog extends AbstractCompetitorWithBoatDial
     protected BoatDTO getBoat() {
         BoatDTO result = null;
         Color boatColor;
-        if (boatDisplayColorTextBox.getValue() == null || boatDisplayColorTextBox.getValue().isEmpty()) {
-            boatColor = null;
+        if (boatDisplayColorTextBox.isValid()) {
+            boatColor = boatDisplayColorTextBox.getColor();
         } else {
-            try {
-                boatColor = new RGBColor(boatDisplayColorTextBox.getValue());
-            } catch (IllegalArgumentException iae) {
-                boatColor = new InvalidColor(iae, getStringMessages());
-            }
+            boatColor = new InvalidColor(new IllegalArgumentException(boatDisplayColorTextBox.getValue()), getStringMessages());
         }
-
         BoatClassDTO boatClass = new BoatClassDTO(boatClassNameTextBox.getValue(), Distance.NULL, Distance.NULL);
         result = new BoatDTO(getCompetitorToEdit().getBoat().getIdAsString(), boatNameTextBox.getValue(), boatClass, sailIdTextBox.getValue(), boatColor);
         return result;

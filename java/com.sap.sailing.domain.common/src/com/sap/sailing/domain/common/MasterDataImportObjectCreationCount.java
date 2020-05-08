@@ -12,9 +12,11 @@ public interface MasterDataImportObjectCreationCount extends Serializable {
 
     int getRegattaCount();
 
-	int getMediaTrackCount();
+    int getMediaTrackCount();
 
     Set<String> getOverwrittenRegattaNames();
 
-	void addOneMediaTrack();
+    void addOneMediaTrack();
+    
+    int getTrackedRacesCount();
 }

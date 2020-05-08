@@ -698,7 +698,15 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
 
     void getCourseTemplates(AsyncCallback<List<CourseTemplateDTO>> asyncCallback);
 
-    void removeCourseTemplate(UUID uuid, AsyncCallback<Void> asyncCallback);
+    /**
+     * Remove course templates by UUIDs
+     * 
+     * @param courseTemplatesUuids
+     *            the {@link Collection} of course templates' UUIDs which will be remove
+     * @param asyncCallback
+     *            {@link AsyncCallback} object
+     */
+    void removeCourseTemplates(Collection<UUID> courseTemplatesUuids, AsyncCallback<Void> asyncCallback);
 
     void getMarkRoles(AsyncCallback<List<MarkRoleDTO>> callback);
 

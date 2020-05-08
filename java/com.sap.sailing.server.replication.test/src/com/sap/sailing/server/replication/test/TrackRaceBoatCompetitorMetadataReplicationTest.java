@@ -86,7 +86,7 @@ public class TrackRaceBoatCompetitorMetadataReplicationTest extends AbstractServ
                         startOfTracking, endOfTracking, /* delayToLiveInMillis */
                         0l, /* offsetToStartTimeOfSimulatedRace */null, /*ignoreTracTracMarkPassings*/ false, EmptyRaceLogStore.INSTANCE,
                         EmptyRegattaLogStore.INSTANCE, tracTracUsername, tracTracPassword, "", "", /* trackWind */ false, /* correctWindDirectionByMagneticDeclination */ false,
-                        /* preferReplayIfAvailable */ false, /* timeoutInMillis */ (int) RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
+                        /* preferReplayIfAvailable */ false, /* timeoutInMillis */ (int) RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, /* useOfficialEventsToUpdateRaceLog */ false);
     }
 
     private void startTracking() throws Exception, InterruptedException {
@@ -104,7 +104,7 @@ public class TrackRaceBoatCompetitorMetadataReplicationTest extends AbstractServ
                 /* start with no series */ Collections.emptySet(),
                 /* persistent */ true, new LowPoint(), /* defaultCourseAreaId */ UUID.randomUUID(),
                 /* buoyZoneRadiusInHullLengths */ 2., /* useStartTimeInference */ false, /* controlTrackingFromStartAndFinishTimes */ false,
-                /* rankingMetricConstructor */ OneDesignRankingMetric::new);
+                /* autoRestartTrackingUponCompetitorSetChange */ false, /* rankingMetricConstructor */ OneDesignRankingMetric::new);
         final RegattaName regattaIdentifier = new RegattaName(regatta.getName());
         master.apply(new UpdateSeries(regattaIdentifier, "Default", "Default", /* isMedal */ false, /* isFleetsCanRunInParallel */ false,
                 /* resultDiscardingThresholds */ null, /* startsWithZeroScore */ false, /* firstColumnIsNonDiscardableCarryForward */ false,

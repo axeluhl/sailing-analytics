@@ -35,14 +35,14 @@ import com.sap.sailing.server.gateway.serialization.impl.DeviceIdentifierJsonSer
 import com.sap.sailing.server.gateway.serialization.impl.MarkPropertiesJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.PlaceHolderDeviceIdentifierJsonHandler;
-import com.sap.sailing.shared.server.gateway.jaxrs.AbstractSailingServerResource;
+import com.sap.sailing.shared.server.gateway.jaxrs.SharedAbstractSailingServerResource;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.impl.RGBColor;
 import com.sun.jersey.api.client.ClientResponse.Status;
 
 @Path("/v1/markproperties")
-public class MarkPropertiesResource extends AbstractSailingServerResource {
+public class MarkPropertiesResource extends SharedAbstractSailingServerResource {
     private JsonSerializer<MarkProperties> markPropertiesSerializer;
     
     public MarkPropertiesResource() {
@@ -65,8 +65,7 @@ public class MarkPropertiesResource extends AbstractSailingServerResource {
         for (MarkProperties markProperties : markPropertiesList) {
             result.add(getMarkPropertiesSerializer().serialize(markProperties));
         }
-        final String json = result.toJSONString();
-        return Response.ok(json).build();
+        return Response.ok(streamingOutput(result)).build();
     }
 
     @GET
@@ -77,9 +76,8 @@ public class MarkPropertiesResource extends AbstractSailingServerResource {
         if (markProperties == null) {
             return getMarkPropertiesNotFoundErrorResponse();
         }
-        final JSONObject serializedMarkedProperties = getMarkPropertiesSerializer().serialize(markProperties);
-        final String json = serializedMarkedProperties.toJSONString();
-        return Response.ok(json).build();
+        final JSONObject serializedMarkProperties = getMarkPropertiesSerializer().serialize(markProperties);
+        return Response.ok(streamingOutput(serializedMarkProperties)).build();
     }
 
     @POST
@@ -129,9 +127,8 @@ public class MarkPropertiesResource extends AbstractSailingServerResource {
             final Position fixedPosition = new DegreePosition(latDeg, lonDeg);
             getSharedSailingData().setFixedPositionForMarkProperties(createdMarkProperties, fixedPosition);
         }
-        final JSONObject serializedMarkedProperties = getMarkPropertiesSerializer().serialize(createdMarkProperties);
-        final String json = serializedMarkedProperties.toJSONString();
-        return Response.ok(json).build();
+        final JSONObject serializedMarkProperties = getMarkPropertiesSerializer().serialize(createdMarkProperties);
+        return Response.ok(streamingOutput(serializedMarkProperties)).build();
     }
 
     @PUT
@@ -147,14 +144,14 @@ public class MarkPropertiesResource extends AbstractSailingServerResource {
         if (deviceUuid != null && deviceUuid.length() > 0) {
             final DeviceIdentifier device = new SmartphoneUUIDIdentifierImpl(UUID.fromString(deviceUuid));
             getSharedSailingData().setTrackingDeviceIdentifierForMarkProperties(markProperties, device);
-        }
-        if (latDeg != null && lonDeg != null) {
+        } else if (latDeg != null && lonDeg != null) {
             final Position fixedPosition = new DegreePosition(latDeg, lonDeg);
             getSharedSailingData().setFixedPositionForMarkProperties(markProperties, fixedPosition);
+        } else {
+            getSharedSailingData().clearPositioningForMarkProperties(markProperties);
         }
-        final JSONObject serializedMarkedProperties = getMarkPropertiesSerializer().serialize(markProperties);
-        final String json = serializedMarkedProperties.toJSONString();
-        return Response.ok(json).build();
+        final JSONObject serializedMarkProperties = getMarkPropertiesSerializer().serialize(markProperties);
+        return Response.ok(streamingOutput(serializedMarkProperties)).build();
     }
 
     @PUT
@@ -172,7 +169,6 @@ public class MarkPropertiesResource extends AbstractSailingServerResource {
         if (markProperties == null) {
             return getMarkPropertiesNotFoundErrorResponse();
         }
-        
         if (name == null || name.isEmpty()) {
             return getBadMarkPropertiesValidationErrorResponse("name must be given");
         }
@@ -182,7 +178,6 @@ public class MarkPropertiesResource extends AbstractSailingServerResource {
         } else {
             effectiveShortName = shortName;
         }
-        
         Color color = null;
         if (rgbColor != null && rgbColor.length() > 0) {
             try {
@@ -207,9 +202,8 @@ public class MarkPropertiesResource extends AbstractSailingServerResource {
             positioningInformation = null;
         }
         getSharedSailingData().updateMarkProperties(markPropertiesUUID, markPropertiesBuilder.build(), positioningInformation, tags);
-        final JSONObject serializedMarkedProperties = getMarkPropertiesSerializer().serialize(markProperties);
-        final String json = serializedMarkedProperties.toJSONString();
-        return Response.ok(json).build();
+        final JSONObject serializedMarkProperties = getMarkPropertiesSerializer().serialize(markProperties);
+        return Response.ok(streamingOutput(serializedMarkProperties)).build();
     }
 
     @DELETE

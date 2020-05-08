@@ -14,7 +14,7 @@ import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 public interface ResultUrlRegistry {
     /**
      * Registers the URL {@code url} for the result provider named {@code resultProviderName}. Unlike the
-     * {@link #getResultUrls(String)} method, here no security check is performed. The caller is expected to assert that
+     * {@link #getReadableResultUrls(String)} method, here no security check is performed. The caller is expected to assert that
      * the calling {@link Subject} has the permission {@link SecuredDomainType#RESULT_IMPORT_URL
      * RESULT_IMPORT_URL}.{@link DefaultActions#CREATE CREATE} after setting the ownership. Implementing this
      * check properly is done best with the {@code SecurityService} which is not visible from this bundle.
@@ -23,7 +23,7 @@ public interface ResultUrlRegistry {
     
     /**
      * Registers the URL {@code url} from the result provider named {@code resultProviderName}. Unlike the
-     * {@link #getResultUrls(String)} method, here no security check is performed. The caller is expected to assert that
+     * {@link #getReadableResultUrls(String)} method, here no security check is performed. The caller is expected to assert that
      * the calling {@link Subject} has the permission {@link SecuredDomainType#RESULT_IMPORT_URL
      * RESULT_IMPORT_URL}.{@link DefaultActions#DELETE DELETE} after setting the ownership. Implementing this
      * check properly is done best with the {@code SecurityService} which is not visible from this bundle.
@@ -38,7 +38,15 @@ public interface ResultUrlRegistry {
      * 
      * @return an always valid, non-{@code null} iterable
      */
-    Iterable<URL> getResultUrls(String resultProviderName);
-    
+    Iterable<URL> getReadableResultUrls(String resultProviderName);
+
+    /**
+     * Obtains the result import URLs registered for the provider named {@code resultProviderName}. If no such URLs are
+     * found, an empty iterable is returned.
+     * Opposed to {@link #getReadableResultUrls(String)} the returned URLs are not filtered in any way.
+     * @return an always valid, non-{@code null} {@link Iterable}
+     */
+    Iterable<URL> getAllResultUrls(String resultProviderName);
+
     Iterable<String> getResultProviderNames();
 }

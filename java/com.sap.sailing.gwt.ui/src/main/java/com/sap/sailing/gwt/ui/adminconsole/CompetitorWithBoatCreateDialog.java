@@ -16,6 +16,7 @@ import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.Color;
 import com.sap.sse.common.Distance;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
@@ -27,7 +28,6 @@ import com.sap.sse.security.ui.client.UserService;
  * 
  */
 public class CompetitorWithBoatCreateDialog extends AbstractCompetitorWithBoatDialog {
-
     private final RadioButton useExistingBoatRadioButton;
     private final RadioButton useNewBoatRadioButton;
     private final VerticalPanel newBoatPanel;
@@ -47,7 +47,6 @@ public class CompetitorWithBoatCreateDialog extends AbstractCompetitorWithBoatDi
             DialogCallback<CompetitorWithBoatDTO> callback, String boatClass) {
         super("Add competitor with boat", stringMessages, competitorToEdit, callback, boatClass);
         this.ensureDebugId("CompetitorWithBoatCreateDialog");
-                        
         this.useNewBoatRadioButton = this.createRadioButton("BoatCreationSelection", "Create new boat");
         this.useExistingBoatRadioButton = this.createRadioButton("BoatCreationSelection", "Use existing boat");
         this.useNewBoatRadioButton.setValue(true);
@@ -65,12 +64,10 @@ public class CompetitorWithBoatCreateDialog extends AbstractCompetitorWithBoatDi
         });        
         newBoatPanel = new VerticalPanel();
         existingBoatPanel = new VerticalPanel();
-        
         this.existingBoatsTable = new BoatTableWrapper<>(sailingServiceWrite, userService, stringMessages, errorReporter, /* multiSelection */ false, 
                 /* enablePager */ true, /* pagingSize*/ 10, false);
         existingBoatsTable.refreshBoatList(true, /* callback */ null);
         this.existingBoatsTable.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-            
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 CompetitorWithBoatCreateDialog.this.validateAndUpdate();
@@ -95,7 +92,10 @@ public class CompetitorWithBoatCreateDialog extends AbstractCompetitorWithBoatDi
             }
         } else {
             BoatClassDTO boatClass = new BoatClassDTO(boatClassNameTextBox.getValue(), Distance.NULL, Distance.NULL);
-            result = new BoatDTO(getCompetitorToEdit().getBoat().getIdAsString(), boatNameTextBox.getName(), boatClass, sailIdTextBox.getText());
+            final Color boatColor = boatDisplayColorTextBox.isValid() ? boatDisplayColorTextBox.getColor()
+                    : new InvalidColor(new IllegalArgumentException(boatDisplayColorTextBox.getValue()),
+                            getStringMessages());
+            result = new BoatDTO(getCompetitorToEdit().getBoat().getIdAsString(), boatNameTextBox.getName(), boatClass, sailIdTextBox.getText(), boatColor);
         }
         return result;
     }

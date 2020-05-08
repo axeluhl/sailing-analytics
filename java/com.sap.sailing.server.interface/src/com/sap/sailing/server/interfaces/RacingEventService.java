@@ -10,10 +10,13 @@ import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
+import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.subject.Subject;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
@@ -76,11 +79,15 @@ import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStoreSupplier;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
+import com.sap.sailing.domain.resultimport.ResultUrlProvider;
 import com.sap.sailing.domain.statistics.Statistics;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
+import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParametersHandler;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
@@ -90,6 +97,7 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTracker;
 import com.sap.sse.common.PairingListCreationException;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -323,30 +331,29 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
             boolean useMarkPassingCalculator, TrackingConnectorInfo trackingConnectorInfo);
 
-    Regatta getOrCreateDefaultRegatta(String name, String boatClassName, Serializable id);
-
     /**
      * Creates a regatta and replicates this to all replicas currently attached.
-     * 
      * @param series
      *            the series must not have any {@link RaceColumn}s yet
      * @param controlTrackingFromStartAndFinishTimes
      *            cannot be {@code true} if {@link useStartTimeInference} is also {@code true}
+     * @param autoRestartTrackingUponCompetitorSetChange TODO
      */
     Regatta createRegatta(String regattaName, String boatClassName, boolean canBoatsOfCompetitorsChangePerRace,
             CompetitorRegistrationType competitorRegistrationType, String registrationLinkSecret, TimePoint startDate, TimePoint endDate, Serializable id, Iterable<? extends Series> series,
             boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId, Double buoyZoneRadiusInHullLengths,
-            boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes, RankingMetricConstructor rankingMetricConstructor);
+            boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes, boolean autoRestartTrackingUponCompetitorSetChange, RankingMetricConstructor rankingMetricConstructor);
     
     /**
      * @param controlTrackingFromStartAndFinishTimes
      *            cannot be {@code true} if {@link useStartTimeInference} is also {@code true}
+     * @param autoRestartTrackingUponCompetitorSetChange TODO
      */
     Regatta updateRegatta(RegattaIdentifier regattaIdentifier, TimePoint startDate, TimePoint endDate,
             Serializable newDefaultCourseAreaId, RegattaConfiguration regattaConfiguration,
             Iterable<? extends Series> series, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
-            boolean controlTrackingFromStartAndFinishTimes, String registrationLinkSecret,
-            CompetitorRegistrationType registrationType);
+            boolean controlTrackingFromStartAndFinishTimes, boolean autoRestartTrackingUponCompetitorSetChange,
+            String registrationLinkSecret, CompetitorRegistrationType registrationType);
 
     /**
      * Adds <code>raceDefinition</code> to the {@link Regatta} such that it will appear in {@link Regatta#getAllRaces()}
@@ -482,6 +489,15 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     Iterable<MediaTrack> getAllMediaTracks();
 
+    Iterable<URL> getResultImportUrls(String resultProviderName) throws UnauthorizedException;
+
+    void removeResultImportURLs(String resultProviderName, Set<URL> toRemove)
+            throws UnauthorizedException, Exception;
+
+    void addResultImportUrl(String resultProviderName, URL url) throws UnauthorizedException, Exception;
+
+    Optional<ResultUrlProvider> getUrlBasedScoreCorrectionProvider(String resultProviderName);
+
     void reloadRaceLog(String leaderboardName, String raceColumnName, String fleetName);
 
     RaceLog getRaceLog(String leaderboardName, String raceColumnName, String fleetName);
@@ -489,6 +505,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     Map<Competitor, Boat> getCompetitorToBoatMappingsForRace(String leaderboardName, String raceColumnName, String fleetName);
     
     /**
+     * @param autoRestartTrackingUponCompetitorSetChange TODO
      * @return a pair with the found or created regatta, and a boolean that tells whether the regatta was created during
      *         the call
      */
@@ -497,7 +514,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
             String registrationLinkSecret, TimePoint startDate, TimePoint endDate, Serializable id,
             Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme,
             Serializable defaultCourseAreaId, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
-            boolean controlTrackingFromStartAndFinishTimes, RankingMetricConstructor rankingMetricConstructor);
+            boolean controlTrackingFromStartAndFinishTimes, boolean autoRestartTrackingUponCompetitorSetChange, RankingMetricConstructor rankingMetricConstructor);
 
     /**
      * @return map where keys are the toString() representation of the {@link RaceDefinition#getId() IDs} of races passed to
@@ -901,4 +918,30 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     }
     
     CourseAndMarkConfigurationFactory getCourseAndMarkConfigurationFactory();
+    
+    /**
+     * @return A {@link RaceTrackingConnectivityParameters} for a given {@link RaceDefinition}. 
+     * Used for MasterDataImport
+     */
+    RaceTrackingConnectivityParameters getConnectivityParametersByRace(RaceDefinition raceDefinition);
+
+    RaceTrackingHandler getPermissionAwareRaceTrackingHandler();
+    
+    /**
+     * Uses the {@link #getPermissionAwareRaceTrackingHandler()} as the {@link RaceTrackingHandler}
+     */
+    @Override
+    RaceHandle addRace(RegattaIdentifier regattaToAddTo, RaceTrackingConnectivityParameters params, long timeoutInMilliseconds) throws Exception;
+    
+    TypeBasedServiceFinder<RaceTrackingConnectivityParametersHandler> getRaceTrackingConnectivityParamsServiceFinder();
+    
+    /**
+     * Import MasterData from a remote server URL. A caller might provide either targetServerUsername and
+     * targetServerPassword or targetServerBearerToken. If neither of those are provided the method will try to create
+     * or get the bearer token for the current user.
+     */
+    void importMasterData(final String urlAsString, final String[] groupNames, final boolean override,
+            final boolean compress, final boolean exportWind, final boolean exportDeviceConfigurations,
+            String targetServerUsername, String targetServerPassword, String targetServerBearerToken,
+            final boolean exportTrackedRacesAndStartTracking, final UUID importOperationId) throws IllegalArgumentException;
 }

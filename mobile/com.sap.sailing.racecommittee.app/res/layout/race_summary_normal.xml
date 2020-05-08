@@ -411,6 +411,8 @@
                         android:id="@+id/textView2" />
                 </LinearLayout>
             </LinearLayout>
+
+            <include layout="@layout/race_finishing_revoke_button" />
         </LinearLayout>
     </ScrollView>
 </RelativeLayout>

@@ -333,11 +333,11 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
         final DialogConfig<CompetitorDTO> editOwnerShipDialog = EditOwnershipDialog.create(userService.getUserManagementService(), SecuredDomainType.COMPETITOR,
                 null, stringMessages);
         competitorActionColumn.addAction(CompetitorConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
-                editOwnerShipDialog::openDialog);
+                editOwnerShipDialog::openOwnershipDialog);
         final EditACLDialog.DialogConfig<CompetitorDTO> configACL = EditACLDialog
                 .create(userService.getUserManagementService(), type, null, stringMessages);
         competitorActionColumn.addAction(CompetitorConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                configACL::openDialog);
+                configACL::openACLDialog);
         mainPanel.insert(filterField, 0);
         table.addColumnSortHandler(competitorColumnListHandler);
         table.addColumn(competitorNameColumn, getStringMessages().name());

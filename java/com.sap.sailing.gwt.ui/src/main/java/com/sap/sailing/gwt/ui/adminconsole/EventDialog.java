@@ -12,6 +12,7 @@ import java.util.UUID;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
@@ -58,7 +59,15 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
     protected VideosListComposite videosListComposite;
     protected ExternalLinksComposite externalLinksComposite;
     private final FileStorageServiceConnectionTestObservable storageServiceAvailable;
-    
+
+    /**
+     *  We expect only a subset of possible URLs, i.e.:
+     *    https://<hostname>:<port>/<path>
+     */
+    private static RegExp REGEXP_URL = RegExp.compile(
+            "^(https?)://((?:[\\w-]+\\.)+[a-z]{2,}|localhost)(?::\\d+)?(/[\\w~:@_./$!%&=+*'\",;()-]*)?$",
+            "i");
+
     protected static class EventParameterValidator implements Validator<EventDTO> {
 
         private StringMessages stringMessages;
@@ -69,17 +78,28 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
             this.existingEvents = new ArrayList<EventDTO>(existingEvents);
         }
 
+        private boolean isValidURL(String input) {
+            if (input == null || input.isEmpty())
+                return true;
+            else
+                return REGEXP_URL.test(input);
+        }
+
         @Override
         public String getErrorMessage(EventDTO eventToValidate) {
             String errorMessage = null;
-            boolean nameNotEmpty = eventToValidate.getName() != null && eventToValidate.getName().length() > 0;
-            boolean venueNotEmpty = eventToValidate.venue.getName() != null && eventToValidate.venue.getName().length() > 0;
-            boolean courseAreaNotEmpty = eventToValidate.venue.getCourseAreas() != null && eventToValidate.venue.getCourseAreas().size() > 0;
 
-            if (courseAreaNotEmpty) {
+            boolean emptyName = eventToValidate.getName() == null
+                    || eventToValidate.getName().isEmpty();
+            boolean emptyVenue = eventToValidate.venue.getName() == null
+                    || eventToValidate.venue.getName().isEmpty();
+            boolean emptyCourseArea = eventToValidate.venue.getCourseAreas() == null
+                    || eventToValidate.venue.getCourseAreas().isEmpty();
+
+            if (!emptyCourseArea) {
                 for (CourseAreaDTO courseArea : eventToValidate.venue.getCourseAreas()) {
-                    courseAreaNotEmpty = courseArea.getName() != null && courseArea.getName().length() > 0;
-                    if (!courseAreaNotEmpty) {
+                    emptyCourseArea = courseArea.getName() == null || courseArea.getName().isEmpty();
+                    if (emptyCourseArea) {
                         break;
                     }
                 }
@@ -99,22 +119,24 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
             // remark: startDate == null and endDate == null is valid
             if (startDate != null && endDate != null) {
                 if (startDate.after(endDate)) {
-                    datesErrorMessage = stringMessages.startDateMustBeforeEndDate(); 
+                    datesErrorMessage = stringMessages.startDateMustBeforeEndDate();
                 }
             } else if ((startDate != null && endDate == null) || (startDate == null && endDate != null)) {
                 datesErrorMessage = stringMessages.pleaseEnterStartAndEndDate();
             }
-            
+
             if (datesErrorMessage != null) {
                 errorMessage = datesErrorMessage;
-            } else if (!nameNotEmpty) {
+            } else if (emptyName) {
                 errorMessage = stringMessages.pleaseEnterAName();
-            } else if (!venueNotEmpty) {
+            } else if (emptyVenue) {
                 errorMessage = stringMessages.pleaseEnterNonEmptyVenue();
-            } else if (!courseAreaNotEmpty) {
+            } else if (emptyCourseArea) {
                 errorMessage = stringMessages.pleaseEnterNonEmptyCourseArea();
             } else if (!unique) {
                 errorMessage = stringMessages.eventWithThisNameAlreadyExists();
+            } else if (!isValidURL(eventToValidate.getBaseURL())) {
+                errorMessage = stringMessages.invalidURL();
             }
 
             return errorMessage;
@@ -182,7 +204,7 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
             final LeaderboardGroupDTO lgDTO = availableLeaderboardGroupsByName.get(lgName);
             if (lgDTO != null) {
                 result.addLeaderboardGroup(lgDTO);
-            }                
+            }
         }
         result.setName(nameEntryField.getText());
         result.setDescription(descriptionEntryField.getText());

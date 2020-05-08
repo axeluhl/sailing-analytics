@@ -18,7 +18,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.AbstractSortableTextColumn;
 import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
-import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
+import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.celltable.TableWrapper;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions;
@@ -36,14 +36,14 @@ import com.sap.sse.security.ui.shared.SuccessInfo;
  * associated ACL.
  */
 public class UserGroupTableWrapper extends
-        TableWrapper<UserGroupDTO, RefreshableSingleSelectionModel<UserGroupDTO>, StringMessages, CellTableWithCheckboxResources> {
+        TableWrapper<UserGroupDTO, RefreshableMultiSelectionModel<UserGroupDTO>, StringMessages, CellTableWithCheckboxResources> {
     private final LabeledAbstractFilterablePanel<UserGroupDTO> filterField;
     private final UserService userService;
 
     public UserGroupTableWrapper(UserService userService, Iterable<HasPermissions> additionalPermissions,
             StringMessages stringMessages, ErrorReporter errorReporter, boolean enablePager,
             CellTableWithCheckboxResources tableResources, Runnable refresher) {
-        super(stringMessages, errorReporter, false, enablePager, new EntityIdentityComparator<UserGroupDTO>() {
+        super(stringMessages, errorReporter, /* multi selection */ true, enablePager, new EntityIdentityComparator<UserGroupDTO>() {
             @Override
             public boolean representSameEntity(UserGroupDTO dto1, UserGroupDTO dto2) {
                 return dto1.getId().toString().equals(dto2.getId().toString());
@@ -56,14 +56,11 @@ public class UserGroupTableWrapper extends
         }, tableResources);
         this.userService = userService;
         final ListHandler<UserGroupDTO> userColumnListHandler = getColumnSortHandler();
-
-        // users table
+        // user groups table
         final TextColumn<UserGroupDTO> userGroupUUidColumn = new AbstractSortableTextColumn<UserGroupDTO>(
                 group -> group.getId() == null ? "<null>" : group.getId().toString(), userColumnListHandler);
-
         final TextColumn<UserGroupDTO> UserGroupWithSecurityDTONameColumn = new AbstractSortableTextColumn<UserGroupDTO>(
                 UserGroupDTO -> UserGroupDTO.getName(), userColumnListHandler);
-
         final HasPermissions type = SecuredSecurityTypes.USER_GROUP;
         final AccessControlledActionsColumn<UserGroupDTO, DefaultActionsImagesBarCell> actionColumn = create(
                 new DefaultActionsImagesBarCell(stringMessages), userService);
@@ -103,9 +100,9 @@ public class UserGroupTableWrapper extends
                 stringMessages);
 
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_OWNERSHIP, DefaultActions.CHANGE_OWNERSHIP,
-                configOwnership::openDialog);
+                configOwnership::openOwnershipDialog);
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                u -> configACL.openDialog(u));
+                u -> configACL.openACLDialog(u));
 
         filterField = new LabeledAbstractFilterablePanel<UserGroupDTO>(new Label(stringMessages.filterUserGroups()),
                 new ArrayList<UserGroupDTO>(), dataProvider, stringMessages) {

@@ -183,7 +183,7 @@ public class RaceBoardPanel
     
     private final RaceBoardResources raceBoardResources = RaceBoardResources.INSTANCE; 
     private final RaceBoardMainCss mainCss = raceBoardResources.mainCss();
-    private final QuickRanksDTOFromLeaderboardDTOProvider quickRanksDTOProvider;
+    private final QuickFlagDataFromLeaderboardDTOProvider quickFlagDataProvider;
     private ManeuverTablePanel maneuverTablePanel;
 
     private static final RaceMapResources raceMapResources = GWT.create(RaceMapResources.class);
@@ -253,11 +253,11 @@ public class RaceBoardPanel
         RaceTimePanelSettings raceTimePanelSettings = settings
                 .findSettingsByComponentId(raceTimePanelLifecycle.getComponentId());
         final RaceCompetitorSet raceCompetitorSet = new RaceCompetitorSet(competitorSelectionProvider);
-        quickRanksDTOProvider = new QuickRanksDTOFromLeaderboardDTOProvider(raceCompetitorSet, selectedRaceIdentifier);
+        quickFlagDataProvider = new QuickFlagDataFromLeaderboardDTOProvider(raceCompetitorSet, selectedRaceIdentifier);
         raceMap = new RaceMap(this, componentContext, raceMapLifecycle, defaultRaceMapSettings, sailingService, asyncActionsExecutor,
                 errorReporter, timer,
                 competitorSelectionProvider, raceCompetitorSet, stringMessages, selectedRaceIdentifier, 
-                raceMapResources, /* showHeaderPanel */ true, quickRanksDTOProvider, this::showInWindChart,
+                raceMapResources, /* showHeaderPanel */ true, quickFlagDataProvider, this::showInWindChart,
                 leaderboardName, leaderboardGroupName) {
             private static final String INDENT_SMALL_CONTROL_STYLE = "indentsmall";
             private static final String INDENT_BIG_CONTROL_STYLE = "indentbig";
@@ -344,7 +344,7 @@ public class RaceBoardPanel
                 competitorSearchTextBox, availableDetailTypes);
         addChildComponent(leaderboardPanel);
         leaderboardPanel.addVisibilityListener(visible->{
-            quickRanksDTOProvider.setLeaderboardNotCurrentlyUpdating(!visible);
+            quickFlagDataProvider.setLeaderboardNotCurrentlyUpdating(!visible);
         });
         leaderboardPanel.setTitle(stringMessages.leaderboard());
         leaderboardPanel.getElement().getStyle().setMarginLeft(6, Unit.PX);
@@ -673,7 +673,7 @@ public class RaceBoardPanel
         if (editMarkPositionPanel != null) {
             editMarkPositionPanel.setLeaderboard(leaderboard);
         }
-        quickRanksDTOProvider.updateQuickRanks(leaderboard);
+        quickFlagDataProvider.updateFlagData(leaderboard);
     }
 
     @Override

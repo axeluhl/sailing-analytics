@@ -256,7 +256,7 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
         final DomainFactory domainFactory;
         DummyMasterDataResource spyResource = spyResource(new DummyMasterDataResource(), sourceService);
         Mockito.doReturn(securityService).when(spyResource).getSecurityService();
-        Response response = spyResource.getMasterDataByLeaderboardGroups(groupNamesToExport, false, true, false);
+        Response response = spyResource.getMasterDataByLeaderboardGroups(groupNamesToExport, false, true, false, false);
         StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         UUID randomUUID = UUID.randomUUID();

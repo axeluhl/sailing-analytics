@@ -18,6 +18,7 @@ import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.shared.panels.SimpleWelcomeWidget;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
+import com.sap.sse.gwt.shared.ClientConfiguration;
 
 /**
  * 
@@ -69,14 +70,17 @@ public class SpectatorEntryPoint extends AbstractSailingReadEntryPoint implement
             if (!embedded) {
                 groupPanel.setWelcomeWidget(new SimpleWelcomeWidget(getStringMessages().welcomeToSailingAnalytics(),
                         getStringMessages().welcomeToSailingAnalyticsBody()));
-                SimplePanel feedbackPanel = new SimplePanel();
-                feedbackPanel.getElement().getStyle().setProperty("clear", "right");
-                feedbackPanel.addStyleName("feedbackPanel");
-                Anchor feedbackLink = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(
-                        "<img src=\"/gwt/images/feedbackPanel-bg.png\"/>").toSafeHtml());// TODO set image
-                feedbackLink.setHref("mailto:sailing_analytics%40sap.com?subject=[SAP Sailing] Feedback");
-                feedbackPanel.add(feedbackLink);
-                groupAndFeedbackPanel.add(feedbackPanel);
+                if (ClientConfiguration.getInstance().isBrandingActive()) {
+                    SimplePanel feedbackPanel = new SimplePanel();
+                    feedbackPanel.getElement().getStyle().setProperty("clear", "right");
+                    feedbackPanel.addStyleName("feedbackPanel");
+                    Anchor feedbackLink = new Anchor(new SafeHtmlBuilder()
+                            .appendHtmlConstant("<img src=\"/gwt/images/feedbackPanel-bg.png\"/>").toSafeHtml());
+                    // TODO set image
+                    feedbackLink.setHref("mailto:sailing_analytics%40sap.com?subject=[SAP Sailing] Feedback");
+                    feedbackPanel.add(feedbackLink);
+                    groupAndFeedbackPanel.add(feedbackPanel);
+                }
             }
             rootPanel.add(groupAndFeedbackPanel);
         }

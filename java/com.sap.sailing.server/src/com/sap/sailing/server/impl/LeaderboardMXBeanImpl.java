@@ -11,8 +11,9 @@ import com.sap.sailing.server.LeaderboardMXBean;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.util.AbstractMXBeanImpl;
 
-public class LeaderboardMXBeanImpl implements LeaderboardMXBean {
+public class LeaderboardMXBeanImpl extends AbstractMXBeanImpl implements LeaderboardMXBean {
     private static final long serialVersionUID = -8420830339429971378L;
     
     private final Leaderboard leaderboard;
@@ -34,10 +35,6 @@ public class LeaderboardMXBeanImpl implements LeaderboardMXBean {
     @Override
     public String getName() {
         return leaderboard.getName();
-    }
-
-    private String escapeIllegalObjectNameCharacters(String name) {
-        return name.replaceAll("[:/,]", "_");
     }
 
     @Override

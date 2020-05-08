@@ -74,7 +74,7 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
                 new RegattaCreationParametersDTO(seriesStructure), true,
                 newRegatta.scoringScheme, newRegatta.defaultCourseAreaUuid, newRegatta.buoyZoneRadiusInHullLengths, newRegatta.useStartTimeInference,
                 newRegatta.controlTrackingFromStartAndFinishTimes,
-                newRegatta.rankingMetricType, new AsyncCallback<RegattaDTO>() {
+                newRegatta.autoRestartTrackingUponCompetitorSetChange, newRegatta.rankingMetricType, new AsyncCallback<RegattaDTO>() {
             @Override
             public void onFailure(Throwable t) {
                 errorReporter.reportError("Error trying to create new regatta " + newRegatta.getName() + ": " + t.getMessage());

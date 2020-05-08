@@ -14,7 +14,6 @@ import java.util.function.Consumer;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.Timeout;
-import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -35,6 +34,7 @@ import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.interfaces.RacingEventService;
+import com.sap.sse.replication.FullyInitializedReplicableTracker;
 import com.sap.sse.util.ThreadLocalTransporter;
 
 public class TestDeadlockInRegattaListener {
@@ -46,8 +46,8 @@ public class TestDeadlockInRegattaListener {
         CyclicBarrier latch = new CyclicBarrier(2);
         CyclicBarrier monitorOnRegattaListenerLatch = new CyclicBarrier(2);
         @SuppressWarnings("unchecked")
-        ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker =
-                (ServiceTracker<RacingEventService, RacingEventService>) mock(ServiceTracker.class);
+        FullyInitializedReplicableTracker<RacingEventService> racingEventServiceTracker =
+                (FullyInitializedReplicableTracker<RacingEventService>) mock(FullyInitializedReplicableTracker.class);
         final String regattaName = "Test Regatta";
         final RegattaImpl regatta = new RegattaImpl(
                 /* raceLogStore */ null, EmptyRegattaLogStore.INSTANCE, regattaName,
@@ -55,7 +55,7 @@ public class TestDeadlockInRegattaListener {
                 /* startDate */ null, /* endDate */ null,
                 /* trackedRegattaRegistry */ null, new LowPoint(), UUID.randomUUID(),
                 /* courseArea */ null, /* controlTrackingFromStartAndFinishTimes */ true,
-                OneDesignRankingMetric::new, /* registrationLinkSecret */ UUID.randomUUID().toString());
+                /* autoRestartTrackingUponCompetitorSetChange */ false, OneDesignRankingMetric::new, /* registrationLinkSecret */ UUID.randomUUID().toString());
         DynamicTrackedRegatta trackedRegatta = new DynamicTrackedRegattaImpl(regatta) {
             private static final long serialVersionUID = -3599667964201700780L;
 
@@ -102,7 +102,7 @@ public class TestDeadlockInRegattaListener {
                 }
             }
         };
-        when(racingEventServiceTracker.getService()).thenReturn(racingEventService);
+        when(racingEventServiceTracker.getInitializedService(0)).thenReturn(racingEventService);
         RegattaLogFixTrackerRegattaListener listener = new RegattaLogFixTrackerRegattaListener(
                 racingEventServiceTracker, null);
 

@@ -128,7 +128,7 @@ public class ORCPerformanceCurveRankingTest extends OnlineTracTracBasedTest {
             final Boat boat = getTrackedRace().getRace().getBoatOfCompetitor(competitor);
             ORCCertificate certificate;
             if (boat.getSailID().equals("Air is blue")) {
-                certificate = certificates.getCertificateById("ITA52521I5252");
+                certificate = certificates.getCertificateById("ITA00052727");
             } else {
                 certificate = certificates.getCertificateById(boat.getSailID());
                 if (certificate == null) {
