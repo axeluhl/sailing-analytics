@@ -3960,7 +3960,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public TimePoint setStartTimeAndProcedure(String leaderboardName, String raceColumnName, String fleetName,
             String authorName, int authorPriority, int passId, TimePoint logicalTimePoint, TimePoint startTime,
-            RacingProcedureType racingProcedure) {
+            RacingProcedureType racingProcedure, UUID courseAreaId) {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         final TimePoint result;
@@ -3970,7 +3970,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 state.setAdvancePass(logicalTimePoint);
             }
             state.setRacingProcedure(logicalTimePoint, racingProcedure);
-            state.forceNewStartTime(logicalTimePoint, startTime, /* courseAreaId */ null);
+            state.forceNewStartTime(logicalTimePoint, startTime, courseAreaId);
             result = state.getStartTime();
         } else {
             result = null;

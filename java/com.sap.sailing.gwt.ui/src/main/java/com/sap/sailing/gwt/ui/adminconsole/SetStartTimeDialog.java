@@ -48,6 +48,7 @@ public class SetStartTimeDialog extends DataEntryDialogWithDateTimeBox<RaceLogSe
     private com.sap.sse.gwt.client.controls.IntegerBox authorPriorityBox;
     private ListBox racingProcedureSelection;
     private CheckBox advancePassIdCheckbox;
+    private ListBox courseAreaSelection; // TODO bug3465 create and fill from leaderboard's course areas
     
     public SetStartTimeDialog(SailingServiceAsync service, ErrorReporter errorReporter, String leaderboardName, 
             String raceColumnName, String fleetName, StringMessages stringMessages, 
@@ -125,7 +126,7 @@ public class SetStartTimeDialog extends DataEntryDialogWithDateTimeBox<RaceLogSe
         racingProcedureSelection.ensureDebugId("RacingProcedureListBox");
         content.setWidget(3, 0, createLabel(stringMessages.racingProcedure()));
         content.setWidget(3, 1, racingProcedureSelection);
-        
+        // TODO bug3465: add courseAreaSelection list box
         advancePassIdCheckbox = createCheckbox(stringMessages.advancePassId());
         advancePassIdCheckbox.setValue(false);
         advancePassIdCheckbox.ensureDebugId("AnvancePassIdCheckBox");
@@ -145,6 +146,7 @@ public class SetStartTimeDialog extends DataEntryDialogWithDateTimeBox<RaceLogSe
         dto.startTime = timeBox.getValue();
         dto.passId = advancePassIdCheckbox.getValue() ? currentPassId+1 : currentPassId;
         dto.racingProcedure = RacingProcedureType.values()[racingProcedureSelection.getSelectedIndex()];
+        dto.courseAreaId = null; // TODO bug3465: grab from courseAreaSelection
         return dto;
     }
 

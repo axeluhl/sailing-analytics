@@ -584,10 +584,11 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @param passId Pass identifier of the new start time event.
      * @param logicalTimePoint logical {@link TimePoint} of the new event.
      * @param startTime the new Start-Time
+     * @param courseAreaId the ID of the course area on which the start is happening, or {@code null} if not known
      * @return
      */
     TimePoint setStartTimeAndProcedure(String leaderboardName, String raceColumnName, String fleetName, String authorName,
-            int authorPriority, int passId, TimePoint logicalTimePoint, TimePoint startTime, RacingProcedureType racingProcedure);
+            int authorPriority, int passId, TimePoint logicalTimePoint, TimePoint startTime, RacingProcedureType racingProcedure, UUID courseAreaId);
     
     /**
      * Forces a new end time identified by the passed parameters.
