@@ -152,7 +152,7 @@ public abstract class AbstractSeleniumTest {
         } catch (IOException exception) {
             throw new RuntimeException(exception);
         }
-        clearBrowserCache(getWebDriver());
+//        clearBrowserCache(getWebDriver());
     }
     
     public void clearBrowserCache(WebDriver driver) {
