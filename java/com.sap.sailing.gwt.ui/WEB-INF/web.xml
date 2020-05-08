@@ -62,6 +62,7 @@
 	</filter-mapping>
 
     <filter>
+        <display-name>ClientConfigurationFilter</display-name>
         <filter-name>ClientConfigurationFilter</filter-name>
         <filter-class>com.sap.sse.debranding.ClientConfigurationFilter</filter-class>
     </filter>
@@ -70,17 +71,6 @@
         <url-pattern>*.html</url-pattern>
     </filter-mapping>
 
-    <!-- 
-    <servlet>
-        <display-name>ClientConfigurationServlet</display-name>
-        <servlet-name>ClientConfigurationServlet</servlet-name>
-        <servlet-class>com.sap.sse.debranding.ClientConfigurationServlet</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>ClientConfigurationServlet</servlet-name>
-        <url-pattern>*.html</url-pattern>
-    </servlet-mapping>
-    -->
 	<servlet>
 	    <display-name>Status</display-name>
 	    <servlet-name>Status</servlet-name>
