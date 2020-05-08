@@ -49,7 +49,7 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
         this.userService = userService;
         this.stringMessages = stringMessages;
         this.errorReporter = reporter;
-        listComposite = new DeviceConfigurationListComposite(sailingService, errorReporter, stringMessages,
+        listComposite = new DeviceConfigurationListComposite(sailingServiceWrite, errorReporter, stringMessages,
                 userService);
         refreshableMultiSelectionModel = listComposite.getSelectionModel();
         setupUi();

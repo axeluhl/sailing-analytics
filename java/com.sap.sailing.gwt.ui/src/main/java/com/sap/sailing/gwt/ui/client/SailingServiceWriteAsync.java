@@ -78,7 +78,7 @@ import com.sap.sse.pairinglist.PairingList;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
 public interface SailingServiceWriteAsync extends FileStorageManagementGwtServiceAsync, SailingServiceAsync {
-    
+
     void addCourseDefinitionToRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             List<Util.Pair<ControlPointDTO, PassingInstruction>> course, int priority, AsyncCallback<Void> callback)
             throws UnauthorizedException;
@@ -106,7 +106,7 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void addOrUpdateMarkTemplate(MarkTemplateDTO markTemplate, AsyncCallback<MarkTemplateDTO> callback);
 
     void addRaceColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName,
-            List<Pair<String, Integer>> columnNames, AsyncCallback<List<RaceColumnInSeriesDTO>> callback) throws UnauthorizedException;
+            List<Pair<String, Integer>> columnNames, AsyncCallback<List<RaceColumnInSeriesDTO>> callback);
 
     void addResultImportUrl(String resultProviderName, UrlDTO url, AsyncCallback<Void> callback) throws UnauthorizedException/*, Exception*/;
 
@@ -241,11 +241,19 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
 
     void createOrUpdateCourseTemplate(CourseTemplateDTO courseTemplate, AsyncCallback<CourseTemplateDTO> asyncCallback);
 
-    void removeMarkProperties(UUID uuid, AsyncCallback<Void> asyncCallback);
+    /**
+     * Remove mark properties by UUIDs
+     * 
+     * @param markPropertiesUuids
+     *            the {@link Collection} of mark properties' UUIDs which will be remove
+     * @param asyncCallback
+     *            {@link AsyncCallback} object
+     */
+    void removeMarkProperties(Collection<UUID> markPropertiesUuids, AsyncCallback<Void> asyncCallback);
 
     void createMarkRole(MarkRoleDTO markRole, AsyncCallback<MarkRoleDTO> asyncCallback);
         
-            /**
+    /**
      * @param regattaToAddTo
      *            if <code>null</code>, the regatta into which the race has previously been loaded will be looked up; if
      *            found, the race will be loaded into that regatta; otherwise, an existing regatta by the name of the
@@ -272,17 +280,20 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
      */
     void trackWithTracTrac(RegattaIdentifier regattaToAddTo, Iterable<TracTracRaceRecordDTO> rrs, String liveURI,
             String storedURI, String courseDesignUpdateURI, boolean trackWind, boolean correctWindByDeclination,
-            Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm, String tracTracUsername,
+            Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm, 
+            boolean useOfficialEventsToUpdateRaceLog, String tracTracUsername,
             String tracTracPassword, AsyncCallback<Void> callback);
 
-    void trackWithSwissTiming(RegattaIdentifier regattaToAddTo, Iterable<SwissTimingRaceRecordDTO> rrs,
-            String hostname, int port, boolean trackWind, boolean correctWindByDeclination,
-            boolean useInternalMarkPassingAlgorithm, String updateURL, String updateUsername, String updatePassword, AsyncCallback<Void> asyncCallback);
+    void trackWithSwissTiming(RegattaIdentifier regattaToAddTo, Iterable<SwissTimingRaceRecordDTO> rrs, String hostname,
+            int port, boolean trackWind, boolean correctWindByDeclination, boolean useInternalMarkPassingAlgorithm,
+            String updateURL, String updateUsername, String updatePassword, String eventName,
+            String manage2SailEventUrl, AsyncCallback<Void> asyncCallback);
+
 
     void createTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI,
             String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword, AsyncCallback<Void> callback);
 
-    void deleteTracTracConfiguration(TracTracConfigurationWithSecurityDTO tracTracConfiguration,
+    void deleteTracTracConfigurations(Collection<TracTracConfigurationWithSecurityDTO> tracTracConfigurations,
             AsyncCallback<Void> callback);
 
     void updateTracTracConfiguration(TracTracConfigurationWithSecurityDTO tracTracConfiguration,
@@ -297,7 +308,6 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
      *            The identifier for the regatta name, and the race name to remove
      */
     void removeAndUntrackRaces(Iterable<RegattaNameAndRaceName> regattaNamesAndRaceNames, AsyncCallback<Void> callback);
-
 
     void setWind(RegattaAndRaceIdentifier raceIdentifier, WindDTO wind, AsyncCallback<Void> callback);
 
@@ -369,16 +379,14 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void updateRacesDelayToLive(List<RegattaAndRaceIdentifier> regattaAndRaceIdentifiers, long delayToLiveInMs,
             AsyncCallback<Void> callback);
 
-
     void createSwissTimingConfiguration(String configName, String jsonURL, String hostname, Integer port,
             String updateURL, String updateUsername, String updatePassword, AsyncCallback<Void> asyncCallback);
 
     void updateSwissTimingConfiguration(SwissTimingConfigurationWithSecurityDTO configuration,
             AsyncCallback<Void> asyncCallback);
 
-    void deleteSwissTimingConfiguration(SwissTimingConfigurationWithSecurityDTO configuration,
+    void deleteSwissTimingConfigurations(Collection<SwissTimingConfigurationWithSecurityDTO> configurations,
             AsyncCallback<Void> asyncCallback);
-
 
     /**
      * Renames the group with the name <code>oldName</code> to the <code>newName</code>.<br />
@@ -454,8 +462,8 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
             CompetitorRegistrationType competitorRegistrationType, String registrationLinkSecret, Date startDate, Date endDate,
             RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedal, boolean persistent,
             ScoringSchemeType scoringSchemeType, UUID defaultCourseAreaId, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
-            boolean controlTrackingFromStartAndFinishTimes, RankingMetrics rankingMetricType,
-            AsyncCallback<RegattaDTO> callback);
+            boolean controlTrackingFromStartAndFinishTimes, boolean autoRestartTrackingUponCompetitorSetChange,
+            RankingMetrics rankingMetricType, AsyncCallback<RegattaDTO> callback);
 
     void updateSeries(RegattaIdentifier regattaIdentifier, String seriesName, String newSeriesName, boolean isMedal,
             boolean isFleetsCanRunInParallel, int[] resultDiscardingThresholds, boolean startsWithZeroScore,
@@ -478,23 +486,22 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void updateLeaderboardColumnFactor(String leaderboardName, String columnName, Double newFactor,
             AsyncCallback<Void> callback);
 
-    void createSwissTimingArchiveConfiguration(String jsonUrl,
-            AsyncCallback<Void> asyncCallback);
+    void createSwissTimingArchiveConfiguration(String jsonUrl, AsyncCallback<Void> asyncCallback);
 
     void updateSwissTimingArchiveConfiguration(SwissTimingArchiveConfigurationWithSecurityDTO dto,
             AsyncCallback<Void> asyncCallback);
 
-    void deleteSwissTimingArchiveConfiguration(SwissTimingArchiveConfigurationWithSecurityDTO dto,
+    void deleteSwissTimingArchiveConfigurations(Collection<SwissTimingArchiveConfigurationWithSecurityDTO> dtos,
             AsyncCallback<Void> asyncCallback);
 
     void updateRegatta(RegattaIdentifier regattaIdentifier, Date startDate, Date endDate, UUID defaultCourseAreaUuid,
             RegattaConfigurationDTO regattaConfiguration, Double buoyZoneRadiusInHullLengths,
             boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes,
-            String registrationLinkSecret, CompetitorRegistrationType registrationType, AsyncCallback<Void> callback);
+            boolean autoRestartTrackingUponCompetitorSetChange, String registrationLinkSecret, CompetitorRegistrationType registrationType, AsyncCallback<Void> callback);
 
     void importMasterData(String host, String[] names, boolean override, boolean compress, boolean exportWind,
             boolean exportDeviceConfigurations, String targetServerUsername, String targetServerPassword,
-            AsyncCallback<UUID> asyncCallback);
+            boolean exportTrackedRacesAndStartTracking, AsyncCallback<UUID> asyncCallback);
 
     void getImportOperationProgress(UUID id, AsyncCallback<DataImportProgress> asyncCallback);
 

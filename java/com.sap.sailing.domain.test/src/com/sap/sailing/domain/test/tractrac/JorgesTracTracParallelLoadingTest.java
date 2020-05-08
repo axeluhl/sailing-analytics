@@ -116,7 +116,6 @@ public class JorgesTracTracParallelLoadingTest {
                 jsonContent.append(line);
             }
         }
-        reader.close();
         StringTokenizer it = new StringTokenizer(jsonContent.toString(), ",");
         while (it.hasMoreElements()) {
             String item = it.nextElement().toString();

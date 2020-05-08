@@ -115,7 +115,7 @@ public class SwissTimingConnectionTableWrapper extends
         });
 
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_DELETE, DefaultActions.DELETE, dto -> {
-            sailingServiceAsyncWrite.deleteSwissTimingConfigurations(Collections.singletonList(dto), new AsyncCallback<Void>() {
+            sailingServiceWriteAsync.deleteSwissTimingConfigurations(Collections.singletonList(dto), new AsyncCallback<Void>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError("Exception trying to delete configuration in DB: " + caught.getMessage());

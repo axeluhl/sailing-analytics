@@ -112,7 +112,7 @@ public class TracTracConnectionTableWrapper extends
         });
 
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_DELETE, DefaultActions.DELETE, dto -> {
-            sailingServiceAsyncWrite.deleteTracTracConfigurations(Collections.singletonList(dto), new AsyncCallback<Void>() {
+            sailingServiceWriteAsync.deleteTracTracConfigurations(Collections.singletonList(dto), new AsyncCallback<Void>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError("Exception trying to delete configuration in DB: " + caught.getMessage());

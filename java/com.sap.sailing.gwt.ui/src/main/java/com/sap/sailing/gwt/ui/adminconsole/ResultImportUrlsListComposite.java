@@ -51,7 +51,7 @@ public class ResultImportUrlsListComposite extends Composite {
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService,
                 SecuredDomainType.RESULT_IMPORT_URL);
 
-        table = new ResultImportUrlsTableWrapper<>(sailingServiceAsync, userService, stringMessages, errorReporter);
+        table = new ResultImportUrlsTableWrapper<>(sailingServiceWriteAsync, userService, stringMessages, errorReporter);
         final Button add = buttonPanel.addCreateAction(stringMessages.add(), this::addUrl);
         add.setEnabled(false);
 

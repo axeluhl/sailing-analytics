@@ -125,7 +125,7 @@ public class MarkPropertiesPanel extends FlowPanel {
 
     private void removeMarkProperties(Collection<UUID> markPropertiesUuids) {
         if (!markPropertiesUuids.isEmpty()) {
-            sailingService.removeMarkProperties(markPropertiesUuids, new AsyncCallback<Void>() {
+            sailingServiceWrite.removeMarkProperties(markPropertiesUuids, new AsyncCallback<Void>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError("Error trying to remove mark properties:" + caught.getMessage());
@@ -453,7 +453,7 @@ public class MarkPropertiesPanel extends FlowPanel {
 
     private void unsetPosition(final MarkPropertiesDTO originalMarkProperties) {
         if (Window.confirm(stringMessages.confirmUnsettingPositionForMarkProperties(originalMarkProperties.getName()))) {
-            sailingService.updateMarkPropertiesPositioning(originalMarkProperties.getUuid(), /* no tracking device */ null,
+            sailingServiceWrite.updateMarkPropertiesPositioning(originalMarkProperties.getUuid(), /* no tracking device */ null,
                     /* and no fixed position either */ null, new AsyncCallback<MarkPropertiesDTO>() {
                         @Override
                         public void onFailure(Throwable caught) {

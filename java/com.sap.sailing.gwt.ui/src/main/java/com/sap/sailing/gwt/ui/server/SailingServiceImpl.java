@@ -34,6 +34,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -4420,11 +4421,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         return errorMessage;
     }
 
-    //??
-    protected ResultUrlRegistry getResultUrlRegistry() {
-        return resultUrlRegistryServiceTracker.getService();
-    }    
-
     @Override
     //READ
     public List<String> getOverallLeaderboardNamesContaining(String leaderboardName) {
@@ -4831,19 +4827,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public Integer getStructureImportOperationProgress() {
         return 0;
-    }
-
-    //READ
-    protected String createLeaderboardQuery(String[] groupNames, boolean compress, boolean exportWind, boolean exportDeviceConfigurations)
-            throws UnsupportedEncodingException {
-        StringBuffer queryStringBuffer = new StringBuffer("");
-        for (int i = 0; i < groupNames.length; i++) {
-            String encodedGroupName = URLEncoder.encode(groupNames[i], "UTF-8");
-            queryStringBuffer.append("names[]=" + encodedGroupName + "&");
-        }
-        queryStringBuffer.append(String.format("compress=%s&exportWind=%s&exportDeviceConfigs=%s", compress,
-                exportWind, exportDeviceConfigurations));
-        return queryStringBuffer.toString();
     }
 
     @Override
