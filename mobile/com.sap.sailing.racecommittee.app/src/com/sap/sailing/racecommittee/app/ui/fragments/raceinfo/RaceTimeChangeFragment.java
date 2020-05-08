@@ -164,7 +164,7 @@ public class RaceTimeChangeFragment extends BaseFragment implements View.OnClick
             break;
 
         default: // START_TIME_MODE
-            getRaceState().forceNewStartTime(MillisecondsTimePoint.now(), time);
+            getRaceState().forceNewStartTime(MillisecondsTimePoint.now(), time, /* TODO course area ID */ null);
             break;
         }
 

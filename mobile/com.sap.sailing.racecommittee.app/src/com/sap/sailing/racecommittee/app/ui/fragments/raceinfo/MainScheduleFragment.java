@@ -273,9 +273,9 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
                     AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE);
         }
         if (mStartTimeDiff == null && mRaceId == null) {
-            getRaceState().forceNewStartTime(now, mStartTime);
+            getRaceState().forceNewStartTime(now, mStartTime, /* TODO course area ID */ null);
         } else {
-            getRaceState().forceNewDependentStartTime(now, mStartTimeDiff, mRaceId);
+            getRaceState().forceNewDependentStartTime(now, mStartTimeDiff, mRaceId, /* TODO course area ID */ null);
         }
         if (lineStartRacingProcedure != null) {
             lineStartRacingProcedure.setStartModeFlag(MillisecondsTimePoint.now(), flag);

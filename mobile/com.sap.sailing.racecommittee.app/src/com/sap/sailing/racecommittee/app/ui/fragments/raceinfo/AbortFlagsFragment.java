@@ -193,7 +193,7 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
         @Override
         public void run() {
             super.run();
-            getRaceToAbort().getState().forceNewDependentStartTime(getNow(), startTimeDiff, dependentOn);
+            getRaceToAbort().getState().forceNewDependentStartTime(getNow(), startTimeDiff, dependentOn, /* TODO course area ID */ null);
         }
     }
 
@@ -209,7 +209,7 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
 
         @Override
         public void run() {
-            onRace.getState().forceNewStartTime(getNow(), absoluteStartTime);
+            onRace.getState().forceNewStartTime(getNow(), absoluteStartTime, /* TODO course area ID */ null);
         }
     }
 

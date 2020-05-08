@@ -128,7 +128,7 @@ public class StartProcedureFragment extends BaseFragment {
             if (sameProcedure) {
                 sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
             } else {
-                getRaceState().forceNewStartTime(MillisecondsTimePoint.now(), getRaceState().getStartTime());
+                getRaceState().forceNewStartTime(MillisecondsTimePoint.now(), getRaceState().getStartTime(), /* TODO course area ID */ null);
             }
         }
     }

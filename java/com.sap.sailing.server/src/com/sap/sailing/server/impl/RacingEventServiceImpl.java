@@ -3970,7 +3970,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 state.setAdvancePass(logicalTimePoint);
             }
             state.setRacingProcedure(logicalTimePoint, racingProcedure);
-            state.forceNewStartTime(logicalTimePoint, startTime);
+            state.forceNewStartTime(logicalTimePoint, startTime, /* courseAreaId */ null);
             result = state.getStartTime();
         } else {
             result = null;
