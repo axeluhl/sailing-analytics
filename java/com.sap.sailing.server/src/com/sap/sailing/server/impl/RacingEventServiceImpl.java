@@ -1739,7 +1739,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         Regatta regatta = new RegattaImpl(getRaceLogStore(), getRegattaLogStore(), fullRegattaName,
                 getBaseDomainFactory().getOrCreateBoatClass(boatClassName), canBoatsOfCompetitorsChangePerRace,
                 competitorRegistrationType, startDate, endDate, series, persistent, scoringScheme, id,
-                Util.map(courseAreaIds, this::getCourseArea),
+                Util.map(courseAreaIds, courseAreaId->getBaseDomainFactory().getExistingCourseAreaById(courseAreaId)),
                 buoyZoneRadiusInHullLengths, useStartTimeInference, controlTrackingFromStartAndFinishTimes,
                 autoRestartTrackingUponCompetitorSetChange, rankingMetricConstructor, registrationLinkSecret);
         boolean wasCreated = addAndConnectRegatta(persistent, regatta);

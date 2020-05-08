@@ -660,7 +660,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         if (courseAreaId != null) {
             lookupCourseAreaAndAddIfFound(courseAreas, courseAreaId);
         }
-        List<?> courseAreaIds = (List<?>) documentContainingCourseAreaIds.get(FieldNames.COURSE_AREA_ID.name());
+        List<?> courseAreaIds = (List<?>) documentContainingCourseAreaIds.get(FieldNames.COURSE_AREA_IDS.name());
         if (courseAreaIds != null) {
             for (final Object courseAreaIdAsString : courseAreaIds) {
                 lookupCourseAreaAndAddIfFound(courseAreas, courseAreaIdAsString.toString());
