@@ -345,7 +345,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
             boolean persistent, ScoringScheme scoringScheme, Serializable courseAreaId, Double buoyZoneRadiusInHullLengths,
             boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes, boolean autoRestartTrackingUponCompetitorSetChange, RankingMetricConstructor rankingMetricConstructor) {
         return createRegatta(regattaName, boatClassName, canBoatsOfCompetitorsChangePerRace, competitorRegistrationType,
-                registrationLinkSecret, startDate, endDate, courseAreaId, series, persistent, scoringScheme,
+                registrationLinkSecret, startDate, endDate, id, series, persistent, scoringScheme,
                 courseAreaId==null?Collections.emptySet():Collections.singleton(courseAreaId), buoyZoneRadiusInHullLengths, useStartTimeInference,
                 controlTrackingFromStartAndFinishTimes, autoRestartTrackingUponCompetitorSetChange,
                 rankingMetricConstructor);

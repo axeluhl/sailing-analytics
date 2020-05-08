@@ -53,14 +53,12 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
                 /* course area ID */ (Serializable) null,
                 /* buoyZoneRadiusInHullLengths */2.0, /* useStartTimeInference */ true,
                 /* controlTrackingFromStartAndFinishTimes */ false, /* autoRestartTrackingUponCompetitorSetChange */ false, OneDesignRankingMetric::new);
-
         Thread.sleep(1000);
-        
         Regatta replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
         assertTrue(replicatedRegatta.isPersistent());
         assertTrue(Util.isEmpty((replicatedRegatta.getSeries())));
-        assertNull(replicatedRegatta.getCourseAreas());        
+        assertTrue(Util.isEmpty(replicatedRegatta.getCourseAreas()));
         assertTrue(regattaId.equals(replicatedRegatta.getId()));
         assertNull(replicatedRegatta.getRegattaConfiguration());
     }
@@ -126,7 +124,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         Thread.sleep(1000);
         replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
-        assertNull(replicatedRegatta.getCourseAreas());
+        assertTrue(Util.isEmpty(replicatedRegatta.getCourseAreas()));
         // Test for 'alpha'
         currentCourseAreaId = alphaCourseAreaId;
         master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), /*startDate*/ null, /*endDate*/ null, 
@@ -155,7 +153,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         Thread.sleep(1000);
         replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
-        assertNull(replicatedRegatta.getCourseAreas());
+        assertTrue(Util.isEmpty(replicatedRegatta.getCourseAreas()));
     }
     
     public void testUpdateSpecificRegattaReplicationForProcedureAndCourseDesignerAndConfig() throws InterruptedException {
@@ -247,7 +245,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         assertEquals("Medal", replicatedMedal.getName());
         assertEquals(1, Util.size(replicatedMedal.getFleets()));
         assertNotNull(replicatedMedal.getFleetByName("Medal"));
-        assertNull(replicatedRegatta.getCourseAreas());
+        assertTrue(Util.isEmpty(replicatedRegatta.getCourseAreas()));
     }
     
     @Test

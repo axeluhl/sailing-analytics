@@ -1955,7 +1955,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 /* registrationLinkSecret */ regatta.getRegistrationLinkSecret(), regatta.getStartDate(),
                 regatta.getEndDate(), regatta.getId(),
                 getSeriesWithoutRaceColumnsConstructionParametersAsMap(regatta), regatta.isPersistent(),
-                regatta.getScoringScheme(), Util.map(regatta.getCourseAreas(), CourseArea::getId), regatta.getBuoyZoneRadiusInHullLengths(),
+                regatta.getScoringScheme(), Util.mapToArrayList(regatta.getCourseAreas(), CourseArea::getId), regatta.getBuoyZoneRadiusInHullLengths(),
                 regatta.useStartTimeInference(), regatta.isControlTrackingFromStartAndFinishTimes(),
                 regatta.isAutoRestartTrackingUponCompetitorSetChange(), regatta.getRankingMetricType()));
         RegattaIdentifier regattaIdentifier = regatta.getRegattaIdentifier();
