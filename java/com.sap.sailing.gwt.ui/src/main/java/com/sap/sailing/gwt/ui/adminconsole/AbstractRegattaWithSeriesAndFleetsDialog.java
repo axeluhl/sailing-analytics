@@ -281,9 +281,13 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         for (EventDTO event : Util.sortNamedCollection(existingEvents)) {
             sailingEventsListBox.addItem(event.getName());
             if (defaultEvent != null) {
-                if (defaultEvent.getName().equals(event.getName())) {
+                if (defaultEvent.getId().equals(event.getId())) {
                     sailingEventsListBox.setSelectedIndex(sailingEventsListBox.getItemCount() - 1);
                     fillCourseAreaListBox(event);
+                    if (event.venue.getCourseAreas().size() == 1) {
+                        // select the single course area as the default:
+                        courseAreaSelection.setSelected(event.venue.getCourseAreas().iterator().next(), true);
+                    }
                 }
             } else { 
                 if (isAnyOfTheCourseAreasInEvent(event, regatta.courseAreas)) {
@@ -305,7 +309,7 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
     }
 
     protected void setCourseAreaSelection() {
-        EventDTO selectedEvent = getSelectedEvent();
+        final EventDTO selectedEvent = getSelectedEvent();
         courseAreaSelection.clear();
         courseAreaSelection.setEnabled(false);
         if (selectedEvent != null) {

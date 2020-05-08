@@ -25,6 +25,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.sap.sailing.domain.base.CompetitorWithBoat;
+import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.LeaderboardGroupBase;
@@ -33,7 +34,6 @@ import com.sap.sailing.domain.base.LeaderboardSearchResultBase;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.CourseAreaImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
@@ -164,9 +164,9 @@ public class SearchServiceTest {
                 "Kiel", /* isPublic */ true, UUID.randomUUID(), /* officialWebsiteURLAsString */ null, /*baseURL*/null,
                 /* sailorsInfoWebsiteURLAsString */ null, /* images */Collections.<ImageDescriptor> emptyList(), /* videos */Collections.<VideoDescriptor> emptyList(), /* leaderboardGroupIds */ Collections.<UUID> emptyList()));
         kiel = pfingstbusch.getVenue();
-        final CourseAreaImpl kielAlpha = new CourseAreaImpl("Alpha", UUID.randomUUID());
+        final CourseArea kielAlpha = server.getBaseDomainFactory().getOrCreateCourseArea(UUID.randomUUID(), "Alpha");
         kiel.addCourseArea(kielAlpha);
-        final CourseAreaImpl kielBravo = new CourseAreaImpl("Bravo", UUID.randomUUID());
+        final CourseArea kielBravo = server.getBaseDomainFactory().getOrCreateCourseArea(UUID.randomUUID(), "Bravo");
         kiel.addCourseArea(kielBravo);
         final LinkedHashMap<String, SeriesCreationParametersDTO> seriesCreationParams = new LinkedHashMap<String, SeriesCreationParametersDTO>();
         seriesCreationParams.put("Default",
@@ -213,7 +213,7 @@ public class SearchServiceTest {
                 "Flensburg", /* isPublic */ true, UUID.randomUUID(),  /* officialWebsiteURLAsString */ null, /*baseURL*/null,
                 /*sailorsInfoWebsiteURLAsString */ null, /* images */Collections.<ImageDescriptor> emptyList(), /* videos */Collections.<VideoDescriptor> emptyList(), /* leaderboardGroupIds */ Collections.<UUID> emptyList()));
         flensburg = aalEvent.getVenue();
-        final CourseAreaImpl flensburgStandard = new CourseAreaImpl("Standard", UUID.randomUUID());
+        final CourseArea flensburgStandard = server.getBaseDomainFactory().getOrCreateCourseArea(UUID.randomUUID(), "Standard");
         flensburg.addCourseArea(flensburgStandard);
         aalRegatta = server.apply(new AddSpecificRegatta(RegattaImpl.getDefaultName("Aalregatta", "ORC"), "ORC",
                 /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,

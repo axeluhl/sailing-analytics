@@ -1242,7 +1242,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         logger.info("adding flexible leaderboard " + leaderboardName);
         FlexibleLeaderboard result = new FlexibleLeaderboardImpl(getRaceLogStore(), getRegattaLogStore(),
                 leaderboardName, new ThresholdBasedResultDiscardingRuleImpl(discardThresholds), scoringScheme,
-                Util.map(courseAreaIds, this::getCourseArea));
+                Util.map(courseAreaIds, courseAreaId->getBaseDomainFactory().getExistingCourseAreaById(courseAreaId)));
         result.setDisplayName(leaderboardDisplayName);
         if (getLeaderboardByName(leaderboardName) != null) {
             throw new IllegalArgumentException("Leaderboard with name " + leaderboardName + " already exists");

@@ -7,9 +7,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
@@ -20,7 +19,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
  * @author Axel Uhl (D043530)
  *
  */
-public class CourseAreaSelection extends VerticalPanel {
+public class CourseAreaSelection extends CaptionPanel {
     private final Map<CourseAreaDTO, CheckBox> checkboxes;
     private final Set<CourseAreaDTO> selectedSet;
     
@@ -29,9 +28,9 @@ public class CourseAreaSelection extends VerticalPanel {
     }
     
     public CourseAreaSelection(Iterable<CourseAreaDTO> courseAreas, StringMessages stringMessages) {
+        super(stringMessages.selectCourseArea());
         checkboxes = new HashMap<>();
         selectedSet = new HashSet<>();
-        add(new Label(stringMessages.selectCourseArea()));
         for (final CourseAreaDTO courseArea : courseAreas) {
             addCourseArea(courseArea);
         }
