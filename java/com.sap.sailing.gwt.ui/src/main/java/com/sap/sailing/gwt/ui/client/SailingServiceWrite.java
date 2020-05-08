@@ -247,7 +247,7 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
 
     Map<RegattaAndRaceIdentifier, Integer> importWindFromIgtimi(List<RaceDTO> selectedRaces,
             boolean correctByDeclination)
-            throws IllegalStateException, IOException;
+            throws IllegalStateException, Exception;
 
     void removeIgtimiAccount(String eMailOfAccountToRemove);
 
@@ -300,8 +300,6 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
 
     void removeRegattas(Collection<RegattaIdentifier> selectedRegattas);
 
-    EventDTO getEventById(UUID id, boolean withStatisticalData) throws UnauthorizedException;
-
     void renameEvent(UUID eventId, String newName) throws UnauthorizedException;
 
     void removeEvent(UUID eventId) throws UnauthorizedException;
@@ -322,7 +320,7 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
             VenueDTO venue, boolean isPublic, Iterable<UUID> leaderboardGroupIds, String officialWebsiteURLString,
             String baseURLAsString, Map<String, String> sailorsInfoWebsiteURLsByLocaleName, Iterable<ImageDTO> images,
             Iterable<VideoDTO> videos, Iterable<String> windFinderReviewedSpotCollectionIds)
-            throws UnauthorizedException;
+            throws UnauthorizedException, IOException;
 
     void updateLeaderboardGroup(UUID leaderboardGroupId, String oldName, String newName, String newDescription,
             String newDisplayName, List<String> leaderboardNames, int[] overallLeaderboardDiscardThresholds,
@@ -412,7 +410,7 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
 
     void createSwissTimingArchiveConfiguration(final String jsonURL) throws Exception;
 
-    void createRegattaStructure(final Iterable<RegattaDTO> regattas, final EventDTO newEvent);
+    void createRegattaStructure(final Iterable<RegattaDTO> regattas, final EventDTO newEvent) throws IOException;
 
     void removeWind(RegattaAndRaceIdentifier raceIdentifier, WindDTO windDTO);
 

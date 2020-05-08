@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -598,7 +599,7 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
      */
     QRCodeEvent getEvent(UUID eventId, String regattaName, String regattaRegistrationLinkSecret);
     
-    EventDTO getEventById(UUID id, boolean withStatisticalData) throws UnauthorizedException;
+    EventDTO getEventById(UUID id, boolean withStatisticalData) throws IOException, UnauthorizedException;
 
     /**
      * Allows reading public Competitors, or Competitors that are registered in the given regatta

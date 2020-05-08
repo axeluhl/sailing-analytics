@@ -733,8 +733,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     }
 
     @Override
-    public void createRegattaStructure(final Iterable<RegattaDTO> regattas, final EventDTO newEvent)
-            throws MalformedURLException {
+    public void createRegattaStructure(final Iterable<RegattaDTO> regattas, final EventDTO newEvent) throws MalformedURLException {
         final List<String> leaderboardNames = new ArrayList<String>();
         for (RegattaDTO regatta : regattas) {
             createRegattaFromRegattaDTO(regatta);
@@ -1299,7 +1298,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             boolean isPublic, List<String> courseAreaNames, String officialWebsiteURLAsString, String baseURLAsString,
             Map<String, String> sailorsInfoWebsiteURLsByLocaleName, Iterable<ImageDTO> images,
             Iterable<VideoDTO> videos, Iterable<UUID> leaderboardGroupIds)
-            throws MalformedURLException, UnauthorizedException {
+            throws UnauthorizedException {
         final UUID eventUuid = UUID.randomUUID();
 
         return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
