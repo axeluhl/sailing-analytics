@@ -447,7 +447,7 @@ public class RegattaDetailsComposite extends Composite {
             startDate.setText(regatta.startDate != null ? regatta.startDate.toString() : "");
             endDate.setText(regatta.endDate != null ? regatta.endDate.toString() : "");
             boatClassName.setText(regatta.boatClass != null ? regatta.boatClass.getName() : "");
-            courseAreas.setText(Util.join(", ", Util.map(regatta.courseAreas, CourseAreaDTO::getName)));
+            courseAreas.setText(Util.joinStrings(", ", Util.map(regatta.courseAreas, CourseAreaDTO::getName)));
             useStartTimeInference.setText(regatta.useStartTimeInference ? stringMessages.yes() : stringMessages.no());
             controlTrackingFromStartAndFinishTimes.setText(regatta.controlTrackingFromStartAndFinishTimes ? stringMessages.yes() : stringMessages.no());
             autoRestartTrackingUponCompetitorSetChange.setText(regatta.autoRestartTrackingUponCompetitorSetChange ? stringMessages.yes() : stringMessages.no());

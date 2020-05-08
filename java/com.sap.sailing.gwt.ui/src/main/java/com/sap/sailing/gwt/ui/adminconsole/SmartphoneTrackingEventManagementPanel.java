@@ -748,7 +748,7 @@ public class SmartphoneTrackingEventManagementPanel
             DeviceConfigurationDTO.RegattaConfigurationDTO configuration) {
         final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.getName());
         sailingService.updateRegatta(regattaIdentifier, regatta.startDate, regatta.endDate,
-                Util.map(regatta.courseAreas, CourseAreaDTO::getId), configuration, regatta.buoyZoneRadiusInHullLengths,
+                Util.mapToArrayList(regatta.courseAreas, CourseAreaDTO::getId), configuration, regatta.buoyZoneRadiusInHullLengths,
                 regatta.useStartTimeInference, regatta.controlTrackingFromStartAndFinishTimes,
                 regatta.autoRestartTrackingUponCompetitorSetChange, regatta.registrationLinkSecret,
                 regatta.competitorRegistrationType, new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {

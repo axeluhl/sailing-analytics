@@ -77,7 +77,7 @@ public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialo
     }
 
     private void setCourseAreaInDescriptor(LeaderboardDescriptor leaderboard) {
-        leaderboard.setCourseAreaIds(Util.map(getSelectedCourseAreas(), CourseAreaDTO::getId));
+        leaderboard.setCourseAreaIds(Util.mapToArrayList(getSelectedCourseAreas(), CourseAreaDTO::getId));
     }
 
     @Override

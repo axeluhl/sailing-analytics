@@ -362,7 +362,13 @@ public class Util {
             }
         });
     }
-    
+
+    public static <S, T> ArrayList<T> mapToArrayList(final Iterable<S> iterable, final Mapper<S, T> mapper) {
+        final ArrayList<T> result = new ArrayList<>();
+        addAll(map(iterable, mapper), result);
+        return result;
+    }
+
     public static <T> Iterable<T> filter(final Iterable<T> iterable, final Predicate<T> predicate) {
         return StreamSupport.stream(iterable.spliterator(), /* parallel */ false).filter(predicate)::iterator;
     }

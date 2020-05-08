@@ -72,7 +72,7 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
                 newRegatta.canBoatsOfCompetitorsChangePerRace, newRegatta.competitorRegistrationType,
                 newRegatta.registrationLinkSecret, newRegatta.startDate, newRegatta.endDate,
                 new RegattaCreationParametersDTO(seriesStructure), true, newRegatta.scoringScheme,
-                Util.map(newRegatta.courseAreas, CourseAreaDTO::getId), newRegatta.buoyZoneRadiusInHullLengths,
+                Util.mapToArrayList(newRegatta.courseAreas, CourseAreaDTO::getId), newRegatta.buoyZoneRadiusInHullLengths,
                 newRegatta.useStartTimeInference, newRegatta.controlTrackingFromStartAndFinishTimes,
                 newRegatta.autoRestartTrackingUponCompetitorSetChange, newRegatta.rankingMetricType,
                 new AsyncCallback<RegattaDTO>() {

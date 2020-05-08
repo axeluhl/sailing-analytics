@@ -287,12 +287,12 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
         TextColumn<StrippedLeaderboardDTOWithSecurity> courseAreasColumn = new TextColumn<StrippedLeaderboardDTOWithSecurity>() {
             @Override
             public String getValue(StrippedLeaderboardDTOWithSecurity leaderboard) {
-                return Util.join(", ", Util.map(leaderboard.courseAreas, CourseAreaDTO::getName));
+                return Util.joinStrings(", ", Util.map(leaderboard.courseAreas, CourseAreaDTO::getName));
             }
         };
         courseAreasColumn.setSortable(true);
         leaderboardColumnListHandler.setComparator(courseAreasColumn,
-                (o1, o2) -> new NaturalComparator().compare(Util.join(", ", Util.map(o1.courseAreas, CourseAreaDTO::getName)),
+                (o1, o2) -> new NaturalComparator().compare(Util.joinStrings(", ", Util.map(o1.courseAreas, CourseAreaDTO::getName)),
                         Util.join(", ", Util.map(o2.courseAreas, CourseAreaDTO::getName))));
 
         final HasPermissions type = SecuredDomainType.LEADERBOARD;
@@ -468,7 +468,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
     private LeaderboardDescriptor createLeaderboardDescriptor(StrippedLeaderboardDTO leaderboardDTO,
             ScoringSchemeType scoringScheme) {
         return new LeaderboardDescriptor(leaderboardDTO.getName(), leaderboardDTO.displayName, scoringScheme,
-                leaderboardDTO.discardThresholds, leaderboardDTO.regattaName, Util.map(leaderboardDTO.courseAreas, CourseAreaDTO::getId));
+                leaderboardDTO.discardThresholds, leaderboardDTO.regattaName, Util.mapToArrayList(leaderboardDTO.courseAreas, CourseAreaDTO::getId));
     }
 
     @Override

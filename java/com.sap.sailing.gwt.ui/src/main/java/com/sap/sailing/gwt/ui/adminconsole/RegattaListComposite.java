@@ -347,7 +347,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
     private void commitEditedRegatta(final RegattaDTO editedRegatta) {
         final RegattaIdentifier regattaName = new RegattaName(editedRegatta.getName());
         sailingService.updateRegatta(regattaName, editedRegatta.startDate, editedRegatta.endDate,
-                Util.map(editedRegatta.courseAreas, CourseAreaDTO::getId),
+                Util.mapToArrayList(editedRegatta.courseAreas, CourseAreaDTO::getId),
                 editedRegatta.configuration, editedRegatta.buoyZoneRadiusInHullLengths, editedRegatta.useStartTimeInference, editedRegatta.controlTrackingFromStartAndFinishTimes,
                 editedRegatta.autoRestartTrackingUponCompetitorSetChange, editedRegatta.registrationLinkSecret,
                 editedRegatta.competitorRegistrationType, new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
