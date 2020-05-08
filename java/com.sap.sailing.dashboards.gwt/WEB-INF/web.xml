@@ -28,6 +28,17 @@
 		<url-pattern>/service/sailing</url-pattern>
 	</servlet-mapping>
 
+    <servlet>
+        <display-name>Sailing ServiceWrite</display-name>
+        <servlet-name>SailingServiceWrite</servlet-name>
+        <servlet-class>com.sap.sailing.gwt.ui.server.SailingServiceWriteImpl</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>SailingServiceWrite</servlet-name>
+        <url-pattern>/service/sailingmaster</url-pattern>
+        <url-pattern>/service/sailingmaster/*</url-pattern>
+    </servlet-mapping>
+
 	<filter>
 		<filter-name>LocaleInjectionFilter</filter-name>
 		<filter-class>com.sap.sse.security.ui.server.LocaleInjectionFilter</filter-class>
