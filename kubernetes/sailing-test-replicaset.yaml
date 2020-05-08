@@ -1,0 +1,109 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sailing-test-replicaset
+  labels:
+    app: test
+    role: sailing-deployment
+    environment: sailing
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: test
+      role: sailing-replica
+      environment: sailing
+  template:
+    metadata:
+      labels:
+        app: test
+        role: sailing-replica
+        environment: sailing
+    spec:
+    # AntiAffinity between replicas and associated master
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 80
+              podAffinityTerm:
+                labelSelector:
+                    matchExpressions:
+                      - key: app
+                        operator: In
+                        values:
+                          - test
+                      - key: environment
+                        operator: In
+                        values:
+                          - sailing
+                      - key: role
+                        operator: In
+                        values:
+                          - sailing-replica
+                topologyKey: kubernetes.io/hostname
+            - weight: 40
+              podAffinityTerm:
+                labelSelector:
+                    matchExpressions:
+                      - key: app
+                        operator: In
+                        values:
+                          - test
+                      - key: environment
+                        operator: In
+                        values:
+                          - sailing
+                      - key: role
+                        operator: In
+                        values:
+                          - sailing-master
+                topologyKey: kubernetes.io/hostname
+      containers:
+      - name: sailing
+        image: donaldduck70/sapsailing:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8888
+          name: http-port
+        - containerPort: 14888
+          name: telnet-port
+        resources:
+          requests:
+            memory: "6Gi"
+            cpu: "500m"
+          limits:
+            memory: "12Gi"
+            cpu: "2"
+        env:
+        - name: MONGODB_URI
+          value: mongodb://mongo-live-rs-client/test-replica?replicaSet=rs0
+        - name: REPLICATION_HOST
+          value: rabbitmq
+        - name: REPLICATE_MASTER_SERVLET_HOST
+          value: sailing-test-service
+        - name: REPLICATE_MASTER_SERVLET_PORT
+          value: '8888'
+        - name: REPLICATE_MASTER_QUEUE_HOST
+          value: rabbitmq
+        - name: REPLICATE_MASTER_QUEUE_PORT
+          value: '5672'
+        - name: REPLICATE_ON_START
+          value: 'com.sap.sailing.server.impl.RacingEventServiceImpl,com.sap.sse.security.impl.SecurityServiceImpl,com.sap.sse.filestorage.impl.FileStorageManagementServiceImpl,com.sap.sse.mail.impl.MailServiceImpl,com.sap.sailing.polars.impl.PolarDataServiceImpl,com.sap.sailing.domain.racelogtracking.impl.fixtracker.RegattaLogFixTrackerRegattaListener,com.sap.sailing.windestimation.integration.WindEstimationFactoryServiceImpl'
+        - name: REPLICATE_MASTER_EXCHANGE_NAME
+          value: sailing-test-master
+        - name: REPLICATE_MASTER_BEARER_TOKEN
+          value: 'OdhJu40cKJ3swVcqBLauUYT7cQWKKulPARFREGGAhsQ='
+        livenessProbe:
+          httpGet:
+            path: /
+            port: http-port
+          initialDelaySeconds: 10
+          periodSeconds: 30
+        readinessProbe:
+          exec:
+            command:
+            - ./status
+          initialDelaySeconds: 10
+          periodSeconds: 30
+      imagePullSecrets:
+      - name: dockerhubsecret

@@ -19,13 +19,27 @@ spec:
     resources:
       requests:
         memory: "6Gi"
-        cpu: "250m"
+        cpu: "500m"
       limits:
         memory: "12Gi"
-        cpu: "500m"
+        cpu: "2"
     env:
     - name: MONGODB_URI
       value: mongodb://mongo-live-rs-client/test-master?replicaSet=rs0
+    - name: REPLICATION_CHANNEL
+      valueFrom:
+          fieldRef:
+            fieldPath: metadata.name
+    - name: REPLICATION_HOST
+      value: rabbitmq
+    - name: REPLICATE_MASTER_QUEUE_HOST
+      value: rabbitmq
+    - name: REPLICATE_MASTER_QUEUE_PORT
+      value: '5672'
+    - name: SERVER_NAME
+      valueFrom:
+          fieldRef:
+            fieldPath: metadata.name
     livenessProbe:
       httpGet:
         path: /

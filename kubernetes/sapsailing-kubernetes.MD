@@ -85,6 +85,27 @@ Now you can look for the primary executing ``db.isMaster()`` in the mongo shell.
 
 ## Sailing Analytics
 
+### Pod and Service
+Created a basic pod specification, see ```sailing-test-master-pod.yaml```. Also a ```service-test-master.yaml```. Applied to cluster, everything went fine. Connected via a ```kubectl port-forward pod/sailing-test-master 8081:8888```.
+
+Attempted a master data import from a big event, during which the following was experienced:
+- Mongo ran out of storage. Adjusted the pvc, after that the mongo pods came back without need to touch them -> it should be possible to automate this
+- Several times a mongo pod has been killed by the kubelet, as the node went out of memory. The sailing pod switches to another mongo pod, nothing to do manually. After this has happened a couple of times the MDI goes into a halt, but resumes after some time.
+-> Get a better understanding of the Gardener cluster autoscaler, imo this should have triggered a new node
+
+
+## RabbitMQ
+
+In order to be able to create a Sailing Analytics master-replica set we need a rabbitMQ in our cluster.
+Get the helm chart with
+```
+helm pull bitnami/rabbitmq --untar
+```
+and adjust the ```values.yaml``` accordingly. There is a ```rabbitmq.yaml``` in ```/kubernetes``` containing a couple of modifications. If you do not want to write a password specifically in there create a Kubernetes secret, using:
+```
+k create secret generic <secret-name> --from-literal=rabbitmq-password='<password>'
+```
+Be carefull to match rabbitmq-password as key, as this is defined within the helm chart of bitnami/rabbitmq (see l259 in /helm-charts/rabbitmq/templates/statefulset.yaml). After that add the secret name in the rabbitmq.yaml, l75.
 
 ### Tips:
 - [install kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 
