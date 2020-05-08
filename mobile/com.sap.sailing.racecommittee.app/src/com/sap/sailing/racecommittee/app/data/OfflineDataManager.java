@@ -97,7 +97,7 @@ public class OfflineDataManager extends DataManager {
                 null);
         SeriesWithRows medal = new SeriesWithRowsImpl("Medal", true, /* isFleetsCanRunInParallel */ true, null);
         RaceGroup raceGroup = new RaceGroupImpl("ESS", /* displayName */ null, new BoatClassImpl("X40", false), false,
-                null, Arrays.asList(qualifying, medal), new EmptyRegattaConfiguration());
+                Arrays.asList(qualifying, medal), new EmptyRegattaConfiguration());
 
         List<Competitor> competitors = new ArrayList<Competitor>();
         competitors.add(new CompetitorImpl(UUID.randomUUID(), "SAP Extreme Sailing Team", "SAP", Color.BLUE, null, null,
@@ -116,31 +116,25 @@ public class OfflineDataManager extends DataManager {
         final AbstractLogEventAuthor author = AppPreferences.on(context).getAuthor();
         ConfigurationLoader<RegattaConfiguration> configuration = PreferencesRegattaConfigurationLoader
                 .loadFromPreferences(preferences);
-
         log.add(new RaceLogStartTimeEventImpl(new MillisecondsTimePoint(new Date().getTime() - 2000), author, 1,
-                new MillisecondsTimePoint(new Date().getTime() - 1000)));
-
+                new MillisecondsTimePoint(new Date().getTime() - 1000), /* course area ID */ null));
         log.add(new RaceLogRaceStatusEventImpl(new MillisecondsTimePoint(new Date().getTime()),
                 AppPreferences.on(context).getAuthor(), 1, RaceLogRaceStatus.FINISHING));
-
         ManagedRace q1 = new ManagedRaceImpl(
                 new ManagedRaceIdentifierImpl("A.B", new FleetImpl("A"), qualifying, raceGroup),
                 RaceStateImpl.create(new AndroidRaceLogResolver(), log, AppPreferences.on(context).getAuthor(),
                         configuration),
                 /* zeroBasedIndexInFleet */ 0);
-
         log = new RaceLogImpl(UUID.randomUUID());
         /*
          * log.add(factory.createStartTimeEvent( new MillisecondsTimePoint(new Date()), 1, RaceLogRaceStatus.SCHEDULED,
          * new MillisecondsTimePoint(new Date().getTime() + 100000)));
          */
-
         ManagedRace q2 = new ManagedRaceImpl(
                 new ManagedRaceIdentifierImpl("B", new FleetImpl("A.A"), qualifying, raceGroup),
                 RaceStateImpl.create(new AndroidRaceLogResolver(), log, AppPreferences.on(context).getAuthor(),
                         configuration),
                 /* zeroBasedIndexInFleet */ 1);
-
         log = new RaceLogImpl(UUID.randomUUID());
         /*
          * log.add(factory.createRaceStatusEvent( new MillisecondsTimePoint(new Date()), 5,
@@ -159,11 +153,9 @@ public class OfflineDataManager extends DataManager {
         dataStore.addRace(q2);
         dataStore.addRace(q3);
         // dataStore.addRace(m1);
-
         Mark m1 = new MarkImpl("Red");
         Mark m2 = new MarkImpl("Green");
         Mark m3 = new MarkImpl("White");
-
         dataStore.addMark(raceGroup, m1);
         dataStore.addMark(raceGroup, m2);
         dataStore.addMark(raceGroup, m3);
