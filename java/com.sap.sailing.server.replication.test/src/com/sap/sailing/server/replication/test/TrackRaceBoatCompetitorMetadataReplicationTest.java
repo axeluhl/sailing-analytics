@@ -86,7 +86,8 @@ public class TrackRaceBoatCompetitorMetadataReplicationTest extends AbstractServ
                         startOfTracking, endOfTracking, /* delayToLiveInMillis */
                         0l, /* offsetToStartTimeOfSimulatedRace */null, /*ignoreTracTracMarkPassings*/ false, EmptyRaceLogStore.INSTANCE,
                         EmptyRegattaLogStore.INSTANCE, tracTracUsername, tracTracPassword, "", "", /* trackWind */ false, /* correctWindDirectionByMagneticDeclination */ false,
-                        /* preferReplayIfAvailable */ false, /* timeoutInMillis */ (int) RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, /* useOfficialEventsToUpdateRaceLog */ false);
+                        /* preferReplayIfAvailable */ false, /* timeoutInMillis */ (int) RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS,
+                        /* useOfficialEventsToUpdateRaceLog */ false);
     }
 
     private void startTracking() throws Exception, InterruptedException {
@@ -102,7 +103,9 @@ public class TrackRaceBoatCompetitorMetadataReplicationTest extends AbstractServ
                 CompetitorRegistrationType.CLOSED, /* registrationLinkSecret */ null,
                 /* startDate */ null, /* endDate */ null, UUID.randomUUID(),
                 /* start with no series */ Collections.emptySet(),
-                /* persistent */ true, new LowPoint(), /* defaultCourseAreaId */ UUID.randomUUID(),
+                /* persistent */ true, new LowPoint(),
+                /* defaultCourseAreaId */ master.getBaseDomainFactory()
+                        .getOrCreateCourseArea(UUID.randomUUID(), "Course Area").getId(),
                 /* buoyZoneRadiusInHullLengths */ 2., /* useStartTimeInference */ false, /* controlTrackingFromStartAndFinishTimes */ false,
                 /* autoRestartTrackingUponCompetitorSetChange */ false, /* rankingMetricConstructor */ OneDesignRankingMetric::new);
         final RegattaName regattaIdentifier = new RegattaName(regatta.getName());
@@ -128,28 +131,22 @@ public class TrackRaceBoatCompetitorMetadataReplicationTest extends AbstractServ
         final String boat1CompetitorName = "CYC"; 
         final String boat1Name = "Boot 1";
         final String boat1Color = "#141414";
-
         final String boat2CompetitorName = "SVI"; 
         final String boat2Name = "Boot 2";
         final String boat2Color = "#606060";
-
         final String boat3CompetitorName = "BYCÜ"; 
         final String boat3Name = "Boot 3";
         final String boat3Color = "#0169EF";
-        
         startTracking();
         Thread.sleep(5000);
         TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
         assertNotNull(replicaTrackedRace);
-        
         Iterable<Competitor> masterCompetitors = masterTrackedRace.getRace().getCompetitors();
         Iterable<Competitor> replicaCompetitors = replicaTrackedRace.getRace().getCompetitors();
-        
         assertNotSame(masterTrackedRace, replicaTrackedRace);
         assertNotSame(masterTrackedRace.getRace(), replicaTrackedRace.getRace());
         assertEquals(Util.size(masterCompetitors), 6);
         assertEquals(Util.size(masterCompetitors), Util.size(replicaCompetitors));
-        
         for (Competitor competitor : masterCompetitors) {
             Competitor replicaCompetitor = findCompetitor(replicaCompetitors, competitor);
             Boat competitorBoat = masterTrackedRace.getBoatOfCompetitor(competitor);

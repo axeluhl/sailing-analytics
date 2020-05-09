@@ -42,7 +42,8 @@ public class PostingOperationFromReplicaToMasterTest extends AbstractServerRepli
         final String leaderboardName = "My Leaderboard";
         final CreateFlexibleLeaderboard operation = new CreateFlexibleLeaderboard(/* leaderboardName */ leaderboardName,
                 /* leaderboardDisplayName */ null, /* discardThresholds */ new int[0], /* scoringScheme */ new LowPoint(),
-                /* courseAreaId */ Collections.singleton(UUID.randomUUID()));
+                /* courseAreaId */ Collections.singleton(replica.getBaseDomainFactory().getOrCreateCourseArea(UUID.randomUUID(), 
+                        "Course Area").getId()));
         replica.apply(operation);
         Thread.sleep(1000);
         assertTrue(master.getLeaderboards().containsKey(leaderboardName));
