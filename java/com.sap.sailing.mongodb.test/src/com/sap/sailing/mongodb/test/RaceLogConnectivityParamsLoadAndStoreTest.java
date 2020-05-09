@@ -20,7 +20,6 @@ import com.mongodb.MongoException;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
-import com.sap.sailing.domain.base.impl.CourseAreaImpl;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
