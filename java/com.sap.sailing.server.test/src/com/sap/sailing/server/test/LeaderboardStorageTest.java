@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import org.bson.Document;
 import org.junit.Test;
@@ -51,7 +52,7 @@ public class LeaderboardStorageTest extends TestCase {
         RacingEventService service = new RacingEventServiceImpl();
         int[] dicardingThresholds = {};
         Leaderboard leaderboard = service.addFlexibleLeaderboard(LEADERBOARD_NAME, "testIt", dicardingThresholds,
-                new LowPoint(), Collections.singleton("maaap"));
+                new LowPoint(), Collections.singleton(service.getBaseDomainFactory().getOrCreateCourseArea(UUID.randomUUID(), "maaap").getId()));
         List<DynamicPerson> sailorList = new ArrayList<DynamicPerson>();
         sailorList.add(new PersonImpl("sailor", new NationalityImpl("GER"), null, ""));
         DynamicTeam team = new TeamImpl("team", sailorList, null);
