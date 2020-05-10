@@ -5561,15 +5561,19 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 newEvent.getWindFinderReviewedSpotsCollectionIds());
     }
     
+    private Triple<String, String, String> getLeaderboardSlotKey(RegattaOverviewEntryDTO entry) {
+        return new Triple<>(entry.leaderboardName, entry.raceInfo.raceName, entry.raceInfo.fleetName);
+    }
+    
     @Override
     public List<RegattaOverviewEntryDTO> getRaceStateEntriesForRaceGroup(UUID eventId, List<UUID> visibleCourseAreaIds,
             List<String> visibleRegattas, boolean showOnlyCurrentlyRunningRaces, boolean showOnlyRacesOfSameDay, Duration clientTimeZoneOffset)
             throws NoWindException, InterruptedException, ExecutionException {
-        List<RegattaOverviewEntryDTO> result = new ArrayList<RegattaOverviewEntryDTO>();
         Calendar dayToCheck = Calendar.getInstance();
         dayToCheck.setTime(new Date());
         Event event = getService().getEvent(eventId);
         getSecurityService().checkCurrentUserReadPermission(event);
+        final Map<Triple<String, String, String>, RegattaOverviewEntryDTO> entriesByRaceIdentifier = new HashMap<>();
         if (event != null) {
             for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
                 if (visibleCourseAreaIds.contains(courseArea.getId())) {
@@ -5579,20 +5583,24 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                             // race entries that either have no course area explicitly defined or otherwise have
                             // a course area that is part of the visibleCourseAreaIds
                             if (Util.contains(leaderboard.getCourseAreas(), courseArea)) {
-                                Util.addAll(
-                                    Util.filter(
-                                        getRaceStateEntriesForLeaderboard(leaderboard.getName(),
+                                for (final RegattaOverviewEntryDTO entry : getRaceStateEntriesForLeaderboard(leaderboard.getName(),
                                             showOnlyCurrentlyRunningRaces, showOnlyRacesOfSameDay, clientTimeZoneOffset,
-                                            visibleRegattas),
-                                        entry->entry.courseAreaIdAsString == null || visibleCourseAreaIds.contains(UUID.fromString(
-                                                entry.courseAreaIdAsString))), result);
+                                            visibleRegattas)) {
+                                    // use "leaderboard slot key" consisting of leaderboard name / race column name / fleet name
+                                    // because the raceInfo.raceIdentifier could be null as no TrackedRace has to be attached
+                                    if (!entriesByRaceIdentifier.containsKey(getLeaderboardSlotKey(entry)) &&
+                                            (entry.courseAreaIdAsString == null || visibleCourseAreaIds.contains(UUID.fromString(
+                                                    entry.courseAreaIdAsString)))) {
+                                        entriesByRaceIdentifier.put(getLeaderboardSlotKey(entry), entry);
+                                    }
+                                }
                             }
                         }
                     }
                 }
             }
         }
-        return result;
+        return new ArrayList<>(entriesByRaceIdentifier.values());
     }
 
     /**

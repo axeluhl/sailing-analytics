@@ -81,7 +81,6 @@ public class RegattaOverviewPanel extends SimplePanel {
             final ErrorReporter errorReporter, 
             final StringMessages stringMessages, 
             RegattaOverviewContextDefinition regattaOverviewContextDefinition) {
-        
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
@@ -91,29 +90,24 @@ public class RegattaOverviewPanel extends SimplePanel {
         this.eventDTO = null;
         this.raceGroupDTOs = new ArrayList<RaceGroupDTO>();
         this.userService = userService;
-
         mainPanel = new VerticalPanel();
         setWidget(mainPanel);
         mainPanel.setWidth("100%");
         mainPanel.addStyleName(style.contentWrapper());
-        
         refreshNowButton = new Anchor(stringMessages.refreshNow());
         refreshNowButton.setStyleName(RES.mainCss().button());
         refreshNowButton.addStyleName(style.button());
-
         refreshNowButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 regattaRaceStatesComponent.loadAndUpdateEventLog();
             }
-            
         });
         settingsButton = new Anchor("&nbsp;", true);
         settingsButton.ensureDebugId("RegattaOverviewSettingsButton");
         settingsButton.setStyleName(style.settingsButton());
         settingsButton.addStyleName(RES.mainCss().button());
         settingsButton.addStyleName(style.button());
-
         settingsButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -138,7 +132,6 @@ public class RegattaOverviewPanel extends SimplePanel {
                     startStopUpdatingButton.addStyleName(style.refreshButton_live());
                 }
             }
-            
         });
         // FIXME The chained calls from here are independent from each other and should be implemented with Dispatching Framework
         sailingService.getEventById(regattaOverviewContextDefinition.getEvent(), false, new MarkedAsyncCallback<EventDTO>(
