@@ -32,6 +32,26 @@
                             Particularly attributes such as <tt>QueuedTasks</tt> and <tt>CompletedTaskCount</tt>
                             can help JMX clients such as JConsole to understand the state of the server.
                         </li>
+                        <li>Leaderboards and regattas used to have a single "default" course area assignment. This caused
+                            problems when particularly split-fleet regattas assigned their different fleets to different
+                            course areas at the same time. See also
+                            <a href="https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=3465">bug 3465</a>. Now it is
+                            possible to select more than one course area from the enclosing event for a regatta and flexible
+                            leaderboard. As an immediate effect, the SAP Sailing Race Manager app which uses the course area
+                            as a filter for the regattas to display for an event can now see the same regatta on different devices
+                            configured for different course areas. For example, if a regatta splits its Gold and Silver fleets
+                            to race on course areas Delta and Echo, respectively, then now users of the SAP Sailing Race Manager app
+                            will see this regatta when they are logged on to course area Delta or to course area Echo.
+                        </li>
+                        <li>When setting a start time for a race through the "Race Log," such as from the SAP Sailing Race
+                            Manager app or, e.g., the AdminConsole.html start time setting feature, the course area on which the
+                            start will happen can be captured in the log entry. If not provided, and if the regatta / leaderboard
+                            to whose log the entry is added has exactly one course area configured then that will be the default
+                            course area for the race. With this new feature is it possible to specify exactly on which course area
+                            a race has started, even if the enclosing regatta uses multiple course areas, either over time or even
+                            at the same time. The SAP Sailing Race Manager app now uses the course area to which the user logs on to
+                            fill this new field in the start time log entries.
+                        </li>
                         <li>An incompatible change has been applied to the JSON output format of the
                             <tt>sailingserver/api/v1/regattas/{regatta-name}</tt> end point. Instead of delivering
                             the ID of the single "default" course area in the field <tt>courseAreaId</tt> now a list
