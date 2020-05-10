@@ -7,6 +7,7 @@ public class SubscriptionWebhookEvent {
     public static final String EVENT_SUBSCRIPTION_DELETED = "subscription_deleted";
     public static final String EVENT_SUBSCRIPTION_CREATED = "subscription_created";
     public static final String EVENT_SUBSCRIPTION_CHANGED = "subscription_changed";
+    public static final String EVENT_SUBSCRIPTION_CANCELLED = "subscription_cancelled";
     public static final String EVENT_PAYMENT_SUCCEEDED = "payment_succeeded";
     public static final String EVENT_PAYMENT_FAILED = "payment_failed";
     public static final String EVENT_SUBSCRIPTION_ACTIVATED = "subscription_activated";

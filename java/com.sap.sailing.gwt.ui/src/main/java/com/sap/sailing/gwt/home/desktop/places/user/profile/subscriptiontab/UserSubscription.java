@@ -50,6 +50,12 @@ public class UserSubscription extends Composite implements UserSubscriptionView 
         presenter.openCheckout();
     }
     
+    @UiHandler("cancelSubscriptionButtonUi")
+    public void handleCancelSubscriptionClick(ClickEvent e) {
+        cancelSubscriptionButtonUi.setEnabled(false);
+        presenter.cancelSubscription();
+    }
+    
     @Override
     protected void onLoad() {
         super.onLoad();

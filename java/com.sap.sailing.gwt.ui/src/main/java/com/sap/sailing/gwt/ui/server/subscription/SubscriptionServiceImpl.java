@@ -197,4 +197,27 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
             this.message = message;
         }
     }
+
+    @Override
+    public boolean cancelSubscription() {
+        try {
+            User user = getCurrentUser();
+            Subscription subscription = user.getSubscription();
+            String subscriptionId = subscription.subscriptionId;
+            if (subscriptionId != null && !subscriptionId.isEmpty()) {
+                Result result = com.chargebee.models.Subscription.cancel(subscriptionId)
+                                .request();
+                if (!result.subscription().status().name().toLowerCase().equals(Subscription.SUBSCRIPTION_STATUS_CANCELLED)) {
+                    return false;
+                }
+            }
+            
+            getSecurityService().updateUserSubscription(user.getName(), null);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.log(Level.WARNING, "Error in cancel subscription ", e);
+            return false;
+        }
+    }
 }

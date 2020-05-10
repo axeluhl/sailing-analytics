@@ -103,6 +103,27 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
         });
     }
     
+    @Override
+    public void cancelSubscription() {
+        clientFactory.getSubscriptionService().cancelSubscription(new AsyncCallback<Boolean>() {
+            
+            @Override
+            public void onSuccess(Boolean result) {
+                if (!result) {
+                    Window.alert("Failed to cancel the subscription");
+                    return;
+                }
+                
+                view.updateView(null);
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                Window.alert("Cancel subscription error: " + caught.getMessage());
+            }
+        });
+    }
+    
     private void requestFinishingPlanUpgrading(String hostedPageId) {
         clientFactory.getSubscriptionService().upgradePlanSuccess(hostedPageId, new AsyncCallback<SubscriptionDTO>() {
 

@@ -7,4 +7,5 @@ public interface SubscriptionService extends RemoteService {
     public String generateHostedPageObject();
     public SubscriptionDTO upgradePlanSuccess(String hostedPageId);
     public SubscriptionDTO getSubscription();
+    public boolean cancelSubscription();
 }

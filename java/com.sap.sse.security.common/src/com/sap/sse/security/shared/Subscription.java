@@ -7,6 +7,7 @@ public class Subscription implements Serializable {
     public static String PAYMENT_STATUS_NO_SUCCESS = "no_success";
     public static String SUBSCRIPTION_STATUS_TRIAL = "in_trial";
     public static String SUBSCRIPTION_STATUS_ACTIVE = "active";
+    public static String SUBSCRIPTION_STATUS_CANCELLED = "cancelled";
     
     private static final long serialVersionUID = 96845123954667808L;
     

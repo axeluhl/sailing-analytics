@@ -40,7 +40,9 @@ public class SubscriptionWebhookServlet extends SailingServerHttpServlet {
                 return;
             }
             
-            if (user.getSubscription() != null && event.getEventOccurredAt() < user.getSubscription().latestEventTime) {
+            Subscription userSubscription = user.getSubscription();
+            
+            if (userSubscription != null && event.getEventOccurredAt() < user.getSubscription().latestEventTime) {
                 response.setStatus(200);
                 return;
             }
@@ -49,8 +51,9 @@ public class SubscriptionWebhookServlet extends SailingServerHttpServlet {
             case SubscriptionWebhookEvent.EVENT_CUSTOMER_DELETED:
                 updateUserSubscription(user, null);
                 break;
+            case SubscriptionWebhookEvent.EVENT_SUBSCRIPTION_CANCELLED:
             case SubscriptionWebhookEvent.EVENT_SUBSCRIPTION_DELETED:
-                if (user.getSubscription().subscriptionId.equals(event.getSubscriptionId())) {
+                if (userSubscription != null && userSubscription.subscriptionId.equals(event.getSubscriptionId())) {
                     updateUserSubscription(user, null);
                 }
                 break;
@@ -59,7 +62,7 @@ public class SubscriptionWebhookServlet extends SailingServerHttpServlet {
             case SubscriptionWebhookEvent.EVENT_SUBSCRIPTION_ACTIVATED:
             case SubscriptionWebhookEvent.EVENT_PAYMENT_SUCCEEDED:
             case SubscriptionWebhookEvent.EVENT_PAYMENT_FAILED:
-                updateUserSubscription(user, buildSubscription(user.getSubscription(), event));
+                updateUserSubscription(user, buildSubscription(userSubscription, event));
                 break;
             }
             

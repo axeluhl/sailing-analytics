@@ -7,4 +7,5 @@ public interface SubscriptionServiceAsync {
     public void generateHostedPageObject(AsyncCallback<String> callback);
     public void upgradePlanSuccess(String hostedPageId, AsyncCallback<SubscriptionDTO> callback);
     public void getSubscription(AsyncCallback<SubscriptionDTO> callback);
+    void cancelSubscription(AsyncCallback<Boolean> callback);
 }

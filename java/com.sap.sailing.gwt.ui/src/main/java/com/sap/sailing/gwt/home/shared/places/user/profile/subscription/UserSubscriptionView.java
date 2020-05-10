@@ -13,5 +13,6 @@ public interface UserSubscriptionView extends IsWidget {
         public void loadSubscription();
         public void openCheckout();
         public void setView(UserSubscriptionView view);
+        public void cancelSubscription();
     }
 }
