@@ -18,6 +18,7 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -98,14 +99,17 @@ public class TrackRaceBoatCompetitorMetadataReplicationTest extends AbstractServ
     }
 
     private void startTrackingOnMaster() throws Exception {
+        final CourseArea courseArea = master.getBaseDomainFactory().getOrCreateCourseArea(UUID.randomUUID(), "Course Area");
+        // in production, a course area creation based on an event's venue creation would be
+        // replicated; in test set-ups, the course area needs to be "replicated" manually:
+        replica.getBaseDomainFactory().getOrCreateCourseArea(courseArea.getId(), courseArea.getName());
         final Regatta regatta = master.createRegatta("Test regatta", "J/70",
                 /* canBoatsOfCompetitorsChangePerRace==true because it's a league race we're using for this test */ true,
                 CompetitorRegistrationType.CLOSED, /* registrationLinkSecret */ null,
                 /* startDate */ null, /* endDate */ null, UUID.randomUUID(),
                 /* start with no series */ Collections.emptySet(),
                 /* persistent */ true, new LowPoint(),
-                /* defaultCourseAreaId */ master.getBaseDomainFactory()
-                        .getOrCreateCourseArea(UUID.randomUUID(), "Course Area").getId(),
+                /* defaultCourseAreaId */ courseArea.getId(),
                 /* buoyZoneRadiusInHullLengths */ 2., /* useStartTimeInference */ false, /* controlTrackingFromStartAndFinishTimes */ false,
                 /* autoRestartTrackingUponCompetitorSetChange */ false, /* rankingMetricConstructor */ OneDesignRankingMetric::new);
         final RegattaName regattaIdentifier = new RegattaName(regatta.getName());
