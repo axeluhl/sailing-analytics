@@ -63,7 +63,7 @@ public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialo
             ErrorReporter errorReporter, LeaderboardParameterValidator validator,  DialogCallback<LeaderboardDescriptor> callback) {
         super(title, leaderboardDTO, stringMessages, validator, callback);
         this.existingEvents = existingEvents;
-        courseAreaSelection = new CourseAreaSelection(stringMessages);
+        courseAreaSelection = new CourseAreaSelection(stringMessages, this);
         courseAreaSelection.setEnabled(false);
     }
 

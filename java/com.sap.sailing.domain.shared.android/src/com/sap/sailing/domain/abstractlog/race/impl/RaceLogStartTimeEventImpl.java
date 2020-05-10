@@ -43,7 +43,7 @@ public class RaceLogStartTimeEventImpl extends RaceLogRaceStatusEventImpl implem
 
     @Override
     public String getShortInfo() {
-        return "startTime=" + startTime;
+        return "startTime=" + startTime+(getCourseAreaId()==null?"":(", course area ID="+getCourseAreaId().toString()));
     }
 
 }

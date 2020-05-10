@@ -51,7 +51,8 @@ public class RaceLogDependentStartTimeEventImpl extends RaceLogRaceStatusEventIm
 
     @Override
     public String getShortInfo() {
-        return "dependentOnRace=" + dependentOnRace + "startTimeDifference=" + startTimeDifference;
+        return "dependentOnRace=" + dependentOnRace + "startTimeDifference=" + startTimeDifference
+                +(getCourseAreaId()==null?"":(", course area ID="+getCourseAreaId().toString()));
     }
 
     @Override

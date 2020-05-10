@@ -97,7 +97,7 @@ public final class RegattaRaceStatesSettings extends AbstractGenericSerializable
     }
     
     public void setDefaultRegattas(Iterable<RaceGroupDTO> defaultRaceGroups) {
-        if(defaultRaceGroups == null) {
+        if (defaultRaceGroups == null) {
             defaultRaceGroups = Collections.emptySet();
         }
         Set<String> regattaIds = new HashSet<>();

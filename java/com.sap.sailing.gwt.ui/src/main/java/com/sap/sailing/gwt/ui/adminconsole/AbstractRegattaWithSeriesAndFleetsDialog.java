@@ -112,7 +112,7 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         autoRestartTrackingUponCompetitorSetChangeCheckBox.setValue(regatta.autoRestartTrackingUponCompetitorSetChange);
         buoyZoneRadiusInHullLengthsDoubleBox = createDoubleBox(regatta.buoyZoneRadiusInHullLengths, 10);
         buoyZoneRadiusInHullLengthsDoubleBox.ensureDebugId("BuoyZoneRadiusInHullLengthsDoubleBox");
-        courseAreaSelection = new CourseAreaSelection(stringMessages);
+        courseAreaSelection = new CourseAreaSelection(stringMessages, this);
         courseAreaSelection.ensureDebugId("CourseAreaListBox");
         courseAreaSelection.setEnabled(false);
         this.seriesEditor = createSeriesEditor(series);
@@ -310,7 +310,7 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
 
     protected void setCourseAreaSelection() {
         final EventDTO selectedEvent = getSelectedEvent();
-        courseAreaSelection.clear();
+        courseAreaSelection.removeAll();
         courseAreaSelection.setEnabled(false);
         if (selectedEvent != null) {
             fillCourseAreaListBox(selectedEvent);

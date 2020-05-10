@@ -985,6 +985,17 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
+    public List<CourseAreaDTO> getCourseAreas(String leaderboardName) {
+        final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        getSecurityService().checkCurrentUserReadPermission(leaderboard);
+        final List<CourseAreaDTO> result = new ArrayList<>();
+        for (final CourseArea courseArea : leaderboard.getCourseAreas()) {
+            result.add(convertToCourseAreaDTO(courseArea));
+        }
+        return result;
+    }
+
+    @Override
     public IncrementalOrFullLeaderboardDTO getLeaderboardForRace(final RegattaAndRaceIdentifier race,
             final String leaderboardName, final Date date,
             final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, boolean addOverallDetails,
@@ -4870,17 +4881,16 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             }
         }
         if (event != null) {
+            final Set<Leaderboard> leaderboardsAlreadyAddedAsRaceGroup = new HashSet<>();
             for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
                 for (Leaderboard leaderboard : getService().getLeaderboards().values()) {
-                    if (getSecurityService().hasCurrentUserReadPermission(leaderboard)) {
-                        if (leaderboard.getCourseAreas() != null
-                                && leaderboard.getCourseAreas() == courseArea) {
+                    if (!leaderboardsAlreadyAddedAsRaceGroup.contains(leaderboard)
+                    && getSecurityService().hasCurrentUserReadPermission(leaderboard)) {
+                        if (Util.contains(leaderboard.getCourseAreas(), courseArea)) {
                             RaceGroupDTO raceGroup = new RaceGroupDTO(leaderboard.getName());
-                            raceGroup.courseAreaIdAsString = courseArea.getId().toString();
                             raceGroup.displayName = getRegattaNameFromLeaderboard(leaderboard);
                             if (leaderboardWithLeaderboardGroups.containsKey(leaderboard)) {
-                                raceGroup.leaderboardGroupName = leaderboardWithLeaderboardGroups.get(leaderboard)
-                                        .getName();
+                                raceGroup.leaderboardGroupName = leaderboardWithLeaderboardGroups.get(leaderboard).getName();
                             }
                             if (leaderboard instanceof RegattaLeaderboard) {
                                 RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
@@ -4904,6 +4914,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                                         .addAll(convertToRaceColumnDTOs(leaderboard.getRaceColumns()));
                             }
                             raceGroups.add(raceGroup);
+                            leaderboardsAlreadyAddedAsRaceGroup.add(leaderboard);
                         }
                     }
                 }
@@ -4912,71 +4923,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         return raceGroups;
     }
 
-    /**
-     * the replacement service for {@link #getRegattaStructureForEvent(UUID)}
-     */
-    @Override
-    public List<RaceGroupDTO> getRegattaStructureOfEvent(UUID eventId) {
-        List<RaceGroupDTO> raceGroups = new ArrayList<RaceGroupDTO>();
-        Event event = getService().getEvent(eventId);
-        getSecurityService().checkCurrentUserReadPermission(event);
-        Map<Leaderboard, LeaderboardGroup> leaderboardWithLeaderboardGroups = new HashMap<Leaderboard, LeaderboardGroup>();
-        for(LeaderboardGroup leaderboardGroup: event.getLeaderboardGroups()) {
-            for(Leaderboard leaderboard: leaderboardGroup.getLeaderboards()) {
-                if (getSecurityService().hasCurrentUserReadPermission(leaderboard)) {
-                    leaderboardWithLeaderboardGroups.put(leaderboard, leaderboardGroup);
-                }
-            }
-        }
-        if (event != null) {
-            for(LeaderboardGroup leaderboardGroup: event.getLeaderboardGroups()) {
-                for(Leaderboard leaderboard: leaderboardGroup.getLeaderboards()) {
-                    if (getSecurityService().hasCurrentUserReadPermission(leaderboard)) {
-                        RaceGroupDTO raceGroup = new RaceGroupDTO(leaderboard.getName());
-                        for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
-                            if (leaderboard.getCourseAreas() != null
-                                    && leaderboard.getCourseAreas() == courseArea) {
-                                raceGroup.courseAreaIdAsString = courseArea.getId().toString();
-                                break;
-                            }
-                        }
-                        raceGroup.displayName = getRegattaNameFromLeaderboard(leaderboard);
-                        if (leaderboardWithLeaderboardGroups.containsKey(leaderboard)) {
-                            raceGroup.leaderboardGroupName = leaderboardWithLeaderboardGroups.get(leaderboard)
-                                    .getName();
-                        }
-                        if (leaderboard instanceof RegattaLeaderboard) {
-                            RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
-                            raceGroup.boatClass = regattaLeaderboard.getRegatta().getBoatClass().getDisplayName();
-                            for (Series series : regattaLeaderboard.getRegatta().getSeries()) {
-                                RaceGroupSeriesDTO seriesDTO = new RaceGroupSeriesDTO(series.getName());
-                                raceGroup.getSeries().add(seriesDTO);
-                                for (Fleet fleet : series.getFleets()) {
-                                    FleetDTO fleetDTO = new FleetDTO(fleet.getName(), fleet.getOrdering(),
-                                            fleet.getColor());
-                                    seriesDTO.getFleets().add(fleetDTO);
-                                }
-                                seriesDTO.getRaceColumns().addAll(convertToRaceColumnDTOs(series.getRaceColumns()));
-                            }
-                        } else {
-                            RaceGroupSeriesDTO seriesDTO = new RaceGroupSeriesDTO(
-                                    LeaderboardNameConstants.DEFAULT_SERIES_NAME);
-                            raceGroup.getSeries().add(seriesDTO);
-                            FleetDTO fleetDTO = new FleetDTO(LeaderboardNameConstants.DEFAULT_FLEET_NAME, 0, null);
-                            seriesDTO.getFleets().add(fleetDTO);
-                            seriesDTO.getRaceColumns().addAll(convertToRaceColumnDTOs(leaderboard.getRaceColumns()));
-
-                            BoatClass boatClass = leaderboard.getBoatClass();
-                            raceGroup.boatClass = boatClass != null ? boatClass.getDisplayName() : null;
-                        }
-                        raceGroups.add(raceGroup);
-                    }
-                }
-            }
-        }
-        return raceGroups;
-    }
-    
     /**
      * The name of the regatta to be shown on the regatta overview webpage is retrieved from the name of the {@link Leaderboard}. Since regattas are
      * not always represented by a {@link Regatta} object in the Sailing Suite but need to be shown on the regatta overview page, the leaderboard is
@@ -5629,10 +5575,17 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 if (visibleCourseAreaIds.contains(courseArea.getId())) {
                     for (Leaderboard leaderboard : getService().getLeaderboards().values()) {
                         if (getSecurityService().hasCurrentUserReadPermission(leaderboard)) {
+                            // leaderboard's course areas must intersect with those of event; if so, add those
+                            // race entries that either have no course area explicitly defined or otherwise have
+                            // a course area that is part of the visibleCourseAreaIds
                             if (Util.contains(leaderboard.getCourseAreas(), courseArea)) {
-                                result.addAll(getRaceStateEntriesForLeaderboard(leaderboard.getName(),
-                                        showOnlyCurrentlyRunningRaces, showOnlyRacesOfSameDay, clientTimeZoneOffset,
-                                        visibleRegattas));
+                                Util.addAll(
+                                    Util.filter(
+                                        getRaceStateEntriesForLeaderboard(leaderboard.getName(),
+                                            showOnlyCurrentlyRunningRaces, showOnlyRacesOfSameDay, clientTimeZoneOffset,
+                                            visibleRegattas),
+                                        entry->entry.courseAreaIdAsString == null || visibleCourseAreaIds.contains(UUID.fromString(
+                                                entry.courseAreaIdAsString))), result);
                             }
                         }
                     }
@@ -5650,7 +5603,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             Distance buyZoneRadius, String seriesName, RaceColumn raceColumn, Map<String, List<RegattaOverviewEntryDTO>> entriesPerFleet) {
         if (!raceColumn.isCarryForward()) {
             for (Fleet fleet : raceColumn.getFleets()) {
-                // TODO bug 3465: in the future we hope to have a course area set per start attempt/pass in the RaceLog; that one should then be used here
                 RegattaOverviewEntryDTO entry = createRegattaOverviewEntryDTO(leaderboard,
                         boatClassName, regattaName, buyZoneRadius, seriesName, raceColumn, fleet, showOnlyRacesOfSameDay, 
                         clientTimeZoneOffset, dayToCheck);
@@ -5673,11 +5625,10 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                         if (entry.raceInfo.lastStatus.equals(RaceLogRaceStatus.FINISHED)) {
                             finishedEntries.add(entry);
                         } else if (entry.raceInfo.lastStatus.equals(RaceLogRaceStatus.UNSCHEDULED)) {
-                            //don't filter when the race is unscheduled and aborted before
+                            // don't filter when the race is unscheduled and aborted before
                             if (!entry.raceInfo.isRaceAbortedInPassBefore) {
                                 result.remove(entry);
                             }
-                            
                         }
                     }
                 }
@@ -5685,7 +5636,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                     //keep the last finished race in the list to be shown
                     int indexOfLastElement = finishedEntries.size() - 1;
                     finishedEntries.remove(indexOfLastElement);
-                    
                     //... and remove all other finished races
                     result.removeAll(finishedEntries);
                 }
@@ -5719,16 +5669,16 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         // try to find course area information in the race log which may tell on which course are
         // the latest / valid start attempt / pass has happened; if this information cannot be found,
         // e.g., because the race log is empty, or it is a legacy race log that doesn't provide this
-        // information, and the leaderboard has one or more course areas assigned, any of those
-        // is used as a default.
+        // information, and the leaderboard has exactly one course areas assigned, that one is used.
+        // If the leaderboard has multiple course areas assigned we assume that the choice must come
+        // from a race log start time event or else it hasn't been decided yet where that race will take place.
         final UUID courseAreaIdFromRaceLog;
         if (state != null && (courseAreaIdFromRaceLog=state.getCourseAreaId()) != null) {
             // no race log; use default course area in any case:
-            final CourseArea courseAreaFromRaceLog = getBaseDomainFactory()
-                    .getExistingCourseAreaById(courseAreaIdFromRaceLog);
+            final CourseArea courseAreaFromRaceLog = getBaseDomainFactory().getExistingCourseAreaById(courseAreaIdFromRaceLog);
             entry.courseAreaName = courseAreaFromRaceLog.getName();
             entry.courseAreaIdAsString = courseAreaFromRaceLog.getId().toString();
-        } else if (!Util.isEmpty(leaderboard.getCourseAreas())) {
+        } else if (Util.size(leaderboard.getCourseAreas()) == 1) {
             final CourseArea defaultCourseArea = leaderboard.getCourseAreas().iterator().next();
             entry.courseAreaName = defaultCourseArea.getName();
             entry.courseAreaIdAsString = defaultCourseArea.getId().toString();
