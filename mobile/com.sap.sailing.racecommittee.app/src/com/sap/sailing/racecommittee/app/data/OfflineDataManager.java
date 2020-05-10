@@ -89,8 +89,10 @@ public class OfflineDataManager extends DataManager {
                 UUID.randomUUID(), Collections.<LeaderboardGroupBase> emptySet(), Collections.emptySet()));
         EventBase newEvent = new StrippedEventImpl("Extreme Sailing Series 2013 (Muscat)", startDate, endDate, "Muscat",
                 true, UUID.randomUUID(), Collections.<LeaderboardGroupBase> emptySet(), Collections.emptySet());
-        newEvent.getVenue().addCourseArea(new CourseAreaImpl("Offshore", UUID.randomUUID()));
-        newEvent.getVenue().addCourseArea(new CourseAreaImpl("Stadium", UUID.randomUUID()));
+        final CourseAreaImpl offshore = new CourseAreaImpl("Offshore", UUID.randomUUID());
+        newEvent.getVenue().addCourseArea(offshore);
+        final CourseAreaImpl stadium = new CourseAreaImpl("Stadium", UUID.randomUUID());
+        newEvent.getVenue().addCourseArea(stadium);
         dataStore.addEvent(newEvent);
 
         SeriesWithRows qualifying = new SeriesWithRowsImpl("Qualifying", false, /* isFleetsCanRunInParallel */ true,
@@ -117,7 +119,7 @@ public class OfflineDataManager extends DataManager {
         ConfigurationLoader<RegattaConfiguration> configuration = PreferencesRegattaConfigurationLoader
                 .loadFromPreferences(preferences);
         log.add(new RaceLogStartTimeEventImpl(new MillisecondsTimePoint(new Date().getTime() - 2000), author, 1,
-                new MillisecondsTimePoint(new Date().getTime() - 1000), /* course area ID */ null));
+                new MillisecondsTimePoint(new Date().getTime() - 1000), /* course area ID */ stadium.getId()));
         log.add(new RaceLogRaceStatusEventImpl(new MillisecondsTimePoint(new Date().getTime()),
                 AppPreferences.on(context).getAuthor(), 1, RaceLogRaceStatus.FINISHING));
         ManagedRace q1 = new ManagedRaceImpl(

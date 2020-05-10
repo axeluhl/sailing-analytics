@@ -793,10 +793,10 @@ public class StartTimeFragment extends BaseFragment
             if (getArguments().getInt(START_MODE, START_MODE_PRESETUP) != START_MODE_PRESETUP) {
                 if (startTimeDiff == null && identifier == null) {
                     // absolute start time
-                    getRaceState().forceNewStartTime(now, startTime, /* TODO course area ID */ null);
+                    getRaceState().forceNewStartTime(now, startTime, mDataStore.getCourseAreaId());
                 } else {
                     // relative start time
-                    getRaceState().forceNewDependentStartTime(now, startTimeDiff, identifier, /* TODO course area ID */ null);
+                    getRaceState().forceNewDependentStartTime(now, startTimeDiff, identifier, mDataStore.getCourseAreaId());
                 }
                 fragment = RaceFlagViewerFragment.newInstance();
                 viewId = R.id.race_content;

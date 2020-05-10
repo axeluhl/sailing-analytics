@@ -8,6 +8,8 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProce
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
+import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.ui.adapters.checked.CheckedItemAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.checked.StartProcedureItem;
 import com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout;
@@ -128,7 +130,9 @@ public class StartProcedureFragment extends BaseFragment {
             if (sameProcedure) {
                 sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
             } else {
-                getRaceState().forceNewStartTime(MillisecondsTimePoint.now(), getRaceState().getStartTime(), /* TODO course area ID */ null);
+                final ReadonlyDataManager dataManager = OnlineDataManager.create(getActivity());
+                getRaceState().forceNewStartTime(MillisecondsTimePoint.now(), getRaceState().getStartTime(),
+                        dataManager.getDataStore().getCourseAreaId());
             }
         }
     }
