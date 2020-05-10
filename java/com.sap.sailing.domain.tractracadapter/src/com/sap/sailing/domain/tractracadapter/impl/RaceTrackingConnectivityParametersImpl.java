@@ -28,7 +28,6 @@ import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 import com.tractrac.util.lib.api.exceptions.TimeOutException;
 
 public class RaceTrackingConnectivityParametersImpl extends AbstractRaceTrackingConnectivityParameters {
-
     private static final long serialVersionUID = 5088282956033068149L;
     private static final Logger logger = Logger.getLogger(RaceTrackingConnectivityParametersImpl.class.getName());
     public static final String TYPE = "TRAC_TRAC";
@@ -81,11 +80,11 @@ public class RaceTrackingConnectivityParametersImpl extends AbstractRaceTracking
         final IRace tractracRace = getTractracRace();
         if (preferReplayIfAvailable && isReplayRace(tractracRace) &&
                 (!Util.equalsWithNull(liveURI, tractracRace.getLiveURI()) || !Util.equalsWithNull(storedURI, tractracRace.getStoredURI()))) {
-                logger.info("Replay format available and preferred for race " + tractracRace.getName()
-                        + "; using storedURI " + tractracRace.getStoredURI() + " instead of " + storedURI
-                        + " and liveURI " + tractracRace.getLiveURI() + " instead of " + liveURI);
-                this.liveURI = tractracRace.getLiveURI();
-                this.storedURI = tractracRace.getStoredURI();
+            logger.info("Replay format available and preferred for race " + tractracRace.getName()
+                    + "; using storedURI " + tractracRace.getStoredURI() + " instead of " + storedURI
+                    + " and liveURI " + tractracRace.getLiveURI() + " instead of " + liveURI);
+            this.liveURI = tractracRace.getLiveURI();
+            this.storedURI = tractracRace.getStoredURI();
         } else {
             this.liveURI = liveURI;
             this.storedURI = storedURI;
