@@ -118,23 +118,18 @@ public class SearchServiceTest {
     public void setUp() {
         UserGroupImpl defaultTenant = new UserGroupImpl(new UUID(0, 1), "defaultTenant");
         User currentUser = Mockito.mock(User.class);
-
         securityService = Mockito.mock(SecurityService.class);
         SecurityManager securityManager = Mockito.mock(org.apache.shiro.mgt.SecurityManager.class);
         Subject fakeSubject = Mockito.mock(Subject.class);
-
-
         SecurityUtils.setSecurityManager(securityManager);
         Mockito.doReturn(fakeSubject).when(securityManager).createSubject(Mockito.any());
         Mockito.doReturn(defaultTenant).when(securityService).getServerGroup();
         Mockito.doReturn(currentUser).when(securityService).getCurrentUser();
         Mockito.doReturn(true).when(securityService).hasCurrentUserReadPermission(Mockito.any());
         Mockito.doNothing().when(securityService).checkCurrentUserReadPermission(Mockito.any());
-
         Mockito.doReturn(true).when(securityService)
                 .hasCurrentUserReadPermission(Mockito.any(WithQualifiedObjectIdentifier.class));
         Mockito.doReturn(true).when(fakeSubject).isAuthenticated();
-
         server = Mockito.spy(new RacingEventServiceImpl());
         Mockito.doReturn(securityService).when(server).getSecurityService();
         TaggingServiceImpl taggingServer = Mockito.spy(new TaggingServiceImpl(server));
@@ -256,7 +251,6 @@ public class SearchServiceTest {
         pfingstbusch29erTrackedR3 = server.apply(new CreateTrackedRace(pfingstbusch29er.getRaceIdentifier(pfingstbusch29erR3), EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 3000,
                 /* millisecondsOverWhichToAverageWind */ 15000, /* millisecondsOverWhichToAverageSpeed */ 15000, null));
         pfingstbusch29erLeaderboard.getRaceColumnByName("R3").setTrackedRace(pfingstbusch29erLeaderboard.getRaceColumnByName("R3").getFleetByName("Default"), pfingstbusch29erTrackedR3);
-
         final RaceDefinitionImpl pfingstbush470R1 = new RaceDefinitionImpl("R1", new CourseImpl("up/down", Collections.<Waypoint>emptyList()), pfingstbusch470.getBoatClass(),
                 AbstractTracTracLiveTest.createCompetitorAndBoatsMap(philippBuhl, antonKoch));
         final RaceDefinitionImpl pfingstbush470R2 = new RaceDefinitionImpl("R2", new CourseImpl("up/down", Collections.<Waypoint>emptyList()), pfingstbusch470.getBoatClass(),
@@ -271,7 +265,6 @@ public class SearchServiceTest {
         pfingstbusch470TrackedR2 = server.apply(new CreateTrackedRace(pfingstbusch470.getRaceIdentifier(pfingstbush470R2), EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 3000,
                 /* millisecondsOverWhichToAverageWind */ 15000, /* millisecondsOverWhichToAverageSpeed */ 15000, null));
         pfingstbusch470Leaderboard.getRaceColumnByName("R2").setTrackedRace(pfingstbusch470Leaderboard.getRaceColumnByName("R2").getFleetByName("Default"), pfingstbusch470TrackedR2);
-
         final RaceDefinitionImpl aalOrcR1 = new RaceDefinitionImpl("R1", new CourseImpl("up/down", Collections.<Waypoint>emptyList()), aalRegatta.getBoatClass(),
                 AbstractTracTracLiveTest.createCompetitorAndBoatsMap(hassoPlattner, dennisGehrlein, philippBuhl));
         final RaceDefinitionImpl aalOrcR2 = new RaceDefinitionImpl("R2", new CourseImpl("up/down", Collections.<Waypoint>emptyList()), aalRegatta.getBoatClass(),
