@@ -350,6 +350,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      */
     private static final ScheduledExecutorService scheduler = ThreadPoolUtil.INSTANCE.getDefaultForegroundTaskThreadPoolExecutor();
 
+    private static final ScheduledExecutorService simulatorExecutor = ThreadPoolUtil.INSTANCE.createBackgroundTaskThreadPoolExecutor("Simulator Background Executor");
+
     private final com.sap.sailing.domain.base.DomainFactory baseDomainFactory;
 
     /**
@@ -873,7 +875,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         operationExecutionListeners = new ConcurrentHashMap<>();
         courseListeners = new ConcurrentHashMap<>();
         persistentRegattasForRaceIDs = new ConcurrentHashMap<>();
-        final ScheduledExecutorService simulatorExecutor = ThreadPoolUtil.INSTANCE.createBackgroundTaskThreadPoolExecutor("Simulator Background Executor");
         simulationService = SimulationServiceFactory.INSTANCE.getService(simulatorExecutor, this);
         taggingService = TaggingServiceFactory.INSTANCE.getService(this);
         this.raceLogReplicator = new RaceLogReplicatorAndNotifier(this);
