@@ -38,7 +38,7 @@ public class HomePage extends HostPageWithAuthentication {
     @FindBy(how=BySeleniumId.class, using = "privacyAnchorLink")
     private WebElement privacyAnchorLink;
     
-    @FindBy(how=BySeleniumId.class, using = "sapSupportAnchor")
+    @FindBy(how=BySeleniumId.class, using = "supportAnchor")
     private WebElement sapSupportAnchor;
 
     @FindBy(how = BySeleniumId.class, using = "feedbackAnchor")
