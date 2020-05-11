@@ -16,6 +16,7 @@ public class EditCompetitorsDialog extends DataEntryDialog<List<CompetitorWithBo
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
     private final String leaderboardName;
+    private final String boatClassName;
 
     protected static class CompetitorsValidator implements Validator<List<CompetitorWithBoatDTO>> {
         public CompetitorsValidator() {
@@ -28,7 +29,8 @@ public class EditCompetitorsDialog extends DataEntryDialog<List<CompetitorWithBo
         }
     }
         
-    public EditCompetitorsDialog(final SailingServiceAsync sailingService, final UserService userService, String leaderboardName, final StringMessages stringMessages,
+    public EditCompetitorsDialog(final SailingServiceAsync sailingService, final UserService userService, final String leaderboardName, 
+            final String boatClassName, final StringMessages stringMessages,
             final ErrorReporter errorReporter, DialogCallback<List<CompetitorWithBoatDTO>> callback) {
         super(stringMessages.actionEditCompetitors(), null, stringMessages.ok(), stringMessages.cancel(), new CompetitorsValidator(), callback);
         this.sailingService = sailingService;
@@ -36,6 +38,7 @@ public class EditCompetitorsDialog extends DataEntryDialog<List<CompetitorWithBo
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
         this.leaderboardName = leaderboardName;
+        this.boatClassName = boatClassName;
     }
 
     @Override
@@ -45,7 +48,7 @@ public class EditCompetitorsDialog extends DataEntryDialog<List<CompetitorWithBo
 
     @Override
     protected Widget getAdditionalWidget() {
-        CompetitorPanel competitorPanel = new CompetitorPanel(sailingService, userService, leaderboardName, stringMessages, errorReporter);
+        CompetitorPanel competitorPanel = new CompetitorPanel(sailingService, userService, leaderboardName, boatClassName, stringMessages, errorReporter);
         return competitorPanel; 
     }
 }

@@ -310,7 +310,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
         leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_EDIT_COMPETITORS, UPDATE,
                 leaderboardDTO -> {
                     EditCompetitorsDialog editCompetitorsDialog = new EditCompetitorsDialog(sailingService, userService,
-                            leaderboardDTO.getName(), stringMessages, errorReporter,
+                            leaderboardDTO.getName(), leaderboardDTO.boatClassName, stringMessages, errorReporter,
                             new DialogCallback<List<CompetitorWithBoatDTO>>() {
                                 @Override
                                 public void cancel() {

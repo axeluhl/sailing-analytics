@@ -459,6 +459,49 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
         dialog.show();
     }
 
+    void openCompetitorWithBoatAddDialog(final CompetitorWithBoatDTO newCompetitor) {
+        final CompetitorWithOptionalBoatAddDialog dialog = new CompetitorWithOptionalBoatAddDialog(getStringMessages(),
+                newCompetitor, new DialogCallback<CompetitorWithBoatDTO>() {
+                    @Override
+                    public void ok(final CompetitorWithBoatDTO competitor) {
+                        if (competitor.hasBoat()) {
+                            sailingService.addOrUpdateCompetitorWithBoat(competitor,
+                                    new AsyncCallback<CompetitorWithBoatDTO>() {
+                                        @Override
+                                        public void onFailure(Throwable caught) {
+                                            logCompetitorAddError(caught);
+                                        }
+
+                                        @Override
+                                        public void onSuccess(CompetitorWithBoatDTO addedCompetitor) {
+                                            onCompetitorAddSuccess(addedCompetitor);
+                                        }
+                                    });
+                        } else {
+                            sailingService.addOrUpdateCompetitorWithoutBoat(competitor,
+                                    new AsyncCallback<CompetitorDTO>() {
+                                        @Override
+                                        public void onFailure(Throwable caught) {
+                                            logCompetitorAddError(caught);
+                                        }
+
+                                        @Override
+                                        public void onSuccess(CompetitorDTO addedCompetitor) {
+                                            onCompetitorAddSuccess(addedCompetitor);
+                                        }
+                                    });
+                        }
+
+                    }
+
+                    @Override
+                    public void cancel() {
+                    }
+                });
+        dialog.show();
+
+    }
+    
     void openEditCompetitorWithoutBoatDialog(final CompetitorDTO originalCompetitor) {
         final CompetitorEditDialog<CompetitorDTO> dialog = CompetitorEditDialog.create(getStringMessages(), originalCompetitor, new DialogCallback<CompetitorDTO>() {
             @Override
@@ -533,5 +576,15 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
             }
             return "";
         });
+    }
+
+    private void logCompetitorAddError(Throwable caught) {
+        errorReporter.reportError(
+                "Error trying to add competitor: " + caught.getMessage());
+    }
+    
+    private void onCompetitorAddSuccess(CompetitorDTO addedCompetitor) {
+        getFilterField().add(addedCompetitor);
+        getDataProvider().refresh();
     }
 }

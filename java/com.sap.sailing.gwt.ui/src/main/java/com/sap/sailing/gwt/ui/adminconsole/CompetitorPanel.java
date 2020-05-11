@@ -9,6 +9,8 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.CompetitorDescriptor;
+import com.sap.sailing.domain.common.dto.BoatClassDTO;
+import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTOImpl;
 import com.sap.sailing.gwt.ui.adminconsole.CompetitorImportProviderSelectionDialog.MatchImportedCompetitorsDialogFactory;
@@ -32,18 +34,19 @@ public class CompetitorPanel extends SimplePanel implements BusyDisplay {
     private final CompetitorTableWrapper<RefreshableMultiSelectionModel<CompetitorDTO>> competitorTable;
     private final RefreshableMultiSelectionModel<CompetitorDTO> refreshableCompetitorSelectionModel;
     private final String leaderboardName;
-
+    private final String boatClassName;
     private final BusyIndicator busyIndicator;
 
     public CompetitorPanel(final SailingServiceAsync sailingService, final UserService userService, final StringMessages stringMessages,
             final ErrorReporter errorReporter) {
-        this(sailingService, userService, null, stringMessages, errorReporter);
+        this(sailingService, userService, null, null, stringMessages, errorReporter);
     }
 
     public CompetitorPanel(final SailingServiceAsync sailingService, final UserService userService, final String leaderboardName,
-            final StringMessages stringMessages, final ErrorReporter errorReporter) {
+            String boatClassName, final StringMessages stringMessages, final ErrorReporter errorReporter) {
         super();
         this.leaderboardName = leaderboardName;
+        this.boatClassName = boatClassName;
         this.competitorTable = new CompetitorTableWrapper<>(sailingService, userService, stringMessages, errorReporter, /* multiSelection */ true, /* enablePager */ true, 
                 /* filterCompetitorWithBoat */ false, /* filterCompetitorsWithoutBoat */ false);
         this.refreshableCompetitorSelectionModel = (RefreshableMultiSelectionModel<CompetitorDTO>) competitorTable.getSelectionModel();
@@ -135,8 +138,11 @@ public class CompetitorPanel extends SimplePanel implements BusyDisplay {
 
     private void openAddCompetitorDialog() {
         CompetitorWithBoatDTOImpl competitorDTO = new CompetitorWithBoatDTOImpl();
-        competitorDTO.setBoat(null);
-        competitorTable.openEditCompetitorWithoutBoatDialog(competitorDTO);
+        BoatClassDTO boatClassDTO = new BoatClassDTO(boatClassName, null, null);
+        BoatDTO boatDTO = new BoatDTO();
+        boatDTO.setBoatClass(boatClassDTO);
+        competitorDTO.setBoat(boatDTO);
+        competitorTable.openCompetitorWithBoatAddDialog(competitorDTO);
     }
 
     public void refreshCompetitorList() {
