@@ -465,33 +465,10 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                     @Override
                     public void ok(final CompetitorWithBoatDTO competitor) {
                         if (competitor.hasBoat()) {
-                            sailingService.addOrUpdateCompetitorWithBoat(competitor,
-                                    new AsyncCallback<CompetitorWithBoatDTO>() {
-                                        @Override
-                                        public void onFailure(Throwable caught) {
-                                            logCompetitorAddError(caught);
-                                        }
-
-                                        @Override
-                                        public void onSuccess(CompetitorWithBoatDTO addedCompetitor) {
-                                            onCompetitorAddSuccess(addedCompetitor);
-                                        }
-                                    });
+                            sailingService.addOrUpdateCompetitorWithBoat(competitor, createAddCompetitorCallback());
                         } else {
-                            sailingService.addOrUpdateCompetitorWithoutBoat(competitor,
-                                    new AsyncCallback<CompetitorDTO>() {
-                                        @Override
-                                        public void onFailure(Throwable caught) {
-                                            logCompetitorAddError(caught);
-                                        }
-
-                                        @Override
-                                        public void onSuccess(CompetitorDTO addedCompetitor) {
-                                            onCompetitorAddSuccess(addedCompetitor);
-                                        }
-                                    });
+                            sailingService.addOrUpdateCompetitorWithoutBoat(competitor, createAddCompetitorCallback());
                         }
-
                     }
 
                     @Override
@@ -578,13 +555,18 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
         });
     }
 
-    private void logCompetitorAddError(Throwable caught) {
-        errorReporter.reportError(
-                "Error trying to add competitor: " + caught.getMessage());
-    }
-    
-    private void onCompetitorAddSuccess(CompetitorDTO addedCompetitor) {
-        getFilterField().add(addedCompetitor);
-        getDataProvider().refresh();
+    private <T extends CompetitorDTO> AsyncCallback<T> createAddCompetitorCallback() {
+        return new AsyncCallback<T>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError("Error trying to add competitor: " + caught.getMessage());
+            }
+
+            @Override
+            public void onSuccess(T addedCompetitor) {
+                getFilterField().add(addedCompetitor);
+                getDataProvider().refresh();
+            }
+        };
     }
 }

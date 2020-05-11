@@ -29,10 +29,11 @@ public class EditCompetitorsDialog extends DataEntryDialog<List<CompetitorWithBo
         }
     }
         
-    public EditCompetitorsDialog(final SailingServiceAsync sailingService, final UserService userService, final String leaderboardName, 
-            final String boatClassName, final StringMessages stringMessages,
+    public EditCompetitorsDialog(final SailingServiceAsync sailingService, final UserService userService,
+            final String leaderboardName, final String boatClassName, final StringMessages stringMessages,
             final ErrorReporter errorReporter, DialogCallback<List<CompetitorWithBoatDTO>> callback) {
-        super(stringMessages.actionEditCompetitors(), null, stringMessages.ok(), stringMessages.cancel(), new CompetitorsValidator(), callback);
+        super(stringMessages.actionEditCompetitors(), null, stringMessages.ok(), stringMessages.cancel(),
+                new CompetitorsValidator(), callback);
         this.sailingService = sailingService;
         this.userService = userService;
         this.stringMessages = stringMessages;
@@ -48,7 +49,8 @@ public class EditCompetitorsDialog extends DataEntryDialog<List<CompetitorWithBo
 
     @Override
     protected Widget getAdditionalWidget() {
-        CompetitorPanel competitorPanel = new CompetitorPanel(sailingService, userService, leaderboardName, boatClassName, stringMessages, errorReporter);
-        return competitorPanel; 
+        CompetitorPanel competitorPanel = new CompetitorPanel(sailingService, userService, leaderboardName,
+                boatClassName, stringMessages, errorReporter);
+        return competitorPanel;
     }
 }
