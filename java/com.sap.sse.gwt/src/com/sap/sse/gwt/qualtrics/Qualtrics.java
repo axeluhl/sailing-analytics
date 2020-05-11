@@ -17,7 +17,9 @@ import com.google.gwt.dom.client.Document;
  * "Settings / Deployment" where the Javascript snippet can be found. Copy it to the {@code resources/qualtrics.js}
  * file, stripping off the HTML comments and the &lt;script&gt; tag surrounding it. Copy the project ID that you find
  * in the &lt;div&gt; element's {@code id} field at the bottom of the snippet as well as in your Qualtrics dashboard's
- * URL parameter {@code ContextZone} into the file {@code resources/qualtricsProjectId.txt}.
+ * URL parameter {@code ContextZone} into the file {@code resources/qualtricsProjectId.txt}. In your Qualtrics dashboard
+ * under "Settings" find the "Manage Project / Project Options" drop-down menu and set the "Project Loading Options"
+ * to "Manually Load Project."<p>
  * 
  * An example UiBinder usage with an {@link AnchorElement} can look like this:
  * 
@@ -41,6 +43,9 @@ import com.google.gwt.dom.client.Document;
  *       &lt;ui:text from='{i18n.footerFeedback}' /&gt;
  * &lt;/a&gt;
  * </pre>
+ * 
+ * @author Axel Uhl (D043530)
+ * 
  */
 public final class Qualtrics {
     public static QualtricsRessource QUALTRICS_RESSOURCES = GWT.create(QualtricsRessource.class);
