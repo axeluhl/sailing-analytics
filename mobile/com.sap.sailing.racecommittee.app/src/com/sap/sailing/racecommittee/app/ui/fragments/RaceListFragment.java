@@ -85,36 +85,31 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
     private final Set<ManagedRace> mAllRaces;
 
     private BaseRaceStateChangedListener stateListener = new BaseRaceStateChangedListener() {
-
         @Override
-        public void onFinishingPositionsChanged(ReadonlyRaceState state) {
-            super.onFinishingPositionsChanged(state);
-
-            update(state);
-        }
-
-        @Override
-        public void onFinishingPositionsConfirmed(ReadonlyRaceState state) {
-            super.onFinishingPositionsConfirmed(state);
-
-            update(state);
-        }
-
-        @Override
-        public void onStartTimeChanged(ReadonlyRaceState state) {
-            super.onStartTimeChanged(state);
-
+        public void onRacingProcedureChanged(ReadonlyRaceState state) {
+            super.onRacingProcedureChanged(state);
             update(state);
         }
 
         @Override
         public void onStatusChanged(ReadonlyRaceState state) {
             super.onStatusChanged(state);
-
             update(state);
         }
 
-        void update(ReadonlyRaceState state) {
+        @Override
+        public void onStartTimeChanged(ReadonlyRaceState state) {
+            super.onStartTimeChanged(state);
+            update(state);
+        }
+
+        @Override
+        public void onFinishingTimeChanged(ReadonlyRaceState state) {
+            super.onFinishingTimeChanged(state);
+            update(state);
+        }
+
+        private void update(ReadonlyRaceState state) {
             dataChanged(state);
             filterChanged();
             updateConflictSign();
