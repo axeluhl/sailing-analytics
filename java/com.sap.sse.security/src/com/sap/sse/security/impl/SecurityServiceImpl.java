@@ -322,8 +322,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         final ReplicatingCacheManager result = new ReplicatingCacheManager();
         for (Entry<String, Set<Session>> cacheNameAndSessions : PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory().loadSessionsByCacheName().entrySet()) {
             final String cacheName = cacheNameAndSessions.getKey();
-            final ReplicatingCache<Object, Object> cache = (ReplicatingCache<Object, Object>) result.getCache(cacheName,
-                    this);
+            final ReplicatingCache<Object, Object> cache = (ReplicatingCache<Object, Object>) result.getCache(cacheName, this);
             for (final Session session : cacheNameAndSessions.getValue()) {
                 cache.put(session.getId(), session, /* store */ false);
                 count++;
