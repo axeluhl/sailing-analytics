@@ -6,6 +6,8 @@ import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithDispatch;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 import com.sap.sailing.gwt.ui.client.subscription.Chargebee;
 import com.sap.sailing.gwt.ui.client.subscription.CheckoutOption;
+import com.sap.sailing.gwt.ui.client.subscription.PortalOption;
+import com.sap.sailing.gwt.ui.client.subscription.PortalSessionSetterCallback;
 import com.sap.sailing.gwt.ui.client.subscription.SubscriptionConfiguration;
 import com.sap.sailing.gwt.ui.client.subscription.WithSubscriptionService;
 import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionDTO;
@@ -42,7 +44,14 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
                     view.onCloseCheckoutModal();
                 }
             };
-    
+    private PortalOption.CloseCallback onPortalCloseCallback =
+            new PortalOption.CloseCallback() {
+                
+                @Override
+                public void call() {
+                    view.onClosePortalModal();
+                }
+            };
     
     public UserSubscriptionPresenter(C clientFactory) {
         this.clientFactory = clientFactory;
@@ -122,6 +131,29 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
                 Window.alert("Cancel subscription error: " + caught.getMessage());
             }
         });
+    }
+
+    @Override
+    public void openPortalSession() {
+        clientFactory.getSubscriptionService().generatePortalPageObject(new AsyncCallback<String>() {
+
+            @Override
+            public void onSuccess(String result) {
+                if (result == null) {
+                    Window.alert("Failed to generating portal page object");
+                    return;
+                }
+                
+                Chargebee.getInstance().setPortalSession(PortalSessionSetterCallback.create(result));
+                Chargebee.getInstance().createChargebeePortal().open(PortalOption.create(onPortalCloseCallback));
+            }
+            
+            @Override
+            public void onFailure(Throwable caught) {
+                Window.alert("Generating portal page object error: " + caught.getMessage());
+            }
+        });
+        
     }
     
     private void requestFinishingPlanUpgrading(String hostedPageId) {

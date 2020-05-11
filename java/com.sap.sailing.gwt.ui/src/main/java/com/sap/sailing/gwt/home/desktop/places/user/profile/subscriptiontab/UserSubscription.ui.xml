@@ -20,6 +20,9 @@
         <g:Button ui:field="cancelSubscriptionButtonUi" addStyleNames="{res.mainCss.button} {res.mainCss.buttonprimary} {local_res.css.bottomButton}">
           <ui:text from="{i18n.cancelSubscription}" />
         </g:Button>
+        <g:Button ui:field="openPortalSessionButtonUi" addStyleNames="{res.mainCss.button} {res.mainCss.buttonprimary} {local_res.css.bottomButton}">
+          <ui:text from="{i18n.openPortal}" />
+        </g:Button>
       </div>
     </g:HTMLPanel>
 </ui:UiBinder>

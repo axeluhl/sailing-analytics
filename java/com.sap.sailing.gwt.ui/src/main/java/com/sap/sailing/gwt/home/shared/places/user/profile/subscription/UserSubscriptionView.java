@@ -7,6 +7,7 @@ public interface UserSubscriptionView extends IsWidget {
     public void onStartLoadSubscription();
     public void updateView(SubscriptionDTO subscription);
     public void onCloseCheckoutModal();
+    public void onClosePortalModal();
     
     public interface Presenter {
         public void init();
@@ -14,5 +15,6 @@ public interface UserSubscriptionView extends IsWidget {
         public void openCheckout();
         public void setView(UserSubscriptionView view);
         public void cancelSubscription();
+        public void openPortalSession();
     }
 }

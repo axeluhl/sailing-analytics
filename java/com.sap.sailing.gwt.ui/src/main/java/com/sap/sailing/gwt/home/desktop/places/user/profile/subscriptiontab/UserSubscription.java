@@ -34,6 +34,7 @@ public class UserSubscription extends Composite implements UserSubscriptionView 
     @UiField SpanElement subscriptionStatusSpanUi;
     @UiField SpanElement paymentStatusSpanUi;
     @UiField DivElement paymentStatusDivUi;
+    @UiField Button openPortalSessionButtonUi;
     
     private Presenter presenter;
 
@@ -56,6 +57,12 @@ public class UserSubscription extends Composite implements UserSubscriptionView 
         presenter.cancelSubscription();
     }
     
+    @UiHandler("openPortalSessionButtonUi")
+    public void handleOpenPortalClick(ClickEvent e) {
+        openPortalSessionButtonUi.setEnabled(false);
+        presenter.openPortalSession();
+    }
+    
     @Override
     protected void onLoad() {
         super.onLoad();
@@ -70,6 +77,11 @@ public class UserSubscription extends Composite implements UserSubscriptionView 
     @Override
     public void onCloseCheckoutModal() {
         upgradeButtonUi.setEnabled(true);
+    }
+    
+    @Override
+    public void onClosePortalModal() {
+        openPortalSessionButtonUi.setEnabled(true);
     }
 
     @Override
@@ -87,6 +99,7 @@ public class UserSubscription extends Composite implements UserSubscriptionView 
             planNameSpanUi.setInnerText("Free");
             hideElement(subscriptionGroupUi);
             cancelSubscriptionButtonUi.setVisible(false);
+            openPortalSessionButtonUi.setVisible(false);
             show();
             return;
         }
@@ -175,6 +188,7 @@ public class UserSubscription extends Composite implements UserSubscriptionView 
         cancelSubscriptionButtonUi.setVisible(true);
         showElement(paymentStatusDivUi);
         showElement(trialDivUi);
+        openPortalSessionButtonUi.setVisible(true);
     }
     
     private void hideElement(Element element) {

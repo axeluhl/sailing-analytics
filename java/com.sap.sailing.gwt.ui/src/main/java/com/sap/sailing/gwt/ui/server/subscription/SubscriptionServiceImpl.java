@@ -16,6 +16,7 @@ import com.chargebee.Environment;
 import com.chargebee.Result;
 import com.chargebee.models.HostedPage;
 import com.chargebee.models.HostedPage.Content;
+import com.chargebee.models.PortalSession;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sailing.gwt.ui.client.subscription.SubscriptionService;
 import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionDTO;
@@ -164,6 +165,43 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
         return subscriptionDto;
     }
     
+    @Override
+    public boolean cancelSubscription() {
+        try {
+            User user = getCurrentUser();
+            Subscription subscription = user.getSubscription();
+            String subscriptionId = subscription.subscriptionId;
+            if (subscriptionId != null && !subscriptionId.isEmpty()) {
+                Result result = com.chargebee.models.Subscription.cancel(subscriptionId)
+                                .request();
+                if (!result.subscription().status().name().toLowerCase().equals(Subscription.SUBSCRIPTION_STATUS_CANCELLED)) {
+                    return false;
+                }
+            }
+            
+            getSecurityService().updateUserSubscription(user.getName(), null);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.log(Level.WARNING, "Error in cancel subscription ", e);
+            return false;
+        }
+    }
+
+    @Override
+    public String generatePortalPageObject() {
+        try {
+            User user = getCurrentUser();
+            Result result = PortalSession.create().customerId(user.getName()).request();
+            PortalSession portalSession = result.portalSession();
+            return portalSession.toJson();
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.log(Level.WARNING, "Error in generating portal session page object ", e);
+            return null;
+        }
+    }
+    
     private SecurityService getSecurityService() {
         try {
             return securityService.get();
@@ -195,29 +233,6 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
 
         public SubscriptionException(String message) {
             this.message = message;
-        }
-    }
-
-    @Override
-    public boolean cancelSubscription() {
-        try {
-            User user = getCurrentUser();
-            Subscription subscription = user.getSubscription();
-            String subscriptionId = subscription.subscriptionId;
-            if (subscriptionId != null && !subscriptionId.isEmpty()) {
-                Result result = com.chargebee.models.Subscription.cancel(subscriptionId)
-                                .request();
-                if (!result.subscription().status().name().toLowerCase().equals(Subscription.SUBSCRIPTION_STATUS_CANCELLED)) {
-                    return false;
-                }
-            }
-            
-            getSecurityService().updateUserSubscription(user.getName(), null);
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            logger.log(Level.WARNING, "Error in cancel subscription ", e);
-            return false;
         }
     }
 }
