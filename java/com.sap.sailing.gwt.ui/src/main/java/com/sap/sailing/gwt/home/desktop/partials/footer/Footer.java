@@ -78,7 +78,7 @@ public class Footer extends Composite {
             privacyAnchorLink.getStyle().setDisplay(Display.NONE);
         }
         copyrightDiv.setAttribute(DebugConstants.DEBUG_ID_ATTRIBUTE, "copyrightDiv");
-        supportAnchor.setAttribute(DEBUG_ID_ATTRIBUTE, "feedbackAnchor");
+        supportAnchor.setAttribute(DEBUG_ID_ATTRIBUTE, "supportAnchor");
         feedbackAnchor.setAttribute(DEBUG_ID_ATTRIBUTE, "feedbackAnchor");
         whatsNewAnchor.setAttribute(DEBUG_ID_ATTRIBUTE, "whatsNewAnchor");
         imprintAnchorLink.setAttribute(DEBUG_ID_ATTRIBUTE, "imprintAnchorLink");
