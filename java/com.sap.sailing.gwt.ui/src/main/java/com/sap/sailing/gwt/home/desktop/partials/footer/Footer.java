@@ -22,6 +22,7 @@ import com.sap.sailing.gwt.home.shared.SwitchingEntryPoint;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.controls.languageselect.LanguageSelector;
+import com.sap.sse.gwt.qualtrics.Qualtrics;
 import com.sap.sse.gwt.shared.ClientConfiguration;
 import com.sap.sse.gwt.shared.DebugConstants;
 
@@ -32,7 +33,7 @@ public class Footer extends Composite {
     }
     
     @UiField AnchorElement whatsNewAnchor;
-    @UiField AnchorElement sapJobsAnchor;
+    @UiField AnchorElement supportAnchor;
     @UiField AnchorElement feedbackAnchor;
     @UiField LanguageSelector languageSelector;
     @UiField DivElement copyrightDiv;
@@ -59,23 +60,29 @@ public class Footer extends Composite {
                 }
             }
         });
-
+        Event.sinkEvents(feedbackAnchor, Event.ONCLICK);
+        Event.setEventListener(feedbackAnchor, event->{
+            if (Event.ONCLICK == event.getTypeInt()) {
+                event.preventDefault();
+                event.stopPropagation();
+                Qualtrics.triggerIntercepts();
+            }
+        });
         if (!ClientConfiguration.getInstance().isBrandingActive()) {
             copyrightDiv.getStyle().setDisplay(NONE);
             languageSelector.setLabelText(StringMessages.INSTANCE.whitelabelFooterLanguage());
-            sapJobsAnchor.getStyle().setDisplay(Display.NONE);
+            supportAnchor.getStyle().setDisplay(Display.NONE);
             feedbackAnchor.getStyle().setDisplay(Display.NONE);
             whatsNewAnchor.getStyle().setDisplay(Display.NONE);
             imprintAnchorLink.getStyle().setDisplay(Display.NONE);
             privacyAnchorLink.getStyle().setDisplay(Display.NONE);
         }
         copyrightDiv.setAttribute(DebugConstants.DEBUG_ID_ATTRIBUTE, "copyrightDiv");
-        sapJobsAnchor.setAttribute(DEBUG_ID_ATTRIBUTE, "sapJobsAnchor");
+        supportAnchor.setAttribute(DEBUG_ID_ATTRIBUTE, "feedbackAnchor");
         feedbackAnchor.setAttribute(DEBUG_ID_ATTRIBUTE, "feedbackAnchor");
         whatsNewAnchor.setAttribute(DEBUG_ID_ATTRIBUTE, "whatsNewAnchor");
         imprintAnchorLink.setAttribute(DEBUG_ID_ATTRIBUTE, "imprintAnchorLink");
         privacyAnchorLink.setAttribute(DEBUG_ID_ATTRIBUTE, "privacyAnchorLink");
         languageSelector.getElement().setAttribute(DEBUG_ID_ATTRIBUTE, "languageSelector");
     }
-    
 }

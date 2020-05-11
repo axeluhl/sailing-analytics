@@ -21,6 +21,7 @@ import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
 import com.sap.sailing.gwt.home.shared.SwitchingEntryPoint;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.controls.languageselect.LanguageSelector;
+import com.sap.sse.gwt.qualtrics.Qualtrics;
 import com.sap.sse.gwt.shared.ClientConfiguration;
 
 /**
@@ -33,7 +34,7 @@ public class Footer extends Composite {
     }
     
     @UiField Anchor whatsNewLinkUi;
-    @UiField AnchorElement sapJobsAnchor;
+    @UiField AnchorElement supportAnchor;
     @UiField AnchorElement feedbackAnchor;
     @UiField LanguageSelector languageSelector;
     @UiField DivElement copyrightDiv;
@@ -45,10 +46,8 @@ public class Footer extends Composite {
     public Footer(MobilePlacesNavigator placeNavigator) {
         this.placeNavigator = placeNavigator;
         FooterResources.INSTANCE.css().ensureInjected();
-
         initWidget(uiBinder.createAndBindUi(this));
         placeNavigator.getImprintNavigation().configureAnchorElement(imprintAnchorLink);
-        
         DOM.sinkEvents(desktopUi, Event.ONCLICK);
         DOM.setEventListener(desktopUi, new EventListener() {
             @Override
@@ -59,11 +58,18 @@ public class Footer extends Composite {
                 }
             }
         });
-        
+        Event.sinkEvents(feedbackAnchor, Event.ONCLICK);
+        Event.setEventListener(feedbackAnchor, event->{
+            if (Event.ONCLICK == event.getTypeInt()) {
+                event.preventDefault();
+                event.stopPropagation();
+                Qualtrics.triggerIntercepts();
+            }
+        });
         if (!ClientConfiguration.getInstance().isBrandingActive()) {
             copyrightDiv.getStyle().setDisplay(NONE);
             languageSelector.setLabelText(StringMessages.INSTANCE.whitelabelFooterLanguage());
-            sapJobsAnchor.getStyle().setDisplay(Display.NONE);
+            supportAnchor.getStyle().setDisplay(Display.NONE);
             feedbackAnchor.getStyle().setDisplay(Display.NONE);
             whatsNewLinkUi.getElement().getStyle().setDisplay(Display.NONE);
             imprintAnchorLink.getStyle().setDisplay(Display.NONE);
@@ -74,5 +80,4 @@ public class Footer extends Composite {
     void onWhatsNew(ClickEvent e) {
         placeNavigator.getWhatsNewNavigation(WhatsNewPlace.WhatsNewNavigationTabs.SailingAnalytics).goToPlace();
     }
-
 }

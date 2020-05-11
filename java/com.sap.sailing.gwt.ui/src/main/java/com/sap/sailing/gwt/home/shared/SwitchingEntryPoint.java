@@ -49,10 +49,8 @@ public class SwitchingEntryPoint implements EntryPoint {
     public void onModuleLoad() {
         Document.get().getElementById("loading").removeFromParent();
         LOG.info("Start switching entry point");
-
         SharedResources.INSTANCE.mediaCss().ensureInjected();
         SharedResources.INSTANCE.mainCss().ensureInjected();
-
         String hash = Window.Location.getHash();
         if (hash != null && hash.startsWith("#")) {
             hash = hash.substring(1);
@@ -150,5 +148,4 @@ public class SwitchingEntryPoint implements EntryPoint {
             }
         });
     }
-
 }
