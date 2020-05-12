@@ -64,7 +64,7 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
                     @Override
                     public boolean onPreferenceChange(Preference preference, Object newValue) {
                         AppPreferences.on(getActivity()).setNeedConfigRefresh(true);
-                        if (DataManager.create(getActivity()).getDataStore().getCourseUUID() != null) {
+                        if (DataManager.create(getActivity()).getDataStore().getCourseAreaId() != null) {
                             AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
                             builder.setTitle(getString(R.string.non_public_changed_title));
                             builder.setMessage(getString(R.string.app_refresh_message));
@@ -124,7 +124,7 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
                 AppPreferences.on(getActivity()).setNeedConfigRefresh(true);
-                if (DataManager.create(getActivity()).getDataStore().getCourseUUID() != null) {
+                if (DataManager.create(getActivity()).getDataStore().getCourseAreaId() != null) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
                     builder.setTitle(getString(R.string.url_refresh_title));
                     builder.setMessage(getString(R.string.app_refresh_message));

@@ -23,13 +23,14 @@ import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.interfaces.RacingEventServiceOperation;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 
 public class AddSpecificRegatta extends AbstractAddRegattaOperation {
     private static final long serialVersionUID = -8018855620167669352L;
     private final RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedalAndStartsWithZeroScoreAndDiscardingThresholds;
     private final boolean persistent;
     private final ScoringScheme scoringScheme;
-    private final Serializable defaultCourseAreaId;
+    private final List<Serializable> courseAreaIds;
     private final Double buoyZoneRadiusInHullLengths;
     private final boolean useStartTimeInference;
     private final boolean controlTrackingFromStartAndFinishTimes;
@@ -39,10 +40,16 @@ public class AddSpecificRegatta extends AbstractAddRegattaOperation {
     private final RankingMetrics rankingMetricType;
     private final String registrationLinkSecret;
     
+    /**
+     * @param courseAreaIds
+     *            may be {@code null}, meaning an empty set of course areas; no worries about serializability; a local
+     *            serializable collection will be used, and the elements of this parameter, if not {@code null}, will be
+     *            copied into it
+     */
     public AddSpecificRegatta(String regattaName, String boatClassName, boolean canBoatsOfCompetitorsChangePerRace,
             CompetitorRegistrationType competitorRegistrationType, String registrationLinkSecret, TimePoint startDate, TimePoint endDate, Serializable id,
             RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedalAndDiscardingThresholds,
-            boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
+            boolean persistent, ScoringScheme scoringScheme, Iterable<? extends Serializable> courseAreaIds, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
             boolean controlTrackingFromStartAndFinishTimes, boolean autoRestartTrackingUponCompetitorSetChange, RankingMetrics rankingMetricType) {
         super(regattaName, boatClassName, startDate, endDate, id);
         this.canBoatsOfCompetitorsChangePerRace = canBoatsOfCompetitorsChangePerRace;
@@ -50,7 +57,10 @@ public class AddSpecificRegatta extends AbstractAddRegattaOperation {
         this.seriesNamesWithFleetNamesAndFleetOrderingAndMedalAndStartsWithZeroScoreAndDiscardingThresholds = seriesNamesWithFleetNamesAndFleetOrderingAndMedalAndDiscardingThresholds;
         this.persistent = persistent;
         this.scoringScheme = scoringScheme;
-        this.defaultCourseAreaId = defaultCourseAreaId;
+        this.courseAreaIds = new ArrayList<>();
+        if (courseAreaIds != null) {
+            Util.addAll(courseAreaIds, this.courseAreaIds);
+        }
         this.useStartTimeInference = useStartTimeInference;
         this.controlTrackingFromStartAndFinishTimes = controlTrackingFromStartAndFinishTimes;
         this.autoRestartTrackingUponCompetitorSetChange = autoRestartTrackingUponCompetitorSetChange;
@@ -63,7 +73,7 @@ public class AddSpecificRegatta extends AbstractAddRegattaOperation {
     public Regatta internalApplyTo(RacingEventService toState) throws Exception {
         Regatta regatta = toState.createRegatta(getRegattaName(), getBoatClassName(),
                 canBoatsOfCompetitorsChangePerRace, competitorRegistrationType, registrationLinkSecret, getStartDate(),
-                getEndDate(), getId(), createSeries(toState), persistent, scoringScheme, defaultCourseAreaId,
+                getEndDate(), getId(), createSeries(toState), persistent, scoringScheme, courseAreaIds,
                 buoyZoneRadiusInHullLengths, useStartTimeInference, controlTrackingFromStartAndFinishTimes,
                 autoRestartTrackingUponCompetitorSetChange, RankingMetricsFactory.getRankingMetricConstructor(rankingMetricType));
         return regatta;

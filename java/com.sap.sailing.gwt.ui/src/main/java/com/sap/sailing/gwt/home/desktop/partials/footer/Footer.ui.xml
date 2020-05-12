@@ -23,7 +23,7 @@
 	          <a ui:field="sapJobsAnchor" href="https://jobs.sap.com" target="_blank" class="{local_res.css.sitefooter_links_link}">
 	              <ui:text from='{i18n.footerJobs}'/>
 	          </a>
-            <a ui:field="feedbackAnchor" href="mailto:sailing_analytics%40sap.com?subject=[SAP Sailing] Feedback" target="_blank" class="{local_res.css.sitefooter_links_link}">
+            <a ui:field="feedbackAnchor" href="mailto:support%40sapsailing.com?subject=[SAP Sailing] Feedback" target="_blank" class="{local_res.css.sitefooter_links_link}">
               <ui:text from='{i18n.footerFeedback}' />
             </a>
             <a ui:field="mobileUi" href="HomeMobile.html" 

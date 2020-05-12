@@ -150,7 +150,7 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
     public void testStoreAndLoadStartTimeEvent() {
         TimePoint startTime = new MillisecondsTimePoint(1337);
         RaceLogStartTimeEvent expectedEvent = new RaceLogStartTimeEventImpl(MillisecondsTimePoint.now(),
-                expectedEventTime, author, expectedId, expectedPassId, startTime, RaceLogRaceStatus.SCHEDULED);
+                expectedEventTime, author, expectedId, expectedPassId, startTime, RaceLogRaceStatus.SCHEDULED, /* courseAreaId */ null);
 
         Document dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
         RaceLogStartTimeEvent actualEvent = loadEvent(dbObject);

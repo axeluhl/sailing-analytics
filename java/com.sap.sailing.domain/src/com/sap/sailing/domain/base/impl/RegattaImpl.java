@@ -122,7 +122,11 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     private final RankingMetricConstructor rankingMetricConstructor;
     private Double buoyZoneRadiusInHullLengths;
 
-    private CourseArea defaultCourseArea;
+    /**
+     * A synchronized list; synchronize on the object monitor before iterating or modifying
+     */
+    private List<CourseArea> courseAreas;
+    
     private RegattaConfiguration configuration;
     private RaceExecutionOrderCache raceExecutionOrderCache;
     
@@ -231,6 +235,21 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
                 scoringScheme, id, courseArea, /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */true, controlTrackingFromStartAndFinishTimes,
                 autoRestartTrackingUponCompetitorSetChange, rankingMetricConstructor, registrationLinkSecret);
     }
+    
+    public <S extends Series> RegattaImpl(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, String name,
+            BoatClass boatClass, boolean canBoatsOfCompetitorsChangePerRace, CompetitorRegistrationType competitorRegistrationType,
+            TimePoint startDate, TimePoint endDate, Iterable<S> series, boolean persistent,
+            ScoringScheme scoringScheme, Serializable id, CourseArea courseArea, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
+            boolean controlTrackingFromStartAndFinishTimes, boolean autoRestartTrackingUponCompetitorSetChange,
+            RankingMetricConstructor rankingMetricConstructor, String registrationLinkSecret) {
+        this(raceLogStore, regattaLogStore, name,
+            boatClass, canBoatsOfCompetitorsChangePerRace, competitorRegistrationType,
+            startDate, endDate, series, persistent,
+            scoringScheme, id, courseArea==null?Collections.emptySet():Collections.singleton(courseArea),
+            buoyZoneRadiusInHullLengths, useStartTimeInference,
+            controlTrackingFromStartAndFinishTimes, autoRestartTrackingUponCompetitorSetChange,
+            rankingMetricConstructor, registrationLinkSecret);
+    }
 
     /**
      * @param series
@@ -240,7 +259,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     public <S extends Series> RegattaImpl(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, String name,
             BoatClass boatClass, boolean canBoatsOfCompetitorsChangePerRace, CompetitorRegistrationType competitorRegistrationType,
             TimePoint startDate, TimePoint endDate, Iterable<S> series, boolean persistent,
-            ScoringScheme scoringScheme, Serializable id, CourseArea courseArea, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
+            ScoringScheme scoringScheme, Serializable id, Iterable<CourseArea> courseAreas, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
             boolean controlTrackingFromStartAndFinishTimes, boolean autoRestartTrackingUponCompetitorSetChange,
             RankingMetricConstructor rankingMetricConstructor, String registrationLinkSecret) {
         super(name);
@@ -268,7 +287,8 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         }
         this.persistent = persistent;
         this.scoringScheme = scoringScheme;
-        this.defaultCourseArea = courseArea;
+        this.courseAreas = Collections.synchronizedList(new ArrayList<>());
+        Util.addAll(courseAreas, this.courseAreas);
         this.configuration = null;
         this.buoyZoneRadiusInHullLengths = buoyZoneRadiusInHullLengths;
         this.regattaLikeHelper = new BaseRegattaLikeImpl(new RegattaAsRegattaLikeIdentifier(this), regattaLogStore) {
@@ -662,13 +682,16 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     }
 
     @Override
-    public CourseArea getDefaultCourseArea() {
-        return defaultCourseArea;
+    public Iterable<CourseArea> getCourseAreas() {
+        return courseAreas;
     }
 
     @Override
-    public void setDefaultCourseArea(CourseArea newCourseArea) {
-        this.defaultCourseArea = newCourseArea;
+    public void setCourseAreas(Iterable<CourseArea> newCourseAreas) {
+        synchronized (this.courseAreas) {
+            this.courseAreas.clear();
+            Util.addAll(newCourseAreas, this.courseAreas);
+        }
     }
     
     @Override
