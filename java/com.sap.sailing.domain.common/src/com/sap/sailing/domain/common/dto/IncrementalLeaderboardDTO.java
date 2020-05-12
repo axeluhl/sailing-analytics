@@ -56,8 +56,7 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
     private boolean competitorDisplayNamesUnchanged;
     private boolean regattaNameUnchanged;
     private boolean displayNameUnchanged;
-    private boolean defaultCourseAreaIdAsStringUnchanged;
-    private boolean defaultCourseAreaNameUnchanged;
+    private boolean courseAreasUnchanged;
     private boolean boatClassUnchanged;
     
     /**
@@ -352,11 +351,8 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
             if (this.commentUnchanged) {
                 this.setComment(previousVersion.getComment());
             }
-            if (this.defaultCourseAreaIdAsStringUnchanged) {
-                this.defaultCourseAreaId = previousVersion.defaultCourseAreaId;
-            }
-            if (this.defaultCourseAreaNameUnchanged) {
-                this.defaultCourseAreaName = previousVersion.defaultCourseAreaName;
+            if (this.courseAreasUnchanged) {
+                this.courseAreas = previousVersion.courseAreas;
             }
             if (this.displayNameUnchanged) {
                 this.displayName = previousVersion.displayName;
@@ -519,13 +515,9 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
             this.displayName = null;
             this.displayNameUnchanged = true;
         }
-        if (Util.equalsWithNull(this.defaultCourseAreaId, previousVersion.defaultCourseAreaId)) {
-            this.defaultCourseAreaId = null;
-            this.defaultCourseAreaIdAsStringUnchanged = true;
-        }
-        if (Util.equalsWithNull(this.defaultCourseAreaName, previousVersion.defaultCourseAreaName)) {
-            this.defaultCourseAreaName = null;
-            this.defaultCourseAreaNameUnchanged = true;
+        if (Util.equalsWithNull(this.courseAreas, previousVersion.courseAreas)) {
+            this.courseAreas = null;
+            this.courseAreasUnchanged = true;
         }
         if (Util.equalsWithNull(this.getBoatClass(), previousVersion.getBoatClass())) {
             this.setBoatClass(null);

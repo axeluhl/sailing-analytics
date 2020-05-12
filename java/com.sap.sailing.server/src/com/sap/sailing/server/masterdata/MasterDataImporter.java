@@ -42,12 +42,10 @@ public class MasterDataImporter {
         this.racingEventService = racingEventService;
         this.user = user;
         this.tenant = tenant;
-
     }
 
     public void importFromStream(InputStream inputStream, UUID importOperationId, boolean override)
-            throws IOException,
-            ClassNotFoundException {
+            throws IOException, ClassNotFoundException {
         ObjectInputStreamResolvingAgainstCache<DomainFactory> objectInputStream = racingEventService
                 .getBaseDomainFactory()
                 .createObjectInputStreamResolvingAgainstThisFactory(inputStream, new ResolveListener() {
@@ -70,24 +68,27 @@ public class MasterDataImporter {
         RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(
                 racingEventService.getMongoObjectFactory(), racingEventService.getDomainObjectFactory());
         RegattaImpl.setOngoingMasterDataImport(new MasterDataImportInformation(raceLogStore));
-        ClassLoader oldContextClassLoader = Thread.currentThread().getContextClassLoader();
+        final ClassLoader oldContextClassLoader = Thread.currentThread().getContextClassLoader();
+        final TopLevelMasterData topLevelMasterData;
         Thread.currentThread().setContextClassLoader(racingEventService.getCombinedMasterDataClassLoader());
-        @SuppressWarnings("unchecked")
-        final List<Serializable> competitorIds = (List<Serializable>) objectInputStream.readObject();
-        if (override) {
-            setAllowCompetitorsDataToBeReset(competitorIds);
+        try {
+            @SuppressWarnings("unchecked")
+            final List<Serializable> competitorIds = (List<Serializable>) objectInputStream.readObject();
+            if (override) {
+                setAllowCompetitorsDataToBeReset(competitorIds);
+            }
+            // Deserialize Regattas to make sure that Regattas are deserialized before Series
+            objectInputStream.readObject();
+            topLevelMasterData = (TopLevelMasterData) objectInputStream.readObject();
+        } finally {
+            RegattaImpl.setOngoingMasterDataImport(null);
+            Thread.currentThread().setContextClassLoader(oldContextClassLoader);
         }
-        // Deserialize Regattas to make sure that Regattas are deserialized before Series
-        objectInputStream.readObject();
-        TopLevelMasterData topLevelMasterData = (TopLevelMasterData) objectInputStream.readObject();
-        RegattaImpl.setOngoingMasterDataImport(null);
-        Thread.currentThread().setContextClassLoader(oldContextClassLoader);
         // in order to restore all listeners we need to initialize the regatta
         // after the whole object graph has been restored
         for (Regatta regatta : topLevelMasterData.getAllRegattas()) {
             RegattaImpl regattaImpl = (RegattaImpl)regatta;
             regattaImpl.initializeSeriesAfterDeserialize();
-
             // master data import from older system, generate a uuid for this.
             if (regatta.getRegistrationLinkSecret() == null) {
                 logger.info("Generated missing registrationLinkSecret for " + this + " while importing MasterData");

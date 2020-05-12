@@ -79,11 +79,11 @@ public class DeviceConfigurationImpl extends NamedImpl implements DeviceConfigur
 
     @Override
     public QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+        return getPermissionType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
     }
 
     @Override
-    public HasPermissions getType() {
+    public HasPermissions getPermissionType() {
         return SecuredDomainType.RACE_MANAGER_APP_DEVICE_CONFIGURATION;
     }
 

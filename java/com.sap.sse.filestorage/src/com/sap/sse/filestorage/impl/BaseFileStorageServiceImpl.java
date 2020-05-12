@@ -6,31 +6,30 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.filestorage.FileStorageService;
 import com.sap.sse.filestorage.FileStorageServiceProperty;
 import com.sap.sse.filestorage.FileStorageServiceResolver;
+import com.sap.sse.replication.FullyInitializedReplicableTracker;
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.util.ServiceTrackerFactory;
 
 public abstract class BaseFileStorageServiceImpl implements FileStorageService {
     private static final long serialVersionUID = 7787261863522200165L;
     private final String name;
     private final String descriptionKey;
     protected final Map<String, FileStorageServicePropertyImpl> propertiesByNameInInsertionOrder = new LinkedHashMap<>();
-    private transient ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
+    private transient FullyInitializedReplicableTracker<SecurityService> securityServiceTracker;
     
     protected BaseFileStorageServiceImpl(String name, String descriptionKey, BundleContext bundleContext) {
         this.name = name;
         this.descriptionKey = descriptionKey;
-        this.securityServiceTracker = bundleContext == null ? null : ServiceTrackerFactory.createAndOpen(bundleContext, SecurityService.class);
+        this.securityServiceTracker = bundleContext == null ? null : FullyInitializedReplicableTracker.createAndOpen(bundleContext, SecurityService.class);
     }
     
     protected SecurityService getSecurityService() {
         try {
-            return securityServiceTracker.waitForService(0);
+            return securityServiceTracker.getInitializedService(0);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }

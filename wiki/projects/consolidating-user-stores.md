@@ -27,12 +27,12 @@ To figure out which databases are active and then classify them into those to be
 There are a few dedicated server instances with their DBs:
 * ARCHIVE, DB ``dbserver.internal.sapsailing.com:10201/winddb``
 * AST (Australian Sailing Team), DB ``ast.sapsailing.com:27017/AST`` backed up to ``dbserver.internal.sapsailing.com:10202/AST``
-* The DBs of all instances running on "SL Multi-Instance Kiel" (we should check if we could take this opportunity to shut down those that are still entirely empty): bartlomiejkapusta benjaminalhadef ditlevleth emilienpochet filip frederiksivertsen guentherpachschwoell gustavhultgren hinnerksiemsen janekbalster jassiskogman joanameyerduro jyrikuivalainen konradlipski lukasgrallert mandy marcusbaur martinmaursundrishovd oriolmahiques paulbakker peterwagner rolandregnemer tamarafischer thorbennowak thorechristiansen
-* The DBs of all instances running on "SL Multi-Instance Sailing Server NVMe" (we should check if we could take this opportunity to shut down those that are still entirely empty): 49er AARHUSSEJLKLUB abeam-training alarie505 ASVIA baldeneysee BYC d-labs DUTCH_FEDERATION ess-team-training formula18 galvestaure HNV hsc-womensteam irishdbscdw3 ISR JOJOPOLGAR jonaswitt KBSC KJSCS KSSS kyc LYC mdf my NOR oakcliff phoenix PMYC RDSAILING rheinwoche2019 SAILCANADA SAILINGACADEMY sailracer Sailtracks schadewaldt schanzenberg schwielochsee seascape SEGELZENTRUM SINGAPORESAILING SITGES SRN SRV SSC SSV STARLAB TracTracTest ubilabs-test USSAILING VSAW YCL
+* The DBs of all instances running on "SL Multi-Instance Kiel" (we should check if we could take this opportunity to shut down those that are still entirely empty): bartlomiejkapusta benjaminalhadef ditlevleth emilienpochet filip first-seascape-germany frederiksivertsen guentherpachschwoell gustavhultgren hinnerksiemsen janekbalster jassiskogman joanameyerduro jyrikuivalainen konradlipski lukasgrallert mandy marcusbaur martinmaursundrishovd oriolmahiques paulbakker peterwagner rolandregnemer tamarafischer thorbennowak thorechristiansen
+* The DBs of all instances running on "SL Multi-Instance Sailing Server NVMe" (we should check if we could take this opportunity to shut down those that are still entirely empty): AARHUSSEJLKLUB abeam-training alarie505 ASVIA baldeneysee BYC d-labs DUTCH_FEDERATION ess-team-training formula18 galvestaure HNV hsc-womensteam irishdbscdw3 ISR JOJOPOLGAR jonaswitt KBSC KJSCS KSSS kyc LYC mdf my NOR oakcliff phoenix PMYC RDSAILING rheinwoche2019 SAILCANADA SAILINGACADEMY sailracer Sailtracks schadewaldt schanzenberg schwielochsee seascape SEGELZENTRUM SINGAPORESAILING SITGES SRN SRV SSC SSV STARLAB TracTracTest ubilabs-test USSAILING VSAW YCL
 
 bartlomiejkapusta is empty. Removing. benjaminalhadef is largely empty. Removing. mandy is basically empty. Removing. filip is empty. Removing. thorbennowak empty. Removing. lukasgrallert basically empty. Removing. konradlipski only imported old stuff. Removing. gustavhultgren was not even started and had only one old test event. Removing. oriolmahiques has only empty events. Removing. thorechristiansen empty other than Bundesliga imports. Removing. tamarafischer basically empty. Removing. emilienpochet contains only empty events. Removing. paulbakker empty, removing. guentherpachschwoell only has league imports. Removing. rolandregnemer empty; removing. ditlevleth empty; removing. frederiksivertsen empty; removing. jassiskogman empty; removing. jyrikuivalainen empty; removing. martinmaursundrishovd empty; removing. The janekbalster and peterwagner DBs have remained, and their server instances have now been moved to the common multi-instance server. The "SL Multi-Instance Kiel" server has been terminated by now. YCL is completely empty. Removed.
 
-On the "SL Multi-Instance Sailing Server NVMe" server some cleanup is possible, too. I'll remove the ``ubilabs-test`` instance and DB. In particular, "49er" is empty and dead. I'll remove that now.
+On the "SL Multi-Instance Sailing Server NVMe" server some cleanup is possible, too. I'll remove the ``ubilabs-test`` instance and DB. In particular, "49er" is empty and dead. I'll remove that now. After checking back with Rasmus Koestner, I also got permission to dismantle the extreme-team.sapsailing.com instance with its ess-team-training DB.
 
 So the list of remaining active, non-isolated server database names other than ``winddb`` for the archive server is:
 * AARHUSSEJLKLUB
@@ -43,7 +43,7 @@ So the list of remaining active, non-isolated server database names other than `
 * baldeneysee
 * BYC
 * DUTCH_FEDERATION
-* ess-team-training
+* first-seascape-germany
 * formula18
 * galvestaure
 * HNV
@@ -121,7 +121,7 @@ The ``PERMISSIONS`` field has entries for a significant number of users, mostly 
 The query
 
 ```
-for i in *_USERS.json; do output=$( cat $i | jq -r 'select(.NAME != "<all>" and .PERMISSIONS != [] and .PERMISSIONS != null) | ( .NAME+":", "  "+(.PERMISSIONS[] | select(match("DATA_MINING"))) )'); if [ \! -z "$output" ]; then echo " ====== $i ====="; echo "$output"; fi; done|
+for i in *_USERS.json; do output=$( cat $i | jq -r 'select(.NAME != "<all>" and .PERMISSIONS != [] and .PERMISSIONS != null) | ( .NAME+":", "  "+(.PERMISSIONS[] | select(match("DATA_MINING"))) )'); if [ \! -z "$output" ]; then echo " ====== $i ====="; echo "$output"; fi; done
 ```
 reveals that there are a number of unqualified ``DATA_MINING`` permissions, one on bundesliga1-2019 which is just about to be archived, one on a recently archived server hwcs2020. And then there is a user "Chelsie2112" with unqualified ``SERVER:DATA_MINING`` access on the archive server. This is being changed now to a qualified ``SERVER:DATA_MINING:ARCHIVE``.
 
@@ -293,11 +293,11 @@ Merging the ``USER_GROUPS``, ``USERS``, ``PREFERENCES``, ``OWNERSHIPS`` and ``AC
 
 In the first pass the decision is made for each object of type ``User``, ``UserGroup``, ``Ownership``, ``AccessControlList`` and the user preferences whether it will be added, merged or dropped. Warnings will be issued for objects dropped.
 
-Groups will be added if none with the same UUID or an equal name exists on the importing side. Should a user group with the same ID exist, it will be marked for merge. If a user group exists on the importing side that has an equal name but a different ID, the groups will only be marked for merge if their equal names have the format``"&lt;username&gt;-tenant"`` and a user named ``&lt;username&gt;`` exists in both groups. Otherwise, the source group will be marked for dropping.
+Groups will be added if none with the same UUID or an equal name exists on the importing side. Should a user group with the same ID exist, it will be marked for merge. If a user group exists on the importing side that has an equal name but a different ID, the groups will only be marked for merge if their equal names have the format``"&lt;username&gt;-tenant"`` and a user named ``&lt;username&gt;`` exists in both groups and the user in the imported group is merged with the corresponding user in the importing group. Otherwise, the source group will be marked for dropping.
 
 Users with a name for which no user exists in the target will be marked for "add". If a target user exists with a name equal to that of the source user the source user will be marked for merge into the target user if the e-mail addresses are equal. Otherwise, the source user is marked for dropping. For objects marked for merging, the merge target is recorded for each merge source.
 
-Ownerships can only be marked for add or drop. They are added if no ownership exist in the target for the object ID yet and group or user owner will exist in the target (either added or merged); they are dropped otherwise, or if all owner references (group and/or user) point to objects marked for drop.
+Ownerships can only be marked for add or drop. They are added if no ownership exists in the target for the object ID yet and group or user owner will exist in the target (either added or merged); they are dropped otherwise, or if all owner references (group and/or user) point to objects marked for drop.
 
 Access control lists (ACLs) for object IDs for which no ACL exists in the target are marked for add. ACLs for object IDs for which an ACL exists already in the target are marked for merge. ACLs for which all groups used by it are marked for drop will be marked for drop.
 
@@ -320,7 +320,7 @@ All objects marked to be added are copied from their source store to the target 
 
 For ``UserGroup`` objects the set of role definitions will be merged, and the set of users will be merged. When merging the role definitions, if source and target group refer to the same RoleDefinition (equal IDs) and one role is granted for all users, the other only for members of the group, the merge result will grant the role for all users.
 
-For ``User`` objects the roles are merged in a "set" logic, avoiding duplicates. Comparison includes the group/user qualifications. Unqualified roles from the source object are ignored. The same applies for the permissions. Proper permission qualification particularly for ``SERVER`` operations needs to be ensured in a preparatory step. The default creation groups are merged by server name to which they apply. If both objects have a default creation group for the same server name, the importing side "wins." The e-mail validation status is set to ``true`` if at least one of the two objects has a validated e-mail address. Furthermore, a role referenced in the user's roles will only be merged if the role's ID exists in the target's role definitions  (which should be the case by the assumption above that no extensions were made anywhere to the ``ROLES`` collection). According to the research above, only ``user``, ``admin`` and ``moderator`` assignments seem to exist and those are pre-defined roles that will exist in the target with the same IDs. During a merge we won't touch the account and password information. The importing side's account data remains unchanged. Users affected by a merge will therefore end up with the username/password combination they have on the ARCHIVE server. Should that be different and should they have forgotten, they can still recover the password.
+For ``User`` objects the roles are merged in a "set" logic, avoiding duplicates. Comparison includes the group/user qualifications. Unqualified roles from the source object are ignored. The same applies for the permissions. Proper permission qualification particularly for ``SERVER`` operations needs to be ensured in a preparatory step. The default creation groups are merged by server name to which they apply. If both objects have a default creation group for the same server name, the importing side "wins." The e-mail validation status is set to ``true`` if at least one of the two objects has a validated e-mail address. Furthermore, a role referenced in the user's roles will only be merged if the role's ID exists in the target's role definitions  (which should be the case by the assumption above that no extensions were made anywhere to the ``ROLES`` collection). According to the research above, only ``user``, ``admin`` and ``moderator`` assignments seem to exist and those are pre-defined roles that will exist in the target with the same IDs. During a merge we won't touch the account and password information. The importing side's account data remains unchanged. Users affected by a merge will therefore end up with the username/password combination they have on the ARCHIVE server. Should that be different and should they have forgotten, they can still recover the password. If the importing side lacks optional field values for the User object for which valid values exist on the imported side, the valid values are used (company, full name, locale).
 
 The ``UserStore.getPreference(...)`` data can be merged based on user name for all users in the source store. If a preference key for a user already exists in the importing (target) side, the target wins, and the source key's value is dropped, and the situation is logged.
 
@@ -329,3 +329,71 @@ Merging two ``AccessControlList`` objects considers the groups and the permissio
 ## Open Issues
 
 Should we implement a migration of Local Storage properties? If a server is configured to use a cross-domain storage and under the application origin's local storage there exist one or more properties, should we make an effort to copy those into the shared cross-domain storage? How to resolve conflicts there?
+
+## The Actual Merging Process
+
+There is a new server instance ``security-service.sapsailing.com`` with MongoDB ``mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/security_service?replicaSet=live&retryWrites=true``. The initial contents of the DB were the copies of the security-related collections as taken from the ``ARCHIVE`` server, with DB connectivity string ``mongodb://dbserver.internal.sapsailing.com:10201/winddb?replicaSet=archive&retryWrites=true``. This process is encoded in the script ``dbserver.internal.sapsailing.com:/var/lib/mongodb/security_service/copyarchivestore.sh``. A copy of this script can also be found in git under ``configuration/``. It uses the scripts ``export_security.sh`` and ``import_security.sh`` which are found in the same directory, respectively.
+
+An exported JAR file based on a launch configuration (``MergeSecurityAndAccessControlStores.launch``) for the ``SecurityStoreMerger`` class has been placed under ``dbserver.internal.sapsailing.com:/var/lib/mongodb/security_service``. To merge, e.g., the ``VSAW`` database, use the following command:
+
+```
+      java -Dmongo.uri="mongodb://localhost:10203/security_service?replicaSet=live&retryWrites=true" -Ddefault.tenant.name=ARCHIVE-server -jar SecurityStoreMerger.jar "mongodb://localhost:10203/VSAW?replicaSet=live&retryWrites=true" VSAW-server 2>&1 | tee storemerge_VSAW.log      
+```
+
+The log output is stored in the ``storemerge_VSAW.log`` file which may contain WARNINGs or even Exceptions. Search for those in the log and do some plausibility checks. You may also restart the security-service.sapsailing.com instance to use its AdminConsole for checking the results and comparing with the server from which the security-related information was imported.
+
+Then, repeat for more server DBs that you'd like to import. This may be scripted, at least for all DBs from the ``live`` replica set, as follows:
+
+```
+        for DB in VSAW SEASCAPE ...; do
+                java -Dmongo.uri="mongodb://localhost:10203/security_service?replicaSet=live&retryWrites=true" -Ddefault.tenant.name=ARCHIVE-server -jar SecurityStoreMerger.jar "mongodb://localhost:10203/${DB}?replicaSet=live&retryWrites=true" ${DB}-server 2>&1 | tee storemerge_${DB}.log
+        done
+```
+
+Likewise, those DBs that are not hosted on the ``live`` MongoDB replica set but on the MongoDB "archive" instance running on port 10202, the following would be the script:
+
+```
+        for DB in SSC SRV ...; do
+                java -Dmongo.uri="mongodb://localhost:10203/security_service?replicaSet=live&retryWrites=true" -Ddefault.tenant.name=ARCHIVE-server -jar SecurityStoreMerger.jar "mongodb://localhost:10202/${DB}" ${DB}-server 2>&1 | tee storemerge_${DB}.log
+        done
+```
+There are three files describing the DBs in question:
+* ``list-of-archive-dbs`` has those DBs available on ``dbserver.internal.sapsailing.com:10202``
+* ``list-of-live-dbs`` has those DBs available on ``mongodb://localhost:10203/security_service?replicaSet=live&retryWrites=true``
+* ``list-of-dbs-to-merge`` has the list of DBs we want to merge, taken from the list at the beginning of this document
+
+We now need to find each element from ``list-of-dbs-to-merge`` first in ``list-of-live-dbs`` and if it's not there, then in ``list-of-archive-dbs``. If a DB to merge cannot be found in either one then that's an error. There is the script ``dbserver.internal.sapsailing.com:/var/lib/mongodb/security_service/mergedbs.sh`` which enumerates all DBs to merge, looks them up in the archive and live DB lists and based on that decides which merge command to use. All logs wil be written to ``dbserver.internal.sapsailing.com:/var/lib/mongodb/security_service/storemerge_....log``. This script can be executed after the initial filling of the security_service DB that was done by the ``copyarchivestore.sh`` command.
+
+So the total sequence of commands for running the entire import/merge process is:
+
+```
+        ssh -A root@dbserver.internal.sapsailing.com
+        cd /var/lib/mongodb/security_service
+        ./copyarchivestore.sh
+        ./mergedbs.sh
+```
+This produces all ``storemerge_....log`` files and a merge result in the ``mongodb://localhost:10203/security_service?replicaSet=live&retryWrites=true`` database. Again, search for WARNING and Exception in the logs, understand dropped objects and do some spot checks. Also validate by launching the ``security-service.sapsailing.com`` server and inspect security-related objects in the AdminConsole.
+
+### Updating the server instances
+
+The first step is to restart the security-service.sapsailing.com instance based on the new DB. It uses the following configuration options in its env.sh to expose the shared services:
+
+```
+ADDITIONAL_JAVA_ARGS=... -Dsecurity.sharedAcrossSubdomainsOf=sapsailing.com -Dsecurity.baseUrlForCrossDomainStorage=https://security-service.sapsailing.com -Dgwt.acceptableCrossDomainStorageRequestOriginRegexp=https?://(.*\.)?sapsailing\.com(:[0-9]*)?$
+REPLICATION_CHANNEL=security_service
+```
+
+A new user ``security-service-replicator`` has been added that has replication permissions for the ``security-service`` server. Other servers need to obtain an access token for that user and add it in their startup options as follows:
+
+```
+ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Dsecurity.sharedAcrossSubdomainsOf=sapsailing.com -Dsecurity.baseUrlForCrossDomainStorage=https://security-service.sapsailing.com -Dgwt.acceptableCrossDomainStorageRequestOriginRegexp=https?://(.*\.)?sapsailing\.com(:[0-9]*)?$"
+REPLICATE_ON_START=com.sap.sse.security.impl.SecurityServiceImpl,com.sap.sailing.shared.server.impl.SharedSailingDataImpl
+REPLICATE_MASTER_SERVLET_HOST=security-service.sapsailing.com
+REPLICATE_MASTER_SERVLET_PORT=443
+REPLICATE_MASTER_EXCHANGE_NAME=security_service
+REPLICATE_MASTER_BEARER_TOKEN="..."
+```
+
+The bearer token can be obtained by logging on as user ``security-service-replicator`` to ``https://security-service.sapsailing.com`` and then getting the access token from ``https://security-service.sapsailing.com/security/api/restsecurity/access_token``. Ask one of j.hamann@sailtracks.tv, alessandro.stoltenberg@sap.com and axel.uhl@sap.com for the user credentials. Of course, any other user that has permissions  ``SERVER:REPLICATE:security-service`` and ``SERVER:READ_REPLICATOR:security-service`` can do the same, so a user may also ask someone who has the premissions required to transfer the permissions to another user.
+
+These properties have now been appended to the env.sh files of the existing servers on the multi-instance set-up (including swisstimingtest, sailtracks, and tractractest). 

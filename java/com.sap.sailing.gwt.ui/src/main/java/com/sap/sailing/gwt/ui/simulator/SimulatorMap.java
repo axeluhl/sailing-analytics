@@ -10,8 +10,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
-import com.google.gwt.maps.client.LoadApi;
-import com.google.gwt.maps.client.LoadApi.LoadLibrary;
 import com.google.gwt.maps.client.MapOptions;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
@@ -48,8 +46,8 @@ import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorUISelectionDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
-import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapAPIKey;
 import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapStyleHelper;
+import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapsLoader;
 import com.sap.sailing.gwt.ui.shared.racemap.PathNameFormatter;
 import com.sap.sailing.gwt.ui.simulator.util.ColorPalette;
 import com.sap.sailing.gwt.ui.simulator.util.ColorPaletteGenerator;
@@ -370,11 +368,6 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     }
 
     private void loadMapsAPIV3() {
-        // load all the libs for use in the maps
-        ArrayList<LoadLibrary> loadLibraries = new ArrayList<LoadApi.LoadLibrary>();
-        loadLibraries.add(LoadLibrary.DRAWING);
-        loadLibraries.add(LoadLibrary.GEOMETRY);
-
         Runnable onLoad = new Runnable() {
           @Override
           public void run() {
@@ -557,8 +550,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
               }
           }
         };
-
-        LoadApi.go(onLoad, loadLibraries, GoogleMapAPIKey.V3_PARAMS);
+        GoogleMapsLoader.load(onLoad);
     }
 
     private void initializeOverlays() {

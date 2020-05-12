@@ -114,7 +114,7 @@ public class TracTracConfigurationWithSecurityDTO implements IsSerializable, Sec
     }
 
     @Override
-    public HasPermissions getType() {
+    public HasPermissions getPermissionType() {
         return SecuredDomainType.TRACTRAC_ACCOUNT;
     }
 
@@ -125,6 +125,6 @@ public class TracTracConfigurationWithSecurityDTO implements IsSerializable, Sec
 
     @Override
     public QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+        return getPermissionType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
     }
 }

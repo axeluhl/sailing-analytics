@@ -17,7 +17,7 @@ public class SecurityServiceMockFactory {
     public static SecurityService mockSecurityService() {
         UserGroupImpl defaultTenant = new UserGroupImpl(new UUID(0, 1), "defaultTenant");
         final SecurityService result = Mockito.mock(SecurityService.class);
-        Mockito.doReturn(defaultTenant).when(result).getDefaultTenant();
+        Mockito.doReturn(defaultTenant).when(result).getServerGroup();
         Mockito.doAnswer(new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {

@@ -3,6 +3,8 @@ package com.sap.sailing.domain.swisstimingadapter.impl;
 import com.sap.sailing.domain.swisstimingadapter.CrewMember;
 
 public class CrewMemberImpl implements CrewMember {
+
+    private static final long serialVersionUID = -8245103493741600643L;
     private String name;
     private String nationality;
     private String position;

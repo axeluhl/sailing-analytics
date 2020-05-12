@@ -14,6 +14,6 @@ echo
 
 # get token
 echo "Retrieving token ..."
-TOKEN=$(curl -s -H "Content-Type: application/json" -X POST -d '{"username": "'${UNAME}'", "password": "'${UPASS}'"}' https://cloud.docker.com/v2/users/login/ | jq -r .token)
+TOKEN=$(curl -s -H "Content-Type: application/json" -X POST -d '{"username": "'${UNAME}'", "password": "'${UPASS}'"}' https://hub.docker.com/v2/users/login/ | jq -r .token)
 
 echo "$TOKEN" >"${TOKEN_FILE}"

@@ -117,7 +117,7 @@ public class SwissTimingConfigurationWithSecurityDTO implements IsSerializable, 
     }
 
     @Override
-    public HasPermissions getType() {
+    public HasPermissions getPermissionType() {
         return SecuredDomainType.SWISS_TIMING_ACCOUNT;
     }
 
@@ -128,6 +128,6 @@ public class SwissTimingConfigurationWithSecurityDTO implements IsSerializable, 
 
     @Override
     public QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+        return getPermissionType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
     }
 }

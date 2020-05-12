@@ -40,7 +40,7 @@ public class CompetitorImportTest extends AbstractEventResultJsonServiceTest {
     @Test
     public void simpleCompetitorImportTest() throws FileNotFoundException, IOException, JAXBException {
         ResultUrlRegistry resultUrlRegistry = mock(ResultUrlRegistry.class);
-        when(resultUrlRegistry.getResultUrls(AbstractManage2SailProvider.NAME)).thenReturn(Arrays.asList(getClass().getClassLoader().getResource(EVENT_RESULTS_JSON+".txt")));
+        when(resultUrlRegistry.getReadableResultUrls(AbstractManage2SailProvider.NAME)).thenReturn(Arrays.asList(getClass().getClassLoader().getResource(EVENT_RESULTS_JSON+".txt")));
         final CompetitorImporter competitorImporter = new CompetitorImporter(ParserFactory.INSTANCE, resultUrlRegistry);
         assertTrue(competitorImporter.getHasCompetitorsForRegattasInEvent().containsKey("YES - Young Europeans Sailing 2013"));
         assertTrue(competitorImporter.getHasCompetitorsForRegattasInEvent().get("YES - Young Europeans Sailing 2013").contains("29er"));
@@ -55,7 +55,7 @@ public class CompetitorImportTest extends AbstractEventResultJsonServiceTest {
     @Test
     public void simpleCompetitorImportTestNoResultsYet() throws FileNotFoundException, IOException, JAXBException {
         ResultUrlRegistry resultUrlRegistry = mock(ResultUrlRegistry.class);
-        when(resultUrlRegistry.getResultUrls(AbstractManage2SailProvider.NAME)).thenReturn(Arrays.asList(getClass().getClassLoader().getResource("VSaW_420_Test.json.txt")));
+        when(resultUrlRegistry.getReadableResultUrls(AbstractManage2SailProvider.NAME)).thenReturn(Arrays.asList(getClass().getClassLoader().getResource("VSaW_420_Test.json.txt")));
         final CompetitorProvider competitorImporter = new CompetitorImporter(ParserFactory.INSTANCE, resultUrlRegistry) {
             private static final long serialVersionUID = 6450491595924905L;
 
@@ -79,7 +79,7 @@ public class CompetitorImportTest extends AbstractEventResultJsonServiceTest {
     @Test
     public void simpleCompetitorImportTestNoResultsYetAndDivisionEmpty() throws FileNotFoundException, IOException, JAXBException {
         ResultUrlRegistry resultUrlRegistry = mock(ResultUrlRegistry.class);
-        when(resultUrlRegistry.getResultUrls(AbstractManage2SailProvider.NAME)).thenReturn(Arrays.asList(getClass().getClassLoader().getResource("VSaW_420_Test_EmptyDivision.json.txt")));
+        when(resultUrlRegistry.getReadableResultUrls(AbstractManage2SailProvider.NAME)).thenReturn(Arrays.asList(getClass().getClassLoader().getResource("VSaW_420_Test_EmptyDivision.json.txt")));
         final CompetitorProvider competitorImporter = new CompetitorImporter(ParserFactory.INSTANCE, resultUrlRegistry) {
             private static final long serialVersionUID = -7647297718831584969L;
 

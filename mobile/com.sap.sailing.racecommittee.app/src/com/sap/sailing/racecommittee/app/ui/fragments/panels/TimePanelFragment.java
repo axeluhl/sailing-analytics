@@ -2,7 +2,6 @@ package com.sap.sailing.racecommittee.app.ui.fragments.panels;
 
 import static com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult.ResolutionFailed.NO_START_TIME_SET;
 
-import java.text.SimpleDateFormat;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.BroadcastManager;
@@ -49,7 +48,6 @@ public class TimePanelFragment extends BasePanelFragment {
 
     private RaceStateChangedListener mStateListener;
     private IntentReceiver mReceiver;
-    private SimpleDateFormat dateFormat;
 
     private TimePanelHeaderLayout mRaceHeader;
     private PanelButton mCompetitorList;
@@ -79,7 +77,6 @@ public class TimePanelFragment extends BasePanelFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.race_panel_time, container, false);
 
-        dateFormat = new SimpleDateFormat("HH:mm:ss", getResources().getConfiguration().locale);
         mStateListener = new RaceStateChangedListener();
 
         mRaceHeader = ViewHelper.get(layout, R.id.race_content_header);
@@ -153,7 +150,7 @@ public class TimePanelFragment extends BasePanelFragment {
         super.notifyTick(now);
 
         if (mCurrentTime != null) {
-            mCurrentTime.setText(dateFormat.format(now.asMillis()));
+            mCurrentTime.setText(TimeUtils.formatTime(now));
             mCurrentTime.setVisibility(View.VISIBLE);
         }
 
@@ -162,7 +159,7 @@ public class TimePanelFragment extends BasePanelFragment {
 
             if (mTimeStart != null) {
                 if (startTime != null) {
-                    mTimeStart.setText(getString(R.string.time_start, dateFormat.format(startTime.asDate())));
+                    mTimeStart.setText(getString(R.string.time_start, TimeUtils.formatTime(startTime, false)));
                 } else {
                     mTimeStart.setText(getString(R.string.time_start, "N/A"));
                 }
@@ -173,10 +170,10 @@ public class TimePanelFragment extends BasePanelFragment {
                 int resId;
                 if (startTime.after(now)) {
                     resId = R.string.race_start_time_in;
-                    time = TimeUtils.formatDurationUntil(startTime.minus(now.asMillis()).asMillis());
+                    time = TimeUtils.formatDurationUntil(startTime.minus(now.asMillis()).asMillis(), false);
                 } else {
                     resId = R.string.race_start_time_ago;
-                    time = TimeUtils.formatDurationSince(now.minus(startTime.asMillis()).asMillis());
+                    time = TimeUtils.formatDurationSince(now.minus(startTime.asMillis()).asMillis(), false);
                 }
                 mHeaderTime.setText(getString(resId, time));
             }
@@ -270,7 +267,7 @@ public class TimePanelFragment extends BasePanelFragment {
 
     private void checkWarnings(ReadonlyRaceState state) {
         CompetitorResults draft = state.getFinishPositioningList();
-        CompetitorResults confirmed = state.getConfirmedFinishPositioningList();
+        CompetitorResults confirmed = state.getConfirmedFinishPositioningList().getCompetitorResults();
         mCompetitorList.showAdditionalImage(
                 (draft != null && draft.hasConflicts()) || (confirmed != null && confirmed.hasConflicts()));
     }

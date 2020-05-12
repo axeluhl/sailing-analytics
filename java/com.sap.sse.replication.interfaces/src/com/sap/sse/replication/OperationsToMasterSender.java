@@ -58,7 +58,7 @@ public interface OperationsToMasterSender<S, O extends OperationWithResult<S, ?>
         dos.writeUTF(getId().toString());
         this.writeOperation(operationWithResultWithIdWrapper, outputStream, /* closeStream */ true);
         final int responseCode = connection.getResponseCode();
-        if (responseCode < 300 || responseCode >= 500) {
+        if (responseCode < 300 || responseCode >= 500 || responseCode == 404) {
             // if OK or an internal error, process as usual; in case of >= 500 this will throw an exception
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             bufferedReader.close();

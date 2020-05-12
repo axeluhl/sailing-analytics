@@ -59,11 +59,16 @@ public class SailingDataRetrievalChainDefinitions {
         leaderboardRetrieverChainDefinition.endWith(LeaderboardGroupRetrievalProcessor.class, LeaderboardRetrievalProcessor.class,
                 HasLeaderboardContext.class, "Leaderboard");
         
+        final DataRetrieverChainDefinition<RacingEventService, HasTrackedRaceContext> trackedRaceResultOfCompetitorRetrieverChainDefinition =
+                new SimpleDataRetrieverChainDefinition<>(leaderboardRetrieverChainDefinition, HasTrackedRaceContext.class, "RaceResultSailingDomainRetrieverChain");
+        trackedRaceResultOfCompetitorRetrieverChainDefinition.endWith(LeaderboardRetrievalProcessor.class, TrackedRaceRetrievalProcessor.class, HasTrackedRaceContext.class, "Race");
+        dataRetrieverChainDefinitions.add(trackedRaceResultOfCompetitorRetrieverChainDefinition);
+        
         final DataRetrieverChainDefinition<RacingEventService, HasRaceResultOfCompetitorContext> raceResultOfCompetitorRetrieverChainDefinition =
-                new SimpleDataRetrieverChainDefinition<>(leaderboardRetrieverChainDefinition, HasRaceResultOfCompetitorContext.class, "RaceResultSailingDomainRetrieverChain");
-        raceResultOfCompetitorRetrieverChainDefinition.endWith(LeaderboardRetrievalProcessor.class, CompetitorOfRaceInLeaderboardRetrievalProcessor.class, HasRaceResultOfCompetitorContext.class, "Competitor");
+                new SimpleDataRetrieverChainDefinition<>(trackedRaceResultOfCompetitorRetrieverChainDefinition, HasRaceResultOfCompetitorContext.class, "RaceResultSailingDomainRetrieverChain");
+        raceResultOfCompetitorRetrieverChainDefinition.endWith(TrackedRaceRetrievalProcessor.class, CompetitorOfRaceInLeaderboardRetrievalProcessor.class, HasRaceResultOfCompetitorContext.class, "Competitor");
         dataRetrieverChainDefinitions.add(raceResultOfCompetitorRetrieverChainDefinition);
-
+        
         final DataRetrieverChainDefinition<RacingEventService, HasTrackedRaceContext> trackedRaceRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
                 leaderboardRetrieverChainDefinition, HasTrackedRaceContext.class, "RaceSailingDomainRetrieverChain");
         trackedRaceRetrieverChainDefinition.endWith(LeaderboardRetrievalProcessor.class, TrackedRaceRetrievalProcessor.class,

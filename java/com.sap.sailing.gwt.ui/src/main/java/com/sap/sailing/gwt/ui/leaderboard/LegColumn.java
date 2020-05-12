@@ -268,11 +268,11 @@ public class LegColumn extends ExpandableSortableColumn<String> {
                         detailColumnStyle, leaderboardPanel));
         result.put(DetailType.LEG_AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS,
                 new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.LEG_AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS,
-                        new DoubleDetailTypeExtractor(e -> e.averageAbsoluteCrossTrackErrorInMeters), detailHeaderStyle,
+                        new DoubleDetailTypeExtractor(e -> e.currentOrAverageAbsoluteCrossTrackErrorInMeters), detailHeaderStyle,
                         detailColumnStyle, leaderboardPanel));
         result.put(DetailType.LEG_AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS,
                 new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.LEG_AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS,
-                        new DoubleDetailTypeExtractor(e -> e.averageSignedCrossTrackErrorInMeters), detailHeaderStyle,
+                        new DoubleDetailTypeExtractor(e -> e.currentOrAverageSignedCrossTrackErrorInMeters), detailHeaderStyle,
                         detailColumnStyle, leaderboardPanel));
         result.put(DetailType.EXPEDITION_LEG_AWA,
                 new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_LEG_AWA,

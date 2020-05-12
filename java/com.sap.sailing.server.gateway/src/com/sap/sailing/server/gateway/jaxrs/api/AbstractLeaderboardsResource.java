@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
 
+import org.apache.shiro.SecurityUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -31,6 +32,10 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 
 public abstract class AbstractLeaderboardsResource extends AbstractSailingServerResource {
     private static final Logger logger = Logger.getLogger(AbstractLeaderboardsResource.class.getName());
@@ -53,12 +58,16 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
         return result;
     }
 
-    protected JSONObject createEmptyLeaderboardJson(Leaderboard leaderboard, ResultStates resultState, Integer maxCompetitorsCount) throws NoWindException {
+    protected JSONObject createEmptyLeaderboardJson(Leaderboard leaderboard, ResultStates resultState, Integer maxCompetitorsCount, boolean userPresentedValidRegattaSecret) throws NoWindException {
         JSONObject jsonLeaderboard = new JSONObject();
         writeCommonLeaderboardData(jsonLeaderboard, leaderboard, resultState, null, maxCompetitorsCount);
         JSONArray jsonCompetitorEntries = new JSONArray();
         jsonLeaderboard.put("competitors", jsonCompetitorEntries);
-        for (Competitor competitor : leaderboard.getCompetitors()) {
+        for (Competitor competitor : Util.filter(leaderboard.getCompetitors(),
+            competitor->userPresentedValidRegattaSecret || SecurityUtils.getSubject().isPermitted(competitor.getIdentifier()
+                    .getStringPermission(SecuredSecurityTypes.PublicReadableActions.READ_PUBLIC))
+                    || SecurityUtils.getSubject()
+                    .isPermitted(competitor.getIdentifier().getStringPermission(DefaultActions.READ)))) {
             JSONObject jsonCompetitor = new JSONObject();
             jsonCompetitor.put("name", competitor.getName());
             jsonCompetitor.put("shortName", competitor.getShortName());
@@ -125,26 +134,27 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
         final String displayName = leaderboard.getDisplayName();
         jsonLeaderboard.put("displayName", displayName == null ? leaderboard.getName() : displayName);
         jsonLeaderboard.put("resultTimepoint", resultTimePoint != null ? resultTimePoint.getTime() : null);
+        jsonLeaderboard.put("delayToLiveInMillis", leaderboard.getDelayToLiveInMillis());
         jsonLeaderboard.put("resultState", resultState.name());
         jsonLeaderboard.put("type", leaderboard.getLeaderboardType().name());
         jsonLeaderboard.put("shardingLeaderboardName", ShardingType.LEADERBOARDNAME.encodeIfNeeded(leaderboard.getName()));
-        ResultDiscardingRule resultDiscardingRule = leaderboard.getResultDiscardingRule();
+        final ResultDiscardingRule resultDiscardingRule = leaderboard.getResultDiscardingRule();
         if (resultDiscardingRule instanceof ThresholdBasedResultDiscardingRule) {
             final ThresholdBasedResultDiscardingRule thresholdBasedResultDiscardingRule = (ThresholdBasedResultDiscardingRule) resultDiscardingRule;
-            JSONArray discardIndices = new JSONArray();
+            final JSONArray discardIndices = new JSONArray();
             jsonLeaderboard.put("discardIndexResultsStartingWithHowManyRaces", discardIndices);
             for (int index : thresholdBasedResultDiscardingRule.getDiscardIndexResultsStartingWithHowManyRaces()) {
                 discardIndices.add(index);
             }
         }
         if (leaderboard instanceof RegattaLeaderboard) {
-            RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
+            final RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
             jsonLeaderboard.put("canBoatsOfCompetitorsChangePerRace", regattaLeaderboard.getRegatta().canBoatsOfCompetitorsChangePerRace());
         } else {
             jsonLeaderboard.put("canBoatsOfCompetitorsChangePerRace", false);
         }
         jsonLeaderboard.put("maxCompetitorsCount", maxCompetitorsCount);
-        SettableScoreCorrection scoreCorrection = leaderboard.getScoreCorrection();
+        final SettableScoreCorrection scoreCorrection = leaderboard.getScoreCorrection();
         if (scoreCorrection != null) {
             jsonLeaderboard.put("scoringComment", scoreCorrection.getComment());
             TimePoint lastUpdateTimepoint = scoreCorrection.getTimePointOfLastCorrectionsValidity();
@@ -153,10 +163,43 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
             jsonLeaderboard.put("scoringComment", null);
             jsonLeaderboard.put("lastScoringUpdate", null);
         }
-        JSONArray jsonColumnNames = new JSONArray();
+        final JSONArray jsonColumnNames = new JSONArray();
+        final JSONArray trackedRacesInfo = new JSONArray();
         jsonLeaderboard.put("columnNames", jsonColumnNames);
+        jsonLeaderboard.put("trackedRacesInfo", trackedRacesInfo);
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             jsonColumnNames.add(raceColumn.getName());
+            final JSONObject raceColumnJson = new JSONObject();
+            trackedRacesInfo.add(raceColumnJson);
+            raceColumnJson.put("raceColumnName", raceColumn.getName());
+            final JSONArray fleetsJson = new JSONArray();
+            raceColumnJson.put("fleets", fleetsJson);
+            for (final Fleet fleet : raceColumn.getFleets()) {
+                final JSONObject fleetJson = new JSONObject();
+                fleetsJson.add(fleetJson);
+                fleetJson.put("name", fleet.getName());
+                final TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
+                final JSONObject trackedRaceInfo;
+                if (trackedRace == null) {
+                    trackedRaceInfo = null;
+                } else {
+                    trackedRaceInfo = new JSONObject();
+                    trackedRaceInfo.put("name", trackedRace.getRace().getName());
+                    trackedRaceInfo.put("id", trackedRace.getRace().getId().toString());
+                    final TimePoint startOfRace = trackedRace.getStartOfRace();
+                    trackedRaceInfo.put("startTimeMillis", startOfRace==null?null:startOfRace.asMillis());
+                    trackedRaceInfo.put("live", trackedRace.isLive(
+                            resultTimePoint == null
+                                    ? MillisecondsTimePoint.now().minus(trackedRace.getDelayToLiveInMillis())
+                                    : new MillisecondsTimePoint(resultTimePoint)));
+                    trackedRaceInfo.put("delayToLiveInMillis", trackedRace.getDelayToLiveInMillis());
+                    if (trackedRace.getStatus() != null) {
+                        trackedRaceInfo.put("status", trackedRace.getStatus().getStatus().toString());
+                        trackedRaceInfo.put("loadingProgress", trackedRace.getStatus().getLoadingProgress());
+                    }
+                }
+                fleetJson.put("trackedRace", trackedRaceInfo);
+            }
         }
     }
 
@@ -210,20 +253,22 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
     protected abstract JSONObject getLeaderboardJson(Leaderboard leaderboard, TimePoint resultTimePoint,
             ResultStates resultState, Integer maxCompetitorsCount, List<String> raceColumnNames,
             List<String> raceDetailNames, boolean competitorAndBoatIdsOnly,
-            List<String> showOnlyActiveRacesForCompetitorIds)
+            List<String> showOnlyActiveRacesForCompetitorIds, boolean userPresentedValidRegattaSecret, boolean showOnlyCompetitorsWithIdsProvided)
             throws NoWindException, InterruptedException, ExecutionException;
 
     protected JSONObject getLeaderboardJson(ResultStates resultState, Integer maxCompetitorsCount,
             TimePoint requestTimePoint, Leaderboard leaderboard, TimePoint timePoint, List<String> raceColumnNames,
             List<String> raceDetailNames, boolean competitorAndBoatIdsOnly,
-            List<String> showOnlyActiveRacesForCompetitorIds)
+            List<String> showOnlyActiveRacesForCompetitorIds, boolean userPresentedValidRegattaSecret,
+            boolean showOnlyCompetitorsWithIdsProvided)
             throws NoWindException, InterruptedException, ExecutionException {
         final JSONObject jsonLeaderboard;
         if (timePoint != null || resultState == ResultStates.Live) {
             jsonLeaderboard = getLeaderboardJson(leaderboard, timePoint, resultState, maxCompetitorsCount,
-                    raceColumnNames, raceDetailNames, competitorAndBoatIdsOnly, showOnlyActiveRacesForCompetitorIds);
+                    raceColumnNames, raceDetailNames, competitorAndBoatIdsOnly, showOnlyActiveRacesForCompetitorIds,
+                    userPresentedValidRegattaSecret, showOnlyCompetitorsWithIdsProvided);
         } else {
-            jsonLeaderboard = createEmptyLeaderboardJson(leaderboard, resultState, maxCompetitorsCount);
+            jsonLeaderboard = createEmptyLeaderboardJson(leaderboard, resultState, maxCompetitorsCount, userPresentedValidRegattaSecret);
         }
         return jsonLeaderboard;
     }

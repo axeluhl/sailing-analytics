@@ -1,6 +1,6 @@
 # Security
 
-The Sports Sponsorships Engine (SSE) on which the SAP Sailing Analytics and the SAP Tennis Analytics are based, uses Apache Shiro to implement security. This in particular includes authentication and authorization. This document does not aim to replace the Shiro documentation which is available, e.g., at [http://shiro.apache.org/configuration.html](http://shiro.apache.org/configuration.html), [http://shiro.apache.org/permissions.html](http://shiro.apache.org/permissions.html) and [http://shiro.apache.org/web.html](http://shiro.apache.org/web.html).
+The Sports Sponsorships Engine (SSE) on which the SAP Sailing Analytics and the SAP Tennis Analytics are based, uses Apache Shiro to implement security. This in particular includes authentication and authorization. This document does not aim to replace the Shiro documentation which is available, e.g., at [http://shiro.apache.org/configuration.html](http://shiro.apache.org/configuration.html), [http://shiro.apache.org/permissions.html](http://shiro.apache.org/permissions.html) and [http://shiro.apache.org/web.html](http://shiro.apache.org/web.html). It relies on a sophisticated and powerful security engine that is part of SSE and whose [permission concept is described here](permission-concept).
 
 ## Users, Sessions, Roles, and Permissions
 
@@ -58,11 +58,23 @@ There are generally two ways in which some feature can require the user to be eq
 
 Example for a declarative permission check:
     [urls]
-    /api/v1/events = bearerToken, perms["event:view"]
+    /api/v1/events = bearerToken, perms["EVENT:READ"]
 This requires users trying to access the URL `/api/v1/events` to be authenticated using a valid `JSESSIONID` cookie or any authentication supported by the `bearerToken` filter such that the authenticated user has permissions that imply the `event:view:*` permission.
 
-Example for a programmatic check:
-    SecurityUtils.getSubject().checkPermission("event:view");
+Examples for programmatic checks if the domain object, here ``event`` is at hand:
+
+```
+    SecurityUtils.getSubject().isPermitted(SecuredDomainType.EVENT.getStringPermissionForObject(DefaultActions.READ, event))
+```
+
+or
+
+```
+    SecurityUtils.getSubject().isPermitted(SecuredDomainType.EVENT.getStringPermissionForTypeRelativeIdentifier(
+                DefaultActions.UPDATE, EventBaseImpl.getTypeRelativeObjectIdentifier(eventId)))
+```
+
+if only an ID such as ``eventId`` is available at the point of the permission check.
 
 ### Special Case: Permission Checks in the AdminConsole
 

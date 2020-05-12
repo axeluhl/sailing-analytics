@@ -161,7 +161,7 @@ public class Activator implements BundleActivator {
         userStore.clear();
         accessControlStore.clear();
         userStore.ensureDefaultRolesExist();
-        userStore.ensureDefaultTenantExists();
+        userStore.ensureServerGroupExists();
         getSecurityService().initialize();
         applyCustomizations();
     }
@@ -195,7 +195,7 @@ public class Activator implements BundleActivator {
                     @Override
                     public SecurityInitializationCustomizer addingService(ServiceReference<SecurityInitializationCustomizer> reference) {
                         final SecurityInitializationCustomizer service = context.getService(reference);
-                        service.customizeSecurityService(getSecurityService());
+                        getSecurityService().registerCustomizer(service);
                         return service;
                     }
                     
@@ -280,12 +280,7 @@ public class Activator implements BundleActivator {
                 }
             }
         }
-        
-        final QualifiedObjectIdentifier serverIdentifier = SecuredSecurityTypes.SERVER
-                .getQualifiedObjectIdentifier(
-                        new TypeRelativeObjectIdentifier(ServerInfo.getName()));
-        securityService.migrateOwnership(serverIdentifier, serverIdentifier.toString());
-
+        securityService.migrateServerObject();
         securityService.checkMigration(SecuredSecurityTypes.getAllInstances());
     }
     

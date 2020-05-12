@@ -1,7 +1,7 @@
 package com.sap.sse.gwt.client.celltable;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -9,6 +9,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.HasRows;
 import com.google.gwt.view.client.ListDataProvider;
+import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.Range;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -95,8 +96,20 @@ public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>, SM
         return columnSortHandler;
     }
 
-    public CellTable<T> getTable() {
+    public FlushableCellTable<T> getTable() {
         return table;
+    }
+    
+    public void addColumn(Column<T, ?> column) {
+        table.addColumn(column);
+    }
+    
+    public void addColumn(Column<T, ?> column, String header) {
+        table.addColumn(column, header);
+    }
+
+    public void setEmptyTableWidget(Widget widget) {
+        table.setEmptyTableWidget(widget);
     }
     
     public S getSelectionModel() {
@@ -155,5 +168,14 @@ public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>, SM
 
     protected TR getTableRes() {
         return tableRes;
+    }
+    
+    /**
+     * @return {@code null} if no or multiple objects are currently selected; the single selected object otherwise; this
+     *         can be useful if certain actions are enabled with this table only if a single object is selected.
+     */
+    public static <X> X getSingleSelectedUserGroup(MultiSelectionModel<X> selectionModel) {
+        return selectionModel.getSelectedSet() != null && selectionModel.getSelectedSet().size() == 1 ?
+                selectionModel.getSelectedSet().iterator().next() : null;
     }
 }

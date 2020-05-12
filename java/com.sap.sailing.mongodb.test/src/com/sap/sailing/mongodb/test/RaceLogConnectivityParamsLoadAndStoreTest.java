@@ -20,7 +20,6 @@ import com.mongodb.MongoException;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
-import com.sap.sailing.domain.base.impl.CourseAreaImpl;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
@@ -53,9 +52,10 @@ public class RaceLogConnectivityParamsLoadAndStoreTest extends AbstractConnectiv
         final Regatta regatta = racingEventService.createRegatta("My Regatta", "12mR", true,
                 CompetitorRegistrationType.CLOSED, /* registrationLinkSecret */ null, MillisecondsTimePoint.now(),
                 MillisecondsTimePoint.now().plus(Duration.ONE_DAY), UUID.randomUUID(), series, /* persistent */ true,
-                new LowPoint(), new CourseAreaImpl("Default", UUID.randomUUID()), /* buoyZoneRadiusInHullLengths */ 2.0,
+                new LowPoint(), racingEventService.getBaseDomainFactory().getOrCreateCourseArea(UUID.randomUUID(), "Default").getId(),
+                /* buoyZoneRadiusInHullLengths */ 2.0,
                 /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false,
-                OneDesignRankingMetric::new);
+                /* autoRestartTrackingUponCompetitorSetChange */ false, OneDesignRankingMetric::new);
         theSeries.addRaceColumn("R1", racingEventService);
         theSeries.addRaceColumn("R2", racingEventService);
         theSeries.addRaceColumn("R3", racingEventService);
@@ -63,7 +63,7 @@ public class RaceLogConnectivityParamsLoadAndStoreTest extends AbstractConnectiv
         RaceLogTrackingAdapterFactory.INSTANCE.getAdapter(domainObjectFactory.getBaseDomainFactory()).denoteAllRacesForRaceLogTracking(racingEventService, leaderboard,
                 /* race name prefix */ null);
         final RaceLogConnectivityParams rlParams = new RaceLogConnectivityParams(
-                racingEventService, regatta, leaderboard.getRaceColumnByName("R2"), fleet, leaderboard,
+                racingEventService.getServerAuthor(), regatta, leaderboard.getRaceColumnByName("R2"), fleet, leaderboard,
                 delayToLiveInMillis, domainObjectFactory.getBaseDomainFactory(), trackWind,
                 correctWindDirectionByMagneticDeclination);
         // store

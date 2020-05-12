@@ -33,9 +33,9 @@ public class Activator implements BundleActivator {
     public void start(BundleContext bundleContext) throws Exception {
         Activator.context = bundleContext;
         logger.info("Creating user store");
-        final String defaultTenantName = System.getProperty(UserStore.DEFAULT_TENANT_NAME_PROPERTY_NAME,
+        final String defaultServerGroupName = System.getProperty(UserStore.DEFAULT_SERVER_GROUP_NAME_PROPERTY_NAME,
                 ServerInfo.getName() + "-server");
-        final UserStoreImpl userStore = new UserStoreImpl(defaultTenantName);
+        final UserStoreImpl userStore = new UserStoreImpl(defaultServerGroupName);
         AccessControlStoreImpl accessControlStore = new AccessControlStoreImpl(userStore);
         accessControlStoreRegistration = context.registerService(AccessControlStore.class.getName(),
                 accessControlStore, null);

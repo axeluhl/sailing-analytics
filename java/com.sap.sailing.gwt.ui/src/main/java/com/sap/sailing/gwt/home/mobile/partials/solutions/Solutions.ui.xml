@@ -31,9 +31,6 @@
                         </p>
                         <ul>
                             <li>
-                                <ui:text from='{i18n.contentSapInSailing6}' />
-                            </li>
-                            <li>
                                 <ui:text from='{i18n.contentSapInSailing7}' />
                             </li>
                             <li>

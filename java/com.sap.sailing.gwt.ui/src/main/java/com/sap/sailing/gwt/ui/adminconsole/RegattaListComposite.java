@@ -31,6 +31,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
+import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
@@ -277,12 +278,12 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         final DialogConfig<RegattaDTO> config = EditOwnershipDialog.create(userService.getUserManagementService(), type,
                 regatta -> regattaRefresher.fillRegattas(), stringMessages);
         actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
-                regattaDTO -> config.openDialog(regattaDTO));
+                regattaDTO -> config.openOwnershipDialog(regattaDTO));
         final EditACLDialog.DialogConfig<RegattaDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementService(), type, regatta -> regattaRefresher.fillRegattas(),
                 stringMessages);
         actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                regattaDTO -> configACL.openDialog(regattaDTO));
+                regattaDTO -> configACL.openACLDialog(regattaDTO));
         table.addColumn(regattaSelectionCheckboxColumn, regattaSelectionCheckboxColumn.getHeader());
         table.addColumn(regattaNameColumn, stringMessages.regattaName());
         table.addColumn(regattaCanBoatsOfCompetitorsChangePerRaceColumn, stringMessages.canBoatsChange());
@@ -345,10 +346,11 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
 
     private void commitEditedRegatta(final RegattaDTO editedRegatta) {
         final RegattaIdentifier regattaName = new RegattaName(editedRegatta.getName());
-        sailingService.updateRegatta(regattaName, editedRegatta.startDate, editedRegatta.endDate, editedRegatta.defaultCourseAreaUuid,
+        sailingService.updateRegatta(regattaName, editedRegatta.startDate, editedRegatta.endDate,
+                Util.mapToArrayList(editedRegatta.courseAreas, CourseAreaDTO::getId),
                 editedRegatta.configuration, editedRegatta.buoyZoneRadiusInHullLengths, editedRegatta.useStartTimeInference, editedRegatta.controlTrackingFromStartAndFinishTimes,
-                editedRegatta.registrationLinkSecret, editedRegatta.competitorRegistrationType,
-                new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
+                editedRegatta.autoRestartTrackingUponCompetitorSetChange, editedRegatta.registrationLinkSecret,
+                editedRegatta.competitorRegistrationType, new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError("Error trying to update regatta " + editedRegatta.getName() + ": "

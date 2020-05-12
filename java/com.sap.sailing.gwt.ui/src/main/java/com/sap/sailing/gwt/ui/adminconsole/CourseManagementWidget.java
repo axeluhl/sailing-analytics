@@ -182,7 +182,7 @@ public abstract class CourseManagementWidget implements IsWidget {
                 waypoint -> createOrcPcsLegEventForLegEndingAt(waypoint));
         waypointsActionColumn.addAction(WaypointImagesBarCell.ACTION_ORC_PCS_DEFINE_ALL_LEGS, DefaultActions.UPDATE,
                 waypoint -> createOrcPcsLegEventsForAllLegs());
-        waypoints.getTable().addColumn(waypointsActionColumn);
+        waypoints.addColumn(waypointsActionColumn);
         waypoints.getSelectionModel().addSelectionChangeHandler(new Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {

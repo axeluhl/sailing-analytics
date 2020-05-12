@@ -8,6 +8,7 @@ import static com.sap.sailing.selenium.api.core.ApiContext.createApiContext;
 import static com.sap.sailing.selenium.api.core.GpsFixMoving.createFix;
 import static com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage.goToPage;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -45,6 +46,8 @@ import com.sap.sailing.selenium.api.regatta.RegattaRaces;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class RegattaApiTest extends AbstractSeleniumTest {
 
@@ -67,28 +70,45 @@ public class RegattaApiTest extends AbstractSeleniumTest {
     @Test
     public void testGetRegattaForCreatedEvent() {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
-
         eventApi.createEvent(ctx, EVENT_NAME, BOAT_CLASS, CLOSED, "default");
         Regatta regatta = regattaApi.getRegatta(ctx, EVENT_NAME);
         JSONArray series = (JSONArray) regatta.get("series");
         JSONObject serie = (JSONObject) series.get(0);
         JSONArray fleets = (JSONArray) serie.get("fleets");
         JSONObject trackedRaces = (JSONObject) serie.get("trackedRaces");
-
         assertEquals("read: regatta.name is different", EVENT_NAME, regatta.getName());
         assertNull("read: regatta.startDate should be null", regatta.getStartDate());
         assertNull("read: regatta.endDate should be null", regatta.getEndDate());
         assertEquals("read: regatta.scoringSystem is different", "LOW_POINT", regatta.getScoringSystem());
         assertEquals("read: regatta.boeatclass is different", BOAT_CLASS, regatta.getBoatClass());
-        assertNotNull("read: regatta.courseAreaId is missing", regatta.getCourseAreaId());
+        assertFalse("read: regatta.courseAreaId is missing", regatta.getCourseAreaId().isEmpty());
         assertEquals("read: regatta.canBoatsOfCompetitorsChangePerRace should be false", false,
                 regatta.canBoatsOfCompetitorsChangePerRace());
         assertEquals("read: regatta.competitorRegistrationType is different", CLOSED,
                 regatta.getCompetitorRegistrationType());
-
+        assertTrue(regatta.isUseStartTimeInference());
+        assertFalse(regatta.isControlTrackingFromStartAndFinishTimes());
         assertEquals("read: reagtta.series should have 1 entry", 1, series.size());
         assertEquals("read: reagtta.fleets should have 1 entry", 1, fleets.size());
         assertNotNull("read: reagtta.trackedRaces is missing", trackedRaces);
+    }
+    
+    @Test
+    public void testUpdateRegatta() {
+        final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
+        
+        eventApi.createEvent(ctx, EVENT_NAME, BOAT_CLASS, CLOSED, "default");
+        final TimePoint start = new MillisecondsTimePoint(1337);
+        final TimePoint end = new MillisecondsTimePoint(2337);
+        regattaApi.updateRegatta(ctx, EVENT_NAME, start, end,
+                null, null, false, true, null, null);
+        
+        Regatta regatta = regattaApi.getRegatta(ctx, EVENT_NAME);
+        
+        assertEquals(start, regatta.getStartDate());
+        assertEquals(end, regatta.getEndDate());
+        assertFalse(regatta.isUseStartTimeInference());
+        assertTrue(regatta.isControlTrackingFromStartAndFinishTimes());
     }
 
     @Test

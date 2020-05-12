@@ -166,12 +166,8 @@ public class AccessControlStoreImpl implements AccessControlStore {
     }
 
     private AccessControlListAnnotation getOrCreateAcl(QualifiedObjectIdentifier idOfAccessControlledObject) {
-        AccessControlListAnnotation acl = accessControlLists.get(idOfAccessControlledObject);
-        if (acl == null) {
-            acl = new AccessControlListAnnotation(new AccessControlList(), idOfAccessControlledObject,
-                    /* display name */ null);
-        }
-        return acl;
+        return accessControlLists.computeIfAbsent(idOfAccessControlledObject,
+                id->new AccessControlListAnnotation(new AccessControlList(), id, /* display name */ null));
     }
 
     @Override
@@ -197,21 +193,6 @@ public class AccessControlStoreImpl implements AccessControlStore {
                 AccessControlListAnnotation acl = getOrCreateAcl(idOfAccessControlledObjectAsString);
                 if (acl.getAnnotation().removePermission(userGroup, action)) {
                     internalRemoveUserGroupToACLMapping(userGroup, acl);
-                    mongoObjectFactory.storeAccessControlList(acl);
-                }
-            }
-        });
-    }
-
-    @Override
-    public void denyAclPermission(final QualifiedObjectIdentifier idOfAccessControlledObjectAsString,
-            final UserGroup userGroup, final String action) {
-        LockUtil.executeWithWriteLock(lockForManagementMappings, new Runnable() {
-            @Override
-            public void run() {
-                final AccessControlListAnnotation acl = getOrCreateAcl(idOfAccessControlledObjectAsString);
-                if (acl.getAnnotation().denyPermission(userGroup, action)) {
-                    internalMapUserGroupToACL(userGroup, acl);
                     mongoObjectFactory.storeAccessControlList(acl);
                 }
             }
@@ -248,22 +229,6 @@ public class AccessControlStoreImpl implements AccessControlStore {
                 userGroupToAccessControlListAnnotation.remove(userGroup);
             }
         }
-    }
-
-    @Override
-    public void removeAclDenial(final QualifiedObjectIdentifier idOfAccessControlledObject, final UserGroup userGroup2,
-            final String action) {
-        final UserGroup userGroup = userGroup2 == null ? NULL_GROUP : userGroup2;
-        LockUtil.executeWithWriteLock(lockForManagementMappings, new Runnable() {
-            @Override
-            public void run() {
-                final AccessControlListAnnotation acl = getOrCreateAcl(idOfAccessControlledObject);
-                if (acl.getAnnotation().removeDenial(userGroup, action)) {
-                    internalRemoveUserGroupToACLMapping(userGroup, acl);
-                    mongoObjectFactory.storeAccessControlList(acl);
-                }
-            }
-        });
     }
 
     @Override
@@ -331,14 +296,14 @@ public class AccessControlStoreImpl implements AccessControlStore {
     }
 
     @Override
-    public void removeOwnership(final QualifiedObjectIdentifier idAsString) {
+    public void removeOwnership(final QualifiedObjectIdentifier id) {
         LockUtil.executeWithWriteLock(lockForManagementMappings, new Runnable() {
             @Override
             public void run() {
-                OwnershipAnnotation ownership = ownerships.remove(idAsString);
+                OwnershipAnnotation ownership = ownerships.remove(id);
                 if (ownership != null) {
                     removeUserAndUserGroupToOwnershipMapping(ownership);
-                    mongoObjectFactory.deleteOwnership(idAsString, ownership.getAnnotation());
+                    mongoObjectFactory.deleteOwnership(id, ownership.getAnnotation());
                 }
             }
         });
@@ -385,7 +350,6 @@ public class AccessControlStoreImpl implements AccessControlStore {
     public Iterable<OwnershipAnnotation> getOwnerships() {
         return LockUtil.executeWithReadLockAndResult(lockForManagementMappings,
                 new RunnableWithResult<Iterable<OwnershipAnnotation>>() {
-
                     @Override
                     public Iterable<OwnershipAnnotation> run() {
                         return new ArrayList<>(ownerships.values());
@@ -396,7 +360,6 @@ public class AccessControlStoreImpl implements AccessControlStore {
     @Override
     public void clear() {
         LockUtil.executeWithWriteLock(lockForManagementMappings, new Runnable() {
-
             @Override
             public void run() {
                 accessControlLists.clear();

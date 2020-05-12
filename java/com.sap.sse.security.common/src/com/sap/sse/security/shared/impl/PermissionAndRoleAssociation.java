@@ -6,15 +6,19 @@ import com.sap.sse.security.shared.WildcardPermission;
 
 public class PermissionAndRoleAssociation {
     public static TypeRelativeObjectIdentifier get(Role role, User userWithRole) {
-        String ownerTenantString = "null";
+        final String ownerTenantString;
         UserGroup ownerTenant = role.getQualifiedForTenant();
         if (ownerTenant != null) {
             ownerTenantString = UserGroupImpl.getTypeRelativeObjectIdentifierAsString(ownerTenant);
+        } else {
+            ownerTenantString = "null";
         }
-        String ownerUserString = "null";
+        final String ownerUserString;
         User ownerUser = role.getQualifiedForUser();
         if (ownerUser != null) {
             ownerUserString = ownerUser.getIdentifier().getTypeRelativeObjectIdentifier().toString();
+        } else {
+            ownerUserString = "null";
         }
         String roleDefinitionString = RoleDefinitionImpl.getTypeRelativeObjectIdentifierAsString(role.getRoleDefinition());
         String userWithRoleString = userWithRole.getIdentifier().getTypeRelativeObjectIdentifier().toString();

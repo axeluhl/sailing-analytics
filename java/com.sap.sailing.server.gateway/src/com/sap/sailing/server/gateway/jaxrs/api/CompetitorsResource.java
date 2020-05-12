@@ -38,6 +38,7 @@ import com.sap.sailing.server.gateway.serialization.impl.NationalityJsonSerializ
 import com.sap.sailing.server.gateway.serialization.impl.PersonJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.TeamJsonSerializer;
 import com.sap.sailing.server.interfaces.RacingEventService;
+import com.sap.sailing.server.operationaltransformation.UpdateCompetitor;
 import com.sap.sse.common.Util;
 import com.sap.sse.filestorage.InvalidPropertiesException;
 import com.sap.sse.filestorage.OperationFailedException;
@@ -98,9 +99,7 @@ public class CompetitorsResource extends AbstractSailingServerResource {
                 getSecurityService().checkCurrentUserHasOneOfExplicitPermissions(competitor,
                         SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS);
             }
-            String jsonString = getCompetitorJSON(competitor).toJSONString();
-            response = Response.ok(jsonString).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8")
-                    .build();
+            response = Response.ok(streamingOutput(getCompetitorJSON(competitor))).build();
         }
         return response;
     }
@@ -124,8 +123,7 @@ public class CompetitorsResource extends AbstractSailingServerResource {
         TeamJsonSerializer teamJsonSerializer = new TeamJsonSerializer(new PersonJsonSerializer(
                 new NationalityJsonSerializer()));
         JSONObject teamJson = teamJsonSerializer.serialize(team);
-        String json = teamJson.toJSONString();
-        return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+        return Response.ok(streamingOutput(teamJson)).build();
     }
 
     /**
@@ -187,11 +185,11 @@ public class CompetitorsResource extends AbstractSailingServerResource {
             throw new WebApplicationException(Response.status(Status.INTERNAL_SERVER_ERROR)
                     .entity("Could not store competitor image").type(MediaType.TEXT_PLAIN).build());
         }
-        getService().getCompetitorAndBoatStore().updateCompetitor(competitorId, competitor.getName(), competitor.getShortName(), 
-                competitor.getColor(), competitor.getEmail(), 
-                competitor.getTeam().getNationality(), imageUri, competitor.getFlagImage(),
-                /* timeOnTimeFactor */ competitor.getTimeOnTimeFactor(),
-                /* timeOnDistanceAllowancePerNauticalMile */ competitor.getTimeOnDistanceAllowancePerNauticalMile(), competitor.getSearchTag(), /* storePersistently */ true);
+        getService().apply(new UpdateCompetitor(competitorId, competitor.getName(), competitor.getShortName(),
+                competitor.getColor(), competitor.getEmail(), competitor.getTeam().getNationality(), imageUri,
+                competitor.getFlagImage(), /* timeOnTimeFactor */ competitor.getTimeOnTimeFactor(),
+                /* timeOnDistanceAllowancePerNauticalMile */ competitor.getTimeOnDistanceAllowancePerNauticalMile(),
+                competitor.getSearchTag()));
         logger.log(Level.INFO, "Set team image for competitor " + competitor.getName());
         JSONObject result = new JSONObject();
         result.put(DeviceMappingConstants.JSON_TEAM_IMAGE_URI, imageUri.toString());

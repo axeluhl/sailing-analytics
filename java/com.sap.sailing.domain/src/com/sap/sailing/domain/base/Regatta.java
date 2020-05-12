@@ -60,19 +60,20 @@ public interface Regatta
     void setEndDate(TimePoint startDate);
 
     /**
-     * Gets the course area for all races of this {@link Regatta}.
+     * Gets the course areas that the races of this {@link Regatta} are expected to be run on. This can, e.g., be used
+     * to implement a filter when retrieving regattas from an event.
      * 
-     * @return the {@link CourseArea} object.
+     * @return the {@link CourseArea} objects on which races of this regatta may run; always valid, never
+     *         {@code null}, but may be empty; callers need to {@code synchronize} on the object returned
+     *         if they want to iterate.
      */
-    CourseArea getDefaultCourseArea();
+    Iterable<CourseArea> getCourseAreas();
 
     /**
-     * Sets the course area for all races of this {@link Regatta}.
-     * 
-     * @param newCourseArea
-     *            {@link CourseArea} to be set.
+     * Sets the course areas, telling where races in this regatta can be sailed. Replaces the course areas set
+     * so far.
      */
-    void setDefaultCourseArea(CourseArea newCourseArea);
+    void setCourseAreas(Iterable<CourseArea> newCourseAreas);
 
     /**
      * Gets the {@link RegattaConfiguration} associated with this {@link Regatta}'s races.
@@ -238,15 +239,30 @@ public interface Regatta
      * show_bug.cgi?id=3588</a>.
      */
     boolean isControlTrackingFromStartAndFinishTimes();
-
+    
     /**
      * @see #isControlTrackingFromStartAndFinishTimes()
      */
     void setControlTrackingFromStartAndFinishTimes(boolean controlTrackingFromStartAndFinishTimes);
+    
+    /**
+     * Tells whether in the scope of this regatta tracking of a race shall automatically be re-started if the competitor
+     * registrations change. Removing the {@link TrackedRace tracked races} and {@link RaceDefinition}s affected is then
+     * required because the {@link RaceDefinition#getCompetitors() set of competitors of a race} is modeled to be
+     * immutable. As the set of competitors that are part of a tracked race is provided by the tracking connector, the
+     * responsibility for adhering to this flag, which rather expresses a request than describes a fact, lies with the
+     * respective connectors.
+     */
+    boolean isAutoRestartTrackingUponCompetitorSetChange();
+    
+    /**
+     * @see #isAutoRestartTrackingUponCompetitorSetChange()
+     */
+    void setAutoRestartTrackingUponCompetitorSetChange(boolean autoRestartTrackingUponCompetitorSetChange);
 
     @Override
     default QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+        return getPermissionType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
     }
 
     default TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
@@ -262,7 +278,7 @@ public interface Regatta
     }
 
     @Override
-    default HasPermissions getType() {
+    default HasPermissions getPermissionType() {
         return SecuredDomainType.REGATTA;
     }
 

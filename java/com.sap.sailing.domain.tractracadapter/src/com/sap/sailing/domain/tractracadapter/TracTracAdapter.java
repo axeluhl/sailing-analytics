@@ -49,12 +49,13 @@ public interface TracTracAdapter {
      * @param timeoutInMilliseconds
      *            if the race definition is not received for the race within this time, the race tracker for that race
      *            is stopped; use -1 to wait forever
+     * @param useOfficialEventsToUpdateRaceLog TODO
      */
     RaceHandle addTracTracRace(TrackerManager trackerManager, URL paramURL, URI liveURI, URI storedURI,
             URI courseDesignUpdateURI, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             long timeoutInMilliseconds, String tracTracUsername, String tracTracPassword, String raceStatus,
             String raceVisibility, boolean trackWind, boolean correctWindDirectionByMagneticDeclination, int timeoutInMillis,
-            RaceTrackingHandler raceTrackingHandler)
+            boolean useOfficialEventsToUpdateRaceLog, RaceTrackingHandler raceTrackingHandler)
                     throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
     /**
@@ -74,13 +75,13 @@ public interface TracTracAdapter {
      *            described above will be created and used.
      * @param offsetToStartTimeOfSimulatedRace
      *            if non-<code>null</code>, the {@link Simulator} will be used with this duration as start offset
+     * @param useOfficialEventsToUpdateRaceLog TODO
      */
     RaceHandle addTracTracRace(TrackerManager trackerManager, RegattaIdentifier regattaToAddTo, URL paramURL,
             URI liveURI, URI storedURI, URI courseDesignUpdateURI, TimePoint trackingStartTime,
             TimePoint trackingEndTime, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             long timeoutForReceivingRaceDefinitionInMilliseconds, Duration offsetToStartTimeOfSimulatedRace,  boolean useInternalMarkPassingAlgorithm,
-            String tracTracUsername, String tracTracPassword, String raceStatus, String raceVisibility, boolean trackWind, boolean correctWindDirectionByMagneticDeclination,
-            RaceTrackingHandler raceTrackingHandler)
+            String tracTracUsername, String tracTracPassword, String raceStatus, String raceVisibility, boolean trackWind, boolean correctWindDirectionByMagneticDeclination, boolean useOfficialEventsToUpdateRaceLog)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
     /**

@@ -339,7 +339,8 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
         if (id2 != null && !id2.trim().isEmpty()) {
             markNamesAsIds.add(id2.trim());
         }
-        final ControlPoint controlPoint = domainFactory.getOrCreateControlPoint(name, markNamesAsIds, getMarkType(markType));
+        final ControlPoint controlPoint = domainFactory.getOrCreateControlPoint(name, markNamesAsIds,
+                getMarkType(markType), name);
         if (index == 0) {
             currentCourseDefinition = new ArrayList<>();
         }
@@ -392,7 +393,8 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
                 for (ControlPoint cp : currentCourseDefinition) {
                     courseToUpdate.add(new Pair<ControlPoint, PassingInstruction>(cp, PassingInstruction.None));
                 }
-                course.update(courseToUpdate, domainFactory.getBaseDomainFactory());
+                course.update(courseToUpdate, course.getAssociatedRoles(),
+                        course.getOriginatingCourseTemplateIdOrNull(), domainFactory.getBaseDomainFactory());
             } catch (PatchFailedException e) {
                 throw new RuntimeException(e);
             }
@@ -426,7 +428,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
                 dynamicRaceDefinitionSet.addRaceDefinition(race, trackedRace);
             }
         } catch (Exception exception) {
-            logger.log(Level.WARNING, "Error while creating race " + raceName + " for retatta " + regatta, exception);
+            logger.log(Level.WARNING, "Error while creating race " + raceName + " for regatta " + regatta, exception);
             try {
                 if (tracker != null) {
                     trackedRegattaRegistry.stopTracker(regatta, getTracker());
