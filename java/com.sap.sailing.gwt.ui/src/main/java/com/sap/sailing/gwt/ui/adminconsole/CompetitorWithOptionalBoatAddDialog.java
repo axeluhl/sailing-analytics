@@ -42,7 +42,7 @@ public class CompetitorWithOptionalBoatAddDialog extends AbstractCompetitorWithB
         initWithBoatCheckBox();
         boatDataPanel = new VerticalPanel();
         boatDataPanel.setVisible(false);
-        this.ensureDebugId("CompetitorWithBoatEditDialog");
+        this.ensureDebugId("CompetitorWithBoatAddDialog");
     }
 
     private void initWithBoatCheckBox() {
