@@ -25,6 +25,7 @@ import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorAndBoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.PairingListDTO;
@@ -195,6 +196,8 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
     void getCoursePositions(RegattaAndRaceIdentifier raceIdentifier, Date date,
             AsyncCallback<CoursePositionsDTO> asyncCallback);
 
+    void getCourseAreas(String leaderboardName, AsyncCallback<List<CourseAreaDTO>> callback);
+
     void getLeaderboardByName(String leaderboardName, Date date,
             Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, boolean addOverallDetails,
             String previousLeaderboardId, boolean fillTotalPointsUncorrected,
@@ -341,8 +344,6 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
     void getLeaderboardType(String leaderboardName, AsyncCallback<LeaderboardType> callback);
 
     void getRegattaStructureForEvent(UUID eventId, AsyncCallback<List<RaceGroupDTO>> asyncCallback);
-    
-    void getRegattaStructureOfEvent(UUID eventId, AsyncCallback<List<RaceGroupDTO>> callback);
 
     void getRaceStateEntriesForRaceGroup(UUID eventId, List<UUID> visibleCourseAreas, List<String> visibleRegattas,
             boolean showOnlyCurrentlyRunningRaces, boolean showOnlyRacesOfSameDay,

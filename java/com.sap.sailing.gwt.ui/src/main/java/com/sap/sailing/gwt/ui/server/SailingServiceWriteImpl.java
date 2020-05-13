@@ -180,6 +180,7 @@ import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.PairingListDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
@@ -802,7 +803,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     @Override
     public StrippedLeaderboardDTOWithSecurity createFlexibleLeaderboard(String leaderboardName,
             String leaderboardDisplayName, int[] discardThresholds, ScoringSchemeType scoringSchemeType,
-            UUID courseAreaId) {
+            Iterable<UUID> courseAreaIds) {
         return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.LEADERBOARD, Leaderboard.getTypeRelativeObjectIdentifier(leaderboardName),
                 leaderboardDisplayName, new Callable<StrippedLeaderboardDTOWithSecurity>() {
@@ -811,8 +812,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                         return createStrippedLeaderboardDTOWithSecurity(
                                 getService().apply(new CreateFlexibleLeaderboard(leaderboardName,
                                         leaderboardDisplayName, discardThresholds,
-                                        baseDomainFactory.createScoringScheme(scoringSchemeType), courseAreaId)),
-                                false, false);
+                                baseDomainFactory.createScoringScheme(scoringSchemeType), courseAreaIds)), false, false);
                     }
                 });
     }
@@ -849,12 +849,12 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
 
     @Override
     public StrippedLeaderboardDTOWithSecurity updateLeaderboard(String leaderboardName, String newLeaderboardName,
-            String newLeaderboardDisplayName, int[] newDiscardingThresholds, UUID newCourseAreaId) {
+            String newLeaderboardDisplayName, int[] newDiscardingThresholds, Iterable<UUID> newCourseAreaIds) {
         SecurityUtils.getSubject().checkPermission(
                 SecuredDomainType.LEADERBOARD.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
                         Leaderboard.getTypeRelativeObjectIdentifier(leaderboardName)));
-        Leaderboard updatedLeaderboard = getService().apply(new UpdateLeaderboard(leaderboardName, newLeaderboardName,
-                newLeaderboardDisplayName, newDiscardingThresholds, newCourseAreaId));
+        Leaderboard updatedLeaderboard = getService().apply(
+                new UpdateLeaderboard(leaderboardName, newLeaderboardName, newLeaderboardDisplayName, newDiscardingThresholds, newCourseAreaIds));
         return createStrippedLeaderboardDTOWithSecurity(updatedLeaderboard, false, false);
     }
 
@@ -1246,7 +1246,6 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         }
         String eventName = newEvent.getName();
         List<UUID> eventLeaderboardGroupUUIDs = new ArrayList<>();
-
         // create Leaderboard Group
         LeaderboardGroup leaderboardGroup = getService().getLeaderboardGroupByName(eventName);
         if (leaderboardGroup == null) {
@@ -1420,7 +1419,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     }
 
     @Override
-    public void updateRegatta(RegattaIdentifier regattaName, Date startDate, Date endDate, UUID defaultCourseAreaUuid, 
+    public void updateRegatta(RegattaIdentifier regattaName, Date startDate, Date endDate, Iterable<UUID> courseAreaUuids, 
             RegattaConfigurationDTO configurationDTO, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes,
             boolean autoRestartTrackingUponCompetitorSetChange, String registrationLinkSecret, CompetitorRegistrationType registrationType) {
         Regatta regatta = getService().getRegatta(regattaName);
@@ -1429,7 +1428,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         }
         TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
         TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
-        getService().apply(new UpdateSpecificRegatta(regattaName, startTimePoint, endTimePoint, defaultCourseAreaUuid,
+        getService().apply(new UpdateSpecificRegatta(regattaName, startTimePoint, endTimePoint, courseAreaUuids,
                 convertToRegattaConfiguration(configurationDTO), buoyZoneRadiusInHullLengths, useStartTimeInference,
                 controlTrackingFromStartAndFinishTimes, autoRestartTrackingUponCompetitorSetChange, registrationLinkSecret, registrationType));
     }
@@ -1501,7 +1500,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             boolean canBoatsOfCompetitorsChangePerRace, CompetitorRegistrationType competitorRegistrationType, String registrationLinkSecret,
             Date startDate, Date endDate,
             RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
-            boolean persistent, ScoringSchemeType scoringSchemeType, UUID defaultCourseAreaId, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
+            boolean persistent, ScoringSchemeType scoringSchemeType, Iterable<UUID> courseAreaIds, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
             boolean controlTrackingFromStartAndFinishTimes, boolean autoRestartTrackingUponCompetitorSetChange, RankingMetrics rankingMetricType) {
         return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.REGATTA, Regatta.getTypeRelativeObjectIdentifier(regattaName),
@@ -1514,7 +1513,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                                 canBoatsOfCompetitorsChangePerRace, competitorRegistrationType, registrationLinkSecret,
                                 startTimePoint, endTimePoint, UUID.randomUUID(),
                                 seriesNamesWithFleetNamesAndFleetOrderingAndMedal, persistent,
-                                baseDomainFactory.createScoringScheme(scoringSchemeType), defaultCourseAreaId,
+                                baseDomainFactory.createScoringScheme(scoringSchemeType), courseAreaIds,
                                 buoyZoneRadiusInHullLengths, useStartTimeInference,
                                 controlTrackingFromStartAndFinishTimes, autoRestartTrackingUponCompetitorSetChange, rankingMetricType));
                         return convertToRegattaDTO(regatta);
@@ -1522,13 +1521,13 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                 });
     }
 
-    protected void createRegattaFromRegattaDTO(RegattaDTO regatta) {
-        this.createRegatta(regatta.getName(), regatta.boatClass.getName(),
-                regatta.canBoatsOfCompetitorsChangePerRace, regatta.competitorRegistrationType, regatta.registrationLinkSecret,
-                regatta.startDate, regatta.endDate,
-                new RegattaCreationParametersDTO(getSeriesCreationParameters(regatta)), 
-                true, regatta.scoringScheme, regatta.defaultCourseAreaUuid, regatta.buoyZoneRadiusInHullLengths, regatta.useStartTimeInference,
-                regatta.controlTrackingFromStartAndFinishTimes, regatta.autoRestartTrackingUponCompetitorSetChange, regatta.rankingMetricType);
+    private void createRegattaFromRegattaDTO(RegattaDTO regatta) {
+        this.createRegatta(regatta.getName(), regatta.boatClass.getName(), regatta.canBoatsOfCompetitorsChangePerRace,
+                regatta.competitorRegistrationType, regatta.registrationLinkSecret, regatta.startDate, regatta.endDate,
+                new RegattaCreationParametersDTO(getSeriesCreationParameters(regatta)), true, regatta.scoringScheme,
+                Util.map(regatta.courseAreas, CourseAreaDTO::getId), regatta.buoyZoneRadiusInHullLengths,
+                regatta.useStartTimeInference, regatta.controlTrackingFromStartAndFinishTimes,
+                regatta.autoRestartTrackingUponCompetitorSetChange, regatta.rankingMetricType);
     }
 
     /**
@@ -2867,15 +2866,13 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                 || (endOfTrackingOfRaceToSlice != null && endOfTrackingOfRaceToSlice.before(sliceTo))) {
             throw new ServiceException(serverStringMessages.get(locale, "slicingTimeRangeOutOfBounds"));
         }
-        final Pair<RaceColumn, Fleet> raceColumnAndFleetOfRaceToSlice = regatta
-                .getRaceColumnAndFleet(trackedRaceToSlice);
+        final Pair<RaceColumn, Fleet> raceColumnAndFleetOfRaceToSlice = regatta.getRaceColumnAndFleet(trackedRaceToSlice);
         // RaceColumns in a RegattaLeaderboard are always RaceColumnInSeries instances
         final RaceColumnInSeries raceColumnOfRaceToSlice = (RaceColumnInSeries) raceColumnAndFleetOfRaceToSlice.getA();
         final Fleet fleet = raceColumnAndFleetOfRaceToSlice.getB();
         final Series series = raceColumnOfRaceToSlice.getSeries();
         final RaceLog raceLogOfRaceToSlice = raceColumnOfRaceToSlice.getRaceLog(fleet);
-        final RaceColumn raceColumn = getService()
-                .apply(new AddColumnToSeries(regattaIdentifier, series.getName(), newRaceColumnName));
+        final RaceColumn raceColumn = getService().apply(new AddColumnToSeries(regattaIdentifier, series.getName(), newRaceColumnName));
         final RaceLog raceLog = raceColumn.getRaceLog(fleet);
         final AbstractLogEventAuthor author = getService().getServerAuthor();
         final TimePoint startOfTracking = sliceFrom;
@@ -2883,8 +2880,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         raceLog.add(new RaceLogStartOfTrackingEventImpl(startOfTracking, author, raceLog.getCurrentPassId()));
         raceLog.add(new RaceLogEndOfTrackingEventImpl(endOfTracking, author, raceLog.getCurrentPassId()));
         final TimeRange timeRange = new TimeRangeImpl(sliceFrom, sliceTo);
-        final StartTimeFinderResult startTimeFinderResult = new StartTimeFinder(getService(), raceLogOfRaceToSlice)
-                .analyze();
+        final StartTimeFinderResult startTimeFinderResult = new StartTimeFinder(getService(), raceLogOfRaceToSlice).analyze();
         final TimePoint startTime = startTimeFinderResult.getStartTime();
         final boolean hasStartTime = startTime != null && timeRange.includes(startTime);
         final boolean dependentStartTime = startTimeFinderResult.isDependentStartTime();
@@ -2903,7 +2899,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             hasFinishingTime = false;
             hasFinishedTime = false;
         }
-
+        
         // Only wind fixes in the new tracking interval as well as the best fallback fixes are added to the new RaceLog
         final LogEventTimeRangeWithFallbackFilter<RaceLogWindFixEvent> windFixEvents = new LogEventTimeRangeWithFallbackFilter<>(
                 timeRange);
@@ -2917,54 +2913,53 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                             raceLog.add(new RaceLogDependentStartTimeEventImpl(event.getCreatedAt(),
                                     event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(),
                                     raceLog.getCurrentPassId(), event.getDependentOnRaceIdentifier(),
-                                    event.getStartTimeDifference(), event.getNextStatus()));
+                                    event.getStartTimeDifference(), event.getNextStatus(), event.getCourseAreaId()));
                         }
                     }
-
+                    
                     @Override
                     public void visit(RaceLogStartTimeEvent event) {
                         if (!dependentStartTime && isLatestPass(event)) {
                             raceLog.add(new RaceLogStartTimeEventImpl(event.getCreatedAt(), event.getLogicalTimePoint(),
-                                    event.getAuthor(), UUID.randomUUID(), raceLog.getCurrentPassId(),
-                                    event.getStartTime(), event.getNextStatus()));
+                                    event.getAuthor(), UUID.randomUUID(), raceLog.getCurrentPassId(), event.getStartTime(),
+                                    event.getNextStatus(), event.getCourseAreaId()));
                         }
                     }
-
+                    
                     @Override
                     public void visit(RaceLogRegisterCompetitorEvent event) {
                         raceLog.add(new RaceLogRegisterCompetitorEventImpl(event.getCreatedAt(),
                                 event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(),
                                 raceLog.getCurrentPassId(), event.getCompetitor(), event.getBoat()));
                     }
-
+    
                     @Override
                     public void visit(RaceLogWindFixEvent event) {
                         windFixEvents.addEvent(event);
                     }
-
+                    
                     @Override
                     public void visit(RaceLogUseCompetitorsFromRaceLogEvent event) {
-                        raceLog.add(
-                                new RaceLogUseCompetitorsFromRaceLogEventImpl(event.getCreatedAt(), event.getAuthor(),
-                                        event.getLogicalTimePoint(), UUID.randomUUID(), raceLog.getCurrentPassId()));
+                        raceLog.add(new RaceLogUseCompetitorsFromRaceLogEventImpl(event.getCreatedAt(), event.getAuthor(),
+                                event.getLogicalTimePoint(), UUID.randomUUID(), raceLog.getCurrentPassId()));
                     }
-
+                    
                     @Override
                     public void visit(RaceLogCourseDesignChangedEvent event) {
                         raceLog.add(new RaceLogCourseDesignChangedEventImpl(event.getCreatedAt(),
                                 event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(),
                                 raceLog.getCurrentPassId(), event.getCourseDesign(), event.getCourseDesignerMode()));
                     }
-
+                    
                     @Override
                     public void visit(RaceLogFlagEvent event) {
                         if (hasStartTime && isLatestPass(event) && !event.getLogicalTimePoint().after(sliceTo)) {
                             raceLog.add(new RaceLogFlagEventImpl(event.getCreatedAt(), event.getLogicalTimePoint(),
-                                    event.getAuthor(), UUID.randomUUID(), raceLog.getCurrentPassId(),
-                                    event.getUpperFlag(), event.getLowerFlag(), event.isDisplayed()));
+                                    event.getAuthor(), UUID.randomUUID(), raceLog.getCurrentPassId(), event.getUpperFlag(),
+                                    event.getLowerFlag(), event.isDisplayed()));
                         }
                     }
-
+                    
                     @Override
                     public void visit(RaceLogStartProcedureChangedEvent event) {
                         if (hasStartTime && isLatestPass(event)) {
@@ -2973,38 +2968,35 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                                     raceLog.getCurrentPassId(), event.getStartProcedureType()));
                         }
                     }
-
+                    
                     @Override
                     public void visit(RaceLogFinishPositioningConfirmedEvent event) {
                         if (hasFinishedTime && isLatestPass(event)) {
                             raceLog.add(new RaceLogFinishPositioningConfirmedEventImpl(event.getCreatedAt(),
                                     event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(),
-                                    raceLog.getCurrentPassId(),
-                                    event.getPositionedCompetitorsIDsNamesMaxPointsReasons()));
+                                    raceLog.getCurrentPassId(), event.getPositionedCompetitorsIDsNamesMaxPointsReasons()));
                         }
                     }
-
+                    
                     @Override
                     public void visit(RaceLogFinishPositioningListChangedEvent event) {
                         if (hasFinishedTime && isLatestPass(event)) {
                             raceLog.add(new RaceLogFinishPositioningListChangedEventImpl(event.getCreatedAt(),
                                     event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(),
-                                    raceLog.getCurrentPassId(),
-                                    event.getPositionedCompetitorsIDsNamesMaxPointsReasons()));
+                                    raceLog.getCurrentPassId(), event.getPositionedCompetitorsIDsNamesMaxPointsReasons()));
                         }
                     }
-
+                    
                     @Override
                     public void visit(RaceLogFixedMarkPassingEvent event) {
-                        if (hasStartTime && isLatestPass(event)
-                                && timeRange.includes(event.getTimePointOfFixedPassing())) {
+                        if (hasStartTime && isLatestPass(event) && timeRange.includes(event.getTimePointOfFixedPassing())) {
                             raceLog.add(new RaceLogFixedMarkPassingEventImpl(event.getCreatedAt(),
                                     event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(),
                                     event.getInvolvedCompetitors(), raceLog.getCurrentPassId(),
                                     event.getTimePointOfFixedPassing(), event.getZeroBasedIndexOfPassedWaypoint()));
                         }
                     }
-
+                    
                     @Override
                     public void visit(RaceLogSuppressedMarkPassingsEvent event) {
                         if (hasStartTime && isLatestPass(event) && timeRange.includes(event.getLogicalTimePoint())) {
@@ -3014,7 +3006,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                                     event.getZeroBasedIndexOfFirstSuppressedWaypoint()));
                         }
                     }
-
+                    
                     @Override
                     public void visit(RaceLogProtestStartTimeEvent event) {
                         if (hasFinishedTime && isLatestPass(event)) {
@@ -3023,7 +3015,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                                     raceLog.getCurrentPassId(), event.getProtestTime()));
                         }
                     }
-
+                    
                     @Override
                     public void visit(RaceLogAdditionalScoringInformationEvent event) {
                         if (hasFinishedTime && isLatestPass(event)) {
@@ -3032,16 +3024,16 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                                     raceLog.getCurrentPassId(), event.getType()));
                         }
                     }
-
+                    
                     @Override
                     public void visit(RaceLogPathfinderEvent event) {
                         if (hasStartTime && isLatestPass(event)) {
-                            raceLog.add(new RaceLogPathfinderEventImpl(event.getCreatedAt(),
-                                    event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(),
-                                    raceLog.getCurrentPassId(), event.getPathfinderId()));
+                            raceLog.add(new RaceLogPathfinderEventImpl(event.getCreatedAt(), event.getLogicalTimePoint(),
+                                    event.getAuthor(), UUID.randomUUID(), raceLog.getCurrentPassId(),
+                                    event.getPathfinderId()));
                         }
                     }
-
+                    
                     @Override
                     public void visit(RaceLogGateLineOpeningTimeEvent event) {
                         if (hasStartTime && isLatestPass(event)) {
@@ -3051,22 +3043,22 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                                     event.getGateLineOpeningTimes().getGolfDownTime()));
                         }
                     }
-
+                    
                     @Override
                     public void visit(RaceLogRaceStatusEvent event) {
                         if (isLatestPass(event) && !(event instanceof RaceLogDependentStartTimeEvent)
                                 && !(event instanceof RaceLogStartTimeEvent)) {
-                            if ((hasStartTime && event.getNextStatus().getOrderNumber() <= RaceLogRaceStatus.RUNNING
-                                    .getOrderNumber())
+                            if ((hasStartTime
+                                    && event.getNextStatus().getOrderNumber() <= RaceLogRaceStatus.RUNNING.getOrderNumber())
                                     || (hasFinishingTime && event.getNextStatus() == RaceLogRaceStatus.FINISHING)
                                     || (hasFinishedTime && event.getNextStatus() == RaceLogRaceStatus.FINISHED)) {
-                                raceLog.add(new RaceLogRaceStatusEventImpl(event.getCreatedAt(),
-                                        event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(),
-                                        raceLog.getCurrentPassId(), event.getNextStatus()));
+                                raceLog.add(new RaceLogRaceStatusEventImpl(event.getCreatedAt(), event.getLogicalTimePoint(),
+                                        event.getAuthor(), UUID.randomUUID(), raceLog.getCurrentPassId(),
+                                        event.getNextStatus()));
                             }
                         }
                     }
-
+                    
                     @Override
                     public void visit(RaceLogORCImpliedWindSourceEvent event) {
                         raceLog.add(new RaceLogORCImpliedWindSourceEventImpl(event.getCreatedAt(),
@@ -3101,18 +3093,17 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                         event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(), raceLog.getCurrentPassId(),
                         event.getWindFix(), event.isMagnetic())));
         final TimePoint startTrackingTimePoint = MillisecondsTimePoint.now();
-        // this ensures that the events consistently have different timepoints to ensure a consistent result of the
-        // state analysis
+        // this ensures that the events consistently have different timepoints to ensure a consistent result of the state analysis
         // that's why we can't just call adapter.denoteRaceForRaceLogTracking
         final TimePoint denotationTimePoint = startTrackingTimePoint.minus(1);
-        raceLog.add(new RaceLogDenoteForTrackingEventImpl(denotationTimePoint, author, raceLog.getCurrentPassId(),
-                trackedRaceName, regatta.getBoatClass(), UUID.randomUUID()));
+        raceLog.add(new RaceLogDenoteForTrackingEventImpl(denotationTimePoint,
+                author, raceLog.getCurrentPassId(), trackedRaceName, regatta.getBoatClass(), UUID.randomUUID()));
         raceLog.add(new RaceLogStartTrackingEventImpl(startTrackingTimePoint, author, raceLog.getCurrentPassId()));
         try {
             final RaceHandle raceHandle = getRaceLogTrackingAdapter().startTracking(getService(), regattaLeaderboard,
                     raceColumn, fleet, /* trackWind */ true, /* correctWindDirectionByMagneticDeclination */ true,
                     getService().getPermissionAwareRaceTrackingHandler());
-
+            
             // wait for the RaceDefinition to be created
             raceHandle.getRace();
 
@@ -3125,8 +3116,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                     final WindTrack windTrackToCopyFrom = trackedRaceToSlice.getOrCreateWindTrack(windSourceToCopy);
                     windTrackToCopyFrom.lockForRead();
                     try {
-                        for (Wind windToCopy : windTrackToCopyFrom.getFixes(startOfTracking, true, endOfTracking,
-                                true)) {
+                        for (Wind windToCopy : windTrackToCopyFrom.getFixes(startOfTracking, true, endOfTracking, true)) {
                             trackedRace.recordWind(windToCopy, windSourceToCopy);
                         }
                     } finally {
@@ -3134,7 +3124,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                     }
                 }
             }
-
+            
             final Iterable<MediaTrack> mediaTracksForOriginalRace = getService().getMediaTracksForRace(raceIdentifier);
             for (MediaTrack mediaTrack : mediaTracksForOriginalRace) {
                 if (mediaTrack.overlapsWith(sliceFrom, sliceTo)) {

@@ -31,6 +31,7 @@ import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorAndBoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.PairingListDTO;
@@ -208,6 +209,8 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
             Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, boolean addOverallDetails,
             String previousLeaderboardId, boolean fillTotalPointsUncorrected) throws UnauthorizedException, Exception;
 
+    List<CourseAreaDTO> getCourseAreas(String leaderboardName);
+
     IncrementalOrFullLeaderboardDTO getLeaderboardForRace(RegattaAndRaceIdentifier raceIdentifer,
             String leaderboardName, Date date, Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails,
             boolean addOverallDetails, String previousLeaderboardId, boolean fillTotalPointsUncorrected)
@@ -299,9 +302,6 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
 
     /** for backward compatibility with the regatta overview */
     List<RaceGroupDTO> getRegattaStructureForEvent(UUID eventId) throws UnauthorizedException;
-
-    /** the replacement service for getRegattaStructureForEvent() */
-    List<RaceGroupDTO> getRegattaStructureOfEvent(UUID eventId) throws UnauthorizedException;
 
     List<RegattaOverviewEntryDTO> getRaceStateEntriesForRaceGroup(UUID eventId, List<UUID> visibleCourseAreas,
             List<String> visibleRegattas, boolean showOnlyCurrentlyRunningRaces, boolean showOnlyRacesOfSameDay,

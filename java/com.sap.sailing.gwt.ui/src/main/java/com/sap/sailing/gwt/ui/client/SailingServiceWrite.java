@@ -274,7 +274,7 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
     RegattaDTO createRegatta(String regattaName, String boatClassName, boolean canBoatsOfCompetitorsChangePerRace,
             CompetitorRegistrationType competitorRegistrationType, String registrationLinkSecret, Date startDate,
             Date endDate, RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
-            boolean persistent, ScoringSchemeType scoringSchemeType, UUID defaultCourseAreaId,
+            boolean persistent, ScoringSchemeType scoringSchemeType, Iterable<UUID> courseAreaIds,
             Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
             boolean controlTrackingFromStartAndFinishTimes, boolean autoRestartTrackingUponCompetitorSetChange, RankingMetrics rankingMetricType)
             throws UnauthorizedException;
@@ -293,7 +293,7 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
             boolean firstRaceIsNonDiscardableCarryForward, boolean hasSplitFleetScore, Integer maximumNumberOfDiscards,
             List<FleetDTO> fleets) throws UnauthorizedException;
 
-    void updateRegatta(RegattaIdentifier regattaIdentifier, Date startDate, Date endDate, UUID defaultCourseAreaUuid,
+    void updateRegatta(RegattaIdentifier regattaIdentifier, Date startDate, Date endDate, Iterable<UUID> courseAreaUuids,
             RegattaConfigurationDTO regattaConfiguration, Double buoyZoneRadiusInHullLengths,
             boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes,
             boolean autoRestartTrackingUponCompetitorSetChange, String registrationLinkSecret, CompetitorRegistrationType registrationType) throws UnauthorizedException;
@@ -398,7 +398,7 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
     void renameLeaderboard(String leaderboardName, String newLeaderboardName) throws UnauthorizedException;
 
     StrippedLeaderboardDTOWithSecurity updateLeaderboard(String leaderboardName, String newLeaderboardName,
-            String newLeaderboardDisplayName, int[] newDiscardingThreasholds, UUID newCourseAreaId)
+            String newLeaderboardDisplayName, int[] newDiscardingThreasholds, Iterable<UUID> newCourseAreaIds)
             throws UnauthorizedException;
 
     StrippedLeaderboardDTOWithSecurity createRegattaLeaderboardWithEliminations(String name, String displayName,
@@ -408,7 +408,7 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
             String leaderboardDisplayName, int[] discardThresholds) throws UnauthorizedException;
 
     StrippedLeaderboardDTOWithSecurity createFlexibleLeaderboard(String leaderboardName, String leaderboardDisplayName,
-            int[] discardThresholds, ScoringSchemeType scoringSchemeType, UUID courseAreaId)
+            int[] discardThresholds, ScoringSchemeType scoringSchemeType, Iterable<UUID> courseAreaIds)
             throws UnauthorizedException;
 
     void removeResultImportURLs(String resultProviderName, Set<UrlDTO> toRemove) throws Exception;

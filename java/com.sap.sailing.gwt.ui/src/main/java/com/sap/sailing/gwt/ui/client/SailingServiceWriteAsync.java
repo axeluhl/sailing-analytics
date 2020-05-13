@@ -315,12 +315,12 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
 
 
     void updateLeaderboard(String leaderboardName, String newLeaderboardName, String newLeaderboardDisplayName,
-            int[] newDiscardingThreasholds, UUID newCourseAreaId,
+            int[] newDiscardingThreasholds, Iterable<UUID> newCourseAreaIds,
             AsyncCallback<StrippedLeaderboardDTOWithSecurity> callback);
 
     void createFlexibleLeaderboard(String leaderboardName, String leaderboardDisplayName,
             int[] discardThresholds,
-            ScoringSchemeType scoringSchemeType, UUID courseAreaId,
+            ScoringSchemeType scoringSchemeType, Iterable<UUID> courseAreaIds,
             AsyncCallback<StrippedLeaderboardDTOWithSecurity> asyncCallback);
 
     void createRegattaLeaderboard(RegattaName regattaIdentifier,
@@ -461,7 +461,7 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void createRegatta(String regattaName, String boatClassName, boolean canBoatsOfCompetitorsChangePerRace,
             CompetitorRegistrationType competitorRegistrationType, String registrationLinkSecret, Date startDate, Date endDate,
             RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedal, boolean persistent,
-            ScoringSchemeType scoringSchemeType, UUID defaultCourseAreaId, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
+            ScoringSchemeType scoringSchemeType, Iterable<UUID> courseAreaIds, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
             boolean controlTrackingFromStartAndFinishTimes, boolean autoRestartTrackingUponCompetitorSetChange,
             RankingMetrics rankingMetricType, AsyncCallback<RegattaDTO> callback);
 
@@ -494,10 +494,11 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void deleteSwissTimingArchiveConfigurations(Collection<SwissTimingArchiveConfigurationWithSecurityDTO> dtos,
             AsyncCallback<Void> asyncCallback);
 
-    void updateRegatta(RegattaIdentifier regattaIdentifier, Date startDate, Date endDate, UUID defaultCourseAreaUuid,
+    void updateRegatta(RegattaIdentifier regattaIdentifier, Date startDate, Date endDate, Iterable<UUID> courseAreaUuids,
             RegattaConfigurationDTO regattaConfiguration, Double buoyZoneRadiusInHullLengths,
             boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes,
-            boolean autoRestartTrackingUponCompetitorSetChange, String registrationLinkSecret, CompetitorRegistrationType registrationType, AsyncCallback<Void> callback);
+            boolean autoRestartTrackingUponCompetitorSetChange, String registrationLinkSecret,
+            CompetitorRegistrationType registrationType, AsyncCallback<Void> callback);
 
     void importMasterData(String host, String[] names, boolean override, boolean compress, boolean exportWind,
             boolean exportDeviceConfigurations, String targetServerUsername, String targetServerPassword,
