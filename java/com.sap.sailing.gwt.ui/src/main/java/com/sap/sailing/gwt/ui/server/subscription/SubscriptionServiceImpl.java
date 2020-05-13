@@ -19,6 +19,7 @@ import com.chargebee.models.HostedPage.Content;
 import com.chargebee.models.PortalSession;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sailing.gwt.ui.client.subscription.SubscriptionService;
+import com.sap.sailing.gwt.ui.shared.subscription.HostedPageResultDTO;
 import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionDTO;
 import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionPlans;
 import com.sap.sse.security.SecurityService;
@@ -67,42 +68,64 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
     }
 
     @Override
-    public String generateHostedPageObject() {
+    public HostedPageResultDTO generateHostedPageObject(String planId) {
+        HostedPageResultDTO response = new HostedPageResultDTO();
+        if (planId == null || planId.isEmpty() || SubscriptionPlans.getPlan(planId) == null) {
+            response.error = "Invalid plan";
+            return response;
+        }
+        
         try {
             User user = getCurrentUser();
             
-            String[] userNameParts = user.getFullName().split("\\s+");
-            String firstName = userNameParts[0];
-            String lastName = "";
-            if (userNameParts.length > 1) {
-                lastName = String.join(" ", Arrays.copyOfRange(userNameParts, 1, userNameParts.length));
+            if (user.getSubscription() != null && user.getSubscription().planId.equals(planId)) {
+                response.error = "User has already subscribed to " + SubscriptionPlans.getPlan(planId).getName() + " plan";
+                return response;
             }
             
-            String locale = user.getLocaleOrDefault().getLanguage();
+            Result result;
             
-            Result result = HostedPage.checkoutNew()
-                            .customerId(user.getName())
-                            .customerEmail(user.getEmail())
-                            .customerFirstName(firstName)
-                            .customerLastName(lastName)
-                            .customerLocale(locale)
-                            .subscriptionPlanId(SubscriptionPlans.PREMIUM.getId())
-                            .billingAddressFirstName(firstName)
-                            .billingAddressLastName(lastName)
-                            .billingAddressCountry("US").request();
-            return result.hostedPage().toJson();
+            if (user.getSubscription() == null) {
+                String[] userNameParts = user.getFullName().split("\\s+");
+                String firstName = userNameParts[0];
+                String lastName = "";
+                if (userNameParts.length > 1) {
+                    lastName = String.join(" ", Arrays.copyOfRange(userNameParts, 1, userNameParts.length));
+                }
+                
+                String locale = user.getLocaleOrDefault().getLanguage();
+                
+                result = HostedPage.checkoutNew()
+                        .customerId(user.getName())
+                        .customerEmail(user.getEmail())
+                        .customerFirstName(firstName)
+                        .customerLastName(lastName)
+                        .customerLocale(locale)
+                        .subscriptionPlanId(planId)
+                        .billingAddressFirstName(firstName)
+                        .billingAddressLastName(lastName)
+                        .billingAddressCountry("US").request();
+            } else {
+                result = HostedPage.checkoutExisting()
+                        .subscriptionId(user.getSubscription().subscriptionId)
+                        .subscriptionPlanId(planId)
+                        .request();
+            }
+            
+            response.hostedPageJSONString = result.hostedPage().toJson();
         } catch (Exception e) {
             e.printStackTrace();
             
             logger.log(Level.WARNING, "Error in generating Chargebee hosted page data ", e);
             
-            return null;
+            response.error = "Error in generating Chargebee hosted page";
         }
         
+        return response;
     }
     
     @Override
-    public SubscriptionDTO upgradePlanSuccess(String hostedPageId) {
+    public SubscriptionDTO updatePlanSuccess(String hostedPageId) {
         SubscriptionDTO subscriptionDto = new SubscriptionDTO();
         
         try {
@@ -188,19 +211,19 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
         }
     }
 
-    @Override
-    public String generatePortalPageObject() {
-        try {
-            User user = getCurrentUser();
-            Result result = PortalSession.create().customerId(user.getName()).request();
-            PortalSession portalSession = result.portalSession();
-            return portalSession.toJson();
-        } catch (Exception e) {
-            e.printStackTrace();
-            logger.log(Level.WARNING, "Error in generating portal session page object ", e);
-            return null;
-        }
-    }
+//    @Override
+//    public String generatePortalPageObject() {
+//        try {
+//            User user = getCurrentUser();
+//            Result result = PortalSession.create().customerId(user.getName()).request();
+//            PortalSession portalSession = result.portalSession();
+//            return portalSession.toJson();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            logger.log(Level.WARNING, "Error in generating portal session page object ", e);
+//            return null;
+//        }
+//    }
     
     private SecurityService getSecurityService() {
         try {

@@ -10,6 +10,7 @@ import com.sap.sailing.gwt.ui.client.subscription.PortalOption;
 import com.sap.sailing.gwt.ui.client.subscription.PortalSessionSetterCallback;
 import com.sap.sailing.gwt.ui.client.subscription.SubscriptionConfiguration;
 import com.sap.sailing.gwt.ui.client.subscription.WithSubscriptionService;
+import com.sap.sailing.gwt.ui.shared.subscription.HostedPageResultDTO;
 import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionDTO;
 import com.sap.sse.security.ui.authentication.WithAuthenticationManager;
 import com.sap.sse.security.ui.authentication.WithUserService;
@@ -33,7 +34,7 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
         
                 @Override
                 public void call(String error) {
-                    Window.alert("Checkout error : " + error);
+                    view.onOpenCheckoutError(error);
                 }
             };
     private CheckoutOption.CloseCallback onCheckoutCloseCallback =
@@ -42,14 +43,6 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
                 @Override
                 public void call() {
                     view.onCloseCheckoutModal();
-                }
-            };
-    private PortalOption.CloseCallback onPortalCloseCallback =
-            new PortalOption.CloseCallback() {
-                
-                @Override
-                public void call() {
-                    view.onClosePortalModal();
                 }
             };
     
@@ -91,23 +84,29 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
     }
 
     @Override
-    public void openCheckout() {
-        clientFactory.getSubscriptionService().generateHostedPageObject(new AsyncCallback<String>() {
+    public void openCheckout(String planId) {
+        clientFactory.getSubscriptionService().generateHostedPageObject(planId, new AsyncCallback<HostedPageResultDTO>() {
             
             @Override
-            public void onSuccess(String hostedPage) {
-                Chargebee.getInstance().openCheckout(
-                    CheckoutOption.create(
-                        hostedPage,
-                        onCheckoutSuccessCallback,
-                        onCheckoutErrorCallback,
-                        onCheckoutCloseCallback
-                    ));;
+            public void onSuccess(HostedPageResultDTO hostedPage) {
+                if (hostedPage.error != null && !hostedPage.error.isEmpty()) {
+                    view.onOpenCheckoutError(hostedPage.error);
+                } else if (hostedPage.hostedPageJSONString != null && !hostedPage.hostedPageJSONString.isEmpty()) {
+                    Chargebee.getInstance().openCheckout(
+                            CheckoutOption.create(
+                                hostedPage.hostedPageJSONString,
+                                onCheckoutSuccessCallback,
+                                onCheckoutErrorCallback,
+                                onCheckoutCloseCallback
+                            ));;
+                } else {
+                    view.onOpenCheckoutError("Failed to generating hosted page object, please try again");
+                }
             }
             
             @Override
             public void onFailure(Throwable caught) {
-                Window.alert("Checkout error: " + caught.getMessage());
+                view.onOpenCheckoutError("Checkout error: " + caught.getMessage());
             }
         });
     }
@@ -133,31 +132,31 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
         });
     }
 
-    @Override
-    public void openPortalSession() {
-        clientFactory.getSubscriptionService().generatePortalPageObject(new AsyncCallback<String>() {
-
-            @Override
-            public void onSuccess(String result) {
-                if (result == null) {
-                    Window.alert("Failed to generating portal page object");
-                    return;
-                }
-                
-                Chargebee.getInstance().setPortalSession(PortalSessionSetterCallback.create(result));
-                Chargebee.getInstance().createChargebeePortal().open(PortalOption.create(onPortalCloseCallback));
-            }
-            
-            @Override
-            public void onFailure(Throwable caught) {
-                Window.alert("Generating portal page object error: " + caught.getMessage());
-            }
-        });
-        
-    }
+//    @Override
+//    public void openPortalSession() {
+//        clientFactory.getSubscriptionService().generatePortalPageObject(new AsyncCallback<String>() {
+//
+//            @Override
+//            public void onSuccess(String result) {
+//                if (result == null) {
+//                    Window.alert("Failed to generating portal page object");
+//                    return;
+//                }
+//                
+//                Chargebee.getInstance().setPortalSession(PortalSessionSetterCallback.create(result));
+//                Chargebee.getInstance().createChargebeePortal().open(PortalOption.create(onPortalCloseCallback));
+//            }
+//            
+//            @Override
+//            public void onFailure(Throwable caught) {
+//                Window.alert("Generating portal page object error: " + caught.getMessage());
+//            }
+//        });
+//        
+//    }
     
     private void requestFinishingPlanUpgrading(String hostedPageId) {
-        clientFactory.getSubscriptionService().upgradePlanSuccess(hostedPageId, new AsyncCallback<SubscriptionDTO>() {
+        clientFactory.getSubscriptionService().updatePlanSuccess(hostedPageId, new AsyncCallback<SubscriptionDTO>() {
 
             @Override
             public void onSuccess(SubscriptionDTO result) {

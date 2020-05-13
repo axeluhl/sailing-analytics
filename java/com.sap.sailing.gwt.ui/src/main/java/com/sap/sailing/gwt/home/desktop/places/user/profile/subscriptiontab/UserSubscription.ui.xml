@@ -14,14 +14,17 @@
             <div ui:field="trialDivUi" class="{local_res.css.textRow} {local_res.css.trialText}"></div>
             <div ui:field="paymentStatusDivUi" class="{local_res.css.textRow}">Payment charge status: <span ui:field="paymentStatusSpanUi"></span></div>
         </div>
-        <g:Button ui:field="upgradeButtonUi" addStyleNames="{res.mainCss.button} {res.mainCss.buttonprimary} {local_res.css.bottomButton}">
-          <ui:text from="{i18n.upgradePremium}" />
+        <div class="{res.mediaCss.medium4} {res.mediaCss.small12} {local_res.css.planInputContainer}">
+          <label class="{local_res.css.plansLabel}">
+            <ui:text from="{i18n.plans}" />
+          </label>
+          <g:ListBox ui:field="planListUi" addStyleNames="{local_res.css.plansInput}" />
+        </div> 
+        <g:Button ui:field="updateSubscriptionButtonUi" addStyleNames="{res.mainCss.button} {res.mainCss.buttonprimary} {local_res.css.bottomButton}">
+          <ui:text from="{i18n.updateSubscription}" />
         </g:Button>
         <g:Button ui:field="cancelSubscriptionButtonUi" addStyleNames="{res.mainCss.button} {res.mainCss.buttonprimary} {local_res.css.bottomButton}">
           <ui:text from="{i18n.cancelSubscription}" />
-        </g:Button>
-        <g:Button ui:field="openPortalSessionButtonUi" addStyleNames="{res.mainCss.button} {res.mainCss.buttonprimary} {local_res.css.bottomButton}">
-          <ui:text from="{i18n.openPortal}" />
         </g:Button>
       </div>
     </g:HTMLPanel>

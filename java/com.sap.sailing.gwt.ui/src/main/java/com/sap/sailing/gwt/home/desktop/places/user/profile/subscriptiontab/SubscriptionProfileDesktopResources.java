@@ -16,5 +16,8 @@ public interface SubscriptionProfileDesktopResources extends ClientBundle {
         String textRow();
         String errorText();
         String blueText();
+        String plansLabel();
+        String plansInput();
+        String planInputContainer();
     }
 }

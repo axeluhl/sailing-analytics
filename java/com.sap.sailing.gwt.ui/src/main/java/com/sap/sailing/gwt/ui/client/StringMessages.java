@@ -2381,7 +2381,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String whitelabelFooterLanguage();
     String whitelabelSailing();
     String subscription();
-    String upgradePremium();
+    String updateSubscription();
     String cancelSubscription();
     String openPortal();
+    String plans();
 }

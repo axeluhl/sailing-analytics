@@ -28,6 +28,7 @@ public class SubscriptionWebhookServlet extends SailingServerHttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         if (!verifyBasicAuth(request)) {
+            logger.log(Level.WARNING, "Invalid webhook http basic auth");
             response.setStatus(403);
             return;
         }

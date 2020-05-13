@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.desktop.places.user.profile.subscriptiontab;
 
 import java.util.Date;
+import java.util.List;
 
 import com.google.gwt.core.client.Duration;
 import com.google.gwt.core.client.GWT;
@@ -13,8 +14,10 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.shared.places.user.profile.subscription.UserSubscriptionView;
 import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionDTO;
@@ -26,7 +29,7 @@ public class UserSubscription extends Composite implements UserSubscriptionView 
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
     
     @UiField DivElement rootUi;
-    @UiField Button upgradeButtonUi;
+    @UiField Button updateSubscriptionButtonUi;
     @UiField Button cancelSubscriptionButtonUi;
     @UiField SpanElement planNameSpanUi;
     @UiField DivElement trialDivUi;
@@ -34,7 +37,7 @@ public class UserSubscription extends Composite implements UserSubscriptionView 
     @UiField SpanElement subscriptionStatusSpanUi;
     @UiField SpanElement paymentStatusSpanUi;
     @UiField DivElement paymentStatusDivUi;
-    @UiField Button openPortalSessionButtonUi;
+    @UiField ListBox planListUi;
     
     private Presenter presenter;
 
@@ -45,22 +48,16 @@ public class UserSubscription extends Composite implements UserSubscriptionView 
         this.presenter = presenter;
     }
     
-    @UiHandler("upgradeButtonUi")
-    public void handleUpgradeClick(ClickEvent e) {
-        upgradeButtonUi.setEnabled(false);
-        presenter.openCheckout();
+    @UiHandler("updateSubscriptionButtonUi")
+    public void handleUpdateSubscriptionClick(ClickEvent e) {
+        updateSubscriptionButtonUi.setEnabled(false);
+        presenter.openCheckout(planListUi.getSelectedValue());
     }
     
     @UiHandler("cancelSubscriptionButtonUi")
     public void handleCancelSubscriptionClick(ClickEvent e) {
         cancelSubscriptionButtonUi.setEnabled(false);
         presenter.cancelSubscription();
-    }
-    
-    @UiHandler("openPortalSessionButtonUi")
-    public void handleOpenPortalClick(ClickEvent e) {
-        openPortalSessionButtonUi.setEnabled(false);
-        presenter.openPortalSession();
     }
     
     @Override
@@ -75,20 +72,23 @@ public class UserSubscription extends Composite implements UserSubscriptionView 
     }
     
     @Override
-    public void onCloseCheckoutModal() {
-        upgradeButtonUi.setEnabled(true);
+    public void onOpenCheckoutError(String error) {
+        updateSubscriptionButtonUi.setEnabled(true);
+        Window.alert(error);
     }
     
     @Override
-    public void onClosePortalModal() {
-        openPortalSessionButtonUi.setEnabled(true);
+    public void onCloseCheckoutModal() {
+        updateSubscriptionButtonUi.setEnabled(true);
     }
 
     @Override
     public void updateView(SubscriptionDTO subscription) {
         resetElementsVisibleState();
         
-        upgradeButtonUi.setEnabled(true);
+        updatePlanList(subscription);
+        
+        updateSubscriptionButtonUi.setEnabled(true);
         
         Plan plan = null;
         if (subscription != null) {
@@ -99,12 +99,9 @@ public class UserSubscription extends Composite implements UserSubscriptionView 
             planNameSpanUi.setInnerText("Free");
             hideElement(subscriptionGroupUi);
             cancelSubscriptionButtonUi.setVisible(false);
-            openPortalSessionButtonUi.setVisible(false);
             show();
             return;
         }
-        
-        upgradeButtonUi.setVisible(false);
         
         planNameSpanUi.setInnerText(plan.getName());
         subscriptionStatusSpanUi.setInnerText(subscription.subscriptionStatus);
@@ -126,6 +123,22 @@ public class UserSubscription extends Composite implements UserSubscriptionView 
         }
         
         show();
+    }
+    
+    private void updatePlanList(SubscriptionDTO subscription) {
+        planListUi.clear();
+        if (subscription == null) {
+            planListUi.addItem("", "-- Select plan --");
+            planListUi.setSelectedIndex(0);
+        }
+        List<Plan> planList = SubscriptionPlans.getPlanList();
+        for (int i = 0; i < planList.size(); i++) {
+            Plan plan = planList.get(i);
+            planListUi.addItem(plan.getName(), plan.getId());
+            if (subscription != null && subscription.planId.equals(plan.getId())) {
+                planListUi.setSelectedIndex(i);
+            }
+        }
     }
     
     private String buildTrialText(SubscriptionDTO subscription) {
@@ -183,12 +196,10 @@ public class UserSubscription extends Composite implements UserSubscriptionView 
     }
     
     private void resetElementsVisibleState() {
-        upgradeButtonUi.setVisible(true);
         showElement(subscriptionGroupUi);
         cancelSubscriptionButtonUi.setVisible(true);
         showElement(paymentStatusDivUi);
         showElement(trialDivUi);
-        openPortalSessionButtonUi.setVisible(true);
     }
     
     private void hideElement(Element element) {
