@@ -39,7 +39,7 @@ public class SystemInformationPanel extends FlowPanel {
                 @Override
                 public void onClick(ClickEvent event) {
                     AdditionalInformationDialog additionalInformationDialog = new AdditionalInformationDialog(
-                            stringMessages.additionalInformation(), fullVersionText, stringMessages.ok(),
+                            stringMessages.additionalInformation(), stringMessages.version(fullVersionText), stringMessages.ok(),
                             stringMessages.cancel(), /* validator */ null, /* animationEnabled */ false,
                             /* callback */null);
                     additionalInformationDialog.show();
