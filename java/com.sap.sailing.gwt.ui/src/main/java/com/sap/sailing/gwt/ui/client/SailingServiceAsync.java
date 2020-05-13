@@ -38,6 +38,7 @@ import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorAndBoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.PairingListDTO;
@@ -303,12 +304,12 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
             AsyncCallback<List<StrippedLeaderboardDTO>> callback);
 
     void updateLeaderboard(String leaderboardName, String newLeaderboardName, String newLeaderboardDisplayName,
-            int[] newDiscardingThreasholds, UUID newCourseAreaId,
+            int[] newDiscardingThreasholds, Iterable<UUID> newCourseAreaIds,
             AsyncCallback<StrippedLeaderboardDTOWithSecurity> callback);
 
     void createFlexibleLeaderboard(String leaderboardName, String leaderboardDisplayName,
             int[] discardThresholds,
-            ScoringSchemeType scoringSchemeType, UUID courseAreaId,
+            ScoringSchemeType scoringSchemeType, Iterable<UUID> courseAreaIds,
             AsyncCallback<StrippedLeaderboardDTOWithSecurity> asyncCallback);
 
     void createRegattaLeaderboard(RegattaName regattaIdentifier,
@@ -498,7 +499,7 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
     void createRegatta(String regattaName, String boatClassName, boolean canBoatsOfCompetitorsChangePerRace,
             CompetitorRegistrationType competitorRegistrationType, String registrationLinkSecret, Date startDate, Date endDate,
             RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedal, boolean persistent,
-            ScoringSchemeType scoringSchemeType, UUID defaultCourseAreaId, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
+            ScoringSchemeType scoringSchemeType, Iterable<UUID> courseAreaIds, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
             boolean controlTrackingFromStartAndFinishTimes, boolean autoRestartTrackingUponCompetitorSetChange,
             RankingMetrics rankingMetricType, AsyncCallback<RegattaDTO> callback);
 
@@ -564,6 +565,8 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
 
     void removeLeaderboardColumns(String leaderboardName, List<String> columnsToRemove, AsyncCallback<Void> callback);
 
+    void getCourseAreas(String leaderboardName, AsyncCallback<List<CourseAreaDTO>> callback);
+    
     void getLeaderboard(String leaderboardName, AsyncCallback<StrippedLeaderboardDTO> callback);
 
     void getLeaderboardWithSecurity(String leaderboardName, AsyncCallback<StrippedLeaderboardDTOWithSecurity> callback);
@@ -606,10 +609,11 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
     void deleteSwissTimingArchiveConfigurations(Collection<SwissTimingArchiveConfigurationWithSecurityDTO> dtos,
             AsyncCallback<Void> asyncCallback);
 
-    void updateRegatta(RegattaIdentifier regattaIdentifier, Date startDate, Date endDate, UUID defaultCourseAreaUuid,
+    void updateRegatta(RegattaIdentifier regattaIdentifier, Date startDate, Date endDate, Iterable<UUID> courseAreaUuids,
             RegattaConfigurationDTO regattaConfiguration, Double buoyZoneRadiusInHullLengths,
             boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes,
-            boolean autoRestartTrackingUponCompetitorSetChange, String registrationLinkSecret, CompetitorRegistrationType registrationType, AsyncCallback<Void> callback);
+            boolean autoRestartTrackingUponCompetitorSetChange, String registrationLinkSecret,
+            CompetitorRegistrationType registrationType, AsyncCallback<Void> callback);
 
     /**
      * @param detailType
@@ -629,8 +633,6 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
 
     void getRegattaStructureForEvent(UUID eventId, AsyncCallback<List<RaceGroupDTO>> asyncCallback);
     
-    void getRegattaStructureOfEvent(UUID eventId, AsyncCallback<List<RaceGroupDTO>> callback);
-
     void getRaceStateEntriesForRaceGroup(UUID eventId, List<UUID> visibleCourseAreas, List<String> visibleRegattas,
             boolean showOnlyCurrentlyRunningRaces, boolean showOnlyRacesOfSameDay,
             Duration clientTimeZoneOffset, AsyncCallback<List<RegattaOverviewEntryDTO>> markedAsyncCallback);

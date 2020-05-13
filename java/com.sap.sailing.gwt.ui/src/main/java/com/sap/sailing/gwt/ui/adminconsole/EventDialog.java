@@ -12,7 +12,6 @@ import java.util.UUID;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
@@ -23,12 +22,12 @@ import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.domain.common.windfinder.AvailableWindFinderSpotCollections;
 import com.sap.sailing.gwt.ui.client.DataEntryDialogWithDateTimeBox;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
-import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
@@ -60,14 +59,6 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
     protected ExternalLinksComposite externalLinksComposite;
     private final FileStorageServiceConnectionTestObservable storageServiceAvailable;
 
-    /**
-     *  We expect only a subset of possible URLs, i.e.:
-     *    https://<hostname>:<port>/<path>
-     */
-    private static RegExp REGEXP_URL = RegExp.compile(
-            "^(https?)://((?:[\\w-]+\\.)+[a-z]{2,}|localhost)(?::\\d+)?(/[\\w~:@_./$!%&=+*'\",;()-]*)?$",
-            "i");
-
     protected static class EventParameterValidator implements Validator<EventDTO> {
 
         private StringMessages stringMessages;
@@ -76,13 +67,6 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
         public EventParameterValidator(StringMessages stringMessages, Collection<EventDTO> existingEvents) {
             this.stringMessages = stringMessages;
             this.existingEvents = new ArrayList<EventDTO>(existingEvents);
-        }
-
-        private boolean isValidURL(String input) {
-            if (input == null || input.isEmpty())
-                return true;
-            else
-                return REGEXP_URL.test(input);
         }
 
         @Override
@@ -135,13 +119,9 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
                 errorMessage = stringMessages.pleaseEnterNonEmptyCourseArea();
             } else if (!unique) {
                 errorMessage = stringMessages.eventWithThisNameAlreadyExists();
-            } else if (!isValidURL(eventToValidate.getBaseURL())) {
-                errorMessage = stringMessages.invalidURL();
             }
-
             return errorMessage;
         }
-
     }
 
     /**

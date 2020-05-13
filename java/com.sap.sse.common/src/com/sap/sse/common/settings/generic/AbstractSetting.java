@@ -1,7 +1,5 @@
 package com.sap.sse.common.settings.generic;
 
-
-
 public abstract class AbstractSetting implements Setting {
     
     protected transient final AbstractGenericSerializableSettings settings;
@@ -10,7 +8,7 @@ public abstract class AbstractSetting implements Setting {
     public AbstractSetting(String settingName, AbstractGenericSerializableSettings settings) {
         this.settingName = settingName;
         this.settings = settings;
-        if(settings != null) {
+        if (settings != null) {
             settings.addSetting(settingName, this);
         }
     }
