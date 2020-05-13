@@ -14,14 +14,12 @@ public class SystemInformationPanel extends FlowPanel {
 
     private final Label buildVersionText;
     private String fullVersionText;
-    private StringMessages stringMessages;
     private boolean buildVersionCut;
     private Anchor additionalInformation;
 
     public SystemInformationPanel(final ServerInfoDTO serverInfo, final ErrorReporter errorReporter,
             final StringMessages stringMessages) {
         super();
-        this.stringMessages = stringMessages;
         buildVersionText = new Label();
         if (serverInfo != null) {
             fullVersionText = serverInfo.getBuildVersion();
