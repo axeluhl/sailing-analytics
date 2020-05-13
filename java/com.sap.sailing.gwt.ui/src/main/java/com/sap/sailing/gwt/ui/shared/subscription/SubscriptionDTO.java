@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.shared.subscription;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class SubscriptionDTO implements IsSerializable {
     public static String PAYMENT_STATUS_SUCCESS = "success";
@@ -25,5 +26,29 @@ public class SubscriptionDTO implements IsSerializable {
     
     public boolean isPaymentSuccess() {
         return paymentStatus.equals(PAYMENT_STATUS_SUCCESS);
-    } 
+    }
+    
+    public String getSubscriptionStatusLabel() {
+        if (subscriptionStatus != null) {
+            if (subscriptionStatus.equals(SUBSCRIPTION_STATUS_TRIAL)) {
+                return StringMessages.INSTANCE.inTrial();
+            } else if (subscriptionStatus.equals(SUBSCRIPTION_STATUS_ACTIVE)) {
+                return StringMessages.INSTANCE.active();
+            }
+        }
+        
+        return "";
+    }
+    
+    public String getPaymentStatusLabel() {
+        if (paymentStatus != null) {
+            if (paymentStatus.equals(PAYMENT_STATUS_SUCCESS)) {
+                return StringMessages.INSTANCE.paymentStatusSuccess();
+            } else {
+                return StringMessages.INSTANCE.paymentStatusNoSuccess();
+            }
+        }
+        
+        return "";
+    }
 }

@@ -2385,4 +2385,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String cancelSubscription();
     String openPortal();
     String plans();
+    String inTrial();
+    String paymentStatusSuccess();
+    String paymentStatusNoSuccess();
 }

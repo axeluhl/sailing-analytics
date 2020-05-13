@@ -104,10 +104,10 @@ public class UserSubscription extends Composite implements UserSubscriptionView 
         }
         
         planNameSpanUi.setInnerText(plan.getName());
-        subscriptionStatusSpanUi.setInnerText(subscription.subscriptionStatus);
+        subscriptionStatusSpanUi.setInnerText(subscription.getSubscriptionStatusLabel());
         if (subscription.isActive()) {
             subscriptionStatusSpanUi.addClassName(SubscriptionProfileDesktopResources.INSTANCE.css().blueText());
-            paymentStatusSpanUi.setInnerText(subscription.isPaymentSuccess() ? "Success" : "No success");
+            paymentStatusSpanUi.setInnerText(subscription.getPaymentStatusLabel());
             paymentStatusSpanUi.addClassName(
                     subscription.isPaymentSuccess() ? 
                             SubscriptionProfileDesktopResources.INSTANCE.css().blueText() :
