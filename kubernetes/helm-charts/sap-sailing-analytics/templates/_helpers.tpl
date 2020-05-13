@@ -18,5 +18,15 @@ Define error message for already existing "app" value.
 Create the mongo connection string.
 */}}
 {{- define "mongodb-connection-string-master" -}}
-mongodb://{{ .Values.mongodbService }}/{{- template "sapsailing-app-name" . -}}-master?replicaSet={{ .Values.replicaSetName }} 
+mongodb://{{ .Values.mongodb.mongodbService }}/{{- template "sapsailing-app-name" . -}}-master?replicaSet={{ .Values.mongodb.replicaSetName }} 
 {{- end -}}
+{{- define "mongodb-connection-string-replica" -}}
+mongodb://{{ .Values.mongodb.mongodbService }}/{{- template "sapsailing-app-name" . -}}-replica?replicaSet={{ .Values.mongodb.replicaSetName }} 
+{{- end -}}
+
+{{/*
+Define master service name
+*/}}
+{{- define "sailing-master-service-name" }}
+{{- template "sapsailing-app-name" . }}-{{ .Values.master.role }}-service
+{{- end }}

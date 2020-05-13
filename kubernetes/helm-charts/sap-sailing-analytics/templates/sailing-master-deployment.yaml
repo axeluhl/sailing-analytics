@@ -28,25 +28,22 @@ spec:
         - containerPort: 8888
           name: http-port
         - containerPort: 14888
-          name: telnet-port
+          name: telnet-port       
         resources:
-          requests:
-            memory: "6Gi"
-            cpu: "500m"
-          limits:
-            memory: "12Gi"
-            cpu: "2"
+{{- if .Values.master.resources }}
+{{- tpl (toYaml .Values.master.resources) . | nindent 10 }}
+{{- end }}
         env:
         - name: MONGODB_URI
           value: {{ template "mongodb-connection-string-master" . }}
         - name: REPLICATION_CHANNEL
           value: {{ template "sapsailing-app-name" . }}-{{ .Values.master.role }}
         - name: REPLICATION_HOST
-          value: {{ .Values.rabbitmq }}
+          value: {{ .Values.rabbitmq.host }}
         - name: REPLICATE_MASTER_QUEUE_HOST
-          value: {{ .Values.rabbitmq }}
+          value: {{ .Values.rabbitmq.host }}
         - name: REPLICATE_MASTER_QUEUE_PORT
-          value: '5672'
+          value: {{ .Values.rabbitmq.port }}
         - name: SERVER_NAME
           value: {{ template "sapsailing-app-name" . }}-{{ .Values.master.role }}
         livenessProbe:

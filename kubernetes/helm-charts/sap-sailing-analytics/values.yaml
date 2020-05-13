@@ -22,12 +22,38 @@ imagePullSecret: dockerhubsecret
 ### Environment setup
 ## General
 # Mongodb: specify the name of the service that exposes the mongodb replicaset and the replica set name.
-mongodbService: mongo-live-rs-client
-replicaSetName: rs0
-
+mongodb:
+  mongodbService: mongo-live-rs-client
+  replicaSetName: rs0
 # RabbitMq: specifiy the name of the service that exposes the rabbitMq
-rabbitmq: rabbitmq
+rabbitmq:
+  host: rabbitmq
+  port: 5672
 # Master
 master:
-  role: sailing-master
+  role: sailing-master  
+  # Optional
+  # resources:
+  #  requests:
+  #    memory: "6Gi"
+  #    cpu: "500m"
+  #  limits:
+  #    memory: "12Gi"
+  #    cpu: "2" 
+
+# Replicas
+replica:
+  role: sailing-replica
+  replicateOnStart: 'com.sap.sailing.server.impl.RacingEventServiceImpl,com.sap.sse.security.impl.SecurityServiceImpl,com.sap.sse.filestorage.impl.FileStorageManagementServiceImpl,com.sap.sse.mail.impl.MailServiceImpl,com.sap.sailing.polars.impl.PolarDataServiceImpl,com.sap.sailing.domain.racelogtracking.impl.fixtracker.RegattaLogFixTrackerRegattaListener,com.sap.sailing.windestimation.integration.WindEstimationFactoryServiceImpl'
+  replicateMasterBearerToken: 
+  replicateMasterUsername:
+  replicateMasterPassword:
+  # Optional
+  # resources:
+  #  requests:
+  #    memory: "6Gi"
+  #    cpu: "500m"
+  #  limits:
+  #    memory: "12Gi"
+  #    cpu: "2" 
 
