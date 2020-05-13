@@ -107,6 +107,10 @@ k create secret generic <secret-name> --from-literal=rabbitmq-password='<passwor
 ```
 Be carefull to match rabbitmq-password as key, as this is defined within the helm chart of bitnami/rabbitmq (see l259 in /helm-charts/rabbitmq/templates/statefulset.yaml). After that add the secret name in the rabbitmq.yaml, l75.
 
+## Sailing Analytics
+
+There is a helm chart for the sailing analytics in ```/helm-charts/sap-sailing-analytics``` along with some values in ```values.yaml```.  
+
 ### Tips:
 - [install kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 
 
