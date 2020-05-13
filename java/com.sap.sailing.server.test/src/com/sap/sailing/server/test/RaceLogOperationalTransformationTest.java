@@ -95,7 +95,7 @@ public class RaceLogOperationalTransformationTest {
     public void testSimpleApply() {
         Calendar c = new GregorianCalendar(2013, 6, 7, 13, 59, 33);
         final MillisecondsTimePoint startTime = new MillisecondsTimePoint(c.getTime());
-        RaceLogStartTimeEvent startTimeEvent = new RaceLogStartTimeEventImpl(startTime, author, /* pass ID */ 1, startTime);
+        RaceLogStartTimeEvent startTimeEvent = new RaceLogStartTimeEventImpl(startTime, author, /* pass ID */ 1, startTime, /* courseAreaId */ null);
         RaceLogStartTimeEventWithTransformationSupport e = new RaceLogStartTimeEventWithTransformationSupport(startTimeEvent);
         server.apply(e);
         serverLatch.countDown();
@@ -140,7 +140,7 @@ public class RaceLogOperationalTransformationTest {
         {
             RaceLogStartTimeEvent startTimeEventServer = new RaceLogStartTimeEventImpl(createdAt,
                     startTimeServer, author, UUID.randomUUID(), /* pass ID */1,
-                    startTimeServer, RaceLogRaceStatus.SCHEDULED);
+                    startTimeServer, RaceLogRaceStatus.SCHEDULED, /* courseAreaId */ null);
             RaceLogStartTimeEventWithTransformationSupport eServer = new RaceLogStartTimeEventWithTransformationSupport(
                     startTimeEventServer);
             server.apply(eServer);
@@ -150,7 +150,7 @@ public class RaceLogOperationalTransformationTest {
             final MillisecondsTimePoint startTimeClient1 = new MillisecondsTimePoint(cClient1.getTime());
             RaceLogStartTimeEvent startTimeEventClient1 = new RaceLogStartTimeEventImpl(createdAt,
                     startTimeClient1, author, UUID.randomUUID(), /* pass ID */1,
-                    startTimeClient1, RaceLogRaceStatus.SCHEDULED);
+                    startTimeClient1, RaceLogRaceStatus.SCHEDULED, /* courseAreaId */ null);
             final RaceLogStartTimeEventWithTransformationSupport eClient1 = new RaceLogStartTimeEventWithTransformationSupport(
                     startTimeEventClient1);
             client1.apply(eClient1); // this call won't block because server calls apply(Peer, O, int) which first waits for the latch before synchronizing

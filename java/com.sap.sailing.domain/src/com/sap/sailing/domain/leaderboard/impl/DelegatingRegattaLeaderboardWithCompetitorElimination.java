@@ -422,8 +422,8 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
         return getFullLeaderboard().getNowMinusDelay();
     }
 
-    public CourseArea getDefaultCourseArea() {
-        return getFullLeaderboard().getDefaultCourseArea();
+    public Iterable<CourseArea> getCourseAreas() {
+        return getFullLeaderboard().getCourseAreas();
     }
 
     public NumberOfCompetitorsInLeaderboardFetcher getNumberOfCompetitorsInLeaderboardFetcher() {

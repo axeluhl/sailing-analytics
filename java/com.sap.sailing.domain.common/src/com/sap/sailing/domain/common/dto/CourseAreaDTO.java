@@ -1,14 +1,13 @@
-package com.sap.sailing.gwt.ui.shared;
+package com.sap.sailing.domain.common.dto;
 
 import java.util.UUID;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sse.security.shared.dto.NamedDTO;
 
 /**
  * Equality and hash code are based on the course area's {@link #id}.
  */
-public class CourseAreaDTO extends NamedDTO implements IsSerializable {
+public class CourseAreaDTO extends NamedDTO {
     private static final long serialVersionUID = -5279690838452265454L;
     public UUID id;
     
@@ -17,6 +16,10 @@ public class CourseAreaDTO extends NamedDTO implements IsSerializable {
 
     public CourseAreaDTO(String name) {
         super(name);
+    }
+    
+    public UUID getId() {
+        return id;
     }
 
     @Override

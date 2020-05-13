@@ -47,6 +47,7 @@ import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorAndBoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.PairingListDTO;
@@ -281,6 +282,8 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
             Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, boolean addOverallDetails,
             String previousLeaderboardId, boolean fillTotalPointsUncorrected) throws UnauthorizedException, Exception;
 
+    List<CourseAreaDTO> getCourseAreas(String leaderboardName);
+
     IncrementalOrFullLeaderboardDTO getLeaderboardForRace(RegattaAndRaceIdentifier raceIdentifer,
             String leaderboardName, Date date, Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails,
             boolean addOverallDetails, String previousLeaderboardId, boolean fillTotalPointsUncorrected)
@@ -289,11 +292,11 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     List<StrippedLeaderboardDTOWithSecurity> getLeaderboardsWithSecurity() throws UnauthorizedException;
 
     StrippedLeaderboardDTOWithSecurity updateLeaderboard(String leaderboardName, String newLeaderboardName,
-            String newLeaderboardDisplayName, int[] newDiscardingThreasholds, UUID newCourseAreaId)
+            String newLeaderboardDisplayName, int[] newDiscardingThreasholds, Iterable<UUID> newCourseAreaIds)
             throws UnauthorizedException;
 
     StrippedLeaderboardDTOWithSecurity createFlexibleLeaderboard(String leaderboardName, String leaderboardDisplayName,
-            int[] discardThresholds, ScoringSchemeType scoringSchemeType, UUID courseAreaId)
+            int[] discardThresholds, ScoringSchemeType scoringSchemeType, Iterable<UUID> courseAreaIds)
             throws UnauthorizedException;
 
     StrippedLeaderboardDTOWithSecurity createRegattaLeaderboard(RegattaName regattaIdentifier,
@@ -323,7 +326,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     RegattaDTO createRegatta(String regattaName, String boatClassName, boolean canBoatsOfCompetitorsChangePerRace,
             CompetitorRegistrationType competitorRegistrationType, String registrationLinkSecret, Date startDate,
             Date endDate, RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
-            boolean persistent, ScoringSchemeType scoringSchemeType, UUID defaultCourseAreaId,
+            boolean persistent, ScoringSchemeType scoringSchemeType, Iterable<UUID> courseAreaIds,
             Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
             boolean controlTrackingFromStartAndFinishTimes, boolean autoRestartTrackingUponCompetitorSetChange, RankingMetrics rankingMetricType)
             throws UnauthorizedException;
@@ -334,7 +337,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     void removeRegattas(Collection<RegattaIdentifier> regattas) throws UnauthorizedException;
 
-    void updateRegatta(RegattaIdentifier regattaIdentifier, Date startDate, Date endDate, UUID defaultCourseAreaUuid,
+    void updateRegatta(RegattaIdentifier regattaIdentifier, Date startDate, Date endDate, Iterable<UUID> courseAreaUuids,
             RegattaConfigurationDTO regattaConfiguration, Double buoyZoneRadiusInHullLengths,
             boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes,
             boolean autoRestartTrackingUponCompetitorSetChange, String registrationLinkSecret, CompetitorRegistrationType registrationType) throws UnauthorizedException;
@@ -556,9 +559,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     /** for backward compatibility with the regatta overview */
     List<RaceGroupDTO> getRegattaStructureForEvent(UUID eventId) throws UnauthorizedException;
-
-    /** the replacement service for getRegattaStructureForEvent() */
-    List<RaceGroupDTO> getRegattaStructureOfEvent(UUID eventId) throws UnauthorizedException;
 
     List<RegattaOverviewEntryDTO> getRaceStateEntriesForRaceGroup(UUID eventId, List<UUID> visibleCourseAreas,
             List<String> visibleRegattas, boolean showOnlyCurrentlyRunningRaces, boolean showOnlyRacesOfSameDay,

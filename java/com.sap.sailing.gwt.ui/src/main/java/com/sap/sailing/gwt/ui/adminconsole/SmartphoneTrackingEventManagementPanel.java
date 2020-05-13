@@ -43,6 +43,7 @@ import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLo
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
@@ -747,7 +748,7 @@ public class SmartphoneTrackingEventManagementPanel
             DeviceConfigurationDTO.RegattaConfigurationDTO configuration) {
         final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.getName());
         sailingService.updateRegatta(regattaIdentifier, regatta.startDate, regatta.endDate,
-                regatta.defaultCourseAreaUuid, configuration, regatta.buoyZoneRadiusInHullLengths,
+                Util.mapToArrayList(regatta.courseAreas, CourseAreaDTO::getId), configuration, regatta.buoyZoneRadiusInHullLengths,
                 regatta.useStartTimeInference, regatta.controlTrackingFromStartAndFinishTimes,
                 regatta.autoRestartTrackingUponCompetitorSetChange, regatta.registrationLinkSecret,
                 regatta.competitorRegistrationType, new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
