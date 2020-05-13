@@ -16,14 +16,16 @@ import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.NavigationEvents;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseFragment;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
 public abstract class BasePanelFragment extends RaceFragment {
-
+    private final static String TAG = BaseFragment.class.getSimpleName();
     /**
      * Marker level is unknown, due to an error
      */
@@ -226,5 +228,19 @@ public abstract class BasePanelFragment extends RaceFragment {
                 setMarkerLevel(container, resId, getMarkerLevel(container, resId));
             }
         }, delay);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        ExLog.i(getActivity(), TAG, "attach fragment " + this.getClass().getSimpleName());
+        NavigationEvents.INSTANCE.attach(this);
+    }
+
+    @Override
+    public void onDetach() {
+        ExLog.i(getActivity(), TAG, "detach fragment " + this.getClass().getSimpleName());
+        NavigationEvents.INSTANCE.detach(this);
+        super.onDetach();
     }
 }

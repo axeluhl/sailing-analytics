@@ -3,8 +3,10 @@ package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.NavigationEvents;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 
 import android.support.annotation.IdRes;
@@ -12,6 +14,7 @@ import android.support.annotation.IntDef;
 import android.support.v4.app.FragmentTransaction;
 
 public class BaseFragment extends RaceFragment {
+    private final static String TAG = BaseFragment.class.getSimpleName();
 
     @IntDef({ START_MODE_PRESETUP, START_MODE_PLANNED })
     @Retention(RetentionPolicy.SOURCE)
@@ -62,6 +65,20 @@ public class BaseFragment extends RaceFragment {
             sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
             sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        ExLog.i(getActivity(), TAG, "attach fragment " + this.getClass().getSimpleName());
+        NavigationEvents.INSTANCE.attach(this);
+    }
+
+    @Override
+    public void onDetach() {
+        ExLog.i(getActivity(), TAG, "detach fragment " + this.getClass().getSimpleName());
+        NavigationEvents.INSTANCE.detach(this);
+        super.onDetach();
     }
 
     public boolean onBackPressed() {

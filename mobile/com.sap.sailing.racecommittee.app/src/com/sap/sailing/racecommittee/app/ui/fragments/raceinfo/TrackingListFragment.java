@@ -30,7 +30,6 @@ import android.widget.Toast;
 
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.BitmapHelper;
-import com.sap.sailing.android.shared.util.BroadcastManager;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult.MergeState;
@@ -342,11 +341,6 @@ public class TrackingListFragment extends BaseFragment
         }
 
         initLocalData();
-
-        Intent intent = new Intent(AppConstants.INTENT_ACTION_ON_LIFECYCLE);
-        intent.putExtra(AppConstants.INTENT_ACTION_EXTRA_LIFECYCLE, AppConstants.INTENT_ACTION_EXTRA_START);
-        intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_COMPETITOR);
-        BroadcastManager.getInstance(getActivity()).addIntent(intent);
     }
 
     @Override
@@ -362,11 +356,6 @@ public class TrackingListFragment extends BaseFragment
         if (!diff.isEmpty()) {
             getRaceState().setFinishPositioningListChanged(MillisecondsTimePoint.now(), diff);
         }
-
-        Intent intent = new Intent(AppConstants.INTENT_ACTION_ON_LIFECYCLE);
-        intent.putExtra(AppConstants.INTENT_ACTION_EXTRA_LIFECYCLE, AppConstants.INTENT_ACTION_EXTRA_STOP);
-        intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_COMPETITOR);
-        BroadcastManager.getInstance(getActivity()).addIntent(intent);
     }
 
     @Override

@@ -41,14 +41,8 @@ public class AppConstants {
 
     // Inner process events
     public final static String INTENT_ACTION_TOGGLE = PACKAGE_NAME + ".action.toggle";
-    public final static String INTENT_ACTION_ON_LIFECYCLE = PACKAGE_NAME + ".action.on";
     public final static String INTENT_ACTION_EXTRA = PACKAGE_NAME + ".action.extra";
     public final static String INTENT_ACTION_EXTRA_FORCED = INTENT_ACTION_EXTRA + ".forced";
-
-    // Lifecycle events as extra
-    public final static String INTENT_ACTION_EXTRA_LIFECYCLE = INTENT_ACTION_EXTRA + ".lifecycle";
-    public final static String INTENT_ACTION_EXTRA_START = "start";
-    public final static String INTENT_ACTION_EXTRA_STOP = "stop";
 
     public final static String INTENT_ACTION_TOGGLE_PROCEDURE = "procedure";
     public final static String INTENT_ACTION_TOGGLE_PROCEDURE_MORE_MODE = "more_mode";
@@ -57,17 +51,6 @@ public class AppConstants {
     public final static String INTENT_ACTION_TOGGLE_FACTOR = "factor";
     public final static String INTENT_ACTION_TOGGLE_COURSE = "course";
     public final static String INTENT_ACTION_TOGGLE_WIND = "wind";
-    public final static String INTENT_ACTION_TOGGLE_TIME = "time";
-    public final static String INTENT_ACTION_TOGGLE_POSTPONE = "postpone";
-    public final static String INTENT_ACTION_TOGGLE_ABANDON = "abandon";
-    public final static String INTENT_ACTION_TOGGLE_RECALL = "recall";
-    public final static String INTENT_ACTION_TOGGLE_BLUE_FIRST = "more";
-    public final static String INTENT_ACTION_TOGGLE_BLUE_LAST = "blue_last";
-    public final static String INTENT_ACTION_TOGGLE_COMPETITOR = "competitor";
-
-    public final static String INTENT_ACTION_TOGGLE_REPLAY = "replay";
-    public final static String INTENT_ACTION_TOGGLE_PHOTOS = "photos";
-    public final static String INTENT_ACTION_TOGGLE_LIST = "list";
 
     public final static String INTENT_ACTION_TOGGLE_EVENT = "event";
     public final static String INTENT_ACTION_TOGGLE_AREA = "area";

@@ -113,6 +113,10 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
             return fragment;
         }
 
+        public int getStartMode(){
+            return getArguments().getInt(START_MODE);
+        }
+
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);

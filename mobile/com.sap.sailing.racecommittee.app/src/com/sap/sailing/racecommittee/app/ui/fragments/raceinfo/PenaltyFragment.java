@@ -2,7 +2,6 @@ package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -29,7 +28,6 @@ import android.widget.Toast;
 
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.BitmapHelper;
-import com.sap.sailing.android.shared.util.BroadcastManager;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult.MergeState;
@@ -302,11 +300,6 @@ public class PenaltyFragment extends BaseFragment
         }
 
         initLocalData();
-
-        Intent intent = new Intent(AppConstants.INTENT_ACTION_ON_LIFECYCLE);
-        intent.putExtra(AppConstants.INTENT_ACTION_EXTRA_LIFECYCLE, AppConstants.INTENT_ACTION_EXTRA_START);
-        intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_COMPETITOR);
-        BroadcastManager.getInstance(getActivity()).addIntent(intent);
     }
 
     @Override
@@ -322,11 +315,6 @@ public class PenaltyFragment extends BaseFragment
         if (diff.size() > 0) {
             getRaceState().setFinishPositioningListChanged(MillisecondsTimePoint.now(), diff);
         }
-
-        Intent intent = new Intent(AppConstants.INTENT_ACTION_ON_LIFECYCLE);
-        intent.putExtra(AppConstants.INTENT_ACTION_EXTRA_LIFECYCLE, AppConstants.INTENT_ACTION_EXTRA_STOP);
-        intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_COMPETITOR);
-        BroadcastManager.getInstance(getActivity()).addIntent(intent);
     }
 
     private void setReason(String reason) {

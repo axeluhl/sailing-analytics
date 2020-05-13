@@ -15,6 +15,7 @@ import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.Loader;
 import android.support.v4.content.LocalBroadcastManager;
@@ -90,6 +91,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class RacingActivity extends SessionActivity implements RaceListCallbacks {
     private static final String TAG = RacingActivity.class.getName();
@@ -205,6 +207,12 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
 
         super.onCreate(savedInstanceState);
 
+        getSupportFragmentManager().registerFragmentLifecycleCallbacks(new FragmentManager.FragmentLifecycleCallbacks() {
+            @Override
+            public void onFragmentDetached(FragmentManager fm, Fragment f) {
+                super.onFragmentDetached(fm, f);
+            }
+        }, false);
         setContentView(R.layout.racing_view);
 
         dataManager = DataManager.create(this);

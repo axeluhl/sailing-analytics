@@ -61,13 +61,14 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
         return fragment;
     }
 
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.flag_list, container, false);
 
         ListView listView = ViewHelper.get(layout, R.id.listView);
         if (listView != null) {
-            Flags flag = Flags.valueOf(getArguments().getString(AppConstants.FLAG_KEY));
+            Flags flag = getFlag();
             listView.setAdapter(new AbortFlagsAdapter(getActivity(), this, flag));
         }
 
@@ -86,11 +87,15 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
         return layout;
     }
 
+    public Flags getFlag() {
+        return Flags.valueOf(getArguments().getString(AppConstants.FLAG_KEY));
+    }
+
     @Override
     public void onClick(Flags flag) {
         TimePoint now = MillisecondsTimePoint.now();
         RaceState state = getRaceState();
-        Flags mainFlag = Flags.valueOf(getArguments().getString(AppConstants.FLAG_KEY));
+        Flags mainFlag = getFlag();
         switch (mainFlag) {
         case AP:
             logFlag(flag);

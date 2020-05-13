@@ -1,5 +1,6 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
+import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -40,6 +41,7 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.DataStore;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.racecommittee.app.ui.NavigationEvents;
 import com.sap.sailing.racecommittee.app.ui.adapters.DependentRaceSpinnerAdapter;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DatePickerFragment;
@@ -154,6 +156,12 @@ public class StartTimeFragment extends BaseFragment
             DatePickerFragment fragment = (DatePickerFragment) childFragment;
             fragment.setOnDateSetListener(this);
         }
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        NavigationEvents.INSTANCE.attach(this);
     }
 
     @Override

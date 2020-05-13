@@ -15,6 +15,7 @@ import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.racecommittee.app.ui.NavigationEvents;
 import com.sap.sailing.racecommittee.app.ui.activities.BaseActivity;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sailing.racecommittee.app.utils.TickListener;
@@ -219,5 +220,19 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
             // show current panel
             mPanels.get(mActivePage).setVisibility(View.VISIBLE);
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        ExLog.i(getActivity(), TAG, "attach fragment " + this.getClass().getSimpleName());
+        NavigationEvents.INSTANCE.attach(this);
+    }
+
+    @Override
+    public void onDetach() {
+        ExLog.i(getActivity(), TAG, "detach fragment " + this.getClass().getSimpleName());
+        NavigationEvents.INSTANCE.detach(this);
+        super.onDetach();
     }
 }
