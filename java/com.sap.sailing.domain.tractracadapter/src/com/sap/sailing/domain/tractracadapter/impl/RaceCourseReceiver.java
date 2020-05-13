@@ -151,7 +151,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
                         getTracTracEvent().getId()+" does not contain the IControl with ID "+
                         cp.getId()+" which is used by race "+tractracRace.getId()+
                         ". Adding control point adapter based on race data.");
-                ttControlPointsForAllOriginalEventControlPoints.put(cp,  new ControlPointAdapter(cp));
+                ttControlPointsForAllOriginalEventControlPoints.put(cp, new ControlPointAdapter(cp));
             }
             ttControlPoints.add(new Pair<TracTracControlPoint, PassingInstruction>(ttControlPointsForAllOriginalEventControlPoints.get(cp), passingInstructions));
             i++;

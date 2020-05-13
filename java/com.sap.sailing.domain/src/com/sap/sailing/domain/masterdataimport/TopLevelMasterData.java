@@ -141,7 +141,7 @@ public class TopLevelMasterData implements Serializable {
 
     /**
      * Workaround to look for the events connected to RegattaLeadeboards. There should be a proper connection between
-     * regatta and event soon. TODO
+     * regatta and event soon. TODO See bugs 1896 and 1532
      */
     private Map<LeaderboardGroup, Set<Event>> createEventMap(Set<LeaderboardGroup> groupsToExport,
             Iterable<Event> allEvents) {
@@ -156,9 +156,8 @@ public class TopLevelMasterData implements Serializable {
             HashSet<Event> eventSet = new HashSet<Event>();
             eventsForLeaderboardGroup.put(leaderboardGroup, eventSet);
             for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
-                CourseArea courseArea = leaderboard.getDefaultCourseArea();
-                if (courseArea != null) {
-                    Event event = eventForCourseArea.get(courseArea);
+                for (final CourseArea courseArea : leaderboard.getCourseAreas()) {
+                    final Event event = eventForCourseArea.get(courseArea);
                     if (event != null) {
                         eventSet.add(event);
                     }

@@ -56,9 +56,9 @@ public class PasswordActivity extends BaseActivity {
         public void onReceive(Context context, Intent intent) {
             DataStore dataStore = DataManager.create(PasswordActivity.this).getDataStore();
             Intent start;
-            if (dataStore.getCourseUUID() != null) {
+            if (dataStore.getCourseAreaId() != null) {
                 start = new Intent(PasswordActivity.this, RacingActivity.class);
-                start.putExtra(AppConstants.COURSE_AREA_UUID_KEY, dataStore.getCourseUUID());
+                start.putExtra(AppConstants.COURSE_AREA_UUID_KEY, dataStore.getCourseAreaId());
                 start.putExtra(AppConstants.EventIdTag, dataStore.getEventUUID());
             } else {
                 start = new Intent(PasswordActivity.this, LoginActivity.class);

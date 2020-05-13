@@ -50,12 +50,10 @@ public abstract class SailingServiceHelper {
     public static SailingServiceAsync createSailingServiceInstance(boolean sameBundle, ServiceRoutingProvider routingProvider) {
         final SailingServiceAsync service = GWT.create(SailingService.class);
         final ServiceDefTarget serviceToRegister = (ServiceDefTarget) service;
-        
         final StringBuilder servicePath = new StringBuilder(RemoteServiceMappingConstants.sailingServiceRemotePath);
         if (routingProvider != null) {
             servicePath.append(routingProvider.routingSuffixPath());
         }
-        
         final String servicePathWithRoutingSuffix = servicePath.toString();
         if (sameBundle) {
             EntryPointHelper.registerASyncService(serviceToRegister, servicePathWithRoutingSuffix);
