@@ -76,14 +76,14 @@ fieldset legend {
 	clear: both;
 }
 
-.footerInfoPanel {
-    text-align: center;
-    padding: 0px 50px 0px 0px;
+.systemInformationPanel {
+    float: left;
+    display: inline-flex;
+    padding: 0px 0px 0px 50px;
 }
 
-.systemInformationPanel {
-    cursor: pointer;
-    
+.releaseNotesAnchor {
+    float: right;
 }
 
 .errorLabel {

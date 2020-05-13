@@ -207,13 +207,12 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
         persistentInformationWidget.addStyleName("footerInfoPanel");
         informationPanel.add(persistentInformationWidget, DockPanel.CENTER);
         SystemInformationPanel sysinfoPanel = new SystemInformationPanel(serverInfo, errorReporter, stringMessages);
-        sysinfoPanel.addStyleName("footerInfoPanel");
         sysinfoPanel.addStyleName("systemInformationPanel");
         sysinfoPanel.ensureDebugId("SystemInformation");
         if (ClientConfiguration.getInstance().isBrandingActive()) {
             final Anchor releaseNotesLink = new Anchor(
                     new SafeHtmlBuilder().appendEscaped(releaseNotesAnchorLabel).toSafeHtml(), releaseNotesURL);
-        releaseNotesLink.addStyleName("footerInfoPanel");
+        releaseNotesLink.addStyleName("releaseNotesAnchor");
                 sysinfoPanel.add(releaseNotesLink);
         informationPanel.add(releaseNotesLink, DockPanel.EAST);
         }
