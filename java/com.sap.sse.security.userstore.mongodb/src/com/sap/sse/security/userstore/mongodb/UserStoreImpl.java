@@ -1039,7 +1039,6 @@ public class UserStoreImpl implements UserStore {
     @Override
     public void registerPreferenceConverter(String preferenceKey, PreferenceConverter<?> converter) {
         PreferenceConverter<?> alreadyAssociatedConverter = preferenceConverters.putIfAbsent(preferenceKey, converter);
-
         if (alreadyAssociatedConverter == null) {
             final Set<String> usersToProcess = new HashSet<>(preferences.keySet());
             for (String user : usersToProcess) {
