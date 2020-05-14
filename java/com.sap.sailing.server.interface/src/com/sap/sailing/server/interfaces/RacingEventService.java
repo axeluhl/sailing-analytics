@@ -73,6 +73,7 @@ import com.sap.sailing.domain.leaderboard.LeaderboardRegistry;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboardWithEliminations;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
+import com.sap.sailing.domain.leaderboard.impl.DelegatingRegattaLeaderboardWithCompetitorElimination;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.polars.PolarDataService;
@@ -234,6 +235,12 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     RegattaLeaderboardWithEliminations addRegattaLeaderboardWithEliminations(String leaderboardName, String leaderboardDisplayName, RegattaLeaderboard fullRegattaLeaderboard);
 
+    /**
+     * Removes the leaderboard specified by {@code leaderboardName} as well as all delegating leaderboards that reference it,
+     * in particular those {@link DelegatingRegattaLeaderboardWithCompetitorElimination} which which the leaderboard specified
+     * by {@code leaderboardName} was their underlying regatta leaderboard. If no leaderboard named as specified by the
+     * {@code leaderboardName} parameter exists, this method has no effect.
+     */
     void removeLeaderboard(String leaderboardName);
 
     /**
