@@ -1,11 +1,9 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -16,14 +14,16 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 
 /**
  * An Add dialog for a competitor with an optional boat. If {@link #withBoatCheckBox} is checked the
- * {@link #boatDataPanel} is visible and validated
+ * {@link #boatDataPanel} is visible and validated. While the dialog always returns a
+ * {@link CompetitorWithBoatDTO}, the resulting object may still have {@link CompetitorWithBoatDTO#hasBoat() hasBoat()==false}
+ * in which case the {@link #withBoatCheckBox} was not ticked.
  * 
  * @author Dmitry Bilyk
  */
 
 public class CompetitorWithOptionalBoatAddDialog extends AbstractCompetitorWithBoatDialog {
 
-    private static CheckBox withBoatCheckBox;
+    private final CheckBox withBoatCheckBox;
     private final VerticalPanel boatDataPanel;
 
     /**
@@ -31,37 +31,40 @@ public class CompetitorWithOptionalBoatAddDialog extends AbstractCompetitorWithB
      * 
      * @param competitorToAdd
      *            The 'competitorToAdd' parameter contains the competitor which should be initialized.
+     * @param createWithBoatByDefault
+     *            decides the default setting of the {@link #withBoatCheckBox}.
      * @param boatClass
      *            The boat class is the default shown boat class for new boats. Set <code>null</code> if your boat is
      *            already initialized or you don't want a default boat class.
      */
     public CompetitorWithOptionalBoatAddDialog(StringMessages stringMessages, CompetitorWithBoatDTO competitorToAdd,
-            DialogCallback<CompetitorWithBoatDTO> callback) {
-        super(stringMessages.addCompetitor(), stringMessages, competitorToAdd, callback, null,
-                new CompetitorWithOptionalBoatAddDialog.CompetitorWithOptionalBoatValidator(stringMessages));
-        initWithBoatCheckBox();
-        boatDataPanel = new VerticalPanel();
-        boatDataPanel.setVisible(false);
-        this.ensureDebugId("CompetitorWithBoatAddDialog");
+            boolean createWithBoatByDefault, DialogCallback<CompetitorWithBoatDTO> callback) {
+        this(stringMessages, competitorToAdd, new CheckBox(stringMessages.withBoat()), createWithBoatByDefault, callback);
     }
-
-    private void initWithBoatCheckBox() {
-        withBoatCheckBox = new CheckBox();
-        withBoatCheckBox.addClickHandler(new ClickHandler() {
+    
+    public CompetitorWithOptionalBoatAddDialog(StringMessages stringMessages, CompetitorWithBoatDTO competitorToAdd,
+            CheckBox withBoatCheckBox, boolean createWithBoatByDefault, DialogCallback<CompetitorWithBoatDTO> callback) {
+        super(stringMessages.addCompetitor(), stringMessages, competitorToAdd, callback, null,
+                new CompetitorWithOptionalBoatAddDialog.CompetitorWithOptionalBoatValidator(withBoatCheckBox, stringMessages));
+        this.withBoatCheckBox = withBoatCheckBox;
+        this.withBoatCheckBox.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 boatDataPanel.setVisible(withBoatCheckBox.getValue());
                 validateAndUpdate();
             }
         });
-        withBoatCheckBox.setValue(false);
+        this.withBoatCheckBox.setValue(createWithBoatByDefault);
+        boatDataPanel = new VerticalPanel();
+        boatDataPanel.setVisible(createWithBoatByDefault);
+        this.ensureDebugId("CompetitorWithBoatAddDialog");
     }
 
     @Override
     protected Widget getAdditionalWidget() {
         VerticalPanel result = new VerticalPanel();
         result.add(super.getAdditionalWidget());
-        result.add(createWithBoatCheckBoxPanel());
+        result.add(withBoatCheckBox);
         boatDataPanel.add(createHeadlineLabel(getStringMessages().boat()));
         Grid grid = new Grid(5, 2);
         grid.setWidget(0, 0, new Label(getStringMessages().name()));
@@ -86,16 +89,6 @@ public class CompetitorWithOptionalBoatAddDialog extends AbstractCompetitorWithB
         return competitorWithOptionalBoat;
     }
 
-    private HorizontalPanel createWithBoatCheckBoxPanel() {
-        HorizontalPanel withBoatCheckBoxPanel = new HorizontalPanel();
-        withBoatCheckBoxPanel.add(new Label(getStringMessages().withBoat()));
-        withBoatCheckBoxPanel.getElement().getStyle().setMarginTop(10, Unit.PX);
-        withBoatCheckBoxPanel.getElement().getStyle().setMarginLeft(20, Unit.PX);
-        withBoatCheckBoxPanel.getElement().getStyle().setMarginBottom(10, Unit.PX);
-        withBoatCheckBoxPanel.add(withBoatCheckBox);
-        return withBoatCheckBoxPanel;
-    }
-
     @Override
     protected void setBoatClassNameEnabled(SuggestBox boatClassNameTextBox, boolean enabled) {
         super.setBoatClassNameEnabled(boatClassNameTextBox, true);
@@ -103,10 +96,12 @@ public class CompetitorWithOptionalBoatAddDialog extends AbstractCompetitorWithB
 
     protected static class CompetitorWithOptionalBoatValidator
             extends CompetitorWithoutBoatValidator<CompetitorWithBoatDTO> {
-        protected final StringMessages stringMessages;
+        private final StringMessages stringMessages;
+        private final CheckBox withBoatCheckBox;
 
-        public CompetitorWithOptionalBoatValidator(StringMessages stringMessages) {
+        public CompetitorWithOptionalBoatValidator(CheckBox withBoatCheckBox, StringMessages stringMessages) {
             super(stringMessages);
+            this.withBoatCheckBox = withBoatCheckBox;
             this.stringMessages = stringMessages;
         }
 
@@ -133,7 +128,6 @@ public class CompetitorWithOptionalBoatAddDialog extends AbstractCompetitorWithB
         private boolean isBoatClassInvalid(BoatDTO boatToValidate) {
             return boatToValidate.getBoatClass().getName() == null || boatToValidate.getBoatClass().getName().isEmpty();
         }
-
     }
 
 }

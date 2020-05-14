@@ -459,9 +459,9 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
         dialog.show();
     }
 
-    void openCompetitorWithBoatAddDialog(final CompetitorWithBoatDTO newCompetitor) {
+    void openCompetitorWithBoatAddDialog(final CompetitorWithBoatDTO newCompetitor, boolean createWithBoatByDefault) {
         final CompetitorWithOptionalBoatAddDialog dialog = new CompetitorWithOptionalBoatAddDialog(getStringMessages(),
-                newCompetitor, new DialogCallback<CompetitorWithBoatDTO>() {
+                newCompetitor, createWithBoatByDefault, new DialogCallback<CompetitorWithBoatDTO>() {
                     @Override
                     public void ok(final CompetitorWithBoatDTO competitor) {
                         if (competitor.hasBoat()) {

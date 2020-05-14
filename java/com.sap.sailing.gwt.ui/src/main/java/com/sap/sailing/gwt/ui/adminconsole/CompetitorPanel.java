@@ -39,11 +39,12 @@ public class CompetitorPanel extends SimplePanel implements BusyDisplay {
 
     public CompetitorPanel(final SailingServiceWriteAsync sailingServiceWrite, final UserService userService, final StringMessages stringMessages,
             final ErrorReporter errorReporter) {
-        this(sailingServiceWrite, userService, null, null, stringMessages, errorReporter);
+        this(sailingServiceWrite, userService, /* leaderboardName */ null, /* boatClassName */ null, /* createWithBoatByDefault */ true,
+                stringMessages, errorReporter);
     }
 
     public CompetitorPanel(final SailingServiceWriteAsync sailingServiceWrite, final UserService userService, final String leaderboardName,
-            String boatClassName, final StringMessages stringMessages, final ErrorReporter errorReporter) {
+            String boatClassName, boolean createWithBoatByDefault, final StringMessages stringMessages, final ErrorReporter errorReporter) {
         super();
         this.leaderboardName = leaderboardName;
         this.boatClassName = boatClassName;
@@ -56,27 +57,22 @@ public class CompetitorPanel extends SimplePanel implements BusyDisplay {
         this.setWidget(mainPanel);
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, COMPETITOR);
         mainPanel.add(buttonPanel);
-
         final Button refreshButton = buttonPanel.addUnsecuredAction(stringMessages.refresh(),
                 this::refreshCompetitorList);
         refreshButton.ensureDebugId("RefreshButton");
-
         final Button allowReloadButton = buttonPanel.addUnsecuredAction(stringMessages.allowReload(),
                 () -> competitorTable.allowUpdate(refreshableCompetitorSelectionModel.getSelectedSet()));
         refreshableCompetitorSelectionModel.addSelectionChangeHandler(
                 event -> allowReloadButton.setEnabled(!refreshableCompetitorSelectionModel.getSelectedSet().isEmpty()));
         allowReloadButton.setEnabled(!refreshableCompetitorSelectionModel.getSelectedSet().isEmpty());
-
         final Button addCompetitorButton = buttonPanel.addCreateAction(stringMessages.add(),
-                this::openAddCompetitorDialog);
+                ()->openAddCompetitorDialog(createWithBoatByDefault));
         addCompetitorButton.ensureDebugId("AddCompetitorButton");
-        
         buttonPanel.addUnsecuredAction(stringMessages.selectAll(), () -> {
             for (CompetitorDTO c : competitorTable.getDataProvider().getList()) {
                 refreshableCompetitorSelectionModel.setSelected(c, true);
             }
         });
-
         buttonPanel.addCreateAction(stringMessages.importCompetitors(), () -> {
             sailingServiceWrite.getCompetitorProviderNames(new AsyncCallback<Iterable<String>>() {
                 @Override
@@ -96,7 +92,6 @@ public class CompetitorPanel extends SimplePanel implements BusyDisplay {
                 }
             });
         });
-
         // only if this competitor panel is connected to a leaderboard, we want to enable invitations
         if (leaderboardName != null) {
             buttonPanel.addCreateAction(stringMessages.inviteSelectedCompetitors(), () -> {
@@ -106,10 +101,8 @@ public class CompetitorPanel extends SimplePanel implements BusyDisplay {
                 helper.inviteCompetitors(competitors, leaderboardName);
             });
         }
-
         mainPanel.add(busyIndicator);
         mainPanel.add(competitorTable);
-        
         if (leaderboardName != null) {
             refreshCompetitorList();
         }
@@ -136,13 +129,13 @@ public class CompetitorPanel extends SimplePanel implements BusyDisplay {
         };
     }
 
-    private void openAddCompetitorDialog() {
+    private void openAddCompetitorDialog(boolean createWithBoatByDefault) {
         CompetitorWithBoatDTOImpl competitorDTO = new CompetitorWithBoatDTOImpl();
-        BoatClassDTO boatClassDTO = new BoatClassDTO(boatClassName, null, null);
+        BoatClassDTO boatClassDTO = new BoatClassDTO(boatClassName, /* hullLength */ null, /* hullBeam */ null);
         BoatDTO boatDTO = new BoatDTO();
         boatDTO.setBoatClass(boatClassDTO);
         competitorDTO.setBoat(boatDTO);
-        competitorTable.openCompetitorWithBoatAddDialog(competitorDTO);
+        competitorTable.openCompetitorWithBoatAddDialog(competitorDTO, createWithBoatByDefault);
     }
 
     public void refreshCompetitorList() {

@@ -17,6 +17,7 @@ public class EditCompetitorsDialog extends DataEntryDialog<List<CompetitorWithBo
     private final ErrorReporter errorReporter;
     private final String leaderboardName;
     private final String boatClassName;
+    private final boolean createWithBoatByDefault;
 
     protected static class CompetitorsValidator implements Validator<List<CompetitorWithBoatDTO>> {
         public CompetitorsValidator() {
@@ -30,8 +31,8 @@ public class EditCompetitorsDialog extends DataEntryDialog<List<CompetitorWithBo
     }
         
     public EditCompetitorsDialog(final SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
-            final String leaderboardName, final String boatClassName, final StringMessages stringMessages,
-            final ErrorReporter errorReporter, DialogCallback<List<CompetitorWithBoatDTO>> callback) {
+            final String leaderboardName, final String boatClassName, boolean createWithBoatByDefault,
+            final StringMessages stringMessages, final ErrorReporter errorReporter, DialogCallback<List<CompetitorWithBoatDTO>> callback) {
         super(stringMessages.actionEditCompetitors(), null, stringMessages.ok(), stringMessages.cancel(),
                 new CompetitorsValidator(), callback);
         this.sailingServiceWrite = sailingServiceWrite;
@@ -40,6 +41,7 @@ public class EditCompetitorsDialog extends DataEntryDialog<List<CompetitorWithBo
         this.errorReporter = errorReporter;
         this.leaderboardName = leaderboardName;
         this.boatClassName = boatClassName;
+        this.createWithBoatByDefault = createWithBoatByDefault;
     }
 
     @Override
@@ -50,7 +52,7 @@ public class EditCompetitorsDialog extends DataEntryDialog<List<CompetitorWithBo
     @Override
     protected Widget getAdditionalWidget() {
         CompetitorPanel competitorPanel = new CompetitorPanel(sailingServiceWrite, userService, leaderboardName,
-                boatClassName, stringMessages, errorReporter);
+                boatClassName, createWithBoatByDefault, stringMessages, errorReporter);
         return competitorPanel;
     }
 }
