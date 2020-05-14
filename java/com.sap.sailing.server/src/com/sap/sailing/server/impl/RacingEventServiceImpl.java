@@ -1440,9 +1440,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             LockUtil.unlockAfterWrite(leaderboardsByNameLock);
         }
         // don't need the lock anymore to update DB
-        if (toRename instanceof Renamable) {
-            mongoObjectFactory.renameLeaderboard(oldName, newName);
-        }
+        // can have arrived here only if toRename instanceof Renamable because otherwise
+        // an exception would have been thrown above.
+        mongoObjectFactory.renameLeaderboard(oldName, newName);
     }
 
     @Override

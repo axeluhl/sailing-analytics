@@ -59,7 +59,6 @@ public class UpdateLeaderboard extends AbstractLeaderboardOperation<Leaderboard>
             leaderboard.setCrossLeaderboardResultDiscardingRule(new ThresholdBasedResultDiscardingRuleImpl(newDiscardingThresholds));
         }
         leaderboard.setDisplayName(newLeaderboardDisplayName);
-        
         if (leaderboard instanceof FlexibleLeaderboard) {
             FlexibleLeaderboard flexibleLeaderboard = (FlexibleLeaderboard) leaderboard;
             flexibleLeaderboard.setCourseAreas(Util.map(newCourseAreaIds, toState::getCourseArea));
@@ -67,5 +66,4 @@ public class UpdateLeaderboard extends AbstractLeaderboardOperation<Leaderboard>
         updateStoredLeaderboard(toState, leaderboard);
         return leaderboard;
     }
-
 }
