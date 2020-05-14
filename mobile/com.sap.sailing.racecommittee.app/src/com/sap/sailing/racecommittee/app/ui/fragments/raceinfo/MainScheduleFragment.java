@@ -24,6 +24,8 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
+import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
+import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.impl.SelectionItem;
 import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
@@ -38,6 +40,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.UUID;
 
 public class MainScheduleFragment extends BaseFragment implements View.OnClickListener, SelectionAdapter.ItemClick {
 
@@ -259,7 +262,6 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
 
     private void startRace() {
         ConfigurableStartModeFlagRacingProcedure lineStartRacingProcedure = null;
-
         Flags flag = null;
         if (getRaceState().getRacingProcedure() instanceof ConfigurableStartModeFlagRacingProcedure) {
             lineStartRacingProcedure = getRaceState().getTypedRacingProcedure();
@@ -272,10 +274,12 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
                     /* enable */ mItemRaceGroup.isChecked(),
                     AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE);
         }
+        final ReadonlyDataManager dataManager = OnlineDataManager.create(getActivity());
+        final UUID courseAreaId = dataManager.getDataStore().getCourseAreaId();
         if (mStartTimeDiff == null && mRaceId == null) {
-            getRaceState().forceNewStartTime(now, mStartTime);
+            getRaceState().forceNewStartTime(now, mStartTime, courseAreaId);
         } else {
-            getRaceState().forceNewDependentStartTime(now, mStartTimeDiff, mRaceId);
+            getRaceState().forceNewDependentStartTime(now, mStartTimeDiff, mRaceId, courseAreaId);
         }
         if (lineStartRacingProcedure != null) {
             lineStartRacingProcedure.setStartModeFlag(MillisecondsTimePoint.now(), flag);
@@ -311,14 +315,11 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
     }
 
     private String calcCountdown(TimePoint timePoint) {
-        Calendar now = (Calendar) mCalendar.clone();
-        now.setTime(timePoint.asDate());
-
         RacingActivity activity = (RacingActivity) getActivity();
-        Calendar startTime = (Calendar) mCalendar.clone();
-        startTime.setTime(activity.getStartTime().asDate());
-
-        return TimeUtils.calcDuration(TimeUtils.floorTime(now), TimeUtils.floorTime(startTime));
+        if (activity != null) {
+            return TimeUtils.formatDuration(activity.getStartTime(), timePoint, true);
+        }
+        return "";
     }
 
     private void openFragment(RaceFragment fragment) {

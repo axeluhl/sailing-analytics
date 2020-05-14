@@ -26,7 +26,7 @@ import com.sap.sailing.gwt.settings.client.leaderboard.MetaLeaderboardPerspectiv
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiCompetitorLeaderboardChartLifecycle;
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiCompetitorLeaderboardChartSettings;
 import com.sap.sailing.gwt.settings.client.utils.StoredSettingsLocationFactory;
-import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
+import com.sap.sailing.gwt.ui.client.AbstractSailingReadEntryPoint;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceHelper;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -44,7 +44,7 @@ import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorage;
 import com.sap.sse.security.ui.settings.StoredSettingsLocation;
 
-public class LeaderboardEntryPoint extends AbstractSailingEntryPoint implements ProvidesLeaderboardRouting {
+public class LeaderboardEntryPoint extends AbstractSailingReadEntryPoint implements ProvidesLeaderboardRouting {
     public static final long DEFAULT_REFRESH_INTERVAL_MILLIS = 3000l;
 
     private static final Logger logger = Logger.getLogger(LeaderboardEntryPoint.class.getName());

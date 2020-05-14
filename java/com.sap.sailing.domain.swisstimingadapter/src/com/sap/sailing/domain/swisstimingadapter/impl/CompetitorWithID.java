@@ -5,6 +5,8 @@ import java.util.List;
 import com.sap.sailing.domain.swisstimingadapter.CrewMember;
 
 public class CompetitorWithID extends AbstractCompetitor {
+
+    private static final long serialVersionUID = 3865630272442632120L;
     private final String idAsString;
     private List<CrewMember> crew;
     

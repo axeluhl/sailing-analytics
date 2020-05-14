@@ -20,7 +20,6 @@ public class DefaultErrorReporter<S extends StringMessages> implements ErrorRepo
     
     public DefaultErrorReporter(S stringMessages) {
         this.stringMessages = stringMessages;
-
         /* TODO: Make this more generic (e.g. make it support all kinds of messages) */
         errorDialogBox = createErrorDialog(); 
         persistentAlertLabel = new Label("");

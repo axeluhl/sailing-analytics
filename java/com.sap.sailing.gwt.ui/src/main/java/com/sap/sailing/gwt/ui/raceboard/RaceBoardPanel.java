@@ -63,6 +63,7 @@ import com.sap.sailing.gwt.ui.client.RaceTimePanelLifecycle;
 import com.sap.sailing.gwt.ui.client.RaceTimePanelSettings;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.MediaPlayerLifecycle;
 import com.sap.sailing.gwt.ui.client.media.MediaPlayerManager.PlayerChangeListener;
@@ -137,6 +138,7 @@ public class RaceBoardPanel
         extends AbstractPerspectiveComposite<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveOwnSettings>
         implements LeaderboardUpdateListener, PopupPositionProvider, RequiresResize {
     private final SailingServiceAsync sailingService;
+    private SailingServiceWriteAsync sailingServiceWrite;
     private final MediaServiceAsync mediaService;
     private final UUID eventId;
     private final StringMessages stringMessages;
@@ -182,12 +184,12 @@ public class RaceBoardPanel
     
     private final RaceBoardResources raceBoardResources = RaceBoardResources.INSTANCE; 
     private final RaceBoardMainCss mainCss = raceBoardResources.mainCss();
-    private final QuickRanksDTOFromLeaderboardDTOProvider quickRanksDTOProvider;
+    private final QuickFlagDataFromLeaderboardDTOProvider quickFlagDataProvider;
     private ManeuverTablePanel maneuverTablePanel;
 
     private static final RaceMapResources raceMapResources = GWT.create(RaceMapResources.class);
     private TrackingConnectorInfoDTO trackingConnectorInfo;
-    
+
     /**
      * @param eventId
      *            an optional event that can be used for "back"-navigation in case the race board shows a race in the
@@ -217,9 +219,10 @@ public class RaceBoardPanel
             UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider,
             boolean showChartMarkEditMediaButtonsAndVideo, boolean showHeaderPanel,
             Iterable<DetailType> availableDetailTypes, StrippedLeaderboardDTOWithSecurity leaderboardDTO,
-            final RaceWithCompetitorsAndBoatsDTO raceDTO, TrackingConnectorInfoDTO trackingConnectorInfo) {
+            final RaceWithCompetitorsAndBoatsDTO raceDTO, TrackingConnectorInfoDTO trackingConnectorInfo, SailingServiceWriteAsync sailingServiceWrite) {
         super(parent, componentContext, lifecycle, settings);
         this.sailingService = sailingService;
+        this.sailingServiceWrite = sailingServiceWrite;
         this.mediaService = mediaService;
         this.stringMessages = stringMessages;
         this.raceTimesInfoProvider = raceTimesInfoProvider;
@@ -251,14 +254,14 @@ public class RaceBoardPanel
         RaceTimePanelSettings raceTimePanelSettings = settings
                 .findSettingsByComponentId(raceTimePanelLifecycle.getComponentId());
         final RaceCompetitorSet raceCompetitorSet = new RaceCompetitorSet(competitorSelectionProvider);
-        quickRanksDTOProvider = new QuickRanksDTOFromLeaderboardDTOProvider(raceCompetitorSet, selectedRaceIdentifier);
+        quickFlagDataProvider = new QuickFlagDataFromLeaderboardDTOProvider(raceCompetitorSet, selectedRaceIdentifier);
 
         boolean isSimulationPermitted = userService.hasPermission(raceDTO, TrackedRaceActions.SIMULATOR);
 
         raceMap = new RaceMap(this, componentContext, raceMapLifecycle, defaultRaceMapSettings, sailingService, asyncActionsExecutor,
                 errorReporter, timer,
                 competitorSelectionProvider, raceCompetitorSet, stringMessages, selectedRaceIdentifier, 
-                raceMapResources, /* showHeaderPanel */ true, quickRanksDTOProvider, this::showInWindChart,
+                raceMapResources, /* showHeaderPanel */ true, quickFlagDataProvider, this::showInWindChart,
                 leaderboardName, leaderboardGroupName, isSimulationPermitted) {
             private static final String INDENT_SMALL_CONTROL_STYLE = "indentsmall";
             private static final String INDENT_BIG_CONTROL_STYLE = "indentbig";
@@ -335,7 +338,7 @@ public class RaceBoardPanel
             }
         }
         taggingPanel = new TaggingPanel(parent, componentContext, stringMessages, sailingService, userService, timer,
-                raceTimesInfoProvider, sharedTagTimePoint, sharedTagTitle, leaderboardDTO);
+                raceTimesInfoProvider, sharedTagTimePoint, sharedTagTitle, leaderboardDTO, sailingServiceWrite);
         addChildComponent(taggingPanel);
         taggingPanel.setVisible(showTaggingPanel);
         // Determine if the screen is large enough to initially display the leaderboard panel on the left side of the
@@ -345,7 +348,7 @@ public class RaceBoardPanel
                 competitorSearchTextBox, availableDetailTypes);
         addChildComponent(leaderboardPanel);
         leaderboardPanel.addVisibilityListener(visible->{
-            quickRanksDTOProvider.setLeaderboardNotCurrentlyUpdating(!visible);
+            quickFlagDataProvider.setLeaderboardNotCurrentlyUpdating(!visible);
         });
         leaderboardPanel.setTitle(stringMessages.leaderboard());
         leaderboardPanel.getElement().getStyle().setMarginLeft(6, Unit.PX);
@@ -421,7 +424,7 @@ public class RaceBoardPanel
                     errorReporter, true, true, leaderboardGroupName, leaderboardName);
             competitorChart.setVisible(false);
             competitorChart.updateSettings(multiCompetitorRaceChartSettings);
-            new SliceRaceHandler(sailingService, userService, errorReporter, competitorChart, selectedRaceIdentifier,
+            new SliceRaceHandler(sailingServiceWrite, userService, errorReporter, competitorChart, selectedRaceIdentifier,
                     leaderboardGroupName, leaderboardName, event, leaderboard, raceDTO);
             componentsForSideBySideViewer.add(competitorChart);
             windChart = new WindChart(this, getComponentContext(), windChartLifecycle, sailingService,
@@ -440,7 +443,7 @@ public class RaceBoardPanel
         if (showChartMarkEditMediaButtonsAndVideo) {
             componentsForSideBySideViewer.add(maneuverTablePanel);
         }
-        editMarkPassingPanel = new EditMarkPassingsPanel(this, getComponentContext(), sailingService,
+        editMarkPassingPanel = new EditMarkPassingsPanel(this, getComponentContext(), sailingServiceWrite,
                 selectedRaceIdentifier,
                 stringMessages,
                 competitorSelectionProvider, errorReporter, timer);
@@ -452,13 +455,13 @@ public class RaceBoardPanel
         editMarkPositionPanel = new EditMarkPositionPanel(this, getComponentContext(), raceMap, leaderboardPanel,
                 selectedRaceIdentifier,
                 leaderboardName, stringMessages, sailingService, timer, timeRangeWithZoomModel,
-                asyncActionsExecutor, errorReporter);
+                asyncActionsExecutor, errorReporter, sailingServiceWrite);
         if (showChartMarkEditMediaButtonsAndVideo) {
             editMarkPositionPanel.setLeaderboard(leaderboardPanel.getLeaderboard());
             componentsForSideBySideViewer.add(editMarkPositionPanel);
         }
         mediaPlayerManagerComponent = new MediaPlayerManagerComponent(this, getComponentContext(), mediaPlayerLifecycle,
-                sailingService, selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, userService,
+                sailingServiceWrite, selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, userService,
                 stringMessages, errorReporter, userAgent, this, mediaPlayerSettings, raceDTO);
 
         final LeaderboardWithSecurityFetcher asyncFetcher = new LeaderboardWithSecurityFetcher() {
@@ -674,7 +677,7 @@ public class RaceBoardPanel
         if (editMarkPositionPanel != null) {
             editMarkPositionPanel.setLeaderboard(leaderboard);
         }
-        quickRanksDTOProvider.updateQuickRanks(leaderboard);
+        quickFlagDataProvider.updateFlagData(leaderboard);
     }
 
     @Override

@@ -25,7 +25,8 @@ Require-Bundle: org.json.simple;bundle-version="1.1.0",
  com.sap.sse.security.common,
  com.sap.sse.security.interface,
  org.apache.shiro.core,
- org.apache.shiro.web
+ org.apache.shiro.web,
+ com.sap.sse.replication
 Import-Package: com.sap.sse.security.shared,
  javax.ws.rs;version="1.1.1",
  javax.ws.rs.core;version="1.1.1",

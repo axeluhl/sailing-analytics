@@ -572,7 +572,7 @@ public class ExpeditionAllInOneImporter {
                 startOfTracking, endOfTracking, regatta, regattaLeaderboard, raceColumn, fleet);
         if (startTime != null) {
             final RaceLog raceLog = raceColumn.getRaceLog(raceColumn.getFleets().iterator().next());
-            raceLog.add(new RaceLogStartTimeEventImpl(startTime, service.getServerAuthor(), /* priority */ 0, startTime));
+            raceLog.add(new RaceLogStartTimeEventImpl(startTime, service.getServerAuthor(), /* priority */ 0, startTime, /* courseAreaId */ null));
         }
         return new Triple<>(trackedRace, raceColumnName, fleetName);
     }
@@ -762,8 +762,11 @@ public class ExpeditionAllInOneImporter {
                 /* can boats of competitors change */ false, CompetitorRegistrationType.CLOSED,
                 /* registrationLinkSecret */ UUID.randomUUID().toString(), /* start date */ null, /* end date */ null,
                 UUID.randomUUID(),
-                regattaCreationParameters, true, scoringScheme, courseAreaId, buoyZoneRadiusInHullLengths, true, false,
-                rankingMetric));
+                regattaCreationParameters, true, scoringScheme,
+                courseAreaId==null?Collections.emptySet():Collections.singleton(courseAreaId),
+                buoyZoneRadiusInHullLengths, /* use start time inference */ true,
+                /* control tracking from start and finish times */ false,
+                /* autoRestartTrackingUponCompetitorSetChange */ false, rankingMetric));
         this.ensureBoatClassDetermination(regatta);
         service.apply(new AddColumnToSeries(regattaIdentifier, seriesName, raceColumnName));
         return regatta;

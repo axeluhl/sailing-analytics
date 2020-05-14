@@ -16,11 +16,9 @@ public class FlexibleLeaderboardCreateDialog extends FlexibleLeaderboardDialog {
         nameTextBox = createTextBox(null);
         nameTextBox.ensureDebugId("NameTextBox");
         nameTextBox.setVisibleLength(50);
-        
         displayNameTextBox = createTextBox(null);
         displayNameTextBox.ensureDebugId("DisplayNameTextBox");
         displayNameTextBox.setVisibleLength(50);
-
         scoringSchemeListBox = createScoringSchemeListBox(this, stringMessages);
         sailingEventsListBox = createSailingEventListBox();
         discardThresholdBoxes = new DiscardThresholdBoxes(this, stringMessages);

@@ -547,6 +547,16 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
+    public Distance getAbsoluteCrossTrackError(TimePoint timePoint) throws NoWindException {
+        return getTrackedLeg().getAbsoluteCrossTrackError(getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(timePoint, /* extrapolate */ true), timePoint);
+    }
+
+    @Override
+    public Distance getSignedCrossTrackError(TimePoint timePoint) throws NoWindException {
+        return getTrackedLeg().getSignedCrossTrackError(getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(timePoint, /* extrapolate */ true), timePoint);
+    }
+
+    @Override
     public Duration getGapToLeader(TimePoint timePoint, final Competitor leaderInLegAtTimePoint,
             final RankingInfo rankingInfo, WindPositionMode windPositionMode) throws NoWindException {
         return getGapToLeader(timePoint, leaderInLegAtTimePoint, windPositionMode, rankingInfo, new LeaderboardDTOCalculationReuseCache(timePoint));

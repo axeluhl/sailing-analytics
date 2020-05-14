@@ -1,6 +1,6 @@
 package com.sap.sailing.server.gateway.test.jaxrs;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 import java.util.Collections;
 
@@ -14,6 +14,7 @@ import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
+import com.sap.sse.rest.StreamingOutputUtil;
 
 public class CompetitorsResourceTest extends AbstractJaxRsApiTest {
     private final String name = "Heiko KRÖGER";
@@ -31,12 +32,11 @@ public class CompetitorsResourceTest extends AbstractJaxRsApiTest {
 
     @Test
     public void testGetCompetitorAsJson() throws Exception {
-        String jsonString = competitorsResource.getCompetitor(id, null, null).getEntity().toString();
+        String jsonString = StreamingOutputUtil.getEntityAsString(competitorsResource.getCompetitor(id, null, null).getEntity());
         JSONObject json = Helpers.toJSONObjectSafe(JSONValue.parse(jsonString));
-        assertTrue(json.get("id").equals(id));
-        assertTrue(json.get("name").equals(name));
-        assertTrue(json.get("nationality").equals(nationality));
-        assertTrue(json.get("countryCode").equals(countryCode));
+        assertEquals(id, json.get("id"));
+        assertEquals(name, json.get("name"));
+        assertEquals(nationality, json.get("nationality"));
+        assertEquals(countryCode, json.get("countryCode"));
     }
-
 }

@@ -24,7 +24,7 @@ import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.racemap.DefaultQuickRanksDTOProvider;
+import com.sap.sailing.gwt.ui.client.shared.racemap.DefaultQuickFlagDataProvider;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceCompetitorSet;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings;
@@ -33,7 +33,7 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapResources;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings.ZoomTypes;
-import com.sap.sailing.gwt.ui.raceboard.AbstractQuickRanksDTOProvider;
+import com.sap.sailing.gwt.ui.raceboard.AbstractQuickFlagDataProvider;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
@@ -219,7 +219,7 @@ public class AutoplayHelper {
                                                 callback, clientTimeWhenResponseWasReceived,
                                                 serverTimeDuringRequest, clientTimeWhenRequestWasSent,
                                                 raceTimesInfo, creationTimeProvider,
-                                                new DefaultQuickRanksDTOProvider());
+                                                new DefaultQuickFlagDataProvider());
                                     }
                                     
                                     @Override
@@ -274,7 +274,7 @@ public class AutoplayHelper {
             AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter, Timer raceboardTimer,
             AsyncCallback<RVWrapper> callback, long clientTimeWhenResponseWasReceived, Date serverTimeDuringRequest,
             long clientTimeWhenRequestWasSent, Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos,
-            RaceTimesInfoProvider creationTimeProvider, AbstractQuickRanksDTOProvider provider) {
+            RaceTimesInfoProvider creationTimeProvider, AbstractQuickFlagDataProvider provider) {
 
         ArrayList<ZoomTypes> typesToConsiderOnZoom = new ArrayList<>();
         // Other zoom types such as BOATS, TAILS or WINDSENSORS are not currently used as default zoom types.

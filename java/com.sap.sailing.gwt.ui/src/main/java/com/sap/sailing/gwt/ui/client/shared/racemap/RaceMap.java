@@ -14,7 +14,6 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
@@ -26,8 +25,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.NumberFormat;
-import com.google.gwt.maps.client.LoadApi;
-import com.google.gwt.maps.client.LoadApi.LoadLibrary;
 import com.google.gwt.maps.client.MapOptions;
 import com.google.gwt.maps.client.MapTypeId;
 import com.google.gwt.maps.client.MapWidget;
@@ -104,9 +101,9 @@ import com.sap.sailing.gwt.ui.client.RequiresDataInitialization;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
-import com.sap.sailing.gwt.ui.client.shared.filter.QuickRankProvider;
+import com.sap.sailing.gwt.ui.client.shared.filter.QuickFlagDataValuesProvider;
 import com.sap.sailing.gwt.ui.client.shared.racemap.BoatOverlay.DisplayMode;
-import com.sap.sailing.gwt.ui.client.shared.racemap.QuickRanksDTOProvider.QuickRanksListener;
+import com.sap.sailing.gwt.ui.client.shared.racemap.QuickFlagDataProvider.QuickFlagDataListener;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceCompetitorSet.CompetitorsForRaceDefinedListener;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings.ZoomTypes;
@@ -130,8 +127,8 @@ import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.CanvasOverlayV3;
 import com.sap.sailing.gwt.ui.shared.racemap.DetailTypeMetricOverlay;
-import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapAPIKey;
 import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapStyleHelper;
+import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapsLoader;
 import com.sap.sailing.gwt.ui.shared.racemap.RaceSimulationOverlay;
 import com.sap.sailing.gwt.ui.shared.racemap.WindStreamletsRaceboardOverlay;
 import com.sap.sse.common.Bearing;
@@ -164,9 +161,11 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
+import com.sap.sse.gwt.shared.ClientConfiguration;
+import com.sap.sse.gwt.shared.DebugConstants;
 
 public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> implements TimeListener, CompetitorSelectionChangeListener,
-        RaceTimesInfoProviderListener, TailFactory, ColorMapperChangedListener, RequiresDataInitialization, RequiresResize, QuickRankProvider {
+        RaceTimesInfoProviderListener, TailFactory, ColorMapperChangedListener, RequiresDataInitialization, RequiresResize, QuickFlagDataValuesProvider {
     /* Line colors */
     static final String ADVANTAGE_LINE_COLOR = "#ff9900"; // orange
     static final String START_LINE_COLOR = "#ffffff";
@@ -370,11 +369,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private int lastLegNumber;
 
     /**
-     * The strategy for maintaining and delivering the "quick ranks" information. The provider will be informed about
-     * quick ranks received from a {@link RaceMapDataDTO#quickRanks} field but may choose to ignore this information, e.g.,
-     * if it can assume that more current information about ranks and leg numbers is available from a {@link LeaderboardDTO}.
+     * The strategy for maintaining and delivering the "flag data" information. The provider will be informed about
+     * flag data (rank or speed) received from a {@link RaceMapDataDTO} field but may choose to ignore this information, e.g.,
+     * if it can assume that more current information about ranks and speed and leg numbers is available from a {@link LeaderboardDTO}.
      */
-    private QuickRanksDTOProvider quickRanksDTOProvider;
+    private QuickFlagDataProvider quickFlagDataProvider;
     
     private final CombinedWindPanel combinedWindPanel;
     private final TrueNorthIndicatorPanel trueNorthIndicatorPanel;
@@ -536,7 +535,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         }
     }
 
-    private class AdvantageLineUpdater implements QuickRanksListener {
+    private class AdvantageLineUpdater implements QuickFlagDataListener {
         @Override
         public void rankChanged(String competitorIdAsString, QuickRankDTO oldQuickRank, QuickRankDTO quickRank) {
             if (advantageLineCompetitor == null ||
@@ -545,6 +544,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 showAdvantageLine(getCompetitorsToShow(), getTimer().getTime(), /* timeForPositionTransitionMillis */ -1 /* (no transition) */);
             }
         }
+
+        @Override
+        public void speedInKnotsChanged(CompetitorDTO competitor, Double quickSpeedInKnots) {
+            // empty body
+        }
     }
     
     public RaceMap(Component<?> parent, ComponentContext<?> context, RaceMapLifecycle raceMapLifecycle,
@@ -552,7 +556,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             ErrorReporter errorReporter, Timer timer, RaceCompetitorSelectionProvider competitorSelection,
             RaceCompetitorSet raceCompetitorSet, StringMessages stringMessages, RegattaAndRaceIdentifier raceIdentifier, 
-            RaceMapResources raceMapResources, boolean showHeaderPanel, QuickRanksDTOProvider quickRanksDTOProvider,
+            RaceMapResources raceMapResources, boolean showHeaderPanel, QuickFlagDataProvider quickRanksDTOProvider,
             boolean isSimulationEnabled) {
         this(parent, context, raceMapLifecycle, raceMapSettings, sailingService, asyncActionsExecutor, errorReporter,
                 timer, competitorSelection, raceCompetitorSet, stringMessages, raceIdentifier, raceMapResources,
@@ -564,7 +568,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             ErrorReporter errorReporter, Timer timer, RaceCompetitorSelectionProvider competitorSelection,
             RaceCompetitorSet raceCompetitorSet, StringMessages stringMessages, RegattaAndRaceIdentifier raceIdentifier, 
-            RaceMapResources raceMapResources, boolean showHeaderPanel, QuickRanksDTOProvider quickRanksDTOProvider,
+            RaceMapResources raceMapResources, boolean showHeaderPanel, QuickFlagDataProvider quickRanksDTOProvider,
             String leaderboardName, String leaderboardGroupName, boolean isSimulationEnabled) {
         this(parent, context, raceMapLifecycle, raceMapSettings, sailingService, asyncActionsExecutor, errorReporter,
                 timer, competitorSelection, raceCompetitorSet, stringMessages, raceIdentifier, raceMapResources,
@@ -577,12 +581,12 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             ErrorReporter errorReporter, Timer timer, RaceCompetitorSelectionProvider competitorSelection, RaceCompetitorSet raceCompetitorSet,
             StringMessages stringMessages, RegattaAndRaceIdentifier raceIdentifier, RaceMapResources raceMapResources, boolean showHeaderPanel,
-            QuickRanksDTOProvider quickRanksDTOProvider, Consumer<WindSource> showWindChartForProvider,
+            QuickFlagDataProvider quickFlagDataProvider, Consumer<WindSource> showWindChartForProvider,
             String leaderboardName, String leaderboardGroupName, boolean isSimulationEnabled) {
         super(parent, context);
         this.maneuverMarkersAndLossIndicators = new ManeuverMarkersAndLossIndicators(this, sailingService, errorReporter, stringMessages);
         this.showHeaderPanel = showHeaderPanel;
-        this.quickRanksDTOProvider = quickRanksDTOProvider;
+        this.quickFlagDataProvider = quickFlagDataProvider;
         this.raceMapLifecycle = raceMapLifecycle;
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
@@ -602,8 +606,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         infoOverlaysForLinesForCourseGeometry = new HashMap<>();
         boatOverlays = new HashMap<>();
         competitorInfoOverlays = new CompetitorInfoOverlays(this, stringMessages);
-        quickRanksDTOProvider.addQuickRanksListener(competitorInfoOverlays);
-        quickRanksDTOProvider.addQuickRanksListener(new AdvantageLineUpdater());
+        quickFlagDataProvider.addQuickFlagDataListener(competitorInfoOverlays);
+        quickFlagDataProvider.addQuickFlagDataListener(new AdvantageLineUpdater());
         windSensorOverlays = new HashMap<WindSource, WindSensorOverlay>();
         courseMarkOverlays = new HashMap<String, CourseMarkOverlay>();
         courseMarkClickHandlers = new HashMap<String, HandlerRegistration>();
@@ -648,11 +652,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         return raceMapImageManager;
     }
 
-    public void setQuickRanksDTOProvider(QuickRanksDTOProvider newQuickRanksDTOProvider) {
-        if (this.quickRanksDTOProvider != null) {
-            this.quickRanksDTOProvider.moveListernersTo(newQuickRanksDTOProvider);
+    public void setQuickRanksDTOProvider(QuickFlagDataProvider newQuickRanksDTOProvider) {
+        if (this.quickFlagDataProvider != null) {
+            this.quickFlagDataProvider.moveListernersTo(newQuickRanksDTOProvider);
         }
-        this.quickRanksDTOProvider = newQuickRanksDTOProvider;
+        this.quickFlagDataProvider = newQuickRanksDTOProvider;
     }
     /**
      * The {@link WindDTO#dampenedTrueWindFromDeg} direction if {@link #lastCombinedWindTrackInfoDTO} has a
@@ -753,11 +757,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
 
     private void loadMapsAPIV3(final boolean showMapControls, final boolean showHeaderPanel,
             final boolean showSatelliteLayer) {
-        // load all the libs for use in the maps
-        ArrayList<LoadLibrary> loadLibraries = new ArrayList<LoadApi.LoadLibrary>();
-        loadLibraries.add(LoadLibrary.DRAWING);
-        loadLibraries.add(LoadLibrary.GEOMETRY);
-
         Runnable onLoad = new Runnable() {
             @Override
             public void run() {
@@ -766,7 +765,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 rootPanel.add(map, 0, 0);
                 if (showHeaderPanel) {
                     Image sapLogo = createSAPLogo();
-                    rootPanel.add(sapLogo);
+                    if (ClientConfiguration.getInstance().isBrandingActive()) {
+                        rootPanel.add(sapLogo);
+                    }
                 }
 
                 map.setControls(ControlPosition.LEFT_TOP, topLeftControlsWrapperPanel);
@@ -929,7 +930,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 RaceMap.this.managedInfoWindow = new ManagedInfoWindow(map);
             }
         };
-        LoadApi.go(onLoad, loadLibraries, GoogleMapAPIKey.V3_PARAMS);
+        GoogleMapsLoader.load(onLoad);
     }
 
     /**
@@ -1293,16 +1294,17 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                                         " in regatta "+raceIdentifier.getRegattaName(), e);
                             }
                         }
-                        quickRanksDTOProvider.quickRanksReceivedFromServer(raceMapDataDTO.quickRanks);
+                        quickFlagDataProvider.quickRanksReceivedFromServer(raceMapDataDTO.quickRanks);
                         if (isSimulationEnabled && settings.isShowSimulationOverlay()) {
                             lastLegNumber = raceMapDataDTO.coursePositions.currentLegNumber;
                                 simulationOverlay.updateLeg(Math.max(lastLegNumber, 1), /* clearCanvas */ false, raceMapDataDTO.simulationResultVersion);
                         }
-                        // Do boat specific actions
                         Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatData = raceMapDataDTO.boatPositions;
+                        Map<CompetitorDTO, Double> quickSpeedsFromServerInKnots = getCompetitorsSpeedInKnotsMap(boatData);
+                        quickFlagDataProvider.quickSpeedsInKnotsReceivedFromServer(quickSpeedsFromServerInKnots);
+                        // Do boat specific actions
                         updateBoatPositions(newTime, transitionTimeInMillis, hasTailOverlapForCompetitor,
                                 competitorsToShow, boatData, /* updateTailsOnly */ false, detailTypeChanged);
-                        
                         if (!isRedraw) {
                             // only remove markers if the time is actually changed
                             if (douglasMarkers != null) {
@@ -1318,12 +1320,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         showCourseSidelinesOnMap(raceMapDataDTO.courseSidelines);
                         showStartAndFinishAndCourseMiddleLines(raceMapDataDTO.coursePositions);
                         showStartLineToFirstMarkTriangle(raceMapDataDTO.coursePositions);
-
                         // Rezoom the map
                         LatLngBounds zoomToBounds = null;
                         if (!settings.getZoomSettings().containsZoomType(ZoomTypes.NONE)) {
                             // Auto zoom if setting is not manual
-
                             zoomToBounds = settings.getZoomSettings().getNewBounds(RaceMap.this);
                             if (zoomToBounds == null && !mapFirstZoomDone) {
                                 // the user-specified zoom couldn't find what it was looking for; try defaults once
@@ -1349,6 +1349,22 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 } else {
                     lastTimeChangeBeforeInitialization = newTime;
                 }
+            }
+
+            private Map<CompetitorDTO, Double> getCompetitorsSpeedInKnotsMap(
+                    Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatData) {
+                Map<CompetitorDTO, Double> quickSpeedsFromServerInKnots = new HashMap<>();
+                for (CompetitorDTO competitor : boatData.keySet()) {
+                    List<GPSFixDTOWithSpeedWindTackAndLegType> fixesList = boatData.get(competitor);
+                    if (!fixesList.isEmpty()) {
+                        SpeedWithBearingDTO speedWithBearing = fixesList.get(fixesList.size() - 1).speedWithBearing;
+                        if (speedWithBearing != null) {
+                            Double speedInKnots = speedWithBearing.speedInKnots;
+                            quickSpeedsFromServerInKnots.put(competitor, speedInKnots);
+                        }
+                    }
+                }
+                return quickSpeedsFromServerInKnots;
             }
         });
     }
@@ -1409,7 +1425,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             if (!updateTailsOnly) {
                 showCompetitorInfoOnMap(newTime, transitionTimeInMillis,
                         competitorSelection.getSelectedFilteredCompetitors());
-
                 // even though the wind data is retrieved by a separate call, re-draw the advantage line because it
                 // needs to adjust to new boat positions
                 showAdvantageLine(competitorsToShow, newTime, transitionTimeInMillis);
@@ -1582,9 +1597,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         if (lastBoatFix != null) {
                             CompetitorInfoOverlay competitorInfoOverlay = competitorInfoOverlays.get(competitorDTO);
                             final Integer rank = getRank(competitorDTO);
+                            final Double speed = getSpeedInKnots(competitorDTO);
                             if (competitorInfoOverlay == null) {
                                 competitorInfoOverlay = competitorInfoOverlays.createCompetitorInfoOverlay(RaceMapOverlaysZIndexes.INFO_OVERLAY_ZINDEX, competitorDTO,
-                                        lastBoatFix, rank, timeForPositionTransitionMillis);
+                                        lastBoatFix, rank, speed, timeForPositionTransitionMillis);
                                 competitorInfoOverlay.addToMap();
                             } else {
                                 competitorInfoOverlays.updatePosition(competitorDTO, lastBoatFix, timeForPositionTransitionMillis);
@@ -1710,14 +1726,14 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     
     /**
      * Returns a pair whose first component is the leg number (one-based) of the competitor returned as the second component.
-     * The competitor returned currently has the best ranking in the quick ranks provided by the {@link #quickRanksDTOProvider}.
+     * The competitor returned currently has the best ranking in the quick ranks provided by the {@link #quickFlagDataProvider}.
      */
     private com.sap.sse.common.Util.Pair<Integer, CompetitorDTO> getBestVisibleCompetitorWithOneBasedLegNumber(
             Iterable<CompetitorDTO> competitorsToShow) {
         CompetitorDTO leadingCompetitorDTO = null;
         int legOfLeaderCompetitor = -1;
         int bestOneBasedRank = Integer.MAX_VALUE;
-        for (QuickRankDTO competitorFromBestToWorstAndOneBasedLegNumber : quickRanksDTOProvider.getQuickRanks().values()) {
+        for (QuickRankDTO competitorFromBestToWorstAndOneBasedLegNumber : quickFlagDataProvider.getQuickRanks().values()) {
             if (Util.contains(competitorsToShow, competitorFromBestToWorstAndOneBasedLegNumber.competitor) && 
                     competitorFromBestToWorstAndOneBasedLegNumber.legNumberOneBased != 0 &&
                     competitorFromBestToWorstAndOneBasedLegNumber.oneBasedRank < bestOneBasedRank) {
@@ -1735,7 +1751,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
 
     final static Distance advantageLineLength = new MeterDistance(1000); // TODO this should probably rather scale with the visible area of the map; bug 616
     private void showAdvantageLine(Iterable<CompetitorDTO> competitorsToShow, Date date, long timeForPositionTransitionMillis) {
-        if (map != null && lastRaceTimesInfo != null && !quickRanksDTOProvider.getQuickRanks().isEmpty()
+        if (map != null && lastRaceTimesInfo != null && !quickFlagDataProvider.getQuickRanks().isEmpty()
                 && lastCombinedWindTrackInfoDTO != null) {
             boolean drawAdvantageLine = false;
             if (settings.getHelpLinesSettings().isVisible(HelpLineTypes.ADVANTAGELINE)) {
@@ -3196,13 +3212,18 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     @Override
     public Integer getRank(CompetitorDTO competitor) {
         final Integer result;
-        QuickRankDTO quickRank = quickRanksDTOProvider.getQuickRanks().get(competitor.getIdAsString());
+        QuickRankDTO quickRank = quickFlagDataProvider.getQuickRanks().get(competitor.getIdAsString());
         if (quickRank != null) {
             result = quickRank.oneBasedRank;
         } else {
             result = null;
         }
         return result;
+    }
+    
+    @Override
+    public Double getSpeedInKnots(CompetitorDTO competitor) {
+        return quickFlagDataProvider.getQuickSpeedsInKnots(competitor);
     }
     
     private Image createSAPLogo() {
@@ -3215,6 +3236,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             }
         });
         sapLogo.setStyleName("raceBoard-Logo");
+        sapLogo.getElement().setAttribute(DebugConstants.DEBUG_ID_ATTRIBUTE, "raceBoardSapLogo");
         return sapLogo;
     }
 

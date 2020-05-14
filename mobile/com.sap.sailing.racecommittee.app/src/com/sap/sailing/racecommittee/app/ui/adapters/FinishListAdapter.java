@@ -1,20 +1,8 @@
 package com.sap.sailing.racecommittee.app.ui.adapters;
 
-import java.util.List;
-
-import com.sap.sailing.android.shared.util.ViewHelper;
-import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultWithIdImpl;
-import com.sap.sailing.racecommittee.app.ui.adapters.dragandswipelist.BaseDraggableSwipeAdapter;
-import com.sap.sailing.racecommittee.app.ui.adapters.dragandswipelist.BaseDraggableSwipeViewHolder;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.TrackingListFragment;
-import com.sap.sailing.racecommittee.app.ui.utils.CompetitorUtils;
-import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
-
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
@@ -27,6 +15,18 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultWithIdImpl;
+import com.sap.sailing.racecommittee.app.ui.adapters.dragandswipelist.BaseDraggableSwipeAdapter;
+import com.sap.sailing.racecommittee.app.ui.adapters.dragandswipelist.BaseDraggableSwipeViewHolder;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.TrackingListFragment;
+import com.sap.sailing.racecommittee.app.ui.utils.CompetitorUtils;
+import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
+
+import java.util.List;
+
 public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapter.ItemViewHolder> {
 
     private final String TAG = FinishListAdapter.class.getName();
@@ -36,12 +36,12 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
     private final boolean mCanBoatsOfCompetitorsChangePerRace;
     private TrackingListFragment mParent;
 
-    public FinishListAdapter(Context context, List<CompetitorResultWithIdImpl> competitors,
-            boolean canBoatsOfCompetitorsChangePerRace, TrackingListFragment parent) {
+    public FinishListAdapter(Context context, CompetitorResultsList<CompetitorResultWithIdImpl> competitors,
+                             boolean canBoatsOfCompetitorsChangePerRace, TrackingListFragment parent) {
         super(context, competitors, parent);
         setHasStableIds(true);
         mContext = context;
-        mItems = (CompetitorResultsList<CompetitorResultWithIdImpl>) competitors;
+        mItems = competitors;
         mCanBoatsOfCompetitorsChangePerRace = canBoatsOfCompetitorsChangePerRace;
         mParent = parent;
     }
@@ -69,14 +69,12 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
      * Override {@link #onBindViewHolder(RecyclerView.ViewHolder, int, List)} instead if Adapter can handle efficient
      * partial bind.
      *
-     * @param holder
-     *            The ViewHolder which should be updated to represent the contents of the item at the given position in
-     *            the data set.
-     * @param position
-     *            The position of the item within the adapter's data set.
+     * @param holder   The ViewHolder which should be updated to represent the contents of the item at the given position in
+     *                 the data set.
+     * @param position The position of the item within the adapter's data set.
      */
     @Override
-    public void onBindViewHolder(ItemViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ItemViewHolder holder, int position) {
         CompetitorResultWithIdImpl item = mItems.get(position);
         if (item.getOneBasedRank() != 0) {
             holder.position.setText(String.valueOf(item.getOneBasedRank()));
@@ -86,7 +84,7 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
         holder.vesselId.setVisibility(View.GONE);
         if (mCanBoatsOfCompetitorsChangePerRace && item.getBoat() != null) {
             holder.vesselId.setVisibility(View.VISIBLE);
-            holder.vesselId.setText(item.getBoat().getSailID());
+            holder.vesselId.setText(item.getBoatSailId());
             if (item.getBoat().getColor() != null) {
                 ViewHelper.setColors(holder.vesselId, item.getBoat().getColor().getAsHtml());
             }
@@ -94,17 +92,18 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
         holder.competitor.setText(CompetitorUtils.getDisplayName(item));
         Drawable warning;
         switch (item.getMergeState()) {
-        case ERROR:
-            warning = ContextCompat.getDrawable(mContext, R.drawable.ic_warning_red);
-            break;
-        case WARNING:
-            warning = ContextCompat.getDrawable(mContext, R.drawable.ic_warning_yellow);
-            break;
-        default:
-            warning = null;
-            break;
+            case ERROR:
+                warning = ContextCompat.getDrawable(mContext, R.drawable.ic_warning_red);
+                break;
+            case WARNING:
+                warning = ContextCompat.getDrawable(mContext, R.drawable.ic_warning_yellow);
+                break;
+            default:
+                warning = null;
+                break;
         }
         holder.warning.setImageDrawable(warning);
+        holder.warning.setVisibility(warning == null ? View.GONE : View.VISIBLE);
         holder.penalty.setText(item.getMaxPointsReason().name());
         holder.penalty.setVisibility(item.getMaxPointsReason().equals(MaxPointsReason.NONE) ? View.GONE : View.VISIBLE);
         int bgId = R.attr.sap_gray_black_30;
@@ -132,19 +131,27 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
 
     @Override
     public boolean onItemMove(int fromPosition, int toPosition) {
+        return onItemMove(fromPosition, toPosition, true);
+    }
+
+    public boolean onItemMove(int fromPosition, int toPosition, boolean adjustRanks) {
         // Note: fromPosition may be greater than toPosition if item is moved towards the top of the list
         boolean wasMoved = super.onItemMove(fromPosition, toPosition);
         if (wasMoved) {
-            mParent.onItemMove(fromPosition, toPosition);
+            mParent.onItemMove(fromPosition, toPosition, adjustRanks);
         }
         return wasMoved;
     }
 
     @Override
     public void onItemRemove(int position) {
+        onItemRemove(position, true);
+    }
+
+    public void onItemRemove(int position, boolean adjustRanks) {
         CompetitorResultWithIdImpl item = mItems.get(position);
         super.onItemRemove(position);
-        mParent.onItemRemove(position, item);
+        mParent.onItemRemove(position, item, adjustRanks);
     }
 
     private static Pair<Integer, Integer> getItemDraggableRange(
@@ -171,18 +178,16 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
         public ItemViewHolder(View itemView) {
             super(itemView);
 
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    CompetitorResultWithIdImpl item = mItems.get(getAdapterPosition());
+                    mParent.onItemEdit(item);
+                }
+            });
+
             container = ViewHelper.get(itemView, R.id.container);
             dragHandle = ViewHelper.get(itemView, R.id.drag_handle);
-            editItem = ViewHelper.get(itemView, R.id.edit_item);
-            if (editItem != null) {
-                editItem.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        CompetitorResultWithIdImpl item = mItems.get(getAdapterPosition());
-                        mParent.onItemEdit(item);
-                    }
-                });
-            }
             vesselId = ViewHelper.get(itemView, R.id.vessel_id);
             competitor = ViewHelper.get(itemView, R.id.competitor);
             warning = ViewHelper.get(itemView, R.id.warning_sign);
@@ -206,11 +211,6 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
          */
         @Override
         public void onItemSelected() {
-            itemView.setBackgroundColor(Color.LTGRAY);
-            CompetitorResultWithIdImpl item = mItems.get(getAdapterPosition());
-            if (item.getOneBasedRank() == 0) {
-                container.setBackgroundColor(ThemeHelper.getColor(mContext, R.attr.sap_gray_black_30));
-            }
         }
 
         /**
@@ -219,8 +219,6 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
          */
         @Override
         public void onItemClear() {
-            itemView.setBackgroundColor(0);
-            container.setBackgroundColor(0);
         }
 
         @Override

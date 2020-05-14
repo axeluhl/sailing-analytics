@@ -65,13 +65,10 @@ public class RoleWithSecurityDTOTableWrapper extends
         }, tableResources);
         this.userSelectionModel = userSelectionModel;
         this.userSelectionModel.addSelectionChangeHandler(e -> refreshRoleList());
-
         final ListHandler<RoleWithSecurityDTO> userColumnListHandler = getColumnSortHandler();
-
         // users table
         final TextColumn<RoleWithSecurityDTO> userGroupWithSecurityDTONameColumn = new AbstractSortableTextColumn<RoleWithSecurityDTO>(
                 dto -> dto.toString(), userColumnListHandler);
-
         // add action column
         final AccessControlledActionsColumn<RoleWithSecurityDTO, PermissionAndRoleImagesBarCell> userActionColumn = create(
                 new PermissionAndRoleImagesBarCell(stringMessages), userService);
@@ -85,7 +82,6 @@ public class RoleWithSecurityDTOTableWrapper extends
                         selectedRole.getRoleDefinition().getId(),
                         qualifiedForTenant == null ? null : qualifiedForTenant.getName(),
                         new AsyncCallback<SuccessInfo>() {
-
                             @Override
                             public void onFailure(Throwable caught) {
                                 Window.alert(stringMessages.couldNotRemoveRoleFromUser(selectedObject.getName(),
@@ -106,25 +102,21 @@ public class RoleWithSecurityDTOTableWrapper extends
                 Window.alert(stringMessages.pleaseSelect());
             }
         });
-
         final HasPermissions type = SecuredSecurityTypes.PERMISSION_ASSOCIATION;
-
         final EditOwnershipDialog.DialogConfig<RoleWithSecurityDTO> configOwnership = EditOwnershipDialog
                 .create(userService.getUserManagementService(), type, permission -> refreshRoleList(), stringMessages);
-
         final EditACLDialog.DialogConfig<RoleWithSecurityDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementService(), type, user -> user.getAccessControlList(), stringMessages);
-        userActionColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, configOwnership::openDialog);
+        userActionColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, configOwnership::openOwnershipDialog);
         userActionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                permission -> configACL.openDialog(permission));
-
+                permission -> configACL.openACLDialog(permission));
         // filter field configuration
         filterField = new LabeledAbstractFilterablePanel<RoleWithSecurityDTO>(new Label(stringMessages.filterRoles()),
                 new ArrayList<RoleWithSecurityDTO>(), dataProvider, stringMessages) {
             @Override
             public Iterable<String> getSearchableStrings(RoleWithSecurityDTO t) {
                 List<String> string = new ArrayList<String>();
-                string.add(t.getName());
+                string.add(t.toString());
                 return string;
             }
 
@@ -135,9 +127,7 @@ public class RoleWithSecurityDTOTableWrapper extends
         };
         filterField.setUpdatePermissionFilterForCheckbox(role -> userService.hasPermission(role, DefaultActions.UPDATE));
         registerSelectionModelOnNewDataProvider(filterField.getAllListDataProvider());
-
         mainPanel.insert(filterField, 0);
-
         // setup table
         table.addColumnSortHandler(userColumnListHandler);
         table.addColumn(userGroupWithSecurityDTONameColumn, stringMessages.roleName());

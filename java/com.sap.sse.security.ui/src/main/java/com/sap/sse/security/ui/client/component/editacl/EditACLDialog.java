@@ -1,6 +1,7 @@
 package com.sap.sse.security.ui.client.component.editacl;
 
 import static com.sap.sse.gwt.client.Notification.NotificationType.ERROR;
+import static com.sap.sse.gwt.shared.DebugConstants.DEBUG_ID_ATTRIBUTE;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -66,6 +67,8 @@ public class EditACLDialog extends DataEntryDialog<AclDialogResult> {
                         aclEditPanel.updateAcl(result);
                     }
                 });
+       
+       super.getDialogBox().getElement().setAttribute(DEBUG_ID_ATTRIBUTE, "AclDialog");
     }
 
     @Override
@@ -80,7 +83,7 @@ public class EditACLDialog extends DataEntryDialog<AclDialogResult> {
 
     /**
      * Creates a new {@link DialogConfig dialog configuration} instance which can be (re-)used to
-     * {@link DialogConfig#openDialog(Named) open} a {@link EditACLDialog dialog}.
+     * {@link DialogConfig#openACLDialog(Named) open} a {@link EditACLDialog dialog}.
      * 
      * @param userManagementService
      *            {@link UserManagementServiceAsync} to use to set the secured object's ownership
@@ -123,7 +126,7 @@ public class EditACLDialog extends DataEntryDialog<AclDialogResult> {
          * @param securedObject
          *            {@link Named} {@link SecuredObject} instance to edit ownerships for
          */
-        public void openDialog(final T securedObject) {
+        public void openACLDialog(final T securedObject) {
             new EditACLDialog(userManagementService, identifierFactory.apply(securedObject),
                     availableActionsFactory.get(), stringMessages, new EditAclDialogCallback(securedObject)).show();
         }

@@ -298,7 +298,7 @@ public class ReplicationReceiverImpl implements ReplicationReceiver, Runnable {
     
     private <S, O extends OperationWithResult<S, ?>> void readOperationAndApplyOrQueueIt(Replicable<S, O> replicable,
             byte[] serializedOperation) throws ClassNotFoundException, IOException {
-        OperationWithResult<S, ?> operation = replicable.readOperation(new ByteArrayInputStream(serializedOperation));
+        O operation = replicable.readOperation(new ByteArrayInputStream(serializedOperation));
         applyOrQueue(operation, replicable);
     }
 
@@ -309,7 +309,7 @@ public class ReplicationReceiverImpl implements ReplicationReceiver, Runnable {
      * @param replicable
      *            the replicable to which to apply or for which to queue the operation
      */
-    private synchronized <S, O extends OperationWithResult<S, ?>> void applyOrQueue(OperationWithResult<S, ?> operation, Replicable<S, O> replicable) {
+    private synchronized <S, O extends OperationWithResult<S, ?>> void applyOrQueue(O operation, Replicable<S, O> replicable) {
         if (isSuspended()) {
             queue(operation, replicable);
         } else {
@@ -317,7 +317,7 @@ public class ReplicationReceiverImpl implements ReplicationReceiver, Runnable {
         }
     }
 
-    private synchronized <S, O extends OperationWithResult<S, ?>> void apply(final OperationWithResult<S, ?> operation, Replicable<S, O> replicable) {
+    private synchronized <S, O extends OperationWithResult<S, ?>> void apply(final O operation, Replicable<S, O> replicable) {
         final int operationCount = ++operationCounter;
         logger.fine(()->""+operationCount+": Applying "+operation);
         Runnable runnable = () -> replicable.applyReceivedReplicated(operation);
@@ -384,10 +384,9 @@ public class ReplicationReceiverImpl implements ReplicationReceiver, Runnable {
     }
 
     @SuppressWarnings("unchecked")
-    private <S, O extends OperationWithResult<S, ?>> void applyWithCast(OperationWithResult<?, ?> operation, Replicable<?, ?> replicable) {
-        OperationWithResult<S, ?> castOperation = (OperationWithResult<S, ?>) operation;
+    private <S, O extends OperationWithResult<S, ?>> void applyWithCast(O operation, Replicable<?, ?> replicable) {
         Replicable<S, O> castReplicable = (Replicable<S, O>) replicable;
-        apply(castOperation, castReplicable);
+        apply(operation, castReplicable);
     }
 
     @Override

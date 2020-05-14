@@ -31,7 +31,7 @@ import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.adminconsole.FileStorageServiceConnectionTestObservable;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.popup.PopoutWindowPlayer;
 import com.sap.sailing.gwt.ui.client.media.popup.PopoutWindowPlayer.PlayerCloseListener;
@@ -94,7 +94,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     private List<PlayerChangeListener> playerChangeListener = new ArrayList<>();
 
     public MediaPlayerManagerComponent(Component<?> parent, ComponentContext<?> context,
-            MediaPlayerLifecycle mediaPlayerLifecycle, SailingServiceAsync sailingService,
+            MediaPlayerLifecycle mediaPlayerLifecycle, SailingServiceWriteAsync sailingServiceWrite,
             RegattaAndRaceIdentifier selectedRaceIdentifier,
             RaceTimesInfoProvider raceTimesInfoProvider, Timer raceTimer, MediaServiceAsync mediaService,
             UserService userService, StringMessages stringMessages, ErrorReporter errorReporter,
@@ -118,7 +118,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
         this.userAgent = userAgent;
         this.popupPositionProvider = popupPositionProvider;
         this.settings = settings;
-        this.storageServiceAvailable = new FileStorageServiceConnectionTestObservable(sailingService);
+        this.storageServiceAvailable = new FileStorageServiceConnectionTestObservable(sailingServiceWrite);
         Window.addCloseHandler(this);
         Window.addWindowClosingHandler(this);
 

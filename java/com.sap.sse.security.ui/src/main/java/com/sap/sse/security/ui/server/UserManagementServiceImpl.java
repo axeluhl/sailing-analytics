@@ -244,21 +244,6 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public AccessControlListDTO updateAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
-            Map<String, Set<String>> permissionStrings) throws UnauthorizedException {
-        if (SecurityUtils.getSubject()
-                .isPermitted(idOfAccessControlledObject.getStringPermission(DefaultActions.CHANGE_ACL))) {
-            Map<UserGroup, Set<String>> permissionMap = new HashMap<>();
-            for (String group : permissionStrings.keySet()) {
-                permissionMap.put(getSecurityService().getUserGroupByName(group), permissionStrings.get(group));
-            }
-            return securityDTOFactory.createAccessControlListDTO(getSecurityService().updateAccessControlList(idOfAccessControlledObject, permissionMap));
-        } else {
-            throw new UnauthorizedException("Not permitted to grant and revoke permissions for user");
-        }
-    }
-
-    @Override
     public AccessControlListDTO addToAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
             String groupIdAsString, String action) throws UnauthorizedException {
         if (SecurityUtils.getSubject()
@@ -494,22 +479,20 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         return new SuccessInfo(true, "Logged out.", /* redirectURL */ null, null);
     }
 
-    public UserDTO createSimpleUser(String username, String email, String password, String fullName, String company,
-            String localeName, String validationBaseURL)
+    public UserDTO createSimpleUser(final String username, final String email, final String password,
+            final String fullName, final String company, final String localeName, final String validationBaseURL)
             throws UserManagementException, MailException, UnauthorizedException {
-
         User user = getSecurityService().checkPermissionForObjectCreationAndRevertOnErrorForUserCreation(username,
                 new Callable<User>() {
                     @Override
                     public User call() throws Exception {
                         if (userGroupExists(username + SecurityService.TENANT_SUFFIX)) {
                             throw new UserManagementException(
-                                    "User tenant already exists, please chose a different username!");
+                                    "User " + username + " already exists, please chose a different username!");
                         }
                         try {
                             User newUser = getSecurityService().createSimpleUser(username, email, password, fullName,
-                                    company,
-                                    getLocaleFromLocaleName(localeName), validationBaseURL,
+                                    company, getLocaleFromLocaleName(localeName), validationBaseURL,
                                     getSecurityService().getDefaultTenantForCurrentUser());
                             return newUser;
                         } catch (UserManagementException | UserGroupManagementException e) {
@@ -880,7 +863,6 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                                     .getQualifiedObjectIdentifier(associationTypeIdentifier);
                             getSecurityService().addToAccessControlList(qualifiedObjectAssociationIdentifier,
                                     null, DefaultActions.READ.name());
-
                             getSecurityService().addRoleForUser(user, role);
                             logger.info(message);
                         }

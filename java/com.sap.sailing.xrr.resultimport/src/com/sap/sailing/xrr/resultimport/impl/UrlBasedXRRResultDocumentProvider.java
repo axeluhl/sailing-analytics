@@ -10,9 +10,9 @@ import java.util.logging.Logger;
 
 import javax.xml.bind.JAXBException;
 
+import com.sap.sailing.domain.resultimport.ResultUrlProvider;
 import com.sap.sailing.resultimport.ResultDocumentDescriptor;
 import com.sap.sailing.resultimport.ResultDocumentProvider;
-import com.sap.sailing.resultimport.ResultUrlProvider;
 import com.sap.sailing.xrr.resultimport.Parser;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
 import com.sap.sailing.xrr.schema.RegattaResults;
@@ -31,7 +31,7 @@ public abstract class UrlBasedXRRResultDocumentProvider implements ResultDocumen
     @Override
     public Iterable<ResultDocumentDescriptor> getResultDocumentDescriptors() throws IOException {
         List<ResultDocumentDescriptor> result = new ArrayList<>();
-        for (URL url : resultUrlProvider.getUrls()) {
+        for (URL url : resultUrlProvider.getReadableUrls()) {
             URLConnection eventResultConn = url.openConnection();
             InputStream is = (InputStream) eventResultConn.getContent();
             Parser parser = parserFactory.createParser(is, url.toString());

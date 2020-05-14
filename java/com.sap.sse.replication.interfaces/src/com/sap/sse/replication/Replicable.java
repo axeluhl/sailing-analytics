@@ -50,13 +50,23 @@ import com.sap.sse.util.ThreadLocalTransporter;
  *            the type of state to which the operations are applied; usually this will be set to the implementing
  *            subclass
  * @param <O>
- *            type of operation that the replicable accepts
+ *            type of operation that the replicable accepts; it is good practice to declare a dedicated interface for
+ *            the operation type of each {@link Replicable} implementation class. This helps to avoid accidentally
+ *            passing an operation intended for a different replicable service. Make sure to implement operation types
+ *            as dedicated classes and withstand the temptation to use lambdas. While lambdas may work at first and look
+ *            nice and compact, two major problems emerge (see also
+ *            <a href="https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=5197">bug 5197</a>): you may unintentionally
+ *            reference comprehensive contextual state in your lambda which then needs to get serialized with it; and by
+ *            using {@link Serializable} lambdas, serialization compatibility is brittle because it depends on the lambda's
+ *            position in its type, and hence code insertions, removals or changes in method ordering can already cause
+ *            unnecessary incompatibilities. Specifically for {@link Replicable} services shared by many instances this should
+ *            be avoided at any cost because incompatible changes then require upgrading the entire landscape.
  * 
  * @author Axel Uhl (D043530)
  *
  */
 public interface Replicable<S, O extends OperationWithResult<S, ?>>
-extends OperationsToMasterSender<S, OperationWithResult<S, ?>>, Replicator<S, O> {
+extends OperationsToMasterSender<S, O>, Replicator<S, O> {
     static final Logger logger = Logger.getLogger(Replicable.class.getName());
     
     /**
@@ -71,31 +81,35 @@ extends OperationsToMasterSender<S, OperationWithResult<S, ?>>, Replicator<S, O>
      * If this object is not a replica, executes the <code>operation</code>. By
      * {@link OperationExecutionListener#executed(OperationWithTransformationSupport) notifying} all registered
      * operation execution listeners about the execution of the operation, the <code>operation</code> will in particular
-     * be replicated to all replicas registered.
+     * be replicated to all replicas registered, unless its
+     * {@link OperationWithResult#isRequiresExplicitTransitiveReplication()} method returns {@code false}.
      * <p>
      * 
-     * If this object is a replica, the operation will not be executed locally and will instead be forwarded to the
+     * If this object is a replica, the operation will be executed locally and will then be forwarded to the
      * master server for execution from where it is expected to replicate to all replicas including this object where
-     * the {@link #applyReplicated(OperationWithResult)} method will then carry out the operation.
+     * the {@link #applyReplicated(OperationWithResult)} method will identify it as the one that originated here and
+     * ignore it (see also {@link OperationWithResultWithIdWrapper}).
      * <p>
      * 
      * To determine whether this {@link Replicable} is a replica, this method uses the
      * {@link ReplicationService#getReplicatingFromMaster()} method which also provides the master server's connectivity
      * information required to forward the <code>operation</code>.
      */
-    <T> T apply(OperationWithResult<S, T> operation);
+    <T> T apply(O operation);
 
     /**
      * Executes an operation received from another (usually "master") server where this object lives on a replica. The
-     * <code>operation</code>'s effects also need to be replicated to any replica of this service known and
+     * <code>operation</code>'s effects also need to be replicated to any replica of this service known, so this method
      * {@link OperationExecutionListener#executed(OperationWithTransformationSupport) notifies} all registered operation
-     * execution listeners about the execution of the operation.<p>
+     * execution listeners about the execution of the operation, unless its
+     * {@link OperationWithResult#isRequiresExplicitTransitiveReplication()} method returns {@code false}.
+     * <p>
      * 
      * One important difference to {@link #apply(OperationWithResult)} is that the operation will be applied immediately
      * in any case whereas {@link #apply(OperationWithResult)} will check first if this is a replica and in that case
      * forward the operation to the master for first execution instead of initiating the execution on the replica.
      */
-    <T> T applyReplicated(OperationWithResult<S, T> operation);
+    <T> T applyReplicated(O operation);
     
     void startedReplicatingFrom(ReplicationMasterDescriptor master);
     
@@ -158,7 +172,7 @@ extends OperationsToMasterSender<S, OperationWithResult<S, ?>>, Replicator<S, O>
      * sent to the master}. If so, the operation is ignored because it has been applied before to this replica.
      * Otherwise, it is locally applied and replicated, using a call to {@link #applyReplicated(OperationWithResult)}. 
      */
-    default void applyReceivedReplicated(OperationWithResult<S, ?> operation) {
+    default void applyReceivedReplicated(O operation) {
         if (!hasSentOperationToMaster(operation)) {
             assert !isCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster();
             try {

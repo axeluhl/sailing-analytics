@@ -32,6 +32,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
@@ -47,7 +48,7 @@ import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
 public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
     private final StringMessages stringMessages;
-    private final SailingServiceAsync sailingService;
+    private final SailingServiceWriteAsync sailingServiceWrite;
     private final ErrorReporter errorReporter;
     private final CellTable<ExpeditionDeviceConfiguration> allDeviceConfigurations;
     private final LabeledAbstractFilterablePanel<ExpeditionDeviceConfiguration> filterDeviceConfigurationsPanel;
@@ -76,8 +77,8 @@ public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
         }
     }
     
-    public ExpeditionDeviceConfigurationsPanel(final SailingServiceAsync sailingService, final ErrorReporter errorReporter, final StringMessages stringMessages) {
-        this.sailingService = sailingService;
+    public ExpeditionDeviceConfigurationsPanel(final SailingServiceWriteAsync sailingServiceWrite, final ErrorReporter errorReporter, final StringMessages stringMessages) {
+        this.sailingServiceWrite = sailingServiceWrite;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
         
@@ -158,13 +159,13 @@ public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
                         removeDeviceConfiguration(deviceConfiguration, filterDeviceConfigurationsPanel);
                     }
                 } else if (DeviceConfigurationImagesBarCell.ACTION_EDIT.equals(value)) {
-                    new EditDeviceConfigurationDialog(filterDeviceConfigurationsPanel, sailingService, stringMessages, errorReporter, deviceConfiguration).show();
+                    new EditDeviceConfigurationDialog(filterDeviceConfigurationsPanel, sailingServiceWrite, stringMessages, errorReporter, deviceConfiguration).show();
                 }
             }
         });
         allDeviceConfigurations.addColumn(deviceConfigurationActionColumn, stringMessages.actions());
         allDeviceConfigurations.addColumnSortHandler(deviceConfigurationColumnListHandler);
-        updateAllAccounts(sailingService, filterDeviceConfigurationsPanel, stringMessages, errorReporter);
+        updateAllAccounts(sailingServiceWrite, filterDeviceConfigurationsPanel, stringMessages, errorReporter);
         Button addAccountButton = new Button(stringMessages.add());
         addAccountButton.ensureDebugId("addExpeditionDeviceConfiguration");
         addAccountButton.addClickHandler(new ClickHandler() {
@@ -185,7 +186,7 @@ public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
     }
     
     public void refresh() {
-        updateAllAccounts(sailingService, filterDeviceConfigurationsPanel, stringMessages, errorReporter);
+        updateAllAccounts(sailingServiceWrite, filterDeviceConfigurationsPanel, stringMessages, errorReporter);
     }
 
     private abstract class AbstractDeviceConfigurationDialog extends DataEntryDialog<ExpeditionDeviceConfiguration> {
@@ -232,12 +233,12 @@ public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
 
     private class AddDeviceConfigurationDialog extends AbstractDeviceConfigurationDialog {
         public AddDeviceConfigurationDialog(final LabeledAbstractFilterablePanel<ExpeditionDeviceConfiguration> filterAccountsPanel,
-                final SailingServiceAsync sailingService, final StringMessages stringMessages, final ErrorReporter errorReporter) {
-            super(filterAccountsPanel, sailingService, stringMessages, errorReporter, stringMessages.addExpeditionDeviceConfiguration(),
+                final SailingServiceWriteAsync sailingServiceWrite, final StringMessages stringMessages, final ErrorReporter errorReporter) {
+            super(filterAccountsPanel, sailingServiceWrite, stringMessages, errorReporter, stringMessages.addExpeditionDeviceConfiguration(),
                     new DialogCallback<ExpeditionDeviceConfiguration>() {
                 @Override
                 public void ok(final ExpeditionDeviceConfiguration editedObject) {
-                    sailingService.addOrReplaceExpeditionDeviceConfiguration(editedObject, new AsyncCallback<Void>() {
+                    sailingServiceWrite.addOrReplaceExpeditionDeviceConfiguration(editedObject, new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
                             errorReporter.reportError(stringMessages.errorUpdatingExpeditionDeviceConfiguration(editedObject.getName(),
@@ -268,13 +269,13 @@ public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
         private final ExpeditionDeviceConfiguration valueToEdit;
         
         public EditDeviceConfigurationDialog(final LabeledAbstractFilterablePanel<ExpeditionDeviceConfiguration> filterAccountsPanel,
-                final SailingServiceAsync sailingService, final StringMessages stringMessages, final ErrorReporter errorReporter,
+                final SailingServiceWriteAsync sailingServiceWrite, final StringMessages stringMessages, final ErrorReporter errorReporter,
                 final ExpeditionDeviceConfiguration valueToEdit) {
-            super(filterAccountsPanel, sailingService, stringMessages, errorReporter, stringMessages.editExpeditionDeviceConfiguration(),
+            super(filterAccountsPanel, sailingServiceWrite, stringMessages, errorReporter, stringMessages.editExpeditionDeviceConfiguration(),
                     new DialogCallback<ExpeditionDeviceConfiguration>() {
                 @Override
                 public void ok(final ExpeditionDeviceConfiguration editedObject) {
-                    sailingService.addOrReplaceExpeditionDeviceConfiguration(editedObject, new AsyncCallback<Void>() {
+                    sailingServiceWrite.addOrReplaceExpeditionDeviceConfiguration(editedObject, new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
                             errorReporter.reportError(stringMessages.errorUpdatingExpeditionDeviceConfiguration(editedObject.getName(),
@@ -327,12 +328,12 @@ public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
     }
 
     private void addAccount() {
-        new AddDeviceConfigurationDialog(filterDeviceConfigurationsPanel, sailingService, stringMessages, errorReporter).show();
+        new AddDeviceConfigurationDialog(filterDeviceConfigurationsPanel, sailingServiceWrite, stringMessages, errorReporter).show();
     }
     
     private void removeDeviceConfiguration(final ExpeditionDeviceConfiguration expeditionDeviceConfiguration,
             final LabeledAbstractFilterablePanel<ExpeditionDeviceConfiguration> filterDeviceConfigurationsPanel) {
-        sailingService.removeExpeditionDeviceConfiguration(expeditionDeviceConfiguration, new AsyncCallback<Void>() {
+        sailingServiceWrite.removeExpeditionDeviceConfiguration(expeditionDeviceConfiguration, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(stringMessages.errorTryingToRemoveExpeditionDeviceConfiguration(expeditionDeviceConfiguration.getName(), caught.getMessage()));

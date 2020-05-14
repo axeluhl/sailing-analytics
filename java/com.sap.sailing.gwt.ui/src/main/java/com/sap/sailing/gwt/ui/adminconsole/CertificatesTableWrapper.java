@@ -15,10 +15,10 @@ import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -27,6 +27,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.ImagesBarColumn;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.ui.client.UserService;
 
@@ -34,9 +35,9 @@ public class CertificatesTableWrapper<S extends RefreshableSelectionModel<ORCCer
 
     private final LabeledAbstractFilterablePanel<ORCCertificate> filterField;
 
-    public CertificatesTableWrapper(SailingServiceAsync sailingService, final UserService userService, StringMessages stringMessages,
+    public CertificatesTableWrapper(SailingServiceWriteAsync sailingServiceWrite, final UserService userService, StringMessages stringMessages,
             ErrorReporter errorReporter, boolean multiSelection, boolean enablePager, int pagingSize) {
-        super(sailingService, stringMessages, errorReporter, multiSelection, enablePager, pagingSize, new EntityIdentityComparator<ORCCertificate>() {
+        super(sailingServiceWrite, stringMessages, errorReporter, multiSelection, enablePager, pagingSize, new EntityIdentityComparator<ORCCertificate>() {
             @Override
             public boolean representSameEntity(ORCCertificate cert1, ORCCertificate cert2) {
                 return cert1.getId().equals(cert2.getId());
@@ -174,9 +175,19 @@ public class CertificatesTableWrapper<S extends RefreshableSelectionModel<ORCCer
         table.ensureDebugId("BoatsWithVertificateTable");
     }
     
-    protected void showCertificate(ORCCertificate certificate) {
-        Window.confirm("Certificate: "+certificate);
-        // TODO Implement CertificatesTableWrapper.showCertificate(...)
+    protected void showCertificate(final ORCCertificate certificate) {
+        new DataEntryDialog<Void>(getStringMessages().orcCertificate(), /* message */ null,
+                getStringMessages().ok(), getStringMessages().cancel(), /* validator */ null, /* animation */ false, /* callback */ null) {
+                    @Override
+                    protected Widget getAdditionalWidget() {
+                        return new ORCCertificateDisplayPanel(certificate, getStringMessages());
+                    }
+
+                    @Override
+                    protected Void getResult() {
+                        return null;
+                    }
+        }.show();
     }
 
     public void setCertificates(Collection<ORCCertificate> result) {

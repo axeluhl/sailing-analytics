@@ -175,6 +175,7 @@ public class Activator implements BundleActivator {
                             " before firing up replication automatically...");
                     final List<Replicable<?, ?>> replicables = new ArrayList<>();
                     for (String replicableIdAsString : replicableIdsAsStrings) {
+                        logger.info("Trying to obtain Replicable " + replicableIdAsString+", waiting if necessary");
                         Replicable<?, ?> replicable = replicablesProvider.getReplicable(replicableIdAsString, /* wait */true);
                         logger.info("Obtained Replicable " + replicableIdAsString);
                         replicables.add(replicable);

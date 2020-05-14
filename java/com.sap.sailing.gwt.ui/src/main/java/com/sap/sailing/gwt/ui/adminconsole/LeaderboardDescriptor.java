@@ -1,8 +1,11 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sse.common.Util;
 
 /**
  * A descriptor class for creating and editing basic data of a leaderboard.
@@ -16,29 +19,30 @@ public class LeaderboardDescriptor {
     private ScoringSchemeType scoringScheme; 
     private int[] discardThresholds;
     private String regattaName;
-    private UUID courseAreaId;
+    private List<UUID> courseAreaIds;
 
     public LeaderboardDescriptor() {
     }
 
-    public LeaderboardDescriptor(String name, String displayName, ScoringSchemeType scoringScheme, int[] discardThresholds, String regattaName, UUID courseAreaId) {
+    public LeaderboardDescriptor(String name, String displayName, ScoringSchemeType scoringScheme,
+            int[] discardThresholds, String regattaName, Iterable<UUID> courseAreaIds) {
         this.name = name;
         this.displayName = displayName;
         this.scoringScheme = scoringScheme;
         this.discardThresholds = discardThresholds;
         this.regattaName = regattaName;
-        this.courseAreaId = courseAreaId;
+        setCourseAreaIds(courseAreaIds);
     }
 
     /**
      * Leaves the {@link #regattaName} <code>null</code>, representing a flexible leaderboard, not a regatta leaderboard
      */
-    public LeaderboardDescriptor(String name, String displayName, ScoringSchemeType scoringScheme, int[] discardThresholds, UUID courseAreaId) {
+    public LeaderboardDescriptor(String name, String displayName, ScoringSchemeType scoringScheme, int[] discardThresholds, Iterable<UUID> courseAreaIds) {
         this.name = name;
         this.displayName = displayName;
         this.scoringScheme = scoringScheme;
         this.discardThresholds = discardThresholds;
-        this.courseAreaId = courseAreaId;
+        setCourseAreaIds(courseAreaIds);
     }
 
     public String getName() {
@@ -86,11 +90,12 @@ public class LeaderboardDescriptor {
         this.displayName = displayName;
     }
 
-    public UUID getCourseAreaId() {
-        return courseAreaId;
+    public Iterable<UUID> getCourseAreaIds() {
+        return courseAreaIds;
     }
 
-    public void setCourseAreaId(UUID courseAreaId) {
-        this.courseAreaId = courseAreaId;
+    public void setCourseAreaIds(Iterable<UUID> courseAreaIds) {
+        this.courseAreaIds = new ArrayList<>();
+        Util.addAll(courseAreaIds, this.courseAreaIds);
     }
 }

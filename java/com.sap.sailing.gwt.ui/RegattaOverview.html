@@ -9,18 +9,22 @@
     <meta content='yes' name='apple-mobile-web-app-capable'>
     <meta content='black' name='apple-mobile-web-app-status-bar-style'>
 
-    <link href='images/sap-sailing-app-icon.png' rel='apple-touch-icon'>
-	<link rel="shortcut icon" type="image/x-icon" href="images/sap.ico" />
+    <link href='sap-sailing-app-icon${whitelabeled}.png' rel='apple-touch-icon'>
+    <link rel="shortcut icon" type="image/x-icon" href="images/sap${whitelabeled}.ico" />
     
-    <title>SAP Sailing Analytics Regatta Overview</title>
+    <title>${SAP}Sailing Analytics Regatta Overview</title>
     
     <link rel="stylesheet" type="text/css" href="/sailing-fontface-1.0.cache.css">
-    
+    <script>
+       document.clientConfigurationContext = {
+            debrandingActive: ${debrandingActive}
+       };
+    </script>
     <script 
-    		type="text/javascript" 
-    		language="javascript" 
-    		src="com.sap.sailing.gwt.regattaoverview.RegattaOverview/com.sap.sailing.gwt.regattaoverview.RegattaOverview.nocache.js"
-    		></script>
+            type="text/javascript" 
+            language="javascript" 
+            src="com.sap.sailing.gwt.regattaoverview.RegattaOverview/com.sap.sailing.gwt.regattaoverview.RegattaOverview.nocache.js"
+            ></script>
   </head>
   <body>
     <!-- OPTIONAL: include this if you want history support -->
