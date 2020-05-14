@@ -8,7 +8,6 @@ import java.util.UUID;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
@@ -189,7 +188,9 @@ public class RaceLogReplicationTest extends AbstractLogReplicationTest<RaceLog, 
         }
     }
     
-    @Ignore("The test shows an unsolved issue tracked as bug 5282")
+    /**
+     * See also bug5282
+     */
     @Test
     public void testRaceEventReplicationOnRenamingFlexibleLeaderboard() throws ClassNotFoundException, IOException, InterruptedException {
         final String leaderboardName = "Test";
