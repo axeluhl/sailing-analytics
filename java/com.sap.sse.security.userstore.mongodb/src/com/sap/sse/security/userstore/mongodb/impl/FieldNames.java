@@ -93,6 +93,7 @@ public class FieldNames {
         PAYMENT_STATUS,
         SUBSCRIPTION_CREATED_AT,
         SUBSCRIPTION_UPDATED_AT,
-        LATEST_EVENT_TIME;
+        LATEST_EVENT_TIME,
+        MANUAL_UPDATED_AT;
     }
 }

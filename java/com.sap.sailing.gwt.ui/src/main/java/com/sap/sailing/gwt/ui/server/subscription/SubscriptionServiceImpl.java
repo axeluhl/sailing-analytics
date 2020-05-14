@@ -16,7 +16,6 @@ import com.chargebee.Environment;
 import com.chargebee.Result;
 import com.chargebee.models.HostedPage;
 import com.chargebee.models.HostedPage.Content;
-import com.chargebee.models.PortalSession;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sailing.gwt.ui.client.subscription.SubscriptionService;
 import com.sap.sailing.gwt.ui.shared.subscription.HostedPageResultDTO;
@@ -143,6 +142,7 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
             subscription.subsciptionCreatedAt = Math.round(content.subscription().createdAt().getTime() / 1000);
             subscription.subsciptionUpdatedAt = Math.round(content.subscription().updatedAt().getTime() / 1000);
             subscription.latestEventTime = 0;
+            subscription.manualUpdatedAt = Math.round(System.currentTimeMillis() / 1000);
             
             getSecurityService().updateUserSubscription(user.getName(), subscription);
             
@@ -169,7 +169,7 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
             User user = getCurrentUser();
             
             Subscription subscription = user.getSubscription();
-            if (subscription == null) {
+            if (subscription == null || subscription.planId == null || subscription.planId.isEmpty()) {
                 return null;
             }
             
@@ -193,6 +193,10 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
         try {
             User user = getCurrentUser();
             Subscription subscription = user.getSubscription();
+            if (subscription == null) {
+                return true;
+            }
+            
             String subscriptionId = subscription.subscriptionId;
             if (subscriptionId != null && !subscriptionId.isEmpty()) {
                 Result result = com.chargebee.models.Subscription.cancel(subscriptionId)
@@ -202,7 +206,10 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
                 }
             }
             
-            getSecurityService().updateUserSubscription(user.getName(), null);
+            Subscription newSubscription = new Subscription();
+            newSubscription.latestEventTime = subscription.latestEventTime;
+            newSubscription.manualUpdatedAt = Math.round(System.currentTimeMillis() / 1000);
+            getSecurityService().updateUserSubscription(user.getName(), newSubscription);
             return true;
         } catch (Exception e) {
             e.printStackTrace();

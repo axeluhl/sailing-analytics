@@ -51,19 +51,23 @@ public class SubscriptionWebhookServlet extends SailingServerHttpServlet {
             
             Subscription userSubscription = user.getSubscription();
             
-            if (userSubscription != null && event.getEventOccurredAt() < user.getSubscription().latestEventTime) {
+            long occuredAt = event.getEventOccurredAt();
+            
+            if (userSubscription != null && 
+                    occuredAt < user.getSubscription().latestEventTime &&
+                    occuredAt < user.getSubscription().manualUpdatedAt) {
                 response.setStatus(200);
                 return;
             }
             
             switch (event.getEventType()) {
             case SubscriptionWebhookEvent.EVENT_CUSTOMER_DELETED:
-                updateUserSubscription(user, null);
+                updateUserSubscription(user, buildEmptySubscription(userSubscription, event));
                 break;
             case SubscriptionWebhookEvent.EVENT_SUBSCRIPTION_CANCELLED:
             case SubscriptionWebhookEvent.EVENT_SUBSCRIPTION_DELETED:
-                if (userSubscription != null && userSubscription.subscriptionId.equals(event.getSubscriptionId())) {
-                    updateUserSubscription(user, null);
+                if (userSubscription != null && userSubscription.subscriptionId !=null && userSubscription.subscriptionId.equals(event.getSubscriptionId())) {
+                    updateUserSubscription(user, buildEmptySubscription(userSubscription, event));
                 }
                 break;
             case SubscriptionWebhookEvent.EVENT_SUBSCRIPTION_CREATED:
@@ -87,7 +91,14 @@ public class SubscriptionWebhookServlet extends SailingServerHttpServlet {
         }
     }
     
-    private Subscription buildSubscription(Subscription currentSubscription, SubscriptionWebhookEvent event) throws CloneNotSupportedException {
+    private Subscription buildEmptySubscription(Subscription currentSubscription, SubscriptionWebhookEvent event) {
+        Subscription subscription = new Subscription();
+        subscription.latestEventTime = event.getEventOccurredAt();
+        subscription.manualUpdatedAt = currentSubscription != null ? currentSubscription.manualUpdatedAt : 0;
+        return subscription;
+    }
+    
+    private Subscription buildSubscription(Subscription currentSubscription, SubscriptionWebhookEvent event) {
         Subscription subscription = new Subscription();
         
         subscription.subscriptionId = event.getSubscriptionId();
@@ -99,7 +110,7 @@ public class SubscriptionWebhookServlet extends SailingServerHttpServlet {
         subscription.subsciptionCreatedAt = event.getSubscriptionCreatedAt();
         subscription.subsciptionUpdatedAt = event.getSubscriptionUpdatedAt();
         subscription.latestEventTime = event.getEventOccurredAt();
-        
+        subscription.manualUpdatedAt = currentSubscription != null ? currentSubscription.manualUpdatedAt : 0;
         
         if (subscription.subscriptionStatus != null && subscription.subscriptionStatus.equals(SubscriptionWebhookEvent.SUBSCRIPTION_STATUS_ACTIVE)) {
             String paymentStatus = getEventPaymentStatus(event);

@@ -322,6 +322,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         doc.put(FieldNames.Subscription.SUBSCRIPTION_CREATED_AT.name(), subscription.subsciptionCreatedAt);
         doc.put(FieldNames.Subscription.SUBSCRIPTION_UPDATED_AT.name(), subscription.subsciptionUpdatedAt);
         doc.put(FieldNames.Subscription.LATEST_EVENT_TIME.name(), subscription.latestEventTime);
+        doc.put(FieldNames.Subscription.MANUAL_UPDATED_AT.name(), subscription.manualUpdatedAt);
         
         return doc;
     }

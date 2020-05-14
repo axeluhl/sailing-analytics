@@ -21,4 +21,5 @@ public class Subscription implements Serializable {
     public long subsciptionCreatedAt;
     public long subsciptionUpdatedAt;
     public long latestEventTime;
+    public long manualUpdatedAt;
 }
