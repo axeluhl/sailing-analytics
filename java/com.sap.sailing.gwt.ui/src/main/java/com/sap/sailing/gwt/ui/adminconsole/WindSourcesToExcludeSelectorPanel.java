@@ -14,7 +14,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -30,11 +30,11 @@ import com.sap.sse.gwt.client.ErrorReporter;
 public class WindSourcesToExcludeSelectorPanel extends VerticalPanel implements HasEnabled {
     private final LinkedHashMap<WindSource, CheckBox> checkboxesByWindSource;
     private final StringMessages stringMessages;
-    private final SailingServiceAsync service;
+    private final SailingServiceWriteAsync service;
     private final ErrorReporter errorReporter;
     private RegattaAndRaceIdentifier raceIdentifier;
 
-    public WindSourcesToExcludeSelectorPanel(SailingServiceAsync service,
+    public WindSourcesToExcludeSelectorPanel(SailingServiceWriteAsync service,
             StringMessages stringMessages, ErrorReporter errorReporter) {
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;

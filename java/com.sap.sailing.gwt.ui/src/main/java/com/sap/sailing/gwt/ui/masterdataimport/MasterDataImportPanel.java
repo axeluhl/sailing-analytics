@@ -33,7 +33,7 @@ import com.sap.sailing.gwt.ui.client.LeaderboardGroupsRefresher;
 import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
 import com.sap.sailing.gwt.ui.client.MediaTracksRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sse.common.Util;
@@ -54,7 +54,7 @@ public class MasterDataImportPanel extends VerticalPanel {
 
     private final StringMessages stringMessages;
     private String currentHost;
-    private SailingServiceAsync sailingService;
+    private SailingServiceWriteAsync sailingServiceWrite;
     private CheckBox overrideSwitch;
     private final RegattaRefresher regattaRefresher;
     private final EventsRefresher eventRefresher;
@@ -69,11 +69,11 @@ public class MasterDataImportPanel extends VerticalPanel {
     private TextBox usernameBox;
     private TextBox passwordBox;
 
-    public MasterDataImportPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
+    public MasterDataImportPanel(StringMessages stringMessages, SailingServiceWriteAsync sailingServiceWrite,
             RegattaRefresher regattaRefresher, EventsRefresher eventsRefresher,
             LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity> leaderboardsRefresher,
             LeaderboardGroupsRefresher leaderboardGroupsRefresher, MediaTracksRefresher mediaTracksRefresher) {
-        this.sailingService = sailingService;
+        this.sailingServiceWrite = sailingServiceWrite;
         this.stringMessages = stringMessages;
         this.regattaRefresher = regattaRefresher;
         this.eventRefresher = eventsRefresher;
@@ -170,7 +170,7 @@ public class MasterDataImportPanel extends VerticalPanel {
             boolean exportWind = exportWindSwitch.getValue();
             boolean exportDeviceConfigs = exportDeviceConfigsSwitch.getValue();
             boolean exportTrackedRacesAndStartTracking = exportTrackedRacesAndStartTrackingSwitch.getValue();
-            sailingService.importMasterData(currentHost, groupNames, override, compress, exportWind,
+            sailingServiceWrite.importMasterData(currentHost, groupNames, override, compress, exportWind,
                     exportDeviceConfigs, usernameBox.getValue(), passwordBox.getValue(), exportTrackedRacesAndStartTracking, new AsyncCallback<UUID>() {
 
                 @Override
@@ -184,7 +184,7 @@ public class MasterDataImportPanel extends VerticalPanel {
 
                         @Override
                         public void run() {
-                            sailingService.getImportOperationProgress(resultId,
+                            sailingServiceWrite.getImportOperationProgress(resultId,
                                     new AsyncCallback<DataImportProgress>() {
 
                                         @Override
@@ -326,7 +326,7 @@ public class MasterDataImportPanel extends VerticalPanel {
         currentHost = host;
         disableAllButtons();
         // FIXME what about login here?
-        sailingService.getLeaderboardGroupNamesFromRemoteServer(host, usernameBox.getValue(), passwordBox.getValue(),
+        sailingServiceWrite.getLeaderboardGroupNamesFromRemoteServer(host, usernameBox.getValue(), passwordBox.getValue(),
                 new AsyncCallback<List<String>>() {
 
             @Override
