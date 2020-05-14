@@ -76,21 +76,19 @@ public class TestRefreshableSelectionModel extends AbstractSeleniumTest {
             setUpAuthenticatedSession(windowForEditDriver);
             final TrackedRacesCompetitorsPanelPO competitorsPanel = goToCompetitorsPanel(
                     windowForEditDriver);
-            
             for (int i = 0; i < 2; i++) {
                 TrackedRacesCompetitorEditDialogPO dialog = competitorsPanel.pushAddCompetitorButton();
                 dialog.setNameTextBox("" + System.currentTimeMillis());
                 dialog.setShortNameTextBox("" + System.currentTimeMillis());
+                dialog.setWithBoat(false);
                 dialog.pressOk();
             }
-            
             TrackedRacesCompetitorEditDialogPO dialog = competitorsPanel.pushAddCompetitorButton();
             final String name = "" + System.currentTimeMillis();
             dialog.setNameTextBox(name);
             final String shortName = "" + System.currentTimeMillis();
             dialog.setShortNameTextBox(shortName);
             dialog.pressOk();
-            
             boolean found = false;
             for (final CompetitorEntry it : competitorsPanel.getCompetitorTable().getEntries()) {
                 String itName = it.getName();
@@ -101,7 +99,6 @@ public class TestRefreshableSelectionModel extends AbstractSeleniumTest {
                 }
             }
             assertTrue(found);
-            
             TrackedRacesCompetitorsPanelPO competitorPanelForSelection = goToCompetitorsPanel(
                     windowForSelection.switchToWindow());
             found = false;
@@ -115,7 +112,6 @@ public class TestRefreshableSelectionModel extends AbstractSeleniumTest {
             }
             assertTrue(found);
             competitorPanelForSelection.getCompetitorTable().selectEntry(competitorEntryToSelect);
-            
             assertEquals(1, competitorPanelForSelection.getCompetitorTable().getSelectedEntries().size());
             assertEquals(name, competitorPanelForSelection.getCompetitorTable().getSelectedEntries().get(0).getName());
             assertEquals(shortName, competitorPanelForSelection.getCompetitorTable().getSelectedEntries().get(0).getShortName());
@@ -127,10 +123,8 @@ public class TestRefreshableSelectionModel extends AbstractSeleniumTest {
             final String changedShortName = "" + System.currentTimeMillis();
             dialog.setShortNameTextBox(changedShortName);
             dialog.pressOk();
-            
             // assert selection
             windowForSelection.switchToWindow();
-            
             competitorPanelForSelection.pushRefreshButton();
             WebDriverWait waitTimer = new WebDriverWait(competitorPanelForSelection.driver, 10);
             ExpectedCondition<Boolean> condition = new ExpectedCondition<Boolean>() {
@@ -140,7 +134,6 @@ public class TestRefreshableSelectionModel extends AbstractSeleniumTest {
                 }
             };
             waitTimer.until(condition);
-            
             assertEquals(1, competitorPanelForSelection.getCompetitorTable().getSelectedEntries().size());
             for (final CompetitorEntry it : competitorPanelForSelection.getCompetitorTable().getEntries()) {
                 String itName = it.getName();
