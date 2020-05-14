@@ -140,8 +140,7 @@ public abstract class AbstractGenericSerializableSettings extends AbstractSettin
      * TODO make abstract when all Settings are ported to the new system
      * 
      */
-    protected void addChildSettings() {
-    }
+    protected abstract void addChildSettings();
     
     // TODO make protected
     public Value getValue(String settingName) {

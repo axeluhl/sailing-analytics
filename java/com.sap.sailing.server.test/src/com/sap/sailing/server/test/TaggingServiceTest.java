@@ -98,7 +98,7 @@ public class TaggingServiceTest {
         securityService.createSimpleUser(username, email, password, fullName, company, Locale.ENGLISH, null,
                 securityService.getDefaultTenantForCurrentUser());
         ThreadContext.unbindSubject(); // ensure that a new subject is created that knows the current security manager
-        subject = SecurityUtils.getSubject();
+        subject = SecurityUtils.getSubject(); // this also binds the Subject to the ThreadContext
         subject.login(new UsernamePasswordToken(username, password));
         threadState = new SubjectThreadState(subject);
         // setup tagging service

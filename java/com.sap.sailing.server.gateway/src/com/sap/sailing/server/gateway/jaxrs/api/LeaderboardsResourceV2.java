@@ -72,7 +72,8 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
             @QueryParam("maxCompetitorsCount") Integer maxCompetitorsCount,
             @QueryParam("secret") String regattaSecret,
             @DefaultValue("false") @QueryParam("competitorAndBoatIdsOnly") boolean competitorAndBoatIdsOnly,
-            @QueryParam("showOnlyActiveRacesForCompetitorIds") List<String> showOnlyActiveRacesForCompetitorIds) {
+            @QueryParam("showOnlyActiveRacesForCompetitorIds") List<String> showOnlyActiveRacesForCompetitorIds,
+            @DefaultValue("False") @QueryParam("showOnlyCompetitorsWithIdsProvided") Boolean showOnlyCompetitorsWithIdsProvided) {
         ShardingContext.setShardingConstraint(ShardingType.LEADERBOARDNAME, leaderboardName);
         try {
             Response response;
@@ -98,7 +99,7 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                     if (timePoint != null || resultState == ResultStates.Live) {
                         jsonLeaderboard = getLeaderboardJson(leaderboard, timePoint, resultState, maxCompetitorsCount,
                                 raceColumnNames, raceDetails, competitorAndBoatIdsOnly,
-                                showOnlyActiveRacesForCompetitorIds, skip);
+                                showOnlyActiveRacesForCompetitorIds, skip, showOnlyCompetitorsWithIdsProvided);
                     } else {
                         jsonLeaderboard = createEmptyLeaderboardJson(leaderboard, resultState, maxCompetitorsCount, skip);
                     }
@@ -121,7 +122,7 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
     protected JSONObject getLeaderboardJson(Leaderboard leaderboard, TimePoint resultTimePoint,
             ResultStates resultState, Integer maxCompetitorsCount, List<String> raceColumnNames,
             List<String> raceDetailNames, boolean competitorAndBoatIdsOnly,
-            List<String> showOnlyActiveRacesForCompetitorIds, boolean userPresentedValidRegattaSecret)
+            List<String> showOnlyActiveRacesForCompetitorIds, boolean userPresentedValidRegattaSecret, boolean showOnlyCompetitorsWithIdsProvided)
             throws NoWindException, InterruptedException, ExecutionException {
         List<String> raceColumnsToShow = calculateRaceColumnsToShow(leaderboard, raceColumnNames, showOnlyActiveRacesForCompetitorIds, resultTimePoint);
         List<DetailType> raceDetailsToShow = calculateRaceDetailTypesToShow(raceDetailNames);
@@ -173,7 +174,11 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                             .getStringPermission(SecuredSecurityTypes.PublicReadableActions.READ_PUBLIC))
                     || SecurityUtils.getSubject()
                             .isPermitted(competitor.getIdentifier().getStringPermission(DefaultActions.READ))) {
-                filteredCompetitors.add(competitor);
+                // add competitor if all shall be added or else if the competitor ID's string representation was provided
+                // in showOnlyActiveRacesForCompetitorIds for the active race selection:
+                if (!showOnlyCompetitorsWithIdsProvided || showOnlyActiveRacesForCompetitorIds.contains(competitor.getId().toString())) {
+                    filteredCompetitors.add(competitor);
+                }
             }
         });
         int competitorCounter = 0;

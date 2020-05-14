@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.shared;
 
 import java.util.Date;
+import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -18,4 +19,5 @@ public class RaceLogSetStartTimeAndProcedureDTO implements IsSerializable {
     public Date logicalTimePoint;
     public Date startTime;
     public RacingProcedureType racingProcedure;
+    public UUID courseAreaId;
 }

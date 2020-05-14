@@ -3,6 +3,7 @@ package com.sap.sailing.server.testsupport;
 import java.util.logging.Logger;
 
 import org.apache.shiro.SecurityUtils;
+import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.impl.Activator;
@@ -33,7 +34,19 @@ public class SecurityBundleTestWrapper {
             new UserStoreImpl("defaultTenant"); // only to trigger bundle loading and activation so that security service can find the bundle and its original user store
             logger.info("Setup for TaggingServiceTest in an OSGi environment");
             // Note: This timeout of 3 minutes is just for debugging purposes and should not be used in production!
-            securityService = ServiceTrackerFactory.createAndOpen(Activator.getContext(), SecurityService.class).waitForService(180 * 1000);
+            final ServiceTracker<SecurityService, SecurityService> serviceTracker = ServiceTrackerFactory.createAndOpen(Activator.getContext(), SecurityService.class);
+            if (serviceTracker == null) {
+                logger.severe("Couldn't obtain service tracker for SecurityService");
+                securityService = null;
+            } else {
+                securityService = serviceTracker.waitForService(180 * 1000);
+                if (securityService == null) {
+                    logger.severe("Waiting for the SecurityService timed out");
+                } else {
+                    // the security manager may have been set to other mock objects by other tests while the SecurityService survived
+                    SecurityUtils.setSecurityManager(securityService.getSecurityManager());
+                }
+            }
         }
         return securityService;
     }

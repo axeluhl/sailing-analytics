@@ -726,10 +726,6 @@ public class RegattaRaceStatesComponent extends AbstractCompositeComponent<Regat
         });
     }
 
-    public List<RegattaOverviewEntryDTO> getAllRaces() {
-        return allEntries;
-    }
-
     @Override
     public boolean hasSettings() {
         return true;
