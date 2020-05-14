@@ -10,7 +10,6 @@ import java.util.UUID;
 
 import org.apache.shiro.authz.UnauthorizedException;
 
-import com.sap.sailing.domain.abstractlog.Revokable;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogTagEvent;
@@ -111,12 +110,6 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
             String raceColumnName, String fleetName, Map<String, ORCCertificate> certificatesForBoatsWithIdAsString)
             throws IOException, NotFoundException;
 
-    Triple<Integer, Integer, Integer> assignORCPerformanceCurveCertificates(RegattaAndRaceIdentifier raceIdentifier,
-            Map<String, ORCCertificate> certificatesForBoatsWithIdAsString) throws IOException, NotFoundException;
-
-    Triple<Integer, Integer, Integer> assignORCPerformanceCurveCertificates(String leaderboardName,
-            Map<String, ORCCertificate> certificatesForBoatsWithIdAsString) throws IOException, NotFoundException;
-
     Triple<Integer, Integer, Integer> assignORCPerformanceCurveCertificates(RegattaIdentifier regattaIdentifier,
             Map<String, ORCCertificate> certificatesForBoatsWithIdAsString) throws IOException, NotFoundException;
 
@@ -176,16 +169,6 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
 
     void setActiveFileStorageService(String serviceName, String localeInfoName);
 
-    /**
-     * Performs all the necessary steps to start tracking the race. The {@code RaceLog} needs to be denoted for
-     * racelog-tracking beforehand.
-     * 
-     * @see RaceLogTrackingAdapter#startTracking
-     */
-    void startRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName, boolean trackWind,
-            boolean correctWindByDeclination)
-            throws UnauthorizedException, NotDenotedForRaceLogTrackingException, Exception;
-
     void startRaceLogTracking(List<Triple<String, String, String>> leaderboardRaceColumnFleetNames, boolean trackWind,
             boolean correctWindByDeclination)
             throws UnauthorizedException, NotDenotedForRaceLogTrackingException, Exception;
@@ -240,8 +223,6 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
 
     void denoteForRaceLogTracking(String leaderboardName, String prefix) throws Exception;
 
-    void denoteForRaceLogTracking(String leaderboardName) throws Exception;
-
     Boolean denoteForRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName)
             throws NotFoundException, NotDenotableForRaceLogTrackingException;
 
@@ -259,12 +240,6 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
 
     DataImportProgress getImportOperationProgress(UUID id) throws UnauthorizedException;
 
-    boolean unlinkBoatFromCompetitorForRace(String leaderboardName, String raceColumnName, String fleetName,
-            String competitorIdAsString) throws NotFoundException;
-
-    boolean linkBoatToCompetitorForRace(String leaderboardName, String raceColumnName, String fleetName,
-            String competitorIdAsString, String boatIdAsString) throws NotFoundException;
-
     void allowCompetitorResetToDefaults(Iterable<CompetitorDTO> competitors);
 
     UUID importMasterData(String host, String[] groupNames, boolean override, boolean compress, boolean exportWind,
@@ -280,12 +255,6 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
             throws UnauthorizedException;
 
     void removeRaceColumnsFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames)
-            throws UnauthorizedException;
-
-    void moveRaceColumnInSeriesUp(RegattaIdentifier regattaIdentifier, String seriesName, String columnName)
-            throws UnauthorizedException;
-
-    void moveRaceColumnInSeriesDown(RegattaIdentifier regattaIdentifier, String seriesName, String columnName)
             throws UnauthorizedException;
 
     void updateSeries(RegattaIdentifier regattaIdentifier, String seriesName, String newSeriesName, boolean isMedal,
@@ -349,8 +318,6 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
 
     void updateRacesDelayToLive(List<RegattaAndRaceIdentifier> regattaAndRaceIdentifiers, long delayToLiveInMs);
 
-    void updateRaceDelayToLive(RegattaAndRaceIdentifier regattaAndRaceIdentifier, long delayToLiveInMs);
-
     void updateIsMedalRace(String leaderboardName, String columnName, boolean isMedalRace);
 
     void moveLeaderboardColumnUp(String leaderboardName, String columnName) throws UnauthorizedException;
@@ -385,17 +352,11 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
 
     void removeLeaderboardColumn(String leaderboardName, String columnName) throws UnauthorizedException;
 
-    void removeLeaderboardColumns(String leaderboardName, List<String> columnsToRemove);
-
     void removeLeaderboardGroups(Set<String> groupNames);
-
-    void renameLeaderboardGroup(String oldName, String newName);
 
     void removeLeaderboard(String leaderboardName) throws UnauthorizedException;
 
     void removeLeaderboards(Collection<String> leaderboardNames) throws UnauthorizedException;
-
-    void renameLeaderboard(String leaderboardName, String newLeaderboardName) throws UnauthorizedException;
 
     StrippedLeaderboardDTOWithSecurity updateLeaderboard(String leaderboardName, String newLeaderboardName,
             String newLeaderboardDisplayName, int[] newDiscardingThreasholds, Iterable<UUID> newCourseAreaIds)
@@ -692,12 +653,4 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
     SuccessInfo removeTag(String leaderboardName, String raceColumnName, String fleetName, TagDTO tag)
             throws UnauthorizedException;
 
-    /**
-     * Revoke the events in the {@code RaceLog} that are identified by the {@code eventIds}. This only affects such
-     * events that implement {@link Revokable}.
-     * 
-     * @throws NotFoundException
-     */
-    void revokeRaceAndRegattaLogEvents(String leaderboardName, String raceColumnName, String fleetName,
-            List<UUID> eventIds) throws UnauthorizedException, NotRevokableException, NotFoundException;
 }

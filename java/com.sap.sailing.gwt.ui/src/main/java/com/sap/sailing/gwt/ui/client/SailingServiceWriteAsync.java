@@ -219,15 +219,7 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
             Map<String, ORCCertificate> certificatesForBoatsWithIdAsString,
             AsyncCallback<Triple<Integer, Integer, Integer>> callback);
 
-    void assignORCPerformanceCurveCertificates(RegattaAndRaceIdentifier raceIdentifier,
-            Map<String, ORCCertificate> certificatesForBoatsWithIdAsString,
-            AsyncCallback<Triple<Integer, Integer, Integer>> callback);
-
     void assignORCPerformanceCurveCertificates(String leaderboardName, String raceColumnName, String fleetName,
-            Map<String, ORCCertificate> certificatesForBoatsWithIdAsString,
-            AsyncCallback<Triple<Integer, Integer, Integer>> callback);
-
-    void assignORCPerformanceCurveCertificates(String leaderboardName,
             Map<String, ORCCertificate> certificatesForBoatsWithIdAsString,
             AsyncCallback<Triple<Integer, Integer, Integer>> callback);
 
@@ -335,8 +327,6 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
 
     void removeLeaderboards(Collection<String> leaderboardNames, AsyncCallback<Void> asyncCallback);
 
-    void renameLeaderboard(String leaderboardName, String newLeaderboardName, AsyncCallback<Void> asyncCallback);
-
     void renameLeaderboardColumn(String leaderboardName, String oldColumnName, String newColumnName,
             AsyncCallback<Void> callback);
 
@@ -373,9 +363,6 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
 
     void updateIsMedalRace(String leaderboardName, String columnName, boolean isMedalRace, AsyncCallback<Void> callback);
 
-    void updateRaceDelayToLive(RegattaAndRaceIdentifier regattaAndRaceIdentifier, long delayToLiveInMs,
-            AsyncCallback<Void> callback);
-
     void updateRacesDelayToLive(List<RegattaAndRaceIdentifier> regattaAndRaceIdentifiers, long delayToLiveInMs,
             AsyncCallback<Void> callback);
 
@@ -387,13 +374,6 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
 
     void deleteSwissTimingConfigurations(Collection<SwissTimingConfigurationWithSecurityDTO> configurations,
             AsyncCallback<Void> asyncCallback);
-
-    /**
-     * Renames the group with the name <code>oldName</code> to the <code>newName</code>.<br />
-     * If there's no group with the name <code>oldName</code> or there's already a group with the name
-     * <code>newName</code> a {@link IllegalArgumentException} is thrown.
-     */
-    void renameLeaderboardGroup(String oldName, String newName, AsyncCallback<Void> callback);
 
     /**
      * Removes the leaderboard groups with the given names from the service and the persistant store.
@@ -452,12 +432,6 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
 
     void removeRegattas(Collection<RegattaIdentifier> regattas, AsyncCallback<Void> asyncCallback);
 
-    void moveRaceColumnInSeriesUp(RegattaIdentifier regattaIdentifier, String seriesName, String columnName,
-            AsyncCallback<Void> callback);
-
-    void moveRaceColumnInSeriesDown(RegattaIdentifier regattaIdentifier, String seriesName, String columnName,
-            AsyncCallback<Void> callback);
-
     void createRegatta(String regattaName, String boatClassName, boolean canBoatsOfCompetitorsChangePerRace,
             CompetitorRegistrationType competitorRegistrationType, String registrationLinkSecret, Date startDate, Date endDate,
             RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedal, boolean persistent,
@@ -477,8 +451,6 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
             List<Util.Pair<ControlPointDTO, PassingInstruction>> controlPoints, AsyncCallback<Void> callback);
 
     void removeResultImportURLs(String resultProviderName, Set<UrlDTO> toRemove, AsyncCallback<Void> callback);
-
-    void removeLeaderboardColumns(String leaderboardName, List<String> columnsToRemove, AsyncCallback<Void> callback);
 
     void suppressCompetitorInLeaderboard(String leaderboardName, String competitorIdAsString, boolean suppressed,
             AsyncCallback<Void> asyncCallback);
@@ -508,10 +480,6 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
 
     void allowCompetitorResetToDefaults(Iterable<CompetitorDTO> competitors, AsyncCallback<Void> asyncCallback);
 
-    void linkBoatToCompetitorForRace(String leaderboardName, String raceColumnName, String fleetName, String competitorIdAsString, String boatIdAsString, AsyncCallback<Boolean> asyncCallback);
-
-    void unlinkBoatFromCompetitorForRace(String leaderboardName, String raceColumnName, String fleetName, String competitorIdAsString, AsyncCallback<Boolean> asyncCallback);
-
     void removeDeviceConfiguration(UUID deviceConfigurationId, AsyncCallback<Boolean> asyncCallback);
 
     void authorizeAccessToIgtimiUser(String eMailAddress, String password, AsyncCallback<Boolean> callback);
@@ -528,12 +496,7 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void denoteForRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<Boolean> callback);
 
-    void denoteForRaceLogTracking(String leaderboardName, AsyncCallback<Void> callback);
-    
     void denoteForRaceLogTracking(String leaderboardName,String prefix, AsyncCallback<Void> callback);
-
-    void startRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName, boolean trackWind,
-            boolean correctWindByDeclination, AsyncCallback<Void> callback);
 
     void startRaceLogTracking(List<Triple<String, String, String>> leaderboardRaceColumnFleetNames,
             final boolean trackWind, final boolean correctWindByDeclination, AsyncCallback<Void> callback);
@@ -568,9 +531,6 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void pingMark(String leaderboardName, MarkDTO mark,
             TimePoint timePoint, Position position, AsyncCallback<Void> callback);
 
-    void revokeRaceAndRegattaLogEvents(String leaderboardName, String raceColumnName, String fleetName,
-            List<UUID> eventIds, AsyncCallback<Void> callback);
-
     void removeSeries(RegattaIdentifier regattaIdentifier, String seriesName, AsyncCallback<Void> callback);
 
     void removeDenotationForRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName,
@@ -595,7 +555,8 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
 
     void inviteBuoyTenderViaEmail(String serverUrlWithoutTrailingSlash, EventDTO eventDto, String leaderboardName,
             String emails, String iOSAppUrl, String androidAppUrl, String localeInfoName, AsyncCallback<Void> callback);
-                void revokeRaceAndRegattaLogEvents(String leaderboardName, List<UUID> eventIds, AsyncCallback<Void> callback);
+
+    void revokeRaceAndRegattaLogEvents(String leaderboardName, List<UUID> eventIds, AsyncCallback<Void> callback);
 
     void closeOpenEndedDeviceMapping(String leaderboardName, DeviceMappingDTO mappingDto, Date closingTimePoint,
             AsyncCallback<Void> asyncCallback);

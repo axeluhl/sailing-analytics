@@ -8,7 +8,6 @@ import java.util.UUID;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
@@ -42,7 +41,6 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
 import com.sap.sailing.server.operationaltransformation.CreateRegattaLeaderboard;
-import com.sap.sailing.server.operationaltransformation.RenameLeaderboard;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.AbstractColor;
@@ -187,22 +185,6 @@ public class RaceLogReplicationTest extends AbstractLogReplicationTest<RaceLog, 
         }
     }
 
-    @Ignore
-    public void testRaceEventReplicationOnRenamingFlexibleLeaderboard() throws ClassNotFoundException, IOException, InterruptedException {
-        final String leaderboardName = "Test";
-        final String fleetName = "Default";
-        final String raceColumnName = "R1";
-        FlexibleLeaderboard masterLeaderboard = setupFlexibleLeaderboard(leaderboardName);
-        RaceLog masterLog = setupRaceColumn(leaderboardName, fleetName, raceColumnName);
-        replicaReplicator.startToReplicateFrom(masterDescriptor);
-        masterLog.add(raceLogEvent);
-        RenameLeaderboard renameOperation = new RenameLeaderboard(leaderboardName, leaderboardName + "new");
-        master.apply(renameOperation);
-        Thread.sleep(3000);
-        RaceLog replicaLog = getReplicaLog(fleetName, raceColumnName, masterLeaderboard);
-        addAndValidateEventIds(masterLog, replicaLog, anotherRaceLogEvent);
-    }
-    
     /**
      * See bug 1666; a race log reload operation may not properly have been replicating. This tests asserts that when a race log event
      * has been added to the DB and then race log is re-loaded on the master, the events added through the DB also show up on the replica.
