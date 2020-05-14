@@ -87,8 +87,8 @@ public class RegattaLeaderboardImpl extends AbstractLeaderboardImpl implements R
     }
 
     @Override
-    public CourseArea getDefaultCourseArea() {
-        return regatta.getDefaultCourseArea();
+    public Iterable<CourseArea> getCourseAreas() {
+        return regatta.getCourseAreas();
     }
 
     /**

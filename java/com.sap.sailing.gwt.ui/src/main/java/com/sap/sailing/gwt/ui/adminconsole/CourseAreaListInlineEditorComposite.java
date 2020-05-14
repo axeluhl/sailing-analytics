@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import com.google.gwt.resources.client.ImageResource;
-import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
+import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.StringMessages;
 import com.sap.sse.gwt.client.controls.listedit.ExpandedListEditorUi;
