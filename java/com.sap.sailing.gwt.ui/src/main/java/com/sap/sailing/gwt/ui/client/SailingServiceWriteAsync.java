@@ -131,7 +131,7 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
             /*throws NoCorrespondingServiceRegisteredException, TransformationException, DoesNotHaveRegattaLogException*/;
 
     
-    void allowBoatResetToDefaults(Iterable<BoatDTO> boats, AsyncCallback<Void> callback) throws UnauthorizedException;
+    void allowBoatResetToDefaults(List<BoatDTO> boats, AsyncCallback<Void> callback) throws UnauthorizedException;
     
     void setTrackingTimes(RaceLogSetTrackingTimesDTO dto, AsyncCallback<Void> callback);
     
@@ -180,7 +180,7 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
      * @param callback
      */
     void fillRaceLogsFromPairingListTemplate(final String leaderboardName, final int flightMultiplier,
-            final Iterable<String> selectedFlightNames,PairingListDTO pairingListDTO, AsyncCallback<Void> callback);
+            final List<String> selectedFlightNames,PairingListDTO pairingListDTO, AsyncCallback<Void> callback);
 
     /**
      * Checks whether the user may cut the race identified by {@code radeIdentifier} into multiple races. For this, it
@@ -270,13 +270,13 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
      *            be <code>null</code> or the empty string in which case the server will use the
      *            {@link TracTracRaceRecordDTO#storedURI} from the <code>rr</code> race record.
      */
-    void trackWithTracTrac(RegattaIdentifier regattaToAddTo, Iterable<TracTracRaceRecordDTO> rrs, String liveURI,
+    void trackWithTracTrac(RegattaIdentifier regattaToAddTo, List<TracTracRaceRecordDTO> rrs, String liveURI,
             String storedURI, String courseDesignUpdateURI, boolean trackWind, boolean correctWindByDeclination,
             Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm, 
             boolean useOfficialEventsToUpdateRaceLog, String tracTracUsername,
             String tracTracPassword, AsyncCallback<Void> callback);
 
-    void trackWithSwissTiming(RegattaIdentifier regattaToAddTo, Iterable<SwissTimingRaceRecordDTO> rrs, String hostname,
+    void trackWithSwissTiming(RegattaIdentifier regattaToAddTo, List<SwissTimingRaceRecordDTO> rrs, String hostname,
             int port, boolean trackWind, boolean correctWindByDeclination, boolean useInternalMarkPassingAlgorithm,
             String updateURL, String updateUsername, String updatePassword, String eventName,
             String manage2SailEventUrl, AsyncCallback<Void> asyncCallback);
@@ -291,7 +291,7 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void updateTracTracConfiguration(TracTracConfigurationWithSecurityDTO tracTracConfiguration,
             AsyncCallback<Void> callback);
 
-    void stopTrackingRaces(Iterable<RegattaAndRaceIdentifier> racesToStopTracking, AsyncCallback<Void> asyncCallback);
+    void stopTrackingRaces(List<RegattaAndRaceIdentifier> racesToStopTracking, AsyncCallback<Void> asyncCallback);
 
     /**
      * Untracks the race and removes it from the regatta. It will also be removed in all leaderboards
@@ -299,7 +299,7 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
      * @param regattaNamesAndRaceNames
      *            The identifier for the regatta name, and the race name to remove
      */
-    void removeAndUntrackRaces(Iterable<RegattaNameAndRaceName> regattaNamesAndRaceNames, AsyncCallback<Void> callback);
+    void removeAndUntrackRaces(List<RegattaNameAndRaceName> regattaNamesAndRaceNames, AsyncCallback<Void> callback);
 
     void setWind(RegattaAndRaceIdentifier raceIdentifier, WindDTO wind, AsyncCallback<Void> callback);
 
@@ -307,12 +307,12 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
 
 
     void updateLeaderboard(String leaderboardName, String newLeaderboardName, String newLeaderboardDisplayName,
-            int[] newDiscardingThreasholds, Iterable<UUID> newCourseAreaIds,
+            int[] newDiscardingThreasholds, List<UUID> newCourseAreaIds,
             AsyncCallback<StrippedLeaderboardDTOWithSecurity> callback);
 
     void createFlexibleLeaderboard(String leaderboardName, String leaderboardDisplayName,
             int[] discardThresholds,
-            ScoringSchemeType scoringSchemeType, Iterable<UUID> courseAreaIds,
+            ScoringSchemeType scoringSchemeType, List<UUID> courseAreaIds,
             AsyncCallback<StrippedLeaderboardDTOWithSecurity> asyncCallback);
 
     void createRegattaLeaderboard(RegattaName regattaIdentifier,
@@ -395,7 +395,7 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void setRaceIsKnownToStartUpwind(RegattaAndRaceIdentifier raceIdentifier, boolean raceIsKnownToStartUpwind,
             AsyncCallback<Void> callback);
 
-    void setWindSourcesToExclude(RegattaAndRaceIdentifier raceIdentifier, Iterable<WindSource> windSourcesToExclude,
+    void setWindSourcesToExclude(RegattaAndRaceIdentifier raceIdentifier, List<WindSource> windSourcesToExclude,
             AsyncCallback<Void> callback);
 
 
@@ -415,14 +415,14 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
 
     void createEvent(String eventName, String eventDescription, Date startDate, Date endDate, String venue,
             boolean isPublic, List<String> courseAreaNames, String officialWebsiteURL, String baseURL,
-            Map<String, String> sailorsInfoWebsiteURLsByLocaleName, Iterable<ImageDTO> images,
-            Iterable<VideoDTO> videos, Iterable<UUID> leaderboardGroupIDs,
+            Map<String, String> sailorsInfoWebsiteURLsByLocaleName, List<ImageDTO> images,
+            List<VideoDTO> videos, List<UUID> leaderboardGroupIDs,
             AsyncCallback<EventDTO> callback);
 
     void updateEvent(UUID eventId, String eventName, String eventDescription, Date startDate, Date endDate,
-            VenueDTO venue, boolean isPublic, Iterable<UUID> leaderboardGroupIds, String officialWebsiteURL,
-            String baseURL, Map<String, String> sailorsInfoWebsiteURLsByLocaleName, Iterable<ImageDTO> images,
-            Iterable<VideoDTO> videos, Iterable<String> windFinderReviewedSpotCollectionIds, AsyncCallback<EventDTO> callback);
+            VenueDTO venue, boolean isPublic, List<UUID> leaderboardGroupIds, String officialWebsiteURL,
+            String baseURL, Map<String, String> sailorsInfoWebsiteURLsByLocaleName, List<ImageDTO> images,
+            List<VideoDTO> videos, List<String> windFinderReviewedSpotCollectionIds, AsyncCallback<EventDTO> callback);
 
     void createCourseAreas(UUID eventId, String[] courseAreaNames, AsyncCallback<Void> callback);
 
@@ -435,7 +435,7 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void createRegatta(String regattaName, String boatClassName, boolean canBoatsOfCompetitorsChangePerRace,
             CompetitorRegistrationType competitorRegistrationType, String registrationLinkSecret, Date startDate, Date endDate,
             RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedal, boolean persistent,
-            ScoringSchemeType scoringSchemeType, Iterable<UUID> courseAreaIds, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
+            ScoringSchemeType scoringSchemeType, List<UUID> courseAreaIds, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
             boolean controlTrackingFromStartAndFinishTimes, boolean autoRestartTrackingUponCompetitorSetChange,
             RankingMetrics rankingMetricType, AsyncCallback<RegattaDTO> callback);
 
@@ -466,7 +466,7 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void deleteSwissTimingArchiveConfigurations(Collection<SwissTimingArchiveConfigurationWithSecurityDTO> dtos,
             AsyncCallback<Void> asyncCallback);
 
-    void updateRegatta(RegattaIdentifier regattaIdentifier, Date startDate, Date endDate, Iterable<UUID> courseAreaUuids,
+    void updateRegatta(RegattaIdentifier regattaIdentifier, Date startDate, Date endDate, List<UUID> courseAreaUuids,
             RegattaConfigurationDTO regattaConfiguration, Double buoyZoneRadiusInHullLengths,
             boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes,
             boolean autoRestartTrackingUponCompetitorSetChange, String registrationLinkSecret,
@@ -478,7 +478,7 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
 
     void getImportOperationProgress(UUID id, AsyncCallback<DataImportProgress> asyncCallback);
 
-    void allowCompetitorResetToDefaults(Iterable<CompetitorDTO> competitors, AsyncCallback<Void> asyncCallback);
+    void allowCompetitorResetToDefaults(List<CompetitorDTO> competitors, AsyncCallback<Void> asyncCallback);
 
     void removeDeviceConfiguration(UUID deviceConfigurationId, AsyncCallback<Boolean> asyncCallback);
 
@@ -542,7 +542,7 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void updateSuppressedMarkPassings(String leaderboardName, String raceColumnName, String fleetName,
             Integer newZeroBasedIndexOfSuppressedMarkPassing, CompetitorDTO competitorDTO, AsyncCallback<Void> callback);
 
-    void createRegattaStructure(Iterable<RegattaDTO> regattaNames, EventDTO newEvent,
+    void createRegattaStructure(List<RegattaDTO> regattaNames, EventDTO newEvent,
             AsyncCallback<Void> asyncCallback);
 
     void updateFixedMarkPassing(String leaderboardName, String raceColumnName, String fleetName,

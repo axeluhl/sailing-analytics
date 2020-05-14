@@ -204,7 +204,7 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
             throws DoesNotHaveRegattaLogException, NotFoundException;
 
     void fillRaceLogsFromPairingListTemplate(final String leaderboardName, final int flightMultiplier,
-            final Iterable<String> selectedFlightNames, final PairingListDTO pairingListDTO)
+            final List<String> selectedFlightNames, final PairingListDTO pairingListDTO)
             throws NotFoundException, CompetitorRegistrationOnRaceLogDisabledException;
 
     void setBoatRegistrationsInRegattaLog(String leaderboardName, Set<BoatDTO> boatDTOs)
@@ -240,7 +240,7 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
 
     DataImportProgress getImportOperationProgress(UUID id) throws UnauthorizedException;
 
-    void allowCompetitorResetToDefaults(Iterable<CompetitorDTO> competitors);
+    void allowCompetitorResetToDefaults(List<CompetitorDTO> competitors);
 
     UUID importMasterData(String host, String[] groupNames, boolean override, boolean compress, boolean exportWind,
             boolean exportDeviceConfigurations, String targetServerUsername, String targetServerPassword,
@@ -249,7 +249,7 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
     RegattaDTO createRegatta(String regattaName, String boatClassName, boolean canBoatsOfCompetitorsChangePerRace,
             CompetitorRegistrationType competitorRegistrationType, String registrationLinkSecret, Date startDate,
             Date endDate, RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
-            boolean persistent, ScoringSchemeType scoringSchemeType, Iterable<UUID> courseAreaIds,
+            boolean persistent, ScoringSchemeType scoringSchemeType, List<UUID> courseAreaIds,
             Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
             boolean controlTrackingFromStartAndFinishTimes, boolean autoRestartTrackingUponCompetitorSetChange, RankingMetrics rankingMetricType)
             throws UnauthorizedException;
@@ -262,7 +262,7 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
             boolean firstRaceIsNonDiscardableCarryForward, boolean hasSplitFleetScore, Integer maximumNumberOfDiscards,
             List<FleetDTO> fleets) throws UnauthorizedException;
 
-    void updateRegatta(RegattaIdentifier regattaIdentifier, Date startDate, Date endDate, Iterable<UUID> courseAreaUuids,
+    void updateRegatta(RegattaIdentifier regattaIdentifier, Date startDate, Date endDate, List<UUID> courseAreaUuids,
             RegattaConfigurationDTO regattaConfiguration, Double buoyZoneRadiusInHullLengths,
             boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes,
             boolean autoRestartTrackingUponCompetitorSetChange, String registrationLinkSecret, CompetitorRegistrationType registrationType) throws UnauthorizedException;
@@ -285,14 +285,14 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
 
     EventDTO createEvent(String eventName, String eventDescription, Date startDate, Date endDate, String venue,
             boolean isPublic, List<String> courseAreaNames, String officialWebsiteURLAsString, String baseURLAsString,
-            Map<String, String> sailorsInfoWebsiteURLsByLocaleName, Iterable<ImageDTO> images,
-            Iterable<VideoDTO> videos, Iterable<UUID> leaderboardGroupIds)
+            Map<String, String> sailorsInfoWebsiteURLsByLocaleName, List<ImageDTO> images,
+            List<VideoDTO> videos, List<UUID> leaderboardGroupIds)
             throws UnauthorizedException;
 
     EventDTO updateEvent(UUID eventId, String eventName, String eventDescription, Date startDate, Date endDate,
-            VenueDTO venue, boolean isPublic, Iterable<UUID> leaderboardGroupIds, String officialWebsiteURLString,
-            String baseURLAsString, Map<String, String> sailorsInfoWebsiteURLsByLocaleName, Iterable<ImageDTO> images,
-            Iterable<VideoDTO> videos, Iterable<String> windFinderReviewedSpotCollectionIds)
+            VenueDTO venue, boolean isPublic, List<UUID> leaderboardGroupIds, String officialWebsiteURLString,
+            String baseURLAsString, Map<String, String> sailorsInfoWebsiteURLsByLocaleName, List<ImageDTO> images,
+            List<VideoDTO> videos, List<String> windFinderReviewedSpotCollectionIds)
             throws UnauthorizedException, IOException;
 
     void updateLeaderboardGroup(UUID leaderboardGroupId, String oldName, String newName, String newDescription,
@@ -303,7 +303,7 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
             boolean displayGroupsInReverseOrder, int[] overallLeaderboardDiscardThresholds,
             ScoringSchemeType overallLeaderboardScoringSchemeType);
 
-    void trackWithSwissTiming(RegattaIdentifier regattaToAddTo, Iterable<SwissTimingRaceRecordDTO> rrs, String hostname,
+    void trackWithSwissTiming(RegattaIdentifier regattaToAddTo, List<SwissTimingRaceRecordDTO> rrs, String hostname,
             int port, boolean trackWind, boolean correctWindByDeclination, boolean useInternalMarkPassingAlgorithm,
             String updateURL, String updateUsername, String updatePassword, String eventName, String manage2SailEventUrl) throws UnauthorizedException, Exception;
 
@@ -359,7 +359,7 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
     void removeLeaderboards(Collection<String> leaderboardNames) throws UnauthorizedException;
 
     StrippedLeaderboardDTOWithSecurity updateLeaderboard(String leaderboardName, String newLeaderboardName,
-            String newLeaderboardDisplayName, int[] newDiscardingThreasholds, Iterable<UUID> newCourseAreaIds)
+            String newLeaderboardDisplayName, int[] newDiscardingThreasholds, List<UUID> newCourseAreaIds)
             throws UnauthorizedException;
 
     StrippedLeaderboardDTOWithSecurity createRegattaLeaderboardWithEliminations(String name, String displayName,
@@ -369,7 +369,7 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
             String leaderboardDisplayName, int[] discardThresholds) throws UnauthorizedException;
 
     StrippedLeaderboardDTOWithSecurity createFlexibleLeaderboard(String leaderboardName, String leaderboardDisplayName,
-            int[] discardThresholds, ScoringSchemeType scoringSchemeType, Iterable<UUID> courseAreaIds)
+            int[] discardThresholds, ScoringSchemeType scoringSchemeType, List<UUID> courseAreaIds)
             throws UnauthorizedException;
 
     void removeResultImportURLs(String resultProviderName, Set<UrlDTO> toRemove) throws Exception;
@@ -383,11 +383,11 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
     void createSwissTimingArchiveConfiguration(String jsonUrl)
             throws UnauthorizedException, Exception;
 
-    void createRegattaStructure(final Iterable<RegattaDTO> regattas, final EventDTO newEvent) throws IOException;
+    void createRegattaStructure(final List<RegattaDTO> regattas, final EventDTO newEvent) throws IOException;
 
     void removeWind(RegattaAndRaceIdentifier raceIdentifier, WindDTO windDTO);
 
-    void setWindSourcesToExclude(RegattaAndRaceIdentifier raceIdentifier, Iterable<WindSource> windSourcesToExclude);
+    void setWindSourcesToExclude(RegattaAndRaceIdentifier raceIdentifier, List<WindSource> windSourcesToExclude);
 
     void setRaceIsKnownToStartUpwind(RegattaAndRaceIdentifier raceIdentifier, boolean raceIsKnownToStartUpwind);
 
@@ -396,9 +396,9 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
 
     void setWind(RegattaAndRaceIdentifier raceIdentifier, WindDTO windDTO);
 
-    void removeAndUntrackRaces(Iterable<RegattaAndRaceIdentifier> regattaAndRaceIdentifiers);
+    void removeAndUntrackRaces(List<RegattaAndRaceIdentifier> regattaAndRaceIdentifiers);
 
-    void stopTrackingRaces(Iterable<RegattaAndRaceIdentifier> regattaAndRaceIdentifiers) throws Exception;
+    void stopTrackingRaces(List<RegattaAndRaceIdentifier> regattaAndRaceIdentifiers) throws Exception;
 
     void updateTracTracConfiguration(TracTracConfigurationWithSecurityDTO tracTracConfiguration)
             throws UnauthorizedException, Exception;
@@ -409,7 +409,7 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
     void createTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI,
             String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword) throws Exception;
 
-    void trackWithTracTrac(RegattaIdentifier regattaToAddTo, Iterable<TracTracRaceRecordDTO> rrs, String liveURI,
+    void trackWithTracTrac(RegattaIdentifier regattaToAddTo, List<TracTracRaceRecordDTO> rrs, String liveURI,
             String storedURI, String courseDesignUpdateURI, boolean trackWind, boolean correctWindByDeclination,
             Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm, boolean useOfficialEventsToUpdateRaceLog,
             String tracTracUsername, String tracTracPassword) throws UnauthorizedException, Exception;
@@ -506,7 +506,7 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
             String imageURL, String resizedImageURL, boolean visibleForPublic, TimePoint raceTimepoint)
             throws UnauthorizedException;
 
-    void allowBoatResetToDefaults(Iterable<BoatDTO> boats) throws UnauthorizedException;
+    void allowBoatResetToDefaults(List<BoatDTO> boats) throws UnauthorizedException;
 
     /**
      * Into the first {@link RaceLog} {@link TrackedRace#getAttachedRaceLogs() attached} to the tracked race identified
