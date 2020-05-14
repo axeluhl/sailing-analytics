@@ -1462,7 +1462,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public void removeLeaderboard(String leaderboardName) {
-        Leaderboard leaderboard = removeLeaderboardFromLeaderboardsByName(leaderboardName);
+        // TODO bug5280: if this is a non-delegating regatta leaderboard, find all other delegating regatta leaderboards pointing to this one and remove as well
+        final Leaderboard leaderboard = removeLeaderboardFromLeaderboardsByName(leaderboardName);
         if (leaderboard != null) {
             leaderboard.removeRaceColumnListener(raceLogReplicator);
             leaderboard.removeRaceColumnListener(raceLogScoringReplicator);
@@ -2650,6 +2651,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 }
             }
         }
+        // TODO bug5280: avoid nested loop with squared effort
         for (RegattaLeaderboard regattaLeaderboardToRemove : leaderboardsToRemove) {
             removeLeaderboard(regattaLeaderboardToRemove.getName());
         }
