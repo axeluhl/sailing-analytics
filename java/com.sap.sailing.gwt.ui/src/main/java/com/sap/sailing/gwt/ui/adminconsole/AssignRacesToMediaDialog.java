@@ -15,7 +15,7 @@ import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -32,7 +32,7 @@ public class AssignRacesToMediaDialog extends DataEntryDialog<Set<RegattaAndRace
     private final VerticalPanel panel;
     private Button btnRefresh;
 
-    public AssignRacesToMediaDialog(final SailingServiceAsync sailingService, final UserService userService,
+    public AssignRacesToMediaDialog(final SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
             final MediaTrack mediaTrack,
             final ErrorReporter errorReporter, final RegattaRefresher regattaRefresher,
             final StringMessages stringMessages,
@@ -42,7 +42,7 @@ public class AssignRacesToMediaDialog extends DataEntryDialog<Set<RegattaAndRace
                 stringMessages.ok(), stringMessages.cancel(), validator, callback);
         this.stringMessages = stringMessages;
         this.mediaTrack = mediaTrack;
-        trackedRacesListComposite = new TrackedRacesListComposite(null, null, sailingService, userService,
+        trackedRacesListComposite = new TrackedRacesListComposite(null, null, sailingServiceWrite, userService,
                 errorReporter,
                 regattaRefresher,
                 stringMessages, /* multiselection */true, /* actionButtonsEnabled */ false) {

@@ -54,7 +54,7 @@ import com.sap.sailing.gwt.ui.client.Collator;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.FlagImageRenderer;
 import com.sap.sailing.gwt.ui.client.FlagImageResolverImpl;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.ClassicLeaderboardStyle;
 import com.sap.sailing.gwt.ui.leaderboard.CompetitorColumnBase;
@@ -92,6 +92,8 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
     final private ListDataProvider<CompetitorDTO> suppressedCompetitorsShown;
 
     private CheckBox showUncorrectedTotalPointsCheckbox;
+    
+    private final SailingServiceWriteAsync sailingServiceWrite; 
     
     private class SettingsClickHandler implements ClickHandler {
         private final StringMessages stringMessages;
@@ -587,13 +589,14 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
         }
     }
 
-    public EditableLeaderboardPanel(final SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
+    public EditableLeaderboardPanel(final SailingServiceWriteAsync sailingServiceWrite, AsyncActionsExecutor asyncActionsExecutor,
             String leaderboardName, String leaderboardGroupName, final ErrorReporter errorReporter,
             final StringMessages stringMessages, UserAgentDetails userAgent, Iterable<DetailType> availableDetailTypes) {
-        super(null, null, sailingService, asyncActionsExecutor, new MultiRaceLeaderboardSettings(),
+        super(null, null, sailingServiceWrite, asyncActionsExecutor, new MultiRaceLeaderboardSettings(),
                 new CompetitorSelectionModel(/* hasMultiSelection */true),
                 leaderboardName, errorReporter, stringMessages, /* showRaceDetails */ true, new ClassicLeaderboardStyle(),
                 FlagImageResolverImpl.get(), availableDetailTypes);
+        this.sailingServiceWrite = sailingServiceWrite;
         suppressedCompetitorsShown = new ListDataProvider<>(new ArrayList<>());
         suppressedCompetitorsTable = createSuppressedCompetitorsTable();
         ImageResource importIcon = resources.importIcon();
@@ -603,7 +606,7 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
         importAnchor.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                sailingService.getScoreCorrectionProviderNames(new AsyncCallback<Iterable<String>>() {
+                sailingServiceWrite.getScoreCorrectionProviderNames(new AsyncCallback<Iterable<String>>() {
                     @Override
                     public void onSuccess(Iterable<String> providerNames) {
                         ResultSelectionAndApplyDialog dialog = new ResultSelectionAndApplyDialog(EditableLeaderboardPanel.this, providerNames, getSailingService(), 
@@ -640,7 +643,7 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
                 final String lastScoreCorrectionComment = lastScoreCorrectionCommentBox.getText();
                 final Date lastScoreCorrectionTime = lastScoreCorrectionTimeBox.getValue();
 
-                sailingService.updateLeaderboardScoreCorrectionMetadata(getLeaderboardName(), lastScoreCorrectionTime, lastScoreCorrectionComment, new AsyncCallback<Void>() {
+                sailingServiceWrite.updateLeaderboardScoreCorrectionMetadata(getLeaderboardName(), lastScoreCorrectionTime, lastScoreCorrectionComment, new AsyncCallback<Void>() {
                     @Override
                     public void onSuccess(Void noarg) {
                         updateScoreCorrectionInformation(lastScoreCorrectionComment, lastScoreCorrectionTime);
@@ -1042,4 +1045,8 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
     protected void blurFocusedElementAfterSelectionChange() {
     }   
 
+    public SailingServiceWriteAsync getSailingService() {
+        return sailingServiceWrite;
+    }
+    
 }

@@ -18,7 +18,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationWithSecurityDTO;
 import com.sap.sse.common.Util;
@@ -50,13 +50,13 @@ public class DeviceConfigurationListComposite extends Composite  {
 
     private final Label noConfigurationsLabel;
 
-    private final SailingServiceAsync sailingService;
+    private final SailingServiceWriteAsync sailingServiceWrite;
     private final ErrorReporter errorReporter;
     protected final StringMessages stringMessages;
 
-    public DeviceConfigurationListComposite(SailingServiceAsync sailingService, ErrorReporter errorReporter,
+    public DeviceConfigurationListComposite(SailingServiceWriteAsync sailingServiceWrite, ErrorReporter errorReporter,
             StringMessages stringMessages, final UserService userService) {
-        this.sailingService = sailingService;
+        this.sailingServiceWrite = sailingServiceWrite;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
         mainPanel = new SimplePanel();
@@ -88,7 +88,7 @@ public class DeviceConfigurationListComposite extends Composite  {
     }
 
     public void refreshTable() {
-        sailingService.getDeviceConfigurations(new AsyncCallback<List<DeviceConfigurationWithSecurityDTO>>() {
+        sailingServiceWrite.getDeviceConfigurations(new AsyncCallback<List<DeviceConfigurationWithSecurityDTO>>() {
             @Override
             public void onSuccess(List<DeviceConfigurationWithSecurityDTO> result) {
                 if (configurationsDataProvider.getList().isEmpty()) {
@@ -141,7 +141,7 @@ public class DeviceConfigurationListComposite extends Composite  {
                 new DefaultActionsImagesBarCell(stringMessages), userService);
         actionColumn.addAction(ACTION_DELETE, DELETE, config -> {
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveDeviceConfiguration(config.getName()))) {
-                sailingService.removeDeviceConfiguration(config.id, new AsyncCallback<Boolean>() {
+                sailingServiceWrite.removeDeviceConfiguration(config.id, new AsyncCallback<Boolean>() {
                     @Override
                     public void onSuccess(Boolean result) {
                         refreshTable();
