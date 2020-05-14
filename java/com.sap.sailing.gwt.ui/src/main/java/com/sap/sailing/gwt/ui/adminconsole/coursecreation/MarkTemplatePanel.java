@@ -71,7 +71,6 @@ public class MarkTemplatePanel extends FlowPanel {
         add(buttonAndFilterPanel);
         allMarkTemplates = new ArrayList<>();
         buttonAndFilterPanel.addUnsecuredAction(stringMessages.refresh(), new Command() {
-
             @Override
             public void execute() {
                 loadMarkTemplates();
@@ -81,14 +80,11 @@ public class MarkTemplatePanel extends FlowPanel {
             @Override
             public void execute() {
                 openEditMarkTemplateDialog(new MarkTemplateDTO());
-                // TODO add action
             }
         });
-
         Label lblFilterRaces = new Label(stringMessages.filterMarkTemplateByName() + ":");
         lblFilterRaces.setWordWrap(false);
         buttonAndFilterPanel.addUnsecuredWidget(lblFilterRaces);
-
         this.filterableMarkTemplates = new LabeledAbstractFilterablePanel<MarkTemplateDTO>(lblFilterRaces,
                 allMarkTemplates, markTemplateListDataProvider, stringMessages) {
             @Override
@@ -132,17 +128,14 @@ public class MarkTemplatePanel extends FlowPanel {
 
     private void createMarkTemplatesTable(final UserService userService) {
         // Create a CellTable.
-
         // Set a key provider that provides a unique key for each contact. If key is
         // used to identify contacts when fields (such as the name and address)
         // change.
         markTemplateTable = new BaseCelltable<>(1000, tableResources);
         markTemplateTable.setWidth("100%");
-
         // Attach a column sort handler to the ListDataProvider to sort the list.
         ListHandler<MarkTemplateDTO> sortHandler = new ListHandler<>(markTemplateListDataProvider.getList());
         markTemplateTable.addColumnSortHandler(sortHandler);
-
         // Add a selection model so we can select cells.
         refreshableSelectionModel = new RefreshableMultiSelectionModel<>(
                 new EntityIdentityComparator<MarkTemplateDTO>() {
@@ -188,7 +181,6 @@ public class MarkTemplatePanel extends FlowPanel {
 
         // Initialize the columns.
         initTableColumns(sortHandler, userService);
-
         markTemplateListDataProvider.addDataDisplay(markTemplateTable);
         add(markTemplateTable);
         allMarkTemplates.clear();
@@ -210,7 +202,6 @@ public class MarkTemplatePanel extends FlowPanel {
         };
         markTemplateTable.addColumn(checkColumn, SafeHtmlUtils.fromSafeConstant("<br/>"));
         markTemplateTable.setColumnWidth(checkColumn, 40, Unit.PX);
-
         // id
         Column<MarkTemplateDTO, String> idColumn = new Column<MarkTemplateDTO, String>(new TextCell()) {
             @Override
@@ -264,31 +255,24 @@ public class MarkTemplatePanel extends FlowPanel {
                         : "";
             }
         };
-
         nameColumn.setSortable(true);
         sortHandler.setComparator(nameColumn, new Comparator<MarkTemplateDTO>() {
             public int compare(MarkTemplateDTO markTemplate1, MarkTemplateDTO markTemplate2) {
                 return markTemplate1.getName().compareTo(markTemplate2.getName());
             }
         });
-
         markTemplateTable.addColumn(nameColumn, stringMessages.name());
         markTemplateTable.addColumn(shortNameColumn, stringMessages.shortName());
         markTemplateTable.addColumn(colorColumn, stringMessages.color());
         markTemplateTable.addColumn(shapeColumn, stringMessages.shape());
         markTemplateTable.addColumn(patternColumn, stringMessages.pattern());
         markTemplateTable.addColumn(typeColumn, stringMessages.type());
-
         SecuredDTOOwnerColumn.configureOwnerColumns(markTemplateTable, sortHandler, stringMessages);
-
         final HasPermissions type = SecuredDomainType.MARK_TEMPLATE;
-
         final AccessControlledActionsColumn<MarkTemplateDTO, DefaultActionsImagesBarCell> actionsColumn = create(
                 new DefaultActionsImagesBarCell(stringMessages), userService);
-        final EditOwnershipDialog.DialogConfig<MarkTemplateDTO> configOwnership = EditOwnershipDialog
-                .create(userService.getUserManagementService(), type, markTemplate -> {
-                    refreshMarkTemplates();}, stringMessages);
-
+        final EditOwnershipDialog.DialogConfig<MarkTemplateDTO> configOwnership = EditOwnershipDialog.create(
+                userService.getUserManagementService(), type, markTemplate -> refreshMarkTemplates(), stringMessages);
         final EditACLDialog.DialogConfig<MarkTemplateDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementService(), type, markTemplate -> markTemplate.getAccessControlList(),
                 stringMessages);
@@ -297,7 +281,6 @@ public class MarkTemplatePanel extends FlowPanel {
                 markTemplate -> configACL.openACLDialog(markTemplate));
         markTemplateTable.addColumn(idColumn, stringMessages.id());
         markTemplateTable.addColumn(actionsColumn, stringMessages.actions());
-
     }
 
     public void refreshMarkTemplates() {
@@ -337,5 +320,4 @@ public class MarkTemplatePanel extends FlowPanel {
         dialog.ensureDebugId("MarkTemplateEditDialog");
         dialog.show();
     }
-
 }
