@@ -14,7 +14,7 @@ import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTOImpl;
 import com.sap.sailing.gwt.ui.adminconsole.CompetitorImportProviderSelectionDialog.MatchImportedCompetitorsDialogFactory;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
@@ -37,17 +37,17 @@ public class CompetitorPanel extends SimplePanel implements BusyDisplay {
     private final String boatClassName;
     private final BusyIndicator busyIndicator;
 
-    public CompetitorPanel(final SailingServiceAsync sailingService, final UserService userService, final StringMessages stringMessages,
+    public CompetitorPanel(final SailingServiceWriteAsync sailingServiceWrite, final UserService userService, final StringMessages stringMessages,
             final ErrorReporter errorReporter) {
-        this(sailingService, userService, null, null, stringMessages, errorReporter);
+        this(sailingServiceWrite, userService, null, null, stringMessages, errorReporter);
     }
 
-    public CompetitorPanel(final SailingServiceAsync sailingService, final UserService userService, final String leaderboardName,
+    public CompetitorPanel(final SailingServiceWriteAsync sailingServiceWrite, final UserService userService, final String leaderboardName,
             String boatClassName, final StringMessages stringMessages, final ErrorReporter errorReporter) {
         super();
         this.leaderboardName = leaderboardName;
         this.boatClassName = boatClassName;
-        this.competitorTable = new CompetitorTableWrapper<>(sailingService, userService, stringMessages, errorReporter, /* multiSelection */ true, /* enablePager */ true, 
+        this.competitorTable = new CompetitorTableWrapper<>(sailingServiceWrite, userService, stringMessages, errorReporter, /* multiSelection */ true, /* enablePager */ true, 
                 /* filterCompetitorWithBoat */ false, /* filterCompetitorsWithoutBoat */ false);
         this.refreshableCompetitorSelectionModel = (RefreshableMultiSelectionModel<CompetitorDTO>) competitorTable.getSelectionModel();
         busyIndicator = new SimpleBusyIndicator(false, 0.8f);
@@ -78,13 +78,13 @@ public class CompetitorPanel extends SimplePanel implements BusyDisplay {
         });
 
         buttonPanel.addCreateAction(stringMessages.importCompetitors(), () -> {
-            sailingService.getCompetitorProviderNames(new AsyncCallback<Iterable<String>>() {
+            sailingServiceWrite.getCompetitorProviderNames(new AsyncCallback<Iterable<String>>() {
                 @Override
                 public void onSuccess(Iterable<String> providerNames) {
                     MatchImportedCompetitorsDialogFactory matchCompetitorsDialogFactory = getMatchCompetitorsDialogFactory(
-                            sailingService, userService, stringMessages, errorReporter);
+                            sailingServiceWrite, userService, stringMessages, errorReporter);
                     CompetitorImportProviderSelectionDialog dialog = new CompetitorImportProviderSelectionDialog(
-                            matchCompetitorsDialogFactory, CompetitorPanel.this, providerNames, sailingService,
+                            matchCompetitorsDialogFactory, CompetitorPanel.this, providerNames, sailingServiceWrite,
                             stringMessages, errorReporter);
                     dialog.show();
                 }
@@ -101,7 +101,7 @@ public class CompetitorPanel extends SimplePanel implements BusyDisplay {
         if (leaderboardName != null) {
             buttonPanel.addCreateAction(stringMessages.inviteSelectedCompetitors(), () -> {
                 final Set<CompetitorDTO> competitors = refreshableCompetitorSelectionModel.getSelectedSet();
-                final CompetitorInvitationHelper helper = new CompetitorInvitationHelper(sailingService, stringMessages,
+                final CompetitorInvitationHelper helper = new CompetitorInvitationHelper(sailingServiceWrite, stringMessages,
                         errorReporter);
                 helper.inviteCompetitors(competitors, leaderboardName);
             });
@@ -116,14 +116,14 @@ public class CompetitorPanel extends SimplePanel implements BusyDisplay {
     }
 
     private MatchImportedCompetitorsDialogFactory getMatchCompetitorsDialogFactory(
-            final SailingServiceAsync sailingService, final UserService userService, final StringMessages stringMessages,
+            final SailingServiceWriteAsync sailingServiceWrite, final UserService userService, final StringMessages stringMessages,
             final ErrorReporter errorReporter) {
         return new MatchImportedCompetitorsDialogFactory() {
             @Override
             public MatchImportedCompetitorsDialog createMatchImportedCompetitorsDialog(
                     final Iterable<CompetitorDescriptor> competitorDescriptors,
                     final Iterable<CompetitorDTO> competitors) {
-                ImportCompetitorCallback importCompetitorCallback = new ImportCompetitorCallback(sailingService, errorReporter, stringMessages) {
+                ImportCompetitorCallback importCompetitorCallback = new ImportCompetitorCallback(sailingServiceWrite, errorReporter, stringMessages) {
                     @Override
                     public void registerCompetitors(Set<CompetitorDTO> competitorDTOs) {
                         super.registerCompetitors(competitorDTOs);
@@ -131,7 +131,7 @@ public class CompetitorPanel extends SimplePanel implements BusyDisplay {
                     }
                 };
                 return new MatchImportedCompetitorsDialog(competitorDescriptors, competitors, stringMessages,
-                        sailingService, userService, errorReporter, importCompetitorCallback);
+                        sailingServiceWrite, userService, errorReporter, importCompetitorCallback);
             }
         };
     }
