@@ -10,7 +10,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
@@ -30,25 +30,25 @@ public class CompetitorToBoatMappingsViewPanel extends SimplePanel {
     private final String leaderboardName;
     private final String raceColumnName;
     private final String fleetName;
-    private final SailingServiceAsync sailingService;
+    private final SailingServiceWriteAsync sailingServiceWrite;
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
     
     private final RefreshableSelectionModel<CompetitorDTO> refreshableCompetitorSelectionModel;
 
-    public CompetitorToBoatMappingsViewPanel(final SailingServiceAsync sailingService, final StringMessages stringMessages,
+    public CompetitorToBoatMappingsViewPanel(final SailingServiceWriteAsync sailingServiceWrite, final StringMessages stringMessages,
             final ErrorReporter errorReporter, final String leaderboardName, final String raceColumnName,
             final String fleetName, UserService userService) {
         super();
-        this.sailingService = sailingService;
+        this.sailingServiceWrite = sailingServiceWrite;
         this.stringMessages = stringMessages;
         this.leaderboardName = leaderboardName;
         this.raceColumnName = raceColumnName;
         this.fleetName = fleetName;
         this.errorReporter = errorReporter;
-        this.competitorTable = new CompactCompetitorTableWrapper<>(sailingService, stringMessages, errorReporter,
+        this.competitorTable = new CompactCompetitorTableWrapper<>(sailingServiceWrite, stringMessages, errorReporter,
                 /* multiSelection */ false, /* enablePager */ true, userService);
-        this.boatTable = new CompactBoatTableWrapper<>(sailingService, stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true);
+        this.boatTable = new CompactBoatTableWrapper<>(sailingServiceWrite, stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true);
         refreshableCompetitorSelectionModel = competitorTable.getSelectionModel();
         refreshableCompetitorSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             public void onSelectionChange(SelectionChangeEvent event) {
@@ -94,7 +94,7 @@ public class CompetitorToBoatMappingsViewPanel extends SimplePanel {
     }
 
     private void selectBoatForCompetitor(CompetitorDTO selectedCompetitor) {
-        sailingService.getBoatLinkedToCompetitorForRace(leaderboardName,
+        sailingServiceWrite.getBoatLinkedToCompetitorForRace(leaderboardName,
                 raceColumnName, fleetName, selectedCompetitor.getIdAsString(), new MarkedAsyncCallback<BoatDTO>(
                         new AsyncCallback<BoatDTO>() {
                             @Override
