@@ -58,7 +58,6 @@ public abstract class BaseRacingProcedurePrerequisite implements RacingProcedure
         if (resolver == null) {
             throw new IllegalArgumentException("resolver must not be null");
         }
-
         this.resolver = resolver;
         resolveOn(resolver);
     }

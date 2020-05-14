@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="no"?><resources xmlns:tools="http://schemas.android.com/tools">
+<?xml version="1.0" encoding="UTF-8"?><resources xmlns:tools="http://schemas.android.com/tools">
 
     <string-array name="empty_array" tools:ignore="UnusedResources"/>
     <string name="empty"/>
@@ -385,7 +385,6 @@
     <string name="finishing_started">"Primo al traguardo alle %1$s"</string>
     <string name="finishing_started_since">"(%s)"</string>
     <string name="finishing_done">"Ammaina ora"</string>
-
     <string name="finished_recording">"Registrazione"</string>
     <string name="finished_replay">"Riproduci vocale"</string>
     <string name="finished_list">"Lista completamento"</string>
@@ -566,7 +565,7 @@
 
     <string name="competitor_merge_error_message">"Questo concorrente è stato modificato da un altro dispositivo e l\'utente ha modificato gli stessi dati. Verificare che tali dati siano ora corretti."</string>
 
-    <string name="finishing_revoke">Revoke</string>
-    <string name="error_revoke_finished">Cannot revoke finished time</string>
-    <string name="error_revoke_finishing">Cannot revoke finishing time</string>
+    <string name="finishing_revoke">"Revoca"</string>
+    <string name="error_revoke_finished">"Impossibile revocare l\'ora di conclusione"</string>
+    <string name="error_revoke_finishing">"Impossibile revocare l\'ora di fine"</string>
 </resources>

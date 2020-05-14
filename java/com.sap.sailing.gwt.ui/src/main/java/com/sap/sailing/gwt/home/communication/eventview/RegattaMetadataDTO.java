@@ -6,6 +6,7 @@ import java.util.Date;
 
 import com.sap.sailing.gwt.home.communication.event.EventSeriesReferenceDTO;
 import com.sap.sse.common.Distance;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.dispatch.shared.commands.DTO;
 
 public class RegattaMetadataDTO extends RegattaReferenceDTO implements HasRegattaMetadata {
@@ -14,7 +15,7 @@ public class RegattaMetadataDTO extends RegattaReferenceDTO implements HasRegatt
     private String boatClass;
     private ArrayList<String> leaderboardGroupNames;
     private String defaultCourseAreaName;
-    private String defaultCourseAreaId;
+    private ArrayList<String> courseAreaIdsAsStrings;
     private Date startDate;
     private Date endDate;
     private RegattaState state;
@@ -111,12 +112,13 @@ public class RegattaMetadataDTO extends RegattaReferenceDTO implements HasRegatt
         this.flexibleLeaderboard = flexibleLeaderboard;
     }
 
-    public String getDefaultCourseAreaId() {
-        return defaultCourseAreaId;
+    public Iterable<String> getCourseAreaIdsAsStrings() {
+        return courseAreaIdsAsStrings;
     }
 
-    public void setDefaultCourseAreaId(String defaultCourseAreaId) {
-        this.defaultCourseAreaId = defaultCourseAreaId;
+    public void setCourseAreaIdsAsStrings(Iterable<String> courseAreaIdsAsStrings) {
+        this.courseAreaIdsAsStrings = new ArrayList<>();
+        Util.addAll(courseAreaIdsAsStrings, this.courseAreaIdsAsStrings);
     }
     
     public RaceDataInfo getRaceDataInfo() {

@@ -654,7 +654,7 @@ public class SettingsTest extends AbstractSeleniumTest {
         // add a second regatta to the event and link its leaderboard to the event leaderboard
         RegattaStructureManagementPanelPO regattas = adminConsole.goToRegattaStructure();
         regattas.createRegattaAndAddToEvent(new RegattaDescriptor(AUDI_CUP_REGATTA, AUDI_CUP_BOAT_CLASS), BMW_CUP_EVENT,
-                CUSTOM_COURSE_AREA);
+                new String[] { CUSTOM_COURSE_AREA });
         // open regatta overview for the created event
         events = adminConsole.goToEvents();
         RegattaOverviewPage regattaOverviewPage = events.goToRegattaOverviewOfEvent(BMW_CUP_EVENT);
@@ -718,7 +718,7 @@ public class SettingsTest extends AbstractSeleniumTest {
         // add a second regatta to the event and link its leaderboard to the event leaderboard
         regattas = adminConsole.goToRegattaStructure();
         regattas.createRegattaAndAddToEvent(new RegattaDescriptor(BMW_CUP_REGATTA, BMW_CUP_BOAT_CLASS), AUDI_CUP_EVENT,
-                CUSTOM_COURSE_AREA);
+                new String[] { CUSTOM_COURSE_AREA });
         // open regatta overview without ignoreLocalSettings flag for the recently created event
         events = adminConsole.goToEvents();
         String audiCupRegattaOverviewUrl = events.getRegattaOverviewUrlOfEvent(AUDI_CUP_EVENT);

@@ -77,7 +77,7 @@ public class UserGroupResource extends AbstractSecurityResource {
         } else {
             if (getService().hasCurrentUserReadPermission(usergroup)) {
                 final JSONObject jsonResult = convertUserGroupToJson(usergroup);
-                response = Response.ok(jsonResult.toJSONString()).build();
+                response = Response.ok(streamingOutput(jsonResult)).build();
             } else {
                 response = Response.status(Status.UNAUTHORIZED).build();
             }
@@ -141,7 +141,7 @@ public class UserGroupResource extends AbstractSecurityResource {
             if (group == null) {
                 response = Response.status(Status.INTERNAL_SERVER_ERROR).entity("Could not create user group.").build();
             } else {
-                response = Response.status(Status.CREATED).entity(convertUserGroupToJson(group).toJSONString()).build();
+                response = Response.status(Status.CREATED).entity(streamingOutput(convertUserGroupToJson(group))).build();
             }
         }
 

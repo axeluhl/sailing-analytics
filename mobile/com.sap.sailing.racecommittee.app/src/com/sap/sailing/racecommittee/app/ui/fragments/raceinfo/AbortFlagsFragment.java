@@ -24,6 +24,8 @@ import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
+import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.logging.LogEvent;
 import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
@@ -193,7 +195,9 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
         @Override
         public void run() {
             super.run();
-            getRaceToAbort().getState().forceNewDependentStartTime(getNow(), startTimeDiff, dependentOn);
+            final ReadonlyDataManager dataManager = OnlineDataManager.create(getActivity());
+            getRaceToAbort().getState().forceNewDependentStartTime(getNow(), startTimeDiff, dependentOn,
+                    dataManager.getDataStore().getCourseAreaId());
         }
     }
 
@@ -209,7 +213,8 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
 
         @Override
         public void run() {
-            onRace.getState().forceNewStartTime(getNow(), absoluteStartTime);
+            final ReadonlyDataManager dataManager = OnlineDataManager.create(getActivity());
+            onRace.getState().forceNewStartTime(getNow(), absoluteStartTime, dataManager.getDataStore().getCourseAreaId());
         }
     }
 
