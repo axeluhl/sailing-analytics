@@ -78,8 +78,12 @@ public interface DataStore {
 
     void setEventUUID(Serializable uuid);
 
-    UUID getCourseUUID();
+    /**
+     * The ID of the course area to which the user has logged on. Used as filter when
+     * loading regattas / race groups, and used in start time events when scheduling
+     * a race, assuming that this is the course area where the start will happen.
+     */
+    UUID getCourseAreaId();
 
-    void setCourseUUID(UUID uuid);
-
+    void setCourseAreaId(UUID uuid);
 }

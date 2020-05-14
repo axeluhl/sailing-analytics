@@ -40,7 +40,7 @@ public class SettingsList<T extends AbstractGenericSerializableSettings> extends
     
     private ValueCollectionValue<List<Value>> ensureValue() {
         ValueListValue result = getValue();
-        if(result == null) {
+        if (result == null) {
             result = new ValueListValue();
             settings.setValue(settingName, result);
         }
@@ -79,8 +79,8 @@ public class SettingsList<T extends AbstractGenericSerializableSettings> extends
         this.values.clear();
         ValueCollectionValue<List<Value>> valueObject = ensureValue();
         valueObject.clear();
-        if(values != null) {
-            for(T value : values) {
+        if (values != null) {
+            for (T value : values) {
                 this.values.add(value);
                 valueObject.addValue(value.getInnerValueObject());
             }

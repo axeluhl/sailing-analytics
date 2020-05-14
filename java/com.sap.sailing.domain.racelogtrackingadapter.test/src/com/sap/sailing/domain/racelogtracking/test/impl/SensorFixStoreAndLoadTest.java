@@ -741,7 +741,7 @@ public class SensorFixStoreAndLoadTest {
         trackedRace.attachRegattaLog(regattaLog);
         testNumberOfRawFixes(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME), 0);
         raceLog.add(new RaceLogStartTimeEventImpl(new MillisecondsTimePoint(START_OF_TRACKING), author, 0, 
-                new MillisecondsTimePoint(START_OF_TRACKING)));
+                new MillisecondsTimePoint(START_OF_TRACKING), /* courseAreaId */ null));
         assertNotNull(trackedRace.getStartOfTracking());
         trackedRace.waitForLoadingToFinish();
         testNumberOfRawFixes(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME), 3);

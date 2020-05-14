@@ -2380,4 +2380,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String autoRestartTrackingUponCompetitorSetChange();
     String whitelabelFooterLanguage();
     String whitelabelSailing();
+    String unableToLoadCourseAreas(String message);
 }

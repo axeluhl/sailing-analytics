@@ -3,27 +3,28 @@ package com.sap.sailing.server.operationaltransformation;
 import java.io.Serializable;
 import java.util.Arrays;
 
-import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.interfaces.RacingEventServiceOperation;
+import com.sap.sse.common.Util;
 
 public class UpdateLeaderboard extends AbstractLeaderboardOperation<Leaderboard> {
     private static final long serialVersionUID = -8040361040050151768L;
     private final String newLeaderboardName;
     private final String newLeaderboardDisplayName;
     private final int[] newDiscardingThresholds;
-    private final Serializable newCourseAreaId;
+    private final Iterable<? extends Serializable> newCourseAreaIds;
     
-    public UpdateLeaderboard(String leaderboardName, String newLeaderboardName, String newLeaderboardDisplayName, int[] newDiscardingThresholds, Serializable newCourseAreaId) {
+    public UpdateLeaderboard(String leaderboardName, String newLeaderboardName, String newLeaderboardDisplayName,
+            int[] newDiscardingThresholds, Iterable<? extends Serializable> newCourseAreaIds) {
         super(leaderboardName);
         this.newLeaderboardName = newLeaderboardName;
         this.newLeaderboardDisplayName = newLeaderboardDisplayName;
         this.newDiscardingThresholds = newDiscardingThresholds;
-        this.newCourseAreaId = newCourseAreaId;
+        this.newCourseAreaIds = newCourseAreaIds;
     }
 
     @Override
@@ -58,10 +59,7 @@ public class UpdateLeaderboard extends AbstractLeaderboardOperation<Leaderboard>
         
         if (leaderboard instanceof FlexibleLeaderboard) {
             FlexibleLeaderboard flexibleLeaderboard = (FlexibleLeaderboard) leaderboard;
-            CourseArea newCourseArea = toState.getCourseArea(newCourseAreaId);
-            if (newCourseArea != flexibleLeaderboard.getDefaultCourseArea()) {
-                flexibleLeaderboard.setDefaultCourseArea(newCourseArea);
-            }
+            flexibleLeaderboard.setCourseAreas(Util.map(newCourseAreaIds, toState::getCourseArea));
         }
         updateStoredLeaderboard(toState, leaderboard);
         return leaderboard;

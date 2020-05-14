@@ -160,6 +160,7 @@
 <setEntry value="com.sap.sailing.sailwave.resultimport@4:true"/>
 <setEntry value="com.sap.sailing.server.gateway.serialization.shared.android@default:default"/>
 <setEntry value="com.sap.sailing.server.gateway.serialization@default:default"/>
+<setEntry value="com.sap.sailing.server.gateway.test.support@default:default"/>
 <setEntry value="com.sap.sailing.server.gateway@5:true"/>
 <setEntry value="com.sap.sailing.server.interface@default:default"/>
 <setEntry value="com.sap.sailing.server.trackfiles@default:default"/>
