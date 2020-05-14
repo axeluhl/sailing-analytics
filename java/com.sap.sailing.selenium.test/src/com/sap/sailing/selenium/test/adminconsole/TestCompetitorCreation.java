@@ -10,6 +10,7 @@ import org.junit.Test;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesCompetitorEditDialogPO;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesCompetitorTablePO.CompetitorEntry;
+import com.sap.sailing.selenium.pages.gwt.CheckBoxPO;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesCompetitorsPanelPO;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
@@ -42,6 +43,7 @@ public class TestCompetitorCreation extends AbstractSeleniumTest {
         final String shortName = "NRV";
         dialog.setNameTextBox(name);
         dialog.setShortNameTextBox(shortName);
+        dialog.setWithBoat(false);
         dialog.pressOk();
         boolean found = false;
         for (final CompetitorEntry it : competitorsPanel.getCompetitorTable().getEntries()) {

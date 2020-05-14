@@ -47,6 +47,7 @@ public class CompetitorWithOptionalBoatAddDialog extends AbstractCompetitorWithB
         super(stringMessages.addCompetitor(), stringMessages, competitorToAdd, callback, null,
                 new CompetitorWithOptionalBoatAddDialog.CompetitorWithOptionalBoatValidator(withBoatCheckBox, stringMessages));
         this.withBoatCheckBox = withBoatCheckBox;
+        this.withBoatCheckBox.ensureDebugId("WithBoatCheckBox");
         this.withBoatCheckBox.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {

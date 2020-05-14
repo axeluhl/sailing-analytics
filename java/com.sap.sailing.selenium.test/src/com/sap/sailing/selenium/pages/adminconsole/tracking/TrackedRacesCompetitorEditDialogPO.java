@@ -6,6 +6,7 @@ import org.openqa.selenium.WebElement;
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.common.DataEntryDialogPO;
+import com.sap.sailing.selenium.pages.gwt.CheckBoxPO;
 
 public class TrackedRacesCompetitorEditDialogPO extends DataEntryDialogPO {
     @FindBy(how = BySeleniumId.class, using = "NameTextBox")
@@ -14,11 +15,17 @@ public class TrackedRacesCompetitorEditDialogPO extends DataEntryDialogPO {
     @FindBy(how = BySeleniumId.class, using = "ShortNameTextBox")
     private WebElement shortNameTextBox;
     
+    @FindBy(how = BySeleniumId.class, using = "WithBoatCheckBox")
+    private WebElement withBoatCheckBoxElement;
+    
     @FindBy(how = BySeleniumId.class, using = "OkButton")
     private WebElement okButton;
 
+    private final CheckBoxPO withBoatCheckBox;
+
     public TrackedRacesCompetitorEditDialogPO(WebDriver driver, WebElement element) {
         super(driver, element);
+        withBoatCheckBox = CheckBoxPO.create(driver, withBoatCheckBoxElement);
     }
 
     public void setNameTextBox(String name) {
@@ -29,5 +36,9 @@ public class TrackedRacesCompetitorEditDialogPO extends DataEntryDialogPO {
     public void setShortNameTextBox(String name) {
         this.shortNameTextBox.clear();
         this.shortNameTextBox.sendKeys(name);
+    }
+    
+    public void setWithBoat(boolean withBoat) {
+        this.withBoatCheckBox.setSelected(withBoat);
     }
 }
