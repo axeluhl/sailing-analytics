@@ -269,8 +269,8 @@ public class LeaderboardContext {
             regattaDTO.setEndDate(getEndDateWithEventFallback());
         }
         regattaDTO.setState(calculateRegattaState());
-        regattaDTO.setDefaultCourseAreaName(HomeServiceUtil.getCourseAreaNameForRegattaIdThereIsMoreThanOne(event, leaderboard));
-        regattaDTO.setDefaultCourseAreaId(HomeServiceUtil.getCourseAreaIdForRegatta(event, leaderboard));
+        regattaDTO.setDefaultCourseAreaName(HomeServiceUtil.getCourseAreaNameForRegattaIfThereIsMoreThanOne(event, leaderboard));
+        regattaDTO.setCourseAreaIdsAsStrings(HomeServiceUtil.getCourseAreaIdsAsStringsForRegatta(event, leaderboard));
         regattaDTO.setFlexibleLeaderboard(leaderboard instanceof FlexibleLeaderboard);
         
         RegattaRaceDataInfoCalculator regattaRaceDataInfoCalculator = new RegattaRaceDataInfoCalculator();

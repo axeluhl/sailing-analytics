@@ -8,6 +8,8 @@ import com.sap.sailing.android.shared.util.BroadcastManager;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
+import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.domain.impl.Result;
 import com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
@@ -146,7 +148,6 @@ public class RaceTimeChangeFragment extends BaseFragment implements View.OnClick
     @Override
     public void onClick(View v) {
         TimePoint time = getPickerTime();
-
         Result result;
         switch (getArguments().getInt(TIME_MODE)) {
         case FINISHING_TIME_MODE:
@@ -155,19 +156,17 @@ public class RaceTimeChangeFragment extends BaseFragment implements View.OnClick
                 Toast.makeText(getActivity(), result.getMessage(getActivity()), Toast.LENGTH_LONG).show();
             }
             break;
-
         case FINISHED_TIME_MODE:
             result = getRace().setFinishedTime(time);
             if (result.hasError()) {
                 Toast.makeText(getActivity(), result.getMessage(getActivity()), Toast.LENGTH_LONG).show();
             }
             break;
-
         default: // START_TIME_MODE
-            getRaceState().forceNewStartTime(MillisecondsTimePoint.now(), time);
+            final ReadonlyDataManager dataManager = OnlineDataManager.create(getActivity());
+            getRaceState().forceNewStartTime(MillisecondsTimePoint.now(), time, dataManager.getDataStore().getCourseAreaId());
             break;
         }
-
         closeFragment();
     }
 
