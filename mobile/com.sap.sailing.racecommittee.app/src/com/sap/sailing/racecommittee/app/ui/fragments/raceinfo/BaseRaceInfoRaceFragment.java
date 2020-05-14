@@ -98,20 +98,18 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
             super.onStatusChanged(state);
 
             switch (state.getStatus()) {
-            case UNSCHEDULED:
-            case FINISHED:
-                RacingActivity activity = (RacingActivity) getActivity();
-                if (activity != null) {
-                    activity.onRaceItemClicked(getRace(), true);
-                }
-                break;
+                case UNSCHEDULED:
+                case FINISHING:
+                case FINISHED:
+                    RacingActivity activity = (RacingActivity) getActivity();
+                    if (activity != null) {
+                        activity.onRaceItemClicked(getRace(), true);
+                    }
+                    break;
 
-            case RUNNING:
-                break;
-
-            default:
-                showMainContent();
-                break;
+                default:
+                    showMainContent();
+                    break;
             }
         }
 
@@ -146,13 +144,13 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
             setupUi();
 
             switch (getRaceState().getStatus()) {
-            case SCHEDULED:
-                showMainContent();
-                break;
+                case SCHEDULED:
+                    showMainContent();
+                    break;
 
-            default:
-                // nothing
-                break;
+                default:
+                    // nothing
+                    break;
             }
         }
 

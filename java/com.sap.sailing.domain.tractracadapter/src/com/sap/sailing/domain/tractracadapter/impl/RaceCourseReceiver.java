@@ -146,6 +146,13 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
         int i = 0;
         for (IControl cp : event.getA().getControls()) {
             PassingInstruction passingInstructions = courseWaypointPassingInstructions.containsKey(i) ? courseWaypointPassingInstructions.get(i) : PassingInstruction.None;
+            if (!ttControlPointsForAllOriginalEventControlPoints.containsKey(cp)) {
+                logger.warning("The TracTrac event "+getTracTracEvent()+" with ID "+
+                        getTracTracEvent().getId()+" does not contain the IControl with ID "+
+                        cp.getId()+" which is used by race "+tractracRace.getId()+
+                        ". Adding control point adapter based on race data.");
+                ttControlPointsForAllOriginalEventControlPoints.put(cp, new ControlPointAdapter(cp));
+            }
             ttControlPoints.add(new Pair<TracTracControlPoint, PassingInstruction>(ttControlPointsForAllOriginalEventControlPoints.get(cp), passingInstructions));
             i++;
         }

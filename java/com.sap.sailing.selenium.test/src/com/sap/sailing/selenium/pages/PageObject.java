@@ -304,8 +304,8 @@ public class PageObject {
      * @return
      *   The first matching element in the given context.
      */
-    protected WebElement waitForElementBySeleniumId(SearchContext context, String id, int timeout) {
-        FluentWait<SearchContext> wait = createFluentWait(context, timeout, DEFAULT_POLLING_INTERVAL);
+    protected WebElement waitForElementBySeleniumId(SearchContext context, String id, int timeoutInSeconds) {
+        FluentWait<SearchContext> wait = createFluentWait(context, timeoutInSeconds, DEFAULT_POLLING_INTERVAL);
         return (WebElement) wait.until(new Function<SearchContext, Object>() {
             @Override
             public Object apply(SearchContext context) {
@@ -514,13 +514,13 @@ public class PageObject {
      * 
      * @param supplier {@link PageAreaSupplier} used to instantiate the {@link PageArea}
      * @param seleniumId the selenium id of the desired element
-     * @param timeout the timeout in seconds to wait for the element
+     * @param timeoutInSeconds the timeout in seconds to wait for the element
      * @return {@link PageArea} representing the first matching element
      * 
      * @see #findElementBySeleniumId(SearchContext, String)
      */
-    protected <T extends PageArea> T waitForPO(PageAreaSupplier<T> supplier, String seleniumId, int timeout) {
-        return supplier.get(driver, waitForElementBySeleniumId(driver, seleniumId, timeout));
+    protected <T extends PageArea> T waitForPO(PageAreaSupplier<T> supplier, String seleniumId, int timeoutInSeconds) {
+        return supplier.get(driver, waitForElementBySeleniumId(driver, seleniumId, timeoutInSeconds));
     }
     
     /**
@@ -626,7 +626,6 @@ public class PageObject {
     protected void waitForNotificationAndDismiss(int timeoutInSeconds, String expectedNotificationMessage) {
         WebDriverWait wait = new WebDriverWait(driver, timeoutInSeconds);
         wait.until(new Function<WebDriver, Boolean>() {
-
             @Override
             public Boolean apply(WebDriver t) {
                 boolean clickedNotifications = false;

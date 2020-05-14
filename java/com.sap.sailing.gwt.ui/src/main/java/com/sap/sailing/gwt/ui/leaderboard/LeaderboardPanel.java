@@ -1904,34 +1904,11 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             }
         }
 
-        private abstract class AbstractLastLegDetailField<T extends Comparable<?>> implements DataExtractor<T, LeaderboardRowDTO> {
+        private abstract class AbstractLastLegDetailField<T extends Comparable<?>> extends com.sap.sailing.gwt.ui.leaderboard.AbstractLastLegDetailField<T> {
             @Override
-            public final T get(LeaderboardRowDTO row) {
-                T result = null;
-                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
-                if (fieldsForRace != null && fieldsForRace.legDetails != null) {
-                    int lastLegIndex = fieldsForRace.legDetails.size() - 1;
-                    if (lastLegIndex >= 0) {
-                        LegEntryDTO lastLegDetail = fieldsForRace.legDetails.get(lastLegIndex);
-                        // competitor may be in leg prior to the one the leader is in; find competitors current leg
-                        while (lastLegDetail == null && lastLegIndex > 0) {
-                            lastLegDetail = fieldsForRace.legDetails.get(--lastLegIndex);
-                        }
-                        if (lastLegDetail != null) {
-                            if (lastLegDetail.finished) {
-                                result = getAfterLastLegFinished(row);
-                            } else {
-                                result = getBeforeLastLegFinished(lastLegDetail);
-                            }
-                        }
-                    }
-                }
-                return result;
+            public String getRaceColumnName() {
+                return TextRaceColumn.this.getRaceColumnName();
             }
-
-            protected abstract T getBeforeLastLegFinished(LegEntryDTO currentLegDetail);
-
-            protected abstract T getAfterLastLegFinished(LeaderboardRowDTO row);
         }
 
         private class RaceCurrentSpeedOverGroundInKnots extends AbstractLastLegDetailField<Double> {

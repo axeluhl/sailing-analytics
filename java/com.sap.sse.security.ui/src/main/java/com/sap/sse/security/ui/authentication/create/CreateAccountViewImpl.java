@@ -1,11 +1,15 @@
 package com.sap.sse.security.ui.authentication.create;
 
+import java.io.IOException;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.i18n.client.LocaleInfo;
+import com.google.gwt.text.shared.Renderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -14,7 +18,9 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.gwt.client.GWTLocaleUtil;
 import com.sap.sse.gwt.common.CommonSharedResources;
 import com.sap.sse.security.ui.authentication.UserManagementResources;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
@@ -29,6 +35,18 @@ public class CreateAccountViewImpl extends Composite implements CreateAccountVie
     @UiField TextBox emailUi;
     @UiField TextBox usernameUi;
     @UiField TextBox nameUi;
+    @UiField(provided = true)
+    public ValueListBox<String> localeListBox = new ValueListBox<String>(new Renderer<String>() {
+        @Override
+        public String render(String object) {
+            return GWTLocaleUtil.getDecoratedLanguageDisplayNameWithDefaultLocaleSupport(object);
+        }
+
+        @Override
+        public void render(String object, Appendable appendable) throws IOException {
+            appendable.append(render(object));
+        }
+    });
     @UiField TextBox companyUi;
     @UiField PasswordTextBox passwordUi;
     @UiField PasswordTextBox passwordConfirmationUi;
@@ -46,11 +64,9 @@ public class CreateAccountViewImpl extends Composite implements CreateAccountVie
         this.res = resources;
         UserManagementResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
-        
         StringMessages i18n = StringMessages.INSTANCE;
         setPlaceholder(passwordUi, i18n.newPasswordPlaceholder());
         setPlaceholder(passwordConfirmationUi, i18n.passwordRepeatPlaceholder());
-        
         emailUi.addKeyUpHandler(new FieldKeyUpHandler() {
             @Override
             void updateFieldValue() {
@@ -69,6 +85,8 @@ public class CreateAccountViewImpl extends Composite implements CreateAccountVie
                 presenter.onChangeFullName(nameUi.getValue());
             }
         });
+        localeListBox.setAcceptableValues(GWTLocaleUtil.getAvailableLocalesAndDefault());
+        localeListBox.addValueChangeHandler(event -> presenter.onChangeLocale(localeListBox.getValue()));
         companyUi.addKeyUpHandler(new FieldKeyUpHandler() {
             @Override
             void updateFieldValue() {
@@ -106,6 +124,7 @@ public class CreateAccountViewImpl extends Composite implements CreateAccountVie
     
     @Override
     protected void onLoad() {
+        localeListBox.setValue(LocaleInfo.getCurrentLocale().getLocaleName(), true);
         selectAll(emailUi);
     }
     

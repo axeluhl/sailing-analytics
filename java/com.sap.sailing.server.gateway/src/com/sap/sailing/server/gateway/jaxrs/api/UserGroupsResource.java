@@ -45,7 +45,7 @@ public class UserGroupsResource extends AbstractSailingServerResource {
             for (UserGroup group : user.getUserGroups()) {
                 groups.add(userGroupToJson(group, /* includingRoles */ false));
             }
-            response = Response.ok(root.toJSONString()).build();
+            response = Response.ok(streamingOutput(root)).build();
         } else {
             response = Response.status(401).build();
         }
@@ -73,7 +73,7 @@ public class UserGroupsResource extends AbstractSailingServerResource {
             userGroups.forEach(ug -> userGroupsJson.add(userGroupToJson(ug, /* includingRoles */ true)));
             response = Response.ok(root.toJSONString()).build();
             root.put("readableGroups", userGroupsJson);
-            response = Response.ok().entity(root.toJSONString()).build();
+            response = Response.ok().entity(streamingOutput(root)).build();
         } else {
             response = Response.status(Status.UNAUTHORIZED).build();
         }
@@ -139,7 +139,7 @@ public class UserGroupsResource extends AbstractSailingServerResource {
         UserGroup userGroup = getService().getSecurityService().getUserGroup(userGroupId);
         getSecurityService().checkCurrentUserReadPermission(userGroup);
         if (userGroup != null) {
-            response = Response.ok(userGroupToJson(userGroup, /* includingRoles */ true).toJSONString()).build();
+            response = Response.ok(streamingOutput(userGroupToJson(userGroup, /* includingRoles */ true))).build();
         } else {
             response = Response.status(401).build();
         }

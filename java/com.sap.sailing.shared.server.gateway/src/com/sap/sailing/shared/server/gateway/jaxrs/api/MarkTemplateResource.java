@@ -20,13 +20,13 @@ import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.impl.MarkTemplateImpl;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.MarkTemplateJsonSerializer;
-import com.sap.sailing.shared.server.gateway.jaxrs.AbstractSailingServerResource;
+import com.sap.sailing.shared.server.gateway.jaxrs.SharedAbstractSailingServerResource;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.impl.RGBColor;
 import com.sun.jersey.api.client.ClientResponse.Status;
 
 @Path("/v1/marktemplates")
-public class MarkTemplateResource extends AbstractSailingServerResource {
+public class MarkTemplateResource extends SharedAbstractSailingServerResource {
 
     private Response getBadMarkTemplateValidationErrorResponse(String errorText) {
         return Response.status(Status.BAD_REQUEST).entity(StringEscapeUtils.escapeHtml(errorText) + ".")
@@ -59,9 +59,8 @@ public class MarkTemplateResource extends AbstractSailingServerResource {
             return getMarkTemplateNotFoundErrorResponse();
         }
         JsonSerializer<MarkTemplate> markTemplateSerializer = new MarkTemplateJsonSerializer();
-        final JSONObject serializedMarkedTemplate = markTemplateSerializer.serialize(markTemplate);
-        final String json = serializedMarkedTemplate.toJSONString();
-        return Response.ok(json).build();
+        final JSONObject serializedMarkTemplate = markTemplateSerializer.serialize(markTemplate);
+        return Response.ok(streamingOutput(serializedMarkTemplate)).build();
     }
 
     @POST
@@ -74,7 +73,6 @@ public class MarkTemplateResource extends AbstractSailingServerResource {
             return getBadMarkTemplateValidationErrorResponse("name must be given");
         }
         final String effectiveShortName = shortName == null || shortName.isEmpty() ? name : shortName;
-        
         Color color = null;
         if (rgbColor != null && rgbColor.length() > 0) {
             try {
@@ -87,13 +85,10 @@ public class MarkTemplateResource extends AbstractSailingServerResource {
         if (markType != null && markType.length() > 0) {
             type = MarkType.valueOf(markType);
         }
-
         final MarkTemplate markTemplate = new MarkTemplateImpl(name, effectiveShortName, color, shape, pattern, type);
         final MarkTemplate createdMarkTemplate = getSharedSailingData().createMarkTemplate(markTemplate);
         JsonSerializer<MarkTemplate> markTemplateSerializer = new MarkTemplateJsonSerializer();
-        final JSONObject serializedMarkedTemplate = markTemplateSerializer.serialize(createdMarkTemplate);
-        final String json = serializedMarkedTemplate.toJSONString();
-        return Response.ok(json).build();
+        final JSONObject serializedMarkTemplate = markTemplateSerializer.serialize(createdMarkTemplate);
+        return Response.ok(streamingOutput(serializedMarkTemplate)).build();
     }
-
 }

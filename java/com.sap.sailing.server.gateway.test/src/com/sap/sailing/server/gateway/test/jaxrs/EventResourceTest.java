@@ -12,6 +12,7 @@ import java.text.ParseException;
 import java.util.Arrays;
 import java.util.UUID;
 
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
@@ -30,6 +31,7 @@ import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.server.gateway.jaxrs.api.AbstractLeaderboardsResource;
 import com.sap.sse.InvalidDateException;
+import com.sap.sse.rest.StreamingOutputUtil;
 
 public class EventResourceTest extends AbstractJaxRsApiTest {
     private String randomName; 
@@ -77,7 +79,7 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
         assertTrue(hasAtLeastOneCourseArea(objEvent));
         JSONObject objRegatta = getRegatta(randomName);
         String strRegattaName = (String) objRegatta.get("name");
-        String strRegattaCourseAreaId = (String) objRegatta.get("courseAreaId");
+        String strRegattaCourseAreaId = (String) ((JSONArray) objRegatta.get("courseAreaIds")).get(0);
         assertTrue(strRegattaCourseAreaId.equals(getDefaultCourseAreaId(objEvent)));
         leaderBoardWithNameExists(strRegattaName);
         JSONArray leaderboardGroups = getLeaderboardGroups(objEvent);
@@ -96,7 +98,7 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
         assertTrue(isValidCreateEventResponse(eventResponse));
         String strEventId = getIdFromCreateEventResponse(eventResponse);
         JSONObject regatta = getRegatta(eventName);
-        String strRegattaCourseAreaId = (String) regatta.get("courseAreaId");
+        String strRegattaCourseAreaId = (String) ((JSONArray) regatta.get("courseAreaIds")).get(0);
         JSONArray arrCourseAreas = getCourseAreasOfEvent(strEventId);
         assertTrue(arrCourseAreas.size() == 1);
         JSONObject objCourseArea = (JSONObject) arrCourseAreas.get(0);
@@ -208,7 +210,6 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
     private String getDefaultCourseAreaId(JSONObject objEvent) {
         JSONArray arrCourseAreas = getCourseAreas(objEvent);
         assertTrue(arrCourseAreas.size() == 1);
-        
         JSONObject courseArea = (JSONObject) arrCourseAreas.get(0);
         String strCourseAreaId = (String) courseArea.get("id");
         return strCourseAreaId;
@@ -223,44 +224,44 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
         return array.stream().filter(o -> ((JSONObject) o).get(attributeName).equals(value)).findFirst().isPresent();
     }
 
-    private JSONObject getRegatta(String eventName) {
+    private JSONObject getRegatta(String eventName) throws WebApplicationException, IOException {
         Response regattasResponse = regattasResource.getRegatta(eventName, null);
-        return toJSONObject((String) regattasResponse.getEntity());
+        return toJSONObject(StreamingOutputUtil.getEntityAsString(regattasResponse.getEntity()));
     }
 
-    private boolean isValidCreateEventResponse(Response response) {
+    private boolean isValidCreateEventResponse(Response response) throws WebApplicationException, IOException {
         String id = getIdFromCreateEventResponse(response);
         return validateUUID(id);
     }
     
-    private JSONArray getCourseAreasOfEvent(String strEventId) {
+    private JSONArray getCourseAreasOfEvent(String strEventId) throws WebApplicationException, IOException {
         JSONObject objEvent = getEvent(strEventId);
         JSONArray arrCourseAreas = getCourseAreas(objEvent);
         return arrCourseAreas;
     }
 
-    private JSONObject getEvent(String strEventId) {
+    private JSONObject getEvent(String strEventId) throws WebApplicationException, IOException {
         String jsonEvent = getEventAsString(strEventId);
         JSONObject objEvent = toJSONObject(jsonEvent);
         return objEvent;
     }
 
-    private boolean leaderBoardWithNameExists(String name) {
+    private boolean leaderBoardWithNameExists(String name) throws WebApplicationException, IOException {
         Response leaderboardResponse = getLeaderboard(name);
         JSONObject objLeaderboard = getLeaderboardAsJsonObject(leaderboardResponse);
         String strLeaderboardName = (String) objLeaderboard.get("name");
         return strLeaderboardName.equals(name);
     }
 
-    private JSONObject getLeaderboardAsJsonObject(Response leaderboardResponse) {
-        String strLeaderboardGroup = (String) leaderboardResponse.getEntity();
+    private JSONObject getLeaderboardAsJsonObject(Response leaderboardResponse) throws WebApplicationException, IOException {
+        String strLeaderboardGroup = StreamingOutputUtil.getEntityAsString(leaderboardResponse.getEntity());
         JSONObject objLeaderboardGroup = toJSONObject(strLeaderboardGroup);
         return objLeaderboardGroup;
     }
 
-    private JSONObject getLeaderboardGroup(String strDefaultLeaderboardGroupName) {
+    private JSONObject getLeaderboardGroup(String strDefaultLeaderboardGroupName) throws WebApplicationException, IOException {
         Response leaderboardGroupsResponse = leaderboardGroupsResource.getLeaderboardGroup(strDefaultLeaderboardGroupName);
-        return toJSONObject(leaderboardGroupsResponse.getEntity().toString());
+        return toJSONObject(StreamingOutputUtil.getEntityAsString(leaderboardGroupsResponse.getEntity()));
     }
 
     private JSONArray getLeaderboardGroups(JSONObject objEvent) {
@@ -287,12 +288,12 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
     }
     
 
-    private String getIdFromCreateEventResponse(Response createEventResponse) {
-        return (String) toJSONObject((String) createEventResponse.getEntity()).get("eventid");
+    private String getIdFromCreateEventResponse(Response createEventResponse) throws WebApplicationException, IOException {
+        return (String) toJSONObject(StreamingOutputUtil.getEntityAsString(createEventResponse.getEntity())).get("eventid");
     }
 
-    private String getEventAsString(String eventId) {
-        return (String) eventsResource.getEvent(eventId, null).getEntity();
+    private String getEventAsString(String eventId) throws WebApplicationException, IOException {
+        return StreamingOutputUtil.getEntityAsString(eventsResource.getEvent(eventId, null).getEntity());
     }
 
 }

@@ -8,6 +8,7 @@ import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -80,6 +81,7 @@ import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.mail.MailException;
+import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
 import com.sap.sse.mail.MailService;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
@@ -185,6 +187,11 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     private CachingSecurityManager securityManager;
     
+    private static final String STRING_MESSAGES_BASE_NAME = "stringmessages/StringMessages";
+    private static final ResourceBundleStringMessagesImpl messages = new ResourceBundleStringMessagesImpl(
+            SecurityServiceImpl.STRING_MESSAGES_BASE_NAME, SecurityServiceImpl.class.getClassLoader(),
+            StandardCharsets.UTF_8.name());
+
     /**
      * A cache manager that the {@link SessionCacheManager} delegates to. This way, multiple Shiro configurations can
      * share the cache manager provided as a singleton within this bundle instance. The cache manager is replicating,
@@ -289,9 +296,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         this.mailServiceTracker = mailServiceTracker;
         this.hasPermissionsProvider = hasPermissionsProvider;
         cacheManager = loadReplicationCacheManagerContents();
-        Factory<SecurityManager> factory = new WebIniSecurityManagerFactory(shiroConfiguration);
+        final Factory<SecurityManager> factory = new WebIniSecurityManagerFactory(shiroConfiguration);
         logger.info("Loaded shiro.ini file from: classpath:shiro.ini");
-        StringBuilder logMessage = new StringBuilder("[urls] section from Shiro configuration:");
+        final StringBuilder logMessage = new StringBuilder("[urls] section from Shiro configuration:");
         final Section urlsSection = shiroConfiguration.getSection("urls");
         if (urlsSection != null) {
             for (Entry<String, String> e : urlsSection.entrySet()) {
@@ -303,7 +310,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         }
         logger.info(logMessage.toString());
         System.setProperty("java.net.useSystemProxies", "true");
-        CachingSecurityManager securityManager = (CachingSecurityManager) factory.getInstance();
+        final CachingSecurityManager securityManager = (CachingSecurityManager) factory.getInstance();
         logger.info("Created: " + securityManager);
         SecurityUtils.setSecurityManager(securityManager);
         this.securityManager = securityManager;
@@ -315,8 +322,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         final ReplicatingCacheManager result = new ReplicatingCacheManager();
         for (Entry<String, Set<Session>> cacheNameAndSessions : PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory().loadSessionsByCacheName().entrySet()) {
             final String cacheName = cacheNameAndSessions.getKey();
-            final ReplicatingCache<Object, Object> cache = (ReplicatingCache<Object, Object>) result.getCache(cacheName,
-                    this);
+            final ReplicatingCache<Object, Object> cache = (ReplicatingCache<Object, Object>) result.getCache(cacheName, this);
             for (final Session session : cacheNameAndSessions.getValue()) {
                 cache.put(session.getId(), session, /* store */ false);
                 count++;
@@ -359,7 +365,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     private void initEmptyStore() {
         final AdminRole adminRolePrototype = AdminRole.getInstance();
         RoleDefinition adminRoleDefinition = getRoleDefinition(adminRolePrototype.getId());
-        adminRoleDefinition = getRoleDefinition(adminRolePrototype.getId());
         assert adminRoleDefinition != null;
         try {
             isInitialOrMigration = false;
@@ -1099,12 +1104,13 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             urlParameters.put("u", URLEncoder.encode(user.getName(), "UTF-8"));
             urlParameters.put("v", URLEncoder.encode(validationSecret, "UTF-8"));
             StringBuilder url = buildURL(baseURL, urlParameters);
-            sendMail(user.getName(), "e-Mail Validation",
-                    "Please click on the link below to validate your e-mail address for user "+user.getName()+".\n   "+url.toString());
+            sendMail(user.getName(), messages.get(user.getLocaleOrDefault(), "emailValidationSubject"),
+                    new StringBuilder()
+                            .append(messages.get(user.getLocaleOrDefault(), "emailValidationMessage", user.getName()))
+                            .append("\n").append("   ").append(url.toString()).toString());
         } catch (UnsupportedEncodingException e) {
-            logger.log(Level.SEVERE,
-                    "Internal error: encoding UTF-8 not found. Couldn't send e-mail to user " + user.getName()
-                            + " at e-mail address " + user.getEmail(), e);
+            logger.log(Level.SEVERE, "Internal error: encoding UTF-8 not found. Couldn't send e-mail to user "
+                    + user.getName() + " at e-mail address " + user.getEmail(), e);
         }
     }
 
@@ -1819,7 +1825,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public void setDefaultOwnershipIfNotSet(QualifiedObjectIdentifier identifier) {
         final OwnershipAnnotation preexistingOwnership = getOwnership(identifier);
-        if (preexistingOwnership == null) {
+        if (preexistingOwnership == null || (preexistingOwnership.getAnnotation() == null ||
+                (preexistingOwnership.getAnnotation().getTenantOwner() == null && preexistingOwnership.getAnnotation().getUserOwner() == null))) {
             setDefaultOwnership(identifier, identifier.toString());
         }
     }
@@ -1849,7 +1856,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public void setOwnershipIfNotSet(QualifiedObjectIdentifier identifier, User user, UserGroup tenantOwner) {
         final OwnershipAnnotation preexistingOwnership = getOwnership(identifier);
-        if (preexistingOwnership == null) {
+        if (preexistingOwnership == null || (preexistingOwnership.getAnnotation() == null ||
+                (preexistingOwnership.getAnnotation().getTenantOwner() == null && preexistingOwnership.getAnnotation().getUserOwner() == null))) {
             setOwnership(identifier, user, tenantOwner, identifier.toString());
         }
     }
@@ -2247,13 +2255,13 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public void migrateOwnership(WithQualifiedObjectIdentifier identifier) {
-        migrateOwnership(identifier.getIdentifier(), identifier.getName());
+    public boolean migrateOwnership(WithQualifiedObjectIdentifier identifier) {
+        return migrateOwnership(identifier.getIdentifier(), identifier.getName());
     }
 
     @Override
-    public void migrateOwnership(final QualifiedObjectIdentifier identifier, final String displayName) {
-        this.migrateOwnership(identifier, null, /* setServerGroupAsOwner */ true, displayName);
+    public boolean migrateOwnership(final QualifiedObjectIdentifier identifier, final String displayName) {
+        return this.migrateOwnership(identifier, null, /* setServerGroupAsOwner */ true, displayName);
     }
     
     @Override

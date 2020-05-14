@@ -350,6 +350,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      */
     private static final ScheduledExecutorService scheduler = ThreadPoolUtil.INSTANCE.getDefaultForegroundTaskThreadPoolExecutor();
 
+    private static final ScheduledExecutorService simulatorExecutor = ThreadPoolUtil.INSTANCE.createBackgroundTaskThreadPoolExecutor("Simulator Background Executor");
+
     private final com.sap.sailing.domain.base.DomainFactory baseDomainFactory;
 
     /**
@@ -873,7 +875,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         operationExecutionListeners = new ConcurrentHashMap<>();
         courseListeners = new ConcurrentHashMap<>();
         persistentRegattasForRaceIDs = new ConcurrentHashMap<>();
-        final ScheduledExecutorService simulatorExecutor = ThreadPoolUtil.INSTANCE.createBackgroundTaskThreadPoolExecutor("Simulator Background Executor");
         simulationService = SimulationServiceFactory.INSTANCE.getService(simulatorExecutor, this);
         taggingService = TaggingServiceFactory.INSTANCE.getService(this);
         this.raceLogReplicator = new RaceLogReplicatorAndNotifier(this);
@@ -1238,12 +1239,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public FlexibleLeaderboard addFlexibleLeaderboard(String leaderboardName, String leaderboardDisplayName,
-            int[] discardThresholds, ScoringScheme scoringScheme, Serializable courseAreaId) {
+            int[] discardThresholds, ScoringScheme scoringScheme, Iterable<? extends Serializable> courseAreaIds) {
         logger.info("adding flexible leaderboard " + leaderboardName);
-        CourseArea courseArea = getCourseArea(courseAreaId);
         FlexibleLeaderboard result = new FlexibleLeaderboardImpl(getRaceLogStore(), getRegattaLogStore(),
                 leaderboardName, new ThresholdBasedResultDiscardingRuleImpl(discardThresholds), scoringScheme,
-                courseArea);
+                Util.map(courseAreaIds, courseAreaId->getBaseDomainFactory().getExistingCourseAreaById(courseAreaId)));
         result.setDisplayName(leaderboardDisplayName);
         if (getLeaderboardByName(leaderboardName) != null) {
             throw new IllegalArgumentException("Leaderboard with name " + leaderboardName + " already exists");
@@ -1695,14 +1695,16 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     public Regatta createRegatta(String fullRegattaName, String boatClassName, boolean canBoatsOfCompetitorsChangePerRace,
             CompetitorRegistrationType competitorRegistrationType, String registrationLinkSecret, TimePoint startDate, TimePoint endDate,
             Serializable id, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme,
-            Serializable defaultCourseAreaId, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes,
-            RankingMetricConstructor rankingMetricConstructor) {
+            Iterable<? extends Serializable> courseAreaIds, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes,
+            boolean autoRestartTrackingUponCompetitorSetChange, RankingMetricConstructor rankingMetricConstructor) {
         if (useStartTimeInference && controlTrackingFromStartAndFinishTimes) {
             throw new IllegalArgumentException("Cannot set both of useStartTimeInference and controlTrackingFromStartAndFinishTimes to true");
         }
         com.sap.sse.common.Util.Pair<Regatta, Boolean> regattaWithCreatedFlag = getOrCreateRegattaWithoutReplication(
-                fullRegattaName, boatClassName, canBoatsOfCompetitorsChangePerRace, competitorRegistrationType, registrationLinkSecret, startDate, endDate, id, series, persistent, scoringScheme,
-                defaultCourseAreaId, buoyZoneRadiusInHullLengths, useStartTimeInference, controlTrackingFromStartAndFinishTimes, rankingMetricConstructor);
+                fullRegattaName, boatClassName, canBoatsOfCompetitorsChangePerRace, competitorRegistrationType,
+                registrationLinkSecret, startDate, endDate, id, series, persistent, scoringScheme, courseAreaIds,
+                buoyZoneRadiusInHullLengths, useStartTimeInference, controlTrackingFromStartAndFinishTimes,
+                autoRestartTrackingUponCompetitorSetChange, rankingMetricConstructor);
         Regatta regatta = regattaWithCreatedFlag.getA();
         if (regattaWithCreatedFlag.getB()) {
             onRegattaLikeAdded(regatta);
@@ -1713,11 +1715,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public void addRegattaWithoutReplication(Regatta regatta) {
-        UUID defaultCourseAreaId = null;
-        if (regatta.getDefaultCourseArea() != null) {
-            defaultCourseAreaId = regatta.getDefaultCourseArea().getId();
-        }
-        boolean wasAdded = addAndConnectRegatta(regatta.isPersistent(), defaultCourseAreaId, regatta);
+        boolean wasAdded = addAndConnectRegatta(regatta.isPersistent(), regatta);
         if (!wasAdded) {
             logger.info("Regatta with name " + regatta.getName() + " already existed, so it hasn't been added.");
         }
@@ -1736,22 +1734,23 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             String boatClassName, boolean canBoatsOfCompetitorsChangePerRace,
             CompetitorRegistrationType competitorRegistrationType, String registrationLinkSecret, TimePoint startDate,
             TimePoint endDate, Serializable id, Iterable<? extends Series> series, boolean persistent,
-            ScoringScheme scoringScheme, Serializable defaultCourseAreaId, Double buoyZoneRadiusInHullLengths,
+            ScoringScheme scoringScheme, Iterable<? extends Serializable> courseAreaIds, Double buoyZoneRadiusInHullLengths,
             boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes,
-            RankingMetricConstructor rankingMetricConstructor) {
-        CourseArea courseArea = getCourseArea(defaultCourseAreaId);
+            boolean autoRestartTrackingUponCompetitorSetChange, RankingMetricConstructor rankingMetricConstructor) {
         Regatta regatta = new RegattaImpl(getRaceLogStore(), getRegattaLogStore(), fullRegattaName,
-                getBaseDomainFactory().getOrCreateBoatClass(boatClassName), canBoatsOfCompetitorsChangePerRace, competitorRegistrationType, startDate, endDate, series, persistent,
-                scoringScheme, id, courseArea, buoyZoneRadiusInHullLengths, useStartTimeInference,
-                controlTrackingFromStartAndFinishTimes, rankingMetricConstructor, registrationLinkSecret);
-        boolean wasCreated = addAndConnectRegatta(persistent, defaultCourseAreaId, regatta);
+                getBaseDomainFactory().getOrCreateBoatClass(boatClassName), canBoatsOfCompetitorsChangePerRace,
+                competitorRegistrationType, startDate, endDate, series, persistent, scoringScheme, id,
+                Util.map(courseAreaIds, courseAreaId->getBaseDomainFactory().getExistingCourseAreaById(courseAreaId)),
+                buoyZoneRadiusInHullLengths, useStartTimeInference, controlTrackingFromStartAndFinishTimes,
+                autoRestartTrackingUponCompetitorSetChange, rankingMetricConstructor, registrationLinkSecret);
+        boolean wasCreated = addAndConnectRegatta(persistent, regatta);
         if (wasCreated) {
             logger.info("Created regatta " + regatta.getName() + " (" + hashCode() + ") on " + this);
         }
         return new com.sap.sse.common.Util.Pair<Regatta, Boolean>(regatta, wasCreated);
     }
 
-    private boolean addAndConnectRegatta(boolean persistent, Serializable defaultCourseAreaId, Regatta regatta) {
+    private boolean addAndConnectRegatta(boolean persistent, Regatta regatta) {
         boolean wasCreated = false;
         // try a quick read protected by the concurrent hash map implementation
         if (!regattasByName.containsKey(regatta.getName())) {
@@ -1951,19 +1950,15 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      *            (yet)}.
      */
     private void replicateSpecificRegattaWithoutRaceColumns(Regatta regatta) {
-        Serializable courseAreaId = null;
-        if (regatta.getDefaultCourseArea() != null) {
-            courseAreaId = regatta.getDefaultCourseArea().getId();
-        }
         replicate(new AddSpecificRegatta(regatta.getName(),
                 regatta.getBoatClass() == null ? null : regatta.getBoatClass().getName(),
                 regatta.canBoatsOfCompetitorsChangePerRace(), regatta.getCompetitorRegistrationType(),
                 /* registrationLinkSecret */ regatta.getRegistrationLinkSecret(), regatta.getStartDate(),
                 regatta.getEndDate(), regatta.getId(),
                 getSeriesWithoutRaceColumnsConstructionParametersAsMap(regatta), regatta.isPersistent(),
-                regatta.getScoringScheme(), courseAreaId, regatta.getBuoyZoneRadiusInHullLengths(),
+                regatta.getScoringScheme(), Util.mapToArrayList(regatta.getCourseAreas(), CourseArea::getId), regatta.getBuoyZoneRadiusInHullLengths(),
                 regatta.useStartTimeInference(), regatta.isControlTrackingFromStartAndFinishTimes(),
-                regatta.getRankingMetricType()));
+                regatta.isAutoRestartTrackingUponCompetitorSetChange(), regatta.getRankingMetricType()));
         RegattaIdentifier regattaIdentifier = regatta.getRegattaIdentifier();
         for (RaceDefinition race : regatta.getAllRaces()) {
             replicate(new AddRaceDefinition(regattaIdentifier, race));
@@ -2099,11 +2094,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             TrackedRaceReplicatorAndNotifier trackedRaceReplicator = new TrackedRaceReplicatorAndNotifier(trackedRace);
             trackedRaceReplicators.put(trackedRace, trackedRaceReplicator);
             trackedRace.addListener(trackedRaceReplicator, /* fire wind already loaded */true, /* notifyAboutGPSFixesAlreadyLoaded */ true);
-
             PolarFixCacheUpdater polarFixCacheUpdater = new PolarFixCacheUpdater(trackedRace);
             polarFixCacheUpdaters.put(trackedRace, polarFixCacheUpdater);
             trackedRace.addListener(polarFixCacheUpdater);
-            
             if (polarDataService != null) {
                 trackedRace.setPolarDataService(polarDataService);
             }
@@ -2694,22 +2687,20 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public Regatta updateRegatta(RegattaIdentifier regattaIdentifier, TimePoint startDate, TimePoint endDate,
-            Serializable newDefaultCourseAreaId, RegattaConfiguration newRegattaConfiguration,
+            Iterable<? extends Serializable> newCourseAreaIds, RegattaConfiguration newRegattaConfiguration,
             Iterable<? extends Series> series, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes,
-            String registrationLinkSecret, CompetitorRegistrationType registrationType) {
+            boolean autoRestartTrackingUponCompetitorSetChange, String registrationLinkSecret, CompetitorRegistrationType registrationType) {
         if (useStartTimeInference && controlTrackingFromStartAndFinishTimes) {
             throw new IllegalArgumentException("Cannot set both of useStartTimeInference and controlTrackingFromStartAndFinishTimes to true");
         }
         // We're not doing any renaming of the regatta itself, therefore we don't have to sync on the maps.
         Regatta regatta = getRegatta(regattaIdentifier);
-        CourseArea newCourseArea = getCourseArea(newDefaultCourseAreaId);
-        if (newCourseArea != regatta.getDefaultCourseArea()) {
-            regatta.setDefaultCourseArea(newCourseArea);
-        }
+        regatta.setCourseAreas(Util.map(newCourseAreaIds, this::getCourseArea));
         regatta.setStartDate(startDate);
         regatta.setEndDate(endDate);
         regatta.setBuoyZoneRadiusInHullLengths(buoyZoneRadiusInHullLengths);
         regatta.setControlTrackingFromStartAndFinishTimes(controlTrackingFromStartAndFinishTimes);
+        regatta.setAutoRestartTrackingUponCompetitorSetChange(autoRestartTrackingUponCompetitorSetChange);
         regatta.setRegistrationLinkSecret(registrationLinkSecret);
         regatta.setCompetitorRegistrationType(registrationType);
         if (regatta.useStartTimeInference() != useStartTimeInference) {
@@ -2739,6 +2730,36 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             mongoObjectFactory.storeRegatta(regatta);
         }
         return regatta;
+    }
+    
+    /**
+     * The current implementation uses {@link #removeRace(Regatta, RaceDefinition)} to remove the {@link TrackedRace}
+     * and the {@link RaceDefinition} and based on the {@link #connectivityParametersByRace} uses the connectivity
+     * parameters of the previously existing tracked race to restore the race by tracking it again after
+     * {@link #removeRace(Regatta, RaceDefinition)} has completed.
+     * 
+     * @return {@code null} if it was not possible to re-load the race, either because the regatta doesn't allow for it,
+     *         or because the connectivity parameters were not found; a {@link RaceHandle} for the re-started race
+     *         otherwise.
+     */
+    @Override
+    public RaceHandle updateRaceCompetitors(Regatta regatta, RaceDefinition race) throws Exception {
+        final RaceHandle result;
+        if (regatta.isAutoRestartTrackingUponCompetitorSetChange()) {
+            final RaceTrackingConnectivityParameters connectivityParams = connectivityParametersByRace.get(race);
+            if (connectivityParams != null) {
+                removeRace(regatta, race);
+                result = addRace(regatta.getRegattaIdentifier(), connectivityParams, RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS,
+                        new DefaultRaceTrackingHandler()); // no need for ownership setting here because we're only "re-tracking" an existing race
+            } else {
+                result = null;
+                logger.warning("Unable to update race competitors for race "+race+" in regatta "+regatta+
+                        " because no connectivity params were found that we could use to start tracking again for that race.");
+            }
+        } else {
+            result = null;
+        }
+        return result;
     }
 
     @Override
@@ -3940,7 +3961,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public TimePoint setStartTimeAndProcedure(String leaderboardName, String raceColumnName, String fleetName,
             String authorName, int authorPriority, int passId, TimePoint logicalTimePoint, TimePoint startTime,
-            RacingProcedureType racingProcedure) {
+            RacingProcedureType racingProcedure, UUID courseAreaId) {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         final TimePoint result;
@@ -3950,7 +3971,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 state.setAdvancePass(logicalTimePoint);
             }
             state.setRacingProcedure(logicalTimePoint, racingProcedure);
-            state.forceNewStartTime(logicalTimePoint, startTime);
+            state.forceNewStartTime(logicalTimePoint, startTime, courseAreaId);
             result = state.getStartTime();
         } else {
             result = null;
@@ -4614,35 +4635,60 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         DetailedRaceInfo bestMatch = null;
         boolean matchesName = false;
         boolean matchesCourseArea = false;
-        // start from the top; while there are more efficient ways to look up the TrackedRace by its
-        // race identifier, this wouldn't tell a valid event and leaderboard combination through which
-        // to navigate to it
-        for (Event event : this.getAllEvents()) {
-            final EventType eventType = EventUtil.getEventType(event);
-            for (LeaderboardGroup group : event.getLeaderboardGroups()) {
-                for (Leaderboard leaderboard : group.getLeaderboards()) {
-                    for (RaceColumn race : leaderboard.getRaceColumns()) {
-                        for (Fleet fleet : race.getFleets()) {
-                            TrackedRace trackedRace = race.getTrackedRace(fleet);
-                            if (trackedRace != null) {
-                                RegattaAndRaceIdentifier trackedRaceIdentifier = trackedRace.getRaceIdentifier();
-                                // check if the race matches the RegattaAndRaceIdentifier
-                                if (trackedRaceIdentifier.equals(raceIdentifier)
-                                        && trackedRace.getStartOfRace() != null) {
-                                    final CourseArea defaultCourseArea = leaderboard.getDefaultCourseArea();
-                                    boolean leaderboardLinkedToEventThroughCourseArea = (defaultCourseArea != null
-                                            && Util.contains(event.getVenue().getCourseAreas(), defaultCourseArea));
-                                    boolean nameOfRegattaAndLeaderboardMatch = leaderboard.getName().equals(trackedRaceIdentifier.getRegattaName());
-                                    // check if the match is a best match -> we keep the previous match otherwise
-                                    if (bestMatch == null
-                                            || (leaderboardLinkedToEventThroughCourseArea && !matchesCourseArea)
-                                            || (leaderboardLinkedToEventThroughCourseArea == matchesCourseArea
-                                                    && nameOfRegattaAndLeaderboardMatch && !matchesName)) {
-                                        bestMatch = new DetailedRaceInfo(trackedRaceIdentifier, leaderboard.getName(),
-                                                leaderboard.getDisplayName(), trackedRace.getStartOfRace(),
-                                                event.getId(), event.getName(), eventType, null);
-                                        matchesName = nameOfRegattaAndLeaderboardMatch;
-                                        matchesCourseArea = leaderboardLinkedToEventThroughCourseArea;
+        // A perfect match with a leaderboard name matching the regatta name, and an event that has a course area also specified
+        // by the leaderboard can be found in O(n) with n being the number of events, by scanning the events for one with a matching
+        // course area. The leaderboard can be found in O(1).
+        // Only if this lookup/search does not provide perfect match, we will have to start searching in all leaderboards because
+        // there could be a FlexibleLeaderboard with a name different from the regatta name that has a matching course area.
+        // So, first try to identify the leaderboard by the regatta name; if found, we already have a name match there. We then
+        // only need to find an event that contains the leaderboard through any leaderboard group
+        final Leaderboard leaderboardByRegattaName = getLeaderboardByName(raceIdentifier.getRegattaName());
+        if (leaderboardByRegattaName != null) {
+            final TrackedRace trackedRace = Util.first(Util.filter(leaderboardByRegattaName.getTrackedRaces(), tr->tr.getRaceIdentifier().equals(raceIdentifier)));
+            if (trackedRace != null && leaderboardByRegattaName != null && !Util.isEmpty(leaderboardByRegattaName.getCourseAreas())) {
+                final Event eventMatchingAtLeastOneCourseArea = findEventContainingLeaderboardAndMatchingAtLeastOneCourseArea(leaderboardByRegattaName);
+                if (eventMatchingAtLeastOneCourseArea != null) {
+                    // that's the best match
+                    bestMatch = new DetailedRaceInfo(raceIdentifier, leaderboardByRegattaName.getName(),
+                            leaderboardByRegattaName.getDisplayName(), trackedRace.getStartOfRace(),
+                            eventMatchingAtLeastOneCourseArea.getId(), eventMatchingAtLeastOneCourseArea.getName(),
+                            EventUtil.getEventType(eventMatchingAtLeastOneCourseArea), null);
+                }
+            }
+        }
+        if (bestMatch == null) { // do the more expensive search now:
+            for (Event event : this.getAllEvents()) {
+                final EventType eventType = EventUtil.getEventType(event);
+                for (LeaderboardGroup group : event.getLeaderboardGroups()) {
+                    for (Leaderboard leaderboard : group.getLeaderboards()) {
+                        for (RaceColumn race : leaderboard.getRaceColumns()) {
+                            for (Fleet fleet : race.getFleets()) {
+                                TrackedRace trackedRace = race.getTrackedRace(fleet);
+                                if (trackedRace != null) {
+                                    RegattaAndRaceIdentifier trackedRaceIdentifier = trackedRace.getRaceIdentifier();
+                                    // check if the race matches the RegattaAndRaceIdentifier and has a valid start time
+                                    if (trackedRaceIdentifier.equals(raceIdentifier) && trackedRace.getStartOfRace() != null) {
+                                        boolean leaderboardLinkedToEventThroughCourseArea = Util.containsAny(event.getVenue().getCourseAreas(), leaderboard.getCourseAreas());
+                                        boolean nameOfRegattaAndLeaderboardMatch = leaderboard.getName().equals(trackedRaceIdentifier.getRegattaName());
+                                        // check if the match is a better match than bestMatch -> we keep the previous match otherwise;
+                                        // "better" means that we either have no match at all, or
+                                        // the new match now matches the event's course area (regardless whether the previous best match has a matching leaderboard name), or
+                                        // the new match now matches the leaderboard name while not "getting worse" regarding a previous course area match.
+                                        // In other words, we will prefer a course area match with a leaderboard name mismatch over a match that has
+                                        // no course area match but a matching leaderboard name.
+                                        if (bestMatch == null
+                                                || (leaderboardLinkedToEventThroughCourseArea && !matchesCourseArea)
+                                                || (leaderboardLinkedToEventThroughCourseArea == matchesCourseArea
+                                                        && nameOfRegattaAndLeaderboardMatch && !matchesName)) {
+                                            bestMatch = new DetailedRaceInfo(trackedRaceIdentifier, leaderboard.getName(),
+                                                    leaderboard.getDisplayName(), trackedRace.getStartOfRace(),
+                                                    event.getId(), event.getName(), eventType, null);
+                                            matchesName = nameOfRegattaAndLeaderboardMatch;
+                                            matchesCourseArea = leaderboardLinkedToEventThroughCourseArea;
+                                            if (matchesName && matchesCourseArea) {
+                                                return bestMatch; // it won't get any better than this
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -4652,6 +4698,20 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             }
         }
         return bestMatch;
+    }
+
+    private Event findEventContainingLeaderboardAndMatchingAtLeastOneCourseArea(Leaderboard leaderboard) {
+        assert !Util.isEmpty(leaderboard.getCourseAreas());
+        for (final Event event : getAllEvents()) {
+            if (Util.containsAny(event.getVenue().getCourseAreas(), leaderboard.getCourseAreas())) {
+                for (final LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
+                    if (leaderboardGroup.getIndexOf(leaderboard) >= 0) {
+                        return event;
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     @Override
