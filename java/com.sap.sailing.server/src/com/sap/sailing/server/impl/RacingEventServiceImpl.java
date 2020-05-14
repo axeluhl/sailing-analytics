@@ -3105,6 +3105,14 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         mongoObjectFactory.removeLeaderboardGroup(groupName);
     }
 
+    /**
+     * Renames the group with the name <code>oldName</code> to the <code>newName</code>.<br />
+     * If there's no group with the name <code>oldName</code> or there's already a group with the name
+     * <code>newName</code> a {@link IllegalArgumentException} is thrown.
+     * 
+     * @param oldName The old name of the group
+     * @param newName The new name of the group
+     */
     private void renameLeaderboardGroup(String oldName, String newName) {
         LockUtil.lockForWrite(leaderboardGroupsByNameLock);
         try {
