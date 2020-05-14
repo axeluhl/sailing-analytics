@@ -1,4 +1,4 @@
-package com.sap.sailing.server.gateway.jaxrs.api;
+package com.sap.sse.security.jaxrs.api;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -13,23 +13,18 @@ import javax.ws.rs.core.Response;
 import org.apache.shiro.SecurityUtils;
 import org.json.simple.parser.ParseException;
 
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
-import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.jaxrs.AbstractSecurityResource;
 
-@Deprecated
-@Path("/v1/preferences")
-public class PreferencesResource extends AbstractSailingServerResource {
+@Path("/restsecurity/preferences")
+public class PreferencesResource extends AbstractSecurityResource {
     @GET
     @Produces("application/json;charset=UTF-8")
     @Path("{settingsKey}")
-    public Response getPreference(@PathParam("settingsKey") String settingsKey)
-            throws ParseException, JsonDeserializationException {
+    public Response getPreference(@PathParam("settingsKey") String settingsKey) throws ParseException {
         Response response = null;
         if (SecurityUtils.getSubject().isAuthenticated()) {
             String username = SecurityUtils.getSubject().getPrincipal().toString();
-            SecurityService securityService = getService(SecurityService.class);
-            String settings = securityService.getPreference(username, settingsKey);
+            String settings = getService().getPreference(username, settingsKey);
             if (settings == null) {
                 response = Response.noContent().build();
             } else {
@@ -44,13 +39,11 @@ public class PreferencesResource extends AbstractSailingServerResource {
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("{settingsKey}")
-    public Response putPreference(@PathParam("settingsKey") String settingsKey, String json)
-            throws ParseException, JsonDeserializationException {
+    public Response putPreference(@PathParam("settingsKey") String settingsKey, String json) throws ParseException {
         Response response = null;
         if (SecurityUtils.getSubject().isAuthenticated()) {
             String username = SecurityUtils.getSubject().getPrincipal().toString();
-            SecurityService securityService = getService(SecurityService.class);
-            securityService.setPreference(username, settingsKey, json);
+            getService().setPreference(username, settingsKey, json);
             response = Response.ok().build();
         } else {
             response = Response.status(401).build();
@@ -61,13 +54,11 @@ public class PreferencesResource extends AbstractSailingServerResource {
     @DELETE
     @Produces("application/json;charset=UTF-8")
     @Path("{settingsKey}")
-    public Response deletePreference(@PathParam("settingsKey") String settingsKey)
-            throws ParseException, JsonDeserializationException {
+    public Response deletePreference(@PathParam("settingsKey") String settingsKey) throws ParseException {
         Response response = null;
         if (SecurityUtils.getSubject().isAuthenticated()) {
             String username = SecurityUtils.getSubject().getPrincipal().toString();
-            SecurityService securityService = getService(SecurityService.class);
-            securityService.unsetPreference(username, settingsKey);
+            getService().unsetPreference(username, settingsKey);
             response = Response.ok().build();
         } else {
             response = Response.status(401).build();
