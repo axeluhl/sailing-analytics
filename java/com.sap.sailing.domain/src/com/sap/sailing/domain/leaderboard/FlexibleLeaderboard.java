@@ -69,8 +69,9 @@ public interface FlexibleLeaderboard extends LeaderboardThatHasRegattaLike, Rena
     void updateIsMedalRace(String raceName, boolean isMedalRace);
 
     /**
-     * Sets the default {@link CourseArea} of this leaderboard.
-     * @param newCourseArea the {@link CourseArea} to be set.
+     * Sets the {@link CourseArea}s for this leaderboard, telling on which course areas races in this leaderboard may
+     * happen. Afterwards, {@link #getCourseAreas()} will return an {@link Iterable} that has exactly the elements
+     * contained in {@code newCourseAreas}.
      */
-    void setDefaultCourseArea(CourseArea newCourseArea);
+    void setCourseAreas(Iterable<CourseArea> newCourseAreas);
 }

@@ -2,6 +2,7 @@ package com.sap.sailing.server.gateway.deserialization.racelog.impl;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.UUID;
 
 import org.json.simple.JSONObject;
 
@@ -37,7 +38,14 @@ public class RaceLogDependentStartTimeEventDeserializer extends RaceLogRaceStatu
         Duration startTimeDifference = new MillisecondsDurationImpl(startTimeDifferenceInMs);
         RaceLogRaceStatusEvent event = (RaceLogRaceStatusEvent) super.deserialize(object, id, createdAt, author, timePoint, passId, competitors);
         SimpleRaceLogIdentifier dependentOnRace = new SimpleRaceLogIdentifierImpl(regattaLikeParentName, raceColumnName, fleetName);
+        final String courseAreaIdAsString = (String) object.get(RaceLogDependentStartTimeEventSerializer.FIELD_COURSE_AREA_ID_AS_STRING);
+        final UUID courseAreaId;
+        if (courseAreaIdAsString != null) {
+            courseAreaId = UUID.fromString(courseAreaIdAsString);
+        } else {
+            courseAreaId = null;
+        }
         return new RaceLogDependentStartTimeEventImpl(event.getCreatedAt(), event.getLogicalTimePoint(), author, event.getId(), 
-                event.getPassId(), dependentOnRace, startTimeDifference, event.getNextStatus());
+                event.getPassId(), dependentOnRace, startTimeDifference, event.getNextStatus(), courseAreaId);
     }
 }

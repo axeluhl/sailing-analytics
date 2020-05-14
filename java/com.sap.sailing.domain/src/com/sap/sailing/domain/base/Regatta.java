@@ -60,19 +60,20 @@ public interface Regatta
     void setEndDate(TimePoint startDate);
 
     /**
-     * Gets the course area for all races of this {@link Regatta}.
+     * Gets the course areas that the races of this {@link Regatta} are expected to be run on. This can, e.g., be used
+     * to implement a filter when retrieving regattas from an event.
      * 
-     * @return the {@link CourseArea} object.
+     * @return the {@link CourseArea} objects on which races of this regatta may run; always valid, never
+     *         {@code null}, but may be empty; callers need to {@code synchronize} on the object returned
+     *         if they want to iterate.
      */
-    CourseArea getDefaultCourseArea();
+    Iterable<CourseArea> getCourseAreas();
 
     /**
-     * Sets the course area for all races of this {@link Regatta}.
-     * 
-     * @param newCourseArea
-     *            {@link CourseArea} to be set.
+     * Sets the course areas, telling where races in this regatta can be sailed. Replaces the course areas set
+     * so far.
      */
-    void setDefaultCourseArea(CourseArea newCourseArea);
+    void setCourseAreas(Iterable<CourseArea> newCourseAreas);
 
     /**
      * Gets the {@link RegattaConfiguration} associated with this {@link Regatta}'s races.

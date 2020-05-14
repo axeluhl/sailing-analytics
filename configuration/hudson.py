@@ -1,4 +1,4 @@
-#!/bin/env python3
+#!/usr/bin/env python3
 #
 # Fetches and analyzes build and test data from the Hudson API
 # Run with -h or --help for usage information
@@ -7,23 +7,24 @@
 try:
 	import aiohttp
 except ImportError:
-	print("Missing package: aiohttp\nInstall with: pip3 install aiohttp")
+	print("Missing package: aiohttp\nInstall with: pip3 install aiohttp\npip3 debian package: python3-pip")
 	exit(1)
 import asyncio, logging, random
-from typing import List, Tuple, Dict
+#from typing import List, Tuple, Dict
+from sys import version_info
 from argparse import ArgumentParser
 from getpass import getpass
 
 # ---------- Model ----------
 
 class WithUrl:
-	url: str
+	url = ""#: str
 
 	def __init__(self, url):
 		self.url = url
 
 class NamedWithUrl(WithUrl):
-	name: str
+	name = ""#: str
 
 	def __init__(self, name, url):
 		super(NamedWithUrl, self).__init__(url)
@@ -31,51 +32,52 @@ class NamedWithUrl(WithUrl):
 
 
 class Case:
-	name: str
-	status: str
-	duration: int
-	fail_age: int
+	name = ""#: str
+	status = ""#: str
+	duration = -1#: int
+	fail_age = -1#: int
 
-	def __init__(self, name: str, status: str, duration: int, fail_age: int):
+	def __init__(self, name, status, duration, fail_age):
 		self.name = name
 		self.status = status
 		self.duration = duration
 		self.fail_age = fail_age
 
 class Suite:
-	name: str
-	cases: List[Case] = []
-	duration: float
+	name = ""#: str
+	cases = None#: List[Case] = []
+	duration = -1.0#: float
 
-	def __init__(self, name: str, duration: float):
+	def __init__(self, name, duration):
 		self.name = name
+		self.cases = []
 		self.duration = duration
 
 class Build(NamedWithUrl):
-	suites: List[Suite] = []
+	suites = []#: List[Suite]
 
 class Job(NamedWithUrl):
-	builds: List[Build] = []
-	color: str
+	builds = []#: List[Build]
+	color = ""#: str
 
 class Root(WithUrl):
-	jobs: List[Job] = []
+	jobs = []#: List[Job]
 
 # ---------- Donwloader ---------
 
 class Downloader:
-	__session: aiohttp.ClientSession
-	__lock: asyncio.Semaphore
-	__all_job_urls: Dict[str, str] = None
-	base_url: str
-	api_suffix: str
+	__session = None#: aiohttp.ClientSession
+	__lock = None#: asyncio.Semaphore
+	__all_job_urls = None#: Dict[str, str]
+	base_url = ""#: str
+	api_suffix = ""#: str
 
 	logger = logging.getLogger(__name__)
 
 	n_builds = 0
 	p_builds = 0
 
-	def __init__(self, base_url: str, auth: Tuple[str, str], max_concurrent_connections, api_suffix="api/json"):
+	def __init__(self, base_url, auth, max_concurrent_connections, api_suffix="api/json"):
 		self.base_url = base_url
 		self.__session = aiohttp.ClientSession(auth=aiohttp.BasicAuth(auth[0], auth[1]))
 		self.__lock = asyncio.Semaphore(max_concurrent_connections)
@@ -85,7 +87,7 @@ class Downloader:
 		if self.__session != None:
 			await self.__session.close()
 	
-	async def build_tree(self, jobs: List[str], build_limit: int = 0) -> Root:
+	async def build_tree(self, jobs, build_limit):
 		if self.__all_job_urls == None:
 			# Very first request; Test connection and get all existing jobs to compare against
 			try:
@@ -107,13 +109,13 @@ class Downloader:
 		await asyncio.gather(*[self.__populate_builds_in_job(job, build_limit) for job in root.jobs])
 		return root
 	
-	async def __get_job_list(self) -> None:
+	async def __get_job_list(self):
 		self.__all_job_urls = {}
 		json = await self.get_json(self.base_url)
 		for job in json["jobs"]:
 			self.__all_job_urls[job["name"]] = job["url"]
 	
-	async def __populate_builds_in_job(self, job: Job, build_limit: int) -> None:
+	async def __populate_builds_in_job(self, job, build_limit):
 		try:
 			json = await self.get_json(job.url)
 		except aiohttp.ClientResponseError:
@@ -128,7 +130,7 @@ class Downloader:
 		self.n_builds += len(job.builds)
 		await asyncio.gather(*[self.__populate_suites_in_build(build) for build in job.builds])
 	
-	async def __populate_suites_in_build(self, build: Build) -> None:
+	async def __populate_suites_in_build(self, build):
 		try:
 			json = await self.get_json(build.url + "testReport/api/json", append_api_suffix=False)
 		except aiohttp.ClientResponseError:
@@ -136,14 +138,13 @@ class Downloader:
 		build.suites = await asyncio.gather(*[self.__parse_suite_with_cases(suite) for suite in json["suites"]])
 		self.p_builds += 1
 	
-	async def __parse_suite_with_cases(self, json: str) -> Suite:
+	async def __parse_suite_with_cases(self, json):
 		suite = Suite(json.get("name"), json.get("duration"))
-		suite.cases = [] # For some reason new Suite instances all share the same list
 		for case_json in json["cases"]:
-			suite.cases.append(Case(case_json["className"], case_json["status"], case_json["duration"], case_json["age"]))
+			suite.cases.append(Case(case_json["className"] + "." + case_json["name"], case_json["status"], case_json["duration"], case_json["age"]))
 		return suite
 	
-	async def get_json(self, url: str, append_api_suffix=True):
+	async def get_json(self, url, append_api_suffix=True):
 		if append_api_suffix == True:
 			if not url.endswith("/"):
 				url += "/"
@@ -161,7 +162,7 @@ class Downloader:
 				except asyncio.TimeoutError as e:
 					self.logger.warning(e)
 					await asyncio.sleep(random.uniform(1, 10))
-			self.logger.error(f"5 consecutive timeouts for URL: {url}")
+			self.logger.error("5 consecutive timeouts for URL: {}".format(url))
 			raise aiohttp.ClientResponseError
 	
 	def get_progress(self):
@@ -172,21 +173,21 @@ class Downloader:
 # ---------- Analysis ----------
 
 class AbstractModule:
-	def process(self, root: Root):
+	def process(self, root):
 		raise NotImplementedError
 	def progress(self):
 		raise NotImplementedError
-	def result(self) -> str:
+	def result(self):
 		return None
 
 class Analyzer:
 	__tasks = []
-	modules: List[AbstractModule]
+	modules = None#: List[AbstractModule]
 
-	def __init__(self, *modules: AbstractModule):
+	def __init__(self, *modules):
 		self.modules = list(modules)
 	
-	async def analyze_tree(self, root: Root):
+	async def analyze_tree(self, root):
 		loop = asyncio.get_event_loop()
 		await asyncio.gather(*[loop.run_in_executor(None, m.process, root) for m in self.modules])
 	
@@ -202,22 +203,22 @@ class Analyzer:
 		for m in self.modules:
 			r = m.result()
 			if r != None:
-				print(f"Results from {m.__class__.__name__}:\n{r}")
+				print("Results from {}:\n{}".format(m.__class__.__name__, r))
 
-	def add_module(self, module: AbstractModule):
+	def add_module(self, module):
 		self.modules.append(module)
 	
-	def remove_module(self, module: AbstractModule):
+	def remove_module(self, module):
 		self.modules.remove(module)
 
 
 class ModelVisualizerModule(AbstractModule):
-	__root: Root
-	level: int
-	def __init__(self, level: int = 1):
+	__root = None#: Root
+	level = -1#: int
+	def __init__(self, level = 1):
 		super(ModelVisualizerModule, self).__init__()
 		self.level = level
-	def process(self, root: Root):
+	def process(self, root):
 		self.__root = root
 	def progress(self):
 		return 1
@@ -234,16 +235,14 @@ class ModelVisualizerModule(AbstractModule):
 		return out[:-1]
 
 class FlakyCasesModule(AbstractModule):
-	threshold_div: int
-	case_counter: Dict[str, int] = {}
+	case_counter = {}#: Dict[str, int]
 	n_builds = 0
 	p_builds = 0
 
-	def __init__(self, threshold_div: int = 4):
+	def __init__(self):
 		super(FlakyCasesModule, self).__init__()
-		self.threshold_div = threshold_div
 	
-	def process(self, root: Root):
+	def process(self, root):
 		for job in root.jobs:
 			self.n_builds += len(job.builds)
 		
@@ -261,23 +260,21 @@ class FlakyCasesModule(AbstractModule):
 		return self.p_builds / self.n_builds
 	
 	def result(self):
-		out = ""
+		out = "sum of case first fail across all builds divided by number of builds, name of case\n"
 		s = [(k, self.case_counter.get(k)) for k in sorted(self.case_counter, key=self.case_counter.get, reverse=True)]
 		for case, new_fails in s:
-			if (new_fails <= self.n_builds // 4):
-				break
-			out += f"  {new_fails / self.n_builds:.2f}, {case}\n"
+			out += "  {0:.2f}, {1}\n".format(new_fails / self.n_builds, case)
 		return out[:-1]
 
 class FailedCasesModule(AbstractModule):
-	case_counter: Dict[str, int] = {}
+	case_counter = {}#: Dict[str, int]
 	n_builds = 0
 	p_builds = 0
 
 	def __init__(self):
 		super(FailedCasesModule, self).__init__()
 
-	def process(self, root: Root):
+	def process(self, root):
 		for job in root.jobs:
 			self.n_builds += len(job.builds)
 
@@ -295,17 +292,17 @@ class FailedCasesModule(AbstractModule):
 		return self.p_builds / self.n_builds
 
 	def result(self):
-		out = ""
+		out = "sum of case fails across all builds divided by number of builds, name of case\n"
 		s = [(k, self.case_counter.get(k)) for k in sorted(self.case_counter, key=self.case_counter.get, reverse=True)]
 		for case, fails in s:
-			out += f"{fails:>5}, {case}\n"
+			out += "  {0:.2f}, {1}\n".format(fails / self.n_builds, case)
 		return out[:-1]
 
 class FailedSuitesModule(FailedCasesModule):
 	def __init__(self):
 		super(FailedSuitesModule, self).__init__()
 
-	def process(self, root: Root):
+	def process(self, root):
 		for job in root.jobs:
 			self.n_builds += len(job.builds)
 
@@ -326,7 +323,7 @@ class CaseDurationModule(AbstractModule):
 	def __init__(self):
 		super(CaseDurationModule, self).__init__()
 
-	def process(self, root: Root):
+	def process(self, root):
 		for job in root.jobs:
 			self.n_builds += len(job.builds)
 
@@ -345,11 +342,11 @@ class CaseDurationModule(AbstractModule):
 		return self.p_builds / self.n_builds
 	
 	def result(self):
-		out = ""
+		out = "avg duration of passed case across all builds, name of case\n"
 		s = [(case, total / self.run_counter.get(case), total) for case, total in self.dur_counter.items()]
 		s = sorted(s, key=lambda x: x[1], reverse=True)
 		for case, duration, total in s:
-			out += f"{duration:>3}s/r ({total:>6}s total): {case}\n"
+			out += "{0:>3}s/r ({1:>6}s total): {2}\n".format(duration, total, case)
 		return out[:-1]
 
 # ---------- Functions And Helpers ----------
@@ -361,24 +358,24 @@ class ProgressBar:
 	__spin = -1
 	def start(self, progress_function):
 		if self.__task == None:
-			self.__task = asyncio.create_task(self.show(progress_function))
+			self.__task = asyncio_create_task(self.show(progress_function))
 	async def show(self, progress_function):
 		if not self.enabled:
 			return
 		self.running = True
 		while self.running:
 			p = progress_function()
-			print(f"{str(round(p * 100)):>3}% [{self.__bar(p)}] {self.__spinner()}", end="\r", flush=True)
+			print("{0:>3}% [{1}] {2}".format(round(p * 100), self.__bar(p), self.__spinner()), end="\r", flush=True)
 			if p >= 1:
 				self.running = False
 			else:
 				await asyncio.sleep(0.5)
-		print(f"100% [{self.__bar(1)}]  ", flush=True)
+		print("100% [{}]  ".format(self.__bar(1)), flush=True)
 	def __bar(self, p):
 		width = 20
 		pos = round(p * width)
 		if pos > 0:
-			out = f"{'=' * (pos - 1)}>"
+			out = "{}>".format('=' * (pos - 1))
 		else:
 			out = ""
 		return out + "-" * (width - len(out))
@@ -391,6 +388,25 @@ class ProgressBar:
 		if self.__task != None:
 			await self.__task
 			self.__task = None
+
+def asyncio_create_task(coro):
+	if version_info >= (3, 7):
+		return asyncio.create_task(coro)
+	loop = asyncio.get_event_loop()
+	return loop.create_task(coro)
+
+def asyncio_run(aw): #https://stackoverflow.com/questions/55590343/asyncio-run-or-run-until-complete
+    if version_info >= (3, 7):
+        return asyncio.run(aw)
+
+    # Emulate asyncio.run() on older versions
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    try:
+        return loop.run_until_complete(aw)
+    finally:
+        loop.close()
+        asyncio.set_event_loop(None)
 
 def parse_args():
 	parser = ArgumentParser(description="Fetches and analyzes build and test data from the Hudson API")
@@ -422,7 +438,7 @@ def create_logger(args):
 	return logger
 
 def get_credentials(username):
-	password = getpass(f"Enter password: ")
+	password = getpass("Enter password: ")
 	return (username, password)
 
 async def main(args):
@@ -437,7 +453,7 @@ async def main(args):
 	await d.close()
 	await pb.done()
 	logger.info("Processing data...")
-	a = Analyzer(ModelVisualizerModule(level=1), FailedCasesModule(), FlakyCasesModule(threshold_div=4))
+	a = Analyzer(ModelVisualizerModule(level=1), FailedCasesModule(), FlakyCasesModule())
 	pb.start(a.get_progress)
 	await a.analyze_tree(tree)
 	await pb.done()
@@ -445,4 +461,4 @@ async def main(args):
 	a.print_results()
 
 if __name__ == "__main__":
-	asyncio.run(main(parse_args()))
+	asyncio_run(main(parse_args()))

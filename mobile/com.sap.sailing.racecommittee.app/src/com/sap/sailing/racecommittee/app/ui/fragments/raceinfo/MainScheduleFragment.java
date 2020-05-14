@@ -24,6 +24,8 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
+import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
+import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.impl.SelectionItem;
 import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
@@ -37,6 +39,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 public class MainScheduleFragment extends BaseFragment implements View.OnClickListener, SelectionAdapter.ItemClick {
 
@@ -217,7 +220,6 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
 
     private void startRace() {
         ConfigurableStartModeFlagRacingProcedure lineStartRacingProcedure = null;
-
         Flags flag = null;
         if (getRaceState().getRacingProcedure() instanceof ConfigurableStartModeFlagRacingProcedure) {
             lineStartRacingProcedure = getRaceState().getTypedRacingProcedure();
@@ -230,10 +232,12 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
                     /* enable */ mItemRaceGroup.isChecked(),
                     AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE);
         }
+        final ReadonlyDataManager dataManager = OnlineDataManager.create(getActivity());
+        final UUID courseAreaId = dataManager.getDataStore().getCourseAreaId();
         if (mStartTimeDiff == null && mRaceId == null) {
-            getRaceState().forceNewStartTime(now, mStartTime);
+            getRaceState().forceNewStartTime(now, mStartTime, courseAreaId);
         } else {
-            getRaceState().forceNewDependentStartTime(now, mStartTimeDiff, mRaceId);
+            getRaceState().forceNewDependentStartTime(now, mStartTimeDiff, mRaceId, courseAreaId);
         }
         if (lineStartRacingProcedure != null) {
             lineStartRacingProcedure.setStartModeFlag(MillisecondsTimePoint.now(), flag);
