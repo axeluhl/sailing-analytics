@@ -10,9 +10,9 @@ environment: sailing
 
 # Image used to build
 image:
-  repository: donalduck70/sapsailing
+  repository: donaldduck70/sapsailing
   tag: latest
-  pullPolicy: always
+  pullPolicy: Always
 
 # Name of the Kubernetes secret that should be used to pull the images
 imagePullSecret: dockerhubsecret
@@ -45,8 +45,8 @@ replica:
   count: 2
   replicateOnStart: 'com.sap.sailing.server.impl.RacingEventServiceImpl,com.sap.sse.security.impl.SecurityServiceImpl,com.sap.sse.filestorage.impl.FileStorageManagementServiceImpl,com.sap.sse.mail.impl.MailServiceImpl,com.sap.sailing.polars.impl.PolarDataServiceImpl,com.sap.sailing.domain.racelogtracking.impl.fixtracker.RegattaLogFixTrackerRegattaListener,com.sap.sailing.windestimation.integration.WindEstimationFactoryServiceImpl'
   replicateMasterBearerToken: 
-  replicateMasterUsername:
-  replicateMasterPassword:
+  replicateMasterUsername: admin
+  replicateMasterPassword: admin
   # Optional
   # resources:
   #  requests:

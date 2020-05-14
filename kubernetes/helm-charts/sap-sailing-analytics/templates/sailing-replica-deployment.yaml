@@ -92,14 +92,22 @@ spec:
         - name: REPLICATE_MASTER_QUEUE_HOST
           value: {{ .Values.rabbitmq.host }}
         - name: REPLICATE_MASTER_QUEUE_PORT
-          value: {{ .Values.rabbitmq.port }}
+          value: "{{ .Values.rabbitmq.port }}"
         - name: REPLICATE_ON_START
           value: {{ .Values.replica.replicateOnStart }}
         - name: REPLICATE_MASTER_EXCHANGE_NAME
           value: {{ template "sapsailing-app-name" . }}-{{ .Values.master.role }}
+          {{- if .Values.replica.replicateMasterBearerToken }}
         - name: REPLICATE_MASTER_BEARER_TOKEN
-          value: 'OdhJu40cKJ3swVcqBLauUYT7cQWKKulPARFREGGAhsQ='
+          value: {{ .Values.replica.replicateMasterBearerToken }}
+          {{- end }}
+        - name: REPLICATE_MASTER_USERNAME
+          value: {{ .Values.replica.replicateMasterUsername }}
+        - name: REPLICATE_MASTER_PASSWORD
+          value: {{ .Values.replica.replicateMasterPassword }}
         - name: SERVER_NAME
+          value: {{ template "sapsailing-app-name" . }}-{{ .Values.replica.role }}
+        - name: REPLICATION_CHANNEL
           value: {{ template "sapsailing-app-name" . }}-{{ .Values.replica.role }}
         livenessProbe:
           httpGet:

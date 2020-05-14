@@ -11,7 +11,8 @@ Define error message for already existing "app" value.
 */}}
 {{- define "already-existing-app-tag" -}}
 {{ $appname := include "sapsailing-app-name" . }}
-{{- printf "Invalid value set for \"app\"-tag, a release/pod already exists using \"app: %s\". Specify either release name or explicitly the app tag." $appname -}}
+{{ $role := $.Values.master.role }}
+{{- printf "Invalid value set for \"app\"-tag, a pod already exists using \"app: %s\" and \"role: %s\" . Specify either release name or explicitly the app tag." $appname $role -}}
 {{- end -}}
 
 {{/*

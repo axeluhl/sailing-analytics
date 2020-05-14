@@ -43,7 +43,7 @@ spec:
         - name: REPLICATE_MASTER_QUEUE_HOST
           value: {{ .Values.rabbitmq.host }}
         - name: REPLICATE_MASTER_QUEUE_PORT
-          value: {{ .Values.rabbitmq.port }}
+          value: "{{ .Values.rabbitmq.port }}"
         - name: SERVER_NAME
           value: {{ template "sapsailing-app-name" . }}-{{ .Values.master.role }}
         livenessProbe:

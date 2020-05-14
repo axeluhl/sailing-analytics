@@ -6,8 +6,8 @@
 {{ $appname := include "sapsailing-app-name" . }}
 {{ $errorgenerator := include "already-existing-app-tag" . }}
 {{ range $pods := (lookup "v1" "Pod" "" "").items }}
-    {{ if $pods.metadata.labels.app }}
-        {{ if eq $appname $pods.metadata.labels.app }}
+    {{ if and ( $pods.metadata.labels.app ) ( $pods.metadata.labels.role ) }}
+        {{ if and ( eq $appname $pods.metadata.labels.app ) ( eq $.Values.master.role $pods.metadata.labels.role ) }}
             {{ required $errorgenerator $.Values.doNotUseThisValueInYourFile}}
         {{ end }}
     {{ end }}
