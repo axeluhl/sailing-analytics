@@ -60,14 +60,13 @@ spec:
                 topologyKey: kubernetes.io/hostname
       initContainers:
       - name: wait-for-master-to-register
-        image: alpine:latest
+        image: alstolten/alpine-with-curl:0.1.1
         args:
         - /bin/sh
         - "-c"
         - |
-          apk --no-cache add curl
           set -x
-          until curl --fail --connect-timeout 5 {{ template "sailing-master-service-name" . }}:8888/gwt/status -s; do sleep 2; done
+          while [ $(curl -sw '%{http_code}' "{{ template "sailing-master-service-name" . }}:8888/gwt/status" -o /dev/null) -ne 200 ]; do sleep 10; done
       containers:
       - name: sailing
         image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
