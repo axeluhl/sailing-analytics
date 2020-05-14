@@ -44,7 +44,6 @@ public class RecallFlagsFragment extends RaceFragment implements RecallFlagItemC
             header.setHeaderOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
                     sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
                 }
             });

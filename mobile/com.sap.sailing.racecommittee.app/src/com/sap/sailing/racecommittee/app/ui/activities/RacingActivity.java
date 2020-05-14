@@ -207,12 +207,6 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
 
         super.onCreate(savedInstanceState);
 
-        getSupportFragmentManager().registerFragmentLifecycleCallbacks(new FragmentManager.FragmentLifecycleCallbacks() {
-            @Override
-            public void onFragmentDetached(FragmentManager fm, Fragment f) {
-                super.onFragmentDetached(fm, f);
-            }
-        }, false);
         setContentView(R.layout.racing_view);
 
         dataManager = DataManager.create(this);

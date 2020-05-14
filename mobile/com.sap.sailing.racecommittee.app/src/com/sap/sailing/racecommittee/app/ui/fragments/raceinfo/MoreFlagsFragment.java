@@ -113,7 +113,7 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
             return fragment;
         }
 
-        public int getStartMode(){
+        public int getStartMode() {
             return getArguments().getInt(START_MODE);
         }
 
@@ -269,7 +269,6 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
                     break;
                 }
                 default:
-                    sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
                     sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
                     break;
             }

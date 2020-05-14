@@ -62,7 +62,6 @@ public class BaseFragment extends RaceFragment {
         if (getArguments() != null && getArguments().getInt(START_MODE, START_MODE_PRESETUP) == START_MODE_PRESETUP) {
             openMainScheduleFragment();
         } else {
-            sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
             sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
         }
     }

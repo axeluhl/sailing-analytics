@@ -142,7 +142,7 @@ public class SetupPanelFragment extends BasePanelFragment implements NavigationE
         filter.addAction(AppConstants.INTENT_ACTION_UPDATE_SCREEN);
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, filter);
 
-        sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
+        NavigationEvents.INSTANCE.subscribeFragmentAttachment(this);
     }
 
 

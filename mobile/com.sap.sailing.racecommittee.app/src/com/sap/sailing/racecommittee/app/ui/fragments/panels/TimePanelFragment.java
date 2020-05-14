@@ -293,12 +293,12 @@ public class TimePanelFragment extends BasePanelFragment implements NavigationEv
     @Override
     public void onFragmentAttach(Fragment fragment) {
         ExLog.i(getContext(), "","");
-        if (fragment instanceof StartTimeFragment){
+        if (fragment instanceof StartTimeFragment) {
             setMarkerLevel(mRaceHeader, R.id.time_marker, LEVEL_TOGGLED);
             mCompetitorList.setMarkerLevel(PanelButton.LEVEL_NORMAL);
             mCompetitorToggleOn = false;
         }
-        if (fragment instanceof PenaltyFragment || fragment instanceof TrackingListFragment){
+        if (fragment instanceof PenaltyFragment || fragment instanceof TrackingListFragment) {
             mCompetitorList.setMarkerLevel(PanelButton.LEVEL_TOGGLED);
             setMarkerLevel(mRaceHeader, R.id.time_marker, LEVEL_NORMAL);
             mCompetitorToggleOn = true;
@@ -308,11 +308,11 @@ public class TimePanelFragment extends BasePanelFragment implements NavigationEv
     @Override
     public void onFragmentDetach(Fragment fragment) {
         ExLog.i(getContext(), "","");
-        if (fragment instanceof StartTimeFragment){
+        if (fragment instanceof StartTimeFragment) {
             setMarkerLevel(mRaceHeader, R.id.time_marker, LEVEL_NORMAL);
             mCompetitorList.setMarkerLevel(PanelButton.LEVEL_NORMAL);
         }
-        if (fragment instanceof PenaltyFragment){
+        if (fragment instanceof PenaltyFragment) {
             setMarkerLevel(mRaceHeader, R.id.time_marker, LEVEL_NORMAL);
             mCompetitorList.setMarkerLevel(LEVEL_NORMAL);
         }

@@ -111,7 +111,6 @@ public class RaceFactorFragment extends BaseFragment implements View.OnClickList
         }
 
         if (isAdded()) {
-            BroadcastManager.getInstance(getActivity()).addIntent(new Intent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE));
             BroadcastManager.getInstance(getActivity())
                     .addIntent(new Intent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT));
             BroadcastManager.getInstance(getActivity()).addIntent(new Intent(AppConstants.INTENT_ACTION_UPDATE_SCREEN));

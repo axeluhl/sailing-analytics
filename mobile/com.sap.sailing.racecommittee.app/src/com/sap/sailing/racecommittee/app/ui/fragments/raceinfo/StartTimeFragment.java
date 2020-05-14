@@ -41,7 +41,6 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.DataStore;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.ui.NavigationEvents;
 import com.sap.sailing.racecommittee.app.ui.adapters.DependentRaceSpinnerAdapter;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DatePickerFragment;
@@ -156,12 +155,6 @@ public class StartTimeFragment extends BaseFragment
             DatePickerFragment fragment = (DatePickerFragment) childFragment;
             fragment.setOnDateSetListener(this);
         }
-    }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        NavigationEvents.INSTANCE.attach(this);
     }
 
     @Override
@@ -677,7 +670,6 @@ public class StartTimeFragment extends BaseFragment
                         && getArguments().getInt(START_MODE, START_MODE_PRESETUP) == START_MODE_PRESETUP) {
                     changeFragment();
                 } else {
-                    sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
                     sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
                 }
                 break;
@@ -820,7 +812,6 @@ public class StartTimeFragment extends BaseFragment
         fragment.setArguments(args);
         transaction.replace(viewId, fragment);
         transaction.commit();
-        sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
         if (requireActivity().findViewById(R.id.race_edit) != null) {
             sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
         }

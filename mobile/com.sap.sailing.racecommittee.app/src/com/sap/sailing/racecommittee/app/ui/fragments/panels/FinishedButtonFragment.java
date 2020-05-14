@@ -88,13 +88,6 @@ public class FinishedButtonFragment extends BasePanelFragment implements Navigat
     public void onResume() {
         super.onResume();
 
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(AppConstants.INTENT_ACTION_TOGGLE);
-        filter.addAction(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, filter);
-
-        sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
-
         if (!preferences.getRacingProcedureIsResultEntryEnabled(getRaceState().getRacingProcedure().getType())) {
             mList.setVisibility(View.GONE);
         } else {

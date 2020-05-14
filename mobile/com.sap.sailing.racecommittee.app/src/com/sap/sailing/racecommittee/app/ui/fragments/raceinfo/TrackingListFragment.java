@@ -185,7 +185,6 @@ public class TrackingListFragment extends BaseFragment
             mHeader.setHeaderOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
                     //Check if finished or not
                     boolean finished = getRaceState().getFinishedTime() != null;
                     if (finished) {
@@ -313,7 +312,6 @@ public class TrackingListFragment extends BaseFragment
                     initializeFinishList();
                     initLocalData();
                     Toast.makeText(getActivity(), R.string.publish_clicked, Toast.LENGTH_SHORT).show();
-                    sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
                     //Check if finished or not
                     boolean finished = getRaceState().getFinishedTime() != null;
                     if (finished) {

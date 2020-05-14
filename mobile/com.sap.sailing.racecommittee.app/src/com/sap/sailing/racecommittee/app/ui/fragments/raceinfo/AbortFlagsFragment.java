@@ -78,7 +78,6 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
             header.setHeaderOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
                     sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
                 }
             });
@@ -286,8 +285,6 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
                     action.run();
                 }
                 if (!racesToAbort.contains(getRace())) {
-                    BroadcastManager.getInstance(getActivity())
-                            .addIntent(new Intent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE));
                     BroadcastManager.getInstance(getActivity())
                             .addIntent(new Intent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT));
                 }
