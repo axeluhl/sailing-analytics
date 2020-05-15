@@ -31,7 +31,7 @@ import com.sap.sailing.gwt.ui.adminconsole.resulthandling.ExpeditionDataImportRe
 import com.sap.sailing.gwt.ui.adminconsole.resulthandling.ExpeditionDataImportResultsDialog;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -49,7 +49,7 @@ public class ExpeditionAllInOneImportPanel extends Composite implements Regattas
 
     private final RegattaSuggestOracle regattaOracle;
 
-    public ExpeditionAllInOneImportPanel(final StringMessages stringMessages, final SailingServiceAsync sailingService, final UserService userService,
+    public ExpeditionAllInOneImportPanel(final StringMessages stringMessages, final SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
             final ErrorReporter errorReporter, final RegattaRefresher regattaRefresher) {
         final FormPanel formPanel = new FormPanel();
         final BusyIndicator busyIndicator = new SimpleBusyIndicator();
@@ -160,7 +160,7 @@ public class ExpeditionAllInOneImportPanel extends Composite implements Regattas
                 new ExpeditionAllInOneAfterImportHandler(response.getEventId(), response.getRegattaName(),
                         response.getLeaderboardName(), response.getLeaderboardGroupName(), response.getRaceEntries(),
                         response.getGpsDeviceIds(), response.getSensorDeviceIds(), response.getSensorFixImporterType(),
-                        response.getStartTimes(), sailingService, userService,
+                        response.getStartTimes(), sailingServiceWrite, userService,
                         errorReporter, stringMessages);
                 regattaRefresher.fillRegattas();
             } else {
@@ -172,7 +172,7 @@ public class ExpeditionAllInOneImportPanel extends Composite implements Regattas
             public void onSelection(SelectionEvent<Suggestion> event) {
                 final String selected = event.getSelectedItem().getReplacementString();
                 if (selected != null) {
-                    sailingService.getRegattaByName(selected, new AsyncCallback<RegattaDTO>() {
+                    sailingServiceWrite.getRegattaByName(selected, new AsyncCallback<RegattaDTO>() {
                         @Override
                         public void onSuccess(RegattaDTO result) {
                             validation.run();

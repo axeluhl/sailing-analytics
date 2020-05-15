@@ -16,12 +16,14 @@ import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceHelper;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.security.ui.client.SecureClientFactoryImpl;
 
 public abstract class AutoPlayClientFactoryBase
         extends SecureClientFactoryImpl<ApplicationTopLevelView> implements AutoPlayClientFactory {
     private final SailingServiceAsync sailingService;
+    private final SailingServiceWriteAsync sailingServiceWrite;
     private final MediaServiceAsync mediaService;
     private final AutoPlayPlaceNavigator navigator;
 
@@ -32,6 +34,7 @@ public abstract class AutoPlayClientFactoryBase
         super(root, eventBus, placeController);
         this.navigator = navigator;
         sailingService = SailingServiceHelper.createSailingServiceInstance();
+        sailingServiceWrite = SailingServiceHelper.createSailingServiceWriteInstance();
         mediaService = GWT.create(MediaService.class);
         EntryPointHelper.registerASyncService((ServiceDefTarget) sailingService,
                 RemoteServiceMappingConstants.sailingServiceRemotePath);
@@ -65,6 +68,11 @@ public abstract class AutoPlayClientFactoryBase
             }
             return sailingServiceAsync;
         }
+    }
+  
+    @Override
+    public SailingServiceWriteAsync getSailingServiceWrite() {
+        return sailingServiceWrite;
     }
 
     @Override
