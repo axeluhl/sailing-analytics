@@ -1,5 +1,8 @@
 package com.sap.sailing.gwt.ui.client;
 
+import static com.sap.sse.gwt.shared.RpcConstants.HEADER_FORWARD_TO_PRIMARY;
+import static com.sap.sse.gwt.shared.RpcConstants.HEADER_FORWARD_TO_REPLICA;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.sap.sse.gwt.client.EntryPointHelper;
@@ -56,9 +59,9 @@ public abstract class SailingServiceHelper {
         }
         final String servicePathWithRoutingSuffix = servicePath.toString();
         if (sameBundle) {
-            EntryPointHelper.registerASyncService(serviceToRegister, servicePathWithRoutingSuffix);
+            EntryPointHelper.registerASyncService(serviceToRegister, servicePathWithRoutingSuffix, HEADER_FORWARD_TO_REPLICA);
         } else {
-            EntryPointHelper.registerASyncService(serviceToRegister, RemoteServiceMappingConstants.WEB_CONTEXT_PATH, servicePathWithRoutingSuffix);
+            EntryPointHelper.registerASyncService(serviceToRegister, RemoteServiceMappingConstants.WEB_CONTEXT_PATH, servicePathWithRoutingSuffix, HEADER_FORWARD_TO_REPLICA);
         }
         return service;
     }
@@ -81,9 +84,9 @@ public abstract class SailingServiceHelper {
         
         final String servicePathWithRoutingSuffix = servicePath.toString();
         if (sameBundle) {
-            EntryPointHelper.registerASyncService(serviceToRegister, servicePathWithRoutingSuffix);
+            EntryPointHelper.registerASyncService(serviceToRegister, servicePathWithRoutingSuffix, HEADER_FORWARD_TO_PRIMARY);
         } else {
-            EntryPointHelper.registerASyncService(serviceToRegister, RemoteServiceMappingConstants.WEB_CONTEXT_PATH, servicePathWithRoutingSuffix);
+            EntryPointHelper.registerASyncService(serviceToRegister, RemoteServiceMappingConstants.WEB_CONTEXT_PATH, servicePathWithRoutingSuffix, HEADER_FORWARD_TO_PRIMARY);
         }
         return service;
     }
