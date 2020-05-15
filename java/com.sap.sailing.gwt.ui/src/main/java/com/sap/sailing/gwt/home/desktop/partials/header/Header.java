@@ -81,27 +81,26 @@ public class Header extends Composite {
 
     public Header(final DesktopPlacesNavigator navigator, EventBus eventBus) {
         this.navigator = navigator;
-
         HeaderResources.INSTANCE.css().ensureInjected();
-        
         initWidget(uiBinder.createAndBindUi(this));
         links = Arrays.asList(new Anchor[] { startPageLink, eventsPageLink, solutionsPageLink, adminConsolePageLink });
-        
         homeNavigation = navigator.getHomeNavigation();
         eventsNavigation = navigator.getEventsNavigation();
         solutionsNavigation = navigator.getSolutionsNavigation(SolutionsNavigationTabs.SapInSailing);
         startPageLink.setHref(homeNavigation.getTargetUrl());
         eventsPageLink.setHref(eventsNavigation.getTargetUrl());
         solutionsPageLink.setHref(solutionsNavigation.getTargetUrl());
-
+        // make the Admin link visible only for signed-in users
         adminConsolePageLink.getElement().getStyle().setDisplay(Display.NONE);
         eventBus.addHandler(AuthenticationContextEvent.TYPE, event->{
             AuthenticationContext authContext = event.getCtx();
+            // make it point to the current server if the user has CREATE_OBJECT permission there
             if (authContext.hasServerPermission(ServerActions.CREATE_OBJECT)) {
                 adminConsolePageLink.setHref(ADMIN_CONSOLE_PATH);
                 adminConsolePageLink.setTarget(ADMIN_CONSOLE_WINDOW);
                 adminConsolePageLink.getElement().getStyle().setDisplay(Display.INLINE_BLOCK);
             } else if (authContext.isLoggedIn()) {
+                // make it point to the default "manage events" self-service server configured in ServerInfo otherwise
                 String base = authContext.getServerInfo().getManageEventsBaseUrl();
                 adminConsolePageLink.setHref(UriUtils.fromString(base + ADMIN_CONSOLE_PATH));
                 adminConsolePageLink.setTarget(ADMIN_CONSOLE_WINDOW);
@@ -110,7 +109,6 @@ public class Header extends Composite {
                 adminConsolePageLink.getElement().getStyle().setDisplay(Display.NONE);
             }
         });
-        
         searchText.getElement().setAttribute("placeholder", StringMessages.INSTANCE.headerSearchPlaceholder());
         searchText.addKeyPressHandler(new KeyPressHandler() {
             @Override
@@ -120,22 +118,18 @@ public class Header extends Composite {
                 }
             }
         });
-        
         eventBus.addHandler(PlaceChangedEvent.TYPE, new PlaceChangedEvent.Handler() {
             @Override
             public void onPlaceChanged(PlaceChangedEvent event) {
                 updateActiveLink(event.getNewPlace());
             }
         });
-        
         authenticationMenuView = new AuthenticationMenuViewImpl(usermenu, HeaderResources.INSTANCE.css().loggedin(), HeaderResources.INSTANCE.css().open());
-        
         if (!ClientConfiguration.getInstance().isBrandingActive()) {
             logoImage.getStyle().setDisplay(Display.NONE);
             solutionsPageLink.getElement().getStyle().setDisplay(Display.NONE);
             logoAnchor.setHref("");
         }
-        
         logoImage.setAttribute(DebugConstants.DEBUG_ID_ATTRIBUTE, "logoImage");
         solutionsPageLink.getElement().setAttribute(DEBUG_ID_ATTRIBUTE, "solutionsPageLink");
         logoAnchor.setAttribute(DEBUG_ID_ATTRIBUTE, "logoAnchor");
@@ -157,11 +151,6 @@ public class Header extends Composite {
         handleClickEvent(e, solutionsNavigation, solutionsPageLink);
     }
 
-//    @UiHandler("sponsoringPageLink")
-//    public void goToSponsoring(ClickEvent e) {
-//        handleClickEvent(e, sponsoringNavigation, sponsoringPageLink);
-//    }
-
     @UiHandler("searchButton")
     void searchButtonClick(ClickEvent event) {
         PlaceNavigation<SearchResultPlace> searchResultNavigation = navigator.getSearchResultNavigation(searchText
@@ -182,7 +171,6 @@ public class Header extends Composite {
         } else {
             setActiveLink(null);
         }
-        // TODO add more rules
     }
     
     private void setActiveLink(Anchor link) {

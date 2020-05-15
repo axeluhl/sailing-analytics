@@ -4066,7 +4066,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 }
             }
         }
-        
         if (serverConfiguration.isPublic() != null) {
             final RoleDefinition viewerRole = getSecurityService()
                     .getRoleDefinition(SailingViewerRole.getInstance().getId());
