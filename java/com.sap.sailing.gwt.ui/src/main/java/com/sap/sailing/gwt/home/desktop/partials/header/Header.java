@@ -38,10 +38,10 @@ import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.Solutions
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.mvp.PlaceChangedEvent;
-import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
-import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
 import com.sap.sse.gwt.shared.ClientConfiguration;
 import com.sap.sse.gwt.shared.DebugConstants;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
+import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.authentication.view.AuthenticationMenuView;
 import com.sap.sse.security.ui.authentication.view.AuthenticationMenuViewImpl;
@@ -62,7 +62,9 @@ public class Header extends Composite {
     @UiField ImageElement logoImage;
 
     private static final HyperlinkImpl HYPERLINK_IMPL = GWT.create(HyperlinkImpl.class);
-    
+    private static final String ADMIN_CONSOLE_PATH = "/gwt/AdminConsole.html";
+    private static final String ADMIN_CONSOLE_WINDOW = "adminConsoleWindow";
+
     private final List<Anchor> links;
     private final DesktopPlacesNavigator navigator;
 
@@ -88,20 +90,21 @@ public class Header extends Composite {
         homeNavigation = navigator.getHomeNavigation();
         eventsNavigation = navigator.getEventsNavigation();
         solutionsNavigation = navigator.getSolutionsNavigation(SolutionsNavigationTabs.SapInSailing);
-        
         startPageLink.setHref(homeNavigation.getTargetUrl());
         eventsPageLink.setHref(eventsNavigation.getTargetUrl());
         solutionsPageLink.setHref(solutionsNavigation.getTargetUrl());
-        
-        adminConsolePageLink.setHref("/gwt/AdminConsole.html");
+
         adminConsolePageLink.getElement().getStyle().setDisplay(Display.NONE);
         eventBus.addHandler(AuthenticationContextEvent.TYPE, event->{
             AuthenticationContext authContext = event.getCtx();
             if (authContext.hasServerPermission(ServerActions.CREATE_OBJECT)) {
+                adminConsolePageLink.setHref(ADMIN_CONSOLE_PATH);
+                adminConsolePageLink.setTarget(ADMIN_CONSOLE_WINDOW);
                 adminConsolePageLink.getElement().getStyle().setDisplay(Display.INLINE_BLOCK);
             } else if (authContext.isLoggedIn()) {
                 String base = authContext.getServerInfo().getManageEventsBaseUrl();
-                adminConsolePageLink.setHref(UriUtils.fromString(base + "/gwt/AdminConsole.html"));
+                adminConsolePageLink.setHref(UriUtils.fromString(base + ADMIN_CONSOLE_PATH));
+                adminConsolePageLink.setTarget(ADMIN_CONSOLE_WINDOW);
                 adminConsolePageLink.getElement().getStyle().setDisplay(Display.INLINE_BLOCK);
             } else {
                 adminConsolePageLink.getElement().getStyle().setDisplay(Display.NONE);

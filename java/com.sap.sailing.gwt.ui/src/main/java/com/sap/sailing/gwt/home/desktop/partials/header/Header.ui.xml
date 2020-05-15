@@ -24,7 +24,7 @@
           <g:Anchor ui:field="solutionsPageLink"
             styleName="{local_res.css.sitenavigation_link}" text="{i18n.solutions}" />
           <g:Anchor ui:field="adminConsolePageLink"
-            styleName="{local_res.css.sitenavigation_link}" text="{i18n.administration}" />
+            styleName="{local_res.css.sitenavigation_link}" text="{i18n.administration}" target="adminConsoleWindow"/>
           <!-- 
           <g:Anchor ui:field="sponsoringPageLink"
             styleName="{local_res.css.sitenavigation_link}" text="{i18n.sponsoring}" />
