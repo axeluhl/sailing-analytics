@@ -91,7 +91,7 @@ public abstract class AbstractGenericSerializableSettings extends AbstractSettin
     public AbstractGenericSerializableSettings(String name, AbstractGenericSerializableSettings settings) {
         super(name, settings);
         value = (SettingsValue) settings.getValue(name);
-        if(value == null) {
+        if (value == null) {
             value = new SettingsValue();
             settings.setValue(name, value);
         }
@@ -103,18 +103,18 @@ public abstract class AbstractGenericSerializableSettings extends AbstractSettin
      */
     protected void adoptValue(SettingsValue value) {
         this.value = value;
-        if(childSettings != null) {
-            for(Map.Entry<String, Setting> entry : childSettings.entrySet()) {
+        if (childSettings != null) {
+            for (Map.Entry<String, Setting> entry : childSettings.entrySet()) {
                 Setting childSetting = entry.getValue();
-                if(childSetting instanceof AbstractGenericSerializableSettings) {
+                if (childSetting instanceof AbstractGenericSerializableSettings) {
                     Value childValue = value.getValue(entry.getKey());
-                    if(childValue != null) {
+                    if (childValue != null) {
                         ((AbstractGenericSerializableSettings) childSetting).adoptValue((SettingsValue) childValue);
                     }
                 }
-                if(childSetting instanceof SettingsList<?>) {
+                if (childSetting instanceof SettingsList<?>) {
                     Value childValue = value.getValue(entry.getKey());
-                    if(childValue != null) {
+                    if (childValue != null) {
                         ((SettingsList<?>) childSetting).adoptValue();
                     }
                 }

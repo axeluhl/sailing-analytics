@@ -27,7 +27,7 @@ import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.DefaultSelectionEventManager.SelectAction;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkTemplateDTO;
 import com.sap.sse.common.Util;
@@ -52,7 +52,7 @@ import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 public class MarkTemplatePanel extends FlowPanel {
     private static AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
 
-    private final SailingServiceAsync sailingService;
+    private final SailingServiceWriteAsync sailingServiceWrite;
     private final LabeledAbstractFilterablePanel<MarkTemplateDTO> filterableMarkTemplates;
     private List<MarkTemplateDTO> allMarkTemplates;
     private final ErrorReporter errorReporter;
@@ -61,9 +61,9 @@ public class MarkTemplatePanel extends FlowPanel {
     private ListDataProvider<MarkTemplateDTO> markTemplateListDataProvider = new ListDataProvider<>();
     private RefreshableMultiSelectionModel<MarkTemplateDTO> refreshableSelectionModel;
 
-    public MarkTemplatePanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
+    public MarkTemplatePanel(SailingServiceWriteAsync sailingServiceWrite, ErrorReporter errorReporter,
             StringMessages stringMessages, final UserService userService) {
-        this.sailingService = sailingService;
+        this.sailingServiceWrite = sailingServiceWrite;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
         AccessControlledButtonPanel buttonAndFilterPanel = new AccessControlledButtonPanel(userService,
@@ -114,7 +114,7 @@ public class MarkTemplatePanel extends FlowPanel {
 
     public void loadMarkTemplates() {
         markTemplateListDataProvider.getList().clear();
-        sailingService.getMarkTemplates(new AsyncCallback<List<MarkTemplateDTO>>() {
+        sailingServiceWrite.getMarkTemplates(new AsyncCallback<List<MarkTemplateDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(caught.toString());
@@ -301,7 +301,7 @@ public class MarkTemplatePanel extends FlowPanel {
                 new DialogCallback<MarkTemplateDTO>() {
                     @Override
                     public void ok(MarkTemplateDTO markTemplate) {
-                        sailingService.addOrUpdateMarkTemplate(markTemplate, new AsyncCallback<MarkTemplateDTO>() {
+                        sailingServiceWrite.addOrUpdateMarkTemplate(markTemplate, new AsyncCallback<MarkTemplateDTO>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 errorReporter
