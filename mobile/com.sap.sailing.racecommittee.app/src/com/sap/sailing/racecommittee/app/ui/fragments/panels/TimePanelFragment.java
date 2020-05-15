@@ -30,6 +30,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -108,15 +109,15 @@ public class TimePanelFragment extends BasePanelFragment implements NavigationEv
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
         NavigationEvents.INSTANCE.subscribeFragmentAttachment(this);
     }
 
     @Override
-    public void onStop() {
+    public void onDetach() {
         NavigationEvents.INSTANCE.unSubscribeFragmentAttachment(this);
-        super.onStop();
+        super.onDetach();
     }
 
     @Override
@@ -292,7 +293,6 @@ public class TimePanelFragment extends BasePanelFragment implements NavigationEv
 
     @Override
     public void onFragmentAttach(Fragment fragment) {
-        ExLog.i(getContext(), "","");
         if (fragment instanceof StartTimeFragment) {
             setMarkerLevel(mRaceHeader, R.id.time_marker, LEVEL_TOGGLED);
             mCompetitorList.setMarkerLevel(PanelButton.LEVEL_NORMAL);
@@ -307,7 +307,6 @@ public class TimePanelFragment extends BasePanelFragment implements NavigationEv
 
     @Override
     public void onFragmentDetach(Fragment fragment) {
-        ExLog.i(getContext(), "","");
         if (fragment instanceof StartTimeFragment) {
             setMarkerLevel(mRaceHeader, R.id.time_marker, LEVEL_NORMAL);
             mCompetitorList.setMarkerLevel(PanelButton.LEVEL_NORMAL);
@@ -395,12 +394,13 @@ public class TimePanelFragment extends BasePanelFragment implements NavigationEv
 
         @Override
         public void onClick(PanelButton view) {
-            switch (view.toggleMarker()) {
+            int toggle = view.toggleMarker();
+            mCompetitorToggleOn = toggle == PanelButton.LEVEL_TOGGLED;
+            switch (toggle) {
             case PanelButton.LEVEL_NORMAL:
                 Intent intent = new Intent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
                 intent.putExtra(AppConstants.INTENT_ACTION_EXTRA_FORCED, true);
                 BroadcastManager.getInstance(getActivity()).addIntent(intent);
-                mCompetitorToggleOn = false;
                 break;
 
             case PanelButton.LEVEL_TOGGLED:
@@ -413,7 +413,6 @@ public class TimePanelFragment extends BasePanelFragment implements NavigationEv
                     content = TrackingListFragment.newInstance(args, 1);
                 }
                 replaceFragment(content, R.id.race_content);
-                mCompetitorToggleOn = true;
                 break;
 
             default:

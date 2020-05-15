@@ -1,6 +1,9 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.panels;
 
+import java.io.Serializable;
 import java.text.DecimalFormat;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.ViewHelper;
@@ -29,11 +32,13 @@ import com.sap.sailing.racecommittee.app.ui.views.PanelButton;
 import com.sap.sailing.racecommittee.app.utils.RaceHelper;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
@@ -58,6 +63,9 @@ public class SetupPanelFragment extends BasePanelFragment implements NavigationE
     private PanelButton mButtonWind;
 
     private DecimalFormat mFactorFormat;
+
+    private static final String STATE_CURRENT_FLAG = "state-current-flag";
+    private Map<Integer, Boolean> flagStates = new HashMap<>();
 
     public SetupPanelFragment() {
         mReceiver = new IntentReceiver();
@@ -141,16 +149,38 @@ public class SetupPanelFragment extends BasePanelFragment implements NavigationE
         IntentFilter filter = new IntentFilter();
         filter.addAction(AppConstants.INTENT_ACTION_UPDATE_SCREEN);
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, filter);
+        View view = getView();
+        if (view != null) {
+            for (Integer id : flagStates.keySet()) {
+                final View v = ViewHelper.get(view, id);
+                if (v instanceof PanelButton) {
+                    updateOneMarker((PanelButton) v, flagStates.get(id) == Boolean.TRUE);
+                }
+            }
+        }
 
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
         NavigationEvents.INSTANCE.subscribeFragmentAttachment(this);
     }
 
+    @Override
+    public void onDetach() {
+        NavigationEvents.INSTANCE.unSubscribeFragmentAttachment(this);
+        super.onDetach();
+    }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
         mFactorFormat = new DecimalFormat(getActivity().getString(R.string.race_factor_format));
+        if (savedInstanceState != null) {
+            flagStates.putAll((Map<Integer, Boolean>) savedInstanceState.getSerializable(STATE_CURRENT_FLAG));
+        }
     }
 
     @Override
@@ -161,7 +191,6 @@ public class SetupPanelFragment extends BasePanelFragment implements NavigationE
         getRaceState().getRacingProcedure().removeChangedListener(mProcedureListener);
 
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mReceiver);
-        NavigationEvents.INSTANCE.unSubscribeFragmentAttachment(this);
     }
 
     private void refreshPanel() {
@@ -347,10 +376,12 @@ public class SetupPanelFragment extends BasePanelFragment implements NavigationE
         }
     }
 
-    private void uncheckOneMarker(PanelButton view) {
+    private void updateOneMarker(PanelButton view, boolean checked) {
+        final int level = checked ? LEVEL_TOGGLED : LEVEL_NORMAL;
         if (isAdded()) {
             if (view != null) {
-                view.setMarkerLevel(PanelButton.LEVEL_NORMAL);
+                flagStates.put(view.getId(), checked);
+                view.setMarkerLevel(level);
             }
         }
     }
@@ -420,19 +451,19 @@ public class SetupPanelFragment extends BasePanelFragment implements NavigationE
     @Override
     public void onFragmentDetach(Fragment fragment) {
         if (fragment instanceof StartProcedureFragment) {
-            uncheckOneMarker(mButtonProcedure);
+            updateOneMarker(mButtonProcedure, false);
         } else if (fragment instanceof StartModeFragment) {
-            uncheckOneMarker(mButtonMode);
+            updateOneMarker(mButtonMode, false);
         } else if (fragment instanceof GateStartPathFinderFragment) {
-            uncheckOneMarker(mButtonPathfinder);
+            updateOneMarker(mButtonPathfinder, false);
         } else if (fragment instanceof GateStartTimingFragment) {
-            uncheckOneMarker(mButtonTiming);
+            updateOneMarker(mButtonTiming, false);
         } else if (fragment instanceof RaceFactorFragment) {
-            uncheckOneMarker(mButtonFactor);
+            updateOneMarker(mButtonFactor, false);
         } else if (fragment instanceof CourseFragment) {
-            uncheckOneMarker(mButtonCourse);
+            updateOneMarker(mButtonCourse, false);
         } else if (fragment instanceof WindFragment) {
-            uncheckOneMarker(mButtonWind);
+            updateOneMarker(mButtonWind, false);
         }
     }
 
@@ -485,7 +516,9 @@ public class SetupPanelFragment extends BasePanelFragment implements NavigationE
 
         @Override
         public void onClick(PanelButton view) {
-            switch (view.toggleMarker()) {
+            int toggle = view.toggleMarker();
+            flagStates.put(view.getId(), toggle == PanelButton.LEVEL_TOGGLED);
+            switch (toggle) {
                 case PanelButton.LEVEL_NORMAL:
                     sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
                     break;
@@ -513,7 +546,9 @@ public class SetupPanelFragment extends BasePanelFragment implements NavigationE
 
         @Override
         public void onClick(PanelButton view) {
-            switch (view.toggleMarker()) {
+            int toggle = view.toggleMarker();
+            flagStates.put(view.getId(), toggle == PanelButton.LEVEL_TOGGLED);
+            switch (toggle) {
                 case PanelButton.LEVEL_NORMAL:
                     sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
                     break;
@@ -540,7 +575,9 @@ public class SetupPanelFragment extends BasePanelFragment implements NavigationE
 
         @Override
         public void onClick(PanelButton view) {
-            switch (view.toggleMarker()) {
+            int toggle = view.toggleMarker();
+            flagStates.put(view.getId(), toggle == PanelButton.LEVEL_TOGGLED);
+            switch (toggle) {
                 case PanelButton.LEVEL_NORMAL:
                     sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
                     break;
@@ -568,7 +605,9 @@ public class SetupPanelFragment extends BasePanelFragment implements NavigationE
 
         @Override
         public void onClick(PanelButton view) {
-            switch (view.toggleMarker()) {
+            int toggle = view.toggleMarker();
+            flagStates.put(view.getId(), toggle == PanelButton.LEVEL_TOGGLED);
+            switch (toggle) {
                 case PanelButton.LEVEL_NORMAL:
                     sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
                     break;
@@ -608,7 +647,9 @@ public class SetupPanelFragment extends BasePanelFragment implements NavigationE
 
         @Override
         public void onClick(PanelButton view) {
-            switch (view.toggleMarker()) {
+            int toggle = view.toggleMarker();
+            flagStates.put(view.getId(), toggle == PanelButton.LEVEL_TOGGLED);
+            switch (toggle) {
                 case LEVEL_NORMAL:
                     sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
                     break;
@@ -634,7 +675,9 @@ public class SetupPanelFragment extends BasePanelFragment implements NavigationE
 
         @Override
         public void onClick(PanelButton view) {
-            switch (view.toggleMarker()) {
+            int toggle = view.toggleMarker();
+            flagStates.put(view.getId(), toggle == PanelButton.LEVEL_TOGGLED);
+            switch (toggle) {
                 case LEVEL_NORMAL:
                     sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
                     break;
@@ -660,7 +703,9 @@ public class SetupPanelFragment extends BasePanelFragment implements NavigationE
 
         @Override
         public void onClick(PanelButton view) {
-            switch (view.toggleMarker()) {
+            int toggle = view.toggleMarker();
+            flagStates.put(view.getId(), toggle == PanelButton.LEVEL_TOGGLED);
+            switch (toggle) {
                 case LEVEL_NORMAL:
                     sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
                     break;
@@ -691,5 +736,11 @@ public class SetupPanelFragment extends BasePanelFragment implements NavigationE
                 refreshPanel();
             }
         }
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putSerializable(STATE_CURRENT_FLAG, (Serializable) flagStates);
     }
 }

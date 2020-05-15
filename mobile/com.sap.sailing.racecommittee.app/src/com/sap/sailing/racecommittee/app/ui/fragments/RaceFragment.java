@@ -40,7 +40,7 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
     protected @interface MOVE_VALUES {
     }
 
-    private static final String TAG = RaceFragment.class.getName();
+    private static final String TAG = RaceFragment.class.getSimpleName();
 
     protected ManagedRace managedRace;
     protected AppPreferences preferences;

@@ -10,6 +10,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.PhotoListFragment
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.TrackingListFragment;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -96,12 +97,17 @@ public class FinishedButtonFragment extends BasePanelFragment implements Navigat
                 mWarning.setVisibility(results.hasConflicts() ? View.VISIBLE : View.GONE);
             }
         }
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
         NavigationEvents.INSTANCE.subscribeFragmentAttachment(this);
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
+    public void onDetach() {
+        super.onDetach();
         NavigationEvents.INSTANCE.unSubscribeFragmentAttachment(this);
     }
 
