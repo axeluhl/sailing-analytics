@@ -47,7 +47,6 @@ public class RemoveLeaderboardGroupTest {
     
     @Before
     public void setUp() {
-        
         final SecurityService securityService = SecurityServiceMockFactory.mockSecurityService();
         server = new RacingEventServiceImpl() {
             @Override

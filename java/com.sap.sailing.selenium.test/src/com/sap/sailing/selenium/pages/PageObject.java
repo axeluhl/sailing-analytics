@@ -210,7 +210,6 @@ public class PageObject {
     public PageObject(WebDriver driver, SearchContext context) {
         this.driver = driver;
         this.context = context;
-        
         verify();
         initElements();
     }
