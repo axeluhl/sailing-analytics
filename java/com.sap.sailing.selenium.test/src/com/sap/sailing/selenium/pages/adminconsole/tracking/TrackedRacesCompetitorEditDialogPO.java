@@ -1,5 +1,9 @@
 package com.sap.sailing.selenium.pages.adminconsole.tracking;
 
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
@@ -15,9 +19,6 @@ public class TrackedRacesCompetitorEditDialogPO extends DataEntryDialogPO {
     @FindBy(how = BySeleniumId.class, using = "ShortNameTextBox")
     private WebElement shortNameTextBox;
     
-    @FindBy(how = BySeleniumId.class, using = "WithBoatCheckBox")
-    private WebElement withBoatCheckBoxElement;
-    
     @FindBy(how = BySeleniumId.class, using = "OkButton")
     private WebElement okButton;
 
@@ -25,7 +26,12 @@ public class TrackedRacesCompetitorEditDialogPO extends DataEntryDialogPO {
 
     public TrackedRacesCompetitorEditDialogPO(WebDriver driver, WebElement element) {
         super(driver, element);
-        withBoatCheckBox = CheckBoxPO.create(driver, withBoatCheckBoxElement);
+        final List<WebElement> withBoatCheckBoxElement = driver.findElements(new BySeleniumId("WithBoatCheckBox"));
+        if (withBoatCheckBoxElement.isEmpty()) {
+            withBoatCheckBox = null;
+        } else {
+            withBoatCheckBox = CheckBoxPO.create(driver, withBoatCheckBoxElement.get(0));
+        }
     }
 
     public void setNameTextBox(String name) {
@@ -39,6 +45,8 @@ public class TrackedRacesCompetitorEditDialogPO extends DataEntryDialogPO {
     }
     
     public void setWithBoat(boolean withBoat) {
-        this.withBoatCheckBox.setSelected(withBoat);
+        if (withBoatCheckBox != null) {
+            this.withBoatCheckBox.setSelected(withBoat);
+        }
     }
 }

@@ -88,6 +88,7 @@ public class TestRefreshableSelectionModel extends AbstractSeleniumTest {
             dialog.setNameTextBox(name);
             final String shortName = "" + System.currentTimeMillis();
             dialog.setShortNameTextBox(shortName);
+            dialog.setWithBoat(false);
             dialog.pressOk();
             boolean found = false;
             for (final CompetitorEntry it : competitorsPanel.getCompetitorTable().getEntries()) {
