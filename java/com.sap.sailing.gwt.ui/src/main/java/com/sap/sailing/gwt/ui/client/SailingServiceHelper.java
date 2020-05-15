@@ -18,6 +18,14 @@ public abstract class SailingServiceHelper {
     public static SailingServiceAsync createSailingServiceInstance() {
         return createSailingServiceInstance(true, null);
     }
+    
+    /**
+     * Creates a new {@link SailingServiceWriteAsync} instance, should be used when code resides in the same bundle as the sailing service code.
+     */
+    public static SailingServiceWriteAsync createSailingServiceWriteInstance() {
+        return createSailingServiceWriteInstance(true, null);
+    }
+    
     /**
      * Creates a new {@link SailingServiceAsync} instance.
      * 
@@ -42,8 +50,31 @@ public abstract class SailingServiceHelper {
     public static SailingServiceAsync createSailingServiceInstance(boolean sameBundle, ServiceRoutingProvider routingProvider) {
         final SailingServiceAsync service = GWT.create(SailingService.class);
         final ServiceDefTarget serviceToRegister = (ServiceDefTarget) service;
-        
         final StringBuilder servicePath = new StringBuilder(RemoteServiceMappingConstants.sailingServiceRemotePath);
+        if (routingProvider != null) {
+            servicePath.append(routingProvider.routingSuffixPath());
+        }
+        final String servicePathWithRoutingSuffix = servicePath.toString();
+        if (sameBundle) {
+            EntryPointHelper.registerASyncService(serviceToRegister, servicePathWithRoutingSuffix);
+        } else {
+            EntryPointHelper.registerASyncService(serviceToRegister, RemoteServiceMappingConstants.WEB_CONTEXT_PATH, servicePathWithRoutingSuffix);
+        }
+        return service;
+    }
+    
+    /**
+     * Creates a new {@link SailingServiceWriteAsync} instance that uses a routing provider, for code in same bundle.
+     */
+    public static SailingServiceWriteAsync createSailingServiceWriteInstance(ServiceRoutingProvider routingProvider) {
+        return createSailingServiceWriteInstance(true, routingProvider);
+    }
+    
+    public static SailingServiceWriteAsync createSailingServiceWriteInstance(boolean sameBundle, ServiceRoutingProvider routingProvider) {
+        final SailingServiceWriteAsync service = GWT.create(SailingServiceWrite.class);
+        final ServiceDefTarget serviceToRegister = (ServiceDefTarget) service;
+        
+        final StringBuilder servicePath = new StringBuilder(RemoteServiceMappingConstants.sailingServiceWriteRemotePath);
         if (routingProvider != null) {
             servicePath.append(routingProvider.routingSuffixPath());
         }

@@ -21,7 +21,7 @@ import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.FlagImageRenderer;
 import com.sap.sailing.gwt.ui.client.FlagImageResolverImpl;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -45,9 +45,9 @@ public class CompactCompetitorTableWrapper<S extends RefreshableSelectionModel<C
     private final LabeledAbstractFilterablePanel<CompetitorDTO> filterField;
     private final Map<CompetitorDTO, BoatDTO> boatsForCompetitors;
     
-    public CompactCompetitorTableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages, ErrorReporter errorReporter,
+    public CompactCompetitorTableWrapper(SailingServiceWriteAsync sailingServiceWrite, StringMessages stringMessages, ErrorReporter errorReporter,
             boolean multiSelection, boolean enablePager, UserService userService) {
-        super(sailingService, stringMessages, errorReporter, multiSelection, enablePager,
+        super(sailingServiceWrite, stringMessages, errorReporter, multiSelection, enablePager,
                 new EntityIdentityComparator<CompetitorDTO>() {
                     @Override
                     public boolean representSameEntity(CompetitorDTO dto1, CompetitorDTO dto2) {
@@ -191,7 +191,7 @@ public class CompactCompetitorTableWrapper<S extends RefreshableSelectionModel<C
                 refreshCompetitorList(result);
             }
         };
-        sailingService.getCompetitorsAndBoatsOfRace(leaderboardName, raceColumnName, fleetName, myCallback);
+        sailingServiceWrite.getCompetitorsAndBoatsOfRace(leaderboardName, raceColumnName, fleetName, myCallback);
     }
 
     private void getFilteredCompetitors(Iterable<? extends CompetitorDTO> result) {

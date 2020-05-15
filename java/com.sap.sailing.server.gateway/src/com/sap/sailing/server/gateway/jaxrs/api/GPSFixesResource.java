@@ -75,6 +75,6 @@ public class GPSFixesResource extends AbstractSailingServerResource {
         } catch (NoCorrespondingServiceRegisteredException e) {
             logger.log(Level.WARNING, "Could not store fix for device " + device);
         }
-        return Response.ok(answer.toJSONString()).build();
+        return Response.ok(streamingOutput(answer)).build();
     }
 }

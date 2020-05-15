@@ -6,12 +6,10 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -291,7 +289,8 @@ public class DomainFactoryImpl implements DomainFactory {
         return result;
     }
 
-    private Map<Competitor, Boat> createCompetitorsAndBoats(StartList startList, String raceId, BoatClass boatClass,
+    @Override
+    public Map<Competitor, Boat> createCompetitorsAndBoats(StartList startList, String raceId, BoatClass boatClass,
             RaceTrackingHandler raceTrackHandler) {
         Map<Competitor, Boat> result = new LinkedHashMap<>();
         for (com.sap.sailing.domain.swisstimingadapter.Competitor swissTimingCompetitor : startList.getCompetitors()) {
@@ -398,24 +397,6 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public MarkPassing createMarkPassing(TimePoint timePoint, Waypoint waypoint, com.sap.sailing.domain.base.Competitor competitor) {
         return baseDomainFactory.createMarkPassing(timePoint, waypoint, competitor);
-    }
-
-    @Override
-    public void removeRace(String raceID) {
-        Regatta regatta = raceIDToRegattaCache.get(raceID);
-        if (regatta != null) {
-            Set<RaceDefinition> toRemove = new HashSet<RaceDefinition>();
-            RaceDefinition race = regatta.getRaceByName(raceID);
-            if (race != null) {
-                toRemove.add(race);
-            }
-            for (RaceDefinition raceToRemove : toRemove) {
-                regatta.removeRace(raceToRemove);
-            }
-            if (Util.isEmpty(regatta.getAllRaces())) {
-                raceIDToRegattaCache.remove(raceID);
-            }
-        }
     }
 
     @Override

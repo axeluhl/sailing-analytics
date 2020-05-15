@@ -362,7 +362,13 @@ public class Util {
             }
         });
     }
-    
+
+    public static <S, T> ArrayList<T> mapToArrayList(final Iterable<S> iterable, final Mapper<S, T> mapper) {
+        final ArrayList<T> result = new ArrayList<>();
+        addAll(map(iterable, mapper), result);
+        return result;
+    }
+
     public static <T> Iterable<T> filter(final Iterable<T> iterable, final Predicate<T> predicate) {
         return StreamSupport.stream(iterable.spliterator(), /* parallel */ false).filter(predicate)::iterator;
     }
@@ -385,6 +391,22 @@ public class Util {
             }
             return false;
         }
+    }
+    
+    /**
+     * @return {@code true} if {@code ts} {@link #contains(Iterable, Object) contains} at least one of the elements in
+     *         {@code isAnyOfTheseContained}. This means in particular that if {@code isAnyOfTheseContained} is
+     *         {@code null} or is empty, {@code false} will result.
+     */
+    public static <T> boolean containsAny(Iterable<T> ts, Iterable<T> isAnyOfTheseContained) {
+        if (isAnyOfTheseContained != null) {
+            for (final T t : isAnyOfTheseContained) {
+                if (contains(ts, t)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -764,8 +786,13 @@ public class Util {
     }
     
     public static <T> Set<T> asSet(Iterable<T> iterable) {
-        final Set<T> result = new HashSet<>();
-        addAll(iterable, result);
+        final Set<T> result;
+        if (iterable instanceof Set<?>) {
+            result = (Set<T>) iterable;
+        } else {
+            result = new HashSet<>();
+            addAll(iterable, result);
+        }
         return result;
     }
 
@@ -966,5 +993,14 @@ public class Util {
             result = !str.isEmpty();
         }
         return result;
+    }
+
+    /**
+     * Compares two iterable sequences based on {@link Set} semantics. If both objects turn out to be {@link Set}s,
+     * the {@link Set#equals(Object)} method will be used. Otherwise, non-{@link Set} objects will be filled into
+     * temporary {@link Set} objects and then compared as sets.
+     */
+    public static <T> boolean setEquals(Iterable<T> a, Iterable<T> b) {
+        return asSet(a).equals(asSet(b));
     }
 }

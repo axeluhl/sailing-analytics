@@ -198,7 +198,7 @@ public class EventsResource extends AbstractSailingServerResource {
                         eventAndLeaderboardGroupAndLeaderboard.getC().getRegatta().getRegistrationLinkSecret());
                 jsonResponse.put("leaderboard", eventAndLeaderboardGroupAndLeaderboard.getC().getName());
             }
-            response = ok(jsonResponse.toJSONString(), MediaType.APPLICATION_JSON);
+            response = Response.ok(streamingOutput(jsonResponse)).build();
         }
         return response;
     }
@@ -334,9 +334,7 @@ public class EventsResource extends AbstractSailingServerResource {
                     new VenueJsonSerializer(new CourseAreaJsonSerializer()), new LeaderboardGroupBaseJsonSerializer(),
                     new TrackingConnectorInfoJsonSerializer());
             JSONObject eventJson = eventSerializer.serialize(event);
-
-            String json = eventJson.toJSONString();
-            response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+            response = Response.ok(streamingOutput(eventJson)).build();
         }
         return response;
     }
@@ -375,9 +373,7 @@ public class EventsResource extends AbstractSailingServerResource {
                         filterByLeaderboard, filterByDayOffset, clientTimeZoneOffset, getService());
                 JSONObject raceStatesJson = eventRaceStatesSerializer.serialize(
                         new Pair<Event, Iterable<Leaderboard>>(event, getService().getLeaderboards().values()));
-                String json = raceStatesJson.toJSONString();
-                response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8")
-                        .build();
+                response = Response.ok(streamingOutput(raceStatesJson)).build();
             } else {
                 response = Response.status(Status.FORBIDDEN).build();
             }
@@ -388,11 +384,13 @@ public class EventsResource extends AbstractSailingServerResource {
     private RegattaLeaderboard validateAndCreateRegatta(String regattaNameParam, String boatClassNameParam,
             String scoringSchemeParam, UUID courseAreaId, String buoyZoneRadiusInHullLengthsParam,
             String useStartTimeInterferenceParam, String controlTrackingFromStartAndFinishTimesParam,
-            String rankingMetricParam, List<Integer> leaderboardDiscardThresholdsParam, String numberOfRacesParam,
-            boolean canBoatsOfCompetitorsChangePerRace, CompetitorRegistrationType competitorRegistrationType,
-            String competitorRegistrationSecret) throws ParseException, NotFoundException {
+            String autoRestartTrackingUponCompetitorSetChangeParam, String rankingMetricParam, List<Integer> leaderboardDiscardThresholdsParam,
+            String numberOfRacesParam, boolean canBoatsOfCompetitorsChangePerRace,
+            CompetitorRegistrationType competitorRegistrationType, String competitorRegistrationSecret) throws ParseException, NotFoundException {
         boolean controlTrackingFromStartAndFinishTimes = controlTrackingFromStartAndFinishTimesParam == null ? false
                 : Boolean.parseBoolean(controlTrackingFromStartAndFinishTimesParam);
+        boolean autoRestartTrackingUponCompetitorSetChange = autoRestartTrackingUponCompetitorSetChangeParam == null ? false
+                : Boolean.parseBoolean(autoRestartTrackingUponCompetitorSetChangeParam);
         boolean useStartTimeInterference = useStartTimeInterferenceParam == null ? true
                 : Boolean.parseBoolean(useStartTimeInterferenceParam);
         double buoyZoneRadiusInHullLengths = buoyZoneRadiusInHullLengthsParam == null ? 3.0
@@ -425,8 +423,9 @@ public class EventsResource extends AbstractSailingServerResource {
                     public Regatta call() throws Exception {
                         return getService().apply(new AddSpecificRegatta(regattaName, boatClassName,
                                 canBoatsOfCompetitorsChangePerRace, competitorRegistrationType, competitorRegistrationSecret, null, null, regattaId, regattaCreationParametersDTO,
-                                /* isPersistent */ true, scoringScheme, courseAreaId, buoyZoneRadiusInHullLengths,
-                                useStartTimeInterference, controlTrackingFromStartAndFinishTimes, rankingMetric));
+                                /* isPersistent */ true, scoringScheme,
+                                courseAreaId==null?Collections.emptySet():Collections.singleton(courseAreaId), buoyZoneRadiusInHullLengths,
+                                useStartTimeInterference, controlTrackingFromStartAndFinishTimes, autoRestartTrackingUponCompetitorSetChange, rankingMetric));
                     }
                 });
         final RegattaLeaderboard leaderboard = addLeaderboard(regattaName, leaderboardDiscardThresholds);
@@ -497,7 +496,6 @@ public class EventsResource extends AbstractSailingServerResource {
             throw new IllegalArgumentException(ExceptionManager.incorrectParameterValue(competitorRegistrationTypeString,
                     StringUtils.join(CompetitorRegistrationType.values(), ", ")));
         }
-        
         Callable<Util.Triple<Event, LeaderboardGroup, RegattaLeaderboard>> doCreationAction = new Callable<Util.Triple<Event, LeaderboardGroup, RegattaLeaderboard>>() {
             @Override
             public Util.Triple<Event, LeaderboardGroup, RegattaLeaderboard> call() throws Exception {
@@ -525,9 +523,9 @@ public class EventsResource extends AbstractSailingServerResource {
                     leaderboard = validateAndCreateRegatta(regattaAndLeaderboardName, boatClassName,
                             /* scoringSchemeParam */ scoringScheme, courseArea.getId(), /* buoyZoneRadiusInHullLengthsParam */ null,
                             /* useStartTimeInterferenceParam */ null, /* controlTrackingFromStartAndFinishTimesParam */ null,
-                            /* rankingMetricParam */ rankingMetric, /* leaderboardDiscardThresholdsParam */ leaderboardDiscardThresholdsParam,
-                            numberOfRacesParam, canBoatsOfCompetitorsChangePerRace, competitorRegistrationType,
-                            localCompetitorRegistrationSecret);
+                            /* autoRestartTrackingUponCompetitorSetChangeParam */ null, /* rankingMetricParam */ rankingMetric,
+                            /* leaderboardDiscardThresholdsParam */ leaderboardDiscardThresholdsParam, numberOfRacesParam, canBoatsOfCompetitorsChangePerRace,
+                            competitorRegistrationType, localCompetitorRegistrationSecret);
                     if (leaderboardGroup != null) {
                         getService().apply(new UpdateLeaderboardGroup(leaderboardGroup.getName(), leaderboardGroup.getName(),
                                 leaderboardGroup.getDescription(), leaderboardGroup.getDisplayName(),
@@ -657,7 +655,7 @@ public class EventsResource extends AbstractSailingServerResource {
         for (Event event : getService().getAllEvents()) {
             Iterable<CourseArea> courseAreas = event.getVenue().getCourseAreas();
             for (CourseArea courseArea : courseAreas) {
-                if (courseArea.getId().equals(leaderboard.getRegatta().getDefaultCourseArea().getId())) {
+                if (Util.contains(leaderboard.getRegatta().getCourseAreas(), courseArea.getId())) {
                     for (LeaderboardGroup lg : event.getLeaderboardGroups()) {
                         // if leaderboard group is default leaderboard group, then add leaderboard
                         if (lg.getName().equals(event.getName())) {
@@ -707,10 +705,6 @@ public class EventsResource extends AbstractSailingServerResource {
                 .apply(new CreateRegattaLeaderboard(new RegattaName(regattaName), regattaName, discardThresholds));
                     }
                 });
-    }
-
-    private Response ok(String message, String mediaType) {
-        return Response.ok(message).header("Content-Type", mediaType + ";charset=UTF-8").build();
     }
 
     private Response getBadEventErrorResponse(String eventId) {

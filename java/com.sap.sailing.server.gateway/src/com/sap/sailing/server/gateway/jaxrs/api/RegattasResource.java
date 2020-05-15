@@ -1,5 +1,8 @@
 package com.sap.sailing.server.gateway.jaxrs.api;
 
+import java.io.BufferedWriter;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -33,6 +36,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.shiro.SecurityUtils;
@@ -289,8 +293,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                     new ColorJsonSerializer()));
             JsonSerializer<Regatta> regattaSerializer = new RegattaJsonSerializer(seriesJsonSerializer, null, null, getSecurityService());
             JSONObject serializedRegatta = regattaSerializer.serialize(regatta);
-            String json = serializedRegatta.toJSONString();
-            response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+            response = Response.ok(streamingOutput(serializedRegatta)).build();
         }
         return response;
     }
@@ -306,7 +309,6 @@ public class RegattasResource extends AbstractSailingServerResource {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
             getSecurityService().checkCurrentUserUpdatePermission(regatta);
-
             final JSONObject requestObject;
             try {
                 Object requestBody = JSONValue.parseWithException(jsonBody);
@@ -316,48 +318,41 @@ public class RegattasResource extends AbstractSailingServerResource {
                 return Response.status(Status.BAD_REQUEST).entity("Invalid JSON body in request")
                         .type(MediaType.TEXT_PLAIN).build();
             }
-
             final Number startTimePointAsMillis = (Number) requestObject.get("startTimePointAsMillis");
             final TimePoint startTimePoint = startTimePointAsMillis == null ? null
                     : new MillisecondsTimePoint(startTimePointAsMillis.longValue());
             final Number endTimePointAsMillis = (Number) requestObject.get("endTimePointAsMillis");
             final TimePoint endTimePoint = endTimePointAsMillis == null ? null
                     : new MillisecondsTimePoint(endTimePointAsMillis.longValue());
-
             final String defaultCourseAreaUuidString = (String) requestObject.get("defaultCourseAreaUuid");
             final UUID defaultCourseAreaUuid = defaultCourseAreaUuidString == null ? null
                     : UUID.fromString(defaultCourseAreaUuidString);
-
             final Number buoyZoneRadiusInHullLengthsNumber = (Number) requestObject.get("buoyZoneRadiusInHullLengths");
             final Double buoyZoneRadiusInHullLengths = buoyZoneRadiusInHullLengthsNumber == null ? null
                     : buoyZoneRadiusInHullLengthsNumber.doubleValue();
             final boolean useStartTimeInference = Boolean.TRUE.equals(requestObject.get("useStartTimeInference"));
             final boolean controlTrackingFromStartAndFinishTimes = Boolean.TRUE
                     .equals(requestObject.get("controlTrackingFromStartAndFinishTimes"));
-
+            final boolean autoRestartTrackingUponCompetitorSetChange = Boolean.TRUE.equals(requestObject.get("autoRestartTrackingUponCompetitorSetChange"));
             String registrationLinkSecret = (String) requestObject.get("registrationLinkSecret");
             if (registrationLinkSecret == null) {
                 registrationLinkSecret = regatta.getRegistrationLinkSecret();
             }
-
             final String competitorRegistrationTypeString = (String) requestObject.get("competitorRegistrationType");
             final CompetitorRegistrationType competitorRegistrationType = competitorRegistrationTypeString == null
                     ? regatta.getCompetitorRegistrationType()
                     : CompetitorRegistrationType.valueOf(competitorRegistrationTypeString);
-
             getService().apply(new UpdateSpecificRegatta(new RegattaName(regattaName), startTimePoint, endTimePoint,
                     defaultCourseAreaUuid,
                     /* TODO updating the configuration is currently not supported */ regatta.getRegattaConfiguration(),
                     buoyZoneRadiusInHullLengths, useStartTimeInference, controlTrackingFromStartAndFinishTimes,
-                    registrationLinkSecret, competitorRegistrationType));
-
+                    autoRestartTrackingUponCompetitorSetChange, registrationLinkSecret, competitorRegistrationType));
             SeriesJsonSerializer seriesJsonSerializer = new SeriesJsonSerializer(
                     new FleetJsonSerializer(new ColorJsonSerializer()));
             JsonSerializer<Regatta> regattaSerializer = new RegattaJsonSerializer(seriesJsonSerializer, null, null,
                     getSecurityService());
             JSONObject serializedRegatta = regattaSerializer.serialize(regatta);
-            String json = serializedRegatta.toJSONString();
-            response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+            response = Response.ok(streamingOutput(serializedRegatta)).build();
         }
         return response;
     }
@@ -385,8 +380,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                     new PersonJsonSerializer(nationalityJsonSerializer)), boatJsonSerializer, /* serializeNonPublicFields */ false);
             JsonSerializer<Regatta> regattaSerializer = new RegattaJsonSerializer(null, competitorJsonSerializer, boatJsonSerializer, getSecurityService());
             JSONObject serializedRegatta = regattaSerializer.serialize(regatta);
-            String json = serializedRegatta.toJSONString();
-            response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+            response = Response.ok(streamingOutput(serializedRegatta)).build();
         }
         return response;
     }
@@ -414,8 +408,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             } else {
                 JsonSerializer<RaceDefinition> raceEntriesSerializer = new RaceEntriesJsonSerializer(getSecurityService());
                 JSONObject serializedRaceEntries = raceEntriesSerializer.serialize(race);
-                String json = serializedRaceEntries.toJSONString();
-                response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+                response = Response.ok(streamingOutput(serializedRaceEntries)).build();
             }
         }
         return response;
@@ -638,7 +631,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 }
             }
             regatta.registerCompetitor(competitor);
-            response = Response.ok(CompetitorJsonSerializer.create().serialize(competitor).toJSONString())
+            response = Response.ok(streamingOutput(CompetitorJsonSerializer.create().serialize(competitor)))
                     .header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
             if (checkInCompetitor) {
                 final DeviceIdentifier device = new SmartphoneUUIDIdentifierImpl(UUID.fromString(deviceUuid));
@@ -651,7 +644,6 @@ public class RegattasResource extends AbstractSailingServerResource {
         } else {
             response = getBadRegattaRegistrationTypeErrorResponse(regattaName);
         }
-
         return response;
     }
 
@@ -826,7 +818,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 response = getBadRaceErrorResponse(regattaName, raceName);
             } else {
                 TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
-
+                getSecurityService().checkCurrentUserExplicitPermissions(trackedRace, SecuredDomainType.TrackedRaceActions.EXPORT);
                 TimePoint from;
                 TimePoint to;
                 try {
@@ -844,7 +836,6 @@ public class RegattasResource extends AbstractSailingServerResource {
                     return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Could not parse the 'to' time.")
                             .type(MediaType.TEXT_PLAIN).build();
                 }
-
                 JSONObject jsonRace = new JSONObject();
                 jsonRace.put("name", trackedRace.getRace().getName());
                 jsonRace.put("regatta", regatta.getName());
@@ -915,11 +906,8 @@ public class RegattasResource extends AbstractSailingServerResource {
                                     }
                                     if (earlierFix != null && (fix == null || earlierFix.getTimePoint().until(from)
                                             .compareTo(to.until(fix.getTimePoint())) <= 0)) {
-                                        addCompetitorFixToJsonFixes(jsonFixes, earlierFix, tack); // the earlier fix is
-                                                                                                  // closer to the
-                                                                                                  // interval's
-                                                                                                  // beginning than fix
-                                                                                                  // is to its end
+                                        // the earlier fix is closer to the interval's beginning than fix is to its end
+                                        addCompetitorFixToJsonFixes(jsonFixes, earlierFix, tack);
                                     } else if (fix != null) {
                                         addCompetitorFixToJsonFixes(jsonFixes, fix, tack);
                                     }
@@ -933,9 +921,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                     }
                 }
                 jsonRace.put("competitors", jsonCompetitors);
-
-                String json = jsonRace.toJSONString();
-                response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+                response = Response.ok((StreamingOutput) (OutputStream output)->jsonRace.writeJSONString(new BufferedWriter(new OutputStreamWriter(output)))).build();
             }
         }
         return response;
@@ -983,6 +969,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             return getBadRaceErrorResponse(regattaName, raceName);
         }
         TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
+        getSecurityService().checkCurrentUserExplicitPermissions(trackedRace, SecuredDomainType.TrackedRaceActions.EXPORT);
         TimePoint from;
         TimePoint to;
         try {
@@ -1058,8 +1045,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             jsonMarks.add(jsonMark);
         }
         jsonRace.put("marks", jsonMarks);
-        String json = jsonRace.toJSONString();
-        return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+        return Response.ok(streamingOutput(jsonRace)).build();
     }
 
     private JSONObject addMarkFixToJsonFixes(JSONArray jsonFixes, GPSFix fix) {
@@ -1164,8 +1150,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             final LineDetails startLineDetails = optionalTrackedRace.getStartLine(timePointForStartLine);
             jsonCourse = new CourseBaseWithGeometryJsonSerializer(waypointSerializer).serialize(new Triple<>(course, geometry, startLineDetails));
         }
-        String json = jsonCourse.toJSONString();
-        response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+        response = Response.ok(streamingOutput(jsonCourse)).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
         return response;
     }
     
@@ -1253,8 +1238,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                         targetTime = trackedRace.getEstimatedTimeToComplete(timePoint);
                         final TargetTimeInfoSerializer serializer = new TargetTimeInfoSerializer(new WindJsonSerializer(new PositionJsonSerializer()));
                         JSONObject jsonCourse = serializer.serialize(targetTime);
-                        String json = jsonCourse.toJSONString();
-                        response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+                        response = Response.ok(streamingOutput(jsonCourse)).build();
                     } catch (NotEnoughDataHasBeenAddedException | NoWindException e) {
                         response = getNotEnoughDataAvailabeErrorResponse(regattaName, raceName);
                     }
@@ -1318,8 +1302,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             } else {
                 try {
                     JSONObject jsonStartAnalysis = getStartAnalysis(trackedRace, regatta);
-                    String json = jsonStartAnalysis.toJSONString();
-                    response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+                    response = Response.ok(streamingOutput(jsonStartAnalysis)).build();
                 } catch (NoWindException | InterruptedException | ExecutionException e) {
                     response = Response.status(Status.INTERNAL_SERVER_ERROR)
                             .entity("Error computing start analysis for race '" + StringEscapeUtils.escapeHtml(raceName) + "' in regatta '" + StringEscapeUtils.escapeHtml(regattaName) + "': "+
@@ -1418,10 +1401,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 response = getBadRaceErrorResponse(regattaName, raceName);
             } else {
                 JSONObject jsonRaceTimes = getRaceTimesJSONForRaceName(raceName, regatta);
-
-                String json = jsonRaceTimes.toJSONString();
-                response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8")
-                        .build();
+                response = Response.ok(streamingOutput(jsonRaceTimes)).build();
             }
         }
         return response;
@@ -1562,8 +1542,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
                 RaceWindJsonSerializer serializer = new RaceWindJsonSerializer();
                 JSONObject jsonWindTracks = serializer.serialize(trackedRace);
-                String json = jsonWindTracks.toJSONString();
-                return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+                return Response.ok(streamingOutput(jsonWindTracks)).build();
             }
         }
         return response;
@@ -1598,6 +1577,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                             .type(MediaType.TEXT_PLAIN).build();
                 } else {
                     TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
+                    getSecurityService().checkCurrentUserExplicitPermissions(trackedRace, SecuredDomainType.TrackedRaceActions.EXPORT);
                     TimePoint from;
                     TimePoint to;
                     try {
@@ -1625,8 +1605,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                             windSource, windSourceId);
 
                     JSONObject jsonWindTracks = serializer.serialize(trackedRace);
-                    String json = jsonWindTracks.toJSONString();
-                    response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+                    response = Response.ok(streamingOutput(jsonWindTracks)).build();
                 }
             }
         }
@@ -1734,8 +1713,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 BearingJsonSerializer serializer = new BearingJsonSerializer();
                 JSONObject jsonBearing = serializer.serialize(trackedRace.getDirectionFromStartToNextMark(timePoint)
                         .getFrom());
-                String json = jsonBearing.toJSONString();
-                return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+                return Response.ok(streamingOutput(jsonBearing)).build();
             }
         }
         return response;
@@ -1763,8 +1741,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 getSecurityService().checkCurrentUserReadPermission(trackedRace);
                 AbstractTrackedRaceDataJsonSerializer serializer = new MarkPassingsJsonSerializer(/* use now-livedelay as time point for mark ranks */ null);
                 JSONObject jsonMarkPassings = serializer.serialize(trackedRace);
-                String json = jsonMarkPassings.toJSONString();
-                return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+                return Response.ok(streamingOutput(jsonMarkPassings)).build();
             }
         }
         return response;
@@ -1838,8 +1815,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                     ManeuversJsonSerializer serializer = new ManeuversJsonSerializer(
                             new ManeuverJsonSerializer(new GPSFixJsonSerializer(), new DistanceJsonSerializer()));
                     JSONObject jsonMarkPassings = serializer.serialize(data);
-                    String json = jsonMarkPassings.toJSONString();
-                    return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+                    return Response.ok(streamingOutput(jsonMarkPassings)).build();
                 }
             }
         }
@@ -1886,8 +1862,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                         getNullableValueFromDefault(startAfterFinishLineInSeconds),
                         getNullableValueFromDefault(endAfterFinishLineInSeconds));
                 JSONObject jsonMarkPassings = serializer.serialize(trackedRace);
-                String json = jsonMarkPassings.toJSONString();
-                return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+                return Response.ok(streamingOutput(jsonMarkPassings)).build();
             }
         }
         return response;
@@ -1932,8 +1907,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                         getNullableValueFromDefault(startAfterFinishLineInSeconds),
                         getNullableValueFromDefault(endAfterFinishLineInSeconds));
                 JSONObject jsonMarkPassings = serializer.serialize(trackedRace);
-                String json = jsonMarkPassings.toJSONString();
-                return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+                return Response.ok(streamingOutput(jsonMarkPassings)).build();
             }
         }
         return response;
@@ -1969,8 +1943,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 jsonRace.put("courseName", race.getCourse() != null ? race.getCourse().getName() : "");
                 jsonRace.put("id", race.getId().toString());
             }
-            String json = jsonRaceResults.toJSONString();
-            return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+            return Response.ok(streamingOutput(jsonRaceResults)).build();
         }
         return response;
     }
@@ -2129,8 +2102,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                     course.unlockAfterRead();
                 }
                 jsonRaceResults.put("legs", jsonLegs);
-                String json = jsonRaceResults.toJSONString();
-                return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+                return Response.ok(streamingOutput(jsonRaceResults)).build();
             }
         }
         return response;
@@ -2264,8 +2236,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                     }
                 }
                 jsonLiveData.put("competitors", jsonCompetitors);
-                String json = jsonLiveData.toJSONString();
-                return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+                return Response.ok(streamingOutput(jsonLiveData)).build();
             }
         }
         return response;
@@ -2679,8 +2650,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                             + item.getId() + "; type: " + item.getClass().getName());
                 }
             });
-            return Response.ok(result.toJSONString())
-                    .header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+            return Response.ok(streamingOutput(result)).build();
         } else {
             throw new IllegalStateException("Regatta named " + regattaName + " could not be resolved");
         }

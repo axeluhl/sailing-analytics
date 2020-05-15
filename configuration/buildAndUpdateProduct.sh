@@ -27,6 +27,15 @@ find_project_home ()
     echo $(correct_file_path  "$1")
 }
 
+clean_gwt_artifacts ()
+{
+    cd $PROJECT_HOME/java
+    rm -rf com.sap.$PROJECT_TYPE.gwt.ui/com.sap.$PROJECT_TYPE.* com.sap.$PROJECT_TYPE.gwt.ui/.generated
+    rm -rf com.sap.sailing.dashboards.gwt/com.sap.sailing.dashboards.gwt.* com.sap.sailing.dashboards.gwt/.generated
+    rm -rf com.sap.sse.security.ui/com.sap.sse.security.ui.* com.sap.sse.security.ui/.generated
+    rm -rf com.sap.sse.gwt/com.sap.sse.gwt.* com.sap.sse.gwt/.generated
+}
+
 # this holds for default installation
 USER_HOME=~
 START_DIR="`pwd`"
@@ -207,10 +216,7 @@ if [[ "$@" == "clean" ]]; then
     if [[ $? != 0 ]]; then
         exit 100
     fi
-    cd $PROJECT_HOME/java
-    rm -rf com.sap.$PROJECT_TYPE.gwt.ui/com.sap.$PROJECT_TYPE.*
-    rm -rf com.sap.sailing.dashboards.gwt/com.sap.sailing.dashboards.gwt.*
-    rm -rf com.sap.sse.security.ui/com.sap.sse.security.ui.*
+    clean_gwt_artifacts
     cd $PROJECT_HOME
     echo "Using following command: mvn $extra -DargLine=\"$APP_PARAMETERS\" -fae -s $MAVEN_SETTINGS $clean"
     echo "Maven version used: `mvn --version`"
@@ -559,27 +565,26 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	cd $PROJECT_HOME/java
 	if [ $gwtcompile -eq 1 ] && [[ "$clean" == "clean" ]]; then
 	    echo "INFO: Compiling GWT (rm -rf com.sap.$PROJECT_TYPE.gwt.ui/com.sap.$PROJECT_TYPE.*)"
-	    rm -rf com.sap.$PROJECT_TYPE.gwt.ui/com.sap.$PROJECT_TYPE.*
-        GWT_XML_FILES=`find . -name '*.gwt.xml'`
-        if [ $onegwtpermutationonly -eq 1 ]; then
-            echo "INFO: Patching .gwt.xml files such that only one GWT permutation needs to be compiled"
-            for i in $GWT_XML_FILES; do
-                echo "INFO: Patching $i files such that only one GWT permutation needs to be compiled"
-                cp $i $i.bak
-                cat $i | sed -e 's/AllPermutations/SinglePermutation/' >$i.sed
-                mv $i.sed $i                
-            done
-        else
-            echo "INFO: Patching .gwt.xml files such that all GWT permutations are compiled"
-            for i in $GWT_XML_FILES; do
-                echo "INFO: Patching $i files such that all GWT permutations are compiled"
-                cp $i $i.bak
-                cat $i | sed -e 's/SinglePermutation/AllPermutations/' >$i.sed
-                mv $i.sed $i
-                
-            done
-        fi
-
+	    clean_gwt_artifacts
+	    GWT_XML_FILES=`find . -name '*.gwt.xml'`
+	    if [ $onegwtpermutationonly -eq 1 ]; then
+		echo "INFO: Patching .gwt.xml files such that only one GWT permutation needs to be compiled"
+		for i in $GWT_XML_FILES; do
+		    echo "INFO: Patching $i files such that only one GWT permutation needs to be compiled"
+		    cp $i $i.bak
+		    cat $i | sed -e 's/AllPermutations/SinglePermutation/' >$i.sed
+		    mv $i.sed $i                
+		done
+	    else
+		echo "INFO: Patching .gwt.xml files such that all GWT permutations are compiled"
+		for i in $GWT_XML_FILES; do
+		    echo "INFO: Patching $i files such that all GWT permutations are compiled"
+		    cp $i $i.bak
+		    cat $i | sed -e 's/SinglePermutation/AllPermutations/' >$i.sed
+		    mv $i.sed $i
+		    
+		done
+	    fi
 	else
 	    echo "INFO: GWT Compilation disabled"
 	    extra="$extra -Pdebug.no-gwt-compile"
