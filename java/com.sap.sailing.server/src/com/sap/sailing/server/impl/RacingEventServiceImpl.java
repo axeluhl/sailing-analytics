@@ -185,8 +185,6 @@ import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
-import com.sap.sailing.domain.ranking.RankingMetric.CompetitorRankingInfo;
-import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
@@ -295,7 +293,6 @@ import com.sap.sailing.server.util.EventUtil;
 import com.sap.sailing.shared.server.SharedSailingData;
 import com.sap.sse.MasterDataImportClassLoaderService;
 import com.sap.sse.ServerInfo;
-import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.PairingListCreationException;
 import com.sap.sse.common.Renamable;
@@ -3108,8 +3105,15 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         mongoObjectFactory.removeLeaderboardGroup(groupName);
     }
 
-    @Override
-    public void renameLeaderboardGroup(String oldName, String newName) {
+    /**
+     * Renames the group with the name <code>oldName</code> to the <code>newName</code>.<br />
+     * If there's no group with the name <code>oldName</code> or there's already a group with the name
+     * <code>newName</code> a {@link IllegalArgumentException} is thrown.
+     * 
+     * @param oldName The old name of the group
+     * @param newName The new name of the group
+     */
+    private void renameLeaderboardGroup(String oldName, String newName) {
         LockUtil.lockForWrite(leaderboardGroupsByNameLock);
         try {
             final LeaderboardGroup toRename = leaderboardGroupsByName.get(oldName);
@@ -4379,22 +4383,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
     }
     
-    @Override
-    public Iterable<Competitor> getCompetitorInOrderOfWindwardDistanceTraveledFarthestFirst(TrackedRace trackedRace, TimePoint timePoint) {
-        final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(timePoint);
-        final List<Competitor> result = new ArrayList<>();
-        final Map<Competitor, Distance> windwardDistanceSailedPerCompetitor = new HashMap<>();
-        for (final Competitor competitor : trackedRace.getRace().getCompetitors()) {
-            result.add(competitor);
-            final CompetitorRankingInfo competitorRankingInfo = rankingInfo.getCompetitorRankingInfo().apply(competitor);
-            windwardDistanceSailedPerCompetitor.put(competitor, competitorRankingInfo == null ? null : competitorRankingInfo.getWindwardDistanceSailed());
-        }
-        final Comparator<Distance> durationComparatorNullsLast = Comparator.nullsLast(Comparator.naturalOrder());
-        result.sort((c1, c2) -> durationComparatorNullsLast.compare(windwardDistanceSailedPerCompetitor.get(c2),
-                                windwardDistanceSailedPerCompetitor.get(c1)));
-        return result;
-    }
-
     /**
      * A {@link SimpleRaceLogIdentifier} in particular has a {@link SimpleRaceLogIdentifier#getRegattaLikeParentName()}
      * which identifies either a regatta by name or a flexible leaderboard by name. Here is why this can luckily be
@@ -4738,21 +4726,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public Pair<Integer, AnniversaryType> getNextAnniversary() {
         return anniversaryRaceDeterminator.getNextAnniversary();
-    }
-
-    @Override
-    public Triple<Integer, DetailedRaceInfo, AnniversaryType> getLastAnniversary() {
-        Map<Integer, Pair<DetailedRaceInfo, AnniversaryType>> allAnniversaries = anniversaryRaceDeterminator
-                .getKnownAnniversaries();
-        Triple<Integer, DetailedRaceInfo, AnniversaryType> lastAnniversary = null;
-        if (!allAnniversaries.isEmpty()) {
-            ArrayList<Integer> list = new ArrayList<>(allAnniversaries.keySet());
-            list.sort(Integer::compare);
-            Integer anniversary = list.get(list.size() - 1);
-            Pair<DetailedRaceInfo, AnniversaryType> info = allAnniversaries.get(anniversary);
-            lastAnniversary = new Triple<>(anniversary, info.getA(), info.getB());
-        }
-        return lastAnniversary;
     }
 
     @Override

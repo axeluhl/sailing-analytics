@@ -315,16 +315,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     void removeLeaderboardGroup(String groupName);
 
     /**
-     * Renames the group with the name <code>oldName</code> to the <code>newName</code>.<br />
-     * If there's no group with the name <code>oldName</code> or there's already a group with the name
-     * <code>newName</code> a {@link IllegalArgumentException} is thrown.
-     * 
-     * @param oldName The old name of the group
-     * @param newName The new name of the group
-     */
-    void renameLeaderboardGroup(String oldName, String newName);
-
-    /**
      * Updates the group data in the persistant store.
      */
     void updateStoredLeaderboardGroup(LeaderboardGroup leaderboardGroup);
@@ -736,8 +726,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     ClassLoader getCombinedMasterDataClassLoader();
 
-    Iterable<Competitor> getCompetitorInOrderOfWindwardDistanceTraveledFarthestFirst(TrackedRace trackedRace, TimePoint timePoint);
-
     /**
      * Gets the {@link RaceTracker} associated with a given {@link RegattaAndRaceIdentifier}. If the {@link RaceTracker}
      * is already available, the {@code callback} is invoked immediately. If the {@link RaceTracker} isn't available
@@ -847,15 +835,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     Map<Integer, Pair<DetailedRaceInfo, AnniversaryType>> getKnownAnniversaries();
 
-    /**
-     * Provides the number, {@link DetailedRaceInfo race} and {@link AnniversaryType type} information for the latest
-     * anniversary race.
-     * 
-     * @return {@link Triple} containing the last anniversary number, {@link DetailedRaceInfo race} and
-     *         {@link AnniversaryType type}, or <code>null</code> if there's no anniversary so far
-     */
-    Triple<Integer, DetailedRaceInfo, AnniversaryType> getLastAnniversary();
-    
     /**
      * Returns the {@link AnniversaryRaceDeterminator} used by this service. This is needed for replication for
      * anniversary races only.

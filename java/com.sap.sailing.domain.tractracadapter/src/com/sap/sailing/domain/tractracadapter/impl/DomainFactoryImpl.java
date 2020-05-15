@@ -112,7 +112,6 @@ import com.tractrac.model.lib.api.event.IEvent;
 import com.tractrac.model.lib.api.event.IRace;
 import com.tractrac.model.lib.api.event.IRaceCompetitor;
 import com.tractrac.model.lib.api.route.IControl;
-import com.tractrac.model.lib.api.route.IControlPoint;
 import com.tractrac.subscription.lib.api.IEventSubscriber;
 import com.tractrac.subscription.lib.api.IRaceSubscriber;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;
@@ -703,15 +702,6 @@ public class DomainFactoryImpl implements DomainFactory {
         }
     }
 
-    @Override
-    public Iterable<IControlPoint> getControlPointsForCourseArea(IEvent tracTracEvent, String tracTracCourseAreaName) {
-    	final Set<IControlPoint> result = new HashSet<>();
-    	for (final IControl control : getControlsForCourseArea(tracTracEvent, tracTracCourseAreaName)) {
-    	    result.addAll(control.getControlPoints());
-    	}
-    	return result;
-    }
-    
     @Override
     public Iterable<IControl> getControlsForCourseArea(IEvent tracTracEvent, String tracTracCourseAreaName) {
         final Set<IControl> result = new HashSet<>();
