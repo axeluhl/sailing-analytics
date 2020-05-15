@@ -100,12 +100,12 @@ spec:
           value: 'com.sap.sailing.server.impl.RacingEventServiceImpl,com.sap.sse.security.impl.SecurityServiceImpl,com.sap.sse.filestorage.impl.FileStorageManagementServiceImpl,com.sap.sse.mail.impl.MailServiceImpl,com.sap.sailing.polars.impl.PolarDataServiceImpl,com.sap.sailing.domain.racelogtracking.impl.fixtracker.RegattaLogFixTrackerRegattaListener,com.sap.sailing.windestimation.integration.WindEstimationFactoryServiceImpl'
         - name: REPLICATE_MASTER_EXCHANGE_NAME
           value: sailing-test-master
-#        - name: REPLICATE_MASTER_USERNAME
-#          value: admin
-#        - name: REPLICATE_MASTER_PASSWORD
-#          value: admin
-        - name: REPLICATE_MASTER_BEARER_TOKEN
-          value: 'OdhJu40cKJ3swVcqBLauUYT7cQWKKulPARFREGGAhsQ='
+        - name: REPLICATE_MASTER_USERNAME
+          value: admin
+        - name: REPLICATE_MASTER_PASSWORD
+          value: admin
+#        - name: REPLICATE_MASTER_BEARER_TOKEN
+#          value: 'OdhJu40cKJ3swVcqBLauUYT7cQWKKulPARFREGGAhsQ='
         livenessProbe:
           httpGet:
             path: /
