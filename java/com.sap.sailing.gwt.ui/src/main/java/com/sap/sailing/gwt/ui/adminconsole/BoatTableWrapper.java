@@ -169,7 +169,6 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
         };
         filterField.setUpdatePermissionFilterForCheckbox(boat -> userService.hasPermission(boat, DefaultActions.UPDATE));
         registerSelectionModelOnNewDataProvider(filterField.getAllListDataProvider());
-        
         // BoatTable edit features
         final HasPermissions type = SecuredDomainType.BOAT;
         AccessControlledActionsColumn<BoatDTO, BoatConfigImagesBarCell> boatActionColumn = create(
@@ -178,15 +177,13 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
                 this::openEditBoatDialog);
         boatActionColumn.addAction(BoatConfigImagesBarCell.ACTION_REFRESH, this::allowUpdate);
         final DialogConfig<BoatDTO> editOwnerShipDialog = EditOwnershipDialog.create(
-                userService.getUserManagementService(), SecuredDomainType.BOAT, null, stringMessages);
+                userService.getUserManagementService(), SecuredDomainType.BOAT, boatDTO -> refresh(Collections.singleton(boatDTO)), stringMessages);
         boatActionColumn.addAction(BoatConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
                 editOwnerShipDialog::openOwnershipDialog);
-
         final EditACLDialog.DialogConfig<BoatDTO> configACL = EditACLDialog
                 .create(userService.getUserManagementService(), type, null, stringMessages);
         boatActionColumn.addAction(BoatConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 configACL::openACLDialog);
-
         mainPanel.insert(filterField, 0);
         table.addColumnSortHandler(boatColumnListHandler);
         table.addColumn(boatNameColumn, stringMessages.name());

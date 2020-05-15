@@ -293,29 +293,22 @@ public class CourseTemplatePanel extends FlowPanel {
                 return Integer.toString(courseTemplate.getWaypointTemplates().size());
             }
         };
-
         nameColumn.setSortable(true);
         sortHandler.setComparator(nameColumn, new Comparator<CourseTemplateDTO>() {
             public int compare(CourseTemplateDTO courseTemplate1, CourseTemplateDTO courseTemplate2) {
                 return courseTemplate1.getName().compareTo(courseTemplate2.getName());
             }
         });
-
         courseTemplateTable.addColumn(nameColumn, stringMessages.name());
         courseTemplateTable.addColumn(urlColumn, stringMessages.url());
         courseTemplateTable.addColumn(tagsColumn, stringMessages.tags());
         courseTemplateTable.addColumn(waypointTemplateCountColumn, stringMessages.waypoints());
-
         SecuredDTOOwnerColumn.configureOwnerColumns(courseTemplateTable, sortHandler, stringMessages);
-
         final HasPermissions type = SecuredDomainType.COURSE_TEMPLATE;
-
         final AccessControlledActionsColumn<CourseTemplateDTO, DefaultActionsImagesBarCell> actionsColumn = create(
                 new DefaultActionsImagesBarCell(stringMessages), userService);
         final EditOwnershipDialog.DialogConfig<CourseTemplateDTO> configOwnership = EditOwnershipDialog
-                .create(userService.getUserManagementService(), type, courseTemplate -> {
-                    /* no refresh action */}, stringMessages);
-
+                .create(userService.getUserManagementService(), type, courseTemplate -> refreshCourseTemplates(), stringMessages);
         final EditACLDialog.DialogConfig<CourseTemplateDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementService(), type, courseTemplate -> courseTemplate.getAccessControlList(),
                 stringMessages);

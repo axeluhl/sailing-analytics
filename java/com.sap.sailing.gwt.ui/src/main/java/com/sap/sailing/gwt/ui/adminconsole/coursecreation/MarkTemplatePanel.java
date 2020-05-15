@@ -264,31 +264,24 @@ public class MarkTemplatePanel extends FlowPanel {
                         : "";
             }
         };
-
         nameColumn.setSortable(true);
         sortHandler.setComparator(nameColumn, new Comparator<MarkTemplateDTO>() {
             public int compare(MarkTemplateDTO markTemplate1, MarkTemplateDTO markTemplate2) {
                 return markTemplate1.getName().compareTo(markTemplate2.getName());
             }
         });
-
         markTemplateTable.addColumn(nameColumn, stringMessages.name());
         markTemplateTable.addColumn(shortNameColumn, stringMessages.shortName());
         markTemplateTable.addColumn(colorColumn, stringMessages.color());
         markTemplateTable.addColumn(shapeColumn, stringMessages.shape());
         markTemplateTable.addColumn(patternColumn, stringMessages.pattern());
         markTemplateTable.addColumn(typeColumn, stringMessages.type());
-
         SecuredDTOOwnerColumn.configureOwnerColumns(markTemplateTable, sortHandler, stringMessages);
-
         final HasPermissions type = SecuredDomainType.MARK_TEMPLATE;
-
         final AccessControlledActionsColumn<MarkTemplateDTO, DefaultActionsImagesBarCell> actionsColumn = create(
                 new DefaultActionsImagesBarCell(stringMessages), userService);
         final EditOwnershipDialog.DialogConfig<MarkTemplateDTO> configOwnership = EditOwnershipDialog
-                .create(userService.getUserManagementService(), type, markTemplate -> {
-                    refreshMarkTemplates();}, stringMessages);
-
+                .create(userService.getUserManagementService(), type, markTemplate -> refreshMarkTemplates(), stringMessages);
         final EditACLDialog.DialogConfig<MarkTemplateDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementService(), type, markTemplate -> markTemplate.getAccessControlList(),
                 stringMessages);
@@ -297,7 +290,6 @@ public class MarkTemplatePanel extends FlowPanel {
                 markTemplate -> configACL.openACLDialog(markTemplate));
         markTemplateTable.addColumn(idColumn, stringMessages.id());
         markTemplateTable.addColumn(actionsColumn, stringMessages.actions());
-
     }
 
     public void refreshMarkTemplates() {
