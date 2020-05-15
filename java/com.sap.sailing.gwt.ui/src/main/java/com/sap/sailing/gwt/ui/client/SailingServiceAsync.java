@@ -12,10 +12,8 @@ import java.util.UUID;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.CompetitorDescriptor;
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.LegIdentifier;
 import com.sap.sailing.domain.common.MailInvitationType;
-import com.sap.sailing.domain.common.PolarSheetsXYDiagramData;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
@@ -46,7 +44,6 @@ import com.sap.sailing.domain.common.windfinder.SpotDTO;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
 import com.sap.sailing.gwt.ui.client.shared.charts.MarkPositionService.MarkTrackDTO;
-import com.sap.sailing.gwt.ui.client.shared.charts.MarkPositionService.MarkTracksDTO;
 import com.sap.sailing.gwt.ui.shared.AccountWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.CompactBoatPositionsDTO;
 import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
@@ -116,8 +113,6 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
 
     void getRegattas(AsyncCallback<List<RegattaDTO>> callback);
 
-    void getRegattasWithUpdatePermission(AsyncCallback<List<RegattaDTO>> callback);
-
     void getRegattaByName(String regattaName, AsyncCallback<RegattaDTO> asyncCallback);
 
     /**
@@ -151,15 +146,6 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
      */
     void getAveragedWindInfo(RegattaAndRaceIdentifier raceIdentifier, Date from, Date to,
             long resolutionInMilliseconds, Collection<String> windSourceTypeNames, boolean onlyUpToNewestEvent,
-            AsyncCallback<WindInfoForRaceDTO> callback);
-
-    /**
-     * @param windSourceTypeNames
-     *            if <code>null</code>, data from all available wind sources will be returned, otherwise only from those
-     *            whose {@link WindSource} name is contained in the <code>windSources</code> collection.
-     */
-    void getAveragedWindInfo(RegattaAndRaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth,
-            int numberOfFixes, double latDeg, double lngDeg, Collection<String> windSourceTypeNames,
             AsyncCallback<WindInfoForRaceDTO> callback);
 
     /**
@@ -212,8 +198,6 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
 
     void getLeaderboardsWithSecurity(AsyncCallback<List<StrippedLeaderboardDTOWithSecurity>> callback);
 
-    void getLeaderboardsByRaceAndRegatta(String raceName, RegattaIdentifier regattaIdentifier,
-            AsyncCallback<List<StrippedLeaderboardDTO>> callback);
     /**
      * The key set of the map returned contains all fleets of the race column identified by the combination of
      * <code>leaderboardName</code> and <code>raceColumnName</code>. If a value is <code>null</code>, there is no
@@ -227,8 +211,6 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
     void getPreviousSwissTimingConfigurations(AsyncCallback<List<SwissTimingConfigurationWithSecurityDTO>> asyncCallback);
 
     void getRacesOfSwissTimingEvent(String eventJsonUrl, AsyncCallback<SwissTimingEventRecordDTO> asyncCallback);
-
-    void getCountryCodes(AsyncCallback<String[]> callback);
 
     void getDouglasPoints(RegattaAndRaceIdentifier raceIdentifier, Map<CompetitorDTO, TimeRange> competitorTimeRanges,
             double meters, AsyncCallback<Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>>> callback);
@@ -341,17 +323,11 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
     void getLeaderboardsNamesOfMetaLeaderboard(String metaLeaderboardName,
             AsyncCallback<List<Util.Pair<String, String>>> callback);
 
-    void getLeaderboardType(String leaderboardName, AsyncCallback<LeaderboardType> callback);
-
     void getRegattaStructureForEvent(UUID eventId, AsyncCallback<List<RaceGroupDTO>> asyncCallback);
 
     void getRaceStateEntriesForRaceGroup(UUID eventId, List<UUID> visibleCourseAreas, List<String> visibleRegattas,
             boolean showOnlyCurrentlyRunningRaces, boolean showOnlyRacesOfSameDay,
             Duration clientTimeZoneOffset, AsyncCallback<List<RegattaOverviewEntryDTO>> markedAsyncCallback);
-
-    void getRaceStateEntriesForLeaderboard(String leaderboardName, boolean showOnlyCurrentlyRunningRaces,
-            boolean showOnlyRacesOfSameDay, Duration clientTimeZoneOffset, List<String> visibleRegattas,
-            AsyncCallback<List<RegattaOverviewEntryDTO>> callback);
 
     void reloadRaceLog(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet,
             AsyncCallback<Void> asyncCallback);
@@ -360,8 +336,6 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
             AsyncCallback<RaceLogDTO> callback);
 
     void getRegattaLog(String leaderboardName, AsyncCallback<RegattaLogDTO> callback);
-
-    void getStructureImportOperationProgress(AsyncCallback<Integer> asyncCallback);
 
     void getLeaderboardGroupNamesFromRemoteServer(String host, String username, String password,
             AsyncCallback<List<String>> leaderboardGroupNames);
@@ -380,8 +354,6 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
     void getBoatLinkedToCompetitorForRace(String leaderboardName, String raceColumnName, String fleetName, String competitorIdAsString, AsyncCallback<BoatDTO> asyncCallback); 
     
     void getDeviceConfigurations(AsyncCallback<List<DeviceConfigurationWithSecurityDTO>> asyncCallback);
-
-    void getDeviceConfiguration(UUID id, AsyncCallback<DeviceConfigurationDTO> callback);
 
     void createOrUpdateDeviceConfiguration(DeviceConfigurationDTO configurationDTO, AsyncCallback<Void> callback);
 
@@ -417,15 +389,7 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
     void getFinishingAndFinishTime(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<Util.Triple<Date, Date, Integer>> asyncCallback);
     
-    void getAllIgtimiAccountEmailAddresses(AsyncCallback<Iterable<String>> callback);
-
     void getIgtimiAuthorizationUrl(String redirectProtocol, String redirectHostname, String redirectPort, AsyncCallback<String> callback);
-
-    void getAllTags(String leaderboardName, String raceColumnName, String fleetName,
-            AsyncCallback<List<TagDTO>> asyncCallback);
-
-    void getPublicTags(String leaderboardName, String raceColumnName, String fleetName,
-            AsyncCallback<List<TagDTO>> asyncCallback);
 
     void getPrivateTags(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<List<TagDTO>> asyncCallback);
@@ -441,8 +405,6 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
 
     void getTrackFileImportDeviceIds(List<String> uuids,
             AsyncCallback<List<TrackFileImportDeviceIdentifierDTO>> callback);
-
-    void createXYDiagramForBoatClass(String itemText, AsyncCallback<PolarSheetsXYDiagramData> asyncCallback);
 
     void getEventsForLeaderboard(String leaderboardName, AsyncCallback<Collection<EventDTO>> callback);
 
@@ -464,8 +426,6 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
 
     void getCompetitorRaceLogMarkPassingData(String leaderboardName, String raceColumnName, String fleetName,
             CompetitorDTO competitor, AsyncCallback<Map<Integer, Date>> callback);
-
-    void getLeaderboardGroupsByEventId(UUID id, AsyncCallback<ArrayList<LeaderboardGroupDTO>> callback);
 
     void getMarksInRegattaLog(String leaderboardName, AsyncCallback<Iterable<MarkDTO>> callback);
 
@@ -502,9 +462,6 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
     void getMarksInTrackedRace(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<Iterable<MarkDTO>> callback);
 
-    void getMarkTracks(String leaderboardName, String raceColumnName, String fleetName,
-            AsyncCallback<MarkTracksDTO> callback);
-    
     void getMarkTrack(String leaderboardName, String raceColumnName, String fleetName, String markIdAsString, 
             AsyncCallback<MarkTrackDTO> callback);
     
@@ -604,11 +561,6 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
      */
     void openRegattaRegistrationQrCode(String url, AsyncCallback<String> asyncCallback);
 
-    /**
-     * gets a (possibly imcomplete) list of available tennants to choose from.
-     */
-    void getPossibleTennants(AsyncCallback<List<String>> asyncCallback);
-
     void getAllIgtimiAccountsWithSecurity(AsyncCallback<Iterable<AccountWithSecurityDTO>> callback);
 
     /**
@@ -635,14 +587,7 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
     void getCompetitor(UUID competitorId, String leaderboardName, String regattaRegistrationLinkSecret,
             AsyncCallback<CompetitorDTO> asyncCallback);
 
-    void existsSwissTimingConfigurationForCurrentUser(String jsonUrl, AsyncCallback<Boolean> callback);
-
-    void existsSwissTimingArchiveConfigurationForCurrentUser(String jsonUrl, AsyncCallback<Boolean> callback);
-
-    void existsTracTracConfigurationForCurrentUser(String jsonUrl, AsyncCallback<Boolean> callback);
-
     void getTrackedRaceIsUsingMarkPassingCalculator(RegattaAndRaceIdentifier regattaNameAndRaceName, AsyncCallback<Boolean> callback);
-
 
     void getLegGeometry(String leaderboardName, String raceColumnName, String fleetName, int[] zeroBasedLegIndices,
             ORCPerformanceCurveLegTypes[] legTypes, AsyncCallback<ORCPerformanceCurveLegImpl[]> callback);
@@ -661,10 +606,6 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
     void getORCCertificates(String json, AsyncCallback<Collection<ORCCertificate>> callback);
 
     void getORCCertificateAssignmentsByBoatIdAsString(RegattaIdentifier regattaIdentifier, AsyncCallback<Map<String, ORCCertificate>> asyncCallback);
-
-    void getORCCertificateAssignmentsByBoatIdAsString(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<Map<String, ORCCertificate>> asyncCallback);
-
-    void getORCCertificateAssignmentsByBoatIdAsString(String leaderboardName, AsyncCallback<Map<String, ORCCertificate>> asyncCallback);
 
     void getORCCertificateAssignmentsByBoatIdAsString(String leaderboardName, String raceColumnName, String fleetName, AsyncCallback<Map<String, ORCCertificate>> asyncCallback);
 
