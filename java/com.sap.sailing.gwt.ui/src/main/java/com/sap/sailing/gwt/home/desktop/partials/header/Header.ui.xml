@@ -25,10 +25,8 @@
             styleName="{local_res.css.sitenavigation_link}" text="{i18n.solutions}" />
           <g:Anchor ui:field="adminConsolePageLink"
             styleName="{local_res.css.sitenavigation_link}" text="{i18n.administration}" target="adminConsoleWindow"/>
-          <!-- 
-          <g:Anchor ui:field="sponsoringPageLink"
-            styleName="{local_res.css.sitenavigation_link}" text="{i18n.sponsoring}" />
-          -->
+          <g:Anchor ui:field="dataMiningPageLink"
+            styleName="{local_res.css.sitenavigation_link}" text="{i18n.dataMining}" target="dataMiningWindow"/>
           <!-- IF siteNavigation.current -->
           <span class="{local_res.css.search} {local_res.css.sitenavigation_search}">
             <g:TextBox ui:field="searchText" styleName="{local_res.css.search_textfield}" />

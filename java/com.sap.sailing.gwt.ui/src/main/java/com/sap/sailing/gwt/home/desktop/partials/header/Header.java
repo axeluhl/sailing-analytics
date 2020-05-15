@@ -30,6 +30,7 @@ import com.sap.sailing.gwt.home.client.place.event.legacy.EventPlace;
 import com.sap.sailing.gwt.home.client.place.event.legacy.RegattaPlace;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.partials.header.HeaderConstants;
 import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.shared.places.events.EventsPlace;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultPlace;
@@ -46,14 +47,13 @@ import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.authentication.view.AuthenticationMenuView;
 import com.sap.sse.security.ui.authentication.view.AuthenticationMenuViewImpl;
 
-public class Header extends Composite {
+public class Header extends Composite implements HeaderConstants {
     @UiField Anchor startPageLink;
     @UiField Anchor eventsPageLink;
     @UiField Anchor solutionsPageLink;
     @UiField AnchorElement logoAnchor;
     @UiField Anchor adminConsolePageLink;
-//    @UiField Anchor sponsoringPageLink;
-    
+    @UiField Anchor dataMiningPageLink;
     @UiField TextBox searchText;
     @UiField Button searchButton;
     
@@ -62,16 +62,11 @@ public class Header extends Composite {
     @UiField ImageElement logoImage;
 
     private static final HyperlinkImpl HYPERLINK_IMPL = GWT.create(HyperlinkImpl.class);
-    private static final String ADMIN_CONSOLE_PATH = "/gwt/AdminConsole.html";
-    private static final String ADMIN_CONSOLE_WINDOW = "adminConsoleWindow";
-
     private final List<Anchor> links;
     private final DesktopPlacesNavigator navigator;
-
     private final PlaceNavigation<StartPlace> homeNavigation;
     private final PlaceNavigation<EventsPlace> eventsNavigation;
     private final PlaceNavigation<SolutionsPlace> solutionsNavigation;
-    
     private final AuthenticationMenuView authenticationMenuView;
     
     interface HeaderUiBinder extends UiBinder<Widget, Header> {
@@ -83,15 +78,16 @@ public class Header extends Composite {
         this.navigator = navigator;
         HeaderResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
-        links = Arrays.asList(new Anchor[] { startPageLink, eventsPageLink, solutionsPageLink, adminConsolePageLink });
+        links = Arrays.asList(new Anchor[] { startPageLink, eventsPageLink, solutionsPageLink, adminConsolePageLink, dataMiningPageLink });
         homeNavigation = navigator.getHomeNavigation();
         eventsNavigation = navigator.getEventsNavigation();
         solutionsNavigation = navigator.getSolutionsNavigation(SolutionsNavigationTabs.SapInSailing);
         startPageLink.setHref(homeNavigation.getTargetUrl());
         eventsPageLink.setHref(eventsNavigation.getTargetUrl());
         solutionsPageLink.setHref(solutionsNavigation.getTargetUrl());
-        // make the Admin link visible only for signed-in users
+        // make the Admin and DataMining links visible only for signed-in users
         adminConsolePageLink.getElement().getStyle().setDisplay(Display.NONE);
+        dataMiningPageLink.getElement().getStyle().setDisplay(Display.NONE);
         eventBus.addHandler(AuthenticationContextEvent.TYPE, event->{
             AuthenticationContext authContext = event.getCtx();
             // make it point to the current server if the user has CREATE_OBJECT permission there
@@ -107,6 +103,13 @@ public class Header extends Composite {
                 adminConsolePageLink.getElement().getStyle().setDisplay(Display.INLINE_BLOCK);
             } else {
                 adminConsolePageLink.getElement().getStyle().setDisplay(Display.NONE);
+            }
+            if (authContext.hasServerPermission(ServerActions.DATA_MINING)) {
+                dataMiningPageLink.setHref(DATA_MINING_PATH);
+                dataMiningPageLink.setTarget(DATA_MINING_WINDOW);
+                dataMiningPageLink.getElement().getStyle().setDisplay(Display.INLINE_BLOCK);
+            } else {
+                dataMiningPageLink.getElement().getStyle().setDisplay(Display.NONE);
             }
         });
         searchText.getElement().setAttribute("placeholder", StringMessages.INSTANCE.headerSearchPlaceholder());

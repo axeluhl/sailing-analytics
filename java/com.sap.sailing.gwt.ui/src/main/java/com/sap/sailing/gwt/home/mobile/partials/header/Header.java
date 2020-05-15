@@ -22,6 +22,7 @@ import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.app.ResettableNavigationPathDisplay;
+import com.sap.sailing.gwt.home.shared.partials.header.HeaderConstants;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.home.shared.utils.DropdownHandler;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -35,10 +36,7 @@ import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 /**
  * Mobile page header with SAP logo title and a dropdown menu (burger button) on the right.
  */
-public class Header extends Composite {
-    // @UiField TextBox searchText;
-    // @UiField Button searchButton;
-    
+public class Header extends Composite implements HeaderConstants {
     @UiField HeaderResources local_res;
     @UiField DivElement dropdownTriggerUi;
     @UiField Element dropdownContainerUi;
@@ -50,9 +48,6 @@ public class Header extends Composite {
 
     @UiField
     DivElement locationTitleUi;
-
-    private static final String ADMIN_CONSOLE_PATH = "/gwt/AdminConsole.html";
-    private static final String ADMIN_CONSOLE_WINDOW = "adminConsoleWindow";
 
     private final ResettableNavigationPathDisplay navigationPathDisplay;
 
@@ -68,22 +63,18 @@ public class Header extends Composite {
     public Header(final MobilePlacesNavigator placeNavigator, final EventBus eventBus) {
         initWidget(uiBinder.createAndBindUi(this));
         local_res.css().ensureInjected();
-        
         dropdownListExtUi.getElement().getStyle().setDisplay(Display.NONE);
         navigationPathDisplay = new DropdownNavigationPathDisplay();
-        
         addNavigation(placeNavigator.getHomeNavigation(), StringMessages.INSTANCE.home());
         addNavigation(placeNavigator.getEventsNavigation(), StringMessages.INSTANCE.events());
         addNavigation(placeNavigator.getSolutionsNavigation(SolutionsNavigationTabs.SailingAnalytics),
                 StringMessages.INSTANCE.solutions());
-
         HeaderNavigationItem manageEventsNavItem = addNavigation(ADMIN_CONSOLE_PATH,
                 StringMessages.INSTANCE.administration(), ()->{});
         manageEventsNavItem.getElement().getStyle().setDisplay(Display.NONE);
         manageEventsNavItem.addClickHandler(event -> {
             Window.open(manageEventsNavItem.getHref(), manageEventsNavItem.getTarget(), null);
         });
-
         signInNavigationItem = addNavigation(com.sap.sse.security.ui.client.i18n.StringMessages.INSTANCE.signIn(), new Runnable() {
             @Override
             public void run() {
@@ -97,9 +88,7 @@ public class Header extends Composite {
                         eventBus.fireEvent(new AuthenticationSignOutRequestEvent());
             }
         });
-
         dropdownHandler = new DropdownHandler(dropdownTriggerUi, dropdownContainerUi);
-
         Event.sinkEvents(searchUi, Event.ONCLICK);
         Event.setEventListener(searchUi, new EventListener() {
             @Override
@@ -111,7 +100,6 @@ public class Header extends Composite {
                 
             }
         });
-
         eventBus.addHandler(AuthenticationContextEvent.TYPE, new AuthenticationContextEvent.Handler() {
             @Override
             public void onUserChangeEvent(AuthenticationContextEvent event) {
@@ -135,7 +123,6 @@ public class Header extends Composite {
                 }
             }
         });
-        
         if (!ClientConfiguration.getInstance().isBrandingActive()) {
             logoImage.getStyle().setDisplay(Display.NONE);
             logoAnchor.setHref("");

@@ -32,9 +32,11 @@ public class ServerInfo {
     }
     
     /**
-     * Retrieve event management base URL from server startup configuration.
+     * Retrieve event management base URL from server startup configuration. This is the default
+     * URL for a self-service server in case the user doesn't have the {@code CREATE_OBJECT} permission
+     * for the current server.
      * 
-     * @return the base URL.
+     * @return the base URL of a self service-enabled server
      * @see ServerStartupConstants#MANAGE_EVENTS_URL
      */
     public static String getManageEventsBaseUrl() {

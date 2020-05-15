@@ -985,7 +985,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String rerunQueryAfterRefresh();
     String refreshIntervalMustntBeEmpty();
     String selectionTables();
-
     String addConfiguration();
     String noConfigurations();
     String errorRetrievingConfiguration();
