@@ -128,6 +128,7 @@ import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DataImportSubProgress;
 import com.sap.sailing.domain.common.DeviceIdentifier;
+import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.Position;
@@ -1459,21 +1460,44 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public void removeLeaderboard(String leaderboardName) {
-        Leaderboard leaderboard = removeLeaderboardFromLeaderboardsByName(leaderboardName);
+        final Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
-            leaderboard.removeRaceColumnListener(raceLogReplicator);
-            leaderboard.removeRaceColumnListener(raceLogScoringReplicator);
-            final ScoreCorrectionListener scoreCorrectionListener = scoreCorrectionListenersByLeaderboard.remove(leaderboard);
-            if (scoreCorrectionListener != null) {
-                leaderboard.getScoreCorrection().removeScoreCorrectionListener(scoreCorrectionListener);
+            final Set<Leaderboard> leaderboardsToRemove = new HashSet<>();
+            leaderboardsToRemove.add(leaderboard);
+            if (leaderboard.getLeaderboardType() == LeaderboardType.RegattaLeaderboard) {
+                final Regatta regatta = ((RegattaLeaderboard) leaderboard).getRegatta();
+                for (final Leaderboard candidateForRemoval : getLeaderboards().values()) {
+                    if (candidateForRemoval != leaderboard && candidateForRemoval instanceof RegattaLeaderboard) {
+                        final Regatta candidatesRegatta = ((RegattaLeaderboard) candidateForRemoval).getRegatta();
+                        if (candidatesRegatta == regatta) {
+                            leaderboardsToRemove.add(candidateForRemoval);
+                        }
+                    }
+                }
             }
-            mongoObjectFactory.removeLeaderboard(leaderboardName);
-            syncGroupsAfterLeaderboardRemove(leaderboardName, true);
-            if (leaderboard instanceof FlexibleLeaderboard) {
-                onRegattaLikeRemoved(((FlexibleLeaderboard) leaderboard).getRegattaLike());
+            for (final Leaderboard toRemove : leaderboardsToRemove) {
+                removeSingleLeaderboardInternal(toRemove);
             }
-            leaderboard.destroy();
         }
+    }
+
+    /**
+     * Removes only {@code leaderboard} and not implicitly all other leaderboards delegating to it
+     */
+    private void removeSingleLeaderboardInternal(final Leaderboard leaderboard) {
+        removeLeaderboardFromLeaderboardsByName(leaderboard.getName());
+        leaderboard.removeRaceColumnListener(raceLogReplicator);
+        leaderboard.removeRaceColumnListener(raceLogScoringReplicator);
+        final ScoreCorrectionListener scoreCorrectionListener = scoreCorrectionListenersByLeaderboard.remove(leaderboard);
+        if (scoreCorrectionListener != null) {
+            leaderboard.getScoreCorrection().removeScoreCorrectionListener(scoreCorrectionListener);
+        }
+        mongoObjectFactory.removeLeaderboard(leaderboard.getName());
+        syncGroupsAfterLeaderboardRemove(leaderboard.getName(), true);
+        if (leaderboard instanceof FlexibleLeaderboard) {
+            onRegattaLikeRemoved(((FlexibleLeaderboard) leaderboard).getRegattaLike());
+        }
+        leaderboard.destroy();
     }
 
     private Leaderboard removeLeaderboardFromLeaderboardsByName(String leaderboardName) {
@@ -2638,17 +2662,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public void removeRegatta(Regatta regatta) throws MalformedURLException, IOException, InterruptedException {
-        Set<RegattaLeaderboard> leaderboardsToRemove = new HashSet<>();
-        for (Leaderboard leaderboard : getLeaderboards().values()) {
-            if (leaderboard instanceof RegattaLeaderboard) {
-                RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
-                if (regattaLeaderboard.getRegatta() == regatta) {
-                    leaderboardsToRemove.add(regattaLeaderboard);
-                }
-            }
-        }
-        for (RegattaLeaderboard regattaLeaderboardToRemove : leaderboardsToRemove) {
-            removeLeaderboard(regattaLeaderboardToRemove.getName());
+        final String regattaLeaderboardName = RegattaLeaderboardImpl.getLeaderboardNameForRegatta(regatta);
+        if (getLeaderboardByName(regattaLeaderboardName) != null) {
+            removeLeaderboard(regattaLeaderboardName); // removes regatta leaderboard and all that delegate to it
         }
         // avoid ConcurrentModificationException by copying the races to remove:
         Set<RaceDefinition> racesToRemove = new HashSet<>();
