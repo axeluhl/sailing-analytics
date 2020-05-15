@@ -70,7 +70,7 @@ public class Header extends Composite implements HeaderConstants {
         addNavigation(placeNavigator.getSolutionsNavigation(SolutionsNavigationTabs.SailingAnalytics),
                 StringMessages.INSTANCE.solutions());
         HeaderNavigationItem manageEventsNavItem = addNavigation(ADMIN_CONSOLE_PATH,
-                StringMessages.INSTANCE.administration(), ()->{});
+                StringMessages.INSTANCE.manageEvents(), ()->{});
         manageEventsNavItem.getElement().getStyle().setDisplay(Display.NONE);
         manageEventsNavItem.addClickHandler(event -> {
             Window.open(manageEventsNavItem.getHref(), manageEventsNavItem.getTarget(), null);
