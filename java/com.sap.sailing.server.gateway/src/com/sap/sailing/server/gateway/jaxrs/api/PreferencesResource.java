@@ -17,7 +17,6 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializationExcepti
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sse.security.SecurityService;
 
-@Deprecated
 @Path("/v1/preferences")
 public class PreferencesResource extends AbstractSailingServerResource {
     @GET

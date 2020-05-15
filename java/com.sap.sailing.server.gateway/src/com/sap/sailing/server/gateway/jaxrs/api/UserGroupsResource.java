@@ -31,7 +31,6 @@ import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 
-@Deprecated
 @Path("/v1/usergroups")
 public class UserGroupsResource extends AbstractSailingServerResource {
     @GET
