@@ -87,7 +87,6 @@ public class RemoveLeaderboardTest {
         leaderboard = server.apply(
                 new CreateFlexibleLeaderboard(LEADERBOARD_NAME, /* display name */ null, new int[0], new LowPoint(), /* default course area ID */ null));
         leaderboard.addRaceColumn(R1, /* medalRace */ false);
-        
         boatClass = new BoatClassImpl(BOATCLASSNAME, /* typicallyStartsUpwind */ true);
         regatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE,
                 RegattaImpl.getDefaultName(EVENTNAME, boatClass.getName()), boatClass, /* canBoatsOfCompetitorsChangePerRace*/ true,  CompetitorRegistrationType.CLOSED,
