@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -15,7 +16,7 @@ import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.common.Util;
@@ -42,10 +43,10 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
     private boolean actionButtonsEnabled;
 
     public TrackedRacesListComposite(Component<?> parent, ComponentContext<?> context,
-            final SailingServiceAsync sailingService, UserService userService,
+            final SailingServiceWriteAsync sailingServiceWrite, UserService userService,
             final ErrorReporter errorReporter,
             final RegattaRefresher regattaRefresher, final StringMessages stringMessages, boolean hasMultiSelection, boolean actionButtonsEnabled) {
-        super(parent, context, sailingService, errorReporter, regattaRefresher, stringMessages, hasMultiSelection, userService);
+        super(parent, context, sailingServiceWrite, errorReporter, regattaRefresher, stringMessages, hasMultiSelection, userService);
         this.raceIsTrackedRaceChangeListener = new HashSet<TrackedRaceChangedListener>();
         this.actionButtonsEnabled = actionButtonsEnabled;
         createUI();
@@ -145,7 +146,8 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
             trackedRacesButtonPanel.add(btnExport);
 
             btnRemoveRace = new SelectedElementsCountingButton<RaceDTO>(stringMessages.remove(),
-                    refreshableSelectionModel, e -> e.getRegattaName() + " - " + e.getName(),
+                    refreshableSelectionModel, /* element name mapper */ e -> e.getRegattaName() + " - " + e.getName(),
+                    StringMessages.INSTANCE::doYouReallyWantToRemoveSelectedElements,
                     (event) -> removeAndUntrackRaces(refreshableSelectionModel.getSelectedSet()));
             btnRemoveRace.ensureDebugId("RemoveRaceButton");
             trackedRacesButtonPanel.add(btnRemoveRace);
@@ -178,7 +180,6 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
                     if (!userService.hasPermission(race, SecuredDomainType.TrackedRaceActions.EXPORT)) {
                         canExportAll = false;
                     }
-
                 }
                 btnSetDelayToLive.setEnabled(canUpdateAll);
                 btnRemoveRace.setEnabled(canDeleteAll);

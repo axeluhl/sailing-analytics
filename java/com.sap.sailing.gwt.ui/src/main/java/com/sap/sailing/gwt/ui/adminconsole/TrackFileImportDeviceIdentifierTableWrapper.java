@@ -15,7 +15,7 @@ import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
 import com.sap.sailing.gwt.ui.client.MappableToDeviceFormatter;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
@@ -29,9 +29,9 @@ public class TrackFileImportDeviceIdentifierTableWrapper extends
     private TextColumn<TrackFileImportDeviceIdentifierDTO> trackNameColumn;
     private final Map<TrackFileImportDeviceIdentifierDTO, MappableToDevice> mappings = new HashMap<>();
 
-    public TrackFileImportDeviceIdentifierTableWrapper(SailingServiceAsync sailingService,
+    public TrackFileImportDeviceIdentifierTableWrapper(SailingServiceWriteAsync sailingServiceWrite,
             StringMessages stringMessages, ErrorReporter errorReporter) {
-        super(sailingService, stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true,
+        super(sailingServiceWrite, stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true,
                 new EntityIdentityComparator<TrackFileImportDeviceIdentifierDTO>() {
                     @Override
                     public boolean representSameEntity(TrackFileImportDeviceIdentifierDTO dto1,

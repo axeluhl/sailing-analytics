@@ -28,7 +28,7 @@ public class CompetitorRaceRankFilter extends AbstractNumberFilter<CompetitorDTO
      * An optional quick rank provider; if <code>null</code>, a more expensive algorithm based on the {@link #selectedRace}
      * and the leaderboard that can be obtained through the {@link #leaderboardFetcher} needs to be employed to obtain the rank.
      */
-    private QuickRankProvider quickRankProvider;
+    private QuickFlagDataValuesProvider quickRankProvider;
 
     public CompetitorRaceRankFilter() {
     }
@@ -170,7 +170,7 @@ public class CompetitorRaceRankFilter extends AbstractNumberFilter<CompetitorDTO
     }
 
     @Override
-    public void setQuickRankProvider(QuickRankProvider quickRankProvider) {
+    public void setQuickRankProvider(QuickFlagDataValuesProvider quickRankProvider) {
         this.quickRankProvider = quickRankProvider;
     }
 

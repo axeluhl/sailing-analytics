@@ -24,7 +24,7 @@ import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayService;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
-import com.sap.sailing.gwt.ui.server.SailingServiceImpl;
+import com.sap.sailing.gwt.ui.server.SailingServiceWriteImpl;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.xrr.schema.RegattaResults;
@@ -34,7 +34,7 @@ import com.sap.sse.replication.impl.AbstractReplicablesProvider;
 import com.sap.sse.replication.impl.ReplicationInstancesManager;
 import com.sap.sse.replication.impl.ReplicationServiceImpl;
 
-public class SailingServiceImplMock extends SailingServiceImpl {
+public class SailingServiceWriteImplMock extends SailingServiceWriteImpl {
     private static final long serialVersionUID = 8564037671550730455L;
 
     private final RacingEventService service;
@@ -45,7 +45,7 @@ public class SailingServiceImplMock extends SailingServiceImpl {
     private final SwissTimingReplayService swissTimingReplayService = null;
     private final RaceLogTrackingAdapterFactory raceLogTrackingAdapterFactory = RaceLogTrackingAdapterFactory.INSTANCE;
 
-    public SailingServiceImplMock() {
+    public SailingServiceWriteImplMock() {
         super();
         service = new RacingEventServiceImpl(/* clearPersistentCompetitorStore */ true, new MockSmartphoneImeiServiceFinderFactory(), /* restoreTrackedRaces */ false);
         try {

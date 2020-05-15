@@ -70,28 +70,24 @@ public class RegattaApiTest extends AbstractSeleniumTest {
     @Test
     public void testGetRegattaForCreatedEvent() {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
-
         eventApi.createEvent(ctx, EVENT_NAME, BOAT_CLASS, CLOSED, "default");
         Regatta regatta = regattaApi.getRegatta(ctx, EVENT_NAME);
         JSONArray series = (JSONArray) regatta.get("series");
         JSONObject serie = (JSONObject) series.get(0);
         JSONArray fleets = (JSONArray) serie.get("fleets");
         JSONObject trackedRaces = (JSONObject) serie.get("trackedRaces");
-
         assertEquals("read: regatta.name is different", EVENT_NAME, regatta.getName());
         assertNull("read: regatta.startDate should be null", regatta.getStartDate());
         assertNull("read: regatta.endDate should be null", regatta.getEndDate());
         assertEquals("read: regatta.scoringSystem is different", "LOW_POINT", regatta.getScoringSystem());
         assertEquals("read: regatta.boeatclass is different", BOAT_CLASS, regatta.getBoatClass());
-        assertNotNull("read: regatta.courseAreaId is missing", regatta.getCourseAreaId());
+        assertFalse("read: regatta.courseAreaId is missing", regatta.getCourseAreaId().isEmpty());
         assertEquals("read: regatta.canBoatsOfCompetitorsChangePerRace should be false", false,
                 regatta.canBoatsOfCompetitorsChangePerRace());
         assertEquals("read: regatta.competitorRegistrationType is different", CLOSED,
                 regatta.getCompetitorRegistrationType());
-
         assertTrue(regatta.isUseStartTimeInference());
         assertFalse(regatta.isControlTrackingFromStartAndFinishTimes());
-
         assertEquals("read: reagtta.series should have 1 entry", 1, series.size());
         assertEquals("read: reagtta.fleets should have 1 entry", 1, fleets.size());
         assertNotNull("read: reagtta.trackedRaces is missing", trackedRaces);
