@@ -9,15 +9,10 @@
 </head>
 <body>
 <h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
-<h2>URL: /api/v1/usergroups/</h2>
+<h2>URL: /api/restsecurity/usergroups/readable</h2>
 
-<p class="deprecationMessage">This API is deprecated and will be removed in near future.<br>
-  Please use <a href="/security/api/restsecurity/usergroup/list/groupsUserIsPartOf">GET /security/api/restsecurity/usergroup/list/groupsUserIsPartOf</a> instead!<br>
-  For more information see the <a href=/security/webservices/api/usergroup.html>Security API documentation</a>.
-</p>
-<br>
 <b>Description:</b>
-<p>Gets the usergroup names and id's the currently logged in user is part of</p>
+<p>Gets the usergroups a user or the current logged in user can read.</p>
 <br/>
 <table>
     <tr>
@@ -29,14 +24,39 @@
         <td>Json</td>
     </tr>
     <tr>
+        <td>Request method:</td>
+        <td>GET</td>
+    </tr>
+    <tr>
         <td>Mandatory parameters:</td>
         <td>none</td>
     </tr>
     <tr>
+        <td>Optional parameters:</td>
+        <td>userName: username of he user to obtain readable groups from. If this is not set, the readable groups of the currently logged in user are returned.</td>
+    </tr>
+    <tr>
         <td>Examples:</td>
         <td>
-            Get @ http://sapsailing.com/sailingserver/api/v1/usergroups/
+            Get @ <a href="http://sapsailing.com/security/api/restsecurity/usergroup/readable">http://sapsailing.com/security/api/restsecurity/usergroup/readable</a>
             <br>
+            Example payload:<br>
+            <pre>
+{
+    "readableGroups": [
+        {
+            "uuid": "96759067-7090-413d-94c5-8367c2e34b9f",
+            "name": "group2ToAdd",
+            "roles": []
+        },
+        {
+            "uuid": "a8f98697-6d74-42da-b516-430279d9dadd",
+            "name": "user1-tenant",
+            "roles": []
+        }
+    ]
+}
+</pre>
         </td>
     </tr>
 </table>
