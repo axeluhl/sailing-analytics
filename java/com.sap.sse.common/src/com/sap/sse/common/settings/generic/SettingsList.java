@@ -13,6 +13,13 @@ import com.sap.sse.common.settings.value.ValueListValue;
 public class SettingsList<T extends AbstractGenericSerializableSettings> extends AbstractSetting implements SettingsListSetting<T> {
     
     private SettingsFactory<T> settingsFactory;
+
+    /**
+     * All access to this list must be {@code synchronized}. Unfortunately, GWT does not offer
+     * {@link Collections#synchronizedList(List)} in its JRE emulation, so we have to
+     * make sure to consistently wrap all methods that access this list with a {@code synchronized}
+     * block that obtains this list's monitor.
+     */
     private final List<T> values = new ArrayList<>();
     
     public SettingsList(String name, AbstractGenericSerializableSettings settings, SettingsFactory<T> settingsFactory) {
@@ -22,13 +29,15 @@ public class SettingsList<T extends AbstractGenericSerializableSettings> extends
     }
     
     protected void adoptValue() {
-        values.clear();
-        ValueListValue value = getValue();
-        if(value != null) {
-            for(Value val : value.getValueObjects()) {
-                T childSettingsInstance = settingsFactory.newInstance();
-                childSettingsInstance.adoptValue((SettingsValue)val);
-                values.add(childSettingsInstance);
+        synchronized (values) {
+            values.clear();
+            ValueListValue value = getValue();
+            if(value != null) {
+                for(Value val : value.getValueObjects()) {
+                    T childSettingsInstance = settingsFactory.newInstance();
+                    childSettingsInstance.adoptValue((SettingsValue)val);
+                    values.add(childSettingsInstance);
+                }
             }
         }
     }
@@ -40,7 +49,7 @@ public class SettingsList<T extends AbstractGenericSerializableSettings> extends
     
     private ValueCollectionValue<List<Value>> ensureValue() {
         ValueListValue result = getValue();
-        if(result == null) {
+        if (result == null) {
             result = new ValueListValue();
             settings.setValue(settingName, result);
         }
@@ -58,65 +67,80 @@ public class SettingsList<T extends AbstractGenericSerializableSettings> extends
 
     @Override
     public boolean isDefaultValue() {
-        // explicit default values are possible to implement
-        // currently, empty is always default
-        return values.isEmpty();
+        synchronized (values) {
+            // explicit default values are possible to implement
+            // currently, empty is always default
+            return values.isEmpty();
+        }
     }
 
     @Override
     public void resetToDefault() {
-        this.values.clear();
-        settings.setValue(settingName, null);
+        synchronized (values) {
+            this.values.clear();
+            settings.setValue(settingName, null);
+        }
     }
 
     @Override
     public Iterable<T> getValues() {
-        return Collections.unmodifiableCollection(values);
+        synchronized (values) {
+            final List<T> result = new ArrayList<>(values);
+            return result;
+        }
     }
 
     @Override
     public void setValues(Iterable<T> values) {
-        this.values.clear();
-        ValueCollectionValue<List<Value>> valueObject = ensureValue();
-        valueObject.clear();
-        if(values != null) {
-            for(T value : values) {
-                this.values.add(value);
-                valueObject.addValue(value.getInnerValueObject());
+        synchronized (values) {
+            this.values.clear();
+            ValueCollectionValue<List<Value>> valueObject = ensureValue();
+            valueObject.clear();
+            if (values != null) {
+                for (T value : values) {
+                    this.values.add(value);
+                    valueObject.addValue(value.getInnerValueObject());
+                }
             }
         }
     }
     
     @Override
     public void addValue(T value) {
-        ValueCollectionValue<List<Value>> valueObject = ensureValue();
-        this.values.add(value);
-        valueObject.addValue(value.getInnerValueObject());
+        synchronized (values) {
+            ValueCollectionValue<List<Value>> valueObject = ensureValue();
+            this.values.add(value);
+            valueObject.addValue(value.getInnerValueObject());
+        }
     }
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((values == null) ? 0 : values.hashCode());
-        return result;
+        synchronized (values) {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((values == null) ? 0 : values.hashCode());
+            return result;
+        }
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        @SuppressWarnings("rawtypes")
-        SettingsList other = (SettingsList) obj;
-        if (values == null) {
-            if (other.values != null)
+        synchronized (values) {
+            if (this == obj)
+                return true;
+            if (obj == null)
                 return false;
-        } else if (!values.equals(other.values))
-            return false;
-        return true;
+            if (getClass() != obj.getClass())
+                return false;
+            @SuppressWarnings("rawtypes")
+            SettingsList other = (SettingsList) obj;
+            if (values == null) {
+                if (other.values != null)
+                    return false;
+            } else if (!values.equals(other.values))
+                return false;
+            return true;
+        }
     }
 }

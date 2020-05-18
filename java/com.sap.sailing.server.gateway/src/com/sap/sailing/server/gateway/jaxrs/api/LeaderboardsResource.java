@@ -64,6 +64,7 @@ import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
+import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
@@ -313,7 +314,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             getService().apply(new UpdateLeaderboard(/* leaderboardName */ leaderboard.getName(),
                     /* newLeaderboardName */ leaderboard.getName(), newLeaderboardDisplayName,
                     resultDiscardingThresholds,
-                    leaderboard.getDefaultCourseArea() != null ? leaderboard.getDefaultCourseArea().getId() : null));
+                    Util.map(leaderboard.getCourseAreas(), CourseArea::getId)));
         } else {
             return Response.status(Status.NOT_FOUND).entity(
                     "Could not find a leaderboard with name '" + StringEscapeUtils.escapeHtml(leaderboardName) + "'.")
@@ -1219,7 +1220,8 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             @QueryParam(BaseRaceLogEventSerializer.FIELD_AUTHOR_PRIORITY) Integer authorPriority,
             @QueryParam(BaseRaceLogEventSerializer.FIELD_PASS_ID) Integer passId,
             @QueryParam(RaceLogStartTimeEventSerializer.FIELD_START_TIME) Long startTime,
-            @QueryParam(RaceLogStartProcedureChangedEventSerializer.FIELD_START_PROCEDURE_TYPE) String racingProcedure) {
+            @QueryParam(RaceLogStartProcedureChangedEventSerializer.FIELD_START_PROCEDURE_TYPE) String racingProcedure,
+            @QueryParam(RaceLogStartTimeEventSerializer.FIELD_COURSE_AREA_ID_AS_STRING) String courseAreaIdAsString) {
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard == null) {
             return Response.status(Status.NOT_FOUND)
@@ -1244,7 +1246,8 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         final TimePoint effectiveStartTime = getService().setStartTimeAndProcedure(
                 leaderboardName, raceColumnName, fleetName, authorName, authorPriority, passId, MillisecondsTimePoint.now(),
                 new MillisecondsTimePoint(startTime),
-                racingProcedure==null?null:RacingProcedureType.valueOf(racingProcedure));
+                racingProcedure==null?null:RacingProcedureType.valueOf(racingProcedure),
+                        courseAreaIdAsString==null?null:UUID.fromString(courseAreaIdAsString));
         final JSONObject responseJson = new JSONObject();
         responseJson.put("startTimeAsMillis", effectiveStartTime.asMillis());
         return Response.ok(streamingOutput(responseJson)).build();
