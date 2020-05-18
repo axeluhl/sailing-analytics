@@ -21,6 +21,7 @@ public abstract class AbstractLeaderboardDialog<LD extends LeaderboardDescriptor
         super(title, null, stringMessages.ok(), stringMessages.cancel(), validator, callback);
         nameTextBox = createTextBox(leaderboardDescriptor.getName());
         nameTextBox.setVisibleLength(50);
+        nameTextBox.ensureDebugId("NameTextBox");
         nameTextBox.setEnabled(false); // name is not editable; see also bug5282
         this.stringMessages = stringMessages;
         this.leaderboardDescriptor = leaderboardDescriptor;
