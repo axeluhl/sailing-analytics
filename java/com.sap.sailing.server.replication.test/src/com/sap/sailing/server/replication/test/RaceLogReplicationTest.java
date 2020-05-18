@@ -204,8 +204,7 @@ public class RaceLogReplicationTest extends AbstractLogReplicationTest<RaceLog, 
         masterLog.add(raceLogEvent);
         final String newLeaderboardName = leaderboardName + "new";
         final UpdateLeaderboard renameOperation = new UpdateLeaderboard(
-                leaderboardName, newLeaderboardName, masterLeaderboard.getDisplayName(),
-                ((ThresholdBasedResultDiscardingRule) masterLeaderboard.getResultDiscardingRule()).getDiscardIndexResultsStartingWithHowManyRaces(),
+                leaderboardName, masterLeaderboard.getDisplayName(), ((ThresholdBasedResultDiscardingRule) masterLeaderboard.getResultDiscardingRule()).getDiscardIndexResultsStartingWithHowManyRaces(),
                 Util.map(masterLeaderboard.getCourseAreas(), CourseArea::getId));
         master.apply(renameOperation);
         Thread.sleep(3000);

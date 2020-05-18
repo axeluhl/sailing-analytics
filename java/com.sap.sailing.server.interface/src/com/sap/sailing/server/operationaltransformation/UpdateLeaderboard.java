@@ -15,15 +15,13 @@ import com.sap.sse.common.Util;
 
 public class UpdateLeaderboard extends AbstractLeaderboardOperation<Leaderboard> {
     private static final long serialVersionUID = -8040361040050151768L;
-    private final String newLeaderboardName;
     private final String newLeaderboardDisplayName;
     private final int[] newDiscardingThresholds;
     private final Collection<Serializable> newCourseAreaIds;
     
-    public UpdateLeaderboard(String leaderboardName, String newLeaderboardName, String newLeaderboardDisplayName,
-            int[] newDiscardingThresholds, Iterable<? extends Serializable> newCourseAreaIds) {
+    public UpdateLeaderboard(String leaderboardName, String newLeaderboardDisplayName, int[] newDiscardingThresholds,
+            Iterable<? extends Serializable> newCourseAreaIds) {
         super(leaderboardName);
-        this.newLeaderboardName = newLeaderboardName;
         this.newLeaderboardDisplayName = newLeaderboardDisplayName;
         this.newDiscardingThresholds = newDiscardingThresholds;
         this.newCourseAreaIds = new ArrayList<>();
@@ -44,10 +42,7 @@ public class UpdateLeaderboard extends AbstractLeaderboardOperation<Leaderboard>
 
     @Override
     public Leaderboard internalApplyTo(RacingEventService toState) {
-        if (!getLeaderboardName().equals(newLeaderboardName)) {
-            toState.renameLeaderboard(getLeaderboardName(), newLeaderboardName);
-        }
-        Leaderboard leaderboard = toState.getLeaderboardByName(newLeaderboardName);
+        Leaderboard leaderboard = toState.getLeaderboardByName(getLeaderboardName());
         // If the new thresholds are null this means that the leaderboard is expected to obtain its result discarding
         // configuration from somewhere else implicitly, e.g., an underlying regatta, and we'll leave it alone;
         // Otherwise, a new threshold-based result discarding rule will be set based on the newDiscardingThresholds

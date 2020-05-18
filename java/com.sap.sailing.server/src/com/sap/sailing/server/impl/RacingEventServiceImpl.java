@@ -296,7 +296,6 @@ import com.sap.sse.MasterDataImportClassLoaderService;
 import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.PairingListCreationException;
-import com.sap.sse.common.Renamable;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
@@ -1414,36 +1413,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         } else {
             throw new IllegalArgumentException("Leaderboard named " + leaderboardName + " not found");
         }
-    }
-
-    @Override
-    public void renameLeaderboard(String oldName, String newName) {
-        final Leaderboard toRename = leaderboardsByName.get(oldName);
-        LockUtil.lockForWrite(leaderboardsByNameLock);
-        try {
-            if (toRename == null) {
-                throw new IllegalArgumentException("No leaderboard with name " + oldName + " found");
-            }
-            if (leaderboardsByName.containsKey(newName)) {
-                throw new IllegalArgumentException("Leaderboard with name " + newName + " already exists");
-            }
-            if (toRename instanceof Renamable) {
-                removeMBeanForLeaderboard(toRename);
-                ((Renamable) toRename).setName(newName);
-                leaderboardsByName.remove(oldName);
-                leaderboardsByName.put(newName, toRename);
-                tryToRegisterMBeanForLeaderboard(toRename);
-            } else {
-                throw new IllegalArgumentException("Leaderboard with name " + newName + " is of type "
-                        + toRename.getClass().getSimpleName() + " and therefore cannot be renamed");
-            }
-        } finally {
-            LockUtil.unlockAfterWrite(leaderboardsByNameLock);
-        }
-        // don't need the lock anymore to update DB
-        // can have arrived here only if toRename instanceof Renamable because otherwise
-        // an exception would have been thrown above.
-        mongoObjectFactory.renameLeaderboard(oldName, newName);
     }
 
     @Override

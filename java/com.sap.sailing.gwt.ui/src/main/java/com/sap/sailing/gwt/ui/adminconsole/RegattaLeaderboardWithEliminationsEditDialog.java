@@ -34,8 +34,6 @@ public class RegattaLeaderboardWithEliminationsEditDialog extends RegattaLeaderb
                 errorReporter,
                 new RegattaLeaderboardWithEliminationsDialog.LeaderboardParameterValidator(stringMessages,
                         otherExistingLeaderboards), callback);
-        nameTextBox.setEnabled(false);
-        nameTextBox.setText(leaderboardDescriptor.getName());
         for (int i=0; i<regattaLeaderboardsListBox.getItemCount(); i++) {
             if (regattaLeaderboardsListBox.getValue(i).equals(leaderboardDescriptor.getRegattaName())) {
                 regattaLeaderboardsListBox.setSelectedIndex(i);
