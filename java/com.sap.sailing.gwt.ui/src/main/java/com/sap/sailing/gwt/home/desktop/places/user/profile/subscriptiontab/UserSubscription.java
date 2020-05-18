@@ -24,6 +24,12 @@ import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionDTO;
 import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionPlans;
 import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionPlans.Plan;
 
+/**
+ * View for displaying user subscription information like plan, subscription status...
+ * In this view user is able to subscribe to a plan or cancel current subscription.
+ * 
+ * @author tutran
+ */
 public class UserSubscription extends Composite implements UserSubscriptionView {
     interface MyUiBinder extends UiBinder<Widget, UserSubscription> {}
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);

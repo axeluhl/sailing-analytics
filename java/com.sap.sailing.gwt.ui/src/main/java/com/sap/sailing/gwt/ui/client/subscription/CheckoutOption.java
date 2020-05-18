@@ -2,6 +2,12 @@ package com.sap.sailing.gwt.ui.client.subscription;
 
 import com.google.gwt.core.client.JavaScriptObject;
 
+/**
+ * Class represent JS option object for Chargebee instance openCheckout method
+ * {@link ChargebeeInstance}
+ * 
+ * @author tutran
+ */
 public class CheckoutOption extends JavaScriptObject {
     protected CheckoutOption() {}
     

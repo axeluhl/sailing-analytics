@@ -77,14 +77,14 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
         try {
             User user = getCurrentUser();
             
-            if (user.getSubscription() != null && user.getSubscription().planId.equals(planId)) {
+            if (user.getSubscription() != null && user.getSubscription().planId != null && user.getSubscription().planId.equals(planId)) {
                 response.error = "User has already subscribed to " + SubscriptionPlans.getPlan(planId).getName() + " plan";
                 return response;
             }
             
             Result result;
             
-            if (user.getSubscription() == null) {
+            if (user.getSubscription() == null || user.getSubscription().planId == null) {
                 String[] userNameParts = user.getFullName().split("\\s+");
                 String firstName = userNameParts[0];
                 String lastName = "";

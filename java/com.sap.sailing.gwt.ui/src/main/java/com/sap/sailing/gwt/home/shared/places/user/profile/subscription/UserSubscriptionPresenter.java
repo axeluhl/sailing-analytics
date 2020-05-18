@@ -6,8 +6,6 @@ import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithDispatch;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 import com.sap.sailing.gwt.ui.client.subscription.Chargebee;
 import com.sap.sailing.gwt.ui.client.subscription.CheckoutOption;
-import com.sap.sailing.gwt.ui.client.subscription.PortalOption;
-import com.sap.sailing.gwt.ui.client.subscription.PortalSessionSetterCallback;
 import com.sap.sailing.gwt.ui.client.subscription.SubscriptionConfiguration;
 import com.sap.sailing.gwt.ui.client.subscription.WithSubscriptionService;
 import com.sap.sailing.gwt.ui.shared.subscription.HostedPageResultDTO;
@@ -15,12 +13,22 @@ import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionDTO;
 import com.sap.sse.security.ui.authentication.WithAuthenticationManager;
 import com.sap.sse.security.ui.authentication.WithUserService;
 
+/**
+ * Presenter for {@link UserSubscriptionView}, implementation of {@link UserSubscriptionView.Presenter}}, 
+ * which handles initializing Chargebee, opening and executing checkout,
+ * requesting user subscription data, and canceling user subscription
+ * 
+ * @author tutran
+ */
 public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & ErrorAndBusyClientFactory & WithAuthenticationManager & WithUserService & WithSubscriptionService>
     implements UserSubscriptionView.Presenter {
     
     private final C clientFactory;
     private UserSubscriptionView view;
     
+    /**
+     * Callback for Chargebee checkout success event
+     */
     private CheckoutOption.SuccessCallback onCheckoutSuccessCallback = 
             new CheckoutOption.SuccessCallback() {
         
@@ -29,6 +37,10 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
                     requestFinishingPlanUpgrading(hostedPageId);
                 }
             };
+            
+    /**
+     * Callback for Chargebee checkout fail event
+     */
     private CheckoutOption.ErrorCallback onCheckoutErrorCallback =
             new CheckoutOption.ErrorCallback() {
         
@@ -37,6 +49,10 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
                     view.onOpenCheckoutError(error);
                 }
             };
+            
+    /**
+     * Callback for Chargebee checkout modal close event
+     */
     private CheckoutOption.CloseCallback onCheckoutCloseCallback =
             new CheckoutOption.CloseCallback() {
         
@@ -50,11 +66,17 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
         this.clientFactory = clientFactory;
     }
     
+    /**
+     * Init Chargebee
+     */
     @Override
     public void init() {
         Chargebee.init(Chargebee.InitOption.create(SubscriptionConfiguration.CHARGEBEE_SITE));
     }
 
+    /**
+     * Load user's subscription data
+     */
     @Override
     public void loadSubscription() {
         view.onStartLoadSubscription();
@@ -83,6 +105,11 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
         this.view = view;        
     }
 
+    /**
+     * Open Chargebee checkout modal from which user can create new subscription or change one if user is already in a subscription plan
+     * 
+     * @param planId Id of plan user want to subscribe to
+     */
     @Override
     public void openCheckout(String planId) {
         clientFactory.getSubscriptionService().generateHostedPageObject(planId, new AsyncCallback<HostedPageResultDTO>() {
@@ -111,6 +138,9 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
         });
     }
     
+    /**
+     * Cancel current user's subscription
+     */
     @Override
     public void cancelSubscription() {
         clientFactory.getSubscriptionService().cancelSubscription(new AsyncCallback<Boolean>() {
@@ -131,29 +161,6 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
             }
         });
     }
-
-//    @Override
-//    public void openPortalSession() {
-//        clientFactory.getSubscriptionService().generatePortalPageObject(new AsyncCallback<String>() {
-//
-//            @Override
-//            public void onSuccess(String result) {
-//                if (result == null) {
-//                    Window.alert("Failed to generating portal page object");
-//                    return;
-//                }
-//                
-//                Chargebee.getInstance().setPortalSession(PortalSessionSetterCallback.create(result));
-//                Chargebee.getInstance().createChargebeePortal().open(PortalOption.create(onPortalCloseCallback));
-//            }
-//            
-//            @Override
-//            public void onFailure(Throwable caught) {
-//                Window.alert("Generating portal page object error: " + caught.getMessage());
-//            }
-//        });
-//        
-//    }
     
     private void requestFinishingPlanUpgrading(String hostedPageId) {
         clientFactory.getSubscriptionService().updatePlanSuccess(hostedPageId, new AsyncCallback<SubscriptionDTO>() {

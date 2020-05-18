@@ -2,6 +2,13 @@ package com.sap.sailing.gwt.ui.client.subscription;
 
 import com.google.gwt.core.client.JavaScriptObject;
 
+/**
+ * Class represent Chargeebee portal session callback function
+ * {@link ChargebeeInstance}
+ * {@link https://www.chargebee.com/checkout-portal-docs/api.html#setportalsession}
+ * 
+ * @author tutran
+ */
 public class PortalSessionSetterCallback extends JavaScriptObject {
     protected PortalSessionSetterCallback() {}
     

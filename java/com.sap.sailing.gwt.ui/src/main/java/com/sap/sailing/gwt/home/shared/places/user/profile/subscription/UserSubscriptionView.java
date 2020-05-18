@@ -15,6 +15,5 @@ public interface UserSubscriptionView extends IsWidget {
         public void openCheckout(String planId);
         public void setView(UserSubscriptionView view);
         public void cancelSubscription();
-//        public void openPortalSession();
     }
 }
