@@ -40,6 +40,8 @@ import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
+import com.sap.sailing.server.impl.RacingEventServiceImpl;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
 import com.sap.sailing.server.operationaltransformation.CreateRegattaLeaderboard;
@@ -200,14 +202,20 @@ public class RaceLogReplicationTest extends AbstractLogReplicationTest<RaceLog, 
         RaceLog masterLog = setupRaceColumn(leaderboardName, fleetName, raceColumnName);
         replicaReplicator.startToReplicateFrom(masterDescriptor);
         masterLog.add(raceLogEvent);
+        final String newLeaderboardName = leaderboardName + "new";
         final UpdateLeaderboard renameOperation = new UpdateLeaderboard(
-                leaderboardName, leaderboardName + "new", masterLeaderboard.getDisplayName(),
+                leaderboardName, newLeaderboardName, masterLeaderboard.getDisplayName(),
                 ((ThresholdBasedResultDiscardingRule) masterLeaderboard.getResultDiscardingRule()).getDiscardIndexResultsStartingWithHowManyRaces(),
                 Util.map(masterLeaderboard.getCourseAreas(), CourseArea::getId));
         master.apply(renameOperation);
         Thread.sleep(3000);
-        RaceLog replicaLog = getReplicaLog(fleetName, raceColumnName, masterLeaderboard);
+        final RaceLog replicaLog = getReplicaLog(fleetName, raceColumnName, masterLeaderboard);
         addAndValidateEventIds(masterLog, replicaLog, anotherRaceLogEvent);
+        // now verify that the race log event is still there when loading the master RacingEventService from its persistence layer again:
+        final RacingEventService loadedService = new RacingEventServiceImpl();
+        final Leaderboard loadedLeaderboard = loadedService.getLeaderboardByName(newLeaderboardName);
+        final RaceLog loadedRaceLog = loadedLeaderboard.getRaceColumnByName(raceColumnName).getRaceLog(loadedLeaderboard.getRaceColumnByName(raceColumnName).getFleetByName(fleetName));
+        assertEqualsOnId(masterLog, loadedRaceLog);
     }
     
     /**
