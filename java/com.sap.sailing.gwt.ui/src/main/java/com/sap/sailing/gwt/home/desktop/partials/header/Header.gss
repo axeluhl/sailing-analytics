@@ -49,8 +49,8 @@
   background-color: #0a0a0a;
 }
 .sitenavigation_linkactive,
-.sitenavigation_link:hover,
-.sitenavigation_link:focus {
+.sitenavigation_link:hover
+{
   text-decoration: none;
   color: #f0ab00;
 }
