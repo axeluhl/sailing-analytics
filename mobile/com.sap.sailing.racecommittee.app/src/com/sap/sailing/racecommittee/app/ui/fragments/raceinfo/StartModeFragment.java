@@ -19,9 +19,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ListView;
 
 public class StartModeFragment extends BaseFragment {
@@ -43,18 +41,10 @@ public class StartModeFragment extends BaseFragment {
         super.onActivityCreated(savedInstanceState);
 
         if (getArguments() != null) {
-            switch (getArguments().getInt(START_MODE, START_MODE_PRESETUP)) {
-            case START_MODE_PLANNED:
-                if (AppUtils.with(getActivity()).isLandscape()) {
-                    if (getView() != null) {
-                        View header = getView().findViewById(R.id.header);
-                        header.setVisibility(View.GONE);
-                    }
-                }
-                break;
-
-            default:
-                break;
+            final View view = getView();
+            if (getArguments().getInt(START_MODE, START_MODE_PRESETUP) == START_MODE_PLANNED && AppUtils.with(getActivity()).isLandscape() && view != null) {
+                View header = view.findViewById(R.id.header);
+                header.setVisibility(View.GONE);
             }
         }
 
@@ -65,16 +55,11 @@ public class StartModeFragment extends BaseFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.race_schedule_mode, container, false);
 
-        mListView = (ListView) layout.findViewById(R.id.listView);
+        mListView = layout.findViewById(R.id.listView);
 
-        HeaderLayout header = (HeaderLayout) layout.findViewById(R.id.header);
+        HeaderLayout header = layout.findViewById(R.id.header);
         if (header != null) {
-            header.setHeaderOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    goHome();
-                }
-            });
+            header.setHeaderOnClickListener(v -> goHome());
         }
 
         mFlagSize = getResources().getInteger(R.integer.flag_size_large);
@@ -107,26 +92,14 @@ public class StartModeFragment extends BaseFragment {
             final CheckedItemAdapter adapter = new CheckedItemAdapter(getActivity(), startModes);
             adapter.setCheckedPosition(selected);
             mListView.setAdapter(adapter);
-            mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    adapter.setCheckedPosition(position);
-                    StartModeItem item = (StartModeItem) adapter.getItem(position);
-                    if (item != null) {
-                        onClick(item);
-                    }
+            mListView.setOnItemClickListener((parent, view, position1, id) -> {
+                adapter.setCheckedPosition(position1);
+                StartModeItem item = (StartModeItem) adapter.getItem(position1);
+                if (item != null) {
+                    onClick(item);
                 }
             });
-
-            sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
         }
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-
-        sendIntent(AppConstants.INTENT_ACTION_TIME_SHOW);
     }
 
     public void onClick(StartModeItem startMode) {
@@ -145,7 +118,7 @@ public class StartModeFragment extends BaseFragment {
         }
     }
 
-    private class StartModeComparator implements Comparator<StartModeItem> {
+    private static class StartModeComparator implements Comparator<StartModeItem> {
 
         @Override
         public int compare(StartModeItem left, StartModeItem right) {

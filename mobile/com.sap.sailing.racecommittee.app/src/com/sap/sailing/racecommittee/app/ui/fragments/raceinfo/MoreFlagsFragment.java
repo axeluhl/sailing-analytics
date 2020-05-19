@@ -79,20 +79,6 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
         }
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-
-        sendIntent(AppConstants.INTENT_ACTION_TIME_SHOW);
-    }
-
     public static class FinishTimeFragment extends BaseFragment
             implements View.OnClickListener, DatePickerDialog.OnDateSetListener {
 
@@ -224,20 +210,6 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
                     }
                 }
             }
-        }
-
-        @Override
-        public void onResume() {
-            super.onResume();
-
-            sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
-        }
-
-        @Override
-        public void onPause() {
-            super.onPause();
-
-            sendIntent(AppConstants.INTENT_ACTION_TIME_SHOW);
         }
 
         @Override

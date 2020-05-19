@@ -14,6 +14,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
@@ -255,13 +256,12 @@ public class WindFragment extends BaseFragment
         // disconnect googleApiClient and unregister position poller
         stopLocationUpdates();
         LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(mReceiver);
-        sendIntent(AppConstants.INTENT_ACTION_TIME_SHOW);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        mRacesByGroup = ((RacingActivity) getActivity()).getRacesByGroup();
+        mRacesByGroup = ((RacingActivity) requireActivity()).getRacesByGroup();
         final Set<ManagedRace> allRaces = new HashSet<>();
         for (final Iterable<ManagedRace> racesInGroup : mRacesByGroup.values()) {
             Util.addAll(racesInGroup, allRaces);
@@ -270,13 +270,11 @@ public class WindFragment extends BaseFragment
         mManagedRaces = new ArrayList<>(raceFilter.getCurrentRaces());
         Collections.sort(mManagedRaces, new CurrentRaceComparator());
         mSelectedRaces = new ArrayList<>();
-        sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
         // register receiver to be notified if race is tracked
         IntentFilter filter = new IntentFilter(AppConstants.INTENT_ACTION_IS_TRACKING);
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, filter);
+        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(mReceiver, filter);
         // Contact server and ask if race is tracked and map is allowed to show.
-        WindHelper.isTrackedRace(getActivity(), getRace());
-        sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
+        WindHelper.isTrackedRace(requireActivity(), getRace());
 
         startLocationUpdates();
     }
@@ -297,7 +295,8 @@ public class WindFragment extends BaseFragment
      */
     private void refreshUI(boolean timeOnly) {
         if (isAdded()) {
-            int whiteColor = ThemeHelper.getColor(getActivity(), R.attr.white);
+            final FragmentActivity activity = requireActivity();
+            int whiteColor = ThemeHelper.getColor(activity, R.attr.white);
             int redColor = R.color.sap_red;
             if (!timeOnly) {
                 setTextAndColor(mLatitude, getString(R.string.not_available), redColor);
@@ -318,12 +317,12 @@ public class WindFragment extends BaseFragment
                     if (mAccuracy != null) {
                         mAccuracy.setAccuracy(mCurrentLocation.getAccuracy());
                     }
-                    setTextAndColor(mLatitude, GeoUtils.getInDMSFormat(getActivity(), latitude), whiteColor);
-                    setTextAndColor(mLongitude, GeoUtils.getInDMSFormat(getActivity(), longitude), whiteColor);
+                    setTextAndColor(mLatitude, GeoUtils.getInDMSFormat(activity, latitude), whiteColor);
+                    setTextAndColor(mLongitude, GeoUtils.getInDMSFormat(activity, longitude), whiteColor);
                 }
                 long timeDifference = System.currentTimeMillis() - mCurrentLocation.getTime();
                 setTextAndColor(mAccuracyTimestamp,
-                        getString(R.string.accuracy_timestamp, TimeUtils.formatTimeAgo(getActivity(), timeDifference)),
+                        getString(R.string.accuracy_timestamp, TimeUtils.formatTimeAgo(activity, timeDifference)),
                         whiteColor);
             }
         }
@@ -367,39 +366,19 @@ public class WindFragment extends BaseFragment
      */
     public void setupButtons() {
         if (mHeaderText != null) {
-            mHeaderText.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    goHome();
-                }
-            });
+            mHeaderText.setOnClickListener(v -> goHome());
         }
         if (mSetData != null) {
-            mSetData.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    onSendClick();
-                }
-            });
+            mSetData.setOnClickListener(v -> onSendClick());
         }
         if (mSetDataMulti != null) {
-            mSetDataMulti.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    showWindDialog();
-                }
-            });
+            mSetDataMulti.setOnClickListener(v -> showWindDialog());
         }
         if (mContentMapShow != null) {
             // disable functionality at first. will be enabled after contacting the server if race is tracked
             mContentMapShow.setEnabled(false);
-            mContentMapShow.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    loadRaceMap(/* showWindCharts */ true, /* showStreamlets */ false, /* showSimulation */ false,
-                            /* showMapControls */ true);
-                }
-            });
+            mContentMapShow.setOnClickListener(v -> loadRaceMap(/* showWindCharts */ true, /* showStreamlets */ false, /* showSimulation */ false,
+                    /* showMapControls */ true));
         }
     }
 
@@ -418,7 +397,7 @@ public class WindFragment extends BaseFragment
         }
 
         if (mWindSpeed != null && mCompassView != null) {
-            initSpeedPicker(mWindSpeed, ThemeHelper.getColor(getActivity(), R.attr.white));
+            initSpeedPicker(mWindSpeed, ThemeHelper.getColor(requireActivity(), R.attr.white));
             mCompassView.setDirection((float) enteredWindBearingFrom);
             mWindSpeed.setValue(((int) ((enteredWindSpeed - MIN_KTS) * 2)));
         } else if (mWindInputDirection != null && mWindInputSpeed != null) {
@@ -430,8 +409,8 @@ public class WindFragment extends BaseFragment
     private void initSpeedPicker(NumberPicker picker, @ColorInt int textColor) {
         String numbers[] = generateNumbers();
         ViewHelper.disableSave(picker);
-        ThemeHelper.setPickerColor(getActivity(), picker, textColor,
-                ThemeHelper.getColor(getActivity(), R.attr.sap_yellow_1));
+        ThemeHelper.setPickerColor(requireActivity(), picker, textColor,
+                ThemeHelper.getColor(requireActivity(), R.attr.sap_yellow_1));
         picker.setMaxValue(numbers.length - 1);
         picker.setMinValue(0);
         picker.setWrapSelectorWheel(false);

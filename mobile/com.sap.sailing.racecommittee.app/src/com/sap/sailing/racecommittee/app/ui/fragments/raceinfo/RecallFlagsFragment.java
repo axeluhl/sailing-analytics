@@ -41,12 +41,7 @@ public class RecallFlagsFragment extends RaceFragment implements RecallFlagItemC
         HeaderLayout header = ViewHelper.get(layout, R.id.header);
         if (header != null) {
             header.setHeaderText(getArguments().getString(HEADER_TEXT, getString(R.string.not_available)));
-            header.setHeaderOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
-                }
-            });
+            header.setHeaderOnClickListener(v -> sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT));
         }
 
         return layout;
@@ -78,19 +73,5 @@ public class RecallFlagsFragment extends RaceFragment implements RecallFlagItemC
             // TODO see bug 1649: Explicit passing of pass identifier in RaceState interface
             getRaceState().setAdvancePass(now);
         }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-
-        sendIntent(AppConstants.INTENT_ACTION_TIME_SHOW);
     }
 }

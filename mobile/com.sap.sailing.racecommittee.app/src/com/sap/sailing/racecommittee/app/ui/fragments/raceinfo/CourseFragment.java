@@ -2,7 +2,6 @@ package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.domain.common.CourseDesignerMode;
-import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
@@ -42,14 +41,9 @@ public abstract class CourseFragment extends BaseFragment {
         super.onActivityCreated(savedInstanceState);
 
         if (getView() != null && getArguments() != null) {
-            HeaderLayout header = (HeaderLayout) getView().findViewById(R.id.header);
+            HeaderLayout header = getView().findViewById(R.id.header);
             if (header != null) {
-                header.setHeaderOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        goHome();
-                    }
-                });
+                header.setHeaderOnClickListener(v -> goHome());
                 switch (getArguments().getInt(START_MODE, START_MODE_PRESETUP)) {
                 case START_MODE_PLANNED:
                     if (AppUtils.with(getActivity()).isLandscape() && AppUtils.with(getActivity()).is10inch()) {
@@ -59,19 +53,5 @@ public abstract class CourseFragment extends BaseFragment {
                 }
             }
         }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-
-        sendIntent(AppConstants.INTENT_ACTION_TIME_SHOW);
     }
 }

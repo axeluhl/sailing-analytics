@@ -167,7 +167,6 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
             if (fragment != null) {
                 LocalBroadcastManager manager = LocalBroadcastManager.getInstance(this);
                 manager.sendBroadcast(new Intent(action));
-                manager.sendBroadcast(new Intent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE));
                 return true;
             }
         }

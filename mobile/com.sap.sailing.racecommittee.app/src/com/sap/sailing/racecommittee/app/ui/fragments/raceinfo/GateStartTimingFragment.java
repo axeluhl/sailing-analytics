@@ -3,7 +3,6 @@ package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 import com.sap.sailing.android.shared.util.ActivityHelper;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.GateStartRacingProcedure;
-import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
@@ -47,12 +46,7 @@ public class GateStartTimingFragment extends BaseFragment {
 
         HeaderLayout header = ViewHelper.get(layout, R.id.header);
         if (header != null) {
-            header.setHeaderOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    goHome();
-                }
-            });
+            header.setHeaderOnClickListener(v -> goHome());
         }
 
         View additional = ViewHelper.get(layout, R.id.addition_golf_time);
@@ -69,9 +63,9 @@ public class GateStartTimingFragment extends BaseFragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        mTotalTime = (TextView) getActivity().findViewById(R.id.total_time_text);
-        mTimeLaunch = (NumberPicker) getActivity().findViewById(R.id.time_launch);
-        mTimeGolf = (NumberPicker) getActivity().findViewById(R.id.time_golf);
+        mTotalTime = getActivity().findViewById(R.id.total_time_text);
+        mTimeLaunch = getActivity().findViewById(R.id.time_launch);
+        mTimeGolf = getActivity().findViewById(R.id.time_golf);
         mProcedure = getRaceState().getTypedRacingProcedure();
         ViewHelper.disableSave(mTimeLaunch);
         ThemeHelper.setPickerColor(getActivity(), mTimeLaunch, ThemeHelper.getColor(getActivity(), R.attr.white),
@@ -85,20 +79,6 @@ public class GateStartTimingFragment extends BaseFragment {
         setButton();
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-
-        sendIntent(AppConstants.INTENT_ACTION_TIME_SHOW);
-    }
-
     private void setTimeLaunchWidget() {
         if (mTimeLaunch != null) {
             mTimeLaunch.setMinValue(MIN_VALUE);
@@ -106,12 +86,7 @@ public class GateStartTimingFragment extends BaseFragment {
             mTimeLaunch.setWrapSelectorWheel(false);
             int value = (int) (mProcedure.getGateLaunchStopTime() / ONE_MINUTE_MILLISECONDS);
             mTimeLaunch.setValue(value);
-            mTimeLaunch.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
-                @Override
-                public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
-                    mTotalTime.setText("" + (newVal + mTimeGolf.getValue()));
-                }
-            });
+            mTimeLaunch.setOnValueChangedListener((picker, oldVal, newVal) -> mTotalTime.setText("" + (newVal + mTimeGolf.getValue())));
         }
     }
 
@@ -122,15 +97,12 @@ public class GateStartTimingFragment extends BaseFragment {
             mTimeGolf.setWrapSelectorWheel(false);
             int value = (int) (mProcedure.getGolfDownTime() / ONE_MINUTE_MILLISECONDS);
             mTimeGolf.setValue(value);
-            mTimeGolf.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
-                @Override
-                public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
-                    int launch = 0;
-                    if (mTimeLaunch != null) {
-                        launch = mTimeLaunch.getValue();
-                    }
-                    mTotalTime.setText("" + (newVal + launch));
+            mTimeGolf.setOnValueChangedListener((picker, oldVal, newVal) -> {
+                int launch = 0;
+                if (mTimeLaunch != null) {
+                    launch = mTimeLaunch.getValue();
                 }
+                mTotalTime.setText("" + (newVal + launch));
             });
             int launch = 0;
             if (mTimeLaunch != null) {
@@ -143,25 +115,21 @@ public class GateStartTimingFragment extends BaseFragment {
     private void setButton() {
         View button = getActivity().findViewById(R.id.set_gate_time);
         if (button != null) {
-            button.setOnClickListener(new View.OnClickListener() {
+            button.setOnClickListener(v -> {
+                ActivityHelper.with(getActivity()).hideKeyboard();
+                long launch = 0;
+                long golf = 0;
 
-                @Override
-                public void onClick(View v) {
-                    ActivityHelper.with(getActivity()).hideKeyboard();
-                    long launch = 0;
-                    long golf = 0;
-
-                    if (mTimeLaunch != null) {
-                        launch = mTimeLaunch.getValue() * ONE_MINUTE_MILLISECONDS;
-                    }
-                    if (mTimeGolf != null) {
-                        golf = mTimeGolf.getValue() * ONE_MINUTE_MILLISECONDS;
-                    }
-
-                    GateStartRacingProcedure procedure = getRaceState().getTypedRacingProcedure();
-                    procedure.setGateLineOpeningTimes(MillisecondsTimePoint.now(), launch, golf);
-                    goHome();
+                if (mTimeLaunch != null) {
+                    launch = mTimeLaunch.getValue() * ONE_MINUTE_MILLISECONDS;
                 }
+                if (mTimeGolf != null) {
+                    golf = mTimeGolf.getValue() * ONE_MINUTE_MILLISECONDS;
+                }
+
+                GateStartRacingProcedure procedure = getRaceState().getTypedRacingProcedure();
+                procedure.setGateLineOpeningTimes(MillisecondsTimePoint.now(), launch, golf);
+                goHome();
             });
         }
     }

@@ -71,18 +71,13 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
         ListView listView = ViewHelper.get(layout, R.id.listView);
         if (listView != null) {
             Flags flag = getFlag();
-            listView.setAdapter(new AbortFlagsAdapter(getActivity(), this, flag));
+            listView.setAdapter(new AbortFlagsAdapter(requireContext(), this, flag));
         }
 
         HeaderLayout header = ViewHelper.get(layout, R.id.header);
         if (header != null) {
             header.setHeaderText(getArguments().getString(HEADER_TEXT, getString(R.string.not_available)));
-            header.setHeaderOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
-                }
-            });
+            header.setHeaderOnClickListener(v -> sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT));
         }
 
         return layout;
@@ -139,20 +134,7 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
         RaceListFragment.showProtest(getActivity(), getRace());
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        sendIntent(AppConstants.INTENT_ACTION_TIME_SHOW);
-    }
-
-    private abstract class ActionWithNowTimePoint implements Runnable {
+    private static abstract class ActionWithNowTimePoint implements Runnable {
         private final TimePoint now;
 
         public ActionWithNowTimePoint(TimePoint now) {
@@ -233,66 +215,63 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
         recyclerView.setAdapter(adapter);
         builder.setTitle(R.string.abort_title);
         builder.setView(layout);
-        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                // We assume that adapter.getSelected() returns the races in an order such that races occurring at
-                // lesser
-                // indices may depend (directly or transitively) on races with greater indices, but not the other way
-                // around.
-                final List<ManagedRace> racesToAbort = adapter.getSelected();
-                final Set<ActionWithNowTimePoint> actions = new HashSet<>();
-                for (final ManagedRace raceToAbort : racesToAbort) { // raceToAbort is "R" from bug 3148 comment #2
-                    final List<ManagedRace> dependentRaces = activity.getRacesWithStartTimeImmediatelyDependingOn(
-                            raceToAbort,
-                            new RaceLogRaceStatus[] { RaceLogRaceStatus.STARTPHASE, RaceLogRaceStatus.RUNNING,
-                                    RaceLogRaceStatus.FINISHING, RaceLogRaceStatus.FINISHED }); // Q
-                    final Iterable<SimpleRaceLogIdentifier> dependingOnRaces = raceToAbort.getState()
-                            .getStartTimeFinderResult().getDependingOnRaces();
-                    final SimpleRaceLogIdentifier immediatelyDependsOnRace = dependingOnRaces.iterator().hasNext()
-                            ? dependingOnRaces.iterator().next()
-                            : null; // P
-                    // create abort command for raceToAbort; if it has a relative start time and immediately depends on
-                    // another race that is also to be aborted
-                    // renew the relative start time in the new pass; if it has a relative start time and immediately
-                    // depends on another race that is *not*
-                    // to be aborted, only abort but leave without start time definition.
-                    if (immediatelyDependsOnRace != null) {
-                        final ManagedRace raceStateOfRaceThatTheRaceToBeAbortedImmediatelyDependsUpon = getManagedRace(
-                                racesToAbort, immediatelyDependsOnRace);
-                        if (raceStateOfRaceThatTheRaceToBeAbortedImmediatelyDependsUpon != null) {
-                            // the race on which raceToAbort depends immediately also is to be aborted
-                            final Duration startTimeDiff = raceToAbort.getState().getStartTimeFinderResult()
-                                    .getStartTimeDiff();
-                            actions.add(new AbortAndRenewRelativeStartTime(raceToAbort, now, flag, startTimeDiff,
-                                    immediatelyDependsOnRace));
-                        } else {
-                            // the race on which raceToAbort depends immediately is NOT to be aborted
-                            actions.add(new AbortAction(raceToAbort, now, flag));
-                        }
+        builder.setPositiveButton(android.R.string.ok, (dialog, which) -> {
+            // We assume that adapter.getSelected() returns the races in an order such that races occurring at
+            // lesser
+            // indices may depend (directly or transitively) on races with greater indices, but not the other way
+            // around.
+            final List<ManagedRace> racesToAbort = adapter.getSelected();
+            final Set<ActionWithNowTimePoint> actions = new HashSet<>();
+            for (final ManagedRace raceToAbort : racesToAbort) { // raceToAbort is "R" from bug 3148 comment #2
+                final List<ManagedRace> dependentRaces = activity.getRacesWithStartTimeImmediatelyDependingOn(
+                        raceToAbort,
+                        new RaceLogRaceStatus[] { RaceLogRaceStatus.STARTPHASE, RaceLogRaceStatus.RUNNING,
+                                RaceLogRaceStatus.FINISHING, RaceLogRaceStatus.FINISHED }); // Q
+                final Iterable<SimpleRaceLogIdentifier> dependingOnRaces = raceToAbort.getState()
+                        .getStartTimeFinderResult().getDependingOnRaces();
+                final SimpleRaceLogIdentifier immediatelyDependsOnRace = dependingOnRaces.iterator().hasNext()
+                        ? dependingOnRaces.iterator().next()
+                        : null; // P
+                // create abort command for raceToAbort; if it has a relative start time and immediately depends on
+                // another race that is also to be aborted
+                // renew the relative start time in the new pass; if it has a relative start time and immediately
+                // depends on another race that is *not*
+                // to be aborted, only abort but leave without start time definition.
+                if (immediatelyDependsOnRace != null) {
+                    final ManagedRace raceStateOfRaceThatTheRaceToBeAbortedImmediatelyDependsUpon = getManagedRace(
+                            racesToAbort, immediatelyDependsOnRace);
+                    if (raceStateOfRaceThatTheRaceToBeAbortedImmediatelyDependsUpon != null) {
+                        // the race on which raceToAbort depends immediately also is to be aborted
+                        final Duration startTimeDiff = raceToAbort.getState().getStartTimeFinderResult()
+                                .getStartTimeDiff();
+                        actions.add(new AbortAndRenewRelativeStartTime(raceToAbort, now, flag, startTimeDiff,
+                                immediatelyDependsOnRace));
                     } else {
+                        // the race on which raceToAbort depends immediately is NOT to be aborted
                         actions.add(new AbortAction(raceToAbort, now, flag));
                     }
-                    for (final ManagedRace dependentRace : dependentRaces) { // dependentRace is "Q" from bug 3148
-                                                                             // comment #2
-                        final RaceState raceStateOfDependentRace = dependentRace.getState();
-                        if (!racesToAbort.contains(dependentRace)) {
-                            // materialize an absolute start time for dependentRace
-                            actions.add(new MaterializeAbsoluteStartTime(now, dependentRace,
-                                    raceStateOfDependentRace.getStartTimeFinderResult().getStartTime()));
-                        }
+                } else {
+                    actions.add(new AbortAction(raceToAbort, now, flag));
+                }
+                for (final ManagedRace dependentRace : dependentRaces) { // dependentRace is "Q" from bug 3148
+                                                                         // comment #2
+                    final RaceState raceStateOfDependentRace = dependentRace.getState();
+                    if (!racesToAbort.contains(dependentRace)) {
+                        // materialize an absolute start time for dependentRace
+                        actions.add(new MaterializeAbsoluteStartTime(now, dependentRace,
+                                raceStateOfDependentRace.getStartTimeFinderResult().getStartTime()));
                     }
                 }
-                if (!racesToAbort.isEmpty() && flag != Flags.NONE) {
-                    setProtestTime();
-                }
-                for (final ActionWithNowTimePoint action : actions) {
-                    action.run();
-                }
-                if (!racesToAbort.contains(getRace())) {
-                    BroadcastManager.getInstance(getActivity())
-                            .addIntent(new Intent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT));
-                }
+            }
+            if (!racesToAbort.isEmpty() && flag != Flags.NONE) {
+                setProtestTime();
+            }
+            for (final ActionWithNowTimePoint action : actions) {
+                action.run();
+            }
+            if (!racesToAbort.contains(getRace())) {
+                BroadcastManager.getInstance(getActivity())
+                        .addIntent(new Intent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT));
             }
         });
         builder.setNegativeButton(R.string.abort_dismiss, null);

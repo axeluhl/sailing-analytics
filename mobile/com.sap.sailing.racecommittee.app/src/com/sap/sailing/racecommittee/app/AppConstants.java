@@ -48,18 +48,11 @@ public class AppConstants {
     public final static String INTENT_ACTION_TOGGLE_AREA = "area";
     public final static String INTENT_ACTION_TOGGLE_POSITION = "position";
 
-    private final static String INTENT_ACTION_TIME = PACKAGE_NAME + "action.time";
-    public final static String INTENT_ACTION_TIME_HIDE = INTENT_ACTION_TIME + ".hide";
-    public final static String INTENT_ACTION_TIME_SHOW = INTENT_ACTION_TIME + ".show";
-
     public final static String INTENT_ACTION_CHECK_LOGIN = "show_empty_screen";
     public final static String INTENT_ACTION_SHOW_ONBOARDING = "show_onboarding";
     public final static String INTENT_ACTION_SHOW_LOGIN = "show_login";
     public final static String INTENT_ACTION_VALID_DATA = "valid_data";
     public final static String INTENT_ACTION_SHOW_WELCOME = "show_welcome";
-
-    // clears all toggle buttons
-    public final static String INTENT_ACTION_CLEAR_TOGGLE = PACKAGE_NAME + ".action.toggle.clear";
 
     public final static String INTENT_ACTION_UPDATE_SCREEN = PACKAGE_NAME + ".action.update.screen";
     public final static String INTENT_ACTION_SHOW_MAIN_CONTENT = PACKAGE_NAME + ".action.show.main";

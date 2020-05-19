@@ -1,7 +1,17 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.panels;
 
-import static com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult.ResolutionFailed.NO_START_TIME_SET;
-
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.BroadcastManager;
@@ -18,9 +28,20 @@ import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.ui.NavigationEvents;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.AbortFlagsFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.CourseFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.GateStartPathFinderFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.GateStartTimingFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.MoreFlagsFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.PenaltyFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFinishingFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFlagViewerFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RecallFlagsFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.StartModeFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.StartProcedureFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.StartTimeFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.TrackingListFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.WindFragment;
 import com.sap.sailing.racecommittee.app.ui.layouts.TimePanelHeaderLayout;
 import com.sap.sailing.racecommittee.app.ui.views.PanelButton;
 import com.sap.sailing.racecommittee.app.utils.RaceHelper;
@@ -30,21 +51,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.content.LocalBroadcastManager;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
+import static com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult.ResolutionFailed.NO_START_TIME_SET;
 
 public class TimePanelFragment extends BasePanelFragment implements NavigationEvents.NavigationListener {
 
@@ -53,7 +60,6 @@ public class TimePanelFragment extends BasePanelFragment implements NavigationEv
 
 
     private RaceStateChangedListener mStateListener;
-    private IntentReceiver mReceiver;
 
     private TimePanelHeaderLayout mRaceHeader;
     private PanelButton mCompetitorList;
@@ -70,7 +76,7 @@ public class TimePanelFragment extends BasePanelFragment implements NavigationEv
     private boolean mCompetitorToggleOn;
 
     public TimePanelFragment() {
-        mReceiver = new IntentReceiver();
+
     }
 
     public static TimePanelFragment newInstance(Bundle args) {
@@ -140,11 +146,6 @@ public class TimePanelFragment extends BasePanelFragment implements NavigationEv
 
         getRaceState().addChangedListener(mStateListener);
 
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(AppConstants.INTENT_ACTION_TIME_SHOW);
-        filter.addAction(AppConstants.INTENT_ACTION_TIME_HIDE);
-        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(mReceiver, filter);
-
         if (mCompetitorToggleOn) {
             mCompetitorList.setMarkerLevel(PanelButton.LEVEL_TOGGLED);
         }
@@ -157,7 +158,6 @@ public class TimePanelFragment extends BasePanelFragment implements NavigationEv
         getRaceState().removeChangedListener(mStateListener);
 
         TickSingleton.INSTANCE.unregisterListener(this);
-        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(mReceiver);
     }
 
     @Override
@@ -278,6 +278,8 @@ public class TimePanelFragment extends BasePanelFragment implements NavigationEv
             setMarkerLevel(mRaceHeader, R.id.time_marker, LEVEL_NORMAL);
             mCompetitorToggleOn = true;
         }
+        handlePanelTimeVisibility(fragment);
+
     }
 
     @Override
@@ -403,30 +405,36 @@ public class TimePanelFragment extends BasePanelFragment implements NavigationEv
         }
     }
 
-    private class IntentReceiver extends BroadcastReceiver {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (isAdded()) {
-                String action = intent.getAction();
-                final FragmentActivity fragmentActivity = requireActivity();
-                View view = fragmentActivity.findViewById(R.id.race_panel_time);
-                if (fragmentActivity.findViewById(R.id.race_edit) == null && view != null) {
-                    if (AppConstants.INTENT_ACTION_TIME_HIDE.equals(action)) {
-                        view.setVisibility(View.GONE);
-                    }
-
-                    if (AppConstants.INTENT_ACTION_TIME_SHOW.equals(action)) {
-                        view.setVisibility(View.VISIBLE);
-                    }
-                }
-            }
-        }
-    }
-
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean(COMPETITOR_TOGGLE_STATE_ON, mCompetitorToggleOn);
+    }
+
+    private void setPanelTimeVisibility(final boolean visible) {
+        final FragmentActivity fragmentActivity = requireActivity();
+        View view = fragmentActivity.findViewById(R.id.race_panel_time);
+        if (fragmentActivity.findViewById(R.id.race_edit) == null && view != null) {
+            view.setVisibility(visible ? View.VISIBLE : View.GONE);
+        }
+    }
+
+    private void handlePanelTimeVisibility(Fragment fragment) {
+        boolean shouldHide = fragment instanceof AbortFlagsFragment ||
+                fragment instanceof CourseFragment ||
+                fragment instanceof GateStartPathFinderFragment ||
+                fragment instanceof GateStartTimingFragment ||
+                fragment instanceof MoreFlagsFragment ||
+                fragment instanceof MoreFlagsFragment.FinishTimeFragment ||
+                fragment instanceof RecallFlagsFragment ||
+                fragment instanceof StartModeFragment ||
+                fragment instanceof StartProcedureFragment ||
+                fragment instanceof WindFragment;
+        boolean shouldShow = fragment instanceof PenaltyFragment ||
+                             fragment instanceof TrackingListFragment ||
+                             fragment instanceof RaceFinishingFragment ||
+                             fragment instanceof StartTimeFragment ||
+                             fragment instanceof RaceFlagViewerFragment;
+        setPanelTimeVisibility(!shouldHide && shouldShow);
     }
 }
