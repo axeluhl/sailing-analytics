@@ -191,33 +191,6 @@ public class RaceLogReplicationTest extends AbstractLogReplicationTest<RaceLog, 
     }
     
     /**
-     * See also bug5282
-     */
-    @Test
-    public void testRaceEventReplicationOnRenamingFlexibleLeaderboard() throws ClassNotFoundException, IOException, InterruptedException {
-        final String leaderboardName = "Test";
-        final String fleetName = "Default";
-        final String raceColumnName = "R1";
-        FlexibleLeaderboard masterLeaderboard = setupFlexibleLeaderboard(leaderboardName);
-        RaceLog masterLog = setupRaceColumn(leaderboardName, fleetName, raceColumnName);
-        replicaReplicator.startToReplicateFrom(masterDescriptor);
-        masterLog.add(raceLogEvent);
-        final String newLeaderboardName = leaderboardName + "new";
-        final UpdateLeaderboard renameOperation = new UpdateLeaderboard(
-                leaderboardName, masterLeaderboard.getDisplayName(), ((ThresholdBasedResultDiscardingRule) masterLeaderboard.getResultDiscardingRule()).getDiscardIndexResultsStartingWithHowManyRaces(),
-                Util.map(masterLeaderboard.getCourseAreas(), CourseArea::getId));
-        master.apply(renameOperation);
-        Thread.sleep(3000);
-        final RaceLog replicaLog = getReplicaLog(fleetName, raceColumnName, masterLeaderboard);
-        addAndValidateEventIds(masterLog, replicaLog, anotherRaceLogEvent);
-        // now verify that the race log event is still there when loading the master RacingEventService from its persistence layer again:
-        final RacingEventService loadedService = new RacingEventServiceImpl();
-        final Leaderboard loadedLeaderboard = loadedService.getLeaderboardByName(newLeaderboardName);
-        final RaceLog loadedRaceLog = loadedLeaderboard.getRaceColumnByName(raceColumnName).getRaceLog(loadedLeaderboard.getRaceColumnByName(raceColumnName).getFleetByName(fleetName));
-        assertEqualsOnId(masterLog, loadedRaceLog);
-    }
-    
-    /**
      * See bug 1666; a race log reload operation may not properly have been replicating. This tests asserts that when a race log event
      * has been added to the DB and then race log is re-loaded on the master, the events added through the DB also show up on the replica.
      */
