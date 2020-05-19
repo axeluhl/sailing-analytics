@@ -90,7 +90,7 @@ public class LeaderboardDescriptor {
         this.displayName = displayName;
     }
 
-    public Iterable<UUID> getCourseAreaIds() {
+    public List<UUID> getCourseAreaIds() {
         return courseAreaIds;
     }
 
