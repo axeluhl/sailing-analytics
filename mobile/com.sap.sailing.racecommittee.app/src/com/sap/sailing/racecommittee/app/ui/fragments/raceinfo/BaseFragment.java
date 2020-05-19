@@ -9,6 +9,7 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.NavigationEvents;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 
+import android.content.Context;
 import android.support.annotation.IdRes;
 import android.support.annotation.IntDef;
 import android.support.v4.app.FragmentTransaction;
@@ -53,9 +54,12 @@ public class BaseFragment extends RaceFragment {
         if (getArguments() != null) {
             fragment.getArguments().putAll(getArguments());
         }
-        FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        transaction.replace(viewId, fragment);
-        transaction.commit();
+
+        if (getFragmentManager() != null) {
+            FragmentTransaction transaction = getFragmentManager().beginTransaction();
+            transaction.replace(viewId, fragment);
+            transaction.commit();
+        }
     }
 
     protected void goHome() {
@@ -67,8 +71,8 @@ public class BaseFragment extends RaceFragment {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
+    public void onAttach(Context context) {
+        super.onAttach(context);
         ExLog.i(getActivity(), TAG, "attach fragment " + this.getClass().getSimpleName());
         NavigationEvents.INSTANCE.attach(this);
     }

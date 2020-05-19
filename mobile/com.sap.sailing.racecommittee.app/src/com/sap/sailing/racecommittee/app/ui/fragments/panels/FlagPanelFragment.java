@@ -15,7 +15,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RecallFlagsFragme
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
 
-import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
 
 import android.os.Bundle;
@@ -125,12 +125,15 @@ public class FlagPanelFragment extends BasePanelFragment implements NavigationEv
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         if (savedInstanceState != null) {
-            flagStates.putAll((Map<Integer, Boolean>) savedInstanceState.getSerializable(STATE_CURRENT_FLAG));
+            final Map<Integer, Boolean> stateFlags = (Map<Integer, Boolean>) savedInstanceState.getSerializable(STATE_CURRENT_FLAG);
+            if (stateFlags != null) {
+                flagStates.putAll(stateFlags);
+            }
         }
     }
 
     @Override
-    public void onAttach(Activity activity) {
+    public void onAttach(Context activity) {
         super.onAttach(activity);
         NavigationEvents.INSTANCE.subscribeFragmentAttachment(this);
     }
@@ -278,7 +281,7 @@ public class FlagPanelFragment extends BasePanelFragment implements NavigationEv
     private void updateOneMarker(View view, boolean checked) {
         final int level = checked ? LEVEL_TOGGLED : LEVEL_NORMAL;
         if (isAdded()) {
-            if (view!=null) {
+            if (view != null) {
                 flagStates.put(view.getId(), checked);
             }
             if (mAbandonFlags.equals(view)) {

@@ -10,22 +10,20 @@ import android.os.Handler;
 import android.support.annotation.IdRes;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.widget.ImageView;
 
-import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.ui.NavigationEvents;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseFragment;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
 public abstract class BasePanelFragment extends RaceFragment {
-    private final static String TAG = BaseFragment.class.getSimpleName();
     /**
      * Marker level is unknown, due to an error
      */
@@ -51,7 +49,7 @@ public abstract class BasePanelFragment extends RaceFragment {
     protected int toggleMarker(View view, @IdRes int resId) {
         int retValue = LEVEL_UNKNOWN;
 
-        ImageView image = (ImageView) view.findViewById(resId);
+        final ImageView image = view.findViewById(resId);
         if (image != null) {
             Drawable drawable = image.getDrawable();
             if (drawable != null) {
@@ -75,7 +73,7 @@ public abstract class BasePanelFragment extends RaceFragment {
         int retValue = LEVEL_UNKNOWN;
 
         if (isAdded()) {
-            ImageView image = (ImageView) view.findViewById(resId);
+            final ImageView image = view.findViewById(resId);
             if (image != null) {
                 Drawable drawable = image.getDrawable();
                 if (drawable != null) {
@@ -111,20 +109,17 @@ public abstract class BasePanelFragment extends RaceFragment {
         int retValue = LEVEL_UNKNOWN;
 
         if (view != null && isAdded()) {
-            ImageView image = (ImageView) view.findViewById(resId);
+            final ImageView image = view.findViewById(resId);
             if (image != null) {
-                Drawable drawable = image.getDrawable();
+                final Drawable drawable = image.getDrawable();
                 if (drawable != null) {
                     drawable.setLevel(level);
                     retValue = drawable.getLevel();
-                    switch (retValue) {
-                    case LEVEL_TOGGLED:
-                        view.setBackgroundColor(ThemeHelper.getColor(getActivity(), R.attr.sap_gray_black_20));
-                        break;
-
-                    default:
-                        view.setBackgroundColor(ThemeHelper.getColor(getActivity(), R.attr.sap_gray));
-                        break;
+                    final FragmentActivity activity = requireActivity();
+                    if (retValue == LEVEL_TOGGLED) {
+                        view.setBackgroundColor(ThemeHelper.getColor(activity, R.attr.sap_gray_black_20));
+                    } else {
+                        view.setBackgroundColor(ThemeHelper.getColor(activity, R.attr.sap_gray));
                     }
                 }
             }
@@ -161,7 +156,7 @@ public abstract class BasePanelFragment extends RaceFragment {
 
     protected void resetFragment(boolean isLocked, @IdRes int idRes, Class<? extends BaseFragment> cls) {
         if (isLocked && getFragmentManager() != null) {
-            Fragment fragment = getFragmentManager().findFragmentById(idRes);
+            final Fragment fragment = getFragmentManager().findFragmentById(idRes);
             if (fragment != null) {
                 if (cls.getCanonicalName().equals(fragment.getClass().getCanonicalName())) {
                     sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
@@ -171,11 +166,13 @@ public abstract class BasePanelFragment extends RaceFragment {
     }
 
     protected void replaceFragment(RaceFragment fragment) {
-        replaceFragment(fragment, getFrameId(getActivity(), R.id.race_edit, R.id.race_content, true));
+        replaceFragment(fragment, getFrameId(requireActivity(), R.id.race_edit, R.id.race_content, true));
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     protected void replaceFragment(RaceFragment fragment, @IdRes int idRes) {
+        final FragmentActivity activity = requireActivity();
+
         Bundle args = getRecentArguments();
         if (fragment.getArguments() != null) {
             args.putAll(fragment.getArguments());
@@ -184,8 +181,11 @@ public abstract class BasePanelFragment extends RaceFragment {
         FragmentManager manager = getFragmentManager();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
             if (getParentFragment() != null) {
-                manager = getActivity().getSupportFragmentManager();
+                manager = activity.getSupportFragmentManager();
             }
+        }
+        if (manager == null) {
+            return;
         }
         FragmentTransaction transaction = manager.beginTransaction();
         if (idRes != R.id.race_content) {
@@ -221,26 +221,9 @@ public abstract class BasePanelFragment extends RaceFragment {
         container.setClickable(false);
         container.setBackgroundColor(getResources().getColor(R.color.constant_sap_yellow_1));
         Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                container.setClickable(true);
-                setMarkerLevel(container, resId, getMarkerLevel(container, resId));
-            }
+        handler.postDelayed(() -> {
+            container.setClickable(true);
+            setMarkerLevel(container, resId, getMarkerLevel(container, resId));
         }, delay);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        ExLog.i(getActivity(), TAG, "attach fragment " + this.getClass().getSimpleName());
-        NavigationEvents.INSTANCE.attach(this);
-    }
-
-    @Override
-    public void onDetach() {
-        ExLog.i(getActivity(), TAG, "detach fragment " + this.getClass().getSimpleName());
-        NavigationEvents.INSTANCE.detach(this);
-        super.onDetach();
     }
 }

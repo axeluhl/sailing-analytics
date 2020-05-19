@@ -25,11 +25,13 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.support.annotation.IntDef;
+import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -37,7 +39,7 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
 
     @IntDef({ MOVE_DOWN, MOVE_NONE, MOVE_UP })
     @Retention(RetentionPolicy.SOURCE)
-    protected @interface MOVE_VALUES {
+    @interface MOVE_VALUES {
     }
 
     private static final String TAG = RaceFragment.class.getSimpleName();
@@ -102,17 +104,6 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
         }
     }
 
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-
-        BaseActivity baseActivity = (BaseActivity) activity;
-        if (baseActivity != null) {
-            preferences = baseActivity.getPreferences();
-        } else {
-            preferences = AppPreferences.on(activity);
-        }
-    }
 
     @Override
     public void onStart() {
@@ -200,15 +191,16 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
         }
 
         // tint all dots gray
+        final FragmentActivity activity = requireActivity();
         for (ImageView mDot : mDots) {
-            int tint = ThemeHelper.getColor(getActivity(), R.attr.sap_light_gray);
-            Drawable drawable = BitmapHelper.getTintedDrawable(getActivity(), R.drawable.ic_dot, tint);
+            int tint = ThemeHelper.getColor(activity, R.attr.sap_light_gray);
+            Drawable drawable = BitmapHelper.getTintedDrawable(activity, R.drawable.ic_dot, tint);
             mDot.setImageDrawable(drawable);
         }
 
         // tint current dot black
-        int tint = ThemeHelper.getColor(getActivity(), R.attr.black);
-        Drawable drawable = BitmapHelper.getTintedDrawable(getActivity(), R.drawable.ic_dot, tint);
+        int tint = ThemeHelper.getColor(activity, R.attr.black);
+        Drawable drawable = BitmapHelper.getTintedDrawable(activity, R.drawable.ic_dot, tint);
         mDots.get(mActivePage).setImageDrawable(drawable);
 
         // hide all panels
@@ -223,8 +215,16 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        if (context instanceof BaseActivity) {
+            BaseActivity baseActivity = (BaseActivity) context;
+            preferences = baseActivity.getPreferences();
+        } else {
+            preferences = AppPreferences.on(context);
+        }
+
         ExLog.i(getActivity(), TAG, "attach fragment " + this.getClass().getSimpleName());
         NavigationEvents.INSTANCE.attach(this);
     }

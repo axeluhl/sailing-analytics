@@ -10,7 +10,6 @@ import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.PhotoListFragment
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.TrackingListFragment;
 
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -70,7 +69,7 @@ public class FinishedButtonFragment extends BasePanelFragment implements Navigat
             mPhoto.setOnClickListener(new PhotoClick());
         }
         mPhotoLock = ViewHelper.get(layout, R.id.photo_lock);
-        if (!isCameraAvailable(getActivity())) {
+        if (!isCameraAvailable(requireContext())) {
             mPhotoLock.setVisibility(View.VISIBLE);
         }
 
@@ -100,8 +99,8 @@ public class FinishedButtonFragment extends BasePanelFragment implements Navigat
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
+    public void onAttach(Context context) {
+        super.onAttach(context);
         NavigationEvents.INSTANCE.subscribeFragmentAttachment(this);
     }
 
@@ -111,26 +110,21 @@ public class FinishedButtonFragment extends BasePanelFragment implements Navigat
         NavigationEvents.INSTANCE.unSubscribeFragmentAttachment(this);
     }
 
-    private void uncheckMarker(View view) {
+    private void uncheckMarker() {
         if (isAdded()) {
-            if (!mRecord.equals(view)) {
-                // TODO
-                setMarkerLevel(mRecord, R.id.record_marker, LEVEL_NORMAL);
-            }
+            // TODO
+            setMarkerLevel(mRecord, R.id.record_marker, LEVEL_NORMAL);
 
-            if (!mPhoto.equals(view)) {
-                resetFragment(null, getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false),
-                        PhotoListFragment.class);
-                setMarkerLevel(mPhoto, R.id.photo_marker, LEVEL_NORMAL);
-            }
+            resetFragment(null, getFrameId(requireActivity(), R.id.race_edit, R.id.race_content, false),
+                    PhotoListFragment.class);
+            setMarkerLevel(mPhoto, R.id.photo_marker, LEVEL_NORMAL);
 
-            if (!mList.equals(view)) {
-                resetFragment(null, getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false),
-                        TrackingListFragment.class);
-                setMarkerLevel(mList, R.id.list_marker, LEVEL_NORMAL);
-            }
+            resetFragment(null, getFrameId(requireActivity(), R.id.race_edit, R.id.race_content, false),
+                    TrackingListFragment.class);
+            setMarkerLevel(mList, R.id.list_marker, LEVEL_NORMAL);
         }
     }
+
     private void updateMarker(View view, boolean checked) {
         int level = checked ? LEVEL_TOGGLED : LEVEL_NORMAL;
         if (isAdded()) {
@@ -152,19 +146,19 @@ public class FinishedButtonFragment extends BasePanelFragment implements Navigat
 
     @Override
     public void onFragmentAttach(Fragment fragment) {
-        uncheckMarker(null);
-        if (fragment instanceof PhotoListFragment){
+        uncheckMarker();
+        if (fragment instanceof PhotoListFragment) {
             updateMarker(mPhoto, true);
-        } else if (fragment instanceof TrackingListFragment){
+        } else if (fragment instanceof TrackingListFragment) {
             updateMarker(mList, true);
         }
     }
 
     @Override
     public void onFragmentDetach(Fragment fragment) {
-        if (fragment instanceof PhotoListFragment){
+        if (fragment instanceof PhotoListFragment) {
             updateMarker(mPhoto, false);
-        } else if (fragment instanceof TrackingListFragment){
+        } else if (fragment instanceof TrackingListFragment) {
             updateMarker(mList, false);
         }
     }
@@ -175,17 +169,17 @@ public class FinishedButtonFragment extends BasePanelFragment implements Navigat
         public void onClick(View v) {
             if (mRecordLock == null || mRecordLock.getVisibility() == View.GONE) {
                 switch (toggleMarker(v, R.id.record_marker)) {
-                case LEVEL_NORMAL:
-                    sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
-                    break;
+                    case LEVEL_NORMAL:
+                        sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
+                        break;
 
-                case LEVEL_TOGGLED:
-                    // TODO
-                    break;
+                    case LEVEL_TOGGLED:
+                        // TODO
+                        break;
 
-                default:
-                    ExLog.i(getActivity(), TAG, "Unknown return value");
-                    break;
+                    default:
+                        ExLog.i(getActivity(), TAG, "Unknown return value");
+                        break;
                 }
             }
         }
@@ -197,18 +191,18 @@ public class FinishedButtonFragment extends BasePanelFragment implements Navigat
         public void onClick(View v) {
             if (mPhotoLock == null || mPhotoLock.getVisibility() == View.GONE) {
                 switch (toggleMarker(v, R.id.photo_marker)) {
-                case LEVEL_NORMAL:
-                    sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
-                    break;
+                    case LEVEL_NORMAL:
+                        sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
+                        break;
 
-                case LEVEL_TOGGLED:
-                    replaceFragment(PhotoListFragment.newInstance(getRecentArguments()),
-                            getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content, true));
-                    break;
+                    case LEVEL_TOGGLED:
+                        replaceFragment(PhotoListFragment.newInstance(getRecentArguments()),
+                                getFrameId(requireActivity(), R.id.finished_edit, R.id.finished_content, true));
+                        break;
 
-                default:
-                    ExLog.i(getActivity(), TAG, "Unknown return value");
-                    break;
+                    default:
+                        ExLog.i(getActivity(), TAG, "Unknown return value");
+                        break;
                 }
             }
         }
@@ -220,18 +214,18 @@ public class FinishedButtonFragment extends BasePanelFragment implements Navigat
         public void onClick(View v) {
             if (mListLock == null || mListLock.getVisibility() == View.GONE) {
                 switch (toggleMarker(v, R.id.list_marker)) {
-                case LEVEL_NORMAL:
-                    sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
-                    break;
+                    case LEVEL_NORMAL:
+                        sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
+                        break;
 
-                case LEVEL_TOGGLED:
-                    replaceFragment(TrackingListFragment.newInstance(getRecentArguments(), 0),
-                            getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content, true));
-                    break;
+                    case LEVEL_TOGGLED:
+                        replaceFragment(TrackingListFragment.newInstance(getRecentArguments(), 0),
+                                getFrameId(requireActivity(), R.id.finished_edit, R.id.finished_content, true));
+                        break;
 
-                default:
-                    ExLog.i(getActivity(), TAG, "Unknown return value");
-                    break;
+                    default:
+                        ExLog.i(getActivity(), TAG, "Unknown return value");
+                        break;
                 }
             }
         }
