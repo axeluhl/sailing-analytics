@@ -9,15 +9,12 @@
 </head>
 <body>
 <h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
-<h2>URL: /api/v1/usergroups/</h2>
+<h2>URL: /api/restsecurity/usergroups/setDefaultTenantForCurrentServerAndUser</h2>
 
-<p class="deprecationMessage">This API is deprecated and will be removed in near future.<br>
-  Please use <a href="/security/api/restsecurity/usergroup/list/groupsUserIsPartOf">GET /security/api/restsecurity/usergroup/list/groupsUserIsPartOf</a> instead!<br>
-  For more information see the <a href=/security/webservices/api/usergroup.html>Security API documentation</a>.
-</p>
-<br>
 <b>Description:</b>
-<p>Gets the usergroup names and id's the currently logged in user is part of</p>
+<p>Sets the users default tenant to the given usergroup or clears any prior assignment.
+This default tenant or "group" is the group used for the group ownership of new objects
+created on the user's behalf.</p>
 <br/>
 <table>
     <tr>
@@ -26,18 +23,23 @@
     </tr>
     <tr>
         <td>Output format:</td>
-        <td>Json</td>
-    </tr>
-    <tr>
-        <td>Mandatory parameters:</td>
         <td>none</td>
     </tr>
     <tr>
-        <td>Examples:</td>
-        <td>
-            Get @ http://sapsailing.com/sailingserver/api/v1/usergroups/
-            <br>
-        </td>
+        <td>Mandatory parameters:</td>
+        <td>None</td>
+    </tr>
+    <tr>
+        <td>Optional parameters:</td>
+        <td>tenantGroup UUID of the new tenant group, can be null</td>
+    </tr>
+    <tr>
+        <td>Request method:</td>
+        <td>POST</td>
+    </tr>
+    <tr>
+        <td>Example:</td>
+        <td><a href="http://sapsailing.com/security/api/restsecurity/usergroup/setDefaultTenantForCurrentServerAndUser?tenantGroup=e406d1c5-d613-48d7-9d56-f0573ad61194"/>http://sapsailing.com/security/api/restsecurity/usergroup/setDefaultTenantForCurrentServerAndUser?tenantGroup=e406d1c5-d613-48d7-9d56-f0573ad61194</td>
     </tr>
 </table>
 <div style="height: 1em;"></div>

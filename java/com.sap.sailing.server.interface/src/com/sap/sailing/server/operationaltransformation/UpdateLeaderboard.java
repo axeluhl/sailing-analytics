@@ -1,7 +1,9 @@
 package com.sap.sailing.server.operationaltransformation;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -16,7 +18,7 @@ public class UpdateLeaderboard extends AbstractLeaderboardOperation<Leaderboard>
     private final String newLeaderboardName;
     private final String newLeaderboardDisplayName;
     private final int[] newDiscardingThresholds;
-    private final Iterable<? extends Serializable> newCourseAreaIds;
+    private final Collection<Serializable> newCourseAreaIds;
     
     public UpdateLeaderboard(String leaderboardName, String newLeaderboardName, String newLeaderboardDisplayName,
             int[] newDiscardingThresholds, Iterable<? extends Serializable> newCourseAreaIds) {
@@ -24,7 +26,8 @@ public class UpdateLeaderboard extends AbstractLeaderboardOperation<Leaderboard>
         this.newLeaderboardName = newLeaderboardName;
         this.newLeaderboardDisplayName = newLeaderboardDisplayName;
         this.newDiscardingThresholds = newDiscardingThresholds;
-        this.newCourseAreaIds = newCourseAreaIds;
+        this.newCourseAreaIds = new ArrayList<>();
+        Util.addAll(newCourseAreaIds, this.newCourseAreaIds);
     }
 
     @Override
