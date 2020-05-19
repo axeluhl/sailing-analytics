@@ -683,6 +683,13 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     void registerCustomizer(SecurityInitializationCustomizer customizer);
     
+    /**
+     * Persist user subscription data
+     * 
+     * @param username
+     * @param subscription
+     * @throws UserManagementException
+     */
     void updateUserSubscription(String username, Subscription subscription) throws UserManagementException;
 
 }

@@ -9,14 +9,14 @@ import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.home.shared.places.user.profile.subscription.UserProfileSubscriptionPlace;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 
-public class UserProfileSubscriptionTabView extends Composite implements UserProfileTabView<UserProfileSubscriptionPlace> {
-    
+public class UserProfileSubscriptionTabView extends Composite
+        implements UserProfileTabView<UserProfileSubscriptionPlace> {
+
     private UserProfileSubscriptionView view;
     private UserProfileSubscriptionView.Presenter currentPresenter;
 
     @Override
     public Class<UserProfileSubscriptionPlace> getPlaceClassForActivation() {
-        // TODO Auto-generated method stub
         return UserProfileSubscriptionPlace.class;
     }
 

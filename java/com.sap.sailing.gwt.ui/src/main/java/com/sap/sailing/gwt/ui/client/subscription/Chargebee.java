@@ -14,24 +14,27 @@ import jsinterop.annotations.JsType;
 public class Chargebee {
     /**
      * Init Chargebee module {@link https://www.chargebee.com/checkout-portal-docs/api.html#chargebee-object}
+     * 
      * @param options
      * @return
      */
     public static native ChargebeeInstance init(InitOption options);
-    
+
     /**
      * Get Chargebee instance which is available only after initialization
      * {@link https://www.chargebee.com/checkout-portal-docs/api.html#getinstance}
+     * 
      * @return
      */
     public static native ChargebeeInstance getInstance();
-    
+
     public static class InitOption extends JavaScriptObject {
-        protected InitOption() {}
-        
+        protected InitOption() {
+        }
+
         public static native InitOption create(String site) /*-{
             return {
-                site: site
+                site : site
             };
         }-*/;
     }

@@ -8,9 +8,9 @@ import com.sap.sse.security.ui.authentication.decorator.NotLoggedInPresenter;
 public interface UserProfileSubscriptionView extends IsWidget {
 
     void setPresenter(Presenter presenter);
-    
+
     NeedsAuthenticationContext getDecorator();
-    
+
     public interface Presenter extends NotLoggedInPresenter, NeedsAuthenticationContext {
         UserSubscriptionView.Presenter getUserSubscriptionPresenter();
     }

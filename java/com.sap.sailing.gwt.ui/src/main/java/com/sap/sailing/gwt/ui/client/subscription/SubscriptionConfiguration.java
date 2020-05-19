@@ -1,8 +1,7 @@
 package com.sap.sailing.gwt.ui.client.subscription;
 
 /**
- * Chargebee configuration.
- * From frontend side we need to know Chargebee site
+ * Chargebee configuration. From frontend side we need to know Chargebee site
  * 
  * @author tutran
  */

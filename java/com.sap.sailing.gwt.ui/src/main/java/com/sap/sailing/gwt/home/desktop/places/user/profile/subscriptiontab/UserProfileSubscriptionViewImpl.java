@@ -14,9 +14,11 @@ public class UserProfileSubscriptionViewImpl extends Composite implements UserPr
     }
 
     private static MyBinder uiBinder = GWT.create(MyBinder.class);
-    
-    @UiField(provided = true) AuthorizedContentDecoratorDesktop decoratorUi;
-    @UiField(provided = true) UserSubscription userSubscriptionUi;
+
+    @UiField(provided = true)
+    AuthorizedContentDecoratorDesktop decoratorUi;
+    @UiField(provided = true)
+    UserSubscription userSubscriptionUi;
 
     @Override
     public void setPresenter(Presenter presenter) {
@@ -24,7 +26,7 @@ public class UserProfileSubscriptionViewImpl extends Composite implements UserPr
         userSubscriptionUi = new UserSubscription(presenter.getUserSubscriptionPresenter());
         initWidget(uiBinder.createAndBindUi(this));
     }
-    
+
     @Override
     protected void onLoad() {
         super.onLoad();
