@@ -13,7 +13,7 @@ import java.util.UUID;
  *
  */
 public enum PredefinedRoles {
-    spectator(UUID.fromString("244cb84c-2b8a-4557-b175-db963072cfbc"), "spectator", Collections.<String>emptyList()),
+    spectator(UUID.fromString("244cb84c-2b8a-4557-b175-db963072cfbc"), "spectator", Collections.emptyList()),
     moderator(UUID.fromString("91c88a11-c977-4c24-b0a6-15bac0525764"), "moderator", asList("TRACKED_RACE:CAN_REPLAY_DURING_LIVE_RACES,DETAIL_TIMER")),
     mediaeditor(UUID.fromString("2e22583b-c9c1-4ee4-8231-e8e320a8a411"), "mediaeditor", asList("MEDIA_TRACK:*"));
     
@@ -21,7 +21,7 @@ public enum PredefinedRoles {
     private final String rolename;
     private final Iterable<String> permissions;
     
-    private PredefinedRoles(UUID id, String rolename, Iterable<String> permissions) {
+    PredefinedRoles(UUID id, String rolename, Iterable<String> permissions) {
         this.id = id;
         this.rolename = rolename;
         this.permissions = permissions;

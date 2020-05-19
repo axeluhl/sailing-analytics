@@ -23,11 +23,12 @@ import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.osgi.CachedOsgiTypeBasedServiceFinderFactory;
 import com.sap.sse.replication.ReplicationService;
+import com.sap.sse.rest.StreamingOutputUtil;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.util.DateParser;
 import com.sun.jersey.api.core.ResourceContext;
 
-public abstract class AbstractSailingServerResource {
+public abstract class SharedAbstractSailingServerResource extends StreamingOutputUtil {
     private static final String SLASH_ENCODING = "__";
     @Context ServletContext servletContext;
     @Context ResourceContext resourceContext;

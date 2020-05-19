@@ -44,7 +44,7 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
         canBoatsOfCompetitorsChangePerRaceCheckBox.setEnabled(false);
         scoringSchemeListBox.setEnabled(false);
         sailingEventsListBox.setEnabled(true);
-        courseAreaListBox.setEnabled(true);
+        courseAreaSelection.setEnabled(true);
         regattaConfigurationCheckbox = createCheckbox(stringMessages.setRacingProcedureConfiguration());
         regattaConfigurationCheckbox.ensureDebugId("RacingProcedureConfigurationCheckBox");
         regattaConfigurationCheckbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
@@ -83,7 +83,7 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
 
     @Override
     protected FocusWidget getInitialFocusWidget() {
-        return courseAreaListBox;
+        return this.nameEntryField;
     }
 
     @Override

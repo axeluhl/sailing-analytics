@@ -976,6 +976,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String editCompetitor();
     String pleaseEnterASailNumber();
     String pleaseEnterASailNumberOrABoatName();
+    String addCompetitor();
+    String editCompetitorWithBoat();
+    String withBoat();
     String successfullyAllowedCompetitorReset(String names);
     String successfullyAllowedBoatReset(String names);
     String allowReload();
@@ -2388,4 +2391,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String inTrial();
     String paymentStatusSuccess();
     String paymentStatusNoSuccess();
+    String unableToLoadCourseAreas(String message);
 }

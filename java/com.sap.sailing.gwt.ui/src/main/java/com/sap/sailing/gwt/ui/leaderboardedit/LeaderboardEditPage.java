@@ -17,7 +17,7 @@ import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.common.communication.routing.ProvidesLeaderboardRouting;
 import com.sap.sailing.gwt.settings.client.leaderboardedit.LeaderboardEditContextDefinition;
-import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
+import com.sap.sailing.gwt.ui.client.AbstractSailingWriteEntryPoint;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
@@ -30,7 +30,7 @@ import com.sap.sse.security.ui.authentication.generic.GenericAuthentication;
 import com.sap.sse.security.ui.authentication.generic.GenericAuthorizedContentDecorator;
 import com.sap.sse.security.ui.authentication.generic.sapheader.SAPHeaderWithAuthentication;
 
-public class LeaderboardEditPage extends AbstractSailingEntryPoint implements ProvidesLeaderboardRouting {
+public class LeaderboardEditPage extends AbstractSailingWriteEntryPoint implements ProvidesLeaderboardRouting {
     private static final Logger logger = Logger.getLogger(LeaderboardEntryPoint.class.getName());
     private String leaderboardName;
     
@@ -120,4 +120,5 @@ public class LeaderboardEditPage extends AbstractSailingEntryPoint implements Pr
     public String getLeaderboardName() {
         return leaderboardName;
     }
+
 }

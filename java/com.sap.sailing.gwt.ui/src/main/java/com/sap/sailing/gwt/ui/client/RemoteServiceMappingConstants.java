@@ -19,6 +19,8 @@ public interface RemoteServiceMappingConstants {
     public static final String mediaServiceRemotePath = "service/media";
 
     public static final String sailingServiceRemotePath = "service/sailing";
+    
+    public static final String sailingServiceWriteRemotePath = "service/sailingmaster";
 
     public static final String serverConfigurationServiceRemotePath = "service/serverconfiguration";
 

@@ -239,7 +239,7 @@ public class RaceStateService extends Service {
         DataStore dataStore = dataManager.getDataStore();
         dataStore.getRaces().clear();
         dataStore.setEventUUID(null);
-        dataStore.setCourseUUID(null);
+        dataStore.setCourseAreaId(null);
         ExLog.i(this, TAG, "handleClearRaces: Cleared all races.");
         stopSelf();
     }

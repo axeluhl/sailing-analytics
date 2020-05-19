@@ -1,5 +1,8 @@
 package com.sap.sse.security.jaxrs.api;
 
+import java.io.BufferedWriter;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -17,6 +20,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.shiro.SecurityUtils;
@@ -124,7 +128,7 @@ public class OwnershipResource extends AbstractSecurityResource {
         result.put(KEY_GROUP_ID, existingOwnership == null || existingOwnership.getAnnotation().getTenantOwner() == null ? null : existingOwnership.getAnnotation().getTenantOwner().getId().toString());
         result.put(KEY_USERNAME, existingOwnership == null || existingOwnership.getAnnotation().getUserOwner() == null ? null : existingOwnership.getAnnotation().getUserOwner().getName());
         result.put(KEY_DISPLAY_NAME, existingOwnership == null || existingOwnership.getDisplayNameOfAnnotatedObject() == null ? null : existingOwnership.getDisplayNameOfAnnotatedObject());
-        return Response.ok(result.toJSONString()).build();
+        return Response.ok((StreamingOutput) (OutputStream output)->result.writeJSONString(new BufferedWriter(new OutputStreamWriter(output)))).build();
     }
 
     @Path("{objectType}/{typeRelativeObjectId}/acl")
@@ -151,7 +155,7 @@ public class OwnershipResource extends AbstractSecurityResource {
                 actionsForGroup.put(KEY_ACTIONS, actions);
             }
         }
-        return Response.ok(result.toJSONString()).build();
+        return Response.ok((StreamingOutput) (OutputStream output)->result.writeJSONString(new BufferedWriter(new OutputStreamWriter(output)))).build();
     }
 
     @Path("{objectType}/{typeRelativeObjectId}/acl")
