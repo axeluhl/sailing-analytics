@@ -370,6 +370,17 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public void clear() {
+        if (mongoObjectFactory != null) {
+            users.values().forEach(mongoObjectFactory::deleteUser);
+            userGroups.values().forEach(mongoObjectFactory::deleteUserGroup);
+            roleDefinitions.values().forEach(mongoObjectFactory::deleteRoleDefinition);
+            mongoObjectFactory.deleteAllPreferences();
+            mongoObjectFactory.deleteAllSettings();
+        }
+        removeAll();
+    }
+
+    private void removeAll() {
         userGroups.clear();
         userGroupsByName.clear();
         LockUtil.lockForWrite(userGroupsUserCacheLock);
@@ -387,6 +398,7 @@ public class UserStoreImpl implements UserStore {
         roleDefinitions.clear();
         usersByEmail.clear();
         usersByAccessToken.clear();
+
     }
 
     /**
