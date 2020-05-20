@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
@@ -21,10 +20,9 @@ import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 public abstract class AbstractRoleDefinitionDialog extends DataEntryDialog<RoleDefinitionDTO> {
-    static class RoleValidator implements DataEntryDialog.Validator<RoleDefinitionDTO> {
+    private static class RoleValidator implements DataEntryDialog.Validator<RoleDefinitionDTO> {
         private final StringMessages stringMessages;
         private final Map<String, RoleDefinition> allOtherRoles;
-        private boolean roleDefinitionNameFieldChanged = false;
 
         public RoleValidator(StringMessages stringMessages, Iterable<RoleDefinitionDTO> allOtherRoles) {
             super();
@@ -40,16 +38,12 @@ public abstract class AbstractRoleDefinitionDialog extends DataEntryDialog<RoleD
             final String result;
             if (valueToValidate.getName() == null || valueToValidate.getName().isEmpty()) {
                 result = stringMessages.pleaseEnterARoleName();
-            } else if (roleDefinitionNameFieldChanged && allOtherRoles.containsKey(valueToValidate.getName())) {
+            } else if (allOtherRoles.containsKey(valueToValidate.getName())) {
                 result = stringMessages.otherRoleWithNameAlreadyExists(valueToValidate.getName());
             } else {
                 result = null;
             }
             return result;
-        }
-        
-        void setRoleDefinitionNameFieldChanged(ChangeEvent ce) {
-            this.roleDefinitionNameFieldChanged = true;
         }
     }
 
@@ -57,14 +51,12 @@ public abstract class AbstractRoleDefinitionDialog extends DataEntryDialog<RoleD
     protected final GenericStringListInlineEditorComposite<WildcardPermission> permissionsList;
     private final StringMessages stringMessages;
 
-    public AbstractRoleDefinitionDialog(StringMessages stringMessages,
-            Iterable<WildcardPermission> allExistingPermissions, RoleValidator roleValidator,
-            DialogCallback<RoleDefinitionDTO> callback) {
+    public AbstractRoleDefinitionDialog(StringMessages stringMessages, Iterable<WildcardPermission> allExistingPermissions,
+            Iterable<RoleDefinitionDTO> allOtherRoles, DialogCallback<RoleDefinitionDTO> callback) {
         super(stringMessages.roles(), stringMessages.editRoles(), stringMessages.ok(), stringMessages.cancel(),
-                roleValidator, /* animationEnabled */ true, callback);
+                new RoleValidator(stringMessages, allOtherRoles), /* animationEnabled */ true, callback);
         this.stringMessages = stringMessages;
         roleDefinitionNameField = createTextBox("", /* visible length */ 20);
-        roleDefinitionNameField.addChangeHandler(roleValidator::setRoleDefinitionNameFieldChanged);
         permissionsList = new GenericStringListInlineEditorComposite<WildcardPermission>(Collections.emptySet(),
                 stringMessages, IconResources.INSTANCE.removeIcon(), Util.map(allExistingPermissions, p->p.toString()),
                 /* text box size */ 20) {
