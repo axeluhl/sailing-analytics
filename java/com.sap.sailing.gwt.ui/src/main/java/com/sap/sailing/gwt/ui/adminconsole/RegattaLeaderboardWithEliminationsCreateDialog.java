@@ -23,6 +23,7 @@ public class RegattaLeaderboardWithEliminationsCreateDialog extends RegattaLeade
                 new LeaderboardDescriptor(), Collections.emptySet()), existingRegattas,
                 existingLeaderboards, stringMessages,
                 errorReporter, new RegattaLeaderboardWithEliminationsDialog.LeaderboardParameterValidator(stringMessages, existingLeaderboards), callback);
+        nameTextBox.setEnabled(true); // a name can be selected during creation of a regatta leaderboard with eliminations
     }
 
     @Override

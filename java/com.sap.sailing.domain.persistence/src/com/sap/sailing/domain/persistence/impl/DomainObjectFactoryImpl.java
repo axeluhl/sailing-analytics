@@ -590,8 +590,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                     + " for corresponding regatta leaderboard. Not loading regatta leaderboard.");
         } else {
             result = new RegattaLeaderboardImpl(regatta, resultDiscardingRule);
-            result.setName(leaderboardName); // this will temporarily set the display name; it will be adjusted later if
-                                             // a display name is found
         }
         return result;
     }

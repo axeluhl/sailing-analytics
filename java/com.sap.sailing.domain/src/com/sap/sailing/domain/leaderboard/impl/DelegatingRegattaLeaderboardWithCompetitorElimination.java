@@ -106,10 +106,6 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
         return name;
     }
 
-    public void setName(String newName) {
-        getFullLeaderboard().setName(newName);
-    }
-
     @Override
     public Iterable<Competitor> getCompetitors() {
         return new ObscuringIterable<>(getFullLeaderboard().getCompetitors(), eliminatedCompetitors.keySet());

@@ -243,15 +243,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     void removeLeaderboard(String leaderboardName);
 
-    /**
-     * Renames a leaderboard. If a leaderboard by the name <code>oldName</code> does not exist in {@link #getLeaderboards()},
-     * or if a leaderboard with the name <code>newName</code> already exists, an {@link IllegalArgumentException} is thrown.
-     * If the method completes normally, the rename has been successful, and the leaderboard previously obtained by calling
-     * {@link #getLeaderboardByName(String) getLeaderboardByName(oldName)} can now be obtained by calling
-     * {@link #getLeaderboardByName(String) getLeaderboardByName(newName)}.
-     */
-    void renameLeaderboard(String oldName, String newName);
-
     RaceColumn addColumnToLeaderboard(String columnName, String leaderboardName, boolean medalRace);
 
     void moveLeaderboardColumnUp(String leaderboardName, String columnName);
