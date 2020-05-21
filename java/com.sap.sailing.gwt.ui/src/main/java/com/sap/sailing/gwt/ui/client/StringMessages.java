@@ -2389,7 +2389,17 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String openPortal();
     String plans();
     String inTrial();
+    String trialText(String endIn, String endAt);
+    String numHours(int hours);
+    String numDays(int days);
+    String numMinutes(int minutes);
     String paymentStatusSuccess();
     String paymentStatusNoSuccess();
+    String errorLoadingUserSubscription(String errMessage);
+    String failGeneratingHostedPageObject();
+    String errorOpenCheckout(String errMessage);
+    String failedCancelSubscription();
+    String errorCancelSubscription(String errMessage);
+    String errorSaveSubscription(String errMessage);
     String unableToLoadCourseAreas(String message);
 }

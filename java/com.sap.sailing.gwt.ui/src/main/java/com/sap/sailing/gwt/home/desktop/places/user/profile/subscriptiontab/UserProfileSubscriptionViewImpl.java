@@ -35,7 +35,6 @@ public class UserProfileSubscriptionViewImpl extends Composite implements UserPr
 
     @Override
     public NeedsAuthenticationContext getDecorator() {
-        // TODO Auto-generated method stub
         return decoratorUi;
     }
 

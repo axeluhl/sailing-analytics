@@ -19,27 +19,27 @@ public class Subscription implements Serializable {
     /**
      * Subscription id from Chargebee
      */
-    public String subscriptionId;
+    private String subscriptionId;
     
     /**
      * Current subscription plan id
      */
-    public String planId;
+    private String planId;
     
     /**
      * Chargebee's customer id, this is same as the system's user name
      */
-    public String customerId;
+    private String customerId;
     
     /**
      * Subscription trial start timestamp
      */
-    public long trialStart;
+    private long trialStart;
     
     /**
      * Subscription trial end timestamp
      */
-    public long trialEnd;
+    private long trialEnd;
     
     /**
      * Subscription status, it could be in_trial, active, or cancelled.
@@ -47,24 +47,24 @@ public class Subscription implements Serializable {
      * active means the subscription is active
      * cancelled means the subscription has been cancelled(by user or by admin from Chargebee dashboard)
      */
-    public String subscriptionStatus;
+    private String subscriptionStatus;
     
     /**
      * Subscription payment status, it records if user has successfully paid for the subscription.
      * User will pay for the subscription only if the subscription is turned to active(after trial period)
      * If user has successfully paid for the subscription, this has value "success", otherwise "no_success"
      */
-    public String paymentStatus;
+    private String paymentStatus;
     
     /**
      * Record the creating timestamp of the Chargebee's subscription
      */
-    public long subsciptionCreatedAt;
+    private long subsciptionCreatedAt;
     
     /**
      * Record the updating timestamp of the Chargebee's subscription
      */
-    public long subsciptionUpdatedAt;
+    private long subsciptionUpdatedAt;
     
     /**
      * Record the timestamp of the latest handled webhook event.
@@ -73,12 +73,100 @@ public class Subscription implements Serializable {
      * 
      * {@link https://www.chargebee.com/docs/webhook_settings.html#automatic-retries}
      */
-    public long latestEventTime;
+    private long latestEventTime;
     
     /**
      * Record the timestamp the subscription was updated by user using the system, like changing plan or cancel subscription.
      * Reason is Chargebee will retried to send us failed webhook events, so with this timestamp we'll process only webhook events
      * occur after this timestamp, otherwise we'll update with old data.
      */
-    public long manualUpdatedAt;
+    private long manualUpdatedAt;
+
+    public String getSubscriptionId() {
+        return subscriptionId;
+    }
+
+    public void setSubscriptionId(String subscriptionId) {
+        this.subscriptionId = subscriptionId;
+    }
+
+    public String getPlanId() {
+        return planId;
+    }
+
+    public void setPlanId(String planId) {
+        this.planId = planId;
+    }
+
+    public String getCustomerId() {
+        return customerId;
+    }
+
+    public void setCustomerId(String customerId) {
+        this.customerId = customerId;
+    }
+
+    public long getTrialStart() {
+        return trialStart;
+    }
+
+    public void setTrialStart(long trialStart) {
+        this.trialStart = trialStart;
+    }
+
+    public long getTrialEnd() {
+        return trialEnd;
+    }
+
+    public void setTrialEnd(long trialEnd) {
+        this.trialEnd = trialEnd;
+    }
+
+    public String getSubscriptionStatus() {
+        return subscriptionStatus;
+    }
+
+    public void setSubscriptionStatus(String subscriptionStatus) {
+        this.subscriptionStatus = subscriptionStatus;
+    }
+
+    public String getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public void setPaymentStatus(String paymentStatus) {
+        this.paymentStatus = paymentStatus;
+    }
+
+    public long getSubsciptionCreatedAt() {
+        return subsciptionCreatedAt;
+    }
+
+    public void setSubsciptionCreatedAt(long subsciptionCreatedAt) {
+        this.subsciptionCreatedAt = subsciptionCreatedAt;
+    }
+
+    public long getSubsciptionUpdatedAt() {
+        return subsciptionUpdatedAt;
+    }
+
+    public void setSubsciptionUpdatedAt(long subsciptionUpdatedAt) {
+        this.subsciptionUpdatedAt = subsciptionUpdatedAt;
+    }
+
+    public long getLatestEventTime() {
+        return latestEventTime;
+    }
+
+    public void setLatestEventTime(long latestEventTime) {
+        this.latestEventTime = latestEventTime;
+    }
+
+    public long getManualUpdatedAt() {
+        return manualUpdatedAt;
+    }
+
+    public void setManualUpdatedAt(long manualUpdatedAt) {
+        this.manualUpdatedAt = manualUpdatedAt;
+    }
 }

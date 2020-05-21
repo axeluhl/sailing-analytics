@@ -312,17 +312,17 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         }
         
         Document doc = new Document();
-        doc.put(FieldNames.Subscription.SUBSCRIPTION_ID.name(), subscription.subscriptionId);
-        doc.put(FieldNames.Subscription.PLAN_ID.name(), subscription.planId);
-        doc.put(FieldNames.Subscription.CUSTOMER_ID.name(), subscription.customerId);
-        doc.put(FieldNames.Subscription.TRIAL_START.name(), subscription.trialStart);
-        doc.put(FieldNames.Subscription.TRIAL_END.name(), subscription.trialEnd);
-        doc.put(FieldNames.Subscription.SUBSCRIPTION_STATUS.name(), subscription.subscriptionStatus);
-        doc.put(FieldNames.Subscription.PAYMENT_STATUS.name(), subscription.paymentStatus);
-        doc.put(FieldNames.Subscription.SUBSCRIPTION_CREATED_AT.name(), subscription.subsciptionCreatedAt);
-        doc.put(FieldNames.Subscription.SUBSCRIPTION_UPDATED_AT.name(), subscription.subsciptionUpdatedAt);
-        doc.put(FieldNames.Subscription.LATEST_EVENT_TIME.name(), subscription.latestEventTime);
-        doc.put(FieldNames.Subscription.MANUAL_UPDATED_AT.name(), subscription.manualUpdatedAt);
+        doc.put(FieldNames.Subscription.SUBSCRIPTION_ID.name(), subscription.getSubscriptionId());
+        doc.put(FieldNames.Subscription.PLAN_ID.name(), subscription.getPlanId());
+        doc.put(FieldNames.Subscription.CUSTOMER_ID.name(), subscription.getCustomerId());
+        doc.put(FieldNames.Subscription.TRIAL_START.name(), subscription.getTrialStart());
+        doc.put(FieldNames.Subscription.TRIAL_END.name(), subscription.getTrialEnd());
+        doc.put(FieldNames.Subscription.SUBSCRIPTION_STATUS.name(), subscription.getSubscriptionStatus());
+        doc.put(FieldNames.Subscription.PAYMENT_STATUS.name(), subscription.getPaymentStatus());
+        doc.put(FieldNames.Subscription.SUBSCRIPTION_CREATED_AT.name(), subscription.getSubsciptionCreatedAt());
+        doc.put(FieldNames.Subscription.SUBSCRIPTION_UPDATED_AT.name(), subscription.getSubsciptionUpdatedAt());
+        doc.put(FieldNames.Subscription.LATEST_EVENT_TIME.name(), subscription.getLatestEventTime());
+        doc.put(FieldNames.Subscription.MANUAL_UPDATED_AT.name(), subscription.getManualUpdatedAt());
         
         return doc;
     }

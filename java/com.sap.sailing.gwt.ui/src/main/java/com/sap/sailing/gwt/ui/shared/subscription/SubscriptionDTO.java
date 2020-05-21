@@ -18,32 +18,32 @@ public class SubscriptionDTO implements IsSerializable {
     /**
      * User current subscription plan id
      */
-    public String planId;
+    private String planId;
 
     /**
      * Trial start timestamp
      */
-    public long trialStart;
+    private long trialStart;
 
     /**
      * Trial end timestamp
      */
-    public long trialEnd;
+    private long trialEnd;
 
     /**
      * Subscription status: active or in_trial
      */
-    public String subscriptionStatus;
+    private String subscriptionStatus;
 
     /**
      * Subscription payment status: success or no_success
      */
-    public String paymentStatus;
+    private String paymentStatus;
 
     /**
      * Error message
      */
-    public String error;
+    private String error;
 
     /**
      * Check if subscription is in trial status
@@ -51,7 +51,7 @@ public class SubscriptionDTO implements IsSerializable {
      * @return
      */
     public boolean isInTrial() {
-        return subscriptionStatus.equals(SUBSCRIPTION_STATUS_TRIAL);
+        return subscriptionStatus != null && subscriptionStatus.equals(SUBSCRIPTION_STATUS_TRIAL);
     }
 
     /**
@@ -60,11 +60,11 @@ public class SubscriptionDTO implements IsSerializable {
      * @return
      */
     public boolean isActive() {
-        return subscriptionStatus.equals(SUBSCRIPTION_STATUS_ACTIVE);
+        return subscriptionStatus != null && subscriptionStatus.equals(SUBSCRIPTION_STATUS_ACTIVE);
     }
 
     public boolean isPaymentSuccess() {
-        return paymentStatus.equals(PAYMENT_STATUS_SUCCESS);
+        return paymentStatus != null && paymentStatus.equals(PAYMENT_STATUS_SUCCESS);
     }
 
     /**
@@ -99,5 +99,53 @@ public class SubscriptionDTO implements IsSerializable {
         }
 
         return "";
+    }
+
+    public String getPlanId() {
+        return planId;
+    }
+
+    public void setPlanId(String planId) {
+        this.planId = planId;
+    }
+
+    public long getTrialStart() {
+        return trialStart;
+    }
+
+    public void setTrialStart(long trialStart) {
+        this.trialStart = trialStart;
+    }
+
+    public long getTrialEnd() {
+        return trialEnd;
+    }
+
+    public void setTrialEnd(long trialEnd) {
+        this.trialEnd = trialEnd;
+    }
+
+    public String getSubscriptionStatus() {
+        return subscriptionStatus;
+    }
+
+    public void setSubscriptionStatus(String subscriptionStatus) {
+        this.subscriptionStatus = subscriptionStatus;
+    }
+
+    public String getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public void setPaymentStatus(String paymentStatus) {
+        this.paymentStatus = paymentStatus;
+    }
+
+    public String getError() {
+        return error;
+    }
+
+    public void setError(String error) {
+        this.error = error;
     }
 }

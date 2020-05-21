@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.Response;
 
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -32,7 +33,7 @@ public class SubscriptionWebhookServlet extends SailingServerHttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         try {
             Object requestBody = JSONValue.parseWithException(request.getReader());
             JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
@@ -45,7 +46,7 @@ public class SubscriptionWebhookServlet extends SailingServerHttpServlet {
 
             User user = getUser(event.getCustomerId());
             if (user == null) {
-                response.setStatus(200);
+                sendSuccess(response);
                 return;
             }
 
@@ -55,75 +56,79 @@ public class SubscriptionWebhookServlet extends SailingServerHttpServlet {
 
             // Verify the event time, only process if event time is larger than last success processed event and last
             // updated time by user
-            if (userSubscription != null && occuredAt < user.getSubscription().latestEventTime
-                    && occuredAt < user.getSubscription().manualUpdatedAt) {
-                response.setStatus(200);
+            if (userSubscription != null && occuredAt < user.getSubscription().getLatestEventTime()
+                    && occuredAt < user.getSubscription().getManualUpdatedAt()) {
+                sendSuccess(response);
                 return;
             }
 
-            switch (event.getEventType()) {
-            case SubscriptionWebhookEvent.EVENT_CUSTOMER_DELETED:
+            EventType eventType = event.getEventType();
+            if (eventType == null) {
+                sendSuccess(response);
+                return;
+            }
+
+            switch (eventType) {
+            case CUSTOMER_DELETED:
                 updateUserSubscription(user, buildEmptySubscription(userSubscription, event));
                 break;
-            case SubscriptionWebhookEvent.EVENT_SUBSCRIPTION_CANCELLED:
-            case SubscriptionWebhookEvent.EVENT_SUBSCRIPTION_DELETED:
-                if (userSubscription != null && userSubscription.subscriptionId != null
-                        && userSubscription.subscriptionId.equals(event.getSubscriptionId())) {
+            case SUBSCRIPTION_CANCELLED:
+            case SUBSCRIPTION_DELETED:
+                if (userSubscription != null && userSubscription.getSubscriptionId() != null
+                        && userSubscription.getSubscriptionId().equals(event.getSubscriptionId())) {
                     updateUserSubscription(user, buildEmptySubscription(userSubscription, event));
                 }
                 break;
-            case SubscriptionWebhookEvent.EVENT_SUBSCRIPTION_CREATED:
-            case SubscriptionWebhookEvent.EVENT_SUBSCRIPTION_CHANGED:
-            case SubscriptionWebhookEvent.EVENT_SUBSCRIPTION_ACTIVATED:
-            case SubscriptionWebhookEvent.EVENT_PAYMENT_SUCCEEDED:
-            case SubscriptionWebhookEvent.EVENT_PAYMENT_FAILED:
+            case SUBSCRIPTION_CREATED:
+            case SUBSCRIPTION_CHANGED:
+            case SUBSCRIPTION_ACTIVATED:
+            case PAYMENT_SUCCEEDED:
+            case PAYMENT_FAILED:
                 updateUserSubscription(user, buildSubscription(userSubscription, event));
                 break;
             }
 
-            response.setStatus(200);
+            sendSuccess(response);
         } catch (ParseException e) {
-            e.printStackTrace();
             logger.log(Level.WARNING, "Failed to parse subscription webhook event data: " + e.getMessage());
-            response.setStatus(500);
+            sendFail(response);
         } catch (Exception e) {
-            e.printStackTrace();
             logger.log(Level.WARNING, "Failed to proccess subscription webhook event: " + e.getMessage());
-            response.setStatus(500);
+            sendFail(response);
         }
     }
 
     private Subscription buildEmptySubscription(Subscription currentSubscription, SubscriptionWebhookEvent event) {
         Subscription subscription = new Subscription();
-        subscription.latestEventTime = event.getEventOccurredAt();
-        subscription.manualUpdatedAt = currentSubscription != null ? currentSubscription.manualUpdatedAt : 0;
+        subscription.setLatestEventTime(event.getEventOccurredAt());
+        subscription.setManualUpdatedAt(currentSubscription != null ? currentSubscription.getManualUpdatedAt() : 0);
         return subscription;
     }
 
     private Subscription buildSubscription(Subscription currentSubscription, SubscriptionWebhookEvent event) {
         Subscription subscription = new Subscription();
 
-        subscription.subscriptionId = event.getSubscriptionId();
-        subscription.planId = event.getPlanId();
-        subscription.customerId = event.getCustomerId();
-        subscription.trialStart = event.getSubscriptionTrialStart();
-        subscription.trialEnd = event.getSubscriptionTrialEnd();
-        subscription.subscriptionStatus = event.getSubscriptionStatus();
-        subscription.subsciptionCreatedAt = event.getSubscriptionCreatedAt();
-        subscription.subsciptionUpdatedAt = event.getSubscriptionUpdatedAt();
-        subscription.latestEventTime = event.getEventOccurredAt();
-        subscription.manualUpdatedAt = currentSubscription != null ? currentSubscription.manualUpdatedAt : 0;
+        subscription.setSubscriptionId(event.getSubscriptionId());
+        subscription.setPlanId(event.getPlanId());
+        subscription.setCustomerId(event.getCustomerId());
+        subscription.setTrialStart(event.getSubscriptionTrialStart());
+        subscription.setTrialEnd(event.getSubscriptionTrialEnd());
+        subscription.setSubscriptionStatus(event.getSubscriptionStatus());
+        subscription.setSubsciptionCreatedAt(event.getSubscriptionCreatedAt());
+        subscription.setSubsciptionUpdatedAt(event.getSubscriptionUpdatedAt());
+        subscription.setLatestEventTime(event.getEventOccurredAt());
+        subscription.setManualUpdatedAt(currentSubscription != null ? currentSubscription.getManualUpdatedAt() : 0);
 
-        if (subscription.subscriptionStatus != null
-                && subscription.subscriptionStatus.equals(SubscriptionWebhookEvent.SUBSCRIPTION_STATUS_ACTIVE)) {
+        if (subscription.getSubscriptionStatus() != null
+                && subscription.getSubscriptionStatus().equals(SubscriptionWebhookEvent.SUBSCRIPTION_STATUS_ACTIVE)) {
             String paymentStatus = getEventPaymentStatus(event);
             if (paymentStatus != null) {
-                subscription.paymentStatus = paymentStatus;
+                subscription.setPaymentStatus(paymentStatus);
             } else {
-                subscription.paymentStatus = currentSubscription != null ? currentSubscription.paymentStatus : null;
+                subscription.setPaymentStatus(currentSubscription != null ? currentSubscription.getPaymentStatus() : null);
             }
         } else {
-            subscription.paymentStatus = null;
+            subscription.setPaymentStatus(null);
         }
 
         return subscription;
@@ -157,5 +162,13 @@ public class SubscriptionWebhookServlet extends SailingServerHttpServlet {
         }
 
         return paymentStatus;
+    }
+
+    private void sendSuccess(HttpServletResponse response) {
+        response.setStatus(Response.Status.OK.getStatusCode());
+    }
+
+    private void sendFail(HttpServletResponse response) {
+        response.setStatus(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
     }
 }

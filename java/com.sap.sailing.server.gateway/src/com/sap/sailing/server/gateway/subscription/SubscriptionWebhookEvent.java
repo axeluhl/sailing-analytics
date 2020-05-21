@@ -8,14 +8,6 @@ import org.json.simple.JSONObject;
  * @author tutran
  */
 public class SubscriptionWebhookEvent {
-    public static final String EVENT_CUSTOMER_DELETED = "customer_deleted";
-    public static final String EVENT_SUBSCRIPTION_DELETED = "subscription_deleted";
-    public static final String EVENT_SUBSCRIPTION_CREATED = "subscription_created";
-    public static final String EVENT_SUBSCRIPTION_CHANGED = "subscription_changed";
-    public static final String EVENT_SUBSCRIPTION_CANCELLED = "subscription_cancelled";
-    public static final String EVENT_PAYMENT_SUCCEEDED = "payment_succeeded";
-    public static final String EVENT_PAYMENT_FAILED = "payment_failed";
-    public static final String EVENT_SUBSCRIPTION_ACTIVATED = "subscription_activated";
 
     public static final String SUBSCRIPTION_STATUS_ACTIVE = "active";
     public static final String INVOICE_STATUS_PAID = "paid";
@@ -43,8 +35,12 @@ public class SubscriptionWebhookEvent {
         return eventId;
     }
 
-    public String getEventType() {
-        return eventType;
+    public EventType getEventType() {
+        try {
+            return EventType.valueOf(eventType.toUpperCase());
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public String getCustomerEmail() {

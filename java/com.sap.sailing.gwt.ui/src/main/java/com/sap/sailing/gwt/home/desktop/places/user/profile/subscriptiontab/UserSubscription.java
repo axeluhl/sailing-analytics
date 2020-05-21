@@ -14,15 +14,17 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.shared.places.user.profile.subscription.UserSubscriptionView;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionDTO;
 import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionPlans;
 import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionPlans.Plan;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 
 /**
  * View for displaying user subscription information like plan, subscription status...In this view user is able to
@@ -92,7 +94,7 @@ public class UserSubscription extends Composite implements UserSubscriptionView 
     @Override
     public void onOpenCheckoutError(String error) {
         updateSubscriptionButtonUi.setEnabled(true);
-        Window.alert(error);
+        Notification.notify(error, NotificationType.ERROR);
     }
 
     @Override
@@ -110,7 +112,7 @@ public class UserSubscription extends Composite implements UserSubscriptionView 
 
         Plan plan = null;
         if (subscription != null) {
-            plan = SubscriptionPlans.getPlan(subscription.planId);
+            plan = SubscriptionPlans.getPlan(subscription.getPlanId());
         }
 
         if (subscription == null || plan == null) {
@@ -149,28 +151,26 @@ public class UserSubscription extends Composite implements UserSubscriptionView 
             planListUi.setSelectedIndex(0);
         }
         List<Plan> planList = SubscriptionPlans.getPlanList();
-        for (int i = 0; i < planList.size(); i++) {
-            Plan plan = planList.get(i);
+        int i = 0;
+        for (Plan plan : planList) {
             planListUi.addItem(plan.getName(), plan.getId());
-            if (subscription != null && subscription.planId.equals(plan.getId())) {
+            if (subscription != null && subscription.getPlanId().equals(plan.getId())) {
                 planListUi.setSelectedIndex(i);
             }
+            i++;
         }
     }
 
     private String buildTrialText(SubscriptionDTO subscription) {
         long now = Math.round(Duration.currentTimeMillis() / 1000);
-        long remain = subscription.trialEnd - now;
+        long remain = subscription.getTrialEnd() - now;
         StringBuilder remainText = new StringBuilder();
         if (remain <= 0) {
-            remainText.append("0 day");
+            remainText.append(StringMessages.INSTANCE.numHours(0));
         } else {
-            long days = remain / 86400;
+            int days = (int) (remain / 86400);
             if (days > 0) {
-                remainText.append(days).append(" day");
-                if (days > 1) {
-                    remainText.append("s");
-                }
+                remainText.append(StringMessages.INSTANCE.numDays(days));
             }
             remain = remain % 86400;
             int hours = (int) (remain / 3600);
@@ -178,10 +178,7 @@ public class UserSubscription extends Composite implements UserSubscriptionView 
                 if (remainText.length() > 0) {
                     remainText.append(" ");
                 }
-                remainText.append(hours).append(" hour");
-                if (hours > 1) {
-                    remainText.append("s");
-                }
+                remainText.append(StringMessages.INSTANCE.numHours(hours));
             }
             if (days == 0) {
                 remain = remain % 3600;
@@ -190,24 +187,17 @@ public class UserSubscription extends Composite implements UserSubscriptionView 
                     if (remainText.length() > 0) {
                         remainText.append(" ");
                     }
-                    remainText.append(mins).append(" min");
-                    if (mins > 1) {
-                        remainText.append("s");
-                    }
+                    remainText.append(StringMessages.INSTANCE.numMinutes(mins));
                 }
             }
         }
 
         if (remainText.length() == 0) {
-            remainText.append("0 day");
+            remainText.append(StringMessages.INSTANCE.numHours(0));
         }
 
-        StringBuilder trialText = new StringBuilder();
-        trialText.append("Your trial expires in ").append(remainText.toString()).append(" (").append("ends on ")
-                .append(DateTimeFormat.getFormat("yyyy-MM-dd HH:mm").format(new Date(subscription.trialEnd * 1000)))
-                .append(")");
-
-        return trialText.toString();
+        return StringMessages.INSTANCE.trialText(remainText.toString(),
+                DateTimeFormat.getFormat("yyyy-MM-dd HH:mm").format(new Date(subscription.getTrialEnd() * 1000)));
     }
 
     private void resetElementsVisibleState() {

@@ -5,24 +5,24 @@ import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionDTO;
 
 public interface UserSubscriptionView extends IsWidget {
     /**
-     * This is called on start loading subscription data
+     * Called on start loading subscription data
      */
     public void onStartLoadSubscription();
 
     /**
-     * Call to update the view with subscription data returned from backend
+     * Update the view with subscription data returned from back-end
      * 
      * @param subscription
      */
     public void updateView(SubscriptionDTO subscription);
 
     /**
-     * Called on Chargebee checkout modal is closed
+     * Called on checkout modal is closed
      */
     public void onCloseCheckoutModal();
 
     /**
-     * Called on openning Chargebee checkout modal has errors
+     * Called on checkout modal has errors
      * 
      * @param error
      */
@@ -35,7 +35,7 @@ public interface UserSubscriptionView extends IsWidget {
      */
     public interface Presenter {
         /**
-         * Init Chargebee
+         * Initialize
          */
         public void init();
 
@@ -45,11 +45,10 @@ public interface UserSubscriptionView extends IsWidget {
         public void loadSubscription();
 
         /**
-         * Open Chargebee checkout modal from which user can create new subscription or change one if user is already in
-         * a subscription plan
+         * Open checkout modal from which user can create new subscription or change current subscription
          * 
          * @param planId
-         *            Id of plan user want to subscribe to
+         *            Id of plan to subscribe to
          */
         public void openCheckout(String planId);
 

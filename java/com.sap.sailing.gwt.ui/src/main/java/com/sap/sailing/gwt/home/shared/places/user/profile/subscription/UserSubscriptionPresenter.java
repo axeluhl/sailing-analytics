@@ -1,8 +1,8 @@
 package com.sap.sailing.gwt.home.shared.places.user.profile.subscription;
 
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithDispatch;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 import com.sap.sailing.gwt.ui.client.subscription.Chargebee;
 import com.sap.sailing.gwt.ui.client.subscription.CheckoutOption;
@@ -10,35 +10,30 @@ import com.sap.sailing.gwt.ui.client.subscription.SubscriptionConfiguration;
 import com.sap.sailing.gwt.ui.client.subscription.WithSubscriptionService;
 import com.sap.sailing.gwt.ui.shared.subscription.HostedPageResultDTO;
 import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionDTO;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.security.ui.authentication.WithAuthenticationManager;
 import com.sap.sse.security.ui.authentication.WithUserService;
 
-/**
- * Presenter for {@link UserSubscriptionView}, implementation of {@link UserSubscriptionView.Presenter}}, which handles
- * initializing Chargebee, opening and executing checkout, requesting user subscription data, and canceling user
- * subscription
- * 
- * @author tutran
- */
 public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & ErrorAndBusyClientFactory & WithAuthenticationManager & WithUserService & WithSubscriptionService>
         implements UserSubscriptionView.Presenter {
-
+    
     private final C clientFactory;
     private UserSubscriptionView view;
 
     /**
-     * Callback for Chargebee checkout success event
+     * Checkout success callback
      */
     private CheckoutOption.SuccessCallback onCheckoutSuccessCallback = new CheckoutOption.SuccessCallback() {
 
         @Override
         public void call(String hostedPageId) {
-            requestFinishingPlanUpgrading(hostedPageId);
+            requestFinishingPlanUpdating(hostedPageId);
         }
     };
 
     /**
-     * Callback for Chargebee checkout fail event
+     * Checkout fail callback
      */
     private CheckoutOption.ErrorCallback onCheckoutErrorCallback = new CheckoutOption.ErrorCallback() {
 
@@ -49,7 +44,7 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
     };
 
     /**
-     * Callback for Chargebee checkout modal close event
+     * Checkout modal close callback
      */
     private CheckoutOption.CloseCallback onCheckoutCloseCallback = new CheckoutOption.CloseCallback() {
 
@@ -76,8 +71,8 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
 
             @Override
             public void onSuccess(SubscriptionDTO result) {
-                if (result != null && result.error != null && !result.error.isEmpty()) {
-                    Window.alert("Get user subscription error: " + result.error);
+                if (result != null && result.getError() != null && !result.getError().isEmpty()) {
+                    showError(StringMessages.INSTANCE.errorLoadingUserSubscription(result.getError()));
                     return;
                 }
 
@@ -86,7 +81,7 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
 
             @Override
             public void onFailure(Throwable caught) {
-                Window.alert("Get user subscription failed: " + caught.getMessage());
+                showError(StringMessages.INSTANCE.errorLoadingUserSubscription(caught.getMessage()));
             }
         });
     }
@@ -111,13 +106,13 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
                                     onCheckoutSuccessCallback, onCheckoutErrorCallback, onCheckoutCloseCallback));
                             ;
                         } else {
-                            view.onOpenCheckoutError("Failed to generating hosted page object, please try again");
+                            view.onOpenCheckoutError(StringMessages.INSTANCE.failGeneratingHostedPageObject());
                         }
                     }
 
                     @Override
                     public void onFailure(Throwable caught) {
-                        view.onOpenCheckoutError("Checkout error: " + caught.getMessage());
+                        view.onOpenCheckoutError(StringMessages.INSTANCE.errorOpenCheckout(caught.getMessage()));
                     }
                 });
     }
@@ -129,7 +124,7 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
             @Override
             public void onSuccess(Boolean result) {
                 if (!result) {
-                    Window.alert("Failed to cancel the subscription");
+                    showError(StringMessages.INSTANCE.failedCancelSubscription());
                     return;
                 }
 
@@ -138,12 +133,12 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
 
             @Override
             public void onFailure(Throwable caught) {
-                Window.alert("Cancel subscription error: " + caught.getMessage());
+                showError(StringMessages.INSTANCE.errorCancelSubscription(caught.getMessage()));
             }
         });
     }
 
-    private void requestFinishingPlanUpgrading(String hostedPageId) {
+    private void requestFinishingPlanUpdating(String hostedPageId) {
         clientFactory.getSubscriptionService().updatePlanSuccess(hostedPageId, new AsyncCallback<SubscriptionDTO>() {
 
             @Override
@@ -155,9 +150,13 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
             @Override
             public void onFailure(Throwable caught) {
                 Chargebee.getInstance().closeAll();
-                Window.alert("Saving subscription data error: " + caught.getMessage());
+                showError(StringMessages.INSTANCE.errorSaveSubscription(caught.getMessage()));
             }
 
         });
+    }
+    
+    private void showError(String message) {
+        Notification.notify(message, NotificationType.ERROR);
     }
 }
