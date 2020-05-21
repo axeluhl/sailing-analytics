@@ -94,15 +94,14 @@ public class SubscriptionWebhookEvent {
     public String getTransactionType() {
         return toLowerCase(getJsonValue(content, "transaction", "type"));
     }
-    
-    @SuppressWarnings("unchecked")
-    private <T> T getJsonValue(JSONObject object, String key) {
-        return (T) object.get(key);
-    }
-    
+
     @SuppressWarnings("unchecked")
     private <T> T getJsonValue(JSONObject object, String... keys) {
-        return (T) getNestedJsonValue(object, keys);
+        if (keys.length == 1) {
+            return (T) object.get(keys[0]);
+        } else {
+            return (T) getNestedJsonValue(object, keys);
+        }
     }
 
     private <T> T getNestedJsonValue(JSONObject object, String... keys) {
