@@ -5,7 +5,7 @@ import com.sap.sailing.gwt.ui.shared.subscription.HostedPageResultDTO;
 import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionDTO;
 
 /**
- * Async remote service interface for {@link SubscriptionService}
+ * Async-interface for {@link SubscriptionService}
  * 
  * @author tutran
  */

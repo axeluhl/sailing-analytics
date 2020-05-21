@@ -27,7 +27,7 @@ import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.ui.server.Activator;
 
 /**
- * Backend implementation of {@link SubscriptionService} remote service interface.
+ * Back-end implementation of {@link SubscriptionService} remote service interface.
  * 
  * @author tutran
  */
@@ -40,7 +40,7 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
     private final FutureTask<SecurityService> securityService;
 
     public SubscriptionServiceImpl() {
-        // Configure Chargebee
+        // Configure payment service
         Environment.configure(SubscriptionConfiguration.getInstance().getSite(),
                 SubscriptionConfiguration.getInstance().getApiKey());
 
@@ -98,7 +98,7 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
 
             Result result;
 
-            // If there's no subscription data attach to user model then we create a checkout-new request to Chargebee
+            // If there's no subscription data attach to user model then we create a checkout-new request
             if (user.getSubscription() == null || user.getSubscription().planId == null) {
                 String[] userNameParts = user.getFullName().split("\\s+");
                 String firstName = userNameParts[0];
@@ -109,17 +109,17 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
 
                 String locale = user.getLocaleOrDefault().getLanguage();
 
-                // Send checkout-new request to Chargebee with all necessary customer information and get back hosted
-                // page result object
+                // Send checkout-new request with all necessary customer information and get back hosted page result
+                // object
                 result = HostedPage.checkoutNew()
-                        // here Chargebee's customer id is same as the system user name
+                        // customer id is same as the system user name
                         .customerId(user.getName()).customerEmail(user.getEmail()).customerFirstName(firstName)
                         .customerLastName(lastName).customerLocale(locale).subscriptionPlanId(planId)
                         .billingAddressFirstName(firstName).billingAddressLastName(lastName).billingAddressCountry("US")
                         .request();
             } else {
-                // User has already subscribed to a plan, so here user wants to change plan
-                // and we make a checkout-existing request to Chargebee, and get back hosted page object
+                // User has already subscribed to a plan, and user wants to change plan
+                // so we make a checkout-existing request
                 result = HostedPage.checkoutExisting().subscriptionId(user.getSubscription().subscriptionId)
                         .subscriptionPlanId(planId).request();
             }
@@ -211,7 +211,7 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
 
             String subscriptionId = subscription.subscriptionId;
             if (subscriptionId != null && !subscriptionId.isEmpty()) {
-                // Send cancel request to Chargebee and verify result and only process if the result's subscription
+                // Send cancel request, verify result and only process if the result's subscription
                 // status is updated to be cancelled
                 Result result = com.chargebee.models.Subscription.cancel(subscriptionId).request();
                 if (!result.subscription().status().name().toLowerCase()
@@ -220,8 +220,7 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
                 }
             }
 
-            // for a cancelled subscription we'll update user's subscription data with plan, subscription, status to be
-            // null
+            // we update user's subscription data with plan, subscription, status to be null
             Subscription newSubscription = new Subscription();
             newSubscription.latestEventTime = subscription.latestEventTime;
             newSubscription.manualUpdatedAt = Math.round(System.currentTimeMillis() / 1000);

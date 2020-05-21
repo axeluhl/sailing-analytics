@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.client.subscription;
 import com.google.gwt.core.client.JavaScriptObject;
 
 /**
- * Class represent JS option object for Chargebee instance openCheckout method {@link ChargebeeInstance}
+ * Class represent JS checkout option object {@link ChargebeeInstance#openCheckout(CheckoutOption)}
  * 
  * @author tutran
  */
@@ -11,11 +11,24 @@ public class CheckoutOption extends JavaScriptObject {
     protected CheckoutOption() {
     }
 
-    public static native CheckoutOption create(String hostedPage, SuccessCallback onSuccess, ErrorCallback onError,
-            CloseCallback onClose) /*-{
+    /**
+     * Create checkout option JS object
+     * 
+     * @param hostedPageJSONString
+     *            hosted page object encoded in JSON, this value is generated from back-end
+     * @param onSuccess
+     *            on checkout success callback
+     * @param onError
+     *            on checkout fail callback
+     * @param onClose
+     *            on checkout modal close callback
+     * @return checkout option object
+     */
+    public static native CheckoutOption create(String hostedPageJSONString, SuccessCallback onSuccess,
+            ErrorCallback onError, CloseCallback onClose) /*-{
         return {
             hostedPage : function() {
-                return Promise.resolve(JSON.parse(hostedPage));
+                return Promise.resolve(JSON.parse(hostedPageJSONString));
             },
             success : function(hostedPageId) {
                 onSuccess.@com.sap.sailing.gwt.ui.client.subscription.CheckoutOption.SuccessCallback::call(Ljava/lang/String;)(hostedPageId);

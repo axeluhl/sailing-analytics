@@ -3,7 +3,7 @@ package com.sap.sailing.server.gateway.subscription;
 import org.json.simple.JSONObject;
 
 /**
- * Wrapped class for Chargebee webhook event JSON object
+ * Wrapped class for webhook event JSON object
  * 
  * @author tutran
  */
@@ -30,9 +30,9 @@ public class SubscriptionWebhookEvent {
     public SubscriptionWebhookEvent(JSONObject eventJSON) {
         this.eventJSON = eventJSON;
 
-        eventId = getJSONString(eventJSON, "id");
-        eventType = toLowerCase(getJSONString(eventJSON, "event_type"));
-        content = getJSONObject(eventJSON, "content");
+        eventId = getJsonValue(eventJSON, "id");
+        eventType = toLowerCase(getJsonValue(eventJSON, "event_type"));
+        content = getJsonValue(eventJSON, "content");
     }
 
     public boolean isValidEvent() {
@@ -48,92 +48,82 @@ public class SubscriptionWebhookEvent {
     }
 
     public String getCustomerEmail() {
-        return getNestedJSONString(content, "customer", "email");
+        return getJsonValue(content, "customer", "email");
     }
 
     public String getCustomerId() {
-        return getNestedJSONString(content, "customer", "id");
+        return getJsonValue(content, "customer", "id");
     }
 
     public String getPlanId() {
-        return getNestedJSONString(content, "subscription", "plan_id");
+        return getJsonValue(content, "subscription", "plan_id");
     }
 
     public String getSubscriptionId() {
-        return getNestedJSONString(content, "subscription", "id");
+        return getJsonValue(content, "subscription", "id");
     }
 
     public String getSubscriptionStatus() {
-        return toLowerCase(getNestedJSONString(content, "subscription", "status"));
+        return toLowerCase(getJsonValue(content, "subscription", "status"));
     }
 
     public long getSubscriptionTrialStart() {
-        return getNestedJSONLong(content, "subscription", "trial_start");
+        return getJsonValue(content, "subscription", "trial_start");
     }
 
     public long getSubscriptionTrialEnd() {
-        return getNestedJSONLong(content, "subscription", "trial_end");
+        return getJsonValue(content, "subscription", "trial_end");
     }
 
     public long getSubscriptionCreatedAt() {
-        return getNestedJSONLong(content, "subscription", "created_at");
+        return getJsonValue(content, "subscription", "created_at");
     }
 
     public long getSubscriptionUpdatedAt() {
-        return getNestedJSONLong(content, "subscription", "updated_at");
+        return getJsonValue(content, "subscription", "updated_at");
     }
 
     public long getEventOccurredAt() {
-        return getJSONLong(eventJSON, "occurred_at");
+        return getJsonValue(eventJSON, "occurred_at");
     }
 
     public String getTransactionStatus() {
-        return toLowerCase(getNestedJSONString(content, "transaction", "status"));
+        return toLowerCase(getJsonValue(content, "transaction", "status"));
     }
 
     public String getInvoiceStatus() {
-        return toLowerCase(getNestedJSONString(content, "invoice", "status"));
+        return toLowerCase(getJsonValue(content, "invoice", "status"));
     }
 
     public String getTransactionType() {
-        return toLowerCase(getNestedJSONString(content, "transaction", "type"));
+        return toLowerCase(getJsonValue(content, "transaction", "type"));
+    }
+    
+    @SuppressWarnings("unchecked")
+    private <T> T getJsonValue(JSONObject object, String key) {
+        return (T) object.get(key);
+    }
+    
+    @SuppressWarnings("unchecked")
+    private <T> T getJsonValue(JSONObject object, String... keys) {
+        return (T) getNestedJsonValue(object, keys);
     }
 
-    private JSONObject getJSONObject(JSONObject object, String key) {
-        return (JSONObject) object.get(key);
-    }
-
-    private String getJSONString(JSONObject object, String key) {
-        return (String) object.get(key);
-    }
-
-    private long getJSONLong(JSONObject object, String key) {
-        return (Long) object.get(key);
-    }
-
-    private Object getNestedJSONValue(JSONObject object, String... keys) {
+    private <T> T getNestedJsonValue(JSONObject object, String... keys) {
         JSONObject tmp = object;
-        Object val = null;
+        T val = null;
         for (int i = 0; i < keys.length; i++) {
             if (i < keys.length - 1) {
-                tmp = getJSONObject(tmp, keys[i]);
+                tmp = getJsonValue(tmp, keys[i]);
                 if (tmp == null) {
                     break;
                 }
             } else {
-                val = tmp.get(keys[i]);
+                val = getJsonValue(tmp, keys[i]);
             }
         }
 
         return val;
-    }
-
-    private String getNestedJSONString(JSONObject object, String... keys) {
-        return (String) getNestedJSONValue(object, keys);
-    }
-
-    private long getNestedJSONLong(JSONObject object, String... keys) {
-        return (Long) getNestedJSONValue(object, keys);
     }
 
     private String toLowerCase(String str) {

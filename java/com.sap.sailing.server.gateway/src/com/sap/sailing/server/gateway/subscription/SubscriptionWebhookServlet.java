@@ -1,7 +1,6 @@
 package com.sap.sailing.server.gateway.subscription;
 
 import java.io.IOException;
-import java.util.Base64;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -20,7 +19,7 @@ import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.impl.User;
 
 /**
- * Servlet for handling Chargebee webhook events Response with status 200 in success handling
+ * Servlet for handling webhook events, response with status 200 in success handling
  * 
  * {@link https://www.chargebee.com/docs/events_and_webhooks.html}
  * 
@@ -30,17 +29,10 @@ public class SubscriptionWebhookServlet extends SailingServerHttpServlet {
     private static final long serialVersionUID = 2608645647937414012L;
     private static final Logger logger = Logger.getLogger(SubscriptionWebhookServlet.class.getName());
 
-    private static String basicAuthHeaderValue;
-
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        if (!verifyBasicAuth(request)) {
-            logger.log(Level.WARNING, "Invalid webhook http basic auth");
-            response.setStatus(403);
-            return;
-        }
-
+        
         try {
             Object requestBody = JSONValue.parseWithException(request.getReader());
             JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
@@ -165,21 +157,5 @@ public class SubscriptionWebhookServlet extends SailingServerHttpServlet {
         }
 
         return paymentStatus;
-    }
-
-    private boolean verifyBasicAuth(HttpServletRequest request) {
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader == null) {
-            return false;
-        }
-
-        if (basicAuthHeaderValue == null) {
-            String cred = WebhookBasicAuthConfiguration.getInstance().getUsername() + ":"
-                    + WebhookBasicAuthConfiguration.getInstance().getPassword();
-            String base64Hash = Base64.getEncoder().encodeToString(cred.getBytes());
-            basicAuthHeaderValue = "Basic " + base64Hash;
-        }
-
-        return authHeader.equals(basicAuthHeaderValue);
     }
 }

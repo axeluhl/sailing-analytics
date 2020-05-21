@@ -4,7 +4,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.gwt.ui.client.subscription.SubscriptionService;
 
 /**
- * Result object of generating Chargebee hosted page object RPC {@link SubscriptionService}
+ * Data transfer object of generating hosted page object {@link SubscriptionService#generateHostedPageObject(String)}
  * 
  * @author tutran
  */

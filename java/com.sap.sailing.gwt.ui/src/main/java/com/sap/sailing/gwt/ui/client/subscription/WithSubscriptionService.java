@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.ui.client.subscription;
 
 /**
- * Interface with provides access to an {@link SubscriptionService} instance
+ * Interface provides access to an {@link SubscriptionService} instance
  * 
  * @author tutran
  */

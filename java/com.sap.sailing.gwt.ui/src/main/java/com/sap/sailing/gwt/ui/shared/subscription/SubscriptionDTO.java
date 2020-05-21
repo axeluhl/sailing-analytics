@@ -5,7 +5,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.subscription.SubscriptionService;
 
 /**
- * User subscription data transfer object {@link SubscriptionService}
+ * User subscription data transfer object {@link SubscriptionService#getSubscription()}
  * 
  * @author tutran
  */
