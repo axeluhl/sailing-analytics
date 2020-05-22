@@ -88,7 +88,7 @@ public class UserImpl extends SecurityUserImpl<RoleDefinition, Role, UserGroup, 
     private transient Set<Role> roles;
     
     private List<Role> roleListForSerialization;
-    
+
     private Subscription subscription;
 
     public UserImpl(String name, String email, Map<String, UserGroup> defaultTenantForServer,

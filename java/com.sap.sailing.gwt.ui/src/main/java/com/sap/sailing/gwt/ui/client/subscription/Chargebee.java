@@ -8,7 +8,7 @@ import jsinterop.annotations.JsType;
 /**
  * Wrapped class for native JS module
  * 
- * @author tutran
+ * @author Tu Tran
  */
 @JsType(isNative = true, namespace = JsPackage.GLOBAL)
 public class Chargebee {

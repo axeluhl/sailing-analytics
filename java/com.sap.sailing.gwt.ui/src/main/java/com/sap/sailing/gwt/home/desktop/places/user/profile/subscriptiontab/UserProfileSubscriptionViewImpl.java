@@ -9,6 +9,11 @@ import com.sap.sailing.gwt.home.shared.usermanagement.decorator.AuthorizedConten
 import com.sap.sse.gwt.resources.CommonControlsCSS;
 import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
 
+/**
+ * Implementation view of {@link UserProfileSubscriptionView}
+ * 
+ * @author Tu Tran
+ */
 public class UserProfileSubscriptionViewImpl extends Composite implements UserProfileSubscriptionView {
     interface MyBinder extends UiBinder<Widget, UserProfileSubscriptionViewImpl> {
     }

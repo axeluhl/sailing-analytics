@@ -7,7 +7,7 @@ import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionDTO;
 /**
  * Remote service interface for handling user subscription actions
  * 
- * @author tutran
+ * @author Tu Tran
  */
 public interface SubscriptionService extends RemoteService {
     /**

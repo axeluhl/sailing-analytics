@@ -33,7 +33,7 @@ import com.sap.sse.security.ui.server.Activator;
 /**
  * Back-end implementation of {@link SubscriptionService} remote service interface.
  * 
- * @author tutran
+ * @author Tu Tran
  */
 public class SubscriptionServiceImpl extends RemoteServiceServlet implements SubscriptionService {
     private static final long serialVersionUID = -4276839013785711262L;

@@ -7,6 +7,11 @@ import com.sap.sailing.gwt.home.shared.places.user.profile.subscription.UserSubs
 import com.sap.sailing.gwt.home.shared.places.user.profile.subscription.UserSubscriptionView.Presenter;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 
+/**
+ * Implementation presenter for {@link UserProfileSubscriptionView}
+ * 
+ * @author Tu Tran
+ */
 public class UserProfileSubscriptionPresenter implements UserProfileSubscriptionView.Presenter {
 
     private final UserProfileSubscriptionView view;

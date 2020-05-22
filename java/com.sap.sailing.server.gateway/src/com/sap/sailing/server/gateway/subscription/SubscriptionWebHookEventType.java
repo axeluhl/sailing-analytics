@@ -5,7 +5,7 @@ package com.sap.sailing.server.gateway.subscription;
  * 
  * {@link https://apidocs.chargebee.com/docs/api/events#event_types}
  * 
- * @author tutran
+ * @author Tu Tran
  */
 public enum SubscriptionWebHookEventType {
     CUSTOMER_DELETED("customer_deleted"), SUBSCRIPTION_DELETED("subscription_deleted"), SUBSCRIPTION_CREATED(

@@ -3,6 +3,12 @@ package com.sap.sailing.gwt.home.shared.places.user.profile.subscription;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionDTO;
 
+/**
+ * View for displaying user subscription information like plan, subscription status...In this view user is able to
+ * subscribe to a plan or cancel current subscription.
+ * 
+ * @author Tu Tran
+ */
 public interface UserSubscriptionView extends IsWidget {
     /**
      * Called on start loading subscription data

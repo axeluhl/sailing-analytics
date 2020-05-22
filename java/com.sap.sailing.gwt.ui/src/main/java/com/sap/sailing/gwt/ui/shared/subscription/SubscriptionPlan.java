@@ -1,9 +1,13 @@
 package com.sap.sailing.gwt.ui.shared.subscription;
 
+/**
+ * Payment subscription plan
+ * 
+ * @author Tu Tran
+ */
 public enum SubscriptionPlan {
-    STARTER("starter", "Starter"),
-    PREMIUM("premium", "Premium");
-    
+    STARTER("starter", "Starter"), PREMIUM("premium", "Premium");
+
     private String name;
     private String id;
 

@@ -9,6 +9,11 @@ import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.home.shared.places.user.profile.subscription.UserProfileSubscriptionPlace;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 
+/**
+ * User profile subscription tab view
+ * 
+ * @author Tu Tran
+ */
 public class UserProfileSubscriptionTabView extends Composite
         implements UserProfileTabView<UserProfileSubscriptionPlace> {
 

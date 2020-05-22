@@ -5,7 +5,7 @@ import jsinterop.annotations.JsType;
 /**
  * Wrapped class for native JS Chargebee's instance
  * 
- * @author tutran
+ * @author Tu Tran
  */
 @JsType(isNative = true, namespace = "Chargebee")
 public class ChargebeeInstance {

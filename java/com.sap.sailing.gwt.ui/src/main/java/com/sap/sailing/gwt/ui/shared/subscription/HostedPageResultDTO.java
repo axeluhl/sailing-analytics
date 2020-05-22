@@ -6,7 +6,7 @@ import com.sap.sailing.gwt.ui.client.subscription.SubscriptionService;
 /**
  * Data transfer object of generating hosted page object {@link SubscriptionService#generateHostedPageObject(String)}
  * 
- * @author tutran
+ * @author Tu Tran
  */
 public class HostedPageResultDTO implements IsSerializable {
     /**

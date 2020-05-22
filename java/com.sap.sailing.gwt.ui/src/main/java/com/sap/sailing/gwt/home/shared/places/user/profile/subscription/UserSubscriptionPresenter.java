@@ -15,6 +15,11 @@ import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.security.ui.authentication.WithAuthenticationManager;
 import com.sap.sse.security.ui.authentication.WithUserService;
 
+/**
+ * Implementation presenter of {@link UserSubscriptionView.Presenter}
+ * 
+ * @author Tu Tran
+ */
 public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & ErrorAndBusyClientFactory & WithAuthenticationManager & WithUserService & WithSubscriptionService>
         implements UserSubscriptionView.Presenter {
 

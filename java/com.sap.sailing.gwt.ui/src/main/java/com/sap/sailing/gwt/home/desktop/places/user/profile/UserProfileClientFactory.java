@@ -5,6 +5,6 @@ import com.sap.sailing.gwt.ui.client.SailingClientFactory;
 import com.sap.sailing.gwt.ui.client.subscription.WithSubscriptionService;
 import com.sap.sse.security.ui.authentication.WithAuthenticationManager;
 
-public interface UserProfileClientFactory
-        extends SailingClientFactory, WithAuthenticationManager, ClientFactoryWithDispatchAndErrorAndUserService, WithSubscriptionService {
+public interface UserProfileClientFactory extends SailingClientFactory, WithAuthenticationManager,
+        ClientFactoryWithDispatchAndErrorAndUserService, WithSubscriptionService {
 }

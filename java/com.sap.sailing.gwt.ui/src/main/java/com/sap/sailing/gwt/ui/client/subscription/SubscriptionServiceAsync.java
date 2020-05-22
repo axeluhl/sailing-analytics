@@ -7,7 +7,7 @@ import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionDTO;
 /**
  * Async-interface for {@link SubscriptionService}
  * 
- * @author tutran
+ * @author Tu Tran
  */
 public interface SubscriptionServiceAsync {
     public void generateHostedPageObject(String planId, AsyncCallback<HostedPageResultDTO> callback);

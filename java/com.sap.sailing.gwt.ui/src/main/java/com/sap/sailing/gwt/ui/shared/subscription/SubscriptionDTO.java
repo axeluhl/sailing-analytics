@@ -7,7 +7,7 @@ import com.sap.sailing.gwt.ui.client.subscription.SubscriptionService;
 /**
  * User subscription data transfer object {@link SubscriptionService#getSubscription()}
  * 
- * @author tutran
+ * @author Tu Tran
  */
 public class SubscriptionDTO implements IsSerializable {
     public static String PAYMENT_STATUS_SUCCESS = "success";

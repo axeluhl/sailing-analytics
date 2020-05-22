@@ -10,7 +10,7 @@ import org.apache.shiro.realm.AuthenticatingRealm;
 /**
  * Shiro Realm for handling subscription WebHook basic authentication
  * 
- * @author tutran
+ * @author Tu Tran
  */
 public class PaymentSystemWebHookAuthRealm extends AuthenticatingRealm {
 

@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * Class hold system subscription plans and method for access the plans
  * 
- * @author tutran
+ * @author Tu Tran
  */
 public class SubscriptionPlanHolder {
 

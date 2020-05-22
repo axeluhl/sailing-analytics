@@ -27,29 +27,27 @@ import com.sap.sse.security.shared.impl.User;
  */
 public interface ReplicableSecurityService extends SecurityService {
     Void internalSetEmptyAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, String displayName);
-
-    Void internalAclPutPermissions(QualifiedObjectIdentifier idOfAccessControlledObject, UUID groupId,
-            Set<String> actions);
-
+    
+    Void internalAclPutPermissions(QualifiedObjectIdentifier idOfAccessControlledObject, UUID groupId, Set<String> actions);
+    
     Void internalAclAddPermission(QualifiedObjectIdentifier idOfAccessControlledObject, UUID groupId, String action);
-
+    
     Void internalAclRemovePermission(QualifiedObjectIdentifier idOfAccessControlledObject, UUID groupId, String action);
-
+    
     Void internalDeleteAcl(QualifiedObjectIdentifier idOfAccessControlledObject);
-
-    Ownership internalSetOwnership(QualifiedObjectIdentifier idOfOwnedObject, String owningUsername, UUID tenantOwnerId,
-            String displayNameOfOwnedObject);
-
+    
+    Ownership internalSetOwnership(QualifiedObjectIdentifier idOfOwnedObject, String owningUsername, UUID tenantOwnerId, String displayNameOfOwnedObject);
+    
     Void internalDeleteOwnership(QualifiedObjectIdentifier idOfOwnedObject);
-
+    
     Void internalCreateUserGroup(UUID groupId, String name) throws UserGroupManagementException;
-
+    
     Void internalDeleteUserGroup(UUID groupId) throws UserGroupManagementException;
-
+    
     Void internalAddUserToUserGroup(UUID groupId, String username) throws UserGroupManagementException;
 
     Void internalRemoveUserFromUserGroup(UUID groupId, String username) throws UserGroupManagementException;
-
+    
     Void internalPutRoleDefinitionToUserGroup(UUID groupId, UUID roleDefinitionId, boolean forAll)
             throws UserGroupManagementException;
 
@@ -57,8 +55,8 @@ public interface ReplicableSecurityService extends SecurityService {
             throws UserGroupManagementException;
 
     /**
-     * Creates and stores a <em>new</em> user in the system. <em>Don't</em> use this to update an existing user. Use
-     * other {@code internal...} methods to update individual user properties instead.
+     * Creates and stores a <em>new</em> user in the system. <em>Don't</em> use this to update an existing user.
+     * Use other {@code internal...} methods to update individual user properties instead.
      */
     User internalCreateUser(String username, String email, Account... accounts) throws UserManagementException;
 
@@ -78,7 +76,7 @@ public interface ReplicableSecurityService extends SecurityService {
     String internalSetPreferenceObject(String username, String key, Object value);
 
     Void internalUnsetPreference(String username, String key);
-
+    
     Void internalSetAccessToken(String username, String accessToken);
 
     Void internalRemoveAccessToken(String username);
@@ -87,24 +85,20 @@ public interface ReplicableSecurityService extends SecurityService {
 
     Void internalAddSetting(String key, Class<?> clazz);
 
-    Void internalAddRoleForUser(String username, UUID roleDefinitionId, UUID idOfTenantQualifyingRole,
-            String nameOfUserQualifyingRole) throws UserManagementException;
+    Void internalAddRoleForUser(String username, UUID roleDefinitionId, UUID idOfTenantQualifyingRole, String nameOfUserQualifyingRole) throws UserManagementException;
 
-    Void internalRemoveRoleFromUser(String username, UUID roleDefinitionId, UUID idOfTenantQualifyingRole,
-            String nameOfUserQualifyingRole) throws UserManagementException;
+    Void internalRemoveRoleFromUser(String username, UUID roleDefinitionId, UUID idOfTenantQualifyingRole, String nameOfUserQualifyingRole) throws UserManagementException;
 
-    Void internalAddPermissionForUser(String username, WildcardPermission permissionToAdd)
-            throws UserManagementException;
+    Void internalAddPermissionForUser(String username, WildcardPermission permissionToAdd) throws UserManagementException;
 
-    Void internalRemovePermissionForUser(String username, WildcardPermission permissionToRemove)
-            throws UserManagementException;
+    Void internalRemovePermissionForUser(String username, WildcardPermission permissionToRemove) throws UserManagementException;
 
     Void internalDeleteUser(String username) throws UserManagementException;
 
     RoleDefinition internalCreateRoleDefinition(UUID roleDefinitionId, String name);
-
+    
     Void internalDeleteRoleDefinition(UUID roleDefinitionId);
-
+    
     Void internalUpdateRoleDefinition(RoleDefinition roleDefinitionWithNewProperties);
 
     void storeSession(String cacheName, Session value);
@@ -118,4 +112,5 @@ public interface ReplicableSecurityService extends SecurityService {
     Void internalResetPassword(String username, String passwordResetSecret);
 
     Void internalUpdateSubscription(String username, Subscription subscription);
+
 }

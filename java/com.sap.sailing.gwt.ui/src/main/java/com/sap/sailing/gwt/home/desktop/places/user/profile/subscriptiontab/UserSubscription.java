@@ -27,10 +27,9 @@ import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 
 /**
- * View for displaying user subscription information like plan, subscription status...In this view user is able to
- * subscribe to a plan or cancel current subscription.
+ * Implementation view for {@link UserSubscriptionView}
  * 
- * @author tutran
+ * @author Tu Tran
  */
 public class UserSubscription extends Composite implements UserSubscriptionView {
     interface MyUiBinder extends UiBinder<Widget, UserSubscription> {

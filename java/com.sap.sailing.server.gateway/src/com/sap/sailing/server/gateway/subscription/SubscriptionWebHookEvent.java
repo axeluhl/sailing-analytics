@@ -5,7 +5,7 @@ import org.json.simple.JSONObject;
 /**
  * Wrapped class for WebHook event JSON object
  * 
- * @author tutran
+ * @author Tu Tran
  */
 public class SubscriptionWebHookEvent {
 

@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.client.subscription;
 /**
  * Interface provides access to an {@link SubscriptionService} instance
  * 
- * @author tutran
+ * @author Tu Tran
  */
 public interface WithSubscriptionService {
     public SubscriptionServiceAsync getSubscriptionService();

@@ -6,6 +6,8 @@ import java.util.logging.Logger;
 /**
  * Subscription configuration. The system will get these information from server application startup arguments:
  * chargebee.site, chargebee.apikey
+ * 
+ * @author Tu Tran
  */
 public class SubscriptionConfiguration {
     private static final Logger logger = Logger.getLogger(SubscriptionConfiguration.class.getName());

@@ -5,7 +5,7 @@ import com.google.gwt.core.client.JavaScriptObject;
 /**
  * Class represent JS checkout option object {@link ChargebeeInstance#openCheckout(CheckoutOption)}
  * 
- * @author tutran
+ * @author Tu Tran
  */
 public class CheckoutOption extends JavaScriptObject {
     protected CheckoutOption() {

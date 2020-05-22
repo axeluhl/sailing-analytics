@@ -29,8 +29,8 @@ public interface User extends SecurityUser<RoleDefinition, Role, UserGroup> {
     void setFullName(String fullName);
 
     /**
-     * An optional company affiliation. May be used, e.g., to better understand the statistics of corporate vs. private
-     * users, if used as a marketing tool.
+     * An optional company affiliation. May be used, e.g., to better understand the statistics of
+     * corporate vs. private users, if used as a marketing tool.
      */
     String getCompany();
 
@@ -53,26 +53,26 @@ public interface User extends SecurityUser<RoleDefinition, Role, UserGroup> {
     Map<AccountType, Account> getAllAccounts();
 
     /**
-     * Sets an e-mail address for this user. The address is considered not yet validated, therefore the caller shall
-     * also ensure that {@link #startEmailValidation} is invoked hereafter, with a secret produced by
-     * {@link #createRandomSecret()}.
+     * Sets an e-mail address for this user. The address is considered not yet validated, therefore the
+     * caller shall also ensure that {@link #startEmailValidation} is invoked hereafter, with a secret
+     * produced by {@link #createRandomSecret()}.
      */
     void setEmail(String email);
 
     /**
-     * When someone has requested a password reset, only the owner of the validated e-mail address is permitted to
-     * actually carry out the reset. This is verified by sending a "reset secret" to the validated e-mail address,
-     * giving the user a link to an entry point for actually carrying out the reset. The reset is only accepted if the
-     * reset secret was provided correctly.
+     * When someone has requested a password reset, only the owner of the validated e-mail address is
+     * permitted to actually carry out the reset. This is verified by sending a "reset secret" to the
+     * validated e-mail address, giving the user a link to an entry point for actually carrying out the
+     * reset. The reset is only accepted if the reset secret was provided correctly.
      */
     String getPasswordResetSecret();
 
     void startPasswordReset(String randomSecret);
 
     /**
-     * Resets the {@link #isEmailValidated()} property and stores the new {@code randomSecret} as the e-mail validation
-     * secret. The {@link #isEmailValidated()} method will return {@code true} only after {@link #validate(String)} has
-     * been called with the {@code randomSecret} passed here.
+     * Resets the {@link #isEmailValidated()} property and stores the new {@code randomSecret} as the
+     * e-mail validation secret. The {@link #isEmailValidated()} method will return {@code true} only
+     * after {@link #validate(String)} has been called with the {@code randomSecret} passed here.
      */
     void startEmailValidation(String randomSecret);
 
@@ -83,10 +83,11 @@ public interface User extends SecurityUser<RoleDefinition, Role, UserGroup> {
     boolean isEmailValidated();
 
     /**
-     * When a new e-mail is set for the user, a validation process should be started. The validation generates a secret
-     * which is then put into a URL which is sent to the new e-mail address. When the user follows the URL, the URL
-     * parameter will be used to validate against the secret stored here. If the secret matches, the email address is
-     * {@link #emailValidated marked as validated}.
+     * When a new e-mail is set for the user, a validation process should be started.
+     * The validation generates a secret which is then put into a URL which is sent to
+     * the new e-mail address. When the user follows the URL, the URL parameter will be
+     * used to validate against the secret stored here. If the secret matches, the
+     * email address is {@link #emailValidated marked as validated}.
      */
     String getValidationSecret();
 
@@ -107,7 +108,7 @@ public interface User extends SecurityUser<RoleDefinition, Role, UserGroup> {
     void setDefaultTenant(UserGroup newDefaultTenant, String serverName);
 
     void setUserGroupProvider(UserGroupProvider userGroupProvider);
-
+    
     UserGroupProvider getUserGroupProvider();
 
     String createRandomSecret();

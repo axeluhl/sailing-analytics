@@ -24,7 +24,7 @@ import com.sap.sse.security.shared.impl.User;
  * 
  * {@link https://www.chargebee.com/docs/events_and_webhooks.html}
  * 
- * @author tutran
+ * @author Tu Tran
  */
 public class SubscriptionWebHookServlet extends SailingServerHttpServlet {
     private static final long serialVersionUID = 2608645647937414012L;

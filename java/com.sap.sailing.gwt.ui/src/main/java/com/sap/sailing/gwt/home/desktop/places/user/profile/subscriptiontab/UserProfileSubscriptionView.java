@@ -5,6 +5,11 @@ import com.sap.sailing.gwt.home.shared.places.user.profile.subscription.UserSubs
 import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
 import com.sap.sse.security.ui.authentication.decorator.NotLoggedInPresenter;
 
+/**
+ * User profile subscription view interface
+ * 
+ * @author Tu Tran
+ */
 public interface UserProfileSubscriptionView extends IsWidget {
 
     void setPresenter(Presenter presenter);
