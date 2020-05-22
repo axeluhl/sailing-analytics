@@ -12,19 +12,18 @@ import org.apache.shiro.realm.AuthenticatingRealm;
  * 
  * @author tutran
  */
-public class SubscriptionWebHookBasicAuthRealm extends AuthenticatingRealm {
-    
+public class PaymentSystemWebHookAuthRealm extends AuthenticatingRealm {
+
     @Override
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
         UsernamePasswordToken authToken = (UsernamePasswordToken) token;
 
         WebHookBasicAuthConfiguration authConfiguration = WebHookBasicAuthConfiguration.getInstance();
-        
+
         if (authToken.getUsername() != null && authToken.getPassword() != null
                 && authToken.getUsername().equals(authConfiguration.getUsername())
                 && new String(authToken.getPassword()).equals(authConfiguration.getPassword())) {
-            return new SimpleAuthenticationInfo(authToken.getPrincipal(), authToken.getCredentials(),
-                    "SAP");
+            return new SimpleAuthenticationInfo(authToken.getPrincipal(), authToken.getCredentials(), "SAP");
         }
 
         return null;

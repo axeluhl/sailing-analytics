@@ -37,7 +37,7 @@ public class SubscriptionWebHookServlet extends SailingServerHttpServlet {
         try {
             Object requestBody = JSONValue.parseWithException(request.getReader());
             JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
-            logger.log(Level.INFO, "Chargebee webhook data: " + requestObject.toJSONString());
+            logger.log(Level.INFO, "Payment service webhook data: " + requestObject.toJSONString());
 
             SubscriptionWebHookEvent event = new SubscriptionWebHookEvent(requestObject);
             if (!event.isValidEvent()) {
@@ -45,47 +45,8 @@ public class SubscriptionWebHookServlet extends SailingServerHttpServlet {
             }
 
             User user = getUser(event.getCustomerId());
-            if (user == null) {
-                sendSuccess(response);
-                return;
-            }
-
-            Subscription userSubscription = user.getSubscription();
-
-            long occuredAt = event.getEventOccurredAt();
-
-            // Verify the event time, only process if event time is larger than last success processed event and last
-            // updated time by user
-            if (userSubscription != null && occuredAt < user.getSubscription().getLatestEventTime()
-                    && occuredAt < user.getSubscription().getManualUpdatedAt()) {
-                sendSuccess(response);
-                return;
-            }
-
-            EventType eventType = event.getEventType();
-            if (eventType == null) {
-                sendSuccess(response);
-                return;
-            }
-
-            switch (eventType) {
-            case CUSTOMER_DELETED:
-                updateUserSubscription(user, buildEmptySubscription(userSubscription, event));
-                break;
-            case SUBSCRIPTION_CANCELLED:
-            case SUBSCRIPTION_DELETED:
-                if (userSubscription != null && userSubscription.getSubscriptionId() != null
-                        && userSubscription.getSubscriptionId().equals(event.getSubscriptionId())) {
-                    updateUserSubscription(user, buildEmptySubscription(userSubscription, event));
-                }
-                break;
-            case SUBSCRIPTION_CREATED:
-            case SUBSCRIPTION_CHANGED:
-            case SUBSCRIPTION_ACTIVATED:
-            case PAYMENT_SUCCEEDED:
-            case PAYMENT_FAILED:
-                updateUserSubscription(user, buildSubscription(userSubscription, event));
-                break;
+            if (user != null && !isDatedEvent(event, user.getSubscription())) {
+                processEvent(event, user);
             }
 
             sendSuccess(response);
@@ -95,6 +56,41 @@ public class SubscriptionWebHookServlet extends SailingServerHttpServlet {
         } catch (Exception e) {
             logger.log(Level.WARNING, "Failed to proccess subscription webhook event: " + e.getMessage());
             sendFail(response);
+        }
+    }
+
+    private boolean isDatedEvent(SubscriptionWebHookEvent event, Subscription userSubscription) {
+        long occuredAt = event.getEventOccurredAt();
+        return userSubscription != null && (occuredAt < userSubscription.getLatestEventTime()
+                || occuredAt < userSubscription.getManualUpdatedAt());
+    }
+
+    private void processEvent(SubscriptionWebHookEvent event, User user) throws UserManagementException {
+        SubscriptionWebHookEventType eventType = event.getEventType();
+        if (eventType == null) {
+            return;
+        }
+
+        Subscription userSubscription = user.getSubscription();
+
+        switch (eventType) {
+        case CUSTOMER_DELETED:
+            updateUserSubscription(user, buildEmptySubscription(userSubscription, event));
+            break;
+        case SUBSCRIPTION_CANCELLED:
+        case SUBSCRIPTION_DELETED:
+            if (userSubscription != null && userSubscription.getSubscriptionId() != null
+                    && userSubscription.getSubscriptionId().equals(event.getSubscriptionId())) {
+                updateUserSubscription(user, buildEmptySubscription(userSubscription, event));
+            }
+            break;
+        case SUBSCRIPTION_CREATED:
+        case SUBSCRIPTION_CHANGED:
+        case SUBSCRIPTION_ACTIVATED:
+        case PAYMENT_SUCCEEDED:
+        case PAYMENT_FAILED:
+            updateUserSubscription(user, buildSubscription(userSubscription, event));
+            break;
         }
     }
 
@@ -125,7 +121,8 @@ public class SubscriptionWebHookServlet extends SailingServerHttpServlet {
             if (paymentStatus != null) {
                 subscription.setPaymentStatus(paymentStatus);
             } else {
-                subscription.setPaymentStatus(currentSubscription != null ? currentSubscription.getPaymentStatus() : null);
+                subscription
+                        .setPaymentStatus(currentSubscription != null ? currentSubscription.getPaymentStatus() : null);
             }
         } else {
             subscription.setPaymentStatus(null);

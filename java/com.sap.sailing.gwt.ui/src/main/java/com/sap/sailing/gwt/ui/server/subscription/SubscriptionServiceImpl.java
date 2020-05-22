@@ -89,7 +89,7 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
 
             response.setHostedPageJSONString(result.hostedPage().toJson());
         } catch (Exception e) {
-            logger.log(Level.WARNING, "Error in generating Chargebee hosted page data ", e);
+            logger.log(Level.SEVERE, "Error in generating Chargebee hosted page data ", e);
             response.setError("Error in generating Chargebee hosted page");
         }
 
@@ -125,7 +125,7 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
             subscriptionDto.setSubscriptionStatus(subscription.getSubscriptionStatus());
             subscriptionDto.setPaymentStatus(subscription.getPaymentStatus());
         } catch (Exception e) {
-            logger.log(Level.WARNING, "Error in saving subscription ", e);
+            logger.log(Level.SEVERE, "Error in saving subscription ", e);
 
             subscriptionDto.setError(e.getMessage());
         }
@@ -150,7 +150,7 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
             subscriptionDto.setTrialStart(subscription.getTrialStart());
             subscriptionDto.setTrialEnd(subscription.getTrialEnd());
         } catch (Exception e) {
-            logger.log(Level.WARNING, "Error in getting subscription ", e);
+            logger.log(Level.SEVERE, "Error in getting subscription ", e);
 
             subscriptionDto.setError(e.getMessage());
         }
@@ -169,8 +169,6 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
 
             String subscriptionId = subscription.getSubscriptionId();
             if (subscriptionId != null && !subscriptionId.isEmpty()) {
-                // Send cancel request, verify result and only process if the result's subscription
-                // status is updated to be cancelled
                 Result result = com.chargebee.models.Subscription.cancel(subscriptionId).request();
                 if (!result.subscription().status().name().toLowerCase()
                         .equals(Subscription.SUBSCRIPTION_STATUS_CANCELLED)) {
@@ -178,14 +176,13 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
                 }
             }
 
-            // we update user's subscription data with plan, subscription, status to be null
             Subscription newSubscription = new Subscription();
             newSubscription.setLatestEventTime(subscription.getLatestEventTime());
             newSubscription.setManualUpdatedAt(System.currentTimeMillis() / 1000);
             getSecurityService().updateUserSubscription(user.getName(), newSubscription);
             return true;
         } catch (Exception e) {
-            logger.log(Level.WARNING, "Error in cancel subscription ", e);
+            logger.log(Level.SEVERE, "Error in cancel subscription ", e);
             return false;
         }
     }

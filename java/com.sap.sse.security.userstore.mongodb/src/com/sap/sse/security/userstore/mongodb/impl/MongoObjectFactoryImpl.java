@@ -305,12 +305,12 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         }
         return dbSettingTypes;
     }
-    
+
     private Document createSubscriptionObject(Subscription subscription) {
         if (subscription == null) {
             return null;
         }
-        
+
         Document doc = new Document();
         doc.put(FieldNames.Subscription.SUBSCRIPTION_ID.name(), subscription.getSubscriptionId());
         doc.put(FieldNames.Subscription.PLAN_ID.name(), subscription.getPlanId());
@@ -323,7 +323,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         doc.put(FieldNames.Subscription.SUBSCRIPTION_UPDATED_AT.name(), subscription.getSubsciptionUpdatedAt());
         doc.put(FieldNames.Subscription.LATEST_EVENT_TIME.name(), subscription.getLatestEventTime());
         doc.put(FieldNames.Subscription.MANUAL_UPDATED_AT.name(), subscription.getManualUpdatedAt());
-        
+
         return doc;
     }
 }

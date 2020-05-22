@@ -343,10 +343,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             // is also only interested in the object's ID
             new MongoObjectFactoryImpl(db).storeUser(result);
         }
-        
-        Document subscriptionDoc = (Document)userDBObject.get(FieldNames.User.SUBSCRIPTION.name());
+
+        Document subscriptionDoc = (Document) userDBObject.get(FieldNames.User.SUBSCRIPTION.name());
         result.setSubscription(loadSubscription(subscriptionDoc));
-        
+
         return result;
     }
 
@@ -490,24 +490,27 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
         return result;
     }
-    
+
     private Subscription loadSubscription(Document subscriptionDoc) {
         if (subscriptionDoc == null) {
             return null;
         }
-        
+
         Subscription subscription = new Subscription();
         subscription.setCustomerId(subscriptionDoc.getString(FieldNames.Subscription.CUSTOMER_ID.name()));
         subscription.setPlanId(subscriptionDoc.getString(FieldNames.Subscription.PLAN_ID.name()));
-        subscription.setSubscriptionStatus(subscriptionDoc.getString(FieldNames.Subscription.SUBSCRIPTION_STATUS.name()));
+        subscription
+                .setSubscriptionStatus(subscriptionDoc.getString(FieldNames.Subscription.SUBSCRIPTION_STATUS.name()));
         subscription.setSubscriptionId(subscriptionDoc.getString(FieldNames.Subscription.SUBSCRIPTION_ID.name()));
         subscription.setTrialStart(subscriptionDoc.getLong(FieldNames.Subscription.TRIAL_START.name()));
         subscription.setTrialEnd(subscriptionDoc.getLong(FieldNames.Subscription.TRIAL_END.name()));
         subscription.setPaymentStatus(subscriptionDoc.getString(FieldNames.Subscription.PAYMENT_STATUS.name()));
-        subscription.setSubsciptionCreatedAt(subscriptionDoc.getLong(FieldNames.Subscription.SUBSCRIPTION_CREATED_AT.name()));
-        subscription.setSubsciptionUpdatedAt(subscriptionDoc.getLong(FieldNames.Subscription.SUBSCRIPTION_UPDATED_AT.name()));
+        subscription.setSubsciptionCreatedAt(
+                subscriptionDoc.getLong(FieldNames.Subscription.SUBSCRIPTION_CREATED_AT.name()));
+        subscription.setSubsciptionUpdatedAt(
+                subscriptionDoc.getLong(FieldNames.Subscription.SUBSCRIPTION_UPDATED_AT.name()));
         subscription.setLatestEventTime(subscriptionDoc.getLong(FieldNames.Subscription.LATEST_EVENT_TIME.name()));
-        
+
         return subscription;
     }
 }

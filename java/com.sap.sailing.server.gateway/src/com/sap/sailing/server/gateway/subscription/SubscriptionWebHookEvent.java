@@ -35,9 +35,9 @@ public class SubscriptionWebHookEvent {
         return eventId;
     }
 
-    public EventType getEventType() {
+    public SubscriptionWebHookEventType getEventType() {
         try {
-            return EventType.valueOf(eventType.toUpperCase());
+            return SubscriptionWebHookEventType.valueOf(eventType.toUpperCase());
         } catch (Exception e) {
             return null;
         }
