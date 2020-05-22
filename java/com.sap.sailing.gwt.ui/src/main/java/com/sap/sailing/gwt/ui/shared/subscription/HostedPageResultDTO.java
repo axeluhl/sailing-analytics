@@ -12,10 +12,26 @@ public class HostedPageResultDTO implements IsSerializable {
     /**
      * In success case, hostedPageJSONString has value of JSON encoded string of hosted page object
      */
-    public String hostedPageJSONString;
+    private String hostedPageJSONString;
 
     /**
      * In fail case, error contains error message
      */
-    public String error;
+    private String error;
+
+    public String getHostedPageJSONString() {
+        return hostedPageJSONString;
+    }
+
+    public void setHostedPageJSONString(String hostedPageJSONString) {
+        this.hostedPageJSONString = hostedPageJSONString;
+    }
+
+    public String getError() {
+        return error;
+    }
+
+    public void setError(String error) {
+        this.error = error;
+    }
 }

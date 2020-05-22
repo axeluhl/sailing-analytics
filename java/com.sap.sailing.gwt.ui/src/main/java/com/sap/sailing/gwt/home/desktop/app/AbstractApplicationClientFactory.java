@@ -18,25 +18,27 @@ import com.sap.sailing.gwt.ui.client.subscription.SubscriptionServiceAsync;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.security.ui.client.SecureClientFactoryImpl;
 
-public abstract class AbstractApplicationClientFactory<ATLV extends ApplicationTopLevelView<?>> extends
-        SecureClientFactoryImpl<ATLV> implements DesktopClientFactory {
+public abstract class AbstractApplicationClientFactory<ATLV extends ApplicationTopLevelView<?>>
+        extends SecureClientFactoryImpl<ATLV> implements DesktopClientFactory {
     private final SailingServiceAsync sailingService;
     private final MediaServiceAsync mediaService;
     private final DesktopPlacesNavigator navigator;
     private final SubscriptionServiceAsync subscriptionService;
 
-    public AbstractApplicationClientFactory(ATLV root, EventBus eventBus,
-            PlaceController placeController, final DesktopPlacesNavigator navigator) {
+    public AbstractApplicationClientFactory(ATLV root, EventBus eventBus, PlaceController placeController,
+            final DesktopPlacesNavigator navigator) {
         super(root, eventBus, placeController);
         this.navigator = navigator;
         sailingService = SailingServiceHelper.createSailingServiceInstance();
         mediaService = GWT.create(MediaService.class);
         subscriptionService = GWT.create(SubscriptionService.class);
-        EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService, RemoteServiceMappingConstants.mediaServiceRemotePath);
-        EntryPointHelper.registerASyncService((ServiceDefTarget) subscriptionService, RemoteServiceMappingConstants.subscriptionServiceRemotePath);
+        EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService,
+                RemoteServiceMappingConstants.mediaServiceRemotePath);
+        EntryPointHelper.registerASyncService((ServiceDefTarget) subscriptionService,
+                RemoteServiceMappingConstants.subscriptionServiceRemotePath);
         getUserService().addKnownHasPermissions(SecuredDomainType.getAllInstances());
     }
-    
+
     @Override
     public Place getDefaultPlace() {
         return new StartPlace();
@@ -65,7 +67,7 @@ public abstract class AbstractApplicationClientFactory<ATLV extends ApplicationT
     public DesktopPlacesNavigator getHomePlacesNavigator() {
         return navigator;
     }
-    
+
     @Override
     public SubscriptionServiceAsync getSubscriptionService() {
         return subscriptionService;

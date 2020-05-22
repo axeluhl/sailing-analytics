@@ -20,15 +20,15 @@ import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.impl.User;
 
 /**
- * Servlet for handling webhook events, response with status 200 in success handling
+ * Servlet for handling WebHook events, response with status 200 in success handling
  * 
  * {@link https://www.chargebee.com/docs/events_and_webhooks.html}
  * 
  * @author tutran
  */
-public class SubscriptionWebhookServlet extends SailingServerHttpServlet {
+public class SubscriptionWebHookServlet extends SailingServerHttpServlet {
     private static final long serialVersionUID = 2608645647937414012L;
-    private static final Logger logger = Logger.getLogger(SubscriptionWebhookServlet.class.getName());
+    private static final Logger logger = Logger.getLogger(SubscriptionWebHookServlet.class.getName());
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -39,7 +39,7 @@ public class SubscriptionWebhookServlet extends SailingServerHttpServlet {
             JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
             logger.log(Level.INFO, "Chargebee webhook data: " + requestObject.toJSONString());
 
-            SubscriptionWebhookEvent event = new SubscriptionWebhookEvent(requestObject);
+            SubscriptionWebHookEvent event = new SubscriptionWebHookEvent(requestObject);
             if (!event.isValidEvent()) {
                 throw new Exception("Invalid webhook event");
             }
@@ -98,14 +98,14 @@ public class SubscriptionWebhookServlet extends SailingServerHttpServlet {
         }
     }
 
-    private Subscription buildEmptySubscription(Subscription currentSubscription, SubscriptionWebhookEvent event) {
+    private Subscription buildEmptySubscription(Subscription currentSubscription, SubscriptionWebHookEvent event) {
         Subscription subscription = new Subscription();
         subscription.setLatestEventTime(event.getEventOccurredAt());
         subscription.setManualUpdatedAt(currentSubscription != null ? currentSubscription.getManualUpdatedAt() : 0);
         return subscription;
     }
 
-    private Subscription buildSubscription(Subscription currentSubscription, SubscriptionWebhookEvent event) {
+    private Subscription buildSubscription(Subscription currentSubscription, SubscriptionWebHookEvent event) {
         Subscription subscription = new Subscription();
 
         subscription.setSubscriptionId(event.getSubscriptionId());
@@ -120,7 +120,7 @@ public class SubscriptionWebhookServlet extends SailingServerHttpServlet {
         subscription.setManualUpdatedAt(currentSubscription != null ? currentSubscription.getManualUpdatedAt() : 0);
 
         if (subscription.getSubscriptionStatus() != null
-                && subscription.getSubscriptionStatus().equals(SubscriptionWebhookEvent.SUBSCRIPTION_STATUS_ACTIVE)) {
+                && subscription.getSubscriptionStatus().equals(SubscriptionWebHookEvent.SUBSCRIPTION_STATUS_ACTIVE)) {
             String paymentStatus = getEventPaymentStatus(event);
             if (paymentStatus != null) {
                 subscription.setPaymentStatus(paymentStatus);
@@ -142,20 +142,20 @@ public class SubscriptionWebhookServlet extends SailingServerHttpServlet {
         getSecurityService().updateUserSubscription(user.getName(), subscription);
     }
 
-    private String getEventPaymentStatus(SubscriptionWebhookEvent event) {
+    private String getEventPaymentStatus(SubscriptionWebHookEvent event) {
         String paymentStatus = null;
         String transactionStatus = event.getTransactionStatus();
         if (transactionStatus == null) {
             String invoiceStatus = event.getInvoiceStatus();
             if (invoiceStatus != null) {
-                paymentStatus = invoiceStatus.equals(SubscriptionWebhookEvent.INVOICE_STATUS_PAID)
+                paymentStatus = invoiceStatus.equals(SubscriptionWebHookEvent.INVOICE_STATUS_PAID)
                         ? Subscription.PAYMENT_STATUS_SUCCESS
                         : Subscription.PAYMENT_STATUS_NO_SUCCESS;
             }
         } else {
             String transactionType = event.getTransactionType();
-            if (transactionType != null && transactionType.equals(SubscriptionWebhookEvent.TRANSACTION_TYPE_PAYMENT)) {
-                paymentStatus = transactionStatus.equals(SubscriptionWebhookEvent.TRANSACTION_STATUS_SUCCESS)
+            if (transactionType != null && transactionType.equals(SubscriptionWebHookEvent.TRANSACTION_TYPE_PAYMENT)) {
+                paymentStatus = transactionStatus.equals(SubscriptionWebHookEvent.TRANSACTION_STATUS_SUCCESS)
                         ? Subscription.PAYMENT_STATUS_SUCCESS
                         : Subscription.PAYMENT_STATUS_NO_SUCCESS;
             }

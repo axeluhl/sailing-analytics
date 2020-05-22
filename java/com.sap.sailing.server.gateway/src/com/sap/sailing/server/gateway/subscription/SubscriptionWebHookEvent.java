@@ -3,11 +3,11 @@ package com.sap.sailing.server.gateway.subscription;
 import org.json.simple.JSONObject;
 
 /**
- * Wrapped class for webhook event JSON object
+ * Wrapped class for WebHook event JSON object
  * 
  * @author tutran
  */
-public class SubscriptionWebhookEvent {
+public class SubscriptionWebHookEvent {
 
     public static final String SUBSCRIPTION_STATUS_ACTIVE = "active";
     public static final String INVOICE_STATUS_PAID = "paid";
@@ -19,7 +19,7 @@ public class SubscriptionWebhookEvent {
     private String eventType;
     private JSONObject content;
 
-    public SubscriptionWebhookEvent(JSONObject eventJSON) {
+    public SubscriptionWebHookEvent(JSONObject eventJSON) {
         this.eventJSON = eventJSON;
 
         eventId = getJsonValue(eventJSON, "id");

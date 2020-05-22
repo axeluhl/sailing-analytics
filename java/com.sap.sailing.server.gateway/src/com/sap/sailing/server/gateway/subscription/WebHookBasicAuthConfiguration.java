@@ -1,29 +1,29 @@
 package com.sap.sailing.server.gateway.subscription;
 
 /**
- * Webhook basic authentication configuration. The basic authentication user and password have to be in server
+ * WebHook basic authentication configuration. The basic authentication user and password have to be in server
  * application start arguments: chargebee.basicauthuser, chargebee.basicauthpass
  * 
  * @author tutran
  */
-public class WebhookBasicAuthConfiguration {
+public class WebHookBasicAuthConfiguration {
     private static final String USER = "chargebee.basicauthuser";
     private static final String PASSWORD = "chargebee.basicauthpass";
 
-    private static WebhookBasicAuthConfiguration instance;
+    private static WebHookBasicAuthConfiguration instance;
 
     private String username;
     private String password;
 
-    public static WebhookBasicAuthConfiguration getInstance() {
+    public static WebHookBasicAuthConfiguration getInstance() {
         if (instance == null) {
-            instance = new WebhookBasicAuthConfiguration(System.getProperty(USER), System.getProperty(PASSWORD));
+            instance = new WebHookBasicAuthConfiguration(System.getProperty(USER), System.getProperty(PASSWORD));
         }
 
         return instance;
     }
 
-    public WebhookBasicAuthConfiguration(String username, String password) {
+    public WebHookBasicAuthConfiguration(String username, String password) {
         this.username = username;
         this.password = password;
     }

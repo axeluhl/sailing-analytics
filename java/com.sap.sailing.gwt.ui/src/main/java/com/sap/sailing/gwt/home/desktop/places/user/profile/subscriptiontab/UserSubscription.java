@@ -21,8 +21,8 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.shared.places.user.profile.subscription.UserSubscriptionView;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionDTO;
-import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionPlans;
-import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionPlans.Plan;
+import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionPlanHolder;
+import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionPlan;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 
@@ -110,19 +110,27 @@ public class UserSubscription extends Composite implements UserSubscriptionView 
 
         updateSubscriptionButtonUi.setEnabled(true);
 
-        Plan plan = null;
-        if (subscription != null) {
-            plan = SubscriptionPlans.getPlan(subscription.getPlanId());
-        }
-
+        SubscriptionPlan plan = getSubscriptionPlan(subscription);
         if (subscription == null || plan == null) {
-            planNameSpanUi.setInnerText("Free");
-            hideElement(subscriptionGroupUi);
-            cancelSubscriptionButtonUi.setVisible(false);
-            show();
-            return;
+            updateViewWithFreePlan();
+        } else {
+            updateViewWithPlan(subscription, plan);
         }
 
+        show();
+    }
+
+    private SubscriptionPlan getSubscriptionPlan(SubscriptionDTO subscription) {
+        return subscription != null ? SubscriptionPlanHolder.getInstance().getPlan(subscription.getPlanId()) : null;
+    }
+
+    private void updateViewWithFreePlan() {
+        planNameSpanUi.setInnerText("Free");
+        hideElement(subscriptionGroupUi);
+        cancelSubscriptionButtonUi.setVisible(false);
+    }
+
+    private void updateViewWithPlan(SubscriptionDTO subscription, SubscriptionPlan plan) {
         planNameSpanUi.setInnerText(plan.getName());
         subscriptionStatusSpanUi.setInnerText(subscription.getSubscriptionStatusLabel());
         if (subscription.isActive()) {
@@ -140,8 +148,6 @@ public class UserSubscription extends Composite implements UserSubscriptionView 
                 hideElement(trialDivUi);
             }
         }
-
-        show();
     }
 
     private void updatePlanList(SubscriptionDTO subscription) {
@@ -150,9 +156,9 @@ public class UserSubscription extends Composite implements UserSubscriptionView 
             planListUi.addItem("", "");
             planListUi.setSelectedIndex(0);
         }
-        List<Plan> planList = SubscriptionPlans.getPlanList();
+        List<SubscriptionPlan> planList = SubscriptionPlanHolder.getInstance().getPlanList();
         int i = 0;
-        for (Plan plan : planList) {
+        for (SubscriptionPlan plan : planList) {
             planListUi.addItem(plan.getName(), plan.getId());
             if (subscription != null && subscription.getPlanId().equals(plan.getId())) {
                 planListUi.setSelectedIndex(i);
@@ -162,6 +168,11 @@ public class UserSubscription extends Composite implements UserSubscriptionView 
     }
 
     private String buildTrialText(SubscriptionDTO subscription) {
+        return StringMessages.INSTANCE.trialText(getTrialRemainingText(subscription),
+                DateTimeFormat.getFormat("yyyy-MM-dd HH:mm").format(new Date(subscription.getTrialEnd() * 1000)));
+    }
+
+    private String getTrialRemainingText(SubscriptionDTO subscription) {
         long now = Math.round(Duration.currentTimeMillis() / 1000);
         long remain = subscription.getTrialEnd() - now;
         StringBuilder remainText = new StringBuilder();
@@ -196,8 +207,7 @@ public class UserSubscription extends Composite implements UserSubscriptionView 
             remainText.append(StringMessages.INSTANCE.numHours(0));
         }
 
-        return StringMessages.INSTANCE.trialText(remainText.toString(),
-                DateTimeFormat.getFormat("yyyy-MM-dd HH:mm").format(new Date(subscription.getTrialEnd() * 1000)));
+        return remainText.toString();
     }
 
     private void resetElementsVisibleState() {

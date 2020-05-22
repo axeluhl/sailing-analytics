@@ -64,7 +64,8 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.server.gateway.serialization.shared.android,
  com.sap.sailing.shared.server,
  org.apache.commons.math;bundle-version="2.1.0",
- com.chargebee.chargebee-java;bundle-version="2.7.7"
+ com.chargebee.chargebee-java;bundle-version="2.7.7",
+ org.apache.commons.lang;bundle-version="2.6.0"
 Bundle-Activator: com.sap.sailing.gwt.ui.server.Activator
 Bundle-ActivationPolicy: lazy
 Import-Package: javax.servlet;version="3.1.0",

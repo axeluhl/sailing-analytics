@@ -6,6 +6,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+
+import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
@@ -18,7 +22,8 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sailing.gwt.ui.client.subscription.SubscriptionService;
 import com.sap.sailing.gwt.ui.shared.subscription.HostedPageResultDTO;
 import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionDTO;
-import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionPlans;
+import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionPlanHolder;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.Subscription;
 import com.sap.sse.security.shared.UserManagementException;
@@ -35,32 +40,15 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
 
     private static final Logger logger = Logger.getLogger(SubscriptionServiceImpl.class.getName());
 
-    private final BundleContext context;
-    private final CompletableFuture<SecurityService> securityService;
+    private BundleContext context;
+    private CompletableFuture<SecurityService> securityService;
 
-    public SubscriptionServiceImpl() {
-        // Configure payment service
-        Environment.configure(SubscriptionConfiguration.getInstance().getSite(),
-                SubscriptionConfiguration.getInstance().getApiKey());
+    @Override
+    public void init(ServletConfig config) throws ServletException {
+        super.init(config);
 
-        // get SecurityService
-        context = Activator.getContext();
-        final ServiceTracker<SecurityService, SecurityService> tracker = new ServiceTracker<>(context,
-                SecurityService.class, null);
-        tracker.open();
-        securityService = CompletableFuture.supplyAsync(() -> {
-            SecurityService result = null;
-            try {
-                logger.info("Waiting for SecurityService...");
-                result = tracker.waitForService(0);
-                logger.info("Obtained SecurityService " + result);
-                SecurityUtils.setSecurityManager(result.getSecurityManager());
-                return result;
-            } catch (InterruptedException e) {
-                logger.log(Level.SEVERE, "Interrupted while waiting for SecurityService service", e);
-                return null;
-            }
-        });
+        initPaymentService();
+        initSecurityService();
     }
 
     @Override
@@ -68,57 +56,41 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
 
         HostedPageResultDTO response = new HostedPageResultDTO();
 
-        // Validate if plan id is valid
-        if (planId == null || planId.isEmpty() || SubscriptionPlans.getPlan(planId) == null) {
-            response.error = "Invalid plan";
+        if (!isValidPlan(planId)) {
+            response.setError("Invalid plan");
             return response;
         }
 
         try {
             User user = getCurrentUser();
 
-            // Check if user already subscribed to a plan, and if it's same plan with new plan then we stop the process
-            // and send back error
-            if (user.getSubscription() != null && user.getSubscription().getPlanId() != null
-                    && user.getSubscription().getPlanId().equals(planId)) {
-                response.error = "User has already subscribed to " + SubscriptionPlans.getPlan(planId).getName()
-                        + " plan";
+            if (isUserSubscribedToPlan(user.getSubscription(), planId)) {
+                response.setError("User has already subscribed to "
+                        + SubscriptionPlanHolder.getInstance().getPlan(planId).getName() + " plan");
                 return response;
             }
 
             Result result;
 
-            // If there's no subscription data attach to user model then we create a checkout-new request
-            if (user.getSubscription() == null || user.getSubscription().getPlanId() == null) {
-                String[] userNameParts = user.getFullName().split("\\s+");
-                String firstName = userNameParts[0];
-                String lastName = "";
-                if (userNameParts.length > 1) {
-                    lastName = String.join(" ", Arrays.copyOfRange(userNameParts, 1, userNameParts.length));
-                }
-
+            if (!hasUserSubscription(user.getSubscription())) {
+                Pair<String, String> usernames = getUserFirstAndLastName(user.getFullName());
                 String locale = user.getLocaleOrDefault().getLanguage();
 
-                // Send checkout-new request with all necessary customer information and get back hosted page result
-                // object
-                result = HostedPage.checkoutNew()
-                        // customer id is same as the system user name
-                        .customerId(user.getName()).customerEmail(user.getEmail()).customerFirstName(firstName)
-                        .customerLastName(lastName).customerLocale(locale).subscriptionPlanId(planId)
-                        .billingAddressFirstName(firstName).billingAddressLastName(lastName).billingAddressCountry("US")
-                        .request();
+                // Make a checkout-new request
+                result = HostedPage.checkoutNew().customerId(user.getName()).customerEmail(user.getEmail())
+                        .customerFirstName(usernames.getA()).customerLastName(usernames.getB()).customerLocale(locale)
+                        .subscriptionPlanId(planId).billingAddressFirstName(usernames.getA())
+                        .billingAddressLastName(usernames.getB()).billingAddressCountry("US").request();
             } else {
-                // User has already subscribed to a plan, and user wants to change plan
-                // so we make a checkout-existing request
+                // Make a checkout-existing request
                 result = HostedPage.checkoutExisting().subscriptionId(user.getSubscription().getSubscriptionId())
                         .subscriptionPlanId(planId).request();
             }
 
-            response.hostedPageJSONString = result.hostedPage().toJson();
+            response.setHostedPageJSONString(result.hostedPage().toJson());
         } catch (Exception e) {
             logger.log(Level.WARNING, "Error in generating Chargebee hosted page data ", e);
-
-            response.error = "Error in generating Chargebee hosted page";
+            response.setError("Error in generating Chargebee hosted page");
         }
 
         return response;
@@ -216,6 +188,55 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
             logger.log(Level.WARNING, "Error in cancel subscription ", e);
             return false;
         }
+    }
+
+    private void initPaymentService() {
+        Environment.configure(SubscriptionConfiguration.getInstance().getSite(),
+                SubscriptionConfiguration.getInstance().getApiKey());
+    }
+
+    private void initSecurityService() {
+        context = Activator.getContext();
+        final ServiceTracker<SecurityService, SecurityService> tracker = new ServiceTracker<>(context,
+                SecurityService.class, null);
+        tracker.open();
+        securityService = CompletableFuture.supplyAsync(() -> {
+            SecurityService result = null;
+            try {
+                logger.info("Waiting for SecurityService...");
+                result = tracker.waitForService(0);
+                logger.info("Obtained SecurityService " + result);
+                SecurityUtils.setSecurityManager(result.getSecurityManager());
+                return result;
+            } catch (InterruptedException e) {
+                logger.log(Level.SEVERE, "Interrupted while waiting for SecurityService service", e);
+                return null;
+            }
+        });
+    }
+
+    private boolean isValidPlan(String planId) {
+        return StringUtils.isNotEmpty(planId) && SubscriptionPlanHolder.getInstance().getPlan(planId) != null;
+    }
+
+    private boolean isUserSubscribedToPlan(Subscription userSubscription, String planId) {
+        return userSubscription != null && userSubscription.getPlanId() != null
+                && userSubscription.getPlanId().equals(planId);
+    }
+
+    private boolean hasUserSubscription(Subscription userSubscription) {
+        return userSubscription != null && userSubscription.getPlanId() != null;
+    }
+
+    private Pair<String, String> getUserFirstAndLastName(String fullName) {
+        String[] userNameParts = fullName.split("\\s+");
+        String firstName = userNameParts[0];
+        String lastName = "";
+        if (userNameParts.length > 1) {
+            lastName = String.join(" ", Arrays.copyOfRange(userNameParts, 1, userNameParts.length));
+        }
+
+        return new Pair<String, String>(firstName, lastName);
     }
 
     private SecurityService getSecurityService() {

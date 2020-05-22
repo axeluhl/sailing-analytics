@@ -8,17 +8,17 @@ import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.realm.AuthenticatingRealm;
 
 /**
- * Shiro Realm for handling subscription webhooks basic authentication
+ * Shiro Realm for handling subscription WebHook basic authentication
  * 
  * @author tutran
  */
-public class SubscriptionWebhookBasicAuthRealm extends AuthenticatingRealm {
+public class SubscriptionWebHookBasicAuthRealm extends AuthenticatingRealm {
     
     @Override
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
         UsernamePasswordToken authToken = (UsernamePasswordToken) token;
 
-        WebhookBasicAuthConfiguration authConfiguration = WebhookBasicAuthConfiguration.getInstance();
+        WebHookBasicAuthConfiguration authConfiguration = WebHookBasicAuthConfiguration.getInstance();
         
         if (authToken.getUsername() != null && authToken.getPassword() != null
                 && authToken.getUsername().equals(authConfiguration.getUsername())

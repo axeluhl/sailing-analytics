@@ -17,7 +17,7 @@ import com.sap.sse.security.ui.authentication.WithUserService;
 
 public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & ErrorAndBusyClientFactory & WithAuthenticationManager & WithUserService & WithSubscriptionService>
         implements UserSubscriptionView.Presenter {
-    
+
     private final C clientFactory;
     private UserSubscriptionView view;
 
@@ -98,12 +98,14 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
 
                     @Override
                     public void onSuccess(HostedPageResultDTO hostedPage) {
-                        if (hostedPage.error != null && !hostedPage.error.isEmpty()) {
-                            view.onOpenCheckoutError(hostedPage.error);
-                        } else if (hostedPage.hostedPageJSONString != null
-                                && !hostedPage.hostedPageJSONString.isEmpty()) {
-                            Chargebee.getInstance().openCheckout(CheckoutOption.create(hostedPage.hostedPageJSONString,
-                                    onCheckoutSuccessCallback, onCheckoutErrorCallback, onCheckoutCloseCallback));
+                        if (hostedPage.getError() != null && !hostedPage.getError().isEmpty()) {
+                            view.onOpenCheckoutError(hostedPage.getError());
+                        } else if (hostedPage.getHostedPageJSONString() != null
+                                && !hostedPage.getHostedPageJSONString().isEmpty()) {
+                            Chargebee.getInstance()
+                                    .openCheckout(CheckoutOption.create(hostedPage.getHostedPageJSONString(),
+                                            onCheckoutSuccessCallback, onCheckoutErrorCallback,
+                                            onCheckoutCloseCallback));
                             ;
                         } else {
                             view.onOpenCheckoutError(StringMessages.INSTANCE.failGeneratingHostedPageObject());
@@ -155,7 +157,7 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
 
         });
     }
-    
+
     private void showError(String message) {
         Notification.notify(message, NotificationType.ERROR);
     }

@@ -263,7 +263,7 @@
   
     <servlet>
         <servlet-name>SubscriptionWebhookServlet</servlet-name>
-        <servlet-class>com.sap.sailing.server.gateway.subscription.SubscriptionWebhookServlet</servlet-class>
+        <servlet-class>com.sap.sailing.server.gateway.subscription.SubscriptionWebHookServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>SubscriptionWebhookServlet</servlet-name>
