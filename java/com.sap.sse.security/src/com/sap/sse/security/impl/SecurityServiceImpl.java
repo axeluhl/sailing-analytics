@@ -156,6 +156,8 @@ import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RolePrototype;
 import com.sap.sse.security.shared.SecurityAccessControlList;
 import com.sap.sse.security.shared.Subscription;
+import com.sap.sse.security.shared.SubscriptionPlan;
+import com.sap.sse.security.shared.SubscriptionPlanHolder;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
@@ -2518,7 +2520,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public void updateUserSubscription(String username, Subscription subscription) throws UserManagementException {
-        final User user = store.getUserByName(username);
+        final User user = getUserByName(username);
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
@@ -2526,10 +2528,88 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public Void internalUpdateSubscription(String username, Subscription subscription) {
+    public Void internalUpdateSubscription(String username, Subscription subscription) throws UserManagementException {
         User user = getUserByName(username);
+        if (user == null) {
+            throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
+        }
+
+        Subscription currentSubscription = user.getSubscription();
+        if (shouldUpdateUserRolesForSubscription(currentSubscription, subscription)) {
+            updateUserRolesOnSubscriptionChange(username, currentSubscription, subscription);
+        }
+
         user.setSubscription(subscription);
         store.updateUser(user);
         return null;
+    }
+
+    private void updateUserRolesOnSubscriptionChange(String username, Subscription currentSubscription,
+            Subscription newSubscription) throws UserManagementException {
+        logger.log(Level.INFO, "Update user subscription roles");
+        if (currentSubscription != null && currentSubscription.getPlanId() != null
+                && currentSubscription.isActiveSubscription()) {
+            SubscriptionPlan currentPlan = SubscriptionPlanHolder.getInstance()
+                    .getPlan(currentSubscription.getPlanId());
+            if (currentPlan != null) {
+                UUID[] roleDefinitionIds = currentPlan.getRoleDefinitionIds();
+                for (UUID roleDefId : roleDefinitionIds) {
+                    store.removeRoleFromUser(username, new Role(getRoleDefinition(roleDefId)));
+                }
+            }
+        }
+
+        if (newSubscription != null && newSubscription.getPlanId() != null && newSubscription.isActiveSubscription()) {
+            SubscriptionPlan newPlan = SubscriptionPlanHolder.getInstance().getPlan(newSubscription.getPlanId());
+            if (newPlan != null) {
+                UUID[] roleDefinitionIds = newPlan.getRoleDefinitionIds();
+                for (UUID roleDefId : roleDefinitionIds) {
+                    store.addRoleForUser(username, new Role(getRoleDefinition(roleDefId)));
+                }
+            }
+        }
+    }
+
+    private boolean shouldUpdateUserRolesForSubscription(Subscription currentSubscription,
+            Subscription newSubscription) {
+        if (isUserSubscriptionPlanChanged(currentSubscription, newSubscription)) {
+            return true;
+        }
+
+        return newSubscription != null && currentSubscription != null
+                && newSubscription.isActiveSubscription() != currentSubscription.isActiveSubscription();
+    }
+
+    /**
+     * 
+     * @param currentSubscription
+     *            current user subscription
+     * @param newSubscription
+     *            new subscription
+     * @return true if new user subscription plan is different with current subscription plan
+     */
+    private boolean isUserSubscriptionPlanChanged(Subscription currentSubscription, Subscription newSubscription) {
+        if ((currentSubscription == null || currentSubscription.getPlanId() == null)
+                && (newSubscription == null || newSubscription.getPlanId() == null)) {
+            return false;
+        }
+
+        String currentPlan = null;
+        String newPlan = null;
+
+        if (currentSubscription != null) {
+            currentPlan = currentSubscription.getPlanId();
+        }
+        if (newSubscription != null) {
+            newPlan = newSubscription.getPlanId();
+        }
+
+        if (currentPlan == null && newPlan == null) {
+            return false;
+        } else if (currentPlan != null && newPlan != null) {
+            return !currentPlan.equals(newPlan);
+        } else {
+            return true;
+        }
     }
 }

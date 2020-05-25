@@ -51,10 +51,10 @@ public class SubscriptionWebHookServlet extends SailingServerHttpServlet {
 
             sendSuccess(response);
         } catch (ParseException e) {
-            logger.log(Level.WARNING, "Failed to parse subscription webhook event data: " + e.getMessage());
+            logger.log(Level.SEVERE, "Failed to parse subscription webhook event data", e);
             sendFail(response);
         } catch (Exception e) {
-            logger.log(Level.WARNING, "Failed to proccess subscription webhook event: " + e.getMessage());
+            logger.log(Level.SEVERE, "Failed to proccess subscription webhook event", e);
             sendFail(response);
         }
     }

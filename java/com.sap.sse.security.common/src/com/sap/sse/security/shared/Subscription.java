@@ -166,4 +166,15 @@ public class Subscription implements Serializable {
     public void setManualUpdatedAt(long manualUpdatedAt) {
         this.manualUpdatedAt = manualUpdatedAt;
     }
+
+    /**
+     * Check if subscription is active, base on this user will gain roles for the subscription
+     * 
+     * @return true if status subscription is in trial or status is active and user has success payment
+     */
+    public boolean isActiveSubscription() {
+        return subscriptionStatus != null && (subscriptionStatus.equals(SUBSCRIPTION_STATUS_TRIAL)
+                || (subscriptionStatus.equals(SUBSCRIPTION_STATUS_ACTIVE) && paymentStatus != null
+                        && paymentStatus.equals(PAYMENT_STATUS_SUCCESS)));
+    }
 }

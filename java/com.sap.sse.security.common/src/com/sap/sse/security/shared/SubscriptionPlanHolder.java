@@ -1,8 +1,6 @@
-package com.sap.sailing.gwt.ui.shared.subscription;
+package com.sap.sse.security.shared;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -19,20 +17,9 @@ public class SubscriptionPlanHolder {
         private static final long serialVersionUID = -8686217706843873886L;
 
         {
-            put(SubscriptionPlan.STARTER.getId(), SubscriptionPlan.STARTER);
-            put(SubscriptionPlan.PREMIUM.getId(), SubscriptionPlan.PREMIUM);
-        }
-    };
-
-    private static final List<SubscriptionPlan> planList = new ArrayList<SubscriptionPlan>() {
-        /**
-         * 
-         */
-        private static final long serialVersionUID = 1775492848916531255L;
-
-        {
-            add(SubscriptionPlan.STARTER);
-            add(SubscriptionPlan.PREMIUM);
+            for (SubscriptionPlan plan : SubscriptionPlan.values()) {
+                put(plan.getId(), plan);
+            }
         }
     };
 
@@ -49,7 +36,7 @@ public class SubscriptionPlanHolder {
         return planMap.get(planId);
     }
 
-    public List<SubscriptionPlan> getPlanList() {
-        return planList;
+    public SubscriptionPlan[] getPlanList() {
+        return SubscriptionPlan.values();
     }
 }

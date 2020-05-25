@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.home.desktop.places.user.profile.subscriptiontab;
 
 import java.util.Date;
-import java.util.List;
 
 import com.google.gwt.core.client.Duration;
 import com.google.gwt.core.client.GWT;
@@ -21,10 +20,10 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.shared.places.user.profile.subscription.UserSubscriptionView;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionDTO;
-import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionPlanHolder;
-import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionPlan;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
+import com.sap.sse.security.shared.SubscriptionPlan;
+import com.sap.sse.security.shared.SubscriptionPlanHolder;
 
 /**
  * Implementation view for {@link UserSubscriptionView}
@@ -155,7 +154,7 @@ public class UserSubscription extends Composite implements UserSubscriptionView 
             planListUi.addItem("", "");
             planListUi.setSelectedIndex(0);
         }
-        List<SubscriptionPlan> planList = SubscriptionPlanHolder.getInstance().getPlanList();
+        SubscriptionPlan[] planList = SubscriptionPlanHolder.getInstance().getPlanList();
         int i = 0;
         for (SubscriptionPlan plan : planList) {
             planListUi.addItem(plan.getName(), plan.getId());
