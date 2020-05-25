@@ -334,7 +334,7 @@ public class MarkPropertiesPanel extends FlowPanel {
                 new MarkPropertiesImagesbarCell(stringMessages), userService);
         final EditOwnershipDialog.DialogConfig<MarkPropertiesDTO> configOwnership = EditOwnershipDialog
                 .create(userService.getUserManagementService(), type, markProperties -> 
-                    refreshMarkProperties(), stringMessages);
+                    markPropertiesListDataProvider.refresh(), stringMessages);
         final EditACLDialog.DialogConfig<MarkPropertiesDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementService(), type, markProperties -> markProperties.getAccessControlList(),
                 stringMessages);

@@ -40,6 +40,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.courseCreation.CourseTemplateDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkRoleDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkTemplateDTO;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
@@ -308,7 +309,7 @@ public class CourseTemplatePanel extends FlowPanel {
         final AccessControlledActionsColumn<CourseTemplateDTO, DefaultActionsImagesBarCell> actionsColumn = create(
                 new DefaultActionsImagesBarCell(stringMessages), userService);
         final EditOwnershipDialog.DialogConfig<CourseTemplateDTO> configOwnership = EditOwnershipDialog
-                .create(userService.getUserManagementService(), type, courseTemplate -> refreshCourseTemplates(), stringMessages);
+                .create(userService.getUserManagementService(), type, courseTemplateDTO -> courseTemplateListDataProvider.refresh(), stringMessages);
         final EditACLDialog.DialogConfig<CourseTemplateDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementService(), type, courseTemplate -> courseTemplate.getAccessControlList(),
                 stringMessages);
@@ -335,7 +336,7 @@ public class CourseTemplatePanel extends FlowPanel {
         courseTemplateTable.addColumn(idColumn, stringMessages.id());
         courseTemplateTable.addColumn(actionsColumn, stringMessages.actions());
     }
-
+    
     public void refreshCourseTemplates() {
         loadCourseTemplates();
         loadMarkRoles();
