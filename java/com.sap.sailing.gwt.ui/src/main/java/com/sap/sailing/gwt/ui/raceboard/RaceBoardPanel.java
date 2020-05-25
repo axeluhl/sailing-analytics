@@ -105,6 +105,7 @@ import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -394,6 +395,13 @@ public class RaceBoardPanel
             manageTimePanelToggleButton(advanceTimePanelEnabled);
         }
         addChildComponent(racetimePanel);
+        final Long zoomStartMillis = parsedPerspectiveOwnSettings.getZoomStart();
+        final Long zoomEndMillis = parsedPerspectiveOwnSettings.getZoomEnd();
+        if(isScreenLargeEnoughToInitiallyDisplayLeaderboard && zoomStartMillis != null && zoomEndMillis != null) {
+            final Date zoomStart = new Date(zoomStartMillis);
+            final Date zoomEnd = new Date(zoomEndMillis);
+            timeRangeWithZoomModel.setTimeZoom(zoomStart, zoomEnd, null);
+        }
         dockPanel = new DockLayoutPanel(Unit.PX);
         dockPanel.addSouth(timePanelWrapper, TIMEPANEL_COLLAPSED_HEIGHT);
         dockPanel.add(mainPanel);
@@ -862,15 +870,22 @@ public class RaceBoardPanel
         for (CompetitorDTO competitorDTO : getCompetitorSelectionProvider().getSelectedCompetitors()) {
             selectedCompetitorIds.add(competitorDTO.getIdAsString());
         }
-        boolean isCompetitorChartVisible = competitorChart == null ? false : competitorChart.isVisible();
-        boolean isWindChartVisible = windChart == null ? false : windChart.isVisible();
-        boolean isManeuverTableVisible = maneuverTablePanel == null ? false : maneuverTablePanel.isVisible();
+        final Pair<Date, Date> timeZoom = timeRangeWithZoomModel.getTimeZoom();
+        Long zoomStartInMillis = null;
+        Long zoomEndInMillis = null;
+        if(timeZoom.getA() != null && timeZoom.getB() != null) {
+            zoomStartInMillis = timeZoom.getA().getTime();
+            zoomEndInMillis = timeZoom.getB().getTime();
+        }
+        final boolean isCompetitorChartVisible = competitorChart == null ? false : competitorChart.isVisible();
+        final boolean isWindChartVisible = windChart == null ? false : windChart.isVisible();
+        final boolean isManeuverTableVisible = maneuverTablePanel == null ? false : maneuverTablePanel.isVisible();
         RaceBoardPerspectiveOwnSettings raceBoardPerspectiveOwnSettings = new RaceBoardPerspectiveOwnSettings(
                 activeCompetitorsFilterSetName, leaderboardPanel.isVisible(), isWindChartVisible,
                 isCompetitorChartVisible, initialSettings.isCanReplayDuringLiveRaces(),
                 newInitialDurationAfterRaceStartInReplay, /* legacy single selectedCompetitor */ null,
                 selectedCompetitorIds, taggingPanel.isVisible(), isManeuverTableVisible,
-                initialSettings.getJumpToTag());
+                initialSettings.getJumpToTag(), zoomStartInMillis, zoomEndInMillis);
         return raceBoardPerspectiveOwnSettings;
     }
     

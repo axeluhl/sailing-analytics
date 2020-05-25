@@ -10,6 +10,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.BooleanSetting;
+import com.sap.sse.common.settings.generic.LongSetting;
 import com.sap.sse.common.settings.generic.StringSetSetting;
 import com.sap.sse.common.settings.generic.StringSetting;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
@@ -34,6 +35,8 @@ public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializable
     private transient BooleanSetting showTags;
     private transient BooleanSetting showManeuverTable;
     private transient StringSetting jumpToTag;
+    private transient LongSetting zoomEnd;
+    private transient LongSetting zoomStart;
     
     public static final String PARAM_VIEW_MODE = "viewMode";
     public static final String PARAM_VIEW_SHOW_LEADERBOARD = "viewShowLeaderboard";
@@ -49,6 +52,8 @@ public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializable
     public static final String PARAM_VIEW_SHOW_TAGS = "viewShowTags";
     public static final String PARAM_VIEW_SHOW_MANEUVER_TABLE = "viewShowManeuverTable";
     public static final String PARAM_JUMP_TO_TAG = TagDTO.TAG_URL_PARAMETER;
+    public static final String PARAM_ZOOM_START = "zoomStart";
+    public static final String PARAM_ZOOM_END = "zoomEnd";
 
     public RaceBoardPerspectiveOwnSettings() {
     }
@@ -77,12 +82,14 @@ public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializable
         this.showTags = new BooleanSetting(PARAM_VIEW_SHOW_TAGS, this, false);
         this.showManeuverTable = new BooleanSetting(PARAM_VIEW_SHOW_MANEUVER_TABLE, this, false);
         this.jumpToTag = new StringSetting(PARAM_JUMP_TO_TAG, this, null);
+        this.zoomStart = new LongSetting(PARAM_ZOOM_START, this, null);
+        this.zoomEnd = new LongSetting(PARAM_ZOOM_END, this, null);
     }
 
     public RaceBoardPerspectiveOwnSettings(String activeCompetitorsFilterSetName, Boolean showLeaderboard,
             Boolean showWindChart, Boolean showCompetitorsChart, Boolean canReplayDuringLiveRaces,
             Duration initialDurationAfterRaceStartInReplay, String selectedCompetitor, Iterable<String> selectedCompetitors, 
-            Boolean showTags, Boolean showManeuverTable, String jumpToTag) {
+            Boolean showTags, Boolean showManeuverTable, String jumpToTag, Long zoomStart, Long zoomEnd) {
         this.showTags.setValue(showTags);
         this.showManeuverTable.setValue(showManeuverTable);
         this.activeCompetitorsFilterSetName.setValue(activeCompetitorsFilterSetName);
@@ -93,6 +100,9 @@ public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializable
         this.initialDurationAfterRaceStartInReplay.setValue(initialDurationAfterRaceStartInReplay);
         this.selectedCompetitor.setValue(selectedCompetitor);
         this.selectedCompetitors.setValues(selectedCompetitors);
+        this.jumpToTag.setValue(jumpToTag);
+        this.zoomStart.setValue(zoomStart);
+        this.zoomEnd.setValue(zoomEnd);
     }
 
     public boolean isShowLeaderboard() {
@@ -129,6 +139,14 @@ public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializable
 
     public String getJumpToTag() {
         return jumpToTag.getValue();
+    }
+    
+    public Long getZoomStart() {
+        return zoomStart.getValue();
+    }
+    
+    public Long getZoomEnd() {
+        return zoomEnd.getValue();
     }
     
     public void resetShowTags() {
@@ -174,11 +192,19 @@ public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializable
     public void resetJumpToTag() {
         this.jumpToTag.resetToDefault();;
     }
+    
+    public void resetZoomStart() {
+        this.zoomStart.resetToDefault();
+    }
+    
+    public void resetZoomEnd() {
+        this.zoomEnd.resetToDefault();
+    }
 
     public static RaceBoardPerspectiveOwnSettings readSettingsFromURL(boolean defaultForViewShowLeaderboard,
             boolean defaultForViewShowWindchart, boolean defaultForViewShowCompetitorsChart,
             String defaultForViewCompetitorFilter, boolean defaultForCanReplayDuringLiveRaces, boolean defaultForViewShowTags,
-            boolean defaultForViewShowManeuverTable, String defaultForJumpToTag) {
+            boolean defaultForViewShowManeuverTable, String defaultForJumpToTag, Long defaultForZoomStart, Long defaultForZoomEnd) {
         final boolean showLeaderboard = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_LEADERBOARD, defaultForViewShowLeaderboard /* default */);
         final boolean showWindChart = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_WINDCHART, defaultForViewShowWindchart /* default */);
         final boolean showCompetitorsChart = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_COMPETITORSCHART, defaultForViewShowCompetitorsChart /* default */);
@@ -192,9 +218,11 @@ public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializable
         final boolean showTags = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_TAGS, defaultForViewShowTags);
         final boolean showManeuverTable = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_MANEUVER_TABLE, defaultForViewShowManeuverTable);
         final String jumpToTag = GwtHttpRequestUtils.getStringParameter(PARAM_JUMP_TO_TAG, defaultForJumpToTag /* default */);
+        final Long zoomStart = GwtHttpRequestUtils.getLongParameter(PARAM_ZOOM_START, defaultForZoomStart);
+        final Long zoomEnd = GwtHttpRequestUtils.getLongParameter(PARAM_ZOOM_END, defaultForZoomEnd);
         return new RaceBoardPerspectiveOwnSettings(activeCompetitorsFilterSetName, showLeaderboard, showWindChart,
                 showCompetitorsChart, canReplayWhileLiveIsPossible, initialDurationAfterRaceStartInReplay,
-                selectedCompetitor, selectedCompetitors, showTags, showManeuverTable, jumpToTag);
+                selectedCompetitor, selectedCompetitors, showTags, showManeuverTable, jumpToTag, zoomStart, zoomEnd);
     }
 
     /**

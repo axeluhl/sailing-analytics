@@ -38,6 +38,7 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
     private CheckBox competitorSelectionCheckBox;
     private CheckBox tagsCheckBox;
     private CheckBox maneuverCheckBox;
+    private CheckBox zoomCheckBox;
     private Label linkFieldLabel;
     private TextBox linkField;
     private Image qrCodeImage;
@@ -110,6 +111,10 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
         }
         if (isScreenBigEnough && !maneuverCheckBox.getValue()) {
             patchedPerspectiveOwnSettings.resetShowManeuver();
+        }
+        if (isScreenBigEnough && !zoomCheckBox.getValue()) {
+            patchedPerspectiveOwnSettings.resetZoomStart();
+            patchedPerspectiveOwnSettings.resetZoomEnd();
         }
         if (!filterSetNameCheckBox.getValue()) {
             patchedPerspectiveOwnSettings.resetActiveCompetitorsFilterSetName();
@@ -211,6 +216,16 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
                 }
             });
             settingsPanel.add(maneuverCheckBox);
+            zoomCheckBox = createCheckbox(stringMessages.zoomCheckBoxLabel());
+            zoomCheckBox.setValue(true);
+            zoomCheckBox.addClickHandler(new ClickHandler() {
+                
+                @Override
+                public void onClick(ClickEvent event) {
+                    updateLink();
+                }
+            });
+            settingsPanel.add(zoomCheckBox);
         }
         linkFieldLabel = createLabel(stringMessages.linkSharingAnchorText());
         linkField = createTextBox(assembleLink());
