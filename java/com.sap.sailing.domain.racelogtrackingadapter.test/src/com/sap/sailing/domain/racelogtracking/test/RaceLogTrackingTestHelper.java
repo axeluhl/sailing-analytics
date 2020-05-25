@@ -23,7 +23,7 @@ public abstract class RaceLogTrackingTestHelper {
     }
     
     protected void setStartAndEndOfRaceInRaceLog(TimePoint startTimeInRaceLog, TimePoint endTimeInRaceLog) {
-        raceLog.add(new RaceLogStartTimeEventImpl(startTimeInRaceLog, author, 0, startTimeInRaceLog));
+        raceLog.add(new RaceLogStartTimeEventImpl(startTimeInRaceLog, author, 0, startTimeInRaceLog, /* courseAreaId */ null));
         raceLog.add(new RaceLogRaceStatusEventImpl(endTimeInRaceLog, endTimeInRaceLog, author, UUID.randomUUID(), 0, RaceLogRaceStatus.FINISHED));
     }
     

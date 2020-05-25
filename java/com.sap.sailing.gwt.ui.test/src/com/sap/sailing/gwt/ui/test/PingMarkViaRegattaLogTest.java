@@ -25,14 +25,14 @@ import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.server.interfaces.RacingEventService;
 
 public class PingMarkViaRegattaLogTest {
-    private SailingServiceImplMock sailingService;
+    private SailingServiceWriteImplMock sailingService;
     private RacingEventService service;
     private final String columnName = "column";
     private final Fleet fleet = new FleetImpl("fleet");
     
     @Before
     public void prepare() {
-        sailingService = new SailingServiceImplMock();
+        sailingService = new SailingServiceWriteImplMock();
         service = sailingService.getRacingEventService();
     }
     

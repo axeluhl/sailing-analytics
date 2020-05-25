@@ -63,6 +63,7 @@ public class ORCCertificatesCollectionJSON extends AbstractORCCertificatesCollec
     private static final String CIRCULAR_RANDOM = "CR";
     private static final String NON_SPINNAKER = "NS";
     private static final String WIND_SPEEDS = "WindSpeeds";
+    private static final String WIND_ANGLES = "WindAngles";
     
     /**
      * Pattern to recognize a true wind angle in the allowances section. Group 1 contains
@@ -189,27 +190,28 @@ public class ORCCertificatesCollectionJSON extends AbstractORCCertificatesCollec
                     }
                     // Now read the various allowances, assuming we find values for the TWS "bins" identified above
                     for (final Object aKey : allowances.keySet()) {
-                        final JSONArray array = (JSONArray) allowances.get(aKey);
+                        final JSONArray twaArray = (JSONArray) allowances.get(aKey);
                         if (((String) aKey).equals(BEAT_ANGLE)) {
-                            for (int i = 0; i < array.size(); i++) {
+                            for (int i = 0; i < twaArray.size(); i++) {
                                 beatAngles.put(new KnotSpeedImpl(trueWindSpeedArray[i]),
-                                        new DegreeBearingImpl(((Number) array.get(i)).doubleValue()));
+                                        new DegreeBearingImpl(((Number) twaArray.get(i)).doubleValue()));
                             }
                             continue;
                         }
                         if (((String) aKey).equals(GYBE_ANGLE)) {
-                            for (int i = 0; i < array.size(); i++) {
+                            for (int i = 0; i < twaArray.size(); i++) {
                                 gybeAngles.put(new KnotSpeedImpl(trueWindSpeedArray[i]),
-                                        new DegreeBearingImpl(((Number) array.get(i)).doubleValue()));
+                                        new DegreeBearingImpl(((Number) twaArray.get(i)).doubleValue()));
                             }
                             continue;
                         }
                         Map<Speed, Duration> twsMap = new HashMap<>();
                         // ignore true wind angles key
-                        if (!twaPattern.matcher((String) aKey).lookingAt()) {
-                            for (int i = 0; i < array.size(); i++) {
+                        if (!aKey.equals(WIND_SPEEDS) && !aKey.equals(WIND_ANGLES) &&
+                                !twaPattern.matcher((String) aKey).lookingAt()) {
+                            for (int i = 0; i < twaArray.size(); i++) {
                                 twsMap.put(new KnotSpeedImpl(trueWindSpeedArray[i]),
-                                        new SecondsDurationImpl(((Number) array.get(i)).doubleValue()));
+                                        new SecondsDurationImpl(((Number) twaArray.get(i)).doubleValue()));
                             }
                         }
                         switch ((String) aKey) {

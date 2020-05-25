@@ -13,7 +13,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.charts.ChartZoomChangedEvent;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChart;
@@ -59,7 +59,7 @@ public class SliceRaceHandler {
 
     private final UUID eventId;
 
-    private final SailingServiceAsync sailingService;
+    private final SailingServiceWriteAsync sailingServiceWrite;
 
     private final UserService userService;
 
@@ -76,11 +76,11 @@ public class SliceRaceHandler {
     /**
      * Registers this handler as a zoom event handler on the {@code competitorRaceChart}.
      */
-    public SliceRaceHandler(SailingServiceAsync sailingService, UserService userService, final ErrorReporter errorReporter,
+    public SliceRaceHandler(SailingServiceWriteAsync sailingServiceWrite, UserService userService, final ErrorReporter errorReporter,
             MultiCompetitorRaceChart competitorRaceChart, RegattaAndRaceIdentifier selectedRaceIdentifier,
             final String leaderboardGroupName, String leaderboardName, UUID eventId,
             StrippedLeaderboardDTOWithSecurity leaderboardDTO, RaceWithCompetitorsAndBoatsDTO raceDTO) {
-        this.sailingService = sailingService;
+        this.sailingServiceWrite = sailingServiceWrite;
         this.userService = userService;
         this.errorReporter = errorReporter;
         this.selectedRaceIdentifier = selectedRaceIdentifier;
@@ -101,7 +101,7 @@ public class SliceRaceHandler {
             updateVisibility();
         });
         sliceButtonUi.addClickHandler((e) -> doSlice());
-        sailingService.canSliceRace(selectedRaceIdentifier, new AsyncCallback<Boolean>() {
+        sailingServiceWrite.canSliceRace(selectedRaceIdentifier, new AsyncCallback<Boolean>() {
             @Override
             public void onSuccess(Boolean result) {
                 canSlice = Boolean.TRUE.equals(result);
@@ -137,7 +137,7 @@ public class SliceRaceHandler {
 
     private void doSlice() {
         if (visibleRange != null) {
-            sailingService.prepareForSlicingOfRace(selectedRaceIdentifier,
+            sailingServiceWrite.prepareForSlicingOfRace(selectedRaceIdentifier,
                     new AsyncCallback<SliceRacePreperationDTO>() {
                         @Override
                         public void onFailure(Throwable caught) {
@@ -147,7 +147,7 @@ public class SliceRaceHandler {
                         @Override
                         public void onSuccess(SliceRacePreperationDTO sliceRacePreperatioData) {
                             new SlicedRaceNameDialog(sliceRacePreperatioData, slicedRaceName -> {
-                                sailingService.sliceRace(selectedRaceIdentifier, slicedRaceName, visibleRange.from(),
+                                sailingServiceWrite.sliceRace(selectedRaceIdentifier, slicedRaceName, visibleRange.from(),
                                         visibleRange.to(), new AsyncCallback<RegattaAndRaceIdentifier>() {
 
                                             @Override

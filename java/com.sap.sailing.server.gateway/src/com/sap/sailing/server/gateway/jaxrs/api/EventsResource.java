@@ -423,7 +423,8 @@ public class EventsResource extends AbstractSailingServerResource {
                     public Regatta call() throws Exception {
                         return getService().apply(new AddSpecificRegatta(regattaName, boatClassName,
                                 canBoatsOfCompetitorsChangePerRace, competitorRegistrationType, competitorRegistrationSecret, null, null, regattaId, regattaCreationParametersDTO,
-                                /* isPersistent */ true, scoringScheme, courseAreaId, buoyZoneRadiusInHullLengths,
+                                /* isPersistent */ true, scoringScheme,
+                                courseAreaId==null?Collections.emptySet():Collections.singleton(courseAreaId), buoyZoneRadiusInHullLengths,
                                 useStartTimeInterference, controlTrackingFromStartAndFinishTimes, autoRestartTrackingUponCompetitorSetChange, rankingMetric));
                     }
                 });
@@ -654,7 +655,7 @@ public class EventsResource extends AbstractSailingServerResource {
         for (Event event : getService().getAllEvents()) {
             Iterable<CourseArea> courseAreas = event.getVenue().getCourseAreas();
             for (CourseArea courseArea : courseAreas) {
-                if (courseArea.getId().equals(leaderboard.getRegatta().getDefaultCourseArea().getId())) {
+                if (Util.contains(leaderboard.getRegatta().getCourseAreas(), courseArea.getId())) {
                     for (LeaderboardGroup lg : event.getLeaderboardGroups()) {
                         // if leaderboard group is default leaderboard group, then add leaderboard
                         if (lg.getName().equals(event.getName())) {

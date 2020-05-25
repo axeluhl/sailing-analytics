@@ -29,16 +29,15 @@ public class DependentStartTimeResolver {
         SimpleRaceLogIdentifier identifier = event.getDependentOnRaceIdentifier();
         Duration startTimeDifference = event.getStartTimeDifference();
         RaceLog raceLog = raceLogResolver.resolve(identifier);
-
         final StartTimeFinderResult result;
         if (raceLog == null) {
-            result = new StartTimeFinderResult(dependingOnRaces, startTimeDifference, ResolutionFailed.RACE_LOG_UNRESOLVED);
+            result = new StartTimeFinderResult(dependingOnRaces, startTimeDifference, ResolutionFailed.RACE_LOG_UNRESOLVED, /* courseAreaId */ null);
         } else {
             List<SimpleRaceLogIdentifier> extendedDependingOnRaces = new ArrayList<>();
             Util.addAll(dependingOnRaces, extendedDependingOnRaces);
             extendedDependingOnRaces.add(identifier);
             if (containsCycle(extendedDependingOnRaces)) {
-                result = new StartTimeFinderResult(extendedDependingOnRaces, null, ResolutionFailed.CYCLIC_DEPENDENCY);
+                result = new StartTimeFinderResult(extendedDependingOnRaces, null, ResolutionFailed.CYCLIC_DEPENDENCY, /* courseAreaId */ null);
             } else {
                 StartTimeFinder dependentStartTimeFinder = new StartTimeFinder(raceLogResolver, raceLog);
                 StartTimeFinderResult resultOfDependentRace = dependentStartTimeFinder.analyze(extendedDependingOnRaces);
@@ -47,7 +46,8 @@ public class DependentStartTimeResolver {
                     result = resultOfDependentRace;
                 } else {
                     result = new StartTimeFinderResult(resultOfDependentRace.getDependingOnRaces(),
-                            resultOfDependentRace.getStartTime().plus(startTimeDifference), startTimeDifference);
+                            resultOfDependentRace.getStartTime().plus(startTimeDifference), startTimeDifference,
+                            event.getCourseAreaId());
                 }
             }
         }

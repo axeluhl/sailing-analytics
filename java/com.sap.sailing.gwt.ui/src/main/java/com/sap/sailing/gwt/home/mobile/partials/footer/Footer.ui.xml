@@ -29,7 +29,7 @@
 	                   <ui:text from='{i18n.footerJobs}'/>
 	                </a>
                     <br></br>
-                    <a ui:field="feedbackAnchor" href="mailto:sailing_analytics%40sap.com?subject=[SAP Sailing] Feedback"
+                    <a ui:field="feedbackAnchor" href="mailto:support%40sapsailing.com?subject=[SAP Sailing] Feedback"
                         title="{i18n.footerFeedback}">
                         <ui:text from='{i18n.footerFeedback}' />
                     </a>
