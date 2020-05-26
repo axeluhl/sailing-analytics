@@ -37,21 +37,17 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
         VerticalPanel mainPanel = new VerticalPanel();
         setWidget(mainPanel);
         mainPanel.setWidth("100%");
-
         eventsPanel = new CaptionPanel(stringMessages.events());
         mainPanel.add(eventsPanel);
         VerticalPanel eventsContentPanel = new VerticalPanel();
         eventsPanel.setContentWidget(eventsContentPanel);
-
         eventListComposite = new EventListComposite(sailingServiceWrite, userService, errorReporter, regattaRefresher, this, handleTabSelectable, stringMessages);
         eventListComposite.ensureDebugId("EventListComposite");
         eventsContentPanel.add(eventListComposite);
-        
         eventDetailsComposite = new EventDetailsComposite(sailingServiceWrite, errorReporter, stringMessages);
         eventDetailsComposite.ensureDebugId("EventDetailsComposite");
         eventDetailsComposite.setVisible(false);
         mainPanel.add(eventDetailsComposite);
-        
         refreshableEventSelectionModel = eventListComposite.getRefreshableMultiSelectionModel();
         refreshableEventSelectionModel.addSelectionChangeHandler(new Handler() {
             @Override

@@ -160,7 +160,6 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         final RefreshableMultiSelectionModel<EventDTO> selectionModel = (RefreshableMultiSelectionModel<EventDTO>) eventTable.getSelectionModel();
         refreshableEventSelectionModel = selectionModel;
         eventTable.setVisible(false);
-
         final Button refresh = buttonPanel.addUnsecuredAction(stringMessages.refresh(), this::fillEvents);
         refresh.ensureDebugId("RefreshEventsButton");
         final Button create = buttonPanel.addCreateAction(stringMessages.actionAddEvent(), this::openCreateEventDialog);
@@ -168,7 +167,6 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         final Button remove = buttonPanel.addRemoveAction(stringMessages.remove(), refreshableEventSelectionModel, true,
                 () -> removeEvents(refreshableEventSelectionModel.getSelectedSet()));
         remove.ensureDebugId("RemoveEventsButton");
-
         this.refreshableEventSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
