@@ -400,7 +400,8 @@ public class RaceBoardPanel
         if(isScreenLargeEnoughToInitiallyDisplayLeaderboard && zoomStartMillis != null && zoomEndMillis != null) {
             final Date zoomStart = new Date(zoomStartMillis);
             final Date zoomEnd = new Date(zoomEndMillis);
-            timeRangeWithZoomModel.setTimeZoom(zoomStart, zoomEnd, null);
+            
+            timeRangeWithZoomModel.setTimeZoom(zoomStart, zoomEnd);
         }
         dockPanel = new DockLayoutPanel(Unit.PX);
         dockPanel.addSouth(timePanelWrapper, TIMEPANEL_COLLAPSED_HEIGHT);
