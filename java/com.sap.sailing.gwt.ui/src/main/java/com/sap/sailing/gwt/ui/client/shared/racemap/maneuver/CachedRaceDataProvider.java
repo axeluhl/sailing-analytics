@@ -50,6 +50,8 @@ public abstract class CachedRaceDataProvider<K, D> {
     private final Map<K, EntryDataCache> cache = new HashMap<>();
     private final boolean triggerFullUpdateOnNewData;
 
+    private TimeRangeProvider timeRangeProvider;
+
     /**
      * Creates a new {@link CachedRaceDataProvider} instance configured by the provided parameter values.
      * 
@@ -69,6 +71,7 @@ public abstract class CachedRaceDataProvider<K, D> {
     public CachedRaceDataProvider(final TimeRangeProvider timeRangeProvider, final Timer timer,
             final Function<D, Date> dataTimePointProvider, final Supplier<Long> dataOffsetProvider,
             final boolean triggerFullUpdateOnNewData) {
+        this.timeRangeProvider = timeRangeProvider;
         final Function<Supplier<Date>, Supplier<TimePoint>> converter = s -> () -> new MillisecondsTimePoint(s.get());
         this.startOfTrackingProvider = converter.apply(timeRangeProvider::getFromTime);
         this.endOfTrackingProvider = converter.apply(timeRangeProvider::getToTime);
@@ -248,7 +251,12 @@ public abstract class CachedRaceDataProvider<K, D> {
         private final Optional<TimeRange> getUpdateTimeRange(final boolean incremental) {
             final Optional<TimeRange> result;
             if (records.isEmpty() || !incremental) {
-                result = Optional.of(new TimeRangeImpl(startOfTrackingProvider.get(), getEndTimePoint(), true));
+                final Date fromTime = timeRangeProvider.getFromTime();
+                if (fromTime != null) {
+                    result = Optional.of(new TimeRangeImpl(startOfTrackingProvider.get(), getEndTimePoint(), true));
+                } else {
+                    result = Optional.empty();
+                }
             } else {
                 if (isReplayingProvider.get()) {
                     result = Optional.empty();
@@ -269,7 +277,7 @@ public abstract class CachedRaceDataProvider<K, D> {
             final TimePoint end = endOfTrackingProvider.get(), live = liveTimePointProvider.get();
             return end == null ? live : new MillisecondsTimePoint(Math.min(end.asMillis(), live.asMillis()));
         }
-
+        
         /**
          * Updates the cache in the given {@link TimeRange time range} by removing all existing data which is included
          * and adding the provided data.
