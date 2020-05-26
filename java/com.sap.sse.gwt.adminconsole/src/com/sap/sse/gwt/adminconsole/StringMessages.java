@@ -109,4 +109,6 @@ public interface StringMessages extends Messages {
     String versionInfoHidden();
 
     String additionalInformation();
+
+    String serverInformation();
 }
