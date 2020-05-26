@@ -337,10 +337,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     public static TimePoint loadTimePoint(Document object, String fieldName) {
-        TimePoint result = null;
+        final TimePoint result;
         Number timePointAsNumber = (Number) object.get(fieldName);
         if (timePointAsNumber != null) {
             result = new MillisecondsTimePoint(timePointAsNumber.longValue());
+        } else {
+            result = null;
         }
         return result;
     }
@@ -351,12 +353,15 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     public static TimeRange loadTimeRange(Document object, FieldNames field) {
         Document timeRangeObj = (Document) object.get(field.name());
+        final TimeRange result;
         if (timeRangeObj == null) {
-            return null;
+            result = null;
+        } else {
+            TimePoint from = loadTimePoint(timeRangeObj, FieldNames.FROM_MILLIS);
+            TimePoint to = loadTimePoint(timeRangeObj, FieldNames.TO_MILLIS);
+            result = new TimeRangeImpl(from, to);
         }
-        TimePoint from = loadTimePoint(timeRangeObj, FieldNames.FROM_MILLIS);
-        TimePoint to = loadTimePoint(timeRangeObj, FieldNames.TO_MILLIS);
-        return new TimeRangeImpl(from, to);
+        return result;
     }
 
     /**
@@ -585,8 +590,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                     + " for corresponding regatta leaderboard. Not loading regatta leaderboard.");
         } else {
             result = new RegattaLeaderboardImpl(regatta, resultDiscardingRule);
-            result.setName(leaderboardName); // this will temporarily set the display name; it will be adjusted later if
-                                             // a display name is found
         }
         return result;
     }
@@ -1165,7 +1168,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         UUID id = (UUID) eventDBObject.get(FieldNames.EVENT_ID.name());
         TimePoint startDate = loadTimePoint(eventDBObject, FieldNames.EVENT_START_DATE);
         TimePoint endDate = loadTimePoint(eventDBObject, FieldNames.EVENT_END_DATE);
-        if (endDate.before(startDate)) {
+        if (endDate != null && startDate != null && endDate.before(startDate)) {
             logger.warning("End date "+endDate+" of event "+name+" with ID "+id+" is before its start date "+
                     startDate+"; adjusting such that end date equals start date.");
             endDate = startDate;

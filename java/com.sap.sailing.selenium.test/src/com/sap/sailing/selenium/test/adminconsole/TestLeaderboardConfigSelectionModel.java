@@ -16,12 +16,12 @@ import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class TestLeaderboardConfigSelectionModel extends AbstractSeleniumTest {
     private static final String LEADERBOARDNAME = "Test";
+    
     @Override
     @Before
     public void setUp() {
         clearState(getContextRoot());
         super.setUp();
-
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         LeaderboardConfigurationPanelPO leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
         leaderboardConfiguration.createFlexibleLeaderboard(LEADERBOARDNAME);
