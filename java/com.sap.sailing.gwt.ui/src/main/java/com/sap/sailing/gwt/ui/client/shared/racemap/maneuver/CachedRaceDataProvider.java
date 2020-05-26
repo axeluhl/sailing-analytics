@@ -49,8 +49,7 @@ public abstract class CachedRaceDataProvider<K, D> {
     private final Function<D, TimePoint> dataTimePointProvider, dataTimePointWithOffsetProvider;
     private final Map<K, EntryDataCache> cache = new HashMap<>();
     private final boolean triggerFullUpdateOnNewData;
-
-    private TimeRangeProvider timeRangeProvider;
+    private final TimeRangeProvider timeRangeProvider;
 
     /**
      * Creates a new {@link CachedRaceDataProvider} instance configured by the provided parameter values.
