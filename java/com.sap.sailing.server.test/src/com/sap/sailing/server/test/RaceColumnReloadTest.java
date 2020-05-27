@@ -84,7 +84,6 @@ public class RaceColumnReloadTest {
         // FIXME use master DomainFactory; see bug 592
         final DomainFactory masterDomainFactory = service.getBaseDomainFactory();
         final MongoObjectFactory objectFactory = new MongoObjectFactoryImpl(MongoDBService.INSTANCE.getDB());
-
         final String leaderboardName = "Test Leaderboard", boatClassName = "49er", raceName = "Test Race";
         BoatClass boatClass = masterDomainFactory.getOrCreateBoatClass(boatClassName, /* typicallyStartsUpwind */true);
         PersonImpl sailor = new PersonImpl("Sailor", DomainFactory.INSTANCE.getOrCreateNationality("GER"), null, null);
@@ -95,7 +94,6 @@ public class RaceColumnReloadTest {
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null, (DynamicBoat) boat, /* storePersistently */ true);
         service.apply(new CreateFlexibleLeaderboard(leaderboardName, "Test", new int[] { 1, 2 }, new LowPoint(), null));
         raceColumn = service.apply(new AddColumnToLeaderboard("R1", leaderboardName, false));
-
         Regatta regatta = service.apply(new AddDefaultRegatta(RegattaImpl.getDefaultName("Test Event", boatClassName),
                 boatClassName, /* startDate */ null, /* endDate */ null, UUID.randomUUID()));
         final CourseImpl masterCourse = new CourseImpl("Test Course", new ArrayList<Waypoint>());
@@ -112,20 +110,15 @@ public class RaceColumnReloadTest {
                 /* millisecondsOverWhichToAverageSpeed */10000, null));
         trackedRace.setStartOfTrackingReceived(MillisecondsTimePoint.now());
         defaultFleet = Util.get(raceColumn.getFleets(), 0);
-
         final RaceLogIdentifier raceLogIdentifier = raceColumn.getRaceLogIdentifier(defaultFleet);
         raceLog = raceColumn.getRaceLog(defaultFleet);
-
         trackedRace.attachRaceLog(raceLog);
-
         mongoStoreVisitor = new MongoRaceLogStoreVisitor(raceLogIdentifier, objectFactory);
-
         final TimePoint t1 = MillisecondsTimePoint.now(), t2 = MillisecondsTimePoint.now().plus(1000);
         final SpeedWithBearing s1 = new KnotSpeedWithBearingImpl(1, new DegreeBearingImpl(10));
         final SpeedWithBearing s2 = new KnotSpeedWithBearingImpl(2, new DegreeBearingImpl(20));
         final Position p1 = new DegreePosition(1, 1), p2 = new DegreePosition(2, 2);
         final AbstractLogEventAuthor author = new LogEventAuthorImpl("Test Author", 1);
-
         testWindEvent1 = new RaceLogWindFixEventImpl(t1, author, 0, new WindImpl(p1, t1, s1), false);
         testWindEvent2 = new RaceLogWindFixEventImpl(t2, author, 0, new WindImpl(p2, t2, s2), false);
     }
@@ -134,12 +127,10 @@ public class RaceColumnReloadTest {
     public void testWindAddedOnlyViaDB() throws InterruptedException {
         final WindFixLoggingRaceLogVisitor raceLogVisitor = new WindFixLoggingRaceLogVisitor(raceLog);
         final WindFixLoggingRaceChangeListener trackedRaceListener = new WindFixLoggingRaceChangeListener(trackedRace);
-
         mongoStoreVisitor.visit(testWindEvent1);
         mongoStoreVisitor.visit(testWindEvent2);
         raceLogVisitor.assertWindFixCount(0);
         trackedRaceListener.assertWindFixCount(0);
-
         raceColumn.reloadRaceLog(defaultFleet);
         raceLogVisitor.assertWindFixCount(2);
         trackedRaceListener.assertWindFixCount(2);
@@ -149,15 +140,12 @@ public class RaceColumnReloadTest {
     public void testWindAddedAndDbWithDifferentAddedReloadWithTrackedRace() throws InterruptedException {
         final WindFixLoggingRaceLogVisitor raceLogVisitor = new WindFixLoggingRaceLogVisitor(raceLog);
         final WindFixLoggingRaceChangeListener trackedRaceListener = new WindFixLoggingRaceChangeListener(trackedRace);
-
         raceLog.add(testWindEvent1);
         raceLogVisitor.assertWindFixCount(1);
         trackedRaceListener.assertWindFixCount(1);
-
         mongoStoreVisitor.visit(testWindEvent2);
         raceLogVisitor.assertWindFixCount(1);
         trackedRaceListener.assertWindFixCount(1);
-
         raceColumn.reloadRaceLog(defaultFleet);
         raceLogVisitor.assertWindFixCount(2);
         trackedRaceListener.assertWindFixCount(2);
@@ -166,7 +154,6 @@ public class RaceColumnReloadTest {
     @Test
     public void testAddedWind() throws InterruptedException {
         final WindFixLoggingRaceLogVisitor raceLogVisitor = new WindFixLoggingRaceLogVisitor(raceLog);
-
         raceLog.add(testWindEvent1);
         raceLogVisitor.assertWindFixCount(1);
     }
@@ -174,7 +161,6 @@ public class RaceColumnReloadTest {
     @Test
     public void testAddedWindAndReloadAndTheSameWindMerged() throws InterruptedException {
         final WindFixLoggingRaceLogVisitor raceLogVisitor = new WindFixLoggingRaceLogVisitor(raceLog);
-
         raceLog.add(testWindEvent1);
         raceColumn.reloadRaceLog(defaultFleet);
         raceLog.add(testWindEvent1);
@@ -185,7 +171,6 @@ public class RaceColumnReloadTest {
     @Test
     public void testAddedWindAndReloadAndAddAnotherAndReloadAgain() throws InterruptedException {
         final WindFixLoggingRaceLogVisitor raceLogVisitor = new WindFixLoggingRaceLogVisitor(raceLog);
-
         raceLog.add(testWindEvent1);
         raceColumn.reloadRaceLog(defaultFleet);
         raceLog.add(testWindEvent2);
@@ -196,10 +181,8 @@ public class RaceColumnReloadTest {
     @Test
     public void testWindAddedAndDbWithSameAndReload() throws InterruptedException {
         final WindFixLoggingRaceLogVisitor raceLogVisitor = new WindFixLoggingRaceLogVisitor(raceLog);
-
         raceLog.add(testWindEvent1);
         raceLogVisitor.assertWindFixCount(1);
-
         mongoStoreVisitor.visit(testWindEvent1);
         raceColumn.reloadRaceLog(defaultFleet);
         raceLogVisitor.assertWindFixCount(1);
@@ -208,13 +191,10 @@ public class RaceColumnReloadTest {
     @Test
     public void testWindAddedAndDbWithDifferentAndReload() throws InterruptedException {
         final WindFixLoggingRaceLogVisitor raceLogVisitor = new WindFixLoggingRaceLogVisitor(raceLog);
-
         raceLog.add(testWindEvent1);
         raceLogVisitor.assertWindFixCount(1);
-
         mongoStoreVisitor.visit(testWindEvent2);
         raceLogVisitor.assertWindFixCount(1);
-
         raceColumn.reloadRaceLog(defaultFleet);
         raceLogVisitor.assertWindFixCount(2);
     }

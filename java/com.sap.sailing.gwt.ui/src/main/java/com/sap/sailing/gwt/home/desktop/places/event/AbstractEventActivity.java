@@ -243,10 +243,9 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         RegattaRaceStatesSettings regattaRaceStatesSettings = new RegattaRaceStatesSettings();
         regattaRaceStatesSettings.setShowOnlyCurrentlyRunningRaces(false);
         regattaRaceStatesSettings.setShowOnlyRaceOfSameDay(eventDTO.isRunning());
-        if(showRegattaMetadata()) {
-            if(getRegattaMetadata().isFlexibleLeaderboard()) {
-                String defaultCourseAreaId = getRegattaMetadata().getDefaultCourseAreaId();
-                if(defaultCourseAreaId != null && !defaultCourseAreaId.isEmpty()) {
+        if (showRegattaMetadata()) {
+            if (getRegattaMetadata().isFlexibleLeaderboard()) {
+                for (final String defaultCourseAreaId : getRegattaMetadata().getCourseAreaIdsAsStrings()) {
                     regattaRaceStatesSettings.getVisibleCourseAreaSettings().addValue(UUID.fromString(defaultCourseAreaId));
                 }
             } else {

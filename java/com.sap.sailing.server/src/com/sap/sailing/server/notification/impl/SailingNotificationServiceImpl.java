@@ -14,7 +14,6 @@ import org.osgi.framework.BundleContext;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -113,12 +112,9 @@ public class SailingNotificationServiceImpl implements SailingNotificationServic
             // could be a series
             for (final LeaderboardGroup leaderboardGroup : foundLeaderboardGroups) {
                 if (leaderboardGroup.hasOverallLeaderboard()) {
-                    CourseArea defaultCourseArea = leaderboard.getDefaultCourseArea();
-                    if (defaultCourseArea != null) {
-                        for (Event event : foundEvents) {
-                            if (Util.contains(event.getVenue().getCourseAreas(), defaultCourseArea)) {
-                                return new Pair<>(event, leaderboardGroup);
-                            }
+                    for (Event event : foundEvents) {
+                        if (Util.containsAny(event.getVenue().getCourseAreas(), leaderboard.getCourseAreas())) {
+                            return new Pair<>(event, leaderboardGroup);
                         }
                     }
                 }

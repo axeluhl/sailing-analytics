@@ -10,7 +10,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
@@ -41,6 +40,7 @@ import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Util;
 
 /**
  * A leaderboard implementation that allows users to flexibly configure which columns exist. No constraints need to be
@@ -70,9 +70,13 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     private static final long serialVersionUID = -5708971849158747846L;
     private final List<FlexibleRaceColumn> races;
     private final ScoringScheme scoringScheme;
-    private String name;
+    private final String name;
     private transient RaceLogStore raceLogStore;
-    private CourseArea courseArea;
+    
+    /**
+     * A synchronized list; obtain the object monitor in order to iterate over the contents!
+     */
+    private List<CourseArea> courseAreas;
     private RaceExecutionOrderProvider raceExecutionOrderProvider;
     
     /**
@@ -89,7 +93,15 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     public FlexibleLeaderboardImpl(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             String name, ThresholdBasedResultDiscardingRule resultDiscardingRule,
             ScoringScheme scoringScheme, CourseArea courseArea) {
+        this(raceLogStore, regattaLogStore, name, resultDiscardingRule, scoringScheme,
+                courseArea == null ? Collections.emptySet() : Collections.singleton(courseArea));
+    }
+    
+    public FlexibleLeaderboardImpl(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
+            String name, ThresholdBasedResultDiscardingRule resultDiscardingRule,
+            ScoringScheme scoringScheme, Iterable<CourseArea> courseAreas) {
         super(resultDiscardingRule);
+        assert courseAreas != null;
         this.scoringScheme = scoringScheme;
         if (name == null) {
             throw new IllegalArgumentException("A leaderboard's name must not be null");
@@ -97,7 +109,8 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         this.name = name;
         this.races = new ArrayList<>();
         this.raceLogStore = raceLogStore;
-        this.courseArea = courseArea;
+        this.courseAreas = Collections.synchronizedList(new ArrayList<>());
+        Util.addAll(courseAreas, this.courseAreas);
         this.regattaLikeHelper = new BaseRegattaLikeImpl(new FlexibleLeaderboardAsRegattaLikeIdentifier(this), regattaLogStore) {
             private static final long serialVersionUID = 4082392360832548953L;
 
@@ -138,25 +151,6 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     @Override
     public String getName() {
         return name;
-    }
-
-    /**
-     * @param newName must not be <code>null</code>
-     */
-    public void setName(String newName) {
-        if (newName == null) {
-            throw new IllegalArgumentException("A leaderboard's name must not be null");
-        }
-        final String oldName = this.name;
-        this.name = newName;
-        notifyLeaderboardChangeListeners(listener->{
-            try {
-                listener.nameChanged(oldName, newName);
-            } catch (Exception e) {
-                logger.log(Level.WARNING, "Exception trying to notify listener "+listener+" about the name of leaderboard "+
-                        getName()+" changing from "+oldName+" to "+newName, e);
-            }
-        });
     }
 
     @Override
@@ -307,14 +301,21 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         return scoringScheme;
     }
 
+    /**
+     * Callers need to {@code synchronize} on the result when iterating the elements in order to
+     * be safe regarding concurrent modifications through {@link #setCourseAreas(Iterable)}.
+     */
     @Override
-    public CourseArea getDefaultCourseArea() {
-        return courseArea;
+    public Iterable<CourseArea> getCourseAreas() {
+        return courseAreas;
     }
 
     @Override
-    public void setDefaultCourseArea(CourseArea newCourseArea) {
-        this.courseArea = newCourseArea;
+    public void setCourseAreas(Iterable<CourseArea> newCourseAreas) {
+        synchronized (this.courseAreas) {
+            this.courseAreas.clear();
+            Util.addAll(newCourseAreas, this.courseAreas);
+        }
     }
     
     @Override
