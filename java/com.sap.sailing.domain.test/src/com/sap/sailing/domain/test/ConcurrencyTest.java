@@ -11,7 +11,10 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestRule;
+import org.junit.rules.Timeout;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.impl.DouglasPeucker;
@@ -34,6 +37,11 @@ public class ConcurrencyTest extends OnlineTracTracBasedTest {
     
     public ConcurrencyTest() throws MalformedURLException, URISyntaxException {
         super();
+    }
+
+    @Rule
+    public TestRule getTimeoutRule() {
+        return Timeout.millis(5 * 60 * 1000); // five instead of three minutes timeout for this test
     }
 
     @Before
