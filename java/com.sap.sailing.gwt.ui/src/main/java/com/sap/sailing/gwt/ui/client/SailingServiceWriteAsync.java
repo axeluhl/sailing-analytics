@@ -306,9 +306,8 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void removeWind(RegattaAndRaceIdentifier raceIdentifier, WindDTO windDTO, AsyncCallback<Void> callback);
 
 
-    void updateLeaderboard(String leaderboardName, String newLeaderboardName, String newLeaderboardDisplayName,
-            int[] newDiscardingThreasholds, List<UUID> newCourseAreaIds,
-            AsyncCallback<StrippedLeaderboardDTOWithSecurity> callback);
+    void updateLeaderboard(String leaderboardName, String newLeaderboardDisplayName, int[] newDiscardingThreasholds,
+            List<UUID> newCourseAreaIds, AsyncCallback<StrippedLeaderboardDTOWithSecurity> callback);
 
     void createFlexibleLeaderboard(String leaderboardName, String leaderboardDisplayName,
             int[] discardThresholds,

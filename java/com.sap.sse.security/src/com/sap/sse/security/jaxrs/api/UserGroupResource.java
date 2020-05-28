@@ -1,11 +1,14 @@
 package com.sap.sse.security.jaxrs.api;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -14,14 +17,17 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
+import org.json.simple.parser.ParseException;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.security.jaxrs.AbstractSecurityResource;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.UserGroupManagementException;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.User;
@@ -70,13 +76,62 @@ public class UserGroupResource extends AbstractSecurityResource {
         return response;
     }
 
+    @GET
+    @Path("list/groupsUserIsPartOf")
+    @Produces("application/json;charset=UTF-8")
+    public Response getUserGroupsCurrentUserIsPartOf() throws ParseException {
+        Response response = null;
+        User user = getService().getCurrentUser();
+        if (user != null) {
+            JSONObject root = new JSONObject();
+            JSONArray groups = new JSONArray();
+            root.put("groupsUserIsPartOf", groups);
+            for (UserGroup group : user.getUserGroups()) {
+                groups.add(convertUserGroupToJson(group, /* includingUSers */ false, /* includingRoles */ false));
+            }
+            response = Response.ok(streamingOutput(root)).build();
+        } else {
+            response = Response.status(401).build();
+        }
+        return response;
+    }
+
+    @GET
+    @Path("list/readable")
+    @Produces("application/json;charset=UTF-8")
+    public Response getReadableUserGroupsForCurrentUser(@QueryParam("userName") String userName) {
+        Response response = null;
+        final User user = userName != null ? getService().getUserByName(userName) : getService().getCurrentUser();
+        if (user != null && getService().hasCurrentUserReadPermission(user)) {
+            final List<UserGroup> userGroups = new ArrayList<>();
+            getService().getUserGroupList().forEach(ug -> {
+                if (getService().getSecurityManager().isPermitted(
+                        new SimplePrincipalCollection(user.getName(), user.getName()),
+                        ug.getIdentifier().getPermission(DefaultActions.READ).toString())) {
+                    userGroups.add(ug);
+                }
+            });
+            final JSONObject root = new JSONObject();
+            final JSONArray userGroupsJson = new JSONArray();
+            userGroups.forEach(ug -> userGroupsJson
+                    .add(convertUserGroupToJson(ug, /* includingUsers */ false, /* includingRoles */ true)));
+            response = Response.ok(root.toJSONString()).build();
+            root.put("readableGroups", userGroupsJson);
+            response = Response.ok().entity(streamingOutput(root)).build();
+        } else {
+            response = Response.status(Status.UNAUTHORIZED).build();
+        }
+        return response;
+    }
+
     private Response handleExistingUserGroup(final UserGroup usergroup) {
         Response response;
         if (usergroup == null) {
             response = Response.status(Status.BAD_REQUEST).entity("Usergroup with this id does not exist.").build();
         } else {
             if (getService().hasCurrentUserReadPermission(usergroup)) {
-                final JSONObject jsonResult = convertUserGroupToJson(usergroup);
+                final JSONObject jsonResult = convertUserGroupToJson(usergroup, /* includingUsers */ true,
+                        /* includingRoles */ true);
                 response = Response.ok(streamingOutput(jsonResult)).build();
             } else {
                 response = Response.status(Status.UNAUTHORIZED).build();
@@ -86,32 +141,39 @@ public class UserGroupResource extends AbstractSecurityResource {
     }
 
     /** Returns a json object with id, groupname, roles and user names (filtered to thouse the current user can see). */
-    private JSONObject convertUserGroupToJson(final UserGroup usergroup) {
+    private JSONObject convertUserGroupToJson(final UserGroup usergroup, boolean includingUsers,
+            boolean includingRoles) {
         final JSONObject jsonResult = new JSONObject();
         jsonResult.put(KEY_GROUP_ID, usergroup.getId().toString());
         jsonResult.put(KEY_GROUP_NAME, usergroup.getName());
 
-        final JSONArray jsonUsersInGroup = new JSONArray();
-        for (final User user : usergroup.getUsers()) {
-            // filter users
-            if (getService().hasCurrentUserReadPermission(user)) {
-                jsonUsersInGroup.add(user.getId());
+        if (includingUsers) {
+            final JSONArray jsonUsersInGroup = new JSONArray();
+            for (final User user : usergroup.getUsers()) {
+                // filter users
+                if (getService().hasCurrentUserReadPermission(user)) {
+                    jsonUsersInGroup.add(user.getId());
+                }
             }
+            jsonResult.put(KEY_USERS, jsonUsersInGroup);
         }
-        jsonResult.put(KEY_USERS, jsonUsersInGroup);
 
-        final JSONArray jsonRolesOfGroup = new JSONArray();
-        for (final Map.Entry<RoleDefinition, Boolean> roleDefinition : usergroup.getRoleDefinitionMap().entrySet()) {
-            // filter users
-            if (getService().hasCurrentUserReadPermission(roleDefinition.getKey())) {
-                JSONObject roleJson = new JSONObject();
-                roleJson.put(KEY_ROLE_ID, roleDefinition.getKey().getId().toString());
-                roleJson.put(KEY_ROLE_NAME, roleDefinition.getKey().getName());
-                roleJson.put(KEY_FOR_ALL, roleDefinition.getValue());
-                jsonRolesOfGroup.add(roleJson);
+        if (includingRoles) {
+            final JSONArray jsonRolesOfGroup = new JSONArray();
+            for (final Map.Entry<RoleDefinition, Boolean> roleDefinition : usergroup.getRoleDefinitionMap()
+                    .entrySet()) {
+                // filter users
+                if (getService().hasCurrentUserReadPermission(roleDefinition.getKey())) {
+                    JSONObject roleJson = new JSONObject();
+                    roleJson.put(KEY_ROLE_ID, roleDefinition.getKey().getId().toString());
+                    roleJson.put(KEY_ROLE_NAME, roleDefinition.getKey().getName());
+                    roleJson.put(KEY_FOR_ALL, roleDefinition.getValue());
+                    jsonRolesOfGroup.add(roleJson);
+                }
             }
+            jsonResult.put(KEY_ROLES, jsonRolesOfGroup);
         }
-        jsonResult.put(KEY_ROLES, jsonRolesOfGroup);
+
         return jsonResult;
     }
 
@@ -141,7 +203,7 @@ public class UserGroupResource extends AbstractSecurityResource {
             if (group == null) {
                 response = Response.status(Status.INTERNAL_SERVER_ERROR).entity("Could not create user group.").build();
             } else {
-                response = Response.status(Status.CREATED).entity(streamingOutput(convertUserGroupToJson(group))).build();
+                response = Response.status(Status.CREATED).entity(streamingOutput(convertUserGroupToJson(group, /* includingUsers */ true, /* includingRoles */ true))).build();
             }
         }
 
@@ -317,7 +379,6 @@ public class UserGroupResource extends AbstractSecurityResource {
     public Response deleteRoleFromUserGroup(@PathParam(KEY_GROUP_ID) String userGroupId,
             @PathParam(KEY_ROLE_ID) String roleIdString) {
         Response response;
-
         try {
             final UUID groupId = UUID.fromString(userGroupId);
             final UserGroup usergroup = getService().getUserGroup(groupId);
@@ -354,6 +415,56 @@ public class UserGroupResource extends AbstractSecurityResource {
             }
         } catch (IllegalArgumentException e) {
             response = Response.status(Status.BAD_REQUEST).entity("Invalid role or group id.").build();
+        }
+        return response;
+    }
+
+    @POST
+    @Produces("application/json;charset=UTF-8")
+    @Path("setDefaultTenantForCurrentServerAndUser")
+    public Response setDefaultTenantForCurrentServerAndUser(@QueryParam("tenantGroup") UUID tenantId)
+            throws ParseException {
+        Response response = null;
+        User user = getService().getCurrentUser();
+        if (user != null) {
+            getService().setDefaultTenantForCurrentServerForUser(user.getName(), tenantId);
+            response = Response.ok().build();
+        } else {
+            response = Response.status(401).build();
+        }
+        return response;
+    }
+
+    @POST
+    @Path("addAnyUserToGroup")
+    @Produces("application/json;charset=UTF-8")
+    public Response addGroupToUserWithoutPermissionOnUser(@QueryParam("userName") String userName,
+            @QueryParam("groupId") UUID userGroupId) {
+        Response response = null;
+        final User user = getService().getUserByName(userName);
+        if (user != null) {
+            final UserGroup userGroup = getService().getUserGroup(userGroupId);
+            if (userGroup != null) {
+                if (!Util.contains(userGroup.getUsers(), user)) {
+                    if (getService().hasCurrentUserUpdatePermission(userGroup)) {
+                        if (!getService().hasCurrentUserMetaPermissionsOfRoleDefinitionsWithQualification(
+                                userGroup.getRoleDefinitionMap().keySet(), new Ownership(null, userGroup))) {
+                            response = Response.status(Status.UNAUTHORIZED).build();
+                        } else {
+                            getService().addUserToUserGroup(userGroup, user);
+                            response = Response.ok().build();
+                        }
+                    } else {
+                        response = Response.status(Status.UNAUTHORIZED).build();
+                    }
+                } else {
+                    response = Response.status(Status.BAD_REQUEST).entity("User is already in this group.").build();
+                }
+            } else {
+                response = Response.status(Status.BAD_REQUEST).entity("User Group does not exist.").build();
+            }
+        } else {
+            response = Response.status(Status.BAD_REQUEST).entity("User does not exist.").build();
         }
         return response;
     }

@@ -24,7 +24,7 @@ public class PreferencesApiTest extends AbstractSeleniumTest {
 
     @Test
     public void createAndGetPreferencesTest() {
-        final ApiContext ctx = createAdminApiContext(getContextRoot(), ApiContext.SERVER_CONTEXT);
+        final ApiContext ctx = createAdminApiContext(getContextRoot(), ApiContext.SECURITY_CONTEXT);
 
         Map<String, String> prefObjectAttr = new HashMap<String, String>();
         prefObjectAttr.put("key1", "value1");
@@ -40,7 +40,7 @@ public class PreferencesApiTest extends AbstractSeleniumTest {
 
     @Test
     public void createAndDeletePreferencesTest() {
-        final ApiContext ctx = createAdminApiContext(getContextRoot(), ApiContext.SERVER_CONTEXT);
+        final ApiContext ctx = createAdminApiContext(getContextRoot(), ApiContext.SECURITY_CONTEXT);
 
         Map<String, String> prefObjectAttr = new HashMap<String, String>();
         prefObjectAttr.put("key1", "value1");

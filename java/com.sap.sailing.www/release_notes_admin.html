@@ -58,6 +58,14 @@
                             of such IDs is provided in the <tt>courseAreaIds</tt> field as an array that is always present
                             but may be empty.
                         </li>
+                        <li>"Flexible" leaderboards can no longer be renamed. The background of this change is that renaming was
+                            always flawed, particularly regarding the race logs attached to those leaderboards.
+                        </li>
+                        <li>The <tt>sailingserver/api/v1/events/createEvents</tt> REST endpoint now generates the event's default base URL
+                            by guessing the protocol (http/https) from any port seen in the request's scheme-specific part, if any, defaulting
+                            to https, assuming that even if the request arrives by HTTP it may likely have passed through an SSL-offloading
+                            reverse proxy or load balancer. Use the <tt>baseurl</tt> form parameter for the request to set this explicitly.
+                        </li>
                     </ul>
                     <h2 class="articleSubheadline">April 2020</h2>
                     <ul class="bulletList">

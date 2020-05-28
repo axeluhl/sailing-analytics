@@ -9,15 +9,10 @@
 </head>
 <body>
 <h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
-<h2>URL: /api/v1/usergroups/</h2>
+<h2>URL: /api/v1/preferences/{SETTINGS_KEY}/</h2>
 
-<p class="deprecationMessage">This API is deprecated and will be removed in near future.<br>
-  Please use <a href="/security/api/restsecurity/usergroup/list/groupsUserIsPartOf">GET /security/api/restsecurity/usergroup/list/groupsUserIsPartOf</a> instead!<br>
-  For more information see the <a href=/security/webservices/api/usergroup.html>Security API documentation</a>.
-</p>
-<br>
 <b>Description:</b>
-<p>Gets the usergroup names and id's the currently logged in user is part of</p>
+<p>Stores the body of the request in the currently logged in users preferences under the given SETTINGS_KEY, the body is expected to be UTF-8 Json</p>
 <br/>
 <table>
     <tr>
@@ -26,7 +21,7 @@
     </tr>
     <tr>
         <td>Output format:</td>
-        <td>Json</td>
+        <td>none</td>
     </tr>
     <tr>
         <td>Mandatory parameters:</td>
@@ -35,8 +30,9 @@
     <tr>
         <td>Examples:</td>
         <td>
-            Get @ http://sapsailing.com/sailingserver/api/v1/usergroups/
+            Put @ http://sapsailing.com/security/api/restsecurity/preferences/testSetting/
             <br>
+            Answer: Ok
         </td>
     </tr>
 </table>
