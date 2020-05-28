@@ -91,7 +91,6 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest i
         super();
     }
     
-    
     @Before
     public void setUp() throws Exception {
         domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl(DomainFactory.TEST_RACE_LOG_RESOLVER));
