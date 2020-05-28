@@ -195,8 +195,7 @@ public class SmartphoneTrackingEventManagementPanel
             Boolean.valueOf(l1.canBoatsOfCompetitorsChangePerRace).compareTo(Boolean.valueOf(l2.canBoatsOfCompetitorsChangePerRace)));
         final HasPermissions type = SecuredDomainType.EVENT;
         final EditOwnershipDialog.DialogConfig<StrippedLeaderboardDTOWithSecurity> configOwnership = EditOwnershipDialog
-                .create(userService.getUserManagementService(), type, leaderboard -> {
-                }, stringMessages);
+                .create(userService.getUserManagementService(), type, leaderboard -> listDataProvider.refresh(), stringMessages);
         final EditACLDialog.DialogConfig<StrippedLeaderboardDTOWithSecurity> configACL = EditACLDialog.create(
                 userService.getUserManagementService(), type, leaderboard -> leaderboard.getAccessControlList(),
                 stringMessages);
