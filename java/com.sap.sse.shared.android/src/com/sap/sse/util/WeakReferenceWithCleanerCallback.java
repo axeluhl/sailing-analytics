@@ -49,7 +49,9 @@ public class WeakReferenceWithCleanerCallback<T> extends WeakReference<T> {
     /**
      * @param cleanerCallback
      *            ensure that no strong reference exists from this parameter object to the {@code referent} or else this
-     *            weak reference will never be cleared and hence will never be enqueued.
+     *            weak reference will never be cleared and hence will never be enqueued. May be {@code null} in which case
+     *            simply no callback will be triggered when this reference is enqueued; use a regular {@link WeakReference}
+     *            instead in this case!
      */
     public WeakReferenceWithCleanerCallback(T referent, Runnable cleanerCallback) {
         super(referent);
