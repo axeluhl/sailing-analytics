@@ -55,6 +55,7 @@ public class TimeOnTimeAndDistanceRankingMetric extends NonPerformanceCurveRanki
 
     private final TimeOnDistanceAllowancePerNauticalMileMap timeOnDistanceFactorNauticalMile;
     
+    // TODO bug5291: cache invalidation is required; this will eventually have to add a listener to the regatta log, but this should be done by the function computing this; the listener shall be weakly referencing only, and when this metric is collected the listener shall remove itself as listener from the regatta log
     private final ConcurrentHashMap<Competitor, Double> timeOnTimeFactorCache;
     
     private final ConcurrentHashMap<Competitor, Duration> timeOnDistanceFactorInSecondsPerNauticalMileCache;
