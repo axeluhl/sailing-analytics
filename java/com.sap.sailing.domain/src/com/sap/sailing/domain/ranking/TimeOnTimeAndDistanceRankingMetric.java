@@ -3,6 +3,7 @@ package com.sap.sailing.domain.ranking;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -54,6 +55,10 @@ public class TimeOnTimeAndDistanceRankingMetric extends NonPerformanceCurveRanki
 
     private final TimeOnDistanceAllowancePerNauticalMileMap timeOnDistanceFactorNauticalMile;
     
+    private final ConcurrentHashMap<Competitor, Double> timeOnTimeFactorCache;
+    
+    private final ConcurrentHashMap<Competitor, Duration> timeOnDistanceFactorInSecondsPerNauticalMileCache;
+    
     /**
      * The regular constructor that can also be used as <code>TimeOnTimeAndDistanceRankingMetric::new</code>
      * to obtain a {@link RankingMetricConstructor} implementation. It uses the {@link TrackedRace}'s regatta
@@ -75,6 +80,8 @@ public class TimeOnTimeAndDistanceRankingMetric extends NonPerformanceCurveRanki
         super(trackedRace);
         this.timeOnTimeFactor = timeOnTimeFactor;
         this.timeOnDistanceFactorNauticalMile = timeOnDistanceFactorInSecondsPerNauticalMile;
+        timeOnTimeFactorCache = new ConcurrentHashMap<>();
+        timeOnDistanceFactorInSecondsPerNauticalMileCache = new ConcurrentHashMap<>();
     }
 
     @Override
@@ -185,11 +192,11 @@ public class TimeOnTimeAndDistanceRankingMetric extends NonPerformanceCurveRanki
     }
 
     double getTimeOnTimeFactor(Competitor competitor) {
-        return timeOnTimeFactor.apply(competitor);
+        return timeOnTimeFactorCache.computeIfAbsent(competitor, timeOnTimeFactor);
     }
 
     Duration getTimeOnDistanceFactorInSecondsPerNauticalMile(Competitor competitor) {
-        return timeOnDistanceFactorNauticalMile.apply(competitor);
+        return timeOnDistanceFactorInSecondsPerNauticalMileCache.computeIfAbsent(competitor, timeOnDistanceFactorNauticalMile);
     }
 
     @Override
