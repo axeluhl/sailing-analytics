@@ -311,10 +311,8 @@ public class MasterDataImportPanel extends VerticalPanel {
     private void fireLgIdRequestAndFillList(final String host) {
         currentHost = host;
         disableAllButtons();
-        // FIXME what about login here?
         sailingServiceWrite.getLeaderboardGroupNamesFromRemoteServer(host, usernameBox.getValue(), passwordBox.getValue(),
                 new AsyncCallback<List<String>>() {
-
             @Override
             public void onFailure(Throwable caught) {
                 showErrorAlert(stringMessages.importGetLeaderboardsFailed(host, caught.getMessage()));
@@ -335,7 +333,6 @@ public class MasterDataImportPanel extends VerticalPanel {
                     filterLeaderboardGroupList();
                 }
             }
-
         });
     }
 
