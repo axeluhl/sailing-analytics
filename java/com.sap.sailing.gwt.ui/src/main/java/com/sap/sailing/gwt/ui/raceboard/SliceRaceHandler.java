@@ -100,7 +100,11 @@ public class SliceRaceHandler {
             visibleRange = null;
             updateVisibility();
         });
-        sliceButtonUi.addClickHandler((e) -> doSlice());
+        sliceButtonUi.addClickHandler((e) -> {
+            if (allowsEditing()) {
+                doSlice();
+            }
+        });
         sailingServiceWrite.canSliceRace(selectedRaceIdentifier, new AsyncCallback<Boolean>() {
             @Override
             public void onSuccess(Boolean result) {
