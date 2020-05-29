@@ -1,5 +1,7 @@
 package com.sap.sse.debranding;
 
+import java.io.ByteArrayOutputStream;
+import java.io.CharArrayWriter;
 import java.io.FilterWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -17,9 +19,11 @@ import javax.servlet.ServletResponse;
 import javax.servlet.WriteListener;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
+
 /**
- * Use ${[variable name]} to get strings replaced within static pages. No escape syntax is currently available. All occurrences of the variables listed below
- * that are found in the document will be replaced. The following variables are available at the moment:
+ * Use ${[variable name]} to get strings replaced within static pages. No escape syntax is currently available. All
+ * occurrences of the variables listed below that are found in the document will be replaced. The following variables
+ * are available at the moment:
  * <table border="1">
  * <tr>
  * <th>Variablename</th>
@@ -68,6 +72,12 @@ import javax.servlet.http.HttpServletResponseWrapper;
 public class ClientConfigurationFilter implements Filter {
 
     public static final String DEBRANDING_PROPERTY_NAME = "com.sap.sse.debranding";
+    public static final String CLIENT_CONFIGURATION_FILTER_MAX_BUFFER = "com.sap.sse.clientconfiguration.maxbuffer";
+    private static volatile Boolean lastStatusDeBrandingActive = null;
+    private static int MAX_REPLACEMENT_BUFFER = Integer
+            .valueOf(System.getProperty(CLIENT_CONFIGURATION_FILTER_MAX_BUFFER, "1000000"));
+    // cache results in a map
+    private Map<String, String> cachedMap;
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -78,15 +88,10 @@ public class ClientConfigurationFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
         final boolean deBrandingActive = Boolean.valueOf(System.getProperty(DEBRANDING_PROPERTY_NAME, "false"));
-        HttpServletResponseWrapper wrappedResponse = new CharResponseWrapper((HttpServletResponse) response,
+        CharResponseWrapper wrappedResponse = new CharResponseWrapper((HttpServletResponse) response,
                 createReplacementMap(deBrandingActive));
         chain.doFilter(request, wrappedResponse);
-        // String body = wrappedResponse.toString();
-        // String replaced = new String(body);
-        // for (Map.Entry<String, String> item : createReplacementMap(deBrandingActive).entrySet()) {
-        // replaced = replaced.replace("${" + item.getKey() + "}", item.getValue());
-        // }
-        // response.getWriter().write(replaced);
+        wrappedResponse.replaceAndWriteToUnderlying();
     }
 
     @Override
@@ -94,50 +99,11 @@ public class ClientConfigurationFilter implements Filter {
         // intentionally left blank
     }
 
-    
-    private static class ContinuousReplacer {
-        StringBuffer buffer;
-        Consumer<byte[]> output;
-        Map<String, String> replacementMap;
-        int bufferSize;
-        
-        public ContinuousReplacer(Map<String,String> replacementMap, Consumer<byte[]> output) {
-            this.replacementMap = replacementMap;
-            this.output = output;
-            int maxKeyLength = this.replacementMap.keySet().stream().map(String::length)
-                    .max((a, b) -> Integer.compare(a, b)).orElse(0);
-            this.bufferSize = maxKeyLength == 0 ? 0 : maxKeyLength + 3;
-            buffer = new StringBuffer();
-        }
-        
-        public void push(String s) throws IOException {
-            buffer.append(s);
-            if (buffer.length()==bufferSize) {
-                int idxClosing;
-                if (buffer.substring(0, 2).equals("${") && (idxClosing = buffer.indexOf("}")) != -1) {
-                    String replacement;
-                    String key = buffer.substring(2, idxClosing);
-                    if ((replacement = replacementMap.get(key)) != null) {
-                        output.accept(replacement.getBytes());
-                    } else {
-                        output.accept("${".getBytes());
-                        output.accept(key.getBytes());
-                        output.accept("}".getBytes());
-                    }
-                    buffer.delete(0, idxClosing);
-                } else {
-                    output.accept(buffer.substring(0, 1).getBytes());
-                    buffer.deleteCharAt(0);
-                }
-            }
-        }
-        
-        private interface Consumer<T> {
-            void accept(T t) throws IOException;
-        }
-    }
-    
     private Map<String, String> createReplacementMap(boolean deBrandingActive) {
+        if (lastStatusDeBrandingActive != null && ((boolean)lastStatusDeBrandingActive) == deBrandingActive && cachedMap != null) {
+            return cachedMap;
+        }
+        lastStatusDeBrandingActive = deBrandingActive;
         final Map<String, String> map = new HashMap<>();
         final String title;
         final String whitelabeled;
@@ -151,106 +117,189 @@ public class ClientConfigurationFilter implements Filter {
         map.put("SAP", title);
         map.put("debrandingActive", Boolean.toString(deBrandingActive));
         map.put("whitelabeled", whitelabeled);
+        cachedMap = map;
         return map;
     }
-    
+
+    /**
+     * Replacement logic is implemented here.
+     * 
+     * @author Georg Herdt
+     *
+     */
+    private static class ContinuousReplacer {
+        StringBuffer buffer;
+        Consumer<byte[]> output;
+        Map<String, String> replacementMap;
+        int bufferSize;
+
+        /**
+         * 
+         * @param replacementMap
+         *            a map containing the key value mappings that will be replaced
+         * @param output
+         *            a consumer that accepts the replaced content. Allows abstraction from writer or stream oriented
+         *            processing.
+         */
+        public ContinuousReplacer(Map<String, String> replacementMap, Consumer<byte[]> output) {
+            this.replacementMap = replacementMap;
+            this.output = output;
+            int maxKeyLength = this.replacementMap.keySet().stream().map(String::length)
+                    .max((a, b) -> Integer.compare(a, b)).orElse(0);
+            this.bufferSize = maxKeyLength == 0 ? 0 : maxKeyLength + 3;
+            buffer = new StringBuffer();
+        }
+
+        public void push(char character) throws IOException {
+            buffer.append(character);
+            // wait until buffer is filled up
+            if (buffer.length() == bufferSize) {
+                int idxClosing;
+                if (buffer.substring(0, 2).equals("${") && (idxClosing = buffer.indexOf("}")) != -1) {
+                    String replacement;
+                    String key = buffer.substring(2, idxClosing);
+                    if ((replacement = replacementMap.get(key)) != null) {
+                        output.accept(replacement.getBytes());
+                    } else {
+                        output.accept("${".getBytes());
+                        output.accept(key.getBytes());
+                        output.accept("}".getBytes());
+                    }
+                    buffer.delete(0, idxClosing + 1);
+                } else {
+                    output.accept(buffer.substring(0, 1).getBytes());
+                    buffer.deleteCharAt(0);
+                }
+            }
+        }
+
+        private interface Consumer<T> {
+            void accept(T t) throws IOException;
+        }
+    }
+
+    /**
+     * Keeps track of bytes buffered during request processing.
+     * 
+     * @author Georg Herdt
+     *
+     */
+    private static final class BufferingWriter extends FilterWriter {
+        int bytesWritten = 0;
+
+        public BufferingWriter(Writer out) {
+            super(out);
+        }
+
+        @Override
+        public void write(char[] cbuf, int off, int len) throws IOException {
+            super.write(cbuf, off, len);
+            count(len);
+        }
+
+        @Override
+        public void write(int c) throws IOException {
+            super.write(c);
+            count(1);
+        }
+
+        @Override
+        public void write(String str, int off, int len) throws IOException {
+            super.write(str, off, len);
+            count(len);
+        }
+
+        private void count(int bytesWritten) {
+            this.bytesWritten += bytesWritten;
+            if (this.bytesWritten > MAX_REPLACEMENT_BUFFER) {
+                throw new IllegalStateException("buffersize exceeded " + MAX_REPLACEMENT_BUFFER);
+            }
+        }
+    }
+
+    /**
+     * Keeps track of bytes buffered during request processing.
+     * 
+     * @author Georg Herdt
+     *
+     */
+    private static final class BufferingServletOutputStream extends ServletOutputStream {
+        private final ByteArrayOutputStream buffer;
+
+        private BufferingServletOutputStream() {
+            this.buffer = new ByteArrayOutputStream();
+        }
+
+        @Override
+        public boolean isReady() {
+            // always ready to write into buffer
+            return true;
+        }
+
+        @Override
+        public void setWriteListener(WriteListener writeListener) {
+            // intentionally left blank, no asynchronous writing supported
+            throw new IllegalStateException("async not supported");
+        }
+
+        @Override
+        public void write(int b) throws IOException {
+            buffer.write(b);
+            if (buffer.size() > MAX_REPLACEMENT_BUFFER) {
+                throw new IllegalStateException("buffersize exceeded " + MAX_REPLACEMENT_BUFFER);
+            }
+        }
+
+        public String getBufferedText() {
+            return buffer.toString();
+        }
+    }
+
+    /**
+     * Wraps response and buffers for later replacement.
+     * 
+     * @author Georg Herdt
+     *
+     */
     private static class CharResponseWrapper extends HttpServletResponseWrapper {
-        
-        private static final class MyWriter extends FilterWriter {
-            private MyWriter(Writer out, Map<String,String> replacementMap) {
-                super(out);
-                new ContinuousReplacer(replacementMap, bytes -> out.write(new String(bytes)));
-            }
-
-            @Override
-            public void write(char[] cbuf, int off, int len) throws IOException {
-                String s = new String(cbuf,off,len);
-                super.write(cbuf, off, len);
-            }
-
-            @Override
-            public void write(int c) throws IOException {
-                // TODO Auto-generated method stub
-                super.write(c);
-            }
-
-            @Override
-            public void write(String str, int off, int len) throws IOException {
-                // TODO Auto-generated method stub
-                super.write(str, off, len);
-            }
-
-            @Override
-            public Writer append(char arg0) throws IOException {
-                // TODO Auto-generated method stub
-                return super.append(arg0);
-            }
-
-            @Override
-            public Writer append(CharSequence arg0, int arg1, int arg2) throws IOException {
-                // TODO Auto-generated method stub
-                return super.append(arg0, arg1, arg2);
-            }
-
-            @Override
-            public Writer append(CharSequence arg0) throws IOException {
-                // TODO Auto-generated method stub
-                return super.append(arg0);
-            }
-
-            @Override
-            public void write(char[] arg0) throws IOException {
-                // TODO Auto-generated method stub
-                super.write(arg0);
-            }
-
-            @Override
-            public void write(String arg0) throws IOException {
-                // TODO Auto-generated method stub
-                super.write(arg0);
-            }
-        }
-
-        private static final class MyServletOutputStream extends ServletOutputStream {
-            private final ServletOutputStream wrappedOutputStream;
-            private final ContinuousReplacer replacer;
-
-            private MyServletOutputStream(ServletOutputStream wrappedOutputStream,Map<String,String> replacementMap) {
-                this.wrappedOutputStream = wrappedOutputStream;
-                this.replacer = new ContinuousReplacer(replacementMap, bytes -> wrappedOutputStream.write(bytes));
-            }
-
-            @Override
-            public void write(int octet) throws IOException {
-                // System.out.print();
-                String current = new String(new char[] { (char) octet });
-                replacer.push(current);
-            }
-
-            @Override
-            public void setWriteListener(WriteListener writeListener) {
-                // disable asynchronous writing, not needed for static pages
-                throw new IllegalStateException("not supported by ClientConfigurationFilter");
-            }
-
-            @Override
-            public boolean isReady() {
-                return wrappedOutputStream.isReady();
-            }
-        }
 
         private Map<String, String> replacementMap;
-        
-        public CharResponseWrapper(HttpServletResponse response, Map<String,String> replacementMap) {
+
+        private BufferingServletOutputStream bufferedStream;
+
+        private FilterWriter bufferedWriter;
+
+        public CharResponseWrapper(HttpServletResponse response, Map<String, String> replacementMap) {
             super(response);
             this.replacementMap = replacementMap;
             response.setBufferSize(0); // prevent buffering here to not need to think about it later
         }
 
+        public void replaceAndWriteToUnderlying() throws IOException {
+            String text;
+            if (bufferedStream != null) {
+                text = bufferedStream.getBufferedText();
+            } else if (bufferedWriter != null) {
+                text = bufferedWriter.toString();
+            } else {
+                text = null;
+            }
+            if (text != null) {
+                ContinuousReplacer replacer = new ContinuousReplacer(replacementMap,
+                        b -> this.getResponse().getOutputStream().write(b));
+                for (char c : text.toCharArray()) {
+                    replacer.push(c);
+                }
+            }
+        }
+
         @Override
         public PrintWriter getWriter() throws IOException {
-            FilterWriter filter = new MyWriter(super.getWriter(), replacementMap);
-            return new PrintWriter(filter);
+            if (bufferedStream != null) {
+                throw new IllegalStateException("getOutputStream already called");
+            }
+            this.bufferedWriter = new BufferingWriter(new CharArrayWriter());
+            return new PrintWriter(this.bufferedWriter);
         }
 
         @Override
@@ -265,7 +314,7 @@ public class ClientConfigurationFilter implements Filter {
 
         @Override
         public int getBufferSize() {
-            return 0;
+            return 0; // not supporting buffering here see API doc
         }
 
         @Override
@@ -285,8 +334,11 @@ public class ClientConfigurationFilter implements Filter {
 
         @Override
         public ServletOutputStream getOutputStream() throws IOException {
-            final ServletOutputStream wrappedOutputStream = super.getOutputStream();
-            return new MyServletOutputStream(wrappedOutputStream, replacementMap);
+            if (bufferedWriter != null) {
+                throw new IllegalStateException("getWriter already called");
+            }
+            this.bufferedStream = new BufferingServletOutputStream();
+            return bufferedStream;
         }
     }
 }
