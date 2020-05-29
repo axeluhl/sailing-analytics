@@ -2,8 +2,6 @@ package com.sap.sse.security.shared;
 
 import java.util.UUID;
 
-import com.sap.sse.security.shared.PredefinedRoles;
-
 /**
  * Payment subscription plan
  * 
