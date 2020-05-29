@@ -112,7 +112,7 @@ public class CompetitorsResource extends AbstractSailingServerResource {
                 getSecurityService().checkCurrentUserHasOneOfExplicitPermissions(competitor,
                         SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS);
             }
-            response = Response.ok(streamingOutput(getCompetitorJSON(competitor))).build();
+            response = Response.ok(streamingOutput(CompetitorJsonSerializer.create().serialize(competitor))).build();
         }
         return response;
     }
