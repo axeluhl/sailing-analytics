@@ -3,6 +3,8 @@ package com.sap.sailing.selenium.api.test;
 import static com.sap.sailing.selenium.api.core.ApiContext.SERVER_CONTEXT;
 import static com.sap.sailing.selenium.api.core.ApiContext.createAdminApiContext;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.HashMap;
@@ -120,6 +122,36 @@ public class CompetitorApiTest extends AbstractSeleniumTest {
         assertEquals("http://teamimage.url", competitorReloaded.getTeam().getTeamImageUri());
         assertEquals(2.4, competitorReloaded.getTimeOnTimeFactor());
         assertEquals(10000.0, competitorU5.getTimeOnDistanceAllowanceInSecondsPerNauticalMile());
+    }
+
+    @Test
+    public void testUpdateCompetitorValuesToNull() {
+        final Competitor competitor = regattaApi.createAndAddCompetitor(adminCtx, EVENT_NAME, BOAT_CLASS, "test@test",
+                COMPETITOR_NAME, "USA");
+        Competitor competitorU1 = competitorApi.updateCompetitor(adminCtx, competitor.getId(),
+                mapOf("name", "Dagobert", "shortName", "D", "email", "test@test2", "nationality", "GER", "flagImageUri",
+                        "http://flagimage.url", "teamImageUri", "http://teamimage.url", "timeOnTimeFactor", 2.4, "displayColor", "#ABCDEF",
+                        "timeOnDistanceAllowanceInSecondsPerNauticalMile", 10000, "searchTag", "atag"));
+        assertNotNull(competitorU1.getName());
+        assertNotNull(competitorU1.getShortName());
+        assertNotNull(competitorU1.getFlagImageUri());
+        assertNotNull(competitorU1.getTeam().getTeamImageUri());
+        assertNotNull(competitorU1.getNationality());
+        assertNotNull(competitorU1.getTimeOnTimeFactor());
+        assertNotNull(competitorU1.getTimeOnDistanceAllowanceInSecondsPerNauticalMile());
+        assertNotNull(competitorU1.getColor());
+
+        Competitor competitorU2 = competitorApi.updateCompetitor(adminCtx, competitor.getId(),
+                mapOf("name", null, "shortName", null, "email", null, "nationality", null, "flagImageUri", null,
+                        "teamImageUri", null, "timeOnTimeFactor", null, "displayColor", null, 
+                        "timeOnDistanceAllowanceInSecondsPerNauticalMile", null, "searchTag", null));
+        assertNull(competitorU2.getName());
+        assertNull(competitorU2.getShortName());
+        assertNull(competitorU2.getFlagImageUri());
+        assertNull(competitorU2.getTeam().getTeamImageUri());
+        assertNull(competitorU2.getTimeOnTimeFactor());
+        assertNull(competitorU2.getTimeOnDistanceAllowanceInSecondsPerNauticalMile());
+        assertNull(competitorU2.getColor());
     }
 
     private Map<String, Object> mapOf(Object... args) {
