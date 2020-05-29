@@ -188,8 +188,8 @@ public class CompetitorsResource extends AbstractSailingServerResource {
                             : competitor.getNationality();
                 } catch (IllegalArgumentException e) {
                     return Response.status(Status.BAD_REQUEST)
-                            .entity(String.format("invalid %s %s", CompetitorJsonConstants.FIELD_TEAM_IMAGE_URI,
-                                    competitorJson.get(CompetitorJsonConstants.FIELD_TEAM_IMAGE_URI)))
+                            .entity(String.format("invalid %s %s", CompetitorJsonConstants.FIELD_NATIONALITY,
+                                    competitorJson.get(CompetitorJsonConstants.FIELD_NATIONALITY)))
                             .type(MediaType.TEXT_PLAIN).build();
                 }
                 final Double timeOnTimeFactor;
