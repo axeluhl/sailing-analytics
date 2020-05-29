@@ -74,27 +74,52 @@ public class CompetitorApiTest extends AbstractSeleniumTest {
         assertEquals(competitor.getName(), competitorU1.getName());
 
         Competitor competitorU2 = competitorApi.updateCompetitor(adminCtx, competitor.getId(),
-                mapOf("name", "Dagobert"));
+                mapOf("name", "Dagobert", "shortName", "D"));
         assertEquals("#ABCDEF", competitorU2.getColor());
         assertEquals("Dagobert", competitorU2.getName());
-        
-        Competitor competitorU3 = competitorApi.updateCompetitor(adminCtx, competitor.getId(),
-                mapOf("nationality", "GER", "flagImageUri", "http://flagimage.url", "teamImageUri", "http://teamimage.url"));
+        assertEquals("D", competitorU2.getShortName());
+
+        Competitor competitorU3 = competitorApi.updateCompetitor(adminCtx, competitor.getId(), mapOf("nationality",
+                "GER", "flagImageUri", "http://flagimage.url", "teamImageUri", "http://teamimage.url"));
         assertEquals("#ABCDEF", competitorU3.getColor());
         assertEquals("Dagobert", competitorU3.getName());
+        assertEquals("D", competitorU2.getShortName());
         assertEquals("GER", competitorU3.getNationality());
         assertEquals("http://flagimage.url", competitorU3.getFlagImageUri());
         assertEquals("http://teamimage.url", competitorU3.getTeam().getTeamImageUri());
-        
+
         Competitor competitorU4 = competitorApi.updateCompetitor(adminCtx, competitor.getId(),
                 mapOf("timeOnTimeFactor", 2.4, "timeOnDistanceAllowanceInSecondsPerNauticalMile", 10000));
         assertEquals("#ABCDEF", competitorU4.getColor());
         assertEquals("Dagobert", competitorU4.getName());
+        assertEquals("D", competitorU2.getShortName());
         assertEquals("GER", competitorU4.getNationality());
         assertEquals("http://flagimage.url", competitorU4.getFlagImageUri());
         assertEquals("http://teamimage.url", competitorU4.getTeam().getTeamImageUri());
         assertEquals(2.4, competitorU4.getTimeOnTimeFactor());
         assertEquals(10000.0, competitorU4.getTimeOnDistanceAllowanceInSecondsPerNauticalMile());
+
+        Competitor competitorU5 = competitorApi.updateCompetitor(adminCtx, competitor.getId(),
+                mapOf("searchTag", "atag"));
+        assertEquals("#ABCDEF", competitorU5.getColor());
+        assertEquals("Dagobert", competitorU5.getName());
+        assertEquals("D", competitorU2.getShortName());
+        assertEquals("GER", competitorU5.getNationality());
+        assertEquals("http://flagimage.url", competitorU5.getFlagImageUri());
+        assertEquals("http://teamimage.url", competitorU5.getTeam().getTeamImageUri());
+        assertEquals(2.4, competitorU5.getTimeOnTimeFactor());
+        assertEquals(10000.0, competitorU5.getTimeOnDistanceAllowanceInSecondsPerNauticalMile());
+
+        // check final state by reloading competitor
+        Competitor competitorReloaded = competitorApi.getCompetitor(adminCtx, competitor.getId());
+        assertEquals("#ABCDEF", competitorReloaded.getColor());
+        assertEquals("Dagobert", competitorReloaded.getName());
+        assertEquals("D", competitorReloaded.getShortName());
+        assertEquals("GER", competitorReloaded.getNationality());
+        assertEquals("http://flagimage.url", competitorReloaded.getFlagImageUri());
+        assertEquals("http://teamimage.url", competitorReloaded.getTeam().getTeamImageUri());
+        assertEquals(2.4, competitorReloaded.getTimeOnTimeFactor());
+        assertEquals(10000.0, competitorU5.getTimeOnDistanceAllowanceInSecondsPerNauticalMile());
     }
 
     private Map<String, Object> mapOf(Object... args) {
