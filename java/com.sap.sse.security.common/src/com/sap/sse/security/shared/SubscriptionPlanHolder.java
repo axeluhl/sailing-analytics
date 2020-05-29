@@ -10,18 +10,13 @@ import java.util.Map;
  */
 public class SubscriptionPlanHolder {
 
-    private static final Map<String, SubscriptionPlan> planMap = new HashMap<String, SubscriptionPlan>() {
-        /**
-         * 
-         */
-        private static final long serialVersionUID = -8686217706843873886L;
+    private static final Map<String, SubscriptionPlan> planMap = new HashMap<String, SubscriptionPlan>();
 
-        {
-            for (SubscriptionPlan plan : SubscriptionPlan.values()) {
-                put(plan.getId(), plan);
-            }
+    static {
+        for (SubscriptionPlan plan : SubscriptionPlan.values()) {
+            planMap.put(plan.getId(), plan);
         }
-    };
+    }
 
     private static final SubscriptionPlanHolder instance = new SubscriptionPlanHolder();
 

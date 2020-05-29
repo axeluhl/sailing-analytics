@@ -29,6 +29,7 @@ import com.sap.sse.security.shared.SubscriptionPlanHolder;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.ui.server.Activator;
+import static com.chargebee.models.Subscription.cancel;
 
 /**
  * Back-end implementation of {@link SubscriptionService} remote service interface.
@@ -169,7 +170,7 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
 
             String subscriptionId = subscription.getSubscriptionId();
             if (subscriptionId != null && !subscriptionId.isEmpty()) {
-                Result result = com.chargebee.models.Subscription.cancel(subscriptionId).request();
+                Result result = cancel(subscriptionId).request();
                 if (!result.subscription().status().name().toLowerCase()
                         .equals(Subscription.SUBSCRIPTION_STATUS_CANCELLED)) {
                     return false;

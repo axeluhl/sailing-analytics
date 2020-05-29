@@ -123,7 +123,7 @@ public class UserSubscription extends Composite implements UserSubscriptionView 
     }
 
     private void updateViewWithFreePlan() {
-        planNameSpanUi.setInnerText("Free");
+        planNameSpanUi.setInnerText(StringMessages.INSTANCE.freePlan());
         hideElement(subscriptionGroupUi);
         cancelSubscriptionButtonUi.setVisible(false);
     }
