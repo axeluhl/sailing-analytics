@@ -5,7 +5,9 @@ import java.io.CharArrayWriter;
 import java.io.FilterWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -91,7 +93,7 @@ public class ClientConfigurationFilter implements Filter {
         CharResponseWrapper wrappedResponse = new CharResponseWrapper((HttpServletResponse) response,
                 createReplacementMap(deBrandingActive));
         chain.doFilter(request, wrappedResponse);
-        wrappedResponse.replaceAndWriteToUnderlying();
+        wrappedResponse.replaceAndWriteToUnderlying(wrappedResponse.getCharacterEncoding());
     }
 
     @Override
@@ -250,8 +252,8 @@ public class ClientConfigurationFilter implements Filter {
             }
         }
 
-        public String getBufferedText() {
-            return buffer.toString();
+        public String getBufferedText(Charset charset) throws UnsupportedEncodingException {
+            return buffer.toString(charset.name());
         }
     }
 
@@ -275,10 +277,17 @@ public class ClientConfigurationFilter implements Filter {
             response.setBufferSize(0); // prevent buffering here to not need to think about it later
         }
 
-        public void replaceAndWriteToUnderlying() throws IOException {
+        public void replaceAndWriteToUnderlying(String encoding) throws IOException {
             String text;
+            Charset charset;
+            try {
+                charset = Charset.forName(encoding);
+            } catch (IllegalArgumentException e) {
+                // default charset as specified by servlet api
+                charset = Charset.forName("ISO-8859-1"); 
+            }
             if (bufferedStream != null) {
-                text = bufferedStream.getBufferedText();
+                text = bufferedStream.getBufferedText(charset);
             } else if (bufferedWriter != null) {
                 text = bufferedWriter.toString();
             } else {
