@@ -75,11 +75,8 @@ public class ClientConfigurationFilter implements Filter {
 
     public static final String DEBRANDING_PROPERTY_NAME = "com.sap.sse.debranding";
     public static final String CLIENT_CONFIGURATION_FILTER_MAX_BUFFER = "com.sap.sse.clientconfiguration.maxbuffer";
-    private static volatile Boolean lastStatusDeBrandingActive = null;
     private static int MAX_REPLACEMENT_BUFFER = Integer
             .valueOf(System.getProperty(CLIENT_CONFIGURATION_FILTER_MAX_BUFFER, "1000000"));
-    // cache results in a map
-    private Map<String, String> cachedMap;
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -102,10 +99,6 @@ public class ClientConfigurationFilter implements Filter {
     }
 
     private Map<String, String> createReplacementMap(boolean deBrandingActive) {
-        if (lastStatusDeBrandingActive != null && ((boolean)lastStatusDeBrandingActive) == deBrandingActive && cachedMap != null) {
-            return cachedMap;
-        }
-        lastStatusDeBrandingActive = deBrandingActive;
         final Map<String, String> map = new HashMap<>();
         final String title;
         final String whitelabeled;
@@ -119,7 +112,7 @@ public class ClientConfigurationFilter implements Filter {
         map.put("SAP", title);
         map.put("debrandingActive", Boolean.toString(deBrandingActive));
         map.put("whitelabeled", whitelabeled);
-        cachedMap = map;
+//        cachedMap = map;
         return map;
     }
 
