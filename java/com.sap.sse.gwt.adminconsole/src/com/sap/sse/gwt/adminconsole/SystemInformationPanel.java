@@ -23,7 +23,8 @@ public class SystemInformationPanel extends FlowPanel {
             fullVersionText = serverInfo.getBuildVersion();
             if (fullVersionText.length() > 70) {
                 buildVersionCut = true;
-                buildVersionText.setText(stringMessages.version(fullVersionText.substring(0, 100) + "..."));
+                final int toIndex = fullVersionText.indexOf(" ") - 1;
+                buildVersionText.setText(stringMessages.version(fullVersionText.substring(0, toIndex) + "..."));
             } else {
                 buildVersionText.setText(stringMessages.version(fullVersionText));
             }
