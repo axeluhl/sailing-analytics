@@ -72,6 +72,9 @@ public class CompetitorsResource extends AbstractSailingServerResource {
         if (competitor.getTeam().getImage() != null) {
             json.put(CompetitorJsonConstants.FIELD_TEAM_IMAGE_URI, competitor.getTeam().getImage().toString());
         }
+        json.put(CompetitorJsonConstants.FIELD_TIME_ON_TIME_FACTOR, competitor.getTimeOnTimeFactor());
+        json.put(CompetitorJsonConstants.FIELD_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE,
+                competitor.getTimeOnDistanceAllowancePerNauticalMile()==null?null:competitor.getTimeOnDistanceAllowancePerNauticalMile().asSeconds());
         return json;
     }
 
