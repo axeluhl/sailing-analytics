@@ -6,15 +6,14 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
-public class AdditionalInformationDialog extends DataEntryDialog<String> {
+public class AdditionalServerInformationDialog extends DataEntryDialog<String> {
 
     private final StringMessages stringMessages;
     private final ServerInfoDTO serverInfo;
 
-    public AdditionalInformationDialog(String title, String message, String okButtonName, String cancelButtonName,
-            Validator<String> validator, boolean animationEnabled, DialogCallback<String> callback,
-            StringMessages stringMessages, ServerInfoDTO serverInfo) {
-        super(title, message, okButtonName, cancelButtonName, validator, animationEnabled, callback);
+    public AdditionalServerInformationDialog(StringMessages stringMessages, ServerInfoDTO serverInfo) {
+        super(stringMessages.serverInformation(), /* text */ null, stringMessages.ok(), stringMessages.cancel(),
+                /* validator */ null, /* animationEnabled */ false, /* callback */null);
         this.stringMessages = stringMessages;
         this.serverInfo = serverInfo;
     }

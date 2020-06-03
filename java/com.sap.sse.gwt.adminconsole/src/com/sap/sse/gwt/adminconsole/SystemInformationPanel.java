@@ -37,10 +37,8 @@ public class SystemInformationPanel extends FlowPanel {
             additionalInformation.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
-                    AdditionalInformationDialog additionalInformationDialog = new AdditionalInformationDialog(
-                            stringMessages.serverInformation(), /* text */ null,
-                            stringMessages.ok(), stringMessages.cancel(), /* validator */ null,
-                            /* animationEnabled */ false, /* callback */null, stringMessages, serverInfo);
+                    AdditionalServerInformationDialog additionalInformationDialog = new AdditionalServerInformationDialog(
+                            stringMessages, serverInfo);
                     additionalInformationDialog.show();
                 }
             });
