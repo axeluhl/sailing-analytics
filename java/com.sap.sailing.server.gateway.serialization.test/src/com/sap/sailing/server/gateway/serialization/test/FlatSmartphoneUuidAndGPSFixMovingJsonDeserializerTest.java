@@ -38,7 +38,7 @@ public class FlatSmartphoneUuidAndGPSFixMovingJsonDeserializerTest {
                 "      \"course\" : 14.2,\n" + 
                 "    },\n" +
                 "    {\n" + 
-                "      \"timestamp-iso\" : \"2004-06-14T23:34:30Z\",\n" + 
+                "      \"timestamp-iso\" : \"2418-03-18T17:34:30Z\",\n" + 
                 "      \"latitude\" : -67.672456,\n" + 
                 "      \"longitude\" : -2.03456,\n" + 
                 "      \"speed\" : 19.3,\n" + 
