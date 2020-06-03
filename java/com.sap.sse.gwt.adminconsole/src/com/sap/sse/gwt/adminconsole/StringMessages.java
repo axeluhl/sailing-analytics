@@ -111,4 +111,6 @@ public interface StringMessages extends Messages {
     String additionalInformation();
 
     String serverInformation();
+
+    String serverName(String buildVersion);
 }
