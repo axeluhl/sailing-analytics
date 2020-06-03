@@ -489,6 +489,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
             public Iterable<String> getSearchableStrings(LeaderboardGroupDTO t) {
                 List<String> string = new ArrayList<String>();
                 string.add(t.getName());
+                string.add(String.valueOf(t.getId()));
                 return string;
             }
 
@@ -1059,18 +1060,18 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
 
     @Override
     public void setupLeaderboardGroups(Map<String, String> params) {
-        String nameLeaderBoardGroup = params.get("LeaderBoardGroupName");
-        if (nameLeaderBoardGroup == null) {
+        String leaderBoardGroupId = params.get("LeaderBoardGroupId");
+        if (leaderBoardGroupId == null) {
             return;
         }
-        //setup filter value to name from params
-        groupsFilterablePanel.search(nameLeaderBoardGroup);
+        // setup filter value to name from params
+        groupsFilterablePanel.search(leaderBoardGroupId);
 
-        //deselect all leaderboard groups except one which name is from params
+        // deselect all leaderboard groups except one which name is from params
         for (LeaderboardGroupDTO leaderboardGroupDTO : availableLeaderboardGroups) {
-            if (nameLeaderBoardGroup.equals(leaderboardGroupDTO.getName())) {
+            if (leaderBoardGroupId.equals(String.valueOf(leaderboardGroupDTO.getId()))) {
                 groupsTable.getSelectionModel().setSelected(leaderboardGroupDTO, true);
-            } else if(groupsTable.getSelectionModel().isSelected(leaderboardGroupDTO)){
+            } else if (groupsTable.getSelectionModel().isSelected(leaderboardGroupDTO)) {
                 groupsTable.getSelectionModel().setSelected(leaderboardGroupDTO, false);
             }
         }

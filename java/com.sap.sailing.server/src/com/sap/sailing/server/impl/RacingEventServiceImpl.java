@@ -2990,6 +2990,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
+    public Map<UUID, LeaderboardGroup> getLeaderboardGroupsIdentifiable() {
+        return Collections.unmodifiableMap(new HashMap<UUID, LeaderboardGroup>(leaderboardGroupsByID));
+    }
+
+    @Override
     public LeaderboardGroup getLeaderboardGroupByName(String groupName) {
         return leaderboardGroupsByName.get(groupName);
     }

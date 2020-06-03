@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.server;
 
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -16,6 +17,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.UnknownHostException;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -23,6 +25,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -4560,11 +4563,11 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-  //READ
-    public List<String> getLeaderboardGroupNamesFromRemoteServer(String url, String username, String password) {
+    // READ
+    public Map<String, String> getLeaderboardGroupNamesFromRemoteServer(String url, String username, String password) {
         String token = RemoteServerUtil.resolveBearerTokenForRemoteServer(url, username, password);
         // FIXME: Add checks here that ensure that the current use is allowed to do MDI
-        final String path = "/sailingserver/api/v1/leaderboardgroups";
+        final String path = "/sailingserver/api/v1/leaderboardgroups/identifiable";
         final String query = null;
         URL serverAddress = null;
         InputStream inputStream = null;
@@ -4574,15 +4577,21 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             serverAddress = RemoteServerUtil.createRemoteServerUrl(base, path, query);
             connection = HttpUrlConnectionHelper.redirectConnectionWithBearerToken(serverAddress, Duration.ONE_MINUTE,
                     token);
-            inputStream = connection.getInputStream();
-            InputStreamReader in = new InputStreamReader(inputStream, "UTF-8");
+            BufferedReader in = new BufferedReader(
+                    new InputStreamReader(connection.getInputStream(), Charset.forName("UTF-8")));
             org.json.simple.parser.JSONParser parser = new org.json.simple.parser.JSONParser();
             org.json.simple.JSONArray array = (org.json.simple.JSONArray) parser.parse(in);
-            List<String> names = new ArrayList<String>();
-            for (Object obj : array) {
-                names.add((String) obj);
+            Map<String, String> leaderboardGroupsMap = new LinkedHashMap<>();
+            Iterator<Object> iterator = array.iterator();
+            while (iterator.hasNext()) {
+                JSONObject next = (JSONObject) iterator.next();
+                leaderboardGroupsMap.put((String) next.get("id"), (String) next.get("name"));
             }
-            return names;
+            List<Map.Entry<String, String>> entries = new ArrayList<>(leaderboardGroupsMap.entrySet());
+            leaderboardGroupsMap.clear();
+            entries.stream().sorted(Comparator.comparing(Map.Entry::getValue, Comparator.naturalOrder()))
+                    .forEachOrdered(e -> leaderboardGroupsMap.put(e.getKey(), e.getValue()));
+            return leaderboardGroupsMap;
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {

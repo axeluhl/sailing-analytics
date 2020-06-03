@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -50,7 +52,7 @@ public class MasterDataImportPanel extends VerticalPanel {
     private Button importLeaderboardGroupsButton;
     private Button fetchIdsButton;   
 
-    private List<String> allLeaderboardGroupNames;
+    private Map<String, String> allLeaderboardGroupsMap;
 
     private final StringMessages stringMessages;
     private String currentHost;
@@ -311,29 +313,25 @@ public class MasterDataImportPanel extends VerticalPanel {
     private void fireLgIdRequestAndFillList(final String host) {
         currentHost = host;
         disableAllButtons();
-        sailingServiceWrite.getLeaderboardGroupNamesFromRemoteServer(host, usernameBox.getValue(), passwordBox.getValue(),
-                new AsyncCallback<List<String>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                showErrorAlert(stringMessages.importGetLeaderboardsFailed(host, caught.getMessage()));
-                changeButtonStateAccordingToApplicationState();
-            }
+        sailingServiceWrite.getLeaderboardGroupNamesFromRemoteServer(host, usernameBox.getValue(),
+                passwordBox.getValue(), new AsyncCallback<Map<String, String>>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        showErrorAlert(stringMessages.importGetLeaderboardsFailed(host, caught.getMessage()));
+                        changeButtonStateAccordingToApplicationState();
+                    }
 
-            @Override
-            public void onSuccess(List<String> result) {
-                clearListBox();
-                Collections.sort(result);
-                allLeaderboardGroupNames = result;
-                leaderboardgroupListBox.setVisibleItemCount(result.size());
-                for (String lgName : result) {
-                    leaderboardgroupListBox.addItem(lgName);
-                }
-                changeButtonStateAccordingToApplicationState();
-                if (!filterBox.getValue().isEmpty()) {
-                    filterLeaderboardGroupList();
-                }
-            }
-        });
+                    @Override
+                    public void onSuccess(Map<String, String> result) {
+                        clearListBox();
+                        allLeaderboardGroupsMap = result;
+                        fillLeaderboardgroupListBox(allLeaderboardGroupsMap);
+                        changeButtonStateAccordingToApplicationState();
+                        if (!filterBox.getValue().isEmpty()) {
+                            filterLeaderboardGroupList();
+                        }
+                    }
+                });
     }
 
     private void showErrorAlert(String string) {
@@ -408,7 +406,6 @@ public class MasterDataImportPanel extends VerticalPanel {
 
     private void filterLeaderboardGroupList() {
         clearListBox();
-        int visibleNameCount = 0;
         Iterable<String> filterTexts = Util.splitAlongWhitespaceRespectingDoubleQuotedPhrases(filterBox.getText());
         final KeywordMatcher<String> matcher = new KeywordMatcher<String>() {
             @Override
@@ -416,14 +413,25 @@ public class MasterDataImportPanel extends VerticalPanel {
                 return Collections.singleton(t);
             } 
         };
-        for (String name : allLeaderboardGroupNames) {
-            if (matcher.matches(filterTexts, name)) {
-                leaderboardgroupListBox.addItem(name);
-                visibleNameCount++;
-            }
+        
+        Map<String, String> filteredMap = allLeaderboardGroupsMap.entrySet().stream()
+                .filter(entry -> matcher.matches(filterTexts, entry.getValue()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        fillLeaderboardgroupListBox(filteredMap);
+        changeButtonStateAccordingToApplicationState();
+    }
+
+    private void fillLeaderboardgroupListBox(Map<String, String> leaderboardGroupsMap) {
+        int visibleNameCount = 0;
+        List<String> keys = new ArrayList<>(leaderboardGroupsMap.keySet());
+        for (int i = 0; i < keys.size(); i++) {
+            String key = keys.get(i);
+            leaderboardgroupListBox.addItem(leaderboardGroupsMap.get(key));
+            leaderboardgroupListBox.setValue(i, key);
+            visibleNameCount++;
+
         }
         leaderboardgroupListBox.setVisibleItemCount(visibleNameCount);
-        changeButtonStateAccordingToApplicationState();
     }
 
     private void deleteProgressIndication(IsWidget... widgetsToRemove) {

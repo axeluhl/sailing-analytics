@@ -268,7 +268,10 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             public List<MultipleLinkCell.CellLink> getValue(EventDTO event) {
                 List<MultipleLinkCell.CellLink> links = new ArrayList<>();
                 for (LeaderboardGroupDTO lg : event.getLeaderboardGroups()) {
-                    links.add(new MultipleLinkCell.CellLink(lg.getName()));
+                    String leaderboardId = String.valueOf(lg.getId());
+                    MultipleLinkCell.CellLink cellLink = new MultipleLinkCell.CellLink(leaderboardId, leaderboardId,
+                            lg.getName());
+                    links.add(cellLink);
                 }
                 return links;
             }
@@ -277,7 +280,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             @Override
             public void update(String value) {
                 Map<String, String> params = new HashMap<>();
-                params.put("LeaderBoardGroupName", value);
+                params.put("LeaderBoardGroupId", value);
                 handleTabSelectable.selectTabByNames(stringMessages.leaderboards(), stringMessages.leaderboardGroups(),
                         params);
             }

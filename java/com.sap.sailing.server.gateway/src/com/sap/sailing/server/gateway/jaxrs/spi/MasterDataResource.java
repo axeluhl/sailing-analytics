@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.UUID;
 import java.util.logging.Logger;
 import java.util.zip.GZIPOutputStream;
 
@@ -76,7 +77,7 @@ public class MasterDataResource extends AbstractSailingServerResource {
             exportTrackedRacesAndStartTracking = false;
         }
         logger.info(String.format("Masterdataexport gzip compression is turned %s", compress ? "on" : "off"));
-        Map<String, LeaderboardGroup> allLeaderboardGroups = getService().getLeaderboardGroups();
+        Map<UUID, LeaderboardGroup> allLeaderboardGroups = getService().getLeaderboardGroupsIdentifiable();
         Set<LeaderboardGroup> groupsToExport = new HashSet<LeaderboardGroup>();
         if (requestedLeaderboardGroups.isEmpty()) {
             // Add all visible LeaderboardGroups.
@@ -89,11 +90,12 @@ public class MasterDataResource extends AbstractSailingServerResource {
         } else {
             // Add all requested LeaderboardGroups.
             // The request will fail due to missing LeaderboardGroup READ permissions.
-            for (String name : requestedLeaderboardGroups) {
-                LeaderboardGroup group = allLeaderboardGroups.get(name);
+            for (String uuid : requestedLeaderboardGroups) {
+                LeaderboardGroup group = allLeaderboardGroups.get(UUID.fromString(uuid));
                 if (group != null) {
                     if (!securityService.hasCurrentUserReadPermission(group)) {
-                        throw new AuthorizationException("No permission to read leaderboard group '" + name + "'");
+                        throw new AuthorizationException(
+                                "No permission to read leaderboard group with uuid'" + uuid + "'");
                     }
                     groupsToExport.add(group);
                 }
