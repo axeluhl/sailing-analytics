@@ -13,6 +13,11 @@ public class TestORCCertificateImporterJSON extends AbstractORCCertificateImport
         testSimpleLocalFileRead("GER2019.json", "GER20041179");
     }
     
+    @Test
+    public void testReadingJSONWithSpecificBins() throws IOException, ParseException {
+        testSimpleLocalFileRead("03600000HUH.json", "03600000HUH");
+    }
+    
     @FailIfNoValidOrcCertificates
     @Test
     public void testSimpleOnlineJSONFileRead() throws IOException, ParseException, InterruptedException {

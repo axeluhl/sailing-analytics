@@ -335,14 +335,6 @@ public interface DomainFactory {
     Iterable<IControl> getControlsForCourseArea(IEvent tracTracEvent, String tracTracCourseAreaName);
 
     /**
-     * Since TracAPI 3.6.1 the TracAPI provides a course area name for {@link IRace} objects. Furthermore, the
-     * {@link IControl} control points can now tell their {@link IControl#getCourseArea() course area}. This allows us
-     * to fetch the {@link IControlPoint}s for a specific course area, thereby, e.g., restricting the marks of an event
-     * that we offer to the Race Manager app's course designer to those available on the course area.
-     */
-    Iterable<IControlPoint> getControlPointsForCourseArea(IEvent tracTracEvent, String tracTracCourseAreaName);
-
-    /**
      * Looks for an {@link IControl} in the {@code candidates} that contains two {@link IControlPoint}s that map to the
      * {@code first} and {@code second} mark.
      */
