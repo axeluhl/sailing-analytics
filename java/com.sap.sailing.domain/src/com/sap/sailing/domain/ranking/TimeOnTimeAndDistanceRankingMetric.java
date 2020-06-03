@@ -3,7 +3,9 @@ package com.sap.sailing.domain.ranking;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -22,6 +24,7 @@ import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
+import com.sap.sse.util.WeakReferenceWithCleanerCallback;
 
 /**
  * The basic concept of this ranking metric is to compare corrected reciproke VMG/VMC (measured in seconds per nautical
@@ -55,10 +58,29 @@ public class TimeOnTimeAndDistanceRankingMetric extends NonPerformanceCurveRanki
 
     private final TimeOnDistanceAllowancePerNauticalMileMap timeOnDistanceFactorNauticalMile;
     
-    // TODO bug5291: cache invalidation is required; this will eventually have to add a listener to the regatta log, but this should be done by the function computing this; the listener shall be weakly referencing only, and when this metric is collected the listener shall remove itself as listener from the regatta log
     private final ConcurrentHashMap<Competitor, Double> timeOnTimeFactorCache;
+
+    /**
+     * For each value obtained and stored in {@link #timeOnTimeFactorCache}, an update callback is registered
+     * that is triggered when the time-on-time factor for that competitor may have changed. It is important to
+     * strongly reference these callbacks here to tie their object life cycle to that of this ranking metric.
+     * When this ranking metric becomes eligible for garbage collection then so do these callback objects.
+     * When used together with a {@link WeakReferenceWithCleanerCallback}, any listener / observer relations
+     * can be terminated at that point. 
+     */
+    private final ConcurrentHashMap<Competitor, Runnable> timeOnTimeFactorCacheUpdateCallbacks;
     
     private final ConcurrentHashMap<Competitor, Duration> timeOnDistanceFactorInSecondsPerNauticalMileCache;
+    
+    /**
+     * For each value obtained and stored in {@link #timeOnTimeFactorCache}, an update callback is registered
+     * that is triggered when the time-on-time factor for that competitor may have changed. It is important to
+     * strongly reference these callbacks here to tie their object life cycle to that of this ranking metric.
+     * When this ranking metric becomes eligible for garbage collection then so do these callback objects.
+     * When used together with a {@link WeakReferenceWithCleanerCallback}, any listener / observer relations
+     * can be terminated at that point. 
+     */
+    private final ConcurrentHashMap<Competitor, Runnable> timeOnDistanceFactorInSecondsPerNauticalMileCacheUpdateCallbacks;
     
     /**
      * The regular constructor that can also be used as <code>TimeOnTimeAndDistanceRankingMetric::new</code>
@@ -67,10 +89,10 @@ public class TimeOnTimeAndDistanceRankingMetric extends NonPerformanceCurveRanki
      */
     public TimeOnTimeAndDistanceRankingMetric(final TrackedRace trackedRace) {
         this(trackedRace,
-                c -> trackedRace.getTrackedRegatta().getRegatta().getTimeOnTimeFactor(c),
-                c -> trackedRace.getTrackedRegatta().getRegatta().getTimeOnDistanceAllowancePerNauticalMile(c));
+                (TimeOnTimeAndDistanceRankingMetric totadrm)->(Competitor c) -> trackedRace.getTrackedRegatta().getRegatta().getTimeOnTimeFactor(c, Optional.of(totadrm.getTimeOnTimeFactorCacheUpdateCallback(c))),
+                (TimeOnTimeAndDistanceRankingMetric totadrm)->(Competitor c) -> trackedRace.getTrackedRegatta().getRegatta().getTimeOnDistanceAllowancePerNauticalMile(c, Optional.of(totadrm.getTimeOnDistanceAllowanceCacheUpdateCallback(c))));
     }
-
+    
     /**
      * Mostly to simplify testing; instead of obtaining the handicap numbers through the {@link TrackedRace} and
      * its regatta, handicap mappings can be passed directly and overrule anything defined for the competitor or
@@ -78,13 +100,36 @@ public class TimeOnTimeAndDistanceRankingMetric extends NonPerformanceCurveRanki
      */
     public TimeOnTimeAndDistanceRankingMetric(final TrackedRace trackedRace, TimeOnTimeFactorMapping timeOnTimeFactor,
             TimeOnDistanceAllowancePerNauticalMileMap timeOnDistanceFactorInSecondsPerNauticalMile) {
+        this(trackedRace,
+                // don't need the "this" pointer here; simply ignoring and passing through the functions provided as parameters
+             (TimeOnTimeAndDistanceRankingMetric totadrm)->timeOnTimeFactor,
+             (TimeOnTimeAndDistanceRankingMetric totadrm)->timeOnDistanceFactorInSecondsPerNauticalMile);
+    }
+    
+    private TimeOnTimeAndDistanceRankingMetric(final TrackedRace trackedRace,
+            Function<TimeOnTimeAndDistanceRankingMetric, TimeOnTimeFactorMapping> timeOnTimeFactorMappingFunction,
+            Function<TimeOnTimeAndDistanceRankingMetric, TimeOnDistanceAllowancePerNauticalMileMap> timeOnDistanceFactorInSecondsPerNauticalMileFunction) {
         super(trackedRace);
-        this.timeOnTimeFactor = timeOnTimeFactor;
-        this.timeOnDistanceFactorNauticalMile = timeOnDistanceFactorInSecondsPerNauticalMile;
+        this.timeOnTimeFactor = timeOnTimeFactorMappingFunction.apply(this);
+        this.timeOnDistanceFactorNauticalMile = timeOnDistanceFactorInSecondsPerNauticalMileFunction.apply(this);
         timeOnTimeFactorCache = new ConcurrentHashMap<>();
         timeOnDistanceFactorInSecondsPerNauticalMileCache = new ConcurrentHashMap<>();
+        timeOnTimeFactorCacheUpdateCallbacks = new ConcurrentHashMap<>();
+        timeOnDistanceFactorInSecondsPerNauticalMileCacheUpdateCallbacks = new ConcurrentHashMap<>();
     }
-
+    
+    private Runnable getTimeOnTimeFactorCacheUpdateCallback(Competitor competitor) {
+        final Runnable result = ()->timeOnTimeFactorCache.remove(competitor);
+        timeOnTimeFactorCacheUpdateCallbacks.put(competitor, result);
+        return result;
+    }
+    
+    private Runnable getTimeOnDistanceAllowanceCacheUpdateCallback(Competitor competitor) {
+        final Runnable result = ()->timeOnDistanceFactorInSecondsPerNauticalMileCache.remove(competitor);
+        timeOnDistanceFactorInSecondsPerNauticalMileCacheUpdateCallbacks.put(competitor, result);
+        return result;
+    }
+    
     @Override
     public RankingMetrics getType() {
         return RankingMetrics.TIME_ON_TIME_AND_DISTANCE;
