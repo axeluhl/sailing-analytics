@@ -59,8 +59,6 @@ public class FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer implements
         } else if (timeIsoObj != null) {
             String strIsoTimestamp = timeIsoObj.toString();
             DateTimeFormatter timeFormatter = DateTimeFormatter.ISO_DATE_TIME;
-            // There might be a timezone issue, please see unit test and compare TZ used in to string between millis and
-            // ISO result.
             OffsetDateTime offsetDateTime = OffsetDateTime.parse(strIsoTimestamp, timeFormatter);
             timeMillis = offsetDateTime.toInstant().toEpochMilli();
         } else {
