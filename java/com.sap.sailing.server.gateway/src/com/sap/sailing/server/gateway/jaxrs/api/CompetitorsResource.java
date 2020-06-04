@@ -31,7 +31,6 @@ import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorAndBoatStore;
-import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Team;
@@ -62,31 +61,6 @@ public class CompetitorsResource extends AbstractSailingServerResource {
      * The maximum size of an image uploaded by a user as a team image, in megabytes (1024*1024 bytes)
      */
     private static final int MAX_SIZE_IN_MB = 5;
-
-    public static JSONObject getCompetitorJSON(Competitor competitor) {
-        // see http://wiki.sapsailing.com/wiki/info/api/api-v1#tracking-app-api-v1_check-in-information_competitor-information-in-general
-        JSONObject json = new JSONObject();
-        json.put(CompetitorJsonConstants.FIELD_ID, competitor.getId().toString());
-        json.put(CompetitorJsonConstants.FIELD_NAME, competitor.getName());
-        if (competitor.hasBoat()) {
-            json.put(CompetitorJsonConstants.FIELD_SAIL_ID, ((CompetitorWithBoat) competitor).getBoat().getSailID());
-        }
-        json.put(CompetitorJsonConstants.FIELD_SHORT_NAME, competitor.getShortName());
-        final Nationality nationality = competitor.getTeam().getNationality();
-        json.put(CompetitorJsonConstants.FIELD_NATIONALITY, nationality==null?null:nationality.getThreeLetterIOCAcronym());
-        json.put(CompetitorJsonConstants.FIELD_COUNTRY_CODE, nationality==null?null:nationality.getCountryCode().getTwoLetterISOCode());
-        json.put(CompetitorJsonConstants.FIELD_COLOR, competitor.getColor() != null ? competitor.getColor().getAsHtml() : null);
-        if (competitor.getFlagImage() != null) {
-            json.put(CompetitorJsonConstants.FIELD_FLAG_IMAGE, competitor.getFlagImage().toString());
-        }
-        if (competitor.getTeam().getImage() != null) {
-            json.put(CompetitorJsonConstants.FIELD_TEAM_IMAGE_URI, competitor.getTeam().getImage().toString());
-        }
-        json.put(CompetitorJsonConstants.FIELD_TIME_ON_TIME_FACTOR, competitor.getTimeOnTimeFactor());
-        json.put(CompetitorJsonConstants.FIELD_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE,
-                competitor.getTimeOnDistanceAllowancePerNauticalMile()==null?null:competitor.getTimeOnDistanceAllowancePerNauticalMile().asSeconds());
-        return json;
-    }
 
     @GET
     @Produces("application/json;charset=UTF-8")
