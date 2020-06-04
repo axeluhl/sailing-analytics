@@ -212,9 +212,9 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
         if (ClientConfiguration.getInstance().isBrandingActive()) {
             final Anchor releaseNotesLink = new Anchor(
                     new SafeHtmlBuilder().appendEscaped(releaseNotesAnchorLabel).toSafeHtml(), releaseNotesURL);
-        releaseNotesLink.addStyleName("releaseNotesAnchor");
-                sysinfoPanel.add(releaseNotesLink);
-        informationPanel.add(releaseNotesLink, DockPanel.EAST);
+            releaseNotesLink.addStyleName("releaseNotesAnchor");
+            sysinfoPanel.add(releaseNotesLink);
+            informationPanel.add(releaseNotesLink, DockPanel.EAST);
         }
         informationPanel.add(sysinfoPanel, DockPanel.EAST);
         informationPanel.setCellHorizontalAlignment(sysinfoPanel, HasHorizontalAlignment.ALIGN_RIGHT);

@@ -32,5 +32,4 @@ public class AdditionalServerInformationDialog extends DataEntryDialog<String> {
     protected String getResult() {
         return null;
     }
-
 }
