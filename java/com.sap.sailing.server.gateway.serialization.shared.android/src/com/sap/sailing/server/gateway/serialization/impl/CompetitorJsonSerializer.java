@@ -144,8 +144,7 @@ public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
         result.put(CompetitorJsonConstants.FIELD_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE,
                 competitor.getTimeOnDistanceAllowancePerNauticalMile() == null ? null :
                     competitor.getTimeOnDistanceAllowancePerNauticalMile().asSeconds());
-        
-        // adding redundant values to migrate CompetitorsResource to use this serializer instead of its own
+        // adding redundant values to migrate CompetitorsResource to use this serializer instead of its own; see also bug5289
         result.put(CompetitorJsonConstants.FIELD_COLOR, color == null ? null : color.getAsHtml());
         result.put(CompetitorJsonConstants.FIELD_COUNTRY_CODE,
                 countryCode == null ? "" : countryCode.getTwoLetterISOCode());
