@@ -25,6 +25,8 @@ import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.ui.client.UserService;
@@ -79,7 +81,7 @@ public class SliceRaceHandler {
     public SliceRaceHandler(SailingServiceWriteAsync sailingServiceWrite, UserService userService, final ErrorReporter errorReporter,
             MultiCompetitorRaceChart competitorRaceChart, RegattaAndRaceIdentifier selectedRaceIdentifier,
             final String leaderboardGroupName, String leaderboardName, UUID eventId,
-            StrippedLeaderboardDTOWithSecurity leaderboardDTO, RaceWithCompetitorsAndBoatsDTO raceDTO) {
+            StrippedLeaderboardDTOWithSecurity leaderboardDTO, RaceWithCompetitorsAndBoatsDTO raceDTO, StringMessages stringMessages) {
         this.sailingServiceWrite = sailingServiceWrite;
         this.userService = userService;
         this.errorReporter = errorReporter;
@@ -92,7 +94,7 @@ public class SliceRaceHandler {
         styles.ensureInjected();
         sliceButtonUi = new Button();
         sliceButtonUi.setStyleName(styles.sliceButtonBackgroundImage());
-        sliceButtonUi.setTitle(StringMessages.INSTANCE.sliceRace());
+        sliceButtonUi.setTitle(stringMessages.sliceRace());
         competitorRaceChart.addToolbarButton(sliceButtonUi);
         sliceButtonUi.setVisible(false);
         competitorRaceChart.addChartZoomChangedHandler(this::checkIfMaySliceSelectedRegattaAndRace);
@@ -103,6 +105,8 @@ public class SliceRaceHandler {
         sliceButtonUi.addClickHandler((e) -> {
             if (allowsEditing()) {
                 doSlice();
+            }else {
+                Notification.notify(stringMessages.insufficientPermissions(), NotificationType.ERROR);
             }
         });
         sailingServiceWrite.canSliceRace(selectedRaceIdentifier, new AsyncCallback<Boolean>() {
