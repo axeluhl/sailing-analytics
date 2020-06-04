@@ -49,8 +49,6 @@ public class CompetitorApiTest extends AbstractSeleniumTest {
         assertEquals(competitor.getId(), competitorReloaded.getId());
         assertEquals(competitor.getName(), competitorReloaded.getName());
         assertEquals(competitor.getNationality(), competitorReloaded.getNationality());
-        // assertEquals(competitor.getNationalityISO2(), competitorReloaded.getNationalityISO2());
-        // assertEquals(competitor.getNationalityISO3(), competitorReloaded.getNationalityISO3());
         assertEquals(competitor.getColor(), competitorReloaded.getColor());
         assertEquals(competitor.getFlagImageUri(), competitorReloaded.getFlagImageUri());
         assertEquals(competitor.getTeam().getTeamImageUri(), competitorReloaded.getTeam().getTeamImageUri());
@@ -68,19 +66,16 @@ public class CompetitorApiTest extends AbstractSeleniumTest {
     public void testUpdateCompetitor() {
         final Competitor competitor = regattaApi.createAndAddCompetitor(adminCtx, EVENT_NAME, BOAT_CLASS, "test@test",
                 COMPETITOR_NAME, "USA");
-
         Competitor competitorU1 = competitorApi.updateCompetitor(adminCtx, competitor.getId(),
                 mapOf("displayColor", "#ABCDEF"));
         assertEquals(competitor.getId(), competitorU1.getId());
         assertEquals("#ABCDEF", competitorU1.getColor());
         assertEquals(competitor.getName(), competitorU1.getName());
-
         Competitor competitorU2 = competitorApi.updateCompetitor(adminCtx, competitor.getId(),
                 mapOf("name", "Dagobert", "shortName", "D"));
         assertEquals("#ABCDEF", competitorU2.getColor());
         assertEquals("Dagobert", competitorU2.getName());
         assertEquals("D", competitorU2.getShortName());
-
         Competitor competitorU3 = competitorApi.updateCompetitor(adminCtx, competitor.getId(), mapOf("nationality",
                 "GER", "flagImageUri", "http://flagimage.url", "teamImageUri", "http://teamimage.url"));
         assertEquals("#ABCDEF", competitorU3.getColor());
@@ -89,7 +84,6 @@ public class CompetitorApiTest extends AbstractSeleniumTest {
         assertEquals("GER", competitorU3.getNationality());
         assertEquals("http://flagimage.url", competitorU3.getFlagImageUri());
         assertEquals("http://teamimage.url", competitorU3.getTeam().getTeamImageUri());
-
         Competitor competitorU4 = competitorApi.updateCompetitor(adminCtx, competitor.getId(),
                 mapOf("timeOnTimeFactor", 2.4, "timeOnDistanceAllowanceInSecondsPerNauticalMile", 10000));
         assertEquals("#ABCDEF", competitorU4.getColor());
@@ -100,7 +94,6 @@ public class CompetitorApiTest extends AbstractSeleniumTest {
         assertEquals("http://teamimage.url", competitorU4.getTeam().getTeamImageUri());
         assertEquals(2.4, competitorU4.getTimeOnTimeFactor());
         assertEquals(10000.0, competitorU4.getTimeOnDistanceAllowanceInSecondsPerNauticalMile());
-
         Competitor competitorU5 = competitorApi.updateCompetitor(adminCtx, competitor.getId(),
                 mapOf("searchTag", "atag"));
         assertEquals("#ABCDEF", competitorU5.getColor());
@@ -111,7 +104,6 @@ public class CompetitorApiTest extends AbstractSeleniumTest {
         assertEquals("http://teamimage.url", competitorU5.getTeam().getTeamImageUri());
         assertEquals(2.4, competitorU5.getTimeOnTimeFactor());
         assertEquals(10000.0, competitorU5.getTimeOnDistanceAllowanceInSecondsPerNauticalMile());
-
         // check final state by reloading competitor
         Competitor competitorReloaded = competitorApi.getCompetitor(adminCtx, competitor.getId());
         assertEquals("#ABCDEF", competitorReloaded.getColor());
@@ -140,7 +132,6 @@ public class CompetitorApiTest extends AbstractSeleniumTest {
         assertNotNull(competitorU1.getTimeOnTimeFactor());
         assertNotNull(competitorU1.getTimeOnDistanceAllowanceInSecondsPerNauticalMile());
         assertNotNull(competitorU1.getColor());
-
         Competitor competitorU2 = competitorApi.updateCompetitor(adminCtx, competitor.getId(),
                 mapOf("name", null, "shortName", null, "email", null, "nationality", null, "flagImageUri", null,
                         "teamImageUri", null, "timeOnTimeFactor", null, "displayColor", null, 
