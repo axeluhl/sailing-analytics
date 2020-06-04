@@ -2700,9 +2700,6 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         final Regatta regatta = getService().getRegattaByName(raceIdentifier.getRegattaName());
         final Leaderboard regattaLeaderboard = getService().getLeaderboardByName(raceIdentifier.getRegattaName());
         final DynamicTrackedRace trackedRace = getService().getTrackedRace(raceIdentifier);
-        getSecurityService().checkCurrentUserUpdatePermission(raceIdentifier);
-        getSecurityService().checkCurrentUserUpdatePermission(regattaLeaderboard);
-        getSecurityService().checkCurrentUserUpdatePermission(regatta);
 
         final boolean result;
         if (regatta == null || !(regattaLeaderboard instanceof RegattaLeaderboard) || trackedRace == null
