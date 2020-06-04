@@ -105,8 +105,6 @@ public interface StringMessages extends Messages {
     String password();
 
     String explainPassword();
-    
-    String versionInfoHidden();
 
     String additionalInformation();
 
