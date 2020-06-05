@@ -54,7 +54,7 @@ public class MasterDataResource extends AbstractSailingServerResource {
     
     @GET
     @Produces("application/x-java-serialized-object")
-    public Response getMasterDataByLeaderboardGroups(@QueryParam("names[]") List<String> requestedLeaderboardGroups,
+    public Response getMasterDataByLeaderboardGroups(@QueryParam("uuids[]") List<String> requestedLeaderboardGroupsUuids,
             @QueryParam("compress") Boolean compress, @QueryParam("exportWind") Boolean exportWind,
             @QueryParam("exportDeviceConfigs") Boolean exportDeviceConfigs,
             @QueryParam("exportTrackedRacesAndStartTracking") Boolean exportTrackedRacesAndStartTracking)
@@ -79,7 +79,7 @@ public class MasterDataResource extends AbstractSailingServerResource {
         logger.info(String.format("Masterdataexport gzip compression is turned %s", compress ? "on" : "off"));
         Map<UUID, LeaderboardGroup> allLeaderboardGroups = getService().getLeaderboardGroupsIdentifiable();
         Set<LeaderboardGroup> groupsToExport = new HashSet<LeaderboardGroup>();
-        if (requestedLeaderboardGroups.isEmpty()) {
+        if (requestedLeaderboardGroupsUuids.isEmpty()) {
             // Add all visible LeaderboardGroups.
             // The request will not fail due to missing LeaderboardGroup READ permissions.
             for (LeaderboardGroup group : allLeaderboardGroups.values()) {
@@ -90,7 +90,7 @@ public class MasterDataResource extends AbstractSailingServerResource {
         } else {
             // Add all requested LeaderboardGroups.
             // The request will fail due to missing LeaderboardGroup READ permissions.
-            for (String uuid : requestedLeaderboardGroups) {
+            for (String uuid : requestedLeaderboardGroupsUuids) {
                 LeaderboardGroup group = allLeaderboardGroups.get(UUID.fromString(uuid));
                 if (group != null) {
                     if (!securityService.hasCurrentUserReadPermission(group)) {
