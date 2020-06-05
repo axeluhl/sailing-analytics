@@ -17,23 +17,23 @@
           </a>
         </div>
         <nav class="{local_res.css.sitenavigation} {res.mediaCss.small10} {res.mediaCss.medium10} {res.mediaCss.large9} {res.mediaCss.columns}">
-          <g:Anchor addStyleNames="{local_res.css.sitenavigation_link} {local_res.css.user_menu_button}" ui:field="usermenu"/>
+          <g:Anchor ui:field="startPageLink"
+            styleName="{local_res.css.sitenavigation_link}" text="{i18n.home}" />
+          <g:Anchor ui:field="eventsPageLink"
+            styleName="{local_res.css.sitenavigation_link}" text="{i18n.events}" />
+          <g:Anchor ui:field="solutionsPageLink"
+            styleName="{local_res.css.sitenavigation_link}" text="{i18n.solutions}" />
+          <g:Anchor ui:field="adminConsolePageLink"
+            styleName="{local_res.css.sitenavigation_link}" text="{i18n.manageEvents}" target="adminConsoleWindow"/>
+          <g:Anchor ui:field="dataMiningPageLink"
+            styleName="{local_res.css.sitenavigation_link}" text="{i18n.dataMining}" target="dataMiningWindow"/>
           <!-- IF siteNavigation.current -->
           <span class="{local_res.css.search} {local_res.css.sitenavigation_search}">
             <g:TextBox ui:field="searchText" styleName="{local_res.css.search_textfield}" />
             <g:Button ui:field="searchButton" styleName="{res.mainCss.button} {res.mainCss.buttonsearch} {local_res.css.search_button}" />
           </span>
           <!-- IFEND siteNavigation.current -->
-          <g:Anchor ui:field="dataMiningPageLink"
-            styleName="{local_res.css.sitenavigation_link}" text="{i18n.dataMining}" target="dataMiningWindow"/>
-          <g:Anchor ui:field="adminConsolePageLink"
-            styleName="{local_res.css.sitenavigation_link}" text="{i18n.manageEvents}" target="adminConsoleWindow"/>
-          <g:Anchor ui:field="solutionsPageLink"
-            styleName="{local_res.css.sitenavigation_link}" text="{i18n.solutions}" />
-          <g:Anchor ui:field="eventsPageLink"
-            styleName="{local_res.css.sitenavigation_link}" text="{i18n.events}" />
-          <g:Anchor ui:field="startPageLink"
-            styleName="{local_res.css.sitenavigation_link}" text="{i18n.home}" />
+          <g:Anchor addStyleNames="{local_res.css.sitenavigation_link} {local_res.css.user_menu_button}" ui:field="usermenu"/>
           <div id="usrMngmtFlyover" />
         </nav>
       </div>
