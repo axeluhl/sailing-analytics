@@ -3,11 +3,13 @@ package com.sap.sailing.server.gateway.serialization.test;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.UUID;
 
 import org.json.simple.JSONValue;
 import org.json.simple.parser.ParseException;
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
@@ -15,7 +17,9 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializationExcepti
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
+
 
 public class FlatSmartphoneUuidAndGPSFixMovingJsonDeserializerTest {
     @Test
@@ -38,7 +42,7 @@ public class FlatSmartphoneUuidAndGPSFixMovingJsonDeserializerTest {
                 "      \"course\" : 14.2,\n" + 
                 "    },\n" +
                 "    {\n" + 
-                "      \"timestamp-iso\" : \"2418-03-18T17:34:30Z\",\n" + 
+                "      \"timestamp-iso\" : \"2418-03-18T15:41:30Z\",\n" + 
                 "      \"latitude\" : -67.672456,\n" + 
                 "      \"longitude\" : -2.03456,\n" + 
                 "      \"speed\" : 19.3,\n" + 
@@ -53,5 +57,81 @@ public class FlatSmartphoneUuidAndGPSFixMovingJsonDeserializerTest {
                 deserializer.deserialize(Helpers.toJSONObjectSafe(JSONValue.parseWithException(json)));
         assertThat("uuid", result.getA(), equalTo(UUID.fromString("af855a56-9726-4a9c-a77e-da955bd289bf")));
         assertThat("number of fixes", result.getB().size(), equalTo(3));
+        
+        TimePoint tp3 = result.getB().get(2).getTimePoint();
+        assertThat(tp3.asMillis(), equalTo(14144168490000L));
+    }
+    
+    @Test
+    public void containsBothTimestampFields() throws JsonDeserializationException, ParseException {
+        String json = "{\n" + 
+                "  \"deviceUuid\" : \"af855a56-9726-4a9c-a77e-da955bd289bf\",\n" + 
+                "  \"fixes\" : [\n" + 
+                "    {\n" + 
+                "      \"timestamp-iso\" : \"2418-03-18T17:34:30Z\",\n" +
+                "      \"timestamp\" : \"14144168490000\",\n" +
+                "      \"latitude\" : -67.672456,\n" + 
+                "      \"longitude\" : -2.03456,\n" + 
+                "      \"speed\" : 19.3,\n" + 
+                "      \"course\" : 359.99,\n" + 
+                "    }\n" +
+                "  ]\n" + 
+                "}";
+        JsonDeserializer<Pair<UUID, List<GPSFixMoving>>> deserializer = 
+                new FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer();
+        try {
+                deserializer.deserialize(Helpers.toJSONObjectSafe(JSONValue.parseWithException(json)));
+                Assert.fail();
+        } catch (JsonDeserializationException e) {
+            assertThat(e.getMessage(),equalTo("two timestamp fields are filled. Please use only one of both."));
+        }
+    }
+    
+    @Test
+    public void wrongFormat_millis() throws JsonDeserializationException, ParseException {
+        String json = "{\n" + 
+                "  \"deviceUuid\" : \"af855a56-9726-4a9c-a77e-da955bd289bf\",\n" + 
+                "  \"fixes\" : [\n" + 
+                "    {\n" + 
+                "      \"timestamp\" : \"2418-03-18T17:34:30Z\",\n" +
+                "      \"latitude\" : -67.672456,\n" + 
+                "      \"longitude\" : -2.03456,\n" + 
+                "      \"speed\" : 19.3,\n" + 
+                "      \"course\" : 359.99,\n" + 
+                "    }\n" +
+                "  ]\n" + 
+                "}";
+        JsonDeserializer<Pair<UUID, List<GPSFixMoving>>> deserializer = 
+                new FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer();
+        try {
+                deserializer.deserialize(Helpers.toJSONObjectSafe(JSONValue.parseWithException(json)));
+                Assert.fail();
+        } catch (NumberFormatException e) {
+            assertThat(e.getMessage(),equalTo("For input string: \"2418-03-18T17:34:30Z\""));
+        }
+    }
+    
+    @Test
+    public void wrongFormat_ISO() throws JsonDeserializationException, ParseException {
+        String json = "{\n" + 
+                "  \"deviceUuid\" : \"af855a56-9726-4a9c-a77e-da955bd289bf\",\n" + 
+                "  \"fixes\" : [\n" + 
+                "    {\n" + 
+                "      \"timestamp-iso\" : \"14144168490000\",\n" +
+                "      \"latitude\" : -67.672456,\n" + 
+                "      \"longitude\" : -2.03456,\n" + 
+                "      \"speed\" : 19.3,\n" + 
+                "      \"course\" : 359.99,\n" + 
+                "    }\n" +
+                "  ]\n" + 
+                "}";
+        JsonDeserializer<Pair<UUID, List<GPSFixMoving>>> deserializer = 
+                new FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer();
+        try {
+                deserializer.deserialize(Helpers.toJSONObjectSafe(JSONValue.parseWithException(json)));
+                Assert.fail();
+        } catch (DateTimeParseException e) {
+            assertThat(e.getMessage(),equalTo("Text '14144168490000' could not be parsed at index 0"));
+        }
     }
 }
