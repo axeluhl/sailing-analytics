@@ -294,7 +294,6 @@ public class MarkPropertiesPanel extends FlowPanel {
                 return String.join(", ", markProperties.getTags());
             }
         };
-
         Column<MarkPropertiesDTO, AbstractImagePrototype> positioningColumn = new Column<MarkPropertiesDTO, AbstractImagePrototype>(
                 new AbstractCell<AbstractImagePrototype>() {
 
@@ -315,14 +314,12 @@ public class MarkPropertiesPanel extends FlowPanel {
                 }
             }
         };
-
         nameColumn.setSortable(true);
         sortHandler.setComparator(nameColumn, new Comparator<MarkPropertiesDTO>() {
             public int compare(MarkPropertiesDTO markProperties1, MarkPropertiesDTO markProperties2) {
                 return markProperties1.getName().compareTo(markProperties2.getName());
             }
         });
-
         markPropertiesTable.addColumn(nameColumn, stringMessages.name());
         markPropertiesTable.addColumn(shortNameColumn, stringMessages.shortName());
         markPropertiesTable.addColumn(colorColumn, stringMessages.color());
@@ -331,17 +328,13 @@ public class MarkPropertiesPanel extends FlowPanel {
         markPropertiesTable.addColumn(typeColumn, stringMessages.type());
         markPropertiesTable.addColumn(positioningColumn, stringMessages.position());
         markPropertiesTable.addColumn(tagsColumn, stringMessages.tags());
-
         SecuredDTOOwnerColumn.configureOwnerColumns(markPropertiesTable, sortHandler, stringMessages);
-
         final HasPermissions type = SecuredDomainType.MARK_PROPERTIES;
-
         final AccessControlledActionsColumn<MarkPropertiesDTO, MarkPropertiesImagesbarCell> actionsColumn = create(
                 new MarkPropertiesImagesbarCell(stringMessages), userService);
         final EditOwnershipDialog.DialogConfig<MarkPropertiesDTO> configOwnership = EditOwnershipDialog
-                .create(userService.getUserManagementService(), type, markProperties -> {
-                    /* no refresh action */}, stringMessages);
-
+                .create(userService.getUserManagementService(), type, markProperties -> 
+                    markPropertiesListDataProvider.refresh(), stringMessages);
         final EditACLDialog.DialogConfig<MarkPropertiesDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementService(), type, markProperties -> markProperties.getAccessControlList(),
                 stringMessages);
