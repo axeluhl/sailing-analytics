@@ -109,20 +109,9 @@ public class SliceRaceHandler {
                 Notification.notify(stringMessages.insufficientPermissions(), NotificationType.ERROR);
             }
         });
-        sailingServiceWrite.canSliceRace(selectedRaceIdentifier, new AsyncCallback<Boolean>() {
-            @Override
-            public void onSuccess(Boolean result) {
-                canSlice = Boolean.TRUE.equals(result);
-                updateVisibility();
-            }
-
-            @Override
-            public void onFailure(Throwable caught) {
-                canSlice = false;
-                updateVisibility();
-            }
-        });
+        updateCanSliceIfAuthorized();
         final UserStatusEventHandler userStatusEventHandler = (user, preAuthenticated) -> {
+            updateCanSliceIfAuthorized();
             updateVisibility();
         };
         sliceButtonUi.addAttachHandler(e -> {
@@ -132,6 +121,24 @@ public class SliceRaceHandler {
                 userService.removeUserStatusEventHandler(userStatusEventHandler);
             }
         });
+    }
+
+    private void updateCanSliceIfAuthorized() {
+        if (allowsEditing()) {
+            sailingServiceWrite.canSliceRace(selectedRaceIdentifier, new AsyncCallback<Boolean>() {
+                @Override
+                public void onSuccess(Boolean result) {
+                    canSlice = Boolean.TRUE.equals(result);
+                    updateVisibility();
+                }
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    canSlice = false;
+                    updateVisibility();
+                }
+            });
+        }
     }
     
     private void updateVisibility() {
