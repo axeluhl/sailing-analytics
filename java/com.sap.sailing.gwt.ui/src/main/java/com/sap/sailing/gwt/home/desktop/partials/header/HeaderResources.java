@@ -2,6 +2,8 @@ package com.sap.sailing.gwt.home.desktop.partials.header;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.resources.client.DataResource;
+import com.google.gwt.resources.client.DataResource.MimeType;
 import com.sap.sse.security.ui.authentication.generic.resource.AuthenticationResources;
 
 public interface HeaderResources extends AuthenticationResources {
@@ -9,6 +11,14 @@ public interface HeaderResources extends AuthenticationResources {
 
     @Source("Header.gss")
     LocalCss css();
+
+    @Source("navigation-icon.svg")
+    @MimeType("image/svg+xml")
+    DataResource navigation();
+    
+    @Source("navigation-icon_hover.svg")
+    @MimeType("image/svg+xml")
+    DataResource navigation_hover();
 
     public interface LocalCss extends CssResource {
         String siteheader();
@@ -26,5 +36,8 @@ public interface HeaderResources extends AuthenticationResources {
         String user_menu_button();
         String loggedin();
         String open();
+        String sitenavigation_fixed();
+        String header_navigation_icon();
+        String header_navigation_iconactive();
     }
 }
