@@ -1,6 +1,7 @@
 package com.sap.sailing.server.gateway.jaxrs.api;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -111,6 +112,7 @@ import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
+import com.sap.sse.util.impl.UUIDHelper;
 
 @Path("/v1/events")
 public class EventsResource extends AbstractSailingServerResource {
@@ -136,30 +138,40 @@ public class EventsResource extends AbstractSailingServerResource {
     
     @DELETE
     @Path("/{eventId}/")
-    public Response delete(@PathParam("eventId") UUID eventId,
-            @QueryParam("withLeaderboardGroupsAndOverallLeaderboard") Boolean withLeaderboardGroupsAndOverallLeaderboard)
+    public Response delete(@PathParam("eventId") String eventId,
+            @QueryParam("withLeaderboardGroupsAndOverallLeaderboard") Boolean withLeaderboardGroupsAndOverallLeaderboard, 
+            @QueryParam("withRegattas") Boolean withRegattas)
             throws ParseException, JsonDeserializationException {
-        Event event = getService().getEvent(eventId);
-        RacingEventService racingEventService = getService();
-        SecurityService securityService = racingEventService.getSecurityService();
-        securityService.checkPermissionAndDeleteOwnershipForObjectRemoval(event, () -> {
-            getService().apply(new RemoveEvent(event.getId()));
-            if (withLeaderboardGroupsAndOverallLeaderboard == Boolean.TRUE) {
-                for (LeaderboardGroup group : event.getLeaderboardGroups()) {
-                    securityService.checkPermissionAndDeleteOwnershipForObjectRemoval(group, () -> {
-                        Leaderboard overallLeaderboard = group.getOverallLeaderboard();
-                        if (overallLeaderboard != null) {
-                            securityService.checkPermissionAndDeleteOwnershipForObjectRemoval(overallLeaderboard,
-                                    () -> {
-                                        racingEventService.apply(new RemoveLeaderboard(overallLeaderboard.getName()));
-                                    });
-                        }
-                        racingEventService.apply(new RemoveLeaderboardGroup(group.getName()));
+        final Serializable eventUUID = UUIDHelper.tryUuidConversion(eventId);
+        final Event event = getService().getEvent(eventUUID);
+        if (event != null) {
+            final SecurityService securityService = getSecurityService();
+            final RacingEventService racingEventService = getService();
+            securityService.checkPermissionAndDeleteOwnershipForObjectRemoval(event, () -> {
+                getService().apply(new RemoveEvent(event.getId()));
+                if (withLeaderboardGroupsAndOverallLeaderboard == Boolean.TRUE) {
+                    deleteRelatedLeaderBoardGroups(event, securityService, racingEventService);
+                }
+            });
+        } else {
+            return getBadEventErrorResponse(eventId);
+        }
+        return Response.ok().build();
+    }
+
+    private void deleteRelatedLeaderBoardGroups(final Event event, final SecurityService securityService,
+            final RacingEventService racingEventService) {
+        for (LeaderboardGroup group : event.getLeaderboardGroups()) {
+            securityService.checkPermissionAndDeleteOwnershipForObjectRemoval(group, () -> {
+                Leaderboard overallLeaderboard = group.getOverallLeaderboard();
+                if (overallLeaderboard != null) {
+                    securityService.checkPermissionAndDeleteOwnershipForObjectRemoval(overallLeaderboard, () -> {
+                        racingEventService.apply(new RemoveLeaderboard(overallLeaderboard.getName()));
                     });
                 }
-            }
-        });
-        return Response.ok().build();
+                racingEventService.apply(new RemoveLeaderboardGroup(group.getName()));
+            });
+        }
     }
 
     @POST
