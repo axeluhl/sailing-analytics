@@ -31,7 +31,9 @@ public class GateDeserializer implements JsonDeserializer<ControlPointWithTwoMar
         Mark leftMark = markDeserializer.deserialize(jsonLeftMark);
         Mark rightMark = markDeserializer.deserialize(jsonRightMark);
         String gateName = (String) object.get(BaseControlPointJsonSerializer.FIELD_NAME);
-        ControlPointWithTwoMarks controlPoint = factory.createControlPointWithTwoMarks(leftMark, rightMark, gateName);
+        String gateShortName = (String) object.get(BaseControlPointJsonSerializer.FIELD_SHORT_NAME);
+        ControlPointWithTwoMarks controlPoint = factory.createControlPointWithTwoMarks(leftMark, rightMark, gateName,
+                gateShortName);
         return controlPoint;
     }
 

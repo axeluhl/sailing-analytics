@@ -288,7 +288,8 @@ public class WindTest {
         DomainFactory domainFactory = DomainFactory.INSTANCE;
         Mark startFinishLeft = domainFactory.getOrCreateMark("Start/Finish left");
         Mark startFinishRight = domainFactory.getOrCreateMark("Start/Finish right");
-        ControlPoint startFinish = domainFactory.createControlPointWithTwoMarks(startFinishLeft, startFinishRight, "Start/Finish");
+        ControlPoint startFinish = domainFactory.createControlPointWithTwoMarks(startFinishLeft, startFinishRight,
+                "Start/Finish", "Start/Finish");
         ControlPoint top = domainFactory.getOrCreateMark("Top");
         Waypoint w1 = domainFactory.createWaypoint(startFinish, /*passingInstruction*/ null);
         Waypoint w2 = domainFactory.createWaypoint(top, /*passingInstruction*/ null);

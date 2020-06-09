@@ -30,6 +30,12 @@ public interface EventBase extends NamedWithID, WithDescription, Renamable, With
      *  @return the start date of the event 
      */
     TimePoint getStartDate();
+    
+    /**
+     * "Atomically" adjusts start and end date. Constraint checks for the end date not being before the start date
+     * are made for the two parameters, regardless of the current event's state.
+     */
+    void setStartAndEndDate(TimePoint startDate, TimePoint endDate);
 
     void setStartDate(TimePoint startDate);
 

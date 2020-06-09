@@ -78,7 +78,7 @@ public class RaceStateTest {
         assertNotNull(state.getRacingProcedure());
         assertEquals(defaultRacingProcedureType, state.getRacingProcedure().getType());
         assertEquals(RaceLogRaceStatus.UNSCHEDULED, state.getStatus());
-        assertNull(state.getConfirmedFinishPositioningList());
+        assertNull(state.getConfirmedFinishPositioningList().getCompetitorResults());
     }
     
     @Test
@@ -117,10 +117,8 @@ public class RaceStateTest {
     @Test
     public void testStartTime() {
         state.addChangedListener(listener);
-        
         TimePoint startTime = MillisecondsTimePoint.now().plus(60 * 60 * 1000);
-        state.forceNewStartTime(nowMock, startTime);
-        
+        state.forceNewStartTime(nowMock, startTime, /* courseAreaId */ null);
         assertEquals(startTime, state.getStartTime());
         assertEquals(RaceLogRaceStatus.SCHEDULED, state.getStatus());
         verify(listener).onStartTimeChanged(state);
@@ -168,7 +166,7 @@ public class RaceStateTest {
     @Test
     public void testInvalidateAfterAdvancePass() throws InterruptedException {
         state.addChangedListener(listener);
-        state.forceNewStartTime(nowMock, new MillisecondsTimePoint(1));
+        state.forceNewStartTime(nowMock, new MillisecondsTimePoint(1), /* courseAreaId */ null);
         Thread.sleep(100);
         state.setFinishedTime(new MillisecondsTimePoint(10));
         state.setCourseDesign(nowMock, mock(CourseBase.class), CourseDesignerMode.ADMIN_CONSOLE);

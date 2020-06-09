@@ -33,7 +33,7 @@ import com.sap.sailing.gwt.ui.client.LeaderboardGroupsRefresher;
 import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
 import com.sap.sailing.gwt.ui.client.MediaTracksRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sse.common.Util;
@@ -54,7 +54,7 @@ public class MasterDataImportPanel extends VerticalPanel {
 
     private final StringMessages stringMessages;
     private String currentHost;
-    private SailingServiceAsync sailingService;
+    private SailingServiceWriteAsync sailingServiceWrite;
     private CheckBox overrideSwitch;
     private final RegattaRefresher regattaRefresher;
     private final EventsRefresher eventRefresher;
@@ -64,22 +64,22 @@ public class MasterDataImportPanel extends VerticalPanel {
     private CheckBox compressSwitch;
     private CheckBox exportWindSwitch;
     private CheckBox exportDeviceConfigsSwitch;
+    private CheckBox exportTrackedRacesAndStartTrackingSwitch;
     private TextBox filterBox;
     private TextBox usernameBox;
     private TextBox passwordBox;
 
-    public MasterDataImportPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
+    public MasterDataImportPanel(StringMessages stringMessages, SailingServiceWriteAsync sailingServiceWrite,
             RegattaRefresher regattaRefresher, EventsRefresher eventsRefresher,
             LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity> leaderboardsRefresher,
             LeaderboardGroupsRefresher leaderboardGroupsRefresher, MediaTracksRefresher mediaTracksRefresher) {
-        this.sailingService = sailingService;
+        this.sailingServiceWrite = sailingServiceWrite;
         this.stringMessages = stringMessages;
         this.regattaRefresher = regattaRefresher;
         this.eventRefresher = eventsRefresher;
         this.leaderboardsRefresher = leaderboardsRefresher;
         this.leaderboardGroupsRefresher = leaderboardGroupsRefresher;
         this.mediaTracksRefresher = mediaTracksRefresher;
-
         HorizontalPanel serverAddressPanel = new HorizontalPanel();
         serverAddressPanel.add(new Label(stringMessages.importRemoteHost()));
         hostBox = new TextBox();
@@ -89,7 +89,7 @@ public class MasterDataImportPanel extends VerticalPanel {
         HorizontalPanel usernamePanel = new HorizontalPanel();
         usernamePanel.add(new Label(stringMessages.username()));
         usernameBox = new TextBox();
-        usernameBox.setText("admin");
+        usernameBox.setText("");
         usernameBox.setWidth("300px");
         usernamePanel.add(usernameBox);
         HorizontalPanel passwordPanel = new HorizontalPanel();
@@ -98,38 +98,34 @@ public class MasterDataImportPanel extends VerticalPanel {
         passwordBox.setText("");
         passwordBox.setWidth("300px");
         passwordPanel.add(passwordBox);
+        HorizontalPanel userContextInformation = new HorizontalPanel();
+        userContextInformation.setWidth("350px");
+        userContextInformation.add(new Label(stringMessages.keepEmptyForDefaultUserAndPassword(), true));
         fetchIdsButton = new Button(stringMessages.importFetchRemoteLgs());
         fetchIdsButton.ensureDebugId("fetchLeaderboardGroupList");
         DialogUtils.linkEnterToButton(fetchIdsButton, usernameBox);
         DialogUtils.linkEnterToButton(fetchIdsButton, passwordBox);
-
         this.add(serverAddressPanel);
+        this.add(userContextInformation);
         this.add(usernamePanel);
         this.add(passwordPanel);
         this.add(fetchIdsButton);
-
         ScrollPanel scrollPanel = new ScrollPanel();
         this.add(scrollPanel);
-
         VerticalPanel contentPanel = new VerticalPanel();
         scrollPanel.setWidget(contentPanel);
-
         addContentToLeftPanel(contentPanel);
-
         setListeners();
     }
 
     private void setListeners() {
         fetchIdsButton.addClickHandler(new ClickHandler() {
-
             @Override
             public void onClick(ClickEvent event) {
                 fireIdRequestsAndFillLists();
             }
         });
-
         hostBox.addKeyDownHandler(new KeyDownHandler() {
-
             @Override
             public void onKeyDown(KeyDownEvent event) {
                 if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
@@ -137,9 +133,7 @@ public class MasterDataImportPanel extends VerticalPanel {
                 }
             }
         });
-
         importLeaderboardGroupsButton.addClickHandler(new ClickHandler() {
-
             @Override
             public void onClick(ClickEvent event) {
                 importLeaderboardGroups();
@@ -164,9 +158,9 @@ public class MasterDataImportPanel extends VerticalPanel {
             boolean compress = compressSwitch.getValue();
             boolean exportWind = exportWindSwitch.getValue();
             boolean exportDeviceConfigs = exportDeviceConfigsSwitch.getValue();
-            sailingService.importMasterData(currentHost, groupNames, override, compress, exportWind,
-                    exportDeviceConfigs, usernameBox.getValue(), passwordBox.getValue(), new AsyncCallback<UUID>() {
-
+            boolean exportTrackedRacesAndStartTracking = exportTrackedRacesAndStartTrackingSwitch.getValue();
+            sailingServiceWrite.importMasterData(currentHost, groupNames, override, compress, exportWind,
+                    exportDeviceConfigs, usernameBox.getValue(), passwordBox.getValue(), exportTrackedRacesAndStartTracking, new AsyncCallback<UUID>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     showErrorAlert(caught.getLocalizedMessage());
@@ -175,12 +169,10 @@ public class MasterDataImportPanel extends VerticalPanel {
                 @Override
                 public void onSuccess(final UUID resultId) {
                     final Timer timer = new Timer() {
-
                         @Override
                         public void run() {
-                            sailingService.getImportOperationProgress(resultId,
+                            sailingServiceWrite.getImportOperationProgress(resultId,
                                     new AsyncCallback<DataImportProgress>() {
-
                                         @Override
                                         public void onFailure(Throwable caught) {
                                             showErrorAlert(stringMessages.importServerError());
@@ -234,6 +226,7 @@ public class MasterDataImportPanel extends VerticalPanel {
         int eventsCreated = creationCount.getEventCount();
         int regattasCreated = creationCount.getRegattaCount();
         int mediaTracksImported = creationCount.getMediaTrackCount();
+        int trackedRacesImported = creationCount.getTrackedRacesCount();
         if (regattasCreated > 0) {
             regattaRefresher.fillRegattas();
         }
@@ -247,11 +240,11 @@ public class MasterDataImportPanel extends VerticalPanel {
             leaderboardsRefresher.fillLeaderboards();
         }
         if (mediaTracksImported > 0) {
-        	mediaTracksRefresher.loadMediaTracks();
+            mediaTracksRefresher.loadMediaTracks();
         }
         Set<String> overwrittenRegattas = creationCount.getOverwrittenRegattaNames();
         showSuccessAlert(leaderboardsCreated, leaderboardGroupsCreated, eventsCreated, regattasCreated,
-                mediaTracksImported, overwrittenRegattas);
+                mediaTracksImported, trackedRacesImported, overwrittenRegattas);
         changeButtonStateAccordingToApplicationState();
     }
 
@@ -284,10 +277,10 @@ public class MasterDataImportPanel extends VerticalPanel {
     }
 
     protected void showSuccessAlert(int leaderboardsCreated, int leaderboardGroupsCreated, int eventsCreated,
-            int regattasCreated, int mediaTracksImported, Set<String> overwrittenRegattas) {
+            int regattasCreated, int mediaTracksImported, int trackedRacesImported, Set<String> overwrittenRegattas) {
         StringBuffer buffer = new StringBuffer();
         buffer.append(stringMessages.importSuccess(leaderboardGroupsCreated, leaderboardsCreated, eventsCreated,
-                regattasCreated, mediaTracksImported));
+                regattasCreated, mediaTracksImported, trackedRacesImported));
         if (overwrittenRegattas.size() > 0) {
             buffer.append("\n\n" + stringMessages.importSuccessOverwriteInfo() + "\n");
             for (String regattaName : overwrittenRegattas) {
@@ -318,10 +311,8 @@ public class MasterDataImportPanel extends VerticalPanel {
     private void fireLgIdRequestAndFillList(final String host) {
         currentHost = host;
         disableAllButtons();
-        // FIXME what about login here?
-        sailingService.getLeaderboardGroupNamesFromRemoteServer(host, usernameBox.getValue(), passwordBox.getValue(),
+        sailingServiceWrite.getLeaderboardGroupNamesFromRemoteServer(host, usernameBox.getValue(), passwordBox.getValue(),
                 new AsyncCallback<List<String>>() {
-
             @Override
             public void onFailure(Throwable caught) {
                 showErrorAlert(stringMessages.importGetLeaderboardsFailed(host, caught.getMessage()));
@@ -342,7 +333,6 @@ public class MasterDataImportPanel extends VerticalPanel {
                     filterLeaderboardGroupList();
                 }
             }
-
         });
     }
 
@@ -352,42 +342,38 @@ public class MasterDataImportPanel extends VerticalPanel {
 
     private void addContentToLeftPanel(VerticalPanel contentPanel) {
         contentPanel.add(new Label(stringMessages.availableLeaderboardGroups()));
-        
         HorizontalPanel filterPanel = new HorizontalPanel();
         filterPanel.add(new Label(stringMessages.filterName() + ":"));
         filterBox = new TextBox();
         setFilterHandler(filterBox);
         filterPanel.add(filterBox);
         contentPanel.add(filterPanel);
-
         leaderboardgroupListBox = new ListBox();
         leaderboardgroupListBox.ensureDebugId("LeaderBoardGroupListBox");
         leaderboardgroupListBox.setMultipleSelect(true);
-
         addSelectionChangedListener();
         contentPanel.add(leaderboardgroupListBox);
-        
         overrideSwitch = new CheckBox(stringMessages.importOverrideSwitchLabel());
         overrideSwitch.ensureDebugId("overrideExisting");
         overrideSwitch.setValue(false);
         contentPanel.add(overrideSwitch);
-        
         compressSwitch = new CheckBox(stringMessages.compress());
         compressSwitch.setTitle(stringMessages.compressTooltip());
         compressSwitch.setValue(true);
         contentPanel.add(compressSwitch);
-
         exportWindSwitch = new CheckBox(stringMessages.importWind());
         exportWindSwitch.setTitle(stringMessages.importWindTooltip());
         exportWindSwitch.setValue(true);
         exportWindSwitch.ensureDebugId("wind");
         contentPanel.add(exportWindSwitch);
-        
         exportDeviceConfigsSwitch = new CheckBox(stringMessages.importDeviceConfigurations());
         exportDeviceConfigsSwitch.setTitle(stringMessages.importDeviceConfigurationsTooltip());
         exportDeviceConfigsSwitch.setValue(false);
         contentPanel.add(exportDeviceConfigsSwitch);
-
+        exportTrackedRacesAndStartTrackingSwitch = new CheckBox(stringMessages.exportTrackedRacesAndStartTracking());
+        exportTrackedRacesAndStartTrackingSwitch.setTitle(stringMessages.exportTrackedRacesAndStartTrackingTooltip());
+        exportTrackedRacesAndStartTrackingSwitch.setValue(false);
+        contentPanel.add(exportTrackedRacesAndStartTrackingSwitch);
         importLeaderboardGroupsButton = new Button(stringMessages.importSelectedLeaderboardGroups());
         importLeaderboardGroupsButton.ensureDebugId("import");
         importLeaderboardGroupsButton.setEnabled(false);

@@ -7,9 +7,7 @@ import java.io.IOException;
 import java.util.UUID;
 
 import org.junit.Assert;
-
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
@@ -43,7 +41,6 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
 import com.sap.sailing.server.operationaltransformation.CreateRegattaLeaderboard;
-import com.sap.sailing.server.operationaltransformation.RenameLeaderboard;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.AbstractColor;
@@ -187,22 +184,6 @@ public class RaceLogReplicationTest extends AbstractLogReplicationTest<RaceLog, 
             replicaLog.unlockAfterRead();
         }
     }
-
-    @Ignore
-    public void testRaceEventReplicationOnRenamingFlexibleLeaderboard() throws ClassNotFoundException, IOException, InterruptedException {
-        final String leaderboardName = "Test";
-        final String fleetName = "Default";
-        final String raceColumnName = "R1";
-        FlexibleLeaderboard masterLeaderboard = setupFlexibleLeaderboard(leaderboardName);
-        RaceLog masterLog = setupRaceColumn(leaderboardName, fleetName, raceColumnName);
-        replicaReplicator.startToReplicateFrom(masterDescriptor);
-        masterLog.add(raceLogEvent);
-        RenameLeaderboard renameOperation = new RenameLeaderboard(leaderboardName, leaderboardName + "new");
-        master.apply(renameOperation);
-        Thread.sleep(3000);
-        RaceLog replicaLog = getReplicaLog(fleetName, raceColumnName, masterLeaderboard);
-        addAndValidateEventIds(masterLog, replicaLog, anotherRaceLogEvent);
-    }
     
     /**
      * See bug 1666; a race log reload operation may not properly have been replicating. This tests asserts that when a race log event
@@ -272,7 +253,7 @@ public class RaceLogReplicationTest extends AbstractLogReplicationTest<RaceLog, 
         course.addWaypoint(0, new WaypointImpl(new ControlPointWithTwoMarksImpl(UUID.randomUUID(), 
                 new MarkImpl(UUID.randomUUID(), "Black", MarkType.BUOY, AbstractColor.getCssColor("black"), "round", "circle"),
                 new MarkImpl(UUID.randomUUID(), "Green", MarkType.BUOY, AbstractColor.getCssColor("green"), "round", "circle"),
-                "Upper gate")));
+                "Upper gate", "Upper gate")));
         course.addWaypoint(1, new WaypointImpl(new MarkImpl(UUID.randomUUID(), "White", MarkType.BUOY, AbstractColor.getCssColor("white"), "conical", "bold"), PassingInstruction.Port));
         
         return course;

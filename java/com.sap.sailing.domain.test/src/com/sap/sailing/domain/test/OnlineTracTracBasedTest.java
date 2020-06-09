@@ -91,7 +91,6 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest i
         super();
     }
     
-    
     @Before
     public void setUp() throws Exception {
         domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl(DomainFactory.TEST_RACE_LOG_RESOLVER));
@@ -136,7 +135,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest i
                 /* trackedRegattaRegistry */ null,
                 mock(RaceLogAndTrackedRaceResolver.class), mock(LeaderboardGroupResolver.class), /* courseDesignUpdateURI */null, /* tracTracUsername */null, /* tracTracPassword */
                 null, getEventSubscriber(), getRaceSubscriber(), /*ignoreTracTracMarkPassings*/ false, RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS,
-                new DefaultRaceTrackingHandler(), receiverTypes)) {
+                new DefaultRaceTrackingHandler(), /* raceAndCompetitorStatusWithRaceLogReconciler */ null, receiverTypes)) {
             receivers.add(r);
         }
         getRaceSubscriber().subscribeConnectionStatus(new IConnectionStatusListener() {

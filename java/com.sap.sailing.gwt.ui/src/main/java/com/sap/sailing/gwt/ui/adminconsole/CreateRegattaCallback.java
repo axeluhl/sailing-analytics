@@ -3,26 +3,26 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.RegattaName;
+import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
 import com.sap.sailing.gwt.ui.client.EventsRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
@@ -31,17 +31,17 @@ import com.sap.sse.security.ui.client.UserService;
 
 public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
 
-    private final SailingServiceAsync sailingService;
+    private final SailingServiceWriteAsync sailingServiceWrite;
     private final ErrorReporter errorReporter;
     private final EventsRefresher eventsRefresher;
     private final RegattaRefresher regattaRefresher;
     private final StringMessages stringMessages;
     private final List<EventDTO> existingEvents;
 
-    public CreateRegattaCallback(UserService userService, SailingServiceAsync sailingService,
+    public CreateRegattaCallback(UserService userService, SailingServiceWriteAsync sailingServiceWrite,
             StringMessages stringMessages, ErrorReporter errorReporter, RegattaRefresher regattaRefresher,
             EventsRefresher eventsRefresher, List<EventDTO> existingEvents) {
-        this.sailingService = sailingService;
+        this.sailingServiceWrite = sailingServiceWrite;
         this.errorReporter = errorReporter;
         this.regattaRefresher = regattaRefresher;
         this.eventsRefresher = eventsRefresher;
@@ -67,14 +67,15 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
                     seriesDTO.hasSplitFleetContiguousScoring(), seriesDTO.getMaximumNumberOfDiscards());
             seriesStructure.put(seriesDTO.getName(), seriesPair);
         }
-        sailingService.createRegatta(newRegatta.getName(),
+        sailingServiceWrite.createRegatta(newRegatta.getName(),
                 newRegatta.boatClass == null ? null : newRegatta.boatClass.getName(),
                 newRegatta.canBoatsOfCompetitorsChangePerRace, newRegatta.competitorRegistrationType,
-                newRegatta.registrationLinkSecret, newRegatta.startDate, newRegatta.endDate, 
-                new RegattaCreationParametersDTO(seriesStructure), true,
-                newRegatta.scoringScheme, newRegatta.defaultCourseAreaUuid, newRegatta.buoyZoneRadiusInHullLengths, newRegatta.useStartTimeInference,
-                newRegatta.controlTrackingFromStartAndFinishTimes,
-                newRegatta.rankingMetricType, new AsyncCallback<RegattaDTO>() {
+                newRegatta.registrationLinkSecret, newRegatta.startDate, newRegatta.endDate,
+                new RegattaCreationParametersDTO(seriesStructure), true, newRegatta.scoringScheme,
+                Util.mapToArrayList(newRegatta.courseAreas, CourseAreaDTO::getId), newRegatta.buoyZoneRadiusInHullLengths,
+                newRegatta.useStartTimeInference, newRegatta.controlTrackingFromStartAndFinishTimes,
+                newRegatta.autoRestartTrackingUponCompetitorSetChange, newRegatta.rankingMetricType,
+                new AsyncCallback<RegattaDTO>() {
             @Override
             public void onFailure(Throwable t) {
                 errorReporter.reportError("Error trying to create new regatta " + newRegatta.getName() + ": " + t.getMessage());
@@ -104,7 +105,7 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
                     // at the end, using -1 as "insertIndex."
                     raceColumnNamesToAddWithInsertIndex.add(new Pair<>(newRaceColumn.getName(), -1));
                 }
-                sailingService.addRaceColumnsToSeries(newRegatta.getRegattaIdentifier(), series.getName(), raceColumnNamesToAddWithInsertIndex,
+                sailingServiceWrite.addRaceColumnsToSeries(newRegatta.getRegattaIdentifier(), series.getName(), raceColumnNamesToAddWithInsertIndex,
                         new AsyncCallback<List<RaceColumnInSeriesDTO>>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -134,11 +135,11 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
     }
     
     private void openCreateDefaultRegattaLeaderboardDialog(final RegattaDTO newRegatta, final List<EventDTO> existingEvents) {
-        CreateDefaultRegattaLeaderboardDialog dialog = new CreateDefaultRegattaLeaderboardDialog(sailingService,
+        CreateDefaultRegattaLeaderboardDialog dialog = new CreateDefaultRegattaLeaderboardDialog(sailingServiceWrite,
                 stringMessages, errorReporter, newRegatta, new DialogCallback<RegattaName>() {
             @Override
                     public void ok(RegattaName regattaIdentifier) {
-                        sailingService.createRegattaLeaderboard(regattaIdentifier,
+                        sailingServiceWrite.createRegattaLeaderboard(regattaIdentifier,
                                 /* displayName */ null, new int[] {},
                                 new AsyncCallback<StrippedLeaderboardDTOWithSecurity>() {
                     @Override
@@ -148,10 +149,10 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
                     }
 
                     @Override
-                                    public void onSuccess(StrippedLeaderboardDTOWithSecurity result) {
-                        if (newRegatta.defaultCourseAreaUuid != null) {
+                    public void onSuccess(StrippedLeaderboardDTOWithSecurity result) {
+                        if (!newRegatta.courseAreas.isEmpty()) {
                             // Show the event's leaderboard groups and allow the user to pick one to assign the regatta leaderboard to
-                            final EventDTO event = getEventForCourseArea(existingEvents, newRegatta.defaultCourseAreaUuid);
+                            final EventDTO event = getEventForCourseArea(existingEvents, newRegatta.courseAreas);
                             if (!event.getLeaderboardGroups().isEmpty()) {
                                 openRegattaLeaderboardToLeaderboardGroupOfEventLinkingDialog(result, event);
                             }
@@ -178,7 +179,7 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
      * @param eventToLinkRegattaTo an event that has at least one {@link EventDTO#getLeaderboardGroups() leaderboard group}
      */
     private void openRegattaLeaderboardToLeaderboardGroupOfEventLinkingDialog(final StrippedLeaderboardDTO newRegattaLeaderboard, EventDTO eventToLinkRegattaTo) {
-        LinkRegattaLeaderboardToLeaderboardGroupOfEventDialog dialog = new LinkRegattaLeaderboardToLeaderboardGroupOfEventDialog(sailingService, stringMessages, errorReporter, newRegattaLeaderboard, eventToLinkRegattaTo,
+        LinkRegattaLeaderboardToLeaderboardGroupOfEventDialog dialog = new LinkRegattaLeaderboardToLeaderboardGroupOfEventDialog(sailingServiceWrite, stringMessages, errorReporter, newRegattaLeaderboard, eventToLinkRegattaTo,
                 new DialogCallback<LeaderboardGroupDTO>() {
                     @Override
                     public void ok(final LeaderboardGroupDTO selectedLeaderboardGroup) {
@@ -187,7 +188,7 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
                             leaderboardNames.add(leaderboard.getName());
                         }
                         leaderboardNames.add(newRegattaLeaderboard.getName());
-                        sailingService.updateLeaderboardGroup(selectedLeaderboardGroup.getId(),
+                        sailingServiceWrite.updateLeaderboardGroup(selectedLeaderboardGroup.getId(),
                                 selectedLeaderboardGroup.getName(), selectedLeaderboardGroup.getName(),
                                 selectedLeaderboardGroup.description, selectedLeaderboardGroup.getDisplayName(),
                                 leaderboardNames, selectedLeaderboardGroup.getOverallLeaderboardDiscardThresholds(),
@@ -215,16 +216,14 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
         dialog.show();
     }
 
-    private EventDTO getEventForCourseArea(final List<EventDTO> existingEvents, final UUID courseAreaId) {
+    private EventDTO getEventForCourseArea(final List<EventDTO> existingEvents, final Iterable<CourseAreaDTO> courseAreas) {
         EventDTO result = null;
         eventLoop:
         for (final EventDTO event : existingEvents) {
             if (event.venue != null) {
-                for (CourseAreaDTO courseArea : event.venue.getCourseAreas()) {
-                    if (courseArea.id.equals(courseAreaId)) {
-                        result = event;
-                        break eventLoop;
-                    }
+                if (Util.containsAny(event.venue.getCourseAreas(), courseAreas)) {
+                    result = event;
+                    break eventLoop;
                 }
             }
         }

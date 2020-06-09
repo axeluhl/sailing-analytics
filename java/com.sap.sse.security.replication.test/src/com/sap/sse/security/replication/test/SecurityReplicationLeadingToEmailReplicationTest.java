@@ -73,7 +73,7 @@ public class SecurityReplicationLeadingToEmailReplicationTest extends AbstractSe
             final AccessControlStore accessControlStore = new AccessControlStoreImpl(userStore);
             SecurityServiceImpl result = new SecurityServiceImpl(trackerMock, userStore, accessControlStore);
             userStore.ensureDefaultRolesExist();
-            userStore.ensureDefaultTenantExists();
+            userStore.ensureServerGroupExists();
             result.initialize();
             result.clearReplicaState();
             return result;
@@ -104,9 +104,9 @@ public class SecurityReplicationLeadingToEmailReplicationTest extends AbstractSe
     @Test
     public void triggerEmailSendByAddingUserOnMaster()
             throws UserManagementException, MailException, IllegalAccessException, InterruptedException, UserGroupManagementException {
-        //TODO IllegalStateExceptions thrown, probably because the two replication services per instance share the
-        //same message queue, but don't know about each other (unlike actual OSGi setup, where there is only
-        //one replication service per instance that nows all Replicables)
+        // TODO IllegalStateExceptions thrown, probably because the two replication services per instance share the
+        // same message queue, but don't know about each other (unlike actual OSGi setup, where there is only
+        // one replication service per instance that knows all Replicables)
         SecurityService masterSecurityService = securitySetUp.getMaster();
         final String username = "Ernie";
         final String email = "ernie@sesame-street.com";

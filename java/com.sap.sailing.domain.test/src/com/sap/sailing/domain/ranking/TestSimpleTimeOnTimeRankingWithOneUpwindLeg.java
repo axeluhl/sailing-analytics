@@ -83,14 +83,14 @@ public class TestSimpleTimeOnTimeRankingWithOneUpwindLeg {
                 RegattaImpl.getDefaultName("Test Regatta", boatClass.getName()), boatClass, 
                 /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED, /*startDate*/ null, /*endDate*/ null, /* trackedRegattaRegistry */ null,
                 DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), "123", /* courseArea */ null,
-                /* controlTrackingFromStartAndFinishTimes */ false, TimeOnTimeAndDistanceRankingMetric::new,
-                /* registrationLinkSecret */ UUID.randomUUID().toString());
+                /* controlTrackingFromStartAndFinishTimes */ false, /* autoRestartTrackingUponCompetitorSetChange */ false,
+                TimeOnTimeAndDistanceRankingMetric::new, /* registrationLinkSecret */ UUID.randomUUID().toString());
         TrackedRegatta trackedRegatta = new DynamicTrackedRegattaImpl(regatta);
         List<Waypoint> waypoints = new ArrayList<Waypoint>();
         // create a two-lap upwind/downwind course:
         MarkImpl left = new MarkImpl("Left lee gate buoy");
         MarkImpl right = new MarkImpl("Right lee gate buoy");
-        ControlPoint leeGate = new ControlPointWithTwoMarksImpl(left, right, "Lee Gate");
+        ControlPoint leeGate = new ControlPointWithTwoMarksImpl(left, right, "Lee Gate", "Lee Gate");
         Mark windwardMark = new MarkImpl("Windward mark");
         waypoints.add(new WaypointImpl(leeGate));
         waypoints.add(new WaypointImpl(windwardMark));

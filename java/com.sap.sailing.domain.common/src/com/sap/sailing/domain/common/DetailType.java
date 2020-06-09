@@ -100,6 +100,9 @@ public enum DetailType implements Serializable {
     OVERALL_TOTAL_DURATION_FOILED_IN_SECONDS(0, DESCENDING, "TOTAL_DURATION_FOILED_IN_SECONDS"),
     OVERALL_TOTAL_DISTANCE_FOILED_IN_METERS(0, DESCENDING, "TOTAL_DISTANCE_FOILED_IN_METERS"),
     RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS(2, DESCENDING),
+    RACE_CURRENT_COURSE_OVER_GROUND_IN_TRUE_DEGREES(1, ASCENDING),
+    RACE_CURRENT_POSITION_LAT_DEG(10, ASCENDING),
+    RACE_CURRENT_POSITION_LNG_DEG(10, ASCENDING),
     BRAVO_RACE_CURRENT_RIDE_HEIGHT_IN_METERS(2, DESCENDING),
     RACE_CURRENT_DISTANCE_FOILED_IN_METERS(0, DESCENDING),
     RACE_CURRENT_DURATION_FOILED_IN_SECONDS(0, DESCENDING),
@@ -110,6 +113,7 @@ public enum DetailType implements Serializable {
     RACE_DISTANCE_TO_START_FIVE_SECONDS_BEFORE_RACE_START(1, ASCENDING),
     RACE_SPEED_OVER_GROUND_FIVE_SECONDS_BEFORE_START(2, DESCENDING),
     RACE_CALCULATED_TIME_TRAVELED(0, ASCENDING),
+    RACE_IMPLIED_WIND(5, DESCENDING),
     RACE_CALCULATED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD(0, ASCENDING),
     RACE_TIME_TRAVELED(0, ASCENDING),
     RACE_TIME_TRAVELED_UPWIND(0, ASCENDING),
@@ -365,6 +369,7 @@ public enum DetailType implements Serializable {
         allowed.add(RACE_DISTANCE_TRAVELED_INCLUDING_GATE_START);
         allowed.add(RACE_TIME_TRAVELED);
         allowed.add(RACE_CALCULATED_TIME_TRAVELED);
+        allowed.add(RACE_IMPLIED_WIND);
         allowed.add(RACE_CALCULATED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD);
         allowed.add(RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS);
         allowed.add(RACE_CURRENT_DISTANCE_FOILED_IN_METERS);
@@ -384,9 +389,8 @@ public enum DetailType implements Serializable {
     }
 
     /**
-     * Returns all types in the enum, minus those for expedition, bravo and bravo extended
-     * 
-     * @return
+     * Returns all types in the enum, minus those for expedition, bravo, bravo extended
+     * and the ToT/ToD/ORC PCS ones
      */
     public static Collection<DetailType> getAllNonRestrictedDetailTypes() {
         final Collection<DetailType> all = new LinkedHashSet<>(Arrays.asList(values()));
@@ -396,6 +400,8 @@ public enum DetailType implements Serializable {
         all.removeAll(getRaceExpeditionDetailTypes());
         all.removeAll(getLegExpeditionDetailColumnTypes());
         all.removeAll(getOverallBravoDetailTypes());
+        all.removeAll(getAllToTToDHandicapDetailTypes());
+        all.removeAll(getAllOrcPerformanceCurveDetailTypes());
         return all;
     }
 
@@ -406,6 +412,7 @@ public enum DetailType implements Serializable {
         allowed.add(OVERALL_TOTAL_AVERAGE_SPEED_OVER_GROUND);
         allowed.add(OVERALL_TOTAL_TIME_SAILED_IN_SECONDS);
         allowed.add(OVERALL_MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS);
+        // TODO bug5209 make ToT / ToD details depend on ranking metric
         allowed.add(OVERALL_TIME_ON_TIME_FACTOR);
         allowed.add(OVERALL_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE);
         allowed.add(OVERALL_TOTAL_SCORED_RACE_COUNT);
@@ -419,6 +426,21 @@ public enum DetailType implements Serializable {
         final Collection<DetailType> allowed = new LinkedHashSet<>();
         allowed.add(OVERALL_TOTAL_DISTANCE_FOILED_IN_METERS);
         allowed.add(OVERALL_TOTAL_DURATION_FOILED_IN_SECONDS);
+        return allowed;
+    }
+
+    public static Collection<? extends DetailType> getAllToTToDHandicapDetailTypes() {
+        final Collection<DetailType> allowed = new LinkedHashSet<>();
+        allowed.add(RACE_CALCULATED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD);
+        allowed.add(RACE_CALCULATED_TIME_TRAVELED);
+        return allowed;
+    }
+
+    public static Collection<? extends DetailType> getAllOrcPerformanceCurveDetailTypes() {
+        final Collection<DetailType> allowed = new LinkedHashSet<>();
+        allowed.add(RACE_CALCULATED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD);
+        allowed.add(RACE_CALCULATED_TIME_TRAVELED);
+        allowed.add(RACE_IMPLIED_WIND);
         return allowed;
     }
 
@@ -571,5 +593,4 @@ public enum DetailType implements Serializable {
         }
         throw new IllegalArgumentException("Could not restore " + value + " to an DetailType enum");
     }
-
 }

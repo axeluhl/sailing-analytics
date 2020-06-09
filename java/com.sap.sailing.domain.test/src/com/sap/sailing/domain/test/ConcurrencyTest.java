@@ -72,7 +72,6 @@ public class ConcurrencyTest extends OnlineTracTracBasedTest {
         long duration = System.nanoTime()-start;
         logger.info("1 thread: "+duration+"ns");
         logger.info("number of approximation points: "+approximation1.size());
-
         dp = new DouglasPeucker<Competitor, GPSFixMoving>(teamAquaTrack, ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor());
         start = System.nanoTime();
         List<GPSFixMoving> approximation2 = dp.approximate(new MeterDistance(3), firstMarkPassing.getTimePoint(), lastMarkPassing.getTimePoint());

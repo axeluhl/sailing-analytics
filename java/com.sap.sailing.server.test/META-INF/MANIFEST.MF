@@ -25,7 +25,9 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.domain.racelogtrackingadapter.testsupport,
  com.sap.sailing.server.testsupport,
  com.sun.jersey;bundle-version="1.17.0",
- com.sap.sse.security.testsupport
+ com.sap.sse.security.testsupport,
+ com.sap.sailing.domain.racelogtrackingadapter,
+ com.sap.sailing.shared.server.gateway
 Import-Package: com.sap.sailing.server.gateway.jaxrs,
  com.sap.sailing.server.gateway.jaxrs.spi,
  com.sap.sse.security.userstore.mongodb,

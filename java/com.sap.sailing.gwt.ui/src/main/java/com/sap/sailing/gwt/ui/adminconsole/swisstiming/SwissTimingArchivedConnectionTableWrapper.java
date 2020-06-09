@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.adminconsole.swisstiming;
 import static com.sap.sse.security.ui.client.component.AccessControlledActionsColumn.create;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.google.gwt.user.cellview.client.AbstractCellTable;
@@ -12,13 +13,14 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationWithSecurityDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.AbstractSortableTextColumn;
 import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
-import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
+import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.celltable.TableWrapper;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
@@ -38,15 +40,15 @@ import com.sap.sse.security.ui.client.i18n.StringMessages;
  * or edit the associated ACL.
  */
 public class SwissTimingArchivedConnectionTableWrapper extends
-        TableWrapper<SwissTimingArchiveConfigurationWithSecurityDTO, RefreshableSingleSelectionModel<SwissTimingArchiveConfigurationWithSecurityDTO>, StringMessages, CellTableWithCheckboxResources> {
+        TableWrapper<SwissTimingArchiveConfigurationWithSecurityDTO, RefreshableMultiSelectionModel<SwissTimingArchiveConfigurationWithSecurityDTO>, StringMessages, CellTableWithCheckboxResources> {
     private final LabeledAbstractFilterablePanel<SwissTimingArchiveConfigurationWithSecurityDTO> filterField;
     private final SailingServiceAsync sailingServiceAsync;
     private final com.sap.sailing.gwt.ui.client.StringMessages stringMessagesClient;
 
-    public SwissTimingArchivedConnectionTableWrapper(final UserService userService, final SailingServiceAsync sailingServiceAsync,
+    public SwissTimingArchivedConnectionTableWrapper(final UserService userService, final SailingServiceWriteAsync sailingServiceAsyncWrite,
             final com.sap.sailing.gwt.ui.client.StringMessages stringMessages, final ErrorReporter errorReporter,
             final boolean enablePager, final CellTableWithCheckboxResources tableResources, final Runnable refresher) {
-        super(stringMessages, errorReporter, false, enablePager,
+        super(stringMessages, errorReporter, true, enablePager,
                 new EntityIdentityComparator<SwissTimingArchiveConfigurationWithSecurityDTO>() {
                     @Override
                     public boolean representSameEntity(SwissTimingArchiveConfigurationWithSecurityDTO dto1,
@@ -60,7 +62,7 @@ public class SwissTimingArchivedConnectionTableWrapper extends
                     }
                 }, tableResources);
         this.stringMessagesClient = stringMessages;
-        this.sailingServiceAsync = sailingServiceAsync;
+        this.sailingServiceAsync = sailingServiceAsyncWrite;
         final ListHandler<SwissTimingArchiveConfigurationWithSecurityDTO> swissTimingAccountColumnListHandler = getColumnSortHandler();
 
         // table
@@ -73,11 +75,11 @@ public class SwissTimingArchivedConnectionTableWrapper extends
         final AccessControlledActionsColumn<SwissTimingArchiveConfigurationWithSecurityDTO, DefaultActionsImagesBarCell> actionColumn = create(
                 new DefaultActionsImagesBarCell(stringMessages), userService);
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_UPDATE, DefaultActions.UPDATE, dto -> {
-            new EditSwissTimingArchivedConnectionDialog(dto,
+            new SwissTimingArchivedConnectionEditDialog(dto,
                     new DialogCallback<SwissTimingArchiveConfigurationWithSecurityDTO>() {
                 @Override
                         public void ok(final SwissTimingArchiveConfigurationWithSecurityDTO editedObject) {
-                            sailingServiceAsync.updateSwissTimingArchiveConfiguration(editedObject,
+                            sailingServiceAsyncWrite.updateSwissTimingArchiveConfiguration(editedObject,
                             new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                                 @Override
                                 public void onFailure(Throwable caught) {
@@ -98,7 +100,7 @@ public class SwissTimingArchivedConnectionTableWrapper extends
             }, userService, errorReporter).show();
         });
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_DELETE, DefaultActions.DELETE, dto -> {
-            sailingServiceAsync.deleteSwissTimingArchiveConfiguration(dto, new AsyncCallback<Void>() {
+            sailingServiceAsyncWrite.deleteSwissTimingArchiveConfigurations(Collections.singletonList(dto), new AsyncCallback<Void>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError("Exception trying to delete configuration in DB: " + caught.getMessage());
@@ -117,9 +119,9 @@ public class SwissTimingArchivedConnectionTableWrapper extends
                 .create(
                 userService.getUserManagementService(), type, dto -> dto.getAccessControlList(), stringMessages);
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_OWNERSHIP, DefaultActions.CHANGE_OWNERSHIP,
-                configOwnership::openDialog);
+                configOwnership::openOwnershipDialog);
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                u -> configACL.openDialog(u));
+                u -> configACL.openACLDialog(u));
         filterField = new LabeledAbstractFilterablePanel<SwissTimingArchiveConfigurationWithSecurityDTO>(
                 new Label(stringMessages.filterSwissTimingAchivedConnections()),
                 new ArrayList<SwissTimingArchiveConfigurationWithSecurityDTO>(), dataProvider, stringMessages) {

@@ -27,6 +27,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.common.WindFinderReviewedSpotsCollectionIdProvider;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.tracking.impl.DoubleVectorFixImpl;
@@ -42,6 +43,7 @@ import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStoreSupplier;
 import com.sap.sailing.domain.tracking.TrackedRegattaListener;
 import com.sap.sailing.domain.windestimation.WindEstimationFactoryService;
+import com.sap.sailing.resultimport.ResultUrlRegistry;
 import com.sap.sailing.server.RacingEventServiceMXBean;
 import com.sap.sailing.server.impl.preferences.model.BoatClassNotificationPreferences;
 import com.sap.sailing.server.impl.preferences.model.CompetitorNotificationPreferences;
@@ -53,6 +55,7 @@ import com.sap.sailing.server.notification.impl.SailingNotificationServiceImpl;
 import com.sap.sailing.server.security.SailingViewerRole;
 import com.sap.sailing.server.statistics.TrackedRaceStatisticsCache;
 import com.sap.sailing.server.statistics.TrackedRaceStatisticsCacheImpl;
+import com.sap.sailing.shared.server.SharedSailingData;
 import com.sap.sse.MasterDataImportClassLoaderService;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.Util;
@@ -60,7 +63,9 @@ import com.sap.sse.mail.MailService;
 import com.sap.sse.mail.queue.MailQueue;
 import com.sap.sse.mail.queue.impl.ExecutorMailQueue;
 import com.sap.sse.osgi.CachedOsgiTypeBasedServiceFinderFactory;
+import com.sap.sse.replication.FullyInitializedReplicableTracker;
 import com.sap.sse.replication.Replicable;
+import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.security.SecurityInitializationCustomizer;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.interfaces.PreferenceConverter;
@@ -108,7 +113,11 @@ public class Activator implements BundleActivator {
 
     private ServiceTracker<MailService, MailService> mailServiceTracker;
 
-    private ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
+    private FullyInitializedReplicableTracker<SecurityService> securityServiceTracker;
+
+    private FullyInitializedReplicableTracker<SharedSailingData> sharedSailingDataTracker;
+    
+    private ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker;
     
     public Activator() {
         clearPersistentCompetitors = Boolean
@@ -125,20 +134,23 @@ public class Activator implements BundleActivator {
         extenderBundleTracker = new ExtenderBundleTracker(context);
         extenderBundleTracker.open();
         mailServiceTracker = ServiceTrackerFactory.createAndOpen(context, MailService.class);
-        securityServiceTracker = ServiceTrackerFactory.createAndOpen(context, SecurityService.class);
-        if (securityServiceTracker != null) {
-            new Thread("Racingevent wait for securityservice for migration thread") {
-                public void run() {
-                    try {
-                        // only continue once we have the service, as some of the services require it to start properly
-                        securityServiceTracker.waitForService(0);
-                        internalStartBundle(context);
-                    } catch (Exception e) {
-                        logger.log(Level.SEVERE, "Could not start RacingEvent service properly", e);
-                    }
-                };
-            }.start();
-        }
+        replicationServiceTracker = ServiceTrackerFactory.createAndOpen(context, ReplicationService.class);
+        sharedSailingDataTracker = FullyInitializedReplicableTracker.createAndOpen(context, SharedSailingData.class);
+        securityServiceTracker = FullyInitializedReplicableTracker.createAndOpen(context, SecurityService.class);
+        securityServiceTracker.open();
+        new Thread(""+this+" initializing RacingEventService in the background") {
+            public void run() {
+                try {
+                    // we used to wait for the SecurityService here, but this now (see bug 4006) would be suspended until replication
+                    // is finished with its initial load, and it's important to get RacingEventService registered with the OSGi service
+                    // registry before the first access to the SecurityService, because only registering RacingEventService can unblock
+                    // the replication and hence make a fully-initialized SecurityService with the initial load already completed available.
+                    internalStartBundle(context);
+                } catch (Exception e) {
+                    logger.log(Level.SEVERE, "Could not start RacingEvent service properly", e);
+                }
+            };
+        }.start();
     }
 
     /**
@@ -146,6 +158,7 @@ public class Activator implements BundleActivator {
      */
     protected void registerPreferenceConvertersForUserStore(BundleContext context) {
         Dictionary<String, String> properties = new Hashtable<String, String>();
+        // it's okay to re-use the properties Dictionary for several registrations because the registry clones its contents
         properties.put(PreferenceConverter.KEY_PARAMETER_NAME, CompetitorNotificationPreferences.PREF_NAME);
         registrations.add(context.registerService(PreferenceConverter.class,
                 new GenericJSONPreferenceConverter<>(() -> new CompetitorNotificationPreferences(racingEventService)),
@@ -194,13 +207,15 @@ public class Activator implements BundleActivator {
         notificationService.stop();
         mailQueue.stop();
         mailServiceTracker.close();
+        sharedSailingDataTracker.close();
+        replicationServiceTracker.close();
         securityServiceTracker.close();
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
         mbs.unregisterMBean(mBeanName);
     }
 
     private void internalStartBundle(BundleContext context) throws MalformedURLException, MalformedObjectNameException,
-            InstanceAlreadyExistsException, MBeanRegistrationException, NotCompliantMBeanException {
+            InstanceAlreadyExistsException, MBeanRegistrationException, NotCompliantMBeanException, InterruptedException {
         mailQueue = new ExecutorMailQueue(mailServiceTracker);
         notificationService = new SailingNotificationServiceImpl(context, mailQueue);
         trackedRegattaListener = new OSGiBasedTrackedRegattaListener(context);
@@ -209,11 +224,13 @@ public class Activator implements BundleActivator {
         registrations.add(context.registerService(SecurityInitializationCustomizer.class,
                 (SecurityInitializationCustomizer) securityService -> {
                     final RoleDefinition sailingViewerRoleDefinition = securityService.getOrCreateRoleDefinitionFromPrototype(SailingViewerRole.getInstance());
-                    if (securityService.isInitialOrMigration()) {
+                    if (securityService.isNewServer()) {
                         // The server is initially set to be public by adding sailing_viewer role to the server group
                         // with forAll=true
-                        securityService.putRoleDefinitionToUserGroup(securityService.getDefaultTenant(),
+                        securityService.putRoleDefinitionToUserGroup(securityService.getServerGroup(),
                                 sailingViewerRoleDefinition, true);
+                    }
+                    if (securityService.isInitialOrMigration()) {
                         // sailing_viewer role is publicly readable
                         securityService.addToAccessControlList(sailingViewerRoleDefinition.getIdentifier(), null, DefaultActions.READ.name());
                     }
@@ -228,14 +245,23 @@ public class Activator implements BundleActivator {
         // this code block is not run, and the test case can inject some other type of finder
         // instead.
         serviceFinderFactory = new CachedOsgiTypeBasedServiceFinderFactory(context);
+        ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> scoreCorrectionProviderServiceTracker =
+                ServiceTrackerFactory.createAndOpen(context, ScoreCorrectionProvider.class);
+        ServiceTracker<ResultUrlRegistry, ResultUrlRegistry> resultUrlRegistryServiceTracker = ServiceTrackerFactory
+                .createAndOpen(context, ResultUrlRegistry.class);
         racingEventService = new RacingEventServiceImpl(clearPersistentCompetitors,
                 serviceFinderFactory, trackedRegattaListener, notificationService,
-                trackedRaceStatisticsCache, restoreTrackedRaces, securityServiceTracker);
+                trackedRaceStatisticsCache, restoreTrackedRaces, securityServiceTracker,
+                sharedSailingDataTracker, replicationServiceTracker, scoreCorrectionProviderServiceTracker, resultUrlRegistryServiceTracker);
         notificationService.setRacingEventService(racingEventService);
+        final MasterDataImportClassLoaderServiceTrackerCustomizer mdiClassLoaderCustomizer = new MasterDataImportClassLoaderServiceTrackerCustomizer(context, racingEventService);
         masterDataImportClassLoaderServiceTracker = new ServiceTracker<MasterDataImportClassLoaderService, MasterDataImportClassLoaderService>(
                 context, MasterDataImportClassLoaderService.class,
-                new MasterDataImportClassLoaderServiceTrackerCustomizer(context, racingEventService));
+                mdiClassLoaderCustomizer);
         masterDataImportClassLoaderServiceTracker.open();
+        for (final ServiceReference<MasterDataImportClassLoaderService> mdiClassLoaderService : masterDataImportClassLoaderServiceTracker.getServiceReferences()) {
+            mdiClassLoaderCustomizer.addingService(mdiClassLoaderService);
+        }
         polarDataServiceTracker = new ServiceTracker<PolarDataService, PolarDataService>(context,
                 PolarDataService.class,
                 new PolarDataServiceTrackerCustomizer(context, racingEventService));
@@ -292,16 +318,16 @@ public class Activator implements BundleActivator {
         mbs.registerMBean(mbean, mBeanName);
         logger.log(Level.INFO, "Started " + context.getBundle().getSymbolicName()
                 + ". Character encoding: " + Charset.defaultCharset());
-        // do initial setup/migration logic
+        // do initial setup/migration logic; do this after the RacingEventService has been published to the OSGi
+        // registry because this will require the SecurityService and that can only become available once the initial
+        // load has been finished in case this is a replica with auto-replication.
         racingEventService.ensureOwnerships();
     }
 
     private class MasterDataImportClassLoaderServiceTrackerCustomizer implements
             ServiceTrackerCustomizer<MasterDataImportClassLoaderService, MasterDataImportClassLoaderService> {
-
         private final BundleContext context;
         private RacingEventServiceImpl racingEventService;
-
         public MasterDataImportClassLoaderServiceTrackerCustomizer(BundleContext context,
                 RacingEventServiceImpl racingEventService) {
             this.context = context;
@@ -326,12 +352,10 @@ public class Activator implements BundleActivator {
                 MasterDataImportClassLoaderService service) {
             racingEventService.removeMasterDataClassLoader(service.getClassLoader());
         }
-
     }
 
     private class PolarDataServiceTrackerCustomizer
             implements ServiceTrackerCustomizer<PolarDataService, PolarDataService> {
-
         private final BundleContext context;
         private RacingEventServiceImpl racingEventService;
 

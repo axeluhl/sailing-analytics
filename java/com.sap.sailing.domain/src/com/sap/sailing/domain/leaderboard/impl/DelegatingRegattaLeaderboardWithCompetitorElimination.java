@@ -3,6 +3,7 @@ package com.sap.sailing.domain.leaderboard.impl;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -103,10 +104,6 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
     @Override
     public String getName() {
         return name;
-    }
-
-    public void setName(String newName) {
-        getFullLeaderboard().setName(newName);
     }
 
     @Override
@@ -300,7 +297,8 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
     }
 
     public Iterable<RaceColumn> getRaceColumns() {
-        return getFullLeaderboard().getRaceColumns();
+        final RegattaLeaderboard theFullLeaderboard = getFullLeaderboard();
+        return theFullLeaderboard == null ? Collections.emptySet() : theFullLeaderboard.getRaceColumns();
     }
 
     public RaceColumn getRaceColumnByName(String name) {
@@ -329,8 +327,8 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
 
     @Override
     public void addScoreCorrectionListener(ScoreCorrectionListener listener) {
-        if (fullLeaderboard != null) {
-            fullLeaderboard.addScoreCorrectionListener(listener);
+        if (getFullLeaderboard() != null) {
+            getFullLeaderboard().addScoreCorrectionListener(listener);
         } else {
             triggerWhenFullLeaderboardIsResolved.put(leaderboard->leaderboard.addScoreCorrectionListener(listener), true);
         }
@@ -338,8 +336,8 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
 
     @Override
     public void removeScoreCorrectionListener(ScoreCorrectionListener listener) {
-        if (fullLeaderboard != null) {
-            fullLeaderboard.removeScoreCorrectionListener(listener);
+        if (getFullLeaderboard() != null) {
+            getFullLeaderboard().removeScoreCorrectionListener(listener);
         } else {
             triggerWhenFullLeaderboardIsResolved.put(leaderboard->leaderboard.removeScoreCorrectionListener(listener), true);
         }
@@ -420,8 +418,8 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
         return getFullLeaderboard().getNowMinusDelay();
     }
 
-    public CourseArea getDefaultCourseArea() {
-        return getFullLeaderboard().getDefaultCourseArea();
+    public Iterable<CourseArea> getCourseAreas() {
+        return getFullLeaderboard().getCourseAreas();
     }
 
     public NumberOfCompetitorsInLeaderboardFetcher getNumberOfCompetitorsInLeaderboardFetcher() {

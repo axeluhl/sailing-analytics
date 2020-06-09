@@ -8,11 +8,19 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.apache.shiro.SecurityUtils;
+import org.hamcrest.Matchers;
+import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.mongodb.MongoException;
@@ -30,6 +38,8 @@ import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.impl.AccessControlList;
+import com.sap.sse.security.shared.impl.QualifiedObjectIdentifierImpl;
 import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
@@ -57,7 +67,7 @@ public class LoginTest {
         db.getCollection(com.sap.sse.security.persistence.impl.CollectionNames.SESSIONS.name()).drop();
         userStore = new UserStoreImpl(DEFAULT_TENANT_NAME);
         userStore.ensureDefaultRolesExist();
-        userStore.ensureDefaultTenantExists();
+        userStore.ensureServerGroupExists();
         accessControlStore = new AccessControlStoreImpl(userStore);
         Activator.setTestStores(userStore, accessControlStore);
         Thread.currentThread().setContextClassLoader(getClass().getClassLoader()); // to enable shiro to find classes from com.sap.sse.security
@@ -82,6 +92,26 @@ public class LoginTest {
         assertNull(securityService.getUserByName(username));
         assertFalse(Util.contains(specialUserGroup1.getUsers(), user));
         assertFalse(Util.contains(specialUserGroup2.getUsers(), user));
+    }
+
+    @Test
+    // FIXME Bug 5239: Negative ACL actions are currently disabled due to bugs
+    @Ignore
+    public void testAclAnonUserGroup() throws UserManagementException, MailException, UserGroupManagementException {
+        final String username = "TheNewUser";
+        securityService.createSimpleUser(username, "u@a.b", "Humba", username, /* company */ null,
+                /* locale */ null, /* validationBaseURL */ null, /* owning group */ null);
+        final UserGroup defaultUserGroup = securityService.getUserGroupByName(username + SecurityService.TENANT_SUFFIX);
+        Map<UserGroup, Set<String>> permissionMap = new HashMap<>();
+        permissionMap.put(defaultUserGroup, new HashSet<>(Arrays.asList(new String[] { "!READ", "UPDATE" })));
+        permissionMap.put(null, new HashSet<>(Arrays.asList(new String[] { "!READ", "UPDATE" })));
+        AccessControlList acl = securityService.overrideAccessControlList(
+                QualifiedObjectIdentifierImpl.fromDBWithoutEscaping("someid/more"), permissionMap);
+
+        Map<UserGroup, Set<String>> result = acl.getActionsByUserGroup();
+
+        Assert.assertThat(result.get(defaultUserGroup), Matchers.contains("!READ", "UPDATE"));
+        Assert.assertThat(result.get(null), Matchers.contains("UPDATE"));
     }
     
     @Test

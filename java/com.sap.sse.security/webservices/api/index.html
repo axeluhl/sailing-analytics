@@ -43,6 +43,10 @@ be <code>http://sapsailing.com/security/api/restsecurity/login</code>.
         <td>Read, update or delete a user</td>
     </tr>
     <tr>
+        <td><a href="has_permission.html">/api/restsecurity/has_permission</a></td>
+        <td>Check whether the subject has one or more permissions.</td>
+    </tr>
+    <tr>
         <td><a href="role.html">/api/restsecurity/role</a></td>
         <td>Create, read, update or delete a role</td>
     </tr>
@@ -62,6 +66,34 @@ be <code>http://sapsailing.com/security/api/restsecurity/login</code>.
 		<td><a href="remove_access_token.html">/api/restsecurity/remove_access_token</a></td>
 		<td>Remove an existing access token, rendering it invalid for authenticating to the server</td>
 	</tr>
+    <tr>
+     <td><a href="ownership.html">/api/restsecurity/ownership</a></td>
+     <td>Change Object ownership</td>
+    </tr>
+        <tr>
+        <td><a href="usergroupsSetDefaultTenantForCurrentServerAndUser.html">/api/restsecurity/usergroups/setDefaultTenantForCurrentServerAndUser</a></td>
+        <td>Allows to set a default tenant for the current user</td>
+    </tr>
+    <tr>
+        <td><a href="usergroupsAddAnyUserToGroup.html">/api/restsecurity/usergroups/addAnyUserToGroup</a></td>
+        <td>Allows to add a user to a group without permissions on the user.</td>
+    </tr>
+    <tr>
+        <td><a href="usergroupsGetReadable.html">/api/restsecurity/usergroups/readable</a></td>
+        <td>Lists all usergroups the current user or any user has readable permission for</td>
+    </tr>
+    <tr>
+        <td><a href="preferencesPut.html">/api/restsecurity/preferences/{SETTINGS_KEY}</a></td>
+        <td>Stores a document into the preferences of a user</td>
+    </tr>
+    <tr>
+        <td><a href="preferencesGet.html">/api/restsecurity/preferences/{SETTINGS_KEY}</a></td>
+        <td>Retrives a document that was stored into the preferences of a user</td>
+    </tr>
+    <tr>
+        <td><a href="preferencesDelete.html">/api/restsecurity/preferences/{SETTINGS_KEY}</a></td>
+        <td>Removes a document from the preferences of a user</td>
+    </tr>
 </tbody>
 </table>
 </body>

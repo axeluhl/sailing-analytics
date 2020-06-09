@@ -2,9 +2,7 @@ package com.sap.sailing.gwt.ui.test;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.junit.Test;
 
@@ -29,7 +27,7 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     
     //These objects should be created by calling GWT.create(Class c);
     private LeaderboardPanelMock leaderboardPanel;
-    private MyTestSailingServiceAsync service;
+    private MyTestSailingServiceWriteAsync service;
     private StringMessages stringMessages;
     
     //Test data.
@@ -54,7 +52,7 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     @Override
     protected void gwtSetUp() throws Exception {
         super.gwtSetUp();
-        service = GWT.create(MyTestSailingService.class);
+        service = GWT.create(MyTestSailingServiceWrite.class);
         stringMessages = GWT.create(StringMessages.class);
     }
 
@@ -87,7 +85,7 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     }
     
     private void trackRace(){
-        final Set<TracTracRaceRecordDTO> rrDAOs = new HashSet<TracTracRaceRecordDTO>();
+        final List<TracTracRaceRecordDTO> rrDAOs = new ArrayList<TracTracRaceRecordDTO>();
         rrDAOs.add(rrDao);
         service.trackWithTracTrac(/* regattaToAddTo */null, rrDAOs, tractracTunnel ? "tcp://" + tractracTunnelHost + ":"
                 + TracTracConnectionConstants.PORT_TUNNEL_LIVE : "tcp://" + TracTracConnectionConstants.HOST_NAME + ":"
@@ -95,7 +93,8 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
                 + TracTracConnectionConstants.PORT_TUNNEL_STORED : "tcp://" + TracTracConnectionConstants.HOST_NAME
                 + ":" + TracTracConnectionConstants.PORT_STORED, 
                 COURSE_DESIGN_UPDATE_URI, 
-                false, false, /* offsetToStartTimeOfSimulatedRace */ null, /* ignoreTracTracMarkPassings */ false, TRACTRAC_USERNAME, TRACTRAC_PASSWORD, new AsyncCallback<Void>() {
+                false, false, /* offsetToStartTimeOfSimulatedRace */ null, /* ignoreTracTracMarkPassings */ false,
+                /* useOfficialEventsToUpdateRaceLog */ false, TRACTRAC_USERNAME, TRACTRAC_PASSWORD, new AsyncCallback<Void>() {
 
             @Override
             public void onFailure(Throwable caught) {

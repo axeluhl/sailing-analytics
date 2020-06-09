@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
 
-interface AdminConsoleResources extends ClientBundle {
+public interface AdminConsoleResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/magnifier.png")
     ImageResource magnifierIcon();
 
@@ -103,6 +103,9 @@ interface AdminConsoleResources extends ClientBundle {
     
     @Source("com/sap/sailing/gwt/ui/client/images/ping.png")
     ImageResource ping();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/remove_ping.png")
+    ImageResource removePing();
 
     @Source("com/sap/sailing/gwt/ui/client/images/copy_course.png")
     ImageResource copyCourse();

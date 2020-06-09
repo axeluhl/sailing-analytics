@@ -1,0 +1,938 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="14.3.0">
+  <zoom_level>9</zoom_level>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>684</x>
+      <y>576</y>
+      <w>144</w>
+      <h>117</h>
+    </coordinates>
+    <panel_attributes>CommonMarkProperties
+--
+color : Color
+shape : String
+pattern : String
+type : MarkType
+name : String
+shortName : String</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>306</x>
+      <y>747</y>
+      <w>198</w>
+      <h>45</h>
+    </coordinates>
+    <panel_attributes>MarkTemplate
+--
+bg=#fffeb3
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>909</x>
+      <y>504</y>
+      <w>225</w>
+      <h>90</h>
+    </coordinates>
+    <panel_attributes>Waypoint
+--
+controlPoint : ControlPoint
+marks: Iterable&lt;Mark&gt;
+passingInstruction: PassingInstruction
+fixedBearing : Bearing
+bg=#ffb3b3</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>954</x>
+      <y>648</y>
+      <w>135</w>
+      <h>45</h>
+    </coordinates>
+    <panel_attributes>ControlPoint
+marks : Iterable&lt;Mark&gt;
+
+bg=#ffb3b3</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>954</x>
+      <y>747</y>
+      <w>171</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>ControlPointWithTwoMarks
+--
+left: Mark
+right: Mark
+bg=#ffb3b3</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1008</x>
+      <y>684</y>
+      <w>27</w>
+      <h>81</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;70.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>792</x>
+      <y>684</y>
+      <w>243</w>
+      <h>81</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>250.0;10.0;250.0;40.0;10.0;40.0;10.0;70.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>702</x>
+      <y>747</y>
+      <w>189</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>Mark
+--
+originatingMarkTemplate : MarkTemplate
+originatingMarkProperties : MarkProperties
+bg=#ffb3b3</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>756</x>
+      <y>684</y>
+      <w>27</w>
+      <h>81</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;70.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>882</x>
+      <y>756</y>
+      <w>90</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-
+2</panel_attributes>
+    <additional_attributes>80.0;20.0;10.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>450</x>
+      <y>342</y>
+      <w>342</w>
+      <h>90</h>
+    </coordinates>
+    <panel_attributes>Course
+--
+waypoints : List&lt;Waypoint&gt;
+associatedRoles : BiMap&lt;Mark, MarkRole&gt;
+courseTemplate : CourseTemplate
+bg=#ffb3b3</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>459</x>
+      <y>18</y>
+      <w>351</w>
+      <h>117</h>
+    </coordinates>
+    <panel_attributes>CourseConfiguration
+--
+waypoints : List&lt;WaypointWithMarkConfiguration&gt;
+associatedRoles : BiMap&lt;MarkConfiguration, IsMarkRole&gt;
+allMarks : Set&lt;MarkConfiguration&gt;
+courseTemplate : CourseTemplate
+numberOfLaps : Integer
+bg=#c0ffb3</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLNote</id>
+    <coordinates>
+      <x>9</x>
+      <y>162</y>
+      <w>369</w>
+      <h>72</h>
+    </coordinates>
+    <panel_attributes>MarkTemplates in waypointTemplates ⊆ markTemplates
+MarkTemplates in waypointTemplates ≡ associatedRoles.keySet()
+RepeatablePartDefinition is based on waypointTemplates
+bg=blue</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLNote</id>
+    <coordinates>
+      <x>9</x>
+      <y>9</y>
+      <w>369</w>
+      <h>63</h>
+    </coordinates>
+    <panel_attributes>associatedRoles.keySet() ⊆ Marks in waypoints
+∀ MarkConfig m  ⊆ waypoints : m ∈ allMarks
+bg=blue</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLNote</id>
+    <coordinates>
+      <x>0</x>
+      <y>315</y>
+      <w>369</w>
+      <h>108</h>
+    </coordinates>
+    <panel_attributes>associatedRoles.keySet() ⊆ Marks in waypoints
+-&gt; associated roles are optional
+the courseTemplate can be null if
+- a courseTemplate was never associated (legacy or freestyle)
+- the waypoint sequence isn't consistent with the CourseTemplate
+- the associated roles aren't consistent with the CourseTemplate
+bg=blue</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1134</x>
+      <y>207</y>
+      <w>297</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>ControlPointWithMarkConfiguration
+--
+markConfigurations : Iterable&lt;MarkConfiguration&gt;
+bg=#c0ffb3</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>306</x>
+      <y>648</y>
+      <w>198</w>
+      <h>45</h>
+    </coordinates>
+    <panel_attributes>ControlPointTemplate
+--
+marks : Iterable&lt;MarkTemplate&gt;
+bg=#fffeb3</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>396</x>
+      <y>684</y>
+      <w>27</w>
+      <h>81</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;70.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>405</x>
+      <y>684</y>
+      <w>333</w>
+      <h>81</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>350.0;10.0;350.0;50.0;10.0;50.0;10.0;70.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>63</x>
+      <y>747</y>
+      <w>135</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>MarkPairTemplate
+--
+left : MarkTemplate
+right: MarkTemplate
+bg=#fffeb3
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>189</x>
+      <y>756</y>
+      <w>135</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-
+2</panel_attributes>
+    <additional_attributes>10.0;20.0;130.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>108</x>
+      <y>684</y>
+      <w>315</w>
+      <h>81</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>330.0;10.0;330.0;40.0;10.0;40.0;10.0;70.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>999</x>
+      <y>837</y>
+      <w>423</w>
+      <h>72</h>
+    </coordinates>
+    <panel_attributes>MarkConfiguration
+--
+optionalMarkTemplate : MarkTemplate
+effectiveProperties: CommonMarkProperties
+storeToInventory: boolean
+
+bg=#c0ffb3</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1269</x>
+      <y>252</y>
+      <w>27</w>
+      <h>603</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;650.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>666</x>
+      <y>1044</y>
+      <w>279</w>
+      <h>45</h>
+    </coordinates>
+    <panel_attributes>FreestlyeMarkConfiguration
+--
+freestyleProperties : CommonMarkProperties
+bg=#c0ffb3</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1062</x>
+      <y>1044</y>
+      <w>198</w>
+      <h>45</h>
+    </coordinates>
+    <panel_attributes>RegattaMarkConfiguration
+--
+mark : Mark
+bg=#c0ffb3</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>891</x>
+      <y>1107</y>
+      <w>423</w>
+      <h>45</h>
+    </coordinates>
+    <panel_attributes>MarkPropertiesBasedMarkConfiguration
+--
+markProperties : MarkProperties
+bg=#c0ffb3</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1305</x>
+      <y>1044</y>
+      <w>261</w>
+      <h>45</h>
+    </coordinates>
+    <panel_attributes>MarkTemplateBasedMarkConfiguration
+--
+bg=#c0ffb3</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1152</x>
+      <y>900</y>
+      <w>144</w>
+      <h>162</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>140.0;10.0;140.0;140.0;10.0;140.0;10.0;160.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1269</x>
+      <y>900</y>
+      <w>27</w>
+      <h>225</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;230.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1269</x>
+      <y>900</y>
+      <w>162</w>
+      <h>162</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;140.0;160.0;140.0;160.0;160.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>792</x>
+      <y>900</y>
+      <w>504</w>
+      <h>162</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>540.0;10.0;540.0;140.0;10.0;140.0;10.0;160.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>477</x>
+      <y>927</y>
+      <w>351</w>
+      <h>81</h>
+    </coordinates>
+    <panel_attributes>MarkProperties
+--
+lastUsedTemplate : Map&lt;MarkTemplate, TimePoint&gt;
+lastUsedRole : Map&lt;MarkRole, Timepoint&gt;
+usedForRegattasOnServers : Map&lt;URL, Set&lt;RegattaIdentifier&gt;&gt;
+bg=#b3deff</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>666</x>
+      <y>684</y>
+      <w>72</w>
+      <h>261</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>60.0;10.0;60.0;50.0;10.0;50.0;10.0;270.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>495</x>
+      <y>756</y>
+      <w>225</w>
+      <h>45</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-
+originatingMarkTemplate
+0..1</panel_attributes>
+    <additional_attributes>230.0;20.0;10.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1098</x>
+      <y>45</y>
+      <w>306</w>
+      <h>90</h>
+    </coordinates>
+    <panel_attributes>WaypointWithMarkConfiguration
+--
+controlPoint : ControlPointWithMarkConfiguration
+passingInstruction: PassingInstruction
+bg=#c0ffb3</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1242</x>
+      <y>126</y>
+      <w>99</w>
+      <h>99</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-
+
+  controlPoint
+  1</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;90.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1008</x>
+      <y>585</y>
+      <w>99</w>
+      <h>81</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-
+ controlPoint
+ 1</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;70.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>459</x>
+      <y>189</y>
+      <w>342</w>
+      <h>90</h>
+    </coordinates>
+    <panel_attributes>Course Template
+--
+waypointTemplates : List&lt;WaypointTemplate&gt;
+associatedRoles : BiMap&lt;MarkTemplate, MarkRole&gt;
+markTemplates : Set&lt;MarkTemplate&gt;
+defaultNumberOfLaps : Integer
+bg=#fffeb3</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>801</x>
+      <y>45</y>
+      <w>315</w>
+      <h>45</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-
+waypoints
+2..n</panel_attributes>
+    <additional_attributes>10.0;20.0;330.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>783</x>
+      <y>378</y>
+      <w>252</w>
+      <h>144</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-
+waypoints
+2..n</panel_attributes>
+    <additional_attributes>10.0;20.0;260.0;20.0;260.0;140.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>612</x>
+      <y>126</y>
+      <w>126</w>
+      <h>81</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-
+   
+  courseTemplate
+   0 .. 1</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;70.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>612</x>
+      <y>270</y>
+      <w>126</w>
+      <h>90</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-
+   0 .. 1
+  courseTemplate
+   </panel_attributes>
+    <additional_attributes>10.0;80.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>297</x>
+      <y>540</y>
+      <w>225</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>WaypointTemplate
+--
+controlPoint : ControlPointTemplate
+passingInstruction : PassingInstruction
+bg=#fffeb3</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>396</x>
+      <y>585</y>
+      <w>90</w>
+      <h>81</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-
+ 
+controlPoint
+ 1</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;70.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>333</x>
+      <y>216</y>
+      <w>207</w>
+      <h>342</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-
+
+
+
+
+
+2..n
+                         waypointTemplates</panel_attributes>
+    <additional_attributes>140.0;20.0;80.0;20.0;80.0;360.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>360</x>
+      <y>0</y>
+      <w>117</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>lt=.</panel_attributes>
+    <additional_attributes>10.0;10.0;110.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>360</x>
+      <y>153</y>
+      <w>117</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>lt=.</panel_attributes>
+    <additional_attributes>10.0;10.0;110.0;40.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>351</x>
+      <y>306</y>
+      <w>117</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>lt=.</panel_attributes>
+    <additional_attributes>10.0;10.0;110.0;40.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>819</x>
+      <y>648</y>
+      <w>198</w>
+      <h>252</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-
+
+
+
+
+
+
+
+
+
+effectiveProperties
+1</panel_attributes>
+    <additional_attributes>200.0;260.0;90.0;260.0;90.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>819</x>
+      <y>792</y>
+      <w>180</w>
+      <h>180</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-
+
+
+
+
+
+
+
+ originatingMarkProperties
+ 0..1
+</panel_attributes>
+    <additional_attributes>20.0;10.0;20.0;180.0;10.0;180.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>360</x>
+      <y>783</y>
+      <w>135</w>
+      <h>207</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-
+
+0..1
+lastUsedTemplate</panel_attributes>
+    <additional_attributes>130.0;190.0;10.0;190.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>891</x>
+      <y>207</y>
+      <w>225</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;interface&gt;&gt;
+WithOptionalRepeatablePart
+--
+hasRepeatablePart() : boolean
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>792</x>
+      <y>225</y>
+      <w>117</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;.
+&lt;&lt;instanceOf&gt;&gt;</panel_attributes>
+    <additional_attributes>110.0;20.0;10.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>801</x>
+      <y>99</y>
+      <w>126</w>
+      <h>135</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;.
+&lt;&lt;instantceOf&gt;&gt;</panel_attributes>
+    <additional_attributes>100.0;130.0;40.0;130.0;40.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1305</x>
+      <y>369</y>
+      <w>144</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>MarkPairConfiguration
+--
+left : MarkConfiguration
+right: MarkConfiguration
+bg=#c0ffb3</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1359</x>
+      <y>252</y>
+      <w>27</w>
+      <h>135</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;130.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1368</x>
+      <y>414</y>
+      <w>54</w>
+      <h>441</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-
+m2=1
+right</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;470.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>999</x>
+      <y>288</y>
+      <w>252</w>
+      <h>63</h>
+    </coordinates>
+    <panel_attributes>RepeatablePart
+--
+zeroBasedIndexOfRepeatablePartStart : int
+zeroBasedIndexOfRepeatablePartEnd : int
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>891</x>
+      <y>252</y>
+      <w>126</w>
+      <h>90</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-
+
+0..1
+repeatablePart</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;80.0;120.0;80.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1404</x>
+      <y>729</y>
+      <w>189</w>
+      <h>81</h>
+    </coordinates>
+    <panel_attributes>Positioning
+--
+type: PositioningType
+position : Position
+deviceIdentifier: DeviceIdentifier</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1413</x>
+      <y>801</y>
+      <w>153</w>
+      <h>135</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-
+
+
+optionalPositioning
+0..1</panel_attributes>
+    <additional_attributes>10.0;90.0;150.0;90.0;150.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>81</x>
+      <y>891</y>
+      <w>144</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>IsMarkRole
+--
+name : String</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>171</x>
+      <y>1008</y>
+      <w>144</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>MarkRole
+--
+id: UUID
+name : String</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>18</x>
+      <y>1008</y>
+      <w>144</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>MarkRoleName
+--
+name : String</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>90</x>
+      <y>936</y>
+      <w>27</w>
+      <h>90</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;80.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>198</x>
+      <y>936</y>
+      <w>27</w>
+      <h>90</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;80.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1323</x>
+      <y>414</y>
+      <w>45</w>
+      <h>441</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-
+m2=1
+left</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;470.0</additional_attributes>
+  </element>
+</diagram>

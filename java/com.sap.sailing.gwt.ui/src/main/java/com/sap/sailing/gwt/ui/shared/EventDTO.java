@@ -80,7 +80,7 @@ public class EventDTO extends EventBaseDTO implements SecuredDTO {
         return leaderboardGroups;
     }
 
-    public Iterable<UUID> getLeaderboardGroupIds() {
+    public List<UUID> getLeaderboardGroupIds() {
         final List<UUID> updatedEventLeaderboardGroupIds = new ArrayList<>();
         for (LeaderboardGroupDTO leaderboardGroup : this.getLeaderboardGroups()) {
             updatedEventLeaderboardGroupIds.add(leaderboardGroup.getId());
@@ -106,10 +106,10 @@ public class EventDTO extends EventBaseDTO implements SecuredDTO {
      * 
      * @return always a valid {@link Iterable} which may, though, be empty
      */
-    public Iterable<String> getWindFinderReviewedSpotsCollectionIds() {
-        final Iterable<String> result;
+    public List<String> getWindFinderReviewedSpotsCollectionIds() {
+        final List<String> result;
         if (windFinderReviewedSpotsCollectionIds == null) {
-            result = Collections.emptySet();
+            result = Collections.emptyList();
         } else {
             result = windFinderReviewedSpotsCollectionIds;
         }
@@ -173,13 +173,13 @@ public class EventDTO extends EventBaseDTO implements SecuredDTO {
     }
     
     @Override
-    public HasPermissions getType() {
+    public HasPermissions getPermissionType() {
         return SecuredDomainType.EVENT;
     }
     
     @Override
     public QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+        return getPermissionType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
     }
 
     public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {

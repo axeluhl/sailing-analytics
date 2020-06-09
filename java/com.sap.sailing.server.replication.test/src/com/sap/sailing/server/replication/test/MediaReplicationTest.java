@@ -198,7 +198,7 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
         User currentUser = new UserImpl("test", "email@test", Collections.emptyMap(), null);
 
         SecurityService securityService = Mockito.mock(SecurityService.class);
-        Mockito.doReturn(defaultTenant).when(securityService).getDefaultTenant();
+        Mockito.doReturn(defaultTenant).when(securityService).getServerGroup();
         Mockito.doReturn(currentUser).when(securityService).getCurrentUser();
         Mockito.doReturn(true).when(securityService).hasCurrentUserReadPermission(Mockito.any());
         Mockito.doNothing().when(securityService).checkCurrentUserReadPermission(Mockito.any());
@@ -251,14 +251,12 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
                 "leaderboard group name", "leaderboard group description", "leaderboard group display name",
                 displayGroupsInReverseOrder, Collections.singletonList(leaderboard.getName()),
                 overallLeaderboardDiscardThresholds, ScoringSchemeType.LOW_POINT);
-
         // Serialize
         List<String> groupNamesToExport = Collections.singletonList(leaderboardGroup.getName());
-
         final DomainFactory domainFactory;
         DummyMasterDataResource spyResource = spyResource(new DummyMasterDataResource(), sourceService);
         Mockito.doReturn(securityService).when(spyResource).getSecurityService();
-        Response response = spyResource.getMasterDataByLeaderboardGroups(groupNamesToExport, false, true, false);
+        Response response = spyResource.getMasterDataByLeaderboardGroups(groupNamesToExport, false, true, false, false);
         StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         UUID randomUUID = UUID.randomUUID();
@@ -283,7 +281,6 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
         } finally {
             os.close();
         }
-
         // ---Asserts---
         final Iterable<MediaTrack> targetTracksMaster = master.getAllMediaTracks();
         compareTracks(trackOnSource, targetTracksMaster);

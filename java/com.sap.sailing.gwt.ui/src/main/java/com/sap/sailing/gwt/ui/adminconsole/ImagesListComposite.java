@@ -29,7 +29,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sse.common.media.MediaTagConstants;
@@ -50,7 +50,7 @@ import com.sap.sse.gwt.client.media.ImageResizingTaskDTO;
  */
 public class ImagesListComposite extends Composite {
     private final StringMessages stringMessages;
-    private final SailingServiceAsync sailingService;
+    private final SailingServiceWriteAsync sailingServiceWrite;
     
     private CellTable<ImageDTO> imageTable;
     private SingleSelectionModel<ImageDTO> imageSelectionModel;
@@ -77,9 +77,9 @@ public class ImagesListComposite extends Composite {
 
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
 
-    public ImagesListComposite(final SailingServiceAsync sailingService, final StringMessages stringMessages,
+    public ImagesListComposite(final SailingServiceWriteAsync sailingServiceWrite, final StringMessages stringMessages,
             final FileStorageServiceConnectionTestObservable storageServiceAvailable) {
-        this.sailingService = sailingService;
+        this.sailingServiceWrite = sailingServiceWrite;
         this.stringMessages = stringMessages;
         this.storageServiceAvailable = storageServiceAvailable;
         mainPanel = new SimplePanel();
@@ -223,7 +223,7 @@ public class ImagesListComposite extends Composite {
             public void update(int index, ImageDTO image, String value) {
                 if (ImageConfigImagesBarCell.ACTION_REMOVE.equals(value)) {
                     imageListDataProvider.getList().remove(image);
-                    updateTableVisisbilty();
+                    updateTableVisibility();
                 } else if (ImageConfigImagesBarCell.ACTION_EDIT.equals(value)) {
                     openEditImageDialog(image);
                 }
@@ -274,7 +274,7 @@ public class ImagesListComposite extends Composite {
     }
 
     private void openCreateImageDialog(String initialTag) {
-        ImageCreateDialog dialog = new ImageCreateDialog(initialTag, sailingService, stringMessages,
+        ImageCreateDialog dialog = new ImageCreateDialog(initialTag, sailingServiceWrite, stringMessages,
                 storageServiceAvailable, new DialogCallback<ImageResizingTaskDTO>() {
                     @Override
                     public void cancel() {
@@ -286,6 +286,7 @@ public class ImagesListComposite extends Composite {
                             callResizingServiceAndUpdateTable(resizingTask, null);
                         } else {
                             imageListDataProvider.getList().add(resizingTask.getImage());
+                            updateTableVisibility();
                         }
                     }
                 });
@@ -293,7 +294,7 @@ public class ImagesListComposite extends Composite {
     }
 
     private void openEditImageDialog(final ImageDTO selectedImage) {
-        ImageEditDialog dialog = new ImageEditDialog(selectedImage, sailingService, stringMessages,
+        ImageEditDialog dialog = new ImageEditDialog(selectedImage, sailingServiceWrite, stringMessages,
                 storageServiceAvailable, new DialogCallback<ImageResizingTaskDTO>() {
                     @Override
                     public void cancel() {
@@ -306,6 +307,7 @@ public class ImagesListComposite extends Composite {
                         } else {
                             imageListDataProvider.getList().remove(selectedImage);
                             imageListDataProvider.getList().add(resizingTask.getImage());
+                            updateTableVisibility();
                         }
                     }
                 });
@@ -325,7 +327,7 @@ public class ImagesListComposite extends Composite {
      *            returned ImageDTOs
      */
     protected void callResizingServiceAndUpdateTable(ImageResizingTaskDTO resizingTask, ImageDTO originalImage) {
-        sailingService.resizeImage(resizingTask, new AsyncCallback<Set<ImageDTO>>() {
+        sailingServiceWrite.resizeImage(resizingTask, new AsyncCallback<Set<ImageDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 Notification.notify(stringMessages.resizeUnsuccessful(caught.getMessage()), NotificationType.ERROR);
@@ -337,14 +339,14 @@ public class ImagesListComposite extends Composite {
                     imageListDataProvider.getList().add(image);
                 }
                 imageListDataProvider.getList().remove(originalImage);
-                updateTableVisisbilty();
+                updateTableVisibility();
                 Notification.notify(stringMessages.resizeSuccessfull(), NotificationType.SUCCESS);
             }
         });
 
     }
 
-    private void updateTableVisisbilty() {
+    private void updateTableVisibility() {
         if (imageListDataProvider.getList().isEmpty()) {
             imageTable.setVisible(false);
             noImagesLabel.setVisible(true);
@@ -358,8 +360,7 @@ public class ImagesListComposite extends Composite {
         imageSelectionModel.clear();
         imageListDataProvider.getList().clear();
         imageListDataProvider.getList().addAll(images);
-        
-        updateTableVisisbilty();
+        updateTableVisibility();
     }
 
     public List<ImageDTO> getAllImages() {

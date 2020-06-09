@@ -31,6 +31,7 @@ import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveCourseImpl;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
 import com.sap.sailing.domain.leaderboard.impl.AbstractSimpleLeaderboardImpl;
 import com.sap.sailing.domain.orc.ORCPerformanceCurve;
+import com.sap.sailing.domain.orc.ORCPerformanceCurveCache;
 import com.sap.sailing.domain.orc.impl.AbstractORCPerformanceCurveTwaLegAdapter;
 import com.sap.sailing.domain.orc.impl.ORCPerformanceCurveByImpliedWindRankingMetric;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -82,6 +83,11 @@ public class LeaderboardDTOCalculationReuseCache implements WindLegTypeAndLegBea
      */
     final ConcurrentHashMap<Triple<TrackedRace, Competitor, TimePoint>, Wind> windCache;
     
+    /**
+     * The average wind in a leg as defined by {@link TrackedLeg#getAverageWind(int)}. See {@link #getWindForLeg(TrackedLeg, Function)}.
+     */
+    private final ConcurrentHashMap<ORCPerformanceCurveLeg, Wind> trackedLegAverageWindCache;
+    
     private static final Wind NULL_WIND = new WindImpl(/* position */ new DegreePosition(0, 0),
             /* time point */ MillisecondsTimePoint.now(), /* windSpeedWithBearing */ new KnotSpeedWithBearingImpl(0, new DegreeBearingImpl(0)));
     
@@ -95,7 +101,7 @@ public class LeaderboardDTOCalculationReuseCache implements WindLegTypeAndLegBea
      * thereof. This course will have any tracked leg adapters replaced by fixed leg descriptions with a fixed TWA and
      * distance as obtained upon the first call for the {@link #timePoint} from the underlying {@link TrackedRace}.
      */
-    private ORCPerformanceCurveCourse totalCourse;
+    private final ConcurrentHashMap<TrackedRace, ORCPerformanceCurveCourse> totalCourse;
     
     private final ConcurrentHashMap<Triple<TrackedRace, Waypoint, TimePoint>, Position> approximateWaypointPositions;
     
@@ -145,10 +151,12 @@ public class LeaderboardDTOCalculationReuseCache implements WindLegTypeAndLegBea
         windCache = new ConcurrentHashMap<>();
         scratchBoat = new ConcurrentHashMap<>();
         legBearingCache = new ConcurrentHashMap<>();
+        trackedLegAverageWindCache = new ConcurrentHashMap<>();
         relativeCorrectedTimePerCompetitor = new ConcurrentHashMap<>();
         approximateWaypointPositions = new ConcurrentHashMap<>();
         this.performanceCurvesPerCompetitor = new ConcurrentHashMap<>();
         this.impliedWindPerCompetitor = new ConcurrentHashMap<>();
+        this.totalCourse = new ConcurrentHashMap<>();
         this.timePoint = timePoint;
     }
     
@@ -207,20 +215,17 @@ public class LeaderboardDTOCalculationReuseCache implements WindLegTypeAndLegBea
 
     @Override
     public ORCPerformanceCurveCourse getTotalCourse(TrackedRace raceContext, Supplier<ORCPerformanceCurveCourse> totalCourseSupplier) {
-        if (totalCourse == null) {
-            totalCourse = fixORCPerformanceCurveCourse(totalCourseSupplier.get());
-        }
-        return totalCourse;
+        return totalCourse.computeIfAbsent(raceContext, key->fixORCPerformanceCurveCourse(totalCourseSupplier.get(), /* cache */ this));
     }
 
-    private ORCPerformanceCurveCourse fixORCPerformanceCurveCourse(ORCPerformanceCurveCourse course) {
+    private ORCPerformanceCurveCourse fixORCPerformanceCurveCourse(ORCPerformanceCurveCourse course, ORCPerformanceCurveCache cache) {
         final List<ORCPerformanceCurveLeg> legs = new ArrayList<>();
         boolean changed = false;
         for (final ORCPerformanceCurveLeg leg : course.getLegs()) {
             if (leg instanceof AbstractORCPerformanceCurveTwaLegAdapter) {
                 final ORCPerformanceCurveLeg pcl;
                 if (leg.getType() == ORCPerformanceCurveLegTypes.TWA) {
-                    pcl = new ORCPerformanceCurveLegImpl(((AbstractORCPerformanceCurveTwaLegAdapter) leg).getLength(this), leg.getTwa());
+                    pcl = new ORCPerformanceCurveLegImpl(((AbstractORCPerformanceCurveTwaLegAdapter) leg).getLength(this), leg.getTwa(cache));
                 } else {
                     pcl = new ORCPerformanceCurveLegImpl(((AbstractORCPerformanceCurveTwaLegAdapter) leg).getLength(this), leg.getType());
                 }
@@ -312,5 +317,16 @@ public class LeaderboardDTOCalculationReuseCache implements WindLegTypeAndLegBea
                 return trackedRace;
             }
         };
+    }
+
+    @Override
+    public <L extends ORCPerformanceCurveLeg> Wind getAverageWind(L leg,
+            Function<L, Wind> averageWindForLegSupplier) {
+        Wind result = trackedLegAverageWindCache.get(leg);
+        if (result == null) {
+            result = averageWindForLegSupplier.apply(leg);
+            trackedLegAverageWindCache.put(leg, result);
+        }
+        return result;
     }
 }

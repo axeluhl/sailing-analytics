@@ -36,8 +36,8 @@ import com.sap.sse.security.Action;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.interfaces.Credential;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
+import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
-import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
@@ -47,7 +47,6 @@ import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.dto.AccessControlListAnnotationDTO;
 import com.sap.sse.security.shared.dto.AccessControlListDTO;
-import com.sap.sse.security.shared.dto.OwnershipAnnotationDTO;
 import com.sap.sse.security.shared.dto.OwnershipDTO;
 import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
 import com.sap.sse.security.shared.dto.RolesAndPermissionsForUserDTO;
@@ -204,22 +203,13 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public OwnershipDTO setOwnership(final String username, final UUID userGroupId,
             final QualifiedObjectIdentifier idOfOwnedObject, final String displayNameOfOwnedObject) {
-
         SecurityUtils.getSubject()
                 .checkPermission(idOfOwnedObject.getStringPermission(DefaultActions.CHANGE_OWNERSHIP));
-
         final User user = getSecurityService().getUserByName(username);
         // no security check if current user can see the user associated with the given username
-
         final Ownership result = getSecurityService().setOwnership(idOfOwnedObject, user,
                 getSecurityService().getUserGroup(userGroupId), displayNameOfOwnedObject);
         return securityDTOFactory.createOwnershipDTO(result, new HashMap<>(), new HashMap<>());
-    }
-
-    @Override
-    public OwnershipAnnotationDTO getOwnership(QualifiedObjectIdentifier idOfOwnedObject) {
-        OwnershipAnnotation annotation = getSecurityService().getOwnership(idOfOwnedObject);
-        return securityDTOFactory.createOwnerShipAnnotationDTO(annotation);
     }
 
     @Override
@@ -233,60 +223,6 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             }
         }
         return acls;
-    }
-
-    @Override
-    public AccessControlListAnnotationDTO getAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject) {
-        // skip permission check for ACL linked to null object since it is public anyway
-        if (idOfAccessControlledObject != null) {
-        SecurityUtils.getSubject()
-                .checkPermission(idOfAccessControlledObject.getStringPermission(DefaultActions.CHANGE_ACL));
-        }
-        return securityDTOFactory.createAccessControlListAnnotationDTO(getSecurityService().getAccessControlList(idOfAccessControlledObject));
-    }
-
-    @Override
-    public AccessControlListDTO updateAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
-            Map<String, Set<String>> permissionStrings) throws UnauthorizedException {
-        if (SecurityUtils.getSubject()
-                .isPermitted(idOfAccessControlledObject.getStringPermission(DefaultActions.CHANGE_ACL))) {
-            Map<UserGroup, Set<String>> permissionMap = new HashMap<>();
-            for (String group : permissionStrings.keySet()) {
-                permissionMap.put(getSecurityService().getUserGroupByName(group), permissionStrings.get(group));
-            }
-            return securityDTOFactory.createAccessControlListDTO(getSecurityService().updateAccessControlList(idOfAccessControlledObject, permissionMap));
-        } else {
-            throw new UnauthorizedException("Not permitted to grant and revoke permissions for user");
-        }
-    }
-
-    @Override
-    public AccessControlListDTO addToAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
-            String groupIdAsString, String action) throws UnauthorizedException {
-        if (SecurityUtils.getSubject()
-                .isPermitted(idOfAccessControlledObject.getStringPermission(DefaultActions.CHANGE_ACL))) {
-            UserGroup userGroup = getUserGroup(groupIdAsString);
-            return securityDTOFactory.createAccessControlListDTO(getSecurityService().addToAccessControlList(idOfAccessControlledObject, userGroup, action));
-        } else {
-            throw new UnauthorizedException("Not permitted to grant permission for user");
-        }
-    }
-
-    private UserGroup getUserGroup(String groupIdAsString) {
-        UUID groupId = UUID.fromString(groupIdAsString);
-        return getSecurityService().getUserGroup(groupId);
-    }
-
-    @Override
-    public AccessControlListDTO removeFromAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
-            String groupOrTenantIdAsString, String permission) throws UnauthorizedException {
-        // FIXME replace permission check with a valid one
-        if (SecurityUtils.getSubject().isPermitted("tenant:revoke_permission:" + groupOrTenantIdAsString)) {
-            UserGroup userGroup = getUserGroup(groupOrTenantIdAsString);
-            return securityDTOFactory.createAccessControlListDTO(getSecurityService().removeFromAccessControlList(idOfAccessControlledObject, userGroup, permission));
-        } else {
-            throw new UnauthorizedException("Not permitted to revoke permission for user");
-        }
     }
 
     @Override
@@ -325,8 +261,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         }
     }
 
-    @Override
-    public UserDTO getUserByName(String username) throws UnauthorizedException {
+    private UserDTO getUserByName(String username) throws UnauthorizedException {
         final User user = getSecurityService().getUserByName(username);
         if (user == null
                 || SecurityUtils.getSubject()
@@ -452,18 +387,10 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public Collection<UserDTO> getUserList() throws UnauthorizedException {
-        List<UserDTO> users = new ArrayList<>();
-        for (User u : getSecurityService().getUserList()) {
-            if (SecurityUtils.getSubject()
-                    .isPermitted(SecuredSecurityTypes.USER.getStringPermissionForObject(DefaultActions.READ, u))
-                    || SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.USER
-                            .getStringPermissionForObject(SecuredSecurityTypes.PublicReadableActions.READ_PUBLIC, u))) {
-                // TODO: pruning if subject only has READ_PUBLIC permission
-                final UserDTO userDTO = getUserDTOWithFilteredRolesAndPermissions(u);
-                users.add(userDTO);
-            }
-        }
-        return users;
+        final HasPermissions.Action[] requiredActionsForRead = SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS;
+        return getSecurityService().mapAndFilterByAnyExplicitPermissionForCurrentUser(SecuredSecurityTypes.USER,
+                requiredActionsForRead, getSecurityService().getUserList(),
+                this::getUserDTOWithFilteredRolesAndPermissions);
     }
 
     @Override
@@ -504,22 +431,20 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         return new SuccessInfo(true, "Logged out.", /* redirectURL */ null, null);
     }
 
-    public UserDTO createSimpleUser(String username, String email, String password, String fullName, String company,
-            String localeName, String validationBaseURL)
+    public UserDTO createSimpleUser(final String username, final String email, final String password,
+            final String fullName, final String company, final String localeName, final String validationBaseURL)
             throws UserManagementException, MailException, UnauthorizedException {
-
         User user = getSecurityService().checkPermissionForObjectCreationAndRevertOnErrorForUserCreation(username,
                 new Callable<User>() {
                     @Override
                     public User call() throws Exception {
                         if (userGroupExists(username + SecurityService.TENANT_SUFFIX)) {
                             throw new UserManagementException(
-                                    "User tenant already exists, please chose a different username!");
+                                    "User " + username + " already exists, please chose a different username!");
                         }
                         try {
                             User newUser = getSecurityService().createSimpleUser(username, email, password, fullName,
-                                    company,
-                                    getLocaleFromLocaleName(localeName), validationBaseURL,
+                                    company, getLocaleFromLocaleName(localeName), validationBaseURL,
                                     getSecurityService().getDefaultTenantForCurrentUser());
                             return newUser;
                         } catch (UserManagementException | UserGroupManagementException e) {
@@ -810,12 +735,6 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public String getAccessToken(String username) throws UnauthorizedException {
-        getSecurityService().checkCurrentUserReadPermission(getUserByName(username));
-        return getSecurityService().getAccessToken(username);
-    }
-
-    @Override
     public String getOrCreateAccessToken(String username) throws UnauthorizedException {
         getSecurityService().checkCurrentUserUpdatePermission(getUserByName(username));
         return getSecurityService().getOrCreateAccessToken(username);
@@ -864,7 +783,6 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public SuccessInfo addRoleToUser(String username, String userQualifierName, UUID roleDefinitionId,
             String tenantQualifierName) throws UserManagementException, UnauthorizedException {
-
         SuccessInfo successInfo;
         try {
             // get user for which to add a role
@@ -885,19 +803,16 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             getSecurityService().setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(
                     SecuredSecurityTypes.ROLE_ASSOCIATION, associationTypeIdentifier,
                     associationTypeIdentifier.toString(), new Action() {
-
                         @Override
                         public void run() throws Exception {
                             final QualifiedObjectIdentifier qualifiedObjectAssociationIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
                                     .getQualifiedObjectIdentifier(associationTypeIdentifier);
                             getSecurityService().addToAccessControlList(qualifiedObjectAssociationIdentifier,
                                     null, DefaultActions.READ.name());
-
                             getSecurityService().addRoleForUser(user, role);
                             logger.info(message);
                         }
                     });
-
             final UserDTO userDTO = securityDTOFactory.createUserDTOFromUser(user, getSecurityService());
             successInfo = new SuccessInfo(true, message, /* redirectURL */null,
                     new Triple<>(userDTO, getAllUser(), getServerInfo()));
@@ -1113,7 +1028,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
      *         user can actually see.
      */
     private UserDTO getUserDTOWithFilteredRolesAndPermissions(final User user) {
-        return securityDTOFactory.createUserDTOFromUser(user, getSecurityService(), permission -> {
+        final UserDTO result = securityDTOFactory.createUserDTOFromUser(user, getSecurityService(), permission -> {
             final TypeRelativeObjectIdentifier typeRelativeObjectIdentifier = PermissionAndRoleAssociation
                     .get(permission, user);
             return SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.PERMISSION_ASSOCIATION
@@ -1124,6 +1039,10 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             return SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.ROLE_ASSOCIATION
                     .getStringPermissionForTypeRelativeIdentifier(DefaultActions.READ, typeRelativeObjectIdentifier));
         });
+        if (!getSecurityService().hasCurrentUserReadPermission(user)) {
+            result.clearNonPublicFields();
+        }
+        return result;
     }
 
     @Override

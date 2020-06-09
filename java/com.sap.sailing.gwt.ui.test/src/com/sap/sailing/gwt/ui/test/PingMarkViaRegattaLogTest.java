@@ -25,14 +25,14 @@ import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.server.interfaces.RacingEventService;
 
 public class PingMarkViaRegattaLogTest {
-    private SailingServiceImplMock sailingService;
+    private SailingServiceWriteImplMock sailingService;
     private RacingEventService service;
     private final String columnName = "column";
     private final Fleet fleet = new FleetImpl("fleet");
     
     @Before
     public void prepare() {
-        sailingService = new SailingServiceImplMock();
+        sailingService = new SailingServiceWriteImplMock();
         service = sailingService.getRacingEventService();
     }
     
@@ -45,10 +45,10 @@ public class PingMarkViaRegattaLogTest {
                 /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED, /* registrationLinkSecret */ null, /*startDate*/ null, /*endDate*/ null, 
                 UUID.randomUUID(), Collections.<Series>singletonList(series),
                 false, new HighPoint(), UUID.randomUUID(), /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */ true,
-                /* controlTrackingFromStartAndFinishTimes */ false, RankingMetricsFactory.getRankingMetricConstructor(RankingMetrics.ONE_DESIGN));
+                /* controlTrackingFromStartAndFinishTimes */ false, /* autoRestartTrackingUponCompetitorSetChange */ false, RankingMetricsFactory.getRankingMetricConstructor(RankingMetrics.ONE_DESIGN));
         RegattaLeaderboard leaderboard = service.addRegattaLeaderboard(regatta.getRegattaIdentifier(), "RegattaLeaderboard", new int[] {});
         
-        MarkDTO mark = new MarkDTO("mark", "mark");
+        MarkDTO mark = new MarkDTO("mark", "mark", "m");
         Position position = new DegreePosition(30, 40);
         
         sailingService.pingMark(leaderboard.getName(), mark, /* time point for fix */ null, position);

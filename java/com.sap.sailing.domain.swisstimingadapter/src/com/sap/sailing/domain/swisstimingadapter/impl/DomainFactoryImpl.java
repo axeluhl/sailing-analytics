@@ -6,12 +6,10 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -291,7 +289,8 @@ public class DomainFactoryImpl implements DomainFactory {
         return result;
     }
 
-    private Map<Competitor, Boat> createCompetitorsAndBoats(StartList startList, String raceId, BoatClass boatClass,
+    @Override
+    public Map<Competitor, Boat> createCompetitorsAndBoats(StartList startList, String raceId, BoatClass boatClass,
             RaceTrackingHandler raceTrackHandler) {
         Map<Competitor, Boat> result = new LinkedHashMap<>();
         for (com.sap.sailing.domain.swisstimingadapter.Competitor swissTimingCompetitor : startList.getCompetitors()) {
@@ -310,7 +309,8 @@ public class DomainFactoryImpl implements DomainFactory {
     private com.sap.sailing.domain.base.Course createCourse(String courseName, Course course) {
         List<Waypoint> waypoints = new ArrayList<Waypoint>();
         for (Mark mark : course.getMarks()) {
-            ControlPoint controlPoint = getOrCreateControlPoint(mark.getDescription(), mark.getDeviceIds(), getMarkType(mark.getMarkType()));
+            ControlPoint controlPoint = getOrCreateControlPoint(mark.getDescription(), mark.getDeviceIds(),
+                    getMarkType(mark.getMarkType()), mark.getDescription());
             Waypoint waypoint = baseDomainFactory.createWaypoint(controlPoint, /* passingInstruction */ PassingInstruction.None);
             waypoints.add(waypoint);
         }
@@ -332,7 +332,8 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public ControlPoint getOrCreateControlPoint(String description, Iterable<Serializable> deviceIds, MarkType markType) {
+    public ControlPoint getOrCreateControlPoint(String description, Iterable<Serializable> deviceIds, MarkType markType,
+            String shortNameOfPotentialGate) {
         ControlPoint result;
         synchronized (controlPointCache) {
             result = controlPointCache.get(deviceIds);
@@ -345,7 +346,8 @@ public class DomainFactoryImpl implements DomainFactory {
                     Iterator<Serializable> markNameIter = deviceIds.iterator();
                     final Serializable idLeft = markNameIter.next();
                     final Serializable idRight = markNameIter.next();
-                    result = baseDomainFactory.createControlPointWithTwoMarks(getOrCreateMark(idLeft, description), getOrCreateMark(idRight, description), description);
+                    result = baseDomainFactory.createControlPointWithTwoMarks(getOrCreateMark(idLeft, description),
+                            getOrCreateMark(idRight, description), description, shortNameOfPotentialGate);
                     break;
                 default:
                     throw new RuntimeException(
@@ -369,7 +371,7 @@ public class DomainFactoryImpl implements DomainFactory {
      */
     @Override
     public com.sap.sailing.domain.base.Mark getOrCreateMark(Serializable trackerId, String description) {
-        return baseDomainFactory.getOrCreateMark(trackerId, description);
+        return baseDomainFactory.getOrCreateMark(trackerId, description, /* no short name available */ description);
     }
 
     @Override
@@ -384,33 +386,17 @@ public class DomainFactoryImpl implements DomainFactory {
         List<com.sap.sse.common.Util.Pair<com.sap.sailing.domain.base.ControlPoint, PassingInstruction>> newDomainControlPoints = new ArrayList<com.sap.sse.common.Util.Pair<com.sap.sailing.domain.base.ControlPoint, PassingInstruction>>();
         for (Mark mark : marks) {
             // TODO bug 1043: propagate the mark names to the waypoint names
-            com.sap.sailing.domain.base.ControlPoint domainControlPoint = getOrCreateControlPoint(mark.getDescription(), mark.getDeviceIds(), getMarkType(mark.getMarkType()));
+            com.sap.sailing.domain.base.ControlPoint domainControlPoint = getOrCreateControlPoint(mark.getDescription(),
+                    mark.getDeviceIds(), getMarkType(mark.getMarkType()), mark.getDescription());
             newDomainControlPoints.add(new com.sap.sse.common.Util.Pair<>(domainControlPoint, PassingInstruction.None));
         }
-        courseToUpdate.update(newDomainControlPoints, baseDomainFactory);
+        courseToUpdate.update(newDomainControlPoints, courseToUpdate.getAssociatedRoles(),
+                courseToUpdate.getOriginatingCourseTemplateIdOrNull(), baseDomainFactory);
     }
 
     @Override
     public MarkPassing createMarkPassing(TimePoint timePoint, Waypoint waypoint, com.sap.sailing.domain.base.Competitor competitor) {
         return baseDomainFactory.createMarkPassing(timePoint, waypoint, competitor);
-    }
-
-    @Override
-    public void removeRace(String raceID) {
-        Regatta regatta = raceIDToRegattaCache.get(raceID);
-        if (regatta != null) {
-            Set<RaceDefinition> toRemove = new HashSet<RaceDefinition>();
-            RaceDefinition race = regatta.getRaceByName(raceID);
-            if (race != null) {
-                toRemove.add(race);
-            }
-            for (RaceDefinition raceToRemove : toRemove) {
-                regatta.removeRace(raceToRemove);
-            }
-            if (Util.isEmpty(regatta.getAllRaces())) {
-                raceIDToRegattaCache.remove(raceID);
-            }
-        }
     }
 
     @Override
@@ -424,11 +410,11 @@ public class DomainFactoryImpl implements DomainFactory {
             long delayToLiveInMillis, SwissTimingFactory swissTimingFactory, DomainFactory domainFactory,
             RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, boolean useInternalMarkPassingAlgorithm,
             boolean trackWind, boolean correctWindDirectionByMagneticDeclination, String updateURL,
-            String updateUsername, String updatePassword) {
+            String updateUsername, String updatePassword, String eventName, String manage2SailEventUrl) {
         return new SwissTimingTrackingConnectivityParameters(hostname, port, raceID, raceName, raceDescription,
                 boatClass, startList, delayToLiveInMillis, swissTimingFactory, domainFactory, raceLogStore,
                 regattaLogStore, useInternalMarkPassingAlgorithm, trackWind, correctWindDirectionByMagneticDeclination,
-                updateURL, updateUsername, updatePassword);
+                updateURL, updateUsername, updatePassword, eventName, manage2SailEventUrl);
     }
 
     @Override

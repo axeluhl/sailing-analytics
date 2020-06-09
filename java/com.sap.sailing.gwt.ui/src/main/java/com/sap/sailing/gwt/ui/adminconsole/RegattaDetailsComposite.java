@@ -31,16 +31,18 @@ import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.RankingMetricTypeFormatter;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -57,7 +59,7 @@ public class RegattaDetailsComposite extends Composite {
 
     private final CaptionPanel mainPanel;
 
-    private final SailingServiceAsync sailingService;
+    private final SailingServiceWriteAsync sailingServiceWrite;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
     private final RegattaRefresher regattaRefresher;
@@ -69,9 +71,10 @@ public class RegattaDetailsComposite extends Composite {
     private final Label boatClassName;
     private final Label scoringSystem;
     private final Label rankingMetric;
-    private final Label defaultCourseArea;
+    private final Label courseAreas;
     private final Label useStartTimeInference;
     private final Label controlTrackingFromStartAndFinishTimes;
+    private final Label autoRestartTrackingUponCompetitorSetChange;
     private final Label canBoatsOfCompetitorsChangePerRace;
     private final Label competitorRegistrationType;
     private final Label configuration;
@@ -84,10 +87,10 @@ public class RegattaDetailsComposite extends Composite {
 
     private static AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
 
-    public RegattaDetailsComposite(final SailingServiceAsync sailingService, final UserService userService,
+    public RegattaDetailsComposite(final SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
             final RegattaRefresher regattaRefresher, final ErrorReporter errorReporter,
             final StringMessages stringMessages) {
-        this.sailingService = sailingService;
+        this.sailingServiceWrite = sailingServiceWrite;
         this.regattaRefresher = regattaRefresher;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
@@ -95,20 +98,19 @@ public class RegattaDetailsComposite extends Composite {
         mainPanel = new CaptionPanel(stringMessages.regatta());
         VerticalPanel vPanel = new VerticalPanel();
         mainPanel.add(vPanel);
-
-        int rows = 15;
+        int rows = 16;
         Grid grid = new Grid(rows, 2);
         vPanel.add(grid);
-        
         int currentRow = 0;
         regattaId = createLabelAndValueWidget(grid, currentRow++, stringMessages.id(), "RegattaIdLabel");
         regattaName = createLabelAndValueWidget(grid, currentRow++, stringMessages.regattaName(), "NameLabel");
         startDate = createLabelAndValueWidget(grid, currentRow++, stringMessages.startDate(), "StartDateLabel");
         endDate = createLabelAndValueWidget(grid, currentRow++, stringMessages.endDate(), "EndDateLabel");
         boatClassName = createLabelAndValueWidget(grid, currentRow++, stringMessages.boatClass(), "BoatClassLabel");
-        defaultCourseArea = createLabelAndValueWidget(grid, currentRow++, stringMessages.courseArea(), "CourseAreaLabel");
+        courseAreas = createLabelAndValueWidget(grid, currentRow++, stringMessages.courseArea(), "CourseAreaLabel");
         useStartTimeInference = createLabelAndValueWidget(grid, currentRow++, stringMessages.useStartTimeInference(), "UseStartTimeInferenceLabel");
-        controlTrackingFromStartAndFinishTimes = createLabelAndValueWidget(grid, currentRow++, stringMessages.controlTrackingFromStartAndFinishTimes(), "UseStartTimeInferenceLabel");
+        controlTrackingFromStartAndFinishTimes = createLabelAndValueWidget(grid, currentRow++, stringMessages.controlTrackingFromStartAndFinishTimes(), "ControlTrackingFromStartAndFinishTimesLabel");
+        autoRestartTrackingUponCompetitorSetChange = createLabelAndValueWidget(grid, currentRow++, stringMessages.autoRestartTrackingUponCompetitorSetChange(), "AutoRestartTrackingUponCompetitorSetChange");
         canBoatsOfCompetitorsChangePerRace = createLabelAndValueWidget(grid, currentRow++, stringMessages.canBoatsOfCompetitorsChangePerRace(), "CanBoatsOfCompetitorsChangePerRaceLabel");
         competitorRegistrationType = createLabelAndValueWidget(grid, currentRow++, stringMessages.competitorRegistrationType(), "CompetitorRegistrationTypeLabel");
         buoyZoneRadiusInHullLengths = createLabelAndValueWidget(grid, currentRow++, stringMessages.buoyZoneRadiusInHullLengths(), "BuoyZoneRadiusInHullLengthsLabel");
@@ -144,12 +146,9 @@ public class RegattaDetailsComposite extends Composite {
         Button button = new Button(stringMessages.registrationLinkShare(), new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-
                 RegistrationLinkWithQRCode registrationLinkWithQRCode = new RegistrationLinkWithQRCode();
                 registrationLinkWithQRCode.setSecret(regatta.registrationLinkSecret);
-
-                sailingService.getMailType(new AsyncCallback<MailInvitationType>() {
-
+                sailingServiceWrite.getMailType(new AsyncCallback<MailInvitationType>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         logger.log(Level.SEVERE, "Could not determine MailInvitationType", caught);
@@ -157,7 +156,7 @@ public class RegattaDetailsComposite extends Composite {
 
                     @Override
                     public void onSuccess(MailInvitationType result) {
-                        RegistrationLinkWithQRCodeDialog dialog = new RegistrationLinkWithQRCodeDialog(sailingService,
+                        RegistrationLinkWithQRCodeDialog dialog = new RegistrationLinkWithQRCodeDialog(sailingServiceWrite,
                                 stringMessages, regatta.getName(), registrationLinkWithQRCode,
                                 new DialogCallback<RegistrationLinkWithQRCode>() {
                                     @Override
@@ -293,7 +292,7 @@ public class RegattaDetailsComposite extends Composite {
         actionsColumn.addAction(SeriesConfigImagesBarCell.ACTION_REMOVE, UPDATE, series -> {
             RegattaIdentifier identifier = new RegattaName(regatta.getName());
             if (Window.confirm(stringMessages.reallyRemoveSeries(series.getName()))) {
-                sailingService.removeSeries(identifier, series.getName(),
+                sailingServiceWrite.removeSeries(identifier, series.getName(),
                         new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable cause) {
@@ -390,7 +389,7 @@ public class RegattaDetailsComposite extends Composite {
         }
         if (raceColumnsToRemove.isEmpty() || Window.confirm(stringMessages.reallyRemoveRace(racesToRemove.toString()))) {
             // first remove:
-            sailingService.removeRaceColumnsFromSeries(regattaIdentifier, series.getName(), raceColumnsToRemove,
+            sailingServiceWrite.removeRaceColumnsFromSeries(regattaIdentifier, series.getName(), raceColumnsToRemove,
                     new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
@@ -401,7 +400,7 @@ public class RegattaDetailsComposite extends Composite {
                         @Override
                         public void onSuccess(Void v) {
                             // when successfully removed, insert:
-                            sailingService.addRaceColumnsToSeries(regattaIdentifier, series.getName(), raceColumnNamesToAddWithInsertIndex,
+                            sailingServiceWrite.addRaceColumnsToSeries(regattaIdentifier, series.getName(), raceColumnNamesToAddWithInsertIndex,
                                     new AsyncCallback<List<RaceColumnInSeriesDTO>>() {
                                         @Override
                                         public void onFailure(Throwable caught) {
@@ -419,7 +418,7 @@ public class RegattaDetailsComposite extends Composite {
             if (isMedalChanged || isFleetsCanRunInParallelChanged || seriesResultDiscardingThresholdsChanged || isStartsWithZeroScoreChanged
                     || isFirstColumnIsNonDiscardableCarryForwardChanged || hasSplitFleetContiguousScoringChanged
                     || seriesNameChanged || maximumNumberOfDiscardsChanged) {
-                sailingService.updateSeries(regattaIdentifier, series.getName(), seriesDescriptor.getSeriesName(),
+                sailingServiceWrite.updateSeries(regattaIdentifier, series.getName(), seriesDescriptor.getSeriesName(),
                         seriesDescriptor.isMedal(), seriesDescriptor.isFleetsCanRunInParallel(), seriesDescriptor.getResultDiscardingThresholds(),
                         seriesDescriptor.isStartsWithZeroScore(),
                         seriesDescriptor.isFirstColumnIsNonDiscardableCarryForward(),
@@ -448,15 +447,14 @@ public class RegattaDetailsComposite extends Composite {
             startDate.setText(regatta.startDate != null ? regatta.startDate.toString() : "");
             endDate.setText(regatta.endDate != null ? regatta.endDate.toString() : "");
             boatClassName.setText(regatta.boatClass != null ? regatta.boatClass.getName() : "");
-            defaultCourseArea.setText(regatta.defaultCourseAreaUuid == null ? "" : regatta.defaultCourseAreaName);
+            courseAreas.setText(Util.joinStrings(", ", Util.map(regatta.courseAreas, CourseAreaDTO::getName)));
             useStartTimeInference.setText(regatta.useStartTimeInference ? stringMessages.yes() : stringMessages.no());
             controlTrackingFromStartAndFinishTimes.setText(regatta.controlTrackingFromStartAndFinishTimes ? stringMessages.yes() : stringMessages.no());
+            autoRestartTrackingUponCompetitorSetChange.setText(regatta.autoRestartTrackingUponCompetitorSetChange ? stringMessages.yes() : stringMessages.no());
             canBoatsOfCompetitorsChangePerRace.setText(regatta.canBoatsOfCompetitorsChangePerRace ? stringMessages.yes() : stringMessages.no());
             competitorRegistrationType.setText(regatta.competitorRegistrationType.getLabel(stringMessages));
-
             registrationLinkWithQRCodeOpenButton.setVisible(regatta.competitorRegistrationType.isOpen());
             buoyZoneRadiusInHullLengths.setText(String.valueOf(regatta.buoyZoneRadiusInHullLengths));
-            
             if (regatta.configuration != null) {
                 configuration.setText(stringMessages.configured());
             } else {
@@ -472,5 +470,4 @@ public class RegattaDetailsComposite extends Composite {
             seriesListDataProvider.getList().addAll(regatta.series);
         } 
     }
-
 }

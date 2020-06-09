@@ -105,4 +105,10 @@ public interface StringMessages extends Messages {
     String password();
 
     String explainPassword();
+
+    String additionalInformation();
+
+    String serverInformation();
+
+    String serverName(String buildVersion);
 }

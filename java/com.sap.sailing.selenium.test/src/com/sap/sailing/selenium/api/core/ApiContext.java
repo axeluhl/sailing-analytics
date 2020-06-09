@@ -26,6 +26,7 @@ import com.sun.jersey.api.representation.Form;
 public class ApiContext {
 
     public static final String SERVER_CONTEXT = "sailingserver"; //$NON-NLS-1$
+    public static final String SHARED_SERVER_CONTEXT = "sharedsailingserver"; //$NON-NLS-1$
     public static final String SECURITY_CONTEXT = "security"; //$NON-NLS-1$
     private static final String ADMIN_USERNAME = "admin"; //$NON-NLS-1$
     private static final String ADMIN_PASSWORD = "admin"; //$NON-NLS-1$
@@ -191,6 +192,35 @@ public class ApiContext {
                     .put(String.class);
         } catch (UniformInterfaceException e) {
             String error = "API PUT request " + url + " failed (rc=" + e.getResponse().getStatus() + "): "
+                    + e.getResponse().getEntity(String.class);
+            logger.severe(error);
+            throw HttpException.forResponse(e.getResponse(), error).orElse(e);
+        }
+        return (R) JSONValue.parse(result);
+    }
+
+    /**
+     * Sending a put request with query params and with form encoded payload.
+     * 
+     * @param url
+     *            context relative url of rest api endpoint
+     * @param queryParams
+     * @param formParams
+     * @return response entity as {@link JSONObject} or {@link JSONArray}
+     */
+    @SuppressWarnings("unchecked")
+    public <R extends JSONAware> R put(String url, Map<String, String> queryParams, Map<String, String> formParams) {
+        WebResource wres = getWebResource().path(url);
+        wres = addQueryParams(wres, queryParams);
+        Form form = new Form();
+        if (formParams != null) {
+            formParams.forEach(form::putSingle);
+        }
+        String result;
+        try {
+            result = auth(wres.getRequestBuilder()).entity(form).put(String.class);
+        } catch (UniformInterfaceException e) {
+            String error = "API POST request " + url + " failed (rc=" + e.getResponse().getStatus() + "): "
                     + e.getResponse().getEntity(String.class);
             logger.severe(error);
             throw HttpException.forResponse(e.getResponse(), error).orElse(e);

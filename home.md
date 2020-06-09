@@ -35,6 +35,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[Creating an EC2 image from scratch|wiki/info/landscape/creating-ec2-image-from-scratch]]
   * [[Creating a webserver EC2 image from scratch|wiki/info/landscape/creating-ec2-image-for-webserver-from-scratch]]
   * [[EC2 mail relaying vs. Amazon Simple E-Mail Service (SES)|wiki/info/landscape/mail-relaying]]
+  * [[Establishing support@sapsailing.com with AWS SES, SNS, and Lambda|wiki/info/landscape/support-email]]
   * [[Creating an EC2 image for a MongoDB Replica Set from scratch|wiki/info/landscape/creating-ec2-mongodb-image-from-scratch]]
   * [[Setting up dedicated S3 buckets|wiki/info/landscape/s3-bucket-setup]]
 * [[Building and Deploying|wiki/info/landscape/building-and-deploying]]
@@ -42,6 +43,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Typical Data Mining Scenarios|wiki/info/landscape/typical-data-mining-scenarios]]
 * [[Create clickable UI prototypes with Axure|wiki/info/landscape/ui-clickable-prototypes]]
 * [[Webdesign|wiki/info/landscape/webdesign]]
+
 
 ### Mobile
 
@@ -110,6 +112,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Profiling|wiki/howto/development/profiling]]
 * [[Working with GWT Super Dev Mode|wiki/howto/development/super-dev-mode]]
 * [[Training of internal Wind Estimation models|wiki/howto/windestimation]]
+* [[Whitelabelling|wiki/howto/whitelabelling]]
 
 ### For Event Managers
 
@@ -141,6 +144,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 ## Projects
 * [[Analytics on a stick|wiki/projects/analytics-on-a-stick]]
 * [[Consolidating User Stores (bug 4006 / 4018)|wiki/projects/consolidating-user-stores]]
+* [[Cloud Infrastructure Orchestration|wiki/projects/cloud-orchestrator]]
 
 ## Events and Planning
 * [[Project Planning (bigger development)|wiki/events/planning]]

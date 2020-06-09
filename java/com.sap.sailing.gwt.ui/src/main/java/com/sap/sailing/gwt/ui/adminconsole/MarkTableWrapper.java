@@ -7,7 +7,7 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.sap.sailing.gwt.ui.adminconsole.ColorColumn.ColorRetriever;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sse.common.Color;
@@ -16,9 +16,9 @@ import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 
 public class MarkTableWrapper<S extends RefreshableSelectionModel<MarkDTO>> extends TableWrapper<MarkDTO, S> {    
-    public MarkTableWrapper(boolean multiSelection, SailingServiceAsync sailingService, StringMessages stringMessages,
+    public MarkTableWrapper(boolean multiSelection, SailingServiceWriteAsync sailingServiceWrite, StringMessages stringMessages,
             ErrorReporter errorReporter) {
-        super(sailingService, stringMessages, errorReporter, multiSelection, true,
+        super(sailingServiceWrite, stringMessages, errorReporter, multiSelection, true,
                 new EntityIdentityComparator<MarkDTO>() {
                     @Override
                     public boolean representSameEntity(MarkDTO dto1, MarkDTO dto2) {
@@ -36,6 +36,14 @@ public class MarkTableWrapper<S extends RefreshableSelectionModel<MarkDTO>> exte
             }
         };
         table.addColumn(markNameColumn, stringMessages.mark());
+
+        TextColumn<MarkDTO> markShortNameColumn = new TextColumn<MarkDTO>() {
+            @Override
+            public String getValue(MarkDTO markDTO) {
+                return markDTO.getShortName();
+            }
+        };
+        table.addColumn(markShortNameColumn, stringMessages.shortName());
 
         TextColumn<MarkDTO> markPositionColumn = new TextColumn<MarkDTO>() {
             @Override

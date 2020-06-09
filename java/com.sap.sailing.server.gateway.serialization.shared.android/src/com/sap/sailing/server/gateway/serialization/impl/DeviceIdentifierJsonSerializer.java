@@ -36,20 +36,25 @@ public class DeviceIdentifierJsonSerializer implements JsonSerializer<DeviceIden
 
     @Override
     public JSONObject serialize(DeviceIdentifier object) {
-        JSONObject result = new JSONObject();
-        DeviceIdentifierJsonHandler handler = serviceFinder.findService(object.getIdentifierType());
-        Util.Pair<String, ? extends Object> pair;
-        try {
-            pair = handler.serialize(object);
-            result.put(DeviceIdentifierJsonDeserializer.FIELD_DEVICE_TYPE, pair.getA());
-            result.put(DeviceIdentifierJsonDeserializer.FIELD_DEVICE_ID, pair.getB());
-            result.put(DeviceIdentifierJsonDeserializer.FIELD_STRING_REPRESENTATION, object.getStringRepresentation());
-            return result;
-        } catch (TransformationException e) {
-            logger.log(Level.WARNING, "Could not serialize device identifier, consider adding a fallback serialization handler");
-            e.printStackTrace();
+        JSONObject result;
+        if (object == null) {
+            result = null;
+        } else {
+            result = new JSONObject();
+            DeviceIdentifierJsonHandler handler = serviceFinder.findService(object.getIdentifierType());
+            Util.Pair<String, ? extends Object> pair;
+            try {
+                pair = handler.serialize(object);
+                result.put(DeviceIdentifierJsonDeserializer.FIELD_DEVICE_TYPE, pair.getA());
+                result.put(DeviceIdentifierJsonDeserializer.FIELD_DEVICE_ID, pair.getB());
+                result.put(DeviceIdentifierJsonDeserializer.FIELD_STRING_REPRESENTATION, object.getStringRepresentation());
+                return result;
+            } catch (TransformationException e) {
+                logger.log(Level.WARNING, "Could not serialize device identifier, consider adding a fallback serialization handler", e);
+                result = null;
+            }
         }
-        return null;
+        return result;
     }
 
 }

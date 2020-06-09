@@ -9,6 +9,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     public static final StringMessages INSTANCE = GWT.create(StringMessages.class);
 
     String name();
+    String locale();
     String company();
     String password();
     String passwordRepeat();
@@ -126,6 +127,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String actionChangeOwnership();
     String errorUpdatingOwnership(String name);
     String doYouReallyWantToRemoveRole(String name);
+    String doYouReallyWantToRemoveSelectedElements(String message);
     String errorTryingToDeleteRole(String rolename, String message);
     String pleaseEnterARoleName();
     String editRoles();
@@ -185,4 +187,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
 
     String editRolesAndPermissionsForUser(String username);
     String permissionType();
+    String couldNotLoadMarkTemplates();
 }

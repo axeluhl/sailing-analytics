@@ -8,7 +8,7 @@ public class LeaderboardDescriptorWithEliminations extends LeaderboardDescriptor
     private final Set<CompetitorDTO> eliminatedCompetitors;
     
     public LeaderboardDescriptorWithEliminations(LeaderboardDescriptor base, Set<CompetitorDTO> eliminatedCompetitors) {
-        super(base.getName(), base.getDisplayName(), base.getScoringScheme(), base.getDiscardThresholds(), base.getRegattaName(), base.getCourseAreaId());
+        super(base.getName(), base.getDisplayName(), base.getScoringScheme(), base.getDiscardThresholds(), base.getRegattaName(), base.getCourseAreaIds());
         this.eliminatedCompetitors = eliminatedCompetitors;
     }
 

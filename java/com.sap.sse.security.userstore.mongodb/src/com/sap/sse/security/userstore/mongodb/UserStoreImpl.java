@@ -28,6 +28,7 @@ import com.sap.sse.security.shared.AdminRole;
 import com.sap.sse.security.shared.PredefinedRoles;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RoleDefinitionImpl;
+import com.sap.sse.security.shared.RolePrototype;
 import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
@@ -63,7 +64,7 @@ public class UserStoreImpl implements UserStore {
 
     private static final String ACCESS_TOKEN_KEY = "___access_token___";
 
-    private String name = "MongoDB user store";
+    private final static String NAME = "MongoDB user store";
 
     /**
      * If a valid default tenant name was passed to the constructor, this field will contain a valid
@@ -72,7 +73,7 @@ public class UserStoreImpl implements UserStore {
      * the original role will obtain a corresponding {@link Role} with this default tenant as the
      * {@link Role#getQualifiedForTenant() tenant qualifier}.
      */
-    private UserGroup defaultTenant;
+    private UserGroup serverGroup;
 
     private final ConcurrentHashMap<UUID, UserGroup> userGroups;
     private final ConcurrentHashMap<String, UserGroup> userGroupsByName;
@@ -137,16 +138,16 @@ public class UserStoreImpl implements UserStore {
      */
     private final transient DomainObjectFactory domainObjectFactory;
 
-    private final String defaultTenantName;
+    private final String serverGroupName;
 
-    public UserStoreImpl(String defaultTenantName) throws UserGroupManagementException, UserManagementException {
+    public UserStoreImpl(String defaultServerGroupName) throws UserGroupManagementException, UserManagementException {
         this(PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(),
-                PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), defaultTenantName);
+                PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), defaultServerGroupName);
     }
 
     public UserStoreImpl(final DomainObjectFactory domainObjectFactory, final MongoObjectFactory mongoObjectFactory,
-            String defaultTenantName) throws UserGroupManagementException, UserManagementException {
-        this.defaultTenantName = defaultTenantName;
+            String defaultServerGroupName) throws UserGroupManagementException, UserManagementException {
+        this.serverGroupName = defaultServerGroupName;
         this.domainObjectFactory = domainObjectFactory;
         roleDefinitions = new ConcurrentHashMap<>();
         userGroups = new ConcurrentHashMap<>();
@@ -191,14 +192,10 @@ public class UserStoreImpl implements UserStore {
         }
     }
 
-    /**
-     * Do only call for testcases, to ensure the Server is correctly setup, without loading all users
-     * 
-     * @throws UserGroupManagementException
-     */
     @Override
-    public void ensureDefaultTenantExists() throws UserGroupManagementException {
-        defaultTenant = getOrCreateDefaultTenant(defaultTenantName);
+    public UserGroup ensureServerGroupExists() throws UserGroupManagementException {
+        serverGroup = getOrCreateServerGroup(serverGroupName);
+        return serverGroup;
     }
 
     /**
@@ -212,7 +209,7 @@ public class UserStoreImpl implements UserStore {
             userGroupsByName.put(group.getName(), group);
         }
         // do this here, in case the default tenant was just loaded before
-        ensureDefaultTenantExists();
+        ensureServerGroupExists();
         for (User u : domainObjectFactory.loadAllUsers(roleDefinitions, this::convertToNewRoleModel, this.userGroups, this)) {
             users.put(u.getName(), u);
             addToUsersByEmail(u);
@@ -254,12 +251,12 @@ public class UserStoreImpl implements UserStore {
                     // Special of the global admin's admin role to ensure that one initial user has global admin permissions
                     groupQualifierForMigratedRole = null;
                 } else {
-                    if (defaultTenant == null) {
+                    if (serverGroup == null) {
                         throw new IllegalStateException(
-                                "For role migration a valid default tenant is required. Set system property "
-                                        + UserStore.DEFAULT_TENANT_NAME_PROPERTY_NAME + " or provide a server name");
+                                "For role migration a valid server group name is required. Set system property "
+                                        + UserStore.DEFAULT_SERVER_GROUP_NAME_PROPERTY_NAME + " or provide a server name");
                     }
-                    groupQualifierForMigratedRole = defaultTenant;
+                    groupQualifierForMigratedRole = serverGroup;
                 }
                 result = new Role(roleDefinition, groupQualifierForMigratedRole, /* user qualification */ null);
                 break;
@@ -270,20 +267,8 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public void ensureDefaultRolesExist() {
-        final AdminRole adminRolePrototype = AdminRole.getInstance();
-        if (getRoleDefinition(adminRolePrototype.getId()) == null) {
-            logger.info("No admin role found. Creating default role \"" + adminRolePrototype.getName()
-                    + "\" with permission \"" + AdminRole.getInstance().getPermissions() + "\"");
-            createRoleDefinition((UUID) adminRolePrototype.getId(), adminRolePrototype.getName(),
-                    adminRolePrototype.getPermissions());
-        }
-        final UserRole userRolePrototype = UserRole.getInstance();
-        if (getRoleDefinition(userRolePrototype.getId()) == null) {
-            logger.info("No user role found. Creating default role \"" + userRolePrototype.getName()
-                    + "\" with permission \"" + userRolePrototype.getPermissions() + "\"");
-            createRoleDefinition((UUID) userRolePrototype.getId(), userRolePrototype.getName(),
-                    userRolePrototype.getPermissions());
-        }
+        getOrCreateRoleDefinitionByPrototype(AdminRole.getInstance());
+        getOrCreateRoleDefinitionByPrototype(UserRole.getInstance());
         for (final PredefinedRoles otherPredefinedRole : PredefinedRoles.values()) {
             if (getRoleDefinition(otherPredefinedRole.getId()) == null) {
                 logger.info("Predefined role definition " + otherPredefinedRole + " not found; creating");
@@ -295,19 +280,51 @@ public class UserStoreImpl implements UserStore {
             }
         }
     }
-
+    
+    private RoleDefinition getOrCreateRoleDefinitionByPrototype(RolePrototype rolePrototype) {
+        RoleDefinition roleDefinition = getRoleDefinition(rolePrototype.getId());
+        if (roleDefinition == null) {
+            logger.info("No " + rolePrototype.getName() + " role found. Creating default role \""
+                    + rolePrototype.getName() + "\" with permission \"" + rolePrototype.getPermissions() + "\"");
+            roleDefinition = createRoleDefinition(rolePrototype.getId(), rolePrototype.getName(), rolePrototype.getPermissions());
+        }
+        return roleDefinition;
+    }
+    
     @Override
-    public UserGroup getDefaultTenant() {
-        return defaultTenant;
+    public RoleDefinition getRoleDefinitionByPrototype(RolePrototype rolePrototype) {
+        final RoleDefinition roleDefinition = getRoleDefinition(rolePrototype.getId());
+        if (roleDefinition == null) {
+            final String errorMsg = "No " + rolePrototype.getName() + " role definition found by ID "
+                    + rolePrototype.getId() + "." + "RoleDefinitions for prototypes are required to exist on usage.";
+            logger.severe(errorMsg);
+            throw new IllegalStateException(errorMsg);
+        }
+        return roleDefinition;
     }
 
-    private UserGroup getOrCreateDefaultTenant(String defaultTenantName) throws UserGroupManagementException {
+    @Override
+    public String getServerGroupName() {
+        return serverGroupName;
+    }
+
+    @Override
+    public UserGroup getServerGroup() {
+        return serverGroup;
+    }
+
+    @Override
+    public void setServerGroup(UserGroup newServerGroup) {
+        this.serverGroup = newServerGroup;
+    }
+
+    private UserGroup getOrCreateServerGroup(String defaultServerGroupName) throws UserGroupManagementException {
         final UserGroup result;
-        if (defaultTenantName != null) {
-            final UserGroup existingTenant = getUserGroupByName(defaultTenantName);
+        if (defaultServerGroupName != null) {
+            final UserGroup existingTenant = getUserGroupByName(defaultServerGroupName);
             if (existingTenant == null) {
-                logger.info("Couldn't find default tenant " + defaultTenantName + "; creating it");
-                result = createUserGroup(UUID.randomUUID(), defaultTenantName);
+                logger.info("Couldn't find default tenant " + defaultServerGroupName + "; creating it");
+                result = createUserGroup(UUID.randomUUID(), defaultServerGroupName);
             } else {
                 result = existingTenant;
             }
@@ -559,7 +576,7 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public String getName() {
-        return name;
+        return NAME;
     }
 
     @Override
@@ -843,14 +860,6 @@ public class UserStoreImpl implements UserStore {
     }
 
     @Override
-    public Iterable<WildcardPermission> getPermissionsFromUser(String username) throws UserManagementException {
-        if (users.get(username) == null) {
-            throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
-        }
-        return users.get(username).getPermissions();
-    }
-
-    @Override
     public void addPermissionForUser(String username, WildcardPermission permission) throws UserManagementException {
         final User user = users.get(username);
         if (user == null) {
@@ -1022,7 +1031,6 @@ public class UserStoreImpl implements UserStore {
     @Override
     public void registerPreferenceConverter(String preferenceKey, PreferenceConverter<?> converter) {
         PreferenceConverter<?> alreadyAssociatedConverter = preferenceConverters.putIfAbsent(preferenceKey, converter);
-
         if (alreadyAssociatedConverter == null) {
             final Set<String> usersToProcess = new HashSet<>(preferences.keySet());
             for (String user : usersToProcess) {
