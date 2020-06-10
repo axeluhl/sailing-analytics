@@ -49,13 +49,16 @@ public class FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer implements
 
     private long deserializeTimestamp(JSONObject fixObject) throws JsonDeserializationException {
         long timeMillis;
-        if (fixObject.get(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.TIME_MILLIS) != null) {
-            timeMillis = Long.parseLong(
-                    fixObject.get(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.TIME_MILLIS).toString());
-        } else if (fixObject.get(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.TIME_ISO) != null) {
-            String strIsoTimestamp = fixObject.get(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.TIME_ISO)
-                    .toString();
-            DateTimeFormatter timeFormatter = DateTimeFormatter.ISO_DATE_TIME;  
+        Object timeMillisObj = fixObject.get(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.TIME_MILLIS);
+        Object timeIsoObj = fixObject.get(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.TIME_ISO);
+        if (timeMillisObj != null && timeIsoObj != null) {
+            throw new JsonDeserializationException("two timestamp fields are filled. Please use only one of both.");
+        }
+        if (timeMillisObj != null) {
+            timeMillis = Long.parseLong(timeMillisObj.toString());
+        } else if (timeIsoObj != null) {
+            String strIsoTimestamp = timeIsoObj.toString();
+            DateTimeFormatter timeFormatter = DateTimeFormatter.ISO_DATE_TIME;
             OffsetDateTime offsetDateTime = OffsetDateTime.parse(strIsoTimestamp, timeFormatter);
             timeMillis = offsetDateTime.toInstant().toEpochMilli();
         } else {
