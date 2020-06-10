@@ -72,6 +72,7 @@ import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
+import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.geocoding.ReverseGeocoder;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
@@ -93,6 +94,7 @@ import com.sap.sailing.server.operationaltransformation.CreateRegattaLeaderboard
 import com.sap.sailing.server.operationaltransformation.RemoveEvent;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardGroup;
+import com.sap.sailing.server.operationaltransformation.RemoveRegatta;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.UpdateSeries;
 import com.sap.sailing.server.security.SailingViewerRole;
@@ -139,18 +141,52 @@ public class EventsResource extends AbstractSailingServerResource {
     @DELETE
     @Path("/{eventId}/")
     public Response delete(@PathParam("eventId") String eventId,
-            @QueryParam("withLeaderboardGroupsAndOverallLeaderboard") Boolean withLeaderboardGroupsAndOverallLeaderboard, 
+            @QueryParam("withLeaderboardGroups") Boolean withLeaderboardGroups, 
+            @QueryParam("withLeaderboardGroupsAndOverallLeaderBoards") Boolean withLeaderboardGroupsAndOverallLeaderBoards, 
+            @QueryParam("withLeaderBoards") Boolean withLeaderBoards,
             @QueryParam("withRegattas") Boolean withRegattas)
             throws ParseException, JsonDeserializationException {
         final Serializable eventUUID = UUIDHelper.tryUuidConversion(eventId);
         final Event event = getService().getEvent(eventUUID);
+        final boolean deleteLeaderboardGroups = withLeaderboardGroups == Boolean.TRUE;
+        final boolean deleteLeaderboardGroupsAndOverallLeaderboards = withLeaderboardGroupsAndOverallLeaderBoards == Boolean.TRUE;
+        final boolean deleteLeaderboards = withLeaderBoards == Boolean.TRUE;
+        final boolean deleteRegattas = withRegattas == Boolean.TRUE;
         if (event != null) {
             final SecurityService securityService = getSecurityService();
             final RacingEventService racingEventService = getService();
             securityService.checkPermissionAndDeleteOwnershipForObjectRemoval(event, () -> {
                 getService().apply(new RemoveEvent(event.getId()));
-                if (withLeaderboardGroupsAndOverallLeaderboard == Boolean.TRUE) {
-                    deleteRelatedLeaderBoardGroups(event, securityService, racingEventService);
+                if (deleteLeaderboardGroups || deleteLeaderboards || deleteLeaderboardGroupsAndOverallLeaderboards || deleteRegattas) {
+                    for (LeaderboardGroup group : event.getLeaderboardGroups()) {
+                            securityService.checkPermissionAndDeleteOwnershipForObjectRemoval(group, () -> {
+                            if(deleteLeaderboards || deleteRegattas) {
+                                for (Leaderboard leaderboard : group.getLeaderboards()) {
+                                    if(deleteRegattas && leaderboard instanceof RegattaLeaderboard) {
+                                        deleteReferencedRegatta(securityService, racingEventService, leaderboard);
+                                    }
+                                    if(deleteLeaderboards) {
+                                        securityService.checkPermissionAndDeleteOwnershipForObjectRemoval(leaderboard, () -> {
+                                            racingEventService.apply(new RemoveLeaderboard(leaderboard.getName()));
+                                        });
+                                    }
+                                }
+                            }else if(deleteLeaderboardGroupsAndOverallLeaderboards) {
+                                final Leaderboard overallLeaderboard = group.getOverallLeaderboard();
+                                if (overallLeaderboard != null) {
+                                    if(deleteRegattas && overallLeaderboard instanceof RegattaLeaderboard) {
+                                        deleteReferencedRegatta(securityService, racingEventService, overallLeaderboard);
+                                    }
+                                    securityService.checkPermissionAndDeleteOwnershipForObjectRemoval(overallLeaderboard, () -> {
+                                        racingEventService.apply(new RemoveLeaderboard(overallLeaderboard.getName()));
+                                    });
+                                }
+                            }
+                            if(deleteLeaderboardGroups || deleteLeaderboardGroupsAndOverallLeaderboards) {
+                                racingEventService.apply(new RemoveLeaderboardGroup(group.getName()));
+                            }
+                        });
+                    }
                 }
             });
         } else {
@@ -159,19 +195,13 @@ public class EventsResource extends AbstractSailingServerResource {
         return Response.ok().build();
     }
 
-    private void deleteRelatedLeaderBoardGroups(final Event event, final SecurityService securityService,
-            final RacingEventService racingEventService) {
-        for (LeaderboardGroup group : event.getLeaderboardGroups()) {
-            securityService.checkPermissionAndDeleteOwnershipForObjectRemoval(group, () -> {
-                Leaderboard overallLeaderboard = group.getOverallLeaderboard();
-                if (overallLeaderboard != null) {
-                    securityService.checkPermissionAndDeleteOwnershipForObjectRemoval(overallLeaderboard, () -> {
-                        racingEventService.apply(new RemoveLeaderboard(overallLeaderboard.getName()));
-                    });
-                }
-                racingEventService.apply(new RemoveLeaderboardGroup(group.getName()));
-            });
-        }
+    private void deleteReferencedRegatta(final SecurityService securityService, final RacingEventService racingEventService,
+            Leaderboard leaderboard) {
+        final RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
+        final Regatta regatta = regattaLeaderboard.getRegatta();
+        securityService.checkPermissionAndDeleteOwnershipForObjectRemoval(regatta, () -> {
+            racingEventService.apply(new RemoveRegatta(regatta.getRegattaIdentifier()));
+        });
     }
 
     @POST
