@@ -349,7 +349,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingWriteEntryPoint
                 },
                 getStringMessages().igtimiAccounts(),
                 SecuredDomainType.IGTIMI_ACCOUNT.getPermission(DefaultActions.values()));
-        ExpeditionDeviceConfigurationsPanel expeditionDeviceConfigurationsPanel = new ExpeditionDeviceConfigurationsPanel(getSailingService(), this, getStringMessages());
+        ExpeditionDeviceConfigurationsPanel expeditionDeviceConfigurationsPanel = new ExpeditionDeviceConfigurationsPanel(getSailingService(), this, getStringMessages(), getUserService());
         expeditionDeviceConfigurationsPanel.ensureDebugId("ExpeditionDeviceConfigurations");
         panel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<ExpeditionDeviceConfigurationsPanel>(expeditionDeviceConfigurationsPanel) {
             @Override

@@ -1,5 +1,13 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import static com.sap.sse.security.shared.HasPermissions.DefaultActions.CHANGE_OWNERSHIP;
+import static com.sap.sse.security.shared.HasPermissions.DefaultActions.DELETE;
+import static com.sap.sse.security.shared.HasPermissions.DefaultActions.UPDATE;
+import static com.sap.sse.security.ui.client.component.AccessControlledActionsColumn.create;
+import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell.ACTION_DELETE;
+import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell.ACTION_UPDATE;
+
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -8,7 +16,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -30,6 +37,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
@@ -41,10 +49,17 @@ import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.ImagesBarCell;
-import com.sap.sse.gwt.client.celltable.ImagesBarColumn;
 import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
+import com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell;
+import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
+import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig;
+import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
 public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
     private final StringMessages stringMessages;
@@ -57,6 +72,8 @@ public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
     public static class DeviceConfigurationImagesBarCell extends ImagesBarCell {
         public static final String ACTION_REMOVE = "ACTION_REMOVE";
         public static final String ACTION_EDIT = "ACTION_EDIT";
+        public static final String ACTION_CHANGE_OWNERSHIP = DefaultActions.CHANGE_OWNERSHIP.name();
+        public static final String ACTION_CHANGE_ACL = DefaultActions.CHANGE_ACL.name();
         private final StringMessages stringMessages;
         
         public DeviceConfigurationImagesBarCell(StringMessages stringMessages) {
@@ -77,7 +94,8 @@ public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
         }
     }
     
-    public ExpeditionDeviceConfigurationsPanel(final SailingServiceWriteAsync sailingServiceWrite, final ErrorReporter errorReporter, final StringMessages stringMessages) {
+    public ExpeditionDeviceConfigurationsPanel(final SailingServiceWriteAsync sailingServiceWrite,
+            final ErrorReporter errorReporter, final StringMessages stringMessages, final UserService userService) {
         this.sailingServiceWrite = sailingServiceWrite;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
@@ -149,21 +167,33 @@ public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
         deviceConfigurationColumnListHandler.setComparator(deviceConfigurationBoatIdColumn,
                 Comparator.comparing(ExpeditionDeviceConfiguration::getExpeditionBoatId, Comparator.nullsLast(Comparator.naturalOrder())));
         allDeviceConfigurations.addColumn(deviceConfigurationBoatIdColumn, stringMessages.expeditionBoatId());
-        ImagesBarColumn<ExpeditionDeviceConfiguration, DeviceConfigurationImagesBarCell> deviceConfigurationActionColumn = new ImagesBarColumn<ExpeditionDeviceConfiguration, DeviceConfigurationImagesBarCell>(
-                new DeviceConfigurationImagesBarCell(stringMessages));
-        deviceConfigurationActionColumn.setFieldUpdater(new FieldUpdater<ExpeditionDeviceConfiguration, String>() {
-            @Override
-            public void update(int index, ExpeditionDeviceConfiguration deviceConfiguration, String value) {
-                if (DeviceConfigurationImagesBarCell.ACTION_REMOVE.equals(value)) {
-                    if (Window.confirm(stringMessages.doYouReallyWantToRemoveExpeditionDeviceConfiguration(deviceConfiguration.getName()))) {
-                        removeDeviceConfiguration(deviceConfiguration, filterDeviceConfigurationsPanel);
-                    }
-                } else if (DeviceConfigurationImagesBarCell.ACTION_EDIT.equals(value)) {
-                    new EditDeviceConfigurationDialog(filterDeviceConfigurationsPanel, sailingServiceWrite, stringMessages, errorReporter, deviceConfiguration).show();
-                }
+
+        final AccessControlledActionsColumn<ExpeditionDeviceConfiguration, DefaultActionsImagesBarCell> actionsColumn = create(
+                new DefaultActionsImagesBarCell(stringMessages), userService);
+        actionsColumn.addAction(ACTION_DELETE, DELETE, deviceConfiguration -> {
+
+            if (Window.confirm(stringMessages
+                    .doYouReallyWantToRemoveExpeditionDeviceConfiguration(deviceConfiguration.getName()))) {
+                removeDeviceConfiguration(deviceConfiguration, filterDeviceConfigurationsPanel);
             }
+
         });
-        allDeviceConfigurations.addColumn(deviceConfigurationActionColumn, stringMessages.actions());
+        actionsColumn.addAction(ACTION_UPDATE, UPDATE, deviceConfiguration -> {
+
+            new EditDeviceConfigurationDialog(filterDeviceConfigurationsPanel, sailingServiceWrite, stringMessages,
+                    errorReporter, deviceConfiguration).show();
+
+        });
+        final HasPermissions type = SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION;
+        final DialogConfig<ExpeditionDeviceConfiguration> config = EditOwnershipDialog
+                .create(userService.getUserManagementService(), type, deviceConfiguration -> refresh(), stringMessages);
+        actionsColumn.addAction(DeviceConfigurationImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
+                deviceConfiguration -> config.openOwnershipDialog(deviceConfiguration));
+        final EditACLDialog.DialogConfig<ExpeditionDeviceConfiguration> configACL = EditACLDialog
+                .create(userService.getUserManagementService(), type, deviceConfiguration -> refresh(), stringMessages);
+        actionsColumn.addAction(DeviceConfigurationImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
+                deviceConfiguration -> configACL.openACLDialog(deviceConfiguration));
+        allDeviceConfigurations.addColumn(actionsColumn, stringMessages.actions());
         allDeviceConfigurations.addColumnSortHandler(deviceConfigurationColumnListHandler);
         updateAllAccounts(sailingServiceWrite, filterDeviceConfigurationsPanel, stringMessages, errorReporter);
         Button addAccountButton = new Button(stringMessages.add());
