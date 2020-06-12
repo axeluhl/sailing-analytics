@@ -69,6 +69,11 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
             if (prefs != null) {
                 // iterate all stored tracked events
                 for (final TrackedEventPreference pref : prefs.getTrackedEvents()) {
+                    // TODO: Temporary precaution for unexpected null values. 
+                    // Note: There should not be any null values in the Collection in the first place.
+                    if (pref == null) {
+                        continue;
+                    }
                     if (!includeArchived && pref.getIsArchived()) {
                         // skip, if event is archived and should be filtered out
                         continue;
