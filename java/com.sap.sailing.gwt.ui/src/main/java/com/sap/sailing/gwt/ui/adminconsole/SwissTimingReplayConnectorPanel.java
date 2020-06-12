@@ -31,6 +31,7 @@ import com.sap.sailing.gwt.ui.adminconsole.swisstiming.SwissTimingArchivedConnec
 import com.sap.sailing.gwt.ui.adminconsole.swisstiming.SwissTimingArchivedConnectionTableWrapper;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationWithSecurityDTO;
@@ -64,9 +65,9 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
 
     private final SwissTimingArchivedConnectionTableWrapper connectionsTable;
 
-    public SwissTimingReplayConnectorPanel(final SailingServiceAsync sailingService, UserService userService,
+    public SwissTimingReplayConnectorPanel(final SailingServiceWriteAsync sailingServiceWrite, UserService userService,
             ErrorReporter errorReporter, RegattaRefresher regattaRefresher, StringMessages stringMessages, CellTableWithCheckboxResources tableResources) {
-        super(sailingService, userService, regattaRefresher, errorReporter, true, stringMessages);
+        super(sailingServiceWrite, userService, regattaRefresher, errorReporter, true, stringMessages);
         this.errorReporter = errorReporter;
         availableSwissTimingRaces = new ArrayList<SwissTimingReplayRaceDTO>();
 
@@ -84,13 +85,13 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         captionPanelConnections.setStyleName("bold");
 
         // add connections table
-        connectionsTable = new SwissTimingArchivedConnectionTableWrapper(userService, sailingService, stringMessages,
+        connectionsTable = new SwissTimingArchivedConnectionTableWrapper(userService, sailingServiceWrite, stringMessages,
                 errorReporter, true, tableResources, () -> {
                 });
         connectionsTable.refreshConnectionList();
 
         // create button UI
-        final AccessControlledButtonPanel buttonPanel = createButtonPanel(sailingService, userService, errorReporter,
+        final AccessControlledButtonPanel buttonPanel = createButtonPanel(sailingServiceWrite, userService, errorReporter,
                 stringMessages);
         verticalPanel.add(buttonPanel);
         verticalPanel.add(connectionsTable);
@@ -250,7 +251,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
                 e -> btnTrack.setEnabled(connectionsTable.getSelectionModel().getSelectedSet().size() == 1));
     }
 
-    private AccessControlledButtonPanel createButtonPanel(final SailingServiceAsync sailingService,
+    private AccessControlledButtonPanel createButtonPanel(final SailingServiceWriteAsync sailingServiceWrite,
             UserService userService, ErrorReporter errorReporter, StringMessages stringMessages) {
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService,
                 SecuredDomainType.SWISS_TIMING_ARCHIVE_ACCOUNT);
@@ -262,7 +263,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
                         new DialogCallback<SwissTimingArchiveConfigurationWithSecurityDTO>() {
                             @Override
                             public void ok(SwissTimingArchiveConfigurationWithSecurityDTO editedConnection) {
-                                sailingService.createSwissTimingArchiveConfiguration(editedConnection.getJsonUrl(),
+                                sailingServiceWrite.createSwissTimingArchiveConfiguration(editedConnection.getJsonUrl(),
                                         new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                                             @Override
                                             public void onFailure(Throwable caught) {
@@ -285,7 +286,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
                         }, userService, errorReporter).show());
         // Remove action
         buttonPanel.addRemoveAction(stringMessages.remove(), connectionsTable.getSelectionModel(), false, () -> {
-            sailingService.deleteSwissTimingArchiveConfigurations(connectionsTable.getSelectionModel().getSelectedSet(),
+            sailingServiceWrite.deleteSwissTimingArchiveConfigurations(connectionsTable.getSelectionModel().getSelectedSet(),
                     new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
@@ -301,7 +302,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         });
         // List Race action
         final Button listRacesButton = buttonPanel.addUnsecuredAction(stringMessages.listRaces(), () -> {
-            fillRaces(sailingService);
+            fillRaces(sailingServiceWrite);
         });
         listRacesButton.setEnabled(false);
         // add change handlers to enable and disable List Races and Remove
@@ -383,7 +384,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
             }
         }
         if (checkBoatClassOK(selectedRegatta, selectedRaces)) {
-            sailingService.replaySwissTimingRace(regattaIdentifier, selectedRaces, trackWind, correctWindByDeclination,
+            sailingServiceWrite.replaySwissTimingRace(regattaIdentifier, selectedRaces, trackWind, correctWindByDeclination,
                 useInternalMarkPassingAlgorithm, new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {

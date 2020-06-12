@@ -13,9 +13,7 @@ public class FlexibleLeaderboardCreateDialog extends FlexibleLeaderboardDialog {
             Collection<EventDTO> existingEvents, ErrorReporter errorReporter, DialogCallback<LeaderboardDescriptor> callback) {
         super(stringMessages.createFlexibleLeaderboard(), new LeaderboardDescriptor(), stringMessages, existingEvents,
                 errorReporter, new FlexibleLeaderboardDialog.LeaderboardParameterValidator(stringMessages, existingLeaderboards), callback);
-        nameTextBox = createTextBox(null);
-        nameTextBox.ensureDebugId("NameTextBox");
-        nameTextBox.setVisibleLength(50);
+        nameTextBox.setEnabled(true); // a name can be selected during FlexibleLeaderboard creation
         displayNameTextBox = createTextBox(null);
         displayNameTextBox.ensureDebugId("DisplayNameTextBox");
         displayNameTextBox.setVisibleLength(50);

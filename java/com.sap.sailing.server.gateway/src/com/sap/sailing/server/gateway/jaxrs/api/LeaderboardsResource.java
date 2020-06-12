@@ -312,8 +312,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                 }
             }
             getService().apply(new UpdateLeaderboard(/* leaderboardName */ leaderboard.getName(),
-                    /* newLeaderboardName */ leaderboard.getName(), newLeaderboardDisplayName,
-                    resultDiscardingThresholds,
+                    newLeaderboardDisplayName, resultDiscardingThresholds,
                     Util.map(leaderboard.getCourseAreas(), CourseArea::getId)));
         } else {
             return Response.status(Status.NOT_FOUND).entity(

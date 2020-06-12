@@ -35,7 +35,7 @@ import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.DefaultSelectionEventManager.SelectAction;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.courseCreation.CourseTemplateDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkRoleDTO;
@@ -61,7 +61,7 @@ import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 public class CourseTemplatePanel extends FlowPanel {
     private static AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
 
-    private final SailingServiceAsync sailingService;
+    private final SailingServiceWriteAsync sailingService;
     private final LabeledAbstractFilterablePanel<CourseTemplateDTO> filterableCourseTemplatePanel;
     private List<CourseTemplateDTO> allCourseTemplates;
     private final ErrorReporter errorReporter;
@@ -72,9 +72,9 @@ public class CourseTemplatePanel extends FlowPanel {
     private List<MarkRoleDTO> allMarkRoles;
     private List<MarkTemplateDTO> allMarkTemplates;
 
-    public CourseTemplatePanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
+    public CourseTemplatePanel(SailingServiceWriteAsync sailingServiceWrite, ErrorReporter errorReporter,
             StringMessages stringMessages, final UserService userService) {
-        this.sailingService = sailingService;
+        this.sailingService = sailingServiceWrite;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
         AccessControlledButtonPanel buttonAndFilterPanel = new AccessControlledButtonPanel(userService,
@@ -293,29 +293,22 @@ public class CourseTemplatePanel extends FlowPanel {
                 return Integer.toString(courseTemplate.getWaypointTemplates().size());
             }
         };
-
         nameColumn.setSortable(true);
         sortHandler.setComparator(nameColumn, new Comparator<CourseTemplateDTO>() {
             public int compare(CourseTemplateDTO courseTemplate1, CourseTemplateDTO courseTemplate2) {
                 return courseTemplate1.getName().compareTo(courseTemplate2.getName());
             }
         });
-
         courseTemplateTable.addColumn(nameColumn, stringMessages.name());
         courseTemplateTable.addColumn(urlColumn, stringMessages.url());
         courseTemplateTable.addColumn(tagsColumn, stringMessages.tags());
         courseTemplateTable.addColumn(waypointTemplateCountColumn, stringMessages.waypoints());
-
         SecuredDTOOwnerColumn.configureOwnerColumns(courseTemplateTable, sortHandler, stringMessages);
-
         final HasPermissions type = SecuredDomainType.COURSE_TEMPLATE;
-
         final AccessControlledActionsColumn<CourseTemplateDTO, DefaultActionsImagesBarCell> actionsColumn = create(
                 new DefaultActionsImagesBarCell(stringMessages), userService);
         final EditOwnershipDialog.DialogConfig<CourseTemplateDTO> configOwnership = EditOwnershipDialog
-                .create(userService.getUserManagementService(), type, courseTemplate -> {
-                    /* no refresh action */}, stringMessages);
-
+                .create(userService.getUserManagementService(), type, courseTemplateDTO -> courseTemplateListDataProvider.refresh(), stringMessages);
         final EditACLDialog.DialogConfig<CourseTemplateDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementService(), type, courseTemplate -> courseTemplate.getAccessControlList(),
                 stringMessages);
@@ -342,7 +335,7 @@ public class CourseTemplatePanel extends FlowPanel {
         courseTemplateTable.addColumn(idColumn, stringMessages.id());
         courseTemplateTable.addColumn(actionsColumn, stringMessages.actions());
     }
-
+    
     public void refreshCourseTemplates() {
         loadCourseTemplates();
         loadMarkRoles();
