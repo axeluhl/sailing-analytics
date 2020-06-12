@@ -137,26 +137,37 @@ public class EventsResource extends AbstractSailingServerResource {
     public EventsResource() {
     }
     
+    
+    /**
+     * Method to delete a specified {@link Event}.
+     * 
+     * @param eventId - The UUID of the event to delete
+     * @param withLeaderboardGroups - Boolean whether to delete all associated {@link LeaderboardGroup}s or not. Doing so will also delete the overall {@link Leaderboard}s of each group.
+     * @param withLeaderBoards - Boolean whether to delete all associated {@link Leaderboard}s. 
+     * @param withRegattas - Boolean whether to delete all associated {@link Regatta}s. Doing so will also delete all their {@link RegattaLeaderboard}s and {@link TrackedRace}s.
+     * @return A 200 response, if the delete was successful or a 404 response, if the eventId was not found.
+     * @throws ParseException
+    */
     @DELETE
     @Path("/{eventId}/")
     public Response delete(@PathParam("eventId") String eventId,
-            @QueryParam("withLeaderboardGroupsAndOverallLeaderBoards") Boolean withLeaderboardGroupsAndOverallLeaderBoards,
+            @QueryParam("withLeaderboardGroups") Boolean withLeaderboardGroups,
             @QueryParam("withLeaderBoards") Boolean withLeaderBoards, @QueryParam("withRegattas") Boolean withRegattas)
-            throws ParseException, JsonDeserializationException {
+            throws ParseException {
         final Serializable eventUUID = UUIDHelper.tryUuidConversion(eventId);
-        final Event event = getService().getEvent(eventUUID);
-        final boolean deleteLeaderboardGroupsAndOverallLeaderboards = withLeaderboardGroupsAndOverallLeaderBoards == Boolean.TRUE;
-        final boolean deleteLeaderboards = withLeaderBoards == Boolean.TRUE;
-        final boolean deleteRegattas = withRegattas == Boolean.TRUE;
+        final RacingEventService racingEventService = getService();
+        final Event event = racingEventService.getEvent(eventUUID);
         if (event != null) {
+            final boolean deleteLeaderboardGroups = withLeaderboardGroups == Boolean.TRUE;
+            final boolean deleteLeaderboards = withLeaderBoards == Boolean.TRUE;
+            final boolean deleteRegattas = withRegattas == Boolean.TRUE;
             final SecurityService securityService = getSecurityService();
-            final RacingEventService racingEventService = getService();
             securityService.checkPermissionAndDeleteOwnershipForObjectRemoval(event, () -> {
-                getService().apply(new RemoveEvent(event.getId()));
-                if (deleteLeaderboards || deleteLeaderboardGroupsAndOverallLeaderboards || deleteRegattas) {
-                    for (LeaderboardGroup group : event.getLeaderboardGroups()) {
+                racingEventService.apply(new RemoveEvent(event.getId()));
+                if (deleteLeaderboards || deleteLeaderboardGroups || deleteRegattas) {
+                    for (final LeaderboardGroup group : event.getLeaderboardGroups()) {
                         if (deleteLeaderboards || deleteRegattas) {
-                            for (Leaderboard leaderboard : group.getLeaderboards()) {
+                            for (final Leaderboard leaderboard : group.getLeaderboards()) {
                                 if (deleteRegattas && leaderboard instanceof RegattaLeaderboard) {
                                     deleteReferencedRegatta(securityService, racingEventService, leaderboard);
                                 }
@@ -168,7 +179,7 @@ public class EventsResource extends AbstractSailingServerResource {
                                 }
                             }
                         }
-                        if (deleteLeaderboardGroupsAndOverallLeaderboards) {
+                        if (deleteLeaderboardGroups) {
                             securityService.checkPermissionAndDeleteOwnershipForObjectRemoval(group, () -> {
                                 if (!deleteLeaderboards) {
                                     deleteReferencedOverallLeaderboard(deleteRegattas, securityService,
@@ -187,7 +198,7 @@ public class EventsResource extends AbstractSailingServerResource {
     }
 
     private void deleteReferencedOverallLeaderboard(final boolean deleteRegattas, final SecurityService securityService,
-            final RacingEventService racingEventService, LeaderboardGroup group) {
+            final RacingEventService racingEventService, final LeaderboardGroup group) {
         final Leaderboard overallLeaderboard = group.getOverallLeaderboard();
         if (overallLeaderboard != null) {
             if (deleteRegattas && overallLeaderboard instanceof RegattaLeaderboard) {
@@ -200,7 +211,7 @@ public class EventsResource extends AbstractSailingServerResource {
     }
 
     private void deleteReferencedRegatta(final SecurityService securityService,
-            final RacingEventService racingEventService, Leaderboard leaderboard) {
+            final RacingEventService racingEventService, final Leaderboard leaderboard) {
         final RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
         final Regatta regatta = regattaLeaderboard.getRegatta();
         securityService.checkPermissionAndDeleteOwnershipForObjectRemoval(regatta, () -> {
