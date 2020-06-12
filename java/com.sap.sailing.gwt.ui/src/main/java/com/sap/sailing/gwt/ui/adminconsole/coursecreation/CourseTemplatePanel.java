@@ -313,7 +313,8 @@ public class CourseTemplatePanel extends FlowPanel {
         final AccessControlledActionsColumn<CourseTemplateDTO, DefaultActionsImagesBarCell> actionsColumn = create(
                 new DefaultActionsImagesBarCell(stringMessages), userService);
         final EditOwnershipDialog.DialogConfig<CourseTemplateDTO> configOwnership = EditOwnershipDialog
-                .create(userService.getUserManagementService(), type, courseTemplate -> refreshCourseTemplates(), stringMessages);
+                .create(userService.getUserManagementService(), type, courseTemplate -> {
+                    /* no refresh action */}, stringMessages);
 
         final EditACLDialog.DialogConfig<CourseTemplateDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementService(), type, courseTemplate -> courseTemplate.getAccessControlList(),

@@ -178,7 +178,7 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
                 this::openEditBoatDialog);
         boatActionColumn.addAction(BoatConfigImagesBarCell.ACTION_REFRESH, this::allowUpdate);
         final DialogConfig<BoatDTO> editOwnerShipDialog = EditOwnershipDialog.create(
-                userService.getUserManagementService(), SecuredDomainType.BOAT, boatDTO -> refresh(Collections.singleton(boatDTO)), stringMessages);
+                userService.getUserManagementService(), SecuredDomainType.BOAT, null, stringMessages);
         boatActionColumn.addAction(BoatConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
                 editOwnerShipDialog::openOwnershipDialog);
 

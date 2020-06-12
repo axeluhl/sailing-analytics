@@ -238,7 +238,8 @@ public class MarkRolePanel extends FlowPanel {
         final AccessControlledActionsColumn<MarkRoleDTO, DefaultActionsImagesBarCell> actionsColumn = create(
                 new DefaultActionsImagesBarCell(stringMessages), userService);
         final EditOwnershipDialog.DialogConfig<MarkRoleDTO> configOwnership = EditOwnershipDialog
-                .create(userService.getUserManagementService(), SecuredDomainType.MARK_ROLE, markRole -> refreshMarkRoles(), stringMessages);
+                .create(userService.getUserManagementService(), SecuredDomainType.MARK_ROLE, markRole -> {
+                    /* no refresh action */}, stringMessages);
         final EditACLDialog.DialogConfig<MarkRoleDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementService(), SecuredDomainType.MARK_ROLE,
                 markRole -> markRole.getAccessControlList(), stringMessages);
