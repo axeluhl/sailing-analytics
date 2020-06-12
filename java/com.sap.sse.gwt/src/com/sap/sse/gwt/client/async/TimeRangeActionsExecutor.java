@@ -1,201 +1,158 @@
 package com.sap.sse.gwt.client.async;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sse.common.MultiTimeRange;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.common.impl.MultiTimeRangeImpl;
 
-public class TimeRangeActionsExecutor<Result> {
-    public interface TimeRangeAsyncAction<Result> extends AsyncAction<Result> {
-        TimeRange getTimeRange();
-        void setTimeRange(TimeRange timeRange);
-    }
+/**
+ * An Executor for efficient, asynchronous execution of {@link TimeRangeAsyncAction}s. For the actual execution this
+ * class relies on an {@link AsyncActionsExecutor}.
+ *
+ *
+ * The idea is to provide an abstraction layer which will handle caching and intelligently cut down on the number and
+ * size of request being made to the server.
+ *
+ * @param <Result>
+ *            Type returned by remote procedure. See {@link TimeRangeAsyncAction}.
+ * @param <SubResult>
+ *            Type representing an individual part or channel of a complete {@code Result}.
+ * @param <Key>
+ *            Typed used to index {@code SubResult}s.
+ *
+ * @author Tim Hessenmüller (D062243)
+ */
+public class TimeRangeActionsExecutor<Result, SubResult, Key> {
+    private final class ExecutorCallback implements AsyncCallback<Result> {
+        private final TimeRangeAsyncCallback<Result, SubResult, Key> callback;
+        private final Collection<Pair<Key, TimeRange>> requestedTimeRanges;
+        private final Map<Key, TimeRange> trimmedTimeRangeMap;
 
-    public interface TimeRangeResultJoiner<T> {
-        /**
-         * 
-         * @param resultsToJoin
-         * @param timeRange
-         * @return {@code null} to indicate missing data.
-         */
-        T join(List<Pair<TimeRange, T>> resultsToJoin, TimeRange timeRange);
-    }
-
-    private class Request<T> implements AsyncCallback<T> {
-        private final TimeRangeAsyncAction<T> action;
-        private final AsyncCallback<T> callback;
-        private T result = null;
-
-        public Request(TimeRangeAsyncAction<T> asyncAction, AsyncCallback<T> asyncCallback) {
-            this.action = asyncAction;
-            this.callback = asyncCallback;
+        private ExecutorCallback(Collection<Pair<Key, TimeRange>> requestedTimeRanges,
+                List<Pair<Key, TimeRange>> trimmedTimeRanges, TimeRangeAsyncCallback<Result, SubResult, Key> callback) {
+            this.callback = callback;
+            this.requestedTimeRanges = requestedTimeRanges;
+            trimmedTimeRangeMap = new HashMap<>(trimmedTimeRanges.size());
+            trimmedTimeRanges.forEach(pair -> trimmedTimeRangeMap.put(pair.getA(), pair.getB()));
         }
 
         @Override
-        public void onSuccess(T result) {
-            TimeRange requestedTimeRange = TimeRangeActionsExecutor.this.requestedRangeMap.get(this);
-            // If this requests TimeRange was trimmed or the results are already present
-            if (requestedTimeRange == null || !requestedTimeRange.equals(action.getTimeRange())) {
-                //TODO reduce amount of elements that the joiner has to search through
-                result = (T) TimeRangeActionsExecutor.this.joinResults((TimeRangeActionsExecutor<Result>.Request<Result>) this); //TODO Type check
+        public void onSuccess(Result result) {
+            Map<Key, SubResult> unzippedResultMap = result != null ? callback.unzipResults(result)
+                    : Collections.emptyMap();
+            Map<Key, Pair<TimeRange, SubResult>> completedResultMap = new HashMap<>();
+            for (Pair<Key, TimeRange> request : requestedTimeRanges) {
+                SubResult subResult = unzippedResultMap.get(request.getA());
+                TimeRangeResultCache<SubResult> cache = getSubResultCache(request.getA());
+                List<Pair<TimeRange, SubResult>> partialResults = cache.registerAndCollectResult(
+                        trimmedTimeRangeMap.get(request.getA()), subResult, new AsyncCallback<Void>() {
+                            @Override
+                            public void onSuccess(Void voidResult) {
+                                ExecutorCallback.this.onSuccess(result);
+                            }
+
+                            @Override
+                            public void onFailure(Throwable caught) {
+                            }
+                        });
+                if (partialResults == null) {
+                    return; // A required request is still in transit
+                }
+                SubResult completedSubResult = callback.joinSubResults(request.getB(), partialResults);
+                completedResultMap.put(request.getA(), new Pair<>(request.getB(), completedSubResult));
             }
-            TimeRangeActionsExecutor.this.requestedRangeMap.remove(this);
-            if (requestedTimeRange != null) {
-                action.setTimeRange(requestedTimeRange); //TODO Resetting this to what it originally was is inefficient
-            }
-            if (result != null) {
-                this.result = result;
-                TimeRangeActionsExecutor.this.receivedRequestsRingBuffer.add((TimeRangeActionsExecutor<Result>.Request<Result>) this); //TODO Type check
-                TimeRangeActionsExecutor.this.receivedRange = null;
-            }
-            if (callback != null) {
-                callback.onSuccess(result);
-            }
+            callback.onSuccess(completedResultMap);
         }
 
         @Override
         public void onFailure(Throwable caught) {
-            TimeRangeActionsExecutor.this.requestedRangeMap.remove(this);
-            //TODO Check if other requests are now missing parts of their request
-            if (callback != null) {
-                callback.onFailure(caught);
-            }
-        }
-
-        public TimeRangeAsyncAction<T> getAction() {
-            return action;
-        }
-
-        public T getResult() {
-            return result;
+            trimmedTimeRangeMap.entrySet().forEach(e -> getSubResultCache(e.getKey()).registerFailure(e.getValue()));
+            callback.onFailure(caught);
         }
     }
 
-
+    /**
+     * {@link AsyncActionsExecutor} that will be used to actually execute remote procedures.
+     */
     protected final AsyncActionsExecutor executor;
+    /**
+     * Action category passed along to the {@link #executor}.
+     *
+     * @see AsyncActionsExecutor#execute(AsyncAction, String, AsyncCallback)
+     */
     protected String actionCategory = MarkedAsyncCallback.CATEGORY_GLOBAL;
-    protected final TimeRangeResultJoiner<Result> resultJoiner;
-    protected final Deque<Request<Result>> waitingForOtherRequestsQueue = new ArrayDeque<>();
-    /**
-     * Holds {@link TimeRange}s of requests that have been given to the {@link #executor}.
-     */
-    protected final Map<Request<Result>, TimeRange> requestedRangeMap = new HashMap<>();
-    /**
-     * Ring buffer holding the last successful responses.
-     */
-    protected final Deque<Request<Result>> receivedRequestsRingBuffer = new ArrayDeque<Request<Result>>() {
-        private static final long serialVersionUID = 1L;
-        private final int bufferSize = 16;
-        @Override
-        public void addFirst(Request<Result> e) {
-            while (size() >= bufferSize) {
-                super.pollFirst();
-            }
-            super.addFirst(e);
-        }
-        @Override
-        public void addLast(Request<Result> e) {
-            while (size() >= bufferSize) {
-                super.pollFirst();
-            }
-            super.addLast(e);
-        }
-    };
-    /**
-     * Get with {@link #getReceivedTimeRange()} as this will be set to {@code null} once it becomes invalid.
-     * {@link MultiTimeRange} containing {@link #receivedRequestsRingBuffer} element's {@link TimeRange}s.
-     */
-    protected MultiTimeRange receivedRange;
+    protected final Map<Key, TimeRangeResultCache<SubResult>> cacheMap = new HashMap<>();
 
-    public TimeRangeActionsExecutor(AsyncActionsExecutor actionsExecutor, TimeRangeResultJoiner<Result> resultJoiner) {
-        this.executor = actionsExecutor;
-        this.resultJoiner = resultJoiner;
+    public TimeRangeActionsExecutor(AsyncActionsExecutor actionsExecutor) {
+        this.executor = Objects.requireNonNull(actionsExecutor);
     }
 
-    public void execute(TimeRangeAsyncAction<Result> action, AsyncCallback<Result> callback) {
+    public TimeRangeActionsExecutor(AsyncActionsExecutor actionsExecutor, String actionCategory) {
+        this.executor = Objects.requireNonNull(actionsExecutor);
+        this.actionCategory = actionCategory;
+    }
+
+    /**
+     * Executes a {@link TimeRangeAsyncAction} and returns the results to a {@link TimeRangeAsyncCallback}. Calls
+     * {@link #execute(TimeRangeAsyncAction, AsyncCallback, boolean)} with {@code forceTimeRange} set to {@code false}.
+     *
+     * @param action
+     *            {@link TimeRangeAsyncAction} to execute.
+     * @param callback
+     *            {@link TimeRangeAsyncCallback} to return results to.
+     * @see #execute(TimeRangeAsyncAction, TimeRangeAsyncCallback, boolean)
+     */
+    public void execute(TimeRangeAsyncAction<Result, Key> action,
+            TimeRangeAsyncCallback<Result, SubResult, Key> callback) {
         execute(action, callback, /* forceTimeRange */ false);
     }
 
-    public void execute(TimeRangeAsyncAction<Result> action, AsyncCallback<Result> callback,
-            boolean forceTimeRange) {
-        Request<Result> request = new Request<>(action, callback);
-        TimeRange requestedTimeRange = action.getTimeRange();
-        if (!forceTimeRange) {
-            TimeRange missingTimeRange = trimActionTimeRange(requestedTimeRange);
-            // If all data is already present simply return the results
-            if (missingTimeRange == null) {
-                request.onSuccess(null);
-                return;
-            }
-            action.setTimeRange(missingTimeRange);
-        }
-        
-        requestedRangeMap.put(request, requestedTimeRange);
-        //TODO waitingQueue
-        //executor.getNumberOfPendingActionsPerType(actionCategory);
-        
-        executor.execute(action, actionCategory, request);
-    }
-
     /**
-     * @return trimmed {@link TimeRange} or {@code null} if the request is unnecessary since the results are already here.
+     * Executes a {@link TimeRangeAsyncAction} and returns the results to a {@link TimeRangeAsyncCallback}.
+     *
+     * @param action
+     *            {@link TimeRangeAsyncAction} to execute.
+     * @param callback
+     *            {@link TimeRangeAsyncCallback} to return results to.
+     * @param forceTimeRange
+     *            if {@code false} the request will be optimized.
+     * @see #execute(TimeRangeAsyncAction, TimeRangeAsyncCallback)
      */
-    private TimeRange trimActionTimeRange(TimeRange timeRange) {
-        // Signal to return result immediately if everything is already there
-        if (getReceivedTimeRange().includes(timeRange)) {
-            return null;
+    public void execute(TimeRangeAsyncAction<Result, Key> action,
+            TimeRangeAsyncCallback<Result, SubResult, Key> callback, boolean forceTimeRange) {
+        List<Pair<Key, TimeRange>> trimmedTimeRanges = new ArrayList<>(action.getTimeRanges().size());
+        for (Pair<Key, TimeRange> part : action.getTimeRanges()) {
+            TimeRangeResultCache<SubResult> cache = getSubResultCache(part.getA());
+            TimeRange trimmedRange = cache.trimAndRegisterRequest(part.getB(), forceTimeRange);
+            if (trimmedRange != null) {
+                trimmedTimeRanges.add(part);
+            }
         }
-        // Trim against already fetched results and mark them
-        for (TimeRange rangeToTrimBy : getReceivedTimeRange()) {
-            timeRange = trimTimeRange(timeRange, rangeToTrimBy); //TODO Mark needed results so they don't get dropped
+        if (!trimmedTimeRanges.isEmpty()) {
+            executor.execute(new AsyncAction<Result>() {
+                @Override
+                public void execute(AsyncCallback<Result> callback) {
+                    action.execute(trimmedTimeRanges, callback);
+                }
+            }, actionCategory, new ExecutorCallback(action.getTimeRanges(), trimmedTimeRanges, callback));
+        } else {
+            new ExecutorCallback(action.getTimeRanges(), trimmedTimeRanges, callback).onSuccess(null);
         }
-        // Trim against requests already in transit
-        for (TimeRange rangeToTrimBy : requestedRangeMap.values()) {
-            timeRange = trimTimeRange(timeRange, rangeToTrimBy);
-        }
-        return timeRange;
     }
 
-    private static TimeRange trimTimeRange(TimeRange toTrim, TimeRange trimWith) {
-        //TODO A TimeRange which had lain within toTrim on the first pass might now be usable on a second pass
-        if (toTrim.intersects(trimWith) && !toTrim.liesWithin(trimWith) && !toTrim.includes(trimWith)) {
-            return toTrim.subtract(trimWith).iterator().next();
+    private TimeRangeResultCache<SubResult> getSubResultCache(Key key) {
+        TimeRangeResultCache<SubResult> cache = cacheMap.get(key);
+        if (cache == null) {
+            cache = new TimeRangeResultCache<>();
+            cacheMap.put(key, cache);
         }
-        return toTrim;
-    }
-
-    private Result joinResults(Request<Result> partialResult) {
-        final TimeRange requestedTimeRange = requestedRangeMap.get(partialResult);
-        if (requestedTimeRange == null) { //TODO Maybe only log since we could recover by using the trimmed TimeRange from Request.getAction().getTimeRange()? Also this case SHOULD never occur
-            throw new IllegalStateException("TimeRange for Request not found in requestedRangeMap");
-        }
-        List<Pair<TimeRange, Result>> results = receivedRequestsRingBuffer.stream()
-                .filter(r -> r.getAction().getTimeRange().intersects(requestedTimeRange))
-                .map(r -> new Pair<>(r.getAction().getTimeRange(), r.getResult()))
-                .collect(Collectors.toList());
-        Result result = resultJoiner.join(results, requestedTimeRange);
-        if (result == null) {
-            //TODO Data missing! Fire off another request or wait for it to finish?
-        }
-        return result;
-    }
-
-    protected MultiTimeRange getReceivedTimeRange() {
-        if (receivedRange == null) {
-            TimeRange[] timeRanges = receivedRequestsRingBuffer.stream()
-                    .map(Request::getAction)
-                    .map(TimeRangeAsyncAction::getTimeRange)
-                    .toArray(TimeRange[]::new);
-            receivedRange = new MultiTimeRangeImpl(timeRanges);
-        }
-        return receivedRange;
+        return cache;
     }
 }
