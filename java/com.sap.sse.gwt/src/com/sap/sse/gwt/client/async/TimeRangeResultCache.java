@@ -143,7 +143,8 @@ public class TimeRangeResultCache<Result> {
 
     /**
      * 
-     * @param timeRange {@link TimeRange} of failed request.
+     * @param timeRange
+     *            {@link TimeRange} of failed request.
      */
     public void registerFailure(TimeRange timeRange) {
         Request<Result> request = requestCache.remove(timeRange);
@@ -154,8 +155,10 @@ public class TimeRangeResultCache<Result> {
     /**
      * Trims a potential request with cached results.
      *
-     * @param toTrim {@link TimeRange}
-     * @param request {@link Request} to attach dependencies to.
+     * @param toTrim
+     *            {@link TimeRange}
+     * @param request
+     *            {@link Request} to attach dependencies to.
      * @param rangesToTrimWith
      * @return {@link TimeRange} which to request from the server because it is not in the cache.
      */
@@ -170,11 +173,22 @@ public class TimeRangeResultCache<Result> {
                 final Map.Entry<TimeRange, Request<Result>> element = iter.next();
                 final TimeRange trimWith = element.getKey();
                 if (toTrim.intersects(trimWith)) {
-                    if (!toTrim.liesWithin(trimWith) && !toTrim.includes(trimWith)) {
+                    // Only consider TimeRanges that touch or overlap toTrim
+                    if (toTrim.liesWithin(trimWith)) {
+                        // toTrim is fully covered by trimWith
                         if (request != null) {
                             request.addDependency(element.getValue());
                         }
-                        toTrim = toTrim.subtract(trimWith).iterator().next(); // TODO Allow trimming to null
+                        return null;
+                    }
+                    if (!toTrim.includes(trimWith)
+                            || (toTrim.from().equals(trimWith.from()) || toTrim.to().equals(trimWith.to()))) {
+                        // toTrim and trimWith overlap and trimWith does not lie within toTrim
+                        // OR special case where trimWith lies within toTrim but touches one of the ends
+                        if (request != null) {
+                            request.addDependency(element.getValue());
+                        }
+                        toTrim = toTrim.subtract(trimWith).iterator().next();
                         iter.remove();
                         rangeWasTrimmedThisIteration = true;
                     }
