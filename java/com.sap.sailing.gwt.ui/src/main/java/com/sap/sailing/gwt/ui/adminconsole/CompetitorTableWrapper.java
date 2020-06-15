@@ -331,7 +331,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
         competitorActionColumn.addAction(CompetitorConfigImagesBarCell.ACTION_UPDATE, HasPermissions.DefaultActions.UPDATE, this::editCompetitor);
         competitorActionColumn.addAction(CompetitorConfigImagesBarCell.ACTION_REFRESH, this::allowUpdate);
         final DialogConfig<CompetitorDTO> editOwnerShipDialog = EditOwnershipDialog.create(userService.getUserManagementService(), SecuredDomainType.COMPETITOR,
-                null, stringMessages);
+                competitorDTO -> refresh(Collections.singleton(competitorDTO)), stringMessages);
         competitorActionColumn.addAction(CompetitorConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
                 editOwnerShipDialog::openOwnershipDialog);
         final EditACLDialog.DialogConfig<CompetitorDTO> configACL = EditACLDialog
@@ -459,6 +459,26 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
         dialog.show();
     }
 
+    void openCompetitorWithBoatAddDialog(final CompetitorWithBoatDTO newCompetitor, boolean createWithBoatByDefault) {
+        final CompetitorWithOptionalBoatAddDialog dialog = new CompetitorWithOptionalBoatAddDialog(getStringMessages(),
+                newCompetitor, createWithBoatByDefault, new DialogCallback<CompetitorWithBoatDTO>() {
+                    @Override
+                    public void ok(final CompetitorWithBoatDTO competitor) {
+                        if (competitor.hasBoat()) {
+                            sailingServiceWrite.addOrUpdateCompetitorWithBoat(competitor, createAddCompetitorCallback());
+                        } else {
+                            sailingServiceWrite.addOrUpdateCompetitorWithoutBoat(competitor, createAddCompetitorCallback());
+                        }
+                    }
+
+                    @Override
+                    public void cancel() {
+                    }
+                });
+        dialog.show();
+
+    }
+    
     void openEditCompetitorWithoutBoatDialog(final CompetitorDTO originalCompetitor) {
         final CompetitorEditDialog<CompetitorDTO> dialog = CompetitorEditDialog.create(getStringMessages(), originalCompetitor, new DialogCallback<CompetitorDTO>() {
             @Override
@@ -533,5 +553,20 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
             }
             return "";
         });
+    }
+
+    private <T extends CompetitorDTO> AsyncCallback<T> createAddCompetitorCallback() {
+        return new AsyncCallback<T>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError("Error trying to add competitor: " + caught.getMessage());
+            }
+
+            @Override
+            public void onSuccess(T addedCompetitor) {
+                getFilterField().add(addedCompetitor);
+                getDataProvider().refresh();
+            }
+        };
     }
 }

@@ -80,7 +80,7 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
                 args.putAll(fragment.getArguments());
             }
             fragment.setArguments(args);
-            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+            FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
             transaction.replace(id, fragment);
             transaction.commit();
         }

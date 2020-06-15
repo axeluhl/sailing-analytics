@@ -2,6 +2,7 @@ package com.sap.sailing.server.gateway.jaxrs.api;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -481,7 +482,14 @@ public class EventsResource extends AbstractSailingServerResource {
         final TimePoint startDate = parseTimePoint(startDateParam, startDateAsMillis, now());
         final TimePoint endDate = parseTimePoint(endDateParam, endDateAsMillis, new MillisecondsTimePoint(addOneWeek(startDate.asDate())));
         URL officialWebsiteURL = officialWebsiteURLParam == null ? null :  toURL(officialWebsiteURLParam);
-        URL baseURL = baseURLParam == null ? uriInfo.getBaseUri().toURL() : toURL(baseURLParam);
+        final URI baseUri = uriInfo.getBaseUri();
+        final int port = baseUri.getPort();
+        // guess the protocol; when behind an SSL-offloading reverse proxy or load balancer, all we'll see is a regular HTTP
+        // request; yet, we'd likely want the client to make requests using HTTPS, unless we see a dedicated port in the request
+        // that is not the HTTPS default port 443:
+        final String scheme = (port >= 0 && port != 443) ? "http" : "https";
+        URL baseURL = baseURLParam == null ? new URL(scheme+":"+baseUri.getSchemeSpecificPart().
+                substring(0, baseUri.getSchemeSpecificPart().length()-baseUri.getPath().length())) : toURL(baseURLParam);
         List<UUID> leaderboardGroupIds = leaderboardGroupIdsListParam == null ? new ArrayList<UUID>() : toUUIDList(leaderboardGroupIdsListParam);
         UUID eventId = UUID.randomUUID();
         // ignoring sailorsInfoWebsiteURLs, images, videos
