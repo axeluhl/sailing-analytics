@@ -36,12 +36,9 @@ public class LinkRegattaLeaderboardToLeaderboardGroupOfEventDialog extends DataE
                 }, callback);
         this.leaderboardGroups = new ArrayList<>();
         leaderboardGroupsBox = createListBox(/* isMultipleSelect */ false);
-        List<LeaderboardGroupDTO> lgDTOs = event.getLeaderboardGroups();
-        for (int i = 0; i < lgDTOs.size(); i++) {
-            LeaderboardGroupDTO lgDTO = lgDTOs.get(i);
+        for (final LeaderboardGroupDTO lgDTO : event.getLeaderboardGroups()) {
             this.leaderboardGroups.add(lgDTO);
-            this.leaderboardGroupsBox.addItem(lgDTO.getName());
-            this.leaderboardGroupsBox.setValue(i, lgDTO.getId().toString());
+            this.leaderboardGroupsBox.addItem(lgDTO.getName(), lgDTO.getId().toString());
         }
     }
     
