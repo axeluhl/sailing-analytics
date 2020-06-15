@@ -58,7 +58,6 @@ public class TimePanelFragment extends BasePanelFragment implements NavigationEv
     private final static String TOGGLED = "toggled";
     private final static String COMPETITOR_TOGGLE_STATE_ON = "competitor-toggle-state-on";
 
-
     private RaceStateChangedListener mStateListener;
 
     private TimePanelHeaderLayout mRaceHeader;
