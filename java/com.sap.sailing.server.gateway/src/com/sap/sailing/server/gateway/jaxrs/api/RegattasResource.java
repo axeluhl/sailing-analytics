@@ -2696,7 +2696,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     }
 
     @POST
-    @Path("{regattaname}/competitors/{competitorid}/updateToDHandicap")
+    @Path("{regattaname}/competitors/{competitorId}/updateToDHandicap")
     @Produces("application/json;charset=UTF-8")
     public Response updateCompetitorToDHandicap(@PathParam("regattaname") String regattaName,
             @PathParam("competitorId") String competitorId,
