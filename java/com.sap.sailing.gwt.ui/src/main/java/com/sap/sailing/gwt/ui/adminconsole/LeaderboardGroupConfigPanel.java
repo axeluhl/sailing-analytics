@@ -91,6 +91,12 @@ import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
         implements LeaderboardGroupsDisplayer, LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity> {
 
+    /**
+     * The key to put into a params map passed into {@link #setupLeaderboardGroups(Map)} used to identify
+     * the leaderboard to select.
+     */
+    static final String LEADERBOARD_GROUP_ID = "LeaderBoardGroupId";
+
     interface AnchorTemplates extends SafeHtmlTemplates {
         @SafeHtmlTemplates.Template("<a href=\"{0}\">{1}</a>")
         SafeHtml cell(SafeUri url, String displayName);
@@ -1060,19 +1066,17 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
 
     @Override
     public void setupLeaderboardGroups(Map<String, String> params) {
-        String leaderBoardGroupId = params.get("LeaderBoardGroupId");
-        if (leaderBoardGroupId == null) {
-            return;
-        }
-        // setup filter value to name from params
-        groupsFilterablePanel.search(leaderBoardGroupId);
-
-        // deselect all leaderboard groups except one which name is from params
-        for (LeaderboardGroupDTO leaderboardGroupDTO : availableLeaderboardGroups) {
-            if (leaderBoardGroupId.equals(String.valueOf(leaderboardGroupDTO.getId()))) {
-                groupsTable.getSelectionModel().setSelected(leaderboardGroupDTO, true);
-            } else if (groupsTable.getSelectionModel().isSelected(leaderboardGroupDTO)) {
-                groupsTable.getSelectionModel().setSelected(leaderboardGroupDTO, false);
+        String leaderBoardGroupId = params.get(LEADERBOARD_GROUP_ID);
+        if (leaderBoardGroupId != null) {
+            // setup filter value to name from params
+            groupsFilterablePanel.search(leaderBoardGroupId);
+            // deselect all leaderboard groups except one which name is from params
+            for (LeaderboardGroupDTO leaderboardGroupDTO : availableLeaderboardGroups) {
+                if (leaderBoardGroupId.equals(String.valueOf(leaderboardGroupDTO.getId()))) {
+                    groupsTable.getSelectionModel().setSelected(leaderboardGroupDTO, true);
+                } else if (groupsTable.getSelectionModel().isSelected(leaderboardGroupDTO)) {
+                    groupsTable.getSelectionModel().setSelected(leaderboardGroupDTO, false);
+                }
             }
         }
     }

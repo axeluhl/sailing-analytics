@@ -279,9 +279,8 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             @Override
             public void update(String value) {
                 Map<String, String> params = new HashMap<>();
-                params.put("LeaderBoardGroupId", value);
-                handleTabSelectable.selectTabByNames(stringMessages.leaderboards(), stringMessages.leaderboardGroups(),
-                        params);
+                params.put(LeaderboardGroupConfigPanel.LEADERBOARD_GROUP_ID, value);
+                handleTabSelectable.selectTabByNames(stringMessages.leaderboards(), stringMessages.leaderboardGroups(), params);
             }
         });
         TextColumn<EventDTO> imagesColumn = new TextColumn<EventDTO>() {
