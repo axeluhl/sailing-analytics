@@ -27,7 +27,7 @@ public class TrackedRacesCompetitorsPanelPO extends PageArea {
     public TrackedRacesCompetitorEditDialogPO pushAddCompetitorButton() {
         this.addCompetitorButton.click();
         waitForAjaxRequests();
-        WebElement dialog = findElementBySeleniumId(this.driver, "CompetitorEditDialog");
+        WebElement dialog = findElementBySeleniumId(this.driver, "CompetitorWithBoatAddDialog");
         return new TrackedRacesCompetitorEditDialogPO(this.driver, dialog);
     }
 

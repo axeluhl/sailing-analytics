@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -523,7 +522,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         //                                because it may be an accidental omission to select that regatta for loading
         List<TracTracRaceRecordDTO> allRaces = raceList.getList();
         SelectionModel<? super TracTracRaceRecordDTO> selectionModel = racesTable.getSelectionModel();
-        final Set<TracTracRaceRecordDTO> selectedRaces = new LinkedHashSet<>();
+        final List<TracTracRaceRecordDTO> selectedRaces = new ArrayList<>();
         for (TracTracRaceRecordDTO race : allRaces) {
             if (selectionModel.isSelected(race)) {
                 selectedRaces.add(race);

@@ -56,16 +56,13 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
         this.errorReporter = errorReporter;
         this.regattaRefresher = regattaRefresher;
         this.eventsRefresher = eventsRefresher;
-
         final VerticalPanel mainPanel = new VerticalPanel();
         setWidget(mainPanel);
         mainPanel.setWidth("100%");
-
         final CaptionPanel regattasPanel = new CaptionPanel(stringMessages.regattas());
         mainPanel.add(regattasPanel);
         final VerticalPanel regattasContentPanel = new VerticalPanel();
         regattasPanel.setContentWidget(regattasContentPanel);
-
         regattaListComposite = new RegattaListComposite(sailingServiceWrite, userService, regattaRefresher, errorReporter,
                 stringMessages);
         regattaListComposite.ensureDebugId("RegattaListComposite");
@@ -73,7 +70,6 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, REGATTA);
         final Button create = buttonPanel.addCreateAction(stringMessages.addRegatta(), this::openCreateRegattaDialog);
         create.ensureDebugId("AddRegattaButton");
-
         final Button remove = buttonPanel.addRemoveAction(stringMessages.remove(),
                 refreshableRegattaMultiSelectionModel, true, () -> {
                     // unmodifiable collection can't be sent to the server.
@@ -81,7 +77,6 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
                     removeRegattas(regattas);
                 });
         regattasContentPanel.add(buttonPanel);
-
         refreshableRegattaMultiSelectionModel.addSelectionChangeHandler(new Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
@@ -113,7 +108,6 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
             }
         });
         regattasContentPanel.add(regattaListComposite);
-        
         regattaDetailsComposite = new RegattaDetailsComposite(sailingServiceWrite, userService, regattaRefresher,
                 errorReporter, stringMessages);
         regattaDetailsComposite.ensureDebugId("RegattaDetailsComposite");
