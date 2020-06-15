@@ -277,12 +277,9 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
     }
     
     private void setupEventAndCourseAreaListBoxes(StringMessages stringMessages) {
-        int index = 0;
-        sailingEventsListBox.addItem(stringMessages.selectSailingEvent());
-        sailingEventsListBox.setValue(index, stringMessages.selectSailingEvent());
+        sailingEventsListBox.addItem(stringMessages.selectSailingEvent(), stringMessages.selectSailingEvent());
         for (EventDTO event : Util.sortNamedCollection(existingEvents)) {
-            sailingEventsListBox.addItem(event.getName());
-            sailingEventsListBox.setValue(++index, event.getId().toString());
+            sailingEventsListBox.addItem(event.getName(), event.getId().toString());
             if (defaultEvent != null) {
                 if (defaultEvent.getId().equals(event.getId())) {
                     sailingEventsListBox.setSelectedIndex(sailingEventsListBox.getItemCount() - 1);
