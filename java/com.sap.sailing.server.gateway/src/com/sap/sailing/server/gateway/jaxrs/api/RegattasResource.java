@@ -2665,7 +2665,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     @Produces("application/json;charset=UTF-8")
     public Response updateCompetitorToTHandicap(@PathParam("regattaname") String regattaName,
             @PathParam("competitorid") String competitorId, @QueryParam("timeOnTimeFactor") Double timeOnTimeFactor)
-            throws IllegalStateException {
+            throws IllegalStateException, ParseException {
         final Regatta regatta = getService().getRegattaByName(regattaName);
         if (regatta != null) {
             final SecurityService securityService = getSecurityService();
@@ -2701,7 +2701,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     public Response updateCompetitorToDHandicap(@PathParam("regattaname") String regattaName,
             @PathParam("competitorId") String competitorId,
             @QueryParam("timeOnDistanceAllowancePerNauticalMile") Long timeOnDistanceAllowancePerNauticalMile)
-            throws IllegalStateException {
+            throws IllegalStateException, ParseException {
         final Regatta regatta = getService().getRegattaByName(regattaName);
         final SecurityService securityService = getSecurityService();
         securityService.checkCurrentUserUpdatePermission(regatta);
