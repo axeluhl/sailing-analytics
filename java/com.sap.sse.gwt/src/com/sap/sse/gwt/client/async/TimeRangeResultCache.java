@@ -14,12 +14,12 @@ import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util.Pair;
 
 /**
- *
- *
+ * Optimizes requests by trimming their wanted {@link TimeRange} against a cache of (fetched and still outstanding)
+ * results.
  *
  * @param <Result>
  *            Type to be cached.
- *
+ * @see TimeRangeActionsExecutor
  * @author Tim Hessenmüller (D062243)
  */
 public class TimeRangeResultCache<Result> {
@@ -83,12 +83,14 @@ public class TimeRangeResultCache<Result> {
     };
 
     /**
-     * 
+     * Trims the requested {@link TimeRange} against results that already cached and registers the trimmed
+     * {@link TimeRange} with the cache.
+     *
      * @param toTrim
      *            {@link TimeRange} to request.
      * @param forceTimeRange
      *            if {@code false} the request will be optimized with cached results.
-     * @return {@link TimeRange} to request or {@code null} if no request is to be made.
+     * @return {@link TimeRange} to request or {@code null} if no request is to be made since the results are cached.
      */
     public TimeRange trimAndRegisterRequest(TimeRange toTrim, boolean forceTimeRange) {
         Request<Result> request = new Request<>();
@@ -106,7 +108,7 @@ public class TimeRangeResultCache<Result> {
     /**
      * Registers that a request has returned with a result and collects all other needed cached results that are needed
      * to construct a complete, time-continuous {@code Result}.
-     * 
+     *
      * @param timeRange
      *            {@link TimeRange} that this request was trimmed to.
      * @param result
@@ -142,25 +144,31 @@ public class TimeRangeResultCache<Result> {
     }
 
     /**
-     * 
+     * Removes the failed request from cache.
+     *
      * @param timeRange
      *            {@link TimeRange} of failed request.
      */
     public void registerFailure(TimeRange timeRange) {
         Request<Result> request = requestCache.remove(timeRange);
-        // TODO Request dependent on this one?
-        request.setResult(null);
+        // TODO Requests dependent on this one?
+        if (request != null) {
+            request.setResult(null);
+        }
     }
 
     /**
-     * Trims a potential request with cached results.
+     * Trims a potential request with cached results. For simplicity {@code toTrim} will currently not be split up into
+     * multiple TimeRanges if a part in the middle is cached.
      *
      * @param toTrim
-     *            {@link TimeRange}
+     *            {@link TimeRange} to trim.
      * @param request
      *            {@link Request} to attach dependencies to.
      * @param rangesToTrimWith
-     * @return {@link TimeRange} which to request from the server because it is not in the cache.
+     *            {@link TimeRange}s that {@code toTrim} will be trimmed against.
+     * @return {@link TimeRange} which to request from the server because it is not covered by {@code rangesToTrimWith}
+     *         or {@code null} if no request to the server is to be made.
      */
     private TimeRange trimTimeRangeAndAttachDeps(TimeRange toTrim, Request<Result> request,
             Iterable<Map.Entry<TimeRange, Request<Result>>> rangesToTrimWith) {
