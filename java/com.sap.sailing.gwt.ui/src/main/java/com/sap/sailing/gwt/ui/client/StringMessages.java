@@ -1161,7 +1161,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String videos();
     String image();
     String images();
+    String imagesWithCount(int number);
     String video();
+    String videosWithCount(int number);
     String flagImageURL();
     String imageURLs();
     String videoURLs();

@@ -268,9 +268,8 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             public List<MultipleLinkCell.CellLink> getValue(EventDTO event) {
                 List<MultipleLinkCell.CellLink> links = new ArrayList<>();
                 for (LeaderboardGroupDTO lg : event.getLeaderboardGroups()) {
-                    String leaderboardId = String.valueOf(lg.getId());
-                    MultipleLinkCell.CellLink cellLink = new MultipleLinkCell.CellLink(leaderboardId, leaderboardId,
-                            lg.getName());
+                    final String leaderboardGroupId = String.valueOf(lg.getId());
+                    MultipleLinkCell.CellLink cellLink = new MultipleLinkCell.CellLink(leaderboardGroupId, leaderboardGroupId, lg.getName());
                     links.add(cellLink);
                 }
                 return links;
@@ -290,8 +289,8 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             public String getValue(EventDTO event) {
                 String result = "";
                 int imageCount = Util.size(event.getImages());
-                if(imageCount > 0) {
-                    result = imageCount + " image(s)"; // TODO i18n
+                if (imageCount > 0) {
+                    result = stringMessages.imagesWithCount(imageCount);
                 }
                 return result;
             }
@@ -301,8 +300,8 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             public String getValue(EventDTO event) {
                 String result = "";
                 int videoCount = Util.size(event.getVideos());
-                if(videoCount > 0) {
-                    result = videoCount + " video(s)"; // TODO i18n
+                if (videoCount > 0) {
+                    result = stringMessages.videosWithCount(videoCount);
                 }
                 return result;
             }
