@@ -163,6 +163,16 @@ public class FinishedButtonFragment extends BasePanelFragment implements Navigat
         }
     }
 
+    @Override
+    public void onFragmentPause(Fragment fragment) {
+
+    }
+
+    @Override
+    public void onFragmentResume(Fragment fragment) {
+
+    }
+
     private class RecordClick implements View.OnClickListener {
 
         @Override

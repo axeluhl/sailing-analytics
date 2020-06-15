@@ -422,6 +422,16 @@ public class FlagPanelFragment extends BasePanelFragment implements NavigationEv
         }
     }
 
+    @Override
+    public void onFragmentPause(Fragment fragment) {
+
+    }
+
+    @Override
+    public void onFragmentResume(Fragment fragment) {
+
+    }
+
     private class RaceStateChangedListener extends BaseRaceStateChangedListener {
         @Override
         public void onStatusChanged(ReadonlyRaceState state) {

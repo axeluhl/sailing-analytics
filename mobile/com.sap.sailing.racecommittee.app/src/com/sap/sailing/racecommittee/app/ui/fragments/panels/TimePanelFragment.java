@@ -294,6 +294,23 @@ public class TimePanelFragment extends BasePanelFragment implements NavigationEv
         }
     }
 
+    @Override
+    public void onFragmentPause(Fragment fragment) {
+
+    }
+
+    @Override
+    public void onFragmentResume(Fragment fragment) {
+        if (fragment instanceof StartTimeFragment) {
+            setMarkerLevel(mRaceHeader, R.id.time_marker, LEVEL_TOGGLED);
+            mCompetitorList.setMarkerLevel(PanelButton.LEVEL_NORMAL);
+        }
+        if (fragment instanceof PenaltyFragment || fragment instanceof TrackingListFragment) {
+            setMarkerLevel(mRaceHeader, R.id.time_marker, LEVEL_NORMAL);
+            mCompetitorList.setMarkerLevel(LEVEL_TOGGLED);
+        }
+    }
+
     private class RaceStateChangedListener extends BaseRaceStateChangedListener {
 
         @Override

@@ -1,6 +1,9 @@
 package com.sap.sailing.racecommittee.app.ui;
 
 import android.support.v4.app.Fragment;
+
+import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
+
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -19,10 +22,26 @@ public enum NavigationEvents {
         }
     }
 
+    public void resume(Fragment raceFragment) {
+        for (NavigationListener navigationListener:fragmentAttachListeners){
+            navigationListener.onFragmentResume(raceFragment);
+        }
+    }
+
+    public void pause(Fragment raceFragment) {
+        for (NavigationListener navigationListener:fragmentAttachListeners){
+            navigationListener.onFragmentPause(raceFragment);
+        }
+    }
+
     public interface NavigationListener {
         void onFragmentAttach(Fragment fragment);
 
         void onFragmentDetach(Fragment fragment);
+
+        void onFragmentResume(Fragment fragment);
+
+        void onFragmentPause(Fragment fragment);
     }
 
     private final List<NavigationListener> fragmentAttachListeners = new CopyOnWriteArrayList<>();

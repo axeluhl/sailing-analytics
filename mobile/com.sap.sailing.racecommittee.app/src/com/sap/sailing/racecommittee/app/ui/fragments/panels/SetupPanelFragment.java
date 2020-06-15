@@ -447,6 +447,16 @@ public class SetupPanelFragment extends BasePanelFragment implements NavigationE
         }
     }
 
+    @Override
+    public void onFragmentPause(Fragment fragment) {
+
+    }
+
+    @Override
+    public void onFragmentResume(Fragment fragment) {
+
+    }
+
     private class RaceStateChangedListener extends BaseRaceStateChangedListener {
 
         @Override

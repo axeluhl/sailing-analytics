@@ -215,6 +215,18 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        NavigationEvents.INSTANCE.resume(this);
+    }
+
+    @Override
+    public void onPause() {
+        NavigationEvents.INSTANCE.pause(this);
+        super.onPause();
+    }
+
+    @Override
     public void onAttach(Context context) {
         super.onAttach(context);
 
