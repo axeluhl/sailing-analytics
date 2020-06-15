@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -37,6 +38,7 @@ import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
+import com.sap.sailing.gwt.home.shared.utils.DropdownHandler;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.mvp.PlaceChangedEvent;
 import com.sap.sse.gwt.shared.ClientConfiguration;
@@ -56,6 +58,8 @@ public class Header extends Composite implements HeaderConstants {
     @UiField Anchor dataMiningPageLink;
     @UiField TextBox searchText;
     @UiField Button searchButton;
+    @UiField Anchor headerNavigationIcon;
+    @UiField Element headerNavigationDropDownMenuContainer;
     
     @UiField Anchor usermenu;
     
@@ -137,6 +141,9 @@ public class Header extends Composite implements HeaderConstants {
         solutionsPageLink.getElement().setAttribute(DEBUG_ID_ATTRIBUTE, "solutionsPageLink");
         logoAnchor.setAttribute(DEBUG_ID_ATTRIBUTE, "logoAnchor");
         eventsPageLink.getElement().setAttribute(DEBUG_ID_ATTRIBUTE, "eventsPage");
+
+        DropdownHandler dropdownHandler = new DropdownHandler(headerNavigationIcon, headerNavigationDropDownMenuContainer);
+        
     }
 
     @UiHandler("startPageLink")

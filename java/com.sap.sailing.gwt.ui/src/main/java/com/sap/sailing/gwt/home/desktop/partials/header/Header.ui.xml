@@ -31,7 +31,8 @@
         </nav>
         <nav class="{local_res.css.sitenavigation_fixed}">
         <!-- -->
-            <g:Anchor styleName="{local_res.css.sitenavigation_link} {local_res.css.header_navigation_icon}"></g:Anchor>
+            <g:Anchor ui:field="headerNavigationIcon" styleName="{local_res.css.sitenavigation_link} {local_res.css.header_navigation_icon}"></g:Anchor>
+            <div ui:field="headerNavigationDropDownMenuContainer" styleName="{local_res.css.sitenavigation_dropdown_container}"><ul><li>Startseite</li></ul></div>
             <span class="{local_res.css.search} {local_res.css.sitenavigation_search}">
             <g:TextBox ui:field="searchText" styleName="{local_res.css.search_textfield}" />
             <g:Button ui:field="searchButton" styleName="{res.mainCss.button} {res.mainCss.buttonsearch} {local_res.css.search_button}" />

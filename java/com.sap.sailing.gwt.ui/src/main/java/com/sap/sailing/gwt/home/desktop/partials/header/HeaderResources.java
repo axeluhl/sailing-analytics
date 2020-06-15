@@ -37,6 +37,7 @@ public interface HeaderResources extends AuthenticationResources {
         String loggedin();
         String open();
         String sitenavigation_fixed();
+        String sitenavigation_dropdown_container();
         String header_navigation_icon();
         String header_navigation_iconactive();
     }

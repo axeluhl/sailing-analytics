@@ -65,6 +65,14 @@
   color: #f0ab00;
 }
 
+.sitenavigation_dropdown_container {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  background-color: red;
+  display: block;
+}
+
 .sitenavigation_fixed {
   white-space: nowrap;
   display: table-cell;
