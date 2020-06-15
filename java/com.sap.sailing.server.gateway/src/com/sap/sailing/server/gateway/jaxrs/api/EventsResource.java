@@ -143,7 +143,7 @@ public class EventsResource extends AbstractSailingServerResource {
      * 
      * @param eventId - The UUID of the event to delete
      * @param withLeaderboardGroups - Boolean whether to delete all associated {@link LeaderboardGroup}s or not. Doing so will also delete the overall {@link Leaderboard}s of each group.
-     * @param withLeaderBoards - Boolean whether to delete all associated {@link Leaderboard}s. 
+     * @param withLeaderboards - Boolean whether to delete all associated {@link Leaderboard}s. 
      * @param withRegattas - Boolean whether to delete all associated {@link Regatta}s. Doing so will also delete all their {@link RegattaLeaderboard}s and {@link TrackedRace}s.
      * @return A 200 response, if the delete was successful or a 404 response, if the eventId was not found.
      * @throws ParseException
@@ -152,14 +152,14 @@ public class EventsResource extends AbstractSailingServerResource {
     @Path("/{eventId}/")
     public Response delete(@PathParam("eventId") String eventId,
             @QueryParam("withLeaderboardGroups") Boolean withLeaderboardGroups,
-            @QueryParam("withLeaderBoards") Boolean withLeaderBoards, @QueryParam("withRegattas") Boolean withRegattas)
+            @QueryParam("withLeaderboards") Boolean withLeaderboards, @QueryParam("withRegattas") Boolean withRegattas)
             throws ParseException {
         final Serializable eventUUID = UUIDHelper.tryUuidConversion(eventId);
         final RacingEventService racingEventService = getService();
         final Event event = racingEventService.getEvent(eventUUID);
         if (event != null) {
             final boolean deleteLeaderboardGroups = withLeaderboardGroups == Boolean.TRUE;
-            final boolean deleteLeaderboards = withLeaderBoards == Boolean.TRUE;
+            final boolean deleteLeaderboards = withLeaderboards == Boolean.TRUE;
             final boolean deleteRegattas = withRegattas == Boolean.TRUE;
             final SecurityService securityService = getSecurityService();
             securityService.checkPermissionAndDeleteOwnershipForObjectRemoval(event, () -> {
