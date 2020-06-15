@@ -313,7 +313,7 @@ public class MasterDataImportPanel extends VerticalPanel {
     private void fireLgIdRequestAndFillList(final String host) {
         currentHost = host;
         disableAllButtons();
-        sailingServiceWrite.getLeaderboardGroupNamesFromRemoteServer(host, usernameBox.getValue(),
+        sailingServiceWrite.getLeaderboardGroupNamesAndIdsAsStringsFromRemoteServer(host, usernameBox.getValue(),
                 passwordBox.getValue(), new AsyncCallback<Map<String, String>>() {
                     @Override
                     public void onFailure(Throwable caught) {

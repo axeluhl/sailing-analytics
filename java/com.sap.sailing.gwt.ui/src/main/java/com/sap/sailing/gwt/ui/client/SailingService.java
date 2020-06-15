@@ -299,7 +299,7 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
 
     RegattaLogDTO getRegattaLog(String leaderboardName) throws UnauthorizedException, DoesNotHaveRegattaLogException;
 
-    Map<String, String> getLeaderboardGroupNamesFromRemoteServer(String url, String username, String password)
+    Map<String, String> getLeaderboardGroupNamesAndIdsAsStringsFromRemoteServer(String url, String username, String password)
             throws UnauthorizedException;
 
     Iterable<CompetitorDTO> getCompetitors(boolean filterCompetitorsWithBoat, boolean filterCompetitorsWithoutBoat)

@@ -4564,7 +4564,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     // READ
-    public Map<String, String> getLeaderboardGroupNamesFromRemoteServer(String url, String username, String password) {
+    public Map<String, String> getLeaderboardGroupNamesAndIdsAsStringsFromRemoteServer(String url, String username, String password) {
         String token = RemoteServerUtil.resolveBearerTokenForRemoteServer(url, username, password);
         // FIXME: Add checks here that ensure that the current use is allowed to do MDI
         final String path = "/sailingserver/api/v1/leaderboardgroups/identifiable";
@@ -4604,6 +4604,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                     inputStream.close();
                 }
             } catch (IOException e) {
+                logger.log(Level.WARNING, "Exception while trying to close the remote stream for leaderboard groups", e);
             }
         }
     }
