@@ -718,7 +718,11 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     /**
      * Adds the leaderboard group to this service; if the group has an overall leaderboard, the overall leaderboard
      * is added to this service as well. For both, the group and the overall leaderboard, any previously existing
-     * objects by the same name of that type will be replaced.
+     * objects by the same name of that type will be replaced.<p>
+     * 
+     * For this method it is permissible to add the leaderboard group even if another one by an equal name but different
+     * {@link LeaderboardGroup#getId() ID} exists. This will make it possible at least to <em>import</em> another leaderboard
+     * group with an already existing name but different ID and later rename it to a unique name.
      */
     void addLeaderboardGroupWithoutReplication(LeaderboardGroup leaderboardGroup);
 

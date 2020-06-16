@@ -3055,11 +3055,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     public void addLeaderboardGroupWithoutReplication(LeaderboardGroup leaderboardGroup) {
         LockUtil.lockForWrite(leaderboardGroupsByNameLock);
         try {
-            String groupName = leaderboardGroup.getName();
-            if (leaderboardGroupsByName.containsKey(groupName)) {
-                throw new IllegalArgumentException("Leaderboard group with name " + groupName + " already exists");
+            if (leaderboardGroupsByID.containsKey(leaderboardGroup.getId())) {
+                throw new IllegalArgumentException("Leaderboard group with ID " + leaderboardGroup.getId() + " already exists");
             }
-            leaderboardGroupsByName.put(groupName, leaderboardGroup);
+            leaderboardGroupsByName.put(leaderboardGroup.getName(), leaderboardGroup);
             leaderboardGroupsByID.put(leaderboardGroup.getId(), leaderboardGroup);
         } finally {
             LockUtil.unlockAfterWrite(leaderboardGroupsByNameLock);

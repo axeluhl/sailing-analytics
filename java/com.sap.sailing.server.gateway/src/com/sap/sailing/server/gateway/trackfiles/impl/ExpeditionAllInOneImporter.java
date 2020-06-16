@@ -783,7 +783,7 @@ public class ExpeditionAllInOneImporter {
                         /* securityDisplayName */ null, new Callable<LeaderboardGroup>() {
                             @Override
                             public LeaderboardGroup call() throws Exception {
-                                AbstractLeaderboardGroupOperation<LeaderboardGroup> createLeaderboardGroup = new CreateLeaderboardGroup(newGroupid,
+                                CreateLeaderboardGroup createLeaderboardGroup = new CreateLeaderboardGroup(newGroupid,
                                         leaderboardGroupName, description, /* displayName */ null,
                                         /* displayGroupsInReverseOrder */ false,
                                         Collections.singletonList(regattaNameAndleaderboardName),
