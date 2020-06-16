@@ -16,6 +16,7 @@ public class FlatSmartphoneUuidAndGPSFixMovingJsonSerializer {
     public static final String LON_DEG = "longitude";
     public static final String LAT_DEG = "latitude";
     public static final String TIME_MILLIS = "timestamp";
+    public static final String TIME_ISO = "timestamp-iso";
     public static final String SPEED_M_PER_S = "speed";
     public static final String BEARING_DEG = "course";
 }
