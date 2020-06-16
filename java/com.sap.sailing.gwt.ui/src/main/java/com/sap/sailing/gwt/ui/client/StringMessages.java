@@ -2384,4 +2384,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String whitelabelFooterLanguage();
     String whitelabelSailing();
     String unableToLoadCourseAreas(String message);
+    String insufficientPermissions();
 }
