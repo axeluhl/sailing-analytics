@@ -2221,7 +2221,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return boat;
     }
 
-    private RegattaLogEvent loadRegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEvent(TimePoint createdAt,
+    private RegattaLogEvent loadRegattaLogSetCompetitorTimeOnTimeFactorEvent(TimePoint createdAt,
             AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, Document dbObject) {
         final Competitor comp = getCompetitorByID(dbObject);
         final Number timeOnTimeFactorAsNumber = (Number) dbObject.get(FieldNames.REGATTA_LOG_TIME_ON_TIME_FACTOR.name());
@@ -2230,7 +2230,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 timeOnTimeFactor);
     }
 
-    private RegattaLogEvent loadRegattaLogSetCompetitorTimeOnTimeFactorEvent(TimePoint createdAt,
+    private RegattaLogEvent loadRegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEvent(TimePoint createdAt,
             AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, Document dbObject) {
         final Competitor comp = getCompetitorByID(dbObject);
         final Number timeOnDistanceSecondsAllowancePerNauticalMileAsNumber = (Number) dbObject
