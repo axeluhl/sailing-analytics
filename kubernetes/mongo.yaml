@@ -64,7 +64,7 @@ extraVars: {}
 
 # Prometheus Metrics Exporter
 metrics:
-  enabled: false
+  enabled: true
   image:
     repository: bitnami/mongodb-exporter
     tag: 0.10.0-debian-9-r71
@@ -80,7 +80,9 @@ metrics:
     runAsUser: 1001
 
 # Annotations to be added to MongoDB pods
-podAnnotations: {}
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "{{ .Values.metrics.port }}"
 
 securityContext:
   enabled: true
@@ -163,7 +165,7 @@ persistentVolume:
   storageClass: "gp2-xfs-allow-volume-expansion"
   accessModes:
     - ReadWriteOnce
-  size: 1Gi
+  size: 5Gi
   annotations: {}
 
 # Annotations to be added to the secrets

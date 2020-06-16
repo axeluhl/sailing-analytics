@@ -398,7 +398,7 @@ readinessProbe:
 ## Prometheus Metrics
 ##
 metrics:
-  enabled: false
+  enabled: true
   port: 9419
   plugins: "rabbitmq_prometheus"
   ## Prometheus pod annotations

@@ -60,7 +60,7 @@ spec:
                 topologyKey: kubernetes.io/hostname
       initContainers:
       - name: wait-for-master-to-register
-        image: alstolten/alpine-with-curl:0.1.1
+        image: alstolten/alpine-with-curl:latest
         args:
         - /bin/sh
         - "-c"
