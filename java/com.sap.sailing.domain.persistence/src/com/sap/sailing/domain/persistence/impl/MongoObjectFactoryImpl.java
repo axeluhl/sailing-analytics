@@ -1714,9 +1714,10 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     public void storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeId, RegattaLogSetCompetitorTimeOnTimeFactorEvent event) {
         Document result = createBasicRegattaLogEventDBObject(event);
-        result.put(FieldNames.REGATTA_LOG_EVENT_CLASS.name(), RegattaLogCloseOpenEndedDeviceMappingEvent.class.getSimpleName());
+        result.put(FieldNames.REGATTA_LOG_EVENT_CLASS.name(), RegattaLogSetCompetitorTimeOnTimeFactorEvent.class.getSimpleName());
         result.put(FieldNames.REGATTA_LOG_COMPETITOR_ID.name(), event.getCompetitor().getId());
         result.put(FieldNames.REGATTA_LOG_TIME_ON_TIME_FACTOR.name(), event.getTimeOnTimeFactor());
+        storeRegattaLogEvent(regattaLikeId, result);
     }
     
     public Document storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogDependentStartTimeEvent event) {
@@ -1728,7 +1729,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     public void storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeId, RegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEvent event) {
         Document result = createBasicRegattaLogEventDBObject(event);
-        result.put(FieldNames.REGATTA_LOG_EVENT_CLASS.name(), RegattaLogCloseOpenEndedDeviceMappingEvent.class.getSimpleName());
+        result.put(FieldNames.REGATTA_LOG_EVENT_CLASS.name(), RegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEvent.class.getSimpleName());
         result.put(FieldNames.REGATTA_LOG_COMPETITOR_ID.name(), event.getCompetitor().getId());
         result.put(FieldNames.REGATTA_LOG_TIME_ON_DISTANCE_SECONDS_ALLOWANCE_PER_NAUTICAL_MILE.name(), event.getTimeOnDistanceAllowancePerNauticalMile().asSeconds());
         storeRegattaLogEvent(regattaLikeId, result);
