@@ -562,8 +562,7 @@ public class ImportMasterDataOperation extends
             UUID id = event.getId();
             Event existingEvent = toState.getEvent(id);
             if (existingEvent != null && override && !creationCount.alreadyAddedEventWithId(id.toString())) {
-                logger.info(String.format("Event with name %1$s already existed and will be overridden.",
-                        event.getName()));
+                logger.info(String.format("Event with ID %1$s already existed and will be overridden.", event.getId()));
                 toState.removeEvent(existingEvent.getId());
                 existingEvent = null;
             }

@@ -11,8 +11,6 @@ import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
-import com.sap.sailing.server.operationaltransformation.AbstractLeaderboardGroupOperation;
 import com.sap.sailing.server.operationaltransformation.CreateLeaderboardGroup;
 import com.sap.sse.replication.ReplicaDescriptor;
 import com.sap.sse.replication.impl.ReplicaDescriptorImpl;
@@ -20,7 +18,7 @@ import com.sap.sse.replication.impl.ReplicationInstancesManager;
 
 public class ReplicationInstancesManagerLoggingPerformanceTest {
     private ReplicationInstancesManager replicationInstanceManager;
-    private AbstractLeaderboardGroupOperation<LeaderboardGroup> operation;
+    private CreateLeaderboardGroup operation;
     private ReplicaDescriptor replica;
 
     @Before
