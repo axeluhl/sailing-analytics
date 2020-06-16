@@ -3490,9 +3490,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-  //READ
+    //READ
     public List<LeaderboardGroupDTO> getLeaderboardGroups(boolean withGeoLocationData) {
-        final Map<String, LeaderboardGroup> leaderboardGroups = getService().getLeaderboardGroups();
+        final Map<UUID, LeaderboardGroup> leaderboardGroups = getService().getLeaderboardGroupsIdentifiable();
         return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
                 leaderboardGroups.values(),
                 leaderboardGroup -> convertToLeaderboardGroupDTO(leaderboardGroup, withGeoLocationData, false));
