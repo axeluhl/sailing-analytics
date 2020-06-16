@@ -49,6 +49,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.dto.OwnershipDTO;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
 import com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell;
@@ -63,13 +64,14 @@ public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
     private final CellTable<ExpeditionDeviceConfiguration> allDeviceConfigurations;
     private final LabeledAbstractFilterablePanel<ExpeditionDeviceConfiguration> filterDeviceConfigurationsPanel;
     private final RefreshableSingleSelectionModel<ExpeditionDeviceConfiguration> refreshableDeviceConfigurationsSelectionModel;
+    private final UserService userService;
 
     public ExpeditionDeviceConfigurationsPanel(final SailingServiceWriteAsync sailingServiceWrite,
             final ErrorReporter errorReporter, final StringMessages stringMessages, final UserService userService) {
         this.sailingServiceWrite = sailingServiceWrite;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
-        
+        this.userService = userService;
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         allDeviceConfigurations = new BaseCelltable<>(/* pageSize */10000, tableRes);
         final ListDataProvider<ExpeditionDeviceConfiguration> filteredDeviceConfigurations = new ListDataProvider<>();
@@ -166,7 +168,7 @@ public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
         addAccountButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                addAccount();
+                addDeviceConfiguration();
             }
         });
         add(addAccountButton);
@@ -227,9 +229,14 @@ public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
     }
 
     private class AddDeviceConfigurationDialog extends AbstractDeviceConfigurationDialog {
-        public AddDeviceConfigurationDialog(final LabeledAbstractFilterablePanel<ExpeditionDeviceConfiguration> filterAccountsPanel,
-                final SailingServiceWriteAsync sailingServiceWrite, final StringMessages stringMessages, final ErrorReporter errorReporter) {
-            super(filterAccountsPanel, sailingServiceWrite, stringMessages, errorReporter, stringMessages.addExpeditionDeviceConfiguration(),
+        private final UserService userService;
+
+        public AddDeviceConfigurationDialog(
+                final LabeledAbstractFilterablePanel<ExpeditionDeviceConfiguration> filterAccountsPanel,
+                final SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
+                final StringMessages stringMessages, final ErrorReporter errorReporter) {
+            super(filterAccountsPanel, sailingServiceWrite,
+                    stringMessages, errorReporter, stringMessages.addExpeditionDeviceConfiguration(),
                     new DialogCallback<ExpeditionDeviceConfiguration>() {
                 @Override
                 public void ok(final ExpeditionDeviceConfiguration editedObject) {
@@ -251,12 +258,15 @@ public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
                 public void cancel() {
                 }
             });
+            this.userService = userService;
             ensureDebugId("AddExpeditionDeviceConfigurationDialog");
         }
         
         @Override
         protected ExpeditionDeviceConfiguration getResult() {
-            return new ExpeditionDeviceConfiguration(boatName.getText(), UUID.randomUUID(), boatId.getValue());
+            final ExpeditionDeviceConfiguration result = new ExpeditionDeviceConfiguration(boatName.getText(), UUID.randomUUID(), boatId.getValue());
+            result.setOwnership(new OwnershipDTO(userService.getCurrentUser().asStrippedUser(), userService.getCurrentTenant()));
+            return result;
         }
     }
 
@@ -322,8 +332,8 @@ public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
         });
     }
 
-    private void addAccount() {
-        new AddDeviceConfigurationDialog(filterDeviceConfigurationsPanel, sailingServiceWrite, stringMessages, errorReporter).show();
+    private void addDeviceConfiguration() {
+        new AddDeviceConfigurationDialog(filterDeviceConfigurationsPanel, sailingServiceWrite, userService, stringMessages, errorReporter).show();
     }
     
     private void removeDeviceConfiguration(final ExpeditionDeviceConfiguration expeditionDeviceConfiguration,

@@ -322,7 +322,6 @@ import com.sap.sailing.server.operationaltransformation.UpdateSeries;
 import com.sap.sailing.server.operationaltransformation.UpdateSpecificRegatta;
 import com.sap.sailing.server.util.WaitForTrackedRaceUtil;
 import com.sap.sailing.xrr.schema.RegattaResults;
-import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.Speed;
@@ -2668,9 +2667,8 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     @Override
     public void addOrReplaceExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration deviceConfiguration) {
         getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION,
-                new TypeRelativeObjectIdentifier(ServerInfo.getName(), deviceConfiguration.getName()),
-                /* display name */ ServerInfo.getName() + "/" + deviceConfiguration.getName(), () -> {
+                SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION, deviceConfiguration.getTypeRelativeObjectIdentifier(),
+                /* display name */ deviceConfiguration.getName(), () -> {
                     getService()
                             .apply(new AddOrReplaceExpeditionDeviceConfiguration(deviceConfiguration.getDeviceUuid(),
                                     deviceConfiguration.getName(), deviceConfiguration.getExpeditionBoatId()));

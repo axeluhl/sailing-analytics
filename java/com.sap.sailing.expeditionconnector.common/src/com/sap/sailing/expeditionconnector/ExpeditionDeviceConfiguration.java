@@ -118,5 +118,4 @@ public class ExpeditionDeviceConfiguration extends NamedImpl implements SecuredD
     public final void setOwnership(final OwnershipDTO ownership) {
         this.securityInformation.setOwnership(ownership);
     }
-
 }

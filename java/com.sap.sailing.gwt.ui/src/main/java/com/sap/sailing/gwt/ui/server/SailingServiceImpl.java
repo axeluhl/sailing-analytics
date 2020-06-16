@@ -5853,7 +5853,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-  //READ
+    //READ
     public List<ExpeditionDeviceConfiguration> getExpeditionDeviceConfigurations() {
         final List<ExpeditionDeviceConfiguration> result = new ArrayList<>();
         final ExpeditionTrackerFactory expeditionConnector = expeditionConnectorTracker.getService();
@@ -5861,6 +5861,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         if (expeditionConnector != null) {
             for (final ExpeditionDeviceConfiguration config : expeditionConnector.getDeviceConfigurations()) {
                 if (subject.isPermitted(config.getIdentifier().getStringPermission(DefaultActions.READ))) {
+                    SecurityDTOUtil.addSecurityInformation(getSecurityService(), config, config.getIdentifier());
                     result.add(config);
                 }
             }
@@ -5879,7 +5880,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
     
     @Override
-  //READ
+    //READ
     public PairingListDTO getPairingListFromTemplate(final String leaderboardName, final int flightMultiplier,
             final Iterable<String> selectedRaceColumnNames, PairingListTemplateDTO templateDTO) 
             throws NotFoundException, PairingListCreationException {
