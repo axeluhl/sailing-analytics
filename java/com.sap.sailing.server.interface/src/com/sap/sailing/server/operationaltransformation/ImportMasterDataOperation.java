@@ -259,7 +259,7 @@ public class ImportMasterDataOperation extends
             leaderboardNames.add(leaderboard.getName());
             if (existingLeaderboards.containsKey(leaderboard.getName())) {
                 if (creationCount.alreadyAddedLeaderboardWithName(leaderboard.getName())) {
-                    //Has already been added by this operation
+                    // Has already been added by this operation
                     continue;
                 } else if (override) {
                     for (RaceColumn raceColumn : existingLeaderboards.get(leaderboard.getName()).getRaceColumns()) {
@@ -290,14 +290,11 @@ public class ImportMasterDataOperation extends
                 relinkTrackedRacesIfPossible(toState, leaderboard);
                 toState.updateStoredLeaderboard(leaderboard);
             }
-
         }
-        // TODO bug 1975: as an aftermath of bug 1970, with LeaderboardGroup now implementing WithID, match making could happen by ID
-        LeaderboardGroup existingLeaderboardGroup = toState.getLeaderboardGroupByName(leaderboardGroup.getName());
+        LeaderboardGroup existingLeaderboardGroup = toState.getLeaderboardGroupByID(leaderboardGroup.getId());
         if (existingLeaderboardGroup != null && override) {
-            logger.info(String.format("Leaderboard Group with name %1$s already existed and will be overridden.",
-                    leaderboardGroup.getName()));
-            toState.removeLeaderboardGroup(leaderboardGroup.getName());
+            logger.info(String.format("Leaderboard Group with ID %1$s already existed and will be overridden.", leaderboardGroup.getId()));
+            toState.removeLeaderboardGroup(leaderboardGroup.getId());
             existingLeaderboardGroup = null;
         }
         if (existingLeaderboardGroup == null) {

@@ -312,10 +312,10 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     /**
      * Removes the group with the name <code>groupName</code> from the service and the database.
      * 
-     * @param groupName
-     *            The name of the group which shall be removed.
+     * @param leaderboardGroupId
+     *            The ID of the group which shall be removed.
      */
-    void removeLeaderboardGroup(String groupName);
+    void removeLeaderboardGroup(UUID leaderboardGroupId);
 
     /**
      * Updates the group data in the persistant store.
@@ -367,7 +367,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     void addRace(RegattaIdentifier addToRegatta, RaceDefinition raceDefinition);
 
-    void updateLeaderboardGroup(String oldName, String newName, String description, String displayName,
+    void updateLeaderboardGroup(UUID leaderboardGroupId, String newName, String description, String displayName,
             List<String> leaderboardNames, int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType);
 
     /**

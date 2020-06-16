@@ -89,6 +89,7 @@ import com.sap.sailing.server.gateway.windimport.AbstractWindImporter;
 import com.sap.sailing.server.gateway.windimport.AbstractWindImporter.WindImportResult;
 import com.sap.sailing.server.gateway.windimport.expedition.WindImporter;
 import com.sap.sailing.server.interfaces.RacingEventService;
+import com.sap.sailing.server.operationaltransformation.AbstractLeaderboardGroupOperation;
 import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
 import com.sap.sailing.server.operationaltransformation.AddSpecificRegatta;
 import com.sap.sailing.server.operationaltransformation.CreateLeaderboardGroup;
@@ -782,7 +783,7 @@ public class ExpeditionAllInOneImporter {
                         /* securityDisplayName */ null, new Callable<LeaderboardGroup>() {
                             @Override
                             public LeaderboardGroup call() throws Exception {
-                                CreateLeaderboardGroup createLeaderboardGroup = new CreateLeaderboardGroup(newGroupid,
+                                AbstractLeaderboardGroupOperation<LeaderboardGroup> createLeaderboardGroup = new CreateLeaderboardGroup(newGroupid,
                                         leaderboardGroupName, description, /* displayName */ null,
                                         /* displayGroupsInReverseOrder */ false,
                                         Collections.singletonList(regattaNameAndleaderboardName),

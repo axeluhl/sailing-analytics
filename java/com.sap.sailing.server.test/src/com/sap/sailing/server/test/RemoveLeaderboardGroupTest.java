@@ -44,6 +44,7 @@ import com.sap.sse.shared.media.VideoDescriptor;
 public class RemoveLeaderboardGroupTest {
     private RacingEventService server;
     private Event pfingstbusch;
+    private UUID newGroupId;
     
     @Before
     public void setUp() {
@@ -64,8 +65,8 @@ public class RemoveLeaderboardGroupTest {
             server.apply(new RemoveLeaderboard(leaderboardName));
         }
         Map<String, LeaderboardGroup> allLeaderboardGroups = new HashMap<>(server.getLeaderboardGroups());
-        for (final String leaderboardGroupName : allLeaderboardGroups.keySet()) {
-            server.apply(new RemoveLeaderboardGroup(leaderboardGroupName));
+        for (final LeaderboardGroup leaderboardGroup : allLeaderboardGroups.values()) {
+            server.apply(new RemoveLeaderboardGroup(leaderboardGroup.getId()));
         }
         server.apply(new RemoveRegatta(new RegattaName("Pfingstbusch (29er)")));
         server.apply(new RemoveRegatta(new RegattaName("Pfingstbusch (470)")));
@@ -79,9 +80,9 @@ public class RemoveLeaderboardGroupTest {
                 "Kiel", /* isPublic */ true, UUID.randomUUID(), /* officialWebsiteURLAsString */ null, /*baseURL*/null,
                 /* sailorsInfoWebsiteURLAsString */ null, /* images */Collections.<ImageDescriptor> emptyList(),
                 /* videos */Collections.<VideoDescriptor> emptyList(), /* leaderboardGroupIds */ Collections.<UUID> emptyList()));
-        UUID newGroupid = UUID.randomUUID();
+        newGroupId = UUID.randomUUID();
         final LeaderboardGroup pfingstbuschLeaderboardGroup = server
-                .apply(new CreateLeaderboardGroup(newGroupid, "Pfingstbusch", "Pfingstbusch", /* displayName */ null,
+                .apply(new CreateLeaderboardGroup(newGroupId, "Pfingstbusch", "Pfingstbusch", /* displayName */ null,
                 /* displayGroupsInReverseOrder */ false, /* leaderboard names */ Collections.emptyList(),
                 new int[0], /* overallLeaderboardScoringSchemeType */ ScoringSchemeType.LOW_POINT));
         server.apply(new AddLeaderboardGroupToEvent(pfingstbusch.getId(), pfingstbuschLeaderboardGroup.getId()));
@@ -95,7 +96,7 @@ public class RemoveLeaderboardGroupTest {
 
     @Test
     public void testOverallLeaderboardDisappearsWhenUpdatingLeaderboardGroup() {
-        server.apply(new UpdateLeaderboardGroup("Pfingstbusch", "Pfingstbusch", "Pfingstbusch", /* displayName */ null,
+        server.apply(new UpdateLeaderboardGroup(newGroupId, "Pfingstbusch", "Pfingstbusch", /* displayName */ null,
                 /* newLeaderboardNames */ Collections.emptyList(),
                 new int[0], /* overallLeaderboardScoringSchemeType */ null));
         final Leaderboard overallLeaderboard = server.getLeaderboardByName("Pfingstbusch "+LeaderboardNameConstants.OVERALL);
@@ -118,7 +119,7 @@ public class RemoveLeaderboardGroupTest {
     @Test
     public void testRemovingLeaderboardGroupDoesNotRemoveOverallLeaderboard() {
         assertEquals(1, Util.size(pfingstbusch.getLeaderboardGroups()));
-        server.apply(new RemoveLeaderboardGroup("Pfingstbusch"));
+        server.apply(new RemoveLeaderboardGroup(newGroupId));
         final Leaderboard overallLeaderboard = server
                 .getLeaderboardByName("Pfingstbusch " + LeaderboardNameConstants.OVERALL);
         assertNotNull(overallLeaderboard);

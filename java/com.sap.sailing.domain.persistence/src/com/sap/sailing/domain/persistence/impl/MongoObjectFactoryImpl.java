@@ -542,16 +542,16 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     @Override
-    public void removeLeaderboardGroup(String groupName) {
+    public void removeLeaderboardGroup(UUID leaderboardGroupId) {
         MongoCollection<Document> leaderboardGroupCollection = database.getCollection(CollectionNames.LEADERBOARD_GROUPS.name());
-        Document query = new Document(FieldNames.LEADERBOARD_GROUP_NAME.name(), groupName);
+        Document query = new Document(FieldNames.LEADERBOARD_GROUP_UUID.name(), leaderboardGroupId);
         leaderboardGroupCollection.deleteOne(query);
     }
 
     @Override
-    public void renameLeaderboardGroup(String oldName, String newName) {
+    public void renameLeaderboardGroup(UUID leaderboardGroupId, String newName) {
         MongoCollection<Document> leaderboardGroupCollection = database.getCollection(CollectionNames.LEADERBOARD_GROUPS.name());
-        Document query = new Document(FieldNames.LEADERBOARD_GROUP_NAME.name(), oldName);
+        Document query = new Document(FieldNames.LEADERBOARD_GROUP_UUID.name(), leaderboardGroupId);
         Document update = new Document("$set", new Document(FieldNames.LEADERBOARD_GROUP_NAME.name(), newName));
         leaderboardGroupCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).updateOne(query, update, new UpdateOptions().upsert(true));
     }

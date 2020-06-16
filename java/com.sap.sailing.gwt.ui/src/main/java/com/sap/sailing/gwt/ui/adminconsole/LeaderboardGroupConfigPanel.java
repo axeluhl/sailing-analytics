@@ -866,11 +866,11 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
     
     private void removeLeaderboardGroups(final Collection<LeaderboardGroupDTO> groups) {
         if (!groups.isEmpty()) {
-            Set<String> groupNames = new HashSet<String>();
+            final Set<UUID> groupIds = new HashSet<>();
             for (LeaderboardGroupDTO group : groups) {
-                groupNames.add(group.getName());
+                groupIds.add(group.getId());
             }
-            sailingServiceWrite.removeLeaderboardGroups(groupNames, new MarkedAsyncCallback<Void>(
+            sailingServiceWrite.removeLeaderboardGroups(groupIds, new MarkedAsyncCallback<Void>(
                     new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable t) {
@@ -889,9 +889,9 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
     }
 
     private void removeLeaderboardGroup(final LeaderboardGroupDTO group) {
-        Set<String> groups = new HashSet<String>();
-        groups.add(group.getName());
-        sailingServiceWrite.removeLeaderboardGroups(groups, new MarkedAsyncCallback<Void>(
+        final Set<UUID> groupIds = new HashSet<>();
+        groupIds.add(group.getId());
+        sailingServiceWrite.removeLeaderboardGroups(groupIds, new MarkedAsyncCallback<Void>(
                 new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable t) {
