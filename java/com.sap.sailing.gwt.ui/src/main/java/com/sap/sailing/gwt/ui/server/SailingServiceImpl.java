@@ -5860,9 +5860,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         final Subject subject = SecurityUtils.getSubject();
         if (expeditionConnector != null) {
             for (final ExpeditionDeviceConfiguration config : expeditionConnector.getDeviceConfigurations()) {
-                if (subject.isPermitted(
-                        SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION.getStringPermissionForTypeRelativeIdentifier(
-                                DefaultActions.READ, config.getTypeRelativeObjectIdentifier(ServerInfo.getName())))) {
+                if (subject.isPermitted(config.getIdentifier().getStringPermission(DefaultActions.READ))) {
                     result.add(config);
                 }
             }
