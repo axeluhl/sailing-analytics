@@ -420,6 +420,7 @@ import com.sap.sailing.manage2sail.RaceResultDescriptor;
 import com.sap.sailing.manage2sail.RegattaResultDescriptor;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.ORCCertificateJsonDeserializer;
+import com.sap.sailing.server.gateway.serialization.LeaderboardGroupConstants;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.interfaces.SimulationService;
 import com.sap.sailing.server.operationaltransformation.AddRemoteSailingServerReference;
@@ -4566,7 +4567,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     // READ
     public Map<String, String> getLeaderboardGroupNamesAndIdsAsStringsFromRemoteServer(String url, String username, String password) {
         String token = RemoteServerUtil.resolveBearerTokenForRemoteServer(url, username, password);
-        // FIXME: Add checks here that ensure that the current use is allowed to do MDI
         final String path = "/sailingserver/api/v1/leaderboardgroups/identifiable";
         final String query = null;
         URL serverAddress = null;
@@ -4577,15 +4577,15 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             serverAddress = RemoteServerUtil.createRemoteServerUrl(base, path, query);
             connection = HttpUrlConnectionHelper.redirectConnectionWithBearerToken(serverAddress, Duration.ONE_MINUTE,
                     token);
-            BufferedReader in = new BufferedReader(
+            final BufferedReader in = new BufferedReader(
                     new InputStreamReader(connection.getInputStream(), Charset.forName("UTF-8")));
-            org.json.simple.parser.JSONParser parser = new org.json.simple.parser.JSONParser();
-            org.json.simple.JSONArray array = (org.json.simple.JSONArray) parser.parse(in);
-            Map<String, String> leaderboardGroupsMap = new LinkedHashMap<>();
-            Iterator<Object> iterator = array.iterator();
+            final org.json.simple.parser.JSONParser parser = new org.json.simple.parser.JSONParser();
+            final org.json.simple.JSONArray array = (org.json.simple.JSONArray) parser.parse(in);
+            final Map<String, String> leaderboardGroupsMap = new LinkedHashMap<>();
+            final Iterator<Object> iterator = array.iterator();
             while (iterator.hasNext()) {
                 JSONObject next = (JSONObject) iterator.next();
-                leaderboardGroupsMap.put((String) next.get("id"), (String) next.get("name"));
+                leaderboardGroupsMap.put((String) next.get(LeaderboardGroupConstants.ID), (String) next.get(LeaderboardGroupConstants.NAME));
             }
             List<Map.Entry<String, String>> entries = new ArrayList<>(leaderboardGroupsMap.entrySet());
             leaderboardGroupsMap.clear();
