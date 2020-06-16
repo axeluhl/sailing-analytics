@@ -39,6 +39,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.filter.impl.KeywordMatcher;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
@@ -413,7 +414,6 @@ public class MasterDataImportPanel extends VerticalPanel {
                 return Collections.singleton(t);
             } 
         };
-        
         Map<String, String> filteredMap = allLeaderboardGroupsMap.entrySet().stream()
                 .filter(entry -> matcher.matches(filterTexts, entry.getValue()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
@@ -422,20 +422,18 @@ public class MasterDataImportPanel extends VerticalPanel {
     }
 
     private void fillLeaderboardgroupListBox(Map<String, String> leaderboardGroupsMap) {
-        int visibleNameCount = 0;
-        List<String> keys = new ArrayList<>(leaderboardGroupsMap.keySet());
-        for (int i = 0; i < keys.size(); i++) {
-            String key = keys.get(i);
-            leaderboardgroupListBox.addItem(leaderboardGroupsMap.get(key));
-            leaderboardgroupListBox.setValue(i, key);
-            visibleNameCount++;
-
+        final List<Pair<String, String>> list = new ArrayList<>();
+        for (final String key : leaderboardGroupsMap.keySet()) {
+            list.add(new Pair<>(leaderboardGroupsMap.get(key), key));
         }
-        leaderboardgroupListBox.setVisibleItemCount(visibleNameCount);
+        Collections.sort(list, (a, b)->a.getA().compareTo(b.getA()));
+        for (final Pair<String, String> pair : list) {
+            leaderboardgroupListBox.addItem(pair.getA(), pair.getB());
+        }
+        leaderboardgroupListBox.setVisibleItemCount(list.size());
     }
 
     private void deleteProgressIndication(IsWidget... widgetsToRemove) {
         Arrays.asList(widgetsToRemove).forEach(this::remove);
     }
-
 }
