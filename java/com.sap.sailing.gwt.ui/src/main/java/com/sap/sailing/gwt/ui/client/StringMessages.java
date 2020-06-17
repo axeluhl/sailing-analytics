@@ -2403,4 +2403,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String errorCancelSubscription(String errMessage);
     String errorSaveSubscription(String errMessage);
     String unableToLoadCourseAreas(String message);
+    String insufficientPermissions();
 }
