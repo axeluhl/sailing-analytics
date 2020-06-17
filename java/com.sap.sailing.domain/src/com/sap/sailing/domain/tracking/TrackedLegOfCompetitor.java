@@ -262,8 +262,8 @@ public interface TrackedLegOfCompetitor extends Serializable {
     /**
      * Computes the distance along the wind track to the wind-projected position of the race's overall leader. If leader
      * and competitor are in the same leg, this is simply the windward distance. If the leader is already one or more
-     * legs ahead, it's the competitor's winward distance to go plus the windward distance between the marks of all legs
-     * that the leader completed after this competitor's leg plus the windard distance between the leader and the
+     * legs ahead, it's the competitor's windward distance to go plus the windward distance between the marks of all legs
+     * that the leader completed after this competitor's leg plus the windward distance between the leader and the
      * leader's leg's start.
      * <p>
      * 

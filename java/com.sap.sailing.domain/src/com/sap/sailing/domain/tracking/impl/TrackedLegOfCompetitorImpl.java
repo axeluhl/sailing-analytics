@@ -17,7 +17,6 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
@@ -487,7 +486,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                                 Distance distanceToNextMark = getTrackedRace().getTrackedLeg(leg)
                                         .getAbsoluteWindwardDistance(currentPosition, nextMarkPosition, timePoint, windPositionMode, cache);
                                 if (distanceToNextMark != null) {
-                                    result = new MeterDistance(result.getMeters() + distanceToNextMark.getMeters());
+                                    result = result.add(distanceToNextMark);
                                 } else {
                                     result = null;
                                     break;
@@ -499,7 +498,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                             final Distance absoluteWindwardDistance = getTrackedRace().getTrackedLeg(leg)
                                     .getAbsoluteWindwardDistance(currentPosition, leaderPosition, timePoint, windPositionMode, cache);
                             if (absoluteWindwardDistance != null) {
-                                result = new MeterDistance(result.getMeters() + absoluteWindwardDistance.getMeters());
+                                result = result.add(absoluteWindwardDistance);
                             } else {
                                 result = null;
                             }
