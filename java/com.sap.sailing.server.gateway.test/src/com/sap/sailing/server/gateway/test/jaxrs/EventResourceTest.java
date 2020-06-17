@@ -79,7 +79,7 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
         assertTrue(hasAtLeastOneCourseArea(objEvent));
         JSONObject objRegatta = getRegatta(randomName);
         String strRegattaName = (String) objRegatta.get("name");
-        String strRegattaCourseAreaId = (String) objRegatta.get("courseAreaId");
+        String strRegattaCourseAreaId = (String) ((JSONArray) objRegatta.get("courseAreaIds")).get(0);
         assertTrue(strRegattaCourseAreaId.equals(getDefaultCourseAreaId(objEvent)));
         leaderBoardWithNameExists(strRegattaName);
         JSONArray leaderboardGroups = getLeaderboardGroups(objEvent);
@@ -98,7 +98,7 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
         assertTrue(isValidCreateEventResponse(eventResponse));
         String strEventId = getIdFromCreateEventResponse(eventResponse);
         JSONObject regatta = getRegatta(eventName);
-        String strRegattaCourseAreaId = (String) regatta.get("courseAreaId");
+        String strRegattaCourseAreaId = (String) ((JSONArray) regatta.get("courseAreaIds")).get(0);
         JSONArray arrCourseAreas = getCourseAreasOfEvent(strEventId);
         assertTrue(arrCourseAreas.size() == 1);
         JSONObject objCourseArea = (JSONObject) arrCourseAreas.get(0);
@@ -210,7 +210,6 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
     private String getDefaultCourseAreaId(JSONObject objEvent) {
         JSONArray arrCourseAreas = getCourseAreas(objEvent);
         assertTrue(arrCourseAreas.size() == 1);
-        
         JSONObject courseArea = (JSONObject) arrCourseAreas.get(0);
         String strCourseAreaId = (String) courseArea.get("id");
         return strCourseAreaId;

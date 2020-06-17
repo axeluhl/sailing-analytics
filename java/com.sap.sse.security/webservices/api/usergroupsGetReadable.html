@@ -1,0 +1,66 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <link href='../../../../sailing-fontface-1.0.cache.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+    <title>SAP Sailing Analytics Webservices API Version 1.0</title>
+</head>
+<body>
+<h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
+<h2>URL: /api/restsecurity/usergroups/readable</h2>
+
+<b>Description:</b>
+<p>Gets the usergroups a user or the current logged in user can read.</p>
+<br/>
+<table>
+    <tr>
+        <td>Webservice Type:</td>
+        <td>REST</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>Json</td>
+    </tr>
+    <tr>
+        <td>Request method:</td>
+        <td>GET</td>
+    </tr>
+    <tr>
+        <td>Mandatory parameters:</td>
+        <td>none</td>
+    </tr>
+    <tr>
+        <td>Optional parameters:</td>
+        <td>userName: username of he user to obtain readable groups from. If this is not set, the readable groups of the currently logged in user are returned.</td>
+    </tr>
+    <tr>
+        <td>Examples:</td>
+        <td>
+            Get @ <a href="http://sapsailing.com/security/api/restsecurity/usergroup/readable">http://sapsailing.com/security/api/restsecurity/usergroup/readable</a>
+            <br>
+            Example payload:<br>
+            <pre>
+{
+    "readableGroups": [
+        {
+            "uuid": "96759067-7090-413d-94c5-8367c2e34b9f",
+            "name": "group2ToAdd",
+            "roles": []
+        },
+        {
+            "uuid": "a8f98697-6d74-42da-b516-430279d9dadd",
+            "name": "user1-tenant",
+            "roles": []
+        }
+    ]
+}
+</pre>
+        </td>
+    </tr>
+</table>
+<div style="height: 1em;"></div>
+<a href="index.html">Back to Web Service Overview</a> 
+</body>
+</html>

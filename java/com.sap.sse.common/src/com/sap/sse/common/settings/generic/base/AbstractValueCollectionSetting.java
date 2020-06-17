@@ -21,7 +21,7 @@ public abstract class AbstractValueCollectionSetting<T, C extends Collection<Val
     }
     
     private D getDefaultValuesCollectionInternal() {
-        if(defaultValues == null) {
+        if (defaultValues == null) {
             defaultValues = createDefaultValuesCollection();
         }
         return defaultValues;
@@ -36,7 +36,7 @@ public abstract class AbstractValueCollectionSetting<T, C extends Collection<Val
     
     private ValueCollectionValue<C> ensureValue() {
         ValueCollectionValue<C> result = getValue();
-        if(result == null) {
+        if (result == null) {
             result = createValue();
             settings.setValue(settingName, result);
         }
@@ -48,10 +48,15 @@ public abstract class AbstractValueCollectionSetting<T, C extends Collection<Val
     @Override
     public Iterable<T> getValues() {
         ValueCollectionValue<C> value = getValue();
-        if(emptyIsDefault && (value == null || value.isEmpty())) {
-            return Collections.unmodifiableCollection(getDefaultValuesCollectionInternal());
+        if (emptyIsDefault && (value == null || value.isEmpty())) {
+            final D defaultVal = getDefaultValuesCollectionInternal();
+            synchronized (defaultVal) {
+                final D result = createDefaultValuesCollection();
+                result.addAll(defaultVal);
+                return result;
+            }
         }
-        if(value == null) {
+        if (value == null) {
             return Collections.emptyList();
         }
         return value.getValues(getValueConverter());
@@ -78,33 +83,45 @@ public abstract class AbstractValueCollectionSetting<T, C extends Collection<Val
     }
     @Override
     public void resetToDefault() {
-        setValues(getDefaultValuesCollectionInternal());
+        final D defaultVal = getDefaultValuesCollectionInternal();
+        synchronized (defaultVal) {
+            setValues(defaultVal);
+        }
     }
     
     @Override
     public final boolean isDefaultValue() {
         final ValueCollectionValue<C> value = getValue();
         final D defaultVal = getDefaultValuesCollectionInternal();
-        return ((emptyIsDefault || defaultVal.isEmpty()) && (value == null || value.isEmpty()))
-                || (value != null && value.size() == defaultVal.size() && defaultVal.containsAll(value.getValues(getValueConverter())));
+        synchronized (defaultVal) {
+            return ((emptyIsDefault || defaultVal.isEmpty()) && (value == null || value.isEmpty()))
+                    || (value != null && value.size() == defaultVal.size() && defaultVal.containsAll(value.getValues(getValueConverter())));
+        }
     }
     
     @Override
     public final void setDefaultValues(Iterable<T> defaultValues) {
         final boolean wasDefault = isDefaultValue();
         final D defaultVal = getDefaultValuesCollectionInternal();
-        defaultVal.clear();
-        if(defaultValues != null) {
-            Util.addAll(defaultValues, defaultVal);
-        }
-        if(wasDefault) {
-            resetToDefault();
+        synchronized (defaultVal) {
+            defaultVal.clear();
+            if (defaultValues != null) {
+                Util.addAll(defaultValues, defaultVal);
+            }
+            if (wasDefault) {
+                resetToDefault();
+            }
         }
     }
     
     @Override
     public Iterable<T> getDefaultValues() {
-        return Collections.unmodifiableCollection(getDefaultValuesCollectionInternal());
+        final D result = createDefaultValuesCollection();
+        final D localDefaultValues = getDefaultValuesCollectionInternal();
+        synchronized (localDefaultValues) {
+            result.addAll(localDefaultValues);
+            return result;
+        }
     }
     
     @Override
@@ -135,7 +152,7 @@ public abstract class AbstractValueCollectionSetting<T, C extends Collection<Val
     @Override
     public String toString() {
         ValueCollectionValue<C> value = getValue();
-        if(value == null) {
+        if (value == null) {
             return "[]";
         }
         return value.toString();

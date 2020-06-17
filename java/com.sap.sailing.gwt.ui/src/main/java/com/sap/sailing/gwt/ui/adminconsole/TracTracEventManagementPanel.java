@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -34,6 +33,7 @@ import com.sap.sailing.gwt.ui.adminconsole.tractrac.TracTracConnectionDialog;
 import com.sap.sailing.gwt.ui.adminconsole.tractrac.TracTracConnectionTableWrapper;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationWithSecurityDTO;
@@ -81,11 +81,13 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
 
     private final UserService userService;
     private final CellTableWithCheckboxResources tableResources;
+    private final SailingServiceWriteAsync sailingServiceWrite;
 
-    public TracTracEventManagementPanel(final SailingServiceAsync sailingService, UserService userService,
+    public TracTracEventManagementPanel(final SailingServiceWriteAsync sailingService, UserService userService,
             ErrorReporter errorReporter, RegattaRefresher regattaRefresher, StringMessages stringMessages,
             final CellTableWithCheckboxResources tableResources) {
         super(sailingService, userService, regattaRefresher, errorReporter, true, stringMessages);
+        this.sailingServiceWrite = sailingService;
         this.userService = userService;
         this.errorReporter = errorReporter;
         this.tableResources = tableResources;
@@ -110,7 +112,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         connectionsPanel.ensureDebugId("ConnectionsSection");
         connectionsPanel.setStyleName("bold");
         VerticalPanel tableAndConfigurationPanel = new VerticalPanel();
-        connectionsTable = new TracTracConnectionTableWrapper(userService, sailingService, stringMessages,
+        connectionsTable = new TracTracConnectionTableWrapper(userService, sailingServiceWrite, stringMessages,
                 errorReporter, true, tableResources, () -> {});
         connectionsTable.refreshTracTracConnectionList();
 
@@ -127,7 +129,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                         new DialogCallback<TracTracConfigurationWithSecurityDTO>() {
                             @Override
                             public void ok(TracTracConfigurationWithSecurityDTO editedConnection) {
-                                sailingService.createTracTracConfiguration(editedConnection.getName(),
+                                sailingServiceWrite.createTracTracConfiguration(editedConnection.getName(),
                                         editedConnection.getJsonUrl(), editedConnection.getLiveDataURI(),
                                         editedConnection.getStoredDataURI(),
                                         editedConnection.getCourseDesignUpdateURI(),
@@ -152,7 +154,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                         }, userService, errorReporter).show());
         addCreateAction.ensureDebugId("AddConnectionButton");
         buttonPanel.addRemoveAction(stringMessages.remove(), connectionsTable.getSelectionModel(), false, () -> {
-            sailingService.deleteTracTracConfigurations(connectionsTable.getSelectionModel().getSelectedSet(),
+            sailingServiceWrite.deleteTracTracConfigurations(connectionsTable.getSelectionModel().getSelectedSet(),
                     new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
@@ -169,7 +171,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         loadingMessageLabel = new Label();
         final Button listRacesButton = buttonPanel.addUnsecuredAction(stringMessages.listRaces(), () -> {
             loadingMessageLabel.setText(stringMessages.loading());
-            fillRaces(sailingService, showHiddenRacesCheckbox.getValue());
+            fillRaces(sailingServiceWrite, showHiddenRacesCheckbox.getValue());
         });
         listRacesButton.ensureDebugId("ListRacesButton");
         listRacesButton.setEnabled(false);
@@ -480,7 +482,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                         TracTracEventManagementPanel.this.racesTable.setPageSize(races.size());
                         loadingMessageLabel.setText("");
                         // store a successful configuration in the database for later retrieval
-                        sailingService.updateTracTracConfiguration(updatedConnection,
+                        sailingServiceWrite.updateTracTracConfiguration(updatedConnection,
                                 new MarkedAsyncCallback<Void>(
                             new AsyncCallback<Void>() {
                                 @Override
@@ -520,14 +522,14 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         //                                because it may be an accidental omission to select that regatta for loading
         List<TracTracRaceRecordDTO> allRaces = raceList.getList();
         SelectionModel<? super TracTracRaceRecordDTO> selectionModel = racesTable.getSelectionModel();
-        final Set<TracTracRaceRecordDTO> selectedRaces = new LinkedHashSet<>();
+        final List<TracTracRaceRecordDTO> selectedRaces = new ArrayList<>();
         for (TracTracRaceRecordDTO race : allRaces) {
             if (selectionModel.isSelected(race)) {
                 selectedRaces.add(race);
             }
         }
         if (checkBoatClassOK(selectedRegatta, selectedRaces)) {
-            sailingService.trackWithTracTrac(regattaIdentifier, selectedRaces, liveURI, storedURI,
+            sailingServiceWrite.trackWithTracTrac(regattaIdentifier, selectedRaces, liveURI, storedURI,
                     courseDesignUpdateURI, trackWind, correctWind, offsetToStartTimeOfSimulatedRace, ignoreTracTracMarkPassings,
                     useOfficialResultsToUpdateRaceLogs, tractracUsername,
                     tractracPassword, new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {

@@ -3,9 +3,9 @@ package com.sap.sailing.server.replication.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.Serializable;
 import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -77,7 +77,7 @@ public class BoatReplicationTest extends AbstractServerReplicationTest {
         Regatta masterRegatta = master.createRegatta(RegattaImpl.getDefaultName(baseEventName, boatClassName), boatClassName, 
                 /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
                 /* registrationLinkSecret */ null, /* startDate */ null, /* endDate */ null, regattaId, series,
-                /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null,
+                /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), /* course area ID */ (Serializable) null,
                 /* buoyZoneRadiusInHullLengths */2.0, /* useStartTimeInference */ true,
                 /* controlTrackingFromStartAndFinishTimes */ false, /* autoRestartTrackingUponCompetitorSetChange */ false, OneDesignRankingMetric::new);
         Iterable<Waypoint> emptyWaypointList = Collections.emptyList();
@@ -101,7 +101,7 @@ public class BoatReplicationTest extends AbstractServerReplicationTest {
         assertNotNull(replicatedRegatta);
         assertTrue(replicatedRegatta.isPersistent());
         assertTrue(Util.isEmpty((replicatedRegatta.getSeries())));
-        assertNull(replicatedRegatta.getDefaultCourseArea());        
+        assertTrue(Util.isEmpty(replicatedRegatta.getCourseAreas()));        
         assertTrue(regattaId.equals(replicatedRegatta.getId()));
         RaceDefinition replicatedRace = replicatedRegatta.getRaceByName(raceName);
         assertNotNull(replicatedRace);
@@ -114,19 +114,15 @@ public class BoatReplicationTest extends AbstractServerReplicationTest {
         assertEquals(boat.getBoatClass().getName(), replicatedBoat.getBoatClass().getName());
         assertEquals(boat.getSailID(), replicatedBoat.getSailID());
         assertEquals(boat.getColor(), replicatedBoat.getColor());
-        
         // now update the boat on master using replicating operation
         final String newBoatName = "Der Vogel, der mit dem Kiel zieht";
         master.apply(new UpdateBoat(boat.getId().toString(), newBoatName, boat.getColor(), boat.getSailID()));
         Thread.sleep(1000);
         assertEquals(newBoatName, replicatedBoat.getName()); // expect in-place update of existing boat in replica
-        
         // now allow for resetting to default through some event, such as receiving a GPS position
         master.apply(new AllowBoatResetToDefaults(Collections.singleton(boat.getId().toString())));
         // modify the boat on the master "from below" without an UpdateBoat operation, only locally:
         master.getBaseDomainFactory().getCompetitorAndBoatStore().updateBoat(boat.getId().toString(), boatName, boat.getColor(), boat.getSailID());
-
-        
         final RegattaAndRaceIdentifier raceIdentifier = masterRegatta.getRaceIdentifier(raceDefinition);
         DynamicTrackedRace trackedRace = (DynamicTrackedRace) master.apply(new CreateTrackedRace(raceIdentifier,
                 EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 3000,
@@ -138,14 +134,12 @@ public class BoatReplicationTest extends AbstractServerReplicationTest {
         assertNotNull(replicatedTrackedRace);
         Boat replicatedBoat2 = replicatedTrackedRace.getBoatOfCompetitor(replicatedCompetitor);
         assertNotNull(replicatedBoat2);
-        
         assertEquals(boatName, replicatedBoat2.getName());
    }
     
     @Test
     public void testBoatCreationReplication() throws InterruptedException, URISyntaxException {
         final String boatName = "Kielzugvogel 123";
-        
         BoatClass boatClass = new BoatClassImpl("Kielzugvogel", true);
         Boat boat = master.getBaseDomainFactory().getOrCreateBoat(123, boatName, boatClass, "GER 123", null, /* storePersistently */ true);
         Thread.sleep(1000);

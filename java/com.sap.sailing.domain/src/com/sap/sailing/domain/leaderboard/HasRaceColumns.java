@@ -17,13 +17,15 @@ public interface HasRaceColumns {
      * Looks through all {@link #getRaceColumns() race columns} and their {@link RaceColumn#getFleets() fleets} and checks
      * if {@code trackedRace} is {@link RaceColumn#getTrackedRace(Fleet) linked} to that combination. If such a slot is found
      * that "slot" is returned by a pair specifying the non-{@code null} {@link RaceColumn} and {@code Fleet} pair. Otherwise,
-     * {@code null} is returned.
+     * {@code null} is returned. {@code null} is also returned if {@code trackedRace==null}.
      */
     default Pair<RaceColumn, Fleet> getRaceColumnAndFleet(TrackedRace trackedRace) {
-        for (final RaceColumn raceColumn : getRaceColumns()) {
-            for (final Fleet fleet : raceColumn.getFleets()) {
-                if (raceColumn.getTrackedRace(fleet) == trackedRace) {
-                    return new Pair<>(raceColumn, fleet);
+        if (trackedRace != null) {
+            for (final RaceColumn raceColumn : getRaceColumns()) {
+                for (final Fleet fleet : raceColumn.getFleets()) {
+                    if (raceColumn.getTrackedRace(fleet) == trackedRace) {
+                        return new Pair<>(raceColumn, fleet);
+                    }
                 }
             }
         }

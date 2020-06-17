@@ -59,7 +59,7 @@ import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.adminconsole.WindImportResult.RaceEntry;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
@@ -95,7 +95,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer {
     private static final String URL_SAILINGSERVER_NMEA_IMPORT = "/../../sailingserver/nmea-wind-import";
     private static final String URL_SAILINGSERVER_BRAVO_IMPORT = "/../../sailingserver/bravo-wind-import";
 
-    private final SailingServiceAsync sailingService;
+    private final SailingServiceWriteAsync sailingServiceWrite;
     private final UserService userService;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
@@ -128,22 +128,22 @@ public class WindPanel extends FormPanel implements RegattasDisplayer {
     private CaptionPanel igtimiImportPanel;
     private CaptionPanel expeditionAllInOneImporterPanel;
     
-    public WindPanel(final SailingServiceAsync sailingService, final UserService userService,
+    public WindPanel(final SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
             final AsyncActionsExecutor asyncActionsExecutor, final ErrorReporter errorReporter,
             final RegattaRefresher regattaRefresher, final StringMessages stringMessages) {
         this.ensureDebugId("WindPanel");
         this.userPermission = race -> userService.hasPermission(race, UPDATE);
-        this.sailingService = sailingService;
+        this.sailingServiceWrite = sailingServiceWrite;
         this.userService = userService;
         this.containedRegattaDisplayers = new HashSet<>();
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
-        this.windSourcesToExcludeSelectorPanel = new WindSourcesToExcludeSelectorPanel(sailingService, stringMessages,
+        this.windSourcesToExcludeSelectorPanel = new WindSourcesToExcludeSelectorPanel(sailingServiceWrite, stringMessages,
                 errorReporter);
         VerticalPanel mainPanel = new VerticalPanel();
         mainPanel.setSize("100%", "100%");
         this.setWidget(mainPanel);
-        trackedRacesListComposite = new TrackedRacesListComposite(null, null, sailingService, userService,
+        trackedRacesListComposite = new TrackedRacesListComposite(null, null, sailingServiceWrite, userService,
                 errorReporter, regattaRefresher, stringMessages, /* multiselection */true,
                 /* actionButtonsEnabled */ false);
         containedRegattaDisplayers.add(trackedRacesListComposite);
@@ -172,7 +172,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer {
                 RegattaAndRaceIdentifier selectedRace = getSelectedRace();
                 if (selectedRace != null) {
                     final RaceDTO race = trackedRacesListComposite.getRaceByIdentifier(selectedRace);
-                    sailingService.getCoursePositions(selectedRace, race.trackedRace.startOfTracking, new AsyncCallback<CoursePositionsDTO>() {
+                    sailingServiceWrite.getCoursePositions(selectedRace, race.trackedRace.startOfTracking, new AsyncCallback<CoursePositionsDTO>() {
                         @Override
                         public void onFailure(Throwable caught) {
                             showWindSettingDialog(race, null);
@@ -208,7 +208,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer {
             List<RaceDTO> selectedRaces = new ArrayList<>(refreshableRaceSelectionModel.getSelectedSet());
             final RegattaAndRaceIdentifier raceIdentifier = selectedRaces.get(selectedRaces.size() - 1)
                     .getRaceIdentifier();
-            sailingService.removeWind(raceIdentifier, wind, new AsyncCallback<Void>() {
+            sailingServiceWrite.removeWind(raceIdentifier, wind, new AsyncCallback<Void>() {
                 @Override
                 public void onSuccess(Void result) {
                     // remove row from underlying list:
@@ -353,7 +353,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer {
                 }
                 if (Window.confirm(warningMessage)) {
                     resultReport.setText(stringMessages.loading());
-                    sailingService.importWindFromIgtimi(new ArrayList<>(refreshableRaceSelectionModel.getSelectedSet()),
+                    sailingServiceWrite.importWindFromIgtimi(new ArrayList<>(refreshableRaceSelectionModel.getSelectedSet()),
                             correctByDeclination.getValue(), new AsyncCallback<Map<RegattaAndRaceIdentifier, Integer>>() {
                         @Override
                         public void onFailure(Throwable caught) {
@@ -506,7 +506,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer {
 
     private Pair<CaptionPanel, ExpeditionAllInOneImportPanel> createExpeditionAllInOneImportPanel(RegattaRefresher regattaRefresher) {
         final CaptionPanel rootPanel = new CaptionPanel(stringMessages.importFullExpeditionData());
-        final ExpeditionAllInOneImportPanel expeditionAllInOneImportPanel = new ExpeditionAllInOneImportPanel(stringMessages, sailingService, userService, errorReporter, regattaRefresher);
+        final ExpeditionAllInOneImportPanel expeditionAllInOneImportPanel = new ExpeditionAllInOneImportPanel(stringMessages, sailingServiceWrite, userService, errorReporter, regattaRefresher);
         rootPanel.add(expeditionAllInOneImportPanel);
         return new Pair<>(rootPanel, expeditionAllInOneImportPanel);
     }
@@ -611,7 +611,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer {
 
     private void addWindFix(final WindDTO wind, final RaceDTO race) {
         final RegattaAndRaceIdentifier raceIdentifier = getSelectedRace();
-        sailingService.setWind(raceIdentifier, wind, new AsyncCallback<Void>() {
+        sailingServiceWrite.setWind(raceIdentifier, wind, new AsyncCallback<Void>() {
             @Override
             public void onSuccess(Void result) {
                 showWind(raceIdentifier, race);
@@ -632,7 +632,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer {
     }
 
     public void showWind(final RegattaAndRaceIdentifier raceIdentifier, final RaceDTO race) {
-        sailingService.getWindSourcesInfo(raceIdentifier, new AsyncCallback<WindInfoForRaceDTO>() {
+        sailingServiceWrite.getWindSourcesInfo(raceIdentifier, new AsyncCallback<WindInfoForRaceDTO>() {
             @Override
             public void onSuccess(final WindInfoForRaceDTO result) {
                 if (result != null) {
@@ -644,7 +644,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer {
                     windSourcesToExcludeSelectorPanel.setEnabled(userHasPermission);
 
                     // load the raw wind fixes
-                    sailingService.getRawWindFixes(raceIdentifier, null, new AsyncCallback<WindInfoForRaceDTO>() {
+                    sailingServiceWrite.getRawWindFixes(raceIdentifier, null, new AsyncCallback<WindInfoForRaceDTO>() {
                         @Override
                         public void onSuccess(WindInfoForRaceDTO result) {
                             if (result != null) {
@@ -719,7 +719,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer {
 
     private void setRaceIsKnownToStartUpwind() {
         final RegattaAndRaceIdentifier selectedRace = getSelectedRace();
-        sailingService.setRaceIsKnownToStartUpwind(selectedRace, raceIsKnownToStartUpwindBox.getValue(), new AsyncCallback<Void>() {
+        sailingServiceWrite.setRaceIsKnownToStartUpwind(selectedRace, raceIsKnownToStartUpwindBox.getValue(), new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(WindPanel.this.stringMessages.errorWhileTryingToSetWindSourceForRace() + " " + selectedRace + ": " + caught.getMessage());
@@ -753,7 +753,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer {
         windSourceTypeNames.add(WindSourceType.COMBINED.name());
         addWindFixButton.setVisible(userPermission.test(race));
         if (race.startOfRace != null) {
-            sailingService.getAveragedWindInfo(raceIdentifier, race.startOfRace, 30000L, 100, windSourceTypeNames,
+            sailingServiceWrite.getAveragedWindInfo(raceIdentifier, race.startOfRace, 30000L, 100, windSourceTypeNames,
                     /* onlyUpToNewestEvent==true means to only use data "based on facts" */ true, /* includeCombinedWindForAllLegMiddles */ false, new AsyncCallback<WindInfoForRaceDTO>() {
                 @Override
                 public void onFailure(Throwable caught) {
