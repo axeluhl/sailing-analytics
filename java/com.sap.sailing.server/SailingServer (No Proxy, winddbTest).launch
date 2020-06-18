@@ -30,6 +30,7 @@
 <stringAttribute key="profilingTraceType-PERFORMANCE_HOTSPOT_TRACE" value="KEY_SESSION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_USER_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_REQUEST_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_IGNORE_SLEEPING_THREADS%CTX_KEY%true%CTX_ENTRY%KEY_APPLICATION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_ENABLEMENT%CTX_KEY%false%CTX_ENTRY%"/>
 <stringAttribute key="profilingTraceType-SYNCHRONIZATION_TRACE" value="KEY_SESSION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_USER_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_REQUEST_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_APPLICATION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_ENABLEMENT%CTX_KEY%false%CTX_ENTRY%"/>
 <setAttribute key="selected_target_bundles">
+<setEntry value="com.chargebee.chargebee-java@default:default"/>
 <setEntry value="com.fasterxml.jackson.core.jackson-annotations@default:default"/>
 <setEntry value="com.fasterxml.jackson.core.jackson-core@default:default"/>
 <setEntry value="com.fasterxml.jackson.core.jackson-databind@default:default"/>

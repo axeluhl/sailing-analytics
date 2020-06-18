@@ -451,4 +451,11 @@
          version="3.4.0.v20170111-1608"
          unpack="false"/>
 
+   <plugin
+         id="com.chargebee.chargebee-java"
+         download-size="0"
+         install-size="0"
+         version="2.7.7"
+         unpack="false"/>
+
 </feature>
