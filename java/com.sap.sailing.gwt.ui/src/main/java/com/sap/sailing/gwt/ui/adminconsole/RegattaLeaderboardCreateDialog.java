@@ -27,6 +27,7 @@ public class RegattaLeaderboardCreateDialog extends RegattaLeaderboardDialog {
                 int selectedIndex = regattaListBox.getSelectedIndex();
                 if (selectedIndex > 0) {
                     nameTextBox.setText(regattaListBox.getValue(selectedIndex)); 
+                    validateAndUpdate();
                 }
                 adjustVisibilityOfResultDiscardingRuleComponent();
             }
