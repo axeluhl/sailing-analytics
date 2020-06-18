@@ -204,7 +204,6 @@
         <module>com.sap.sailing.server.gateway.test.support</module>
         <module>com.sap.sailing.server.gateway.serialization.test</module>
         <module>com.sap.sailing.server.replication.test</module>
-        <module>com.sap.sailing.gwt.ui.test</module>
         <module>com.sap.sailing.mongodb.test</module>
         <module>com.googlecode.java-diff-utils.test</module>
         <module>com.sap.sailing.kiworesultimport.test</module>
