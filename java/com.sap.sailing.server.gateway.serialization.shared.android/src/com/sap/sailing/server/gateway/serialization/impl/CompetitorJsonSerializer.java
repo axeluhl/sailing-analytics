@@ -117,6 +117,9 @@ public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
         }
         result.put(CompetitorJsonConstants.FIELD_NAME, competitor.getName());
         result.put(CompetitorJsonConstants.FIELD_SHORT_NAME, competitor.getShortName());
+        if (competitor.hasBoat()) {
+            result.put(CompetitorJsonConstants.FIELD_SAIL_ID, ((CompetitorWithBoat) competitor).getBoat().getSailID());
+        }
         Color color = getColor(competitor);
         result.put(CompetitorJsonConstants.FIELD_DISPLAY_COLOR, color == null ? null : color.getAsHtml());
         if (serializeNonPublicFields) {
@@ -141,6 +144,16 @@ public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
         result.put(CompetitorJsonConstants.FIELD_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE,
                 competitor.getTimeOnDistanceAllowancePerNauticalMile() == null ? null :
                     competitor.getTimeOnDistanceAllowancePerNauticalMile().asSeconds());
+        // adding redundant values to migrate CompetitorsResource to use this serializer instead of its own; see also bug5289
+        result.put(CompetitorJsonConstants.FIELD_COLOR, color == null ? null : color.getAsHtml());
+        result.put(CompetitorJsonConstants.FIELD_COUNTRY_CODE,
+                countryCode == null ? "" : countryCode.getTwoLetterISOCode());
+        result.put(CompetitorJsonConstants.FIELD_FLAG_IMAGE,
+                competitor.getFlagImage() != null ? competitor.getFlagImage().toString() : null);
+        result.put(CompetitorJsonConstants.FIELD_TEAM_IMAGE_URI,
+                competitor.getTeam() != null
+                        ? competitor.getTeam().getImage() != null ? competitor.getTeam().getImage().toString() : null
+                        : null);
         return result;
     }
 
