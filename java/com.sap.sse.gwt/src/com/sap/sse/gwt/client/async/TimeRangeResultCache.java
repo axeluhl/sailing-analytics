@@ -107,17 +107,17 @@ public class TimeRangeResultCache<Result> {
 
     /**
      * Registers that a request has returned with a result and collects all other needed cached results that are needed
-     * to construct a complete, time-continuous {@code Result}.
+     * to construct a complete, time-continuous {@link Result}.
      *
      * @param timeRange
      *            {@link TimeRange} that this request was trimmed to.
      * @param result
-     *            {@code Result} of this request to cache.
+     *            {@link Result} of this request to cache.
      * @param callbackIfResultsAreMissing
      *            {@link AsyncCallback}{@code <Void>} to call {@link AsyncCallback#onSuccess(Object)} on once a request
      *            this one depends on and which was still in transit returns.
-     * @return {@link List} of {@link TimeRange}, {@code Result} {@link Pair}s that contain all data needed to construct
-     *         a time-continuous {@code Result} object.
+     * @return {@link List} of {@link TimeRange}, {@link Result} {@link Pair}s that contain all data needed to construct
+     *         a time-continuous {@link Result} object.
      */
     public List<Pair<TimeRange, Result>> registerAndCollectResult(TimeRange timeRange, Result result,
             AsyncCallback<Void> callbackIfResultsAreMissing) {

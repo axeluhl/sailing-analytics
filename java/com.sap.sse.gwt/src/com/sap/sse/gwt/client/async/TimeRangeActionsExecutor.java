@@ -14,7 +14,7 @@ import com.sap.sse.common.Util.Pair;
 
 /**
  * An Executor for efficient, asynchronous execution of {@link TimeRangeAsyncAction}s. For the actual execution this
- * class relies on an {@link AsyncActionsExecutor}.
+ * class relies on an {@link AsyncActionsExecutor}.<p>
  *
  *
  * The idea is to provide an abstraction layer which will handle caching and intelligently cut down on the number and
@@ -23,9 +23,9 @@ import com.sap.sse.common.Util.Pair;
  * @param <Result>
  *            Type returned by remote procedure. See {@link TimeRangeAsyncAction}.
  * @param <SubResult>
- *            Type representing an individual part or channel of a complete {@code Result}.
+ *            Type representing an individual part or channel of a complete {@link Result}.
  * @param <Key>
- *            Typed used to index {@code SubResult}s.
+ *            Typed used to index {@link SubResult}s.
  *
  * @author Tim Hessenmüller (D062243)
  */
