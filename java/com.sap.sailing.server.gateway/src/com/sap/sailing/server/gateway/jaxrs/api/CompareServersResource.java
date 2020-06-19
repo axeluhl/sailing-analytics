@@ -2,14 +2,15 @@ package com.sap.sailing.server.gateway.jaxrs.api;
 
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.TreeSet;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.ws.rs.Consumes;
@@ -40,12 +41,6 @@ public class CompareServersResource extends AbstractSailingServerResource {
             "isMetaLeaderboard", "isRegattaLeaderboard", "scoringComment", "lastScoringUpdate", "scoringScheme",
             "regattaName", "series", "isMedalSeries", "fleets", "color", "ordering", "races", "isMedalRace",
             "isTracked", "regattaName", "trackedRaceName", "hasGpsData", "hasWindData" };
-    private static final Comparator<JSONObject> JSONOBJECTCOMPARATOR = new Comparator<JSONObject>() {
-        @Override
-        public int compare(JSONObject o1, JSONObject o2) {
-            return o1.toString().compareTo(o2.toString());
-        }
-    };
 
     public CompareServersResource() {
     }
@@ -54,13 +49,13 @@ public class CompareServersResource extends AbstractSailingServerResource {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces("application/json;charset=UTF-8")
     public Response compareServers(@FormParam("server1") String server1, @FormParam("server2") String server2) {
-        final Map<String, TreeSet<JSONObject>> result = new HashMap<>();
+        final Map<String, Set<JSONObject>> result = new HashMap<>();
         Response response = null;
         if (!Util.hasLength(server1) || !Util.hasLength(server2)) {
             response = badRequest();
         } else {
-            result.put(server1, new TreeSet<>(JSONOBJECTCOMPARATOR));
-            result.put(server2, new TreeSet<>(JSONOBJECTCOMPARATOR));
+            result.put(server1, new HashSet<>());
+            result.put(server2, new HashSet<>());
             try {
                 final URL base1 = RemoteServerUtil.createBaseUrl(server1);
                 final URL base2 = RemoteServerUtil.createBaseUrl(server2);
@@ -73,58 +68,36 @@ public class CompareServersResource extends AbstractSailingServerResource {
                         .parse(new InputStreamReader(lgc1.getInputStream(), "UTF-8"));
                 final JSONArray leaderboardgroupList2 = (JSONArray) parser
                         .parse(new InputStreamReader(lgc2.getInputStream(), "UTF-8"));
-                leaderboardgroupList1.sort(null);
-                leaderboardgroupList2.sort(null);
-                final StringBuilder lgdetailpath = new StringBuilder(LEADERBOARDGROUPSPATH);
-                lgdetailpath.append("/");
-                final int length = lgdetailpath.length();
-                if (Util.equals(leaderboardgroupList1, leaderboardgroupList2)) {
-                    for (Object lg1 : leaderboardgroupList1) {
-                        URI uri = new URI(null, null, lg1.toString(), null, null);
-                        // filter for / in path
-                        if (uri.getRawPath().contains("/")) {
-                            lgdetailpath.replace(length, lgdetailpath.length(),
-                                    uri.getRawPath().replaceAll("/", "%2F"));
-                        } else {
-                            lgdetailpath.replace(length, lgdetailpath.length(), uri.toASCIIString());
-                        }
-                        if (lg1.equals(leaderboardgroupList2.get(leaderboardgroupList1.indexOf(lg1)))) {
-                            final URLConnection lgdetailc1 = HttpUrlConnectionHelper.redirectConnection(
-                                    RemoteServerUtil.createRemoteServerUrl(base1, lgdetailpath.toString(), null));
-                            final URLConnection lgdetailc2 = HttpUrlConnectionHelper.redirectConnection(
-                                    RemoteServerUtil.createRemoteServerUrl(base2, lgdetailpath.toString(), null));
-                            JSONObject lgdetail1 = (JSONObject) parser
-                                    .parse(new InputStreamReader(lgdetailc1.getInputStream(), "UTF-8"));
-                            JSONObject lgdetail2 = (JSONObject) parser
-                                    .parse(new InputStreamReader(lgdetailc2.getInputStream(), "UTF-8"));
-                            lgdetail1 = removeUnnecessaryFields(lgdetail1);
-                            lgdetail2 = removeUnnecessaryFields(lgdetail2);
-                            if (!lgdetail1.equals(lgdetail2)) {
-                                Pair<JSONObject, JSONObject> jsonPair = removeDuplicatesFromJsonAndReturn(lgdetail1,
-                                        lgdetail2);
-                                result.get(server1).add(jsonPair.getA());
-                                result.get(server2).add(jsonPair.getB());
-                            }
-                        }
-                    }
-                } else {
-                    for (Object lg1 : leaderboardgroupList1) {
-                        final JSONObject json1 = new JSONObject();
-                        if (!leaderboardgroupList2.contains(lg1)) {
-                            json1.put("name", lg1.toString());
-                            result.get(server1).add(json1);
-                        }
-                    }
-                    for (Object lg2 : leaderboardgroupList2) {
-                        final JSONObject json2 = new JSONObject();
-                        if (!leaderboardgroupList1.contains(lg2)) {
-                            json2.put("name", lg2.toString());
-                            result.get(server2).add(json2);
+                for (Object lg1 : leaderboardgroupList1) {
+                    if (!leaderboardgroupList2.contains(lg1)) {
+                        result.get(server1).add(createJSONtoAdd(lg1));
+                    } else {
+                        final String lgdetailpath = checkForForwardSlashInPathAndCreatePath(lg1);
+                        final URLConnection lgdetailc1 = HttpUrlConnectionHelper
+                                .redirectConnection(RemoteServerUtil.createRemoteServerUrl(base1, lgdetailpath, null));
+                        final URLConnection lgdetailc2 = HttpUrlConnectionHelper
+                                .redirectConnection(RemoteServerUtil.createRemoteServerUrl(base2, lgdetailpath, null));
+                        JSONObject lgdetail1 = (JSONObject) parser
+                                .parse(new InputStreamReader(lgdetailc1.getInputStream(), "UTF-8"));
+                        JSONObject lgdetail2 = (JSONObject) parser
+                                .parse(new InputStreamReader(lgdetailc2.getInputStream(), "UTF-8"));
+                        lgdetail1 = removeUnnecessaryFields(lgdetail1);
+                        lgdetail2 = removeUnnecessaryFields(lgdetail2);
+                        if (!lgdetail1.equals(lgdetail2)) {
+                            Pair<JSONObject, JSONObject> jsonPair = removeDuplicatesFromJsonAndReturn(lgdetail1,
+                                    lgdetail2);
+                            result.get(server1).add(jsonPair.getA());
+                            result.get(server2).add(jsonPair.getB());
                         }
                     }
                 }
+                for (Object lg2 : leaderboardgroupList2) {
+                    if (!leaderboardgroupList1.contains(lg2)) {
+                        result.get(server2).add(createJSONtoAdd(lg2));
+                    }
+                }
                 JSONObject json = new JSONObject();
-                for (Entry<String, TreeSet<JSONObject>> entry : result.entrySet()) {
+                for (Entry<String, Set<JSONObject>> entry : result.entrySet()) {
                     json.put(entry.getKey(), entry.getValue());
                 }
                 response = Response.ok(streamingOutput(json)).build();
@@ -133,6 +106,29 @@ public class CompareServersResource extends AbstractSailingServerResource {
             }
         }
         return response;
+    }
+
+    private String checkForForwardSlashInPathAndCreatePath(Object leaderboardgroup) throws URISyntaxException {
+        final String result;
+        final StringBuilder lgdetailpath = new StringBuilder(LEADERBOARDGROUPSPATH);
+        lgdetailpath.append("/");
+        final int length = lgdetailpath.length();
+        URI uri = new URI(null, null, leaderboardgroup.toString(), null, null);
+        // filter for / in path
+        if (uri.getRawPath().contains("/")) {
+            lgdetailpath.replace(length, lgdetailpath.length(),
+                    uri.getRawPath().replaceAll("/", "%2F"));
+        } else {
+            lgdetailpath.replace(length, lgdetailpath.length(), uri.toASCIIString());
+        }
+        result = lgdetailpath.toString();
+        return result;
+    }
+    
+    private JSONObject createJSONtoAdd(Object leaderboardgroup) {
+        final JSONObject result = new JSONObject();
+        result.put("name", leaderboardgroup.toString());
+        return result;
     }
 
     private JSONObject removeUnnecessaryFields(JSONObject json) {
