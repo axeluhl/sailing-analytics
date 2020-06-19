@@ -247,7 +247,7 @@ public class CompetitorImpl implements DynamicCompetitor {
     }
 
     private void assertFiniteTimeOnTimeFactor(Double timeOnTimeFactor) {
-        if (!Double.isFinite(timeOnTimeFactor)) {
+        if (timeOnTimeFactor != null && !Double.isFinite(timeOnTimeFactor)) {
             throw new IllegalArgumentException("A competitor's time-on-time factor must be a finite number. "+timeOnTimeFactor+" is not.");
         }
     }
