@@ -1426,8 +1426,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private void storeCompetitorWithoutBoat(Competitor competitor) {
         MongoCollection<Document> collection = database.getCollection(CollectionNames.COMPETITORS.name());
         JSONObject json = competitorSerializer.serialize(competitor);
-        Document query = Document.parse(CompetitorJsonSerializer.getCompetitorIdQuery(competitor).toString());
-        Document entry = Document.parse(json.toString());
+        Document query = Document.parse(CompetitorJsonSerializer.getCompetitorIdQuery(competitor).toJSONString());
+        Document entry = Document.parse(json.toJSONString());
         collection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, entry, new UpdateOptions().upsert(true));
     }
 
