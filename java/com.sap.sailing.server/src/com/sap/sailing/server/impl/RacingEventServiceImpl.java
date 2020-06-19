@@ -45,6 +45,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
 import javax.management.InstanceAlreadyExistsException;
@@ -421,7 +422,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      */
     private final NamedReentrantReadWriteLock leaderboardsByNameLock;
 
-    private final ConcurrentHashMap<String, LeaderboardGroup> leaderboardGroupsByName;
+    private final ConcurrentHashMap<String, Set<LeaderboardGroup>> leaderboardGroupsByName;
 
     private final ConcurrentHashMap<UUID, LeaderboardGroup> leaderboardGroupsByID;
 
@@ -1223,7 +1224,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             logger.info("loaded leaderboard group " + leaderboardGroup.getName() + " into " + this);
             LockUtil.lockForWrite(leaderboardGroupsByNameLock);
             try {
-                leaderboardGroupsByName.put(leaderboardGroup.getName(), leaderboardGroup);
+                leaderboardGroupsByName.put(leaderboardGroup.getName(), Collections.singleton(leaderboardGroup));
                 leaderboardGroupsByID.put(leaderboardGroup.getId(), leaderboardGroup);
             } finally {
                 LockUtil.unlockAfterWrite(leaderboardGroupsByNameLock);
@@ -1490,23 +1491,26 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      */
     private void syncGroupsAfterLeaderboardRemove(String removedLeaderboardName, boolean doDatabaseUpdate) {
         boolean groupNeedsUpdate = false;
-        for (LeaderboardGroup leaderboardGroup : leaderboardGroupsByName.values()) {
-            for (final Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
-                if (leaderboard.getName().equals(removedLeaderboardName)) {
-                    leaderboardGroup.removeLeaderboard(leaderboard);
-                    groupNeedsUpdate = true;
-                    // TODO we assume that the leaderboard names are unique, so we can break the inner loop here
-                    break;
+        for (Set<LeaderboardGroup> leaderboardGroupsSet : leaderboardGroupsByName.values()) {
+            for (LeaderboardGroup leaderboardGroup : leaderboardGroupsSet) {
+                for (final Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
+                    if (leaderboard.getName().equals(removedLeaderboardName)) {
+                        leaderboardGroup.removeLeaderboard(leaderboard);
+                        groupNeedsUpdate = true;
+                        // TODO we assume that the leaderboard names are unique, so we can break the inner loop here
+                        break;
+                    }
                 }
+                if (leaderboardGroup.getOverallLeaderboard() != null
+                        && leaderboardGroup.getOverallLeaderboard().getName().equals(removedLeaderboardName)) {
+                    leaderboardGroup.setOverallLeaderboard(null);
+                    groupNeedsUpdate = true;
+                }
+                if (doDatabaseUpdate && groupNeedsUpdate) {
+                    mongoObjectFactory.storeLeaderboardGroup(leaderboardGroup);
+                }
+                groupNeedsUpdate = false;
             }
-            if (leaderboardGroup.getOverallLeaderboard() != null && leaderboardGroup.getOverallLeaderboard().getName().equals(removedLeaderboardName)) {
-                leaderboardGroup.setOverallLeaderboard(null);
-                groupNeedsUpdate = true;
-            }
-            if (doDatabaseUpdate && groupNeedsUpdate) {
-                mongoObjectFactory.storeLeaderboardGroup(leaderboardGroup);
-            }
-            groupNeedsUpdate = false;
         }
     }
 
@@ -2986,7 +2990,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public Map<String, LeaderboardGroup> getLeaderboardGroups() {
-        return Collections.unmodifiableMap(new HashMap<String, LeaderboardGroup>(leaderboardGroupsByName));
+        return Collections.unmodifiableMap(leaderboardGroupsByName.entrySet().stream().collect(
+                Collectors.toMap(Map.Entry::getKey, stringSetEntry -> stringSetEntry.getValue().iterator().next())));
     }
 
     @Override
@@ -2996,7 +3001,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public LeaderboardGroup getLeaderboardGroupByName(String groupName) {
-        return leaderboardGroupsByName.get(groupName);
+        return leaderboardGroupsByName.get(groupName).stream().findFirst().orElse(null);
     }
 
     @Override
@@ -3042,7 +3047,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             if (leaderboardGroupsByName.containsKey(groupName)) {
                 throw new IllegalArgumentException("Leaderboard group with name " + groupName + " already exists");
             }
-            leaderboardGroupsByName.put(groupName, result);
+            leaderboardGroupsByName.put(groupName, Collections.singleton(result));
             leaderboardGroupsByID.put(result.getId(), result);
         } finally {
             LockUtil.unlockAfterWrite(leaderboardGroupsByNameLock);
@@ -3058,7 +3063,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             if (leaderboardGroupsByID.containsKey(leaderboardGroup.getId())) {
                 throw new IllegalArgumentException("Leaderboard group with ID " + leaderboardGroup.getId() + " already exists");
             }
-            leaderboardGroupsByName.put(leaderboardGroup.getName(), leaderboardGroup);
+            leaderboardGroupsByName.put(leaderboardGroup.getName(), Collections.singleton(leaderboardGroup));
             leaderboardGroupsByID.put(leaderboardGroup.getId(), leaderboardGroup);
         } finally {
             LockUtil.unlockAfterWrite(leaderboardGroupsByNameLock);
@@ -3117,7 +3122,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             }
             leaderboardGroupsByName.remove(toRename.getName());
             toRename.setName(newName);
-            leaderboardGroupsByName.put(newName, toRename);
+            leaderboardGroupsByName.put(newName, Collections.singleton(toRename));
         } finally {
             LockUtil.unlockAfterWrite(leaderboardGroupsByNameLock);
         }
@@ -3249,9 +3254,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         logger.info("Serializing leaderboard groups...");
         oos.writeObject(leaderboardGroupsByName);
         logoutput.append("Serialized " + leaderboardGroupsByName.size() + " leaderboard groups\n");
-        for (LeaderboardGroup lg : leaderboardGroupsByName.values()) {
-            logoutput.append(String.format("%3s\n", lg.toString()));
-        }
+        leaderboardGroupsByName.values().forEach(leaderboardGroupsSet -> leaderboardGroupsSet.stream().findFirst()
+                .ifPresent(lg -> logoutput.append(String.format("%3s\n", lg.toString()))));
         logger.info("Serializing leaderboards...");
         oos.writeObject(leaderboardsByName);
         logoutput.append("Serialized " + leaderboardsByName.size() + " leaderboards\n");
@@ -3338,12 +3342,15 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         logoutput.append("Received " + regattaTrackingCache.size() + " NEW regatta tracking cache entries\n");
 
         logger.info("Reading leaderboard groups...");
-        leaderboardGroupsByName.putAll((Map<String, LeaderboardGroup>) ois.readObject());
+        Map<String, LeaderboardGroup> readObject = (Map<String, LeaderboardGroup>) ois.readObject();
+        leaderboardGroupsByName.putAll(readObject.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
+                stringLeaderboardGroupEntry -> Collections.singleton(stringLeaderboardGroupEntry.getValue()))));
         logoutput.append("Received " + leaderboardGroupsByName.size() + " NEW leaderboard groups\n");
-        for (LeaderboardGroup lg : leaderboardGroupsByName.values()) {
-            leaderboardGroupsByID.put(lg.getId(), lg);
-            logoutput.append(String.format("%3s\n", lg.toString()));
-        }
+        leaderboardGroupsByName.values()
+                .forEach(leaderboardGroupsSet -> leaderboardGroupsSet.stream().findFirst().ifPresent(lg -> {
+                    leaderboardGroupsByID.put(lg.getId(), lg);
+                    logoutput.append(String.format("%3s\n", lg.toString()));
+                }));
 
         logger.info("Reading leaderboards by name...");
         leaderboardsByName.putAll((Map<String, Leaderboard>) ois.readObject());

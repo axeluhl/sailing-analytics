@@ -227,6 +227,8 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
 
     LeaderboardGroupDTO getLeaderboardGroupByName(String groupName, boolean withGeoLocationData)
             throws UnauthorizedException;
+    
+    LeaderboardGroupDTO getLeaderboardGroupById(UUID groupId) throws UnauthorizedException;
 
     CompetitorsRaceDataDTO getCompetitorsRaceData(RegattaAndRaceIdentifier race, List<CompetitorDTO> competitors,
             Date from, Date to, long stepSizeInMs, DetailType detailType, String leaderboardGroupName,
