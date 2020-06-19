@@ -30,6 +30,9 @@ import com.sap.sse.common.Util.Pair;
  * @author Tim Hessenmüller (D062243)
  */
 public class TimeRangeActionsExecutor<Result, SubResult, Key> {
+    /**
+     * Callback called by {@link TimeRangeActionsExecutor#executor} upon receiving an answer from the server.
+     */
     private final class ExecutorCallback implements AsyncCallback<Result> {
         private final TimeRangeAsyncCallback<Result, SubResult, Key> callback;
         private final Collection<Pair<Key, TimeRange>> requestedTimeRanges;
@@ -88,7 +91,7 @@ public class TimeRangeActionsExecutor<Result, SubResult, Key> {
      * @see AsyncActionsExecutor#execute(AsyncAction, String, AsyncCallback)
      */
     protected String actionCategory = MarkedAsyncCallback.CATEGORY_GLOBAL;
-    protected final Map<Key, TimeRangeResultCache<SubResult>> cacheMap = new HashMap<>();
+    protected final Map<Key, TimeRangeResultCache<SubResult>> cacheMap = new HashMap<>(); //TODO Invalidation
 
     public TimeRangeActionsExecutor(AsyncActionsExecutor actionsExecutor) {
         this.executor = Objects.requireNonNull(actionsExecutor);
@@ -127,12 +130,18 @@ public class TimeRangeActionsExecutor<Result, SubResult, Key> {
      */
     public void execute(TimeRangeAsyncAction<Result, Key> action,
             TimeRangeAsyncCallback<Result, SubResult, Key> callback, boolean forceTimeRange) {
+        if (action == null) {
+            throw new IllegalArgumentException("action must not be null!");
+        }
+        if (callback == null) {
+            throw new IllegalArgumentException("callback must not be null!");
+        }
         List<Pair<Key, TimeRange>> trimmedTimeRanges = new ArrayList<>(action.getTimeRanges().size());
         for (Pair<Key, TimeRange> part : action.getTimeRanges()) {
             TimeRangeResultCache<SubResult> cache = getSubResultCache(part.getA());
             TimeRange trimmedRange = cache.trimAndRegisterRequest(part.getB(), forceTimeRange);
             if (trimmedRange != null) {
-                trimmedTimeRanges.add(part);
+                trimmedTimeRanges.add(new Pair<>(part.getA(), trimmedRange));
             }
         }
         if (!trimmedTimeRanges.isEmpty()) {
