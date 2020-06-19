@@ -34,6 +34,7 @@ public class CompetitorImpl implements DynamicCompetitor {
     private Duration timeOnDistanceAllowancePerNauticalMile;
     
     public CompetitorImpl(Serializable id, String name, String shortName, Color color, String email, URI flagImage, DynamicTeam team, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag) {
+        assertFiniteTimeOnTimeFactor(timeOnTimeFactor);
         this.id = id;
         this.name = name;
         this.shortName = shortName;
@@ -235,12 +236,19 @@ public class CompetitorImpl implements DynamicCompetitor {
 
     @Override
     public void setTimeOnTimeFactor(Double timeOnTimeFactor) {
+        assertFiniteTimeOnTimeFactor(timeOnTimeFactor);
         Double oldTimeOnTimeFactor = this.timeOnTimeFactor;
         this.timeOnTimeFactor = timeOnTimeFactor;
         if (!Util.equalsWithNull(oldTimeOnTimeFactor, timeOnTimeFactor)) {
             for (CompetitorChangeListener listener : getListeners()) {
                 listener.timeOnTimeFactorChanged(oldTimeOnTimeFactor, timeOnTimeFactor);
             }
+        }
+    }
+
+    private void assertFiniteTimeOnTimeFactor(Double timeOnTimeFactor) {
+        if (!Double.isFinite(timeOnTimeFactor)) {
+            throw new IllegalArgumentException("A competitor's time-on-time factor must be a finite number. "+timeOnTimeFactor+" is not.");
         }
     }
 
