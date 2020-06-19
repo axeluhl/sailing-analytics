@@ -23,6 +23,24 @@
             <div class="mainContent">
                 <h2 class="releaseHeadline">Release Notes - Administration Console</h2>
                 <div class="innerContent">
+                    <h2 class="articleSubheadline">June 2020</h2>
+                    <ul class="bulletList">
+                        <li>The following REST endpoint URLs of the Usergroups-API and the Preferences-API have been replaced and are now deprecated. The deprecated URLs will be removed in
+                            one of the next releases.
+                        <table>
+                            <tr><th>HTTP Method</th><th>Deprecated Endpoint URL</th><th>Replaced by URL</th><th></th></tr>
+                            <tr><td>GET</td><td><tt>/sailingserver/api/v1/usergroups</tt></td><td><tt>/security/api/restsecurity/usergroup/list/groupsUserIsPartOf</tt></td><td><a target="_new" href="/security/webservices/api/usergroup.html"><tt style="white-space: nowrap;">see docs<tt></a></td></tr>
+                            <tr><td>GET</td><td><tt>/sailingserver/api/v1/usergroups/readable</tt></td><td><tt>/security/api/restsecurity/usergroup/list/readable</tt></td><td><a target="_new" href="/security/webservices/api/usergroupsGetReadable.html"><tt style="white-space: nowrap;">see docs<tt></a></td></tr>
+                            <tr><td>POST</td><td><tt>/sailingserver/api/v1/usergroups/setDefaultTenantForCurrentServerAndUser</tt></td><td><tt>/security/api/restsecurity/usergroup/setDefaultTenantForCurrentServerAndUser</tt></td><td><a target="_new" href="/security/webservices/api/usergroupsSetDefaultTenantForCurrentServerAndUser.html"><tt style="white-space: nowrap;">see docs<tt></a></td></tr>
+                            <tr><td>POST</td><td><tt>/sailingserver/api/v1/usergroups/addAnyUserToGroup</tt></td><td><tt>/security/api/restsecurity/usergroup/addAnyUserToGroup</tt></td><td><a target="_new" href="https://www.sapsailing.com/security/webservices/api/usergroupsAddAnyUserToGroup.html"><tt style="white-space: nowrap;">see docs<tt></a></td></tr>
+                            <tr><td>GET</td><td><tt>/sailingserver/api/v1/usergroups/{userGroupId}/roles</tt></td><td><tt>/security/api/restsecurity/usergroup/{groupId}</tt></td><td><a target="_new" href="/security/webservices/api/usergroup.html"><tt style="white-space: nowrap;">see docs<tt></a></td></tr>
+                            <tr><td>DELETE</td><td><tt>/sailingserver/api/v1/usergroups/{userGroupId}/roles</tt></td><td><tt>/security/api/restsecurity/{groupId}/role/{roleId}</tt></td><td><a target="_new" href="/security/webservices/api/usergroup.html"><tt style="white-space: nowrap;">see docs<tt></a></td></tr>
+                            <tr><td>PUT</td><td><tt>/sailingserver/api/v1/usergroups/{userGroupId}/roles</tt></td><td><tt>/security/api/restsecurity/usergroup/{groupId}/role/{roleId}</tt></td><td><a target="_new" href="/security/webservices/api/usergroup.html"><tt style="white-space: nowrap;">see docs<tt></a></td></tr>
+                            <tr><td>GET</td><td><tt>/sailingserver/api/v1/preferences/{settings_key}</tt></td><td><tt>/security/api/restsecurity//preferences/{settings_key}</tt></td><td><a target="_new" href="/security/webservices/api/preferencesGet.html"><tt style="white-space: nowrap;">see docs<tt></a></td></tr>
+                            <tr><td>PUT</td><td><tt>/sailingserver/api/v1/preferences/{settings_key}</tt></td><td><tt>/security/api/restsecurity//preferences/{settings_key}</tt></td><td><a target="_new" href="/security/webservices/api/preferencesPut.html"><tt style="white-space: nowrap;">see docs<tt></a></td></tr>
+                            <tr><td>DELETE</td><td><tt>/sailingserver/api/v1/preferences/{settings_key}</tt></td><td><tt>/security/api/restsecurity/preferences/{settings_key}</tt></td><td><a target="_new" href="/security/webservices/api/preferencesDelete.html"><tt style="white-space: nowrap;">see docs<tt></a></td></tr>
+                        </table>
+                    </ul>
                     <h2 class="articleSubheadline">May 2020</h2>
                     <ul class="bulletList">
                         <li>There are new Java Management Beans (MX Beans) for the thread pool executors
