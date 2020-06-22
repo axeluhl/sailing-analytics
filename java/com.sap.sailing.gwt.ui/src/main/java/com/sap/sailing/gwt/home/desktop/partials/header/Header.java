@@ -1,9 +1,16 @@
 package com.sap.sailing.gwt.home.desktop.partials.header;
 
+import static com.google.gwt.dom.client.Style.Display.BLOCK;
+import static com.google.gwt.dom.client.Style.Display.NONE;
+import static com.google.gwt.dom.client.Style.Visibility.HIDDEN;
+import static com.google.gwt.dom.client.Style.Visibility.VISIBLE;
 import static com.sap.sse.gwt.shared.DebugConstants.DEBUG_ID_ATTRIBUTE;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;
@@ -14,12 +21,15 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.event.logical.shared.ResizeEvent;
+import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
@@ -50,6 +60,15 @@ import com.sap.sse.security.ui.authentication.view.AuthenticationMenuView;
 import com.sap.sse.security.ui.authentication.view.AuthenticationMenuViewImpl;
 
 public class Header extends Composite implements HeaderConstants {
+    
+    private static final Logger LOG = Logger.getLogger(Header.class.getName());
+    
+    @UiField Anchor startPageLinkMenu;
+    @UiField Anchor eventsPageLinkMenu;
+    @UiField Anchor solutionsPageLinkMenu;
+    @UiField Anchor adminConsolePageLinkMenu;
+    @UiField Anchor dataMiningPageLinkMenu;
+    
     @UiField Anchor startPageLink;
     @UiField Anchor eventsPageLink;
     @UiField Anchor solutionsPageLink;
@@ -76,7 +95,52 @@ public class Header extends Composite implements HeaderConstants {
     interface HeaderUiBinder extends UiBinder<Widget, Header> {
     }
     
+    private static final class MenuItemVisibilityHandler implements ResizeHandler{
+        private static final int visibiltyThreshold = 40;
+        private final Map<Anchor,Anchor> menuToDropDownItemMap;
+        private final Anchor headerNavigationIcon;
+        private final DropdownHandler dropdownHandler;
+
+        public MenuItemVisibilityHandler(Map<Anchor,Anchor> menuToDropDownItemMap, DropdownHandler dropdownHandler, Anchor headerNavigationIcon) {
+            this.dropdownHandler = dropdownHandler;
+            this.headerNavigationIcon = headerNavigationIcon;
+            this.menuToDropDownItemMap = menuToDropDownItemMap;
+            // initialize visibility for drop down
+            refreshVisibility();
+        }
+
+        @Override
+        public void onResize(ResizeEvent event) {
+            refreshVisibility();
+        }
+
+        private boolean isVisibilityInMenuBar(Anchor anchor) {
+            int offsetTop = anchor.getElement().getOffsetTop();
+            return offsetTop < visibiltyThreshold;
+        }
+
+        public void refreshVisibility() {
+            int noOfVisibleItems = 0;
+            for (Map.Entry<Anchor, Anchor> item : menuToDropDownItemMap.entrySet()) {
+                Anchor menuAnchor = item.getKey();
+                Element listItem = item.getValue().getElement().getParentElement();
+                Display isVisible = isVisibilityInMenuBar(menuAnchor) ? NONE : BLOCK;
+                listItem.getStyle().setDisplay(isVisible);
+                LOG.fine(item.getValue().getElement().getParentElement().getId());
+                noOfVisibleItems += isVisible == BLOCK ? 1 : 0;
+            }
+            this.headerNavigationIcon.getElement().getStyle()
+                    .setVisibility(noOfVisibleItems == 0 ? HIDDEN : VISIBLE);
+            if (noOfVisibleItems == 0) { // hide if nothing to display. Otherwise do not touch visibility
+                this.dropdownHandler.setVisible(false);
+            }
+        }
+        
+    }
+
     private static HeaderUiBinder uiBinder = GWT.create(HeaderUiBinder.class);
+
+    private MenuItemVisibilityHandler menuItemVisibilityHandler;
 
     public Header(final DesktopPlacesNavigator navigator, EventBus eventBus) {
         this.navigator = navigator;
@@ -96,12 +160,16 @@ public class Header extends Composite implements HeaderConstants {
             AuthenticationContext authContext = event.getCtx();
             // make it point to the current server if the user has CREATE_OBJECT permission there
             if (authContext.hasServerPermission(ServerActions.CREATE_OBJECT)) {
+                adminConsolePageLinkMenu.setHref(ADMIN_CONSOLE_PATH);
+                adminConsolePageLinkMenu.setTarget(ADMIN_CONSOLE_WINDOW);
                 adminConsolePageLink.setHref(ADMIN_CONSOLE_PATH);
                 adminConsolePageLink.setTarget(ADMIN_CONSOLE_WINDOW);
                 adminConsolePageLink.getElement().getStyle().setDisplay(Display.INLINE_BLOCK);
             } else if (authContext.isLoggedIn()) {
                 // make it point to the default "manage events" self-service server configured in ServerInfo otherwise
                 String base = authContext.getServerInfo().getManageEventsBaseUrl();
+                adminConsolePageLinkMenu.setHref(UriUtils.fromString(base + ADMIN_CONSOLE_PATH));
+                adminConsolePageLinkMenu.setTarget(ADMIN_CONSOLE_WINDOW);
                 adminConsolePageLink.setHref(UriUtils.fromString(base + ADMIN_CONSOLE_PATH));
                 adminConsolePageLink.setTarget(ADMIN_CONSOLE_WINDOW);
                 adminConsolePageLink.getElement().getStyle().setDisplay(Display.INLINE_BLOCK);
@@ -109,12 +177,15 @@ public class Header extends Composite implements HeaderConstants {
                 adminConsolePageLink.getElement().getStyle().setDisplay(Display.NONE);
             }
             if (authContext.hasServerPermission(ServerActions.DATA_MINING)) {
+                dataMiningPageLinkMenu.setHref(DATA_MINING_PATH);
+                dataMiningPageLinkMenu.setTarget(DATA_MINING_WINDOW);
                 dataMiningPageLink.setHref(DATA_MINING_PATH);
                 dataMiningPageLink.setTarget(DATA_MINING_WINDOW);
                 dataMiningPageLink.getElement().getStyle().setDisplay(Display.INLINE_BLOCK);
             } else {
                 dataMiningPageLink.getElement().getStyle().setDisplay(Display.NONE);
             }
+            menuItemVisibilityHandler.refreshVisibility();
         });
         searchText.getElement().setAttribute("placeholder", StringMessages.INSTANCE.headerSearchPlaceholder());
         searchText.addKeyPressHandler(new KeyPressHandler() {
@@ -142,8 +213,23 @@ public class Header extends Composite implements HeaderConstants {
         logoAnchor.setAttribute(DEBUG_ID_ATTRIBUTE, "logoAnchor");
         eventsPageLink.getElement().setAttribute(DEBUG_ID_ATTRIBUTE, "eventsPage");
 
-        DropdownHandler dropdownHandler = new DropdownHandler(headerNavigationIcon, headerNavigationDropDownMenuContainer);
+        // register event handler for dropdown items
+        startPageLinkMenu.addClickHandler(this::goToHome);
+        eventsPageLinkMenu.addClickHandler(this::goToEvents);
+        solutionsPageLinkMenu.addClickHandler(this::goToSolutions);
+        //remaining entries please see at registration for AuthenticationContextEvent 
         
+        Map<Anchor,Anchor> menuToDropDownItemMap = new HashMap<>();
+        menuToDropDownItemMap.put(startPageLink, startPageLinkMenu);
+        menuToDropDownItemMap.put(eventsPageLink, eventsPageLinkMenu);
+        menuToDropDownItemMap.put(solutionsPageLink, solutionsPageLinkMenu);
+        menuToDropDownItemMap.put(adminConsolePageLink, adminConsolePageLinkMenu);
+        menuToDropDownItemMap.put(dataMiningPageLink,dataMiningPageLinkMenu);
+        
+        
+        headerNavigationDropDownMenuContainer.getStyle().setDisplay(Display.NONE);
+        menuItemVisibilityHandler = new MenuItemVisibilityHandler(menuToDropDownItemMap, new DropdownHandler(headerNavigationIcon, headerNavigationDropDownMenuContainer), headerNavigationIcon);
+        Window.addResizeHandler(menuItemVisibilityHandler);
     }
 
     @UiHandler("startPageLink")

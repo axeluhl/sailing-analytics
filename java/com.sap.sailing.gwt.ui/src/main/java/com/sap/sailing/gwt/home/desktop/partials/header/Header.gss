@@ -67,12 +67,20 @@
 
 .sitenavigation_dropdown_container {
   position: absolute;
-  width: 100px;
-  height: 100px;
-  background-color: red;
+  background: #333;
   display: block;
+  z-index: 1;
+  top: 3rem;
 }
-
+.sitenavigation_dropdown_container ul {
+    padding-left: 0px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+.sitenavigation_dropdown_container ul li a {
+    width: 100%;
+    cursor: pointer;
+}
 .sitenavigation_fixed {
   white-space: nowrap;
   display: table-cell;
@@ -170,3 +178,4 @@
 .header_navigation_iconactive {
   background-image: resourceUrl('navigation_hover');
 }
+
