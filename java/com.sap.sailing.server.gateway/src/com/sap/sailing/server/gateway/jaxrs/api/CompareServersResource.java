@@ -153,8 +153,6 @@ public class CompareServersResource extends AbstractSailingServerResource {
             for (int i = 0; i < ((JSONArray) json).size(); i++) {
                 removeUnnecessaryFields(((JSONArray) json).get(i));
             }
-        } else if (json instanceof String || json instanceof Boolean || json instanceof Number || json == null) {
-            return json;
         }
         return json;
     }
