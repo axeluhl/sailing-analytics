@@ -138,13 +138,11 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
     public SubscriptionDTO getSubscription() {
         SubscriptionDTO subscriptionDto = new SubscriptionDTO();
         try {
-            User user = getCurrentUser();
-
-            Subscription subscription = user.getSubscription();
+            final User user = getCurrentUser();
+            final Subscription subscription = user.getSubscription();
             if (subscription == null || subscription.getPlanId() == null || subscription.getPlanId().isEmpty()) {
                 return null;
             }
-
             subscriptionDto.setPlanId(subscription.getPlanId());
             subscriptionDto.setSubscriptionStatus(subscription.getSubscriptionStatus());
             subscriptionDto.setPaymentStatus(subscription.getPaymentStatus());
