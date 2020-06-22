@@ -71,10 +71,10 @@ public class StoreAndLoadRegattaLogEventsTest extends AbstractMongoDBTest {
         regattaIdentifier = mock(RegattaLikeIdentifier.class);
         when(regattaIdentifier.getName()).thenReturn("testRegatta");
     }
-    
+
     public Competitor createCompetitor() {
-        final DynamicCompetitor competitorImpl = new CompetitorImpl(UUID.randomUUID(), "Max Mustermann", "KYC", Color.RED,
-                null, null,
+        final DynamicCompetitor competitorImpl = new CompetitorImpl(UUID.randomUUID(), "Max Mustermann", "KYC",
+                Color.RED, null, null,
                 new TeamImpl("STG",
                         Collections.singleton(new PersonImpl("Max Mustermann", new NationalityImpl("GER"),
                                 /* dateOfBirth */ new Date(), "This is famous Max Mustermann")),
@@ -89,7 +89,7 @@ public class StoreAndLoadRegattaLogEventsTest extends AbstractMongoDBTest {
         assertNotNull(actualEvent);
         assertEquals(expectedEvent.getCreatedAt(), actualEvent.getCreatedAt());
         assertEquals(expectedEvent.getTimePoint(), actualEvent.getTimePoint());
-        //TODO: How to evaluate the logicalTimePoint?
+        // TODO: How to evaluate the logicalTimePoint?
         assertEquals(expectedEvent.getId(), actualEvent.getId());
         assertEquals(expectedEvent.getAuthor().getName(), actualEvent.getAuthor().getName());
         assertEquals(expectedEvent.getAuthor().getPriority(), actualEvent.getAuthor().getPriority());
@@ -112,8 +112,9 @@ public class StoreAndLoadRegattaLogEventsTest extends AbstractMongoDBTest {
     @Test
     public void testStoreAndLoadSetCompetitorTimeOnTimeFactorEvent() {
         final double timeOnTimeFactor = 1.5;
-        final RegattaLogSetCompetitorTimeOnTimeFactorEvent expectedEvent = new RegattaLogSetCompetitorTimeOnTimeFactorEventImpl(MillisecondsTimePoint.now(), expectedEventTime,
-                author, expectedId, createCompetitor(), timeOnTimeFactor);
+        final RegattaLogSetCompetitorTimeOnTimeFactorEvent expectedEvent = new RegattaLogSetCompetitorTimeOnTimeFactorEventImpl(
+                MillisecondsTimePoint.now(), expectedEventTime, author, expectedId, createCompetitor(),
+                timeOnTimeFactor);
         final Document dbObject = mongoFactory.storeRegattaLogEvent(regattaIdentifier, expectedEvent);
         final RegattaLogSetCompetitorTimeOnTimeFactorEvent actualEvent = loadEvent(dbObject);
         assertBaseFields(expectedEvent, actualEvent);
@@ -123,14 +124,15 @@ public class StoreAndLoadRegattaLogEventsTest extends AbstractMongoDBTest {
 
     @Test
     public void testStoreAndLoadPassChangeEvent() {
-        final Duration duration= new MillisecondsDurationImpl(10);
-        RegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEvent expectedEvent = new RegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEventImpl(MillisecondsTimePoint.now(),
-                expectedEventTime, author, expectedId, createCompetitor(), duration);
+        final Duration duration = new MillisecondsDurationImpl(10);
+        RegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEvent expectedEvent = new RegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEventImpl(
+                MillisecondsTimePoint.now(), expectedEventTime, author, expectedId, createCompetitor(), duration);
         Document dbObject = mongoFactory.storeRegattaLogEvent(regattaIdentifier, expectedEvent);
         RegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEvent actualEvent = loadEvent(dbObject);
         assertBaseFields(expectedEvent, actualEvent);
         assertEquals(expectedEvent.getCompetitor().getId(), actualEvent.getCompetitor().getId());
-        assertEquals(expectedEvent.getTimeOnDistanceAllowancePerNauticalMile(), actualEvent.getTimeOnDistanceAllowancePerNauticalMile());
+        assertEquals(expectedEvent.getTimeOnDistanceAllowancePerNauticalMile(),
+                actualEvent.getTimeOnDistanceAllowancePerNauticalMile());
     }
 
     /**
