@@ -126,6 +126,7 @@ import com.sap.sailing.server.gateway.serialization.coursedata.impl.GateJsonSeri
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorAndBoatJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.FlatGPSFixJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.MarkJsonSerializerWithPosition;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.BaseRaceLogEventSerializer;
@@ -559,7 +560,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                 getSecurityService().checkCurrentUserHasOneOfExplicitPermissions(competitor,
                         SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS);
             }
-            JSONObject json = CompetitorsResource.getCompetitorJSON(competitor);
+            JSONObject json = new CompetitorJsonSerializer().serialize(competitor);
             json.put("displayName", leaderboard.getDisplayName(competitor));
             response = Response.ok(streamingOutput(json)).build();
         }
