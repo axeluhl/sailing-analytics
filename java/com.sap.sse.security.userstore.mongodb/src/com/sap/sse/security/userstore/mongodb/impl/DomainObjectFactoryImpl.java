@@ -308,7 +308,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 permissions.add((String) o);
             }
         }
-
         final Map<String, UserGroup> defaultTenant = new ConcurrentHashMap<>();
         final List<?> defaultTenantIds = (List<?>) userDBObject.get(FieldNames.User.DEFAULT_TENANT_IDS.name());
         if (defaultTenantIds != null) {
@@ -343,10 +342,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             // is also only interested in the object's ID
             new MongoObjectFactoryImpl(db).storeUser(result);
         }
-
-        Document subscriptionDoc = (Document) userDBObject.get(FieldNames.User.SUBSCRIPTION.name());
+        final Document subscriptionDoc = (Document) userDBObject.get(FieldNames.User.SUBSCRIPTION.name());
         result.setSubscription(loadSubscription(subscriptionDoc));
-
         return result;
     }
 
@@ -393,7 +390,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     public Map<String, Object> loadSettings() {
         Map<String, Object> result = new HashMap<>();
         MongoCollection<org.bson.Document> settingsCollection = db.getCollection(CollectionNames.SETTINGS.name());
-
         try {
             Document query = new Document();
             query.put(FieldNames.Settings.NAME.name(), FieldNames.Settings.VALUES.name());
@@ -408,7 +404,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load settings.");
             logger.log(Level.SEVERE, "loadSettings", e);
         }
-
         return result;
     }
 
@@ -456,7 +451,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     public Map<String, Class<?>> loadSettingTypes() {
         Map<String, Class<?>> result = new HashMap<String, Class<?>>();
         MongoCollection<Document> settingsCollection = db.getCollection(CollectionNames.SETTINGS.name());
-
         try {
             Document query = new Document();
             query.put(FieldNames.Settings.NAME.name(), FieldNames.Settings.TYPES.name());
@@ -471,7 +465,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load setting types.");
             logger.log(Level.SEVERE, "loadSettingTypes", e);
         }
-
         return result;
     }
 
@@ -492,25 +485,26 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     private Subscription loadSubscription(Document subscriptionDoc) {
-        if (subscriptionDoc == null) {
-            return null;
+        final Subscription result;
+        if (subscriptionDoc != null) {
+            Subscription subscription = new Subscription();
+            subscription.setCustomerId(subscriptionDoc.getString(FieldNames.Subscription.CUSTOMER_ID.name()));
+            subscription.setPlanId(subscriptionDoc.getString(FieldNames.Subscription.PLAN_ID.name()));
+            subscription
+                    .setSubscriptionStatus(subscriptionDoc.getString(FieldNames.Subscription.SUBSCRIPTION_STATUS.name()));
+            subscription.setSubscriptionId(subscriptionDoc.getString(FieldNames.Subscription.SUBSCRIPTION_ID.name()));
+            subscription.setTrialStart(subscriptionDoc.getLong(FieldNames.Subscription.TRIAL_START.name()));
+            subscription.setTrialEnd(subscriptionDoc.getLong(FieldNames.Subscription.TRIAL_END.name()));
+            subscription.setPaymentStatus(subscriptionDoc.getString(FieldNames.Subscription.PAYMENT_STATUS.name()));
+            subscription.setSubsciptionCreatedAt(
+                    subscriptionDoc.getLong(FieldNames.Subscription.SUBSCRIPTION_CREATED_AT.name()));
+            subscription.setSubsciptionUpdatedAt(
+                    subscriptionDoc.getLong(FieldNames.Subscription.SUBSCRIPTION_UPDATED_AT.name()));
+            subscription.setLatestEventTime(subscriptionDoc.getLong(FieldNames.Subscription.LATEST_EVENT_TIME.name()));
+            result = subscription;
+        } else {
+            result = null;
         }
-
-        Subscription subscription = new Subscription();
-        subscription.setCustomerId(subscriptionDoc.getString(FieldNames.Subscription.CUSTOMER_ID.name()));
-        subscription.setPlanId(subscriptionDoc.getString(FieldNames.Subscription.PLAN_ID.name()));
-        subscription
-                .setSubscriptionStatus(subscriptionDoc.getString(FieldNames.Subscription.SUBSCRIPTION_STATUS.name()));
-        subscription.setSubscriptionId(subscriptionDoc.getString(FieldNames.Subscription.SUBSCRIPTION_ID.name()));
-        subscription.setTrialStart(subscriptionDoc.getLong(FieldNames.Subscription.TRIAL_START.name()));
-        subscription.setTrialEnd(subscriptionDoc.getLong(FieldNames.Subscription.TRIAL_END.name()));
-        subscription.setPaymentStatus(subscriptionDoc.getString(FieldNames.Subscription.PAYMENT_STATUS.name()));
-        subscription.setSubsciptionCreatedAt(
-                subscriptionDoc.getLong(FieldNames.Subscription.SUBSCRIPTION_CREATED_AT.name()));
-        subscription.setSubsciptionUpdatedAt(
-                subscriptionDoc.getLong(FieldNames.Subscription.SUBSCRIPTION_UPDATED_AT.name()));
-        subscription.setLatestEventTime(subscriptionDoc.getLong(FieldNames.Subscription.LATEST_EVENT_TIME.name()));
-
-        return subscription;
+        return result;
     }
 }

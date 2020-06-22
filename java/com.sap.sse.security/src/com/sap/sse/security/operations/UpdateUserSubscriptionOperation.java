@@ -11,8 +11,8 @@ import com.sap.sse.security.shared.Subscription;
 public class UpdateUserSubscriptionOperation implements SecurityOperation<Void> {
     private static final long serialVersionUID = 4943500215851172841L;
 
-    private String username;
-    private Subscription subscription;
+    private final String username;
+    private final Subscription subscription;
 
     public UpdateUserSubscriptionOperation(String username, Subscription subscription) {
         this.username = username;

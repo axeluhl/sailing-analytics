@@ -307,23 +307,23 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     private Document createSubscriptionObject(Subscription subscription) {
-        if (subscription == null) {
-            return null;
+        final Document result;
+        if (subscription != null) {
+            result = new Document();
+            result.put(FieldNames.Subscription.SUBSCRIPTION_ID.name(), subscription.getSubscriptionId());
+            result.put(FieldNames.Subscription.PLAN_ID.name(), subscription.getPlanId());
+            result.put(FieldNames.Subscription.CUSTOMER_ID.name(), subscription.getCustomerId());
+            result.put(FieldNames.Subscription.TRIAL_START.name(), subscription.getTrialStart());
+            result.put(FieldNames.Subscription.TRIAL_END.name(), subscription.getTrialEnd());
+            result.put(FieldNames.Subscription.SUBSCRIPTION_STATUS.name(), subscription.getSubscriptionStatus());
+            result.put(FieldNames.Subscription.PAYMENT_STATUS.name(), subscription.getPaymentStatus());
+            result.put(FieldNames.Subscription.SUBSCRIPTION_CREATED_AT.name(), subscription.getSubsciptionCreatedAt());
+            result.put(FieldNames.Subscription.SUBSCRIPTION_UPDATED_AT.name(), subscription.getSubsciptionUpdatedAt());
+            result.put(FieldNames.Subscription.LATEST_EVENT_TIME.name(), subscription.getLatestEventTime());
+            result.put(FieldNames.Subscription.MANUAL_UPDATED_AT.name(), subscription.getManualUpdatedAt());
+        } else {
+            result = null;
         }
-
-        Document doc = new Document();
-        doc.put(FieldNames.Subscription.SUBSCRIPTION_ID.name(), subscription.getSubscriptionId());
-        doc.put(FieldNames.Subscription.PLAN_ID.name(), subscription.getPlanId());
-        doc.put(FieldNames.Subscription.CUSTOMER_ID.name(), subscription.getCustomerId());
-        doc.put(FieldNames.Subscription.TRIAL_START.name(), subscription.getTrialStart());
-        doc.put(FieldNames.Subscription.TRIAL_END.name(), subscription.getTrialEnd());
-        doc.put(FieldNames.Subscription.SUBSCRIPTION_STATUS.name(), subscription.getSubscriptionStatus());
-        doc.put(FieldNames.Subscription.PAYMENT_STATUS.name(), subscription.getPaymentStatus());
-        doc.put(FieldNames.Subscription.SUBSCRIPTION_CREATED_AT.name(), subscription.getSubsciptionCreatedAt());
-        doc.put(FieldNames.Subscription.SUBSCRIPTION_UPDATED_AT.name(), subscription.getSubsciptionUpdatedAt());
-        doc.put(FieldNames.Subscription.LATEST_EVENT_TIME.name(), subscription.getLatestEventTime());
-        doc.put(FieldNames.Subscription.MANUAL_UPDATED_AT.name(), subscription.getManualUpdatedAt());
-
-        return doc;
+        return result;
     }
 }
