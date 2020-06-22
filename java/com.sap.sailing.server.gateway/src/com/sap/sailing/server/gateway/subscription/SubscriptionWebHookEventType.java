@@ -13,7 +13,7 @@ public enum SubscriptionWebHookEventType {
                     "subscription_cancelled"), PAYMENT_SUCCEEDED("payment_succeeded"), PAYMENT_FAILED(
                             "payment_failed"), SUBSCRIPTION_ACTIVATED("subscription_activated");
 
-    private String name;
+    private final String name;
 
     SubscriptionWebHookEventType(String name) {
         this.name = name;

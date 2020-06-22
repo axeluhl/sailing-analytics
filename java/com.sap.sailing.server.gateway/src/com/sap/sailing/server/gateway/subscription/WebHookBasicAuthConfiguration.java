@@ -12,14 +12,13 @@ public class WebHookBasicAuthConfiguration {
 
     private static WebHookBasicAuthConfiguration instance;
 
-    private String username;
-    private String password;
+    private final String username;
+    private final String password;
 
     public static WebHookBasicAuthConfiguration getInstance() {
         if (instance == null) {
             instance = new WebHookBasicAuthConfiguration(System.getProperty(USER), System.getProperty(PASSWORD));
         }
-
         return instance;
     }
 

@@ -159,7 +159,7 @@ public class Subscription implements Serializable {
         this.latestEventTime = latestEventTime;
     }
 
-    public long getManualUpdatedAt() {
+    public long getManuallyUpdatedAt() {
         return manualUpdatedAt;
     }
 

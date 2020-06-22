@@ -1,5 +1,7 @@
 package com.sap.sailing.server.gateway.subscription;
 
+import java.util.logging.Logger;
+
 import org.json.simple.JSONObject;
 
 /**
@@ -8,22 +10,21 @@ import org.json.simple.JSONObject;
  * @author Tu Tran
  */
 public class SubscriptionWebHookEvent {
-
+    private static final Logger logger = Logger.getLogger(SubscriptionWebHookEvent.class.getName());
     public static final String SUBSCRIPTION_STATUS_ACTIVE = "active";
     public static final String INVOICE_STATUS_PAID = "paid";
     public static final String TRANSACTION_STATUS_SUCCESS = "success";
     public static final String TRANSACTION_TYPE_PAYMENT = "payment";
 
-    private JSONObject eventJSON;
-    private String eventId;
-    private String eventType;
-    private JSONObject content;
+    private final JSONObject eventJSON;
+    private final String eventId;
+    private final SubscriptionWebHookEventType eventType;
+    private final JSONObject content;
 
     public SubscriptionWebHookEvent(JSONObject eventJSON) {
         this.eventJSON = eventJSON;
-
         eventId = getJsonValue(eventJSON, "id");
-        eventType = toLowerCase(getJsonValue(eventJSON, "event_type"));
+        eventType = getEventType(eventJSON);
         content = getJsonValue(eventJSON, "content");
     }
 
@@ -35,12 +36,18 @@ public class SubscriptionWebHookEvent {
         return eventId;
     }
 
-    public SubscriptionWebHookEventType getEventType() {
+    private SubscriptionWebHookEventType getEventType(JSONObject eventJSON) {
+        final String eventTypeAsUppercaseString = toUpperCase(getJsonValue(eventJSON, "event_type"));
         try {
-            return SubscriptionWebHookEventType.valueOf(eventType.toUpperCase());
-        } catch (Exception e) {
+            return SubscriptionWebHookEventType.valueOf(eventTypeAsUppercaseString);
+        } catch (NullPointerException | IllegalArgumentException e) {
+            logger.warning("Exception trying to extract subscription event type "+eventTypeAsUppercaseString+": "+e.getMessage());
             return null;
         }
+    }
+
+    public SubscriptionWebHookEventType getEventType() {
+        return eventType;
     }
 
     public String getCustomerEmail() {
@@ -96,7 +103,7 @@ public class SubscriptionWebHookEvent {
     }
 
     @SuppressWarnings("unchecked")
-    private <T> T getJsonValue(JSONObject object, String... keys) {
+    private static <T> T getJsonValue(JSONObject object, String... keys) {
         if (keys.length == 1) {
             return (T) object.get(keys[0]);
         } else {
@@ -104,7 +111,7 @@ public class SubscriptionWebHookEvent {
         }
     }
 
-    private <T> T getNestedJsonValue(JSONObject object, String... keys) {
+    private static <T> T getNestedJsonValue(JSONObject object, String... keys) {
         JSONObject tmp = object;
         T val = null;
         for (int i = 0; i < keys.length; i++) {
@@ -117,11 +124,14 @@ public class SubscriptionWebHookEvent {
                 val = getJsonValue(tmp, keys[i]);
             }
         }
-
         return val;
     }
 
     private String toLowerCase(String str) {
         return str != null ? str.toLowerCase() : null;
+    }
+    
+    private String toUpperCase(String str) {
+        return str != null ? str.toUpperCase() : null;
     }
 }
