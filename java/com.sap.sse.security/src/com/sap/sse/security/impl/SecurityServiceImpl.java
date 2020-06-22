@@ -2581,35 +2581,34 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     /**
-     * 
      * @param currentSubscription
      *            current user subscription
      * @param newSubscription
      *            new subscription
-     * @return true if new user subscription plan is different with current subscription plan
+     * @return {@code true} if new user subscription plan is different with current subscription plan
      */
     private boolean isUserSubscriptionPlanChanged(Subscription currentSubscription, Subscription newSubscription) {
+        final boolean result;
         if ((currentSubscription == null || currentSubscription.getPlanId() == null)
                 && (newSubscription == null || newSubscription.getPlanId() == null)) {
-            return false;
-        }
-
-        String currentPlan = null;
-        String newPlan = null;
-
-        if (currentSubscription != null) {
-            currentPlan = currentSubscription.getPlanId();
-        }
-        if (newSubscription != null) {
-            newPlan = newSubscription.getPlanId();
-        }
-
-        if (currentPlan == null && newPlan == null) {
-            return false;
-        } else if (currentPlan != null && newPlan != null) {
-            return !currentPlan.equals(newPlan);
+            result = false;
         } else {
-            return true;
+            String currentPlan = null;
+            String newPlan = null;
+            if (currentSubscription != null) {
+                currentPlan = currentSubscription.getPlanId();
+            }
+            if (newSubscription != null) {
+                newPlan = newSubscription.getPlanId();
+            }
+            if (currentPlan == null && newPlan == null) {
+                result = false;
+            } else if (currentPlan != null && newPlan != null) {
+                result = !currentPlan.equals(newPlan);
+            } else {
+                result = true;
+            }
         }
+        return result;
     }
 }
