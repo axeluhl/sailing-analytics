@@ -2533,12 +2533,10 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
-
         Subscription currentSubscription = user.getSubscription();
         if (shouldUpdateUserRolesForSubscription(currentSubscription, subscription)) {
             updateUserRolesOnSubscriptionChange(username, currentSubscription, subscription);
         }
-
         user.setSubscription(subscription);
         store.updateUser(user);
         return null;
@@ -2558,7 +2556,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 }
             }
         }
-
         if (newSubscription != null && newSubscription.getPlanId() != null && newSubscription.isActiveSubscription()) {
             SubscriptionPlan newPlan = SubscriptionPlanHolder.getInstance().getPlan(newSubscription.getPlanId());
             if (newPlan != null) {
@@ -2570,22 +2567,25 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         }
     }
 
+    /**
+     * Role assignments that are based on plans subscribed need to be adjusted if the plan to which the user subscribed
+     * has changed, or if the {@link Subscription#isActiveSubscription() is-active} status of the user's subscription
+     * has changed.
+     */
     private boolean shouldUpdateUserRolesForSubscription(Subscription currentSubscription,
             Subscription newSubscription) {
+        final boolean result;
         if (isUserSubscriptionPlanChanged(currentSubscription, newSubscription)) {
-            return true;
-        }
-
-        return newSubscription != null && currentSubscription != null
+            result = true;
+        } else {
+            result = newSubscription != null && currentSubscription != null
                 && newSubscription.isActiveSubscription() != currentSubscription.isActiveSubscription();
+        }
+        return result;
     }
 
     /**
-     * @param currentSubscription
-     *            current user subscription
-     * @param newSubscription
-     *            new subscription
-     * @return {@code true} if new user subscription plan is different with current subscription plan
+     * @return {@code true} if new user subscription plan is different from current subscription plan
      */
     private boolean isUserSubscriptionPlanChanged(Subscription currentSubscription, Subscription newSubscription) {
         final boolean result;
