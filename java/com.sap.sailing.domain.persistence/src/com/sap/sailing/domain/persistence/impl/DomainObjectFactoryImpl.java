@@ -2158,7 +2158,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final AbstractLogEventAuthor author;
         String authorName = (String) dbObject.get(FieldNames.REGATTA_LOG_EVENT_AUTHOR_NAME.name());
         Number authorPriority = (Number) dbObject.get(FieldNames.REGATTA_LOG_EVENT_AUTHOR_PRIORITY.name());
-        author = new LogEventAuthorImpl(authorName, authorPriority.intValue());
+        if (authorName != null && authorPriority != null) {
+            author = new LogEventAuthorImpl(authorName, authorPriority.intValue());
+        } else {
+            author = LogEventAuthorImpl.createCompatibilityAuthor();
+        }
         // CloseOpenEnded, DeviceCompMapping, DeviceMarkMapping, RegisterComp, Revoke
         String eventClass = (String) dbObject.get(FieldNames.REGATTA_LOG_EVENT_CLASS.name());
         if (eventClass.equals(RegattaLogDeviceCompetitorMappingEvent.class.getSimpleName())) {

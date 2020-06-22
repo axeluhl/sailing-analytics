@@ -827,6 +827,13 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             dbObject.put(FieldNames.RACE_LOG_EVENT_AUTHOR_PRIORITY.name(), author.getPriority());
         }
     }
+    
+    private void storeRegattaLogEventAuthor(Document dbObject, AbstractLogEventAuthor author) {
+        if (author != null) {
+            dbObject.put(FieldNames.REGATTA_LOG_EVENT_AUTHOR_NAME.name(), author.getName());
+            dbObject.put(FieldNames.REGATTA_LOG_EVENT_AUTHOR_PRIORITY.name(), author.getPriority());
+        }
+    }
 
     public Document storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogFlagEvent flagEvent) {
         Document result = new Document();
@@ -1621,9 +1628,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         Document result = new Document();
         storeTimePoint(event.getLogicalTimePoint(), result, FieldNames.TIME_AS_MILLIS);
         storeTimePoint(event.getCreatedAt(), result, FieldNames.REGATTA_LOG_EVENT_CREATED_AT);
+        storeRegattaLogEventAuthor(result, event.getAuthor());
         result.put(FieldNames.REGATTA_LOG_EVENT_ID.name(), event.getId());
-        result.put(FieldNames.REGATTA_LOG_EVENT_AUTHOR_NAME.name(), event.getAuthor().getName());
-        result.put(FieldNames.REGATTA_LOG_EVENT_AUTHOR_PRIORITY.name(), event.getAuthor().getPriority());
         return result;
     }
     
