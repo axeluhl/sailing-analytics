@@ -3001,7 +3001,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public LeaderboardGroup getLeaderboardGroupByName(String groupName) {
-        return leaderboardGroupsByName.get(groupName).stream().findFirst().orElse(null);
+        Set<LeaderboardGroup> leaderboardGroups = leaderboardGroupsByName.get(groupName);
+        if (leaderboardGroups != null) {
+            return leaderboardGroups.stream().findFirst().orElse(null);
+        }
+        return null;
     }
 
     @Override
