@@ -2519,32 +2519,32 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public void updateUserSubscription(String username, Subscription subscription) throws UserManagementException {
+    public void updateUserSubscription(String username, Subscription newSubscription) throws UserManagementException {
         final User user = getUserByName(username);
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
-        apply(new UpdateUserSubscriptionOperation(username, subscription));
+        apply(new UpdateUserSubscriptionOperation(username, newSubscription));
     }
 
     @Override
-    public Void internalUpdateSubscription(String username, Subscription subscription) throws UserManagementException {
+    public Void internalUpdateSubscription(String username, Subscription newSubscription) throws UserManagementException {
         User user = getUserByName(username);
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
         Subscription currentSubscription = user.getSubscription();
-        if (shouldUpdateUserRolesForSubscription(currentSubscription, subscription)) {
-            updateUserRolesOnSubscriptionChange(username, currentSubscription, subscription);
+        if (shouldUpdateUserRolesForSubscription(currentSubscription, newSubscription)) {
+            updateUserRolesOnSubscriptionChange(username, currentSubscription, newSubscription);
         }
-        user.setSubscription(subscription);
+        user.setSubscription(newSubscription);
         store.updateUser(user);
         return null;
     }
 
     private void updateUserRolesOnSubscriptionChange(String username, Subscription currentSubscription,
             Subscription newSubscription) throws UserManagementException {
-        logger.log(Level.INFO, "Update user subscription roles");
+        logger.log(Level.INFO, "Update user subscription roles for user "+username);
         if (currentSubscription != null && currentSubscription.getPlanId() != null
                 && currentSubscription.isActiveSubscription()) {
             SubscriptionPlan currentPlan = SubscriptionPlanHolder.getInstance()
@@ -2552,6 +2552,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             if (currentPlan != null) {
                 UUID[] roleDefinitionIds = currentPlan.getRoleDefinitionIds();
                 for (UUID roleDefId : roleDefinitionIds) {
+                    // see also bug5300: this works, based on the AbstractRole.equals definition,
+                    // as long as no qualified roles are assigned
                     store.removeRoleFromUser(username, new Role(getRoleDefinition(roleDefId)));
                 }
             }
@@ -2561,6 +2563,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             if (newPlan != null) {
                 UUID[] roleDefinitionIds = newPlan.getRoleDefinitionIds();
                 for (UUID roleDefId : roleDefinitionIds) {
+                    // see also bug5300: we may want to support qualified roles, too, in the future
                     store.addRoleForUser(username, new Role(getRoleDefinition(roleDefId)));
                 }
             }
