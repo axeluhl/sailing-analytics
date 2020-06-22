@@ -3346,7 +3346,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         logoutput.append("Received " + regattaTrackingCache.size() + " NEW regatta tracking cache entries\n");
 
         logger.info("Reading leaderboard groups...");
-        leaderboardGroupsByName.putAll((Map<String, Set<LeaderboardGroup>>)ois.readObject());
+        leaderboardGroupsByName.putAll((Map<String, Set<LeaderboardGroup>>) ois.readObject());
         logoutput.append("Received " + leaderboardGroupsByName.size() + " NEW leaderboard groups\n");
         leaderboardGroupsByName.values()
                 .forEach(leaderboardGroupsSet -> leaderboardGroupsSet.stream().findFirst().ifPresent(lg -> {
