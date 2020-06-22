@@ -14,69 +14,84 @@
 <b>Description:</b>
  <p>Compares two SAP Sailing Analytics servers based on the content.
   The return contains either the missing leaderboardgroup name or if the
-  leaderboardgroups match on both servers the missing parts within the
+  leaderboardgroupnames match on both servers the missing parts within the
   leaderboardgroups. If the servers contain the exact same content the
-  return will just have the given server URLs in it.</p>
+  return will just have the given server hostnames in it.</p>
  <br/>
 <table>
     <tr>
         <td>Webservice Type:</td>
-        <td>POST</td>
+        <td>GET</td>
     </tr>
     <tr>
         <td>Output format:</td>
         <td>json</td>
     </tr>
     <tr>
-        <td>Mandatory parameters:</td>
+        <td>Mandatory query parameters:</td>
         <td>
-            <div>server1, the URL to the first server.</div>
-            <div>server2, the URL to the second server.</div>
+            <div>server1, the hostname for the first server.</div>
+            <div>server2, the hostname for the second server.</div>
         </td>
     </tr>
     <tr>
         <td>Request method:</td>
-        <td>POST</td>
+        <td>GET</td>
     </tr>
     <tr>
         <td>Example:</td>
-        <td>curl 127.0.0.1:8889/sailingserver/api/v1/compareservers -d "server1=127.0.0.1:8888" -d "server2=127.0.0.1:8889"<br>
+        <td>curl localhost:8888/sailingserver/api/v1/compareservers?server1=localhost:8888&server2=localhost:8889<br>
         produces output:<pre>
         {
-          "127.0.0.1:8889": [
+          "localhost:8888": [
             {
-              "name": "EliminationTestEventLeaderboardGroup1"
+              "name": "TestLeaderboardGroupWithDifferentEvents",
+              "events": []
             },
             {
-              "name": "EliminationTestEventLeaderboardGroup2"
-            }
-          ],
-          "127.0.0.1:8888": []
-        }
-        </pre>
-        </td>
-    </tr>
-    <tr>
-        <td>Example:</td>
-        <td>curl 127.0.0.1:8889/sailingserver/api/v1/compareservers -d "server1=127.0.0.1:8888" -d "server2=127.0.0.1:8889"<br>
-        produces output:<pre>
-        {
-          "127.0.0.1:8889": [
-            {
-              "name": "World Cup Series 2019 - Enoshima, Japan",
+              "name": "World Cup Series 2019 - Genoa, Italy",
               "leaderboards": [
                 {
-                  "name": "WCS 2019 Enoshima - 470 Men",
+                  "name": "WCS 2019 Genoa - Nacra 17",
                   "series": [
                     {
-                      "name": "Opening Series",
+                      "name": "Qualifying Series",
                       "fleets": [
                         {
-                          "name": "Default",
+                          "name": "Yellow",
                           "races": [
                             {
-                              "name": "R1",
-                              "isMedalRace": false,
+                              "name": "R2",
+                              "isTracked": true,
+                              "regattaName": "WCS 2019 Genoa - Nacra 17",
+                              "trackedRaceName": "R2 Yellow (Nacra 17)",
+                              "hasGpsData": true,
+                              "hasWindData": true
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "localhost:8889": [
+            {
+              "name": "World Cup Series 2019 - Genoa, Italy",
+              "leaderboards": [
+                {
+                  "name": "WCS 2019 Genoa - Nacra 17",
+                  "series": [
+                    {
+                      "name": "Qualifying Series",
+                      "fleets": [
+                        {
+                          "name": "Yellow",
+                          "races": [
+                            {
+                              "name": "R2",
                               "isTracked": false,
                               "trackedRaceName": null,
                               "hasGpsData": false,
@@ -89,36 +104,11 @@
                   ]
                 }
               ]
-            }
-          ],
-          "127.0.0.1:8888": [
+            },
             {
-              "name": "World Cup Series 2019 - Enoshima, Japan",
-              "leaderboards": [
-                {
-                  "name": "WCS 2019 Enoshima - 470 Men",
-                  "series": [
-                    {
-                      "name": "Opening Series",
-                      "fleets": [
-                        {
-                          "name": "Default",
-                          "races": [
-                            {
-                              "name": "R1",
-                              "isMedalRace": false,
-                              "isTracked": true,
-                              "regattaName": "WCS 2019 Enoshima - 470 Men",
-                              "trackedRaceName": "R1",
-                              "hasGpsData": true,
-                              "hasWindData": true
-                            }
-                          ]
-                        }
-                      ]
-                    }
-                  ]
-                }
+              "name": "TestLeaderboardGroupWithDifferentEvents",
+              "events": [
+                "782dec32-a2a0-41a3-a775-87c80a406f97"
               ]
             }
           ]

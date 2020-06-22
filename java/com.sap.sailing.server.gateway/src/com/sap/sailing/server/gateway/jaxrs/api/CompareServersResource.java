@@ -5,6 +5,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -13,17 +14,16 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.POST;
+import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 import org.json.simple.parser.JSONParser;
 
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
@@ -37,19 +37,27 @@ public class CompareServersResource extends AbstractSailingServerResource {
     private static final Logger logger = Logger.getLogger(CompareServersResource.class.getName());
 
     private static final String LEADERBOARDGROUPSPATH = "/sailingserver/api/v1/leaderboardgroups";
-    private static final String[] KEYLIST = new String[] { "id", "description", "events", "leaderboards", "displayName",
+    /**
+     * The list of keys that are compared during a compare run.
+     */
+    private static final String[] KEYLIST = new String[] {"id", "description", "events", "leaderboards", "displayName",
             "isMetaLeaderboard", "isRegattaLeaderboard", "scoringComment", "lastScoringUpdate", "scoringScheme",
             "regattaName", "series", "isMedalSeries", "fleets", "color", "ordering", "races", "isMedalRace",
-            "isTracked", "regattaName", "trackedRaceName", "hasGpsData", "hasWindData" };
+            "isTracked", "regattaName", "trackedRaceName", "hasGpsData", "hasWindData"};
+    private static final Set<String> KEYSET = new HashSet<>(Arrays.asList(KEYLIST));
+    /**
+     * The keys that are not compared.
+     */
+    private static final String[] KEYSTOIGNORE = new String[] { "timepoint", "raceViewerUrls" };
+    private static final Set<String> KEYSETTOIGNORE = new HashSet<>(Arrays.asList(KEYSTOIGNORE));
 
     public CompareServersResource() {
     }
 
-    @POST
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @GET
     @Produces("application/json;charset=UTF-8")
-    public Response compareServers(@FormParam("server1") String server1, @FormParam("server2") String server2) {
-        final Map<String, Set<JSONObject>> result = new HashMap<>();
+    public Response compareServers(@QueryParam("server1") String server1, @QueryParam("server2") String server2) {
+        final Map<String, Set<Object>> result = new HashMap<>();
         Response response = null;
         if (!Util.hasLength(server1) || !Util.hasLength(server2)) {
             response = badRequest();
@@ -70,22 +78,19 @@ public class CompareServersResource extends AbstractSailingServerResource {
                         .parse(new InputStreamReader(lgc2.getInputStream(), "UTF-8"));
                 for (Object lg1 : leaderboardgroupList1) {
                     if (!leaderboardgroupList2.contains(lg1)) {
-                        result.get(server1).add(createJSONtoAdd(lg1));
+                        result.get(server1).add(JSONValue.toJSONString(lg1));
                     } else {
                         final String lgdetailpath = checkForForwardSlashInPathAndCreatePath(lg1);
                         final URLConnection lgdetailc1 = HttpUrlConnectionHelper
                                 .redirectConnection(RemoteServerUtil.createRemoteServerUrl(base1, lgdetailpath, null));
                         final URLConnection lgdetailc2 = HttpUrlConnectionHelper
                                 .redirectConnection(RemoteServerUtil.createRemoteServerUrl(base2, lgdetailpath, null));
-                        JSONObject lgdetail1 = (JSONObject) parser
-                                .parse(new InputStreamReader(lgdetailc1.getInputStream(), "UTF-8"));
-                        JSONObject lgdetail2 = (JSONObject) parser
-                                .parse(new InputStreamReader(lgdetailc2.getInputStream(), "UTF-8"));
+                        Object lgdetail1 = JSONValue.parse(new InputStreamReader(lgdetailc1.getInputStream(), "UTF-8"));
+                        Object lgdetail2 = JSONValue.parse(new InputStreamReader(lgdetailc2.getInputStream(), "UTF-8"));
                         lgdetail1 = removeUnnecessaryFields(lgdetail1);
                         lgdetail2 = removeUnnecessaryFields(lgdetail2);
                         if (!lgdetail1.equals(lgdetail2)) {
-                            Pair<JSONObject, JSONObject> jsonPair = removeDuplicatesFromJsonAndReturn(lgdetail1,
-                                    lgdetail2);
+                            Pair<Object, Object> jsonPair = removeDuplicateEntries(lgdetail1, lgdetail2);
                             result.get(server1).add(jsonPair.getA());
                             result.get(server2).add(jsonPair.getB());
                         }
@@ -93,11 +98,11 @@ public class CompareServersResource extends AbstractSailingServerResource {
                 }
                 for (Object lg2 : leaderboardgroupList2) {
                     if (!leaderboardgroupList1.contains(lg2)) {
-                        result.get(server2).add(createJSONtoAdd(lg2));
+                        result.get(server2).add(JSONValue.toJSONString(lg2));
                     }
                 }
                 JSONObject json = new JSONObject();
-                for (Entry<String, Set<JSONObject>> entry : result.entrySet()) {
+                for (Entry<String, Set<Object>> entry : result.entrySet()) {
                     json.put(entry.getKey(), entry.getValue());
                 }
                 response = Response.ok(streamingOutput(json)).build();
@@ -116,72 +121,94 @@ public class CompareServersResource extends AbstractSailingServerResource {
         URI uri = new URI(null, null, leaderboardgroup.toString(), null, null);
         // filter for / in path
         if (uri.getRawPath().contains("/")) {
-            lgdetailpath.replace(length, lgdetailpath.length(),
-                    uri.getRawPath().replaceAll("/", "%2F"));
+            lgdetailpath.replace(length, lgdetailpath.length(), uri.getRawPath().replaceAll("/", "%2F"));
         } else {
             lgdetailpath.replace(length, lgdetailpath.length(), uri.toASCIIString());
         }
         result = lgdetailpath.toString();
         return result;
     }
-    
-    private JSONObject createJSONtoAdd(Object leaderboardgroup) {
-        final JSONObject result = new JSONObject();
-        result.put("name", leaderboardgroup.toString());
-        return result;
-    }
 
-    private JSONObject removeUnnecessaryFields(JSONObject json) {
-        JSONArray lbdetailsArray = (JSONArray) json.get("leaderboards");
-        for (Object lb : lbdetailsArray) {
-            JSONObject lbjson = (JSONObject) lb;
-            JSONArray seriesArray = (JSONArray) lbjson.get("series");
-            for (Object series : seriesArray) {
-                JSONObject seriesjson = (JSONObject) series;
-                JSONArray fleetsArray = (JSONArray) seriesjson.get("fleets");
-                for (Object fleet : fleetsArray) {
-                    JSONObject fleetjson = (JSONObject) fleet;
-                    JSONArray racesArray = (JSONArray) fleetjson.get("races");
-                    for (Object race : racesArray) {
-                        JSONObject racejson = (JSONObject) race;
-                        racejson.remove("raceViewerUrls");
-                    }
+    /**
+     * Strips a (nested) {@link org.json.simple.JSONObject} from the fields specified in
+     * {@link CompareServersResource#KEYSTOIGNORE}.
+     * 
+     * @param json
+     *            org.json.simple.JSONObject
+     * @return The modified {@link org.json.simple.JSONObject}.
+     */
+    private Object removeUnnecessaryFields(Object json) {
+        if (json instanceof JSONObject) {
+            Iterator<Object> iter = ((JSONObject) json).keySet().iterator();
+            while (iter.hasNext()) {
+                Object key = iter.next();
+                if (KEYSETTOIGNORE.contains(key)) {
+                    iter.remove();
+                } else {
+                    Object value = ((JSONObject) json).get(key);
+                    removeUnnecessaryFields(value);
                 }
             }
+        } else if (json instanceof JSONArray) {
+            for (int i = 0; i < ((JSONArray) json).size(); i++) {
+                removeUnnecessaryFields(((JSONArray) json).get(i));
+            }
+        } else if (json instanceof String || json instanceof Boolean || json instanceof Number || json == null) {
+            return json;
         }
-        json.remove("timepoint");
         return json;
     }
 
-    private Pair<JSONObject, JSONObject> removeDuplicatesFromJsonAndReturn(JSONObject jsonObject1,
-            JSONObject jsonObject2) {
-        JSONObject json1 = jsonObject1;
-        JSONObject json2 = jsonObject2;
-        for (String key : KEYLIST) {
-            if (Util.equalsWithNull(json1.get(key), json2.get(key))) {
-                json1.remove(key);
-                json2.remove(key);
-            } else if (json1.get(key) == null || json2.get(key) == null) {
-                break;
+    /**
+     * Takes two (nested) {@link org.json.simple.JSONObject}'s and compares them recursively. They will be modified in
+     * place, the keys by which they get compared are listed in {@link CompareServersResource#KEYLIST}.
+     * 
+     * @return the two (nested) {@link org.json.simple.JSONObject}'s, stripped by all fields and values that are equal
+     *         for both.
+     */
+    private Pair<Object, Object> removeDuplicateEntries(Object json1, Object json2) {
+        Pair<Object, Object> result = new Pair<Object, Object>(null, null);
+        if (Util.equalsWithNull(json1, json2)) {
+            return result;
+        } else if (json1 instanceof JSONObject && json2 instanceof JSONObject) {
+            final Iterator<Object> iter1 = ((JSONObject) json1).keySet().iterator();
+            while (iter1.hasNext()) {
+                Object key = iter1.next();
+                if (((JSONObject) json2).containsKey(key)) {
+                    Object value1 = ((JSONObject) json1).get(key);
+                    Object value2 = ((JSONObject) json2).get(key);
+                    if (key.equals("name") && !Util.equalsWithNull(value1, value2)) {
+                        break;
+                    } else if (Util.equalsWithNull(value1, value2) && KEYSET.contains(key)) {
+                        iter1.remove();
+                        ((JSONObject) json2).remove(key);
+                    } else {
+                        removeDuplicateEntries(value1, value2);
+                    }
+                }
+            }
+        } else if (json1 instanceof JSONArray && json2 instanceof JSONArray) {
+            if (json1.equals(json2)) {
+                ((JSONArray) json1).clear();
+                ((JSONArray) json2).clear();
             } else {
-                JSONArray keyArray1 = (JSONArray) json1.get(key);
-                JSONArray keyArray2 = (JSONArray) json2.get(key);
-                Iterator<Object> iter1 = keyArray1.iterator();
+                final Iterator<Object> iter1 = ((JSONArray) json1).iterator();
                 while (iter1.hasNext()) {
-                    JSONObject key1json = (JSONObject) iter1.next();
-                    if (keyArray2.contains(key1json)) {
-                        keyArray2.remove(key1json);
+                    Object item = iter1.next();
+                    if (((JSONArray) json2).contains(item)) {
+                        ((JSONArray) json2).remove(item);
                         iter1.remove();
                     } else {
-                        for (Object key2 : keyArray2) {
-                            JSONObject key2json = (JSONObject) key2;
-                            removeDuplicatesFromJsonAndReturn(key1json, key2json);
+                        final Iterator<Object> iter2 = ((JSONArray) json2).iterator();
+                        while (iter2.hasNext()) {
+                            removeDuplicateEntries(item, iter2.next());
                         }
                     }
                 }
             }
         }
-        return new Pair<JSONObject, JSONObject>(json1, json2);
+        result = new Pair<Object, Object>(json1, json2);
+        return result;
     }
 
     private Response returnInternalServerError(Throwable e) {
