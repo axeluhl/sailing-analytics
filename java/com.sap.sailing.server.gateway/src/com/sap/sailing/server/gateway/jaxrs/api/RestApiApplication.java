@@ -33,7 +33,6 @@ public class RestApiApplication extends Application {
         classes.add(MarkResource.class);
         classes.add(PreferencesResource.class);
         classes.add(TagsResource.class);
-        classes.add(UserGroupsResource.class);
         classes.add(StatusResource.class);
         classes.add(TrackedEventsResource.class);
         classes.add(TrackingDevicesResource.class);
