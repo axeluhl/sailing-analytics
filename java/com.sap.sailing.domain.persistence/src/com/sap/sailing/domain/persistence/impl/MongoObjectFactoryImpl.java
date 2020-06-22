@@ -1619,7 +1619,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     
     private Document createBasicRegattaLogEventDBObject(RegattaLogEvent event) {
         Document result = new Document();
-        storeTimed(event, result);
+        storeTimePoint(event.getLogicalTimePoint(), result, FieldNames.TIME_AS_MILLIS);
         storeTimePoint(event.getCreatedAt(), result, FieldNames.REGATTA_LOG_EVENT_CREATED_AT);
         result.put(FieldNames.REGATTA_LOG_EVENT_ID.name(), event.getId());
         result.put(FieldNames.REGATTA_LOG_EVENT_AUTHOR_NAME.name(), event.getAuthor().getName());
