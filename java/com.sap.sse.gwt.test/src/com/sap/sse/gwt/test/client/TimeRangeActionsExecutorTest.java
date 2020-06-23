@@ -17,7 +17,6 @@ import org.junit.Test;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.gwt.client.async.AsyncAction;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
@@ -30,21 +29,6 @@ public class TimeRangeActionsExecutorTest {
         @Override
         public <T> void execute(AsyncAction<T> action, String category, AsyncCallback<T> callback) {
             action.execute(callback);
-        }
-    }
-
-    private class MilliTimeRange extends TimeRangeImpl {
-        public MilliTimeRange(long from, long to) {
-            super(new MillisecondsTimePoint(from), new MillisecondsTimePoint(to));
-        }
-
-        public MilliTimeRange(TimeRange timeRange) {
-            super(timeRange.from(), timeRange.to());
-        }
-
-        @Override
-        public String toString() {
-            return from().asMillis() + " - " + to().asMillis();
         }
     }
 

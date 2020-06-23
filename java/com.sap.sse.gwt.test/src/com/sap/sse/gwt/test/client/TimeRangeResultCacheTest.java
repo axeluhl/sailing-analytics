@@ -10,26 +10,9 @@ import org.junit.Test;
 
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.gwt.client.async.TimeRangeResultCache;
 
 public class TimeRangeResultCacheTest {
-    private class MilliTimeRange extends TimeRangeImpl {
-        public MilliTimeRange(long from, long to) {
-            super(new MillisecondsTimePoint(from), new MillisecondsTimePoint(to));
-        }
-
-        public MilliTimeRange(TimeRange timeRange) {
-            super(timeRange.from(), timeRange.to());
-        }
-
-        @Override
-        public String toString() {
-            return from().asMillis() + " - " + to().asMillis();
-        }
-    }
-
     @Test
     public void testSimpleRequest() {
         TimeRangeResultCache<Void> trimmer = new TimeRangeResultCache<>();
