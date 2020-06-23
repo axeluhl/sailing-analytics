@@ -123,7 +123,7 @@ public class StoreAndLoadRegattaLogEventsTest extends AbstractMongoDBTest {
     }
 
     @Test
-    public void testStoreAndLoadPassChangeEvent() {
+    public void testStoreAndLoadSetCompetitorTimeOnDistanceAllowancePerNauticalMileEvent() {
         final Duration duration = new MillisecondsDurationImpl(10);
         RegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEvent expectedEvent = new RegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEventImpl(
                 MillisecondsTimePoint.now(), expectedEventTime, author, expectedId, createCompetitor(), duration);
