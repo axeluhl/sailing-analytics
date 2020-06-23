@@ -74,7 +74,7 @@ public class EventSeriesAnalyticsDataManager {
             SailingServiceAsync sailingService = sailingCF.getSailingService(()-> leaderboardName);
             overallLeaderboardPanel = new MultiRaceLeaderboardPanel(parent, context, sailingService, asyncActionsExecutor,
                     leaderboardSettings, true, 
-                    competitorSelectionProvider, timer, leaderboardGroupName, leaderboardName, errorReporter,
+                    competitorSelectionProvider, timer, leaderboardName, errorReporter,
                     StringMessages.INSTANCE, showRaceDetails, /* competitorSearchTextBox */ null,
                     /* showSelectionCheckbox */ true,
                     /* raceTimesInfoProvider */null, autoExpandLastRaceColumn, /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false,

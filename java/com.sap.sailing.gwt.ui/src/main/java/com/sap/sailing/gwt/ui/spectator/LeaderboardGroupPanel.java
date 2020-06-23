@@ -218,7 +218,7 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
             final String link = EntryPointWithSettingsLinkFactory.createLeaderboardLink(
                     new LeaderboardContextDefinition(
                             leaderboardGroup.getName() + " " + LeaderboardNameConstants.OVERALL,
-                            stringMessages.overallStandings(), leaderboardGroup.getName()),
+                            stringMessages.overallStandings()),
                     new LeaderboardPerspectiveOwnSettings(showRaceDetails, isEmbedded));
             Anchor overallStandingsLink = new Anchor(stringMessages.overallStandings(), true, link);
             overallStandingsLink.setStyleName(STYLE_ACTIVE_LEADERBOARD);
@@ -244,8 +244,7 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
             @Override
             public SafeHtml getValue(StrippedLeaderboardDTO leaderboard) {
                 final String link = EntryPointWithSettingsLinkFactory.createLeaderboardLink(
-                        new LeaderboardContextDefinition(leaderboard.getName(), leaderboard.displayName,
-                                leaderboardGroup.getName()),
+                        new LeaderboardContextDefinition(leaderboard.getName(), leaderboard.displayName),
                         new LeaderboardPerspectiveOwnSettings(showRaceDetails, isEmbedded));
                 return getAnchor(link, stringMessages.leaderboard(),
                         STYLE_ACTIVE_LEADERBOARD);
