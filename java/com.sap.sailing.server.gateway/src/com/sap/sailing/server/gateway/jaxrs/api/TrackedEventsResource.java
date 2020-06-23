@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -40,6 +41,8 @@ import com.sap.sse.security.shared.impl.User;
 @Path("/v1/trackedevents/")
 public class TrackedEventsResource extends AbstractSailingServerResource {
 
+    protected static final Logger logger = Logger.getLogger(TrackedEventsResource.class.getName());
+    
     private static final String KEY_QUERY_INCLUDE_ARCHIVED = "includeArchived";
 
     private static final String KEY_LEADERBOARD_NAME = "leaderboardName";
@@ -69,6 +72,12 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
             if (prefs != null) {
                 // iterate all stored tracked events
                 for (final TrackedEventPreference pref : prefs.getTrackedEvents()) {
+                    // TODO: Temporary precaution for unexpected null values. 
+                    // Note: There should not be any null values in the Collection in the first place.
+                    if (pref == null) {
+                        logger.warning("null entry in TrackedEventPreferences list: " + prefs.toString());
+                        continue;
+                    }
                     if (!includeArchived && pref.getIsArchived()) {
                         // skip, if event is archived and should be filtered out
                         continue;

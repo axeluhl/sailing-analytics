@@ -96,6 +96,7 @@ import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
+import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.racelogtracking.DeviceMappingWithRegattaLogEvent;
 import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
@@ -109,6 +110,7 @@ import com.sap.sailing.domain.tracking.RaceWindCalculator;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.WindSummary;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
@@ -2015,7 +2017,8 @@ public class RegattasResource extends AbstractSailingServerResource {
                 TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
                 TimePoint timePoint = trackedRace.getTimePointOfNewestEvent() == null ? MillisecondsTimePoint.now()
                         : trackedRace.getTimePointOfNewestEvent();
-                final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(timePoint);
+                final WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache = new LeaderboardDTOCalculationReuseCache(timePoint);
+                final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(timePoint, cache);
                 JSONObject jsonRaceResults = new JSONObject();
                 jsonRaceResults.put("name", trackedRace.getRace().getName());
                 jsonRaceResults.put("regatta", regatta.getName());
@@ -2125,12 +2128,12 @@ public class RegattasResource extends AbstractSailingServerResource {
                                         }
                                     }
                                     Duration gapToLeaderDuration = trackedLegOfCompetitor.getGapToLeader(timePoint,
-                                            rankingInfo, WindPositionMode.LEG_MIDDLE);
+                                            WindPositionMode.LEG_MIDDLE, rankingInfo, cache);
                                     jsonCompetitorInLeg.put("gapToLeader-s",
                                             gapToLeaderDuration != null ? gapToLeaderDuration.asSeconds() : 0.0);
                                     Distance gapToLeaderDistance = trackedLegOfCompetitor
                                             .getWindwardDistanceToCompetitorFarthestAhead(timePoint,
-                                                    WindPositionMode.LEG_MIDDLE, rankingInfo);
+                                                    WindPositionMode.LEG_MIDDLE, rankingInfo, cache);
                                     jsonCompetitorInLeg.put("gapToLeader-m",
                                             gapToLeaderDistance != null ? gapToLeaderDistance.getMeters() : 0.0);
                                     jsonCompetitorInLeg.put("started", trackedLegOfCompetitor.hasStartedLeg(timePoint));
@@ -2178,7 +2181,8 @@ public class RegattasResource extends AbstractSailingServerResource {
                 Waypoint lastWaypoint = course.getLastWaypoint();
 
                 TimePoint timePoint = MillisecondsTimePoint.now().minus(trackedRace.getDelayToLiveInMillis());
-                final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(timePoint);
+                final WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache = new LeaderboardDTOCalculationReuseCache(timePoint);
+                final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(timePoint, cache);
                 JSONObject jsonLiveData = new JSONObject();
                 jsonLiveData.put("name", trackedRace.getRace().getName());
                 jsonLiveData.put("regatta", regatta.getName());
@@ -2195,10 +2199,10 @@ public class RegattasResource extends AbstractSailingServerResource {
                     }
                 }
                 JSONArray jsonCompetitors = new JSONArray();
-                List<Competitor> competitorsFromBestToWorst = trackedRace.getCompetitorsFromBestToWorst(timePoint);
+                List<Competitor> competitorsFromBestToWorst = trackedRace.getCompetitorsFromBestToWorst(timePoint, cache);
                 Map<Competitor, Integer> overallRankPerCompetitor = new HashMap<>();
                 if (leaderboard != null) {
-                    List<Competitor> overallRanking = leaderboard.getCompetitorsFromBestToWorst(timePoint);
+                    List<Competitor> overallRanking = leaderboard.getCompetitorsFromBestToWorst(timePoint, cache);
                     Integer overallRank = 1;
                     for (Competitor competitor : overallRanking) {
                         if (getSecurityService().hasCurrentUserOneOfExplicitPermissions(competitor,
@@ -2244,8 +2248,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                             jsonCompetitorInLeg.put("leg", indexOfWaypoint + 1);
                             Distance distanceTraveled = currentLegOfCompetitor.getDistanceTraveled(timePoint);
                             if (distanceTraveled != null) {
-                                jsonCompetitorInLeg.put("distanceTraveled-m",
-                                        roundDouble(distanceTraveled.getMeters(), 2));
+                                jsonCompetitorInLeg.put("distanceTraveled-m", roundDouble(distanceTraveled.getMeters(), 2));
                             }
                             Distance distanceTraveledConsideringGateStart = currentLegOfCompetitor
                                     .getDistanceTraveledConsideringGateStart(timePoint);
@@ -2253,16 +2256,15 @@ public class RegattasResource extends AbstractSailingServerResource {
                                 jsonCompetitorInLeg.put("distanceTraveledConsideringGateStart-m",
                                         roundDouble(distanceTraveledConsideringGateStart.getMeters(), 2));
                             }
-
-                            Duration gapToLeader = currentLegOfCompetitor.getGapToLeader(timePoint, rankingInfo,
-                                    WindPositionMode.LEG_MIDDLE);
+                            Duration gapToLeader = currentLegOfCompetitor.getGapToLeader(timePoint,
+                                    WindPositionMode.LEG_MIDDLE, rankingInfo, cache);
                             if (gapToLeader != null) {
                                 jsonCompetitorInLeg.put("gapToLeader-s", roundDouble(gapToLeader.asSeconds(), 2));
                             }
 
                             Distance windwardDistanceToCompetitorFarthestAhead = currentLegOfCompetitor
                                     .getWindwardDistanceToCompetitorFarthestAhead(timePoint,
-                                            WindPositionMode.LEG_MIDDLE, rankingInfo);
+                                            WindPositionMode.LEG_MIDDLE, rankingInfo, cache);
                             if (windwardDistanceToCompetitorFarthestAhead != null) {
                                 jsonCompetitorInLeg.put("gapToLeader-m",
                                         roundDouble(windwardDistanceToCompetitorFarthestAhead.getMeters(), 2));
