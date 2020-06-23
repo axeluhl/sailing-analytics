@@ -210,7 +210,7 @@ REPLICATE_MASTER_EXCHANGE_NAME=security_service
 REPLICATE_MASTER_BEARER_TOKEN="Gecx+W/dwFKRAxFbIvC/IMafEnJ8kTQF+MlYNVhEwD4="
 
 DEPLOY_TO=seascape
-SERVER_NAME=seascape
+SERVER_NAME=SEASCAPE
 MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/seascape?replicaSet=live&retryWrites=true"
 EXPEDITION_PORT=2057
 SERVER_PORT=8935

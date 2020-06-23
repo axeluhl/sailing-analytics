@@ -210,7 +210,7 @@ REPLICATE_MASTER_EXCHANGE_NAME=security_service
 REPLICATE_MASTER_BEARER_TOKEN="Gecx+W/dwFKRAxFbIvC/IMafEnJ8kTQF+MlYNVhEwD4="
 
 DEPLOY_TO=janek-training
-SERVER_NAME=janek-training
+SERVER_NAME=janekbalster
 SERVER_PORT=8944
 MONGODB_URI="mongodb://dbserver.internal.sapsailing.com:10202/janekbalster"
 EXPEDITION_PORT=2066

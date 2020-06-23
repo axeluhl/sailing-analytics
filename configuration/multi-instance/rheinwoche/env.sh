@@ -210,7 +210,7 @@ REPLICATE_MASTER_EXCHANGE_NAME=security_service
 REPLICATE_MASTER_BEARER_TOKEN="Gecx+W/dwFKRAxFbIvC/IMafEnJ8kTQF+MlYNVhEwD4="
 
 DEPLOY_TO=rheinwoche
-SERVER_NAME=rheinwoche
+SERVER_NAME=rheinwoche2019
 SERVER_PORT=8938
 MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/rheinwoche2019?replicaSet=live&retryWrites=true"
 EXPEDITION_PORT=2060

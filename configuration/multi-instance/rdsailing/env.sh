@@ -210,7 +210,7 @@ REPLICATE_MASTER_EXCHANGE_NAME=security_service
 REPLICATE_MASTER_BEARER_TOKEN="Gecx+W/dwFKRAxFbIvC/IMafEnJ8kTQF+MlYNVhEwD4="
 
 DEPLOY_TO=rdsailing
-SERVER_NAME=rdsailing
+SERVER_NAME=RDSAILING
 SERVER_PORT=8909
 MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/RDSAILING?replicaSet=live&retryWrites=true"
 EXPEDITION_PORT=2031
