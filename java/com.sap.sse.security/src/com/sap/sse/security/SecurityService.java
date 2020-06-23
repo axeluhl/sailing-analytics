@@ -33,7 +33,6 @@ import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RolePrototype;
-import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
@@ -73,24 +72,9 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      */
     OwnershipAnnotation getOwnership(QualifiedObjectIdentifier idOfOwnedObject);
     
-    OwnershipAnnotation createDefaultOwnershipForNewObject(QualifiedObjectIdentifier idOfNewObject);
-
     Iterable<AccessControlListAnnotation> getAccessControlLists();
 
     AccessControlListAnnotation getAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject);
-
-    /**
-     * @param idOfAccessControlledObject Has to be globally unique
-     */
-    SecurityService setEmptyAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject);
-
-    /**
-     * @param id Has to be globally unique
-     */
-    SecurityService setEmptyAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, String displayNameOfAccessControlledObject);
-
-    AccessControlList updateAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
-            Map<UserGroup, Set<String>> permissionMap);
 
     AccessControlList overrideAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
             Map<UserGroup, Set<String>> permissionMap);
@@ -192,9 +176,6 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     
     void updateUserProperties(String username, String fullName, String company, Locale locale) throws UserManagementException;
 
-    User createSocialUser(String username, SocialUserAccount socialUserAccount)
-            throws UserManagementException, UserGroupManagementException;
-
     void deleteUser(String username) throws UserManagementException;
 
     /**
@@ -228,8 +209,6 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     
     void removeRoleFromUser(String username, Role role);
 
-    Iterable<WildcardPermission> getPermissionsFromUser(String username) throws UserManagementException;
-    
     void removePermissionFromUser(String username, WildcardPermission permissionToRemove);
 
     void addPermissionForUser(String username, WildcardPermission permissionToAdd);
@@ -258,8 +237,6 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * <code>setting</code> object does not conform to the type used in {@link #addSetting(String, Class)}
      */
     boolean setSetting(String key, Object setting);
-
-    <T> T getSetting(String key, Class<T> clazz);
 
     Map<String, Object> getAllSettings();
 
@@ -353,8 +330,6 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     void removeAccessToken(String username);
 
-    User loginByAccessToken(String accessToken);
-
     /**
      * Returns the group owning this server/replicaset {@link UserStore#getServerGroup()}. This group is used as default
      * owner if default objects such as role definitions or the admin user have to be created outside of any user
@@ -412,10 +387,6 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
             com.sap.sse.security.shared.HasPermissions.Action action, Iterable<T> objectsToFilter,
             Consumer<T> filteredObjectsConsumer);
 
-    <T extends WithQualifiedObjectIdentifier> void filterObjectsWithPermissionForCurrentUser(
-            com.sap.sse.security.shared.HasPermissions.Action[] actions, Iterable<T> objectsToFilter,
-            Consumer<T> filteredObjectsConsumer);
-
     /**
      * Filters objects with any of the given permissions for the current user.
      */
@@ -425,10 +396,6 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     <T extends WithQualifiedObjectIdentifier, R> List<R> mapAndFilterByReadPermissionForCurrentUser(
             Iterable<T> objectsToFilter, Function<T, R> filteredObjectsMapper);
-
-    <T extends WithQualifiedObjectIdentifier, R> List<R> mapAndFilterByExplicitPermissionForCurrentUser(
-            HasPermissions.Action[] actions, Iterable<T> objectsToFilter,
-            Function<T, R> filteredObjectsMapper);
 
     /**
      * Maps and filters by any of the given permissions for the current user.
@@ -526,9 +493,20 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      */
     void assumeOwnershipMigrated(String typeName);
 
-    void migrateOwnership(WithQualifiedObjectIdentifier object);
+    /**
+     * 
+     * @param object
+     * @return {@code true} if the object required ownership migration
+     */
+    boolean migrateOwnership(WithQualifiedObjectIdentifier object);
 
-    void migrateOwnership(QualifiedObjectIdentifier object, String displayName);
+    /**
+     * 
+     * @param object
+     * @param displayName
+     * @return {@code true} if the object required ownership migration
+     */
+    boolean migrateOwnership(QualifiedObjectIdentifier object, String displayName);
 
     void migrateUser(User user);
 
@@ -543,9 +521,6 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     void migrateServerObject();
     
     void checkMigration(Iterable<HasPermissions> allInstances);
-
-    <T extends WithQualifiedObjectIdentifier> boolean hasCurrentUserRoleForOwnedObject(HasPermissions type, T object,
-            RoleDefinition roleToCheck);
 
     boolean hasCurrentUserMetaPermission(WildcardPermission permissionToCheck, Ownership ownership);
     

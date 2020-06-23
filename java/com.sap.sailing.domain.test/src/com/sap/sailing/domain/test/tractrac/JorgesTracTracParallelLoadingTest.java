@@ -111,11 +111,11 @@ public class JorgesTracTracParallelLoadingTest {
         InputStream is = eventURI.toURL().openStream();
         StringBuffer jsonContent = new StringBuffer();
         String line = null;
-        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-        while ((line = reader.readLine()) != null) {
-            jsonContent.append(line);
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(is));) {
+            while ((line = reader.readLine()) != null) {
+                jsonContent.append(line);
+            }
         }
-        reader.close();
         StringTokenizer it = new StringTokenizer(jsonContent.toString(), ",");
         while (it.hasMoreElements()) {
             String item = it.nextElement().toString();

@@ -25,9 +25,9 @@ import com.tractrac.model.lib.api.ModelLocator;
 import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.model.lib.api.event.IRace;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;
+import com.tractrac.util.lib.api.exceptions.TimeOutException;
 
 public class RaceTrackingConnectivityParametersImpl extends AbstractRaceTrackingConnectivityParameters {
-
     private static final long serialVersionUID = 5088282956033068149L;
     private static final Logger logger = Logger.getLogger(RaceTrackingConnectivityParametersImpl.class.getName());
     public static final String TYPE = "TRAC_TRAC";
@@ -49,8 +49,8 @@ public class RaceTrackingConnectivityParametersImpl extends AbstractRaceTracking
     private final String raceVisibility;
     private final boolean useInternalMarkPassingAlgorithm;
     private final boolean preferReplayIfAvailable;
-    private final transient IRace tractracRace;
     private final int timeoutInMillis;
+    private final boolean useOfficialEventsToUpdateRaceLog;
 
     /**
      * @param preferReplayIfAvailable
@@ -62,29 +62,29 @@ public class RaceTrackingConnectivityParametersImpl extends AbstractRaceTracking
      * @param timeoutInMillis
      *            -1 means no timeout; otherwise, this is the timeout for waiting for the {@link IRace} to be obtained
      *            from the {@code paramURL} document. A {@link TimeoutException} will result if the timeout applied.
+     * @param useOfficialEventsToUpdateRaceLog
+     *            whether to use race and competitor status to create according race log entries that for official
+     *            competitor results can then also lead to leaderboard updates
      */
     public RaceTrackingConnectivityParametersImpl(URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI,
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
             Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm,
             RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, DomainFactory domainFactory,
             String tracTracUsername, String tracTracPassword, String raceStatus, String raceVisibility,
-            boolean trackWind, boolean correctWindDirectionByMagneticDeclination, boolean preferReplayIfAvailable, int timeoutInMillis)
-            throws Exception {
+            boolean trackWind, boolean correctWindDirectionByMagneticDeclination, boolean preferReplayIfAvailable,
+            int timeoutInMillis, boolean useOfficialEventsToUpdateRaceLog) throws Exception {
         super(trackWind, correctWindDirectionByMagneticDeclination);
+        this.useOfficialEventsToUpdateRaceLog = useOfficialEventsToUpdateRaceLog;
         this.paramURL = paramURL;
         this.timeoutInMillis = timeoutInMillis;
-        if (timeoutInMillis == -1) {
-            this.tractracRace = ModelLocator.getEventFactory().createRace(new URI(paramURL.toString()));
-        } else {
-            this.tractracRace = ModelLocator.getEventFactory().createRace(new URI(paramURL.toString()), timeoutInMillis);
-        }
+        final IRace tractracRace = getTractracRace();
         if (preferReplayIfAvailable && isReplayRace(tractracRace) &&
                 (!Util.equalsWithNull(liveURI, tractracRace.getLiveURI()) || !Util.equalsWithNull(storedURI, tractracRace.getStoredURI()))) {
-                logger.info("Replay format available and preferred for race " + tractracRace.getName()
-                        + "; using storedURI " + tractracRace.getStoredURI() + " instead of " + storedURI
-                        + " and liveURI " + tractracRace.getLiveURI() + " instead of " + liveURI);
-                this.liveURI = tractracRace.getLiveURI();
-                this.storedURI = tractracRace.getStoredURI();
+            logger.info("Replay format available and preferred for race " + tractracRace.getName()
+                    + "; using storedURI " + tractracRace.getStoredURI() + " instead of " + storedURI
+                    + " and liveURI " + tractracRace.getLiveURI() + " instead of " + liveURI);
+            this.liveURI = tractracRace.getLiveURI();
+            this.storedURI = tractracRace.getStoredURI();
         } else {
             this.liveURI = liveURI;
             this.storedURI = storedURI;
@@ -109,8 +109,14 @@ public class RaceTrackingConnectivityParametersImpl extends AbstractRaceTracking
         return tractracRace.getStoredURI() != null && tractracRace.getStoredURI().toString().toLowerCase().endsWith(".mtb");
     }
     
-    public IRace getTractracRace() {
-        return tractracRace;
+    public IRace getTractracRace() throws CreateModelException, URISyntaxException, TimeOutException {
+        final IRace result;
+        if (getTimeoutInMillis() == -1) {
+            result = ModelLocator.getEventFactory().createRace(new URI(paramURL.toString()));
+        } else {
+            result = ModelLocator.getEventFactory().createRace(new URI(paramURL.toString()), getTimeoutInMillis());
+        }
+        return result;
     }
 
     @Override
@@ -122,7 +128,7 @@ public class RaceTrackingConnectivityParametersImpl extends AbstractRaceTracking
     public RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore,
             RaceLogAndTrackedRaceResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver,
             long timeoutInMilliseconds, RaceTrackingHandler raceTrackingHandler) throws URISyntaxException,
-            CreateModelException, SubscriberInitializationException, IOException, InterruptedException {
+            CreateModelException, SubscriberInitializationException, IOException, InterruptedException, TimeOutException {
         RaceTracker tracker = domainFactory.createRaceTracker(raceLogStore, regattaLogStore, windStore,
                 trackedRegattaRegistry, raceLogResolver, leaderboardGroupResolver, this, timeoutInMilliseconds,
                 raceTrackingHandler);
@@ -204,9 +210,14 @@ public class RaceTrackingConnectivityParametersImpl extends AbstractRaceTracking
     public int getTimeoutInMillis() {
         return timeoutInMillis;
     }
+
+    public boolean isUseOfficialEventsToUpdateRaceLog() {
+        return useOfficialEventsToUpdateRaceLog;
+    }
     
     @Override
     public String toString() {
-        return getClass().getSimpleName()+" for "+paramURL+", liveURI: "+liveURI+", storedURI: "+storedURI;
+        return getClass().getSimpleName() + " for " + paramURL + ", liveURI: " + liveURI + ", storedURI: " + storedURI
+                + ", useOfficialEventsToUpdateRaceLog: " + useOfficialEventsToUpdateRaceLog;
     }
 }

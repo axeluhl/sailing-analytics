@@ -17,7 +17,7 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
@@ -29,7 +29,7 @@ public abstract class RegattaLeaderboardWithEliminationsDialog extends AbstractL
     protected final ListBox regattaLeaderboardsListBox;
     protected final Collection<RegattaDTO> existingRegattas;
     protected final FlowPanel competitorEliminationPanelHolder;
-    protected final SailingServiceAsync sailingService;
+    protected final SailingServiceWriteAsync sailingServiceWrite;
     protected final UserService userService;
     private final Collection<StrippedLeaderboardDTO> existingLeaderboards;
     protected final ErrorReporter errorReporter;
@@ -80,21 +80,18 @@ public abstract class RegattaLeaderboardWithEliminationsDialog extends AbstractL
         }
     }
 
-    public RegattaLeaderboardWithEliminationsDialog(SailingServiceAsync sailingService, UserService userService, String title,
+    public RegattaLeaderboardWithEliminationsDialog(SailingServiceWriteAsync sailingServiceWrite, UserService userService, String title,
             LeaderboardDescriptorWithEliminations leaderboardDTO, Collection<RegattaDTO> existingRegattas,
             final Collection<StrippedLeaderboardDTO> existingLeaderboards, final StringMessages stringMessages,
             final ErrorReporter errorReporter, LeaderboardParameterValidator validator,
             DialogCallback<LeaderboardDescriptorWithEliminations> callback) {
         super(title, leaderboardDTO, stringMessages, validator, callback);
-        this.sailingService = sailingService;
+        this.sailingServiceWrite = sailingServiceWrite;
         this.userService = userService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
         this.existingRegattas = existingRegattas;
         this.existingLeaderboards = existingLeaderboards;
-        nameTextBox = createTextBox(null);
-        nameTextBox.ensureDebugId("NameTextBox");
-        nameTextBox.setVisibleLength(50);
         displayNameTextBox = createTextBox(null);
         displayNameTextBox.ensureDebugId("DisplayNameTextBox");
         displayNameTextBox.setVisibleLength(50);
@@ -125,7 +122,7 @@ public abstract class RegattaLeaderboardWithEliminationsDialog extends AbstractL
         competitorEliminationPanelHolder.clear();
         StrippedLeaderboardDTO selectedRegattaLeaderboard = getSelectedLeaderboard();
         final CompetitorRegistrationsPanel[] competitorEliminationPanel = new CompetitorRegistrationsPanel[1];
-        competitorEliminationPanel[0] = new CompetitorRegistrationsPanel(sailingService, userService, stringMessages,
+        competitorEliminationPanel[0] = new CompetitorRegistrationsPanel(sailingServiceWrite, userService, stringMessages,
                 errorReporter, /* editable */ true, regattaLeaderboardsListBox.getValue(regattaLeaderboardsListBox.getSelectedIndex()),
                 selectedRegattaLeaderboard.canBoatsOfCompetitorsChangePerRace, selectedRegattaLeaderboard.boatClassName,
                 /* "validator" updates eliminatedCompetitors */ ()->eliminatedCompetitors = competitorEliminationPanel[0].getResult(),

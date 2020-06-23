@@ -1,32 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
-	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
-	version="2.5">
+    xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+    version="2.5">
 
-	<servlet>
-		<servlet-name>default</servlet-name>
-		<servlet-class>org.eclipse.jetty.servlet.DefaultServlet
-		</servlet-class>
-		<init-param>
-			<param-name>dirAllowed</param-name>
-			<param-value>false</param-value>
-		</init-param>
-		<init-param>
-	   		<param-name>useFileMappedBuffer</param-name>
-	   		<param-value>false</param-value>
-	 	</init-param>
-	</servlet>
+    <servlet>
+        <servlet-name>default</servlet-name>
+        <servlet-class>org.eclipse.jetty.servlet.DefaultServlet
+        </servlet-class>
+        <init-param>
+            <param-name>dirAllowed</param-name>
+            <param-value>false</param-value>
+        </init-param>
+        <init-param>
+               <param-name>useFileMappedBuffer</param-name>
+               <param-value>false</param-value>
+         </init-param>
+    </servlet>
 
-	<servlet>
-		<display-name>Sailing Service</display-name>
-		<servlet-name>SailingService</servlet-name>
-		<servlet-class>com.sap.sailing.gwt.ui.server.SailingServiceImpl</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>SailingService</servlet-name>
-		<url-pattern>/service/sailing</url-pattern>
-	</servlet-mapping>
+    <servlet>
+        <display-name>Sailing Service</display-name>
+        <servlet-name>SailingService</servlet-name>
+        <servlet-class>com.sap.sailing.gwt.ui.server.SailingServiceImpl</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>SailingService</servlet-name>
+        <url-pattern>/service/sailing</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <display-name>ClientConfigurationServlet</display-name>
+        <servlet-name>ClientConfigurationServlet</servlet-name>
+        <servlet-class>com.sap.sse.debranding.ClientConfigurationServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ClientConfigurationServlet</servlet-name>
+        <url-pattern>*.html</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <display-name>Sailing ServiceWrite</display-name>
+        <servlet-name>SailingServiceWrite</servlet-name>
+        <servlet-class>com.sap.sailing.gwt.ui.server.SailingServiceWriteImpl</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>SailingServiceWrite</servlet-name>
+        <url-pattern>/service/sailingmaster</url-pattern>
+        <url-pattern>/service/sailingmaster/*</url-pattern>
+    </servlet-mapping>
 
 	<filter>
 		<filter-name>LocaleInjectionFilter</filter-name>
@@ -37,38 +57,46 @@
 		<url-pattern>*.html</url-pattern>
 	</filter-mapping>
 
-        <filter>
-                <filter-name>GWTCacheControlServletFilter</filter-name>
-                <filter-class>com.sap.sse.gwt.server.GWTCacheControlServletFilter</filter-class>
-        </filter>
-        <filter-mapping>
-                <filter-name>GWTCacheControlServletFilter</filter-name>
-                <url-pattern>/*</url-pattern>
-        </filter-mapping>
-        
-  	<servlet>
-		<display-name>Dashboard Dispatch Service</display-name>
-		<servlet-name>dashboardDispatch</servlet-name>
-		<servlet-class>com.sap.sailing.dashboards.gwt.server.DashboardDispatchServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>dashboardDispatch</servlet-name>
-		<url-pattern>/service/dispatch</url-pattern>
-	</servlet-mapping>
-	
-		<!-- enabling remote logging -->
-	<servlet>
-		<servlet-name>remoteLoggingServlet</servlet-name>
-		<servlet-class>com.google.gwt.logging.server.RemoteLoggingServiceImpl</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>remoteLoggingServlet</servlet-name>
-		<url-pattern>/com.sap.sailing.dashboards.gwt.RibDashboard/remote_logging</url-pattern>
-	</servlet-mapping>
+    <filter>
+        <filter-name>LocaleInjectionFilter</filter-name>
+        <filter-class>com.sap.sse.security.ui.server.LocaleInjectionFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>LocaleInjectionFilter</filter-name>
+        <url-pattern>*.html</url-pattern>
+    </filter-mapping>
 
-	<mime-mapping>
-		<extension>manifest</extension>
-		<mime-type>text/cache-manifest</mime-type>
-	</mime-mapping>
+    <filter>
+            <filter-name>GWTCacheControlServletFilter</filter-name>
+            <filter-class>com.sap.sse.gwt.server.GWTCacheControlServletFilter</filter-class>
+    </filter>
+    <filter-mapping>
+            <filter-name>GWTCacheControlServletFilter</filter-name>
+            <url-pattern>/*</url-pattern>
+    </filter-mapping>
 
+    <servlet>
+        <display-name>Dashboard Dispatch Service</display-name>
+        <servlet-name>dashboardDispatch</servlet-name>
+        <servlet-class>com.sap.sailing.dashboards.gwt.server.DashboardDispatchServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>dashboardDispatch</servlet-name>
+        <url-pattern>/service/dispatch</url-pattern>
+    </servlet-mapping>
+
+    <!-- enabling remote logging -->
+    <servlet>
+        <servlet-name>remoteLoggingServlet</servlet-name>
+        <servlet-class>com.google.gwt.logging.server.RemoteLoggingServiceImpl</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>remoteLoggingServlet</servlet-name>
+        <url-pattern>/com.sap.sailing.dashboards.gwt.RibDashboard/remote_logging</url-pattern>
+    </servlet-mapping>
+
+    <mime-mapping>
+        <extension>manifest</extension>
+        <mime-type>text/cache-manifest</mime-type>
+    </mime-mapping>
 </web-app>

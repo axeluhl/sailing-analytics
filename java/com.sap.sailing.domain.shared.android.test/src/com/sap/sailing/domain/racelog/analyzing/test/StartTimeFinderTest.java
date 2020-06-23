@@ -29,7 +29,8 @@ public class StartTimeFinderTest extends PassAwareRaceLogAnalyzerTest<StartTimeF
     protected TargetPair getTargetEventsAndResultForPassAwareTests(int passId, AbstractLogEventAuthor author) {
         RaceLogStartTimeEvent event = createEvent(RaceLogStartTimeEvent.class, 1, passId, author);
         when(event.getStartTime()).thenReturn(mock(TimePoint.class));
-        return new TargetPair(Arrays.asList(event), new StartTimeFinderResult(event.getStartTime(), null));
+        return new TargetPair(Arrays.asList(event), new StartTimeFinderResult(event.getStartTime(),
+                /* startTimeDiff */ null, /* courseAreaId */ null));
     }
 
     @Test

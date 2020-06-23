@@ -137,7 +137,7 @@ public class RaceLogEventSerializerTest {
     @Test
     public void testChoosesStartTimeSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = new RaceLogStartTimeEventImpl(null, author, 0, null);
+        RaceLogEvent event = new RaceLogStartTimeEventImpl(null, author, 0, null, /* courseAreaId */ null);
         serializer.serialize(event);
         verify(startTimeSerializer).serialize(event);
     }

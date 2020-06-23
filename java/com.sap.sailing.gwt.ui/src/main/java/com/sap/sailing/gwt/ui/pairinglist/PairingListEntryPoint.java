@@ -20,13 +20,13 @@ import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.common.communication.routing.ProvidesLeaderboardRouting;
 import com.sap.sailing.gwt.ui.adminconsole.PairingListPreviewDialog;
-import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
+import com.sap.sailing.gwt.ui.client.AbstractSailingReadEntryPoint;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Color;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 
-public class PairingListEntryPoint extends AbstractSailingEntryPoint implements ProvidesLeaderboardRouting {
+public class PairingListEntryPoint extends AbstractSailingReadEntryPoint implements ProvidesLeaderboardRouting {
 
     private PairingListContextDefinition pairingListContextDefinition;
 

@@ -1,16 +1,15 @@
 package com.sap.sailing.domain.abstractlog.race.state.impl;
 
 import java.util.Collections;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AdditionalScoringInformationFinder;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.DependentStartTimeResolver;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceStatusAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseDesignChangedEventImpl;
@@ -31,7 +30,6 @@ import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedureFactory;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedurePrerequisite;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.RacingProcedureFactoryImpl;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
@@ -115,46 +113,15 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
     }
 
     @Override
-    public void requestNewStartTime(final TimePoint now, final TimePoint startTime, RacingProcedurePrerequisite.Resolver resolver) {
-        RacingProcedurePrerequisite.FulfillmentFunction function = new RacingProcedurePrerequisite.FulfillmentFunction() {
-            @Override
-            public void execute() {
-                raceLog.add(new RaceLogStartTimeEventImpl(now, author, raceLog.getCurrentPassId(), startTime));
-            }
-        };
-        
-        getRacingProcedure().checkPrerequisitesForStart(now, startTime, function).resolve(resolver);
+    public void forceNewStartTime(TimePoint now, TimePoint startTime, UUID courseAreaId) {
+        raceLog.add(new RaceLogStartTimeEventImpl(now, author, raceLog.getCurrentPassId(), startTime, courseAreaId));
     }
     
     @Override
-    public void forceNewStartTime(TimePoint now, TimePoint startTime) {
-        raceLog.add(new RaceLogStartTimeEventImpl(now, author, raceLog.getCurrentPassId(), startTime));
+    public void forceNewDependentStartTime(TimePoint now, final Duration startTimeDifference, final SimpleRaceLogIdentifier dependentOnRace, UUID courseAreaId) {
+        raceLog.add(new RaceLogDependentStartTimeEventImpl(now, author, raceLog.getCurrentPassId(), dependentOnRace,
+                startTimeDifference, courseAreaId));
     }
-    
-    @Override
-    public void requestNewDependentStartTime(final TimePoint now, final Duration startTimeDifference, final SimpleRaceLogIdentifier dependentRace, RaceLogResolver raceLogResolver, RacingProcedurePrerequisite.Resolver resolver) {
-        final RaceLogDependentStartTimeEvent dependentStartTimeEvent = new RaceLogDependentStartTimeEventImpl(now, author, raceLog.getCurrentPassId(), dependentRace, startTimeDifference);
-        
-        RacingProcedurePrerequisite.FulfillmentFunction function = new RacingProcedurePrerequisite.FulfillmentFunction() {
-            @Override
-            public void execute() {
-                raceLog.add(dependentStartTimeEvent);
-            }
-        };
-        
-        TimePoint startTime = null;
-            
-        DependentStartTimeResolver dependentStartTimeResolver = new DependentStartTimeResolver(raceLogResolver);
-        startTime = dependentStartTimeResolver.resolve(dependentStartTimeEvent).getStartTime();
-        
-        getRacingProcedure().checkPrerequisitesForStart(now, startTime, function).resolve(resolver);
-    }
-    
-    @Override
-    public void forceNewDependentStartTime(TimePoint now, final Duration startTimeDifference, final SimpleRaceLogIdentifier dependentOnRace) {
-        raceLog.add(new RaceLogDependentStartTimeEventImpl(now, author, raceLog.getCurrentPassId(), dependentOnRace, startTimeDifference));
-    }
-    
 
     @Override
     public void setFinishingTime(TimePoint timePoint) {

@@ -77,7 +77,7 @@ public class PolarDataMiner {
     private static final int EXECUTOR_QUEUE_SIZE = 100;
     private static final int THREAD_POOL_SIZE = ThreadPoolUtil.INSTANCE.getReasonableThreadPoolSize();
     private final ThreadPoolExecutor executor = createExecutor();
-    private final ScheduledExecutorService processRacesThatFinishedLoadingExecutor = ThreadPoolUtil.INSTANCE
+    private static final ScheduledExecutorService processRacesThatFinishedLoadingExecutor = ThreadPoolUtil.INSTANCE
             .createBackgroundTaskThreadPoolExecutor(1,
                     PolarDataMiner.class.getName() + " processRacesThatFinishedLoadingExecutor");
     private final Map<BoatClass, AtomicInteger> stats = new ConcurrentHashMap<>();

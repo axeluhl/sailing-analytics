@@ -8,6 +8,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.common.Util;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 
@@ -22,11 +23,12 @@ public class RegattaJsonSerializer implements JsonSerializer<Regatta> {
     public static final String FIELD_COMPETITORS = "competitors";
     public static final String FIELD_BOATS = "boats";
     public static final String FIELD_TRACKED_RACES = "trackedRaces";
-    public static final String FIELD_COURSE_AREA_ID = "courseAreaId";
+    public static final String FIELD_COURSE_AREA_IDS = "courseAreaIds";
     public static final String FIELD_CAN_BOATS_OF_COMPETITORS_CHANGE_PER_RACE = "canBoatsOfCompetitorsChangePerRace";
     public static final String FIELD_COMPETITOR_REGISTRATION_TYPE = "competitorRegistrationType";
     public static final String FIELD_USE_START_TIME_INFERENCE = "useStartTimeInference";
     public static final String FIELD_CONTROL_TRACKING_FROM_START_AND_FINISH_TIMES = "controlTrackingFromStartAndFinishTimes";
+    public static final String FIELD_AUTO_RESTART_TRACKING_UPON_COMPETITOR_SET_CHANGE = "autoRestartTrackingUponCompetitorSetChange";
 
     private final JsonSerializer<Series> seriesSerializer;
     private final JsonSerializer<Competitor> competitorSerializer;
@@ -54,12 +56,14 @@ public class RegattaJsonSerializer implements JsonSerializer<Regatta> {
         result.put(FIELD_SCORINGSYSTEM, regatta.getScoringScheme().getType().name());
         result.put(FIELD_RANKINGMETRIC, regatta.getRankingMetricType().name());
         result.put(FIELD_BOATCLASS, regatta.getBoatClass() != null ? regatta.getBoatClass().getName() : null);
-        result.put(FIELD_COURSE_AREA_ID,
-                regatta.getDefaultCourseArea() != null ? regatta.getDefaultCourseArea().getId().toString() : null);
+        final JSONArray courseAreaIds = new JSONArray();
+        Util.addAll(Util.map(regatta.getCourseAreas(), ca->ca.getId().toString()), courseAreaIds);
+        result.put(FIELD_COURSE_AREA_IDS, courseAreaIds);
         result.put(FIELD_CAN_BOATS_OF_COMPETITORS_CHANGE_PER_RACE, regatta.canBoatsOfCompetitorsChangePerRace());
         result.put(FIELD_COMPETITOR_REGISTRATION_TYPE, regatta.getCompetitorRegistrationType().name());
         result.put(FIELD_USE_START_TIME_INFERENCE, regatta.useStartTimeInference());
         result.put(FIELD_CONTROL_TRACKING_FROM_START_AND_FINISH_TIMES, regatta.isControlTrackingFromStartAndFinishTimes());
+        result.put(FIELD_AUTO_RESTART_TRACKING_UPON_COMPETITOR_SET_CHANGE, regatta.isAutoRestartTrackingUponCompetitorSetChange());
         if (seriesSerializer != null) {
             JSONArray seriesJson = new JSONArray();
             for (Series series : regatta.getSeries()) {

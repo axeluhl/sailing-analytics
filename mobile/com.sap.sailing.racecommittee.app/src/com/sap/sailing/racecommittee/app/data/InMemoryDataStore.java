@@ -41,7 +41,7 @@ public enum InMemoryDataStore implements DataStore {
     private SharedDomainFactory domainFactory;
 
     private Serializable eventUUID;
-    private UUID courseUUID;
+    private UUID courseAreaId;
 
     private RaceStateService mService;
     private boolean mBound;
@@ -68,7 +68,7 @@ public enum InMemoryDataStore implements DataStore {
         domainFactory = new SharedDomainFactoryImpl(new AndroidRaceLogResolver());
 
         eventUUID = null;
-        courseUUID = null;
+        courseAreaId = null;
 
         if (mContext != null && mBound) {
             mContext.unbindService(mConnection);
@@ -328,16 +328,17 @@ public enum InMemoryDataStore implements DataStore {
     }
 
     @Override
-    public UUID getCourseUUID() {
-        return courseUUID;
+    public UUID getCourseAreaId() {
+        return courseAreaId;
     }
 
     @Override
-    public void setCourseUUID(UUID uuid) {
-        courseUUID = uuid;
+    public void setCourseAreaId(UUID uuid) {
+        courseAreaId = uuid;
     }
 
     public void registerRaces(Collection<ManagedRace> races) {
+        //TODO Log
         if (mBound) {
             for (ManagedRace race : races) {
                 mService.registerRace(race);
@@ -355,6 +356,7 @@ public enum InMemoryDataStore implements DataStore {
 
         @Override
         public void onServiceConnected(ComponentName className, IBinder service) {
+            //TODO Log
             RaceStateService.RaceStateServiceBinder binder = (RaceStateService.RaceStateServiceBinder) service;
             mService = binder.getService();
             mBound = true;

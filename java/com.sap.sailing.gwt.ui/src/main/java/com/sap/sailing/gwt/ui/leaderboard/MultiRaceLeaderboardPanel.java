@@ -254,7 +254,10 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderb
     @Override
     protected AsyncAction<LeaderboardDTO> getRetrieverAction() {
         final Date date = getLeaderboardDisplayDate();
-        return new GetLeaderboardByNameAction(getSailingService(), getLeaderboardName(),
+        // need to call super here otherwise it might take the instantiated types method implementation, 
+        // but fields there might not be initialized if we are within a constructor call.
+        SailingServiceAsync sailingService = super.getSailingService(); 
+        return new GetLeaderboardByNameAction(sailingService, getLeaderboardName(),
                 useNullAsTimePoint() ? null : date,
                 /* namesOfRaceColumnsForWhichToLoadLegDetails */getNamesOfExpandedRaceColumns(),
                 shallAddOverallDetails(), /* previousLeaderboard */

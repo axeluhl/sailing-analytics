@@ -56,6 +56,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.util.impl.ThreadFactoryWithPriority;
+import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.model.lib.api.event.DataSource;
 import com.tractrac.model.lib.api.event.ICompetitor;
 import com.tractrac.model.lib.api.event.IEvent;
@@ -71,6 +72,7 @@ import com.tractrac.subscription.lib.api.event.IConnectionStatusListener;
 import com.tractrac.subscription.lib.api.event.ILiveDataEvent;
 import com.tractrac.subscription.lib.api.event.IStoredDataEvent;
 import com.tractrac.subscription.lib.api.race.IRacesListener;
+import com.tractrac.util.lib.api.exceptions.TimeOutException;
 
 public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
         implements IConnectionStatusListener, TracTracRaceTracker, DynamicRaceDefinitionSet, TrackingDataLoader {
@@ -270,11 +272,12 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
      *            you expect things to have loaded; see also
      *            {@link RaceTracker#TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS}.
      */
-    TracTracRaceTrackerImpl(DomainFactory domainFactory, RaceLogStore raceLogStore,
-            RegattaLogStore regattaLogStore, WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry,
-            RaceLogAndTrackedRaceResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds,
-            RaceTrackingHandler raceTrackingHandler)
-            throws URISyntaxException, SubscriberInitializationException, IOException, InterruptedException {
+    TracTracRaceTrackerImpl(DomainFactory domainFactory, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
+            WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry,
+            RaceLogAndTrackedRaceResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver,
+            RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds,
+            RaceTrackingHandler raceTrackingHandler) throws URISyntaxException, SubscriberInitializationException,
+            IOException, InterruptedException, CreateModelException, TimeOutException {
         this(/* regatta */ null, domainFactory, raceLogStore, regattaLogStore, windStore, trackedRegattaRegistry,
                 raceLogResolver, leaderboardGroupResolver, connectivityParams, timeoutInMilliseconds,
                 raceTrackingHandler);
@@ -299,7 +302,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
             RaceLogAndTrackedRaceResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver,
             RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds,
             RaceTrackingHandler raceTrackingHandler)
-            throws URISyntaxException, SubscriberInitializationException, IOException, InterruptedException {
+            throws URISyntaxException, SubscriberInitializationException, IOException, InterruptedException, CreateModelException, TimeOutException {
         super(connectivityParams);
         final URL paramURL = connectivityParams.getParamURL();
         final URI liveURI = connectivityParams.getLiveURI();
@@ -314,6 +317,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
         final String tracTracPassword = connectivityParams.getTracTracPassword();
         final String raceStatus = connectivityParams.getRaceStatus();
         final String raceVisibility = connectivityParams.getRaceVisibility();
+        final boolean useOfficialEventsToUpdateRaceLog = connectivityParams.isUseOfficialEventsToUpdateRaceLog();
         this.trackedRegattaRegistry = trackedRegattaRegistry;
         this.tractracRace = connectivityParams.getTractracRace();
         this.tractracEvent = tractracRace.getEvent();
@@ -357,14 +361,28 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
             
             @Override
             public void deleteCompetitor(UUID competitorId) {
+                try {
+                    trackedRegattaRegistry.updateRaceCompetitors(getRegatta(), getRace());
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             }
             
             @Override
             public void addCompetitor(ICompetitor competitor) {
+                try {
+                    trackedRegattaRegistry.updateRaceCompetitors(getRegatta(), getRace());
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             }
         };
         eventSubscriber.subscribeCompetitors(competitorsListener);
-        reconciler = new RaceAndCompetitorStatusWithRaceLogReconciler(domainFactory, raceLogResolver, tractracRace);
+        if (useOfficialEventsToUpdateRaceLog) {
+            reconciler = new RaceAndCompetitorStatusWithRaceLogReconciler(domainFactory, raceLogResolver, tractracRace);
+        } else {
+            reconciler = null;
+        }
         racesListener = new IRacesListener() {
             @Override public void abandonRace(UUID raceId) {
                 if (raceId.equals(tractracRace.getId())) {
@@ -388,7 +406,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
             @Override public void dataSourceChanged(IRace race, DataSource oldDataSource, URI oldLiveURI, URI oldStoredURI) {}
             @Override
             public void updateRace(IRace race) {
-                if (Util.equalsWithNull(race, TracTracRaceTrackerImpl.this.tractracRace)) {
+                if (reconciler != null && Util.equalsWithNull(race, TracTracRaceTrackerImpl.this.tractracRace)) {
                     int delayToLiveInMillis = race.getLiveDelay()*1000;
                     if (getRace() != null) {
                         DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(getRace());
@@ -703,19 +721,21 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
      * to all those race logs for events that may require reconciliation of results, race and competitor statuses.
      */
     private void registerRaceAndCompetitorStatusWithRaceLogReconciler(final DynamicTrackedRace trackedRace) {
-        trackedRace.addListener(new AbstractRaceChangeListener() {
-            @Override
-            public void raceLogAttached(RaceLog raceLog) {
-                reconciler.raceLogAttached(trackedRace, raceLog);
+        if (reconciler != null) {
+            trackedRace.addListener(new AbstractRaceChangeListener() {
+                @Override
+                public void raceLogAttached(RaceLog raceLog) {
+                    reconciler.raceLogAttached(trackedRace, raceLog);
+                }
+    
+                @Override
+                public void raceLogDetached(RaceLog raceLog) {
+                    reconciler.raceLogDetached(trackedRace, raceLog);
+                }
+            });
+            for (final RaceLog alreadyAttachedRaceLog : trackedRace.getAttachedRaceLogs()) {
+                reconciler.raceLogAttached(trackedRace, alreadyAttachedRaceLog);
             }
-
-            @Override
-            public void raceLogDetached(RaceLog raceLog) {
-                reconciler.raceLogDetached(trackedRace, raceLog);
-            }
-        });
-        for (final RaceLog alreadyAttachedRaceLog : trackedRace.getAttachedRaceLogs()) {
-            reconciler.raceLogAttached(trackedRace, alreadyAttachedRaceLog);
         }
     }
 

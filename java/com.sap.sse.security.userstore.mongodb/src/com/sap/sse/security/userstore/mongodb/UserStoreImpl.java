@@ -860,14 +860,6 @@ public class UserStoreImpl implements UserStore {
     }
 
     @Override
-    public Iterable<WildcardPermission> getPermissionsFromUser(String username) throws UserManagementException {
-        if (users.get(username) == null) {
-            throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
-        }
-        return users.get(username).getPermissions();
-    }
-
-    @Override
     public void addPermissionForUser(String username, WildcardPermission permission) throws UserManagementException {
         final User user = users.get(username);
         if (user == null) {
@@ -1039,7 +1031,6 @@ public class UserStoreImpl implements UserStore {
     @Override
     public void registerPreferenceConverter(String preferenceKey, PreferenceConverter<?> converter) {
         PreferenceConverter<?> alreadyAssociatedConverter = preferenceConverters.putIfAbsent(preferenceKey, converter);
-
         if (alreadyAssociatedConverter == null) {
             final Set<String> usersToProcess = new HashSet<>(preferences.keySet());
             for (String user : usersToProcess) {

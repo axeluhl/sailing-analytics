@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.WithID;
 import com.sap.sse.common.media.ImageSize;
 import com.sap.sse.common.media.MediaTagConstants;
@@ -16,6 +17,14 @@ import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
 import com.sap.sse.security.shared.dto.NamedDTO;
 
+/**
+ * Basic event information as a DTO. The inherited {@link NamedDTO#equals(Object)} and {@link NamedDTO#hashCode()}
+ * methods that are based on the {@link NamedDTO#getName()} response are overridden here to be based on this event's
+ * {@link #getId() ID}.
+ * 
+ * @author Axel Uhl (D043530)
+ *
+ */
 public class EventBaseDTO extends NamedDTO implements WithID, IsSerializable {
     private static final long serialVersionUID = 818666323178097939L;
 
@@ -68,6 +77,16 @@ public class EventBaseDTO extends NamedDTO implements WithID, IsSerializable {
         sailorsInfoWebsiteURLs = new HashMap<>();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        return Util.equalsWithNull(this.getId(), ((EventBaseDTO) o).getId());
+    }
+    
+    @Override
+    public int hashCode() {
+        return this.getId().hashCode();
+    }
+    
     public ImageDTO getLogoImage() {
         ImageDTO result = null;
         for (ImageDTO image : images) {
@@ -135,8 +154,17 @@ public class EventBaseDTO extends NamedDTO implements WithID, IsSerializable {
         return baseURL;
     }
 
+    /**
+     * Assign the event's base URL.
+     *
+     * NOTE: <code>https://</code> will be assumed if no protocol has been provided.
+     */
     public void setBaseURL(String baseURL) {
-        this.baseURL = baseURL;
+        if (baseURL != null && !baseURL.contains("://")) {
+            this.baseURL = "https://" + baseURL;
+        } else {
+            this.baseURL = baseURL;
+        }
     }
 
     public Iterable<? extends LeaderboardGroupBaseDTO> getLeaderboardGroups() {

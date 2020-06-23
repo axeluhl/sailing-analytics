@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -32,7 +33,6 @@ import com.google.gwt.user.cellview.client.CellTable.Resources;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -56,7 +56,7 @@ import com.sap.sailing.gwt.ui.client.LeaderboardGroupsRefresher;
 import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
 import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
@@ -142,11 +142,11 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
     private final Set<Widget> permissionRestrictedComponent = new HashSet<>();
     private final Label idLabel = new Label();
 
-    public LeaderboardGroupConfigPanel(SailingServiceAsync sailingService, UserService userService,
+    public LeaderboardGroupConfigPanel(SailingServiceWriteAsync sailingServiceWrite, UserService userService,
             RegattaRefresher regattaRefresher, LeaderboardGroupsRefresher leaderboardGroupsRefresher,
             LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity> leaderboardsRefresher, ErrorReporter errorReporter,
             StringMessages stringMessages) {
-        super(sailingService, regattaRefresher, errorReporter, stringMessages);
+        super(sailingServiceWrite, regattaRefresher, errorReporter, stringMessages);
         this.userService = userService;
 
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
@@ -512,28 +512,6 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
         });
         refreshButton.ensureDebugId("RefreshLeaderboardGroupsButton");
         
-        removeButton = buttonPanel.addRemoveAction(stringMessages.remove(), new Command() {
-        
-            @Override
-            public void execute() {
-                if(askUserForConfirmation()){
-                    removeLeaderboardGroups(refreshableGroupsSelectionModel.getSelectedSet()); 
-                }
-            }
-
-            private boolean askUserForConfirmation() {
-                if (refreshableGroupsSelectionModel.itemIsSelectedButNotVisible(groupsTable.getVisibleItems())) {
-                    final String leaderboardGroupNames = refreshableGroupsSelectionModel.getSelectedSet().stream()
-                            .map(LeaderboardGroupDTO::getName).collect(Collectors.joining("\n"));
-                    return Window.confirm(
-                            stringMessages.doYouReallyWantToRemoveNonVisibleLeaderboardGroups(leaderboardGroupNames));
-                } 
-                return Window.confirm(stringMessages.doYouReallyWantToRemoveLeaderboardGroups());
-            }
-        });
-        removeButton.ensureDebugId("RemoveLeaderboardButton");
-        removeButton.setEnabled(false);
-
         AnchorCell anchorCell = new AnchorCell();
 
         final TextColumn<LeaderboardGroupDTO> groupUUidColumn = new AbstractSortableTextColumn<LeaderboardGroupDTO>(
@@ -619,17 +597,29 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
                 userService.getUserManagementService(), type,
                 group -> leaderboardGroupsRefresher.fillLeaderboardGroups(), stringMessages);
         actionsColumn.addAction(LeaderboardGroupConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
-                e -> config.openDialog(e));
+                // Explicitly using an anonymous inner class. Using a method reference caused problems with the GWT compiler (see bug 5269)
+                new Consumer<LeaderboardGroupDTO>() {
+                    @Override
+                    public void accept(LeaderboardGroupDTO e) {
+                        config.openOwnershipDialog(e);
+                    }
+                });
         
         final EditACLDialog.DialogConfig<LeaderboardGroupDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementService(), type,
                 group -> leaderboardGroupsRefresher.fillLeaderboardGroups(), stringMessages);
         actionsColumn.addAction(LeaderboardGroupConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                e -> configACL.openDialog(e));
+                // Explicitly using an anonymous inner class. Using a method reference caused problems with the GWT compiler (see bug 5269)
+                new Consumer<LeaderboardGroupDTO>() {
+                    @Override
+                    public void accept(LeaderboardGroupDTO e) {
+                        configACL.openACLDialog(e);
+                    }
+                });
         
         final MigrateGroupOwnershipDialog.DialogConfig<LeaderboardGroupDTO> migrateDialogConfig = MigrateGroupOwnershipDialog
                 .create(userService.getUserManagementService(), (lg, dto) -> {
-                    sailingService.updateGroupOwnerForLeaderboardGroupHierarchy(lg.getId(), dto,
+                    sailingServiceWrite.updateGroupOwnerForLeaderboardGroupHierarchy(lg.getId(), dto,
                             new AsyncCallback<Void>() {
                                 @Override
                                 public void onFailure(Throwable caught) {
@@ -643,7 +633,13 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
                             });
                 });
         actionsColumn.addAction(EventConfigImagesBarCell.ACTION_MIGRATE_GROUP_OWNERSHIP_HIERARCHY, CHANGE_OWNERSHIP,
-                e -> migrateDialogConfig.openDialog(e));
+                // Explicitly using an anonymous inner class. Using a method reference caused problems with the GWT compiler (see bug 5269)
+                new Consumer<LeaderboardGroupDTO>() {
+                    @Override
+                    public void accept(LeaderboardGroupDTO e) {
+                        migrateDialogConfig.openDialog(e);
+                    }
+                });
 
         SelectionCheckboxColumn<LeaderboardGroupDTO> leaderboardTableSelectionColumn =
                 new SelectionCheckboxColumn<LeaderboardGroupDTO>(
@@ -673,6 +669,11 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
         groupsTable.addColumnSortHandler(leaderboardGroupsListHandler);
 
         refreshableGroupsSelectionModel = leaderboardTableSelectionColumn.getSelectionModel();
+
+        removeButton = buttonPanel.addRemoveAction(stringMessages.remove(), refreshableGroupsSelectionModel, true,
+                () -> removeLeaderboardGroups(refreshableGroupsSelectionModel.getSelectedSet()));
+        removeButton.ensureDebugId("RemoveLeaderboardButton");
+
         refreshableGroupsSelectionModel.addSelectionChangeHandler(event -> groupSelectionChanged());
 
         groupsTable.setSelectionModel(refreshableGroupsSelectionModel, leaderboardTableSelectionColumn.getSelectionManager());
@@ -732,7 +733,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
      */
     private void refreshLeaderboardsList() {
         if (isSingleGroupSelected && getSelectedGroup() != null) {
-            sailingService.getLeaderboardsWithSecurity(new MarkedAsyncCallback<List<StrippedLeaderboardDTOWithSecurity>>(
+            sailingServiceWrite.getLeaderboardsWithSecurity(new MarkedAsyncCallback<List<StrippedLeaderboardDTOWithSecurity>>(
                     new AsyncCallback<List<StrippedLeaderboardDTOWithSecurity>>() {
                         @Override
                         public void onFailure(Throwable t) {
@@ -763,7 +764,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
     }
 
     private void createNewGroup(final LeaderboardGroupDescriptor newGroup) {
-        sailingService.createLeaderboardGroup(newGroup.getName(), newGroup.getDescription(),
+        sailingServiceWrite.createLeaderboardGroup(newGroup.getName(), newGroup.getDescription(),
                 newGroup.getDisplayName(), newGroup.isDisplayLeaderboardsInReverseOrder(),
                 newGroup.getOverallLeaderboardDiscardThresholds(), newGroup.getOverallLeaderboardScoringSchemeType(), new MarkedAsyncCallback<LeaderboardGroupDTO>(
                         new AsyncCallback<LeaderboardGroupDTO>() {
@@ -788,7 +789,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
         for (StrippedLeaderboardDTO leaderboardDTO : groupToUpdate.leaderboards) {
             leaderboardNames.add(leaderboardDTO.getName());
         }
-        sailingService.updateLeaderboardGroup(oldGroupId, oldGroupName, updateDescriptor.getName(), updateDescriptor.getDescription(),
+        sailingServiceWrite.updateLeaderboardGroup(oldGroupId, oldGroupName, updateDescriptor.getName(), updateDescriptor.getDescription(),
                 updateDescriptor.getDisplayName(),
                 leaderboardNames, updateDescriptor.getOverallLeaderboardDiscardThresholds(),
                 updateDescriptor.getOverallLeaderboardScoringSchemeType(), new MarkedAsyncCallback<Void>(
@@ -840,7 +841,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
         for (StrippedLeaderboardDTO leaderboardDTO : group.leaderboards) {
             leaderboardNames.add(leaderboardDTO.getName());
         }
-        sailingService.updateLeaderboardGroup(group.getId(), group.getName(), group.getName(), group.description,
+        sailingServiceWrite.updateLeaderboardGroup(group.getId(), group.getName(), group.getName(), group.description,
                 group.getDisplayName(),
                 leaderboardNames, group.getOverallLeaderboardDiscardThresholds(),
                 group.getOverallLeaderboardScoringSchemeType(), new MarkedAsyncCallback<Void>(
@@ -862,7 +863,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
             for (LeaderboardGroupDTO group : groups) {
                 groupNames.add(group.getName());
             }
-            sailingService.removeLeaderboardGroups(groupNames, new MarkedAsyncCallback<Void>(
+            sailingServiceWrite.removeLeaderboardGroups(groupNames, new MarkedAsyncCallback<Void>(
                     new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable t) {
@@ -883,7 +884,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
     private void removeLeaderboardGroup(final LeaderboardGroupDTO group) {
         Set<String> groups = new HashSet<String>();
         groups.add(group.getName());
-        sailingService.removeLeaderboardGroups(groups, new MarkedAsyncCallback<Void>(
+        sailingServiceWrite.removeLeaderboardGroups(groups, new MarkedAsyncCallback<Void>(
                 new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable t) {
@@ -908,7 +909,6 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
         Set<LeaderboardGroupDTO> selectedLeaderboardGroups = refreshableGroupsSelectionModel.getSelectedSet();
         isSingleGroupSelected = selectedLeaderboardGroups.size() == 1;
 
-        removeButton.setText(selectedLeaderboardGroups.size() <= 1 ? stringMessages.remove() : stringMessages.removeNumber(selectedLeaderboardGroups.size()));
         boolean canDeleteAllSelected = true;
         for (LeaderboardGroupDTO group : selectedLeaderboardGroups) {
             if (!userService.hasPermission(group, DefaultActions.DELETE)) {

@@ -383,8 +383,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String pleaseSelectARegatta();
     String addFleet();
     String doYouReallyWantToRemoveRegatta(String name);
-    String doYouReallyWantToRemoveRegattas();
-    String doYouReallyWantToRemoveNonVisibleRegattas(String regattaNames);
     String errorLoadingScoreCorrectionProviders(String message);
     String selectResultListToImportFrom();
     String of();
@@ -422,7 +420,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String addResultImportUrl();
     String errorAddingResultImportUrl(String message);
     String eventIdOrUrl();
-    String doYouReallyWantToRemoveResultImportUrls();
     String remoteServerInstances();
     String localServer();
     String errorRefreshingSailingServers(String message);
@@ -971,8 +968,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String offset();
     String line();
     String lineAngleToWindAndAdvantage(String startLineLength, String startLineAngleToCombinedWind, String startLineAdvantageousSide, String startLineAdvantageInMeters);
-    String doYouReallyWantToRemoveNonVisibleEvents(String eventNames);
-    String doYouReallyWantToRemoveEvents();
     String doYouReallyWantToRemoveEvent(String eventName);
     String doYouReallyWantToRemoveCompetitors();
     String doYouReallyWantToRemoveCompetitor(String name);
@@ -981,6 +976,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String editCompetitor();
     String pleaseEnterASailNumber();
     String pleaseEnterASailNumberOrABoatName();
+    String addCompetitor();
+    String editCompetitorWithBoat();
+    String withBoat();
     String successfullyAllowedCompetitorReset(String names);
     String successfullyAllowedBoatReset(String names);
     String allowReload();
@@ -1050,8 +1048,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String couldNotAuthorizedAccessToIgtimiUser(String text);
     String errorGettingIgtimiAuthorizationUrl(String message);
     String addIgtimiUser();
-    String doYouReallyWantToRemoveLeaderboards();
-    String doYouReallyWantToRemoveNonVisibleLeaderboards(String leaderboardNames);
     String doYouReallyWantToRemoveTrackedRaces();
     String doYouReallyWantToRemoveNonVisibleTrackedRaces(String trackedRacesName);
     String errorTryingToRemoveIgtimiAccount(String eMailOfAccountToRemove);
@@ -1147,8 +1143,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String availableLeaderboardGroups();
     String leaderboardGroupsOfSelectedEvent();
     String doYouReallyWantToRemoveLeaderboardGroup(String leaderboardGroupName);
-    String doYouReallyWantToRemoveLeaderboardGroups();
-    String doYouReallyWantToRemoveNonVisibleLeaderboardGroups(String leaderboardGroupNames);
     String addRaces();
     String withNamePrefix();
     String pleaseSelectASeriesFirst();
@@ -2345,8 +2339,12 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String pleaseSelectAValidPassingInstruction();
     String pleaseSelectAValidMarkTemplate();
     String doYouReallyWantToRemoveCourseTemplate(String name);
+    String doYouReallyWantToRemoveCourseTemplates();
+    String doYouReallyWantToRemoveNonVisibleCourseTemplates(String message);
     String couldNotRemoveCourseTemplate(String message);
     String doYouReallyWantToRemoveMarkProperties(String name);
+    String doYouReallyWantToRemoveSeveralMarkProperties();
+    String doYouReallyWantToRemoveNonVisibleMarkProperties(String message);
     String couldNotRemoveMarkProperties(String message);
     String markRoles();
     String filterMarkRoles();
@@ -2357,6 +2355,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String wayPointMarkInSequenceMissing();
     String defaultNumberOfLaps();
     String invalidImageURL();
+    String invalidURL();
     String setDeviceIdentifier();
     String setPosition();
     String spareMarksAndTheirOptionalDefaultMarkRoles();
@@ -2379,4 +2378,11 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String unsetPosition();
     String errorTryingToUpdateMarkProperties(String message);
     String confirmUnsettingPositionForMarkProperties(String name);
+    String useOfficialResultsForAutomaticUpdates();
+    String keepEmptyForDefaultUserAndPassword();
+    String autoRestartTrackingUponCompetitorSetChange();
+    String whitelabelFooterLanguage();
+    String whitelabelSailing();
+    String unableToLoadCourseAreas(String message);
+    String insufficientPermissions();
 }

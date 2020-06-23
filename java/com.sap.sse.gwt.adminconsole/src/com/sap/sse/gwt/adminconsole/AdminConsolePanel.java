@@ -26,6 +26,7 @@ import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.gwt.client.panels.AbstractTabLayoutPanel;
 import com.sap.sse.gwt.client.panels.HorizontalTabLayoutPanel;
 import com.sap.sse.gwt.client.panels.VerticalTabLayoutPanel;
+import com.sap.sse.gwt.shared.ClientConfiguration;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.dto.UserDTO;
@@ -202,11 +203,19 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
         final DockPanel informationPanel = new DockPanel();
         informationPanel.setWidth("100%");
         informationPanel.setSpacing(10);
-        informationPanel.add(errorReporter.getPersistentInformationWidget(), DockPanel.CENTER);
+        Widget persistentInformationWidget = errorReporter.getPersistentInformationWidget();
+        persistentInformationWidget.addStyleName("footerInfoPanel");
+        informationPanel.add(persistentInformationWidget, DockPanel.CENTER);
         SystemInformationPanel sysinfoPanel = new SystemInformationPanel(serverInfo, errorReporter, stringMessages);
+        sysinfoPanel.addStyleName("systemInformationPanel");
         sysinfoPanel.ensureDebugId("SystemInformation");
-        final Anchor releaseNotesLink = new Anchor(new SafeHtmlBuilder().appendEscaped(releaseNotesAnchorLabel).toSafeHtml(), releaseNotesURL);
-        sysinfoPanel.add(releaseNotesLink);
+        if (ClientConfiguration.getInstance().isBrandingActive()) {
+            final Anchor releaseNotesLink = new Anchor(
+                    new SafeHtmlBuilder().appendEscaped(releaseNotesAnchorLabel).toSafeHtml(), releaseNotesURL);
+            releaseNotesLink.addStyleName("releaseNotesAnchor");
+            sysinfoPanel.add(releaseNotesLink);
+            informationPanel.add(releaseNotesLink, DockPanel.EAST);
+        }
         informationPanel.add(sysinfoPanel, DockPanel.EAST);
         informationPanel.setCellHorizontalAlignment(sysinfoPanel, HasHorizontalAlignment.ALIGN_RIGHT);
         this.setFooterWidget(informationPanel);
