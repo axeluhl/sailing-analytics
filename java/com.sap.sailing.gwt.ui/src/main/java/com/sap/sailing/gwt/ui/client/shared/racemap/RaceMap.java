@@ -72,6 +72,7 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -108,6 +109,7 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.QuickFlagDataProvider.QuickF
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceCompetitorSet.CompetitorsForRaceDefinedListener;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings.ZoomTypes;
+import com.sap.sailing.gwt.ui.client.shared.racemap.windladder.WindLadderOverlay;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.server.SailingServiceImpl;
 import com.sap.sailing.gwt.ui.shared.CompactBoatPositionsDTO;
@@ -313,6 +315,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private final Map<String, CourseMarkOverlay> courseMarkOverlays;
     
     private final Map<String, HandlerRegistration> courseMarkClickHandlers;
+
+    private WindLadderOverlay windLadderOverlay;
 
     /**
      * Maps from the {@link MarkDTO#getIdAsString() mark's ID converted to a string} to the corresponding {@link MarkDTO}
@@ -1324,6 +1328,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         showCourseSidelinesOnMap(raceMapDataDTO.courseSidelines);
                         showStartAndFinishAndCourseMiddleLines(raceMapDataDTO.coursePositions);
                         showStartLineToFirstMarkTriangle(raceMapDataDTO.coursePositions);
+                        showWindLadder(raceMapDataDTO);
                         // Rezoom the map
                         LatLngBounds zoomToBounds = null;
                         if (!settings.getZoomSettings().containsZoomType(ZoomTypes.NONE)) {
@@ -1876,7 +1881,38 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             }
         }
     }
-    
+
+    private void showWindLadder(RaceMapDataDTO raceMapDataDTO) {
+        // TODO Check settings
+        if (map != null && raceMapDataDTO != null && lastCombinedWindTrackInfoDTO != null) {
+            CompetitorDTO leadingCompetitor = getBestVisibleCompetitorWithOneBasedLegNumber(
+                    raceMapDataDTO.boatPositions.keySet()).getB();
+            List<GPSFixDTOWithSpeedWindTackAndLegType> fixes = raceMapDataDTO.boatPositions.get(leadingCompetitor);
+            final LegType legType = fixes != null && !fixes.isEmpty() ? fixes.get(fixes.size() - 1).legType : null;
+            if (legType == LegType.UPWIND || legType == LegType.DOWNWIND) { //TODO Get LegType from course config / mark highlight
+                final CoursePositionsDTO courseDTO = raceMapDataDTO.coursePositions;
+                final int legNumber = courseDTO.currentLegNumber; // One-based //TODO checks
+                WaypointDTO legStart = courseDTO.course.waypoints.get(legNumber - 1);
+                WaypointDTO legEnd = courseDTO.course.waypoints.get(legNumber);
+                WindTrackInfoDTO windTrackDTO = lastCombinedWindTrackInfoDTO.getCombinedWindOnLegMiddle(legNumber - 1);
+                WindDTO windFix = null;
+                if (windTrackDTO != null && windTrackDTO.windFixes != null && !windTrackDTO.windFixes.isEmpty()) {
+                    windFix = windTrackDTO.windFixes.get(0); //TODO Average or get more stable source?
+                }
+                if (windLadderOverlay == null) {
+                    windLadderOverlay = new WindLadderOverlay(map, 0 /* TODO */, coordinateSystem);
+                    windLadderOverlay.addToMap();
+                }
+                windLadderOverlay.update(legStart, legEnd, windFix);
+                if (!windLadderOverlay.isVisible()) {
+                    windLadderOverlay.setVisible(true);
+                }
+            } else if (windLadderOverlay != null && windLadderOverlay.isVisible()) {
+                windLadderOverlay.setVisible(false);
+            }
+        }
+    }
+
     private final StringBuilder windwardStartLineMarkToFirstMarkLineText = new StringBuilder();
     private final StringBuilder leewardStartLineMarkToFirstMarkLineText = new StringBuilder();
     
