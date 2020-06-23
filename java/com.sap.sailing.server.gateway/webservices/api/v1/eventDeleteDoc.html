@@ -12,7 +12,7 @@
 <h2>URL: /api/v1/events/{event-id}/</h2>
 
 <b>Description:</b>
-<p>Deletes and Event, optionally also allows to delete the LeaderboardGroup this event is part of and the linked OverallLeaderboard</p>
+<p>Deletes an Event, optionally also allows to delete related LeaderboardGroups and/or all related Leaderboards and/or all related Regattas</p>
 <br/>
 <table>
 	<tr>
@@ -25,12 +25,14 @@
 	</tr>
 	<tr>
 		<td>Mandatory parameters:</td>
-		<td>none; when no parameters are provided the call is a no-op</td>
+		<td>none;</td>
 	</tr>
 	<tr>
 		<td>Optional parameters:</td>
 		<td>
-			<div>withLeaderboardGroupsAndOverallLeaderboard If true, the LeaderBoardGroup and the OverallLeaderboard will be deleted as well</div>
+			<div>withLeaderboardGroups - if true, deletes all associated LeaderboardGroups. Doing so will also delete the overall Leaderboards of each group.</div>
+			<div>withLeaderboards - if true, deletes all associated Leaderboards. The deletion of a RegattaLeaderboard entails the deletion of all Leaderboards holding the same Regatta.</div>
+			<div>withRegattas - if true, deletes all associated Regattas. Doing so will also delete all their RegattaLeaderboards and TrackedRaces.</div>
 		</td>
 	</tr>
 	<tr>
@@ -39,7 +41,7 @@
 	</tr>
 	<tr>
 		<td>Example:</td>
-		<td>curl -X DELETE -H "Authorization: Bearer w9YSIfr/Zf6a127SZDddkhdAtQuuv0Jm1PSXlo1Yvd0=" "http://127.0.0.1:8888/sailingserver/api/v1/events/0065b870-9ddb-42be-a7d4-6be2081cb63e?withLeaderboardGroupsAndOverallLeaderboard=true"<br>
+		<td>curl -X DELETE -H "Authorization: Bearer w9YSIfr/Zf6a127SZDddkhdAtQuuv0Jm1PSXlo1Yvd0=" "http://127.0.0.1:8888/sailingserver/api/v1/events/0065b870-9ddb-42be-a7d4-6be2081cb63e?withLeaderboardGroups=true"<br>
 		</pre></td>
 	</tr>
 </table>
