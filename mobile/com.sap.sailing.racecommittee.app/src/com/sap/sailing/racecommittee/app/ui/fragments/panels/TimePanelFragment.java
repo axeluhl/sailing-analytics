@@ -270,8 +270,6 @@ public class TimePanelFragment extends BasePanelFragment implements NavigationEv
         if (fragment instanceof RaceFlagViewerFragment){
             setMarkerLevel(mRaceHeader, R.id.time_marker, LEVEL_NORMAL);
             mCompetitorList.setMarkerLevel(PanelButton.LEVEL_NORMAL);
-            setMarkerLevel(mRaceHeader, R.id.time_marker, LEVEL_NORMAL);
-            mCompetitorList.setMarkerLevel(LEVEL_NORMAL);
         }
         if (fragment instanceof StartTimeFragment) {
             setMarkerLevel(mRaceHeader, R.id.time_marker, LEVEL_TOGGLED);
