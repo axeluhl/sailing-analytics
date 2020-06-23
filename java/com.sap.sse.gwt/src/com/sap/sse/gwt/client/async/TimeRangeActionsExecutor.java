@@ -14,11 +14,16 @@ import com.sap.sse.common.Util.Pair;
 
 /**
  * An Executor for efficient, asynchronous execution of {@link TimeRangeAsyncAction}s. For the actual execution this
- * class relies on an {@link AsyncActionsExecutor}.<p>
- *
+ * class relies on an {@link AsyncActionsExecutor}.<br>
  *
  * The idea is to provide an abstraction layer which will handle caching and intelligently cut down on the number and
- * size of request being made to the server.
+ * size of request being made to the server.<p>
+ *
+ * This executor operates on {@link TimeRangeAsyncAction}s which provide the wanted {@link TimeRange} by {@link Key}
+ * with {@link TimeRangeAsyncAction#getTimeRanges()}. E.g. The {@link Key} could be a competitor or a boat class.<br>
+ * Each of the {@link TimeRange}s is then trimmed against its own cache of returned and outstanding requests in
+ * {@link TimeRangeResultCache}.<br>
+ * After getting the server response the trimmed result is completed by the cache and {@link TimeRangeAsyncCallback}.
  *
  * @param <Result>
  *            Type returned by remote procedure. See {@link TimeRangeAsyncAction}.
@@ -26,6 +31,8 @@ import com.sap.sse.common.Util.Pair;
  *            Type representing an individual part or channel of a complete {@link Result}.
  * @param <Key>
  *            Typed used to index {@link SubResult}s.
+ * @see TimeRangeAsyncAction
+ * @see TimeRangeAsyncCallback
  *
  * @author Tim Hessenmüller (D062243)
  */
