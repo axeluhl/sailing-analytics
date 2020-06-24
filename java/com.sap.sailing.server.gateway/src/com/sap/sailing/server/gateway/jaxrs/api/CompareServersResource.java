@@ -105,7 +105,12 @@ public class CompareServersResource extends AbstractSailingServerResource {
                 for (Entry<String, Set<Object>> entry : result.entrySet()) {
                     json.put(entry.getKey(), entry.getValue());
                 }
-                response = Response.ok(streamingOutput(json)).build();
+                if (result.get(server1).isEmpty() && result.get(server2).isEmpty()) {
+                    response = Response.ok(streamingOutput(json)).build();
+                }
+                else {
+                    response = Response.status(Status.CONFLICT).entity(streamingOutput(json)).build();
+                }
             } catch (Exception e) {
                 response = returnInternalServerError(e);
             }
@@ -219,4 +224,5 @@ public class CompareServersResource extends AbstractSailingServerResource {
         final Response response = Response.status(Status.BAD_REQUEST).build();
         return response;
     }
+    
 }
