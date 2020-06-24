@@ -15,6 +15,9 @@ public class RegattaLogSetCompetitorTimeOnTimeFactorEventImpl extends RegattaLog
     public RegattaLogSetCompetitorTimeOnTimeFactorEventImpl(TimePoint createdAt, TimePoint logicalTimePoint,
             AbstractLogEventAuthor author, Serializable pId, Competitor competitor, Double timeOnTimeFactor) {
         super(createdAt, logicalTimePoint, author, pId, competitor);
+        if (!Double.isFinite(timeOnTimeFactor)) {
+            throw new IllegalArgumentException("A competitor's time-on-time factor must be a finite number. "+timeOnTimeFactor+" is not.");
+        }
         this.timeOnTimeFactor = timeOnTimeFactor;
     }
 

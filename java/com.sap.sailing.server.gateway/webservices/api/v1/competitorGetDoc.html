@@ -10,7 +10,10 @@
 <body>
 <h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
 <h2>URL: /api/v1/competitors/{id}</h2>
-
+<p class="deprecationMessage">This API contains deprecated fields. These fields will be removed in near future.<br>
+  The deprecated fields are marked as deprecated in the example below.<br>
+</p>
+<br>
 <b>Description:</b>
 <p>Gets the details of a competitor</p>
 <br/>
@@ -38,8 +41,64 @@
 	</tr>
 	<tr>
 		<td>Example:</td>
-		<td><a href="http://www.sapsailing.com/sailingserver/api/v1/competitors/bba11294-9930-11e0-85be-406186cbf87c">http://www.sapsailing.com/sailingserver/api/v1/competitors/bba11294-9930-11e0-85be-406186cbf87c</a></td>
-	</tr>
+		<td><a href="http://www.sapsailing.com/sailingserver/api/v1/competitors/bba11294-9930-11e0-85be-406186cbf87c">http://www.sapsailing.com/sailingserver/api/v1/competitors/bba11294-9930-11e0-85be-406186cbf87c</a><br/>
+		Example result:<br>
+	        <pre>
+{
+    "idtype": "java.util.UUID",
+    "id": "d455db1b-fd52-4144-a8e2-3eed503467b0",
+    "name": "Dagobert",
+    "shortName": "D",
+    "sailID": null,
+    "displayColor": "#ABCDEF",
+    "searchTag": "atag",
+    "nationality": "GER",
+    "nationalityISO2": "DE",
+    "nationalityISO3": "DEU",
+    "flagImageUri": "http:\/\/flagimage.url",
+    "team": {
+        "name": "Donald Duck",
+        "coach": null,
+        "sailors": [
+            {
+                "name": "Donald Duck",
+                "description": null,
+                "nationality": {
+                    "IOC": "GER"
+                }
+            }
+        ],
+        "imageUri": "http:\/\/teamimage.url"
+    },
+    "boat": {
+        "idtype": "java.util.UUID",
+        "id": "35712e80-578f-418d-bcbd-9a3d0e391982",
+        "name": "Donald Duck",
+        "sailId": null,
+        "color": null,
+        "boatClass": {
+            "name": "GC 32",
+            "typicallyStartsUpwind": false,
+            "hullLengthInMeters": 10.0,
+            "hullBeamInMeters": 6.0,
+            "displayName": "GC 32",
+            "iconUrl": "\/gwt\/src\/main\/resources\/com\/sap\/sailing\/gwt\/ui\/client\/images\/boatclass\/GC_32.png",
+            "aliasNames": [
+                "GC32",
+                "GC-32"
+            ]
+        }
+    },
+    "timeOnTimeFactor": 2.4,
+    "timeOnDistanceAllowanceInSecondsPerNauticalMile": 10000.0,
+    <i class="deprecationMessage">deprecated - use "displayColor" instead </i>color": "#ABCDEF",
+    <i class="deprecationMessage">deprecated - use "nationalityISO2" instead </i>"countryCode": "DE",
+    <i class="deprecationMessage">deprecated - use "flagImageUri" instead </i>"flagImage": "http:\/\/flagimage.url",
+    <i class="deprecationMessage">deprecated - use "team"/"imageUri" instead</i>"teamImageUri": "http:\/\/teamimage.url"
+}
+    </pre>
+    </td>
+    </tr>
 </table>
 <div style="height: 1em;"></div>
 <a href="index.html">Back to Web Service Overview</a> 
