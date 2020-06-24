@@ -327,18 +327,6 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     }
 
     /**
-     * When the leaderboard name changes, notify this to this object's {@link RaceColumnListener}s as a
-     * change of this race column's name, but only if no {@link Leaderboard#getDisplayName() display name}
-     * is set because that would take precedence over the regular name.
-     */
-    @Override
-    public void nameChanged(String oldName, String newName) {
-        if (leaderboard.getDisplayName() == null) {
-            getRaceColumnListeners().notifyListenersAboutRaceColumnNameChanged(this, oldName, newName);
-        }
-    }
-
-    /**
      * When the leaderboard display name changes, notify this to this object's {@link RaceColumnListener}s as a
      * change of this race column's name
      */

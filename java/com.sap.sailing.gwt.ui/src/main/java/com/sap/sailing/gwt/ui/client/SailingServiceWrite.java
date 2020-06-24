@@ -358,8 +358,8 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
 
     void removeLeaderboards(Collection<String> leaderboardNames) throws UnauthorizedException;
 
-    StrippedLeaderboardDTOWithSecurity updateLeaderboard(String leaderboardName, String newLeaderboardName,
-            String newLeaderboardDisplayName, int[] newDiscardingThreasholds, List<UUID> newCourseAreaIds)
+    StrippedLeaderboardDTOWithSecurity updateLeaderboard(String leaderboardName, String newLeaderboardDisplayName,
+            int[] newDiscardingThreasholds, List<UUID> newCourseAreaIds)
             throws UnauthorizedException;
 
     StrippedLeaderboardDTOWithSecurity createRegattaLeaderboardWithEliminations(String name, String displayName,

@@ -1185,14 +1185,14 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
         // if trackedLeg is the first leg, compute the gap at the start of this leg; otherwise, compute gap
         // at the end of the previous leg
         final TimePoint timePoint = trackedLeg.getStartTime();
-        final TrackedLegOfCompetitor tloc;
         if (course.getFirstWaypoint() == trackedLeg.getLeg().getFrom()) {
-            tloc = trackedLeg;
+            result = Duration.NULL;
         } else {
-            tloc = trackedLeg.getTrackedLeg().getTrackedRace().getTrackedLegFinishingAt(trackedLeg.getLeg().getFrom())
-                    .getTrackedLeg(trackedLeg.getCompetitor());
+            final TrackedLegOfCompetitor tloc = trackedLeg.getTrackedLeg().getTrackedRace()
+                    .getTrackedLegFinishingAt(trackedLeg.getLeg().getFrom()).getTrackedLeg(trackedLeg.getCompetitor());
+            result = trackedLeg.getTrackedLeg().getTrackedRace().getRankingMetric().getLegGapToLegLeaderInOwnTime(tloc,
+                    timePoint, rankingInfo, cache);
         }
-        result = trackedLeg.getTrackedLeg().getTrackedRace().getRankingMetric().getLegGapToLegLeaderInOwnTime(tloc, timePoint, rankingInfo, cache);
         return result;
     }
 

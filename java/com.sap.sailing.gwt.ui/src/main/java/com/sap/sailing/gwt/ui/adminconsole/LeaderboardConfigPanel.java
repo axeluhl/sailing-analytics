@@ -1014,19 +1014,19 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
         leaderboardSelectionModel.setSelected(result, true);
     }
 
-    private void updateLeaderboard(final String oldLeaderboardName, final LeaderboardDescriptor leaderboardToUpdate) {
-        sailingServiceWrite.updateLeaderboard(oldLeaderboardName, leaderboardToUpdate.getName(),
-                leaderboardToUpdate.getDisplayName(), leaderboardToUpdate.getDiscardThresholds(),
-                leaderboardToUpdate.getCourseAreaIds(), new AsyncCallback<StrippedLeaderboardDTOWithSecurity>() {
+    private void updateLeaderboard(final String leaderboardName, final LeaderboardDescriptor leaderboardToUpdate) {
+        sailingServiceWrite.updateLeaderboard(leaderboardName, leaderboardToUpdate.getDisplayName(),
+                leaderboardToUpdate.getDiscardThresholds(), leaderboardToUpdate.getCourseAreaIds(),
+                new AsyncCallback<StrippedLeaderboardDTOWithSecurity>() {
                     @Override
                     public void onFailure(Throwable t) {
                         errorReporter.reportError(
-                                "Error trying to update leaderboard " + oldLeaderboardName + ": " + t.getMessage());
+                                "Error trying to update leaderboard " + leaderboardName + ": " + t.getMessage());
                     }
 
                     @Override
                     public void onSuccess(StrippedLeaderboardDTOWithSecurity updatedLeaderboard) {
-                        refreshLeaderboardInTable(oldLeaderboardName, updatedLeaderboard);
+                        refreshLeaderboardInTable(leaderboardName, updatedLeaderboard);
                     }
                 });
     }

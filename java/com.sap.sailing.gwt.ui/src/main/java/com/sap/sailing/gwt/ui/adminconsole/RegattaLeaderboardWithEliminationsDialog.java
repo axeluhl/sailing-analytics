@@ -92,9 +92,6 @@ public abstract class RegattaLeaderboardWithEliminationsDialog extends AbstractL
         this.errorReporter = errorReporter;
         this.existingRegattas = existingRegattas;
         this.existingLeaderboards = existingLeaderboards;
-        nameTextBox = createTextBox(null);
-        nameTextBox.ensureDebugId("NameTextBox");
-        nameTextBox.setVisibleLength(50);
         displayNameTextBox = createTextBox(null);
         displayNameTextBox.ensureDebugId("DisplayNameTextBox");
         displayNameTextBox.setVisibleLength(50);

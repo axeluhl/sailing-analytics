@@ -516,12 +516,12 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     }
 
                     @Override
-                    public Double getTimeOnTimeFactor(Competitor competitor) {
+                    public Double getTimeOnTimeFactor(Competitor competitor, Optional<Runnable> changeCallback) {
                         return null;
                     }
 
                     @Override
-                    public Duration getTimeOnDistanceAllowancePerNauticalMile(Competitor competitor) {
+                    public Duration getTimeOnDistanceAllowancePerNauticalMile(Competitor competitor, Optional<Runnable> changeCallback) {
                         return null;
                     }
 
