@@ -16,7 +16,7 @@ public class TimeRangeResultCacheTest {
     public void testSimpleRequest() {
         TimeRangeResultCache<Void> trimmer = new TimeRangeResultCache<>();
         TimeRange timeRange = new MilliTimeRange(100, 1000);
-        assertEquals(timeRange, trimmer.trimAndRegisterRequest(timeRange, false));
+        assertEquals(timeRange, trimmer.trimAndRegisterRequest(timeRange, /* force */ false));
         List<Pair<TimeRange, Void>> expectedResult = new ArrayList<>(1);
         expectedResult.add(new Pair<>(timeRange, null));
         assertArrayEquals(expectedResult.toArray(), trimmer.registerAndCollectResult(timeRange, null, null).toArray());
@@ -35,7 +35,7 @@ public class TimeRangeResultCacheTest {
         trimmer.trimAndRegisterRequest(rightRange, true);
         trimmer.trimAndRegisterRequest(includedRange, true);
         trimmer.trimAndRegisterRequest(outsideRange, true);
-        assertEquals(expectedRange, new MilliTimeRange(trimmer.trimAndRegisterRequest(requestRange, false)));
+        assertEquals(expectedRange, new MilliTimeRange(trimmer.trimAndRegisterRequest(requestRange, /* force */ false)));
     }
 
     @Test
@@ -47,11 +47,11 @@ public class TimeRangeResultCacheTest {
         final TimeRange leftSecondPassRange =   new MilliTimeRange(120_000L, 150_000L);
         final TimeRange rightRange =            new MilliTimeRange(190_000L, 300_000L);
         final TimeRange outsideRange =          new MilliTimeRange( 50_000L, 100_000L);
-        trimmer.trimAndRegisterRequest(leftSecondPassRange, true);
-        trimmer.trimAndRegisterRequest(leftRange, true);
-        trimmer.trimAndRegisterRequest(rightRange, true);
-        trimmer.trimAndRegisterRequest(outsideRange, true);
-        assertEquals(expectedRange, new MilliTimeRange(trimmer.trimAndRegisterRequest(requestRange, false)));
+        trimmer.trimAndRegisterRequest(leftSecondPassRange, /* force */ true);
+        trimmer.trimAndRegisterRequest(leftRange, /* force */ true);
+        trimmer.trimAndRegisterRequest(rightRange, /* force */ true);
+        trimmer.trimAndRegisterRequest(outsideRange, /* force */ true);
+        assertEquals(expectedRange, new MilliTimeRange(trimmer.trimAndRegisterRequest(requestRange, /* force */ false)));
     }
 
     @Test
@@ -69,7 +69,7 @@ public class TimeRangeResultCacheTest {
         expectedResult.add(new Pair<>(leftRange, leftInt));
         trimmer.registerAndCollectResult(leftRange, leftInt, null);
         trimmer.registerAndCollectResult(outsideRange, outsideInt, null);
-        TimeRange trimmedRange = trimmer.trimAndRegisterRequest(requestedRange, false);
+        TimeRange trimmedRange = trimmer.trimAndRegisterRequest(requestedRange, /* force */ false);
         assertEquals(expectedRange, trimmedRange);
         List<Pair<TimeRange, Integer>> result = trimmer.registerAndCollectResult(trimmedRange, requestedInt, null);
         assertArrayEquals(expectedResult.toArray(), result.toArray());

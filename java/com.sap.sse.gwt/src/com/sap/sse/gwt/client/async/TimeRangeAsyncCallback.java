@@ -13,7 +13,8 @@ import com.sap.sse.common.Util.Pair;
  *
  * When used with a {@link TimeRangeActionsExecutor} the data flow looks like this:
  * <ol>
- * <li>{@link TimeRangeAsyncAction} gets executed and returns server response.
+ * <li>{@link TimeRangeAsyncAction} gets executed with a compound request for potentially several keys and returns a
+ * compound server response of type {@code Result}
  * <li>The response gets split up into {@link SubResult}s by {@link Key} by {@link #unzipResults(Object)}.
  * <li>By {@link Key} the {@link SubResult}s get cached and get put into {@link #joinSubResults(TimeRange, List)} along
  * with all other required cached {@link SubResult}s.</li>
@@ -22,9 +23,12 @@ import com.sap.sse.common.Util.Pair;
  * </ol>
  *
  * @param <Result>
+ *            The type of the compound result returned by the compound request for multiple keys
  * @param <SubResult>
- *            test
+ *            The type of a result for a single key and time range
  * @param <Key>
+ *            The type of key, each of which can have a separate time range in the compound request, and for each one a
+ *            separate {@code SubResult} is expected to be provided in the compound {@code Result} object.
  * @see TimeRangeAsyncAction
  * @see TimeRangeActionsExecutor
  * @author Tim Hessenmüller (D062243)

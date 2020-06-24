@@ -27,9 +27,7 @@ public interface TimeRange extends Comparable<TimeRange>, Serializable {
     
     /**
      * Also returns true if (either or both) the from or to timepoints are equal.
-     * E.g. 10-100 lies within 10-00, and 10-50 lies within 10-100.
-     * @param other
-     * @return
+     * E.g. 10-100 lies within 5-100, and 10-50 lies within 10-100.
      */
     boolean liesWithin(TimeRange other);
     

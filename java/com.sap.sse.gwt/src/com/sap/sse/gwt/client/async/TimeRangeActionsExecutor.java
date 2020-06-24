@@ -36,10 +36,15 @@ import com.sap.sse.common.Util.Pair;
  *
  *
  * @param <Result>
- *            Type returned by the combined call. See {@link TimeRangeAsyncAction}.
+ *            Type returned by the combined call. See {@link TimeRangeAsyncAction}. Holds a compound result for several
+ *            keys, such as for several competitors or several boats. A {@link TimeRangeAsyncCallback} object is
+ *            expected to be able to {@link TimeRangeAsyncCallback#unzipResults(Object) split} such a {@code Result}
+ *            object into the {@code Key}s and {@code SubResult}s, as well as to
+ *            {@link TimeRangeAsyncCallback#joinSubResults(TimeRange, List) join} these sub-results of the individual
+ *            results for trimmed requests into a sub-result for the full time range requested for one {@code Key}.
  * @param <SubResult>
- *            Type representing an individual part or channel of a complete {@link Result}, as returned by
- *            an individual remote procedure call.
+ *            Type representing an individual part or channel of a compound {@link Result}, specific to one {@code Key},
+ *            as obtained by {@link TimeRangeAsyncCallback#unzipResults(Object) splitting} a compound {@code Result}.
  * @param <Key>
  *            Type used to index {@link SubResult}s.
  * @see TimeRangeAsyncAction
@@ -49,7 +54,8 @@ import com.sap.sse.common.Util.Pair;
  */
 public class TimeRangeActionsExecutor<Result, SubResult, Key> {
     /**
-     * Callback called by {@link TimeRangeActionsExecutor#executor} upon receiving an answer from the server.
+     * Callback called by {@link TimeRangeActionsExecutor#executor} upon receiving an answer from the server
+     * for a potentially trimmed request
      */
     private final class ExecutorCallback implements AsyncCallback<Result> {
         private final TimeRangeAsyncCallback<Result, SubResult, Key> callback;
@@ -66,18 +72,19 @@ public class TimeRangeActionsExecutor<Result, SubResult, Key> {
 
         @Override
         public void onSuccess(Result result) {
-            Map<Key, SubResult> unzippedResultMap = result != null ? callback.unzipResults(result)
-                    : Collections.emptyMap();
-            Map<Key, Pair<TimeRange, SubResult>> completedResultMap = new HashMap<>();
+            // from the compound result extract the potentially trimmed sub-results per key
+            final Map<Key, SubResult> unzippedResultMap = result != null ? callback.unzipResults(result) : Collections.emptyMap();
+            final Map<Key, Pair<TimeRange, SubResult>> completedResultMap = new HashMap<>();
             for (Pair<Key, TimeRange> request : requestedTimeRanges) {
                 final Key key = request.getA();
-                SubResult subResult = unzippedResultMap.get(key);
-                TimeRangeResultCache<SubResult> cache = getSubResultCache(key);
-                List<Pair<TimeRange, SubResult>> partialResults = cache.registerAndCollectResult(
-                        trimmedTimeRangeMap.get(key), subResult, new AsyncCallback<Void>() {
+                final SubResult trimmedSubResultForKey = unzippedResultMap.get(key);
+                final TimeRangeResultCache<SubResult> cache = getSubResultCache(key);
+                // FIXME registerAndCollectResult clears the Request's dependencies; returning bluntly below and hoping for a retry will no longer find those dependencies
+                final List<Pair<TimeRange, SubResult>> partialResults = cache.registerAndCollectResult(
+                        trimmedTimeRangeMap.get(key), trimmedSubResultForKey, new AsyncCallback<Void>() {
                             @Override
                             public void onSuccess(Void voidResult) {
-                                ExecutorCallback.this.onSuccess(result);
+                                ExecutorCallback.this.onSuccess(result); // try again after another dependency has delivered its result
                             }
 
                             @Override
@@ -85,12 +92,12 @@ public class TimeRangeActionsExecutor<Result, SubResult, Key> {
                             }
                         });
                 if (partialResults == null) {
-                    return; // A required request is still in transit
-                }
+                    return; // A required request is still in transit; the callback defined above will be notified when
+                }           // another dependency delivers its result and will then try the result combination process again TODO extra work!
                 SubResult completedSubResult = callback.joinSubResults(request.getB(), partialResults);
                 completedResultMap.put(key, new Pair<>(request.getB(), completedSubResult));
             }
-            callback.onSuccess(completedResultMap);
+            callback.onSuccess(completedResultMap); // TODO use the callback to combine the SubResults into a combined Result object
         }
 
         @Override
@@ -103,17 +110,22 @@ public class TimeRangeActionsExecutor<Result, SubResult, Key> {
     /**
      * {@link AsyncActionsExecutor} that will be used to actually execute remote procedures.
      */
-    protected final AsyncActionsExecutor executor;
+    private final AsyncActionsExecutor executor;
+    
     /**
      * Action category passed along to the {@link #executor}.
      *
      * @see AsyncActionsExecutor#execute(AsyncAction, String, AsyncCallback)
      */
-    protected String actionCategory = MarkedAsyncCallback.CATEGORY_GLOBAL;
-    protected final Map<Key, TimeRangeResultCache<SubResult>> cacheMap = new HashMap<>(); //TODO Invalidation
+    private final String actionCategory;
+    
+    private final Map<Key, TimeRangeResultCache<SubResult>> cacheMap = new HashMap<>(); //TODO Invalidation
 
+    /**
+     * Creates a new executor using a default action category {@link MarkedAsyncCallback#CATEGORY_GLOBAL}.
+     */
     public TimeRangeActionsExecutor(AsyncActionsExecutor actionsExecutor) {
-        this.executor = Objects.requireNonNull(actionsExecutor);
+        this(actionsExecutor, MarkedAsyncCallback.CATEGORY_GLOBAL);
     }
 
     public TimeRangeActionsExecutor(AsyncActionsExecutor actionsExecutor, String actionCategory) {
@@ -123,7 +135,8 @@ public class TimeRangeActionsExecutor<Result, SubResult, Key> {
 
     /**
      * Executes a {@link TimeRangeAsyncAction} and returns the results to a {@link TimeRangeAsyncCallback}. Calls
-     * {@link #execute(TimeRangeAsyncAction, AsyncCallback, boolean)} with {@code forceTimeRange} set to {@code false}.
+     * {@link #execute(TimeRangeAsyncAction, AsyncCallback, boolean)} with {@code forceTimeRange} set to {@code false},
+     * thus allowing for cached requests to help trim the new request so as to avoid overlapping redundant requests.
      *
      * @param action
      *            {@link TimeRangeAsyncAction} to execute.
@@ -144,7 +157,8 @@ public class TimeRangeActionsExecutor<Result, SubResult, Key> {
      * @param callback
      *            {@link TimeRangeAsyncCallback} to return results to.
      * @param forceTimeRange
-     *            if {@code false} the request will be optimized.
+     *            if {@code false} the request will be optimized by trimming its time range; otherwise it will be
+     *            executed unchanged
      * @see #execute(TimeRangeAsyncAction, TimeRangeAsyncCallback)
      */
     public void execute(TimeRangeAsyncAction<Result, Key> action,
@@ -155,21 +169,17 @@ public class TimeRangeActionsExecutor<Result, SubResult, Key> {
         if (callback == null) {
             throw new IllegalArgumentException("callback must not be null!");
         }
-        List<Pair<Key, TimeRange>> trimmedTimeRanges = new ArrayList<>(action.getTimeRanges().size());
+        final List<Pair<Key, TimeRange>> trimmedTimeRanges = new ArrayList<>(action.getTimeRanges().size());
         for (Pair<Key, TimeRange> part : action.getTimeRanges()) {
-            TimeRangeResultCache<SubResult> cache = getSubResultCache(part.getA());
-            TimeRange trimmedRange = cache.trimAndRegisterRequest(part.getB(), forceTimeRange);
+            final TimeRangeResultCache<SubResult> cache = getSubResultCache(part.getA());
+            final TimeRange trimmedRange = cache.trimAndRegisterRequest(part.getB(), forceTimeRange);
             if (trimmedRange != null) {
                 trimmedTimeRanges.add(new Pair<>(part.getA(), trimmedRange));
             }
         }
         if (!trimmedTimeRanges.isEmpty()) {
-            executor.execute(new AsyncAction<Result>() {
-                @Override
-                public void execute(AsyncCallback<Result> callback) {
-                    action.execute(trimmedTimeRanges, callback);
-                }
-            }, actionCategory, new ExecutorCallback(action.getTimeRanges(), trimmedTimeRanges, callback));
+            executor.execute(cb->action.execute(trimmedTimeRanges, cb),
+                    actionCategory, new ExecutorCallback(action.getTimeRanges(), trimmedTimeRanges, callback));
         } else {
             new ExecutorCallback(action.getTimeRanges(), trimmedTimeRanges, callback).onSuccess(null);
         }

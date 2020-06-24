@@ -7,10 +7,18 @@ import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util.Pair;
 
 /**
- * An action that will asynchronously execute a remote procedure that is parameterized by time ranges and by a
- * {@code Key} (e.g., a competitor, or a boat or similar) and that returns a {@code Result}. Executed by
- * {@link TimeRangeActionsExecutor}. The benefit of using this class over making a straight call to the remote procedure
- * is that the {@link TimeRangeActionsExecutor} understands, manages and optimized the overlaps in concurrent requests.
+ * An action that will asynchronously execute a remote procedure that is parameterized by time ranges keyed by a set of
+ * {@code Key}s (e.g., a competitor, or a boat or similar) and that returns a {@code Result}, most likely again keyed by
+ * those {@code Key}s somehow. The action specifies by its return value for the {@link #getTimeRanges()} method for
+ * which time ranges it would like to know the results. When
+ * {@link TimeRangeActionsExecutor#execute(TimeRangeAsyncAction, TimeRangeAsyncCallback) executed} by a
+ * {@link TimeRangeActionsExecutor}, that executor can trim the request time ranges based on cached requests, avoiding
+ * redundant requests for overlapping time ranges. After the executor has trimmed the requests the executor will call
+ * this action's {@link #execute(Collection, AsyncCallback)} method with the trimmed time ranges.
+ * <p>
+ * 
+ * The benefit of using this approach over making a straight call to the remote procedure is that the
+ * {@link TimeRangeActionsExecutor} understands, manages and optimizes the overlaps in concurrent requests.
  *
  * @param <Result>
  *            Type returned by remote procedure.
