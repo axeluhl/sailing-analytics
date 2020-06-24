@@ -1,7 +1,6 @@
 package com.sap.sailing.server.gateway.jaxrs.api;
 
 import java.io.InputStreamReader;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -36,20 +35,27 @@ import com.sap.sse.util.HttpUrlConnectionHelper;
 public class CompareServersResource extends AbstractSailingServerResource {
     private static final Logger logger = Logger.getLogger(CompareServersResource.class.getName());
 
+    private static final String LEADERBOARDGROUPSIDENTIFIABLEPATH = "/sailingserver/api/v1/leaderboardgroups/identifiable";
     private static final String LEADERBOARDGROUPSPATH = "/sailingserver/api/v1/leaderboardgroups";
     /**
      * The list of keys that are compared during a compare run.
      */
-    private static final String[] KEYLIST = new String[] {"id", "description", "events", "leaderboards", "displayName",
+    private static final String[] KEYLISTTOCOMPARE = new String[] {"id", "description", "events", "leaderboards", "displayName",
             "isMetaLeaderboard", "isRegattaLeaderboard", "scoringComment", "lastScoringUpdate", "scoringScheme",
             "regattaName", "series", "isMedalSeries", "fleets", "color", "ordering", "races", "isMedalRace",
             "isTracked", "regattaName", "trackedRaceName", "hasGpsData", "hasWindData"};
-    private static final Set<String> KEYSET = new HashSet<>(Arrays.asList(KEYLIST));
+    private static final Set<String> KEYSETTOCOMPARE = new HashSet<>(Arrays.asList(KEYLISTTOCOMPARE));
     /**
-     * The keys that are not compared.
+     * The list of keys that are not compared.
      */
     private static final String[] KEYSTOIGNORE = new String[] { "timepoint", "raceViewerUrls" };
     private static final Set<String> KEYSETTOIGNORE = new HashSet<>(Arrays.asList(KEYSTOIGNORE));
+    /**
+     * The list of keys that get always printed. "name" needs a special treatment, as it should be printed, but also
+     * during a compare run there is no need to compare entries with different values for "name".
+     */
+    private static final String[] KEYSTOPRINT = new String[] { "id" };
+    private static final Set<String> KEYSETTOPRINT = new HashSet<>(Arrays.asList(KEYSTOPRINT));
 
     public CompareServersResource() {
     }
@@ -67,38 +73,44 @@ public class CompareServersResource extends AbstractSailingServerResource {
             try {
                 final URL base1 = RemoteServerUtil.createBaseUrl(server1);
                 final URL base2 = RemoteServerUtil.createBaseUrl(server2);
-                final URLConnection lgc1 = HttpUrlConnectionHelper
-                        .redirectConnection(RemoteServerUtil.createRemoteServerUrl(base1, LEADERBOARDGROUPSPATH, null));
-                final URLConnection lgc2 = HttpUrlConnectionHelper
-                        .redirectConnection(RemoteServerUtil.createRemoteServerUrl(base2, LEADERBOARDGROUPSPATH, null));
+                final URLConnection lgc1 = HttpUrlConnectionHelper.redirectConnection(
+                        RemoteServerUtil.createRemoteServerUrl(base1, LEADERBOARDGROUPSIDENTIFIABLEPATH, null));
+                final URLConnection lgc2 = HttpUrlConnectionHelper.redirectConnection(
+                        RemoteServerUtil.createRemoteServerUrl(base2, LEADERBOARDGROUPSIDENTIFIABLEPATH, null));
                 final JSONParser parser = new JSONParser();
                 final JSONArray leaderboardgroupList1 = (JSONArray) parser
                         .parse(new InputStreamReader(lgc1.getInputStream(), "UTF-8"));
                 final JSONArray leaderboardgroupList2 = (JSONArray) parser
                         .parse(new InputStreamReader(lgc2.getInputStream(), "UTF-8"));
                 for (Object lg1 : leaderboardgroupList1) {
-                    if (!leaderboardgroupList2.contains(lg1)) {
-                        result.get(server1).add(JSONValue.toJSONString(lg1));
-                    } else {
-                        final String lgdetailpath = checkForForwardSlashInPathAndCreatePath(lg1);
-                        final URLConnection lgdetailc1 = HttpUrlConnectionHelper
-                                .redirectConnection(RemoteServerUtil.createRemoteServerUrl(base1, lgdetailpath, null));
-                        final URLConnection lgdetailc2 = HttpUrlConnectionHelper
-                                .redirectConnection(RemoteServerUtil.createRemoteServerUrl(base2, lgdetailpath, null));
-                        Object lgdetail1 = JSONValue.parse(new InputStreamReader(lgdetailc1.getInputStream(), "UTF-8"));
-                        Object lgdetail2 = JSONValue.parse(new InputStreamReader(lgdetailc2.getInputStream(), "UTF-8"));
-                        lgdetail1 = removeUnnecessaryFields(lgdetail1);
-                        lgdetail2 = removeUnnecessaryFields(lgdetail2);
-                        if (!lgdetail1.equals(lgdetail2)) {
-                            Pair<Object, Object> jsonPair = removeDuplicateEntries(lgdetail1, lgdetail2);
-                            result.get(server1).add(jsonPair.getA());
-                            result.get(server2).add(jsonPair.getB());
+                    try {
+                        if (!leaderboardgroupList2.contains(lg1)) {
+                            result.get(server1).add(lg1);
+                        } else {
+                            final String lgId = ((JSONObject) lg1).get("id").toString();
+                            final URLConnection lgdetailc1 = HttpUrlConnectionHelper.redirectConnection(
+                                    RemoteServerUtil.createRemoteServerUrl(base1, createLgDetailPath(lgId), null));
+                            final URLConnection lgdetailc2 = HttpUrlConnectionHelper.redirectConnection(
+                                    RemoteServerUtil.createRemoteServerUrl(base2, createLgDetailPath(lgId), null));
+                            Object lgdetail1 = JSONValue
+                                    .parse(new InputStreamReader(lgdetailc1.getInputStream(), "UTF-8"));
+                            Object lgdetail2 = JSONValue
+                                    .parse(new InputStreamReader(lgdetailc2.getInputStream(), "UTF-8"));
+                            lgdetail1 = removeUnnecessaryFields(lgdetail1);
+                            lgdetail2 = removeUnnecessaryFields(lgdetail2);
+                            if (!lgdetail1.equals(lgdetail2)) {
+                                Pair<Object, Object> jsonPair = removeDuplicateEntries(lgdetail1, lgdetail2);
+                                result.get(server1).add(jsonPair.getA());
+                                result.get(server2).add(jsonPair.getB());
+                            }
                         }
+                    } catch (Exception e) {
+                        response = returnInternalServerError(e);
                     }
                 }
                 for (Object lg2 : leaderboardgroupList2) {
                     if (!leaderboardgroupList1.contains(lg2)) {
-                        result.get(server2).add(JSONValue.toJSONString(lg2));
+                        result.get(server2).add(lg2);
                     }
                 }
                 JSONObject json = new JSONObject();
@@ -118,18 +130,11 @@ public class CompareServersResource extends AbstractSailingServerResource {
         return response;
     }
 
-    private String checkForForwardSlashInPathAndCreatePath(Object leaderboardgroup) throws URISyntaxException {
+    private String createLgDetailPath(String leaderboardgroupId) throws URISyntaxException {
         final String result;
         final StringBuilder lgdetailpath = new StringBuilder(LEADERBOARDGROUPSPATH);
         lgdetailpath.append("/");
-        final int length = lgdetailpath.length();
-        URI uri = new URI(null, null, leaderboardgroup.toString(), null, null);
-        // filter for / in path
-        if (uri.getRawPath().contains("/")) {
-            lgdetailpath.replace(length, lgdetailpath.length(), uri.getRawPath().replaceAll("/", "%2F"));
-        } else {
-            lgdetailpath.replace(length, lgdetailpath.length(), uri.toASCIIString());
-        }
+        lgdetailpath.append(leaderboardgroupId);
         result = lgdetailpath.toString();
         return result;
     }
@@ -164,7 +169,7 @@ public class CompareServersResource extends AbstractSailingServerResource {
 
     /**
      * Takes two (nested) {@link org.json.simple.JSONObject}'s and compares them recursively. They will be modified in
-     * place, the keys by which they get compared are listed in {@link CompareServersResource#KEYLIST}.
+     * place, the keys by which they get compared are listed in {@link CompareServersResource#KEYLISTTOCOMPARE}.
      * 
      * @return the two (nested) {@link org.json.simple.JSONObject}'s, stripped by all fields and values that are equal
      *         for both.
@@ -182,7 +187,9 @@ public class CompareServersResource extends AbstractSailingServerResource {
                     Object value2 = ((JSONObject) json2).get(key);
                     if (key.equals("name") && !Util.equalsWithNull(value1, value2)) {
                         break;
-                    } else if (Util.equalsWithNull(value1, value2) && KEYSET.contains(key)) {
+                    } else if (KEYSETTOPRINT.contains(key) && Util.equalsWithNull(value1, value2)) {
+                        continue;
+                    } else if (Util.equalsWithNull(value1, value2) && KEYSETTOCOMPARE.contains(key)) {
                         iter1.remove();
                         ((JSONObject) json2).remove(key);
                     } else {
