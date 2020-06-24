@@ -1,4 +1,4 @@
-package com.sap.sse.gwt.test.client;
+package com.sap.sse.gwt.client.async;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -18,11 +18,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.TimeRangeImpl;
-import com.sap.sse.gwt.client.async.AsyncAction;
-import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
-import com.sap.sse.gwt.client.async.TimeRangeActionsExecutor;
-import com.sap.sse.gwt.client.async.TimeRangeAsyncAction;
-import com.sap.sse.gwt.client.async.TimeRangeAsyncCallback;
 
 public class TimeRangeActionsExecutorTest {
     private class MockAsyncActionsExecutor extends AsyncActionsExecutor {

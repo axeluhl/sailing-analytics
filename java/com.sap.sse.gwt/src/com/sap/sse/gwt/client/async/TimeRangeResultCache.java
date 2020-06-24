@@ -84,7 +84,7 @@ public class TimeRangeResultCache<Result> {
     };
 
     /**
-     * Trims the requested {@link TimeRange} against results that already cached and registers the trimmed
+     * Trims the requested {@link TimeRange} against results that are already cached and registers the trimmed
      * {@link TimeRange} with the cache.
      *
      * @param toTrim
@@ -93,7 +93,7 @@ public class TimeRangeResultCache<Result> {
      *            if {@code false} the request will be optimized with cached results.
      * @return {@link TimeRange} to request or {@code null} if no request is to be made since the results are cached.
      */
-    public TimeRange trimAndRegisterRequest(TimeRange toTrim, boolean forceTimeRange) {
+    TimeRange trimAndRegisterRequest(TimeRange toTrim, boolean forceTimeRange) {
         Request request = new Request();
         if (!forceTimeRange) { // TODO Remove old results?
             toTrim = trimTimeRangeAndAttachDeps(toTrim, request, requestCache.entrySet());

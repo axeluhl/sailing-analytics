@@ -1,4 +1,4 @@
-package com.sap.sse.gwt.test.client;
+package com.sap.sse.gwt.client.async;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -10,7 +10,6 @@ import org.junit.Test;
 
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.gwt.client.async.TimeRangeResultCache;
 
 public class TimeRangeResultCacheTest {
     @Test

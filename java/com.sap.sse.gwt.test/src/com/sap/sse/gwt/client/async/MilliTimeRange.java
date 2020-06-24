@@ -1,4 +1,4 @@
-package com.sap.sse.gwt.test.client;
+package com.sap.sse.gwt.client.async;
 
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
