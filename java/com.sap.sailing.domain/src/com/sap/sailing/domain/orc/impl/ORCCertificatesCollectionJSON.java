@@ -138,7 +138,7 @@ public class ORCCertificatesCollectionJSON extends AbstractORCCertificatesCollec
                     sailNumber = entry.getValue() == null ? null : entry.getValue().toString();
                     break;
                 case LOA:
-                    length = new MeterDistance(((Number) entry.getValue()).doubleValue());
+                    length = entry.getValue() == null ? null : new MeterDistance(((Number) entry.getValue()).doubleValue());
                     break;
                 case YACHT_NAME:
                     boatName = entry.getValue() == null ? null : entry.getValue().toString();
@@ -147,17 +147,17 @@ public class ORCCertificatesCollectionJSON extends AbstractORCCertificatesCollec
                     boatclass = (String) entry.getValue();
                     break;
                 case GPH2:
-                    gph = new SecondsDurationImpl(((Number) entry.getValue()).doubleValue());
+                    gph = entry.getValue() == null ? null : new SecondsDurationImpl(((Number) entry.getValue()).doubleValue());
                     break;
                 case CDL2:
-                    cdl = ((Number) entry.getValue()).doubleValue();
+                    cdl = entry.getValue() == null ? null : ((Number) entry.getValue()).doubleValue();
                     break;
                 case ISSUE_DATE:
                     Date date = DatatypeConverter.parseDateTime((String) entry.getValue()).getTime();
                     issueDate = new MillisecondsTimePoint(date);
                     break;
                 case ALLOWANCES:
-                    final JSONObject allowances = (JSONObject) object.get(ALLOWANCES);
+                    final JSONObject allowances = (JSONObject) entry.getValue();
                     // calculating the TWA and TWS before calculating the other dependent values in allowances object
                     final Object windSpeedsObject = allowances.get(WIND_SPEEDS);
                     if (windSpeedsObject != null) {
