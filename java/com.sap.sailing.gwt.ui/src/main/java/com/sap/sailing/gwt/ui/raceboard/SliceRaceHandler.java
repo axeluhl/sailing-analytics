@@ -56,6 +56,8 @@ public class SliceRaceHandler {
     private TimeRange visibleRange;
 
     private final String leaderboardGroupName;
+    
+    private final UUID leaderboardGroupId;
 
     private final String leaderboardName;
 
@@ -80,13 +82,14 @@ public class SliceRaceHandler {
      */
     public SliceRaceHandler(SailingServiceWriteAsync sailingServiceWrite, UserService userService, final ErrorReporter errorReporter,
             MultiCompetitorRaceChart competitorRaceChart, RegattaAndRaceIdentifier selectedRaceIdentifier,
-            final String leaderboardGroupName, String leaderboardName, UUID eventId,
+            final String leaderboardGroupName, UUID leaderboardGroupId, String leaderboardName, UUID eventId,
             StrippedLeaderboardDTOWithSecurity leaderboardDTO, RaceWithCompetitorsAndBoatsDTO raceDTO, StringMessages stringMessages) {
         this.sailingServiceWrite = sailingServiceWrite;
         this.userService = userService;
         this.errorReporter = errorReporter;
         this.selectedRaceIdentifier = selectedRaceIdentifier;
         this.leaderboardGroupName = leaderboardGroupName;
+        this.leaderboardGroupId = leaderboardGroupId;
         this.leaderboardName = leaderboardName;
         this.eventId = eventId;
         this.leaderboardDTO = leaderboardDTO;
@@ -177,7 +180,7 @@ public class SliceRaceHandler {
                                                 new TrackedRaceCreationResultDialog(StringMessages.INSTANCE.sliceRace(),
                                                         StringMessages.INSTANCE.slicingARaceWasSuccessful(), eventId,
                                                         result.getRegattaName(), result.getRaceName(), leaderboardName,
-                                                        leaderboardGroupName).show();
+                                                        leaderboardGroupName, leaderboardGroupId).show();
                                             }
                                         });
                             }).show();

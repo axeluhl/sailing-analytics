@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.server;
 
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -16,6 +17,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.UnknownHostException;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -23,6 +25,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -417,6 +420,7 @@ import com.sap.sailing.manage2sail.RaceResultDescriptor;
 import com.sap.sailing.manage2sail.RegattaResultDescriptor;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.ORCCertificateJsonDeserializer;
+import com.sap.sailing.server.gateway.serialization.LeaderboardGroupConstants;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.interfaces.SimulationService;
 import com.sap.sailing.server.operationaltransformation.AddRemoteSailingServerReference;
@@ -1686,7 +1690,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
   //READ
     public RaceboardDataDTO getRaceboardData(String regattaName, String raceName, String leaderboardName,
-            String leaderboardGroupName, UUID eventId) {
+            String leaderboardGroupName, UUID leaderboardGroupId, UUID eventId) {
         RaceboardDataDTO result = new RaceboardDataDTO(null, false, false, Collections.emptyList(),
                 Collections.emptyList(), null, null);
         RaceWithCompetitorsAndBoatsDTO raceDTO = null;
@@ -1709,9 +1713,12 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                     raceDTO.boatClass = regatta.getBoatClass() == null ? null : regatta.getBoatClass().getName();
                     SecurityDTOUtil.addSecurityInformation(getSecurityService(), raceDTO, raceDTO.getIdentifier());
                     Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-                    LeaderboardGroup leaderboardGroup = leaderboardGroupName != null
-                            ? getService().getLeaderboardGroupByName(leaderboardGroupName)
-                            : null;
+                    LeaderboardGroup leaderboardGroup = getService().getLeaderboardGroupByID(leaderboardGroupId);
+                    if (leaderboardGroup == null) {
+                        leaderboardGroup = leaderboardGroupName != null
+                                ? getService().getLeaderboardGroupByName(leaderboardGroupName)
+                                : null;
+                    }
                     Event event = eventId != null ? getService().getEvent(eventId) : null;
                     if (!getSecurityService().hasCurrentUserReadPermission(event)) {
                         event = null;
@@ -1736,7 +1743,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                         }
                     }
                     Iterable<DetailType> detailTypesForCompetitorChart = determineDetailTypesForCompetitorChart(
-                            leaderboardGroupName, raceDTO.getRaceIdentifier());
+                            leaderboardGroupName, leaderboardGroupId, raceDTO.getRaceIdentifier());
                     Iterable<DetailType> availableDetailTypesForLeaderboard = getAvailableDetailTypesForLeaderboard(
                             leaderboardName, raceDTO.getRaceIdentifier());
                     StrippedLeaderboardDTOWithSecurity leaderboardDTO = createStrippedLeaderboardDTOWithSecurity(
@@ -1760,7 +1767,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             boolean extrapolate, LegIdentifier simulationLegIdentifier,
             byte[] md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID,
             Date timeToGetTheEstimatedDurationFor, boolean estimatedDurationRequired, DetailType detailType,
-            String leaderboardName, String leaderboardGroupName) throws NoWindException {
+            String leaderboardName, String leaderboardGroupName, UUID leaderboardGroupId) throws NoWindException {
         final HashSet<String> raceCompetitorIdsAsStrings;
         final TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         getSecurityService().checkCurrentUserReadPermission(trackedRace);
@@ -1782,7 +1789,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             estimatedDuration = null;
         }
         final Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatPositions = getBoatPositionsInternal(raceIdentifier,
-                fromPerCompetitorIdAsString, toPerCompetitorIdAsString, extrapolate, detailType, leaderboardName, leaderboardGroupName);
+                fromPerCompetitorIdAsString, toPerCompetitorIdAsString, extrapolate, detailType, leaderboardName, leaderboardGroupName,
+                leaderboardGroupId);
         final CoursePositionsDTO coursePositions = getCoursePositions(raceIdentifier, date);
         final List<SidelineDTO> courseSidelines = getCourseSidelines(raceIdentifier, date);
         final QuickRanksDTO quickRanks = getQuickRanksWithoutSecuritychecks(raceIdentifier, date);
@@ -1812,10 +1820,11 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     //READ
     public CompactBoatPositionsDTO getBoatPositions(RegattaAndRaceIdentifier raceIdentifier,
             Map<String, Date> fromPerCompetitorIdAsString, Map<String, Date> toPerCompetitorIdAsString,
-            boolean extrapolate, DetailType detailType, String leaderboardName, String leaderboardGroupName)
-                    throws NoWindException {
-        return new CompactBoatPositionsDTO(getBoatPositionsInternal(raceIdentifier, fromPerCompetitorIdAsString,
-                toPerCompetitorIdAsString, extrapolate, detailType, leaderboardName, leaderboardGroupName));
+            boolean extrapolate, DetailType detailType, String leaderboardName, String leaderboardGroupName,
+            UUID leaderboardGroupId) throws NoWindException {
+        return new CompactBoatPositionsDTO(
+                getBoatPositionsInternal(raceIdentifier, fromPerCompetitorIdAsString, toPerCompetitorIdAsString,
+                        extrapolate, detailType, leaderboardName, leaderboardGroupName, leaderboardGroupId));
     }
 
     /**
@@ -1843,7 +1852,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
   //READ
     private Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> getBoatPositionsInternal(RegattaAndRaceIdentifier raceIdentifier,
             Map<String, Date> fromPerCompetitorIdAsString, Map<String, Date> toPerCompetitorIdAsString,
-            boolean extrapolate, DetailType detailType, String leaderboardName, String leaderboardGroupName)
+            boolean extrapolate, DetailType detailType, String leaderboardName, String leaderboardGroupName, UUID leaderboardGroupId)
             throws NoWindException {
         Map<Pair<Leg, TimePoint>, LegType> legTypeCache = new HashMap<>();
         Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> result = new HashMap<>();
@@ -1936,7 +1945,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                                 }
                                 try {
                                     detailValue = getCompetitorRaceDataEntry(detailType, trackedRace, competitor,
-                                            fix.getTimePoint(), leaderboardGroupName, leaderboardName, cache);
+                                            fix.getTimePoint(), leaderboardGroupName, leaderboardGroupId, leaderboardName, cache);
                                 } catch (NoWindException nwe) {
                                     detailValue = null;
                                 }
@@ -2697,7 +2706,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     //READ
     private Double getCompetitorRaceDataEntry(DetailType dataType, TrackedRace trackedRace, Competitor competitor,
-            TimePoint timePoint, String leaderboardGroupName, String leaderboardName,
+            TimePoint timePoint, String leaderboardGroupName, UUID leaderboardGroupId, String leaderboardName,
             WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException {
         Double result = null;
         Course course = trackedRace.getRace().getCourse();
@@ -2801,7 +2810,10 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 if (leaderboardGroupName == null || leaderboardGroupName.isEmpty()) {
                     break;
                 }
-                LeaderboardGroup group = getService().getLeaderboardGroupByName(leaderboardGroupName);
+                LeaderboardGroup group = getService().getLeaderboardGroupByID(leaderboardGroupId);
+                if (group == null) {
+                    group = getService().getLeaderboardGroupByName(leaderboardGroupName);
+                }
                 Leaderboard overall = group.getOverallLeaderboard();
                 result = overall == null ? null : (double) overall.getTotalRankOfCompetitor(competitor, timePoint);
                 break;
@@ -3111,7 +3123,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
   //READ
     public CompetitorsRaceDataDTO getCompetitorsRaceData(RegattaAndRaceIdentifier race, List<CompetitorDTO> competitors, Date from, Date to,
-            final long stepSizeInMillis, final DetailType detailType, final String leaderboardGroupName, final String leaderboardName) throws NoWindException {
+            final long stepSizeInMillis, final DetailType detailType, final String leaderboardGroupName, final UUID leaderboardGroupId, 
+            final String leaderboardName) throws NoWindException {
         CompetitorsRaceDataDTO result = null;
         final TrackedRace trackedRace = getExistingTrackedRace(race);
         getSecurityService().checkCurrentUserReadPermission(trackedRace);
@@ -3142,7 +3155,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                                     WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache = cachesByTimePoint
                                             .computeIfAbsent(time, LeaderboardDTOCalculationReuseCache::new);
                                     Double competitorMarkPassingsData = getCompetitorRaceDataEntry(detailType,
-                                            trackedRace, competitor, time, leaderboardGroupName, leaderboardName, cache);
+                                            trackedRace, competitor, time, leaderboardGroupName, leaderboardGroupId, leaderboardName, cache);
                                     if (competitorMarkPassingsData != null) {
                                         markPassingsData.add(new com.sap.sse.common.Util.Triple<String, Date, Double>(markPassing
                                                 .getWaypoint().getName(), time.asDate(), competitorMarkPassingsData));
@@ -3168,7 +3181,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                                     cachesByTimePoint.put(time, cache);
                                 }
                                 Double competitorRaceData = getCompetitorRaceDataEntry(detailType, trackedRace,
-                                        competitor, time, leaderboardGroupName, leaderboardName, cache);
+                                        competitor, time, leaderboardGroupName, leaderboardGroupId, leaderboardName, cache);
                                 if (competitorRaceData != null) {
                                     raceData.add(new com.sap.sse.common.Util.Pair<Date, Double>(time.asDate(), competitorRaceData));
                                 }
@@ -3486,9 +3499,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-  //READ
+    //READ
     public List<LeaderboardGroupDTO> getLeaderboardGroups(boolean withGeoLocationData) {
-        final Map<String, LeaderboardGroup> leaderboardGroups = getService().getLeaderboardGroups();
+        final Map<UUID, LeaderboardGroup> leaderboardGroups = getService().getLeaderboardGroupsIdentifiable();
         return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
                 leaderboardGroups.values(),
                 leaderboardGroup -> convertToLeaderboardGroupDTO(leaderboardGroup, withGeoLocationData, false));
@@ -3500,6 +3513,14 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         final LeaderboardGroup leaderboardGroupByName = getService().getLeaderboardGroupByName(groupName);
         getSecurityService().checkCurrentUserReadPermission(leaderboardGroupByName);
         return leaderboardGroupByName == null ? null : convertToLeaderboardGroupDTO(leaderboardGroupByName, withGeoLocationData, false);
+    }
+    
+    @Override
+    //READ
+    public LeaderboardGroupDTO getLeaderboardGroupById(final UUID groupId) {
+        final LeaderboardGroup leaderboardGroupById = getService().getLeaderboardGroupByID(groupId);
+        getSecurityService().checkCurrentUserReadPermission(leaderboardGroupById);
+        return leaderboardGroupById == null ? null : convertToLeaderboardGroupDTO(leaderboardGroupById, false, false);
     }
     
     //READ
@@ -4560,11 +4581,10 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-  //READ
-    public List<String> getLeaderboardGroupNamesFromRemoteServer(String url, String username, String password) {
+    // READ
+    public Map<String, String> getLeaderboardGroupNamesAndIdsAsStringsFromRemoteServer(String url, String username, String password) {
         String token = RemoteServerUtil.resolveBearerTokenForRemoteServer(url, username, password);
-        // FIXME: Add checks here that ensure that the current use is allowed to do MDI
-        final String path = "/sailingserver/api/v1/leaderboardgroups";
+        final String path = "/sailingserver/api/v1/leaderboardgroups/identifiable";
         final String query = null;
         URL serverAddress = null;
         InputStream inputStream = null;
@@ -4574,15 +4594,22 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             serverAddress = RemoteServerUtil.createRemoteServerUrl(base, path, query);
             connection = HttpUrlConnectionHelper.redirectConnectionWithBearerToken(serverAddress, Duration.ONE_MINUTE,
                     token);
-            inputStream = connection.getInputStream();
-            InputStreamReader in = new InputStreamReader(inputStream, "UTF-8");
-            org.json.simple.parser.JSONParser parser = new org.json.simple.parser.JSONParser();
-            org.json.simple.JSONArray array = (org.json.simple.JSONArray) parser.parse(in);
-            List<String> names = new ArrayList<String>();
-            for (Object obj : array) {
-                names.add((String) obj);
+            final BufferedReader in = new BufferedReader(
+                    new InputStreamReader(connection.getInputStream(), Charset.forName("UTF-8")));
+            final org.json.simple.parser.JSONParser parser = new org.json.simple.parser.JSONParser();
+            final org.json.simple.JSONArray array = (org.json.simple.JSONArray) parser.parse(in);
+            final Map<String, String> leaderboardGroupsMap = new LinkedHashMap<>();
+            final Iterator<Object> iterator = array.iterator();
+            while (iterator.hasNext()) {
+                JSONObject next = (JSONObject) iterator.next();
+                leaderboardGroupsMap.put((String) next.get(LeaderboardGroupConstants.ID), (String) next.get(LeaderboardGroupConstants.NAME));
             }
-            return names;
+            leaderboardGroupsMap.put(UUID.randomUUID().toString(), "Second group");
+            List<Map.Entry<String, String>> entries = new ArrayList<>(leaderboardGroupsMap.entrySet());
+            leaderboardGroupsMap.clear();
+            entries.stream().sorted(Comparator.comparing(Map.Entry::getValue, Comparator.naturalOrder()))
+                    .forEachOrdered(e -> leaderboardGroupsMap.put(e.getKey(), e.getValue()));
+            return leaderboardGroupsMap;
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
@@ -4595,6 +4622,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                     inputStream.close();
                 }
             } catch (IOException e) {
+                logger.log(Level.WARNING, "Exception while trying to close the remote stream for leaderboard groups", e);
             }
         }
     }
@@ -5804,7 +5832,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     
     @Override
   //READ
-    public Iterable<DetailType> determineDetailTypesForCompetitorChart(String leaderboardGroupName, RegattaAndRaceIdentifier identifier) {
+  public Iterable<DetailType> determineDetailTypesForCompetitorChart(String leaderboardGroupName,
+          UUID leaderboardGroupId, RegattaAndRaceIdentifier identifier) {
         final LinkedHashSet<DetailType> availableDetailTypes = new LinkedHashSet<>();
         availableDetailTypes.addAll(DetailType.getAutoplayDetailTypesForChart());
         availableDetailTypes.removeAll(DetailType.getRaceBravoDetailTypes());
@@ -5844,7 +5873,10 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             }
         }
         if (leaderboardGroupName != null) {
-            final LeaderboardGroupDTO group = getLeaderboardGroupByName(leaderboardGroupName, false);
+            LeaderboardGroupDTO group = getLeaderboardGroupById(leaderboardGroupId);
+            if (group == null) {
+                group = getLeaderboardGroupByName(leaderboardGroupName, false);
+            }
             if (group != null ? group.hasOverallLeaderboard() : false) {
                 availableDetailTypes.add(DetailType.OVERALL_RANK);
             }

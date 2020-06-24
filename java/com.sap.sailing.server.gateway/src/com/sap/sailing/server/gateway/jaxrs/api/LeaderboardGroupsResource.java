@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -19,6 +20,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.lang.StringEscapeUtils;
@@ -40,6 +42,7 @@ import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
+import com.sap.sailing.server.gateway.serialization.LeaderboardGroupConstants;
 import com.sap.sailing.server.hierarchy.SailingHierarchyOwnershipUpdater;
 import com.sap.sailing.server.util.RaceBoardLinkFactory;
 import com.sap.sse.common.TimePoint;
@@ -70,20 +73,42 @@ public class LeaderboardGroupsResource extends AbstractSailingServerResource {
     @GET
     @Produces("application/json;charset=UTF-8")
     public Response getLeaderboardGroups() {
+        final JSONArray jsonLeaderboardGroups = getLeaderboardGroups(leaderboardGroupEntry->leaderboardGroupEntry.getKey());
+        // header option is set to allow communication between two sapsailing servers, especially for
+        // the master data import functionality
+        return addAccessControlAllowOriginHeader(Response.ok(streamingOutput(jsonLeaderboardGroups))).build();
+    }
+
+    private ResponseBuilder addAccessControlAllowOriginHeader(ResponseBuilder responseBuilder) {
+        return responseBuilder.header("Access-Control-Allow-Origin", "*");
+    }
+    
+    private JSONArray getLeaderboardGroups(Function<Entry<String, LeaderboardGroup>, Object> resultObjectSupplier) {
         JSONArray jsonLeaderboardGroups = new JSONArray();
         Map<String, LeaderboardGroup> leaderboardGroups = getService().getLeaderboardGroups();
         for (Entry<String, LeaderboardGroup> leaderboardGroupEntry : leaderboardGroups.entrySet()) {
             if (getSecurityService().hasCurrentUserReadPermission(leaderboardGroupEntry.getValue())) {
-                jsonLeaderboardGroups.add(leaderboardGroupEntry.getKey());
+                jsonLeaderboardGroups.add(resultObjectSupplier.apply(leaderboardGroupEntry));
             }
         }
-
-        String json = jsonLeaderboardGroups.toJSONString();
-
         // header option is set to allow communication between two sapsailing servers, especially for
         // the master data import functionality
-        return Response.ok(json).header("Access-Control-Allow-Origin", "*")
-                .header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+        return jsonLeaderboardGroups;
+    }
+
+    @GET
+    @Path("/identifiable")
+    @Produces("application/json;charset=UTF-8")
+    public Response getLeaderboardGroupsIdentifiable() {
+        final JSONArray jsonLeaderboardGroups = getLeaderboardGroups(leaderboardGroupEntry->{
+            JSONObject leaderboardGroupObject = new JSONObject();
+            leaderboardGroupObject.put(LeaderboardGroupConstants.ID, leaderboardGroupEntry.getValue().getId().toString());
+            leaderboardGroupObject.put(LeaderboardGroupConstants.NAME, leaderboardGroupEntry.getKey());
+            return leaderboardGroupObject;
+        });
+        // header option is set to allow communication between two sapsailing servers, especially for
+        // the master data import functionality
+        return addAccessControlAllowOriginHeader(Response.ok(streamingOutput(jsonLeaderboardGroups))).build();
     }
 
     @GET

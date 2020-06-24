@@ -9,19 +9,27 @@ public class SpectatorContextDefinition extends AbstractGenericSerializableSetti
     
     private transient StringSetting leaderboardGroupName;
     
+    private transient StringSetting leaderboardGroupId;
+    
     public SpectatorContextDefinition() {
     }
     
-    public SpectatorContextDefinition(String leaderboardGroupName) {
+    public SpectatorContextDefinition(String leaderboardGroupName, String leaderboardGroupId) {
         this.leaderboardGroupName.setValue(leaderboardGroupName);
+        this.leaderboardGroupId.setValue(leaderboardGroupId);
     }
     
     @Override
     protected void addChildSettings() {
         leaderboardGroupName = new StringSetting("leaderboardGroupName", this);
+        leaderboardGroupId = new StringSetting("leaderboardGroupId", this);
     }
     
     public String getLeaderboardGroupName() {
         return leaderboardGroupName.getValue();
+    }
+    
+    public String getLeaderboardGroupId() {
+        return leaderboardGroupId.getValue();
     }
 }

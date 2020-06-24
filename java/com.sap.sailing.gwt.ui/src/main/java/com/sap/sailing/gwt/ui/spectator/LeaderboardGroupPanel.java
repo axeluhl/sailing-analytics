@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
@@ -119,7 +120,7 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
     private final Timer timerForClientServerOffset;
     
     public LeaderboardGroupPanel(SailingServiceAsync sailingService, StringMessages stringConstants,
-            ErrorReporter errorReporter, final String groupName, String viewMode, boolean embedded,
+            ErrorReporter errorReporter, final String groupId, final String groupName, String viewMode, boolean embedded,
             boolean showRaceDetails, boolean canReplayDuringLiveRaces, boolean showMapControls) {
         super();
         this.isEmbedded = embedded;
@@ -137,12 +138,13 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
         mainPanel.addStyleName("mainPanel");
         add(mainPanel);
         timerForClientServerOffset = new Timer(PlayModes.Replay);
-        loadLeaderboardGroup(groupName);
+        loadLeaderboardGroup(groupId, groupName);
     }
 
-    private void loadLeaderboardGroup(final String leaderboardGroupName) {
+    private void loadLeaderboardGroup(final String leaderboardGroupId, final String leaderboardGroupName) {
         final long clientTimeWhenRequestWasSent = System.currentTimeMillis();
-        sailingService.getLeaderboardGroupByName(leaderboardGroupName, false /*withGeoLocationData*/, new AsyncCallback<LeaderboardGroupDTO>() {
+        sailingService.getLeaderboardGroupById(UUID.fromString(leaderboardGroupId),
+                new AsyncCallback<LeaderboardGroupDTO>() {
             @Override
             public void onSuccess(final LeaderboardGroupDTO leaderboardGroupDTO) {
                 final long clientTimeWhenResponseWasReceived = System.currentTimeMillis();
@@ -216,7 +218,7 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
             final String link = EntryPointWithSettingsLinkFactory.createLeaderboardLink(
                     new LeaderboardContextDefinition(
                             leaderboardGroup.getName() + " " + LeaderboardNameConstants.OVERALL,
-                            stringMessages.overallStandings(), leaderboardGroup.getName()),
+                            stringMessages.overallStandings()),
                     new LeaderboardPerspectiveOwnSettings(showRaceDetails, isEmbedded));
             Anchor overallStandingsLink = new Anchor(stringMessages.overallStandings(), true, link);
             overallStandingsLink.setStyleName(STYLE_ACTIVE_LEADERBOARD);
@@ -242,8 +244,7 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
             @Override
             public SafeHtml getValue(StrippedLeaderboardDTO leaderboard) {
                 final String link = EntryPointWithSettingsLinkFactory.createLeaderboardLink(
-                        new LeaderboardContextDefinition(leaderboard.getName(), leaderboard.displayName,
-                                leaderboardGroup.getName()),
+                        new LeaderboardContextDefinition(leaderboard.getName(), leaderboard.displayName),
                         new LeaderboardPerspectiveOwnSettings(showRaceDetails, isEmbedded));
                 return getAnchor(link, stringMessages.leaderboard(),
                         STYLE_ACTIVE_LEADERBOARD);
@@ -394,8 +395,9 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
         if (race != null) {
             RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier();
 
-            RaceboardContextDefinition raceboardContext = new RaceboardContextDefinition(raceIdentifier.getRegattaName(),
-                    raceIdentifier.getRaceName(), leaderboardName, leaderboardGroup.getName(), null, viewMode);
+            RaceboardContextDefinition raceboardContext = new RaceboardContextDefinition(
+                    raceIdentifier.getRegattaName(), raceIdentifier.getRaceName(), leaderboardName,
+                    leaderboardGroup.getName(), leaderboardGroup.getId(), null, viewMode);
             RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = RaceBoardPerspectiveOwnSettings
                     .createDefaultWithCanReplayDuringLiveRaces(canReplayDuringLiveRaces);
             Map<String, Settings> innerSettings = Collections.singletonMap(RaceMapLifecycle.ID,

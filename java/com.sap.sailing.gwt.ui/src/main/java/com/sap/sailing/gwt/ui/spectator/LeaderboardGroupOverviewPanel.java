@@ -233,9 +233,10 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         Column<LeaderboardGroupDTO, SafeHtml> groupsNameColumn = new Column<LeaderboardGroupDTO, SafeHtml>(groupsNameAnchorCell) {
             @Override
             public SafeHtml getValue(LeaderboardGroupDTO group) {
-                String link = new LinkWithSettingsGenerator<SpectatorSettings>(new SpectatorContextDefinition(group.getName()))
-                        .createUrl(new SpectatorSettings(showRaceDetails));
-                return ANCHORTEMPLATE.anchor(UriUtils.fromString(link), group.getName());
+                String link = new LinkWithSettingsGenerator<SpectatorSettings>(
+                        new SpectatorContextDefinition(group.getName(), group.getId().toString()))
+                                .createUrl(new SpectatorSettings(showRaceDetails));
+                return ANCHORTEMPLATE.anchor(UriUtils.fromString(link), group.getId().toString());
             }
         };
         groupsNameColumn.setSortable(true);

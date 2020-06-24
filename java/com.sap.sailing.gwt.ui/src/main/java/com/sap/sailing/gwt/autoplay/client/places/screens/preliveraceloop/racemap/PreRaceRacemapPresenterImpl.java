@@ -97,7 +97,7 @@ public class PreRaceRacemapPresenterImpl extends AutoPlayPresenterConfigured<Pre
     public String getRaceViewerURL(String leaderboardName, String leaderboardGroupName,
             RegattaAndRaceIdentifier raceIdentifier) {
         RaceboardContextDefinition raceboardContext = new RaceboardContextDefinition(raceIdentifier.getRegattaName(),
-                raceIdentifier.getRaceName(), leaderboardName, leaderboardGroupName, null, null);
+                raceIdentifier.getRaceName(), leaderboardName, leaderboardGroupName, null, null, null);
         RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = RaceBoardPerspectiveOwnSettings
                 .createDefaultWithCanReplayDuringLiveRaces(true);
         ;

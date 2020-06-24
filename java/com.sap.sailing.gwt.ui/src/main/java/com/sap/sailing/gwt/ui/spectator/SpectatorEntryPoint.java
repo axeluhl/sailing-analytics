@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.spectator;
 
+import java.util.UUID;
+
 import com.google.gwt.dom.client.Style.Position;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -31,18 +33,22 @@ public class SpectatorEntryPoint extends AbstractSailingReadEntryPoint implement
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
         
-        final String groupParamValue = new SettingsToUrlSerializer()
+        final String groupParamIdValue = new SettingsToUrlSerializer()
+                .deserializeFromCurrentLocation(new SpectatorContextDefinition()).getLeaderboardGroupId();
+        
+        final String groupParamNameValue = new SettingsToUrlSerializer()
                 .deserializeFromCurrentLocation(new SpectatorContextDefinition()).getLeaderboardGroupName();
-        final String groupName;
-        if (groupParamValue == null || groupParamValue.isEmpty()) {
-            groupName = null;
+        
+        final String groupId;
+        if (groupParamIdValue == null || groupParamIdValue.isEmpty()) {
+            groupId = null;
         } else {
-            groupName = groupParamValue;
-            Window.setTitle(groupName);
-            getSailingService().getLeaderboardGroupByName(groupName, false /*withGeoLocationData*/, new AsyncCallback<LeaderboardGroupDTO>() {
+            groupId = groupParamIdValue;
+            Window.setTitle(groupParamNameValue);
+            getSailingService().getLeaderboardGroupById(UUID.fromString(groupId), new AsyncCallback<LeaderboardGroupDTO>() {
                 @Override
                 public void onFailure(Throwable t) {
-                    reportError(getStringMessages().noLeaderboardGroupWithNameFound(groupName));
+                    reportError(getStringMessages().noLeaderboardGroupWithNameFound(groupParamNameValue));
                 }
                 @Override
                 public void onSuccess(LeaderboardGroupDTO group) {                }
@@ -53,7 +59,7 @@ public class SpectatorEntryPoint extends AbstractSailingReadEntryPoint implement
         RootPanel rootPanel = RootPanel.get();
         FlowPanel groupAndFeedbackPanel = new FlowPanel();
         boolean embedded = settings.isEmbedded();
-        if (groupName == null) {
+        if (groupId == null) {
             FlowPanel groupOverviewPanel = new FlowPanel();
             groupOverviewPanel.addStyleName("contentOuterPanel");
             // DON'T DELETE -> the EventOverviewPanel will replace the LeaderboardGroupOverviewPanel later on
@@ -64,7 +70,7 @@ public class SpectatorEntryPoint extends AbstractSailingReadEntryPoint implement
             rootPanel.add(groupOverviewPanel);
         } else {
             LeaderboardGroupPanel groupPanel = new LeaderboardGroupPanel(getSailingService(), getStringMessages(), this,
-                    groupName, settings.getViewMode(), embedded, settings.isShowRaceDetails(), settings.isCanReplayDuringLiveRaces(),
+                    groupId, groupParamNameValue, settings.getViewMode(), embedded, settings.isShowRaceDetails(), settings.isCanReplayDuringLiveRaces(),
                     settings.isShowMapControls());
             groupAndFeedbackPanel.add(groupPanel);
             if (!embedded) {
@@ -85,7 +91,7 @@ public class SpectatorEntryPoint extends AbstractSailingReadEntryPoint implement
             rootPanel.add(groupAndFeedbackPanel);
         }
         if (!embedded) {
-            String title = groupName != null ? groupName : getStringMessages().overview();
+            String title = groupParamNameValue != null ? groupParamNameValue : getStringMessages().overview();
             SAPSailingHeaderWithAuthentication header  = getHeader(title);
             rootPanel.add(header);
         } else {

@@ -273,6 +273,7 @@ import com.sap.sailing.gwt.ui.shared.courseCreation.MarkRoleDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkTemplateDTO;
 import com.sap.sailing.server.hierarchy.SailingHierarchyOwnershipUpdater;
 import com.sap.sailing.server.interfaces.RacingEventService;
+import com.sap.sailing.server.operationaltransformation.AbstractLeaderboardGroupOperation;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
 import com.sap.sailing.server.operationaltransformation.AddCourseAreas;
@@ -883,14 +884,14 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     }
 
     @Override
-    public void removeLeaderboardGroups(Set<String> groupNames) {
-        for (String groupName : groupNames) {
-            removeLeaderboardGroup(groupName);
+    public void removeLeaderboardGroups(Set<UUID> groupIds) {
+        for (final UUID groupId : groupIds) {
+            removeLeaderboardGroup(groupId);
         }
     }
 
-    private void removeLeaderboardGroup(String groupName) {
-        LeaderboardGroup group = getService().getLeaderboardGroupByName(groupName);
+    private void removeLeaderboardGroup(UUID groupId) {
+        LeaderboardGroup group = getService().getLeaderboardGroupByID(groupId);
         if (group != null) {
             if (group.getOverallLeaderboard() != null) {
                 removeLeaderboard(group.getOverallLeaderboard().getName());
@@ -899,7 +900,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(group, new Action() {
                 @Override
                 public void run() throws Exception {
-                    getService().apply(new RemoveLeaderboardGroup(groupName));
+                    getService().apply(new RemoveLeaderboardGroup(groupId));
                 }
             });
         }
@@ -1183,7 +1184,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                 new Callable<LeaderboardGroupDTO>() {
                     @Override
                     public LeaderboardGroupDTO call() throws Exception {
-                        CreateLeaderboardGroup createLeaderboardGroupOp = new CreateLeaderboardGroup(
+                        AbstractLeaderboardGroupOperation<LeaderboardGroup> createLeaderboardGroupOp = new CreateLeaderboardGroup(
                                 newLeaderboardGroupId, groupName, description, displayName, displayGroupsInReverseOrder,
                                 leaderBoards, overallLeaderboardDiscardThresholds, overallLeaderboardScoringSchemeType);
                         return convertToLeaderboardGroupDTO(getService().apply(createLeaderboardGroupOp), false, false);
@@ -1199,7 +1200,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                 .checkPermission(SecuredDomainType.LEADERBOARD_GROUP.getStringPermissionForTypeRelativeIdentifier(
                         DefaultActions.UPDATE,
                         LeaderboardGroupImpl.getTypeRelativeObjectIdentifier(leaderboardGroupId)));
-        getService().apply(new UpdateLeaderboardGroup(oldName, newName, newDescription, newDisplayName,
+        getService().apply(new UpdateLeaderboardGroup(leaderboardGroupId, newName, newDescription, newDisplayName,
                 leaderboardNames, overallLeaderboardDiscardThresholds, overallLeaderboardScoringSchemeType));
     }
 

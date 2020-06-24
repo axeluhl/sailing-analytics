@@ -41,7 +41,8 @@ public class RaceBoardLinkFactory {
         String link = getBaseURL(event).toString() + "/gwt/RaceBoard.html?"
         + (locale == null ? "" : (locale.toLanguageTag()+"&"))
         + "eventId=" + event.getId() + "&leaderboardName=" + leaderboard.getName()
-        + "&leaderboardGroupName=" + leaderboardGroup.getName() + "&raceName="
+        + "&leaderboardGroupName=" + leaderboardGroup.getName() + "&leaderboardGroupId="
+        + leaderboardGroup.getId().toString() +"&raceName="
         + raceIdentifier.getRaceName() + "&showMapControls=true&regattaName="
         + raceIdentifier.getRegattaName() + "&mode=" + raceboardMode;
         return link;

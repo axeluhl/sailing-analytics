@@ -45,6 +45,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
 import javax.management.InstanceAlreadyExistsException;
@@ -421,7 +422,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      */
     private final NamedReentrantReadWriteLock leaderboardsByNameLock;
 
-    private final ConcurrentHashMap<String, LeaderboardGroup> leaderboardGroupsByName;
+    private final ConcurrentHashMap<String, Set<LeaderboardGroup>> leaderboardGroupsByName;
 
     private final ConcurrentHashMap<UUID, LeaderboardGroup> leaderboardGroupsByID;
 
@@ -1005,8 +1006,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     
     @Override
     public void clearState() throws Exception {
-        for (String leaderboardGroupName : new ArrayList<>(this.leaderboardGroupsByName.keySet())) {
-            removeLeaderboardGroup(leaderboardGroupName);
+        for (UUID leaderboardGroupID : new ArrayList<>(this.leaderboardGroupsByID.keySet())) {
+            removeLeaderboardGroup(leaderboardGroupID);
         }
         for (String leaderboardName : new ArrayList<>(this.leaderboardsByName.keySet())) {
             removeLeaderboard(leaderboardName);
@@ -1223,7 +1224,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             logger.info("loaded leaderboard group " + leaderboardGroup.getName() + " into " + this);
             LockUtil.lockForWrite(leaderboardGroupsByNameLock);
             try {
-                leaderboardGroupsByName.put(leaderboardGroup.getName(), leaderboardGroup);
+                leaderboardGroupsByName.put(leaderboardGroup.getName(), Collections.singleton(leaderboardGroup));
                 leaderboardGroupsByID.put(leaderboardGroup.getId(), leaderboardGroup);
             } finally {
                 LockUtil.unlockAfterWrite(leaderboardGroupsByNameLock);
@@ -1490,23 +1491,26 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      */
     private void syncGroupsAfterLeaderboardRemove(String removedLeaderboardName, boolean doDatabaseUpdate) {
         boolean groupNeedsUpdate = false;
-        for (LeaderboardGroup leaderboardGroup : leaderboardGroupsByName.values()) {
-            for (final Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
-                if (leaderboard.getName().equals(removedLeaderboardName)) {
-                    leaderboardGroup.removeLeaderboard(leaderboard);
-                    groupNeedsUpdate = true;
-                    // TODO we assume that the leaderboard names are unique, so we can break the inner loop here
-                    break;
+        for (Set<LeaderboardGroup> leaderboardGroupsSet : leaderboardGroupsByName.values()) {
+            for (LeaderboardGroup leaderboardGroup : leaderboardGroupsSet) {
+                for (final Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
+                    if (leaderboard.getName().equals(removedLeaderboardName)) {
+                        leaderboardGroup.removeLeaderboard(leaderboard);
+                        groupNeedsUpdate = true;
+                        // TODO we assume that the leaderboard names are unique, so we can break the inner loop here
+                        break;
+                    }
                 }
+                if (leaderboardGroup.getOverallLeaderboard() != null
+                        && leaderboardGroup.getOverallLeaderboard().getName().equals(removedLeaderboardName)) {
+                    leaderboardGroup.setOverallLeaderboard(null);
+                    groupNeedsUpdate = true;
+                }
+                if (doDatabaseUpdate && groupNeedsUpdate) {
+                    mongoObjectFactory.storeLeaderboardGroup(leaderboardGroup);
+                }
+                groupNeedsUpdate = false;
             }
-            if (leaderboardGroup.getOverallLeaderboard() != null && leaderboardGroup.getOverallLeaderboard().getName().equals(removedLeaderboardName)) {
-                leaderboardGroup.setOverallLeaderboard(null);
-                groupNeedsUpdate = true;
-            }
-            if (doDatabaseUpdate && groupNeedsUpdate) {
-                mongoObjectFactory.storeLeaderboardGroup(leaderboardGroup);
-            }
-            groupNeedsUpdate = false;
         }
     }
 
@@ -2986,12 +2990,22 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public Map<String, LeaderboardGroup> getLeaderboardGroups() {
-        return Collections.unmodifiableMap(new HashMap<String, LeaderboardGroup>(leaderboardGroupsByName));
+        return Collections.unmodifiableMap(leaderboardGroupsByName.entrySet().stream().collect(
+                Collectors.toMap(Map.Entry::getKey, stringSetEntry -> stringSetEntry.getValue().iterator().next())));
+    }
+
+    @Override
+    public Map<UUID, LeaderboardGroup> getLeaderboardGroupsIdentifiable() {
+        return Collections.unmodifiableMap(new HashMap<UUID, LeaderboardGroup>(leaderboardGroupsByID));
     }
 
     @Override
     public LeaderboardGroup getLeaderboardGroupByName(String groupName) {
-        return leaderboardGroupsByName.get(groupName);
+        Set<LeaderboardGroup> leaderboardGroups = leaderboardGroupsByName.get(groupName);
+        if (leaderboardGroups != null) {
+            return leaderboardGroups.stream().findFirst().orElse(null);
+        }
+        return null;
     }
 
     @Override
@@ -3037,7 +3051,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             if (leaderboardGroupsByName.containsKey(groupName)) {
                 throw new IllegalArgumentException("Leaderboard group with name " + groupName + " already exists");
             }
-            leaderboardGroupsByName.put(groupName, result);
+            leaderboardGroupsByName.put(groupName, Collections.singleton(result));
             leaderboardGroupsByID.put(result.getId(), result);
         } finally {
             LockUtil.unlockAfterWrite(leaderboardGroupsByNameLock);
@@ -3050,11 +3064,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     public void addLeaderboardGroupWithoutReplication(LeaderboardGroup leaderboardGroup) {
         LockUtil.lockForWrite(leaderboardGroupsByNameLock);
         try {
-            String groupName = leaderboardGroup.getName();
-            if (leaderboardGroupsByName.containsKey(groupName)) {
-                throw new IllegalArgumentException("Leaderboard group with name " + groupName + " already exists");
+            if (leaderboardGroupsByID.containsKey(leaderboardGroup.getId())) {
+                throw new IllegalArgumentException("Leaderboard group with ID " + leaderboardGroup.getId() + " already exists");
             }
-            leaderboardGroupsByName.put(groupName, leaderboardGroup);
+            leaderboardGroupsByName.put(leaderboardGroup.getName(), Collections.singleton(leaderboardGroup));
             leaderboardGroupsByID.put(leaderboardGroup.getId(), leaderboardGroup);
         } finally {
             LockUtil.unlockAfterWrite(leaderboardGroupsByNameLock);
@@ -3066,12 +3079,15 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public void removeLeaderboardGroup(String groupName) {
-        final LeaderboardGroup leaderboardGroup;
-        LockUtil.lockForWrite(leaderboardGroupsByNameLock);
-        try {
-            leaderboardGroup = leaderboardGroupsByName.remove(groupName);
-            if (leaderboardGroup != null) {
+    public void removeLeaderboardGroup(UUID leaderboardGroupId) {
+        // important: don't remove from leaderboardGroupsByID before trying to remove from event because
+        // the RemoveLeaderboardGroupFromEvent operation depends on the LeaderboardGroup to be retrievable
+        // from this RacingEventService still by ID:
+        final LeaderboardGroup leaderboardGroup = leaderboardGroupsByID.get(leaderboardGroupId);
+        if (leaderboardGroup != null) {
+            LockUtil.lockForWrite(leaderboardGroupsByNameLock);
+            try {
+                leaderboardGroupsByName.remove(leaderboardGroup.getName());
                 for (final Event event : eventsById.values()) {
                     if (Util.contains(event.getLeaderboardGroups(), leaderboardGroup)) {
                         // unlink the leaderboard group from the event; note that the operation is not "apply"-ed to
@@ -3082,12 +3098,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                         new RemoveLeaderboardGroupFromEvent(event.getId(), leaderboardGroup.getId()).internalApplyTo(this);
                     }
                 }
-                leaderboardGroupsByID.remove(leaderboardGroup.getId());
+                leaderboardGroupsByID.remove(leaderboardGroupId);
+            } finally {
+                LockUtil.unlockAfterWrite(leaderboardGroupsByNameLock);
             }
-        } finally {
-            LockUtil.unlockAfterWrite(leaderboardGroupsByNameLock);
         }
-        mongoObjectFactory.removeLeaderboardGroup(groupName);
+        mongoObjectFactory.removeLeaderboardGroup(leaderboardGroupId);
     }
 
     /**
@@ -3098,33 +3114,36 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      * @param oldName The old name of the group
      * @param newName The new name of the group
      */
-    private void renameLeaderboardGroup(String oldName, String newName) {
+    private void renameLeaderboardGroup(UUID leaderboardGroupId, String newName) {
         LockUtil.lockForWrite(leaderboardGroupsByNameLock);
         try {
-            final LeaderboardGroup toRename = leaderboardGroupsByName.get(oldName);
+            final LeaderboardGroup toRename = leaderboardGroupsByID.get(leaderboardGroupId);
             if (toRename == null) {
-                throw new IllegalArgumentException("No leaderboard group with name " + oldName + " found");
+                throw new IllegalArgumentException("No leaderboard group with ID " + leaderboardGroupId + " found");
             }
             if (leaderboardGroupsByName.containsKey(newName)) {
                 throw new IllegalArgumentException("Leaderboard group with name " + newName + " already exists");
             }
-            leaderboardGroupsByName.remove(oldName);
+            leaderboardGroupsByName.remove(toRename.getName());
             toRename.setName(newName);
-            leaderboardGroupsByName.put(newName, toRename);
+            leaderboardGroupsByName.put(newName, Collections.singleton(toRename));
         } finally {
             LockUtil.unlockAfterWrite(leaderboardGroupsByNameLock);
         }
-        mongoObjectFactory.renameLeaderboardGroup(oldName, newName);
+        mongoObjectFactory.renameLeaderboardGroup(leaderboardGroupId, newName);
     }
 
     @Override
-    public void updateLeaderboardGroup(String oldName, String newName, String description, String displayName,
+    public void updateLeaderboardGroup(UUID leaderboardGroupId, String newName, String description, String displayName,
             List<String> leaderboardNames, int[] overallLeaderboardDiscardThresholds,
             ScoringSchemeType overallLeaderboardScoringSchemeType) {
-        if (!oldName.equals(newName)) {
-            renameLeaderboardGroup(oldName, newName);
+        final LeaderboardGroup group = getLeaderboardGroupByID(leaderboardGroupId);
+        if (group == null) {
+            throw new IllegalArgumentException("LeaderboardGroup with ID "+leaderboardGroupId+" not found");
         }
-        LeaderboardGroup group = getLeaderboardGroupByName(newName);
+        if (!group.getName().equals(newName)) {
+            renameLeaderboardGroup(leaderboardGroupId, newName);
+        }
         if (!description.equals(group.getDescription())) {
             group.setDescriptiom(description);
         }
@@ -3239,9 +3258,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         logger.info("Serializing leaderboard groups...");
         oos.writeObject(leaderboardGroupsByName);
         logoutput.append("Serialized " + leaderboardGroupsByName.size() + " leaderboard groups\n");
-        for (LeaderboardGroup lg : leaderboardGroupsByName.values()) {
-            logoutput.append(String.format("%3s\n", lg.toString()));
-        }
+        leaderboardGroupsByName.values().forEach(leaderboardGroupsSet -> leaderboardGroupsSet.stream().findFirst()
+                .ifPresent(lg -> logoutput.append(String.format("%3s\n", lg.toString()))));
         logger.info("Serializing leaderboards...");
         oos.writeObject(leaderboardsByName);
         logoutput.append("Serialized " + leaderboardsByName.size() + " leaderboards\n");
@@ -3328,12 +3346,13 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         logoutput.append("Received " + regattaTrackingCache.size() + " NEW regatta tracking cache entries\n");
 
         logger.info("Reading leaderboard groups...");
-        leaderboardGroupsByName.putAll((Map<String, LeaderboardGroup>) ois.readObject());
+        leaderboardGroupsByName.putAll((Map<String, Set<LeaderboardGroup>>) ois.readObject());
         logoutput.append("Received " + leaderboardGroupsByName.size() + " NEW leaderboard groups\n");
-        for (LeaderboardGroup lg : leaderboardGroupsByName.values()) {
-            leaderboardGroupsByID.put(lg.getId(), lg);
-            logoutput.append(String.format("%3s\n", lg.toString()));
-        }
+        leaderboardGroupsByName.values()
+                .forEach(leaderboardGroupsSet -> leaderboardGroupsSet.stream().findFirst().ifPresent(lg -> {
+                    leaderboardGroupsByID.put(lg.getId(), lg);
+                    logoutput.append(String.format("%3s\n", lg.toString()));
+                }));
 
         logger.info("Reading leaderboards by name...");
         leaderboardsByName.putAll((Map<String, Leaderboard>) ois.readObject());
@@ -4967,7 +4986,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         StringBuffer queryStringBuffer = new StringBuffer("");
         for (int i = 0; i < groupNames.length; i++) {
             String encodedGroupName = URLEncoder.encode(groupNames[i], "UTF-8");
-            queryStringBuffer.append("names[]=" + encodedGroupName + "&");
+            queryStringBuffer.append("uuids[]=" + encodedGroupName + "&");
         }
         queryStringBuffer.append(String.format("compress=%s&exportWind=%s&exportDeviceConfigs=%s&exportTrackedRacesAndStartTracking=%s", compress,
                 exportWind, exportDeviceConfigurations, exportTrackedRacesAndStartTracking));

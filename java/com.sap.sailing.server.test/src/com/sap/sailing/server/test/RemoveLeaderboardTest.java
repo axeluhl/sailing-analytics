@@ -81,8 +81,8 @@ public class RemoveLeaderboardTest {
             server.apply(new RemoveLeaderboard(leaderboardName));
         }
         Map<String, LeaderboardGroup> allLeaderboardGroups = new HashMap<>(server.getLeaderboardGroups());
-        for (final String leaderboardGroupName : allLeaderboardGroups.keySet()) {
-            server.apply(new RemoveLeaderboardGroup(leaderboardGroupName));
+        for (final LeaderboardGroup leaderboardGroup : allLeaderboardGroups.values()) {
+            server.apply(new RemoveLeaderboardGroup(leaderboardGroup.getId()));
         }
         leaderboard = server.apply(
                 new CreateFlexibleLeaderboard(LEADERBOARD_NAME, /* display name */ null, new int[0], new LowPoint(), /* default course area ID */ null));

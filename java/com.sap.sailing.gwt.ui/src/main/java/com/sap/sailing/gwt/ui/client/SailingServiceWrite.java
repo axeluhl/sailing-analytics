@@ -352,7 +352,7 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
 
     void removeLeaderboardColumn(String leaderboardName, String columnName) throws UnauthorizedException;
 
-    void removeLeaderboardGroups(Set<String> groupNames);
+    void removeLeaderboardGroups(Set<UUID> groupIds);
 
     void removeLeaderboard(String leaderboardName) throws UnauthorizedException;
 

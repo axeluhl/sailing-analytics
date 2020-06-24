@@ -377,7 +377,7 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     /**
      * Removes the leaderboard groups with the given names from the service and the persistant store.
      */
-    void removeLeaderboardGroups(Set<String> groupNames, AsyncCallback<Void> asyncCallback);
+    void removeLeaderboardGroups(Set<UUID> groupIds, AsyncCallback<Void> asyncCallback);
 
     /**
      * Creates a new group with the name <code>groupname</code>, the description <code>description</code> and an empty
