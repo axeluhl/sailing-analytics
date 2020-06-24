@@ -6,6 +6,7 @@ import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.NavigationEvents;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.PenaltyFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.PhotoListFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.TrackingListFragment;
 
@@ -149,7 +150,7 @@ public class FinishedButtonFragment extends BasePanelFragment implements Navigat
         uncheckMarker();
         if (fragment instanceof PhotoListFragment) {
             updateMarker(mPhoto, true);
-        } else if (fragment instanceof TrackingListFragment) {
+        } else if (fragment instanceof TrackingListFragment || fragment instanceof PenaltyFragment) {
             updateMarker(mList, true);
         }
     }
@@ -158,7 +159,7 @@ public class FinishedButtonFragment extends BasePanelFragment implements Navigat
     public void onFragmentDetach(Fragment fragment) {
         if (fragment instanceof PhotoListFragment) {
             updateMarker(mPhoto, false);
-        } else if (fragment instanceof TrackingListFragment) {
+        } else if (fragment instanceof TrackingListFragment || fragment instanceof PenaltyFragment) {
             updateMarker(mList, false);
         }
     }
@@ -170,7 +171,7 @@ public class FinishedButtonFragment extends BasePanelFragment implements Navigat
 
     @Override
     public void onFragmentResume(Fragment fragment) {
-
+        onFragmentAttach(fragment);
     }
 
     private class RecordClick implements View.OnClickListener {
