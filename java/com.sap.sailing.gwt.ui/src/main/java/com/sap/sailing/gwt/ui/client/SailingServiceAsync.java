@@ -227,19 +227,20 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
 
     void getCompetitorBoats(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<Map<CompetitorDTO, BoatDTO>> callback);
     
-    void getRaceboardData(String regattaName, String raceName, String leaderboardName, 
-            String leaderboardGroupName, UUID eventId, AsyncCallback<RaceboardDataDTO> callback);
+    void getRaceboardData(String regattaName, String raceName, String leaderboardName, String leaderboardGroupName,
+            UUID leaderboardGrpoupId, UUID eventId, AsyncCallback<RaceboardDataDTO> callback);
 
     void getRaceMapData(RegattaAndRaceIdentifier raceIdentifier, Date date,
             Map<String, Date> fromPerCompetitorIdAsString, Map<String, Date> toPerCompetitorIdAsString,
             boolean extrapolate, LegIdentifier simulationLegIdentifier,
             byte[] md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID,
             Date timeToGetTheEstimatedDurationFor, boolean estimatedDurationRequired, DetailType detailType,
-            String leaderboardName, String leaderboardGroupName, AsyncCallback<CompactRaceMapDataDTO> callback);
+            String leaderboardName, String leaderboardGroupName, UUID leaderboardGroupId, AsyncCallback<CompactRaceMapDataDTO> callback);
 
     void getBoatPositions(RegattaAndRaceIdentifier raceIdentifier, Map<String, Date> fromPerCompetitorIdAsString,
             Map<String, Date> toPerCompetitorIdAsString, boolean extrapolate, DetailType detailType,
-            String leaderboardName, String leaderboardGroupName, AsyncCallback<CompactBoatPositionsDTO> callback);
+            String leaderboardName, String leaderboardGroupName, UUID leaderboardGroupId,
+            AsyncCallback<CompactBoatPositionsDTO> callback);
 
     void getEvents(AsyncCallback<List<EventDTO>> callback);
 
@@ -297,7 +298,7 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
      * {@link SailingServiceConstants#MAX_NUMBER_OF_FIXES_TO_QUERY} are returned per competitor.
      */
     void getCompetitorsRaceData(RegattaAndRaceIdentifier race, List<CompetitorDTO> competitors, Date from, Date to,
-            long stepSize, DetailType detailType, String leaderboarGroupName, String leaderboardName,
+            long stepSize, DetailType detailType, String leaderboarGroupName, UUID leaderboardGroupId, String leaderboardName,
             AsyncCallback<CompetitorsRaceDataDTO> callback);
 
     /**
@@ -484,7 +485,7 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
      * Used to determine for a Chart the available Detailtypes. This is for example used, to only show the RideHeight as
      * an option for charts, if it actually recorded for the race.
      */
-    void determineDetailTypesForCompetitorChart(String leaderboardGroupName, RegattaAndRaceIdentifier identifier,
+    void determineDetailTypesForCompetitorChart(String leaderboardGroupName, UUID leaderboardGroupId, RegattaAndRaceIdentifier identifier,
             AsyncCallback<Iterable<DetailType>> callback);
 
     void getExpeditionDeviceConfigurations(AsyncCallback<List<ExpeditionDeviceConfiguration>> callback);

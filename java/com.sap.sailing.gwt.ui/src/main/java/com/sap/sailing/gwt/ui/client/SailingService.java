@@ -150,7 +150,7 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
     SimulatorResultsDTO getSimulatorResults(LegIdentifier legIdentifier) throws UnauthorizedException;
 
     RaceboardDataDTO getRaceboardData(String regattaName, String raceName, String leaderboardName,
-            String leaderboardGroupName, UUID eventId) throws UnauthorizedException;
+            String leaderboardGroupName, UUID leaderboardGroupId, UUID eventId) throws UnauthorizedException;
 
     Map<CompetitorDTO, BoatDTO> getCompetitorBoats(RegattaAndRaceIdentifier raceIdentifier)
             throws UnauthorizedException;
@@ -160,11 +160,13 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
             boolean extrapolate, LegIdentifier simulationLegIdentifier,
             byte[] md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID,
             Date timeToGetTheEstimatedDurationFor, boolean estimatedDurationRequired, DetailType detailType,
-            String leaderboardName, String leaderboardGroupName) throws NoWindException, UnauthorizedException;
+            String leaderboardName, String leaderboardGroupName, UUID leaderboardGroupId)
+            throws NoWindException, UnauthorizedException;
 
     CompactBoatPositionsDTO getBoatPositions(RegattaAndRaceIdentifier raceIdentifier,
             Map<String, Date> fromPerCompetitorIdAsString, Map<String, Date> toPerCompetitorIdAsString,
-            boolean extrapolate, DetailType detailType, String leaderboardName, String leaderboardGroupName)
+            boolean extrapolate, DetailType detailType, String leaderboardName, String leaderboardGroupName,
+            UUID leaderboardGroupId)
                     throws NoWindException, UnauthorizedException;
 
     RaceTimesInfoDTO getRaceTimesInfo(RegattaAndRaceIdentifier raceIdentifier) throws UnauthorizedException;
@@ -232,7 +234,7 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
 
     CompetitorsRaceDataDTO getCompetitorsRaceData(RegattaAndRaceIdentifier race, List<CompetitorDTO> competitors,
             Date from, Date to, long stepSizeInMs, DetailType detailType, String leaderboardGroupName,
-            String leaderboardName) throws NoWindException, UnauthorizedException;
+            UUID leaderboardGroupId, String leaderboardName) throws NoWindException, UnauthorizedException;
 
     Pair<Integer, Integer> resolveImageDimensions(String imageUrlAsString) throws UnauthorizedException, Exception;
 
@@ -470,7 +472,7 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
      * Used to determine for a Chart the available Detailtypes. This is for example used to only show the RideHeight as
      * an option for charts if it actually recorded for the race.
      */
-    Iterable<DetailType> determineDetailTypesForCompetitorChart(String leaderboardGroupName,
+    Iterable<DetailType> determineDetailTypesForCompetitorChart(String leaderboardGroupName, UUID leaderboardGroupId,
             RegattaAndRaceIdentifier identifier) throws UnauthorizedException;
 
     List<ExpeditionDeviceConfiguration> getExpeditionDeviceConfigurations() throws UnauthorizedException;

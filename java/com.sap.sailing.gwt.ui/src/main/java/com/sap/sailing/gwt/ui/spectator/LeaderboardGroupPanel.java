@@ -395,8 +395,9 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
         if (race != null) {
             RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier();
 
-            RaceboardContextDefinition raceboardContext = new RaceboardContextDefinition(raceIdentifier.getRegattaName(),
-                    raceIdentifier.getRaceName(), leaderboardName, leaderboardGroup.getName(), null, viewMode);
+            RaceboardContextDefinition raceboardContext = new RaceboardContextDefinition(
+                    raceIdentifier.getRegattaName(), raceIdentifier.getRaceName(), leaderboardName,
+                    leaderboardGroup.getName(), leaderboardGroup.getId(), null, viewMode);
             RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = RaceBoardPerspectiveOwnSettings
                     .createDefaultWithCanReplayDuringLiveRaces(canReplayDuringLiveRaces);
             Map<String, Settings> innerSettings = Collections.singletonMap(RaceMapLifecycle.ID,
