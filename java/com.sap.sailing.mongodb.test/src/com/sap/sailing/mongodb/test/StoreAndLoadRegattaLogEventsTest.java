@@ -88,8 +88,7 @@ public class StoreAndLoadRegattaLogEventsTest extends AbstractMongoDBTest {
     public void assertBaseFields(RegattaLogEvent expectedEvent, RegattaLogEvent actualEvent) {
         assertNotNull(actualEvent);
         assertEquals(expectedEvent.getCreatedAt(), actualEvent.getCreatedAt());
-        assertEquals(expectedEvent.getTimePoint(), actualEvent.getTimePoint());
-        // TODO: How to evaluate the logicalTimePoint?
+        assertEquals(expectedEvent.getLogicalTimePoint(), actualEvent.getLogicalTimePoint());
         assertEquals(expectedEvent.getId(), actualEvent.getId());
         assertEquals(expectedEvent.getAuthor().getName(), actualEvent.getAuthor().getName());
         assertEquals(expectedEvent.getAuthor().getPriority(), actualEvent.getAuthor().getPriority());
@@ -107,6 +106,17 @@ public class StoreAndLoadRegattaLogEventsTest extends AbstractMongoDBTest {
         assertNotNull(actualEvent.getAuthor());
         assertEquals(AbstractLogEventAuthor.PRIORITY_COMPATIBILITY, actualEvent.getAuthor().getPriority());
         assertEquals(AbstractLogEventAuthor.NAME_COMPATIBILITY, actualEvent.getAuthor().getName());
+    }
+    
+    @Test
+    public void testStoreEventWithCorrectTimestamps() {
+        final double timeOnTimeFactor = 1.5;
+        final RegattaLogSetCompetitorTimeOnTimeFactorEvent expectedEvent = new RegattaLogSetCompetitorTimeOnTimeFactorEventImpl(
+                MillisecondsTimePoint.now(), expectedEventTime, null, expectedId, createCompetitor(), timeOnTimeFactor);
+        Document dbObject = mongoFactory.storeRegattaLogEvent(regattaIdentifier, expectedEvent);
+        final RegattaLogEvent actualEvent = loadEvent(dbObject);
+        assertEquals(expectedEvent.getCreatedAt(), actualEvent.getCreatedAt());
+        assertEquals(expectedEvent.getLogicalTimePoint(), actualEvent.getLogicalTimePoint());
     }
 
     @Test
