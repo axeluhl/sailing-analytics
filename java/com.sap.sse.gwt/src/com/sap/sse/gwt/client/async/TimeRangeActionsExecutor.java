@@ -13,24 +13,35 @@ import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util.Pair;
 
 /**
- * An Executor for efficient, asynchronous execution of {@link TimeRangeAsyncAction}s. For the actual execution this
- * class relies on an {@link AsyncActionsExecutor}.<br>
+ * An Executor for efficient, asynchronous execution of {@link TimeRangeAsyncAction}s. This executor operates on
+ * {@link TimeRangeAsyncAction}s which specify the wanted {@link TimeRange} by {@link Key} with
+ * {@link TimeRangeAsyncAction#getTimeRanges()} and are expected to return a {@code Result}. The {@link Key} could,
+ * e.g., be a competitor or a boat class.
+ * <p>
+ * 
+ * This executor manages and optimizes concurrent requests for the same {@code Key} that have overlapping time ranges.
+ * This way, redundant requests for the same data can be avoided. This executor collects the results of the overlapping
+ * concurrent requests and uses them to satisfy each individual client request as if they had all been executed in their
+ * entirety.
+ * <p>
+ * 
+ * Each of the {@link TimeRange}s is then trimmed against the {@link TimeRaneResultCache cache} of returned and
+ * outstanding requests for the respective {@code Key}. After having received the server responses for all time ranges
+ * required to satisfy a {@link TimeRangeAsyncAction} the trimmed results are combined and the
+ * {@link TimeRangeAsyncCallback callback} is invoked.
+ * <p>
+ * 
+ * For the actual execution this class relies on an {@link AsyncActionsExecutor}.
+ * <p>
  *
- * The idea is to provide an abstraction layer which will handle caching and intelligently cut down on the number and
- * size of request being made to the server.<p>
- *
- * This executor operates on {@link TimeRangeAsyncAction}s which provide the wanted {@link TimeRange} by {@link Key}
- * with {@link TimeRangeAsyncAction#getTimeRanges()}. E.g. The {@link Key} could be a competitor or a boat class.<br>
- * Each of the {@link TimeRange}s is then trimmed against its own cache of returned and outstanding requests in
- * {@link TimeRangeResultCache}.<br>
- * After getting the server response the trimmed result is completed by the cache and {@link TimeRangeAsyncCallback}.
  *
  * @param <Result>
- *            Type returned by remote procedure. See {@link TimeRangeAsyncAction}.
+ *            Type returned by the combined call. See {@link TimeRangeAsyncAction}.
  * @param <SubResult>
- *            Type representing an individual part or channel of a complete {@link Result}.
+ *            Type representing an individual part or channel of a complete {@link Result}, as returned by
+ *            an individual remote procedure call.
  * @param <Key>
- *            Typed used to index {@link SubResult}s.
+ *            Type used to index {@link SubResult}s.
  * @see TimeRangeAsyncAction
  * @see TimeRangeAsyncCallback
  *
@@ -59,10 +70,11 @@ public class TimeRangeActionsExecutor<Result, SubResult, Key> {
                     : Collections.emptyMap();
             Map<Key, Pair<TimeRange, SubResult>> completedResultMap = new HashMap<>();
             for (Pair<Key, TimeRange> request : requestedTimeRanges) {
-                SubResult subResult = unzippedResultMap.get(request.getA());
-                TimeRangeResultCache<SubResult> cache = getSubResultCache(request.getA());
+                final Key key = request.getA();
+                SubResult subResult = unzippedResultMap.get(key);
+                TimeRangeResultCache<SubResult> cache = getSubResultCache(key);
                 List<Pair<TimeRange, SubResult>> partialResults = cache.registerAndCollectResult(
-                        trimmedTimeRangeMap.get(request.getA()), subResult, new AsyncCallback<Void>() {
+                        trimmedTimeRangeMap.get(key), subResult, new AsyncCallback<Void>() {
                             @Override
                             public void onSuccess(Void voidResult) {
                                 ExecutorCallback.this.onSuccess(result);
@@ -76,7 +88,7 @@ public class TimeRangeActionsExecutor<Result, SubResult, Key> {
                     return; // A required request is still in transit
                 }
                 SubResult completedSubResult = callback.joinSubResults(request.getB(), partialResults);
-                completedResultMap.put(request.getA(), new Pair<>(request.getB(), completedSubResult));
+                completedResultMap.put(key, new Pair<>(request.getB(), completedSubResult));
             }
             callback.onSuccess(completedResultMap);
         }

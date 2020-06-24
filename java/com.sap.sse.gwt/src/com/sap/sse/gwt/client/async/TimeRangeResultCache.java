@@ -15,10 +15,11 @@ import com.sap.sse.common.Util.Pair;
 
 /**
  * Optimizes requests by trimming their wanted {@link TimeRange} against a cache of (fetched and still outstanding)
- * results.
+ * results. In the context of a {@link TimeRangeActionsExecutor} such a cache is responsible for managing the requests
+ * for a single {@code Key}, such as a competitor or a boat class.
  *
  * @param <Result>
- *            Type to be cached.
+ *            type of the results of the remote calls which are to be cached
  * @see TimeRangeActionsExecutor
  * @author Tim Hessenmüller (D062243)
  */
@@ -26,25 +27,25 @@ public class TimeRangeResultCache<Result> {
     private static final int TRIM_MAX_ITERATIONS = 20;
     private static final int CACHE_SIZE = 32;
 
-    protected class Request<T> {
-        private final Set<Request<T>> dependsOnSet = new HashSet<>();
+    protected class Request {
+        private final Set<Request> dependsOnSet = new HashSet<>();
         private boolean hasResult = false;
-        private Pair<TimeRange, T> result = null;
+        private Pair<TimeRange, Result> result = null;
         private final List<AsyncCallback<Void>> waitingOnResultList = new ArrayList<>(0); // TODO Verify initial cap
 
         public Request() {
         }
 
-        public Request(Pair<TimeRange, T> result) {
+        public Request(Pair<TimeRange, Result> result) {
             this.hasResult = true;
             this.result = result;
         }
 
-        public Set<Request<T>> getDependencies() {
+        public Set<Request> getDependencies() {
             return dependsOnSet;
         }
 
-        public void addDependency(Request<T> request) {
+        public void addDependency(Request request) {
             dependsOnSet.add(request);
         }
 
@@ -52,11 +53,11 @@ public class TimeRangeResultCache<Result> {
             dependsOnSet.clear();
         }
 
-        public Pair<TimeRange, T> getResult() {
+        public Pair<TimeRange, Result> getResult() {
             return result;
         }
 
-        public void setResult(Pair<TimeRange, T> result) {
+        public void setResult(Pair<TimeRange, Result> result) {
             this.hasResult = true;
             this.result = result;
             waitingOnResultList.forEach(c -> c.onSuccess(null));
@@ -72,12 +73,12 @@ public class TimeRangeResultCache<Result> {
         }
     }
 
-    private final Map<TimeRange, Request<Result>> requestCache = new LinkedHashMap<TimeRange, Request<Result>>(
+    private final Map<TimeRange, Request> requestCache = new LinkedHashMap<TimeRange, Request>(
             /* initialCapacity */ CACHE_SIZE, /* loadFactor */ .75f, /* accessOrder */ true) {
         private static final long serialVersionUID = 1L; // TODO Generated id is 1?
 
         @Override
-        protected boolean removeEldestEntry(Entry<TimeRange, Request<Result>> eldest) {
+        protected boolean removeEldestEntry(Entry<TimeRange, Request> eldest) {
             return size() >= CACHE_SIZE; // TODO
         }
     };
@@ -93,7 +94,7 @@ public class TimeRangeResultCache<Result> {
      * @return {@link TimeRange} to request or {@code null} if no request is to be made since the results are cached.
      */
     public TimeRange trimAndRegisterRequest(TimeRange toTrim, boolean forceTimeRange) {
-        Request<Result> request = new Request<>();
+        Request request = new Request();
         if (!forceTimeRange) { // TODO Remove old results?
             toTrim = trimTimeRangeAndAttachDeps(toTrim, request, requestCache.entrySet());
         }
@@ -107,7 +108,7 @@ public class TimeRangeResultCache<Result> {
 
     /**
      * Registers that a request has returned with a result and collects all other needed cached results that are needed
-     * to construct a complete, time-continuous {@link Result}.
+     * to construct a complete, time-contiguous {@link Result}.
      *
      * @param timeRange
      *            {@link TimeRange} that this request was trimmed to.
@@ -121,18 +122,17 @@ public class TimeRangeResultCache<Result> {
      */
     public List<Pair<TimeRange, Result>> registerAndCollectResult(TimeRange timeRange, Result result,
             AsyncCallback<Void> callbackIfResultsAreMissing) {
-        Pair<TimeRange, Result> requestResult = new Pair<>(timeRange, result);
-        Request<Result> request = requestCache.get(timeRange);
+        final Pair<TimeRange, Result> requestResult = new Pair<>(timeRange, result);
+        Request request = requestCache.get(timeRange);
         if (request != null) {
             request.setResult(requestResult);
         } else {
-            request = new Request<>(requestResult);
+            request = new Request(requestResult);
             requestCache.put(timeRange, request);
         }
-
-        List<Pair<TimeRange, Result>> results = new ArrayList<>(request.getDependencies().size() + 1);
+        final List<Pair<TimeRange, Result>> results = new ArrayList<>(request.getDependencies().size() + 1);
         results.add(requestResult);
-        for (Request<Result> dep : request.getDependencies()) {
+        for (final Request dep : request.getDependencies()) {
             if (!dep.hasResult()) {
                 dep.registerOnResultCallback(callbackIfResultsAreMissing);
                 return null;
@@ -150,7 +150,7 @@ public class TimeRangeResultCache<Result> {
      *            {@link TimeRange} of failed request.
      */
     public void registerFailure(TimeRange timeRange) {
-        Request<Result> request = requestCache.remove(timeRange);
+        Request request = requestCache.remove(timeRange);
         // TODO Requests dependent on this one?
         if (request != null) {
             request.setResult(null);
@@ -170,15 +170,15 @@ public class TimeRangeResultCache<Result> {
      * @return {@link TimeRange} which to request from the server because it is not covered by {@code rangesToTrimWith}
      *         or {@code null} if no request to the server is to be made.
      */
-    private TimeRange trimTimeRangeAndAttachDeps(TimeRange toTrim, Request<Result> request,
-            Iterable<Map.Entry<TimeRange, Request<Result>>> rangesToTrimWith) {
-        List<Map.Entry<TimeRange, Request<Result>>> rangesToTrimWithList = new ArrayList<>();
+    private TimeRange trimTimeRangeAndAttachDeps(TimeRange toTrim, Request request,
+            Iterable<Map.Entry<TimeRange, Request>> rangesToTrimWith) {
+        List<Map.Entry<TimeRange, Request>> rangesToTrimWithList = new ArrayList<>();
         rangesToTrimWith.forEach(rangesToTrimWithList::add);
         for (int i = 0; i < TRIM_MAX_ITERATIONS; i++) {
             boolean rangeWasTrimmedThisIteration = false;
-            Iterator<Map.Entry<TimeRange, Request<Result>>> iter = rangesToTrimWithList.iterator();
+            Iterator<Map.Entry<TimeRange, Request>> iter = rangesToTrimWithList.iterator();
             while (iter.hasNext()) {
-                final Map.Entry<TimeRange, Request<Result>> element = iter.next();
+                final Map.Entry<TimeRange, Request> element = iter.next();
                 final TimeRange trimWith = element.getKey();
                 if (toTrim.intersects(trimWith)) {
                     // Only consider TimeRanges that touch or overlap toTrim
