@@ -4604,7 +4604,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 JSONObject next = (JSONObject) iterator.next();
                 leaderboardGroupsMap.put((String) next.get(LeaderboardGroupConstants.ID), (String) next.get(LeaderboardGroupConstants.NAME));
             }
-            leaderboardGroupsMap.put(UUID.randomUUID().toString(), "Second group");
             List<Map.Entry<String, String>> entries = new ArrayList<>(leaderboardGroupsMap.entrySet());
             leaderboardGroupsMap.clear();
             entries.stream().sorted(Comparator.comparing(Map.Entry::getValue, Comparator.naturalOrder()))
