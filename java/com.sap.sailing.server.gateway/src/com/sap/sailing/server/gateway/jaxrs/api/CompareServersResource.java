@@ -74,8 +74,7 @@ public class CompareServersResource extends AbstractSailingServerResource {
     public Response compareServers(@QueryParam("server1") String server1, @QueryParam("server2") String server2, @QueryParam("UUID") String uuid) {
         final Map<String, Set<Object>> result = new HashMap<>();
         Response response = null;
-        if ((!Util.hasLength(server1) || !Util.hasLength(server2))
-                || (Util.hasLength(uuid) && !(UUID.fromString(uuid).toString().equals(uuid)))) {
+        if (!validateParameters(server1, server2, uuid)) {
             response = badRequest();
         } else {
             result.put(server1, new HashSet<>());
@@ -127,6 +126,11 @@ public class CompareServersResource extends AbstractSailingServerResource {
             }
         }
         return response;
+    }
+
+    private boolean validateParameters(String server1, String server2, String uuid) {
+        return (Util.hasLength(server1) && Util.hasLength(server2)
+                && (!Util.hasLength(uuid) || UUID.fromString(uuid).toString().equals(uuid)));
     }
 
     /**
