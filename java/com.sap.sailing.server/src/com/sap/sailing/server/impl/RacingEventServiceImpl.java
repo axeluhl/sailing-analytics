@@ -3010,7 +3010,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public LeaderboardGroup getLeaderboardGroupByID(UUID leaderboardGroupID) {
-        return leaderboardGroupsByID.get(leaderboardGroupID);
+        if (leaderboardGroupID != null) {
+            return leaderboardGroupsByID.get(leaderboardGroupID);  
+        }
+        return null;
     }
 
     @Override
