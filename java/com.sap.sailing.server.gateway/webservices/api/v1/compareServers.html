@@ -13,12 +13,16 @@
 
 <b>Description:</b>
  <p>Compares two SAP Sailing Analytics servers based on the content.
-  The return contains either the missing leaderboardgroup name or if the
-  leaderboardgroupnames match on both servers the missing parts within the
-  leaderboardgroups. If the servers contain the exact same content the
-  return will just have the given server hostnames in it.</p>
- <br/>
-<table>
+  The return contains either the missing leaderboardgroup name and id or
+  if the leaderboardgroupnames match on both servers the missing parts
+  within the leaderboardgroups. If the servers contain the exact same
+  content the return will just have the given server hostnames in it.
+  You may also query for a given leaderboardgroup id, there the same
+  logic applies. The HTTP return code will be 409 if a mismatch is
+  detected in your query, if equal content is present on both servers
+  the response code will be 200.</p>
+ <br />
+ <table>
     <tr>
         <td>Webservice Type:</td>
         <td>GET</td>
@@ -35,6 +39,12 @@
         </td>
     </tr>
     <tr>
+        <td>Optional query parameters:</td>
+        <td>
+            <div>UUID, the leaderboardgroup UUID you want to compare.</div>
+        </td>
+    </tr>
+    <tr>
         <td>Request method:</td>
         <td>GET</td>
     </tr>
@@ -45,26 +55,23 @@
         {
           "localhost:8888": [
             {
-              "name": "TestLeaderboardGroupWithDifferentEvents",
-              "events": []
-            },
-            {
               "name": "World Cup Series 2019 - Genoa, Italy",
+              "id": "1f07d1cf-0652-4fc3-83bc-a79612a5aa68",
               "leaderboards": [
                 {
-                  "name": "WCS 2019 Genoa - Nacra 17",
+                  "name": "WCS 2019 Genoa - 49er",
                   "series": [
                     {
                       "name": "Qualifying Series",
                       "fleets": [
                         {
-                          "name": "Yellow",
+                          "name": "Blue",
                           "races": [
                             {
-                              "name": "R2",
+                              "name": "R1",
                               "isTracked": true,
-                              "regattaName": "WCS 2019 Genoa - Nacra 17",
-                              "trackedRaceName": "R2 Yellow (Nacra 17)",
+                              "regattaName": "WCS 2019 Genoa - 49er",
+                              "trackedRaceName": "R1 Blue (49er)",
                               "hasGpsData": true,
                               "hasWindData": true
                             }
@@ -75,23 +82,28 @@
                   ]
                 }
               ]
+            },
+            {
+              "id": "75e86618-8b0f-4291-9661-6b2a1fa47dff",
+              "name": "MyTestEventWithStrangeCharact/er*s"
             }
           ],
           "localhost:8889": [
             {
               "name": "World Cup Series 2019 - Genoa, Italy",
+              "id": "1f07d1cf-0652-4fc3-83bc-a79612a5aa68",
               "leaderboards": [
                 {
-                  "name": "WCS 2019 Genoa - Nacra 17",
+                  "name": "WCS 2019 Genoa - 49er",
                   "series": [
                     {
                       "name": "Qualifying Series",
                       "fleets": [
                         {
-                          "name": "Yellow",
+                          "name": "Blue",
                           "races": [
                             {
-                              "name": "R2",
+                              "name": "R1",
                               "isTracked": false,
                               "trackedRaceName": null,
                               "hasGpsData": false,
@@ -103,12 +115,6 @@
                     }
                   ]
                 }
-              ]
-            },
-            {
-              "name": "TestLeaderboardGroupWithDifferentEvents",
-              "events": [
-                "782dec32-a2a0-41a3-a775-87c80a406f97"
               ]
             }
           ]
