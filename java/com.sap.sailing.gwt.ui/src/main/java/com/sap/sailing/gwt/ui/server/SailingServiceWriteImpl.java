@@ -1508,7 +1508,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     }
 
     @Override
-    public UUID importMasterData(final String urlAsString, final String[] groupNames, final boolean override,
+    public UUID importMasterData(final String urlAsString, final String[] leaderboardGroupIds, final boolean override,
             final boolean compress, final boolean exportWind, final boolean exportDeviceConfigurations,
             String targetServerUsername, String targetServerPassword,
             final boolean exportTrackedRacesAndStartTracking) {
@@ -1519,7 +1519,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         Runnable masterDataImportTask = new Runnable() {
             @Override
             public void run() {
-                getService().importMasterData(urlAsString, groupNames, override, compress, exportWind,
+                getService().importMasterData(urlAsString, leaderboardGroupIds, override, compress, exportWind,
                         exportDeviceConfigurations, targetServerUsername, targetServerPassword, /* targetServerBeararToken */ null,
                         exportTrackedRacesAndStartTracking, importOperationId);
             }

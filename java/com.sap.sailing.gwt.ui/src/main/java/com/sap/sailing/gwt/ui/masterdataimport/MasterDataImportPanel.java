@@ -145,7 +145,7 @@ public class MasterDataImportPanel extends VerticalPanel {
     }
 
     protected void importLeaderboardGroups() {
-        String[] groupNames = createLeaderBoardGroupNamesFromListBox();
+        String[] leaderboardGroupIds = createLeaderBoardGroupNamesFromListBox();
         final Label overallName = new Label(stringMessages.overallProgress() + ":");
         this.add(overallName);
         final CustomProgressBar overallProgressBar = CustomProgressBar.determinate();
@@ -155,14 +155,14 @@ public class MasterDataImportPanel extends VerticalPanel {
         this.add(subProgressName);
         final CustomProgressBar subProgressBar = CustomProgressBar.determinate();
         this.add(subProgressBar);
-        if (groupNames.length >= 1) {
+        if (leaderboardGroupIds.length >= 1) {
             disableAllButtons();
             boolean override = overrideSwitch.getValue();
             boolean compress = compressSwitch.getValue();
             boolean exportWind = exportWindSwitch.getValue();
             boolean exportDeviceConfigs = exportDeviceConfigsSwitch.getValue();
             boolean exportTrackedRacesAndStartTracking = exportTrackedRacesAndStartTrackingSwitch.getValue();
-            sailingServiceWrite.importMasterData(currentHost, groupNames, override, compress, exportWind,
+            sailingServiceWrite.importMasterData(currentHost, leaderboardGroupIds, override, compress, exportWind,
                     exportDeviceConfigs, usernameBox.getValue(), passwordBox.getValue(), exportTrackedRacesAndStartTracking, new AsyncCallback<UUID>() {
                 @Override
                 public void onFailure(Throwable caught) {
