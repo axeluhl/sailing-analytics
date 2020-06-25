@@ -126,7 +126,6 @@ public class Header extends Composite implements HeaderConstants {
                 Element listItem = item.getValue().getElement().getParentElement();
                 Display isVisible = isVisibilityInMenuBar(menuAnchor) ? NONE : BLOCK;
                 listItem.getStyle().setDisplay(isVisible);
-                LOG.fine(item.getValue().getElement().getParentElement().getId());
                 noOfVisibleItems += isVisible == BLOCK ? 1 : 0;
             }
             this.headerNavigationIcon.getElement().getStyle()
@@ -158,6 +157,7 @@ public class Header extends Composite implements HeaderConstants {
         dataMiningPageLink.getElement().getStyle().setDisplay(Display.NONE);
         eventBus.addHandler(AuthenticationContextEvent.TYPE, event->{
             AuthenticationContext authContext = event.getCtx();
+            LOG.fine("current user:" + authContext.getCurrentUser());
             // make it point to the current server if the user has CREATE_OBJECT permission there
             if (authContext.hasServerPermission(ServerActions.CREATE_OBJECT)) {
                 adminConsolePageLinkMenu.setHref(ADMIN_CONSOLE_PATH);
@@ -165,7 +165,7 @@ public class Header extends Composite implements HeaderConstants {
                 adminConsolePageLink.setHref(ADMIN_CONSOLE_PATH);
                 adminConsolePageLink.setTarget(ADMIN_CONSOLE_WINDOW);
                 adminConsolePageLink.getElement().getStyle().setDisplay(Display.INLINE_BLOCK);
-            } else if (authContext.isLoggedIn()) {
+            } else if (authContext.getCurrentUser() != null && !authContext.getCurrentUser().getName().equals("Anonymous")) {
                 // make it point to the default "manage events" self-service server configured in ServerInfo otherwise
                 String base = authContext.getServerInfo().getManageEventsBaseUrl();
                 adminConsolePageLinkMenu.setHref(UriUtils.fromString(base + ADMIN_CONSOLE_PATH));

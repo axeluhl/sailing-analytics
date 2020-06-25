@@ -113,7 +113,8 @@ public class Header extends Composite implements HeaderConstants {
                     manageEventsNavItem.setHref(UriUtils.fromString(ADMIN_CONSOLE_PATH));
                     manageEventsNavItem.setTarget(ADMIN_CONSOLE_WINDOW);
                     manageEventsNavItem.getElement().getStyle().setDisplay(Display.INLINE_BLOCK);
-                } else if (authContext.isLoggedIn()) {
+                } else if (authContext.getCurrentUser() != null
+                        && !authContext.getCurrentUser().getName().equals("Anonymous")) {
                     String base = authContext.getServerInfo().getManageEventsBaseUrl();
                     manageEventsNavItem.setHref(UriUtils.fromString(base + ADMIN_CONSOLE_PATH));
                     manageEventsNavItem.setTarget(ADMIN_CONSOLE_WINDOW);
