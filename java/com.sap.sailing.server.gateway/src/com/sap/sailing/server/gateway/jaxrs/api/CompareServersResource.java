@@ -1,6 +1,7 @@
 package com.sap.sailing.server.gateway.jaxrs.api;
 
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -57,6 +58,10 @@ public class CompareServersResource extends AbstractSailingServerResource {
     private static final String[] KEYSTOPRINT = new String[] { "id" };
     private static final Set<String> KEYSETTOPRINT = new HashSet<>(Arrays.asList(KEYSTOPRINT));
 
+    private static final String serverToOld = "At least one server you are trying to compare has not yet enabled the "
+            + LEADERBOARDGROUPSIDENTIFIABLEPATH
+            + " endpoint and therefore you need to fallback to running the compareServers shell script.";
+
     public CompareServersResource() {
     }
 
@@ -71,41 +76,24 @@ public class CompareServersResource extends AbstractSailingServerResource {
             result.put(server1, new HashSet<>());
             result.put(server2, new HashSet<>());
             try {
-                final URL base1 = RemoteServerUtil.createBaseUrl(server1);
-                final URL base2 = RemoteServerUtil.createBaseUrl(server2);
-                final URLConnection lgc1 = HttpUrlConnectionHelper.redirectConnection(
-                        RemoteServerUtil.createRemoteServerUrl(base1, LEADERBOARDGROUPSIDENTIFIABLEPATH, null));
-                final URLConnection lgc2 = HttpUrlConnectionHelper.redirectConnection(
-                        RemoteServerUtil.createRemoteServerUrl(base2, LEADERBOARDGROUPSIDENTIFIABLEPATH, null));
-                final JSONParser parser = new JSONParser();
-                final JSONArray leaderboardgroupList1 = (JSONArray) parser
-                        .parse(new InputStreamReader(lgc1.getInputStream(), "UTF-8"));
-                final JSONArray leaderboardgroupList2 = (JSONArray) parser
-                        .parse(new InputStreamReader(lgc2.getInputStream(), "UTF-8"));
+                final JSONArray leaderboardgroupList1 = getLeaderboardgroupList(server1);
+                final JSONArray leaderboardgroupList2 = getLeaderboardgroupList(server2);
                 for (Object lg1 : leaderboardgroupList1) {
-                    try {
-                        if (!leaderboardgroupList2.contains(lg1)) {
-                            result.get(server1).add(lg1);
-                        } else {
-                            final String lgId = ((JSONObject) lg1).get("id").toString();
-                            final URLConnection lgdetailc1 = HttpUrlConnectionHelper.redirectConnection(
-                                    RemoteServerUtil.createRemoteServerUrl(base1, createLgDetailPath(lgId), null));
-                            final URLConnection lgdetailc2 = HttpUrlConnectionHelper.redirectConnection(
-                                    RemoteServerUtil.createRemoteServerUrl(base2, createLgDetailPath(lgId), null));
-                            Object lgdetail1 = JSONValue
-                                    .parse(new InputStreamReader(lgdetailc1.getInputStream(), "UTF-8"));
-                            Object lgdetail2 = JSONValue
-                                    .parse(new InputStreamReader(lgdetailc2.getInputStream(), "UTF-8"));
-                            lgdetail1 = removeUnnecessaryFields(lgdetail1);
-                            lgdetail2 = removeUnnecessaryFields(lgdetail2);
-                            if (!lgdetail1.equals(lgdetail2)) {
-                                Pair<Object, Object> jsonPair = removeDuplicateEntries(lgdetail1, lgdetail2);
-                                result.get(server1).add(jsonPair.getA());
-                                result.get(server2).add(jsonPair.getB());
-                            }
+                    if (!leaderboardgroupList2.contains(lg1)) {
+                        result.get(server1).add(lg1);
+                    } else {
+                        final String lgId = ((JSONObject) lg1).get("id").toString();
+                        Object lgdetail1 = getLeaderboardgroupDetailsById(lgId,
+                                RemoteServerUtil.createBaseUrl(server1));
+                        Object lgdetail2 = getLeaderboardgroupDetailsById(lgId,
+                                RemoteServerUtil.createBaseUrl(server2));
+                        lgdetail1 = removeUnnecessaryFields(lgdetail1);
+                        lgdetail2 = removeUnnecessaryFields(lgdetail2);
+                        if (!lgdetail1.equals(lgdetail2)) {
+                            Pair<Object, Object> jsonPair = removeDuplicateEntries(lgdetail1, lgdetail2);
+                            result.get(server1).add(jsonPair.getA());
+                            result.get(server2).add(jsonPair.getB());
                         }
-                    } catch (Exception e) {
-                        response = returnInternalServerError(e);
                     }
                 }
                 for (Object lg2 : leaderboardgroupList2) {
@@ -119,8 +107,7 @@ public class CompareServersResource extends AbstractSailingServerResource {
                 }
                 if (result.get(server1).isEmpty() && result.get(server2).isEmpty()) {
                     response = Response.ok(streamingOutput(json)).build();
-                }
-                else {
+                } else {
                     response = Response.status(Status.CONFLICT).entity(streamingOutput(json)).build();
                 }
             } catch (Exception e) {
@@ -128,6 +115,31 @@ public class CompareServersResource extends AbstractSailingServerResource {
             }
         }
         return response;
+    }
+    /**
+     * Fetches the leaderboardgrouplist from a server.
+     */
+    private JSONArray getLeaderboardgroupList(String server) throws Exception {
+        final JSONParser parser = new JSONParser();
+        final URL baseUrl = RemoteServerUtil.createBaseUrl(server);
+        final URLConnection leaderboardgroupListC = HttpUrlConnectionHelper.redirectConnection(
+                RemoteServerUtil.createRemoteServerUrl(baseUrl, LEADERBOARDGROUPSIDENTIFIABLEPATH, null));
+        if (((HttpURLConnection) leaderboardgroupListC).getResponseCode() == 404) {
+            throw new Exception(serverToOld);
+        }
+        final JSONArray result = (JSONArray) parser
+                .parse(new InputStreamReader(leaderboardgroupListC.getInputStream(), "UTF-8"));
+        return result;
+    }
+    
+    /**
+     * Fetches the JSON for a given leaderboardgroup UUID.
+     */
+    private Object getLeaderboardgroupDetailsById(String leaderboardgroupId, URL baseUrl) throws Exception {
+        final URLConnection lgdetailc = HttpUrlConnectionHelper.redirectConnection(
+                RemoteServerUtil.createRemoteServerUrl(baseUrl, createLgDetailPath(leaderboardgroupId), null));
+        Object result = JSONValue.parse(new InputStreamReader(lgdetailc.getInputStream(), "UTF-8"));
+        return result;
     }
 
     private String createLgDetailPath(String leaderboardgroupId) throws URISyntaxException {
@@ -138,13 +150,11 @@ public class CompareServersResource extends AbstractSailingServerResource {
         result = lgdetailpath.toString();
         return result;
     }
-
+    
     /**
      * Strips a (nested) {@link org.json.simple.JSONObject} from the fields specified in
      * {@link CompareServersResource#KEYSTOIGNORE}.
-     * 
-     * @param json
-     *            org.json.simple.JSONObject
+     *
      * @return The modified {@link org.json.simple.JSONObject}.
      */
     private Object removeUnnecessaryFields(Object json) {
