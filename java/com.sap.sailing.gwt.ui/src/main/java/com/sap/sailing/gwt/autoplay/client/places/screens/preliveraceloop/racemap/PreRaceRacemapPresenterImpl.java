@@ -100,7 +100,6 @@ public class PreRaceRacemapPresenterImpl extends AutoPlayPresenterConfigured<Pre
                 raceIdentifier.getRaceName(), leaderboardName, leaderboardGroupName, null, null, null);
         RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = RaceBoardPerspectiveOwnSettings
                 .createDefaultWithCanReplayDuringLiveRaces(true);
-        ;
         HashMap<String, Settings> innerSettings = new HashMap<>();
         innerSettings.put(RaceMapLifecycle.ID, RaceMapSettings.getDefaultWithShowMapControls(true));
         PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings = new PerspectiveCompositeSettings<>(

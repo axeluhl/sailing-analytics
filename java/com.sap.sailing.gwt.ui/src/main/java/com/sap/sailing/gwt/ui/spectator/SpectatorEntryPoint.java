@@ -32,13 +32,10 @@ public class SpectatorEntryPoint extends AbstractSailingReadEntryPoint implement
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
-        
         final String groupParamIdValue = new SettingsToUrlSerializer()
                 .deserializeFromCurrentLocation(new SpectatorContextDefinition()).getLeaderboardGroupId();
-        
         final String groupParamNameValue = new SettingsToUrlSerializer()
                 .deserializeFromCurrentLocation(new SpectatorContextDefinition()).getLeaderboardGroupName();
-        
         final String groupId;
         if (groupParamIdValue == null || groupParamIdValue.isEmpty()) {
             groupId = null;
@@ -51,10 +48,11 @@ public class SpectatorEntryPoint extends AbstractSailingReadEntryPoint implement
                     reportError(getStringMessages().noLeaderboardGroupWithNameFound(groupParamNameValue));
                 }
                 @Override
-                public void onSuccess(LeaderboardGroupDTO group) {                }
+                public void onSuccess(LeaderboardGroupDTO group) {
+                    Window.setTitle(group.getName());
+                }
             });
         }
-        
         final SpectatorSettings settings = new SettingsToUrlSerializer().deserializeFromCurrentLocation(new SpectatorSettings());
         RootPanel rootPanel = RootPanel.get();
         FlowPanel groupAndFeedbackPanel = new FlowPanel();

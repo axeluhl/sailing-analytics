@@ -297,10 +297,11 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     private String getRaceViewerURL(final String leaderboardName, final String leaderboardGroupName,
             final UUID leaderboardGroupId, RegattaAndRaceIdentifier raceIdentifier, String mode) {
         RaceboardContextDefinition raceboardContext = new RaceboardContextDefinition(raceIdentifier.getRegattaName(),
-                raceIdentifier.getRaceName(), leaderboardName, leaderboardGroupName, leaderboardGroupId,
+                raceIdentifier.getRaceName(), leaderboardName,
+                // use the leaderboardGroupId if not null; only resort to leaderboardGroupName if ID is not provided
+                leaderboardGroupId == null ? leaderboardGroupName : null, leaderboardGroupId,
                 UUID.fromString(getCtx().getEventId()), mode);
         RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = new RaceBoardPerspectiveOwnSettings();
-        
         HashMap<String, Settings> innerSettings = new HashMap<>();
         innerSettings.put(RaceMapLifecycle.ID, RaceMapSettings.getDefaultWithShowMapControls(true));
         PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings = new PerspectiveCompositeSettings<>(

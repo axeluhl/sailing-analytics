@@ -485,8 +485,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
             @Override
             public SafeHtml getValue(LeaderboardGroupDTO group) {
                 String debugParam = Window.Location.getParameter("gwt.codesvr");
-                String link = URLEncoder.encode("/gwt/Spectator.html?leaderboardGroupId=" + group.getId()
-                        + "&leaderboardGroupName=" + group.getName() + "&showRaceDetails=true&"
+                String link = URLEncoder.encode("/gwt/Spectator.html?leaderboardGroupId=" + group.getId()+"&showRaceDetails=true&"
                         + RaceBoardPerspectiveOwnSettings.PARAM_CAN_REPLAY_DURING_LIVE_RACES + "=true"
                         + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
                 return ANCHORTEMPLATE.cell(UriUtils.fromString(link), group.getName());
