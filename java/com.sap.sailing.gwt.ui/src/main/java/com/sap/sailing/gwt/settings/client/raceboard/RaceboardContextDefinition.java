@@ -22,8 +22,8 @@ public class RaceboardContextDefinition extends AbstractGenericSerializableSetti
     }
 
     public RaceboardContextDefinition(String regattaName, String raceName, String leaderboardName,
-            String leaderboardGroupName, UUID leaderboardGroupid, UUID eventId, String mode) {
-        this(regattaName, raceName, leaderboardName, leaderboardGroupName, leaderboardGroupid, eventId, mode, null);
+            String leaderboardGroupName, UUID leaderboardGroupId, UUID eventId, String mode) {
+        this(regattaName, raceName, leaderboardName, leaderboardGroupName, leaderboardGroupId, eventId, mode, null);
     }
 
     public RaceboardContextDefinition(String regattaName, String raceName, String leaderboardName,
