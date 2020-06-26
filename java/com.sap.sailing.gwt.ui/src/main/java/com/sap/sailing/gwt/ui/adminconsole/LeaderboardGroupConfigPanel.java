@@ -455,7 +455,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
             public Iterable<String> getSearchableStrings(LeaderboardGroupDTO t) {
                 List<String> strings = new ArrayList<String>();
                 strings.add(t.getName());
-                string.add(String.valueOf(t.getId()));
+                strings.add(String.valueOf(t.getId()));
                 strings.add(t.getDisplayName());
                 strings.add(t.getDescription());
                 return strings;
