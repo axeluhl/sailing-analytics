@@ -81,18 +81,6 @@ public class ExpeditionDeviceConfiguration extends NamedImpl implements SecuredD
                 + ", getName()=" + getName() + "]";
     }
 
-    /**
-     * Get TypeRelativeObjectIdentifer. Needs a parameter for the servername passed as a String parameter.
-     * 
-     */
-    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String serverName) {
-        return getTypeRelativeObjectIdentifier(serverName, getName());
-    }
-    
-    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String serverName, String name) {
-        return new TypeRelativeObjectIdentifier(serverName, name);
-    }
-
     public HasPermissions getType() {
         return SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION;
     }
@@ -108,7 +96,7 @@ public class ExpeditionDeviceConfiguration extends NamedImpl implements SecuredD
     }
 
     public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
-        return getTypeRelativeObjectIdentifier(getDeviceUuid().toString());
+        return new TypeRelativeObjectIdentifier(getDeviceUuid().toString());
     }
 
     @Override
@@ -130,5 +118,4 @@ public class ExpeditionDeviceConfiguration extends NamedImpl implements SecuredD
     public final void setOwnership(final OwnershipDTO ownership) {
         this.securityInformation.setOwnership(ownership);
     }
-
 }
