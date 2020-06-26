@@ -1694,7 +1694,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-  //READ
+    //READ
     public RaceboardDataDTO getRaceboardData(String regattaName, String raceName, String leaderboardName,
             String leaderboardGroupName, UUID leaderboardGroupId, UUID eventId) {
         RaceboardDataDTO result = new RaceboardDataDTO(null, false, false, Collections.emptyList(),
@@ -1719,12 +1719,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                     raceDTO.boatClass = regatta.getBoatClass() == null ? null : regatta.getBoatClass().getName();
                     SecurityDTOUtil.addSecurityInformation(getSecurityService(), raceDTO, raceDTO.getIdentifier());
                     Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-                    LeaderboardGroup leaderboardGroup = getService().getLeaderboardGroupByID(leaderboardGroupId);
-                    if (leaderboardGroup == null) {
-                        leaderboardGroup = leaderboardGroupName != null
-                                ? getService().getLeaderboardGroupByName(leaderboardGroupName)
-                                : null;
-                    }
+                    final LeaderboardGroup leaderboardGroup;
+                    leaderboardGroup = getLeaderboardGroupByIdOrName(leaderboardGroupId, leaderboardGroupName);
                     Event event = eventId != null ? getService().getEvent(eventId) : null;
                     if (!getSecurityService().hasCurrentUserReadPermission(event)) {
                         event = null;
@@ -1766,8 +1762,31 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         return result;
     }
 
+    /**
+     * @param leaderboardGroupId
+     *            if not {@code null}, this takes precedence over the {@code leaderboardGroupName} parameter which will
+     *            then be ignored and will be used to look up an optional leaderboard group providing the context, e.g.,
+     *            for seasonal scores from an overall leaderboard
+     * @param leaderboardGroupName
+     *            evaluated only if {@code leaderboardGroupId} was {@code null}; may even be {@code null} if
+     *            {@code leaderboardGroupId} is {@code null} too because leaderboard group resolution is optional. If a
+     *            non-{@code null} name is provided here and if {@code leaderboardGroupId} was {@code null} then the
+     *            name is used to try to resolve the leaderboard group by name.
+     */
+    private LeaderboardGroup getLeaderboardGroupByIdOrName(UUID leaderboardGroupId, String leaderboardGroupName) {
+        final LeaderboardGroup leaderboardGroup;
+        if (leaderboardGroupId != null) {
+            leaderboardGroup = getService().getLeaderboardGroupByID(leaderboardGroupId);
+        } else if (leaderboardGroupName != null) {
+            leaderboardGroup = getService().getLeaderboardGroupByName(leaderboardGroupName);
+        } else {
+            leaderboardGroup = null;
+        }
+        return leaderboardGroup;
+    }
+
     @Override
-  //READ
+    //READ
     public CompactRaceMapDataDTO getRaceMapData(RegattaAndRaceIdentifier raceIdentifier, Date date,
             Map<String, Date> fromPerCompetitorIdAsString, Map<String, Date> toPerCompetitorIdAsString,
             boolean extrapolate, LegIdentifier simulationLegIdentifier,
@@ -1852,6 +1871,15 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
      * @param detailType
      *            if not <code>null</code> the fixes will be equipped with a value representing {@link DetailType} at
      *            their respective timestamps.
+     * @param leaderboardGroupId
+     *            if not {@code null}, this takes precedence over the {@code leaderboardGroupName} parameter which will
+     *            then be ignored and will be used to look up an optional leaderboard group providing the context, e.g.,
+     *            for seasonal scores from an overall leaderboard
+     * @param leaderboardGroupName
+     *            evaluated only if {@code leaderboardGroupId} was {@code null}; may even be {@code null} if
+     *            {@code leaderboardGroupId} is {@code null} too because leaderboard group resolution is optional. If a
+     *            non-{@code null} name is provided here and if {@code leaderboardGroupId} was {@code null} then the
+     *            name is used to try to resolve the leaderboard group by name.
      * @return a map where for each competitor participating in the race the list of GPS fixes in increasing
      *         chronological order is provided. The last one is the last position at or before <code>date</code>.
      */
@@ -2711,6 +2739,17 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     //READ
+    /**
+     * @param leaderboardGroupId
+     *            if not {@code null}, this takes precedence over the {@code leaderboardGroupName} parameter which will
+     *            then be ignored and will be used to look up an optional leaderboard group providing the context, e.g.,
+     *            for seasonal scores from an overall leaderboard
+     * @param leaderboardGroupName
+     *            evaluated only if {@code leaderboardGroupId} was {@code null}; may even be {@code null} if
+     *            {@code leaderboardGroupId} is {@code null} too because leaderboard group resolution is optional. If a
+     *            non-{@code null} name is provided here and if {@code leaderboardGroupId} was {@code null} then the
+     *            name is used to try to resolve the leaderboard group by name.
+     */
     private Double getCompetitorRaceDataEntry(DetailType dataType, TrackedRace trackedRace, Competitor competitor,
             TimePoint timePoint, String leaderboardGroupName, UUID leaderboardGroupId, String leaderboardName,
             WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException {
@@ -2816,10 +2855,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 if (leaderboardGroupName == null || leaderboardGroupName.isEmpty()) {
                     break;
                 }
-                LeaderboardGroup group = getService().getLeaderboardGroupByID(leaderboardGroupId);
-                if (group == null) {
-                    group = getService().getLeaderboardGroupByName(leaderboardGroupName);
-                }
+                final LeaderboardGroup group = getLeaderboardGroupByIdOrName(leaderboardGroupId, leaderboardGroupName);
                 Leaderboard overall = group.getOverallLeaderboard();
                 result = overall == null ? null : (double) overall.getTotalRankOfCompetitor(competitor, timePoint);
                 break;

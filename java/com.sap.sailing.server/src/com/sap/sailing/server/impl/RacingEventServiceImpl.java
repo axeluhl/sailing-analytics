@@ -1486,13 +1486,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     /**
      * Checks all groups, if they contain a leaderboard with the <code>removedLeaderboardName</code> or reference it as their
      * overall leaderboard and removes it from the group or unlinks it as the overall leaderboard, respectively.
-     * 
-     * @param removedLeaderboardName
      */
     private void syncGroupsAfterLeaderboardRemove(String removedLeaderboardName, boolean doDatabaseUpdate) {
         boolean groupNeedsUpdate = false;
-        for (Set<LeaderboardGroup> leaderboardGroupsSet : leaderboardGroupsByName.values()) {
-            for (LeaderboardGroup leaderboardGroup : leaderboardGroupsSet) {
+        for (final Set<LeaderboardGroup> leaderboardGroupsSet : leaderboardGroupsByName.values()) {
+            for (final LeaderboardGroup leaderboardGroup : leaderboardGroupsSet) {
                 for (final Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
                     if (leaderboard.getName().equals(removedLeaderboardName)) {
                         leaderboardGroup.removeLeaderboard(leaderboard);
@@ -3010,10 +3008,13 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public LeaderboardGroup getLeaderboardGroupByID(UUID leaderboardGroupID) {
+        final LeaderboardGroup result;
         if (leaderboardGroupID != null) {
-            return leaderboardGroupsByID.get(leaderboardGroupID);  
+            result = leaderboardGroupsByID.get(leaderboardGroupID);  
+        } else {
+            result = null;
         }
-        return null;
+        return result;
     }
 
     @Override
