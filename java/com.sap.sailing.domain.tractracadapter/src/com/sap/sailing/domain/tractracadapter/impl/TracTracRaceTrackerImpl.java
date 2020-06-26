@@ -435,16 +435,20 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
         // if regatta is still null, no previous assignment of any of the races in this TracTrac event to a Regatta was
         // found;
         // in this case, create a default regatta based on the TracTrac event data
-        this.regatta = effectiveRegatta == null ? domainFactory.getOrCreateDefaultRegatta(
+        final Regatta regattaInWhichToTryToRemoveExistingRace = effectiveRegatta == null ? domainFactory.getOrCreateDefaultRegatta(
                 raceLogStore, regattaLogStore, tractracRace, trackedRegattaRegistry) : effectiveRegatta;
-        trackedRegatta = trackedRegattaRegistry.getOrCreateTrackedRegatta(this.regatta);
         // removeRace may detach the domain regatta from the domain factory if that
         // removed the last race; therefore, it's important to getOrCreate the
         // domain regatta *after* calling removeRace
-        final RaceDefinition raceDefinition = domainFactory.removeRace(tractracRace.getEvent(), tractracRace, this.regatta, trackedRegattaRegistry);
+        final RaceDefinition raceDefinition = domainFactory.removeRace(tractracRace.getEvent(), tractracRace, regattaInWhichToTryToRemoveExistingRace, trackedRegattaRegistry);
         if (raceDefinition != null) {
-            trackedRegattaRegistry.removeRace(this.regatta, raceDefinition);
+            trackedRegattaRegistry.removeRace(regattaInWhichToTryToRemoveExistingRace, raceDefinition);
         }
+        // Look up / create the Regatta and TrackedRegatta after they may potentially have been removed by the
+        // removeRace statements above:
+        this.regatta = effectiveRegatta == null ? domainFactory.getOrCreateDefaultRegatta(
+                raceLogStore, regattaLogStore, tractracRace, trackedRegattaRegistry) : effectiveRegatta;
+        trackedRegatta = trackedRegattaRegistry.getOrCreateTrackedRegatta(this.regatta);
         receivers = new HashSet<Receiver>();
         for (Receiver receiver : domainFactory.getUpdateReceivers(getTrackedRegatta(), delayToLiveInMillis,
                 simulator, windStore, this, trackedRegattaRegistry, raceLogResolver, leaderboardGroupResolver, tractracRace,
