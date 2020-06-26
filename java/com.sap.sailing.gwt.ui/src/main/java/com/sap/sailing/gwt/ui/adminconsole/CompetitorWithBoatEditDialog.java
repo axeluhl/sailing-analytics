@@ -4,12 +4,8 @@ import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.dto.BoatClassDTO;
-import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.common.Color;
-import com.sap.sse.common.Distance;
 
 /**
  * An edit for a competitor with a boat
@@ -27,24 +23,10 @@ public class CompetitorWithBoatEditDialog extends AbstractCompetitorWithBoatDial
      */
     public CompetitorWithBoatEditDialog(StringMessages stringMessages, CompetitorWithBoatDTO competitorToEdit,
             DialogCallback<CompetitorWithBoatDTO> callback, String boatClass) {
-        super("Edit competitor with boat", stringMessages, competitorToEdit, callback, boatClass);
+        super(stringMessages.editCompetitorWithBoat(), stringMessages, competitorToEdit, callback, boatClass);
         this.ensureDebugId("CompetitorWithBoatEditDialog");
     }
 
-    @Override
-    protected BoatDTO getBoat() {
-        BoatDTO result = null;
-        Color boatColor;
-        if (boatDisplayColorTextBox.isValid()) {
-            boatColor = boatDisplayColorTextBox.getColor();
-        } else {
-            boatColor = new InvalidColor(new IllegalArgumentException(boatDisplayColorTextBox.getValue()), getStringMessages());
-        }
-        BoatClassDTO boatClass = new BoatClassDTO(boatClassNameTextBox.getValue(), Distance.NULL, Distance.NULL);
-        result = new BoatDTO(getCompetitorToEdit().getBoat().getIdAsString(), boatNameTextBox.getValue(), boatClass, sailIdTextBox.getValue(), boatColor);
-        return result;
-    }
-    
     @Override
     protected Widget getAdditionalWidget() {
         VerticalPanel result = new VerticalPanel();

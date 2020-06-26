@@ -73,6 +73,7 @@ import com.sap.sailing.domain.leaderboard.LeaderboardRegistry;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboardWithEliminations;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
+import com.sap.sailing.domain.leaderboard.impl.DelegatingRegattaLeaderboardWithCompetitorElimination;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.polars.PolarDataService;
@@ -234,16 +235,13 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     RegattaLeaderboardWithEliminations addRegattaLeaderboardWithEliminations(String leaderboardName, String leaderboardDisplayName, RegattaLeaderboard fullRegattaLeaderboard);
 
-    void removeLeaderboard(String leaderboardName);
-
     /**
-     * Renames a leaderboard. If a leaderboard by the name <code>oldName</code> does not exist in {@link #getLeaderboards()},
-     * or if a leaderboard with the name <code>newName</code> already exists, an {@link IllegalArgumentException} is thrown.
-     * If the method completes normally, the rename has been successful, and the leaderboard previously obtained by calling
-     * {@link #getLeaderboardByName(String) getLeaderboardByName(oldName)} can now be obtained by calling
-     * {@link #getLeaderboardByName(String) getLeaderboardByName(newName)}.
+     * Removes the leaderboard specified by {@code leaderboardName} as well as all delegating leaderboards that reference it,
+     * in particular those {@link DelegatingRegattaLeaderboardWithCompetitorElimination} which which the leaderboard specified
+     * by {@code leaderboardName} was their underlying regatta leaderboard. If no leaderboard named as specified by the
+     * {@code leaderboardName} parameter exists, this method has no effect.
      */
-    void renameLeaderboard(String oldName, String newName);
+    void removeLeaderboard(String leaderboardName);
 
     RaceColumn addColumnToLeaderboard(String columnName, String leaderboardName, boolean medalRace);
 

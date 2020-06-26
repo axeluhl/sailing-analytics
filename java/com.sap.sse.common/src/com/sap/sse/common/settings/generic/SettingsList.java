@@ -92,7 +92,7 @@ public class SettingsList<T extends AbstractGenericSerializableSettings> extends
 
     @Override
     public void setValues(Iterable<T> values) {
-        synchronized (values) {
+        synchronized (this.values) {
             this.values.clear();
             ValueCollectionValue<List<Value>> valueObject = ensureValue();
             valueObject.clear();

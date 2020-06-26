@@ -18,10 +18,8 @@ public class FlexibleLeaderboardEditDialog extends FlexibleLeaderboardDialog {
             DialogCallback<LeaderboardDescriptor> callback) {
         super(stringMessages.editFlexibleLeaderboard(), leaderboard, stringMessages, existingEvents, errorReporter, new FlexibleLeaderboardDialog.LeaderboardParameterValidator(
                 stringMessages, otherExistingLeaderboards), callback);
-        nameTextBox = createTextBox(leaderboard.getName());
         displayNameTextBox = createTextBox(leaderboard.getDisplayName()); 
         scoringSchemeListBox = createListBox(false);
-        nameTextBox.setVisibleLength(50);
         displayNameTextBox.setVisibleLength(50);
         int j = 0;
         for (ScoringSchemeType scoringSchemeType: ScoringSchemeType.values()) {

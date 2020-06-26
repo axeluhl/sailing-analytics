@@ -498,14 +498,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     @Override
-    public void renameLeaderboard(String oldName, String newName) {
-        MongoCollection<Document> leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
-        Document query = new Document(FieldNames.LEADERBOARD_NAME.name(), oldName);
-        Document renameUpdate = new Document("$set", new Document(FieldNames.LEADERBOARD_NAME.name(), newName));
-        leaderboardCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).updateOne(query, renameUpdate);
-    }
-
-    @Override
     public void storeLeaderboardGroup(LeaderboardGroup leaderboardGroup) {
         MongoCollection<Document> leaderboardGroupCollection = database.getCollection(CollectionNames.LEADERBOARD_GROUPS.name());
         MongoCollection<Document> leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
@@ -1434,8 +1426,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private void storeCompetitorWithoutBoat(Competitor competitor) {
         MongoCollection<Document> collection = database.getCollection(CollectionNames.COMPETITORS.name());
         JSONObject json = competitorSerializer.serialize(competitor);
-        Document query = Document.parse(CompetitorJsonSerializer.getCompetitorIdQuery(competitor).toString());
-        Document entry = Document.parse(json.toString());
+        Document query = Document.parse(CompetitorJsonSerializer.getCompetitorIdQuery(competitor).toJSONString());
+        Document entry = Document.parse(json.toJSONString());
         collection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, entry, new UpdateOptions().upsert(true));
     }
 

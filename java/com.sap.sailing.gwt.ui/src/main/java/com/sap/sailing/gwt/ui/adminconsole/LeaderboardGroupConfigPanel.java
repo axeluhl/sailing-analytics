@@ -225,7 +225,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
             public Iterable<String> getSearchableStrings(StrippedLeaderboardDTO t) {
                 List<String> strings = new ArrayList<String>();
                 strings.add(t.getName());
-                strings.add(t.displayName);
+                strings.add(t.getDisplayName());
                 return strings;
             }
 
@@ -357,7 +357,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
             if (isSingleGroupSelected) {
                 LeaderboardGroupDTO selectedGroup = getSelectedGroup();
                 setDescriptionEditable(false);
-                descriptionTextArea.setText(selectedGroup.description);
+                descriptionTextArea.setText(selectedGroup.getDescription());
             }
         });
         abortDescriptionButton.getElement().getStyle().setMarginRight(5, Unit.PX);
@@ -471,13 +471,10 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
         final CaptionPanel leaderboardGroupsCaptionPanel = new CaptionPanel(stringMessages.leaderboardGroups());
         final VerticalPanel leaderboardGroupsContentPanel = new VerticalPanel();
         leaderboardGroupsCaptionPanel.add(leaderboardGroupsContentPanel);
-
         // Create functional elements for the leaderboard groups
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, LEADERBOARD_GROUP);
         leaderboardGroupsContentPanel.add(buttonPanel);
-
         Label filterLeaderboardGroupsLbl = new Label(stringMessages.filterLeaderboardGroupsByName() + ":");
-
         //Create table for leaderboard groups
         groupsProvider = new ListDataProvider<LeaderboardGroupDTO>();
         ListHandler<LeaderboardGroupDTO> leaderboardGroupsListHandler = new ListHandler<LeaderboardGroupDTO>(groupsProvider.getList());
@@ -487,9 +484,11 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
                 availableLeaderboardGroups, groupsProvider, stringMessages) {
             @Override
             public Iterable<String> getSearchableStrings(LeaderboardGroupDTO t) {
-                List<String> string = new ArrayList<String>();
-                string.add(t.getName());
-                return string;
+                List<String> strings = new ArrayList<String>();
+                strings.add(t.getName());
+                strings.add(t.getDisplayName());
+                strings.add(t.getDescription());
+                return strings;
             }
 
             @Override
@@ -501,22 +500,17 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
         leaderboardGroupsContentPanel.add(groupsFilterablePanel);
         groupsFilterablePanel.setUpdatePermissionFilterForCheckbox(
                 leaderboardGroup -> userService.hasPermission(leaderboardGroup, DefaultActions.UPDATE));
-        
         final Button createButton = buttonPanel.addCreateAction(stringMessages.createNewLeaderboardGroup(),
                 this::addNewGroup);
         createButton.ensureDebugId("CreateLeaderboardGroupButton");
-        
         final Button refreshButton = buttonPanel.addUnsecuredAction(stringMessages.refresh(), () -> {
                 leaderboardsRefresher.fillLeaderboards();
                 leaderboardGroupsRefresher.fillLeaderboardGroups();
         });
         refreshButton.ensureDebugId("RefreshLeaderboardGroupsButton");
-        
         AnchorCell anchorCell = new AnchorCell();
-
         final TextColumn<LeaderboardGroupDTO> groupUUidColumn = new AbstractSortableTextColumn<LeaderboardGroupDTO>(
                 group -> group.getId() == null ? "<null>" : group.getId().toString());
-
         Column<LeaderboardGroupDTO, SafeHtml> groupNameColumn = new Column<LeaderboardGroupDTO, SafeHtml>(anchorCell) {
             @Override
             public SafeHtml getValue(LeaderboardGroupDTO group) {
@@ -525,7 +519,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
                         + "&showRaceDetails=true&" + RaceBoardPerspectiveOwnSettings.PARAM_CAN_REPLAY_DURING_LIVE_RACES
                         + "=true" + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
                 return ANCHORTEMPLATE.cell(UriUtils.fromString(link), group.getName());
-        }
+            }
         };
         groupNameColumn.setSortable(true);
         leaderboardGroupsListHandler.setComparator(groupNameColumn, new Comparator<LeaderboardGroupDTO>() {
@@ -534,21 +528,19 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
                 return new NaturalComparator(false).compare(group1.getName(), group2.getName());
             }
         });
-
         TextColumn<LeaderboardGroupDTO> groupDescriptionColumn = new TextColumn<LeaderboardGroupDTO>() {
             @Override
             public String getValue(LeaderboardGroupDTO group) {
-                return group.description.length() <= 100 ? group.description : group.description.substring(0, 98) + "...";
+                return group.getDescription().length() <= 100 ? group.getDescription() : group.getDescription().substring(0, 98) + "...";
             }
         };
         groupDescriptionColumn.setSortable(true);
         leaderboardGroupsListHandler.setComparator(groupDescriptionColumn, new Comparator<LeaderboardGroupDTO>() {
             @Override
             public int compare(LeaderboardGroupDTO group1, LeaderboardGroupDTO group2) {
-                return new NaturalComparator(false).compare(group1.description, group2.description);
+                return new NaturalComparator(false).compare(group1.getDescription(), group2.getDescription());
             }
         });
-
         TextColumn<LeaderboardGroupDTO> groupDisplayNameColumn = new TextColumn<LeaderboardGroupDTO>() {
             @Override
             public String getValue(LeaderboardGroupDTO group) {
@@ -563,7 +555,6 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
                 return new NaturalComparator(false).compare(group1.getDisplayName(), group2.getDisplayName());
             }
         });
-
         TextColumn<LeaderboardGroupDTO> hasOverallLeaderboardColumn = new TextColumn<LeaderboardGroupDTO>() {
             @Override
             public String getValue(LeaderboardGroupDTO group) {
@@ -582,7 +573,6 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
                         hasOverallLeaderboardColumn.getValue(group2));
             }
         });
-
         final HasPermissions type = SecuredDomainType.LEADERBOARD_GROUP;
         final AccessControlledActionsColumn<LeaderboardGroupDTO, LeaderboardGroupConfigImagesBarCell> actionsColumn = create(
                 new LeaderboardGroupConfigImagesBarCell(stringMessages), userService);
@@ -616,7 +606,6 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
                         configACL.openACLDialog(e);
                     }
                 });
-        
         final MigrateGroupOwnershipDialog.DialogConfig<LeaderboardGroupDTO> migrateDialogConfig = MigrateGroupOwnershipDialog
                 .create(userService.getUserManagementService(), (lg, dto) -> {
                     sailingServiceWrite.updateGroupOwnerForLeaderboardGroupHierarchy(lg.getId(), dto,
@@ -640,7 +629,6 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
                         migrateDialogConfig.openDialog(e);
                     }
                 });
-
         SelectionCheckboxColumn<LeaderboardGroupDTO> leaderboardTableSelectionColumn =
                 new SelectionCheckboxColumn<LeaderboardGroupDTO>(
                 tableResources.cellTableStyle().cellTableCheckboxSelected(),
@@ -667,19 +655,14 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
         groupsTable.addColumn(groupUUidColumn, stringMessages.id());
         groupsTable.addColumn(actionsColumn, stringMessages.actions());
         groupsTable.addColumnSortHandler(leaderboardGroupsListHandler);
-
         refreshableGroupsSelectionModel = leaderboardTableSelectionColumn.getSelectionModel();
-
         removeButton = buttonPanel.addRemoveAction(stringMessages.remove(), refreshableGroupsSelectionModel, true,
                 () -> removeLeaderboardGroups(refreshableGroupsSelectionModel.getSelectedSet()));
         removeButton.ensureDebugId("RemoveLeaderboardButton");
-
         refreshableGroupsSelectionModel.addSelectionChangeHandler(event -> groupSelectionChanged());
-
         groupsTable.setSelectionModel(refreshableGroupsSelectionModel, leaderboardTableSelectionColumn.getSelectionManager());
         groupsProvider.addDataDisplay(groupsTable);
         leaderboardGroupsContentPanel.add(groupsTable);
-
         return leaderboardGroupsCaptionPanel;
     }
 
@@ -811,7 +794,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
                                             refreshableGroupsSelectionModel.setSelected(groupToUpdate, false);
                                         }
                                         groupToUpdate.setName(updateDescriptor.getName());
-                                        groupToUpdate.description = updateDescriptor.getDescription();
+                                        groupToUpdate.setDescription(updateDescriptor.getDescription());
                                         groupToUpdate.setDisplayName(updateDescriptor.getDisplayName());
                                         groupToUpdate.displayLeaderboardsInReverseOrder = updateDescriptor.isDisplayLeaderboardsInReverseOrder();
                                         groupToUpdate.setOverallLeaderboardDiscardThresholds(updateDescriptor.getOverallLeaderboardDiscardThresholds());
@@ -841,7 +824,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
         for (StrippedLeaderboardDTO leaderboardDTO : group.leaderboards) {
             leaderboardNames.add(leaderboardDTO.getName());
         }
-        sailingServiceWrite.updateLeaderboardGroup(group.getId(), group.getName(), group.getName(), group.description,
+        sailingServiceWrite.updateLeaderboardGroup(group.getId(), group.getName(), group.getName(), group.getDescription(),
                 group.getDisplayName(),
                 leaderboardNames, group.getOverallLeaderboardDiscardThresholds(),
                 group.getOverallLeaderboardScoringSchemeType(), new MarkedAsyncCallback<Void>(
@@ -923,7 +906,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
             //Display details of the group
             groupDetailsCaptionPanel.setCaptionText(stringMessages.detailsOfLeaderboardGroup() + " '" + selectedGroup.getName() + "'");
             idLabel.setText(selectedGroup.getId().toString());
-            descriptionTextArea.setText(selectedGroup.description);
+            descriptionTextArea.setText(selectedGroup.getDescription());
             setDescriptionEditable(false);
 
             groupDetailsProvider.getList().clear();
@@ -1043,12 +1026,12 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
         LeaderboardGroupDTO selectedGroup = getSelectedGroup();
         if (isSingleGroupSelected && selectedGroup != null) {
             if (newDescription != null && newDescription.length() > 0) {
-                selectedGroup.description = newDescription;
+                selectedGroup.setDescription(newDescription);
                 setDescriptionEditable(false);
                 updateGroup(selectedGroup);
             } else {
                 Notification.notify(stringMessages.pleaseEnterNonEmptyDescription() + ".", NotificationType.ERROR);
-                descriptionTextArea.setText(selectedGroup.description);
+                descriptionTextArea.setText(selectedGroup.getDescription());
             }
         }
     }

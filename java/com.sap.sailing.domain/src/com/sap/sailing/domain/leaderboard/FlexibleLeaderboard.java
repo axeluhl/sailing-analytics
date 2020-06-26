@@ -8,7 +8,6 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sse.common.Renamable;
 
 /**
  * A leaderboard that allows its clients to flexibly modify the race columns arranged in this leaderboard without the
@@ -23,7 +22,7 @@ import com.sap.sse.common.Renamable;
  * @author Axel Uhl (D043530)
  * 
  */
-public interface FlexibleLeaderboard extends LeaderboardThatHasRegattaLike, Renamable, IsRegattaLike {
+public interface FlexibleLeaderboard extends LeaderboardThatHasRegattaLike, IsRegattaLike {
     /**
      * Moves the column with the name <code>name</code> up. 
      * @param name The name of the column to move.

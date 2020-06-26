@@ -590,8 +590,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                     + " for corresponding regatta leaderboard. Not loading regatta leaderboard.");
         } else {
             result = new RegattaLeaderboardImpl(regatta, resultDiscardingRule);
-            result.setName(leaderboardName); // this will temporarily set the display name; it will be adjusted later if
-                                             // a display name is found
         }
         return result;
     }
@@ -2636,23 +2634,24 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     public Collection<DynamicCompetitor> loadAllCompetitors() {
         Map<Serializable, DynamicCompetitor> competitorsById = new HashMap<>();
         MongoCollection<Document> collection = database.getCollection(CollectionNames.COMPETITORS.name());
-        try {
             final JsonWriterSettings writerSettings = JsonWriterSettings.builder().outputMode(JsonMode.RELAXED).build();
             for (Document o : collection.find()) {
-                JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(o.toJson(writerSettings)));
-                DynamicCompetitor c = competitorWithBoatRefDeserializer.deserialize(json);
-                // ensure that in case there should be multiple competitors with equal IDs in the DB
-                // only one will survive
-                if (competitorsById.containsKey(c.getId())) {
-                    collection.deleteOne(o);
-                } else {
-                    competitorsById.put(c.getId(), c);
+                try {
+                    JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(o.toJson(writerSettings)));
+                    DynamicCompetitor c = competitorWithBoatRefDeserializer.deserialize(json);
+                    // ensure that in case there should be multiple competitors with equal IDs in the DB
+                    // only one will survive
+                    if (competitorsById.containsKey(c.getId())) {
+                        collection.deleteOne(o);
+                    } else {
+                        competitorsById.put(c.getId(), c);
+                    }
+                } catch (Exception e) {
+                    logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load competitors: "+
+                            o.toString());
+                    logger.log(Level.SEVERE, "loadCompetitors", e);
                 }
             }
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load competitors.");
-            logger.log(Level.SEVERE, "loadCompetitors", e);
-        }
         return competitorsById.values();
     }
 
