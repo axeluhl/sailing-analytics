@@ -419,8 +419,6 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializationExcepti
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.ORCCertificateJsonDeserializer;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.interfaces.SimulationService;
-import com.sap.sailing.server.operationaltransformation.AddRemoteSailingServerReference;
-import com.sap.sailing.server.operationaltransformation.RemoveRemoteSailingServerReference;
 import com.sap.sailing.server.operationaltransformation.UpdateServerConfiguration;
 import com.sap.sailing.server.security.SailingViewerRole;
 import com.sap.sailing.shared.server.SharedSailingData;
@@ -3631,7 +3629,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
   //READ
-    private RemoteSailingServerReferenceDTO createRemoteSailingServerReferenceDTO(
+    protected RemoteSailingServerReferenceDTO createRemoteSailingServerReferenceDTO(
             final RemoteSailingServerReference serverRef,
             final com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception> eventsOrException) {
         final Iterable<EventBase> events = eventsOrException.getA();
@@ -4113,32 +4111,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             result.add(dto);
         }
         return result;
-    }
-
-    @Override
-    //??
-    public void removeSailingServers(Set<String> namesOfSailingServersToRemove) throws Exception {
-        getSecurityService().checkCurrentUserUpdatePermission(getServerInfo());
-        for (String serverName : namesOfSailingServersToRemove) {
-            getService().apply(new RemoveRemoteSailingServerReference(serverName));
-        }
-    }
-
-    @Override
-    //??
-    public RemoteSailingServerReferenceDTO addRemoteSailingServerReference(RemoteSailingServerReferenceDTO sailingServer) throws MalformedURLException {
-        getSecurityService().checkCurrentUserUpdatePermission(getServerInfo());
-        final String expandedURL;
-        if (sailingServer.getUrl().contains("//")) {
-            expandedURL = sailingServer.getUrl();
-        } else {
-            expandedURL = "https://" + sailingServer.getUrl();
-        }
-        URL serverURL = new URL(expandedURL);
-        RemoteSailingServerReference serverRef = getService().apply(new AddRemoteSailingServerReference(sailingServer.getName(), serverURL));
-        com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception> eventsOrException = getService().updateRemoteServerEventCacheSynchronously(serverRef);
-        return createRemoteSailingServerReferenceDTO(serverRef, eventsOrException);
-        
     }
 
     @Override
@@ -6700,14 +6672,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 StreamSupport.stream(waypointTemplate.getControlPointTemplate().getMarkRoles().spliterator(), false)
                         .map(this::convertToMarkRoleDTO).collect(Collectors.toList()),
                 waypointTemplate.getPassingInstruction());
-    }
-
-    @Override
-    //READ
-    public void removeCourseTemplates(Collection<UUID> courseTemplateUuids) {
-        for (UUID uuid : courseTemplateUuids) {
-            getSharedSailingData().deleteCourseTemplate(getSharedSailingData().getCourseTemplateById(uuid));
-        }
     }
 
     //READ

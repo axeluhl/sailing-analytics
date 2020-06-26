@@ -131,6 +131,7 @@ import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Nationality;
@@ -138,6 +139,7 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.impl.BoatImpl;
@@ -256,6 +258,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.MigrateGroupOwnerForHierarchyDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationWithSecurityDTO;
@@ -276,6 +279,7 @@ import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
 import com.sap.sailing.server.operationaltransformation.AddCourseAreas;
+import com.sap.sailing.server.operationaltransformation.AddRemoteSailingServerReference;
 import com.sap.sailing.server.operationaltransformation.AddSpecificRegatta;
 import com.sap.sailing.server.operationaltransformation.AllowBoatResetToDefaults;
 import com.sap.sailing.server.operationaltransformation.AllowCompetitorResetToDefaults;
@@ -296,6 +300,7 @@ import com.sap.sailing.server.operationaltransformation.RemoveLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardColumn;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.RemoveRegatta;
+import com.sap.sailing.server.operationaltransformation.RemoveRemoteSailingServerReference;
 import com.sap.sailing.server.operationaltransformation.RemoveSeries;
 import com.sap.sailing.server.operationaltransformation.RenameEvent;
 import com.sap.sailing.server.operationaltransformation.RenameLeaderboardColumn;
@@ -461,6 +466,13 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                             optionalRepeatablePart, courseTemplate.getTags(), optionalImageURL, courseTemplate.getDefaultNumberOfLaps()));
         }
         return result;
+    }
+
+    @Override
+    public void removeCourseTemplates(Collection<UUID> courseTemplateUuids) {
+        for (UUID uuid : courseTemplateUuids) {
+            getSharedSailingData().deleteCourseTemplate(getSharedSailingData().getCourseTemplateById(uuid));
+        }
     }
 
     @Override
@@ -669,6 +681,30 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    @Override
+    public void removeSailingServers(Set<String> namesOfSailingServersToRemove) throws Exception {
+        getSecurityService().checkCurrentUserUpdatePermission(getServerInfo());
+        for (String serverName : namesOfSailingServersToRemove) {
+            getService().apply(new RemoveRemoteSailingServerReference(serverName));
+        }
+    }
+
+    @Override
+    public RemoteSailingServerReferenceDTO addRemoteSailingServerReference(RemoteSailingServerReferenceDTO sailingServer) throws MalformedURLException {
+        getSecurityService().checkCurrentUserUpdatePermission(getServerInfo());
+        final String expandedURL;
+        if (sailingServer.getUrl().contains("//")) {
+            expandedURL = sailingServer.getUrl();
+        } else {
+            expandedURL = "https://" + sailingServer.getUrl();
+        }
+        URL serverURL = new URL(expandedURL);
+        RemoteSailingServerReference serverRef = getService().apply(new AddRemoteSailingServerReference(sailingServer.getName(), serverURL));
+        com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception> eventsOrException = getService().updateRemoteServerEventCacheSynchronously(serverRef);
+        return createRemoteSailingServerReferenceDTO(serverRef, eventsOrException);
+        
     }
 
     @Override

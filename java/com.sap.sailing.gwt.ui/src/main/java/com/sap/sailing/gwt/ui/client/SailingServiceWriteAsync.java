@@ -51,6 +51,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.MigrateGroupOwnerForHierarchyDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationWithSecurityDTO;
@@ -232,6 +233,21 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void updateMarkPropertiesPositioning(UUID markPropertiesId, DeviceIdentifierDTO deviceIdentifier, Position position, AsyncCallback<MarkPropertiesDTO> asyncCallback);
 
     void createOrUpdateCourseTemplate(CourseTemplateDTO courseTemplate, AsyncCallback<CourseTemplateDTO> asyncCallback);
+
+    /**
+     * Remove course templates by UUIDs
+     * 
+     * @param courseTemplatesUuids
+     *            the {@link Collection} of course templates' UUIDs which will be remove
+     * @param asyncCallback
+     *            {@link AsyncCallback} object
+     */
+    void removeCourseTemplates(Collection<UUID> courseTemplatesUuids, AsyncCallback<Void> asyncCallback);
+
+    void removeSailingServers(Set<String> toRemove, AsyncCallback<Void> callback);
+
+    void addRemoteSailingServerReference(RemoteSailingServerReferenceDTO sailingServer,
+            AsyncCallback<RemoteSailingServerReferenceDTO> callback);
 
     /**
      * Remove mark properties by UUIDs

@@ -66,6 +66,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.MigrateGroupOwnerForHierarchyDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationWithSecurityDTO;
@@ -394,6 +395,11 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
     void updateRaceCourse(RegattaAndRaceIdentifier raceIdentifier,
             List<Pair<ControlPointDTO, PassingInstruction>> courseDTO);
 
+    void removeSailingServers(Set<String> toRemove) throws UnauthorizedException, Exception;
+
+    RemoteSailingServerReferenceDTO addRemoteSailingServerReference(RemoteSailingServerReferenceDTO sailingServer)
+            throws UnauthorizedException, Exception;
+
     void setWind(RegattaAndRaceIdentifier raceIdentifier, WindDTO windDTO);
 
     void removeAndUntrackRaces(List<RegattaAndRaceIdentifier> regattaAndRaceIdentifiers);
@@ -418,6 +424,14 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
             Position fixedPosition);
 
     CourseTemplateDTO createOrUpdateCourseTemplate(CourseTemplateDTO courseTemplate);
+
+    /**
+     * Removes course templates list
+     * 
+     * @param courseTemplateDTOs
+     *            list of course templates to remove
+     */
+    void removeCourseTemplates(Collection<UUID> courseTemplatesUuids);
 
     /**
      * Removes mark properties list

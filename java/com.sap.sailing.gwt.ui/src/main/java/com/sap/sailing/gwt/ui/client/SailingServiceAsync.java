@@ -266,11 +266,6 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
 
     void getRemoteSailingServerReferences(AsyncCallback<List<RemoteSailingServerReferenceDTO>> callback);
 
-    void removeSailingServers(Set<String> toRemove, AsyncCallback<Void> callback);
-
-    void addRemoteSailingServerReference(RemoteSailingServerReferenceDTO sailingServer,
-            AsyncCallback<RemoteSailingServerReferenceDTO> callback);
-
     void getResultImportUrls(String resultProviderName, AsyncCallback<List<UrlDTO>> callback);
 
     /*
@@ -639,16 +634,6 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
     void getMarkProperties(AsyncCallback<List<MarkPropertiesDTO>> asyncCallback);
 
     void getCourseTemplates(AsyncCallback<List<CourseTemplateDTO>> asyncCallback);
-
-    /**
-     * Remove course templates by UUIDs
-     * 
-     * @param courseTemplatesUuids
-     *            the {@link Collection} of course templates' UUIDs which will be remove
-     * @param asyncCallback
-     *            {@link AsyncCallback} object
-     */
-    void removeCourseTemplates(Collection<UUID> courseTemplatesUuids, AsyncCallback<Void> asyncCallback);
 
     void getMarkRoles(AsyncCallback<List<MarkRoleDTO>> callback);
 

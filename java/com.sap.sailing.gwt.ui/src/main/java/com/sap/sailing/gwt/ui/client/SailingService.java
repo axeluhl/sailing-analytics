@@ -257,11 +257,6 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
 
     List<RemoteSailingServerReferenceDTO> getRemoteSailingServerReferences() throws UnauthorizedException;
 
-    void removeSailingServers(Set<String> toRemove) throws UnauthorizedException, Exception;
-
-    RemoteSailingServerReferenceDTO addRemoteSailingServerReference(RemoteSailingServerReferenceDTO sailingServer)
-            throws UnauthorizedException, Exception;
-
     List<UrlDTO> getResultImportUrls(String resultProviderName) throws UnauthorizedException;
 
     String validateResultImportUrl(String resultProviderName, UrlDTO urlDTO);
@@ -585,14 +580,5 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
 
     List<CourseTemplateDTO> getCourseTemplates();
 
-    /**
-     * Removes course templates list
-     * 
-     * @param courseTemplateDTOs
-     *            list of course templates to remove
-     */
-    void removeCourseTemplates(Collection<UUID> courseTemplatesUuids);
-
     List<MarkRoleDTO> getMarkRoles();
-
 }
