@@ -10,10 +10,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.datamining.data.HasLeaderboardGroupContext;
@@ -58,12 +58,11 @@ public class TestLeaderboardGroupRetrievalProcessor {
         return groups;
     }
 
-    @Ignore
     @Test
     public void testFilteringRetrieval() throws InterruptedException {
         retriever.processElement(service);
         retriever.finish();
-        Collection<LeaderboardGroup> expectedGroups = service.getLeaderboardGroups().values();
-        assertThat(retrievedGroups, is(expectedGroups));
+        final Set<LeaderboardGroup> expectedGroups = new HashSet<>(service.getLeaderboardGroups().values());
+        assertThat(new HashSet<>(retrievedGroups), is(expectedGroups));
     }
 }
