@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
@@ -73,7 +72,7 @@ public class LeaderboardGroupsResource extends AbstractSailingServerResource {
     @GET
     @Produces("application/json;charset=UTF-8")
     public Response getLeaderboardGroups() {
-        final JSONArray jsonLeaderboardGroups = getLeaderboardGroups(leaderboardGroupEntry->leaderboardGroupEntry.getKey());
+        final JSONArray jsonLeaderboardGroups = getLeaderboardGroups(leaderboardGroup->leaderboardGroup.getName());
         // header option is set to allow communication between two sapsailing servers, especially for
         // the master data import functionality
         return addAccessControlAllowOriginHeader(Response.ok(streamingOutput(jsonLeaderboardGroups))).build();
@@ -83,11 +82,10 @@ public class LeaderboardGroupsResource extends AbstractSailingServerResource {
         return responseBuilder.header("Access-Control-Allow-Origin", "*");
     }
     
-    private JSONArray getLeaderboardGroups(Function<Entry<String, LeaderboardGroup>, Object> resultObjectSupplier) {
+    private JSONArray getLeaderboardGroups(Function<LeaderboardGroup, Object> resultObjectSupplier) {
         JSONArray jsonLeaderboardGroups = new JSONArray();
-        Map<String, LeaderboardGroup> leaderboardGroups = getService().getLeaderboardGroups();
-        for (Entry<String, LeaderboardGroup> leaderboardGroupEntry : leaderboardGroups.entrySet()) {
-            if (getSecurityService().hasCurrentUserReadPermission(leaderboardGroupEntry.getValue())) {
+        for (final LeaderboardGroup leaderboardGroupEntry : getService().getLeaderboardGroups().values()) {
+            if (getSecurityService().hasCurrentUserReadPermission(leaderboardGroupEntry)) {
                 jsonLeaderboardGroups.add(resultObjectSupplier.apply(leaderboardGroupEntry));
             }
         }
@@ -100,10 +98,10 @@ public class LeaderboardGroupsResource extends AbstractSailingServerResource {
     @Path("/identifiable")
     @Produces("application/json;charset=UTF-8")
     public Response getLeaderboardGroupsIdentifiable() {
-        final JSONArray jsonLeaderboardGroups = getLeaderboardGroups(leaderboardGroupEntry->{
+        final JSONArray jsonLeaderboardGroups = getLeaderboardGroups(leaderboardGroup->{
             JSONObject leaderboardGroupObject = new JSONObject();
-            leaderboardGroupObject.put(LeaderboardGroupConstants.ID, leaderboardGroupEntry.getValue().getId().toString());
-            leaderboardGroupObject.put(LeaderboardGroupConstants.NAME, leaderboardGroupEntry.getKey());
+            leaderboardGroupObject.put(LeaderboardGroupConstants.ID, leaderboardGroup.getId().toString());
+            leaderboardGroupObject.put(LeaderboardGroupConstants.NAME, leaderboardGroup.getName());
             return leaderboardGroupObject;
         });
         // header option is set to allow communication between two sapsailing servers, especially for

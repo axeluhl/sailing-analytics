@@ -45,7 +45,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
 import javax.management.InstanceAlreadyExistsException;
@@ -2987,13 +2986,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public Map<String, LeaderboardGroup> getLeaderboardGroups() {
-        return Collections.unmodifiableMap(leaderboardGroupsByName.entrySet().stream().collect(
-                Collectors.toMap(Map.Entry::getKey, stringSetEntry -> stringSetEntry.getValue().iterator().next())));
-    }
-
-    @Override
-    public Map<UUID, LeaderboardGroup> getLeaderboardGroupsIdentifiable() {
+    public Map<UUID, LeaderboardGroup> getLeaderboardGroups() {
         return Collections.unmodifiableMap(new HashMap<UUID, LeaderboardGroup>(leaderboardGroupsByID));
     }
 
@@ -3019,8 +3012,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public LeaderboardGroup resolveLeaderboardGroupByRegattaName(String regattaName) {
-        for (LeaderboardGroup leaderboardGroup: getLeaderboardGroups().values()) {
-            for (Leaderboard leaderboard: leaderboardGroup.getLeaderboards()) {
+        for (final LeaderboardGroup leaderboardGroup : getLeaderboardGroups().values()) {
+            for (final Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
                 if (leaderboard.getName().equals(regattaName)) {
                     return leaderboardGroup;
                 }

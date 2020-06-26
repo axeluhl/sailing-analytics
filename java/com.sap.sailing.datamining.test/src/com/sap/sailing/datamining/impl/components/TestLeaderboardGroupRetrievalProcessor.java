@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -35,7 +36,6 @@ public class TestLeaderboardGroupRetrievalProcessor {
     public void initializeComponents() {
         service = mock(RacingEventService.class);
         stub(service.getLeaderboardGroups()).toReturn(getGroupsInService());
-
         retrievedGroups = new HashSet<>();
         Processor<HasLeaderboardGroupContext, Void> receiver = new NullProcessor<HasLeaderboardGroupContext, Void>(HasLeaderboardGroupContext.class, Void.class) {
             @Override
@@ -49,13 +49,12 @@ public class TestLeaderboardGroupRetrievalProcessor {
         retriever = new LeaderboardGroupRetrievalProcessor(ConcurrencyTestsUtil.getExecutor(), resultReceivers, 0, "");
     }
 
-    private Map<String, LeaderboardGroup> getGroupsInService() {
-        Map<String, LeaderboardGroup> groups = new HashMap<>();
-        groups.put("LG1", new LeaderboardGroupImpl("LG1", "", /* displayName */ null, false, new ArrayList<Leaderboard>()));
-        groups.put("LG2", new LeaderboardGroupImpl("LG2", "", /* displayName */ null, false, new ArrayList<Leaderboard>()));
-        groups.put("LG3", new LeaderboardGroupImpl("LG3", "", /* displayName */ null, false, new ArrayList<Leaderboard>()));
-        groups.put("LG4", new LeaderboardGroupImpl("LG4", "", /* displayName */ null, false, new ArrayList<Leaderboard>()));
-        groups.put("LG5", new LeaderboardGroupImpl("LG5", "", /* displayName */ null, false, new ArrayList<Leaderboard>()));
+    private Map<UUID, LeaderboardGroup> getGroupsInService() {
+        Map<UUID, LeaderboardGroup> groups = new HashMap<>();
+        for (int i=1; i<=5; i++) {
+            final LeaderboardGroupImpl lg = new LeaderboardGroupImpl("LG"+i, "", /* displayName */ null, false, new ArrayList<Leaderboard>());
+            groups.put(lg.getId(), lg);
+        }
         return groups;
     }
 
@@ -64,19 +63,7 @@ public class TestLeaderboardGroupRetrievalProcessor {
     public void testFilteringRetrieval() throws InterruptedException {
         retriever.processElement(service);
         retriever.finish();
-        
-        Collection<LeaderboardGroup> expectedGroups = getExpectedRetrievedGroups();
+        Collection<LeaderboardGroup> expectedGroups = service.getLeaderboardGroups().values();
         assertThat(retrievedGroups, is(expectedGroups));
     }
-
-    private Collection<LeaderboardGroup> getExpectedRetrievedGroups() {
-        Collection<LeaderboardGroup> groups = new HashSet<>();
-        groups.add(new LeaderboardGroupImpl("LG1", "", /* displayName */ null, false, new ArrayList<Leaderboard>()));
-        groups.add(new LeaderboardGroupImpl("LG2", "", /* displayName */ null, false, new ArrayList<Leaderboard>()));
-        groups.add(new LeaderboardGroupImpl("LG3", "", /* displayName */ null, false, new ArrayList<Leaderboard>()));
-        groups.add(new LeaderboardGroupImpl("LG4", "", /* displayName */ null, false, new ArrayList<Leaderboard>()));
-        groups.add(new LeaderboardGroupImpl("LG5", "", /* displayName */ null, false, new ArrayList<Leaderboard>()));
-        return groups;
-    }
-
 }
