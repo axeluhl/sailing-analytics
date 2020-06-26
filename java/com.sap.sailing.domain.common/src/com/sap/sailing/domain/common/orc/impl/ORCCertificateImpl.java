@@ -252,7 +252,7 @@ public class ORCCertificateImpl implements ORCCertificate {
     }
 
     @Override
-    public double getCDL() {
+    public Double getCDL() {
         return cdl;
     }
 
