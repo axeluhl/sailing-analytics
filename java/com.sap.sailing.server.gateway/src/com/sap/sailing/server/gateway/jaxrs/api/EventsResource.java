@@ -301,8 +301,7 @@ public class EventsResource extends AbstractSailingServerResource {
                 result.add(eventSerializer.serialize(event));
             }
         }
-        String json = result.toJSONString();
-        return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+        return Response.ok(streamingOutput(result)).build();
     }
 
     @GET

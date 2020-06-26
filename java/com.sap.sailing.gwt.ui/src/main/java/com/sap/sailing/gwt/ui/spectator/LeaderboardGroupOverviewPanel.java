@@ -550,7 +550,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
     }
     
     private void fillGroupDetails(LeaderboardGroupDTO group) {
-        groupDescriptionHTML.setHTML(new SafeHtmlBuilder().appendEscapedLines(group.description).toSafeHtml());
+        groupDescriptionHTML.setHTML(new SafeHtmlBuilder().appendEscapedLines(group.getDescription()).toSafeHtml());
         leaderboardsDataProvider.getList().clear();
         leaderboardsDataProvider.getList().addAll(group.leaderboards);
     }

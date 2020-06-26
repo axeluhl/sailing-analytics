@@ -24,7 +24,26 @@
                 <h2 class="releaseHeadline">Release Notes - Administration Console</h2>
                 <div class="innerContent">
                     <h2 class="articleSubheadline">June 2020</h2>
+                    <ul>
+                    </ul>
                     <ul class="bulletList">
+                        <li>The REST endpoints <tt>/sailingserver/api/v1/competitors/{competitorId}</tt>,<br>
+                            <tt>/sailingsserver/api/v1/leaderboards/{leaderboardName}/competitors/{competitorId}</tt>,<br>
+                            <tt>/sailingserver/api/v1/regattas/{regattaname}/competitors</tt> and<br>
+                            <tt>/sailingserver/api/v1/regattas/{regattaname}/entries</tt><br>
+                            have been brought to the same set of comeptitor attributes in the JSON result object.<br>
+                            For backward compatibility of the endpoints <tt>/sailingserver/api/v1/competitors/{competitorId}</tt> and
+                            <tt>sailingsserver/api/v1/leaderboards/{leaderboardName}/competitors/{competitorId}</tt>
+                            the JSON result object was extended by the attributes
+                            <ul class="bulletList"><li><tt>color</tt> (replaced by <tt>displayColor</tt>)</li>
+                            <li><tt>countryCode</tt> (replaced by <tt>nationalityISO2</tt>)</li>
+                            <li><tt>flagImage</tt> (replaced by <tt>flagImageUri</tt>)</li>
+                            <li><tt>teamImageUri</tt> (replaced by <tt>team/imageUri</tt>)</li>
+                            </ul><br>
+                            These attributes are deprecated and will be removed in one of the next releases.
+                            For more information see the API documentation of <a target="_new" href="/sailingserver/webservices/api/v1/competitorGetDoc.html"><tt style="white-space: nowrap;">/sailingserver/api/v1/competitors/{competitorId}</tt></a>
+                            and <a target="_new" href="/sailingserver/webservices/api/v1/leaderboardCompetitorGetDoc.html"><tt style="white-space: nowrap;">sailingsserver/api/v1/leaderboards/{leaderboardName}/competitors/{competitorId}</tt></a>
+                        </li>
                         <li>The following REST endpoint URLs of the Usergroups-API and the Preferences-API have been replaced and are now deprecated. The deprecated URLs will be removed in
                             one of the next releases.
                         <table>

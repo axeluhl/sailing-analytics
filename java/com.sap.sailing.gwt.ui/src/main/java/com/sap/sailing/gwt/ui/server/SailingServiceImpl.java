@@ -830,15 +830,21 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, boolean addOverallDetails,
             String previousLeaderboardId, boolean fillTotalPointsUncorrected)
             throws NoWindException, InterruptedException, ExecutionException, IllegalArgumentException {
-        final DynamicTrackedRace trackedRace = getService().getTrackedRace(race);
-        final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        if (leaderboard.getRaceColumnAndFleet(trackedRace) == null) {
-            // this race does not seem to be contained in the leaderboard, also check leaderboard
-            getSecurityService().checkCurrentUserReadPermission(leaderboard);
+        final DynamicTrackedRace trackedRace = getService().getExistingTrackedRace(race);
+        final IncrementalOrFullLeaderboardDTO result;
+        if (trackedRace == null) {
+            result = null;
+        } else {
+            final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+            if (leaderboard.getRaceColumnAndFleet(trackedRace) == null) {
+                // this race does not seem to be contained in the leaderboard, also check leaderboard
+                getSecurityService().checkCurrentUserReadPermission(leaderboard);
+            }
+            getSecurityService().checkCurrentUserReadPermission(trackedRace);
+            result = getLeaderBoardByNameInternal(leaderboardName, date, namesOfRaceColumnsForWhichToLoadLegDetails,
+                    addOverallDetails, previousLeaderboardId, fillTotalPointsUncorrected);
         }
-        getSecurityService().checkCurrentUserReadPermission(trackedRace);
-        return getLeaderBoardByNameInternal(leaderboardName, date, namesOfRaceColumnsForWhichToLoadLegDetails,
-                addOverallDetails, previousLeaderboardId, fillTotalPointsUncorrected);
+        return result;
     }
   //READ
     private IncrementalOrFullLeaderboardDTO getLeaderBoardByNameInternal(final String leaderboardName,
