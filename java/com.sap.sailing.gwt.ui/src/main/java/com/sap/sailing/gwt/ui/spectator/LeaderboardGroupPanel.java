@@ -189,7 +189,7 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
             groupNameLabel.setStyleName(STYLE_NAME_PREFIX + "GroupName");
             mainPanel.add(groupNameLabel);
             // Using HTML to display the line breaks in the description
-            HTML leaderboardGroupDescriptionLabel = new HTML(new SafeHtmlBuilder().appendEscapedLines(leaderboardGroup.description).toSafeHtml());
+            HTML leaderboardGroupDescriptionLabel = new HTML(new SafeHtmlBuilder().appendEscapedLines(leaderboardGroup.getDescription()).toSafeHtml());
             leaderboardGroupDescriptionLabel.setStyleName(STYLE_NAME_PREFIX + "GroupDescription");
             mainPanel.add(leaderboardGroupDescriptionLabel);
         }
