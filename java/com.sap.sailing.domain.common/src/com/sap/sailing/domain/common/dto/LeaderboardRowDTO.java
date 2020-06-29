@@ -30,24 +30,29 @@ public class LeaderboardRowDTO implements Serializable {
     public Double totalDurationFoiledInSeconds;
     public Double totalDistanceFoiledInMeters;
     public Integer totalScoredRaces;
+    public Double timeOnTimeFactor;
+    public Duration timeOnDistanceAllowancePerNauticalMile;
     
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
+        result = prime * result + ((boat == null) ? 0 : boat.hashCode());
         result = prime * result + ((carriedPoints == null) ? 0 : carriedPoints.hashCode());
         result = prime * result + ((competitor == null) ? 0 : competitor.hashCode());
-        result = prime * result + ((boat == null) ? 0 : boat.hashCode());
         result = prime * result + ((fieldsByRaceColumnName == null) ? 0 : fieldsByRaceColumnName.hashCode());
         result = prime * result
                 + ((maximumSpeedOverGroundInKnots == null) ? 0 : maximumSpeedOverGroundInKnots.hashCode());
+        result = prime * result + ((netPoints == null) ? 0 : netPoints.hashCode());
+        result = prime * result + ((timeOnDistanceAllowancePerNauticalMile == null) ? 0
+                : timeOnDistanceAllowancePerNauticalMile.hashCode());
+        result = prime * result + ((timeOnTimeFactor == null) ? 0 : timeOnTimeFactor.hashCode());
+        result = prime * result + ((totalDistanceFoiledInMeters == null) ? 0 : totalDistanceFoiledInMeters.hashCode());
         result = prime * result
                 + ((totalDistanceTraveledInMeters == null) ? 0 : totalDistanceTraveledInMeters.hashCode());
         result = prime * result
                 + ((totalDurationFoiledInSeconds == null) ? 0 : totalDurationFoiledInSeconds.hashCode());
-        result = prime * result
-                + ((totalDistanceFoiledInMeters == null) ? 0 : totalDistanceFoiledInMeters.hashCode());
-        result = prime * result + ((netPoints == null) ? 0 : netPoints.hashCode());
+        result = prime * result + ((totalScoredRaces == null) ? 0 : totalScoredRaces.hashCode());
         result = prime * result
                 + ((totalTimeSailedDownwindInSeconds == null) ? 0 : totalTimeSailedDownwindInSeconds.hashCode());
         result = prime * result + ((totalTimeSailedInSeconds == null) ? 0 : totalTimeSailedInSeconds.hashCode());
@@ -55,13 +60,11 @@ public class LeaderboardRowDTO implements Serializable {
                 + ((totalTimeSailedReachingInSeconds == null) ? 0 : totalTimeSailedReachingInSeconds.hashCode());
         result = prime * result
                 + ((totalTimeSailedUpwindInSeconds == null) ? 0 : totalTimeSailedUpwindInSeconds.hashCode());
-        result = prime
-                * result
-                + ((whenMaximumSpeedOverGroundWasAchieved == null) ? 0 : whenMaximumSpeedOverGroundWasAchieved
-                        .hashCode());
+        result = prime * result + ((whenMaximumSpeedOverGroundWasAchieved == null) ? 0
+                : whenMaximumSpeedOverGroundWasAchieved.hashCode());
         return result;
     }
-    
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -71,6 +74,11 @@ public class LeaderboardRowDTO implements Serializable {
         if (getClass() != obj.getClass())
             return false;
         LeaderboardRowDTO other = (LeaderboardRowDTO) obj;
+        if (boat == null) {
+            if (other.boat != null)
+                return false;
+        } else if (!boat.equals(other.boat))
+            return false;
         if (carriedPoints == null) {
             if (other.carriedPoints != null)
                 return false;
@@ -80,11 +88,6 @@ public class LeaderboardRowDTO implements Serializable {
             if (other.competitor != null)
                 return false;
         } else if (!competitor.equals(other.competitor))
-            return false;
-        if (boat == null) {
-            if (other.boat != null)
-                return false;
-        } else if (!boat.equals(other.boat))
             return false;
         if (fieldsByRaceColumnName == null) {
             if (other.fieldsByRaceColumnName != null)
@@ -96,6 +99,26 @@ public class LeaderboardRowDTO implements Serializable {
                 return false;
         } else if (!maximumSpeedOverGroundInKnots.equals(other.maximumSpeedOverGroundInKnots))
             return false;
+        if (netPoints == null) {
+            if (other.netPoints != null)
+                return false;
+        } else if (!netPoints.equals(other.netPoints))
+            return false;
+        if (timeOnDistanceAllowancePerNauticalMile == null) {
+            if (other.timeOnDistanceAllowancePerNauticalMile != null)
+                return false;
+        } else if (!timeOnDistanceAllowancePerNauticalMile.equals(other.timeOnDistanceAllowancePerNauticalMile))
+            return false;
+        if (timeOnTimeFactor == null) {
+            if (other.timeOnTimeFactor != null)
+                return false;
+        } else if (!timeOnTimeFactor.equals(other.timeOnTimeFactor))
+            return false;
+        if (totalDistanceFoiledInMeters == null) {
+            if (other.totalDistanceFoiledInMeters != null)
+                return false;
+        } else if (!totalDistanceFoiledInMeters.equals(other.totalDistanceFoiledInMeters))
+            return false;
         if (totalDistanceTraveledInMeters == null) {
             if (other.totalDistanceTraveledInMeters != null)
                 return false;
@@ -106,15 +129,10 @@ public class LeaderboardRowDTO implements Serializable {
                 return false;
         } else if (!totalDurationFoiledInSeconds.equals(other.totalDurationFoiledInSeconds))
             return false;
-        if (totalDistanceFoiledInMeters == null) {
-            if (other.totalDistanceFoiledInMeters != null)
+        if (totalScoredRaces == null) {
+            if (other.totalScoredRaces != null)
                 return false;
-        } else if (!totalDistanceFoiledInMeters.equals(other.totalDistanceFoiledInMeters))
-            return false;
-        if (netPoints == null) {
-            if (other.netPoints != null)
-                return false;
-        } else if (!netPoints.equals(other.netPoints))
+        } else if (!totalScoredRaces.equals(other.totalScoredRaces))
             return false;
         if (totalTimeSailedDownwindInSeconds == null) {
             if (other.totalTimeSailedDownwindInSeconds != null)
@@ -143,7 +161,7 @@ public class LeaderboardRowDTO implements Serializable {
             return false;
         return true;
     }
-    
+
     public Distance getDistanceTraveled(String raceColumnName) {
         final Distance result;
         LeaderboardEntryDTO fieldsForRace = fieldsByRaceColumnName.get(raceColumnName);

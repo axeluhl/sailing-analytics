@@ -13,6 +13,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -563,6 +564,13 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                         break;
                     }
                 }
+            }
+            if (isLeaderboardThatHasRegattaLike) {
+                LeaderboardThatHasRegattaLike regattaLikeLeaderboard = (LeaderboardThatHasRegattaLike) this;
+                final Duration regattaLevelTimeOnDistanceAllowancePerNauticalMile = regattaLikeLeaderboard.getRegattaLike().getTimeOnDistanceAllowancePerNauticalMile(competitor, Optional.empty());
+                final Double regattaLevelTimeOnTimeFactor = regattaLikeLeaderboard.getRegattaLike().getTimeOnTimeFactor(competitor, Optional.empty());
+                row.timeOnDistanceAllowancePerNauticalMile = regattaLevelTimeOnDistanceAllowancePerNauticalMile;
+                row.timeOnTimeFactor = regattaLevelTimeOnTimeFactor;
             }
         }
         final Duration computeTime = startOfRequestHandling.until(MillisecondsTimePoint.now());
