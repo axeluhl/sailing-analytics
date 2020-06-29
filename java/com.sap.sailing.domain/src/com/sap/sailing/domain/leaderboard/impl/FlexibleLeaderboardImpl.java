@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
@@ -344,13 +345,13 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     }
     
     @Override
-    public Double getTimeOnTimeFactor(Competitor competitor) {
-        return regattaLikeHelper.getTimeOnTimeFactor(competitor);
+    public Double getTimeOnTimeFactor(Competitor competitor, Optional<Runnable> changeCallback) {
+        return regattaLikeHelper.getTimeOnTimeFactor(competitor, changeCallback);
     }
 
     @Override
-    public Duration getTimeOnDistanceAllowancePerNauticalMile(Competitor competitor) {
-        return regattaLikeHelper.getTimeOnDistanceAllowancePerNauticalMile(competitor);
+    public Duration getTimeOnDistanceAllowancePerNauticalMile(Competitor competitor, Optional<Runnable> changeCallback) {
+        return regattaLikeHelper.getTimeOnDistanceAllowancePerNauticalMile(competitor, changeCallback);
     }
 
     private class RaceExecutionOrderCache extends AbstractRaceExecutionOrderProvider {
