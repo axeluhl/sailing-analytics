@@ -71,21 +71,24 @@ public class CompareServersResource extends AbstractSailingServerResource {
 
     @GET
     @Produces("application/json;charset=UTF-8")
-    public Response compareServers(@QueryParam("server1") String server1, @QueryParam("server2") String server2, @QueryParam("UUID") String uuid) {
+    public Response compareServers(@QueryParam("server1") String server1, @QueryParam("server2") String server2,
+            @QueryParam("UUID[]") Set<String> uuidset) {
         final Map<String, Set<Object>> result = new HashMap<>();
         Response response = null;
-        if (!validateParameters(server1, server2, uuid)) {
+        if (!validateParametersForUuidSet(server1, server2, uuidset)) {
             response = badRequest();
         } else {
             result.put(server1, new HashSet<>());
             result.put(server2, new HashSet<>());
             try {
-                if (Util.hasLength(uuid)) {
-                    Pair<Object, Object> jsonPair = fetchLeaderboardgroupDetailsAndRemoveDuplicates(server1, server2,
-                            uuid);
-                    if (jsonPair.getA() != null && jsonPair.getB() != null) {
-                        result.get(server1).add(jsonPair.getA());
-                        result.get(server2).add(jsonPair.getB());
+                if (!uuidset.isEmpty()) {
+                    for (String uuid : uuidset) {
+                        Pair<Object, Object> jsonPair = fetchLeaderboardgroupDetailsAndRemoveDuplicates(server1,
+                                server2, uuid);
+                        if (jsonPair.getA() != null && jsonPair.getB() != null) {
+                            result.get(server1).add(jsonPair.getA());
+                            result.get(server2).add(jsonPair.getB());
+                        }
                     }
                 } else {
                     final JSONArray leaderboardgroupList1 = getLeaderboardgroupList(server1);
@@ -131,6 +134,17 @@ public class CompareServersResource extends AbstractSailingServerResource {
     private boolean validateParameters(String server1, String server2, String uuid) {
         return (Util.hasLength(server1) && Util.hasLength(server2)
                 && (!Util.hasLength(uuid) || UUID.fromString(uuid).toString().equals(uuid)));
+    }
+
+    private boolean validateParametersForUuidSet(String server1, String server2, Set<String> uuidset) {
+        boolean result = true;
+        for (String uuid : uuidset) {
+            if (!validateParameters(server1, server2, uuid)) {
+                result = false;
+                break;
+            }
+        }
+        return result;
     }
 
     /**
