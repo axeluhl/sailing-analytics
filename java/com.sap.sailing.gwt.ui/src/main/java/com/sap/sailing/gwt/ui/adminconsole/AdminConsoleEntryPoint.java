@@ -349,7 +349,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingWriteEntryPoint
                 },
                 getStringMessages().igtimiAccounts(),
                 SecuredDomainType.IGTIMI_ACCOUNT.getPermission(DefaultActions.values()));
-        ExpeditionDeviceConfigurationsPanel expeditionDeviceConfigurationsPanel = new ExpeditionDeviceConfigurationsPanel(getSailingService(), this, getStringMessages());
+        ExpeditionDeviceConfigurationsPanel expeditionDeviceConfigurationsPanel = new ExpeditionDeviceConfigurationsPanel(getSailingService(), this, getStringMessages(), getUserService());
         expeditionDeviceConfigurationsPanel.ensureDebugId("ExpeditionDeviceConfigurations");
         panel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<ExpeditionDeviceConfigurationsPanel>(expeditionDeviceConfigurationsPanel) {
             @Override
@@ -370,7 +370,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingWriteEntryPoint
                 getSailingService(), getUserService(), this, getStringMessages(), this, eventManagementPanel);
         panel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<StructureImportManagementPanel>(structureImportUrlsManagementPanel),
                 getStringMessages().manage2Sail() + " " + getStringMessages().regattaStructureImport(),
-                SecuredDomainType.REGATTA.getPermission(DefaultActions.CREATE)); // TODO bug4763 provide the default CREATE ownership for REGATTA / EVENT
+                SecuredDomainType.REGATTA.getPermission(DefaultActions.CREATE));
 
         /* ADVANCED */
         final HorizontalTabLayoutPanel advancedTabPanel = panel.addVerticalTab(getStringMessages().advanced(),
