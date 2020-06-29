@@ -79,6 +79,7 @@
       <modules>
         <module>com.sap.sse</module>
         <module>com.sap.sse.test</module>
+	<module>com.sap.sse.landscape</module>
         <module>com.sap.sse.jersey.jaxbdependencyfragment</module>
         <module>com.sap.sse.jettyextensions</module>
         <module>com.sap.sailing.routeconverterjava11extension</module>
@@ -226,12 +227,12 @@
         <module>com.sap.sailing.feature.p2build</module>
         <module>com.sap.sailing.polars</module>
         <module>com.sap.sailing.windestimation</module>
-		<module>com.sap.sailing.windestimation.lab</module>
-		<module>com.sap.sailing.windestimation.test</module>
+        <module>com.sap.sailing.windestimation.lab</module>
+        <module>com.sap.sailing.windestimation.test</module>
         <module>com.sap.sailing.polars.datamining</module>
         <module>com.sap.sailing.polars.datamining.shared</module>
         <module>com.sap.sailing.polars.test</module>
-		<module>org.mp4parser.isoparser</module>
+        <module>org.mp4parser.isoparser</module>
         <!--
         com.sap.sailing.targetplatform.base
         left out on purpose: only invoke maven manually to build target platform
