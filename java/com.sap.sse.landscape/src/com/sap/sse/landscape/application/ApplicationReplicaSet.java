@@ -40,7 +40,8 @@ public interface ApplicationReplicaSet<ShardingKey, MetricsT extends Application
      * whether the reference shall only <em>include</em> those scopes ({@code true}) or it should list all scopes
      * <em>except those listed in {@code scopes}</em> ({@code false}) instead.
      */
-    void setRemoteReference(String name, ApplicationReplicaSet<ShardingKey, MetricsT> to, Iterable<Scope<ShardingKey>> scopes, boolean includeOrExcludeScopes);
+    void setRemoteReference(String name, ApplicationReplicaSet<ShardingKey, MetricsT> to,
+            Iterable<Scope<ShardingKey>> scopes, boolean includeOrExcludeScopes);
     
     /**
      * Tells this replica set whether read requests may also be addressed at the master node in case there are one or
