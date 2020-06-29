@@ -16,8 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Consumer;
-
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.cell.client.ValueUpdater;
@@ -316,24 +314,11 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         });
         final DialogConfig<EventDTO> config = EditOwnershipDialog.create(userService.getUserManagementService(), EVENT,
                 event -> fillEvents(), stringMessages);
-        actionsColumn.addAction(EventConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
-                // Explicitly using an anonymous inner class. Using a method reference caused problems with the GWT compiler (see bug 5269)
-                new Consumer<EventDTO>() {
-                    @Override
-                    public void accept(EventDTO t) {
-                        config.openOwnershipDialog(t);
-                    }
-                });
+        actionsColumn.addAction(EventConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, config::openOwnershipDialog);
         final EditACLDialog.DialogConfig<EventDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementService(), EVENT, event -> fillEvents(), stringMessages);
         actionsColumn.addAction(EventConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                // Explicitly using an anonymous inner class. Using a method reference caused problems with the GWT compiler (see bug 5269)
-                new Consumer<EventDTO>() {
-                    @Override
-                    public void accept(EventDTO e) {
-                        configACL.openACLDialog(e);
-                    }
-                });
+                e -> configACL.openACLDialog(e));
         final MigrateGroupOwnershipDialog.DialogConfig<EventDTO> migrateDialogConfig = MigrateGroupOwnershipDialog
                 .create(userService.getUserManagementService(), (event, dto) -> {
                     sailingServiceWrite.updateGroupOwnerForEventHierarchy(event.id, dto, new AsyncCallback<Void>() {
@@ -349,13 +334,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                     });
                 });
         actionsColumn.addAction(EventConfigImagesBarCell.ACTION_MIGRATE_GROUP_OWNERSHIP_HIERARCHY, CHANGE_OWNERSHIP,
-                // Explicitly using an anonymous inner class. Using a method reference caused problems with the GWT compiler (see bug 5269)
-                new Consumer<EventDTO>() {
-                    @Override
-                    public void accept(EventDTO t) {
-                        migrateDialogConfig.openDialog(t);
-                    }
-                });
+                migrateDialogConfig::openDialog);
         eventNameColumn.setSortable(true);
         venueNameColumn.setSortable(true);
         isPublicColumn.setSortable(true);
