@@ -933,4 +933,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
             final boolean compress, final boolean exportWind, final boolean exportDeviceConfigurations,
             String targetServerUsername, String targetServerPassword, String targetServerBearerToken,
             final boolean exportTrackedRacesAndStartTracking, final UUID importOperationId) throws IllegalArgumentException;
+
+    void addOrReplaceExpeditionDeviceConfiguration(UUID deviceConfigurationId, String name, Integer expeditionBoatId);
+
+    void removeExpeditionDeviceConfiguration(UUID deviceUuid);
 }
