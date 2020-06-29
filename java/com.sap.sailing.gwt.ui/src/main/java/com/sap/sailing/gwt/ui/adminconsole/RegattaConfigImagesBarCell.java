@@ -36,7 +36,7 @@ public class RegattaConfigImagesBarCell extends ImagesBarCell {
         GWT.log(getContext().getKey().getClass().getName());
         if (getContext().getKey() instanceof RaceDTO) {
             final RaceDTO object = (RaceDTO) getContext().getKey();
-            final TrackedRaceStatusEnum status = object.status.status;
+            final TrackedRaceStatusEnum status = object.status==null?null:object.status.status;
             if (status != TrackedRaceStatusEnum.ERROR && status != TrackedRaceStatusEnum.REMOVED
                     && status != TrackedRaceStatusEnum.FINISHED) {
                 result.add(new ImageSpec(ACTION_STOP_TRACKING, stringMessages.stopTracking(),
