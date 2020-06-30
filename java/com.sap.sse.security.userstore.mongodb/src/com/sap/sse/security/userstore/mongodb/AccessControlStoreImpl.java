@@ -362,13 +362,19 @@ public class AccessControlStoreImpl implements AccessControlStore {
         LockUtil.executeWithWriteLock(lockForManagementMappings, new Runnable() {
             @Override
             public void run() {
-                accessControlLists.clear();
-                ownerships.clear();
-                userGroupToAccessControlListAnnotation.clear();
-                userGroupToOwnership.clear();
-                userToOwnership.clear();
+                mongoObjectFactory.deleteAllOwnerships();
+                mongoObjectFactory.deleteAllAccessControlLists();
+                removeAll();
             }
         });
+    }
+
+    private void removeAll() {
+        accessControlLists.clear();
+        ownerships.clear();
+        userGroupToAccessControlListAnnotation.clear();
+        userGroupToOwnership.clear();
+        userToOwnership.clear();
     }
 
     @Override

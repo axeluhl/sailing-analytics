@@ -1,8 +1,5 @@
 package com.sap.sailing.server.gateway.jaxrs.api;
 
-import java.io.BufferedWriter;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -36,7 +33,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.shiro.SecurityUtils;
@@ -923,7 +919,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                     }
                 }
                 jsonRace.put("competitors", jsonCompetitors);
-                response = Response.ok((StreamingOutput) (OutputStream output)->jsonRace.writeJSONString(new BufferedWriter(new OutputStreamWriter(output)))).build();
+                response = Response.ok(streamingOutput(jsonRace)).build();
             }
         }
         return response;
