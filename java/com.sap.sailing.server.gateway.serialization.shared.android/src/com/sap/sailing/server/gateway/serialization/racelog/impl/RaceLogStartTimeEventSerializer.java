@@ -11,6 +11,7 @@ public class RaceLogStartTimeEventSerializer extends RaceLogRaceStatusEventSeria
 
     public static final String VALUE_CLASS = RaceLogStartTimeEvent.class.getSimpleName();
     public static final String FIELD_START_TIME = "startTime";
+    public static final String FIELD_COURSE_AREA_ID_AS_STRING = "courseAreaIdAsString";
 
     public RaceLogStartTimeEventSerializer(JsonSerializer<Competitor> competitorSerializer) {
         super(competitorSerializer);
@@ -26,6 +27,8 @@ public class RaceLogStartTimeEventSerializer extends RaceLogRaceStatusEventSeria
         RaceLogStartTimeEvent startTimeEvent = (RaceLogStartTimeEvent) object;
         JSONObject result = super.serialize(startTimeEvent);
         result.put(FIELD_START_TIME, startTimeEvent.getStartTime().asMillis());
+        result.put(FIELD_COURSE_AREA_ID_AS_STRING, startTimeEvent.getCourseAreaId()==null?null:
+            startTimeEvent.getCourseAreaId().toString());
         return result;
     }
 }

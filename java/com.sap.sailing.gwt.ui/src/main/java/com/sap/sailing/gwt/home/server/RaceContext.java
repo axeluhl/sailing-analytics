@@ -255,7 +255,7 @@ public class RaceContext {
     }
     
     private String getCourseAreaOrNull() {
-        return HomeServiceUtil.getCourseAreaNameForRegattaIdThereIsMoreThanOne(event, leaderboard);
+        return HomeServiceUtil.getCourseAreaNameForRegattaIfThereIsMoreThanOne(event, leaderboard);
     }
 
     private RaceProgressDTO getProgressOrNull() {

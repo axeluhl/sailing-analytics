@@ -20,7 +20,7 @@ import com.sap.sailing.domain.common.CompetitorDescriptor;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.FlagImageRenderer;
 import com.sap.sailing.gwt.ui.client.FlagImageResolverImpl;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.CountryCode;
 import com.sap.sse.common.util.NaturalComparator;
@@ -85,9 +85,9 @@ public class CompetitorDescriptorTableWrapper<S extends RefreshableSelectionMode
     }
 
     public CompetitorDescriptorTableWrapper(CompetitorImportMatcher competitorImportMatcherParam,
-            SailingServiceAsync sailingService, final StringMessages stringMessages, ErrorReporter errorReporter,
+            SailingServiceWriteAsync sailingServiceWrite, final StringMessages stringMessages, ErrorReporter errorReporter,
             boolean multiSelection, boolean enablePager, final CompetitorsToImportToExistingLinking unlinkCallback) {
-        super(sailingService, stringMessages, errorReporter, multiSelection, enablePager,
+        super(sailingServiceWrite, stringMessages, errorReporter, multiSelection, enablePager,
                 new EntityIdentityComparator<CompetitorDescriptor>() {
                     @Override
                     public boolean representSameEntity(CompetitorDescriptor dto1, CompetitorDescriptor dto2) {

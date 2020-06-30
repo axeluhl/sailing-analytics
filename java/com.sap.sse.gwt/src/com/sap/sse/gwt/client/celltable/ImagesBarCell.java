@@ -153,7 +153,7 @@ public abstract class ImagesBarCell extends AbstractSafeHtmlCell<String> {
 
     
     /**
-     * @param data Has to contain a list of allowed actions or '*' if everything is permitted. The list has to be 
+     * @param data Has to contain a comma-separated list of allowed actions or '*' if everything is permitted. The list has to be 
      * comma separated. All commas in the allowed actions have to be escaped with a \\ as well as every \\. 
      * The allowed actions are compared to the action name of the {@link ImageSpec} and only those where the 
      * action name corresponds to one allowed action from the list will be displayed.

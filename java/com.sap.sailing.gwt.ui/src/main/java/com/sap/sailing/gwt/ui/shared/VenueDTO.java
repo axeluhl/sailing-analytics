@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sse.security.shared.dto.NamedDTO;
 
 public class VenueDTO extends NamedDTO {

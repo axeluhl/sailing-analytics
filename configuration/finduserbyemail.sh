@@ -7,9 +7,12 @@
 #  for db in `echo "rs.slaveOk()
 #  show dbs
 #  quit()" | mongo --port $port | tail -n +3 | grep -v "^bye$" | awk '{print $1;}'`; do
-#    match=`echo "rs.slaveOk(); db.USERS.find({EMAIL: '$useremail'}); db.COMPETITORS.find({email: '$useremail'})" | mongo --quiet --port $port $i`
-#    if [ "$match" != "" ]; then
-#      echo ${i}: $match
+#    match_1=`echo "rs.slaveOk()
+#                   db.USERS.find({EMAIL: \"$useremail\"})" | mongo --quiet --port $port $db`
+#    match_2=`echo "rs.slaveOk()
+#                   db.COMPETITORS.find({email: \"$useremail\"})" | mongo --quiet --port $port $db`
+#    if [ "$match_1" != ""  -o "$match_2" != "" ]; then
+#      echo ${db} on port $port: $match_1 $match_2
 #    fi
 #  done
 #done

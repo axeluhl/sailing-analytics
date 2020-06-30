@@ -19,6 +19,7 @@ public class RaceLogDependentStartTimeEventSerializer extends RaceLogRaceStatusE
     public static final String FIELD_DEPDENDENT_ON_RACECOLUMN = "dependentOnRaceColumn";
     public static final String FIELD_DEPDENDENT_ON_FLEET = "dependentOnFleet";
     public static final String FIELD_START_TIME_DIFFERENCE = "startTimeDifference";
+    public static final Object FIELD_COURSE_AREA_ID_AS_STRING = "courseAreaIdAsString";
     
     @Override
     protected String getClassFieldValue() {

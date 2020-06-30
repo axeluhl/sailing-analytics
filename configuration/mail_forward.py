@@ -15,6 +15,7 @@ import boto3
 import email
 import re
 import json
+import magic
 from botocore.exceptions import ClientError
 from email.parser import Parser
 from email.policy import default
@@ -33,7 +34,10 @@ def get_message_from_s3(bucket_name, object_key):
 def create_message(file):
     senderMap = json.loads(os.environ["MailSenderJSON"])
     recipientMap = json.loads(os.environ["MailRecipientsJSON"])
-    mailobject = email.message_from_string(file.decode('utf-8'))
+    # Check encoding, uses https://pypi.org/project/python-magic/, similar to unix "file" command.
+    m = magic.Magic(mime_encoding=True)
+    encoding = m.from_buffer(file)
+    mailobject = email.message_from_string(file.decode(encoding))
     # Define sender, either from 'To'-Header or from 'Cc'-Header
     sender = None
     # Check 'To'-Header

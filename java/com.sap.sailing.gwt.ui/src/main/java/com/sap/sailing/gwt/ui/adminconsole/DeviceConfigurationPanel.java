@@ -18,6 +18,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationWithSecurityDTO;
@@ -29,7 +30,7 @@ import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.SelectedElementsCountingButton;
 
 public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfigurationDetailComposite.DeviceConfigurationFactory {
-    private final SailingServiceAsync sailingService;
+    private final SailingServiceWriteAsync sailingServiceWrite;
     private final UserService userService;
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
@@ -42,13 +43,13 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
     
     private final RefreshableMultiSelectionModel<DeviceConfigurationWithSecurityDTO> refreshableMultiSelectionModel;
     
-    public DeviceConfigurationPanel(SailingServiceAsync sailingService, UserService userService,
+    public DeviceConfigurationPanel(SailingServiceWriteAsync sailingServiceWrite, UserService userService,
             StringMessages stringMessages, ErrorReporter reporter) {
-        this.sailingService = sailingService;
+        this.sailingServiceWrite = sailingServiceWrite;
         this.userService = userService;
         this.stringMessages = stringMessages;
         this.errorReporter = reporter;
-        listComposite = new DeviceConfigurationListComposite(sailingService, errorReporter, stringMessages,
+        listComposite = new DeviceConfigurationListComposite(sailingServiceWrite, errorReporter, stringMessages,
                 userService);
         refreshableMultiSelectionModel = listComposite.getSelectionModel();
         setupUi();
@@ -93,7 +94,8 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
             deviceManagementControlPanel.add(addConfigurationButton);
         }
         removeConfigurationButton = new SelectedElementsCountingButton<DeviceConfigurationWithSecurityDTO>(
-                stringMessages.remove(), refreshableMultiSelectionModel, true, (event) -> removeConfiguration());
+                stringMessages.remove(), refreshableMultiSelectionModel,
+                StringMessages.INSTANCE::doYouReallyWantToRemoveSelectedElements, (event) -> removeConfiguration());
         deviceManagementControlPanel.add(removeConfigurationButton);
         refreshConfigurationsButton = new Button(stringMessages.refresh());
         refreshConfigurationsButton.addClickHandler(new ClickHandler() {
@@ -112,7 +114,7 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
         grid.setWidget(0, 0, listComposite);
         grid.getRowFormatter().setVerticalAlign(0, HasVerticalAlignment.ALIGN_TOP);
         grid.getColumnFormatter().getElement(1).getStyle().setPaddingTop(2.0, Unit.EM);
-        detailComposite = new DeviceConfigurationDetailComposite(sailingService, getUserService(), errorReporter, stringMessages, this);
+        detailComposite = new DeviceConfigurationDetailComposite(sailingServiceWrite, getUserService(), errorReporter, stringMessages, this);
         detailComposite.setVisible(false);
         grid.setWidget(0, 1, detailComposite);
     }
@@ -134,7 +136,7 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
     @Override
     public void obtainAndSetNameForConfigurationAndAdd(
             final DeviceConfigurationWithSecurityDTO configurationToObtainAndSetNameForAndAdd) {
-        sailingService.getDeviceConfigurations(
+        sailingServiceWrite.getDeviceConfigurations(
                 new MarkedAsyncCallback<>(new AsyncCallback<List<DeviceConfigurationWithSecurityDTO>>() {
             @Override
                     public void onSuccess(List<DeviceConfigurationWithSecurityDTO> allConfigurations) {
@@ -142,7 +144,7 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
                     @Override
                     public void ok(String nameForNewDeviceConfiguration) {
                         configurationToObtainAndSetNameForAndAdd.name = nameForNewDeviceConfiguration;
-                        sailingService.createOrUpdateDeviceConfiguration(configurationToObtainAndSetNameForAndAdd, 
+                        sailingServiceWrite.createOrUpdateDeviceConfiguration(configurationToObtainAndSetNameForAndAdd, 
                                 new MarkedAsyncCallback<>(new AsyncCallback<Void>() {
                             @Override
                             public void onSuccess(Void result) {
@@ -177,7 +179,7 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
     private void removeConfiguration() {
         detailComposite.setConfiguration(null);
         for (DeviceConfigurationDTO config : refreshableMultiSelectionModel.getSelectedSet()) {
-            sailingService.removeDeviceConfiguration(config.id, new AsyncCallback<Boolean>() {
+            sailingServiceWrite.removeDeviceConfiguration(config.id, new AsyncCallback<Boolean>() {
                 @Override
                 public void onSuccess(Boolean result) {
                     listComposite.refreshTable();

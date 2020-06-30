@@ -29,7 +29,9 @@ The supported race detail constants right now are:<br/>
 - CURRENT_LEG<br/>
 - LEG_VELOCITY_MADE_GOOD_IN_KNOTS<br/>
 - LEG_WINDWARD_DISTANCE_TO_GO_IN_METERS<br/>
-- OVERALL_MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS<br/>
+- OVERALL_MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS
+- OVERALL_TIME_ON_TIME_FACTOR<br/>
+- OVERALL_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE<br/>
 There is also the 'ALL' shortcut constant which can be used to get all available race details without the need to enumerate them.<br/>
 <br/>
 <table>
@@ -51,7 +53,8 @@ There is also the 'ALL' shortcut constant which can be used to get all available
 	</tr>
     <tr>
         <td>&nbsp;</td>
-        <td>columnNames [Default = all columns or what showOnlyActiveRacesForCompetitorIds specifies]</td>
+        <td>columnNames [Default = all columns or what showOnlyActiveRacesForCompetitorIds specifies]: can be specified multiple times
+            to request more than one column; columns specified with this parameter are added to the ones inferred from <tt>showOnlyActiveRacesForCompetitorIds</tt>.</td>
     </tr>
     <tr>
         <td>&nbsp;</td>
@@ -70,9 +73,17 @@ There is also the 'ALL' shortcut constant which can be used to get all available
         </td>
     </tr>
     <tr>
+    	<td>&nbsp;</td>
+    	<td>
+    		<div>showOnlyCompetitorsWithIdsProvided: if <tt>true</tt>, only the competitors whose stringified IDs have been
+    		     provided by one of the <tt>showOnlyActiveRacesForCompetitorIds</tt> parameters will be added to the result
+    		     document; otherwise, all competitors in the fleets selected will be represented in the result.</div>
+    	</td>
+    </tr>
+    <tr>
         <td>&nbsp;</td>
         <td>raceDetails [Default = RACE_GAP_TO_LEADER_IN_SECONDS, RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS, RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS, RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_IN_METERS, CURRENT_LEG];
-            use "ALL" to get all detail types supported.</td>
+            use "ALL" to get all detail types supported. Specify multiple times to select more than one detail field.</td>
     </tr>
     <tr>
         <td>&nbsp;</td>

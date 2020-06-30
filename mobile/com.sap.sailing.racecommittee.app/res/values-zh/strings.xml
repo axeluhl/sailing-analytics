@@ -9,7 +9,7 @@
     
     
     <string name="url_google_geocoder">"http://maps.googleapis.com/maps/api/geocode/json?address="</string>
-    <string name="urlpart_google_geocoder_sensor">"?sensor=true"</string>
+    <string name="urlpart_google_geocoder_sensor">"\?sensor=true"</string>
     <string name="running_on_course">"（在场地%s上）"</string>
     <string name="course_design_number_waypoints">"场地具有%d个航路点"</string>
     
@@ -385,7 +385,6 @@
     <string name="finishing_started">"首位结束时间：%1$s"</string>
     <string name="finishing_started_since">"(%s)"</string>
     <string name="finishing_done">"现在下降"</string>
-
     <string name="finished_recording">"正在录制"</string>
     <string name="finished_replay">"重播语音"</string>
     <string name="finished_list">"结束清单"</string>
@@ -566,7 +565,7 @@
 
     <string name="competitor_merge_error_message">"此参赛队已从其他设备更改，您已更改相同的数据。请确保，此数据现在正确无误。"</string>
 
-    <string name="finishing_revoke">Revoke</string>
-    <string name="error_revoke_finished">Cannot revoke finished time</string>
-    <string name="error_revoke_finishing">Cannot revoke finishing time</string>
+    <string name="finishing_revoke">"撤销"</string>
+    <string name="error_revoke_finished">"无法撤销完成时间"</string>
+    <string name="error_revoke_finishing">"无法撤销结束时间"</string>
 </resources>
