@@ -21,7 +21,7 @@ public class EntryPointHelper {
      * descriptor.
      */
     public static void registerASyncService(ServiceDefTarget serviceToRegister, String servicePath) {
-        registerASyncService(serviceToRegister, servicePath, (Pair<String, String>) null);
+        registerASyncService(serviceToRegister, servicePath, /* no special HTTP headers */ (Pair<String, String>) null);
     }
 
     /**
