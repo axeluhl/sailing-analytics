@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
-import static com.sap.sse.gwt.shared.RpcConstants.HEADER_FORWARD_TO_PRIMARY;
+import static com.sap.sse.gwt.shared.RpcConstants.HEADER_FORWARD_TO_MASTER;
 import static com.sap.sse.gwt.shared.RpcConstants.HEADER_FORWARD_TO_REPLICA;
 
 import com.google.gwt.core.client.GWT;
@@ -82,9 +82,9 @@ public abstract class SailingServiceHelper {
         }
         final String servicePathWithRoutingSuffix = servicePath.toString();
         if (sameBundle) {
-            EntryPointHelper.registerASyncService(serviceToRegister, servicePathWithRoutingSuffix, HEADER_FORWARD_TO_PRIMARY);
+            EntryPointHelper.registerASyncService(serviceToRegister, servicePathWithRoutingSuffix, HEADER_FORWARD_TO_MASTER);
         } else {
-            EntryPointHelper.registerASyncService(serviceToRegister, RemoteServiceMappingConstants.WEB_CONTEXT_PATH, servicePathWithRoutingSuffix, HEADER_FORWARD_TO_PRIMARY);
+            EntryPointHelper.registerASyncService(serviceToRegister, RemoteServiceMappingConstants.WEB_CONTEXT_PATH, servicePathWithRoutingSuffix, HEADER_FORWARD_TO_MASTER);
         }
         return service;
     }

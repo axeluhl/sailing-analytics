@@ -33,7 +33,7 @@ public class EntryPointHelper {
      * where <code>service/sailing</code> is the URL path where the remote servlet is registered in the <code>web.xml</code>
      * descriptor.
      * <p>
-     * Also custom HTTP headers can be set. For possible options see {@link RpcConstants#HEADER_FORWARD_TO_PRIMARY} or {@link RpcConstants#HEADER_FORWARD_TO_REPLICA}
+     * Also custom HTTP headers can be set. For possible options see {@link RpcConstants#HEADER_FORWARD_TO_MASTER} or {@link RpcConstants#HEADER_FORWARD_TO_REPLICA}
      * </p>
      */
     @SafeVarargs
@@ -74,7 +74,7 @@ public class EntryPointHelper {
      * where <code>security/ui</code> is the web context path of the hosting bundle and <code>service/usermanagement</code> is
      * the URL path where the remote servlet is registered in the <code>web.xml</code> descriptor.
      * <p>
-     * Also custom HTTP headers can be set. For possible options see {@link RpcConstants#HEADER_FORWARD_TO_PRIMARY} or {@link RpcConstants#HEADER_FORWARD_TO_REPLICA}
+     * Also custom HTTP headers can be set. For possible options see {@link RpcConstants#HEADER_FORWARD_TO_MASTER} or {@link RpcConstants#HEADER_FORWARD_TO_REPLICA}
      * </p> 
      */
     @SafeVarargs
