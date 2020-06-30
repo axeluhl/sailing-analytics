@@ -923,7 +923,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                     }
                 }
                 jsonRace.put("competitors", jsonCompetitors);
-                response = Response.ok((StreamingOutput) (OutputStream output)->jsonRace.writeJSONString(new BufferedWriter(new OutputStreamWriter(output)))).build();
+                response = Response.ok(streamingOutput(jsonRace)).build();
             }
         }
         return response;
