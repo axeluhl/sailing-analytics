@@ -90,7 +90,13 @@ import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
 public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
         implements LeaderboardGroupsDisplayer, LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity> {
-
+    
+    /**
+     * The key to put into a params map passed into {@link #setupLeaderboardGroups(Map)} used to identify
+     * the leaderboard to select.
+     */
+    static final String LEADERBOARD_GROUP_ID = "LeaderBoardGroupId";
+    
     interface AnchorTemplates extends SafeHtmlTemplates {
         @SafeHtmlTemplates.Template("<a href=\"{0}\">{1}</a>")
         SafeHtml cell(SafeUri url, String displayName);
@@ -488,7 +494,9 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
             @Override
             public Iterable<String> getSearchableStrings(LeaderboardGroupDTO t) {
                 List<String> strings = new ArrayList<String>();
-                strings.add(t.getName());
+                List<String> string = new ArrayList<String>();
+                string.add(t.getName());
+                string.add(String.valueOf(t.getId()));
                 strings.add(t.getDisplayName());
                 strings.add(t.getDescription());
                 return strings;
@@ -861,11 +869,11 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
     
     private void removeLeaderboardGroups(final Collection<LeaderboardGroupDTO> groups) {
         if (!groups.isEmpty()) {
-            Set<String> groupNames = new HashSet<String>();
+            final Set<UUID> groupIds = new HashSet<>();
             for (LeaderboardGroupDTO group : groups) {
-                groupNames.add(group.getName());
+                groupIds.add(group.getId());
             }
-            sailingServiceWrite.removeLeaderboardGroups(groupNames, new MarkedAsyncCallback<Void>(
+            sailingServiceWrite.removeLeaderboardGroups(groupIds, new MarkedAsyncCallback<Void>(
                     new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable t) {
@@ -884,9 +892,9 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
     }
 
     private void removeLeaderboardGroup(final LeaderboardGroupDTO group) {
-        Set<String> groups = new HashSet<String>();
-        groups.add(group.getName());
-        sailingServiceWrite.removeLeaderboardGroups(groups, new MarkedAsyncCallback<Void>(
+        final Set<UUID> groupIds = new HashSet<>();
+        groupIds.add(group.getId());
+        sailingServiceWrite.removeLeaderboardGroups(groupIds, new MarkedAsyncCallback<Void>(
                 new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable t) {
@@ -900,6 +908,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
                     }
                 }));
     }
+
 
     private void removeGroupFromTable(final LeaderboardGroupDTO group) {
         availableLeaderboardGroups.remove(group);
