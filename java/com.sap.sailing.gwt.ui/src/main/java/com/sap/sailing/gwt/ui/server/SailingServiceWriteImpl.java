@@ -242,7 +242,6 @@ import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
 import com.sap.sailing.expeditionconnector.ExpeditionSensorDeviceIdentifier;
-import com.sap.sailing.expeditionconnector.ExpeditionTrackerFactory;
 import com.sap.sailing.gwt.ui.adminconsole.RaceLogSetTrackingTimesDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceWrite;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
@@ -277,6 +276,7 @@ import com.sap.sailing.server.operationaltransformation.AbstractLeaderboardGroup
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
 import com.sap.sailing.server.operationaltransformation.AddCourseAreas;
+import com.sap.sailing.server.operationaltransformation.AddOrReplaceExpeditionDeviceConfiguration;
 import com.sap.sailing.server.operationaltransformation.AddSpecificRegatta;
 import com.sap.sailing.server.operationaltransformation.AllowBoatResetToDefaults;
 import com.sap.sailing.server.operationaltransformation.AllowCompetitorResetToDefaults;
@@ -293,6 +293,7 @@ import com.sap.sailing.server.operationaltransformation.RemoveAndUntrackRace;
 import com.sap.sailing.server.operationaltransformation.RemoveColumnFromSeries;
 import com.sap.sailing.server.operationaltransformation.RemoveCourseAreas;
 import com.sap.sailing.server.operationaltransformation.RemoveEvent;
+import com.sap.sailing.server.operationaltransformation.RemoveExpeditionDeviceConfiguration;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardColumn;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardGroup;
@@ -322,7 +323,6 @@ import com.sap.sailing.server.operationaltransformation.UpdateSeries;
 import com.sap.sailing.server.operationaltransformation.UpdateSpecificRegatta;
 import com.sap.sailing.server.util.WaitForTrackedRaceUtil;
 import com.sap.sailing.xrr.schema.RegattaResults;
-import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.Speed;
@@ -2668,29 +2668,20 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     @Override
     public void addOrReplaceExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration deviceConfiguration) {
         getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION,
-                new TypeRelativeObjectIdentifier(ServerInfo.getName(), deviceConfiguration.getName()),
-                /* display name */ ServerInfo.getName() + "/" + deviceConfiguration.getName(), () -> {
-                    // TODO consider replication
-                    final ExpeditionTrackerFactory expeditionConnector = expeditionConnectorTracker.getService();
-                    if (expeditionConnector != null) {
-                        expeditionConnector.addOrReplaceDeviceConfiguration(deviceConfiguration);
-                    }
+                SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION, deviceConfiguration.getTypeRelativeObjectIdentifier(),
+                /* display name */ deviceConfiguration.getName(), () -> {
+                    getService()
+                            .apply(new AddOrReplaceExpeditionDeviceConfiguration(deviceConfiguration.getDeviceUuid(),
+                                    deviceConfiguration.getName(), deviceConfiguration.getExpeditionBoatId()));
                 });
     }
 
     @Override
     public void removeExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration deviceConfiguration) {
-        QualifiedObjectIdentifier identifier = deviceConfiguration.getType().getQualifiedObjectIdentifier(
-                deviceConfiguration.getTypeRelativeObjectIdentifier(ServerInfo.getName()));
-        getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(identifier, new Callable<Void>() {
+        getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(deviceConfiguration.getIdentifier(), new Callable<Void>() {
             @Override
             public Void call() throws Exception {
-                // TODO consider replication
-                final ExpeditionTrackerFactory expeditionConnector = expeditionConnectorTracker.getService();
-                if (expeditionConnector != null) {
-                    expeditionConnector.removeDeviceConfiguration(deviceConfiguration);
-                }
+                getService().apply(new RemoveExpeditionDeviceConfiguration(deviceConfiguration.getDeviceUuid()));
                 return null;
             }
         });

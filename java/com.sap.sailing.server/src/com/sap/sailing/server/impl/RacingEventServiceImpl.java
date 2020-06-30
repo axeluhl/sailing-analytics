@@ -221,6 +221,7 @@ import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
 import com.sap.sailing.domain.windestimation.WindEstimationFactoryService;
+import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
 import com.sap.sailing.expeditionconnector.ExpeditionTrackerFactory;
 import com.sap.sailing.resultimport.ResultUrlRegistry;
 import com.sap.sailing.server.Replicator;
@@ -4101,15 +4102,46 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         if (bundleContext == null) { // the non-OSGi case
             result = Collections.singleton((WindTrackerFactory) ExpeditionTrackerFactory.getInstance());
         } else {
-            ServiceTracker<WindTrackerFactory, WindTrackerFactory> tracker = new ServiceTracker<WindTrackerFactory, WindTrackerFactory>(
+            ServiceTracker<WindTrackerFactory, WindTrackerFactory> tracker = new ServiceTracker<>(
                     bundleContext, WindTrackerFactory.class, null);
             tracker.open();
             result = new HashSet<>();
             for (WindTrackerFactory factory : tracker.getServices(new WindTrackerFactory[0])) {
                 result.add(factory);
             }
+            tracker.close();
         }
         return result;
+    }
+    
+    @Override
+    public void addOrReplaceExpeditionDeviceConfiguration(UUID deviceConfigurationId, String name, Integer expeditionBoatId) {
+        ServiceTracker<ExpeditionTrackerFactory, ExpeditionTrackerFactory> tracker = new ServiceTracker<>(
+                bundleContext, ExpeditionTrackerFactory.class, null);
+        tracker.open();
+        final ExpeditionTrackerFactory expeditionTrackerFactory = tracker.getService();
+        if (expeditionTrackerFactory != null) {
+            expeditionTrackerFactory.addOrReplaceDeviceConfiguration(new ExpeditionDeviceConfiguration(name, deviceConfigurationId, expeditionBoatId));
+        } else {
+            logger.severe("Addition or update of Expedition device configuration "+deviceConfigurationId+" was requested, "+
+                    "but no Expedition connector was found. Request not fulfilled.");
+        }
+        tracker.close();
+    }
+
+    @Override
+    public void removeExpeditionDeviceConfiguration(UUID deviceUuid) {
+        ServiceTracker<ExpeditionTrackerFactory, ExpeditionTrackerFactory> tracker = new ServiceTracker<>(
+                bundleContext, ExpeditionTrackerFactory.class, null);
+        tracker.open();
+        final ExpeditionTrackerFactory expeditionTrackerFactory = tracker.getService();
+        if (expeditionTrackerFactory != null) {
+            expeditionTrackerFactory.removeDeviceConfiguration(deviceUuid);
+        } else {
+            logger.severe("Addition or update of Expedition device configuration "+deviceUuid+" was requested, "+
+                    "but no Expedition connector was found. Request not fulfilled.");
+        }
+        tracker.close();
     }
 
     @Override
