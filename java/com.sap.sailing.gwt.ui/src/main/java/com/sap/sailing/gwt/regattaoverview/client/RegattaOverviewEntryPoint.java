@@ -18,13 +18,13 @@ import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.regattaoverview.client.RegattaRaceStatesComponent.EntryHandler;
 import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaOverviewContextDefinition;
 import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaRaceStatesSettings;
-import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
+import com.sap.sailing.gwt.ui.client.AbstractSailingReadEntryPoint;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 
-public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
+public class RegattaOverviewEntryPoint extends AbstractSailingReadEntryPoint  {
 
     private static final SettingsToUrlSerializer serializer = new SettingsToUrlSerializer();
     

@@ -9,13 +9,13 @@ import static com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage.goToP
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.WebElement;
 
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.selenium.api.core.ApiContext;
 import com.sap.sailing.selenium.api.event.EventApi;
-import com.sap.sailing.selenium.api.event.EventApi.Event;
 import com.sap.sailing.selenium.api.event.SecurityApi;
 import com.sap.sailing.selenium.pages.adminconsole.AclPopupPO;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
@@ -43,11 +43,12 @@ public class AclRevokeAnonymousTest extends AbstractSeleniumTest {
         ownerCtx = createApiContext(getContextRoot(), SERVER_CONTEXT, "donald", "daisy0815");
         adminConsole = goToPage(getWebDriver(), getContextRoot());
         adminConsole.goToLocalServerPanel().setSelfServiceServer(true);
-        final Event event = eventApi.createEvent(ownerCtx, EVENT_NAME, BOAT_CLASS, CompetitorRegistrationType.CLOSED,
-                "Some special place");
+        eventApi.createEvent(ownerCtx, EVENT_NAME, BOAT_CLASS, CompetitorRegistrationType.CLOSED, "Some special place");
     }
 
     @Test
+    // TODO remove, once we allow denied ACLs again
+    @Ignore("Bug 5239 deactivates denied actions")
     public void test() {
         EventConfigurationPanelPO eventPanel = adminConsole.goToEvents();
         EventEntryPO eventEntry = eventPanel.getEventEntry(EVENT_NAME);

@@ -45,7 +45,7 @@ import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -86,7 +86,7 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
 
     private Label noTrackedRacesLabel;
 
-    protected final SailingServiceAsync sailingService;
+    protected final SailingServiceWriteAsync sailingService;
     protected final ErrorReporter errorReporter;
     protected final RegattaRefresher regattaRefresher;
     protected final StringMessages stringMessages;
@@ -109,11 +109,11 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
     }
 
     public AbstractTrackedRacesListComposite(Component<?> parent, ComponentContext<?> context,
-            final SailingServiceAsync sailingService,
+            final SailingServiceWriteAsync sailingServiceWrite,
             final ErrorReporter errorReporter, final RegattaRefresher regattaRefresher,
             final StringMessages stringMessages, boolean hasMultiSelection, UserService userService) {
         super(parent, context);
-        this.sailingService = sailingService;
+        this.sailingService = sailingServiceWrite;
         this.errorReporter = errorReporter;
         this.regattaRefresher = regattaRefresher;
         this.multiSelection = hasMultiSelection;
@@ -421,13 +421,13 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
                 new RegattaConfigImagesBarCell(stringMessages), userService);
         final DialogConfig<RaceDTO> config = EditOwnershipDialog.create(userService.getUserManagementService(), type,
                 race -> regattaRefresher.fillRegattas(), stringMessages);
-        actionsColumn.addAction(EventConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, config::openDialog);
+        actionsColumn.addAction(EventConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, config::openOwnershipDialog);
 
         final EditACLDialog.DialogConfig<RaceDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementService(), type, regatta -> regattaRefresher.fillRegattas(),
                 stringMessages);
         actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                configACL::openDialog);
+                configACL::openACLDialog);
 
         actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_DELETE, DefaultActions.DELETE,
                 this::removeAndUntrackRace);

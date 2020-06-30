@@ -24,7 +24,7 @@ import com.tractrac.subscription.lib.api.IRaceSubscriber;
 import com.tractrac.subscription.lib.api.competitor.ICompetitorSensorDataListener;
 
 /**
- * Subscribes an 
+ * Subscribes for sensor data other than GPS.
  * 
  * @author Axel Uhl (d043530)
  * 

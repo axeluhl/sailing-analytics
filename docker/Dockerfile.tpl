@@ -1,4 +1,4 @@
-FROM donaldduck70/sapjvm8:8.1.059
+FROM donaldduck70/sapjvm8:8.1.062
 LABEL maintainer=axel.uhl@sap.com
 # Download and extract the release
 WORKDIR /home/sailing/servers/server

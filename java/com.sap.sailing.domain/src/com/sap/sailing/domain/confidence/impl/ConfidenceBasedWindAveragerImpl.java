@@ -31,6 +31,11 @@ import com.sap.sse.common.Speed;
 public class ConfidenceBasedWindAveragerImpl<RelativeTo> extends
         ConfidenceBasedAveragerImpl<ScalableWind, Wind, RelativeTo> implements ConfidenceBasedWindAverager<RelativeTo> {
 
+    /**
+     * @param weigher
+     *            If <code>null</code>, 1.0 will be assumed as default confidence for all values provided, regardless
+     *            the reference point relative to which the average is to be computed
+     */
     public ConfidenceBasedWindAveragerImpl(Weigher<RelativeTo> weigher) {
         super(weigher);
     }
@@ -56,9 +61,9 @@ public class ConfidenceBasedWindAveragerImpl<RelativeTo> extends
             int count = 0;
             while (values.hasNext()) {
                 HasConfidenceAndIsScalable<ScalableWind, Wind, RelativeTo> next = values.next();
-                double relativeWeight = getWeight(next, at);
+                final double relativeWeight = getWeight(next, at);
                 ScalableWind weightedNext = next.getScalableValue().multiply(relativeWeight).getValue();
-                double weighedNextKnots = next.getObject().getKnots() * relativeWeight;
+                final double weighedNextKnots = next.getObject().getKnots() * relativeWeight;
                 if (numerator == null) {
                     numerator = weightedNext;
                 } else {
@@ -74,7 +79,7 @@ public class ConfidenceBasedWindAveragerImpl<RelativeTo> extends
                 count++;
             }
             // TODO consider greater variance to reduce the confidence
-            double newConfidence = confidenceSum / count;
+            final double newConfidence = confidenceSum / count;
             if (confidenceSum == 0) {
                 result = null;
             } else {

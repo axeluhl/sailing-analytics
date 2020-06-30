@@ -23,6 +23,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.TimeUtils;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.BuildConfig;
@@ -36,7 +37,6 @@ import com.sap.sailing.racecommittee.app.utils.RaceHelper;
 import com.sap.sailing.racecommittee.app.utils.StringHelper;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -52,7 +52,6 @@ public class PhotoListFragment extends BaseFragment {
     private PhotoListAdapter mAdapter;
     private RecyclerView mPhotoList;
     private Button mSubmit;
-    private SimpleDateFormat mDateFormat;
 
     public PhotoListFragment() {
         mPhotos = new ArrayList<>();
@@ -67,8 +66,6 @@ public class PhotoListFragment extends BaseFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.photo_list, container, false);
-
-        mDateFormat = new SimpleDateFormat("HH:mm:ss", getResources().getConfiguration().locale);
 
         ImageView button = ViewHelper.get(layout, R.id.photo_button);
         if (button != null) {
@@ -235,9 +232,9 @@ public class PhotoListFragment extends BaseFragment {
         builder.append(
                 getString(R.string.results_mail_body_boat_class, getRace().getRaceGroup().getBoatClass().getName()));
         builder.append(getString(R.string.results_mail_body_start,
-                mDateFormat.format(getRaceState().getStartTime().asDate())));
+                TimeUtils.formatTime(getRaceState().getStartTime())));
         builder.append(getString(R.string.results_mail_body_finish,
-                mDateFormat.format(getRaceState().getFinishedTime().asDate())));
+                TimeUtils.formatTime(getRaceState().getFinishedTime())));
         return builder.toString();
     }
 }

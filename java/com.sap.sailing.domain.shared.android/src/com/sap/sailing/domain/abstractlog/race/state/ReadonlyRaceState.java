@@ -1,15 +1,19 @@
 package com.sap.sailing.domain.abstractlog.race.state;
 
+import java.util.UUID;
+
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogTagEvent;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AbstractFinishPositioningListFinder.CompetitorResultsAndTheirCreationTimePoints;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventComparator;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ReadonlyRacingProcedure;
+import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.common.Wind;
@@ -43,7 +47,6 @@ import com.sap.sse.common.TimeRange;
  * 
  */
 public interface ReadonlyRaceState extends RaceStateEventProcessor {
-
     /**
      * Accesses the underlying {@link RaceLog}.
      */
@@ -131,7 +134,7 @@ public interface ReadonlyRaceState extends RaceStateEventProcessor {
      * If there is a (confirmed) finish positioning list set for the current pass, returns the most recent one.
      * Otherwise <code>null</code>.
      */
-    CompetitorResults getConfirmedFinishPositioningList();
+    CompetitorResultsAndTheirCreationTimePoints getConfirmedFinishPositioningList();
 
     /**
      * If there is a protest time set, returns the most recent one. Otherwise <code>null</code>.
@@ -152,4 +155,13 @@ public interface ReadonlyRaceState extends RaceStateEventProcessor {
      * Returns an iterable of tag events which may be empty but never <code>null</code>.
      */
     Iterable<RaceLogTagEvent> getTagEvents();
+
+    /**
+     * In the last valid start time event looks for a course area specification. If found,
+     * the course area ID is returned. It represents the {@link CourseArea#getId() ID} of the
+     * course area on which a start time was set last. If no start time event is present in
+     * the underlying race log, or none of those start time events specifies a course area ID,
+     * {@code null} is returned.
+     */
+    UUID getCourseAreaId();
 }

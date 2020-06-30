@@ -33,6 +33,7 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
+import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.Timed;
@@ -56,11 +57,12 @@ public class TopLevelMasterData implements Serializable {
     private final Map<LeaderboardGroup, Set<Event>> eventForLeaderboardGroup;
     private final Map<DeviceIdentifier, Set<Timed>> raceLogTrackingFixes;
     private final Iterable<DeviceConfiguration> deviceConfigurations;
+    private final Set<RaceTrackingConnectivityParameters> connectivityParametersToRestore;
 
     public TopLevelMasterData(final Set<LeaderboardGroup> groupsToExport, final Iterable<Event> allEvents,
             final Map<String, Regatta> regattaForRaceIdString, final Iterable<MediaTrack> allMediaTracks,
             SensorFixStore sensorFixStore, boolean exportWind,
-            Iterable<DeviceConfiguration> raceManagerDeviceConfigurations) {
+            Iterable<DeviceConfiguration> raceManagerDeviceConfigurations, final Set<RaceTrackingConnectivityParameters> connectivityParametersToRestore) {
         this.raceIdStringsForRegatta = convertToRaceIdStringsForRegattaMap(regattaForRaceIdString);
         this.leaderboardGroups = groupsToExport;
         this.raceLogTrackingFixes = getAllRelevantRaceLogTrackingFixes(sensorFixStore);
@@ -73,6 +75,7 @@ public class TopLevelMasterData implements Serializable {
         this.eventForLeaderboardGroup = createEventMap(groupsToExport, allEvents);
         this.filteredMediaTracks = new HashSet<MediaTrack>();
         filterMediaTracks(allMediaTracks, this.filteredMediaTracks);
+        this.connectivityParametersToRestore = connectivityParametersToRestore;
     }
 
     private Map<DeviceIdentifier, Set<Timed>> getAllRelevantRaceLogTrackingFixes(SensorFixStore sensorFixStore) {
@@ -138,7 +141,7 @@ public class TopLevelMasterData implements Serializable {
 
     /**
      * Workaround to look for the events connected to RegattaLeadeboards. There should be a proper connection between
-     * regatta and event soon. TODO
+     * regatta and event soon. TODO See bugs 1896 and 1532
      */
     private Map<LeaderboardGroup, Set<Event>> createEventMap(Set<LeaderboardGroup> groupsToExport,
             Iterable<Event> allEvents) {
@@ -153,9 +156,8 @@ public class TopLevelMasterData implements Serializable {
             HashSet<Event> eventSet = new HashSet<Event>();
             eventsForLeaderboardGroup.put(leaderboardGroup, eventSet);
             for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
-                CourseArea courseArea = leaderboard.getDefaultCourseArea();
-                if (courseArea != null) {
-                    Event event = eventForCourseArea.get(courseArea);
+                for (final CourseArea courseArea : leaderboard.getCourseAreas()) {
+                    final Event event = eventForCourseArea.get(courseArea);
                     if (event != null) {
                         eventSet.add(event);
                     }
@@ -316,5 +318,9 @@ public class TopLevelMasterData implements Serializable {
 
     public Iterable<DeviceConfiguration> getDeviceConfigurations() {
         return deviceConfigurations;
+    }
+
+    public Set<RaceTrackingConnectivityParameters> getConnectivityParametersToRestore() {
+        return connectivityParametersToRestore;
     }
 }

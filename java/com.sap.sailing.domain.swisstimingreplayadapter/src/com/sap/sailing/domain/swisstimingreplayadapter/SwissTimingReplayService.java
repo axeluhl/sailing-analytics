@@ -13,7 +13,6 @@ import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.swisstimingreplayadapter.impl.SwissTimingRaceConfig;
-import com.sap.sailing.domain.tracking.RaceTrackingHandler;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.TrackerManager;
 
@@ -36,6 +35,9 @@ public interface SwissTimingReplayService {
      * @param link
      *            the URL without the implicit "http://" prefix, as obtained, e.g., from
      *            {@link SwissTimingReplayRace#getLink()}.
+     * @param swissTimingUrl
+     *            the overview URL that lists the races that can be loaded; passed through in particular for
+     *            re-establishing after master data import
      * @param raceID
      *            the SwissTiming ID for the race
      * @param useInternalMarkPassingAlgorithm
@@ -44,10 +46,10 @@ public interface SwissTimingReplayService {
      *            only required if {@code regattaToAddTo} is {@code null}; used for the retrieval/creation of a default
      *            regatta
      */
-    void loadRaceData(RegattaIdentifier regattaToAddTo, String link, String raceName, String raceID,
-            String boatClassName, TrackerManager trackerManager, TrackedRegattaRegistry trackedRegattaRegistry,
-            boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
-            RaceTrackingHandler raceTrackingHandler)
+    void loadRaceData(RegattaIdentifier regattaToAddTo, String link, String swissTimingUrl, String raceName,
+            String raceID, String boatClassName, TrackerManager trackerManager,
+            TrackedRegattaRegistry trackedRegattaRegistry, boolean useInternalMarkPassingAlgorithm,
+            RaceLogStore raceLogStore, RegattaLogStore regattaLogStore)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
     /**

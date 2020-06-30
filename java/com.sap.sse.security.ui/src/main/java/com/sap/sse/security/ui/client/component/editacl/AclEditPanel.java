@@ -13,7 +13,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -60,10 +59,10 @@ public class AclEditPanel extends Composite {
 
     private static AclEditPanelUiBinder uiBinder = GWT.create(AclEditPanelUiBinder.class);
     
-    private static Logger log = Logger.getLogger(AclEditPanel.class.getName());
-
     interface AclEditPanelUiBinder extends UiBinder<Widget, AclEditPanel> {
     }
+    
+    private static final boolean showDeniedActions = false;
 
     @UiField
     FlowPanel userGroupCellListPanelUi;
@@ -129,8 +128,11 @@ public class AclEditPanel extends Composite {
                 IconResources.INSTANCE.removeIcon(), actionNames, stringMessages.deniedActionName());
         deniedActionsEditor.addValueChangeHandler(e -> userGroupsWithDeniedActions
                 .put(userGroupSelectionModel.getSelectedObject(), toDeniedActionSet(e.getValue())));
-        permissionsCellListPanelUi.add(deniedActionsContainer = createActionsContainer(stringMessages.deniedActions(),
-                deniedActionsEditor, AclDialogResources.INSTANCE.css().deniedActionsTable()));
+        deniedActionsContainer = createActionsContainer(stringMessages.deniedActions(),
+                deniedActionsEditor, AclDialogResources.INSTANCE.css().deniedActionsTable());
+        if (showDeniedActions) {
+            permissionsCellListPanelUi.add(deniedActionsContainer);
+        }
 
         userGroupSelectionModel.addSelectionChangeHandler(event -> {
             StrippedUserGroupDTO userGroup = userGroupSelectionModel.getSelectedObject();
@@ -206,8 +208,10 @@ public class AclEditPanel extends Composite {
         deniedActionsContainer.setVisible(userGroupSelected);
         if (userGroupSelected) {
             allowedActionsEditor.setValue(userGroupsWithAllowedActions.get(selectedUserGroup), false);
-            deniedActionsEditor.setValue(
-                    removeExclamationMarkFromStrings(userGroupsWithDeniedActions.get(selectedUserGroup)), false);
+            if (showDeniedActions) {
+                deniedActionsEditor.setValue(
+                        removeExclamationMarkFromStrings(userGroupsWithDeniedActions.get(selectedUserGroup)), false);
+            }
         }
     }
 

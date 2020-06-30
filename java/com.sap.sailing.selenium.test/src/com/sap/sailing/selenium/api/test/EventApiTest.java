@@ -44,8 +44,7 @@ public class EventApiTest extends AbstractSeleniumTest {
         assertEquals("read: event.description is different", eventName, foundEvent.get("description"));
         assertEquals("read: event.officialWebsiteURL is different", null,
                 (String) foundEvent.get("officialWebsiteURL"));
-        assertEquals("read: event.baseUrl is different", getContextRoot() + ApiContext.SERVER_CONTEXT + "/api/",
-                foundEvent.get("baseURL"));
+        assertEquals("read: event.baseUrl is different", removeTrailingSlash(getContextRoot()), removeTrailingSlash(foundEvent.get("baseURL")));
         assertNotNull("read: event.startDate is missing", foundEvent.getStartDate());
         assertNotNull("read: event.endDate is missing", foundEvent.getEndDate());
         assertEquals("read: event.images should be empty", 0, ((JSONArray) foundEvent.get("images")).size());
@@ -71,5 +70,9 @@ public class EventApiTest extends AbstractSeleniumTest {
                 foundEventLeaderBoardGroupsFirst.get("description"));
         assertEquals("read: event.leaderboardGroups[0].hasOverallLeaderboard is different", false,
                 foundEventLeaderBoardGroupsFirst.get("hasOverallLeaderboard"));
+    }
+    
+    private String removeTrailingSlash(String url) {
+        return url.endsWith("/")?url.substring(0, url.length()-1):url;
     }
 }

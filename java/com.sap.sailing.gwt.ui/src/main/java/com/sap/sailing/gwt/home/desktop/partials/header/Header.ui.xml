@@ -9,8 +9,8 @@
     <!-- Website header-->
       <div class="{res.mediaCss.grid}">
         <div class="{local_res.css.siteheader_logo} {res.mediaCss.small2} {res.mediaCss.medium2} {res.mediaCss.large3} {res.mediaCss.columns}">
-          <a href="https://www.sap.com/sponsorships">
-            <img src="images/home/logo-small@2x.png" alt="{i18n.headerLogo}" class="{local_res.css.siteheader_logo_image}"></img>
+          <a ui:field="logoAnchor" href="https://www.sap.com/sponsorships">
+            <img ui:field="logoImage" src="images/home/logo-small@2x.png" alt="{i18n.headerLogo}" class="{local_res.css.siteheader_logo_image}"></img>
             <p class="{local_res.css.siteheader_logo_title}">
               <ui:text from='{i18n.headerLogo}' />
             </p>
@@ -21,7 +21,7 @@
             styleName="{local_res.css.sitenavigation_link}" text="{i18n.home}" />
           <g:Anchor ui:field="eventsPageLink"
             styleName="{local_res.css.sitenavigation_link}" text="{i18n.events}" />
-	  <g:Anchor ui:field="solutionsPageLink"
+          <g:Anchor ui:field="solutionsPageLink"
             styleName="{local_res.css.sitenavigation_link}" text="{i18n.solutions}" />
           <!-- 
           <g:Anchor ui:field="sponsoringPageLink"

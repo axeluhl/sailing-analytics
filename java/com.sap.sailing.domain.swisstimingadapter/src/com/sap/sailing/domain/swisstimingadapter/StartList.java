@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.swisstimingadapter;
 
-public interface StartList {
+import java.io.Serializable;
+
+public interface StartList extends Serializable {
     String getRaceID();
     
     Iterable<Competitor> getCompetitors();

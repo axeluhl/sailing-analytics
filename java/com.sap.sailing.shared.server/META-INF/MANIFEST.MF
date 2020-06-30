@@ -7,38 +7,26 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: com.sap.sailing.shared.server.impl.Activator
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.sap.sailing.server.gateway.deserialization,
- javax.mail;version="1.4.0",
- javax.mail.internet;version="1.4.0",
- javax.mail.util;version="1.4.0",
- org.json.simple,
- org.json.simple.parser,
- org.osgi.framework;version="1.3.0",
+Import-Package: org.osgi.framework;version="1.3.0",
  org.osgi.util.tracker;version="1.3.1"
 Bundle-ActivationPolicy: lazy
-Require-Bundle: com.sap.sailing.domain,
- com.sap.sse.mongodb,
- com.sap.sailing.domain.common,
+Require-Bundle: com.sap.sailing.domain.common,
  com.sap.sailing.domain.shared.android,
- com.sap.sailing.server.gateway.serialization,
  com.sap.sse.common,
- com.sap.sse.operationaltransformation,
  com.sap.sse.replication.interfaces,
  com.sap.sse,
- com.sap.sailing.server.gateway.serialization.shared.android,
  com.sap.sse.shared.android,
- com.sap.sse.security,
  com.sap.sse.security.common,
  org.apache.shiro.web;bundle-version="1.2.2",
  org.apache.shiro.core;bundle-version="1.2.2",
- javax.servlet;bundle-version="3.1.0",
- com.sap.sse.mail,
- com.sap.sailing.server.interface,
- org.mongodb.mongo-java-driver;bundle-version="3.6.4",
  com.sap.sse.security.common,
- com.sap.sailing.shared.persistence
+ com.sap.sse.operationaltransformation,
+ com.sap.sse.security,
+ com.sap.sailing.shared.persistence,
+ javax.servlet;bundle-version="3.1.0"
 Bundle-ClassPath: .
-Export-Package: com.sap.sailing.shared.server.impl;
+Export-Package: com.sap.sailing.shared.server,
+ com.sap.sailing.shared.server.impl;
   x-friends:="com.sap.sailing.mongodb.test,
    com.sap.sailing.server.test,
    com.sap.sailing.server.gateway.test,

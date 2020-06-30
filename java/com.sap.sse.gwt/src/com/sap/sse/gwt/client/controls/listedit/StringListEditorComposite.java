@@ -68,6 +68,6 @@ public class StringListEditorComposite extends GenericStringListEditorComposite<
         if (activeUi instanceof CollapsedUi)
             ((CollapsedUi) activeUi).setEnabled(enabled);
         if (activeUi instanceof ExpandedUi)
-            ((ExpandedUi) activeUi).setEnabled(enabled);
+            ((ExpandedUi<?>) activeUi).setEnabled(enabled);
     }
 }

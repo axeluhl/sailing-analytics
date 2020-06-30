@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-  xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project xsi:schemaLocation="https://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"
+  xmlns="https://maven.apache.org/POM/4.0.0" xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
@@ -31,11 +31,11 @@
          Due to ECJ/JDT bugs it may fail depending on the Eclipse version tycho is based on 
          (see Bugzilla: https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=3859). -->
     <!-- Most likely, serialization/replication will fail with tycho versions based on Eclipse Neon R (4.6.0). -->
-    <tycho-version>1.0.0</tycho-version>
-    <gwt.version>2.8.2</gwt.version>
+    <tycho-version>1.6.0</tycho-version>
+    <gwt.version>2.9.0</gwt.version>
     <!-- gwt-maven-plugin is typically in sync with the GWT version. But sometimes versions need extra time after a new GWT release. -->
-    <gwt.plugin.version>2.8.2</gwt.plugin.version>
-    <gwt.minVersion>2.8.0</gwt.minVersion>
+    <gwt.plugin.version>2.9.0</gwt.plugin.version>
+    <gwt.minVersion>2.9.0</gwt.minVersion>
     <gwt.workers>2</gwt.workers>
     <p2-target>race-analysis-p2-remote</p2-target><!--can be overidden through p2-target.local profile -->
     <!-- QUESTION: Which properties or settings are system dependent and differ across different machines/environments? QUESTION:
@@ -174,6 +174,7 @@
         <module>com.sap.sailing.server.trackfiles</module>
         <module>com.sap.sailing.feature.runtime</module>
         <module>com.sap.sailing.gwt.ui</module>
+        <module>com.sap.sse.debranding</module>
         <module>com.sap.sailing.domain.test</module>
         <module>com.sap.sse.replication.testsupport</module>
         <module>com.sap.sailing.server.testsupport</module>
@@ -203,7 +204,6 @@
         <module>com.sap.sailing.server.gateway.test.support</module>
         <module>com.sap.sailing.server.gateway.serialization.test</module>
         <module>com.sap.sailing.server.replication.test</module>
-        <module>com.sap.sailing.gwt.ui.test</module>
         <module>com.sap.sailing.mongodb.test</module>
         <module>com.googlecode.java-diff-utils.test</module>
         <module>com.sap.sailing.kiworesultimport.test</module>

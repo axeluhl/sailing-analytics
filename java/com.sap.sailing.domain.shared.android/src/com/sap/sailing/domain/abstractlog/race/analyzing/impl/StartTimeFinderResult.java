@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.abstractlog.race.analyzing.impl;
 
 import java.util.Collections;
+import java.util.UUID;
 
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sse.common.Duration;
@@ -20,6 +21,7 @@ public class StartTimeFinderResult {
     
     private final Iterable<SimpleRaceLogIdentifier> dependingOnRaces;
     private final TimePoint startTime;
+    private final UUID courseAreaId;
     
     /**
      * <code>null</code> if resolution worked
@@ -28,24 +30,25 @@ public class StartTimeFinderResult {
     
     private Duration startTimeDiff;
     
-    public StartTimeFinderResult(Iterable<SimpleRaceLogIdentifier> racesDependingOn, TimePoint startTime, Duration startTimeDiff) {
-        this(racesDependingOn, startTime, startTimeDiff, /* resolutionFailed */ null);
+    public StartTimeFinderResult(Iterable<SimpleRaceLogIdentifier> racesDependingOn, TimePoint startTime, Duration startTimeDiff, UUID courseAreaId) {
+        this(racesDependingOn, startTime, startTimeDiff, /* resolutionFailed */ null, courseAreaId);
     }
     
-    public StartTimeFinderResult(Iterable<SimpleRaceLogIdentifier> racesDependingOn, Duration startTimeDiff, ResolutionFailed resolutionFailed) {
-        this(racesDependingOn, /* startTime */ null, startTimeDiff, resolutionFailed);
+    public StartTimeFinderResult(Iterable<SimpleRaceLogIdentifier> racesDependingOn, Duration startTimeDiff, ResolutionFailed resolutionFailed, UUID courseAreaId) {
+        this(racesDependingOn, /* startTime */ null, startTimeDiff, resolutionFailed, courseAreaId);
     }
     
     public StartTimeFinderResult(Iterable<SimpleRaceLogIdentifier> dependingOnRaces, TimePoint startTime, Duration startTimeDiff,
-            ResolutionFailed resolutionFailed) {
+            ResolutionFailed resolutionFailed, UUID courseAreaId) {
         this.startTime = startTime;
         this.startTimeDiff = startTimeDiff;
         this.dependingOnRaces = dependingOnRaces;
         this.resolutionFailed = resolutionFailed;
+        this.courseAreaId = courseAreaId;
     }
 
-    public StartTimeFinderResult(TimePoint startTime, Duration startTimeDiff) {
-        this(/* racesDependingOn */ Collections.<SimpleRaceLogIdentifier>emptyList(), startTime, startTimeDiff);
+    public StartTimeFinderResult(TimePoint startTime, Duration startTimeDiff, UUID courseAreaId) {
+        this(/* racesDependingOn */ Collections.<SimpleRaceLogIdentifier>emptyList(), startTime, startTimeDiff, courseAreaId);
     }
 
     /**
@@ -79,6 +82,10 @@ public class StartTimeFinderResult {
         return dependingOnRaces != null && !Util.isEmpty(dependingOnRaces);
     }
 
+    public UUID getCourseAreaId() {
+        return courseAreaId;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -87,6 +94,7 @@ public class StartTimeFinderResult {
         result = prime * result + ((resolutionFailed == null) ? 0 : resolutionFailed.hashCode());
         result = prime * result + ((startTime == null) ? 0 : startTime.hashCode());
         result = prime * result + ((startTimeDiff == null) ? 0 : startTimeDiff.hashCode());
+        result = prime * result + ((courseAreaId == null) ? 0 : courseAreaId.hashCode());
         return result;
     }
 
@@ -115,6 +123,11 @@ public class StartTimeFinderResult {
             if (other.startTimeDiff != null)
                 return false;
         } else if (!startTimeDiff.equals(other.startTimeDiff))
+            return false;
+        if (courseAreaId == null) {
+            if (other.courseAreaId != null)
+                return false;
+        } else if (!courseAreaId.equals(other.courseAreaId))
             return false;
         return true;
     }

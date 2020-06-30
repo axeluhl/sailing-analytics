@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -29,6 +30,7 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RacingProcedureTyp
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.TagFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AbstractFinishPositioningListFinder.CompetitorResultsAndTheirCreationTimePoints;
 import com.sap.sailing.domain.abstractlog.race.impl.WeakRaceLogChangedVisitor;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateEvent;
@@ -209,7 +211,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     private TimePoint cachedFinishedTime;
     private TimeRange cachedProtest;
     private CompetitorResults cachedPositionedCompetitors;
-    private CompetitorResults cachedConfirmedPositionedCompetitors;
+    private CompetitorResultsAndTheirCreationTimePoints cachedConfirmedPositionedCompetitors;
     private CourseBase cachedCourseDesign;
     private Wind cachedWindFix;
     private RaceLogResolver raceLogResolver;
@@ -413,7 +415,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     }
 
     @Override
-    public CompetitorResults getConfirmedFinishPositioningList() {
+    public CompetitorResultsAndTheirCreationTimePoints getConfirmedFinishPositioningList() {
         return cachedConfirmedPositionedCompetitors;
     }
 
@@ -552,12 +554,12 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
             cachedProtest = protest;
             changedListeners.onProtestTimeChanged(this);
         }
-        CompetitorResults positionedCompetitors = finishPositioningListAnalyzer.analyze();
+        CompetitorResults positionedCompetitors = finishPositioningListAnalyzer.analyze().getCompetitorResults();
         if (!Util.equalsWithNull(cachedPositionedCompetitors, positionedCompetitors)) {
             cachedPositionedCompetitors = positionedCompetitors;
             changedListeners.onFinishingPositioningsChanged(this);
         }
-        CompetitorResults confirmedPositionedCompetitors = confirmedFinishPositioningListAnalyzer.analyze();
+        CompetitorResultsAndTheirCreationTimePoints confirmedPositionedCompetitors = confirmedFinishPositioningListAnalyzer.analyze();
         if (!Util.equalsWithNull(cachedConfirmedPositionedCompetitors, confirmedPositionedCompetitors)) {
             cachedConfirmedPositionedCompetitors = confirmedPositionedCompetitors;
             if (cachedConfirmedPositionedCompetitors != null) {
@@ -632,5 +634,10 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         statusAnalyzer = new RaceStatusAnalyzer(raceLogResolver, raceLog, statusAnalyzerClock, racingProcedure);
         // let's do an update because status might have changed with new procedure
         update(dependentRaceStates);
+    }
+
+    @Override
+    public UUID getCourseAreaId() {
+        return cachedStartTimeFinderResult == null ? null : cachedStartTimeFinderResult.getCourseAreaId();
     }
 }

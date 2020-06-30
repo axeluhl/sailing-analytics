@@ -986,24 +986,32 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             }
             final Speed averageSpeedOverGround = trackedLeg.getAverageSpeedOverGround(timePoint);
             result.averageSpeedOverGroundInKnots = averageSpeedOverGround == null ? null : averageSpeedOverGround.getKnots();
-            Distance averageAbsoluteCrossTrackError;
+            final boolean hasFinishedLeg = trackedLeg.hasFinishedLeg(timePoint);
+            Distance currentOrAverageAbsoluteCrossTrackError;
             try {
-                averageAbsoluteCrossTrackError = trackedLeg.getAverageAbsoluteCrossTrackError(timePoint, waitForLatestAnalyses);
+                if (hasFinishedLeg) {
+                    currentOrAverageAbsoluteCrossTrackError = trackedLeg.getAverageAbsoluteCrossTrackError(timePoint, waitForLatestAnalyses);
+                } else {
+                    currentOrAverageAbsoluteCrossTrackError = trackedLeg.getAbsoluteCrossTrackError(timePoint);
+                }
             } catch (NoWindException nwe) {
                 // leave averageAbsoluteCrossTrackError as null, meaning "unknown"
-                averageAbsoluteCrossTrackError = null;
+                currentOrAverageAbsoluteCrossTrackError = null;
             }
-            result.averageAbsoluteCrossTrackErrorInMeters = averageAbsoluteCrossTrackError == null ? null : averageAbsoluteCrossTrackError.getMeters();
-            Distance averageSignedCrossTrackError;
+            result.currentOrAverageAbsoluteCrossTrackErrorInMeters = currentOrAverageAbsoluteCrossTrackError == null ? null : currentOrAverageAbsoluteCrossTrackError.getMeters();
+            Distance currentOrAverageSignedCrossTrackError;
             try {
-                averageSignedCrossTrackError = trackedLeg.getAverageSignedCrossTrackError(timePoint, waitForLatestAnalyses);
+                if (hasFinishedLeg) {
+                    currentOrAverageSignedCrossTrackError = trackedLeg.getAverageSignedCrossTrackError(timePoint, waitForLatestAnalyses);
+                } else {
+                    currentOrAverageSignedCrossTrackError = trackedLeg.getSignedCrossTrackError(timePoint);
+                }
             } catch (NoWindException nwe) {
                 // leave averageSignedCrossTrackError as null, meaning "unknown"
-                averageSignedCrossTrackError = null;
+                currentOrAverageSignedCrossTrackError = null;
             }
-            result.averageSignedCrossTrackErrorInMeters = averageSignedCrossTrackError == null ? null : averageSignedCrossTrackError.getMeters();
+            result.currentOrAverageSignedCrossTrackErrorInMeters = currentOrAverageSignedCrossTrackError == null ? null : currentOrAverageSignedCrossTrackError.getMeters();
             Double speedOverGroundInKnots;
-            final boolean hasFinishedLeg = trackedLeg.hasFinishedLeg(timePoint);
             if (hasFinishedLeg) {
                 speedOverGroundInKnots = averageSpeedOverGround == null ? null : averageSpeedOverGround.getKnots();
                 final Distance averageRideHeight = trackedLeg.getAverageRideHeight(timePoint);
@@ -1039,7 +1047,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             // calls. To avoid having to use expensive locking, we'll just double-check here if legFinishTime is null and
             // treat this as if trackedLeg.hasFinishedLeg(timePoint) had returned false.
             result.correctedTotalTime = trackedLeg.hasStartedLeg(timePoint) ? trackedLeg.getTrackedLeg().getTrackedRace().getRankingMetric().getCorrectedTime(trackedLeg.getCompetitor(),
-                    trackedLeg.hasFinishedLeg(timePoint) && legFinishTime != null ? legFinishTime : timePoint, cache) : null;
+                    hasFinishedLeg && legFinishTime != null ? legFinishTime : timePoint, cache) : null;
             // fetch the leg gap in own corrected time from the ranking metric
             final Duration gapToLeaderInOwnTime = trackedLeg.getTrackedLeg().getTrackedRace().getRankingMetric().
                     getLegGapToLegLeaderInOwnTime(trackedLeg, timePoint, rankingInfo, cache);
@@ -1058,7 +1066,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             }
             result.started = trackedLeg.hasStartedLeg(timePoint);
             Speed velocityMadeGood;
-            if (trackedLeg.hasFinishedLeg(timePoint)) {
+            if (hasFinishedLeg) {
                 velocityMadeGood = trackedLeg.getAverageVelocityMadeGood(timePoint);
             } else {
                 velocityMadeGood = trackedLeg.getVelocityMadeGood(timePoint, WindPositionMode.EXACT, cache);
@@ -1177,14 +1185,14 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
         // if trackedLeg is the first leg, compute the gap at the start of this leg; otherwise, compute gap
         // at the end of the previous leg
         final TimePoint timePoint = trackedLeg.getStartTime();
-        final TrackedLegOfCompetitor tloc;
         if (course.getFirstWaypoint() == trackedLeg.getLeg().getFrom()) {
-            tloc = trackedLeg;
+            result = Duration.NULL;
         } else {
-            tloc = trackedLeg.getTrackedLeg().getTrackedRace().getTrackedLegFinishingAt(trackedLeg.getLeg().getFrom())
-                    .getTrackedLeg(trackedLeg.getCompetitor());
+            final TrackedLegOfCompetitor tloc = trackedLeg.getTrackedLeg().getTrackedRace()
+                    .getTrackedLegFinishingAt(trackedLeg.getLeg().getFrom()).getTrackedLeg(trackedLeg.getCompetitor());
+            result = trackedLeg.getTrackedLeg().getTrackedRace().getRankingMetric().getLegGapToLegLeaderInOwnTime(tloc,
+                    timePoint, rankingInfo, cache);
         }
-        result = trackedLeg.getTrackedLeg().getTrackedRace().getRankingMetric().getLegGapToLegLeaderInOwnTime(tloc, timePoint, rankingInfo, cache);
         return result;
     }
 

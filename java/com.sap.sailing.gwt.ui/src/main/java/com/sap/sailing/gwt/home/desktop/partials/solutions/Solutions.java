@@ -10,6 +10,7 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
@@ -156,27 +157,29 @@ public class Solutions extends Composite {
     }
 
     private void scrollToView(SolutionsNavigationTabs navigationTab) {
+        final int actualScrollLeft = Window.getScrollLeft();
         if (navigationTab == null) {
             sapInSailingDiv.scrollIntoView();
+            Window.scrollTo(actualScrollLeft, 0);
         } else {
             switch (navigationTab) {
             case BuoyPingerApp:
-                buoyPingerDiv.scrollIntoView();
+                Window.scrollTo(actualScrollLeft, buoyPingerDiv.getAbsoluteTop());
                 break;
             case InSightApp:
-                inSightDiv.scrollIntoView();
+                Window.scrollTo(actualScrollLeft, inSightDiv.getAbsoluteTop());
                 break;
             case SapInSailing:
-                sapInSailingDiv.scrollIntoView();
+                Window.scrollTo(actualScrollLeft, 0);
                 break;
             case SailingAnalytics:
-                sailingAnalyticsDiv.scrollIntoView();
+                Window.scrollTo(actualScrollLeft, sailingAnalyticsDiv.getAbsoluteTop());
                 break;
             case RaceManagerApp:
-                raceDiv.scrollIntoView();
+                Window.scrollTo(actualScrollLeft, raceDiv.getAbsoluteTop());
                 break;
             case SailingSimulator:
-                simulatorDiv.scrollIntoView();
+                Window.scrollTo(actualScrollLeft, simulatorDiv.getAbsoluteTop());
                 break;
             }
         }

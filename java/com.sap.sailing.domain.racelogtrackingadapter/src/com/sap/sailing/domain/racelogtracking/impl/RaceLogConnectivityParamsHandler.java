@@ -58,7 +58,7 @@ public class RaceLogConnectivityParamsHandler extends AbstractRaceTrackingConnec
 	        if (raceColumn == null) {
 	        	result = null;
 	        } else {
-		        result = new RaceLogConnectivityParams(racingEventService, leaderboard.getRegatta(), raceColumn, 
+		        result = new RaceLogConnectivityParams(racingEventService.getServerAuthor(), leaderboard.getRegatta(), raceColumn, 
 		                raceColumn.getFleetByName((String) map.get(FLEET_NAME)), leaderboard,
 		                ((Number) map.get(DELAY_TO_LIVE_IN_MILLIS)).longValue(), domainFactory, isTrackWind(map),
 		                isCorrectWindDirectionByMagneticDeclination(map));
@@ -76,6 +76,17 @@ public class RaceLogConnectivityParamsHandler extends AbstractRaceTrackingConnec
         result.put(LEADERBOARD_NAME, rlParams.getLeaderboard().getName());
         result.put(RACE_COLUMN_NAME, rlParams.getRaceColumn().getName());
         result.put(FLEET_NAME, rlParams.getFleet().getName());
+        return result;
+    }
+
+    @Override
+    public RaceTrackingConnectivityParameters resolve(RaceTrackingConnectivityParameters params) throws Exception {
+        assert params instanceof RaceTrackingConnectivityParameters;
+        final RaceLogConnectivityParams rLParams = (RaceLogConnectivityParams) params;
+        RaceLogConnectivityParams result = new RaceLogConnectivityParams(racingEventService.getServerAuthor(),
+                rLParams.getRegatta(), rLParams.getRaceColumn(), rLParams.getFleet(), rLParams.getLeaderboard(),
+                rLParams.getDelayToLiveInMillis(), domainFactory, rLParams.isTrackWind(),
+                rLParams.isCorrectWindDirectionByMagneticDeclination());
         return result;
     }
 }

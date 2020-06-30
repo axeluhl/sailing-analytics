@@ -115,12 +115,10 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
     }
     
     default <T> void replicate(O operation) {
-        @SuppressWarnings("unchecked")
-        final OperationWithResult<S, T> castOperation = (OperationWithResult<S, T>) operation;
         // if this is a replica and this replicable is not currently in the process of handling replication data (either an operation
         // or the initial load) coming from the master, send the operation back to the master
         if (getMasterDescriptor() != null && !isCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster()) {
-            scheduleForSending(castOperation, this);
+            scheduleForSending(operation, this);
         }
         replicateReplicated(operation); // this anticipates receiving the operation back from master; then, the operation will be ignored;
         // see also addOperationSentToMasterForReplication
@@ -169,7 +167,7 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
      * also happen while in a resend attempt. Otherwise, {@link #applyReplicated(OperationWithResult)} is invoked which
      * executes and replicates the operation immediately.
      */
-    default <T> T apply(OperationWithResult<S, T> operation) {
+    default <T> T apply(O operation) {
         boolean needToRemoveThreadLocal = false;
         if (operation instanceof OperationWithResultWithIdWrapper<?, ?>) {
             idOfOperationBeingExecuted.set(((OperationWithResultWithIdWrapper<?, ?>) operation).getId());
@@ -193,17 +191,16 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
      * 
      * @see {@link #replicate(RacingEventServiceOperation)}
      */
-    default <T> T applyReplicated(OperationWithResult<S, T> operation) {
+    default <T> T applyReplicated(O operation) {
+        @SuppressWarnings("unchecked")
         OperationWithResult<S, T> reso = (OperationWithResult<S, T>) operation;
         try {
             setCurrentlyApplyingOperationReceivedFromMaster(true);
             @SuppressWarnings("unchecked")
             S replicable = (S) this;
             T result = reso.internalApplyTo(replicable);
-            @SuppressWarnings("unchecked") // This is necessary because otherwise apply(...) couldn't bind the result type T
-            O oo = (O) operation;
-            if (oo.isRequiresExplicitTransitiveReplication()) {
-                replicateReplicated(oo);
+            if (operation.isRequiresExplicitTransitiveReplication()) {
+                replicateReplicated(operation);
             }
             return result;
         } catch (Exception e) {

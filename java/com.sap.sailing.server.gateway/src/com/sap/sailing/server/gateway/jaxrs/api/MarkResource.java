@@ -154,8 +154,7 @@ public class MarkResource extends AbstractSailingServerResource {
             regattaLog.add(event);
             JSONObject answer = new JSONObject();
             answer.put(MARK_ID, markId.toString());
-            response = Response.ok(answer.toJSONString())
-                    .header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+            response = Response.ok(streamingOutput(answer)).build();
         }
         return response;
     }
@@ -285,8 +284,7 @@ public class MarkResource extends AbstractSailingServerResource {
                 new CourseJsonSerializer(new CourseBaseJsonSerializer(
                         new WaypointJsonSerializer(new ControlPointJsonSerializer(new MarkJsonSerializer(),
                                 new GateJsonSerializer(new MarkJsonSerializer()))))).serialize(updatedPublishedCourse));
-        return Response.ok(jsonResult.toJSONString())
-                .header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+        return Response.ok(streamingOutput(jsonResult)).build();
     }
 
     @POST

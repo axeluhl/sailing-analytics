@@ -57,6 +57,9 @@ import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.DummyTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.RaceHandle;
+import com.sap.sailing.domain.tracking.RaceTracker;
+import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.WindTrack;
@@ -94,10 +97,11 @@ public class ImportMasterDataOperation extends
     private User user;
 
     private UserGroup tenant;
-
+    
+    private final Set<RaceTrackingConnectivityParameters> connectivityParametersToRestore;
+    
     public ImportMasterDataOperation(TopLevelMasterData topLevelMasterData, UUID importOperationId, boolean override,
             MasterDataImportObjectCreationCountImpl existingCreationCount, User user, UserGroup tenant) {
-
         this.creationCount = new MasterDataImportObjectCreationCountImpl();
         this.creationCount.add(existingCreationCount);
         this.masterData = topLevelMasterData;
@@ -105,6 +109,7 @@ public class ImportMasterDataOperation extends
         this.importOperationId = importOperationId;
         this.user = user;
         this.tenant = tenant;
+        this.connectivityParametersToRestore = masterData.getConnectivityParametersToRestore();
     }
 
     @Override
@@ -143,7 +148,7 @@ public class ImportMasterDataOperation extends
             progress.setCurrentSubProgressPct(0);
             createWindTracks(toState);
             progress.setCurrentSubProgress(DataImportSubProgress.IMPORT_SENSOR_FIXES);
-            progress.setOverAllProgressPct(0.8);
+            progress.setOverAllProgressPct(0.7);
             progress.setCurrentSubProgressPct(0);
             importRaceLogTrackingGPSFixes(toState);
             if (masterData.getDeviceConfigurations() != null) {
@@ -155,7 +160,10 @@ public class ImportMasterDataOperation extends
                 ensureOwnership(trackToImport.getIdentifier(), securityService);
             }
             toState.mediaTracksImported(allMediaTracksToImport, creationCount, override);
-
+            progress.setCurrentSubProgress(DataImportSubProgress.IMPORT_TRACKED_RACES);
+            progress.setOverAllProgressPct(0.9);
+            progress.setCurrentSubProgressPct(0);
+            importTrackedRaces(toState, securityService);            
             dataImportLock.getProgress(importOperationId).setResult(creationCount);
             return creationCount;
         } catch (Exception e) {
@@ -574,8 +582,8 @@ public class ImportMasterDataOperation extends
     }
 
     private void ensureOwnership(QualifiedObjectIdentifier identifier, SecurityService securityService) {
-        logger.info( "Adopting " + identifier + " from Masterdataimport to " + user.getName() +
-                " and group " + (tenant==null?"null":tenant.getName()));
+        logger.info("Trying to adopt " + identifier + " from Masterdataimport to " + user.getName() +
+                " and group " + (tenant==null?"null":tenant.getName())+" if orphaned");
         securityService.setOwnershipIfNotSet(identifier, user, tenant);
     }
 
@@ -604,5 +612,31 @@ public class ImportMasterDataOperation extends
             regattaImpl.initializeSeriesAfterDeserialize();
         }
     }
-
+    
+    /**
+     * Starts the tracking of imported tracked races.
+     */
+    private void importTrackedRaces(RacingEventService toState, SecurityService securityService) throws Exception {
+        if (connectivityParametersToRestore != null) {
+            int i = 0;
+            final int numberOfConnectivityParamsToRestore = connectivityParametersToRestore.size();
+            for (RaceTrackingConnectivityParameters param : connectivityParametersToRestore) {
+                if (param != null) {
+                    final RaceTrackingConnectivityParameters paramToStartTracking = toState
+                            .getRaceTrackingConnectivityParamsServiceFinder().findService(param.getTypeIdentifier())
+                            .resolve(param);
+                    RaceHandle raceHandle = toState.addRace(/* default */ null, paramToStartTracking, /* do not wait */ -1);
+                    final RaceDefinition race = raceHandle.getRace(RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
+                    if (race != null) {
+                        ensureOwnership(raceHandle.getTrackedRegatta().getTrackedRace(race).getIdentifier(), securityService);
+                        creationCount.addOneTrackedRace(race.getId().toString());
+                    } else {
+                        logger.severe("Race for handle "+raceHandle+" didn't show in "+RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS+"ms; ownership not set");
+                    }
+                }
+                i++;
+                progress.setCurrentSubProgressPct((double) i / numberOfConnectivityParamsToRestore);
+            }
+        }
+    }
 }

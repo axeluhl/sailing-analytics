@@ -11,6 +11,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.Arrays;
+import java.util.concurrent.atomic.LongAdder;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -37,7 +38,7 @@ public class UserGroupApiTest extends AbstractSeleniumTest {
 
     @Before
     public void setUp() {
-        clearState(getContextRoot(), false);
+        clearState(getContextRoot());
         super.setUp();
     }
 
@@ -117,6 +118,48 @@ public class UserGroupApiTest extends AbstractSeleniumTest {
     }
 
     @Test
+    public void testGetReadableUserGroups() {
+        final ApiContext adminSecurityCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
+        final String user1Name = "user1";
+        securityApi.createUser(adminSecurityCtx, user1Name, "test", "company", "password");
+        final ApiContext user1Ctx = ApiContext.createApiContext(getContextRoot(), SECURITY_CONTEXT, user1Name,
+                "password");
+        final ApiContext user1SecurityCtx = ApiContext.createApiContext(getContextRoot(), SECURITY_CONTEXT, user1Name,
+                "password");
+        assertEquals(1, Util.size(userGroupApi.getReadableGroupsOfUser(user1Ctx, user1Name)));
+
+        // admin creates new group and adds user -> does not mean the user is allowed to read the group
+        final LongAdder counter = new LongAdder();
+        final UserGroup group1ToAdd = userGroupApi.createUserGroup(adminSecurityCtx, "group1ToAdd");
+        userGroupApi.addUserToGroup(adminSecurityCtx, group1ToAdd.getGroupId(), user1Name);
+        userGroupApi.getReadableGroupsOfUser(user1Ctx, user1Name).forEach(ug -> {
+            if (group1ToAdd.getGroupId().equals(ug.getGroupId())) {
+                counter.increment();
+            }
+        });
+        assertEquals(0, counter.intValue());
+
+        // user1 creates new group -> this group is readable by user1
+        counter.reset();
+        final UserGroup group2ToAdd = userGroupApi.createUserGroup(user1SecurityCtx, "group2ToAdd");
+        userGroupApi.getReadableGroupsOfUser(user1Ctx, user1Name).forEach(ug -> {
+            if (group2ToAdd.getGroupId().equals(ug.getGroupId())) {
+                counter.increment();
+            }
+        });
+        assertEquals(1, counter.intValue());
+
+        // if passing null for the username, implying the current user, should return the same result
+        counter.reset();
+        userGroupApi.getReadableGroupsOfCurrentUser(user1Ctx).forEach(ug -> {
+            if (group2ToAdd.getGroupId().equals(ug.getGroupId())) {
+                counter.increment();
+            }
+        });
+        assertEquals(1, counter.intValue());
+    }
+
+    @Test
     public void testChangeUsersInUserGroup() {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
 
@@ -166,6 +209,7 @@ public class UserGroupApiTest extends AbstractSeleniumTest {
         final ApiContext adminSecurityCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
         securityApi.createUser(adminSecurityCtx, "donald", "Donald Duck", null, "daisy0815");
         final ApiContext ownerCtx = createApiContext(getContextRoot(), SERVER_CONTEXT, "donald", "daisy0815");
+        final ApiContext ownerSecurityCtx = createApiContext(getContextRoot(), SECURITY_CONTEXT, "donald", "daisy0815");
         final AdminConsolePage adminConsole = goToPage(getWebDriver(), getContextRoot());
         adminConsole.goToLocalServerPanel().setSelfServiceServer(true);
 
@@ -175,7 +219,7 @@ public class UserGroupApiTest extends AbstractSeleniumTest {
         assertEquals("testevent", eventCreatedWithDefaultTenant.getName());
 
         final UserGroup newUserGroup = userGroupApi.createUserGroup(adminSecurityCtx, defaultTenantGroup);
-        userGroupApi.setDefaultTenantForCurrentServerAndUser(ownerCtx, newUserGroup.getGroupId());
+        userGroupApi.setDefaultTenantForCurrentServerAndUser(ownerSecurityCtx, newUserGroup.getGroupId());
 
         final Event eventCreatedWithNewGroupTenant = eventApi.createEvent(ownerCtx, eventName2, "GC 32",
                 CompetitorRegistrationType.CLOSED, "somewhere");
@@ -197,7 +241,7 @@ public class UserGroupApiTest extends AbstractSeleniumTest {
         final UserGroup privateUserGroup = userGroupApi.createUserGroup(groupownerSecurityCtx, "mygroup");
 
         // add user "usertoadd" to private user group
-        final ApiContext groupownerCtx = createApiContext(getContextRoot(), SERVER_CONTEXT, "groupowner", "daisy0815");
+        final ApiContext groupownerCtx = createApiContext(getContextRoot(), SECURITY_CONTEXT, "groupowner", "daisy0815");
         userGroupApi.addUserToUserGroupWithoutPermissionOnUser(groupownerCtx, userToAdd,
                 privateUserGroup.getGroupId());
         final UserGroup privateUserGroupToCheck = userGroupApi.getUserGroup(adminSecurityCtx,

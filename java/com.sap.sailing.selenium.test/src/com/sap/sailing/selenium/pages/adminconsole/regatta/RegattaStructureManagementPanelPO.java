@@ -57,12 +57,12 @@ public class RegattaStructureManagementPanelPO extends PageArea {
         createDefaultRegattaLeaderboardDialog.pressCancel();
     }
     
-    public void createRegattaAndAddToEvent(RegattaDescriptor regatta, String event, String courseArea) {
+    public void createRegattaAndAddToEvent(RegattaDescriptor regatta, String event, String[] courseAreaNames) {
         RegattaCreateDialogPO createRegattaDialog = startRegattaCreation();
         createRegattaDialog.setRegattaName(regatta.getName()+" ("+regatta.getBoatClass()+")");
         createRegattaDialog.setBoatClass(regatta.getBoatClass());
         createRegattaDialog.setCompetitorRegistrationType(regatta.getCompetitorRegistrationType());
-        createRegattaDialog.setEventAndCourseArea(event, courseArea);
+        createRegattaDialog.setEventAndCourseArea(event, courseAreaNames);
         createRegattaDialog.pressOk();
         createDefaultRegattaLeaderboard().pressOk();
         waitForPO(ConfirmDialogPO::new, EventConfigurationPanelPO.ID_LINK_LEADERBORAD_TO_GROUP_DIALOG, 5).pressOk();

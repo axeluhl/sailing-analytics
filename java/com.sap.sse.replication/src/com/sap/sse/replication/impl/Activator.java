@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
+import com.sap.sse.common.Util;
 import com.sap.sse.replication.ReplicaDescriptor;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicablesProvider;
@@ -175,6 +176,7 @@ public class Activator implements BundleActivator {
                             " before firing up replication automatically...");
                     final List<Replicable<?, ?>> replicables = new ArrayList<>();
                     for (String replicableIdAsString : replicableIdsAsStrings) {
+                        logger.info("Trying to obtain Replicable " + replicableIdAsString+", waiting if necessary");
                         Replicable<?, ?> replicable = replicablesProvider.getReplicable(replicableIdAsString, /* wait */true);
                         logger.info("Obtained Replicable " + replicableIdAsString);
                         replicables.add(replicable);
@@ -188,7 +190,7 @@ public class Activator implements BundleActivator {
                     final String servletHost = System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_SERVLET_HOST);
                     final int servletPort = Integer.valueOf(System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_SERVLET_PORT).trim());
                     final String bearerToken;
-                    if (System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_BEARER_TOKEN) != null) {
+                    if (Util.hasLength(System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_BEARER_TOKEN))) {
                         bearerToken = System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_BEARER_TOKEN).trim();
                     } else {
                         bearerToken = RemoteServerUtil.resolveBearerTokenForRemoteServer(servletHost, servletPort,

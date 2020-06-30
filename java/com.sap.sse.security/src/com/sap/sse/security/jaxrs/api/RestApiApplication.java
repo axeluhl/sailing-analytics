@@ -15,6 +15,7 @@ public class RestApiApplication extends Application {
         classes.add(UserGroupResource.class);
         classes.add(RoleResource.class);
         classes.add(OwnershipResource.class);
+        classes.add(PreferencesResource.class);
         // exception mapper
         classes.add(ShiroAuthorizationExceptionTo401ResponseMapper.class);
         classes.add(OwnershipExceptionHandler.class);

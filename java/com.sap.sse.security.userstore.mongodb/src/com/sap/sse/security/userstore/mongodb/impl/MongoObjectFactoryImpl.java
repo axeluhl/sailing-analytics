@@ -50,10 +50,10 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
                     settingCollection.dropIndex(index.getString("name"));
                     break;
                 }
-    }
+            }
         }
         try {
-            settingCollection.createIndex(new Document(FieldNames.Preferences.USERNAME.name(), 1), new IndexOptions().name("uniquebyusername").unique(true));
+            settingCollection.createIndex(new Document(FieldNames.Preferences.USERNAME.name(), 1), new IndexOptions().name("uniquebyusername").unique(true).background(false));
         } catch (Exception e) {
             logger.log(Level.SEVERE, "There are duplicate keys in the "+CollectionNames.PREFERENCES.name()+
                     " collection. Unique index cannot be created. Consider cleaning up.", e);

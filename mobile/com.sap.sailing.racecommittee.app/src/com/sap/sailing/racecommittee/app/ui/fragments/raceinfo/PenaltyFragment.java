@@ -350,8 +350,8 @@ public class PenaltyFragment extends BaseFragment
         }
 
         mConfirmedData.clear();
-        if (getRaceState().getConfirmedFinishPositioningList() != null) {
-            for (CompetitorResult item : getRaceState().getConfirmedFinishPositioningList()) {
+        if (getRaceState().getConfirmedFinishPositioningList().getCompetitorResults() != null) {
+            for (CompetitorResult item : getRaceState().getConfirmedFinishPositioningList().getCompetitorResults()) {
                 mConfirmedData.add(new CompetitorResultImpl(item));
             }
         }

@@ -84,7 +84,7 @@ public class PolarDataServiceImpl implements ReplicablePolarService, ClearStateT
 
     private final Set<OperationWithResult<PolarDataService, ?>> operationsSentToMasterForReplication;
 
-    private ThreadLocal<Boolean> currentlyFillingFromInitialLoad = ThreadLocal.withInitial(() -> false);
+    private volatile boolean currentlyFillingFromInitialLoad;
     
     private ThreadLocal<Boolean> currentlyApplyingOperationReceivedFromMaster = ThreadLocal.withInitial(() -> false);
 
@@ -103,6 +103,7 @@ public class PolarDataServiceImpl implements ReplicablePolarService, ClearStateT
      */
     public PolarDataServiceImpl() {
         resetState();
+        this.currentlyFillingFromInitialLoad = false;
         this.operationsSentToMasterForReplication = new HashSet<>();
         this.operationExecutionListeners = new ConcurrentHashMap<>();
     }
@@ -322,12 +323,12 @@ public class PolarDataServiceImpl implements ReplicablePolarService, ClearStateT
 
     @Override
     public boolean isCurrentlyFillingFromInitialLoad() {
-        return currentlyFillingFromInitialLoad.get();
+        return currentlyFillingFromInitialLoad;
     }
 
     @Override
     public void setCurrentlyFillingFromInitialLoad(boolean currentlyFillingFromInitialLoad) {
-        this.currentlyFillingFromInitialLoad.set(currentlyFillingFromInitialLoad);
+        this.currentlyFillingFromInitialLoad = currentlyFillingFromInitialLoad;
     }
 
     @Override
@@ -453,7 +454,7 @@ public class PolarDataServiceImpl implements ReplicablePolarService, ClearStateT
 
     @Override
     public <S, O extends OperationWithResult<S, ?>, T> void scheduleForSending(
-            OperationWithResult<S, T> operationWithResult, OperationsToMasterSender<S, O> sender) {
+            O operationWithResult, OperationsToMasterSender<S, O> sender) {
         if (unsentOperationsToMasterSender != null) {
             unsentOperationsToMasterSender.scheduleForSending(operationWithResult, sender);
         }
