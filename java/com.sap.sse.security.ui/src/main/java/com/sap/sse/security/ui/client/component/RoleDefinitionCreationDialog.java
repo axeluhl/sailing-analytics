@@ -8,11 +8,10 @@ import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 public class RoleDefinitionCreationDialog extends AbstractRoleDefinitionDialog {
     private final UUID newRoleDefinitionId;
-
-    public RoleDefinitionCreationDialog(StringMessages stringMessages,
-            Iterable<WildcardPermission> allExistingPermissions, Iterable<RoleDefinitionDTO> allOtherRoles,
-            DialogCallback<RoleDefinitionDTO> callback) {
-        super(stringMessages, allExistingPermissions, new RoleValidator(stringMessages, allOtherRoles), callback);
+    
+    public RoleDefinitionCreationDialog(StringMessages stringMessages, Iterable<WildcardPermission> allExistingPermissions,
+            Iterable<RoleDefinitionDTO> allOtherRoles, DialogCallback<RoleDefinitionDTO> callback) {
+        super(stringMessages, allExistingPermissions, allOtherRoles, callback);
         newRoleDefinitionId = UUID.randomUUID();
     }
 
