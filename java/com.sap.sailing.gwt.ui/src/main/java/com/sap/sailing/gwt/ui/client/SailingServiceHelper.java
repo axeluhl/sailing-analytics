@@ -26,7 +26,7 @@ public abstract class SailingServiceHelper {
      * Creates a new {@link SailingServiceWriteAsync} instance, should be used when code resides in the same bundle as the sailing service code.
      */
     public static SailingServiceWriteAsync createSailingServiceWriteInstance() {
-        return createSailingServiceWriteInstance(true, null);
+        return createSailingServiceWriteInstance(/* same bundle */ true, /* no routing provider required, no sharding for write requests */ null);
     }
     
     /**
@@ -70,18 +70,16 @@ public abstract class SailingServiceHelper {
      * Creates a new {@link SailingServiceWriteAsync} instance that uses a routing provider, for code in same bundle.
      */
     public static SailingServiceWriteAsync createSailingServiceWriteInstance(ServiceRoutingProvider routingProvider) {
-        return createSailingServiceWriteInstance(true, routingProvider);
+        return createSailingServiceWriteInstance(/* same bundle */ true, routingProvider);
     }
     
     public static SailingServiceWriteAsync createSailingServiceWriteInstance(boolean sameBundle, ServiceRoutingProvider routingProvider) {
         final SailingServiceWriteAsync service = GWT.create(SailingServiceWrite.class);
         final ServiceDefTarget serviceToRegister = (ServiceDefTarget) service;
-        
         final StringBuilder servicePath = new StringBuilder(RemoteServiceMappingConstants.sailingServiceWriteRemotePath);
         if (routingProvider != null) {
             servicePath.append(routingProvider.routingSuffixPath());
         }
-        
         final String servicePathWithRoutingSuffix = servicePath.toString();
         if (sameBundle) {
             EntryPointHelper.registerASyncService(serviceToRegister, servicePathWithRoutingSuffix, HEADER_FORWARD_TO_PRIMARY);
