@@ -81,7 +81,7 @@ public class PreRaceRacemapPresenterImpl extends AutoPlayPresenterConfigured<Pre
                     //in rare circumstances it can occure, that while the liverace changes, the url could be updated due to timing overlaps
                     RegattaAndRaceIdentifier preRace = getSlideCtx().getPreLiveRace();
                     if(preRace != null){
-                        String url = getRaceViewerURL(getSlideCtx().getContextDefinition().getLeaderboardName(), null,
+                        String url = getRaceViewerURL(getSlideCtx().getContextDefinition().getLeaderboardName(),
                                 preRace);
                         view.updateStatistic(lastStatisticResult, url, windSpeed, windDegree);
                     }
@@ -94,10 +94,9 @@ public class PreRaceRacemapPresenterImpl extends AutoPlayPresenterConfigured<Pre
         view.startingWith(this, panel, getPlace().getRaceMap());
     };
 
-    public String getRaceViewerURL(String leaderboardName, String leaderboardGroupName,
-            RegattaAndRaceIdentifier raceIdentifier) {
+    public String getRaceViewerURL(String leaderboardName, RegattaAndRaceIdentifier raceIdentifier) {
         RaceboardContextDefinition raceboardContext = new RaceboardContextDefinition(raceIdentifier.getRegattaName(),
-                raceIdentifier.getRaceName(), leaderboardName, leaderboardGroupName, null, null, null);
+                raceIdentifier.getRaceName(), leaderboardName, null, null, null, null);
         RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = RaceBoardPerspectiveOwnSettings
                 .createDefaultWithCanReplayDuringLiveRaces(true);
         HashMap<String, Settings> innerSettings = new HashMap<>();

@@ -224,6 +224,8 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
             AsyncCallback<LeaderboardGroupDTO> callback);
     
     void getLeaderboardGroupById(UUID groupId, AsyncCallback<LeaderboardGroupDTO> callback);
+    
+    void getLeaderboardGroupByUuidOrName(UUID groupUuid, String groupName, AsyncCallback<LeaderboardGroupDTO> callback);
 
     void getCompetitorBoats(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<Map<CompetitorDTO, BoatDTO>> callback);
     

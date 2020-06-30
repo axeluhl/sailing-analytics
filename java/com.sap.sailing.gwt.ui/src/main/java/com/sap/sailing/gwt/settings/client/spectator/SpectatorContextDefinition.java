@@ -14,8 +14,7 @@ public class SpectatorContextDefinition extends AbstractGenericSerializableSetti
     public SpectatorContextDefinition() {
     }
     
-    public SpectatorContextDefinition(String leaderboardGroupName, String leaderboardGroupId) {
-        this.leaderboardGroupName.setValue(leaderboardGroupName);
+    public SpectatorContextDefinition(String leaderboardGroupId) {
         this.leaderboardGroupId.setValue(leaderboardGroupId);
     }
     

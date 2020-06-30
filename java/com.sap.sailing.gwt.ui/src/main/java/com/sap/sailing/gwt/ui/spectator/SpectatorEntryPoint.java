@@ -1,12 +1,9 @@
 package com.sap.sailing.gwt.ui.spectator;
 
-import java.util.UUID;
-
 import com.google.gwt.dom.client.Style.Position;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -18,7 +15,6 @@ import com.sap.sailing.gwt.settings.client.spectator.SpectatorSettings;
 import com.sap.sailing.gwt.ui.client.AbstractSailingReadEntryPoint;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.shared.panels.SimpleWelcomeWidget;
-import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 import com.sap.sse.gwt.shared.ClientConfiguration;
 
@@ -28,48 +24,37 @@ import com.sap.sse.gwt.shared.ClientConfiguration;
  *
  */
 public class SpectatorEntryPoint extends AbstractSailingReadEntryPoint implements RegattaRefresher {
-    
+
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
-        final String groupParamIdValue = new SettingsToUrlSerializer()
-                .deserializeFromCurrentLocation(new SpectatorContextDefinition()).getLeaderboardGroupId();
-        final String groupParamNameValue = new SettingsToUrlSerializer()
+
+        final String groupNameParam = new SettingsToUrlSerializer()
                 .deserializeFromCurrentLocation(new SpectatorContextDefinition()).getLeaderboardGroupName();
-        final String groupId;
-        if (groupParamIdValue == null || groupParamIdValue.isEmpty()) {
-            groupId = null;
-        } else {
-            groupId = groupParamIdValue;
-            Window.setTitle(groupParamNameValue);
-            getSailingService().getLeaderboardGroupById(UUID.fromString(groupId), new AsyncCallback<LeaderboardGroupDTO>() {
-                @Override
-                public void onFailure(Throwable t) {
-                    reportError(getStringMessages().noLeaderboardGroupWithNameFound(groupParamNameValue));
-                }
-                @Override
-                public void onSuccess(LeaderboardGroupDTO group) {
-                    Window.setTitle(group.getName());
-                }
-            });
-        }
-        final SpectatorSettings settings = new SettingsToUrlSerializer().deserializeFromCurrentLocation(new SpectatorSettings());
+        final String groupIdParam = new SettingsToUrlSerializer()
+                .deserializeFromCurrentLocation(new SpectatorContextDefinition()).getLeaderboardGroupId();
+
+        final SpectatorSettings settings = new SettingsToUrlSerializer()
+                .deserializeFromCurrentLocation(new SpectatorSettings());
         RootPanel rootPanel = RootPanel.get();
         FlowPanel groupAndFeedbackPanel = new FlowPanel();
         boolean embedded = settings.isEmbedded();
-        if (groupId == null) {
+        if (groupIdParam == null && groupNameParam == null) {
             FlowPanel groupOverviewPanel = new FlowPanel();
             groupOverviewPanel.addStyleName("contentOuterPanel");
             // DON'T DELETE -> the EventOverviewPanel will replace the LeaderboardGroupOverviewPanel later on
-//            EventOverviewPanel eventOverviewPanel = new EventOverviewPanel(sailingServiceWrite, this, stringMessages, showRaceDetails);
-//            groupOverviewPanel.add( eventOverviewPanel);
-            LeaderboardGroupOverviewPanel leaderboardGroupOverviewPanel = new LeaderboardGroupOverviewPanel(getSailingService(), this, getStringMessages(), settings.isShowRaceDetails());
+            // EventOverviewPanel eventOverviewPanel = new EventOverviewPanel(sailingServiceWrite, this, stringMessages,
+            // showRaceDetails);
+            // groupOverviewPanel.add( eventOverviewPanel);
+            LeaderboardGroupOverviewPanel leaderboardGroupOverviewPanel = new LeaderboardGroupOverviewPanel(
+                    getSailingService(), this, getStringMessages(), settings.isShowRaceDetails());
             groupOverviewPanel.add(leaderboardGroupOverviewPanel);
+            setHeader(null, embedded);
             rootPanel.add(groupOverviewPanel);
         } else {
             LeaderboardGroupPanel groupPanel = new LeaderboardGroupPanel(getSailingService(), getStringMessages(), this,
-                    groupId, groupParamNameValue, settings.getViewMode(), embedded, settings.isShowRaceDetails(), settings.isCanReplayDuringLiveRaces(),
-                    settings.isShowMapControls());
+                    groupIdParam, groupNameParam, this::setHeader, settings.getViewMode(), embedded,
+                    settings.isShowRaceDetails(), settings.isCanReplayDuringLiveRaces(), settings.isShowMapControls());
             groupAndFeedbackPanel.add(groupPanel);
             if (!embedded) {
                 groupPanel.setWelcomeWidget(new SimpleWelcomeWidget(getStringMessages().welcomeToSailingAnalytics(),
@@ -88,19 +73,23 @@ public class SpectatorEntryPoint extends AbstractSailingReadEntryPoint implement
             }
             rootPanel.add(groupAndFeedbackPanel);
         }
+        fillRegattas();
+    }
+
+    private void setHeader(final String groupNameParam, final boolean embedded) {
         if (!embedded) {
-            String title = groupParamNameValue != null ? groupParamNameValue : getStringMessages().overview();
-            SAPSailingHeaderWithAuthentication header  = getHeader(title);
-            rootPanel.add(header);
+            String title = groupNameParam != null ? groupNameParam : getStringMessages().overview();
+            Window.setTitle(title);
+            SAPSailingHeaderWithAuthentication header = getHeader(title);
+            RootPanel.get().add(header);
         } else {
             RootPanel.getBodyElement().getStyle().setPadding(0, Unit.PX);
             RootPanel.getBodyElement().getStyle().setPaddingTop(20, Unit.PX);
         }
-        fillRegattas();
     }
 
-    private SAPSailingHeaderWithAuthentication getHeader(String title){
-    	SAPSailingHeaderWithAuthentication header  = new SAPSailingHeaderWithAuthentication(title);         
+    private SAPSailingHeaderWithAuthentication getHeader(String title) {
+        SAPSailingHeaderWithAuthentication header = new SAPSailingHeaderWithAuthentication(title);
         new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
         header.getElement().getStyle().setPosition(Position.FIXED);
         header.getElement().getStyle().setTop(0, Unit.PX);

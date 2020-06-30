@@ -3565,6 +3565,14 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         return leaderboardGroupById == null ? null : convertToLeaderboardGroupDTO(leaderboardGroupById, false, false);
     }
     
+    @Override
+    //READ
+    public LeaderboardGroupDTO getLeaderboardGroupByUuidOrName(final UUID groupUuid, final String groupName) {
+        final LeaderboardGroup leaderboardGroup = getLeaderboardGroupByIdOrName(groupUuid, groupName);
+        getSecurityService().checkCurrentUserReadPermission(leaderboardGroup);
+        return leaderboardGroup == null ? null : convertToLeaderboardGroupDTO(leaderboardGroup, false, false);
+    }
+    
     //READ
     protected LeaderboardGroupDTO convertToLeaderboardGroupDTO(final LeaderboardGroup leaderboardGroup,
             final boolean withGeoLocationData, final boolean withStatisticalData) {
