@@ -190,7 +190,7 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
                         leaderboardNames.add(newRegattaLeaderboard.getName());
                         sailingServiceWrite.updateLeaderboardGroup(selectedLeaderboardGroup.getId(),
                                 selectedLeaderboardGroup.getName(), selectedLeaderboardGroup.getName(),
-                                selectedLeaderboardGroup.description, selectedLeaderboardGroup.getDisplayName(),
+                                selectedLeaderboardGroup.getDescription(), selectedLeaderboardGroup.getDisplayName(),
                                 leaderboardNames, selectedLeaderboardGroup.getOverallLeaderboardDiscardThresholds(),
                                 selectedLeaderboardGroup.getOverallLeaderboardScoringSchemeType(),
                                 new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {

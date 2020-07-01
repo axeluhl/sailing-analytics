@@ -159,7 +159,7 @@ public class Header extends Composite implements HeaderConstants {
             AuthenticationContext authContext = event.getCtx();
             LOG.fine("current user:" + authContext.getCurrentUser());
             // make it point to the current server if the user has CREATE_OBJECT permission there
-            if (authContext.hasServerPermission(ServerActions.CREATE_OBJECT)) {
+            if (authContext.isLoggedIn() && authContext.hasServerPermission(ServerActions.CREATE_OBJECT)) {
                 adminConsolePageLinkMenu.setHref(ADMIN_CONSOLE_PATH);
                 adminConsolePageLinkMenu.setTarget(ADMIN_CONSOLE_WINDOW);
                 adminConsolePageLink.setHref(ADMIN_CONSOLE_PATH);

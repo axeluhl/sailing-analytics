@@ -13,11 +13,9 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.fileupload.FileItem;
-import org.apache.shiro.authz.UnauthorizedException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.fileupload.FileUploadConstants;
 import com.sap.sse.filestorage.InvalidPropertiesException;
 import com.sap.sse.filestorage.OperationFailedException;
@@ -78,8 +76,7 @@ public class FileUploadServlet extends AbstractFileUploadServlet {
                     result.put(FileUploadConstants.FILE_NAME, fileName);
                     result.put(FileUploadConstants.FILE_URI, fileUri.toString());
                 }
-            } catch (IOException | OperationFailedException | InvalidPropertiesException
-                    | NoCorrespondingServiceRegisteredException | UnauthorizedException e) {
+            } catch (IOException | OperationFailedException | RuntimeException | InvalidPropertiesException e) {
                 final String errorMessage = "Could not store file"+ (e.getMessage()==null?"":(": " + e.getMessage()));
                 logger.log(Level.WARNING, "Could not store file", e);
                 result.put(FileUploadConstants.STATUS, Status.INTERNAL_SERVER_ERROR.name());

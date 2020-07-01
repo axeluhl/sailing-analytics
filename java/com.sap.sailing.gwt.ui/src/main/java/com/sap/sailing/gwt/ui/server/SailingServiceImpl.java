@@ -826,15 +826,21 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, boolean addOverallDetails,
             String previousLeaderboardId, boolean fillTotalPointsUncorrected)
             throws NoWindException, InterruptedException, ExecutionException, IllegalArgumentException {
-        final DynamicTrackedRace trackedRace = getService().getTrackedRace(race);
-        final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        if (leaderboard.getRaceColumnAndFleet(trackedRace) == null) {
-            // this race does not seem to be contained in the leaderboard, also check leaderboard
-            getSecurityService().checkCurrentUserReadPermission(leaderboard);
+        final DynamicTrackedRace trackedRace = getService().getExistingTrackedRace(race);
+        final IncrementalOrFullLeaderboardDTO result;
+        if (trackedRace == null) {
+            result = null;
+        } else {
+            final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+            if (leaderboard.getRaceColumnAndFleet(trackedRace) == null) {
+                // this race does not seem to be contained in the leaderboard, also check leaderboard
+                getSecurityService().checkCurrentUserReadPermission(leaderboard);
+            }
+            getSecurityService().checkCurrentUserReadPermission(trackedRace);
+            result = getLeaderBoardByNameInternal(leaderboardName, date, namesOfRaceColumnsForWhichToLoadLegDetails,
+                    addOverallDetails, previousLeaderboardId, fillTotalPointsUncorrected);
         }
-        getSecurityService().checkCurrentUserReadPermission(trackedRace);
-        return getLeaderBoardByNameInternal(leaderboardName, date, namesOfRaceColumnsForWhichToLoadLegDetails,
-                addOverallDetails, previousLeaderboardId, fillTotalPointsUncorrected);
+        return result;
     }
   //READ
     private IncrementalOrFullLeaderboardDTO getLeaderBoardByNameInternal(final String leaderboardName,
@@ -5852,16 +5858,15 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-  //READ
+    //READ
     public List<ExpeditionDeviceConfiguration> getExpeditionDeviceConfigurations() {
         final List<ExpeditionDeviceConfiguration> result = new ArrayList<>();
         final ExpeditionTrackerFactory expeditionConnector = expeditionConnectorTracker.getService();
         final Subject subject = SecurityUtils.getSubject();
         if (expeditionConnector != null) {
             for (final ExpeditionDeviceConfiguration config : expeditionConnector.getDeviceConfigurations()) {
-                if (subject.isPermitted(
-                        SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION.getStringPermissionForTypeRelativeIdentifier(
-                                DefaultActions.READ, config.getTypeRelativeObjectIdentifier(ServerInfo.getName())))) {
+                if (subject.isPermitted(config.getIdentifier().getStringPermission(DefaultActions.READ))) {
+                    SecurityDTOUtil.addSecurityInformation(getSecurityService(), config, config.getIdentifier());
                     result.add(config);
                 }
             }
@@ -5880,7 +5885,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
     
     @Override
-  //READ
+    //READ
     public PairingListDTO getPairingListFromTemplate(final String leaderboardName, final int flightMultiplier,
             final Iterable<String> selectedRaceColumnNames, PairingListTemplateDTO templateDTO) 
             throws NotFoundException, PairingListCreationException {

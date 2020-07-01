@@ -37,8 +37,8 @@ public class ORCCertificateJsonDeserializer implements JsonDeserializer<ORCCerti
         String sailnumber = (String) json.get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_SAILNUMBER);
         String boatName = (String) json.get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_BOATNAME);
         String boatclass = (String) json.get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_BOATCLASS);
-        Distance length = new MeterDistance(
-                ((Number) json.get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_LENGTH)).doubleValue());
+        final Number lengthOverAll = (Number) json.get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_LENGTH);
+        Distance length = lengthOverAll==null?null:new MeterDistance(lengthOverAll.doubleValue());
         Duration gph = new SecondsDurationImpl(
                 ((Number) json.get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_GPH)).doubleValue());
         final Number cdlAsNumber = (Number) json.get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_CDL);
