@@ -598,7 +598,9 @@ public class EventsResource extends AbstractSailingServerResource {
     private String getDefaultEventName() {
         final String username;
         username = getCurrentUser().getName();
-        return "Session "+username+" "+dateTimeFormat.format(new Date());
+        synchronized (dateTimeFormat) {
+            return "Session "+username+" "+dateTimeFormat.format(new Date());
+        }
     }
 
     private User getCurrentUser() {
