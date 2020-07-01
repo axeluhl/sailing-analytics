@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Consumer;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
@@ -455,6 +456,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
      * Needed to get some metrics from {@link SailingServiceImpl.getCompetitorRaceDataEntry}.
      */
     private final String leaderboardGroupName;
+    /**
+     * Needed to get some metrics from {@link SailingServiceImpl.getCompetitorRaceDataEntry}.
+     */
+    private final UUID leaderboardGroupId;
 
     /**
      * Contains all available {@link DetailType}s for this race. Gets filled by {@link #loadAvailableDetailTypes()} and
@@ -559,7 +564,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             RaceMapResources raceMapResources, boolean showHeaderPanel, QuickFlagDataProvider quickRanksDTOProvider) {
         this(parent, context, raceMapLifecycle, raceMapSettings, sailingService, asyncActionsExecutor, errorReporter,
                 timer, competitorSelection, raceCompetitorSet, stringMessages, raceIdentifier, raceMapResources,
-                showHeaderPanel, quickRanksDTOProvider, /* leaderboardName */ "", /* leaderboardGroupName */ "");
+                showHeaderPanel, quickRanksDTOProvider, /* leaderboardName */ "", /* leaderboardGroupName */ "", /* leaderboardGroupId */ null);
     }
     
     public RaceMap(Component<?> parent, ComponentContext<?> context, RaceMapLifecycle raceMapLifecycle,
@@ -568,10 +573,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             ErrorReporter errorReporter, Timer timer, RaceCompetitorSelectionProvider competitorSelection,
             RaceCompetitorSet raceCompetitorSet, StringMessages stringMessages, RegattaAndRaceIdentifier raceIdentifier, 
             RaceMapResources raceMapResources, boolean showHeaderPanel, QuickFlagDataProvider quickRanksDTOProvider,
-            String leaderboardName, String leaderboardGroupName) {
+            String leaderboardName, String leaderboardGroupName, UUID leaderboardGroupId) {
         this(parent, context, raceMapLifecycle, raceMapSettings, sailingService, asyncActionsExecutor, errorReporter,
                 timer, competitorSelection, raceCompetitorSet, stringMessages, raceIdentifier, raceMapResources,
-                showHeaderPanel, quickRanksDTOProvider, visible -> {}, leaderboardName, leaderboardGroupName);
+                showHeaderPanel, quickRanksDTOProvider, visible -> {}, leaderboardName, leaderboardGroupName, leaderboardGroupId);
     }
     
     public RaceMap(Component<?> parent, ComponentContext<?> context, RaceMapLifecycle raceMapLifecycle,
@@ -579,7 +584,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             ErrorReporter errorReporter, Timer timer, RaceCompetitorSelectionProvider competitorSelection, RaceCompetitorSet raceCompetitorSet,
             StringMessages stringMessages, RegattaAndRaceIdentifier raceIdentifier, RaceMapResources raceMapResources, boolean showHeaderPanel,
-            QuickFlagDataProvider quickFlagDataProvider, Consumer<WindSource> showWindChartForProvider, String leaderboardName, String leaderboardGroupName) {
+            QuickFlagDataProvider quickFlagDataProvider, Consumer<WindSource> showWindChartForProvider, String leaderboardName, String leaderboardGroupName,
+            UUID leaderboardGroupId) {
         super(parent, context);
         this.maneuverMarkersAndLossIndicators = new ManeuverMarkersAndLossIndicators(this, sailingService, errorReporter, stringMessages);
         this.showHeaderPanel = showHeaderPanel;
@@ -595,6 +601,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         this.showWindChartForProvider = showWindChartForProvider;
         this.leaderboardName = leaderboardName;
         this.leaderboardGroupName = leaderboardGroupName;
+        this.leaderboardGroupId = leaderboardGroupId;
         timer.addTimeListener(this);
         raceMapImageManager = new RaceMapImageManager(raceMapResources);
         markDTOs = new HashMap<String, MarkDTO>();
@@ -736,7 +743,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     }
     
     private void loadAvailableDetailTypes() {
-        sailingService.determineDetailTypesForCompetitorChart(leaderboardGroupName, raceIdentifier,
+        sailingService.determineDetailTypesForCompetitorChart(leaderboardGroupName, leaderboardGroupId, raceIdentifier,
                 new AsyncCallback<Iterable<DetailType>>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -1234,14 +1241,14 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             race, useNullAsTimePoint() ? null : newTime, fromTimesForQuickCall, toTimesForQuickCall, /* extrapolate */true,
                     (settings.isShowSimulationOverlay() ? simulationOverlay.getLegIdentifier() : null),
                     raceCompetitorSet.getMd5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID(),
-                    newTime, settings.isShowEstimatedDuration(), detailType, leaderboardName, leaderboardGroupName),
+                    newTime, settings.isShowEstimatedDuration(), detailType, leaderboardName, leaderboardGroupName, leaderboardGroupId),
             GET_RACE_MAP_DATA_CATEGORY,
                 getRaceMapDataCallback(newTime, transitionTimeInMillis, fromAndToAndOverlap.getC(), competitorsToShow,
                         ++boatPositionRequestIDCounter, isRedraw, detailTypeChanged));
         // next, if necessary, do the full thing; the two calls have different action classes, so throttling should not drop one for the other
         if (!fromTimesForNonOverlappingTailsCall.keySet().isEmpty()) {
             asyncActionsExecutor.execute(new GetBoatPositionsAction(sailingService, race, fromTimesForNonOverlappingTailsCall, toTimesForNonOverlappingTailsCall,
-                    /* extrapolate */ true, detailType, leaderboardName, leaderboardGroupName), GET_RACE_MAP_DATA_CATEGORY,
+                    /* extrapolate */ true, detailType, leaderboardName, leaderboardGroupName, leaderboardGroupId), GET_RACE_MAP_DATA_CATEGORY,
                     new MarkedAsyncCallback<>(new AsyncCallback<CompactBoatPositionsDTO>() {
                         @Override
                         public void onFailure(Throwable t) {
