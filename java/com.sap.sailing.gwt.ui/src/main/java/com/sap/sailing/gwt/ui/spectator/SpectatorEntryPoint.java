@@ -28,14 +28,10 @@ public class SpectatorEntryPoint extends AbstractSailingReadEntryPoint implement
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
-
-        final String groupNameParam = new SettingsToUrlSerializer()
-                .deserializeFromCurrentLocation(new SpectatorContextDefinition()).getLeaderboardGroupName();
-        final String groupIdParam = new SettingsToUrlSerializer()
-                .deserializeFromCurrentLocation(new SpectatorContextDefinition()).getLeaderboardGroupId();
-
-        final SpectatorSettings settings = new SettingsToUrlSerializer()
-                .deserializeFromCurrentLocation(new SpectatorSettings());
+        final SpectatorContextDefinition contextDefinition = new SettingsToUrlSerializer().deserializeFromCurrentLocation(new SpectatorContextDefinition());
+        final String groupNameParam = contextDefinition.getLeaderboardGroupName();
+        final String groupIdParam = contextDefinition.getLeaderboardGroupId();
+        final SpectatorSettings settings = new SettingsToUrlSerializer().deserializeFromCurrentLocation(new SpectatorSettings());
         RootPanel rootPanel = RootPanel.get();
         FlowPanel groupAndFeedbackPanel = new FlowPanel();
         boolean embedded = settings.isEmbedded();

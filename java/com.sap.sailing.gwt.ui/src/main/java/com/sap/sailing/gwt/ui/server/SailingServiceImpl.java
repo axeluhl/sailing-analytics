@@ -3565,6 +3565,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         return leaderboardGroupById == null ? null : convertToLeaderboardGroupDTO(leaderboardGroupById, false, false);
     }
     
+    /**
+     * @see #getLeaderboardGroupByIdOrName(UUID, String)
+     */
     @Override
     //READ
     public LeaderboardGroupDTO getLeaderboardGroupByUuidOrName(final UUID groupUuid, final String groupName) {

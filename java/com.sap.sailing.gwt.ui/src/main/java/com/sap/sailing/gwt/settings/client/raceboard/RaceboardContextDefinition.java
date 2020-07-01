@@ -29,7 +29,7 @@ public class RaceboardContextDefinition extends AbstractGenericSerializableSetti
             String leaderboardGroupName, UUID leaderboardGroupId, UUID eventId, String mode) {
         this(regattaName, raceName, leaderboardName,
              // use the leaderboardGroupId if not null; only resort to leaderboardGroupName if ID is not provided
-             leaderboardGroupId == null ? leaderboardGroupName : null, leaderboardGroupId, eventId, mode, null);
+             leaderboardGroupId == null ? leaderboardGroupName : null, leaderboardGroupId, eventId, mode, /* selected competitor ID */ null);
     }
 
     public RaceboardContextDefinition(String regattaName, String raceName, String leaderboardName,
