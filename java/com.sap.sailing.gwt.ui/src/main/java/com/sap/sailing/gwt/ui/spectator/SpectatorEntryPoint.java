@@ -38,10 +38,6 @@ public class SpectatorEntryPoint extends AbstractSailingReadEntryPoint implement
         if (groupIdParam == null && groupNameParam == null) {
             FlowPanel groupOverviewPanel = new FlowPanel();
             groupOverviewPanel.addStyleName("contentOuterPanel");
-            // DON'T DELETE -> the EventOverviewPanel will replace the LeaderboardGroupOverviewPanel later on
-            // EventOverviewPanel eventOverviewPanel = new EventOverviewPanel(sailingServiceWrite, this, stringMessages,
-            // showRaceDetails);
-            // groupOverviewPanel.add( eventOverviewPanel);
             LeaderboardGroupOverviewPanel leaderboardGroupOverviewPanel = new LeaderboardGroupOverviewPanel(
                     getSailingService(), this, getStringMessages(), settings.isShowRaceDetails());
             groupOverviewPanel.add(leaderboardGroupOverviewPanel);
