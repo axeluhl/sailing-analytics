@@ -68,7 +68,7 @@ public class CompareServersResource extends AbstractSailingServerResource {
 
     public CompareServersResource() {
     }
-
+//TODO: User authentication POST 
     @GET
     @Produces("application/json;charset=UTF-8")
     public Response compareServers(@QueryParam("server1") String server1, @QueryParam("server2") String server2,
@@ -200,6 +200,7 @@ public class CompareServersResource extends AbstractSailingServerResource {
      *
      * @return The modified {@link org.json.simple.JSONObject}.
      */
+    
     private Object removeUnnecessaryFields(Object json) {
         if (json instanceof JSONObject) {
             Iterator<Object> iter = ((JSONObject) json).keySet().iterator();
@@ -229,48 +230,62 @@ public class CompareServersResource extends AbstractSailingServerResource {
      */
     private Pair<Object, Object> removeDuplicateEntries(Object json1, Object json2) {
         Pair<Object, Object> result = new Pair<Object, Object>(null, null);
-        if (Util.equalsWithNull(json1, json2)) {
+        if (json1.equals(json2)) {
             return result;
-        } else if (json1 instanceof JSONObject && json2 instanceof JSONObject) {
-            final Iterator<Object> iter1 = ((JSONObject) json1).keySet().iterator();
-            while (iter1.hasNext()) {
-                Object key = iter1.next();
-                if (((JSONObject) json2).containsKey(key)) {
-                    Object value1 = ((JSONObject) json1).get(key);
-                    Object value2 = ((JSONObject) json2).get(key);
-                    if (key.equals("name") && !Util.equalsWithNull(value1, value2)) {
-                        break;
-                    } else if (KEYSETTOPRINT.contains(key) && Util.equalsWithNull(value1, value2)) {
-                        continue;
-                    } else if (Util.equalsWithNull(value1, value2) && KEYSETTOCOMPARE.contains(key)) {
-                        iter1.remove();
-                        ((JSONObject) json2).remove(key);
-                    } else {
-                        removeDuplicateEntries(value1, value2);
-                    }
+        }
+        else if (json1 instanceof JSONObject && json2 instanceof JSONObject) {
+            removeDuplicateEntries((JSONObject) json1, (JSONObject) json2);
+        } else if (json1 instanceof JSONArray && json2 instanceof JSONArray) {
+            removeDuplicateEntries((JSONArray) json1, (JSONArray) json2);
+        }
+        result = new Pair<Object, Object>(json1, json2);
+        return result;
+    }
+    
+    
+    private Pair<Object, Object> removeDuplicateEntries(JSONObject json1, JSONObject json2) {
+        Pair<Object, Object> result = new Pair<Object, Object>(null, null);
+        final Iterator<Object> iter1 = json1.keySet().iterator();
+        while (iter1.hasNext()) {
+            Object key = iter1.next();
+            if (json2.containsKey(key)) {
+                Object value1 = json1.get(key);
+                Object value2 = json2.get(key);
+                if (key.equals("name") && !Util.equalsWithNull(value1, value2)) {
+                    break;
+                } else if (KEYSETTOPRINT.contains(key) && Util.equalsWithNull(value1, value2)) {
+                    continue;
+                } else if (Util.equalsWithNull(value1, value2) && KEYSETTOCOMPARE.contains(key)) {
+                    iter1.remove();
+                    json2.remove(key);
+                } else {
+                    removeDuplicateEntries(value1, value2);
                 }
             }
-        } else if (json1 instanceof JSONArray && json2 instanceof JSONArray) {
-            if (json1.equals(json2)) {
-                ((JSONArray) json1).clear();
-                ((JSONArray) json2).clear();
-            } else {
-                final Iterator<Object> iter1 = ((JSONArray) json1).iterator();
-                while (iter1.hasNext()) {
-                    Object item = iter1.next();
-                    if (((JSONArray) json2).contains(item)) {
-                        ((JSONArray) json2).remove(item);
-                        iter1.remove();
-                    } else {
-                        final Iterator<Object> iter2 = ((JSONArray) json2).iterator();
-                        while (iter2.hasNext()) {
-                            removeDuplicateEntries(item, iter2.next());
-                        }
+        }
+        return result;
+    }
+
+    private Pair<Object, Object> removeDuplicateEntries(JSONArray json1, JSONArray json2) {
+        Pair<Object, Object> result = new Pair<Object, Object>(null, null);
+        if (json1.equals(json2)) {
+            ((JSONArray) json1).clear();
+            ((JSONArray) json2).clear();
+        } else {
+            final Iterator<Object> iter1 = ((JSONArray) json1).iterator();
+            while (iter1.hasNext()) {
+                Object item = iter1.next();
+                if (((JSONArray) json2).contains(item)) {
+                    ((JSONArray) json2).remove(item);
+                    iter1.remove();
+                } else {
+                    final Iterator<Object> iter2 = ((JSONArray) json2).iterator();
+                    while (iter2.hasNext()) {
+                        removeDuplicateEntries(item, iter2.next());
                     }
                 }
             }
         }
-        result = new Pair<Object, Object>(json1, json2);
         return result;
     }
 
