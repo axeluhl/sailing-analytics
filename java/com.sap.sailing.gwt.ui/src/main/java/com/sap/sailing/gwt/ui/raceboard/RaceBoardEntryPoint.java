@@ -66,7 +66,9 @@ public class RaceBoardEntryPoint extends AbstractSailingReadEntryPoint implement
         } else {
             getSailingService().getRaceboardData(raceboardContextDefinition.getRegattaName(),
                     raceboardContextDefinition.getRaceName(), raceboardContextDefinition.getLeaderboardName(),
-                    raceboardContextDefinition.getLeaderboardGroupName(), raceboardContextDefinition.getEventId(),
+                    raceboardContextDefinition.getLeaderboardGroupName(),
+                    raceboardContextDefinition.getLeaderboardGroupId(),
+                    raceboardContextDefinition.getEventId(),
                     new AbstractRaceBoardAsyncCallback<RaceboardDataDTO>() {
                         @Override
                         public void onSuccess(RaceboardDataDTO raceboardData) {
@@ -154,9 +156,11 @@ public class RaceBoardEntryPoint extends AbstractSailingReadEntryPoint implement
                 getSailingService(), mediaService, getUserService(), asyncActionsExecutor,
                 raceboardData.getCompetitorAndTheirBoats(), timer, selectedRace.getRaceIdentifier(),
                 raceboardContextDefinition.getLeaderboardName(), raceboardContextDefinition.getLeaderboardGroupName(),
+                raceboardContextDefinition.getLeaderboardGroupId(),
                 raceboardContextDefinition.getEventId(), RaceBoardEntryPoint.this, getStringMessages(), userAgent,
                 raceTimesInfoProvider, showChartMarkEditMediaButtonsAndVideo, true, availableDetailTypes,
-                raceboardData.getLeaderboard(), selectedRace, raceboardData.getTrackingConnectorInfo(), createSailingServiceWriteInstance() /* create write instance for later admin usage*/);
+                raceboardData.getLeaderboard(), selectedRace, raceboardData.getTrackingConnectorInfo(),
+                createSailingServiceWriteInstance() /* create write instance for later admin usage */);
         RootLayoutPanel.get().add(raceBoardPerspective.getEntryWidget());
 
         if (raceBoardMode != null) {

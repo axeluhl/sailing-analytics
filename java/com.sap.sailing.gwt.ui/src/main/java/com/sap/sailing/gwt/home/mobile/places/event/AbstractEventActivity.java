@@ -290,17 +290,16 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     @Override
     public String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata, String mode) {
         RegattaAndRaceIdentifier raceid = raceMetadata.getRegattaAndRaceIdentifier();
-        return getRaceViewerURL(raceMetadata.getLeaderboardName(), raceMetadata.getLeaderboardGroupName(), raceid,
-                mode);
+        return getRaceViewerURL(raceMetadata.getLeaderboardName(), raceMetadata.getLeaderboardGroupName(),
+                raceMetadata.getLeaderboardGroupId(), raceid, mode);
     }
     
-    private String getRaceViewerURL(String leaderboardName, String leaderboardGroupName,
-            RegattaAndRaceIdentifier raceIdentifier, String mode) {
+    private String getRaceViewerURL(final String leaderboardName, final String leaderboardGroupName,
+            final UUID leaderboardGroupId, RegattaAndRaceIdentifier raceIdentifier, String mode) {
         RaceboardContextDefinition raceboardContext = new RaceboardContextDefinition(raceIdentifier.getRegattaName(),
-                raceIdentifier.getRaceName(), leaderboardName, leaderboardGroupName,
+                raceIdentifier.getRaceName(), leaderboardName, leaderboardGroupName, leaderboardGroupId,
                 UUID.fromString(getCtx().getEventId()), mode);
         RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = new RaceBoardPerspectiveOwnSettings();
-        
         HashMap<String, Settings> innerSettings = new HashMap<>();
         innerSettings.put(RaceMapLifecycle.ID, RaceMapSettings.getDefaultWithShowMapControls(true));
         PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings = new PerspectiveCompositeSettings<>(
