@@ -3,23 +3,25 @@ package com.sap.sse.landscape.application;
 import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.Process;
 import com.sap.sse.landscape.RotatingFileBasedLog;
-import com.sap.sse.landscape.mongodb.Database;
 
 public interface ApplicationProcess<ShardingKey, MetricsT extends ApplicationProcessMetrics> extends Process<RotatingFileBasedLog, MetricsT> {
     /**
-     * The database that the process connects to is specific to the process instance. Each process in a replica set must
-     * connect to a different database.
+     * @return the configuration as requested when this process was launched
      */
-    Database getDatabase();
+    ApplicationProcessConfiguration<ShardingKey, MetricsT> getRequestedConfiguration();
     
-    int getTelnetPortToOSGiConsole();
+    /**
+     * @return the effective configuration with which this process is running, resulting from the
+     *         {@link #getRequestedConfiguration() requested configuration} by filling in the "blanks" with defaults as
+     *         deemed appropriate by the {@link ApplicationHost} {@link Process#getHost() running} this this process, e.g.,
+     *         to avoid any conflicting resource assignments.
+     */
+    ApplicationProcessConfiguration<ShardingKey, MetricsT> getEffectiveConfiguration();
 
     /**
      * @return the replica set to which this process belongs
      */
     ApplicationReplicaSet<ShardingKey, MetricsT> getReplicaSet();
-    
-    long getHeapSizeInBytes();
     
     String getJavaVirtualMachineName();
     

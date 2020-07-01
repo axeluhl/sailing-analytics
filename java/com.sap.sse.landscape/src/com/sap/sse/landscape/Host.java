@@ -5,7 +5,7 @@ import java.net.InetAddress;
 public interface Host {
     InetAddress getAddress();
 
-    Iterable<Process<? extends Log, ? extends Metrics>> getRunningProcesses();
+    Iterable<? extends Process<? extends Log, ? extends Metrics>> getRunningProcesses();
     
     long getPhysicalRamInBytes();
     

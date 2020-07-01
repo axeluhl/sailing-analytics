@@ -7,6 +7,19 @@ import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Process;
 
 public interface ApplicationReplicaSet<ShardingKey, MetricsT extends ApplicationProcessMetrics> {
+    /**
+     * The application version that the nodes in this replica set are currently running. During an
+     * {@link #upgrade(ApplicationVersion)} things may temporarily seem inconsistent.
+     */
+    ApplicationVersion getVersion();
+    
+    /**
+     * Upgrades this replica set to a new version. Things may temporarily seem inconsistent; e.g., a master
+     * process may be stopped, upgraded to the new version, and then replica processes may be fired up against the new
+     * master, and when enough replicas have reached an available state they will replace the previous replicas.
+     */
+    void upgrade(ApplicationVersion newVersion);
+    
     ApplicationMasterProcess<ShardingKey, MetricsT> getMaster();
     
     Iterable<ApplicationReplicaProcess<ShardingKey, MetricsT>> getReplicas();
@@ -34,6 +47,8 @@ public interface ApplicationReplicaSet<ShardingKey, MetricsT extends Application
     void importScope(ApplicationReplicaSet<ShardingKey, MetricsT> source, Scope<ShardingKey> scopeToImport,
             boolean failUponDiff, boolean removeFromSourceUponSuccess, boolean setRemoveReferenceInSourceUponSuccess);
     
+    void removeScope(Scope<ShardingKey> scope);
+    
     /**
      * Creates a "remote server reference" on this application replica set pointing to the {@code to} replica set. If a
      * non-{@code null} sequence of {@link Scope}s is provided then the {@code includeOrExcludeScopes} flag decides
@@ -42,6 +57,8 @@ public interface ApplicationReplicaSet<ShardingKey, MetricsT extends Application
      */
     void setRemoteReference(String name, ApplicationReplicaSet<ShardingKey, MetricsT> to,
             Iterable<Scope<ShardingKey>> scopes, boolean includeOrExcludeScopes);
+    
+    void removeRemoteReference(String name);
     
     /**
      * Tells this replica set whether read requests may also be addressed at the master node in case there are one or

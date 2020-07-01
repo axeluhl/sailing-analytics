@@ -16,5 +16,5 @@ public interface Landscape<ShardingKey, MetricsT extends ApplicationProcessMetri
      * Launches a new {@link Host} from a given image into the availability zone specified and controls
      * network access to that instance by setting the security groups specified for the resulting host.
      */
-    Host launchHost(MachineImage fromImage, AvailabilityZone az, Iterable<SecurityGroup> securityGroups);
+    <HostT extends Host> HostT launchHost(MachineImage<HostT> fromImage, AvailabilityZone az, Iterable<SecurityGroup> securityGroups);
 }
