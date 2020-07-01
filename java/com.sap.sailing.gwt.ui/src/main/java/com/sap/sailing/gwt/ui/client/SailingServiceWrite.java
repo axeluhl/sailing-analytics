@@ -242,7 +242,7 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
 
     void allowCompetitorResetToDefaults(List<CompetitorDTO> competitors);
 
-    UUID importMasterData(String host, String[] groupNames, boolean override, boolean compress, boolean exportWind,
+    UUID importMasterData(String host, String[] leaderboardGroupIds, boolean override, boolean compress, boolean exportWind,
             boolean exportDeviceConfigurations, String targetServerUsername, String targetServerPassword,
             boolean exportTrackedRacesAndStartTracking) throws UnauthorizedException;
 
@@ -352,7 +352,7 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
 
     void removeLeaderboardColumn(String leaderboardName, String columnName) throws UnauthorizedException;
 
-    void removeLeaderboardGroups(Set<String> groupNames);
+    void removeLeaderboardGroups(Set<UUID> groupIds);
 
     void removeLeaderboard(String leaderboardName) throws UnauthorizedException;
 

@@ -48,12 +48,13 @@ public class SailorProfileStatisticDTO implements Result, Serializable {
         @GwtIncompatible
         public SingleEntry(Double value, RegattaAndRaceIdentifier relatedRaceOrNull, TimePoint relatedTimePointOrNull,
                 TimePoint relatedRaceStartTimePointOrNull, String leaderboardNameOrNull,
-                String leaderboardGroupNameOrNull, UUID eventIdOrNull, String raceNameOrNull) {
+                String leaderboardGroupNameOrNull, UUID leaderboardGroupIdOrNull, UUID eventIdOrNull, String raceNameOrNull) {
             super();
             this.value = value;
             this.relatedRaceOrNull = relatedRaceOrNull;
             this.leaderboardNameOrNull = leaderboardNameOrNull;
             this.leaderboardGroupNameOrNull = leaderboardGroupNameOrNull;
+            this.leaderboardGroupIdOrNull = leaderboardGroupIdOrNull;
             this.eventIdOrNull = eventIdOrNull;
             this.raceNameOrNull = raceNameOrNull;
             if (relatedTimePointOrNull != null) {
@@ -85,6 +86,7 @@ public class SailorProfileStatisticDTO implements Result, Serializable {
         private MillisecondsTimePoint relatedRaceStartTimePointOrNull;
         private String leaderboardNameOrNull;
         private String leaderboardGroupNameOrNull;
+        private UUID leaderboardGroupIdOrNull;
         private String raceNameOrNull;
         private UUID eventIdOrNull;
 
@@ -109,6 +111,7 @@ public class SailorProfileStatisticDTO implements Result, Serializable {
                     + ", relatedTimePointOrNull=" + relatedTimePointOrNull + ", relatedRaceStartTimePointOrNull="
                     + relatedRaceStartTimePointOrNull + ", leaderboardNameOrNull=" + leaderboardNameOrNull
                     + ", leaderboardGroupNameOrNull=" + leaderboardGroupNameOrNull + ", raceNameOrNull="
+                    + ", leaderboardGroupIdOrNull=" + leaderboardGroupIdOrNull + ", raceNameOrNull="
                     + raceNameOrNull + ", eventIdOrNull=" + eventIdOrNull + "]";
         }
 
@@ -122,6 +125,10 @@ public class SailorProfileStatisticDTO implements Result, Serializable {
 
         public String getLeaderboardGroupNameOrNull() {
             return leaderboardGroupNameOrNull;
+        }
+        
+        public UUID getLeaderboardGroupIdOrNull() {
+            return leaderboardGroupIdOrNull;
         }
 
         public MillisecondsTimePoint getRelatedRaceStartTimePointOrNull() {

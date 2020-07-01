@@ -143,9 +143,9 @@ public class SearchServiceTest {
         for (final String leaderboardName : allLeaderboards.keySet()) {
             server.apply(new RemoveLeaderboard(leaderboardName));
         }
-        Map<String, LeaderboardGroup> allLeaderboardGroups = new HashMap<>(server.getLeaderboardGroups());
-        for (final String leaderboardGroupName : allLeaderboardGroups.keySet()) {
-            server.apply(new RemoveLeaderboardGroup(leaderboardGroupName));
+        Map<UUID, LeaderboardGroup> allLeaderboardGroups = new HashMap<>(server.getLeaderboardGroups());
+        for (final LeaderboardGroup leaderboardGroup : allLeaderboardGroups.values()) {
+            server.apply(new RemoveLeaderboardGroup(leaderboardGroup.getId()));
         }
         server.apply(new RemoveRegatta(new RegattaName("Pfingstbusch (29er)")));
         server.apply(new RemoveRegatta(new RegattaName("Pfingstbusch (470)")));

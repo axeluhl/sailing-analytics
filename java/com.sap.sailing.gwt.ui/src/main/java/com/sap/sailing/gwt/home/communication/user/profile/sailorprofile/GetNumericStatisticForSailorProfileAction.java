@@ -127,21 +127,23 @@ public class GetNumericStatisticForSailorProfileAction
             Leaderboard leaderboard, TrackedRace tr, LeaderboardGroup leaderboardGroup, Event event) {
         switch (type) {
         case MAX_SPEED:
-            getMaxSpeedInRaces(leaderboard, competitor, aggregator, tr, end, leaderboardGroup.getName(), event.getId());
+            getMaxSpeedInRaces(leaderboard, competitor, aggregator, tr, end, leaderboardGroup.getName(), leaderboardGroup.getId(), 
+                    event.getId());
             break;
         case BEST_DISTANCE_TO_START:
             aggregator.add(tr.getDistanceToStartLine(competitor, 0), tr.getStartOfRace(), tr.getStartOfRace(),
-                    tr.getRaceIdentifier(), leaderboard.getName(), leaderboardGroup.getName(), event.getId(),
-                    tr.getRace().getName());
+                    tr.getRaceIdentifier(), leaderboard.getName(), leaderboardGroup.getName(), leaderboardGroup.getId(),
+                    event.getId(), tr.getRace().getName());
             break;
         case BEST_STARTLINE_SPEED:
             Speed speed = tr.getSpeedWhenCrossingStartLine(competitor);
             aggregator.add(speed, tr.getStartOfRace(), tr.getStartOfRace(), tr.getRaceIdentifier(),
-                    leaderboard.getName(), leaderboardGroup.getName(), event.getId(), tr.getRace().getName());
+                    leaderboard.getName(), leaderboardGroup.getName(), leaderboardGroup.getId(), event.getId(),
+                    tr.getRace().getName());
             break;
         case AVERAGE_STARTLINE_DISTANCE:
             Distance distance = tr.getDistanceToStartLine(competitor, 0);
-            aggregator.add(distance, null, null, null, null, null, null, null);
+            aggregator.add(distance, null, null, null, null, null, null, null, null);
         default:
             break;
         }
@@ -204,7 +206,8 @@ public class GetNumericStatisticForSailorProfileAction
 
     @GwtIncompatible
     private SingleEntry getMaxSpeedInRaces(Leaderboard leaderboard, Competitor competitor, Aggregator aggregator,
-            TrackedRace tr, TimePoint endOfEvent, String bestLeaderboardGroupName, UUID eventId) {
+            TrackedRace tr, TimePoint endOfEvent, String bestLeaderboardGroupName, UUID bestLeaderboardGroupId,
+            UUID eventId) {
         Pair<GPSFixMoving, Speed> bestFix = leaderboard.getMaximumSpeedOverGround(competitor, endOfEvent);
         SingleEntry newBetterResult = null;
         if (bestFix != null) {
@@ -218,7 +221,7 @@ public class GetNumericStatisticForSailorProfileAction
 
                 if (maxSpeed != null && maxSpeed.getA() != null && maxSpeed.getB() != null) {
                     aggregator.add(maxSpeed.getB(), bestFix.getA().getTimePoint(), tr.getStartOfRace(),
-                            tr.getRaceIdentifier(), leaderboard.getName(), bestLeaderboardGroupName, eventId,
+                            tr.getRaceIdentifier(), leaderboard.getName(), bestLeaderboardGroupName, bestLeaderboardGroupId, eventId,
                             tr.getRace().getName());
                 }
             }
@@ -249,22 +252,23 @@ public class GetNumericStatisticForSailorProfileAction
     interface Aggregator {
         default void add(Distance distance, TimePoint bestTimePointOrNull, TimePoint startTimePointOrNull,
                 RegattaAndRaceIdentifier regattaAndRaceIdentifierOrNull, String bestLeaderboardName,
-                String bestLeaderboardGroupName, UUID eventId, String bestRaceName) {
+                String bestLeaderboardGroupName, UUID bestLeaderboardGroupId, UUID eventId, String bestRaceName) {
             if (distance != null) {
                 add(distance.getMeters(), bestTimePointOrNull, startTimePointOrNull, regattaAndRaceIdentifierOrNull,
-                        bestLeaderboardName, bestLeaderboardGroupName, eventId, bestRaceName);
+                        bestLeaderboardName, bestLeaderboardGroupName, bestLeaderboardGroupId, eventId, bestRaceName);
             }
         }
 
         void add(Double value, TimePoint bestTime, TimePoint startTime, RegattaAndRaceIdentifier race,
-                String bestLeaderboardName, String bestLeaderboardGroupName, UUID bestEventId, String bestRaceName);
+                String bestLeaderboardName, String bestLeaderboardGroupName, UUID bestLeaderboardGroupId,
+                UUID bestEventId, String bestRaceName);
 
         default void add(Speed speed, TimePoint bestTimePointOrNull, TimePoint startTimePointOrNull,
                 RegattaAndRaceIdentifier regattaAndRaceIdentifierOrNull, String bestLeaderboardName,
-                String bestLeaderboardGroupName, UUID eventId, String bestRaceName) {
+                String bestLeaderboardGroupName, UUID bestLeaderboardGroupId, UUID eventId, String bestRaceName) {
             if (speed != null) {
                 add(speed.getKnots(), bestTimePointOrNull, startTimePointOrNull, regattaAndRaceIdentifierOrNull,
-                        bestLeaderboardName, bestLeaderboardGroupName, eventId, bestRaceName);
+                        bestLeaderboardName, bestLeaderboardGroupName, bestLeaderboardGroupId, eventId, bestRaceName);
             }
         }
 
@@ -277,6 +281,7 @@ public class GetNumericStatisticForSailorProfileAction
         private Double bestValue;
         private String bestLeaderboardName;
         private String bestLeaderboardGroupName;
+        private UUID bestLeaderboardGroupId;
         private String bestRaceName;
         private UUID bestEventId;
         private TimePoint bestTimePoint;
@@ -289,7 +294,8 @@ public class GetNumericStatisticForSailorProfileAction
 
         @Override
         public void add(Double value, TimePoint bestTime, TimePoint startTime, RegattaAndRaceIdentifier race,
-                String bestLeaderboardName, String bestLeaderboardGroupName, UUID bestEventId, String bestRaceName) {
+                String bestLeaderboardName, String bestLeaderboardGroupName, UUID bestLeaderboardGroupId,
+                UUID bestEventId, String bestRaceName) {
             if (value != null) {
                 if (this.bestValue == null || ((max && value > bestValue) || (!max && value < bestValue))) {
                     this.bestValue = value;
@@ -298,6 +304,7 @@ public class GetNumericStatisticForSailorProfileAction
                     this.bestRace = race;
                     this.bestLeaderboardName = bestLeaderboardName;
                     this.bestLeaderboardGroupName = bestLeaderboardGroupName;
+                    this.bestLeaderboardGroupId = bestLeaderboardGroupId;
                     this.bestEventId = bestEventId;
                     this.bestRaceName = bestRaceName;
                 }
@@ -311,7 +318,7 @@ public class GetNumericStatisticForSailorProfileAction
                 // not all timepoints are serializable, ensure we use a compatible one
                 result.add(new SingleEntry(bestValue, bestRace, new MillisecondsTimePoint(bestTimePoint.asMillis()),
                         new MillisecondsTimePoint(startTimePoint.asMillis()), bestLeaderboardName,
-                        bestLeaderboardGroupName, bestEventId, bestRaceName));
+                        bestLeaderboardGroupName, bestLeaderboardGroupId, bestEventId, bestRaceName));
             }
             return result;
         }
@@ -324,7 +331,8 @@ public class GetNumericStatisticForSailorProfileAction
 
         @Override
         public void add(Double value, TimePoint bestTime, TimePoint startTime, RegattaAndRaceIdentifier race,
-                String bestLeaderboardName, String bestLeaderboardGroupName, UUID eventId, String bestRaceName) {
+                String bestLeaderboardName, String bestLeaderboardGroupName, UUID bestLeaderboardGroupId, UUID eventId,
+                String bestRaceName) {
             if (value != null) {
                 averageCount++;
                 if (average == null) {
@@ -339,7 +347,7 @@ public class GetNumericStatisticForSailorProfileAction
         public ArrayList<SingleEntry> getResult() {
             ArrayList<SingleEntry> result = new ArrayList<>();
             if (averageCount > 0) {
-                result.add(new SingleEntry(average, null, null, null, null, null, null, null));
+                result.add(new SingleEntry(average, null, null, null, null, null, null, null, null));
             }
             return result;
         }

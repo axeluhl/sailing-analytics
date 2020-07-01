@@ -412,13 +412,13 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             CompetitorSelectionProvider competitorSelectionProvider, String leaderboardName,
             ErrorReporter errorReporter, final StringMessages stringMessages, boolean showRaceDetails,
             LeaderBoardStyle style, FlagImageResolver flagImageResolver, Iterable<DetailType> availableDetailTypes) {
-        this(parent, context, sailingService, asyncActionsExecutor, settings, false, competitorSelectionProvider, null,
+        this(parent, context, sailingService, asyncActionsExecutor, settings, false, competitorSelectionProvider,
                 leaderboardName, errorReporter, stringMessages, showRaceDetails, style, flagImageResolver, availableDetailTypes);
     }
 
     public LeaderboardPanel(Component<?> parent, ComponentContext<?> context, SailingServiceAsync sailingService,
             AsyncActionsExecutor asyncActionsExecutor, LS settings, boolean isEmbedded,
-            CompetitorSelectionProvider competitorSelectionProvider, String leaderboardGroupName,
+            CompetitorSelectionProvider competitorSelectionProvider,
             String leaderboardName, ErrorReporter errorReporter, final StringMessages stringMessages,
             boolean showRaceDetails, LeaderBoardStyle style, FlagImageResolver flagImageResolver, Iterable<DetailType> availableDetailTypes) {
         this(parent, context, sailingService, asyncActionsExecutor, settings, isEmbedded, competitorSelectionProvider,
@@ -426,7 +426,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                         // perform the first request as "live" but don't by default auto-play
                         PlayModes.Live, PlayStates.Paused,
                         /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS),
-                leaderboardGroupName, leaderboardName, errorReporter, stringMessages, showRaceDetails,
+                leaderboardName, errorReporter, stringMessages, showRaceDetails,
                 /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true,
                 /* optionalRaceTimesInfoProvider */ null, /* autoExpandLastRaceColumn */ false,
                 /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false, /* showCompetitorFilterStatus */ false,
@@ -435,7 +435,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
 
     public LeaderboardPanel(Component<?> parent, ComponentContext<?> context, SailingServiceAsync sailingService,
             AsyncActionsExecutor asyncActionsExecutor, LS settings, boolean isEmbedded,
-            CompetitorSelectionProvider competitorSelectionProvider, Timer timer, String leaderboardGroupName,
+            CompetitorSelectionProvider competitorSelectionProvider, Timer timer,
             String leaderboardName, final ErrorReporter errorReporter, final StringMessages stringMessages,
             boolean showRaceDetails, CompetitorFilterPanel competitorSearchTextBox, boolean showSelectionCheckbox,
             RaceTimesInfoProvider optionalRaceTimesInfoProvider, boolean autoExpandLastRaceColumn,
