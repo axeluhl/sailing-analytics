@@ -337,10 +337,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     public static TimePoint loadTimePoint(Document object, String fieldName) {
-        TimePoint result = null;
+        final TimePoint result;
         Number timePointAsNumber = (Number) object.get(fieldName);
         if (timePointAsNumber != null) {
             result = new MillisecondsTimePoint(timePointAsNumber.longValue());
+        } else {
+            result = null;
         }
         return result;
     }
@@ -351,12 +353,15 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     public static TimeRange loadTimeRange(Document object, FieldNames field) {
         Document timeRangeObj = (Document) object.get(field.name());
+        final TimeRange result;
         if (timeRangeObj == null) {
-            return null;
+            result = null;
+        } else {
+            TimePoint from = loadTimePoint(timeRangeObj, FieldNames.FROM_MILLIS);
+            TimePoint to = loadTimePoint(timeRangeObj, FieldNames.TO_MILLIS);
+            result = new TimeRangeImpl(from, to);
         }
-        TimePoint from = loadTimePoint(timeRangeObj, FieldNames.FROM_MILLIS);
-        TimePoint to = loadTimePoint(timeRangeObj, FieldNames.TO_MILLIS);
-        return new TimeRangeImpl(from, to);
+        return result;
     }
 
     /**
@@ -585,8 +590,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                     + " for corresponding regatta leaderboard. Not loading regatta leaderboard.");
         } else {
             result = new RegattaLeaderboardImpl(regatta, resultDiscardingRule);
-            result.setName(leaderboardName); // this will temporarily set the display name; it will be adjusted later if
-                                             // a display name is found
         }
         return result;
     }
@@ -1165,7 +1168,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         UUID id = (UUID) eventDBObject.get(FieldNames.EVENT_ID.name());
         TimePoint startDate = loadTimePoint(eventDBObject, FieldNames.EVENT_START_DATE);
         TimePoint endDate = loadTimePoint(eventDBObject, FieldNames.EVENT_END_DATE);
-        if (endDate.before(startDate)) {
+        if (endDate != null && startDate != null && endDate.before(startDate)) {
             logger.warning("End date "+endDate+" of event "+name+" with ID "+id+" is before its start date "+
                     startDate+"; adjusting such that end date equals start date.");
             endDate = startDate;
@@ -2631,23 +2634,24 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     public Collection<DynamicCompetitor> loadAllCompetitors() {
         Map<Serializable, DynamicCompetitor> competitorsById = new HashMap<>();
         MongoCollection<Document> collection = database.getCollection(CollectionNames.COMPETITORS.name());
-        try {
             final JsonWriterSettings writerSettings = JsonWriterSettings.builder().outputMode(JsonMode.RELAXED).build();
             for (Document o : collection.find()) {
-                JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(o.toJson(writerSettings)));
-                DynamicCompetitor c = competitorWithBoatRefDeserializer.deserialize(json);
-                // ensure that in case there should be multiple competitors with equal IDs in the DB
-                // only one will survive
-                if (competitorsById.containsKey(c.getId())) {
-                    collection.deleteOne(o);
-                } else {
-                    competitorsById.put(c.getId(), c);
+                try {
+                    JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(o.toJson(writerSettings)));
+                    DynamicCompetitor c = competitorWithBoatRefDeserializer.deserialize(json);
+                    // ensure that in case there should be multiple competitors with equal IDs in the DB
+                    // only one will survive
+                    if (competitorsById.containsKey(c.getId())) {
+                        collection.deleteOne(o);
+                    } else {
+                        competitorsById.put(c.getId(), c);
+                    }
+                } catch (Exception e) {
+                    logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load competitors: "+
+                            o.toString());
+                    logger.log(Level.SEVERE, "loadCompetitors", e);
                 }
             }
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load competitors.");
-            logger.log(Level.SEVERE, "loadCompetitors", e);
-        }
         return competitorsById.values();
     }
 

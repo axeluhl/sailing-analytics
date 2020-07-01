@@ -73,6 +73,7 @@ import com.sap.sailing.domain.leaderboard.LeaderboardRegistry;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboardWithEliminations;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
+import com.sap.sailing.domain.leaderboard.impl.DelegatingRegattaLeaderboardWithCompetitorElimination;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.polars.PolarDataService;
@@ -234,16 +235,13 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     RegattaLeaderboardWithEliminations addRegattaLeaderboardWithEliminations(String leaderboardName, String leaderboardDisplayName, RegattaLeaderboard fullRegattaLeaderboard);
 
-    void removeLeaderboard(String leaderboardName);
-
     /**
-     * Renames a leaderboard. If a leaderboard by the name <code>oldName</code> does not exist in {@link #getLeaderboards()},
-     * or if a leaderboard with the name <code>newName</code> already exists, an {@link IllegalArgumentException} is thrown.
-     * If the method completes normally, the rename has been successful, and the leaderboard previously obtained by calling
-     * {@link #getLeaderboardByName(String) getLeaderboardByName(oldName)} can now be obtained by calling
-     * {@link #getLeaderboardByName(String) getLeaderboardByName(newName)}.
+     * Removes the leaderboard specified by {@code leaderboardName} as well as all delegating leaderboards that reference it,
+     * in particular those {@link DelegatingRegattaLeaderboardWithCompetitorElimination} which which the leaderboard specified
+     * by {@code leaderboardName} was their underlying regatta leaderboard. If no leaderboard named as specified by the
+     * {@code leaderboardName} parameter exists, this method has no effect.
      */
-    void renameLeaderboard(String oldName, String newName);
+    void removeLeaderboard(String leaderboardName);
 
     RaceColumn addColumnToLeaderboard(String columnName, String leaderboardName, boolean medalRace);
 
@@ -313,16 +311,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *            The name of the group which shall be removed.
      */
     void removeLeaderboardGroup(String groupName);
-
-    /**
-     * Renames the group with the name <code>oldName</code> to the <code>newName</code>.<br />
-     * If there's no group with the name <code>oldName</code> or there's already a group with the name
-     * <code>newName</code> a {@link IllegalArgumentException} is thrown.
-     * 
-     * @param oldName The old name of the group
-     * @param newName The new name of the group
-     */
-    void renameLeaderboardGroup(String oldName, String newName);
 
     /**
      * Updates the group data in the persistant store.
@@ -736,8 +724,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     ClassLoader getCombinedMasterDataClassLoader();
 
-    Iterable<Competitor> getCompetitorInOrderOfWindwardDistanceTraveledFarthestFirst(TrackedRace trackedRace, TimePoint timePoint);
-
     /**
      * Gets the {@link RaceTracker} associated with a given {@link RegattaAndRaceIdentifier}. If the {@link RaceTracker}
      * is already available, the {@code callback} is invoked immediately. If the {@link RaceTracker} isn't available
@@ -848,15 +834,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     Map<Integer, Pair<DetailedRaceInfo, AnniversaryType>> getKnownAnniversaries();
 
     /**
-     * Provides the number, {@link DetailedRaceInfo race} and {@link AnniversaryType type} information for the latest
-     * anniversary race.
-     * 
-     * @return {@link Triple} containing the last anniversary number, {@link DetailedRaceInfo race} and
-     *         {@link AnniversaryType type}, or <code>null</code> if there's no anniversary so far
-     */
-    Triple<Integer, DetailedRaceInfo, AnniversaryType> getLastAnniversary();
-    
-    /**
      * Returns the {@link AnniversaryRaceDeterminator} used by this service. This is needed for replication for
      * anniversary races only.
      */
@@ -956,4 +933,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
             final boolean compress, final boolean exportWind, final boolean exportDeviceConfigurations,
             String targetServerUsername, String targetServerPassword, String targetServerBearerToken,
             final boolean exportTrackedRacesAndStartTracking, final UUID importOperationId) throws IllegalArgumentException;
+
+    void addOrReplaceExpeditionDeviceConfiguration(UUID deviceConfigurationId, String name, Integer expeditionBoatId);
+
+    void removeExpeditionDeviceConfiguration(UUID deviceUuid);
 }

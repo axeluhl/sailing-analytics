@@ -106,10 +106,6 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
         return name;
     }
 
-    public void setName(String newName) {
-        getFullLeaderboard().setName(newName);
-    }
-
     @Override
     public Iterable<Competitor> getCompetitors() {
         return new ObscuringIterable<>(getFullLeaderboard().getCompetitors(), eliminatedCompetitors.keySet());
@@ -331,8 +327,8 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
 
     @Override
     public void addScoreCorrectionListener(ScoreCorrectionListener listener) {
-        if (fullLeaderboard != null) {
-            fullLeaderboard.addScoreCorrectionListener(listener);
+        if (getFullLeaderboard() != null) {
+            getFullLeaderboard().addScoreCorrectionListener(listener);
         } else {
             triggerWhenFullLeaderboardIsResolved.put(leaderboard->leaderboard.addScoreCorrectionListener(listener), true);
         }
@@ -340,8 +336,8 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
 
     @Override
     public void removeScoreCorrectionListener(ScoreCorrectionListener listener) {
-        if (fullLeaderboard != null) {
-            fullLeaderboard.removeScoreCorrectionListener(listener);
+        if (getFullLeaderboard() != null) {
+            getFullLeaderboard().removeScoreCorrectionListener(listener);
         } else {
             triggerWhenFullLeaderboardIsResolved.put(leaderboard->leaderboard.removeScoreCorrectionListener(listener), true);
         }

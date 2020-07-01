@@ -20,7 +20,7 @@ import com.sap.sailing.gwt.ui.adminconsole.coursecreation.CourseTemplatePanel;
 import com.sap.sailing.gwt.ui.adminconsole.coursecreation.MarkPropertiesPanel;
 import com.sap.sailing.gwt.ui.adminconsole.coursecreation.MarkRolePanel;
 import com.sap.sailing.gwt.ui.adminconsole.coursecreation.MarkTemplatePanel;
-import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
+import com.sap.sailing.gwt.ui.client.AbstractSailingWriteEntryPoint;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsRefresher;
 import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
@@ -61,7 +61,7 @@ import com.sap.sse.security.ui.client.component.UserGroupManagementPanel;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.client.usermanagement.UserManagementPanel;
 
-public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
+public class AdminConsoleEntryPoint extends AbstractSailingWriteEntryPoint
         implements RegattaRefresher, LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity>, LeaderboardGroupsRefresher {
     private final AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
 
@@ -349,7 +349,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
                 },
                 getStringMessages().igtimiAccounts(),
                 SecuredDomainType.IGTIMI_ACCOUNT.getPermission(DefaultActions.values()));
-        ExpeditionDeviceConfigurationsPanel expeditionDeviceConfigurationsPanel = new ExpeditionDeviceConfigurationsPanel(getSailingService(), this, getStringMessages());
+        ExpeditionDeviceConfigurationsPanel expeditionDeviceConfigurationsPanel = new ExpeditionDeviceConfigurationsPanel(getSailingService(), this, getStringMessages(), getUserService());
         expeditionDeviceConfigurationsPanel.ensureDebugId("ExpeditionDeviceConfigurations");
         panel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<ExpeditionDeviceConfigurationsPanel>(expeditionDeviceConfigurationsPanel) {
             @Override
@@ -370,7 +370,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
                 getSailingService(), getUserService(), this, getStringMessages(), this, eventManagementPanel);
         panel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<StructureImportManagementPanel>(structureImportUrlsManagementPanel),
                 getStringMessages().manage2Sail() + " " + getStringMessages().regattaStructureImport(),
-                SecuredDomainType.REGATTA.getPermission(DefaultActions.CREATE)); // TODO bug4763 provide the default CREATE ownership for REGATTA / EVENT
+                SecuredDomainType.REGATTA.getPermission(DefaultActions.CREATE));
 
         /* ADVANCED */
         final HorizontalTabLayoutPanel advancedTabPanel = panel.addVerticalTab(getStringMessages().advanced(),

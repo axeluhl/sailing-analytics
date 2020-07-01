@@ -13,7 +13,7 @@ import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.settings.client.spectator.SpectatorContextDefinition;
 import com.sap.sailing.gwt.settings.client.spectator.SpectatorSettings;
-import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
+import com.sap.sailing.gwt.ui.client.AbstractSailingReadEntryPoint;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.shared.panels.SimpleWelcomeWidget;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
@@ -25,7 +25,7 @@ import com.sap.sse.gwt.shared.ClientConfiguration;
  * @author Lennart Hensler (D054527)
  *
  */
-public class SpectatorEntryPoint extends AbstractSailingEntryPoint implements RegattaRefresher {
+public class SpectatorEntryPoint extends AbstractSailingReadEntryPoint implements RegattaRefresher {
     
     @Override
     protected void doOnModuleLoad() {
@@ -57,7 +57,7 @@ public class SpectatorEntryPoint extends AbstractSailingEntryPoint implements Re
             FlowPanel groupOverviewPanel = new FlowPanel();
             groupOverviewPanel.addStyleName("contentOuterPanel");
             // DON'T DELETE -> the EventOverviewPanel will replace the LeaderboardGroupOverviewPanel later on
-//            EventOverviewPanel eventOverviewPanel = new EventOverviewPanel(sailingService, this, stringMessages, showRaceDetails);
+//            EventOverviewPanel eventOverviewPanel = new EventOverviewPanel(sailingServiceWrite, this, stringMessages, showRaceDetails);
 //            groupOverviewPanel.add( eventOverviewPanel);
             LeaderboardGroupOverviewPanel leaderboardGroupOverviewPanel = new LeaderboardGroupOverviewPanel(getSailingService(), this, getStringMessages(), settings.isShowRaceDetails());
             groupOverviewPanel.add(leaderboardGroupOverviewPanel);

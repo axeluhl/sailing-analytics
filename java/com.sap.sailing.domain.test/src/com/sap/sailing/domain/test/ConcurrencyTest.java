@@ -43,7 +43,7 @@ public class ConcurrencyTest extends OnlineTracTracBasedTest {
         super.setUp("event_20110815_RCSwedenCu",
         /* raceId */ "event_20110815_RCSwedenCu-Race8",
         /* liveUri */ null,
-        /* storedUri */ tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":"+TracTracConnectionConstants.PORT_TUNNEL_STORED) : new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_STORED),
+        /* storedUri */ new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":4401"),
                 new ReceiverType[] { ReceiverType.MARKPASSINGS,
                 ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS });
         getTrackedRace().recordWind(
@@ -72,7 +72,6 @@ public class ConcurrencyTest extends OnlineTracTracBasedTest {
         long duration = System.nanoTime()-start;
         logger.info("1 thread: "+duration+"ns");
         logger.info("number of approximation points: "+approximation1.size());
-
         dp = new DouglasPeucker<Competitor, GPSFixMoving>(teamAquaTrack, ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor());
         start = System.nanoTime();
         List<GPSFixMoving> approximation2 = dp.approximate(new MeterDistance(3), firstMarkPassing.getTimePoint(), lastMarkPassing.getTimePoint());

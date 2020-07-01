@@ -72,7 +72,6 @@ public class MarkTemplateTest extends AbstractSeleniumTest {
 
         final Iterable<MarkTemplate> markTemplateResult = markTemplateApi.getAllMarkTemplates(ctx);
         for (MarkTemplate markTemplate : markTemplateResult) {
-            System.out.println(markTemplate.getId());
             assertTrue(markTemplate.getId().equals(markTemplate1.getId())
                     || markTemplate.getId().equals(markTemplate2.getId()));
         }

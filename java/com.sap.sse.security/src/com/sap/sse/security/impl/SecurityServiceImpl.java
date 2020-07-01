@@ -91,7 +91,6 @@ import com.sap.sse.replication.OperationsToMasterSendingQueue;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.security.Action;
-import com.sap.sse.security.BearerAuthenticationToken;
 import com.sap.sse.security.ClientUtils;
 import com.sap.sse.security.GithubApi;
 import com.sap.sse.security.InstagramApi;
@@ -103,7 +102,6 @@ import com.sap.sse.security.SessionUtils;
 import com.sap.sse.security.interfaces.AccessControlStore;
 import com.sap.sse.security.interfaces.Credential;
 import com.sap.sse.security.interfaces.OAuthToken;
-import com.sap.sse.security.interfaces.Social;
 import com.sap.sse.security.interfaces.SocialSettingsKeys;
 import com.sap.sse.security.interfaces.UserImpl;
 import com.sap.sse.security.interfaces.UserStore;
@@ -156,7 +154,6 @@ import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RolePrototype;
 import com.sap.sse.security.shared.SecurityAccessControlList;
-import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
@@ -500,12 +497,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public OwnershipAnnotation getOwnership(QualifiedObjectIdentifier idOfOwnedObjectAsString) {
         return accessControlStore.getOwnership(idOfOwnedObjectAsString);
     }
-
-    @Override
-    public OwnershipAnnotation createDefaultOwnershipForNewObject(QualifiedObjectIdentifier idOfNewObject) {
-        return new OwnershipAnnotation(new Ownership(getCurrentUser(), getDefaultTenantForCurrentUser()),
-                idOfNewObject, /* display name */ idOfNewObject.toString());
-    }
     
     public UserGroup getDefaultTenantForUser(User user) {
         UserGroup specificTenant = temporaryDefaultTenant.get();
@@ -687,7 +678,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         }
         final UUID tenantId = tenantOwner == null ? null : tenantOwner.getId();
         final String userOwnerName = userOwner == null ? null : userOwner.getName();
-
         return apply(new SetOwnershipOperation(idOfOwnedObjectAsString, userOwnerName, tenantId,
                 displayNameOfOwnedObject));
     }
@@ -860,21 +850,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         return redirectUrl;
     }
     
-    @Override
-    public User loginByAccessToken(String accessToken) {
-        BearerAuthenticationToken token = new BearerAuthenticationToken(accessToken);
-        logger.info("Trying to login with access token");
-        Subject subject = SecurityUtils.getSubject();
-        try {
-            subject.login(token);
-            final String username = (String) token.getPrincipal();
-            return store.getUserByName(username);
-        } catch (AuthenticationException e) {
-            logger.log(Level.INFO, "Authentication failed with access token "+accessToken);
-            throw e;
-        }
-    }
-
     @Override
     public void logout() {
         Subject subject = SecurityUtils.getSubject();
@@ -1233,11 +1208,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public Iterable<WildcardPermission> getPermissionsFromUser(String username) throws UserManagementException {
-        return store.getPermissionsFromUser(username);
-    }
-
-    @Override
     public void removePermissionFromUser(String username, WildcardPermission permissionToRemove) {
         apply(new RemovePermissionForUserOperation(username, permissionToRemove));
     }
@@ -1313,11 +1283,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public <T> T getSetting(String key, Class<T> clazz) {
-        return store.getSetting(key, clazz);
-    }
-
-    @Override
     public Map<String, Object> getAllSettings() {
         return store.getAllSettings();
     }
@@ -1325,20 +1290,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public Map<String, Class<?>> getAllSettingTypes() {
         return store.getAllSettingTypes();
-    }
-
-    @Override
-    public User createSocialUser(String name, SocialUserAccount socialUserAccount)
-            throws UserManagementException, UserGroupManagementException {
-        if (store.getUserByName(name) != null) {
-            throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
-        }
-        User result = store.createUser(name, socialUserAccount.getProperty(Social.EMAIL.name()),
-                socialUserAccount);
-        UserGroup tenant = getOrCreateTenantForUser(result);
-        accessControlStore.setOwnership(tenant.getIdentifier(), result, tenant, tenant.getName());
-        addUserToUserGroup(tenant, result);
-        return result;
     }
 
     @Override
@@ -1945,22 +1896,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         });
     }
 
-    @Override
-    public <T extends WithQualifiedObjectIdentifier> void filterObjectsWithPermissionForCurrentUser(
-            HasPermissions.Action[] actions, Iterable<T> objectsToFilter,
-            Consumer<T> filteredObjectsConsumer) {
-        objectsToFilter.forEach(objectToCheck -> {
-            boolean isPermitted = actions.length > 0;
-            for (int i = 0; i < actions.length; i++) {
-                isPermitted &= SecurityUtils.getSubject().isPermitted(
-                        objectToCheck.getIdentifier().getStringPermission(actions[i]));
-            }
-            if (isPermitted) {
-                filteredObjectsConsumer.accept(objectToCheck);
-            }
-        });
-    }
-
     /** Filters the objects with any of the given permissions for the current user */
     @Override
     public <T extends WithQualifiedObjectIdentifier> void filterObjectsWithAnyPermissionForCurrentUser(
@@ -1991,16 +1926,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
     
     @Override
-    public <T extends WithQualifiedObjectIdentifier, R> List<R> mapAndFilterByExplicitPermissionForCurrentUser(
-            HasPermissions.Action[] actions, Iterable<T> objectsToFilter,
-            Function<T, R> filteredObjectsMapper) {
-        final List<R> result = new ArrayList<>();
-        filterObjectsWithPermissionForCurrentUser(actions, objectsToFilter,
-                filteredObject -> result.add(filteredObjectsMapper.apply(filteredObject)));
-        return result;
-    }
-
-    @Override
     public <T extends WithQualifiedObjectIdentifier, R> List<R> mapAndFilterByAnyExplicitPermissionForCurrentUser(
             HasPermissions permittedObject, HasPermissions.Action[] actions, Iterable<T> objectsToFilter,
             Function<T, R> filteredObjectsMapper) {
@@ -2013,17 +1938,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public User getAllUser() {
         return store.getUserByName(SecurityService.ALL_USERNAME);
-    }
-    
-    @Override
-    public <T extends WithQualifiedObjectIdentifier> boolean hasCurrentUserRoleForOwnedObject(HasPermissions type, T object,
-            RoleDefinition roleToCheck) {
-        assert type != null;
-        assert object != null;
-        assert roleToCheck != null;
-        OwnershipAnnotation ownershipToCheck = getOwnership(object.getIdentifier());
-        return PermissionChecker.ownsUserASpecificRole(getCurrentUser(), getAllUser(),
-                ownershipToCheck == null ? null : ownershipToCheck.getAnnotation(), roleToCheck.getName());
     }
     
     @Override

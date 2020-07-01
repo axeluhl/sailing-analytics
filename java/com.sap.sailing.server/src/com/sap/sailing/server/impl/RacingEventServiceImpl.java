@@ -128,6 +128,7 @@ import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DataImportSubProgress;
 import com.sap.sailing.domain.common.DeviceIdentifier;
+import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.Position;
@@ -185,8 +186,6 @@ import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
-import com.sap.sailing.domain.ranking.RankingMetric.CompetitorRankingInfo;
-import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
@@ -221,6 +220,7 @@ import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
 import com.sap.sailing.domain.windestimation.WindEstimationFactoryService;
+import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
 import com.sap.sailing.expeditionconnector.ExpeditionTrackerFactory;
 import com.sap.sailing.resultimport.ResultUrlRegistry;
 import com.sap.sailing.server.Replicator;
@@ -295,10 +295,8 @@ import com.sap.sailing.server.util.EventUtil;
 import com.sap.sailing.shared.server.SharedSailingData;
 import com.sap.sse.MasterDataImportClassLoaderService;
 import com.sap.sse.ServerInfo;
-import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.PairingListCreationException;
-import com.sap.sse.common.Renamable;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
@@ -1419,36 +1417,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public void renameLeaderboard(String oldName, String newName) {
-        final Leaderboard toRename = leaderboardsByName.get(oldName);
-        LockUtil.lockForWrite(leaderboardsByNameLock);
-        try {
-            if (toRename == null) {
-                throw new IllegalArgumentException("No leaderboard with name " + oldName + " found");
-            }
-            if (leaderboardsByName.containsKey(newName)) {
-                throw new IllegalArgumentException("Leaderboard with name " + newName + " already exists");
-            }
-            if (toRename instanceof Renamable) {
-                removeMBeanForLeaderboard(toRename);
-                ((Renamable) toRename).setName(newName);
-                leaderboardsByName.remove(oldName);
-                leaderboardsByName.put(newName, toRename);
-                tryToRegisterMBeanForLeaderboard(toRename);
-            } else {
-                throw new IllegalArgumentException("Leaderboard with name " + newName + " is of type "
-                        + toRename.getClass().getSimpleName() + " and therefore cannot be renamed");
-            }
-        } finally {
-            LockUtil.unlockAfterWrite(leaderboardsByNameLock);
-        }
-        // don't need the lock anymore to update DB
-        if (toRename instanceof Renamable) {
-            mongoObjectFactory.renameLeaderboard(oldName, newName);
-        }
-    }
-
-    @Override
     public void updateStoredLeaderboard(Leaderboard leaderboard) {
         getMongoObjectFactory().storeLeaderboard(leaderboard);
     }
@@ -1462,21 +1430,44 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public void removeLeaderboard(String leaderboardName) {
-        Leaderboard leaderboard = removeLeaderboardFromLeaderboardsByName(leaderboardName);
+        final Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
-            leaderboard.removeRaceColumnListener(raceLogReplicator);
-            leaderboard.removeRaceColumnListener(raceLogScoringReplicator);
-            final ScoreCorrectionListener scoreCorrectionListener = scoreCorrectionListenersByLeaderboard.remove(leaderboard);
-            if (scoreCorrectionListener != null) {
-                leaderboard.getScoreCorrection().removeScoreCorrectionListener(scoreCorrectionListener);
+            final Set<Leaderboard> leaderboardsToRemove = new HashSet<>();
+            leaderboardsToRemove.add(leaderboard);
+            if (leaderboard.getLeaderboardType() == LeaderboardType.RegattaLeaderboard) {
+                final Regatta regatta = ((RegattaLeaderboard) leaderboard).getRegatta();
+                for (final Leaderboard candidateForRemoval : getLeaderboards().values()) {
+                    if (candidateForRemoval != leaderboard && candidateForRemoval instanceof RegattaLeaderboard) {
+                        final Regatta candidatesRegatta = ((RegattaLeaderboard) candidateForRemoval).getRegatta();
+                        if (candidatesRegatta == regatta) {
+                            leaderboardsToRemove.add(candidateForRemoval);
+                        }
+                    }
+                }
             }
-            mongoObjectFactory.removeLeaderboard(leaderboardName);
-            syncGroupsAfterLeaderboardRemove(leaderboardName, true);
-            if (leaderboard instanceof FlexibleLeaderboard) {
-                onRegattaLikeRemoved(((FlexibleLeaderboard) leaderboard).getRegattaLike());
+            for (final Leaderboard toRemove : leaderboardsToRemove) {
+                removeSingleLeaderboardInternal(toRemove);
             }
-            leaderboard.destroy();
         }
+    }
+
+    /**
+     * Removes only {@code leaderboard} and not implicitly all other leaderboards delegating to it
+     */
+    private void removeSingleLeaderboardInternal(final Leaderboard leaderboard) {
+        removeLeaderboardFromLeaderboardsByName(leaderboard.getName());
+        leaderboard.removeRaceColumnListener(raceLogReplicator);
+        leaderboard.removeRaceColumnListener(raceLogScoringReplicator);
+        final ScoreCorrectionListener scoreCorrectionListener = scoreCorrectionListenersByLeaderboard.remove(leaderboard);
+        if (scoreCorrectionListener != null) {
+            leaderboard.getScoreCorrection().removeScoreCorrectionListener(scoreCorrectionListener);
+        }
+        mongoObjectFactory.removeLeaderboard(leaderboard.getName());
+        syncGroupsAfterLeaderboardRemove(leaderboard.getName(), true);
+        if (leaderboard instanceof FlexibleLeaderboard) {
+            onRegattaLikeRemoved(((FlexibleLeaderboard) leaderboard).getRegattaLike());
+        }
+        leaderboard.destroy();
     }
 
     private Leaderboard removeLeaderboardFromLeaderboardsByName(String leaderboardName) {
@@ -2641,17 +2632,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public void removeRegatta(Regatta regatta) throws MalformedURLException, IOException, InterruptedException {
-        Set<RegattaLeaderboard> leaderboardsToRemove = new HashSet<>();
-        for (Leaderboard leaderboard : getLeaderboards().values()) {
-            if (leaderboard instanceof RegattaLeaderboard) {
-                RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
-                if (regattaLeaderboard.getRegatta() == regatta) {
-                    leaderboardsToRemove.add(regattaLeaderboard);
-                }
-            }
-        }
-        for (RegattaLeaderboard regattaLeaderboardToRemove : leaderboardsToRemove) {
-            removeLeaderboard(regattaLeaderboardToRemove.getName());
+        final String regattaLeaderboardName = RegattaLeaderboardImpl.getLeaderboardNameForRegatta(regatta);
+        if (getLeaderboardByName(regattaLeaderboardName) != null) {
+            removeLeaderboard(regattaLeaderboardName); // removes regatta leaderboard and all that delegate to it
         }
         // avoid ConcurrentModificationException by copying the races to remove:
         Set<RaceDefinition> racesToRemove = new HashSet<>();
@@ -3108,8 +3091,15 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         mongoObjectFactory.removeLeaderboardGroup(groupName);
     }
 
-    @Override
-    public void renameLeaderboardGroup(String oldName, String newName) {
+    /**
+     * Renames the group with the name <code>oldName</code> to the <code>newName</code>.<br />
+     * If there's no group with the name <code>oldName</code> or there's already a group with the name
+     * <code>newName</code> a {@link IllegalArgumentException} is thrown.
+     * 
+     * @param oldName The old name of the group
+     * @param newName The new name of the group
+     */
+    private void renameLeaderboardGroup(String oldName, String newName) {
         LockUtil.lockForWrite(leaderboardGroupsByNameLock);
         try {
             final LeaderboardGroup toRename = leaderboardGroupsByName.get(oldName);
@@ -4090,15 +4080,46 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         if (bundleContext == null) { // the non-OSGi case
             result = Collections.singleton((WindTrackerFactory) ExpeditionTrackerFactory.getInstance());
         } else {
-            ServiceTracker<WindTrackerFactory, WindTrackerFactory> tracker = new ServiceTracker<WindTrackerFactory, WindTrackerFactory>(
+            ServiceTracker<WindTrackerFactory, WindTrackerFactory> tracker = new ServiceTracker<>(
                     bundleContext, WindTrackerFactory.class, null);
             tracker.open();
             result = new HashSet<>();
             for (WindTrackerFactory factory : tracker.getServices(new WindTrackerFactory[0])) {
                 result.add(factory);
             }
+            tracker.close();
         }
         return result;
+    }
+    
+    @Override
+    public void addOrReplaceExpeditionDeviceConfiguration(UUID deviceConfigurationId, String name, Integer expeditionBoatId) {
+        ServiceTracker<ExpeditionTrackerFactory, ExpeditionTrackerFactory> tracker = new ServiceTracker<>(
+                bundleContext, ExpeditionTrackerFactory.class, null);
+        tracker.open();
+        final ExpeditionTrackerFactory expeditionTrackerFactory = tracker.getService();
+        if (expeditionTrackerFactory != null) {
+            expeditionTrackerFactory.addOrReplaceDeviceConfiguration(new ExpeditionDeviceConfiguration(name, deviceConfigurationId, expeditionBoatId));
+        } else {
+            logger.severe("Addition or update of Expedition device configuration "+deviceConfigurationId+" was requested, "+
+                    "but no Expedition connector was found. Request not fulfilled.");
+        }
+        tracker.close();
+    }
+
+    @Override
+    public void removeExpeditionDeviceConfiguration(UUID deviceUuid) {
+        ServiceTracker<ExpeditionTrackerFactory, ExpeditionTrackerFactory> tracker = new ServiceTracker<>(
+                bundleContext, ExpeditionTrackerFactory.class, null);
+        tracker.open();
+        final ExpeditionTrackerFactory expeditionTrackerFactory = tracker.getService();
+        if (expeditionTrackerFactory != null) {
+            expeditionTrackerFactory.removeDeviceConfiguration(deviceUuid);
+        } else {
+            logger.severe("Addition or update of Expedition device configuration "+deviceUuid+" was requested, "+
+                    "but no Expedition connector was found. Request not fulfilled.");
+        }
+        tracker.close();
     }
 
     @Override
@@ -4379,22 +4400,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
     }
     
-    @Override
-    public Iterable<Competitor> getCompetitorInOrderOfWindwardDistanceTraveledFarthestFirst(TrackedRace trackedRace, TimePoint timePoint) {
-        final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(timePoint);
-        final List<Competitor> result = new ArrayList<>();
-        final Map<Competitor, Distance> windwardDistanceSailedPerCompetitor = new HashMap<>();
-        for (final Competitor competitor : trackedRace.getRace().getCompetitors()) {
-            result.add(competitor);
-            final CompetitorRankingInfo competitorRankingInfo = rankingInfo.getCompetitorRankingInfo().apply(competitor);
-            windwardDistanceSailedPerCompetitor.put(competitor, competitorRankingInfo == null ? null : competitorRankingInfo.getWindwardDistanceSailed());
-        }
-        final Comparator<Distance> durationComparatorNullsLast = Comparator.nullsLast(Comparator.naturalOrder());
-        result.sort((c1, c2) -> durationComparatorNullsLast.compare(windwardDistanceSailedPerCompetitor.get(c2),
-                                windwardDistanceSailedPerCompetitor.get(c1)));
-        return result;
-    }
-
     /**
      * A {@link SimpleRaceLogIdentifier} in particular has a {@link SimpleRaceLogIdentifier#getRegattaLikeParentName()}
      * which identifies either a regatta by name or a flexible leaderboard by name. Here is why this can luckily be
@@ -4738,21 +4743,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public Pair<Integer, AnniversaryType> getNextAnniversary() {
         return anniversaryRaceDeterminator.getNextAnniversary();
-    }
-
-    @Override
-    public Triple<Integer, DetailedRaceInfo, AnniversaryType> getLastAnniversary() {
-        Map<Integer, Pair<DetailedRaceInfo, AnniversaryType>> allAnniversaries = anniversaryRaceDeterminator
-                .getKnownAnniversaries();
-        Triple<Integer, DetailedRaceInfo, AnniversaryType> lastAnniversary = null;
-        if (!allAnniversaries.isEmpty()) {
-            ArrayList<Integer> list = new ArrayList<>(allAnniversaries.keySet());
-            list.sort(Integer::compare);
-            Integer anniversary = list.get(list.size() - 1);
-            Pair<DetailedRaceInfo, AnniversaryType> info = allAnniversaries.get(anniversary);
-            lastAnniversary = new Triple<>(anniversary, info.getA(), info.getB());
-        }
-        return lastAnniversary;
     }
 
     @Override

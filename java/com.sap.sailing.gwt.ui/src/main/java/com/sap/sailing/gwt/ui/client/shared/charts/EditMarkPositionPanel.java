@@ -82,6 +82,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.charts.MarkPositionService.MarkTrackDTO;
 import com.sap.sailing.gwt.ui.client.shared.racemap.BoundsUtil;
@@ -140,10 +141,10 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
             final SingleRaceLeaderboardPanel leaderboardPanel,
             RegattaAndRaceIdentifier selectedRaceIdentifier, String leaderboardName, final StringMessages stringMessages,
             SailingServiceAsync sailingService, Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider,
-            AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter) {
+            AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter, SailingServiceWriteAsync sailingServiceWrite) {
         super(parent, context, sailingService, selectedRaceIdentifier, timer, timeRangeWithZoomProvider, stringMessages,
                 asyncActionsExecutor, errorReporter);
-        this.markPositionService = new MarkPositionServiceForSailingService(sailingService);
+        this.markPositionService = new MarkPositionServiceForSailingService(sailingServiceWrite);
         this.raceIdentifierToLeaderboardRaceColumnAndFleetMapper = new RaceIdentifierToLeaderboardRaceColumnAndFleetMapper();
         this.raceMap = raceMap;
         this.leaderboardPanel = leaderboardPanel;

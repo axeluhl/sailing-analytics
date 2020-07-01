@@ -12,7 +12,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.GateDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
@@ -27,7 +27,7 @@ public class GateCreationDialog extends DataEntryDialog<GateDTO> {
     private final TextBox shortName;
     private final StringMessages stringMessages;
     
-    public GateCreationDialog(SailingServiceAsync sailingService, ErrorReporter errorReporter,
+    public GateCreationDialog(SailingServiceWriteAsync sailingServiceWrite, ErrorReporter errorReporter,
             final StringMessages stringMessages, AdminConsoleTableResources tableRes,
             List<MarkDTO> marks, DialogCallback<GateDTO> callback) {
         super(stringMessages.gate(), stringMessages.gate(),
@@ -46,7 +46,7 @@ public class GateCreationDialog extends DataEntryDialog<GateDTO> {
         name = createTextBox("");
         shortName = createTextBox("");
         marksWrapper = new MarkTableWrapper<RefreshableMultiSelectionModel<MarkDTO>>(
-                /* multiSelection */ true, sailingService, stringMessages, errorReporter);
+                /* multiSelection */ true, sailingServiceWrite, stringMessages, errorReporter);
         marksWrapper.getDataProvider().getList().addAll(marks);
         marksWrapper.getSelectionModel().addSelectionChangeHandler(new Handler() {
             @Override
