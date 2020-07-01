@@ -53,7 +53,7 @@ public class SpectatorEntryPoint extends AbstractSailingReadEntryPoint implement
             rootPanel.add(groupOverviewPanel);
         } else {
             LeaderboardGroupPanel groupPanel = new LeaderboardGroupPanel(getSailingService(), getStringMessages(), this,
-                    groupIdParam, groupNameParam, this::setHeader, settings.getViewMode(), embedded,
+                    groupIdParam, groupNameParam, leaderboardGroupName->setHeader(leaderboardGroupName, embedded), settings.getViewMode(), embedded,
                     settings.isShowRaceDetails(), settings.isCanReplayDuringLiveRaces(), settings.isShowMapControls());
             groupAndFeedbackPanel.add(groupPanel);
             if (!embedded) {

@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
@@ -122,7 +122,7 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
     
     public LeaderboardGroupPanel(SailingServiceAsync sailingService, StringMessages stringConstants,
             ErrorReporter errorReporter, final String groupId, final String groupName,
-            BiConsumer<String, Boolean> headerCallback, String viewMode, boolean embedded,
+            Consumer<String> headerCallback, String viewMode, boolean embedded,
             boolean showRaceDetails, boolean canReplayDuringLiveRaces, boolean showMapControls) {
         super();
         this.isEmbedded = embedded;
@@ -144,7 +144,7 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
     }
 
     private void loadLeaderboardGroup(final String leaderboardGroupId, final String leaderboardGroupName,
-            final BiConsumer<String, Boolean> callback) {
+            final Consumer<String> callback) {
         final long clientTimeWhenRequestWasSent = System.currentTimeMillis();
         sailingService.getLeaderboardGroupByUuidOrName(leaderboardGroupId != null ? UUID.fromString(leaderboardGroupId) : null,
                 leaderboardGroupName, new AsyncCallback<LeaderboardGroupDTO>() {
@@ -152,7 +152,7 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
                     public void onSuccess(final LeaderboardGroupDTO leaderboardGroupDTO) {
                         if (leaderboardGroupDTO != null) {
                             LeaderboardGroupPanel.this.leaderboardGroup = leaderboardGroupDTO;
-                            callback.accept(leaderboardGroupDTO.getName(), isEmbedded);
+                            callback.accept(leaderboardGroupDTO.getName());
                             final long clientTimeWhenResponseWasReceived = System.currentTimeMillis();
 
                             if (leaderboardGroupDTO.getAverageDelayToLiveInMillis() != null) {
