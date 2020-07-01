@@ -140,7 +140,6 @@ public class RaceTimesInfoProvider {
             } else {                
                 getRaceTimesInfoAction = new GetRaceTimesInfoAction(sailingService, raceIdentifiers);
             }
-
             asyncActionsExecutor.execute(getRaceTimesInfoAction, new AsyncCallback<List<RaceTimesInfoDTO>>() {
                 @Override
                 public void onFailure(Throwable caught) {

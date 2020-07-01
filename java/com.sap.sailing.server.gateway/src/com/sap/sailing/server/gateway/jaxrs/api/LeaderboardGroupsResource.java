@@ -222,7 +222,7 @@ public class LeaderboardGroupsResource extends AbstractSailingServerResource {
                                             jsonRaceColumn.put("trackedRaceName", trackedRace.getRace().getName());
                                             final JSONObject raceBoardURLsByEventID = new JSONObject();
                                             for (Event event : eventsReferencingLeaderboardGroup) {
-                                                if (Util.contains(event.getVenue().getCourseAreas(), leaderboard.getCourseAreas())) {
+                                                if (Util.containsAny(event.getVenue().getCourseAreas(), leaderboard.getCourseAreas())) {
                                                     raceBoardURLsByEventID.put(event.getId().toString(), RaceBoardLinkFactory.createRaceBoardLink(trackedRace, leaderboard, event, leaderboardGroup, "PLAYER",
                                                             /* locale */ null));
                                                 }
