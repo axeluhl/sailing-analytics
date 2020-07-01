@@ -427,11 +427,11 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
             }
             // replace null values of Regatta specific competitor handicap values with the respective competitor's default values
             for(LeaderboardRowDTO row : rows.values()) {
-                if(row.timeOnDistanceAllowancePerNauticalMile == null) {
-                    row.timeOnDistanceAllowancePerNauticalMile = row.competitor.getTimeOnDistanceAllowancePerNauticalMile();
+                if(row.effectiveTimeOnDistanceAllowancePerNauticalMile == null) {
+                    row.effectiveTimeOnDistanceAllowancePerNauticalMile = row.competitor.getTimeOnDistanceAllowancePerNauticalMile();
                 }
-                if(row.timeOnTimeFactor == null) {
-                    row.timeOnTimeFactor = row.competitor.getTimeOnTimeFactor();
+                if(row.effectiveTimeOnTimeFactor == null) {
+                    row.effectiveTimeOnTimeFactor = row.competitor.getTimeOnTimeFactor();
                 }
             }
             final Set<String> rowsUnchangedForCompetitorsWithIdAsString = new HashSet<>();
@@ -620,12 +620,12 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
                 cloner.clone(competitorAndRow.getValue(), newRowDTO);
                 // if the Regatta specific competitor handicap values are equal to the competitor's default values they
                 // do not need to be transfered reduntantly
-                if (newRowDTO.timeOnDistanceAllowancePerNauticalMile
+                if (newRowDTO.effectiveTimeOnDistanceAllowancePerNauticalMile
                         .equals(competitorDTO.getTimeOnDistanceAllowancePerNauticalMile())) {
-                    newRowDTO.timeOnDistanceAllowancePerNauticalMile = null;
+                    newRowDTO.effectiveTimeOnDistanceAllowancePerNauticalMile = null;
                 }
-                if (newRowDTO.timeOnTimeFactor.equals(competitorDTO.getTimeOnTimeFactor())) {
-                    newRowDTO.timeOnTimeFactor = null;
+                if (newRowDTO.effectiveTimeOnTimeFactor.equals(competitorDTO.getTimeOnTimeFactor())) {
+                    newRowDTO.effectiveTimeOnTimeFactor = null;
                 }
                 CompetitorDTO compactCompetitor = compactCompetitorMap.get(competitorDTO);
                 newRowDTO.competitor = compactCompetitor;

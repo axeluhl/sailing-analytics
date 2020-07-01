@@ -569,8 +569,8 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                 LeaderboardThatHasRegattaLike regattaLikeLeaderboard = (LeaderboardThatHasRegattaLike) this;
                 final Duration regattaLevelTimeOnDistanceAllowancePerNauticalMile = regattaLikeLeaderboard.getRegattaLike().getTimeOnDistanceAllowancePerNauticalMile(competitor, Optional.empty());
                 final Double regattaLevelTimeOnTimeFactor = regattaLikeLeaderboard.getRegattaLike().getTimeOnTimeFactor(competitor, Optional.empty());
-                row.timeOnDistanceAllowancePerNauticalMile = regattaLevelTimeOnDistanceAllowancePerNauticalMile;
-                row.timeOnTimeFactor = regattaLevelTimeOnTimeFactor;
+                row.effectiveTimeOnDistanceAllowancePerNauticalMile = regattaLevelTimeOnDistanceAllowancePerNauticalMile;
+                row.effectiveTimeOnTimeFactor = regattaLevelTimeOnTimeFactor;
             }
         }
         final Duration computeTime = startOfRequestHandling.until(MillisecondsTimePoint.now());

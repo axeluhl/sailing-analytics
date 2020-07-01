@@ -30,8 +30,8 @@ public class LeaderboardRowDTO implements Serializable {
     public Double totalDurationFoiledInSeconds;
     public Double totalDistanceFoiledInMeters;
     public Integer totalScoredRaces;
-    public Double timeOnTimeFactor;
-    public Duration timeOnDistanceAllowancePerNauticalMile;
+    public Double effectiveTimeOnTimeFactor;
+    public Duration effectiveTimeOnDistanceAllowancePerNauticalMile;
     
     @Override
     public int hashCode() {
@@ -44,9 +44,9 @@ public class LeaderboardRowDTO implements Serializable {
         result = prime * result
                 + ((maximumSpeedOverGroundInKnots == null) ? 0 : maximumSpeedOverGroundInKnots.hashCode());
         result = prime * result + ((netPoints == null) ? 0 : netPoints.hashCode());
-        result = prime * result + ((timeOnDistanceAllowancePerNauticalMile == null) ? 0
-                : timeOnDistanceAllowancePerNauticalMile.hashCode());
-        result = prime * result + ((timeOnTimeFactor == null) ? 0 : timeOnTimeFactor.hashCode());
+        result = prime * result + ((effectiveTimeOnDistanceAllowancePerNauticalMile == null) ? 0
+                : effectiveTimeOnDistanceAllowancePerNauticalMile.hashCode());
+        result = prime * result + ((effectiveTimeOnTimeFactor == null) ? 0 : effectiveTimeOnTimeFactor.hashCode());
         result = prime * result + ((totalDistanceFoiledInMeters == null) ? 0 : totalDistanceFoiledInMeters.hashCode());
         result = prime * result
                 + ((totalDistanceTraveledInMeters == null) ? 0 : totalDistanceTraveledInMeters.hashCode());
@@ -104,15 +104,15 @@ public class LeaderboardRowDTO implements Serializable {
                 return false;
         } else if (!netPoints.equals(other.netPoints))
             return false;
-        if (timeOnDistanceAllowancePerNauticalMile == null) {
-            if (other.timeOnDistanceAllowancePerNauticalMile != null)
+        if (effectiveTimeOnDistanceAllowancePerNauticalMile == null) {
+            if (other.effectiveTimeOnDistanceAllowancePerNauticalMile != null)
                 return false;
-        } else if (!timeOnDistanceAllowancePerNauticalMile.equals(other.timeOnDistanceAllowancePerNauticalMile))
+        } else if (!effectiveTimeOnDistanceAllowancePerNauticalMile.equals(other.effectiveTimeOnDistanceAllowancePerNauticalMile))
             return false;
-        if (timeOnTimeFactor == null) {
-            if (other.timeOnTimeFactor != null)
+        if (effectiveTimeOnTimeFactor == null) {
+            if (other.effectiveTimeOnTimeFactor != null)
                 return false;
-        } else if (!timeOnTimeFactor.equals(other.timeOnTimeFactor))
+        } else if (!effectiveTimeOnTimeFactor.equals(other.effectiveTimeOnTimeFactor))
             return false;
         if (totalDistanceFoiledInMeters == null) {
             if (other.totalDistanceFoiledInMeters != null)
