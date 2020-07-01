@@ -425,15 +425,6 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
                 row.competitor = expandedCompetitor;
                 rows.put(expandedCompetitor, row);
             }
-            // replace null values of Regatta specific competitor handicap values with the respective competitor's default values
-            for(LeaderboardRowDTO row : rows.values()) {
-                if(row.effectiveTimeOnDistanceAllowancePerNauticalMile == null) {
-                    row.effectiveTimeOnDistanceAllowancePerNauticalMile = row.competitor.getTimeOnDistanceAllowancePerNauticalMile();
-                }
-                if(row.effectiveTimeOnTimeFactor == null) {
-                    row.effectiveTimeOnTimeFactor = row.competitor.getTimeOnTimeFactor();
-                }
-            }
             final Set<String> rowsUnchangedForCompetitorsWithIdAsString = new HashSet<>();
             if (rowsUnchanged != null) {
                 for (Entry<String, Set<Void>> rowUnchanged : rowsUnchanged.getAllUnchangedCompetitorIdsAsStringAndKeys(previousVersion).entrySet()) {
@@ -493,6 +484,19 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
                                 }
                             }
                         }
+                    }
+                }
+            }
+            // replace null values of Regatta specific competitor handicap values with the respective competitor's
+            // default values
+            for (LeaderboardRowDTO row : rows.values()) {
+                if(row != null) {
+                    if (row.effectiveTimeOnDistanceAllowancePerNauticalMile == null) {
+                        row.effectiveTimeOnDistanceAllowancePerNauticalMile = row.competitor
+                                .getTimeOnDistanceAllowancePerNauticalMile();
+                    }
+                    if (row.effectiveTimeOnTimeFactor == null) {
+                        row.effectiveTimeOnTimeFactor = row.competitor.getTimeOnTimeFactor();
                     }
                 }
             }
@@ -620,11 +624,11 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
                 cloner.clone(competitorAndRow.getValue(), newRowDTO);
                 // if the Regatta specific competitor handicap values are equal to the competitor's default values they
                 // do not need to be transfered reduntantly
-                if (newRowDTO.effectiveTimeOnDistanceAllowancePerNauticalMile
+                if (newRowDTO.effectiveTimeOnDistanceAllowancePerNauticalMile != null && newRowDTO.effectiveTimeOnDistanceAllowancePerNauticalMile
                         .equals(competitorDTO.getTimeOnDistanceAllowancePerNauticalMile())) {
                     newRowDTO.effectiveTimeOnDistanceAllowancePerNauticalMile = null;
                 }
-                if (newRowDTO.effectiveTimeOnTimeFactor.equals(competitorDTO.getTimeOnTimeFactor())) {
+                if (newRowDTO.effectiveTimeOnTimeFactor != null && newRowDTO.effectiveTimeOnTimeFactor.equals(competitorDTO.getTimeOnTimeFactor())) {
                     newRowDTO.effectiveTimeOnTimeFactor = null;
                 }
                 CompetitorDTO compactCompetitor = compactCompetitorMap.get(competitorDTO);
