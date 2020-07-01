@@ -165,8 +165,6 @@ public class FileStoragePanel extends FlowPanel {
     /**
      * Test the properties using {@link FileStorageService#testProperties()}, and display global errors and per-property
      * errors in the according label and table cells.
-     * 
-     * @param callback
      */
     private void testProperties(final Callback<Void, Void> callback) {
         sailingService.testFileStorageServiceProperties(getSelectedServiceName(), getLocaleInfo(),
