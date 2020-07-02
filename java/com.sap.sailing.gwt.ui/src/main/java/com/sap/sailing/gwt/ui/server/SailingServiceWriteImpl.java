@@ -242,7 +242,6 @@ import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
 import com.sap.sailing.expeditionconnector.ExpeditionSensorDeviceIdentifier;
-import com.sap.sailing.expeditionconnector.ExpeditionTrackerFactory;
 import com.sap.sailing.gwt.ui.adminconsole.RaceLogSetTrackingTimesDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceWrite;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
@@ -273,9 +272,11 @@ import com.sap.sailing.gwt.ui.shared.courseCreation.MarkRoleDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkTemplateDTO;
 import com.sap.sailing.server.hierarchy.SailingHierarchyOwnershipUpdater;
 import com.sap.sailing.server.interfaces.RacingEventService;
+import com.sap.sailing.server.operationaltransformation.AbstractLeaderboardGroupOperation;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
 import com.sap.sailing.server.operationaltransformation.AddCourseAreas;
+import com.sap.sailing.server.operationaltransformation.AddOrReplaceExpeditionDeviceConfiguration;
 import com.sap.sailing.server.operationaltransformation.AddSpecificRegatta;
 import com.sap.sailing.server.operationaltransformation.AllowBoatResetToDefaults;
 import com.sap.sailing.server.operationaltransformation.AllowCompetitorResetToDefaults;
@@ -292,6 +293,7 @@ import com.sap.sailing.server.operationaltransformation.RemoveAndUntrackRace;
 import com.sap.sailing.server.operationaltransformation.RemoveColumnFromSeries;
 import com.sap.sailing.server.operationaltransformation.RemoveCourseAreas;
 import com.sap.sailing.server.operationaltransformation.RemoveEvent;
+import com.sap.sailing.server.operationaltransformation.RemoveExpeditionDeviceConfiguration;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardColumn;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardGroup;
@@ -321,7 +323,6 @@ import com.sap.sailing.server.operationaltransformation.UpdateSeries;
 import com.sap.sailing.server.operationaltransformation.UpdateSpecificRegatta;
 import com.sap.sailing.server.util.WaitForTrackedRaceUtil;
 import com.sap.sailing.xrr.schema.RegattaResults;
-import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.Speed;
@@ -883,14 +884,14 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     }
 
     @Override
-    public void removeLeaderboardGroups(Set<String> groupNames) {
-        for (String groupName : groupNames) {
-            removeLeaderboardGroup(groupName);
+    public void removeLeaderboardGroups(Set<UUID> groupIds) {
+        for (final UUID groupId : groupIds) {
+            removeLeaderboardGroup(groupId);
         }
     }
 
-    private void removeLeaderboardGroup(String groupName) {
-        LeaderboardGroup group = getService().getLeaderboardGroupByName(groupName);
+    private void removeLeaderboardGroup(UUID groupId) {
+        LeaderboardGroup group = getService().getLeaderboardGroupByID(groupId);
         if (group != null) {
             if (group.getOverallLeaderboard() != null) {
                 removeLeaderboard(group.getOverallLeaderboard().getName());
@@ -899,7 +900,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(group, new Action() {
                 @Override
                 public void run() throws Exception {
-                    getService().apply(new RemoveLeaderboardGroup(groupName));
+                    getService().apply(new RemoveLeaderboardGroup(groupId));
                 }
             });
         }
@@ -1183,7 +1184,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                 new Callable<LeaderboardGroupDTO>() {
                     @Override
                     public LeaderboardGroupDTO call() throws Exception {
-                        CreateLeaderboardGroup createLeaderboardGroupOp = new CreateLeaderboardGroup(
+                        AbstractLeaderboardGroupOperation<LeaderboardGroup> createLeaderboardGroupOp = new CreateLeaderboardGroup(
                                 newLeaderboardGroupId, groupName, description, displayName, displayGroupsInReverseOrder,
                                 leaderBoards, overallLeaderboardDiscardThresholds, overallLeaderboardScoringSchemeType);
                         return convertToLeaderboardGroupDTO(getService().apply(createLeaderboardGroupOp), false, false);
@@ -1199,7 +1200,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                 .checkPermission(SecuredDomainType.LEADERBOARD_GROUP.getStringPermissionForTypeRelativeIdentifier(
                         DefaultActions.UPDATE,
                         LeaderboardGroupImpl.getTypeRelativeObjectIdentifier(leaderboardGroupId)));
-        getService().apply(new UpdateLeaderboardGroup(oldName, newName, newDescription, newDisplayName,
+        getService().apply(new UpdateLeaderboardGroup(leaderboardGroupId, newName, newDescription, newDisplayName,
                 leaderboardNames, overallLeaderboardDiscardThresholds, overallLeaderboardScoringSchemeType));
     }
 
@@ -1507,7 +1508,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     }
 
     @Override
-    public UUID importMasterData(final String urlAsString, final String[] groupNames, final boolean override,
+    public UUID importMasterData(final String urlAsString, final String[] leaderboardGroupIds, final boolean override,
             final boolean compress, final boolean exportWind, final boolean exportDeviceConfigurations,
             String targetServerUsername, String targetServerPassword,
             final boolean exportTrackedRacesAndStartTracking) {
@@ -1518,7 +1519,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         Runnable masterDataImportTask = new Runnable() {
             @Override
             public void run() {
-                getService().importMasterData(urlAsString, groupNames, override, compress, exportWind,
+                getService().importMasterData(urlAsString, leaderboardGroupIds, override, compress, exportWind,
                         exportDeviceConfigurations, targetServerUsername, targetServerPassword, /* targetServerBeararToken */ null,
                         exportTrackedRacesAndStartTracking, importOperationId);
             }
@@ -2667,29 +2668,20 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     @Override
     public void addOrReplaceExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration deviceConfiguration) {
         getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION,
-                new TypeRelativeObjectIdentifier(ServerInfo.getName(), deviceConfiguration.getName()),
-                /* display name */ ServerInfo.getName() + "/" + deviceConfiguration.getName(), () -> {
-                    // TODO consider replication
-                    final ExpeditionTrackerFactory expeditionConnector = expeditionConnectorTracker.getService();
-                    if (expeditionConnector != null) {
-                        expeditionConnector.addOrReplaceDeviceConfiguration(deviceConfiguration);
-                    }
+                SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION, deviceConfiguration.getTypeRelativeObjectIdentifier(),
+                /* display name */ deviceConfiguration.getName(), () -> {
+                    getService()
+                            .apply(new AddOrReplaceExpeditionDeviceConfiguration(deviceConfiguration.getDeviceUuid(),
+                                    deviceConfiguration.getName(), deviceConfiguration.getExpeditionBoatId()));
                 });
     }
 
     @Override
     public void removeExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration deviceConfiguration) {
-        QualifiedObjectIdentifier identifier = deviceConfiguration.getType().getQualifiedObjectIdentifier(
-                deviceConfiguration.getTypeRelativeObjectIdentifier(ServerInfo.getName()));
-        getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(identifier, new Callable<Void>() {
+        getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(deviceConfiguration.getIdentifier(), new Callable<Void>() {
             @Override
             public Void call() throws Exception {
-                // TODO consider replication
-                final ExpeditionTrackerFactory expeditionConnector = expeditionConnectorTracker.getService();
-                if (expeditionConnector != null) {
-                    expeditionConnector.removeDeviceConfiguration(deviceConfiguration);
-                }
+                getService().apply(new RemoveExpeditionDeviceConfiguration(deviceConfiguration.getDeviceUuid()));
                 return null;
             }
         });

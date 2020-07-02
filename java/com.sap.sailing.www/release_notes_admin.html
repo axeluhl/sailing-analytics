@@ -23,9 +23,13 @@
             <div class="mainContent">
                 <h2 class="releaseHeadline">Release Notes - Administration Console</h2>
                 <div class="innerContent">
-                    <h2 class="articleSubheadline">June 2020</h2>
-                    <ul>
+                    <h2 class="articleSubheadline">July 2020</h2>
+                    <ul class="bulletList">
+                        <li>Fixed a problem with cross-track error calculations in case no track can be found for a competitor</li>
+                        <li>In the Competitor tables in AdminConsole, added the missing ToT handicap value column and made both,
+                            the ToT and ToD column, sortable.</li>
                     </ul>
+                    <h2 class="articleSubheadline">June 2020</h2>
                     <ul class="bulletList">
                         <li>The REST endpoints <tt>/sailingserver/api/v1/competitors/{competitorId}</tt>,<br>
                             <tt>/sailingsserver/api/v1/leaderboards/{leaderboardName}/competitors/{competitorId}</tt>,<br>
@@ -59,6 +63,13 @@
                             <tr><td>PUT</td><td><tt>/sailingserver/api/v1/preferences/{settings_key}</tt></td><td><tt>/security/api/restsecurity//preferences/{settings_key}</tt></td><td><a target="_new" href="/security/webservices/api/preferencesPut.html"><tt style="white-space: nowrap;">see docs<tt></a></td></tr>
                             <tr><td>DELETE</td><td><tt>/sailingserver/api/v1/preferences/{settings_key}</tt></td><td><tt>/security/api/restsecurity/preferences/{settings_key}</tt></td><td><a target="_new" href="/security/webservices/api/preferencesDelete.html"><tt style="white-space: nowrap;">see docs<tt></a></td></tr>
                         </table>
+                        </li>
+                        <li>Fixed a regression with the <tt>/security/api/restsecurity/ownership</tt> and the
+                            <tt>{regattaname}/races/{racename}/competitors/positions</tt> resource which produced empty
+                            output documents.
+                        </li>
+                        <li>Fixed a concurrency/synchronization issue with the WindFinder connector</li>
+                        <li>Fixed production of the "raceViewerUrl" attribute in the leaderboardgroups REST endpoint.</li>
                     </ul>
                     <h2 class="articleSubheadline">May 2020</h2>
                     <ul class="bulletList">

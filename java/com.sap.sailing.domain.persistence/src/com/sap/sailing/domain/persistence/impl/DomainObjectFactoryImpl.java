@@ -2149,7 +2149,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
     }
 
-    private RegattaLogEvent loadRegattaLogEvent(Document o, RegattaLikeIdentifier regattaLogIdentifier)
+    public RegattaLogEvent loadRegattaLogEvent(Document o, RegattaLikeIdentifier regattaLogIdentifier)
             throws JsonDeserializationException, ParseException {
         Document dbObject = (Document) o.get(FieldNames.REGATTA_LOG_EVENT.name());
         TimePoint logicalTimePoint = loadTimePoint(dbObject);
@@ -2158,7 +2158,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final AbstractLogEventAuthor author;
         String authorName = (String) dbObject.get(FieldNames.REGATTA_LOG_EVENT_AUTHOR_NAME.name());
         Number authorPriority = (Number) dbObject.get(FieldNames.REGATTA_LOG_EVENT_AUTHOR_PRIORITY.name());
-        author = new LogEventAuthorImpl(authorName, authorPriority.intValue());
+        if (authorName != null && authorPriority != null) {
+            author = new LogEventAuthorImpl(authorName, authorPriority.intValue());
+        } else {
+            author = LogEventAuthorImpl.createCompatibilityAuthor();
+        }
         // CloseOpenEnded, DeviceCompMapping, DeviceMarkMapping, RegisterComp, Revoke
         String eventClass = (String) dbObject.get(FieldNames.REGATTA_LOG_EVENT_CLASS.name());
         if (eventClass.equals(RegattaLogDeviceCompetitorMappingEvent.class.getSimpleName())) {
@@ -2221,7 +2225,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return boat;
     }
 
-    private RegattaLogEvent loadRegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEvent(TimePoint createdAt,
+    private RegattaLogEvent loadRegattaLogSetCompetitorTimeOnTimeFactorEvent(TimePoint createdAt,
             AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, Document dbObject) {
         final Competitor comp = getCompetitorByID(dbObject);
         final Number timeOnTimeFactorAsNumber = (Number) dbObject.get(FieldNames.REGATTA_LOG_TIME_ON_TIME_FACTOR.name());
@@ -2230,7 +2234,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 timeOnTimeFactor);
     }
 
-    private RegattaLogEvent loadRegattaLogSetCompetitorTimeOnTimeFactorEvent(TimePoint createdAt,
+    private RegattaLogEvent loadRegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEvent(TimePoint createdAt,
             AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, Document dbObject) {
         final Competitor comp = getCompetitorByID(dbObject);
         final Number timeOnDistanceSecondsAllowancePerNauticalMileAsNumber = (Number) dbObject
