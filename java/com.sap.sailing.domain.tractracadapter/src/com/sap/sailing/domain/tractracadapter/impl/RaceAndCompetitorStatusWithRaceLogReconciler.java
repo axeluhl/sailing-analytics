@@ -219,7 +219,6 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
                     flagForRaceStatus.get(raceStatus), /* lower flag */ null, /* is displayed */ true));
             startNewPass(raceStatusUpdateTime, defaultRaceLog);
         }
-        // TODO bug5154 check IRace.getStatus() and copy all competitor ranks to the leaderboard once the race status reached RaceStatusType.OFFICIAL
     }
 
     protected void startNewPass(final MillisecondsTimePoint timePointForStartOfNewPass, final RaceLog raceLog) {
@@ -368,7 +367,7 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
         }
     }
 
-    private Pair<CompetitorResult, TimePoint> getRaceLogResultAndCreationTimePointForCompetitor(TrackedRace trackedRace,
+    protected Pair<CompetitorResult, TimePoint> getRaceLogResultAndCreationTimePointForCompetitor(TrackedRace trackedRace,
             final Competitor competitor) {
         Pair<CompetitorResult, TimePoint> resultFromRaceLogAndItsCreationTimePoint = null;
         for (final RaceLog raceLog : trackedRace.getAttachedRaceLogs()) {

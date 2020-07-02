@@ -9,12 +9,14 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
+import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
@@ -23,13 +25,26 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFlagEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogPassChangeEventImpl;
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.impl.BoatClassImpl;
+import com.sap.sailing.domain.base.impl.BoatImpl;
+import com.sap.sailing.domain.base.impl.DynamicBoat;
+import com.sap.sailing.domain.base.impl.NationalityImpl;
+import com.sap.sailing.domain.base.impl.PersonImpl;
+import com.sap.sailing.domain.base.impl.TeamImpl;
+import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.impl.RaceAndCompetitorStatusWithRaceLogReconciler;
+import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.tractrac.model.lib.api.event.ICompetitor;
 import com.tractrac.model.lib.api.event.IRace;
+import com.tractrac.model.lib.api.event.IRaceCompetitor;
+import com.tractrac.model.lib.api.event.RaceCompetitorStatusType;
 import com.tractrac.model.lib.api.event.RaceStatusType;
 
 /**
@@ -43,18 +58,50 @@ public class TestTracTracRaceAndCompetitorStatusReconciler {
     private TrackedRace trackedRace;
     private IRace tractracRace;
     private RaceLog raceLog;
-    private RaceAndCompetitorStatusWithRaceLogReconciler reconciler;
+    private RaceAndCompetitorStatusWithRaceLogReconcilerWithPublicResultFetcher reconciler;
     private TimePoint startOfPass;
+    private IRaceCompetitor tractracRaceCompetitor;
+    private ICompetitor tractracCompetitor;
+    private Competitor competitor;
+    
+    private static class RaceAndCompetitorStatusWithRaceLogReconcilerWithPublicResultFetcher extends RaceAndCompetitorStatusWithRaceLogReconciler {
+        public RaceAndCompetitorStatusWithRaceLogReconcilerWithPublicResultFetcher(DomainFactory domainFactory,
+                RaceLogResolver raceLogResolver, IRace tractracRace) {
+            super(domainFactory, raceLogResolver, tractracRace);
+        }
+
+        @Override
+        public Pair<CompetitorResult, TimePoint> getRaceLogResultAndCreationTimePointForCompetitor(
+                TrackedRace trackedRace, Competitor competitor) {
+            return super.getRaceLogResultAndCreationTimePointForCompetitor(trackedRace, competitor);
+        }
+    }
     
     @Before
     public void setUp() {
         author = new LogEventAuthorImpl("me", 1);
         startOfPass = MillisecondsTimePoint.now();
         tractracRace = mock(IRace.class);
+        when(tractracRace.getStatus()).thenReturn(RaceStatusType.RACING);
         trackedRace = mock(TrackedRace.class);
+        tractracCompetitor = mock(ICompetitor.class);
+        tractracRaceCompetitor = mock(IRaceCompetitor.class);
+        when(tractracRaceCompetitor.getRace()).thenReturn(tractracRace);
+        when(tractracRaceCompetitor.getCompetitor()).thenReturn(tractracCompetitor);
+        final String competitorName = "The Competitor";
+        final UUID competitorId = UUID.randomUUID();
+        DynamicBoat b = new BoatImpl(competitorId, competitorName + "'s boat", new BoatClassImpl("505", /* typicallyStartsUpwind */true), null, null);
+        competitor = DomainFactory.INSTANCE.getBaseDomainFactory().getOrCreateCompetitorWithBoat(
+                competitorId, competitorName, "TC", Color.RED, null, null, new TeamImpl("STG", Collections.singleton(
+                        new PersonImpl(competitorName, new NationalityImpl("GER"),
+                        /* dateOfBirth */null, "This is famous " + competitorName)), new PersonImpl("Rigo van Maas",
+                        new NationalityImpl("NED"),
+                        /* dateOfBirth */null, "This is Rigo, the coach")), 
+                        /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null, b, /* store */ false);
+        when(tractracCompetitor.getId()).thenReturn((UUID) competitor.getId());
         raceLog = new RaceLogImpl("RaceLogID");
         when(trackedRace.getAttachedRaceLogs()).thenReturn(Collections.singleton(raceLog));
-        reconciler = new RaceAndCompetitorStatusWithRaceLogReconciler(DomainFactory.INSTANCE, new RaceLogResolver() {
+        reconciler = new RaceAndCompetitorStatusWithRaceLogReconcilerWithPublicResultFetcher(DomainFactory.INSTANCE, new RaceLogResolver() {
             @Override
             public RaceLog resolve(SimpleRaceLogIdentifier identifier) {
                 return raceLog;
@@ -129,5 +176,18 @@ public class TestTracTracRaceAndCompetitorStatusReconciler {
         reconciler.reconcileRaceStatus(tractracRace, trackedRace); // assert that reconciliation is idempotent
         assertEquals(2, raceLog.getCurrentPassId());
         assertSame(abortFlagEvent, abortingFlagFinder.analyze());
+    }
+
+    @Test
+    public void testIRMUpdateFromTracTracMapsToRaceLogCompetitorResult() {
+        // emulate we received a BFD for a competitor a second after the start of the pass
+        final long resultTimePoint = startOfPass.plus(Duration.ONE_SECOND).asMillis();
+        when(tractracRaceCompetitor.getStatusTime()).thenReturn(resultTimePoint);
+        when(tractracRaceCompetitor.getStatus()).thenReturn(RaceCompetitorStatusType.BFD);
+        reconciler.reconcileCompetitorStatus(tractracRaceCompetitor, trackedRace);
+        final Pair<CompetitorResult, TimePoint> raceLogBasedResult = reconciler.getRaceLogResultAndCreationTimePointForCompetitor(trackedRace, competitor);
+        assertNotNull(raceLogBasedResult);
+        assertEquals(resultTimePoint, raceLogBasedResult.getB());
+        assertEquals(MaxPointsReason.BFD, raceLogBasedResult.getA().getMaxPointsReason());
     }
 }
