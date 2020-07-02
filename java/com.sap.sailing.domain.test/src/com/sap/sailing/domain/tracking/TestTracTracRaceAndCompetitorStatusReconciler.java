@@ -185,9 +185,81 @@ public class TestTracTracRaceAndCompetitorStatusReconciler {
         when(tractracRaceCompetitor.getStatusTime()).thenReturn(resultTimePoint);
         when(tractracRaceCompetitor.getStatus()).thenReturn(RaceCompetitorStatusType.BFD);
         reconciler.reconcileCompetitorStatus(tractracRaceCompetitor, trackedRace);
-        final Pair<CompetitorResult, TimePoint> raceLogBasedResult = reconciler.getRaceLogResultAndCreationTimePointForCompetitor(trackedRace, competitor);
-        assertNotNull(raceLogBasedResult);
-        assertEquals(resultTimePoint, raceLogBasedResult.getB());
-        assertEquals(MaxPointsReason.BFD, raceLogBasedResult.getA().getMaxPointsReason());
+        {
+            final Pair<CompetitorResult, TimePoint> raceLogBasedResult = reconciler.getRaceLogResultAndCreationTimePointForCompetitor(trackedRace, competitor);
+            assertNotNull(raceLogBasedResult);
+            assertEquals(resultTimePoint, raceLogBasedResult.getB());
+            assertEquals(MaxPointsReason.BFD, raceLogBasedResult.getA().getMaxPointsReason());
+        }
+        // now simulate an "outdated" TracTrac event and assert that it has no impact on a newer result:
+        final long outdatedResultTimePoint = startOfPass.plus(Duration.ONE_SECOND.divide(2)).asMillis();
+        when(tractracRaceCompetitor.getStatusTime()).thenReturn(outdatedResultTimePoint);
+        when(tractracRaceCompetitor.getStatus()).thenReturn(RaceCompetitorStatusType.DNF);
+        {
+            final Pair<CompetitorResult, TimePoint> raceLogBasedResult = reconciler.getRaceLogResultAndCreationTimePointForCompetitor(trackedRace, competitor);
+            assertNotNull(raceLogBasedResult);
+            assertEquals(resultTimePoint, raceLogBasedResult.getB()); // still expecting to see the result from the later time point
+            assertEquals(MaxPointsReason.BFD, raceLogBasedResult.getA().getMaxPointsReason());
+        }
+        // now simulate a newer TracTrac event and assert that it updates the result:
+        final long newerResultTimePoint = startOfPass.plus(Duration.ONE_SECOND.times(2)).asMillis();
+        when(tractracRaceCompetitor.getStatusTime()).thenReturn(newerResultTimePoint);
+        when(tractracRaceCompetitor.getStatus()).thenReturn(RaceCompetitorStatusType.DNC);
+        {
+            final Pair<CompetitorResult, TimePoint> raceLogBasedResult = reconciler.getRaceLogResultAndCreationTimePointForCompetitor(trackedRace, competitor);
+            assertNotNull(raceLogBasedResult);
+            assertEquals(newerResultTimePoint, raceLogBasedResult.getB()); // still expecting to see the result from the later time point
+            assertEquals(MaxPointsReason.DNC, raceLogBasedResult.getA().getMaxPointsReason());
+        }
     }
+
+    @Test
+    public void testOfficialRankUpdateToRaceLogCompetitorResult() {
+        // emulate we received a valid official rank for a competitor a second after the start of the pass
+        final long resultTimePoint = startOfPass.plus(Duration.ONE_SECOND).asMillis();
+        when(tractracRaceCompetitor.getStatusTime()).thenReturn(resultTimePoint);
+        when(tractracRaceCompetitor.getOfficialRank()).thenReturn(42);
+        reconciler.reconcileCompetitorStatus(tractracRaceCompetitor, trackedRace);
+        {
+            final Pair<CompetitorResult, TimePoint> raceLogBasedResult = reconciler.getRaceLogResultAndCreationTimePointForCompetitor(trackedRace, competitor);
+            assertNotNull(raceLogBasedResult);
+            assertEquals(resultTimePoint, raceLogBasedResult.getB());
+            assertEquals(MaxPointsReason.NONE, raceLogBasedResult.getA().getMaxPointsReason());
+            assertEquals(42, raceLogBasedResult.getA().getOneBasedRank());
+        }
+        // now simulate an "outdated" TracTrac event and assert that it has no impact on a newer result:
+        final long outdatedResultTimePoint = startOfPass.plus(Duration.ONE_SECOND.divide(2)).asMillis();
+        when(tractracRaceCompetitor.getStatusTime()).thenReturn(outdatedResultTimePoint);
+        when(tractracRaceCompetitor.getOfficialRank()).thenReturn(43);
+        {
+            final Pair<CompetitorResult, TimePoint> raceLogBasedResult = reconciler.getRaceLogResultAndCreationTimePointForCompetitor(trackedRace, competitor);
+            assertNotNull(raceLogBasedResult);
+            assertEquals(resultTimePoint, raceLogBasedResult.getB());
+            assertEquals(MaxPointsReason.NONE, raceLogBasedResult.getA().getMaxPointsReason());
+            assertEquals(42, raceLogBasedResult.getA().getOneBasedRank());
+        }
+        // now simulate a newer TracTrac event and assert that it updates the result:
+        final long newerResultTimePoint = startOfPass.plus(Duration.ONE_SECOND.times(2)).asMillis();
+        when(tractracRaceCompetitor.getStatusTime()).thenReturn(newerResultTimePoint);
+        when(tractracRaceCompetitor.getOfficialRank()).thenReturn(44);
+        {
+            final Pair<CompetitorResult, TimePoint> raceLogBasedResult = reconciler.getRaceLogResultAndCreationTimePointForCompetitor(trackedRace, competitor);
+            assertNotNull(raceLogBasedResult);
+            assertEquals(newerResultTimePoint, raceLogBasedResult.getB());
+            assertEquals(MaxPointsReason.NONE, raceLogBasedResult.getA().getMaxPointsReason());
+            assertEquals(44, raceLogBasedResult.getA().getOneBasedRank());
+        }
+        // now simulate a yet newer TracTrac event that resets the official rank to 0, stating that there is no official rank yet
+        final long yetNewerResultTimePoint = startOfPass.plus(Duration.ONE_SECOND.times(2)).asMillis();
+        when(tractracRaceCompetitor.getStatusTime()).thenReturn(yetNewerResultTimePoint);
+        when(tractracRaceCompetitor.getOfficialRank()).thenReturn(0);
+        {
+            final Pair<CompetitorResult, TimePoint> raceLogBasedResult = reconciler.getRaceLogResultAndCreationTimePointForCompetitor(trackedRace, competitor);
+            assertNotNull(raceLogBasedResult);
+            assertEquals(yetNewerResultTimePoint, raceLogBasedResult.getB());
+            assertEquals(MaxPointsReason.NONE, raceLogBasedResult.getA().getMaxPointsReason());
+            assertEquals(0, raceLogBasedResult.getA().getOneBasedRank());
+        }
+    }
+
 }
