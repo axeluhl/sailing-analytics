@@ -290,7 +290,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                 return competitor.getTimeOnDistanceAllowancePerNauticalMile()==null?"":(""+competitor.getTimeOnDistanceAllowancePerNauticalMile());
             }
         };
-        timeOnTimeFactorColumn.setSortable(true);
+        timeOnDistanceAllowancePerNauticalMileColumn.setSortable(true);
         competitorColumnListHandler.setComparator(timeOnDistanceAllowancePerNauticalMileColumn, new Comparator<CompetitorDTO>() {
             @Override
                     public int compare(CompetitorDTO o1, CompetitorDTO o2) {
@@ -343,6 +343,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
         table.addColumn(competitorNameColumn, getStringMessages().name());
         table.addColumn(competitorShortNameColumn, stringMessages.shortName());
         table.addColumn(flagImageColumn, stringMessages.flags());
+        table.addColumn(timeOnTimeFactorColumn, getStringMessages().timeOnTimeFactor());
         table.addColumn(timeOnDistanceAllowancePerNauticalMileColumn, getStringMessages().timeOnDistanceAllowanceInSecondsPerNauticalMile());
         table.addColumn(displayColorColumn, getStringMessages().color());
         table.addColumn(imageColumn, getStringMessages().image());
