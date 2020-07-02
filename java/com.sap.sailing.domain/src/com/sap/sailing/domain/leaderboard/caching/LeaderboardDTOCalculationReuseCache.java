@@ -325,7 +325,9 @@ public class LeaderboardDTOCalculationReuseCache implements WindLegTypeAndLegBea
         Wind result = trackedLegAverageWindCache.get(leg);
         if (result == null) {
             result = averageWindForLegSupplier.apply(leg);
-            trackedLegAverageWindCache.put(leg, result);
+            if (result != null) {
+                trackedLegAverageWindCache.put(leg, result);
+            }
         }
         return result;
     }
