@@ -2212,8 +2212,8 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     private static class TimeOnDistanceAllowanceInSecondsPerNauticalMileColumn implements DataExtractor<Double, LeaderboardRowDTO> {
         @Override
         public Double get(LeaderboardRowDTO row) {
-            return row.competitor.getTimeOnDistanceAllowancePerNauticalMile() == null ? null
-                    : row.competitor.getTimeOnDistanceAllowancePerNauticalMile().asSeconds();
+            return row.effectiveTimeOnDistanceAllowancePerNauticalMile == null ? null
+                    : row.effectiveTimeOnDistanceAllowancePerNauticalMile.asSeconds();
         }
     }
 
@@ -2250,7 +2250,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                 new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.OVERALL_TOTAL_DISTANCE_FOILED_IN_METERS,
                         e -> e.totalDistanceFoiledInMeters, RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
         result.put(DetailType.OVERALL_TIME_ON_TIME_FACTOR, new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.OVERALL_TIME_ON_TIME_FACTOR,
-                e -> e.competitor.getTimeOnTimeFactor(), RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
+                e -> e.effectiveTimeOnTimeFactor, RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
         result.put(DetailType.OVERALL_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE,
                 new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.OVERALL_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE,
                         new TimeOnDistanceAllowanceInSecondsPerNauticalMileColumn(), RACE_COLUMN_HEADER_STYLE,

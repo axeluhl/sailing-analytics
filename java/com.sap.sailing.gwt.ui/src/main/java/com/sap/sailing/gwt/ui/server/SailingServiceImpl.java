@@ -4105,7 +4105,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     //READ
     protected ServerInfoDTO getServerInfo() {
-        ServerInfoDTO result = new ServerInfoDTO(ServerInfo.getName(), ServerInfo.getBuildVersion());
+        ServerInfoDTO result = new ServerInfoDTO(ServerInfo.getName(), ServerInfo.getBuildVersion(), ServerInfo.getManageEventsBaseUrl());
         SecurityDTOUtil.addSecurityInformation(getSecurityService(), result, result.getIdentifier());
         return result;
     }
@@ -4140,7 +4140,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 }
             }
         }
-        
         if (serverConfiguration.isPublic() != null) {
             final RoleDefinition viewerRole = getSecurityService()
                     .getRoleDefinition(SailingViewerRole.getInstance().getId());

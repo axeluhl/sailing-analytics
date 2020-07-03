@@ -453,11 +453,11 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 break;
             case OVERALL_TIME_ON_TIME_FACTOR:
                 name = "timeOnTimeFactor";
-                value = competitor.getTimeOnTimeFactor();
+                value = leaderboardRowDTO.effectiveTimeOnTimeFactor;
                 break;
             case OVERALL_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE:
                 name = "timeOnDistanceAllowanceInSecondsPerNauticalMile";
-                value = competitor.getTimeOnDistanceAllowancePerNauticalMile() == null ? null : competitor.getTimeOnDistanceAllowancePerNauticalMile().asSeconds();
+                value = leaderboardRowDTO.effectiveTimeOnDistanceAllowancePerNauticalMile == null ? null : leaderboardRowDTO.effectiveTimeOnDistanceAllowancePerNauticalMile.asSeconds();
                 break;
             default:
                 name = null;
