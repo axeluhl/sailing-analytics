@@ -430,7 +430,6 @@ public class RaceBoardPanel
                     true);
             windChart.setVisible(false);
             componentsForSideBySideViewer.add(windChart);
-            
         }
         maneuverTablePanel = new ManeuverTablePanel(this, getComponentContext(), sailingService, asyncActionsExecutor,
                 selectedRaceIdentifier, stringMessages, competitorSelectionProvider, errorReporter, timer,
@@ -439,10 +438,10 @@ public class RaceBoardPanel
         if (showChartMarkEditMediaButtonsAndVideo) {
             componentsForSideBySideViewer.add(maneuverTablePanel);
         }
-        editMarkPassingPanel = new EditMarkPassingsPanel(this, getComponentContext(), sailingServiceWrite,
+        editMarkPassingPanel = new EditMarkPassingsPanel(this, getComponentContext(), sailingService,
+                sailingServiceWrite,
                 selectedRaceIdentifier,
-                stringMessages,
-                competitorSelectionProvider, errorReporter, timer);
+                stringMessages, competitorSelectionProvider, errorReporter, timer);
         if (showChartMarkEditMediaButtonsAndVideo) {
             editMarkPassingPanel.setLeaderboard(leaderboardPanel.getLeaderboard());
             editMarkPassingPanel.getEntryWidget().setTitle(stringMessages.editMarkPassings());
@@ -459,7 +458,6 @@ public class RaceBoardPanel
         mediaPlayerManagerComponent = new MediaPlayerManagerComponent(this, getComponentContext(), mediaPlayerLifecycle,
                 sailingServiceWrite, selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, userService,
                 stringMessages, errorReporter, userAgent, this, mediaPlayerSettings, raceDTO);
-
         final LeaderboardWithSecurityFetcher asyncFetcher = new LeaderboardWithSecurityFetcher() {
             @Override
             public void getLeaderboardWithSecurity(Consumer<StrippedLeaderboardDTOWithSecurity> consumer) {
@@ -481,15 +479,12 @@ public class RaceBoardPanel
         mapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, taggingPanel, mediaPlayerManagerComponent,
                 componentsForSideBySideViewer, stringMessages, userService, editMarkPassingPanel, editMarkPositionPanel,
                 maneuverTablePanel, asyncFetcher);
-        
         mediaPlayerManagerComponent.addPlayerChangeListener(new PlayerChangeListener() {
-            
             @Override
             public void notifyStateChange() {
                 updateRaceTimePanelOverlay();
             }
         });
-        
         for (Component<? extends Settings> component : componentsForSideBySideViewer) {
             addChildComponent(component);
         }

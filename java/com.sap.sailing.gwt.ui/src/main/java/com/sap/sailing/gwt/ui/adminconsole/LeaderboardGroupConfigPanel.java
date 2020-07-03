@@ -494,9 +494,8 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
             @Override
             public Iterable<String> getSearchableStrings(LeaderboardGroupDTO t) {
                 List<String> strings = new ArrayList<String>();
-                List<String> string = new ArrayList<String>();
-                string.add(t.getName());
-                string.add(String.valueOf(t.getId()));
+                strings.add(t.getName());
+                strings.add(String.valueOf(t.getId()));
                 strings.add(t.getDisplayName());
                 strings.add(t.getDescription());
                 return strings;
@@ -511,11 +510,9 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
         leaderboardGroupsContentPanel.add(groupsFilterablePanel);
         groupsFilterablePanel.setUpdatePermissionFilterForCheckbox(
                 leaderboardGroup -> userService.hasPermission(leaderboardGroup, DefaultActions.UPDATE));
-        
         final Button createButton = buttonPanel.addCreateAction(stringMessages.createNewLeaderboardGroup(),
                 this::addNewGroup);
         createButton.ensureDebugId("CreateLeaderboardGroupButton");
-        
         final Button refreshButton = buttonPanel.addUnsecuredAction(stringMessages.refresh(), () -> {
                 leaderboardsRefresher.fillLeaderboards();
                 leaderboardGroupsRefresher.fillLeaderboardGroups();
@@ -531,8 +528,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
             @Override
             public SafeHtml getValue(LeaderboardGroupDTO group) {
                 String debugParam = Window.Location.getParameter("gwt.codesvr");
-                String link = URLEncoder.encode("/gwt/Spectator.html?leaderboardGroupName=" + group.getName()
-                        + "&showRaceDetails=true&" + RaceBoardPerspectiveOwnSettings.PARAM_CAN_REPLAY_DURING_LIVE_RACES
+                String link = URLEncoder.encode("/gwt/Spectator.html?leaderboardGroupId=" + group.getId()+"&showRaceDetails=true&"
                         + "=true" + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
                 return ANCHORTEMPLATE.cell(UriUtils.fromString(link), group.getName());
         }

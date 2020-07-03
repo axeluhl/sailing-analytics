@@ -294,6 +294,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String detailsOfLeaderboardGroup();
     String abort();
     String noLeaderboardGroupWithNameFound(String groupName);
+    String noLeaderboardGroupWithIdFound(String groupId);
     String overview();
     String welcomeToSailingAnalytics();
     String welcomeToSailingAnalyticsBody();

@@ -64,7 +64,7 @@ public class RemoveLeaderboardGroupTest {
         for (final String leaderboardName : allLeaderboards.keySet()) {
             server.apply(new RemoveLeaderboard(leaderboardName));
         }
-        Map<String, LeaderboardGroup> allLeaderboardGroups = new HashMap<>(server.getLeaderboardGroups());
+        Map<UUID, LeaderboardGroup> allLeaderboardGroups = new HashMap<>(server.getLeaderboardGroups());
         for (final LeaderboardGroup leaderboardGroup : allLeaderboardGroups.values()) {
             server.apply(new RemoveLeaderboardGroup(leaderboardGroup.getId()));
         }

@@ -45,7 +45,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
 import javax.management.InstanceAlreadyExistsException;
@@ -1487,13 +1486,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     /**
      * Checks all groups, if they contain a leaderboard with the <code>removedLeaderboardName</code> or reference it as their
      * overall leaderboard and removes it from the group or unlinks it as the overall leaderboard, respectively.
-     * 
-     * @param removedLeaderboardName
      */
     private void syncGroupsAfterLeaderboardRemove(String removedLeaderboardName, boolean doDatabaseUpdate) {
         boolean groupNeedsUpdate = false;
-        for (Set<LeaderboardGroup> leaderboardGroupsSet : leaderboardGroupsByName.values()) {
-            for (LeaderboardGroup leaderboardGroup : leaderboardGroupsSet) {
+        for (final Set<LeaderboardGroup> leaderboardGroupsSet : leaderboardGroupsByName.values()) {
+            for (final LeaderboardGroup leaderboardGroup : leaderboardGroupsSet) {
                 for (final Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
                     if (leaderboard.getName().equals(removedLeaderboardName)) {
                         leaderboardGroup.removeLeaderboard(leaderboard);
@@ -2990,13 +2987,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public Map<String, LeaderboardGroup> getLeaderboardGroups() {
-        return Collections.unmodifiableMap(leaderboardGroupsByName.entrySet().stream().collect(
-                Collectors.toMap(Map.Entry::getKey, stringSetEntry -> stringSetEntry.getValue().iterator().next())));
-    }
-
-    @Override
-    public Map<UUID, LeaderboardGroup> getLeaderboardGroupsIdentifiable() {
+    public Map<UUID, LeaderboardGroup> getLeaderboardGroups() {
         return Collections.unmodifiableMap(new HashMap<UUID, LeaderboardGroup>(leaderboardGroupsByID));
     }
 
@@ -3011,16 +3002,19 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public LeaderboardGroup getLeaderboardGroupByID(UUID leaderboardGroupID) {
+        final LeaderboardGroup result;
         if (leaderboardGroupID != null) {
-            return leaderboardGroupsByID.get(leaderboardGroupID);  
+            result = leaderboardGroupsByID.get(leaderboardGroupID);  
+        } else {
+            result = null;
         }
-        return null;
+        return result;
     }
 
     @Override
     public LeaderboardGroup resolveLeaderboardGroupByRegattaName(String regattaName) {
-        for (LeaderboardGroup leaderboardGroup: getLeaderboardGroups().values()) {
-            for (Leaderboard leaderboard: leaderboardGroup.getLeaderboards()) {
+        for (final LeaderboardGroup leaderboardGroup : getLeaderboardGroups().values()) {
+            for (final Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
                 if (leaderboard.getName().equals(regattaName)) {
                     return leaderboardGroup;
                 }
@@ -4113,7 +4107,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
         return result;
     }
-    
+
     @Override
     public void addOrReplaceExpeditionDeviceConfiguration(UUID deviceConfigurationId, String name, Integer expeditionBoatId) {
         ServiceTracker<ExpeditionTrackerFactory, ExpeditionTrackerFactory> tracker = new ServiceTracker<>(

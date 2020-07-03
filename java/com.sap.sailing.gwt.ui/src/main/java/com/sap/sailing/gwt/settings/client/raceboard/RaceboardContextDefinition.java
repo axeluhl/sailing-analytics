@@ -21,9 +21,15 @@ public class RaceboardContextDefinition extends AbstractGenericSerializableSetti
     public RaceboardContextDefinition() {
     }
 
+    /**
+     * If the {@code leaderboardGroupId} is provided as a non-{@code null} value, the {@code leaderboardGroupName}
+     * parameter is ignored and not stored. Otherwise, the {@code leaderboardGroupName} is remembered.
+     */
     public RaceboardContextDefinition(String regattaName, String raceName, String leaderboardName,
-            String leaderboardGroupName, UUID leaderboardGroupid, UUID eventId, String mode) {
-        this(regattaName, raceName, leaderboardName, leaderboardGroupName, leaderboardGroupid, eventId, mode, null);
+            String leaderboardGroupName, UUID leaderboardGroupId, UUID eventId, String mode) {
+        this(regattaName, raceName, leaderboardName,
+             // use the leaderboardGroupId if not null; only resort to leaderboardGroupName if ID is not provided
+             leaderboardGroupId == null ? leaderboardGroupName : null, leaderboardGroupId, eventId, mode, /* selected competitor ID */ null);
     }
 
     public RaceboardContextDefinition(String regattaName, String raceName, String leaderboardName,

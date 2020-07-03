@@ -51,6 +51,8 @@ import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorMappingEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogSetCompetitorTimeOnTimeFactorEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceMappingFinder;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
@@ -171,10 +173,12 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.RGBColor;
 import com.sap.sse.common.util.RoundingUtil;
 import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
+import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.util.impl.UUIDHelper;
 
 @Path("/v1/regattas")
 public class RegattasResource extends AbstractSailingServerResource {
@@ -2648,5 +2652,80 @@ public class RegattasResource extends AbstractSailingServerResource {
         } else {
             throw new IllegalStateException("Regatta named " + regattaName + " could not be resolved");
         }
+    }
+    
+    @POST
+    @Path("{regattaname}/competitors/{competitorid}/updateToTHandicap")
+    @Produces("application/json;charset=UTF-8")
+    public Response updateCompetitorToTHandicap(@PathParam("regattaname") String regattaName,
+            @PathParam("competitorid") String competitorId, @QueryParam("timeOnTimeFactor") Double timeOnTimeFactor)
+            throws IllegalStateException, ParseException {
+        final Regatta regatta = getService().getRegattaByName(regattaName);
+        if (regatta != null) {
+            final SecurityService securityService = getSecurityService();
+            securityService.checkCurrentUserUpdatePermission(regatta);
+            Serializable potentialUUID = UUIDHelper.tryUuidConversion(competitorId);
+            final Competitor competitor = getService().getCompetitorAndBoatStore()
+                    .getExistingCompetitorById(potentialUUID);
+            if (competitor != null) {
+                if (timeOnTimeFactor != null) {
+                    final User author = securityService.getCurrentUser();
+                    final LogEventAuthorImpl logEventAuthor = new LogEventAuthorImpl(author.getName(),
+                            /* priority */ 0);
+                    final TimePoint now = MillisecondsTimePoint.now();
+                    final RegattaLogEvent event = new RegattaLogSetCompetitorTimeOnTimeFactorEventImpl(now, now,
+                            logEventAuthor, UUID.randomUUID(), competitor, timeOnTimeFactor);
+                    final RegattaLog regattaLog = regatta.getRegattaLog();
+                    regattaLog.add(event);
+                } else {
+                    throw new IllegalStateException("Missing required parameter: timeOnTimeFactor");
+                }
+            } else {
+                return getBadCompetitorIdResponse(competitorId);
+            }
+        } else {
+            throw new IllegalStateException("RegattaName could not be resolved to regatta " + regattaName);
+        }
+        return Response.ok().header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+    }
+
+    @POST
+    @Path("{regattaname}/competitors/{competitorId}/updateToDHandicap")
+    @Produces("application/json;charset=UTF-8")
+    public Response updateCompetitorToDHandicap(@PathParam("regattaname") String regattaName,
+            @PathParam("competitorId") String competitorId,
+            @QueryParam("timeOnDistanceAllowancePerNauticalMile") Long timeOnDistanceAllowancePerNauticalMile)
+            throws IllegalStateException, ParseException {
+        final Regatta regatta = getService().getRegattaByName(regattaName);
+        final SecurityService securityService = getSecurityService();
+        securityService.checkCurrentUserUpdatePermission(regatta);
+        if (regatta != null) {
+            Serializable potentialUUID = UUIDHelper.tryUuidConversion(competitorId);
+            final Competitor competitor = getService().getCompetitorAndBoatStore()
+                    .getExistingCompetitorById(potentialUUID);
+            if (competitor != null) {
+                if (timeOnDistanceAllowancePerNauticalMile != null) {
+                    final Duration durationTimeOnDistanceAllowancePerNauticalMile = new MillisecondsDurationImpl(
+                            timeOnDistanceAllowancePerNauticalMile);
+                    final User author = securityService.getCurrentUser();
+                    final LogEventAuthorImpl logEventAuthor = new LogEventAuthorImpl(author.getName(),
+                            /* priority */ 0);
+                    final TimePoint now = MillisecondsTimePoint.now();
+                    final RegattaLogEvent event = new RegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEventImpl(
+                            now, now, logEventAuthor, UUID.randomUUID(), competitor,
+                            durationTimeOnDistanceAllowancePerNauticalMile);
+                    final RegattaLog regattaLog = regatta.getRegattaLog();
+                    regattaLog.add(event);
+                } else {
+                    throw new IllegalStateException(
+                            "Missing required parameter: timeOnDistanceAllowancePerNauticalMile");
+                }
+            } else {
+                return getBadCompetitorIdResponse(competitorId);
+            }
+        } else {
+            throw new IllegalStateException("RegattaName could not be resolved to regatta " + regattaName);
+        }
+        return Response.ok().header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
     }
 }

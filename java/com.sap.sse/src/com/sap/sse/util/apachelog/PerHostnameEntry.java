@@ -37,7 +37,9 @@ public class PerHostnameEntry {
         int tmpYear;
         int tmpZeroBasedMonth;
         try {
-            cal.setTime(dateFormat.parse(dateString));
+            synchronized (dateFormat) {
+                cal.setTime(dateFormat.parse(dateString));
+            }
             tmpYear = cal.get(Calendar.YEAR);
             tmpZeroBasedMonth = cal.get(Calendar.MONTH);
         } catch (ParseException e) {

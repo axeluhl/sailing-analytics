@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
@@ -120,7 +121,8 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
     private final Timer timerForClientServerOffset;
     
     public LeaderboardGroupPanel(SailingServiceAsync sailingService, StringMessages stringConstants,
-            ErrorReporter errorReporter, final String groupId, final String groupName, String viewMode, boolean embedded,
+            ErrorReporter errorReporter, final String groupId, final String groupName,
+            Consumer<String> headerCallback, String viewMode, boolean embedded,
             boolean showRaceDetails, boolean canReplayDuringLiveRaces, boolean showMapControls) {
         super();
         this.isEmbedded = embedded;
@@ -138,49 +140,59 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
         mainPanel.addStyleName("mainPanel");
         add(mainPanel);
         timerForClientServerOffset = new Timer(PlayModes.Replay);
-        loadLeaderboardGroup(groupId, groupName);
+        loadLeaderboardGroup(groupId, groupName, headerCallback);
     }
 
-    private void loadLeaderboardGroup(final String leaderboardGroupId, final String leaderboardGroupName) {
+    private void loadLeaderboardGroup(final String leaderboardGroupId, final String leaderboardGroupName,
+            final Consumer<String> callback) {
         final long clientTimeWhenRequestWasSent = System.currentTimeMillis();
-        sailingService.getLeaderboardGroupById(UUID.fromString(leaderboardGroupId),
-                new AsyncCallback<LeaderboardGroupDTO>() {
+        sailingService.getLeaderboardGroupByUuidOrName(leaderboardGroupId != null ? UUID.fromString(leaderboardGroupId) : null,
+                leaderboardGroupName, new AsyncCallback<LeaderboardGroupDTO>() {
             @Override
             public void onSuccess(final LeaderboardGroupDTO leaderboardGroupDTO) {
-                final long clientTimeWhenResponseWasReceived = System.currentTimeMillis();
                 if (leaderboardGroupDTO != null) {
                     LeaderboardGroupPanel.this.leaderboardGroup = leaderboardGroupDTO;
+                    callback.accept(leaderboardGroupDTO.getName());
+                    final long clientTimeWhenResponseWasReceived = System.currentTimeMillis();
                     if (leaderboardGroupDTO.getAverageDelayToLiveInMillis() != null) {
                         timerForClientServerOffset.setLivePlayDelayInMillis(leaderboardGroupDTO.getAverageDelayToLiveInMillis());
                     }
-                    timerForClientServerOffset.adjustClientServerOffset(clientTimeWhenRequestWasSent, leaderboardGroupDTO.getCurrentServerTime(), clientTimeWhenResponseWasReceived);
-                    // in case there is a regatta leaderboard in the leaderboard group 
+                    timerForClientServerOffset.adjustClientServerOffset(clientTimeWhenRequestWasSent,leaderboardGroup.getCurrentServerTime(), clientTimeWhenResponseWasReceived);
+                    // in case there is a regatta leaderboard in the leaderboard group
                     // we need to know the corresponding regatta structure
-                    if (leaderboardGroup.containsRegattaLeaderboard()) {
+                    if (leaderboardGroupDTO.containsRegattaLeaderboard()) {
                         sailingService.getRegattas(new AsyncCallback<List<RegattaDTO>>() {
                             @Override
                             public void onSuccess(List<RegattaDTO> regattaDTOs) {
-                                for(RegattaDTO regattaDTO: regattaDTOs) {
+                                for (RegattaDTO regattaDTO : regattaDTOs) {
                                     regattasByName.put(regattaDTO.getName(), regattaDTO);
                                 }
                                 createPageContent();
                             }
-                            
+
                             @Override
                             public void onFailure(Throwable t) {
-                                errorReporter.reportError(stringMessages.errorLoadingRegattasForLeaderboardGroup(leaderboardGroupName,t.getMessage()));
+                                errorReporter.reportError(stringMessages.errorLoadingRegattasForLeaderboardGroup(
+                                        leaderboardGroupId != null ? leaderboardGroupId : leaderboardGroupName, t.getMessage()));
                             }
                         });
                     } else {
                         createPageContent();
                     }
                 } else {
-                    errorReporter.reportError(stringMessages.noLeaderboardGroupWithNameFound(leaderboardGroupName));
+                    if (leaderboardGroupId != null) {
+                        errorReporter.reportError(stringMessages.noLeaderboardGroupWithIdFound(leaderboardGroupId));
+                    } else {
+                        errorReporter.reportError(stringMessages.noLeaderboardGroupWithNameFound(leaderboardGroupName));
+                    }
                 }
             }
+
             @Override
             public void onFailure(Throwable t) {
-                errorReporter.reportError(stringMessages.errorLoadingLeaderBoardGroup(leaderboardGroupName,t.getMessage()));
+                errorReporter.reportError(stringMessages.errorLoadingLeaderBoardGroup(
+                        leaderboardGroupId != null ? leaderboardGroupId : leaderboardGroupName,
+                        t.getMessage()));
             }
         });
     }
@@ -195,25 +207,19 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
             leaderboardGroupDescriptionLabel.setStyleName(STYLE_NAME_PREFIX + "GroupDescription");
             mainPanel.add(leaderboardGroupDescriptionLabel);
         }
-        
         FlexTable flexTable = new FlexTable();
- 
         Label leaderboardsLabel = new Label(stringMessages.leaderboards());
         leaderboardsLabel.addStyleName(STYLE_NAME_PREFIX + "LeaderboardsLabel");
-        
         if (leaderboardGroup.hasOverallLeaderboard() && !isEmbedded) {
             mainPanel.add(leaderboardsLabel);
         } else {
             flexTable.setWidget(0, 0, leaderboardsLabel);
         }
-
         mainPanel.add(flexTable);
         flexTable.getCellFormatter().setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_MIDDLE);
-        
         // legend
         HorizontalPanel legendPanel = createLegendPanel();
         flexTable.setWidget(0, 1, legendPanel);
-        
         if (leaderboardGroup.hasOverallLeaderboard()) {
             final String link = EntryPointWithSettingsLinkFactory.createLeaderboardLink(
                     new LeaderboardContextDefinition(
@@ -225,7 +231,6 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
             overallStandingsLink.addStyleName("overallStandings");
             flexTable.setWidget(0, 0, overallStandingsLink);
         }
-
         SafeHtmlCell leaderboardNameCell = new SafeHtmlCell();
         Column<StrippedLeaderboardDTO, SafeHtml> leaderboardNameColumn = new Column<StrippedLeaderboardDTO, SafeHtml>(
                 leaderboardNameCell) {
@@ -237,7 +242,6 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
                 return b.toSafeHtml();
             }
         };
-
         AnchorCell nameAnchorCell = new AnchorCell();
         Column<StrippedLeaderboardDTO, SafeHtml> overviewColumn = new Column<StrippedLeaderboardDTO, SafeHtml>(
                 nameAnchorCell) {
@@ -250,7 +254,6 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
                         STYLE_ACTIVE_LEADERBOARD);
             }
         };
-        
         LeaderboardGroupFullTableResources tableResources = GWT.create(LeaderboardGroupFullTableResources.class);
         CellTable<StrippedLeaderboardDTO> leaderboardsTable = new BaseCelltable<StrippedLeaderboardDTO>(10000,
                 tableResources);
@@ -268,7 +271,6 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
             };
             leaderboardsTable.addColumn(racesColumn, stringMessages.races());
         }
-        
         if (leaderboardGroup.displayLeaderboardsInReverseOrder) {
             leaderboardsTable.setRowData(leaderboardGroup.getLeaderboardsInReverseOrder());
         } else {
@@ -394,10 +396,10 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
     private void renderRaceLink(String leaderboardName, RaceDTO race, boolean isLive, String raceColumnName, SafeHtmlBuilder b) {
         if (race != null) {
             RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier();
-
             RaceboardContextDefinition raceboardContext = new RaceboardContextDefinition(
                     raceIdentifier.getRegattaName(), raceIdentifier.getRaceName(), leaderboardName,
-                    leaderboardGroup.getName(), leaderboardGroup.getId(), null, viewMode);
+                    /* leaderboardGroupName not required because we have the ID */ null,
+                    leaderboardGroup.getId(), null, viewMode);
             RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = RaceBoardPerspectiveOwnSettings
                     .createDefaultWithCanReplayDuringLiveRaces(canReplayDuringLiveRaces);
             Map<String, Settings> innerSettings = Collections.singletonMap(RaceMapLifecycle.ID,

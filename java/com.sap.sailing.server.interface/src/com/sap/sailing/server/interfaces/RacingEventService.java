@@ -284,14 +284,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     DynamicTrackedRace getExistingTrackedRace(RegattaAndRaceIdentifier raceIdentifier);
 
     /**
-     * Obtains an unmodifiable map of the leaderboard groups configured in this service keyed by their names.
-     */
-    Map<String, LeaderboardGroup> getLeaderboardGroups();
-    
-    /**
      * Obtains an unmodifiable map of the leaderboard groups configured in this service keyed by their uuids.
      */
-    Map<UUID, LeaderboardGroup> getLeaderboardGroupsIdentifiable();
+    Map<UUID, LeaderboardGroup> getLeaderboardGroups();
 
     /**
      * Creates a new group with the name <code>groupName</code>, the description <code>desciption</code> and the

@@ -231,6 +231,8 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
             throws UnauthorizedException;
     
     LeaderboardGroupDTO getLeaderboardGroupById(UUID groupId) throws UnauthorizedException;
+    
+    LeaderboardGroupDTO getLeaderboardGroupByUuidOrName(final UUID groupUuid, final String groupName);
 
     CompetitorsRaceDataDTO getCompetitorsRaceData(RegattaAndRaceIdentifier race, List<CompetitorDTO> competitors,
             Date from, Date to, long stepSizeInMs, DetailType detailType, String leaderboardGroupName,

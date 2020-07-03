@@ -77,7 +77,7 @@ public class MasterDataResource extends AbstractSailingServerResource {
             exportTrackedRacesAndStartTracking = false;
         }
         logger.info(String.format("Masterdataexport gzip compression is turned %s", compress ? "on" : "off"));
-        Map<UUID, LeaderboardGroup> allLeaderboardGroups = getService().getLeaderboardGroupsIdentifiable();
+        Map<UUID, LeaderboardGroup> allLeaderboardGroups = getService().getLeaderboardGroups();
         Set<LeaderboardGroup> groupsToExport = new HashSet<LeaderboardGroup>();
         if (requestedLeaderboardGroupsUuids.isEmpty()) {
             // Add all visible LeaderboardGroups.

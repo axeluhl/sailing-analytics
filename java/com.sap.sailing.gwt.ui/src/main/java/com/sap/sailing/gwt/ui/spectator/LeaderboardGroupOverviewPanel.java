@@ -234,7 +234,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
             @Override
             public SafeHtml getValue(LeaderboardGroupDTO group) {
                 String link = new LinkWithSettingsGenerator<SpectatorSettings>(
-                        new SpectatorContextDefinition(group.getName(), group.getId().toString()))
+                        new SpectatorContextDefinition(group.getId().toString()))
                                 .createUrl(new SpectatorSettings(showRaceDetails));
                 return ANCHORTEMPLATE.anchor(UriUtils.fromString(link), group.getName().toString());
             }
@@ -362,9 +362,8 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
                 LeaderboardGroupDTO selectedGroup = groupsSelectionModel.getSelectedObject();
                 String debugParam = Window.Location.getParameter("gwt.codesvr");
                 String link = URLEncoder.encode("/gwt/Leaderboard.html?name=" + leaderboard.getName()
-                        + (showRaceDetails ? "&showRaceDetails=true" : "")
-                        + "&leaderboardGroupName=" + selectedGroup.getName() + "&root=overview"
-                        + "&leaderboardGroupId=" + selectedGroup.getId().toString()
+                        + (showRaceDetails ? "&showRaceDetails=true" : "") + "&root=overview" + "&leaderboardGroupId="
+                        + selectedGroup.getId().toString()
                         + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
                 return ANCHORTEMPLATE.anchor(UriUtils.fromString(link), leaderboard.getName());
             }
@@ -457,8 +456,8 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
                         String debugParam = Window.Location.getParameter("gwt.codesvr");
                         String link = URLEncoder.encode("/gwt/RaceBoard.html?leaderboardName="
                                 + selectedLeaderboard.getName() + "&raceName=" + raceId.getRaceName() + "&regattaName="
-                                + raceId.getRegattaName() + "&leaderboardGroupName=" + selectedGroup.getName()
-                                + "&leaderboardGroupId=" + selectedGroup.getId().toString() + "&root=overview"
+                                + raceId.getRegattaName() + "&leaderboardGroupId=" + selectedGroup.getId().toString()
+                                + "&root=overview"
                                 + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
                         name = ANCHORTEMPLATE.anchor(UriUtils.fromString(link), raceDisplayName);
                     } else {

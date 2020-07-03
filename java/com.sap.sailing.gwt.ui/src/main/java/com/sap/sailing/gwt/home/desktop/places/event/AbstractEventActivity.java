@@ -182,7 +182,6 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
                 raceIdentifier.getRaceName(), leaderboardName, leaderboardGroupName, leaderboardGroupId,
                 UUID.fromString(ctx.getEventId()), mode);
         RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = new RaceBoardPerspectiveOwnSettings();
-        
         HashMap<String, Settings> innerSettings = new HashMap<>();
         innerSettings.put(RaceMapLifecycle.ID, RaceMapSettings.getDefaultWithShowMapControls(true));
         PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings = new PerspectiveCompositeSettings<>(
