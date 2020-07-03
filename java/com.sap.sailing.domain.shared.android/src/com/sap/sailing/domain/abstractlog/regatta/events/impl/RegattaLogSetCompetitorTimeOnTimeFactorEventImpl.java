@@ -30,4 +30,9 @@ public class RegattaLogSetCompetitorTimeOnTimeFactorEventImpl extends RegattaLog
     public Double getTimeOnTimeFactor() {
         return timeOnTimeFactor;
     }
+    
+    @Override
+    public String getShortInfo() {
+        return super.getShortInfo() + ", timeOnTimeFactor: " + timeOnTimeFactor;
+    }
 }

@@ -534,7 +534,7 @@ public class EventsResource extends AbstractSailingServerResource {
                             /* leaderboardDiscardThresholdsParam */ leaderboardDiscardThresholdsParam, numberOfRacesParam, canBoatsOfCompetitorsChangePerRace,
                             competitorRegistrationType, localCompetitorRegistrationSecret);
                     if (leaderboardGroup != null) {
-                        getService().apply(new UpdateLeaderboardGroup(leaderboardGroup.getName(), leaderboardGroup.getName(),
+                        getService().apply(new UpdateLeaderboardGroup(leaderboardGroup.getId(), leaderboardGroup.getName(),
                                 leaderboardGroup.getDescription(), leaderboardGroup.getDisplayName(),
                                 Collections.singletonList(leaderboard.getName()),
                                 leaderboardGroup.getOverallLeaderboard() == null ? null
@@ -686,7 +686,7 @@ public class EventsResource extends AbstractSailingServerResource {
                 overallLeaderboardDiscardThresholds = resultDiscardingRule.getDiscardIndexResultsStartingWithHowManyRaces();
             }
             
-            getService().updateLeaderboardGroup(defaultLeaderboardGroup.getName(), defaultLeaderboardGroup.getName(), defaultLeaderboardGroup.getDescription(),
+            getService().updateLeaderboardGroup(defaultLeaderboardGroup.getId(), defaultLeaderboardGroup.getName(), defaultLeaderboardGroup.getDescription(),
                     defaultLeaderboardGroup.getDisplayName(), leaderboards, overallLeaderboardDiscardThresholds, 
                     defaultLeaderboardGroup.getOverallLeaderboard()==null?null:defaultLeaderboardGroup.getOverallLeaderboard().getScoringScheme().getType());
         }
