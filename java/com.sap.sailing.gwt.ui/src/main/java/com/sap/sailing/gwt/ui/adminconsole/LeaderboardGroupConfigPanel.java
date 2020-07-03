@@ -529,9 +529,10 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
             public SafeHtml getValue(LeaderboardGroupDTO group) {
                 String debugParam = Window.Location.getParameter("gwt.codesvr");
                 String link = URLEncoder.encode("/gwt/Spectator.html?leaderboardGroupId=" + group.getId()+"&showRaceDetails=true&"
-                        + "=true" + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
+                        + RaceBoardPerspectiveOwnSettings.PARAM_CAN_REPLAY_DURING_LIVE_RACES + "=true"
+                        + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
                 return ANCHORTEMPLATE.cell(UriUtils.fromString(link), group.getName());
-        }
+            }
         };
         groupNameColumn.setSortable(true);
         leaderboardGroupsListHandler.setComparator(groupNameColumn, new Comparator<LeaderboardGroupDTO>() {
@@ -1066,19 +1067,17 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
 
     @Override
     public void setupLeaderboardGroups(Map<String, String> params) {
-        String nameLeaderBoardGroup = params.get("LeaderBoardGroupName");
-        if (nameLeaderBoardGroup == null) {
-            return;
-        }
-        //setup filter value to name from params
-        groupsFilterablePanel.search(nameLeaderBoardGroup);
-
-        //deselect all leaderboard groups except one which name is from params
-        for (LeaderboardGroupDTO leaderboardGroupDTO : availableLeaderboardGroups) {
-            if (nameLeaderBoardGroup.equals(leaderboardGroupDTO.getName())) {
-                groupsTable.getSelectionModel().setSelected(leaderboardGroupDTO, true);
-            } else if(groupsTable.getSelectionModel().isSelected(leaderboardGroupDTO)){
-                groupsTable.getSelectionModel().setSelected(leaderboardGroupDTO, false);
+        String leaderBoardGroupId = params.get(LEADERBOARD_GROUP_ID);
+        if (leaderBoardGroupId != null) {
+            // setup filter value to name from params
+            groupsFilterablePanel.search(leaderBoardGroupId);
+            // deselect all leaderboard groups except one which name is from params
+            for (LeaderboardGroupDTO leaderboardGroupDTO : availableLeaderboardGroups) {
+                if (leaderBoardGroupId.equals(String.valueOf(leaderboardGroupDTO.getId()))) {
+                    groupsTable.getSelectionModel().setSelected(leaderboardGroupDTO, true);
+                } else if (groupsTable.getSelectionModel().isSelected(leaderboardGroupDTO)) {
+                    groupsTable.getSelectionModel().setSelected(leaderboardGroupDTO, false);
+                }
             }
         }
     }
