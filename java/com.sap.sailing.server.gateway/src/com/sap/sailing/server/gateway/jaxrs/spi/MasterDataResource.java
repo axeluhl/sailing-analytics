@@ -16,7 +16,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 import java.util.zip.GZIPOutputStream;
 
-import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -51,7 +51,7 @@ public class MasterDataResource extends AbstractSailingServerResource {
     
     private static final Logger logger = Logger.getLogger(MasterDataResource.class.getName());
     
-    @GET
+    @POST
     @Produces("application/x-java-serialized-object")
     public Response getMasterDataByLeaderboardGroups(@QueryParam("names[]") List<String> requestedLeaderboardGroups,
             @QueryParam("compress") Boolean compress, @QueryParam("exportWind") Boolean exportWind,
