@@ -25,12 +25,13 @@
                 <div class="innerContent">
                     <h2 class="articleSubheadline">July 2020</h2>
                     <ul class="bulletList">
+                        <li>Fixed a problem with cross-track error calculations in case no track can be found for a competitor</li>
+                        <li>In the Competitor tables in AdminConsole, added the missing ToT handicap value column and made both,
+                            the ToT and ToD column, sortable.</li>
                         <li>New menu entries in the header of the SAP Sailing home. Depending on the currently logged in users rights a link to the Administration Console and/or Data Mining is shown.
                          When logging into a server without administration rights the event management entry will point to the value configured with the system property com.sap.sailing.eventmanagement.url (default: https://my.sapsailing.com). </li>
                     </ul>
                     <h2 class="articleSubheadline">June 2020</h2>
-                    <ul>
-                    </ul>
                     <ul class="bulletList">
                         <li>The REST endpoints <tt>/sailingserver/api/v1/competitors/{competitorId}</tt>,<br>
                             <tt>/sailingsserver/api/v1/leaderboards/{leaderboardName}/competitors/{competitorId}</tt>,<br>
