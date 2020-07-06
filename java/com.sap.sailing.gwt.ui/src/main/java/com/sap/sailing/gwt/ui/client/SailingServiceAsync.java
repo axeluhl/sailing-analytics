@@ -222,22 +222,49 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
 
     void getLeaderboardGroupByName(String groupName, boolean withGeoLocationData,
             AsyncCallback<LeaderboardGroupDTO> callback);
+    
+    void getLeaderboardGroupById(UUID groupId, AsyncCallback<LeaderboardGroupDTO> callback);
+    
+    void getLeaderboardGroupByUuidOrName(UUID groupUuid, String groupName, AsyncCallback<LeaderboardGroupDTO> callback);
 
     void getCompetitorBoats(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<Map<CompetitorDTO, BoatDTO>> callback);
     
-    void getRaceboardData(String regattaName, String raceName, String leaderboardName, 
-            String leaderboardGroupName, UUID eventId, AsyncCallback<RaceboardDataDTO> callback);
+    /**
+     * @param leaderboardGroupId
+     *            if not {@code null}, this takes precedence over the {@code leaderboardGroupName} parameter which will
+     *            then be ignored and will be used to look up an optional leaderboard group providing the context, e.g.,
+     *            for seasonal scores from an overall leaderboard
+     * @param leaderboardGroupName
+     *            evaluated only if {@code leaderboardGroupId} was {@code null}; may even be {@code null} if
+     *            {@code leaderboardGroupId} is {@code null} too because leaderboard group resolution is optional. If a
+     *            non-{@code null} name is provided here and if {@code leaderboardGroupId} was {@code null} then the
+     *            name is used to try to resolve the leaderboard group by name.
+     */
+    void getRaceboardData(String regattaName, String raceName, String leaderboardName, String leaderboardGroupName,
+            UUID leaderboardGroupId, UUID eventId, AsyncCallback<RaceboardDataDTO> callback);
 
+    /**
+     * @param leaderboardGroupId
+     *            if not {@code null}, this takes precedence over the {@code leaderboardGroupName} parameter which will
+     *            then be ignored and will be used to look up an optional leaderboard group providing the context, e.g.,
+     *            for seasonal scores from an overall leaderboard
+     * @param leaderboardGroupName
+     *            evaluated only if {@code leaderboardGroupId} was {@code null}; may even be {@code null} if
+     *            {@code leaderboardGroupId} is {@code null} too because leaderboard group resolution is optional. If a
+     *            non-{@code null} name is provided here and if {@code leaderboardGroupId} was {@code null} then the
+     *            name is used to try to resolve the leaderboard group by name.
+     */
     void getRaceMapData(RegattaAndRaceIdentifier raceIdentifier, Date date,
             Map<String, Date> fromPerCompetitorIdAsString, Map<String, Date> toPerCompetitorIdAsString,
             boolean extrapolate, LegIdentifier simulationLegIdentifier,
             byte[] md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID,
             Date timeToGetTheEstimatedDurationFor, boolean estimatedDurationRequired, DetailType detailType,
-            String leaderboardName, String leaderboardGroupName, AsyncCallback<CompactRaceMapDataDTO> callback);
+            String leaderboardName, String leaderboardGroupName, UUID leaderboardGroupId, AsyncCallback<CompactRaceMapDataDTO> callback);
 
     void getBoatPositions(RegattaAndRaceIdentifier raceIdentifier, Map<String, Date> fromPerCompetitorIdAsString,
             Map<String, Date> toPerCompetitorIdAsString, boolean extrapolate, DetailType detailType,
-            String leaderboardName, String leaderboardGroupName, AsyncCallback<CompactBoatPositionsDTO> callback);
+            String leaderboardName, String leaderboardGroupName, UUID leaderboardGroupId,
+            AsyncCallback<CompactBoatPositionsDTO> callback);
 
     void getEvents(AsyncCallback<List<EventDTO>> callback);
 
@@ -295,7 +322,7 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
      * {@link SailingServiceConstants#MAX_NUMBER_OF_FIXES_TO_QUERY} are returned per competitor.
      */
     void getCompetitorsRaceData(RegattaAndRaceIdentifier race, List<CompetitorDTO> competitors, Date from, Date to,
-            long stepSize, DetailType detailType, String leaderboarGroupName, String leaderboardName,
+            long stepSize, DetailType detailType, String leaderboarGroupName, UUID leaderboardGroupId, String leaderboardName,
             AsyncCallback<CompetitorsRaceDataDTO> callback);
 
     /**
@@ -337,8 +364,8 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
 
     void getRegattaLog(String leaderboardName, AsyncCallback<RegattaLogDTO> callback);
 
-    void getLeaderboardGroupNamesFromRemoteServer(String host, String username, String password,
-            AsyncCallback<List<String>> leaderboardGroupNames);
+    void getLeaderboardGroupNamesAndIdsAsStringsFromRemoteServer(String host, String username, String password,
+            AsyncCallback<Map<String, String>> leaderboardGroups);
 
     void getCompetitors(boolean filterCompetitorsWithBoat, boolean filterCompetitorsWithoutBoat, AsyncCallback<Iterable<CompetitorDTO>> asyncCallback);
 
@@ -482,7 +509,7 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
      * Used to determine for a Chart the available Detailtypes. This is for example used, to only show the RideHeight as
      * an option for charts, if it actually recorded for the race.
      */
-    void determineDetailTypesForCompetitorChart(String leaderboardGroupName, RegattaAndRaceIdentifier identifier,
+    void determineDetailTypesForCompetitorChart(String leaderboardGroupName, UUID leaderboardGroupId, RegattaAndRaceIdentifier identifier,
             AsyncCallback<Iterable<DetailType>> callback);
 
     void getExpeditionDeviceConfigurations(AsyncCallback<List<ExpeditionDeviceConfiguration>> callback);

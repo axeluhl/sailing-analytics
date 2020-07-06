@@ -284,9 +284,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     DynamicTrackedRace getExistingTrackedRace(RegattaAndRaceIdentifier raceIdentifier);
 
     /**
-     * Obtains an unmodifiable map of the leaderboard groups configured in this service keyed by their names.
+     * Obtains an unmodifiable map of the leaderboard groups configured in this service keyed by their uuids.
      */
-    Map<String, LeaderboardGroup> getLeaderboardGroups();
+    Map<UUID, LeaderboardGroup> getLeaderboardGroups();
 
     /**
      * Creates a new group with the name <code>groupName</code>, the description <code>desciption</code> and the
@@ -307,10 +307,10 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     /**
      * Removes the group with the name <code>groupName</code> from the service and the database.
      * 
-     * @param groupName
-     *            The name of the group which shall be removed.
+     * @param leaderboardGroupId
+     *            The ID of the group which shall be removed.
      */
-    void removeLeaderboardGroup(String groupName);
+    void removeLeaderboardGroup(UUID leaderboardGroupId);
 
     /**
      * Updates the group data in the persistant store.
@@ -362,7 +362,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     void addRace(RegattaIdentifier addToRegatta, RaceDefinition raceDefinition);
 
-    void updateLeaderboardGroup(String oldName, String newName, String description, String displayName,
+    void updateLeaderboardGroup(UUID leaderboardGroupId, String newName, String description, String displayName,
             List<String> leaderboardNames, int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType);
 
     /**
@@ -713,7 +713,11 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     /**
      * Adds the leaderboard group to this service; if the group has an overall leaderboard, the overall leaderboard
      * is added to this service as well. For both, the group and the overall leaderboard, any previously existing
-     * objects by the same name of that type will be replaced.
+     * objects by the same name of that type will be replaced.<p>
+     * 
+     * For this method it is permissible to add the leaderboard group even if another one by an equal name but different
+     * {@link LeaderboardGroup#getId() ID} exists. This will make it possible at least to <em>import</em> another leaderboard
+     * group with an already existing name but different ID and later rename it to a unique name.
      */
     void addLeaderboardGroupWithoutReplication(LeaderboardGroup leaderboardGroup);
 
@@ -929,8 +933,12 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * targetServerPassword or targetServerBearerToken. If neither of those are provided the method will try to create
      * or get the bearer token for the current user.
      */
-    void importMasterData(final String urlAsString, final String[] groupNames, final boolean override,
+    void importMasterData(final String urlAsString, final String[] leaderboardGroupIds, final boolean override,
             final boolean compress, final boolean exportWind, final boolean exportDeviceConfigurations,
             String targetServerUsername, String targetServerPassword, String targetServerBearerToken,
             final boolean exportTrackedRacesAndStartTracking, final UUID importOperationId) throws IllegalArgumentException;
+
+    void addOrReplaceExpeditionDeviceConfiguration(UUID deviceConfigurationId, String name, Integer expeditionBoatId);
+
+    void removeExpeditionDeviceConfiguration(UUID deviceUuid);
 }

@@ -55,7 +55,7 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
         RaceboardContextDefinition newRaceBoardContextDefinition = new RaceboardContextDefinition(
                 raceboardContextDefinition.getRegattaName(), raceboardContextDefinition.getRaceName(),
                 raceboardContextDefinition.getLeaderboardName(), raceboardContextDefinition.getLeaderboardGroupName(),
-                raceboardContextDefinition.getEventId(), /* mode */ null);
+                raceboardContextDefinition.getLeaderboardGroupId(), raceboardContextDefinition.getEventId(), null);
         this.linkWithSettingsGenerator = new LinkWithSettingsGenerator<>(path, newRaceBoardContextDefinition);
         this.isScreenBigEnough = isSmallScreen;
         this.stringMessages = stringMessages;

@@ -87,7 +87,7 @@ public class MasterDataImporter {
         // in order to restore all listeners we need to initialize the regatta
         // after the whole object graph has been restored
         for (Regatta regatta : topLevelMasterData.getAllRegattas()) {
-            RegattaImpl regattaImpl = (RegattaImpl)regatta;
+            RegattaImpl regattaImpl = (RegattaImpl) regatta;
             regattaImpl.initializeSeriesAfterDeserialize();
             // master data import from older system, generate a uuid for this.
             if (regatta.getRegistrationLinkSecret() == null) {

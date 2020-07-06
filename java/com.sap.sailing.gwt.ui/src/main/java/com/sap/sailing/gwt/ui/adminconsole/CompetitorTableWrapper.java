@@ -290,7 +290,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                 return competitor.getTimeOnDistanceAllowancePerNauticalMile()==null?"":(""+competitor.getTimeOnDistanceAllowancePerNauticalMile());
             }
         };
-        timeOnTimeFactorColumn.setSortable(true);
+        timeOnDistanceAllowancePerNauticalMileColumn.setSortable(true);
         competitorColumnListHandler.setComparator(timeOnDistanceAllowancePerNauticalMileColumn, new Comparator<CompetitorDTO>() {
             @Override
                     public int compare(CompetitorDTO o1, CompetitorDTO o2) {
@@ -331,7 +331,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
         competitorActionColumn.addAction(CompetitorConfigImagesBarCell.ACTION_UPDATE, HasPermissions.DefaultActions.UPDATE, this::editCompetitor);
         competitorActionColumn.addAction(CompetitorConfigImagesBarCell.ACTION_REFRESH, this::allowUpdate);
         final DialogConfig<CompetitorDTO> editOwnerShipDialog = EditOwnershipDialog.create(userService.getUserManagementService(), SecuredDomainType.COMPETITOR,
-                null, stringMessages);
+                competitorDTO -> refresh(Collections.singleton(competitorDTO)), stringMessages);
         competitorActionColumn.addAction(CompetitorConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
                 editOwnerShipDialog::openOwnershipDialog);
         final EditACLDialog.DialogConfig<CompetitorDTO> configACL = EditACLDialog
@@ -343,6 +343,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
         table.addColumn(competitorNameColumn, getStringMessages().name());
         table.addColumn(competitorShortNameColumn, stringMessages.shortName());
         table.addColumn(flagImageColumn, stringMessages.flags());
+        table.addColumn(timeOnTimeFactorColumn, getStringMessages().timeOnTimeFactor());
         table.addColumn(timeOnDistanceAllowancePerNauticalMileColumn, getStringMessages().timeOnDistanceAllowanceInSecondsPerNauticalMile());
         table.addColumn(displayColorColumn, getStringMessages().color());
         table.addColumn(imageColumn, getStringMessages().image());

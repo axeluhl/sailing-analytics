@@ -1,13 +1,15 @@
 package com.sap.sailing.server.operationaltransformation;
 
+import java.util.UUID;
+
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.interfaces.RacingEventServiceOperation;
 
 public class RemoveLeaderboardGroup extends AbstractLeaderboardGroupOperation<Void> {
     private static final long serialVersionUID = 3177217793859319236L;
 
-    public RemoveLeaderboardGroup(String leaderboardGroupName) {
-        super(leaderboardGroupName);
+    public RemoveLeaderboardGroup(UUID leaderboardGroupId) {
+        super(leaderboardGroupId);
     }
 
     @Override
@@ -24,7 +26,7 @@ public class RemoveLeaderboardGroup extends AbstractLeaderboardGroupOperation<Vo
 
     @Override
     public Void internalApplyTo(RacingEventService toState) {
-        toState.removeLeaderboardGroup(getLeaderboardGroupName());
+        toState.removeLeaderboardGroup(getLeaderboardGroupId());
         return null;
     }
 

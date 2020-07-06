@@ -294,6 +294,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String detailsOfLeaderboardGroup();
     String abort();
     String noLeaderboardGroupWithNameFound(String groupName);
+    String noLeaderboardGroupWithIdFound(String groupId);
     String overview();
     String welcomeToSailingAnalytics();
     String welcomeToSailingAnalyticsBody();
@@ -1161,7 +1162,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String videos();
     String image();
     String images();
+    String imagesWithCount(int number);
     String video();
+    String videosWithCount(int number);
     String flagImageURL();
     String imageURLs();
     String videoURLs();
@@ -1208,6 +1211,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String registrationLinkSecretExplain();
     String registrationLinkSecretGenerate();
     String registrationLinkUrl();
+    String registrationLinkUrlCopy();
     String registrationLinkUrlExplain();
     String registrationLinkShare();
     String explainRegistrationLinkDialog();
@@ -2395,4 +2399,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String whitelabelSailing();
     String unableToLoadCourseAreas(String message);
     String zoomCheckBoxLabel();
+    String insufficientPermissions();
+    String manageEvents();
 }

@@ -99,7 +99,7 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
     private static final Logger logger = Logger.getLogger(LOGGER_AND_LOGAUTHOR_NAME);
     
     private final AbstractLogEventAuthor raceLogEventAuthor = new LogEventAuthorImpl(LOGGER_AND_LOGAUTHOR_NAME, 0);
-    private final Map<AbstractLog<?, ?>, Object> visitors = new HashMap<AbstractLog<?, ?>, Object>();
+    private final Map<AbstractLog<?, ?>, Object> visitors = new HashMap<>();
     
     private final RaceLogConnectivityParams params;
     private final WindStore windStore;
@@ -232,7 +232,6 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
             // into the race log
             raceLog.add(new RaceLogEndOfTrackingEventImpl(MillisecondsTimePoint.now(), raceLogEventAuthor, raceLog.getCurrentPassId()));
         }
-        
         // remove listeners on logs
         for (Entry<AbstractLog<?, ?>, Object> visitor : visitors.entrySet()) {
             visitor.getKey().removeListener(visitor.getValue());

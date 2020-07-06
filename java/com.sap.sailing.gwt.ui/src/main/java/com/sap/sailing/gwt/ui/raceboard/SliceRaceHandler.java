@@ -25,6 +25,8 @@ import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.ui.client.UserService;
@@ -54,6 +56,8 @@ public class SliceRaceHandler {
     private TimeRange visibleRange;
 
     private final String leaderboardGroupName;
+    
+    private final UUID leaderboardGroupId;
 
     private final String leaderboardName;
 
@@ -78,13 +82,14 @@ public class SliceRaceHandler {
      */
     public SliceRaceHandler(SailingServiceWriteAsync sailingServiceWrite, UserService userService, final ErrorReporter errorReporter,
             MultiCompetitorRaceChart competitorRaceChart, RegattaAndRaceIdentifier selectedRaceIdentifier,
-            final String leaderboardGroupName, String leaderboardName, UUID eventId,
-            StrippedLeaderboardDTOWithSecurity leaderboardDTO, RaceWithCompetitorsAndBoatsDTO raceDTO) {
+            final String leaderboardGroupName, UUID leaderboardGroupId, String leaderboardName, UUID eventId,
+            StrippedLeaderboardDTOWithSecurity leaderboardDTO, RaceWithCompetitorsAndBoatsDTO raceDTO, StringMessages stringMessages) {
         this.sailingServiceWrite = sailingServiceWrite;
         this.userService = userService;
         this.errorReporter = errorReporter;
         this.selectedRaceIdentifier = selectedRaceIdentifier;
         this.leaderboardGroupName = leaderboardGroupName;
+        this.leaderboardGroupId = leaderboardGroupId;
         this.leaderboardName = leaderboardName;
         this.eventId = eventId;
         this.leaderboardDTO = leaderboardDTO;
@@ -92,7 +97,7 @@ public class SliceRaceHandler {
         styles.ensureInjected();
         sliceButtonUi = new Button();
         sliceButtonUi.setStyleName(styles.sliceButtonBackgroundImage());
-        sliceButtonUi.setTitle(StringMessages.INSTANCE.sliceRace());
+        sliceButtonUi.setTitle(stringMessages.sliceRace());
         competitorRaceChart.addToolbarButton(sliceButtonUi);
         sliceButtonUi.setVisible(false);
         competitorRaceChart.addChartZoomChangedHandler(this::checkIfMaySliceSelectedRegattaAndRace);
@@ -100,21 +105,16 @@ public class SliceRaceHandler {
             visibleRange = null;
             updateVisibility();
         });
-        sliceButtonUi.addClickHandler((e) -> doSlice());
-        sailingServiceWrite.canSliceRace(selectedRaceIdentifier, new AsyncCallback<Boolean>() {
-            @Override
-            public void onSuccess(Boolean result) {
-                canSlice = Boolean.TRUE.equals(result);
-                updateVisibility();
-            }
-
-            @Override
-            public void onFailure(Throwable caught) {
-                canSlice = false;
-                updateVisibility();
+        sliceButtonUi.addClickHandler((e) -> {
+            if (allowsEditing()) {
+                doSlice();
+            }else {
+                Notification.notify(stringMessages.insufficientPermissions(), NotificationType.ERROR);
             }
         });
+        updateCanSliceIfAuthorized();
         final UserStatusEventHandler userStatusEventHandler = (user, preAuthenticated) -> {
+            updateCanSliceIfAuthorized();
             updateVisibility();
         };
         sliceButtonUi.addAttachHandler(e -> {
@@ -124,6 +124,24 @@ public class SliceRaceHandler {
                 userService.removeUserStatusEventHandler(userStatusEventHandler);
             }
         });
+    }
+
+    private void updateCanSliceIfAuthorized() {
+        if (allowsEditing()) {
+            sailingServiceWrite.canSliceRace(selectedRaceIdentifier, new AsyncCallback<Boolean>() {
+                @Override
+                public void onSuccess(Boolean result) {
+                    canSlice = Boolean.TRUE.equals(result);
+                    updateVisibility();
+                }
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    canSlice = false;
+                    updateVisibility();
+                }
+            });
+        }
     }
     
     private void updateVisibility() {
@@ -162,7 +180,7 @@ public class SliceRaceHandler {
                                                 new TrackedRaceCreationResultDialog(StringMessages.INSTANCE.sliceRace(),
                                                         StringMessages.INSTANCE.slicingARaceWasSuccessful(), eventId,
                                                         result.getRegattaName(), result.getRaceName(), leaderboardName,
-                                                        leaderboardGroupName).show();
+                                                        leaderboardGroupName, leaderboardGroupId).show();
                                             }
                                         });
                             }).show();

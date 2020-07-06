@@ -2149,7 +2149,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
     }
 
-    private RegattaLogEvent loadRegattaLogEvent(Document o, RegattaLikeIdentifier regattaLogIdentifier)
+    public RegattaLogEvent loadRegattaLogEvent(Document o, RegattaLikeIdentifier regattaLogIdentifier)
             throws JsonDeserializationException, ParseException {
         Document dbObject = (Document) o.get(FieldNames.REGATTA_LOG_EVENT.name());
         TimePoint logicalTimePoint = loadTimePoint(dbObject);
@@ -2158,7 +2158,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final AbstractLogEventAuthor author;
         String authorName = (String) dbObject.get(FieldNames.REGATTA_LOG_EVENT_AUTHOR_NAME.name());
         Number authorPriority = (Number) dbObject.get(FieldNames.REGATTA_LOG_EVENT_AUTHOR_PRIORITY.name());
-        author = new LogEventAuthorImpl(authorName, authorPriority.intValue());
+        if (authorName != null && authorPriority != null) {
+            author = new LogEventAuthorImpl(authorName, authorPriority.intValue());
+        } else {
+            author = LogEventAuthorImpl.createCompatibilityAuthor();
+        }
         // CloseOpenEnded, DeviceCompMapping, DeviceMarkMapping, RegisterComp, Revoke
         String eventClass = (String) dbObject.get(FieldNames.REGATTA_LOG_EVENT_CLASS.name());
         if (eventClass.equals(RegattaLogDeviceCompetitorMappingEvent.class.getSimpleName())) {
@@ -2221,7 +2225,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return boat;
     }
 
-    private RegattaLogEvent loadRegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEvent(TimePoint createdAt,
+    private RegattaLogEvent loadRegattaLogSetCompetitorTimeOnTimeFactorEvent(TimePoint createdAt,
             AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, Document dbObject) {
         final Competitor comp = getCompetitorByID(dbObject);
         final Number timeOnTimeFactorAsNumber = (Number) dbObject.get(FieldNames.REGATTA_LOG_TIME_ON_TIME_FACTOR.name());
@@ -2230,7 +2234,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 timeOnTimeFactor);
     }
 
-    private RegattaLogEvent loadRegattaLogSetCompetitorTimeOnTimeFactorEvent(TimePoint createdAt,
+    private RegattaLogEvent loadRegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEvent(TimePoint createdAt,
             AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, Document dbObject) {
         final Competitor comp = getCompetitorByID(dbObject);
         final Number timeOnDistanceSecondsAllowancePerNauticalMileAsNumber = (Number) dbObject
@@ -2634,23 +2638,24 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     public Collection<DynamicCompetitor> loadAllCompetitors() {
         Map<Serializable, DynamicCompetitor> competitorsById = new HashMap<>();
         MongoCollection<Document> collection = database.getCollection(CollectionNames.COMPETITORS.name());
-        try {
             final JsonWriterSettings writerSettings = JsonWriterSettings.builder().outputMode(JsonMode.RELAXED).build();
             for (Document o : collection.find()) {
-                JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(o.toJson(writerSettings)));
-                DynamicCompetitor c = competitorWithBoatRefDeserializer.deserialize(json);
-                // ensure that in case there should be multiple competitors with equal IDs in the DB
-                // only one will survive
-                if (competitorsById.containsKey(c.getId())) {
-                    collection.deleteOne(o);
-                } else {
-                    competitorsById.put(c.getId(), c);
+                try {
+                    JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(o.toJson(writerSettings)));
+                    DynamicCompetitor c = competitorWithBoatRefDeserializer.deserialize(json);
+                    // ensure that in case there should be multiple competitors with equal IDs in the DB
+                    // only one will survive
+                    if (competitorsById.containsKey(c.getId())) {
+                        collection.deleteOne(o);
+                    } else {
+                        competitorsById.put(c.getId(), c);
+                    }
+                } catch (Exception e) {
+                    logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load competitors: "+
+                            o.toString());
+                    logger.log(Level.SEVERE, "loadCompetitors", e);
                 }
             }
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load competitors.");
-            logger.log(Level.SEVERE, "loadCompetitors", e);
-        }
         return competitorsById.values();
     }
 

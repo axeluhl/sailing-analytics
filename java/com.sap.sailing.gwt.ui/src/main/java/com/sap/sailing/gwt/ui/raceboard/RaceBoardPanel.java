@@ -222,7 +222,7 @@ public class RaceBoardPanel
             SailingServiceAsync sailingService, MediaServiceAsync mediaService, UserService userService,
             AsyncActionsExecutor asyncActionsExecutor, Map<CompetitorDTO, BoatDTO> competitorsAndTheirBoats,
             Timer timer, RegattaAndRaceIdentifier selectedRaceIdentifier, String leaderboardName,
-            String leaderboardGroupName, UUID eventId, ErrorReporter errorReporter, final StringMessages stringMessages,
+            String leaderboardGroupName, UUID leaderboardGroupId, UUID eventId, ErrorReporter errorReporter, final StringMessages stringMessages,
             UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider,
             boolean showChartMarkEditMediaButtonsAndVideo, boolean showHeaderPanel,
             Iterable<DetailType> availableDetailTypes, StrippedLeaderboardDTOWithSecurity leaderboardDTO,
@@ -276,7 +276,7 @@ public class RaceBoardPanel
                 errorReporter, timer,
                 competitorSelectionProvider, raceCompetitorSet, stringMessages, selectedRaceIdentifier, 
                 raceMapResources, /* showHeaderPanel */ true, quickFlagDataProvider, this::showInWindChart,
-                leaderboardName, leaderboardGroupName, shareLinkAction) {
+                leaderboardName, leaderboardGroupName, leaderboardGroupId, shareLinkAction) {
             private static final String INDENT_SMALL_CONTROL_STYLE = "indentsmall";
             private static final String INDENT_BIG_CONTROL_STYLE = "indentbig";
             @Override
@@ -367,7 +367,7 @@ public class RaceBoardPanel
         leaderboardPanel.setTitle(stringMessages.leaderboard());
         leaderboardPanel.getElement().getStyle().setMarginLeft(6, Unit.PX);
         leaderboardPanel.getElement().getStyle().setMarginTop(10, Unit.PX);
-        createOneScreenView(lifecycle, settings, leaderboardName, leaderboardGroupName, eventId, mainPanel,
+        createOneScreenView(lifecycle, settings, leaderboardName, leaderboardGroupName, leaderboardGroupId, eventId, mainPanel,
                 isScreenLargeEnoughToInitiallyDisplayLeaderboard,
                 raceMap, userService, showChartMarkEditMediaButtonsAndVideo, leaderboardDTO, raceDTO); // initializes the raceMap field
         leaderboardPanel.addLeaderboardUpdateListener(this);
@@ -424,7 +424,7 @@ public class RaceBoardPanel
      */
     private void createOneScreenView(RaceBoardPerspectiveLifecycle lifecycle,
             PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings, String leaderboardName,
-            String leaderboardGroupName, UUID event,
+            String leaderboardGroupName, UUID leaderboardGroupId, UUID event,
             FlowPanel mainPanel, boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard, RaceMap raceMap,
             UserService userService, boolean showChartMarkEditMediaButtonsAndVideo,
             StrippedLeaderboardDTOWithSecurity leaderboard, final RaceWithCompetitorsAndBoatsDTO raceDTO) {
@@ -448,11 +448,11 @@ public class RaceBoardPanel
                     sailingService,
                     asyncActionsExecutor,
                     competitorSelectionProvider, selectedRaceIdentifier, timer, timeRangeWithZoomModel, stringMessages,
-                    errorReporter, true, true, leaderboardGroupName, leaderboardName);
+                    errorReporter, true, true, leaderboardGroupName, leaderboardGroupId, leaderboardName);
             competitorChart.setVisible(false);
             competitorChart.updateSettings(multiCompetitorRaceChartSettings);
             new SliceRaceHandler(sailingServiceWrite, userService, errorReporter, competitorChart, selectedRaceIdentifier,
-                    leaderboardGroupName, leaderboardName, event, leaderboard, raceDTO);
+                    leaderboardGroupName, leaderboardGroupId, leaderboardName, event, leaderboard, raceDTO, stringMessages);
             componentsForSideBySideViewer.add(competitorChart);
             windChart = new WindChart(this, getComponentContext(), windChartLifecycle, sailingService,
                     selectedRaceIdentifier, timer,
@@ -469,10 +469,10 @@ public class RaceBoardPanel
         if (showChartMarkEditMediaButtonsAndVideo) {
             componentsForSideBySideViewer.add(maneuverTablePanel);
         }
-        editMarkPassingPanel = new EditMarkPassingsPanel(this, getComponentContext(), sailingServiceWrite,
+        editMarkPassingPanel = new EditMarkPassingsPanel(this, getComponentContext(), sailingService,
+                sailingServiceWrite,
                 selectedRaceIdentifier,
-                stringMessages,
-                competitorSelectionProvider, errorReporter, timer);
+                stringMessages, competitorSelectionProvider, errorReporter, timer);
         if (showChartMarkEditMediaButtonsAndVideo) {
             editMarkPassingPanel.setLeaderboard(leaderboardPanel.getLeaderboard());
             editMarkPassingPanel.getEntryWidget().setTitle(stringMessages.editMarkPassings());

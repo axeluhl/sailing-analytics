@@ -95,7 +95,7 @@ public class IdleSixtyInchLeaderboardNode extends FiresPlaceNode {
             CompetitorSelectionProvider provider, String leaderboardName) {
         MultiRaceLeaderboardPanel leaderboardPanel = new MultiRaceLeaderboardPanel(null, null,
                 cf.getSailingService(() -> leaderboardName), new AsyncActionsExecutor(), leaderboardSettings, false,
-                provider, timer, null, leaderboardName, cf.getErrorReporter(), StringMessages.INSTANCE, false, null,
+                provider, timer, leaderboardName, cf.getErrorReporter(), StringMessages.INSTANCE, false, null,
                 false, null, false, true, false, false, false, new SixtyInchLeaderboardStyle(true),
                 FlagImageResolverImpl.get(), Arrays.asList(DetailType.values()));
 
