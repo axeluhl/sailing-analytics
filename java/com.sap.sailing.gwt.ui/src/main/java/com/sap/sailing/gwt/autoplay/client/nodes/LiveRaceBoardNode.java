@@ -75,6 +75,7 @@ public class LiveRaceBoardNode extends FiresPlaceNode implements RaceTimesInfoPr
                         raceboardTimer,
                         cf.getAutoPlayCtxSignalError().getLifeOrPreLiveRace(), cf.getAutoPlayCtxSignalError().getContextDefinition().getLeaderboardName(),
                         /** leaderboardGroupName */
+                        null, /** leaderboardGroupId */
                         null, /** eventId */
                         null, cf.getErrorReporter(), StringMessages.INSTANCE, null, raceTimesInfoProvider, true, false,
                         Arrays.asList(DetailType.values()), result.getLeaderboard(), result.getRace(), result.getTrackingConnectorInfo(), cf.getSailingServiceWrite());
@@ -92,7 +93,7 @@ public class LiveRaceBoardNode extends FiresPlaceNode implements RaceTimesInfoPr
         };
         sailingService.getRaceboardData(cf.getAutoPlayCtxSignalError().getLifeOrPreLiveRace().getRegattaName(),
                 cf.getAutoPlayCtxSignalError().getLifeOrPreLiveRace().getRaceName(), cf.getAutoPlayCtxSignalError().getContextDefinition().getLeaderboardName(), null,
-                null, raceBoardDataCallback);
+                null, null, raceBoardDataCallback);
     };
 
     @Override

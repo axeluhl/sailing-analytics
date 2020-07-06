@@ -110,10 +110,10 @@ public class TestORCPerformanceCurveCourse {
         assertEquals(1.25, subcourse2.getTotalLength().getNauticalMiles(), accuracy);
         assertEquals(ORCPerformanceCurveLegTypes.LONG_DISTANCE, Util.last(subcourse2.getLegs()).getType());
         assertEquals(0, subcourse2.getLegs().iterator().next().getTwa().getDegrees(), accuracy);
-        // special case: didn't start, equals to no legs finished and 0.0% of current leg
+        // special case: didn't start, equals to no legs finished and no leg started yet, so zero legs
         ORCPerformanceCurveCourse subcourseSpecial1 = course.subcourse(0, 0);
         assertEquals(0, subcourseSpecial1.getTotalLength().getNauticalMiles(), accuracy);
-        assertEquals(1, Util.size(subcourseSpecial1.getLegs()));
+        assertEquals(0, Util.size(subcourseSpecial1.getLegs()));
         // special case: number of finished legs is higher then number of actual legs
         ORCPerformanceCurveCourse subcourseSpecial2 = course.subcourse(10, 0);
         assertEquals(10, subcourseSpecial2.getTotalLength().getNauticalMiles(), accuracy);
