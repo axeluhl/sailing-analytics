@@ -1,9 +1,12 @@
 package com.sap.sailing.selenium.pages.gwt;
 
+import java.util.function.BooleanSupplier;
+
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 
+import com.google.common.base.Objects;
 import com.sap.sailing.selenium.pages.PageObject;
 
 /**
@@ -33,6 +36,23 @@ public class ListBoxPO extends AbstractInputPO {
     public ListBoxPO(WebDriver driver, WebElement element) {
         super(driver, element);
         selectBox = new Select(element);
+    }
+    
+    /**
+     * Wait until selected value is equals to expected value.
+     * @param expected expected value.
+     */
+    public void waitForElementUntil(String expected) {
+        waitUntil(new BooleanSupplier() {
+            @Override
+            public boolean getAsBoolean() {
+                try {
+                    return Objects.equal(getSelectedOptionValue(), expected);
+                } catch (Exception e) {
+                    return false;
+                }
+            }
+        });
     }
     
     public String getSelectedOptionLabel() {

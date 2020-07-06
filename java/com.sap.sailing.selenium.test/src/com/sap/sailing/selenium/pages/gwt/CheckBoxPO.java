@@ -1,5 +1,7 @@
 package com.sap.sailing.selenium.pages.gwt;
 
+import java.util.function.BooleanSupplier;
+
 import org.openqa.selenium.By.ByTagName;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -37,6 +39,24 @@ public class CheckBoxPO extends AbstractInputPO {
      */
     public CheckBoxPO(WebDriver driver, WebElement element) {
         super(driver, element);
+    }
+    
+    /**
+     * Wait until checkbox status equals to expected one.
+     * 
+     * @param expected expected status
+     */
+    public void waitForElementUntil(boolean expected) {
+        waitUntil(new BooleanSupplier() {
+            @Override
+            public boolean getAsBoolean() {
+                try {
+                    return isSelected() == expected;
+                } catch (Exception e) {
+                    return false;
+                }
+            }
+        });
     }
     
     /**
