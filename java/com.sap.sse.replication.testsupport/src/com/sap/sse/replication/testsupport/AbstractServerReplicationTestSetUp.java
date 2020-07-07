@@ -177,7 +177,6 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
         ReplicationInstancesManager rim = new ReplicationInstancesManager();
         masterReplicator = new ReplicationServiceImpl(exchangeName, exchangeHost, 0, rim, new SingletonReplicablesProvider(this.master));
         replicaDescriptor = new ReplicaDescriptorImpl(InetAddress.getLocalHost(), serverUuid, "", new String[] { this.master.getId().toString() });
-        
         // connect to exchange host and local server running as master
         // master server and exchange host can be two different hosts
         ReplicationServiceTestImpl<ReplicableInterface> replicaReplicator = new ReplicationServiceTestImpl<ReplicableInterface>(exchangeName, exchangeHost, rim, replicaDescriptor,
@@ -305,7 +304,7 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
                             String request = readLine(inputStream);
                             logger.info("received request "+request);
                             PrintWriter pw = new PrintWriter(new OutputStreamWriter(s.getOutputStream()));
-                            if (request.startsWith("POST /replication/replication")) {
+                            if (request.equals("POST /replication/replication")) {
                                 final ReplicationServlet servlet = new ReplicationServlet(new SingletonReplicablesProvider(master), /* replicationServiceTracker */ null);
                                 final HttpServletRequest requestMock = Mockito.mock(HttpServletRequest.class);
                                 Mockito.when(requestMock.getInputStream()).thenReturn(new ServletInputStream() {
