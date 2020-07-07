@@ -527,6 +527,8 @@ public class RaceBoardPanel
         mainPanel.add(mapViewer.getViewerWidget());
         boolean showLeaderboard = initialPerspectiveOwnSettings.isShowLeaderboard() && isScreenLargeEnoughToInitiallyDisplayLeaderboard;
         setLeaderboardVisible(showLeaderboard);
+        GWT.debugger();
+        leaderboardPanel.setAutoExpandPreSelected(initialPerspectiveOwnSettings.isAutoExpandPreSelectedRace());
         if (showChartMarkEditMediaButtonsAndVideo) {
             setWindChartVisible(initialPerspectiveOwnSettings.isShowWindChart());
             setCompetitorChartVisible(initialPerspectiveOwnSettings.isShowCompetitorsChart());
