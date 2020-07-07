@@ -9,7 +9,7 @@ import com.sap.sse.landscape.SecurityGroup;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ApplicationReplicaSet;
 import com.sap.sse.landscape.application.Scope;
-import com.sap.sse.landscape.aws.AWSLandscape;
+import com.sap.sse.landscape.aws.AwsLandscape;
 
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentials;
@@ -18,7 +18,7 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.route53.Route53Client;
 
-public class AwsLandscapeImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics> implements AWSLandscape<ShardingKey, MetricsT> {
+public class AwsLandscapeImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics> implements AwsLandscape<ShardingKey, MetricsT> {
     private final String accessKeyId;
     private final String secretAccessKey;
     

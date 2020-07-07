@@ -55,7 +55,8 @@ Bundle-ClassPath: .,
  lib/s3-2.13.50-sources.jar,
  lib/sdk-core-2.13.50-sources.jar,
  lib/utils-2.13.50-sources.jar,
- lib/cloudwatch-2.13.50.jar
+ lib/cloudwatch-2.13.50.jar,
+ lib/elasticloadbalancingv2-2.13.50.jar
 Automatic-Module-Name: com.amazon.aws.aws-java-api
 Export-Package: software.amazon.awssdk.annotations,
  software.amazon.awssdk.arns,
