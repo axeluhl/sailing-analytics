@@ -304,7 +304,9 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
                             String request = readLine(inputStream);
                             logger.info("received request "+request);
                             PrintWriter pw = new PrintWriter(new OutputStreamWriter(s.getOutputStream()));
-                            if (request.equals("POST /replication/replication")) {
+                            // Note the trailing space in the following prefix comparison;
+                            // It matches, e.g., "POST /replication/replication HTTP/1.1"
+                            if (request.startsWith("POST /replication/replication ")) {
                                 final ReplicationServlet servlet = new ReplicationServlet(new SingletonReplicablesProvider(master), /* replicationServiceTracker */ null);
                                 final HttpServletRequest requestMock = Mockito.mock(HttpServletRequest.class);
                                 Mockito.when(requestMock.getInputStream()).thenReturn(new ServletInputStream() {
