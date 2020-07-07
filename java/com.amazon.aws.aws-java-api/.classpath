@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry exported="true" kind="lib" path="lib/cloudwatch-2.13.50.jar" sourcepath="lib/cloudwatch-2.13.50-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/arns-2.13.50-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/auth-2.13.50-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/aws-core-2.13.50-sources.jar"/>
