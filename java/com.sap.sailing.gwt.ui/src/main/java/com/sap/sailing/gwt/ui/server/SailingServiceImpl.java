@@ -4679,17 +4679,17 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-  //READ
-    public Iterable<CompetitorDTO> getCompetitors(boolean filterCompetitorsWithBoat,
-            boolean filterCompetitorsWithoutBoat) {
+    //READ
+    public Iterable<CompetitorDTO> getCompetitors(boolean ignoreCompetitorsWithBoat,
+            boolean ignoreCompetitorsWithoutBoat) {
         CompetitorAndBoatStore competitorStore = getService().getBaseDomainFactory().getCompetitorAndBoatStore();
         final HasPermissions.Action[] requiredActionsForRead = SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS;
         final Iterable<? extends Competitor> filteredCompetitors;
-        if (filterCompetitorsWithBoat == false && filterCompetitorsWithoutBoat == false) {
+        if (ignoreCompetitorsWithBoat == false && ignoreCompetitorsWithoutBoat == false) {
             filteredCompetitors = competitorStore.getAllCompetitors();
-        } else if (filterCompetitorsWithBoat == true && filterCompetitorsWithoutBoat == false) {
+        } else if (ignoreCompetitorsWithBoat == true && ignoreCompetitorsWithoutBoat == false) {
             filteredCompetitors = competitorStore.getCompetitorsWithoutBoat();
-        } else if (filterCompetitorsWithBoat == false && filterCompetitorsWithoutBoat == true) {
+        } else if (ignoreCompetitorsWithBoat == false && ignoreCompetitorsWithoutBoat == true) {
             filteredCompetitors = competitorStore.getCompetitorsWithBoat();
         } else {
             filteredCompetitors = Collections.emptyList();
@@ -4701,7 +4701,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         }
 
     @Override
-  //READ
+    //READ
     public Iterable<CompetitorDTO> getCompetitorsOfLeaderboard(String leaderboardName) {
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         getSecurityService().checkCurrentUserReadPermission(leaderboard);
@@ -4709,7 +4709,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-  //READ
+    //READ
     public Map<? extends CompetitorDTO, BoatDTO> getCompetitorsAndBoatsOfRace(String leaderboardName,
             String raceColumnName, String fleetName) throws NotFoundException {
         getSecurityService().checkCurrentUserReadPermission(getLeaderboardByName(leaderboardName));
