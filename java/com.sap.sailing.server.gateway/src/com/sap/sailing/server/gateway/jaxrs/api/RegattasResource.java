@@ -273,8 +273,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 regattasJson.add(regattaJsonSerializer.serialize(regatta));
             }
         }
-        String json = regattasJson.toJSONString();
-        return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+        return Response.ok(streamingOutput(regattasJson)).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
     }
 
     @GET
@@ -434,8 +433,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                     result.add(competitorSerializer.serialize(competitor));
                 }
             }
-            String json = result.toJSONString();
-            response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+            response = Response.ok(streamingOutput(result)).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
         }
         return response;
     }
@@ -1276,8 +1274,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                     resultJson.add(getRaceTimesJSONForRaceName(raceName, regatta));
                 }
             }
-            String json = resultJson.toJSONString();
-            response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+            response = Response.ok(streamingOutput(resultJson)).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
         }
         return response;
     }
@@ -1664,7 +1661,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                     result.add(toJson(raceColumn, fleet, windSummary));
                 }
             }
-            response = Response.ok(result.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+            response = Response.ok(streamingOutput(result)).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
         }
         return response;
     }
@@ -2458,8 +2455,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                     jsonResponse.add(raceColumnDataAsJson);
                     oneBasedNumberOfLast = oneBasedNumberOfNext;
                 }
-                String json = jsonResponse.toJSONString();
-                response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+                response = Response.ok(streamingOutput(jsonResponse)).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
             }
         }
         return response;
