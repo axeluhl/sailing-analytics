@@ -161,7 +161,7 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
         return leaderboardSettings;
     }
 
-    private boolean isAutoExpandPreSelectedRace() {
+    public boolean isAutoExpandPreSelectedRace() {
         return autoExpandPreSelectedRace;
     }
 

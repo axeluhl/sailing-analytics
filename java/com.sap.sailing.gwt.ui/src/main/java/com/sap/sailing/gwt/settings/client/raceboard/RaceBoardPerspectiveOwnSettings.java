@@ -37,6 +37,7 @@ public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializable
     private transient StringSetting jumpToTag;
     private transient LongSetting zoomEnd;
     private transient LongSetting zoomStart;
+    private transient BooleanSetting autoExpandPreSelectedRace;
     
     public static final String PARAM_VIEW_MODE = "viewMode";
     public static final String PARAM_VIEW_SHOW_LEADERBOARD = "viewShowLeaderboard";
@@ -54,6 +55,8 @@ public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializable
     public static final String PARAM_JUMP_TO_TAG = TagDTO.TAG_URL_PARAMETER;
     public static final String PARAM_ZOOM_START = "zoomStart";
     public static final String PARAM_ZOOM_END = "zoomEnd";
+    public static final String PARAM_AUTO_EXPAND_PRE_SELECTED_RACE = "autoExpandPreSelectedRace";
+
 
     public RaceBoardPerspectiveOwnSettings() {
     }
@@ -84,12 +87,13 @@ public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializable
         this.jumpToTag = new StringSetting(PARAM_JUMP_TO_TAG, this, null);
         this.zoomStart = new LongSetting(PARAM_ZOOM_START, this, null);
         this.zoomEnd = new LongSetting(PARAM_ZOOM_END, this, null);
+        this.autoExpandPreSelectedRace = new BooleanSetting(PARAM_AUTO_EXPAND_PRE_SELECTED_RACE, this, false);
     }
 
     public RaceBoardPerspectiveOwnSettings(String activeCompetitorsFilterSetName, Boolean showLeaderboard,
             Boolean showWindChart, Boolean showCompetitorsChart, Boolean canReplayDuringLiveRaces,
             Duration initialDurationAfterRaceStartInReplay, String selectedCompetitor, Iterable<String> selectedCompetitors, 
-            Boolean showTags, Boolean showManeuverTable, String jumpToTag, Long zoomStart, Long zoomEnd) {
+            Boolean showTags, Boolean showManeuverTable, String jumpToTag, Long zoomStart, Long zoomEnd, Boolean autoExpandPreSelectedRace) {
         this.showTags.setValue(showTags);
         this.showManeuverTable.setValue(showManeuverTable);
         this.activeCompetitorsFilterSetName.setValue(activeCompetitorsFilterSetName);
@@ -103,6 +107,7 @@ public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializable
         this.jumpToTag.setValue(jumpToTag);
         this.zoomStart.setValue(zoomStart);
         this.zoomEnd.setValue(zoomEnd);
+        this.autoExpandPreSelectedRace.setValue(autoExpandPreSelectedRace);
     }
 
     public boolean isShowLeaderboard() {
@@ -147,6 +152,10 @@ public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializable
     
     public Long getZoomEnd() {
         return zoomEnd.getValue();
+    }
+    
+    public Boolean isAutoExpandPreSelectedRace() {
+        return autoExpandPreSelectedRace.getValue();
     }
     
     public void resetShowTags() {
@@ -200,11 +209,15 @@ public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializable
     public void resetZoomEnd() {
         this.zoomEnd.resetToDefault();
     }
+    
+    public void resetAutoExpandPreSelectedRace() {
+        this.autoExpandPreSelectedRace.resetToDefault();
+    }
 
     public static RaceBoardPerspectiveOwnSettings readSettingsFromURL(boolean defaultForViewShowLeaderboard,
             boolean defaultForViewShowWindchart, boolean defaultForViewShowCompetitorsChart,
             String defaultForViewCompetitorFilter, boolean defaultForCanReplayDuringLiveRaces, boolean defaultForViewShowTags,
-            boolean defaultForViewShowManeuverTable, String defaultForJumpToTag, Long defaultForZoomStart, Long defaultForZoomEnd) {
+            boolean defaultForViewShowManeuverTable, String defaultForJumpToTag, Long defaultForZoomStart, Long defaultForZoomEnd, boolean defaultForAutoExpandPreSelectedRace) {
         final boolean showLeaderboard = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_LEADERBOARD, defaultForViewShowLeaderboard /* default */);
         final boolean showWindChart = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_WINDCHART, defaultForViewShowWindchart /* default */);
         final boolean showCompetitorsChart = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_COMPETITORSCHART, defaultForViewShowCompetitorsChart /* default */);
@@ -220,9 +233,10 @@ public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializable
         final String jumpToTag = GwtHttpRequestUtils.getStringParameter(PARAM_JUMP_TO_TAG, defaultForJumpToTag /* default */);
         final Long zoomStart = GwtHttpRequestUtils.getLongParameter(PARAM_ZOOM_START, defaultForZoomStart);
         final Long zoomEnd = GwtHttpRequestUtils.getLongParameter(PARAM_ZOOM_END, defaultForZoomEnd);
+        final boolean autoExpandPreSelectedRace = GwtHttpRequestUtils.getBooleanParameter(PARAM_AUTO_EXPAND_PRE_SELECTED_RACE, defaultForAutoExpandPreSelectedRace);
         return new RaceBoardPerspectiveOwnSettings(activeCompetitorsFilterSetName, showLeaderboard, showWindChart,
                 showCompetitorsChart, canReplayWhileLiveIsPossible, initialDurationAfterRaceStartInReplay,
-                selectedCompetitor, selectedCompetitors, showTags, showManeuverTable, jumpToTag, zoomStart, zoomEnd);
+                selectedCompetitor, selectedCompetitors, showTags, showManeuverTable, jumpToTag, zoomStart, zoomEnd, autoExpandPreSelectedRace);
     }
 
     /**

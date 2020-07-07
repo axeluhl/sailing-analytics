@@ -884,12 +884,13 @@ public class RaceBoardPanel
         final boolean isCompetitorChartVisible = competitorChart == null ? false : competitorChart.isVisible();
         final boolean isWindChartVisible = windChart == null ? false : windChart.isVisible();
         final boolean isManeuverTableVisible = maneuverTablePanel == null ? false : maneuverTablePanel.isVisible();
+        final boolean autoExpandPreSelectedRace = leaderboardPanel.isAutoExpandPreSelectedRace();
         RaceBoardPerspectiveOwnSettings raceBoardPerspectiveOwnSettings = new RaceBoardPerspectiveOwnSettings(
                 activeCompetitorsFilterSetName, leaderboardPanel.isVisible(), isWindChartVisible,
                 isCompetitorChartVisible, initialSettings.isCanReplayDuringLiveRaces(),
                 newInitialDurationAfterRaceStartInReplay, /* legacy single selectedCompetitor */ null,
                 selectedCompetitorIds, taggingPanel.isVisible(), isManeuverTableVisible,
-                initialSettings.getJumpToTag(), zoomStartInMillis, zoomEndInMillis);
+                initialSettings.getJumpToTag(), zoomStartInMillis, zoomEndInMillis, autoExpandPreSelectedRace);
         return raceBoardPerspectiveOwnSettings;
     }
     
