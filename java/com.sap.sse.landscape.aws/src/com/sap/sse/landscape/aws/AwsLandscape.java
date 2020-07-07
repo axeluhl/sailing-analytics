@@ -4,13 +4,21 @@ import com.sap.sse.landscape.AvailabilityZone;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.MachineImage;
+import com.sap.sse.landscape.Region;
 import com.sap.sse.landscape.SecurityGroup;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
+import com.sap.sse.landscape.aws.impl.AmazonMachineImage;
+import com.sap.sse.landscape.aws.impl.AwsInstance;
 import com.sap.sse.landscape.aws.impl.AwsLandscapeImpl;
+
+import software.amazon.awssdk.services.cloudwatch.CloudWatchClient;
+import software.amazon.awssdk.services.ec2.Ec2Client;
+import software.amazon.awssdk.services.route53.Route53Client;
 
 /**
  * A simplified view onto the AWS SDK API that is geared towards specific ways and patterns of managing an application
- * and infrastructure landscape.
+ * and infrastructure landscape. Among others, it uses {@link Ec2Client}, {@link Route53Client},
+ * {@link CloudWatchClient} and {@link ElasticLoadBalancingV2Client} to manage the underlying AWS landscape.
  * 
  * @author Axel Uhl (D043530)
  *
@@ -35,5 +43,18 @@ public interface AwsLandscape<ShardingKey, MetricsT extends ApplicationProcessMe
      * Launches a new {@link Host} from a given image into the availability zone specified and controls
      * network access to that instance by setting the security groups specified for the resulting host.
      */
-    <HostT extends Host> HostT launchHost(MachineImage<HostT> fromImage, AvailabilityZone az, Iterable<SecurityGroup> securityGroups);
+    default AwsInstance launchHost(MachineImage<AwsInstance> fromImage, AvailabilityZone az, Iterable<SecurityGroup> securityGroups) {
+        return launchHosts(1, fromImage, az, securityGroups).iterator().next();
+    }
+
+    /**
+     * Launches a number of new {@link Host}s from a given image into the availability zone specified and controls
+     * network access to that instance by setting the security groups specified for the resulting host.
+     */
+    Iterable<AwsInstance> launchHosts(int numberOfHostsToLaunch, MachineImage<AwsInstance> fromImage, AvailabilityZone az,
+            Iterable<SecurityGroup> securityGroups);
+    
+    AmazonMachineImage getImage(Region region, String imageId);
+
+    void terminate(AwsInstance host);
 }

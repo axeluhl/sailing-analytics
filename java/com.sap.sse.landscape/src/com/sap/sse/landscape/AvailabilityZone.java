@@ -1,5 +1,10 @@
 package com.sap.sse.landscape;
 
-public interface AvailabilityZone {
+import com.sap.sse.common.WithID;
+
+public interface AvailabilityZone extends WithID {
+    @Override
+    String getId();
+    
     Region getRegion();
 }

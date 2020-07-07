@@ -1,5 +1,9 @@
 package com.sap.sse.landscape;
 
-public interface SecurityGroup {
+import com.sap.sse.common.WithID;
 
+@FunctionalInterface
+public interface SecurityGroup extends WithID {
+    @Override
+    String getId();
 }
