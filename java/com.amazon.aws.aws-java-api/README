@@ -1,0 +1,28 @@
+This is an OSGi wrapper project around the parts of the AWS Java SDK libraries required by
+this project. There is a Gradle configuration (build.gradle, settings.gradle). Change to this
+project's directory (${workspace}/java/com.amazon.aws.aws-java-api) and run
+
+	rm ./lib/*
+	../../gradlew downloadLibs
+
+This will download all JARs required for the components listed in build.gradle in the
+dependencies section, such as
+
+    implementation 'software.amazon.awssdk:s3'
+
+Add more components by adding more lines, such as
+
+    implementation 'software.amazon.awssdk:ec2'
+
+and repeat the process as needed. Make sure to update build.properties to
+reference the additional JAR files (which can alternatively be accomplished through the MANIFEST.MF
+editor's "Runtime" tab).
+
+To download source JARs which can then be attached, add lines such as the following to the dependencies section:
+
+    implementation group: 'software.amazon.awssdk', name: 's3', classifier: 'sources'
+
+This will fetch the source JAR corresponding to the s3 code JAR. To attach it, go to the project's
+build path settings, expand the code JAR's tree node in the "Libraries" tab, select the "Source Attachment"
+sub-node, click the "Edit" button and select the source JAR that got downloaded. Don't forget to add the
+source JAR to the git repository.
