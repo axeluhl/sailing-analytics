@@ -191,7 +191,12 @@ public abstract class NonPerformanceCurveRankingMetric extends AbstractRankingMe
             } else {
                 assert getTrackedRace().getRace().getCourse().getIndexOfWaypoint(legWho.getLeg().getFrom()) <= getTrackedRace()
                         .getRace().getCourse().getIndexOfWaypoint(legTo.getLeg().getFrom());
-                final Duration toEndOfLegOrTo = getPredictedDurationToEndOfLegOrTo(timePoint, legWho, legWho.getTrackedLeg().getTrackedLeg(to), cache);
+                // bug5316: note that the following may result in a negative duration; this is particularly the case
+                // when "who" has sailed (or is extrapolated) beyond the end of the leg without having received a mark passing.
+                // In this case we want to assume that it will take "who" approximately that long again to reach back to
+                // the waypoint to actually pass it; so we use the absolute duration instead.
+                final Duration toEndOfLegOrTo = getPredictedDurationToEndOfLegOrTo(timePoint, legWho, legWho.getTrackedLeg().getTrackedLeg(to), cache).
+                        abs();
                 if (toEndOfLegOrTo == null) {
                     result = null;
                 } else {
