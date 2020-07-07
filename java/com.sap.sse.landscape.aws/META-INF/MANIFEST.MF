@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Aws
+Bundle-SymbolicName: com.sap.sse.landscape.aws
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: SAP
+Automatic-Module-Name: com.sap.sse.landscape.aws
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: com.amazon.aws.aws-java-api;bundle-version="2.13.50",
+ com.sap.sse.landscape

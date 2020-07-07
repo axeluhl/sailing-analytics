@@ -6,5 +6,6 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Automatic-Module-Name: com.sap.sse.landscape
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Export-Package: com.sap.sse.landscape
+Export-Package: com.sap.sse.landscape,
+ com.sap.sse.landscape.application
 Require-Bundle: com.sap.sse.common

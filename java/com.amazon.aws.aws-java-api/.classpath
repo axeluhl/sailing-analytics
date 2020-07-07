@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry exported="true" kind="lib" path="lib/arns-2.13.50-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/auth-2.13.50-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/aws-core-2.13.50-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/ec2-2.13.50-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/profiles-2.13.50-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/regions-2.13.50-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/route53-2.13.50-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/route53-2.13.50.jar" sourcepath="lib/route53-2.13.50-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/s3-2.13.50-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/sdk-core-2.13.50-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/utils-2.13.50-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/ec2-2.13.50.jar" sourcepath="lib/ec2-2.13.50-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/annotations-2.13.50.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/apache-client-2.13.50.jar"/>
