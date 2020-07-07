@@ -22,8 +22,7 @@ import com.sap.sse.common.TypeBasedServiceFinder;
  */
 public interface FileStorageService extends IsManagedByCache<FileStorageServiceResolver>, Serializable {
     /**
-     * @param originalFileExtension
-     *            may be {@code null}
+     * @param fileExtension if not {@code null} and not empty then it starts with a dot (".")
      */
     URI storeFile(InputStream is, String fileExtension, long lengthInBytes) throws IOException,
             OperationFailedException, InvalidPropertiesException, UnauthorizedException;

@@ -48,7 +48,7 @@ public abstract class BaseFileStorageServiceImpl implements FileStorageService {
     
     protected static String getKey(String fileExtension) {
         String key = UUID.randomUUID().toString();
-        key += "."+fileExtension;
+        key += fileExtension;
         return key;
     }
 

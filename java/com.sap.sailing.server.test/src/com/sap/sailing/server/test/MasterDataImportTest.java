@@ -163,11 +163,13 @@ import com.sap.sse.shared.media.VideoDescriptor;
 public class MasterDataImportTest {
 
     private static final String TEST_GROUP_NAME = "testGroup";
+    private static final UUID TEST_GROUP_UUID = UUID.randomUUID();
     private static final String TEST_EVENT_NAME = "testEvent";
     private static final String TEST_REGATTA_NAME = "testRegatta";
     private static final String TEST_BOAT_CLASS_NAME = "29er";
     private static final String TEST_LEADERBOARD_NAME = "testRegatta (29er)";
     private static final String TEST_GROUP_NAME2 = "testGroup2";
+    private static final UUID TEST_GROUP_UUID2 = UUID.randomUUID();
 
     private final UUID eventUUID = UUID.randomUUID();
     private AbstractLogEventAuthor author = new LogEventAuthorImpl("Test Author", 1);
@@ -293,7 +295,7 @@ public class MasterDataImportTest {
                 "testDisplayName", discardRule);
         List<String> leaderboardNames = new ArrayList<String>();
         leaderboardNames.add(leaderboard.getName());
-        LeaderboardGroup group = sourceService.addLeaderboardGroup(UUID.randomUUID(), TEST_GROUP_NAME, "testGroupDesc",
+        LeaderboardGroup group = sourceService.addLeaderboardGroup(TEST_GROUP_UUID, TEST_GROUP_NAME, "testGroupDesc",
         /* displayName */null, false, leaderboardNames, null, null);
         event.addLeaderboardGroup(group);
         // Set tracked Race with competitors
@@ -382,13 +384,13 @@ public class MasterDataImportTest {
         String nickName = "Angie";
         leaderboard.setDisplayName(competitorToSuppress, nickName);
         // Serialize
-        List<String> groupNamesToExport = new ArrayList<String>();
-        groupNamesToExport.add(group.getName());
+        List<String> groupUuidsToExport = new ArrayList<String>();
+        groupUuidsToExport.add(group.getId().toString());
         RacingEventService destService;
         DomainFactory domainFactory;
         DummyMasterDataRessource spyResource = spyResource(new DummyMasterDataRessource(), sourceService);
         Mockito.doReturn(securityService).when(spyResource).getSecurityService();
-        Response response = spyResource.getMasterDataByLeaderboardGroups(groupNamesToExport, false, true, false, false);
+        Response response = spyResource.getMasterDataByLeaderboardGroups(groupUuidsToExport, false, true, false, false);
         StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         UUID randomUUID = UUID.randomUUID();
@@ -414,7 +416,7 @@ public class MasterDataImportTest {
         Assert.assertNotNull(creationCount);
         Event eventOnTarget = destService.getEvent(eventUUID);
         Assert.assertNotNull(eventOnTarget);
-        LeaderboardGroup leaderboardGroupOnTarget = destService.getLeaderboardGroupByName(TEST_GROUP_NAME);
+        LeaderboardGroup leaderboardGroupOnTarget = destService.getLeaderboardGroupByID(TEST_GROUP_UUID);
         Assert.assertNotNull(leaderboardGroupOnTarget);
         assertSame(leaderboardGroupOnTarget, eventOnTarget.getLeaderboardGroups().iterator().next());
         Leaderboard leaderboardOnTarget = destService.getLeaderboardByName(TEST_LEADERBOARD_NAME);
@@ -576,7 +578,7 @@ public class MasterDataImportTest {
                 "testDisplayName", discardRule);
         List<String> leaderboardNames = new ArrayList<String>();
         leaderboardNames.add(leaderboard.getName());
-        LeaderboardGroup group = sourceService.addLeaderboardGroup(UUID.randomUUID(), TEST_GROUP_NAME, "testGroupDesc",
+        LeaderboardGroup group = sourceService.addLeaderboardGroup(TEST_GROUP_UUID, TEST_GROUP_NAME, "testGroupDesc",
         /* displayName */null, false, leaderboardNames, null, null);
 
         // Set tracked Race with competitors
@@ -620,7 +622,7 @@ public class MasterDataImportTest {
 
         // Serialize
         List<String> groupNamesToExport = new ArrayList<String>();
-        groupNamesToExport.add(group.getName());
+        groupNamesToExport.add(group.getId().toString());
 
         RacingEventService destService;
         Response response = masterDataResource.getMasterDataByLeaderboardGroups(groupNamesToExport, false, true, false, false);
@@ -652,7 +654,7 @@ public class MasterDataImportTest {
         Assert.assertNotNull(creationCount);
         Event eventOnTarget = destService.getEvent(eventUUID);
         Assert.assertNotNull(eventOnTarget);
-        LeaderboardGroup leaderboardGroupOnTarget = destService.getLeaderboardGroupByName(TEST_GROUP_NAME);
+        LeaderboardGroup leaderboardGroupOnTarget = destService.getLeaderboardGroupByID(TEST_GROUP_UUID);
         Assert.assertNotNull(leaderboardGroupOnTarget);
         Leaderboard leaderboardOnTarget = destService.getLeaderboardByName(TEST_LEADERBOARD_NAME);
         Assert.assertNotNull(leaderboardOnTarget);
@@ -754,7 +756,7 @@ public class MasterDataImportTest {
                 "testDisplayName", discardRule);
         List<String> leaderboardNames = new ArrayList<String>();
         leaderboardNames.add(leaderboard.getName());
-        LeaderboardGroup group = sourceService.addLeaderboardGroup(UUID.randomUUID(), TEST_GROUP_NAME, "testGroupDesc",
+        LeaderboardGroup group = sourceService.addLeaderboardGroup(TEST_GROUP_UUID, TEST_GROUP_NAME, "testGroupDesc",
         /* displayName */null, false, leaderboardNames, null, null);
 
         // Set tracked Race with competitors
@@ -788,7 +790,7 @@ public class MasterDataImportTest {
 
         // Serialize
         List<String> groupNamesToExport = new ArrayList<String>();
-        groupNamesToExport.add(group.getName());
+        groupNamesToExport.add(group.getId().toString());
 
         RacingEventService destService;
         DomainFactory domainFactory;
@@ -823,7 +825,7 @@ public class MasterDataImportTest {
         Assert.assertNotNull(creationCount);
         Event eventOnTarget = destService.getEvent(eventUUID);
         Assert.assertNotNull(eventOnTarget);
-        LeaderboardGroup leaderboardGroupOnTarget = destService.getLeaderboardGroupByName(TEST_GROUP_NAME);
+        LeaderboardGroup leaderboardGroupOnTarget = destService.getLeaderboardGroupByID(TEST_GROUP_UUID);
         Assert.assertNotNull(leaderboardGroupOnTarget);
         Leaderboard leaderboardOnTarget = destService.getLeaderboardByName(TEST_LEADERBOARD_NAME);
         Assert.assertNotNull(leaderboardOnTarget);
@@ -903,7 +905,7 @@ public class MasterDataImportTest {
                 "testDisplayName", discardRule);
         List<String> leaderboardNames = new ArrayList<String>();
         leaderboardNames.add(leaderboard.getName());
-        LeaderboardGroup group = sourceService.addLeaderboardGroup(UUID.randomUUID(), TEST_GROUP_NAME, "testGroupDesc",
+        LeaderboardGroup group = sourceService.addLeaderboardGroup(TEST_GROUP_UUID, TEST_GROUP_NAME, "testGroupDesc",
         /* displayName */null, false, leaderboardNames, null, null);
         // Set tracked Race with competitors
         Set<Competitor> competitors = new HashSet<Competitor>();
@@ -955,7 +957,7 @@ public class MasterDataImportTest {
         storedLogUUIDs.add(finishPositioningConfirmedEvent.getId());
         // Serialize
         List<String> groupNamesToExport = new ArrayList<String>();
-        groupNamesToExport.add(group.getName());
+        groupNamesToExport.add(group.getId().toString());
         RacingEventService destService;
         DomainFactory domainFactory;
         Response response = masterDataResource.getMasterDataByLeaderboardGroups(groupNamesToExport, false, true, false, false);
@@ -984,7 +986,7 @@ public class MasterDataImportTest {
         Assert.assertNotNull(creationCount);
         Event eventOnTarget = destService.getEvent(eventUUID);
         Assert.assertNotNull(eventOnTarget);
-        LeaderboardGroup leaderboardGroupOnTarget = destService.getLeaderboardGroupByName(TEST_GROUP_NAME);
+        LeaderboardGroup leaderboardGroupOnTarget = destService.getLeaderboardGroupByID(TEST_GROUP_UUID);
         Assert.assertNotNull(leaderboardGroupOnTarget);
         Leaderboard leaderboardOnTarget = destService.getLeaderboardByName(TEST_LEADERBOARD_NAME);
         Assert.assertNotNull(leaderboardOnTarget);
@@ -1048,7 +1050,7 @@ public class MasterDataImportTest {
                 "testDisplayName", discardRule);
         List<String> leaderboardNames = new ArrayList<String>();
         leaderboardNames.add(leaderboard.getName());
-        LeaderboardGroup group = sourceService.addLeaderboardGroup(UUID.randomUUID(), TEST_GROUP_NAME, "testGroupDesc",
+        LeaderboardGroup group = sourceService.addLeaderboardGroup(TEST_GROUP_UUID, TEST_GROUP_NAME, "testGroupDesc",
         /* displayName */null, false, leaderboardNames, null, null);
         // Set tracked Race with competitors
         Set<Competitor> competitors = new HashSet<Competitor>();
@@ -1096,7 +1098,7 @@ public class MasterDataImportTest {
         leaderboard.setDisplayName(competitorToSuppress, nickName);
         // Serialize
         List<String> groupNamesToExport = new ArrayList<String>();
-        groupNamesToExport.add(group.getName());
+        groupNamesToExport.add(group.getId().toString());
         RacingEventService destService;
         DomainFactory domainFactory;
         Response response = masterDataResource.getMasterDataByLeaderboardGroups(groupNamesToExport, false, true, false, false);
@@ -1147,7 +1149,7 @@ public class MasterDataImportTest {
                     "testDisplayNameNotToOverride", discardRule);
             List<String> leaderboardNamesNotToOverride = new ArrayList<String>();
             leaderboardNamesNotToOverride.add(leaderboardNotToOverride.getName());
-            groupNotToOverride = destService.addLeaderboardGroup(UUID.randomUUID(), TEST_GROUP_NAME,
+            groupNotToOverride = destService.addLeaderboardGroup(TEST_GROUP_UUID, TEST_GROUP_NAME,
                     "testGroupDescNotToOverride", /* displayName */null, false, leaderboardNamesNotToOverride, null,
                     null);
             inputStream = new ByteArrayInputStream(os.toByteArray());
@@ -1178,7 +1180,7 @@ public class MasterDataImportTest {
         // Check if existing course area survived import
         Assert.assertEquals(courseAreaNotToOverride.getName(), eventOnTarget.getVenue().getCourseAreas().iterator()
                 .next().getName());
-        LeaderboardGroup leaderboardGroupOnTarget = destService.getLeaderboardGroupByName(TEST_GROUP_NAME);
+        LeaderboardGroup leaderboardGroupOnTarget = destService.getLeaderboardGroupByID(TEST_GROUP_UUID);
         Assert.assertNotNull(leaderboardGroupOnTarget);
         // Check if existing leaderboard group survived import
         Assert.assertEquals(groupNotToOverride.getDescription(), leaderboardGroupOnTarget.getDescription());
@@ -1230,7 +1232,7 @@ public class MasterDataImportTest {
                 "testDisplayName", discardRule);
         List<String> leaderboardNames = new ArrayList<String>();
         leaderboardNames.add(leaderboard.getName());
-        LeaderboardGroup group = sourceService.addLeaderboardGroup(UUID.randomUUID(), TEST_GROUP_NAME, "testGroupDesc",
+        LeaderboardGroup group = sourceService.addLeaderboardGroup(TEST_GROUP_UUID, TEST_GROUP_NAME, "testGroupDesc",
                 /* displayName */null, false, leaderboardNames, null, null);
         // Set tracked Race with competitors
         Set<Competitor> competitors = new HashSet<Competitor>();
@@ -1278,7 +1280,7 @@ public class MasterDataImportTest {
         leaderboard.setDisplayName(competitorToSuppress, nickName);
         // Serialize
         List<String> groupNamesToExport = new ArrayList<String>();
-        groupNamesToExport.add(group.getName());
+        groupNamesToExport.add(group.getId().toString());
         RacingEventService destService;
         DomainFactory domainFactory;
         Response response = masterDataResource.getMasterDataByLeaderboardGroups(groupNamesToExport, false, true, false, false);
@@ -1344,9 +1346,9 @@ public class MasterDataImportTest {
             columnToOverride.setTrackedRace(testFleet1ToOverride, trackedRace2);
             identifierOfRegattaTrackedRace = regattaToOverride.getRaceIdentifier(columnToOverride
                     .getRaceDefinition(testFleet1ToOverride));
-            destService.addLeaderboardGroup(UUID.randomUUID(), TEST_GROUP_NAME, "testGroupDescToOverride", /* displayName */
+            destService.addLeaderboardGroup(TEST_GROUP_UUID, TEST_GROUP_NAME, "testGroupDescToOverride", /* displayName */
                     null, false, new ArrayList<String>(), null, null);
-            destService.getLeaderboardGroupByName(TEST_GROUP_NAME).addLeaderboard(leaderboardToOverride);
+            destService.getLeaderboardGroupByID(TEST_GROUP_UUID).addLeaderboard(leaderboardToOverride);
             destService.addLeaderboard(leaderboardToOverride);
             ByteArrayInputStream inputStream = new ByteArrayInputStream(os.toByteArray());
             MasterDataImporter importer = new MasterDataImporter(domainFactory, destService,
@@ -1369,7 +1371,7 @@ public class MasterDataImportTest {
         Assert.assertEquals(event.getVenue().getName(), eventOnTarget.getVenue().getName());
         // Check if existing course area survive import
         Assert.assertEquals(courseAreaNotToOverride.getName(), eventOnTarget.getVenue().getCourseAreas().iterator().next().getName());
-        LeaderboardGroup leaderboardGroupOnTarget = destService.getLeaderboardGroupByName(TEST_GROUP_NAME);
+        LeaderboardGroup leaderboardGroupOnTarget = destService.getLeaderboardGroupByID(TEST_GROUP_UUID);
         Assert.assertNotNull(leaderboardGroupOnTarget);
         // Check if existing leaderboard group didn't survive import
         Assert.assertEquals(group.getDescription(), leaderboardGroupOnTarget.getDescription());
@@ -1421,12 +1423,12 @@ public class MasterDataImportTest {
                 "testDisplayName", new int[] { 1, 2, 3, 4 });
         List<String> leaderboardNames = new ArrayList<String>();
         leaderboardNames.add(leaderboard.getName());
-        LeaderboardGroup group = sourceService.addLeaderboardGroup(UUID.randomUUID(), TEST_GROUP_NAME, "testGroupDesc",
+        LeaderboardGroup group = sourceService.addLeaderboardGroup(TEST_GROUP_UUID, TEST_GROUP_NAME, "testGroupDesc",
         /* displayName */null, false, leaderboardNames, null, null);
 
         // Serialize
         List<String> groupNamesToExport = new ArrayList<String>();
-        groupNamesToExport.add(group.getName());
+        groupNamesToExport.add(group.getId().toString());
 
         RacingEventService destService;
         DomainFactory domainFactory;
@@ -1501,7 +1503,7 @@ public class MasterDataImportTest {
                 "testDisplayName", discardRule);
         List<String> leaderboardNames = new ArrayList<String>();
         leaderboardNames.add(leaderboard.getName());
-        LeaderboardGroup group = sourceService.addLeaderboardGroup(UUID.randomUUID(), TEST_GROUP_NAME, "testGroupDesc",
+        LeaderboardGroup group = sourceService.addLeaderboardGroup(TEST_GROUP_UUID, TEST_GROUP_NAME, "testGroupDesc",
         /* displayName */null, false, leaderboardNames, null, null);
 
         // Set tracked Race with competitors
@@ -1557,7 +1559,7 @@ public class MasterDataImportTest {
 
         // Serialize
         List<String> groupNamesToExport = new ArrayList<String>();
-        groupNamesToExport.add(group.getName());
+        groupNamesToExport.add(group.getId().toString());
 
         RacingEventService destService;
         DomainFactory domainFactory;
@@ -1630,7 +1632,7 @@ public class MasterDataImportTest {
                 "testDisplayName", discardRule);
         List<String> leaderboardNames = new ArrayList<String>();
         leaderboardNames.add(leaderboard.getName());
-        LeaderboardGroup group = sourceService.addLeaderboardGroup(UUID.randomUUID(), TEST_GROUP_NAME, "testGroupDesc",
+        LeaderboardGroup group = sourceService.addLeaderboardGroup(TEST_GROUP_UUID, TEST_GROUP_NAME, "testGroupDesc",
         /* displayName */null, false, leaderboardNames, null, null);
 
         // Set tracked Race with competitors
@@ -1688,7 +1690,7 @@ public class MasterDataImportTest {
 
         // Serialize
         List<String> groupNamesToExport = new ArrayList<String>();
-        groupNamesToExport.add(group.getName());
+        groupNamesToExport.add(group.getId().toString());
 
         RacingEventService destService;
         DomainFactory domainFactory;
@@ -1783,14 +1785,13 @@ public class MasterDataImportTest {
         TrackBasedTest.assignRacesToRegattaLeaderboardColumns(leaderboard, raceIdentifiers);
         boolean displayGroupsInReverseOrder = false;
         int[] overallLeaderboardDiscardThresholds = new int[0];
-        UUID leaderboardGropuUuid = UUID.randomUUID();
-        LeaderboardGroup leaderboardGroup = sourceService.addLeaderboardGroup(leaderboardGropuUuid,
-                "leaderboard group name", "leaderboard group description", "leaderboard group display name",
+        LeaderboardGroup leaderboardGroup = sourceService.addLeaderboardGroup(TEST_GROUP_UUID,
+                TEST_GROUP_NAME, "leaderboard group description", "leaderboard group display name",
                 displayGroupsInReverseOrder, Collections.singletonList(leaderboard.getName()),
                 overallLeaderboardDiscardThresholds, ScoringSchemeType.LOW_POINT);
 
         // Serialize
-        List<String> groupNamesToExport = Collections.singletonList(leaderboardGroup.getName());
+        List<String> groupNamesToExport = Collections.singletonList(leaderboardGroup.getId().toString());
 
         RacingEventService destService;
         DomainFactory domainFactory;
@@ -1873,10 +1874,10 @@ public class MasterDataImportTest {
                 "testDisplayName", discardRule);
         List<String> leaderboardNames = new ArrayList<String>();
         leaderboardNames.add(leaderboard.getName());
-        LeaderboardGroup group1 = sourceService.addLeaderboardGroup(UUID.randomUUID(), TEST_GROUP_NAME,
+        LeaderboardGroup group1 = sourceService.addLeaderboardGroup(TEST_GROUP_UUID, TEST_GROUP_NAME,
                 "testGroupDesc",
                 /* displayName */null, false, leaderboardNames, null, null);
-        LeaderboardGroup group2 = sourceService.addLeaderboardGroup(UUID.randomUUID(), TEST_GROUP_NAME2,
+        LeaderboardGroup group2 = sourceService.addLeaderboardGroup(TEST_GROUP_UUID2, TEST_GROUP_NAME2,
                 "testGroupDesc2",
                 /* displayName */null, false, leaderboardNames, null, null);
 
@@ -1911,8 +1912,8 @@ public class MasterDataImportTest {
 
         // Serialize
         List<String> groupNamesToExport = new ArrayList<String>();
-        groupNamesToExport.add(group1.getName());
-        groupNamesToExport.add(group2.getName());
+        groupNamesToExport.add(group1.getId().toString());
+        groupNamesToExport.add(group2.getId().toString());
 
         RacingEventService destService;
         DomainFactory domainFactory;
@@ -1951,10 +1952,10 @@ public class MasterDataImportTest {
 
         Event eventOnTarget = destService.getEvent(eventUUID);
         Assert.assertNotNull(eventOnTarget);
-        LeaderboardGroup leaderboardGroupOnTarget = destService.getLeaderboardGroupByName(TEST_GROUP_NAME);
+        LeaderboardGroup leaderboardGroupOnTarget = destService.getLeaderboardGroupByID(TEST_GROUP_UUID);
         Assert.assertNotNull(leaderboardGroupOnTarget);
         Assert.assertTrue(leaderboardGroupOnTarget.getLeaderboards().iterator().hasNext());
-        LeaderboardGroup leaderboardGroup2OnTarget = destService.getLeaderboardGroupByName(TEST_GROUP_NAME2);
+        LeaderboardGroup leaderboardGroup2OnTarget = destService.getLeaderboardGroupByID(TEST_GROUP_UUID2);
         Assert.assertNotNull(leaderboardGroup2OnTarget);
         Assert.assertTrue(leaderboardGroup2OnTarget.getLeaderboards().iterator().hasNext());
 
@@ -1966,7 +1967,7 @@ public class MasterDataImportTest {
         int[] discardRule = { 1, 2, 3, 4 };
         ScoringScheme scheme = new LowPoint();
         List<String> leaderboardNames = new ArrayList<String>();
-        LeaderboardGroup sourceGroup = sourceService.addLeaderboardGroup(UUID.randomUUID(), TEST_GROUP_NAME,
+        LeaderboardGroup sourceGroup = sourceService.addLeaderboardGroup(TEST_GROUP_UUID, TEST_GROUP_NAME,
                 "testGroupDesc",
                 /* displayName */null, false, leaderboardNames, discardRule, scheme.getType());
         FlexibleLeaderboard sourceLeaderboard1 = new FlexibleLeaderboardImpl("Leaderboard1", null, scheme, null);
@@ -1980,7 +1981,7 @@ public class MasterDataImportTest {
 
         // Serialize
         List<String> groupNamesToExport = new ArrayList<String>();
-        groupNamesToExport.add(sourceGroup.getName());
+        groupNamesToExport.add(sourceGroup.getId().toString());
 
         RacingEventService destService;
         DomainFactory domainFactory;
@@ -2011,7 +2012,7 @@ public class MasterDataImportTest {
         // Test correct number of creations
         Assert.assertEquals(1, creationCount.getLeaderboardGroupCount());
 
-        LeaderboardGroup leaderboardGroupOnTarget = destService.getLeaderboardGroupByName(TEST_GROUP_NAME);
+        LeaderboardGroup leaderboardGroupOnTarget = destService.getLeaderboardGroupByID(TEST_GROUP_UUID);
         Assert.assertNotNull(leaderboardGroupOnTarget);
         LeaderboardGroupMetaLeaderboard overallLeaderboard = (LeaderboardGroupMetaLeaderboard) leaderboardGroupOnTarget
                 .getOverallLeaderboard();
@@ -2036,7 +2037,7 @@ public class MasterDataImportTest {
 
         // Verify that overall leaderboard data has been persisted
         RacingEventService persistenceVerifier = new RacingEventServiceImplMock(){};
-        LeaderboardGroup lg = persistenceVerifier.getLeaderboardGroupByName(TEST_GROUP_NAME);
+        LeaderboardGroup lg = persistenceVerifier.getLeaderboardGroupByID(TEST_GROUP_UUID);
         Assert.assertNotNull(lg);
         overallLeaderboard = (LeaderboardGroupMetaLeaderboard) lg.getOverallLeaderboard();
         Assert.assertNotNull(overallLeaderboard);
@@ -2097,7 +2098,7 @@ public class MasterDataImportTest {
                 discardRule, scoringScheme, Collections.singleton(courseAreaUUID));
         List<String> leaderboardNames = new ArrayList<String>();
         leaderboardNames.add(leaderboard.getName());
-        LeaderboardGroup group = sourceService.addLeaderboardGroup(UUID.randomUUID(), TEST_GROUP_NAME, "testGroupDesc",
+        LeaderboardGroup group = sourceService.addLeaderboardGroup(TEST_GROUP_UUID, TEST_GROUP_NAME, "testGroupDesc",
         /* displayName */null, false, leaderboardNames, null, null);
 
         // Set tracked Race with competitors
@@ -2161,7 +2162,7 @@ public class MasterDataImportTest {
 
         // Serialize
         List<String> groupNamesToExport = new ArrayList<String>();
-        groupNamesToExport.add(group.getName());
+        groupNamesToExport.add(group.getId().toString());
 
         RacingEventService destService;
         DomainFactory domainFactory;
@@ -2195,7 +2196,7 @@ public class MasterDataImportTest {
                 .getResult();
 
         Assert.assertNotNull(creationCount);
-        LeaderboardGroup leaderboardGroupOnTarget = destService.getLeaderboardGroupByName(TEST_GROUP_NAME);
+        LeaderboardGroup leaderboardGroupOnTarget = destService.getLeaderboardGroupByID(TEST_GROUP_UUID);
         Assert.assertNotNull(leaderboardGroupOnTarget);
         Leaderboard leaderboardOnTarget = destService.getLeaderboardByName(flexLeaderboardName);
         Assert.assertNotNull(leaderboardOnTarget);

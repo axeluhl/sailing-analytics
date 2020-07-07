@@ -46,6 +46,7 @@ public class ExpeditionAllInOneAfterImportHandler {
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
     private final String leaderboardGroupName;
+    private final UUID leaderboardGroupId;
     protected EventDTO event;
     private RegattaDTO regatta;
     private StrippedLeaderboardDTO leaderboard;
@@ -58,11 +59,12 @@ public class ExpeditionAllInOneAfterImportHandler {
     private Iterable<TimePoint> startTimes;
 
     public ExpeditionAllInOneAfterImportHandler(UUID eventId, String regattaName, String leaderboardName,
-            String leaderboardGroupName, List<Triple<String,  String, String>> raceEntries,
+            String leaderboardGroupName, UUID leaderboardGroupId, List<Triple<String,  String, String>> raceEntries,
             List<String> gpsDeviceIds, List<String> sensorDeviceIds, String sensorImporterType,
             Iterable<TimePoint> startTimes, final SailingServiceWriteAsync sailingServiceWrite, final UserService userService, final ErrorReporter errorReporter,
             final StringMessages stringMessages) {
         this.leaderboardGroupName = leaderboardGroupName;
+        this.leaderboardGroupId = leaderboardGroupId;
         this.sensorImporterType = sensorImporterType;
         this.sailingServiceWrite = sailingServiceWrite;
         this.userService = userService;
@@ -259,8 +261,8 @@ public class ExpeditionAllInOneAfterImportHandler {
                             @Override
                             public void onSuccess(Void result) {
                                 new ExpeditionAllInOneImportResultDialog(event.id, regatta.getName(),
-                                        raceNames, leaderboard.getName(),
-                                        leaderboardGroupName).show();
+                                        raceNames, leaderboard.getName(), leaderboardGroupName, leaderboardGroupId)
+                                                .show();
                             }
 
                             @Override
