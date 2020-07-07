@@ -46,7 +46,8 @@ public class BoatClassVectorGraphicsResolver {
                 BoatClassMasterdata.B_ONE, BoatClassMasterdata.J80, BoatClassMasterdata.LASER_SB3, BoatClassMasterdata.LONGTZE,
                 BoatClassMasterdata.RS_FEVA, BoatClassMasterdata.RS_TERA, BoatClassMasterdata.RS100, BoatClassMasterdata.TP52,
                 BoatClassMasterdata.CLUB_SWAN_50, BoatClassMasterdata.BAVARIA_CRUISER_41S, BoatClassMasterdata.BAVARIA_CRUISER_45,
-                BoatClassMasterdata.BAVARIA_CRUISER_46);
+                BoatClassMasterdata.BAVARIA_CRUISER_46, BoatClassMasterdata.SPAEKHUGGER, BoatClassMasterdata.SCAN_KAP_99,
+                BoatClassMasterdata.BB10M);
         BoatClassVectorGraphics dinghyWithSpinnaker = new DinghyWithSpinnakerVectorGraphics(BoatClassMasterdata._420,
                 BoatClassMasterdata._470, BoatClassMasterdata._5O5, BoatClassMasterdata.CADET, BoatClassMasterdata.FLYING_DUTCHMAN,
                 BoatClassMasterdata.FOLKBOAT, BoatClassMasterdata.DYAS, BoatClassMasterdata.DRAGON_INT,

@@ -42,6 +42,7 @@ import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.LegEntryDTO;
 import com.sap.sailing.domain.common.sharding.ShardingType;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonConstants;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.sharding.ShardingContext;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -452,11 +453,11 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 }
                 break;
             case OVERALL_TIME_ON_TIME_FACTOR:
-                name = "timeOnTimeFactor";
+                name = CompetitorJsonConstants.FIELD_TIME_ON_TIME_FACTOR;
                 value = leaderboardRowDTO.effectiveTimeOnTimeFactor;
                 break;
             case OVERALL_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE:
-                name = "timeOnDistanceAllowanceInSecondsPerNauticalMile";
+                name = CompetitorJsonConstants.FIELD_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE;
                 value = leaderboardRowDTO.effectiveTimeOnDistanceAllowancePerNauticalMile == null ? null : leaderboardRowDTO.effectiveTimeOnDistanceAllowancePerNauticalMile.asSeconds();
                 break;
             default:
