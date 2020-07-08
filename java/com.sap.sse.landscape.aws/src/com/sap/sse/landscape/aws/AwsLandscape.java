@@ -64,7 +64,7 @@ public interface AwsLandscape<ShardingKey, MetricsT extends ApplicationProcessMe
     /**
      * Returns the key pair ID
      */
-    String importKeyPair(Region region, byte[] privateKey, String keyName);
+    String importKeyPair(Region region, byte[] publicKey, String keyName);
 
     void terminate(AwsInstance host);
 }

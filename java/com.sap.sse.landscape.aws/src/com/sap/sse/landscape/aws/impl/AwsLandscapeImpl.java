@@ -80,9 +80,9 @@ public class AwsLandscapeImpl<ShardingKey, MetricsT extends ApplicationProcessMe
     }
 
     @Override
-    public String importKeyPair(com.sap.sse.landscape.Region region, byte[] privateKey, String keyName) {
+    public String importKeyPair(com.sap.sse.landscape.Region region, byte[] publicKey, String keyName) {
         return getEc2Client(getRegion(region)).importKeyPair(ImportKeyPairRequest.builder().keyName(keyName)
-                .publicKeyMaterial(SdkBytes.fromByteArray(privateKey)).build()).keyPairId();
+                .publicKeyMaterial(SdkBytes.fromByteArray(publicKey)).build()).keyPairId();
     }
 
     @Override
