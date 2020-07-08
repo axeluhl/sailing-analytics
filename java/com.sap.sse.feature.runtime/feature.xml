@@ -229,13 +229,6 @@
          unpack="false"/>
 
    <plugin
-         id="org.apache.servicemix.bundles.aws-java-sdk"
-         download-size="0"
-         install-size="0"
-         version="1.10.73.1"
-         unpack="false"/>
-
-   <plugin
          id="com.sun.mail.javax.mail"
          download-size="0"
          install-size="0"
