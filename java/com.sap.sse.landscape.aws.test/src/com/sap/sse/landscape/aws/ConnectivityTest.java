@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
-import java.util.logging.Logger;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -33,7 +32,6 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ec2.model.KeyPairInfo;
 
 public class ConnectivityTest {
-    private static final Logger logger = Logger.getLogger(ConnectivityTest.class.getName());
     private AwsLandscape<String, ApplicationProcessMetrics> landscape;
     private AwsRegion region;
     private byte[] keyPass;
@@ -88,8 +86,11 @@ public class ConnectivityTest {
     }
     
     private byte[] getPrivateKeyBytes(final KeyPair keyPair, final byte[] passphrase) {
+        if (!keyPair.decrypt(passphrase)) { // need to decrypt before writePrivateKey would work
+            throw new IllegalArgumentException("Passphrase didn't unlock private key of key pair "+keyPair);
+        }
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        keyPair.writePrivateKey(bos, passphrase);
+        keyPair.writePrivateKey(bos, /* passphrase */ null);
         final byte[] privKeyBytes = bos.toByteArray();
         return privKeyBytes;
     }
@@ -97,30 +98,17 @@ public class ConnectivityTest {
     @Test
     public void testSshConnect() throws JSchException, InterruptedException {
         final JSch jsch = new JSch();
-        JSch.setLogger(new com.jcraft.jsch.Logger() {
-            @Override
-            public void log(int level, String message) {
-                logger.info("TODO");
-                // TODO
-            }
-            
-            @Override
-            public boolean isEnabled(int level) {
-                // TODO Implement Type1594225287084.isEnabled(...)
-                return false;
-            }
-        });
-//        final KeyPair keyPairReadFromFile = KeyPair.load(jsch, "test_key", "test_key.pub");
-        jsch.addIdentity("test_key", keyPass);
-//      jsch.addIdentity("Test Key", getPrivateKeyBytes(keyPairReadFromFile, keyPass), getPublicKeyBytes(keyPairReadFromFile), keyPass);
+        JSch.setLogger(new JCraftLogAdapter());
+        final KeyPair keyPairReadFromFile = KeyPair.load(jsch, "test_key", "test_key.pub");
+        jsch.addIdentity("Test Key", getPrivateKeyBytes(keyPairReadFromFile, keyPass), getPublicKeyBytes(keyPairReadFromFile), keyPass);
         final Session session = jsch.getSession("vishal", "homemp3.dyndns.org");
         assertNotNull(session);
         assertEquals(22, session.getPort());
         session.setUserInfo(new UserInfo() {
             @Override public void showMessage(String message) {}
-            @Override public boolean promptYesNo(String message) { return true; }
-            @Override public boolean promptPassword(String message) { return false; }
-            @Override public boolean promptPassphrase(String message) { return false; }
+            @Override public boolean promptYesNo(String message) { return true; } // accept host key
+            @Override public boolean promptPassword(String message) { return false; } // we're using public key
+            @Override public boolean promptPassphrase(String message) { return false; } // passphrase is provided programmatically
             @Override public String getPassword() { return null; }
             @Override public String getPassphrase() { return null; }
         });
@@ -135,8 +123,12 @@ public class ConnectivityTest {
         boolean foundPwdOutput = false;
         while (!foundPwdOutput && attempts < 10) {
             Thread.sleep(100);
-            foundPwdOutput = new String(shellOutput.toByteArray()).equals("/home/vishal\n");
+            // (?s) means . also matches line separators
+            // (?m) means that we'd like to match a multi-line string
+            foundPwdOutput = new String(shellOutput.toByteArray()).matches("(?s)(?m).*^/home/vishal$.*");
+            attempts++;
         }
+        shellChannel.disconnect();
         assertTrue(foundPwdOutput);
     }
     
