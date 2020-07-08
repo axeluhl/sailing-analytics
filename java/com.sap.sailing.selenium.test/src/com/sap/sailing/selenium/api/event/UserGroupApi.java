@@ -1,5 +1,7 @@
 package com.sap.sailing.selenium.api.event;
 
+import static com.sap.sailing.selenium.api.core.ApiRequest.Context.SECURITY;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -11,6 +13,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.selenium.api.core.ApiContext;
+import com.sap.sailing.selenium.api.core.ApiRequest;
 import com.sap.sailing.selenium.api.core.JsonWrapper;
 import com.sap.sailing.selenium.api.event.RoleApi.Role;
 
@@ -44,6 +47,12 @@ public class UserGroupApi {
         final JSONObject jsonBody = new JSONObject();
         jsonBody.put(KEY_GROUP_NAME, groupName);
         return new UserGroup(ctx.put(USERGROUP_URL, new HashMap<>(), jsonBody));
+    }
+
+    public static ApiRequest<JSONObject, UserGroup> createUserGroup(String groupName) {
+        final JSONObject jsonBody = new JSONObject();
+        jsonBody.put(KEY_GROUP_NAME, groupName);
+        return SECURITY.put(USERGROUP_URL, jsonBody).wrapJsonResult(UserGroup.class);
     }
 
     public void deleteUserGroup(ApiContext ctx, UUID groupId) {
@@ -93,7 +102,7 @@ public class UserGroupApi {
         ctx.post(ADD_USER_TO_USERGROUP_URL, queryParams);
     }
 
-    public class UserGroup extends JsonWrapper {
+    public static class UserGroup extends JsonWrapper {
 
         public UserGroup(JSONObject json) {
             super(json);

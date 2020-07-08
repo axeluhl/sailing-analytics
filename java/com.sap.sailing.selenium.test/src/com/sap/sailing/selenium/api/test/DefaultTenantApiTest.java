@@ -1,7 +1,5 @@
 package com.sap.sailing.selenium.api.test;
 
-import static com.sap.sailing.selenium.api.core.ApiContext.SECURITY_CONTEXT;
-import static com.sap.sailing.selenium.api.core.ApiContext.createAdminApiContext;
 import static com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage.goToPage;
 import static org.junit.Assert.assertEquals;
 
@@ -11,7 +9,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
-import com.sap.sailing.selenium.api.core.ApiContext;
 import com.sap.sailing.selenium.api.event.EventApi;
 import com.sap.sailing.selenium.api.event.SecurityApi;
 import com.sap.sailing.selenium.api.event.UserGroupApi;
@@ -22,36 +19,30 @@ public class DefaultTenantApiTest extends AbstractSeleniumTest {
 
     private static final String TENANT_GROUP_NAME = "NewGroup";
     private static final String EVENT_NAME = "TestEvent2";
-    private final SecurityApi securityApi = new SecurityApi();
-    private final UserGroupApi userGroupApi = new UserGroupApi();
-    private ApiContext adminSecurityCtx;
-    private ApiContext userSecurityCtx;
     private AdminConsolePage adminConsole;
     private UUID tenantGroupId;
+    private String userToken;
 
     @Before
     public void setUp() {
         clearState(getContextRoot());
         super.setUp();
-        adminSecurityCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
-        securityApi.createUser(adminSecurityCtx, "donald", "Donald Duck", null, "daisy0815");
-        userSecurityCtx = ApiContext.createApiContext(getContextRoot(), SECURITY_CONTEXT, "donald", "daisy0815");
+        userToken = SecurityApi.createUser("donald", "daisy0815").run().getAccessToken();
         adminConsole = goToPage(getWebDriver(), getContextRoot());
         adminConsole.goToLocalServerPanel().setSelfServiceServer(true);
-        tenantGroupId = userGroupApi.createUserGroup(userSecurityCtx, TENANT_GROUP_NAME).getGroupId();
+        tenantGroupId = UserGroupApi.createUserGroup(TENANT_GROUP_NAME).auth(userToken).run().getGroupId();
     }
 
     @Test
     public void testEventApiWithUserTenant() {
-        EventApi.create(EVENT_NAME, "GC 32", CompetitorRegistrationType.CLOSED, "somewhere").auth("donald", "daisy0815")
-                .run();
+        EventApi.create(EVENT_NAME, "GC 32", CompetitorRegistrationType.CLOSED, "somewhere").auth(userToken).run();
         assertEquals("donald-tenant", adminConsole.goToEvents().getEventEntry(EVENT_NAME).getColumnContent("Group"));
     }
 
     @Test
     public void testEventApiWithDefaultTenant() {
         EventApi.create(EVENT_NAME, "GC 32", CompetitorRegistrationType.CLOSED, "somewhere")
-                .header("tenantGroupId", tenantGroupId.toString()).auth("donald", "daisy0815").run();
+                .header("tenantGroupId", tenantGroupId.toString()).auth(userToken).run();
         assertEquals(TENANT_GROUP_NAME, adminConsole.goToEvents().getEventEntry(EVENT_NAME).getColumnContent("Group"));
     }
 }

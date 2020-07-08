@@ -6,7 +6,9 @@ import java.util.Map;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.selenium.api.core.ApiContext;
+import com.sap.sailing.selenium.api.core.ApiRequest;
 import com.sap.sailing.selenium.api.core.JsonWrapper;
+import static com.sap.sailing.selenium.api.core.ApiRequest.Context.SECURITY;
 
 public class SecurityApi {
 
@@ -25,6 +27,17 @@ public class SecurityApi {
         return new AccessToken(ctx.post(CREATE_USER_URL, queryParams));
     }
 
+    public static ApiRequest<?, AccessToken> createUser(String username, String fullName, String company,
+            /* String email, */ String password) {
+        return SECURITY.post(CREATE_USER_URL).queryParam("username", username).queryParam("fullName", fullName)
+                .queryParam("company", company).queryParam("password", password).wrapJsonResult(AccessToken.class);
+    }
+
+    public static ApiRequest<?, AccessToken> createUser(String username, String password) {
+        return SECURITY.post(CREATE_USER_URL).queryParam("username", username).queryParam("fullName", username)
+                .queryParam("password", password).wrapJsonResult(AccessToken.class);
+    }
+
     public User getUser(ApiContext ctx, String username) {
         final Map<String, String> queryParams = new HashMap<>();
         queryParams.put("username", username);
@@ -35,7 +48,7 @@ public class SecurityApi {
         return new Hello(ctx.get(SAY_HELLO_URL));
     }
 
-    public class AccessToken extends JsonWrapper {
+    public static class AccessToken extends JsonWrapper {
 
         public AccessToken(JSONObject json) {
             super(json);

@@ -116,10 +116,11 @@ public class ApiRequest<I, O> {
             }
             if (payload != null) {
                 if (payload instanceof JsonWrapper) {
-                    requestBuilder = requestBuilder.entity(((JsonWrapper) payload).getJson(),
+                    requestBuilder = requestBuilder.entity(((JsonWrapper) payload).getJson().toJSONString(),
                             MediaType.APPLICATION_JSON_TYPE);
                 } else if (payload instanceof JSONObject) {
-                    requestBuilder = requestBuilder.entity(payload, MediaType.APPLICATION_JSON_TYPE);
+                    requestBuilder = requestBuilder.entity(((JSONObject) payload).toJSONString(),
+                            MediaType.APPLICATION_JSON_TYPE);
                 } else {
                     requestBuilder = requestBuilder.entity(payload);
                 }
@@ -209,7 +210,7 @@ public class ApiRequest<I, O> {
         }
 
         public <I, O> ApiRequest<I, O> put(final String url, final I payload) {
-            return new ApiRequest<I, O>(this, url, RequestMethod.PUT);
+            return new ApiRequest<I, O>(this, url, RequestMethod.PUT).payload(payload);
         }
 
         public <I, O> ApiRequest<I, O> delete(final String url) {
