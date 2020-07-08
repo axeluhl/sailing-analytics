@@ -8,4 +8,5 @@ Automatic-Module-Name: com.sap.sse.landscape.aws
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: com.amazon.aws.aws-java-api;bundle-version="2.13.50",
  com.sap.sse.landscape,
- com.sap.sse.common
+ com.sap.sse.common,
+ com.jcraft.jsch;bundle-version="0.1.54"

@@ -16,6 +16,10 @@ public interface TimePoint extends Comparable<TimePoint>, Serializable {
 
     Date asDate();
     
+    static TimePoint of(Date date) {
+        return new MillisecondsTimePoint(date);
+    }
+    
     /**
      * @return a time point that is {@code milliseconds} later than {@code this} time point, except in case the
      *         resulting time point would be after the {@link #EndOfTime} in which case {@link #EndOfTime} is returned

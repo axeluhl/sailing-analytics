@@ -17,12 +17,17 @@ import com.sap.sse.landscape.aws.AwsLandscape;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentials;
 import software.amazon.awssdk.awscore.client.builder.AwsClientBuilder;
+import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ec2.Ec2Client;
+import software.amazon.awssdk.services.ec2.model.DeleteKeyPairRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeImagesRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeImagesResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeKeyPairsRequest;
+import software.amazon.awssdk.services.ec2.model.ImportKeyPairRequest;
 import software.amazon.awssdk.services.ec2.model.Instance;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
+import software.amazon.awssdk.services.ec2.model.KeyPairInfo;
 import software.amazon.awssdk.services.ec2.model.Placement;
 import software.amazon.awssdk.services.ec2.model.RunInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.RunInstancesResponse;
@@ -62,6 +67,24 @@ public class AwsLandscapeImpl<ShardingKey, MetricsT extends ApplicationProcessMe
         return AwsBasicCredentials.create(accessKeyId, secretAccessKey);
     }
     
+    @Override
+    public KeyPairInfo getKeyPair(com.sap.sse.landscape.Region region, String keyName) {
+        return getEc2Client(getRegion(region))
+                .describeKeyPairs(DescribeKeyPairsRequest.builder().keyNames(keyName).build()).keyPairs().iterator()
+                .next();
+    }
+
+    @Override
+    public void deleteKeyPair(com.sap.sse.landscape.Region region, String keyName) {
+        getEc2Client(getRegion(region)).deleteKeyPair(DeleteKeyPairRequest.builder().keyName(keyName).build());
+    }
+
+    @Override
+    public String importKeyPair(com.sap.sse.landscape.Region region, byte[] privateKey, String keyName) {
+        return getEc2Client(getRegion(region)).importKeyPair(ImportKeyPairRequest.builder().keyName(keyName)
+                .publicKeyMaterial(SdkBytes.fromByteArray(privateKey)).build()).keyPairId();
+    }
+
     @Override
     public Map<Scope<ShardingKey>, ApplicationReplicaSet<ShardingKey, MetricsT>> getScopes() {
         // TODO Implement Landscape<ShardingKey,MetricsT>.getScopes(...)

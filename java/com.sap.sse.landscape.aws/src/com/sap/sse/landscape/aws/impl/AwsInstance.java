@@ -3,6 +3,9 @@ package com.sap.sse.landscape.aws.impl;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.KeyPair;
 import com.sap.sse.landscape.AvailabilityZone;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.Log;
@@ -29,6 +32,12 @@ public class AwsInstance implements Host {
         } catch (UnknownHostException e) {
             throw new RuntimeException(e);
         }
+    }
+    
+    public com.jcraft.jsch.Session createRootSshSession(KeyPair sshKeyPair) throws JSchException {
+        final JSch jsch = new JSch();
+        jsch.addIdentity((String) /* TODO identity */ null, (byte[]) /* TODO passphrase */ null);
+        return jsch.getSession(getAddress().toString());
     }
 
     @Override

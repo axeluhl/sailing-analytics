@@ -1,6 +1,10 @@
 package com.sap.sse.landscape.aws.impl;
 
 import java.io.Serializable;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
 
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.landscape.MachineImage;
@@ -29,12 +33,19 @@ public class AmazonMachineImage implements MachineImage<AwsInstance> {
 
     @Override
     public TimePoint getCreatedAt() {
-        // TODO Implement MachineImage<AwsInstance>.getCreatedAt(...)
-        return null;
+        Date date;
+        try {
+            final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+            dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+            date = dateFormat.parse(image.creationDate());
+        } catch (ParseException e) {
+            date = null;
+        }
+        return date == null ? null : TimePoint.of(date);
     }
 
     @Override
-    public MachineImage<AwsInstance> updateAllPackages() {
+    public AmazonMachineImage updateAllPackages() {
         // TODO Implement MachineImage<AwsInstance>.updateAllPackages(...)
         return null;
     }
@@ -44,5 +55,4 @@ public class AmazonMachineImage implements MachineImage<AwsInstance> {
         // TODO Implement MachineImage<AwsInstance>.delete(...)
         
     }
-
 }

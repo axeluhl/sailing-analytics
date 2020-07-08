@@ -13,6 +13,7 @@ import com.sap.sse.landscape.aws.impl.AwsLandscapeImpl;
 
 import software.amazon.awssdk.services.cloudwatch.CloudWatchClient;
 import software.amazon.awssdk.services.ec2.Ec2Client;
+import software.amazon.awssdk.services.ec2.model.KeyPairInfo;
 import software.amazon.awssdk.services.route53.Route53Client;
 
 /**
@@ -55,6 +56,15 @@ public interface AwsLandscape<ShardingKey, MetricsT extends ApplicationProcessMe
             Iterable<SecurityGroup> securityGroups);
     
     AmazonMachineImage getImage(Region region, String imageId);
+    
+    KeyPairInfo getKeyPair(Region region, String keyName);
+    
+    void deleteKeyPair(Region region, String keyName);
+    
+    /**
+     * Returns the key pair ID
+     */
+    String importKeyPair(Region region, byte[] privateKey, String keyName);
 
     void terminate(AwsInstance host);
 }
