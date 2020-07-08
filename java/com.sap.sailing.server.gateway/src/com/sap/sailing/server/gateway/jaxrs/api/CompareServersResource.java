@@ -2,6 +2,7 @@ package com.sap.sailing.server.gateway.jaxrs.api;
 
 import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
+import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -16,10 +17,10 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
 
-import javax.ws.rs.GET;
+import javax.ws.rs.FormParam;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -69,13 +70,21 @@ public class CompareServersResource extends AbstractSailingServerResource {
     public CompareServersResource() {
     }
 //TODO: User authentication POST 
-    @GET
+    @POST
     @Produces("application/json;charset=UTF-8")
-    public Response compareServers(@QueryParam("server1") String server1, @QueryParam("server2") String server2,
-            @QueryParam("UUID[]") Set<String> uuidset) {
+    public Response compareServers(
+            @FormParam("server1") String server1, 
+            @FormParam("server2") String server2,
+            @FormParam("UUID[]") Set<String> uuidset,
+            @FormParam("user1") String user1,
+            @FormParam("user2") String user2,
+            @FormParam("password1") String password1,
+            @FormParam("password2") String password2,
+            @FormParam("bearer1") String bearer1,
+            @FormParam("bearer2") String bearer2) {
         final Map<String, Set<Object>> result = new HashMap<>();
         Response response = null;
-        if (!validateParametersForUuidSet(server1, server2, uuidset)) {
+        if (!validateParameters(server1, server2, uuidset, user1, user2, password1, password2, bearer1, bearer2)) {
             response = badRequest();
         } else {
             result.put(server1, new HashSet<>());
@@ -124,6 +133,9 @@ public class CompareServersResource extends AbstractSailingServerResource {
             } catch (FileNotFoundException e) {
                 response = Response.status(Status.CONFLICT).entity(e.toString()).build();
                 logger.warning(e.toString());
+            } catch (ConnectException e) {
+                response = Response.status(Status.CONFLICT).entity(e.toString()).build();
+                logger.warning(e.toString());
             } catch (Exception e) {
                 response = returnInternalServerError(e);
             }
@@ -131,20 +143,32 @@ public class CompareServersResource extends AbstractSailingServerResource {
         return response;
     }
 
-    private boolean validateParameters(String server1, String server2, String uuid) {
-        return (Util.hasLength(server1) && Util.hasLength(server2)
-                && (!Util.hasLength(uuid) || UUID.fromString(uuid).toString().equals(uuid)));
+    private boolean validateParameters(String server1, String server2, Set<String> uuidset, String user1, String user2,
+            String password1, String password2, String bearer1, String bearer2) {
+        boolean result = (validateParameters(user1, password1, bearer1) || validateParameters(user2, password2, bearer2));
+        result = validateParameters(server1, server2, uuidset);
+        return result;
     }
-
-    private boolean validateParametersForUuidSet(String server1, String server2, Set<String> uuidset) {
-        boolean result = true;
+    
+    private boolean validateParameters(String server1, String server2, Set<String> uuidset) {
+        boolean result = validateParameters(server1, server2);
         for (String uuid : uuidset) {
-            if (!validateParameters(server1, server2, uuid)) {
+            if (Util.hasLength(uuid) && !UUID.fromString(uuid).toString().equals(uuid)) {
                 result = false;
                 break;
             }
         }
         return result;
+    }
+    
+    private boolean validateParameters(String server1, String server2) {
+        return Util.hasLength(server1) && Util.hasLength(server2);
+    }
+
+    private boolean validateParameters(String user, String password, String bearer) {
+        return (((Util.hasLength(user) && Util.hasLength(password) && !Util.hasLength(bearer))
+                || (!Util.hasLength(user) && !Util.hasLength(password) && Util.hasLength(bearer)))
+                || (!Util.hasLength(user) && !Util.hasLength(password) && !Util.hasLength(bearer)));
     }
 
     /**
