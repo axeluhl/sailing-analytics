@@ -5054,13 +5054,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             return super.read(b, off, len);
         }
     }
-
-    /**
-     * Constructs a Bearer token for a given remote Server, either using a given username and password, or a given
-     * bearer token. If neither of those are provided the current user will be used to create a bearer token. Provide
-     * only username and password or bearer token, not the three of them.
-     */
-    private String getOrCreateTargetServerBearerToken(String targetServerUrlAsString, String targetServerUsername,
+    
+    @Override
+    public String getOrCreateTargetServerBearerToken(String targetServerUrlAsString, String targetServerUsername,
             String targetServerPassword, String targetServerBearerToken) {
         if (Util.hasLength(targetServerUsername) && Util.hasLength(targetServerPassword)
                 && Util.hasLength(targetServerBearerToken)) {

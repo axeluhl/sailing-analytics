@@ -65,11 +65,9 @@ public class CompareServersResource extends AbstractSailingServerResource {
             + LEADERBOARDGROUPSIDENTIFIABLEPATH
             + " endpoint and therefore you need to fallback to running the compareServers shell script.";
     
-    private static final String BADREQUEST = "Specify two server names and optionally a valid UUID";
-
     public CompareServersResource() {
     }
-//TODO: User authentication POST 
+    
     @POST
     @Produces("application/json;charset=UTF-8")
     public Response compareServers(
@@ -85,30 +83,36 @@ public class CompareServersResource extends AbstractSailingServerResource {
         final Map<String, Set<Object>> result = new HashMap<>();
         Response response = null;
         if (!validateParameters(server1, server2, uuidset, user1, user2, password1, password2, bearer1, bearer2)) {
-            response = badRequest();
-        } else {
+            response = badRequest("Specify two server names and optionally a set of valid leaderboardgroup UUIDs.");
+        } 
+        else if (getSecurityService().getCurrentUser() == null) {
+            response = badRequest("Provide valid user.");
+        }
+        else {
+            final String token1 = getService().getOrCreateTargetServerBearerToken(server1, user1, password1, bearer1);
+            final String token2 = getService().getOrCreateTargetServerBearerToken(server2, user2, password2, bearer2);
             result.put(server1, new HashSet<>());
             result.put(server2, new HashSet<>());
             try {
                 if (!uuidset.isEmpty()) {
                     for (String uuid : uuidset) {
                         Pair<Object, Object> jsonPair = fetchLeaderboardgroupDetailsAndRemoveDuplicates(server1,
-                                server2, uuid);
+                                server2, uuid, token1, token2);
                         if (jsonPair.getA() != null && jsonPair.getB() != null) {
                             result.get(server1).add(jsonPair.getA());
                             result.get(server2).add(jsonPair.getB());
                         }
                     }
                 } else {
-                    final JSONArray leaderboardgroupList1 = getLeaderboardgroupList(server1);
-                    final JSONArray leaderboardgroupList2 = getLeaderboardgroupList(server2);
+                    final JSONArray leaderboardgroupList1 = getLeaderboardgroupList(server1, token1);
+                    final JSONArray leaderboardgroupList2 = getLeaderboardgroupList(server2, token2);
                     for (Object lg1 : leaderboardgroupList1) {
                         if (!leaderboardgroupList2.contains(lg1)) {
                             result.get(server1).add(lg1);
                         } else {
                             final String lgId = ((JSONObject) lg1).get("id").toString();
                             Pair<Object, Object> jsonPair = fetchLeaderboardgroupDetailsAndRemoveDuplicates(server1,
-                                    server2, lgId);
+                                    server2, lgId, token1, token2);
                             if (jsonPair.getA() != null && jsonPair.getB() != null) {
                                 result.get(server1).add(jsonPair.getA());
                                 result.get(server2).add(jsonPair.getB());
@@ -175,10 +179,12 @@ public class CompareServersResource extends AbstractSailingServerResource {
      * Fetches the details for a given leaderboardgroup UUID and removes all the duplicates in the fields.
      */
     private Pair<Object, Object> fetchLeaderboardgroupDetailsAndRemoveDuplicates(String server1, String server2,
-            String leaderboardgroupId) throws Exception {
-        Object lgdetail1 = getLeaderboardgroupDetailsById(leaderboardgroupId, RemoteServerUtil.createBaseUrl(server1));
+            String leaderboardgroupId, String bearer1, String bearer2) throws Exception {
+        Object lgdetail1 = getLeaderboardgroupDetailsById(leaderboardgroupId, RemoteServerUtil.createBaseUrl(server1),
+                bearer1);
         lgdetail1 = removeUnnecessaryFields(lgdetail1);
-        Object lgdetail2 = getLeaderboardgroupDetailsById(leaderboardgroupId, RemoteServerUtil.createBaseUrl(server2));
+        Object lgdetail2 = getLeaderboardgroupDetailsById(leaderboardgroupId, RemoteServerUtil.createBaseUrl(server2),
+                bearer2);
         lgdetail2 = removeUnnecessaryFields(lgdetail2);
         Pair<Object, Object> result = removeDuplicateEntries(lgdetail1, lgdetail2);
         return result;
@@ -186,11 +192,11 @@ public class CompareServersResource extends AbstractSailingServerResource {
     /**
      * Fetches the leaderboardgrouplist from a server.
      */
-    private JSONArray getLeaderboardgroupList(String server) throws Exception {
+    private JSONArray getLeaderboardgroupList(String server, String bearer) throws Exception {
         final JSONParser parser = new JSONParser();
         final URL baseUrl = RemoteServerUtil.createBaseUrl(server);
-        final URLConnection leaderboardgroupListC = HttpUrlConnectionHelper.redirectConnection(
-                RemoteServerUtil.createRemoteServerUrl(baseUrl, LEADERBOARDGROUPSIDENTIFIABLEPATH, null));
+        final URLConnection leaderboardgroupListC = HttpUrlConnectionHelper.redirectConnectionWithBearerToken(
+                RemoteServerUtil.createRemoteServerUrl(baseUrl, LEADERBOARDGROUPSIDENTIFIABLEPATH, null), bearer);
         if (((HttpURLConnection) leaderboardgroupListC).getResponseCode() == 404) {
             throw new FileNotFoundException(SERVERTOOLD);
         }
@@ -202,9 +208,9 @@ public class CompareServersResource extends AbstractSailingServerResource {
     /**
      * Fetches the JSON for a given leaderboardgroup UUID.
      */
-    private Object getLeaderboardgroupDetailsById(String leaderboardgroupId, URL baseUrl) throws Exception {
-        final URLConnection lgdetailc = HttpUrlConnectionHelper.redirectConnection(
-                RemoteServerUtil.createRemoteServerUrl(baseUrl, createLgDetailPath(leaderboardgroupId), null));
+    private Object getLeaderboardgroupDetailsById(String leaderboardgroupId, URL baseUrl, String bearer) throws Exception {
+        final URLConnection lgdetailc = HttpUrlConnectionHelper.redirectConnectionWithBearerToken(
+                RemoteServerUtil.createRemoteServerUrl(baseUrl, createLgDetailPath(leaderboardgroupId), null), bearer);
         Object result = JSONValue.parse(new InputStreamReader(lgdetailc.getInputStream(), "UTF-8"));
         return result;
     }
@@ -319,8 +325,8 @@ public class CompareServersResource extends AbstractSailingServerResource {
         return response;
     }
 
-    private Response badRequest() {
-        final Response response = Response.status(Status.BAD_REQUEST).entity(BADREQUEST).build();
+    private Response badRequest(String message) {
+        final Response response = Response.status(Status.BAD_REQUEST).entity(message).build();
         return response;
     }
     
