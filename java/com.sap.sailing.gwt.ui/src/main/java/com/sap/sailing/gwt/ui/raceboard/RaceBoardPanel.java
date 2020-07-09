@@ -489,7 +489,6 @@ public class RaceBoardPanel
         mediaPlayerManagerComponent = new MediaPlayerManagerComponent(this, getComponentContext(), mediaPlayerLifecycle,
                 sailingServiceWrite, selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, userService,
                 stringMessages, errorReporter, userAgent, this, mediaPlayerSettings, raceDTO);
-
         final LeaderboardWithSecurityFetcher asyncFetcher = new LeaderboardWithSecurityFetcher() {
             @Override
             public void getLeaderboardWithSecurity(Consumer<StrippedLeaderboardDTOWithSecurity> consumer) {
@@ -511,9 +510,7 @@ public class RaceBoardPanel
         mapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, taggingPanel, mediaPlayerManagerComponent,
                 componentsForSideBySideViewer, stringMessages, userService, editMarkPassingPanel, editMarkPositionPanel,
                 asyncFetcher);
-        
         mediaPlayerManagerComponent.addPlayerChangeListener(new PlayerChangeListener() {
-            
             @Override
             public void notifyStateChange() {
                 updateRaceTimePanelOverlay();
@@ -527,7 +524,6 @@ public class RaceBoardPanel
         mainPanel.add(mapViewer.getViewerWidget());
         boolean showLeaderboard = initialPerspectiveOwnSettings.isShowLeaderboard() && isScreenLargeEnoughToInitiallyDisplayLeaderboard;
         setLeaderboardVisible(showLeaderboard);
-        GWT.debugger();
         leaderboardPanel.setAutoExpandPreSelected(initialPerspectiveOwnSettings.isAutoExpandPreSelectedRace());
         if (showChartMarkEditMediaButtonsAndVideo) {
             setWindChartVisible(initialPerspectiveOwnSettings.isShowWindChart());

@@ -920,7 +920,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 metricOverlay = new DetailTypeMetricOverlay(getMap(), 0, coordinateSystem, stringMessages);
                 metricOverlay.setVisible(false);
                 metricOverlay.addToMap();
-                
                 if (showHeaderPanel) {
                     createHeaderPanel(map);
                 }
