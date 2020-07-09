@@ -22,6 +22,7 @@ import com.sap.sse.landscape.aws.persistence.DomainObjectFactory;
 import com.sap.sse.landscape.aws.persistence.MongoObjectFactory;
 import com.sap.sse.landscape.aws.persistence.PersistenceFactory;
 import com.sap.sse.landscape.ssh.SSHKeyPair;
+import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.SessionUtils;
 
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
@@ -56,8 +57,9 @@ public class AwsLandscapeImpl<ShardingKey, MetricsT extends ApplicationProcessMe
     
     public AwsLandscapeImpl() {
         this(System.getProperty(ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME), System.getProperty(SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME),
-                PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(),
-                PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory());
+                // by using MongoDBService.INSTANCE the default test configuration will be used if nothing else is configured
+                PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE),
+                PersistenceFactory.INSTANCE.getMongoObjectFactory(MongoDBService.INSTANCE));
     }
     
     public AwsLandscapeImpl(String accessKeyId, String secretAccessKey,
@@ -142,12 +144,24 @@ public class AwsLandscapeImpl<ShardingKey, MetricsT extends ApplicationProcessMe
     @Override
     public void deleteKeyPair(com.sap.sse.landscape.Region region, String keyName) {
         getEc2Client(getRegion(region)).deleteKeyPair(DeleteKeyPairRequest.builder().keyName(keyName).build());
+        mongoObjectFactory.removeSSHKeyPair(region.getId(), keyName);
     }
 
     @Override
-    public String importKeyPair(com.sap.sse.landscape.Region region, byte[] publicKey, String keyName) {
-        return getEc2Client(getRegion(region)).importKeyPair(ImportKeyPairRequest.builder().keyName(keyName)
+    public String importKeyPair(com.sap.sse.landscape.Region region, byte[] publicKey, byte[] privateKey, String keyName) {
+        final String keyId = getEc2Client(getRegion(region)).importKeyPair(ImportKeyPairRequest.builder().keyName(keyName)
                 .publicKeyMaterial(SdkBytes.fromByteArray(publicKey)).build()).keyPairId();
+        Object principal;
+        try {
+            principal = SessionUtils.getPrincipal();
+        } catch (Exception e) {
+            logger.severe("Couldn't find current user; continuing anonymously");
+            principal = null;
+        }
+        final SSHKeyPair keyPair = new SSHKeyPair(region.getId(), principal==null?"":principal.toString(),
+                TimePoint.now(), keyName, publicKey, privateKey);
+        addSSHKeyPair(keyPair);
+        return keyId;
     }
 
     @Override

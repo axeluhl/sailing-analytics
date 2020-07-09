@@ -77,7 +77,8 @@ public class ConnectivityTest {
         final JSch jsch = new JSch();
         final KeyPair keyPair = KeyPair.genKeyPair(jsch, KeyPair.RSA, 4096);
         final byte[] pubKeyBytes = getPublicKeyBytes(keyPair);
-        final String keyId = landscape.importKeyPair(region, pubKeyBytes, testKeyName);
+        final byte[] privKeyBytes = getPrivateKeyBytes(keyPair, /* passphrase */ null);
+        final String keyId = landscape.importKeyPair(region, pubKeyBytes, privKeyBytes, testKeyName);
         assertTrue(keyId.startsWith("key-"));
         final KeyPairInfo awsKeyPairInfo = landscape.getKeyPairInfo(region, testKeyName);
         assertNotNull(awsKeyPairInfo);
@@ -102,11 +103,21 @@ public class ConnectivityTest {
     }
     
     @Test
-    public void testSshConnect() throws JSchException, InterruptedException {
+    public void testSshConnectWithCreatedKey() throws JSchException, InterruptedException {
         final String keyName = "MyKey-"+UUID.randomUUID();
-        final SSHKeyPair sshKeyPair = landscape.createKeyPair(region, keyName);
-        assertNotNull(sshKeyPair);
-        assertEquals(keyName, sshKeyPair.getName());
+        createKeyPair(keyName);
+        testSshConnectWithKey(keyName);
+    }
+
+    @Test
+    public void testSshConnectWithImportedKey() throws JSchException, InterruptedException {
+        final String keyName = "MyKey-"+UUID.randomUUID();
+        final KeyPair keyPair = KeyPair.genKeyPair(new JSch(), KeyPair.RSA, 4096);
+        landscape.importKeyPair(region, getPublicKeyBytes(keyPair), getPrivateKeyBytes(keyPair, /* passphrase */ null), keyName);
+        testSshConnectWithKey(keyName);
+    }
+
+    private void testSshConnectWithKey(final String keyName) throws InterruptedException, JSchException {
         final AwsInstance host = landscape.launchHost(landscape.getImage(region, "ami-01b4b27a5699e33e6"),
                 new AwsAvailabilityZone("eu-west-2b", region), keyName, Collections.singleton(()->"sg-0b2afd48960251280"));
         try {
@@ -155,16 +166,12 @@ public class ConnectivityTest {
             landscape.terminate(host);
             landscape.deleteKeyPair(region, keyName);
         }
-//        final JSch jsch = new JSch();
-//        JSch.setLogger(new JCraftLogAdapter());
-//        final KeyPair keyPairReadFromFile = KeyPair.load(jsch, "test_key", "test_key.pub");
-//        jsch.addIdentity("Test Key", getPrivateKeyBytes(keyPairReadFromFile, keyPass), getPublicKeyBytes(keyPairReadFromFile), keyPass);
-//        final Session session = jsch.getSession("vishal", "homemp3.dyndns.org");
-//        assertNotNull(session);
-//        assertEquals(22, session.getPort());
-//        session.setUserInfo(new YesUserInfo());
-//        session.connect(/* timeout in millis */ 5000);
-//        final Channel shellChannel = session.openChannel("shell");
+    }
+
+    private void createKeyPair(final String keyName) {
+        final SSHKeyPair sshKeyPair = landscape.createKeyPair(region, keyName);
+        assertNotNull(sshKeyPair);
+        assertEquals(keyName, sshKeyPair.getName());
     }
     
     @Test

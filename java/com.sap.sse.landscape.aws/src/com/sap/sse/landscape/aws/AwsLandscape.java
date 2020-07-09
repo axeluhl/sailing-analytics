@@ -71,9 +71,9 @@ public interface AwsLandscape<ShardingKey, MetricsT extends ApplicationProcessMe
     void deleteKeyPair(Region region, String keyName);
     
     /**
-     * Returns the key pair ID
+     * Uploads the public key to AWS under the name "keyName", stores it in this landscape and returns the key pair ID
      */
-    String importKeyPair(Region region, byte[] publicKey, String keyName);
+    String importKeyPair(Region region, byte[] publicKey, byte[] privateKey, String keyName);
 
     void terminate(AwsInstance host);
 
