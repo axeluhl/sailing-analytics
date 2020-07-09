@@ -2521,25 +2521,28 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public void updateUserSubscription(String username, Subscription newSubscription) throws UserManagementException {
         final User user = getUserByName(username);
-        if (user == null) {
+        if (user != null) {
+            apply(new UpdateUserSubscriptionOperation(username, newSubscription));
+        } else {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
-        apply(new UpdateUserSubscriptionOperation(username, newSubscription));
     }
 
     @Override
-    public Void internalUpdateSubscription(String username, Subscription newSubscription) throws UserManagementException {
+    public Void internalUpdateSubscription(String username, Subscription newSubscription)
+            throws UserManagementException {
         User user = getUserByName(username);
-        if (user == null) {
+        if (user != null) {
+            Subscription currentSubscription = user.getSubscription();
+            if (shouldUpdateUserRolesForSubscription(currentSubscription, newSubscription)) {
+                updateUserRolesOnSubscriptionChange(username, currentSubscription, newSubscription);
+            }
+            user.setSubscription(newSubscription);
+            store.updateUser(user);
+            return null;
+        } else {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
-        Subscription currentSubscription = user.getSubscription();
-        if (shouldUpdateUserRolesForSubscription(currentSubscription, newSubscription)) {
-            updateUserRolesOnSubscriptionChange(username, currentSubscription, newSubscription);
-        }
-        user.setSubscription(newSubscription);
-        store.updateUser(user);
-        return null;
     }
 
     private void updateUserRolesOnSubscriptionChange(String username, Subscription currentSubscription,

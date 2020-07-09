@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.client.subscription;
+package com.sap.sailing.gwt.ui.client.subscription.chargebee;
 
 import jsinterop.annotations.JsType;
 

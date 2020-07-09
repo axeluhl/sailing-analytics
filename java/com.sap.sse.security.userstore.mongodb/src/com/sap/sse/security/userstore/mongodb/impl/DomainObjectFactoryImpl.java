@@ -36,6 +36,7 @@ import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.AccessControlList;
+import com.sap.sse.security.shared.impl.ChargebeeSubscription;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.QualifiedObjectIdentifierImpl;
 import com.sap.sse.security.shared.impl.Role;
@@ -53,11 +54,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     public DomainObjectFactoryImpl(MongoDatabase db) {
         this.db = db;
     }
-    
+
     @Override
     public Iterable<AccessControlListAnnotation> loadAllAccessControlLists(UserStore userStore) {
         ArrayList<AccessControlListAnnotation> result = new ArrayList<>();
-        MongoCollection<org.bson.Document> aclCollection = db.getCollection(CollectionNames.ACCESS_CONTROL_LISTS.name());
+        MongoCollection<org.bson.Document> aclCollection = db
+                .getCollection(CollectionNames.ACCESS_CONTROL_LISTS.name());
         try {
             for (Document o : aclCollection.find()) {
                 result.add(loadAccessControlList(o, userStore));
@@ -68,20 +70,23 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
         return result;
     }
-    
+
     @SuppressWarnings("unchecked")
     private AccessControlListAnnotation loadAccessControlList(Document aclDBObject, UserStore userStore) {
         final QualifiedObjectIdentifier id = QualifiedObjectIdentifierImpl
                 .fromDBWithoutEscaping((String) aclDBObject.get(FieldNames.AccessControlList.OBJECT_ID.name()));
         final String displayName = (String) aclDBObject.get(FieldNames.AccessControlList.OBJECT_DISPLAY_NAME.name());
-        List<Object> dbPermissionMap = ((List<Object>) aclDBObject.get(FieldNames.AccessControlList.PERMISSION_MAP.name()));
+        List<Object> dbPermissionMap = ((List<Object>) aclDBObject
+                .get(FieldNames.AccessControlList.PERMISSION_MAP.name()));
         Map<UserGroup, Set<String>> permissionMap = new HashMap<>();
         for (Object dbPermissionMapEntryO : dbPermissionMap) {
             Document dbPermissionMapEntry = (Document) dbPermissionMapEntryO;
-            final UUID userGroupKey = (UUID) dbPermissionMapEntry.get(FieldNames.AccessControlList.PERMISSION_MAP_USER_GROUP_ID.name());
+            final UUID userGroupKey = (UUID) dbPermissionMapEntry
+                    .get(FieldNames.AccessControlList.PERMISSION_MAP_USER_GROUP_ID.name());
             final UserGroup userGroup = userStore.getUserGroup(userGroupKey);
             Set<String> actions = new HashSet<>();
-            for (Object o : (List<Object>) dbPermissionMapEntry.get(FieldNames.AccessControlList.PERMISSION_MAP_ACTIONS.name())) {
+            for (Object o : (List<Object>) dbPermissionMapEntry
+                    .get(FieldNames.AccessControlList.PERMISSION_MAP_ACTIONS.name())) {
                 actions.add(o.toString());
             }
             permissionMap.put(userGroup, actions);
@@ -90,7 +95,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 displayName);
         return result;
     }
-    
+
     @Override
     public Iterable<OwnershipAnnotation> loadAllOwnerships(UserStore userStore) {
         ArrayList<OwnershipAnnotation> result = new ArrayList<>();
@@ -105,18 +110,21 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
         return result;
     }
-    
+
     private OwnershipAnnotation loadOwnership(Document ownershipDBObject, UserStore userStore) {
         String escapedId = (String) ownershipDBObject.get(FieldNames.Ownership.OBJECT_ID.name());
-        final QualifiedObjectIdentifier idOfOwnedObject = QualifiedObjectIdentifierImpl.fromDBWithoutEscaping(escapedId);
-        final String displayNameOfOwnedObject = (String) ownershipDBObject.get(FieldNames.Ownership.OBJECT_DISPLAY_NAME.name());
+        final QualifiedObjectIdentifier idOfOwnedObject = QualifiedObjectIdentifierImpl
+                .fromDBWithoutEscaping(escapedId);
+        final String displayNameOfOwnedObject = (String) ownershipDBObject
+                .get(FieldNames.Ownership.OBJECT_DISPLAY_NAME.name());
         final String userOwnerName = (String) ownershipDBObject.get(FieldNames.Ownership.OWNER_USERNAME.name());
         final UUID tenantOwnerId = (UUID) ownershipDBObject.get(FieldNames.Ownership.TENANT_OWNER_ID.name());
         final User userOwner = userStore.getUserByName(userOwnerName);
         final UserGroup tenantOwner = userStore.getUserGroup(tenantOwnerId);
-        return new OwnershipAnnotation(new Ownership(userOwner, tenantOwner), idOfOwnedObject, displayNameOfOwnedObject);
+        return new OwnershipAnnotation(new Ownership(userOwner, tenantOwner), idOfOwnedObject,
+                displayNameOfOwnedObject);
     }
-    
+
     @Override
     public Iterable<RoleDefinition> loadAllRoleDefinitions() {
         ArrayList<RoleDefinition> result = new ArrayList<>();
@@ -131,7 +139,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
         return result;
     }
-    
+
     @SuppressWarnings("unchecked")
     private RoleDefinition loadRoleDefinition(Document roleDefinitionDBObject) {
         final String id = (String) roleDefinitionDBObject.get(FieldNames.Role.ID.name());
@@ -142,7 +150,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
         return new RoleDefinitionImpl(UUID.fromString(id), displayName, permissions);
     }
-    
+
     @Override
     public Iterable<UserGroup> loadAllUserGroupsAndTenantsWithProxyUsers(
             Map<UUID, RoleDefinition> roleDefinitionsById) {
@@ -159,8 +167,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
         return userGroups;
     }
-    
-    private UserGroup loadUserGroupWithProxyUsers(Document groupDBObject, Map<UUID, RoleDefinition> roleDefinitionsById) {
+
+    private UserGroup loadUserGroupWithProxyUsers(Document groupDBObject,
+            Map<UUID, RoleDefinition> roleDefinitionsById) {
         final UUID id = (UUID) groupDBObject.get(FieldNames.UserGroup.ID.name());
         final String name = (String) groupDBObject.get(FieldNames.UserGroup.NAME.name());
         Set<User> users = new HashSet<>();
@@ -194,15 +203,16 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
      *            {@link Role#getQualifiedForTenant() tenant qualification} as defined by this parameter; if this
      *            parameter is {@code null}, role migration will throw an exception.
      * @param userGroups
-     *            the user groups to resolve tenant IDs against for users' default tenants as well as role tenant qualifiers
+     *            the user groups to resolve tenant IDs against for users' default tenants as well as role tenant
+     *            qualifiers
      * @return the user objects returned have a fully resolved default tenant as well as fully-resolved role tenant/user
      *         qualifiers; the {@link Tenant} objects passed in the {@code tenants} map may still have an empty user
      *         group that is filled later.
      */
     @Override
-    public Iterable<User> loadAllUsers(
-            Map<UUID, RoleDefinition> roleDefinitionsById, RoleMigrationConverter roleMigrationConverter,
-            Map<UUID, UserGroup> userGroups, UserGroupProvider userGroupProvider) throws UserManagementException {
+    public Iterable<User> loadAllUsers(Map<UUID, RoleDefinition> roleDefinitionsById,
+            RoleMigrationConverter roleMigrationConverter, Map<UUID, UserGroup> userGroups,
+            UserGroupProvider userGroupProvider) throws UserManagementException {
         Map<String, User> result = new HashMap<>();
         MongoCollection<org.bson.Document> userCollection = db.getCollection(CollectionNames.USERS.name());
         try {
@@ -218,7 +228,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         resolveRoleUserQualifiers(result);
         return result.values();
     }
-    
+
     private void resolveRoleUserQualifiers(Map<String, User> users) throws UserManagementException {
         for (final User user : users.values()) {
             final Set<Role> userRoles = new HashSet<>();
@@ -228,9 +238,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 if (userQualifierProxy != null) {
                     final User resolvedUserQualifier = users.get(userQualifierProxy.getName());
                     if (resolvedUserQualifier == null) {
-                        throw new UserManagementException("Unable to resolve user named "+userQualifierProxy.getName()+
-                                " which serves as a role qualifier for role "+roleWithUserQualifierProxy.getName()+
-                                " for user "+user.getName());
+                        throw new UserManagementException("Unable to resolve user named " + userQualifierProxy.getName()
+                                + " which serves as a role qualifier for role " + roleWithUserQualifierProxy.getName()
+                                + " for user " + user.getName());
                     }
                     user.removeRole(roleWithUserQualifierProxy);
                     user.addRole(new Role(roleWithUserQualifierProxy.getRoleDefinition(),
@@ -259,8 +269,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final String email = (String) userDBObject.get(FieldNames.User.EMAIL.name());
         final String fullName = (String) userDBObject.get(FieldNames.User.FULLNAME.name());
         final String company = (String) userDBObject.get(FieldNames.User.COMPANY.name());
-        final String localeRaw = (String)  userDBObject.get(FieldNames.User.LOCALE.name());
-        final Locale locale = localeRaw != null ? Locale.forLanguageTag(localeRaw) : null; 
+        final String localeRaw = (String) userDBObject.get(FieldNames.User.LOCALE.name());
+        final Locale locale = localeRaw != null ? Locale.forLanguageTag(localeRaw) : null;
         Boolean emailValidated = (Boolean) userDBObject.get(FieldNames.User.EMAIL_VALIDATED.name());
         String passwordResetSecret = (String) userDBObject.get(FieldNames.User.PASSWORD_RESET_SECRET.name());
         String validationSecret = (String) userDBObject.get(FieldNames.User.VALIDATION_SECRET.name());
@@ -274,7 +284,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 if (role != null) {
                     roles.add(role);
                 } else {
-                    logger.warning("Role with ID "+o+" that used to be assigned to user "+username+" not found");
+                    logger.warning(
+                            "Role with ID " + o + " that used to be assigned to user " + username + " not found");
                 }
             }
         } else {
@@ -282,20 +293,21 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             // try to find an equal-named role in the set of role definitions and create a role
             // that is qualified by the default tenant; for this a default tenant must exist because
             // otherwise a user would obtain global rights by means of migration which must not happen.
-            logger.info("Migrating roles of user "+username);
+            logger.info("Migrating roles of user " + username);
             List<?> roleNames = (List<?>) userDBObject.get("ROLES");
             if (roleNames != null) {
-                logger.info("Found old roles "+roleNames+" for user "+username);
+                logger.info("Found old roles " + roleNames + " for user " + username);
                 for (Object o : roleNames) {
                     final Role convertedRole = roleMigrationConverter.convert(o.toString(), username);
                     if (convertedRole != null) {
-                        logger.info("Found role "+convertedRole.getRoleDefinition()+" for old role "+o.toString()+" for user "+username);
+                        logger.info("Found role " + convertedRole.getRoleDefinition() + " for old role " + o.toString()
+                                + " for user " + username);
                         // we do not do role associations, to stay similar as before, meaning that all admins can
                         // edit the roles. Without this we would need to determine which admin (if
                         // multiple present) should own this association.
                         roles.add(convertedRole);
                         rolesMigrated = true;
-                    }else {
+                    } else {
                         logger.warning("Role " + o.toString() + " for user " + username
                                 + " not found during migration. User will no longer be in this role.");
                     }
@@ -359,7 +371,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     private Map<AccountType, Account> createAccountMapFromdDBObject(Document accountsMap) {
         Map<AccountType, Account> accounts = new HashMap<>();
-        for (Entry<?, ?> e : accountsMap.entrySet()){
+        for (Entry<?, ?> e : accountsMap.entrySet()) {
             AccountType type = AccountType.valueOf((String) e.getKey());
             Account account = createAccountFromDBObject((Document) e.getValue(), type);
             accounts.put(type, account);
@@ -374,10 +386,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             String saltedPassword = (String) dbAccount.get(FieldNames.UsernamePassword.SALTED_PW.name());
             Binary salt = (Binary) dbAccount.get(FieldNames.UsernamePassword.SALT.name());
             return new UsernamePasswordAccount(name, saltedPassword, salt.getData());
-            //TODO [D056866] add other Account-types
+        // TODO [D056866] add other Account-types
         case SOCIAL_USER:
             SocialUserAccount socialUserAccount = new SocialUserAccount();
-            for (Social s : Social.values()){
+            for (Social s : Social.values()) {
                 socialUserAccount.setProperty(s.name(), (String) dbAccount.get(s.name()));
             }
             return socialUserAccount;
@@ -396,8 +408,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             Document settingDBObject = settingsCollection.find(query).first();
             if (settingDBObject != null) {
                 result = loadSettingMap(settingDBObject);
-            }
-            else {
+            } else {
                 logger.info("No stored settings found!");
             }
         } catch (Exception e) {
@@ -414,7 +425,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         try {
             for (Object o : settingsCollection.find()) {
                 Document usernameAndPreferencesMap = (Document) o;
-                Map<String, String> userMap = loadPreferencesMap((Iterable<?>) usernameAndPreferencesMap.get(FieldNames.Preferences.KEYS_AND_VALUES.name()));
+                Map<String, String> userMap = loadPreferencesMap(
+                        (Iterable<?>) usernameAndPreferencesMap.get(FieldNames.Preferences.KEYS_AND_VALUES.name()));
                 String username = (String) usernameAndPreferencesMap.get(FieldNames.Preferences.USERNAME.name());
                 result.put(username, userMap);
             }
@@ -439,7 +451,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private Map<String, Object> loadSettingMap(Document settingDBObject) {
         Map<String, Object> result = new HashMap<>();
         Map<?, ?> map = ((Document) settingDBObject.get(FieldNames.Settings.MAP.name()));
-        for (Entry<?, ?> e : map.entrySet()){
+        for (Entry<?, ?> e : map.entrySet()) {
             String key = (String) e.getKey();
             Object value = e.getValue();
             result.put(key, value);
@@ -457,8 +469,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             Document settingTypesDBObject = settingsCollection.find(query).first();
             if (settingTypesDBObject != null) {
                 result = loadSettingTypesMap(settingTypesDBObject);
-            }
-            else {
+            } else {
                 logger.info("No stored setting types found!");
             }
         } catch (Exception e) {
@@ -471,7 +482,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private Map<String, Class<?>> loadSettingTypesMap(Document settingTypesDBObject) {
         Map<String, Class<?>> result = new HashMap<>();
         Map<?, ?> map = (Document) settingTypesDBObject.get(FieldNames.Settings.MAP.name());
-        for (Entry<?, ?> e : map.entrySet()){
+        for (Entry<?, ?> e : map.entrySet()) {
             String key = (String) e.getKey();
             Class<?> value = null;
             try {
@@ -487,21 +498,22 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private Subscription loadSubscription(Document subscriptionDoc) {
         final Subscription result;
         if (subscriptionDoc != null) {
-            Subscription subscription = new Subscription();
-            subscription.setCustomerId(subscriptionDoc.getString(FieldNames.Subscription.CUSTOMER_ID.name()));
-            subscription.setPlanId(subscriptionDoc.getString(FieldNames.Subscription.PLAN_ID.name()));
-            subscription
-                    .setSubscriptionStatus(subscriptionDoc.getString(FieldNames.Subscription.SUBSCRIPTION_STATUS.name()));
-            subscription.setSubscriptionId(subscriptionDoc.getString(FieldNames.Subscription.SUBSCRIPTION_ID.name()));
-            subscription.setTrialStart(subscriptionDoc.getLong(FieldNames.Subscription.TRIAL_START.name()));
-            subscription.setTrialEnd(subscriptionDoc.getLong(FieldNames.Subscription.TRIAL_END.name()));
-            subscription.setPaymentStatus(subscriptionDoc.getString(FieldNames.Subscription.PAYMENT_STATUS.name()));
-            subscription.setSubsciptionCreatedAt(
-                    subscriptionDoc.getLong(FieldNames.Subscription.SUBSCRIPTION_CREATED_AT.name()));
-            subscription.setSubsciptionUpdatedAt(
-                    subscriptionDoc.getLong(FieldNames.Subscription.SUBSCRIPTION_UPDATED_AT.name()));
-            subscription.setLatestEventTime(subscriptionDoc.getLong(FieldNames.Subscription.LATEST_EVENT_TIME.name()));
-            result = subscription;
+            String customerId = subscriptionDoc.getString(FieldNames.Subscription.CUSTOMER_ID.name());
+            String planId = subscriptionDoc.getString(FieldNames.Subscription.PLAN_ID.name());
+            String subscriptionStatus = subscriptionDoc.getString(FieldNames.Subscription.SUBSCRIPTION_STATUS.name());
+            String subscriptionId = subscriptionDoc.getString(FieldNames.Subscription.SUBSCRIPTION_ID.name());
+            long trialStart = subscriptionDoc.getLong(FieldNames.Subscription.TRIAL_START.name());
+            long trialEnd = subscriptionDoc.getLong(FieldNames.Subscription.TRIAL_END.name());
+            String paymentStatus = subscriptionDoc.getString(FieldNames.Subscription.PAYMENT_STATUS.name());
+            long subscriptionCreatedAt = subscriptionDoc
+                    .getLong(FieldNames.Subscription.SUBSCRIPTION_CREATED_AT.name());
+            long subscriptionUpdatedAt = subscriptionDoc
+                    .getLong(FieldNames.Subscription.SUBSCRIPTION_UPDATED_AT.name());
+            long latestEventTime = subscriptionDoc.getLong(FieldNames.Subscription.LATEST_EVENT_TIME.name());
+            long manualUpdatedAt = subscriptionDoc.getLong(FieldNames.Subscription.MANUAL_UPDATED_AT.name());
+            result = new ChargebeeSubscription(subscriptionId, planId, customerId, trialStart, trialEnd,
+                    subscriptionStatus, paymentStatus, subscriptionCreatedAt, subscriptionUpdatedAt, latestEventTime,
+                    manualUpdatedAt);
         } else {
             result = null;
         }

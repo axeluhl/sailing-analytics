@@ -13,8 +13,8 @@ import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceHelper;
-import com.sap.sailing.gwt.ui.client.subscription.SubscriptionService;
-import com.sap.sailing.gwt.ui.client.subscription.SubscriptionServiceAsync;
+import com.sap.sailing.gwt.ui.client.subscription.chargebee.SubscriptionService;
+import com.sap.sailing.gwt.ui.client.subscription.chargebee.SubscriptionServiceAsync;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.security.ui.client.SecureClientFactoryImpl;
 

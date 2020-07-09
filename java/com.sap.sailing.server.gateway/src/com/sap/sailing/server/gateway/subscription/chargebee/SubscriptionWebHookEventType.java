@@ -1,4 +1,4 @@
-package com.sap.sailing.server.gateway.subscription;
+package com.sap.sailing.server.gateway.subscription.chargebee;
 
 /**
  * Enum for payment service WebHook event types

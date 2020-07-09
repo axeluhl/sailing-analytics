@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.server.subscription;
+package com.sap.sailing.gwt.ui.server.subscription.chargebee;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;

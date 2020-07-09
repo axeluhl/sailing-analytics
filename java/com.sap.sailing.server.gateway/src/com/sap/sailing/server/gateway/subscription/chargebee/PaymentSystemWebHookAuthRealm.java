@@ -1,4 +1,4 @@
-package com.sap.sailing.server.gateway.subscription;
+package com.sap.sailing.server.gateway.subscription.chargebee;
 
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;

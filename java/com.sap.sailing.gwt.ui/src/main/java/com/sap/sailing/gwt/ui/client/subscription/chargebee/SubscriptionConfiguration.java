@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.client.subscription;
+package com.sap.sailing.gwt.ui.client.subscription.chargebee;
 
 /**
  * Subscription service configuration. On front-end side we need to know the site value

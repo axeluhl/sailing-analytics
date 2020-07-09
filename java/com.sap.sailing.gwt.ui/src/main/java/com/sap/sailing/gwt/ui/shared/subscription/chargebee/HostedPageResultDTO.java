@@ -1,7 +1,7 @@
-package com.sap.sailing.gwt.ui.shared.subscription;
+package com.sap.sailing.gwt.ui.shared.subscription.chargebee;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.gwt.ui.client.subscription.SubscriptionService;
+import com.sap.sailing.gwt.ui.client.subscription.chargebee.SubscriptionService;
 
 /**
  * Data transfer object of generating hosted page object {@link SubscriptionService#generateHostedPageObject(String)}

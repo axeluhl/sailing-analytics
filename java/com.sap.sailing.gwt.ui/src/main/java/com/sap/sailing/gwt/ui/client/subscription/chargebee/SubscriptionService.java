@@ -1,8 +1,8 @@
-package com.sap.sailing.gwt.ui.client.subscription;
+package com.sap.sailing.gwt.ui.client.subscription.chargebee;
 
 import com.google.gwt.user.client.rpc.RemoteService;
-import com.sap.sailing.gwt.ui.shared.subscription.HostedPageResultDTO;
-import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionDTO;
+import com.sap.sailing.gwt.ui.shared.subscription.chargebee.HostedPageResultDTO;
+import com.sap.sailing.gwt.ui.shared.subscription.chargebee.SubscriptionDTO;
 
 /**
  * Remote service interface for handling user subscription actions

@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.server.subscription;
+package com.sap.sailing.gwt.ui.server.subscription.chargebee;
 
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
@@ -19,14 +19,15 @@ import com.chargebee.Result;
 import com.chargebee.models.HostedPage;
 import com.chargebee.models.HostedPage.Content;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-import com.sap.sailing.gwt.ui.client.subscription.SubscriptionService;
-import com.sap.sailing.gwt.ui.shared.subscription.HostedPageResultDTO;
-import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionDTO;
+import com.sap.sailing.gwt.ui.client.subscription.chargebee.SubscriptionService;
+import com.sap.sailing.gwt.ui.shared.subscription.chargebee.HostedPageResultDTO;
+import com.sap.sailing.gwt.ui.shared.subscription.chargebee.SubscriptionDTO;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.Subscription;
 import com.sap.sse.security.shared.SubscriptionPlanHolder;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.impl.ChargebeeSubscription;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.ui.server.Activator;
 import static com.chargebee.models.Subscription.cancel;
@@ -106,17 +107,14 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
 
             Result result = HostedPage.acknowledge(hostedPageId).request();
             Content content = result.hostedPage().content();
-            Subscription subscription = new Subscription();
-            subscription.setSubscriptionId(content.subscription().id());
-            subscription.setCustomerId(content.customer().id());
-            subscription.setPlanId(content.subscription().planId());
-            subscription.setTrialStart(content.subscription().trialStart().getTime() / 1000);
-            subscription.setTrialEnd(content.subscription().trialEnd().getTime() / 1000);
-            subscription.setSubscriptionStatus(content.subscription().status().name().toLowerCase());
-            subscription.setSubsciptionCreatedAt(content.subscription().createdAt().getTime() / 1000);
-            subscription.setSubsciptionUpdatedAt(content.subscription().updatedAt().getTime() / 1000);
-            subscription.setLatestEventTime(0);
-            subscription.setManualUpdatedAt(System.currentTimeMillis() / 1000);
+
+            Subscription subscription = new ChargebeeSubscription(content.subscription().id(),
+                    content.subscription().planId(), content.customer().id(),
+                    content.subscription().trialStart().getTime() / 1000,
+                    content.subscription().trialEnd().getTime() / 1000,
+                    content.subscription().status().name().toLowerCase(), null,
+                    content.subscription().createdAt().getTime() / 1000,
+                    content.subscription().updatedAt().getTime() / 1000, 0, System.currentTimeMillis() / 1000);
 
             getSecurityService().updateUserSubscription(user.getName(), subscription);
 
@@ -170,14 +168,13 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
             if (subscriptionId != null && !subscriptionId.isEmpty()) {
                 Result result = cancel(subscriptionId).request();
                 if (!result.subscription().status().name().toLowerCase()
-                        .equals(Subscription.SUBSCRIPTION_STATUS_CANCELLED)) {
+                        .equals(ChargebeeSubscription.SUBSCRIPTION_STATUS_CANCELLED)) {
                     return false;
                 }
             }
 
-            Subscription newSubscription = new Subscription();
-            newSubscription.setLatestEventTime(subscription.getLatestEventTime());
-            newSubscription.setManualUpdatedAt(System.currentTimeMillis() / 1000);
+            Subscription newSubscription = ChargebeeSubscription
+                    .createEmptySubscription(subscription.getLatestEventTime(), System.currentTimeMillis() / 1000);
             getSecurityService().updateUserSubscription(user.getName(), newSubscription);
             return true;
         } catch (Exception e) {
