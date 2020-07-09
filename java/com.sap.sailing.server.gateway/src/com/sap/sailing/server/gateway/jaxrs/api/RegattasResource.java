@@ -13,6 +13,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -90,6 +91,7 @@ import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonConstants;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
@@ -273,8 +275,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 regattasJson.add(regattaJsonSerializer.serialize(regatta));
             }
         }
-        String json = regattasJson.toJSONString();
-        return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+        return Response.ok(streamingOutput(regattasJson)).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
     }
 
     @GET
@@ -431,11 +432,17 @@ public class RegattasResource extends AbstractSailingServerResource {
             for (final Competitor competitor : regatta.getAllCompetitors()) {
                 if (getSecurityService().hasCurrentUserOneOfExplicitPermissions(competitor,
                         SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS)) {
-                    result.add(competitorSerializer.serialize(competitor));
+                    final double effectiveTimeOnTimeFactor = regatta.getTimeOnTimeFactor(competitor, /* changeCallback */ Optional.empty());
+                    final Duration effectiveTimeOnDistanceAllowancePerNauticalMile = regatta.getTimeOnDistanceAllowancePerNauticalMile(competitor, /* changeCallback */ Optional.empty());
+                    final JSONObject competitorJson = competitorSerializer.serialize(competitor);
+                    // overwrite the competitor-specific values by the efffective ones in the scope of the regatta:
+                    competitorJson.put(CompetitorJsonConstants.FIELD_TIME_ON_TIME_FACTOR, effectiveTimeOnTimeFactor);
+                    competitorJson.put(CompetitorJsonConstants.FIELD_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE,
+                            effectiveTimeOnDistanceAllowancePerNauticalMile==null?null:effectiveTimeOnDistanceAllowancePerNauticalMile.asSeconds());
+                    result.add(competitorJson);
                 }
             }
-            String json = result.toJSONString();
-            response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+            response = Response.ok(streamingOutput(result)).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
         }
         return response;
     }
@@ -1276,8 +1283,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                     resultJson.add(getRaceTimesJSONForRaceName(raceName, regatta));
                 }
             }
-            String json = resultJson.toJSONString();
-            response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+            response = Response.ok(streamingOutput(resultJson)).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
         }
         return response;
     }
@@ -1664,7 +1670,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                     result.add(toJson(raceColumn, fleet, windSummary));
                 }
             }
-            response = Response.ok(result.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+            response = Response.ok(streamingOutput(result)).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
         }
         return response;
     }
@@ -2458,8 +2464,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                     jsonResponse.add(raceColumnDataAsJson);
                     oneBasedNumberOfLast = oneBasedNumberOfNext;
                 }
-                String json = jsonResponse.toJSONString();
-                response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+                response = Response.ok(streamingOutput(jsonResponse)).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
             }
         }
         return response;
