@@ -1,16 +1,21 @@
 package com.sap.sailing.expeditionconnector;
 
-import java.io.Serializable;
 import java.util.UUID;
 
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sse.common.impl.NamedImpl;
 import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.dto.AccessControlListDTO;
+import com.sap.sse.security.shared.dto.OwnershipDTO;
+import com.sap.sse.security.shared.dto.SecuredDTO;
+import com.sap.sse.security.shared.dto.SecurityInformationDTO;
 
-public class ExpeditionDeviceConfiguration extends NamedImpl implements Serializable {
+public class ExpeditionDeviceConfiguration extends NamedImpl implements SecuredDTO {
     private static final long serialVersionUID = -7819154195403387909L;
 
+    private SecurityInformationDTO securityInformation = new SecurityInformationDTO();
     private final UUID deviceUuid;
     
     /**
@@ -76,19 +81,41 @@ public class ExpeditionDeviceConfiguration extends NamedImpl implements Serializ
                 + ", getName()=" + getName() + "]";
     }
 
-    /**
-     * Get TypeRelativeObjectIdentifer. Needs a parameter for the servername passed as a String parameter.
-     * 
-     */
-    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String serverName) {
-        return getTypeRelativeObjectIdentifier(serverName, getName());
-    }
-    
-    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String serverName, String name) {
-        return new TypeRelativeObjectIdentifier(serverName, name);
-    }
-
     public HasPermissions getType() {
         return SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION;
+    }
+
+    @Override
+    public QualifiedObjectIdentifier getIdentifier() {
+        return getPermissionType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+    }
+
+    @Override
+    public HasPermissions getPermissionType() {
+        return SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION;
+    }
+
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return new TypeRelativeObjectIdentifier(getDeviceUuid().toString());
+    }
+
+    @Override
+    public final AccessControlListDTO getAccessControlList() {
+        return securityInformation.getAccessControlList();
+    }
+
+    @Override
+    public final OwnershipDTO getOwnership() {
+        return securityInformation.getOwnership();
+    }
+
+    @Override
+    public final void setAccessControlList(final AccessControlListDTO accessControlList) {
+        this.securityInformation.setAccessControlList(accessControlList);
+    }
+
+    @Override
+    public final void setOwnership(final OwnershipDTO ownership) {
+        this.securityInformation.setOwnership(ownership);
     }
 }

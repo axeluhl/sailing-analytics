@@ -17,8 +17,6 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
@@ -64,9 +62,7 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
 
     private static final int METADATA_CONNECTION_TIMEOUT = 10000;
 
-    DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
     private ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
-
 
     private static final long serialVersionUID = -8917349579281305977L;
 

@@ -502,9 +502,6 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     boolean migrateOwnership(WithQualifiedObjectIdentifier object);
 
     /**
-     * 
-     * @param object
-     * @param displayName
      * @return {@code true} if the object required ownership migration
      */
     boolean migrateOwnership(QualifiedObjectIdentifier object, String displayName);

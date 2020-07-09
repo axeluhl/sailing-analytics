@@ -682,7 +682,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         }
         final UUID tenantId = tenantOwner == null ? null : tenantOwner.getId();
         final String userOwnerName = userOwner == null ? null : userOwner.getName();
-
         return apply(new SetOwnershipOperation(idOfOwnedObjectAsString, userOwnerName, tenantId,
                 displayNameOfOwnedObject));
     }

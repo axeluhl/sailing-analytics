@@ -74,7 +74,6 @@
 <setEntry value="com.fasterxml.jackson.core.jackson-databind@default:default"/>
 <setEntry value="org.apache.commons.io@default:default"/>
 <setEntry value="jcl.over.slf4j@default:default"/>
-<setEntry value="org.apache.servicemix.bundles.aws-java-sdk@default:default"/>
 <setEntry value="com.sun.mail.javax.mail@default:default"/>
 <setEntry value="com.rabbitmq.client@default:default"/>
 <setEntry value="org.apache.commons.lang@default:default"/>
@@ -207,6 +206,7 @@
 <setEntry value="com.sap.sse.security.interface@default:default"/>
 <setEntry value="com.sap.sse.jettyextensions@default:default"/>
 <setEntry value="com.sap.sse.replication.persistence@default:default"/>
+<setEntry value="com.amazon.aws.aws-java-api@default:default"/>
 </setAttribute>
 <booleanAttribute key="show_selected_only" value="false"/>
 <booleanAttribute key="tracing" value="false"/>
