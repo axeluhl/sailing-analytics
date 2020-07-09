@@ -504,6 +504,10 @@ public interface BoatClassImageResources extends ClientBundle {
     @ImageOptions(preventInlining = true)
     ImageResource Viper640Icon();
 
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/WAYFARER.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource WayfarerIcon();
+
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/WETA.png")
     @ImageOptions(preventInlining = true)
     ImageResource WetaIcon();
