@@ -3,6 +3,7 @@ package com.sap.sailing.domain.persistence;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -106,6 +107,16 @@ public interface MongoObjectFactory {
      * @param serves the servers to store
      */
     void storeSailingServer(RemoteSailingServerReference server);
+
+    /**
+     * Stores the list of excluded from being loading event id's for remote sailing server
+     * 
+     * @param name
+     *            to get target sailing server by
+     * @param eventIdsToExclude
+     *            the list of event id's to exclude from being loading
+     */
+    void updateSailingServerExcludedEventIds(String name, List<UUID> eventIdsToExclude);
 
     void removeSailingServer(String name);
 

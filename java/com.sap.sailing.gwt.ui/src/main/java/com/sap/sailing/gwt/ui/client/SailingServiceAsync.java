@@ -297,6 +297,9 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
 
     void addRemoteSailingServerReference(RemoteSailingServerReferenceDTO sailingServer,
             AsyncCallback<RemoteSailingServerReferenceDTO> callback);
+    
+    void updateRemoteSailingServerReferenceEcludedEventIds(RemoteSailingServerReferenceDTO sailingServer,
+            AsyncCallback<RemoteSailingServerReferenceDTO> callback);
 
     void getResultImportUrls(String resultProviderName, AsyncCallback<List<UrlDTO>> callback);
 

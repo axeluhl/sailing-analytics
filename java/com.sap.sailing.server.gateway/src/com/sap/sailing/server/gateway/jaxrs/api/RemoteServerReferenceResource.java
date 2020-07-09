@@ -105,7 +105,7 @@ public class RemoteServerReferenceResource extends AbstractSailingServerResource
 
     private List<String> getRemoteEventsList(RemoteSailingServerReference serverRef) {
         final Pair<Iterable<EventBase>, Exception> remoteServerEventsAndExceptions = getService()
-                .updateRemoteServerEventCacheSynchronously(serverRef);
+                .updateRemoteServerEventCacheSynchronously(serverRef, false);
         final List<String> remoteEventsList = new LinkedList<>();
         for (EventBase event : remoteServerEventsAndExceptions.getA()) {
             remoteEventsList.add(event.getName());

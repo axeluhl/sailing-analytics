@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ScheduledExecutorService;
@@ -23,6 +24,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -245,7 +247,7 @@ public class RemoteSailingServerSet {
         Util.Pair<Iterable<EventBase>, Exception> result;
         try {
             try {
-                final URL eventsURL = getEventsURL(ref.getURL());
+                URL eventsURL = getEventsURL(ref);
                 logger.fine("Updating events for remote server " + ref + " from URL " + eventsURL);
                 URLConnection urlConnection = HttpUrlConnectionHelper.redirectConnection(eventsURL);
                 bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream(), "UTF-8"));
@@ -330,8 +332,14 @@ public class RemoteSailingServerSet {
         });
     }
 
-    private URL getEventsURL(URL remoteServerBaseURL) throws MalformedURLException {
-        return getEndpointUrl(remoteServerBaseURL, "/events");
+    private URL getEventsURL(RemoteSailingServerReference remoteServerBaseURL) throws MalformedURLException {
+        String eventsEndpointName = "/events";
+        List<UUID> excludedEventIds = remoteServerBaseURL.getExcludedEventIds();
+        if (excludedEventIds != null && !excludedEventIds.isEmpty()) {
+            eventsEndpointName = eventsEndpointName + "?excludedEvents=" + String.join(",",
+                    excludedEventIds.stream().map(element -> element.toString()).collect(Collectors.toList()));
+        }
+        return getEndpointUrl(remoteServerBaseURL.getURL(), eventsEndpointName);
     }
     
     private URL getStatisticsByYearURL(URL remoteServerBaseURL) throws MalformedURLException {
@@ -375,11 +383,14 @@ public class RemoteSailingServerSet {
     /**
      * Synchronously fetches the latest events list for the remote server reference specified. The result is cached. If
      * <code>ref</code> was not yet part of this remote sailing server reference set, it is automatically added.
+     * 
+     * @param <code>forceUpdate</code>
+     *            is used to trigger cache update in case the list of excluded events is changed
      */
-    public Util.Pair<Iterable<EventBase>, Exception> getEventsOrException(RemoteSailingServerReference ref) {
+    public Util.Pair<Iterable<EventBase>, Exception> getEventsOrException(RemoteSailingServerReference ref, boolean forceUpdate) {
         LockUtil.lockForWrite(lock);
         try {
-            if (!remoteSailingServers.containsKey(ref.getName())) {
+            if (forceUpdate || !remoteSailingServers.containsKey(ref.getName())) {
                 remoteSailingServers.put(ref.getName(), ref);
             }
         } finally {

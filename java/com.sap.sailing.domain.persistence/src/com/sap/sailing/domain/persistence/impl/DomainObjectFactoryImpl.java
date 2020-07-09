@@ -26,6 +26,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.bson.Document;
 import org.bson.json.JsonMode;
@@ -1132,9 +1133,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         RemoteSailingServerReference result = null;
         String name = (String) serverDBObject.get(FieldNames.SERVER_NAME.name());
         String urlAsString = (String) serverDBObject.get(FieldNames.SERVER_URL.name());
+        @SuppressWarnings("unchecked")
+        List<String> excludedEventIdsAsString = (List<String>) serverDBObject.get(FieldNames.EXCLUDED_EVENT_IDS.name());
+        List<UUID> excludedEventIds = excludedEventIdsAsString.stream().map(element -> UUID.fromString(element))
+                .collect(Collectors.toList());
         try {
             URL serverUrl = new URL(urlAsString);
-            result = new RemoteSailingServerReferenceImpl(name, serverUrl);
+            result = new RemoteSailingServerReferenceImpl(name, serverUrl, excludedEventIds);
         } catch (MalformedURLException e) {
             logger.log(Level.SEVERE, "Can't load the sailing server with URL " + urlAsString, e);
         }

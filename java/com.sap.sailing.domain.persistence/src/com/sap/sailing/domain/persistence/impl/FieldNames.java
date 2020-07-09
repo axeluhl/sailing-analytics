@@ -133,6 +133,7 @@ public enum FieldNames {
     // remote server reference fields
     SERVER_NAME,
     SERVER_URL,
+    EXCLUDED_EVENT_IDS,
     
     // local server instance fields
     SERVER_IS_STANDALONE,

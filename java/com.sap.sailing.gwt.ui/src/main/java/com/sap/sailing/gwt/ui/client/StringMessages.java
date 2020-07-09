@@ -422,6 +422,10 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String errorAddingResultImportUrl(String message);
     String eventIdOrUrl();
     String remoteServerInstances();
+    String remoteServerEventsExclusion();
+    String eventsListIsEmpty();
+    String included();
+    String excluded();
     String localServer();
     String errorRefreshingSailingServers(String message);
     String successfullyUpdatedSailingServers();

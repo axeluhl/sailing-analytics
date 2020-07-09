@@ -290,12 +290,20 @@ public class EventsResource extends AbstractSailingServerResource {
     
     @GET
     @Produces("application/json;charset=UTF-8")
-    public Response getEvents(@QueryParam("showNonPublic") String showNonPublic) {
+    public Response getEvents(@QueryParam("showNonPublic") String showNonPublic,
+            @QueryParam("excludedEvents") String excludedEvents) {
         JsonSerializer<EventBase> eventSerializer = new EventBaseJsonSerializer(
                 new VenueJsonSerializer(new CourseAreaJsonSerializer()), new LeaderboardGroupBaseJsonSerializer(),
                 new TrackingConnectorInfoJsonSerializer());
         JSONArray result = new JSONArray();
-        for (Event event : getService().getAllEvents()) {
+        Iterable<Event> events;
+        if (excludedEvents != null) {
+            events = getService().getExcludedEvents(Stream.of(excludedEvents.split(","))
+                    .map(element -> UUID.fromString(element)).collect(Collectors.toList()));
+        } else {
+            events = getService().getAllEvents();
+        }
+        for (Event event : events) {
             if (getSecurityService().hasCurrentUserReadPermission(event)
                     && ((showNonPublic != null && Boolean.valueOf(showNonPublic)) || event.isPublic())) {
                 result.add(eventSerializer.serialize(event));

@@ -132,9 +132,7 @@ public abstract class DataEntryDialog<T> {
         statusLabel.ensureDebugId("StatusLabel");
         dialogFPanel.add(statusLabel);
         if (message != null) {
-            Label messageLabel = new Label(message);
-            messageLabel.addStyleName("dialogMessageLabel");
-            dialogFPanel.add(messageLabel);
+            setDialogMessage(message, dialogFPanel);
         }
         panelForAdditionalWidget = new FlowPanel();
         panelForAdditionalWidget.setWidth("100%");
@@ -174,6 +172,12 @@ public abstract class DataEntryDialog<T> {
                 });
             }
         });
+    }
+
+    public void setDialogMessage(final String message, final FlowPanel dialogFPanel) {
+        Label messageLabel = new Label(message);
+        messageLabel.addStyleName("dialogMessageLabel");
+        dialogFPanel.add(messageLabel);
     }
     
     /**

@@ -425,6 +425,7 @@ import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.interfaces.SimulationService;
 import com.sap.sailing.server.operationaltransformation.AddRemoteSailingServerReference;
 import com.sap.sailing.server.operationaltransformation.RemoveRemoteSailingServerReference;
+import com.sap.sailing.server.operationaltransformation.UpdateSailingServerReferenceExcludedEvents;
 import com.sap.sailing.server.operationaltransformation.UpdateServerConfiguration;
 import com.sap.sailing.server.security.SailingViewerRole;
 import com.sap.sailing.shared.server.SharedSailingData;
@@ -4203,9 +4204,24 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         }
         URL serverURL = new URL(expandedURL);
         RemoteSailingServerReference serverRef = getService().apply(new AddRemoteSailingServerReference(sailingServer.getName(), serverURL));
-        com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception> eventsOrException = getService().updateRemoteServerEventCacheSynchronously(serverRef);
+        com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception> eventsOrException = getService()
+                .updateRemoteServerEventCacheSynchronously(serverRef, false);
         return createRemoteSailingServerReferenceDTO(serverRef, eventsOrException);
         
+    }
+    
+    @Override
+    // ??
+    public RemoteSailingServerReferenceDTO updateRemoteSailingServerReferenceEcludedEventIds(
+            final RemoteSailingServerReferenceDTO sailingServer) throws MalformedURLException {
+        getSecurityService().checkCurrentUserUpdatePermission(getServerInfo());
+        RemoteSailingServerReference serverRef = getService().apply(new UpdateSailingServerReferenceExcludedEvents(
+                sailingServer.getName(), sailingServer.getExcludedEvents().stream().map(element -> {
+                    return (UUID) element.getId();
+                }).collect(Collectors.toList())));
+        com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception> eventsOrException = getService()
+                .updateRemoteServerEventCacheSynchronously(serverRef, true);
+        return createRemoteSailingServerReferenceDTO(serverRef, eventsOrException);
     }
 
     @Override

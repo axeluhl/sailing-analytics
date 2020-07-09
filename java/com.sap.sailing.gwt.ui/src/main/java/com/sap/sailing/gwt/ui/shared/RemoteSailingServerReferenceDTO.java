@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.ui.shared;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import com.sap.sse.security.shared.dto.NamedDTO;
 
@@ -8,6 +10,7 @@ public class RemoteSailingServerReferenceDTO extends NamedDTO {
     private static final long serialVersionUID = -4209262742778693873L;
     private String url;
     private Iterable<EventBaseDTO> events;
+    private List<EventBaseDTO> excludedEvents;
 
     /**
      * The error message is usually filled in case {@link #events} is <code>null</code> and gives a hint about the
@@ -33,6 +36,7 @@ public class RemoteSailingServerReferenceDTO extends NamedDTO {
         super(name);
         this.url = url;
         this.events = events;
+        this.excludedEvents = new ArrayList<>();
         this.lastErrorMessage = lastErrorMessage;
     }
 
@@ -46,6 +50,14 @@ public class RemoteSailingServerReferenceDTO extends NamedDTO {
 
     public Iterable<EventBaseDTO> getEvents() {
         return events;
+    }
+
+    public List<EventBaseDTO> getExcludedEvents() {
+        return excludedEvents;
+    }
+
+    public void addExcludedEvents(List<EventBaseDTO> excludedEvents) {
+        this.excludedEvents.addAll(excludedEvents);
     }
 
     public String getLastErrorMessage() {

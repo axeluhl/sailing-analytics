@@ -579,7 +579,19 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         Document serverDBObject = new Document();
         serverDBObject.put(FieldNames.SERVER_NAME.name(), server.getName());
         serverDBObject.put(FieldNames.SERVER_URL.name(), server.getURL().toExternalForm());
+        serverDBObject.put(FieldNames.EXCLUDED_EVENT_IDS.name(), server.getExcludedEventIds());
         serverCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, serverDBObject, new UpdateOptions().upsert(true));
+    }
+    
+    @Override
+    public void updateSailingServerExcludedEventIds(final String serverName, final List<UUID> eventIdsToExclude) {
+        MongoCollection<Document> serverCollection = database.getCollection(CollectionNames.SAILING_SERVERS.name());
+        Document query = new Document();
+        query.put(FieldNames.SERVER_NAME.name(), serverName);
+        Document serverDBObject = new Document();
+        serverDBObject.put(FieldNames.EXCLUDED_EVENT_IDS.name(), eventIdsToExclude);
+        serverCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, serverDBObject,
+                new UpdateOptions().upsert(true));
     }
 
     @Override
