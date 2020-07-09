@@ -1,5 +1,6 @@
 package com.sap.sse.landscape.aws;
 
+import com.jcraft.jsch.JSchException;
 import com.sap.sse.landscape.AvailabilityZone;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.Landscape;
@@ -33,9 +34,10 @@ public interface AwsLandscape<ShardingKey, MetricsT extends ApplicationProcessMe
     static String SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME = "com.sap.sse.landscape.aws.secretaccesskey";
 
     /**
-     * Based on system properties for the AWS access key ID and the secret access key, this method
-     * returns a landscape object which internally has access to the clients for the underlying AWS landscape,
-     * such as an EC2 client, a Route53 client, etc.
+     * Based on system properties for the AWS access key ID and the secret access key (see
+     * {@link #ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME} and {@link #SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME}), this method
+     * returns a landscape object which internally has access to the clients for the underlying AWS landscape, such as
+     * an EC2 client, a Route53 client, etc.
      */
     static <ShardingKey, MetricsT extends ApplicationProcessMetrics> AwsLandscape<ShardingKey, MetricsT> obtain() {
         return new AwsLandscapeImpl<>();
@@ -73,11 +75,13 @@ public interface AwsLandscape<ShardingKey, MetricsT extends ApplicationProcessMe
     /**
      * Uploads the public key to AWS under the name "keyName", stores it in this landscape and returns the key pair ID
      */
-    String importKeyPair(Region region, byte[] publicKey, byte[] privateKey, String keyName);
+    String importKeyPair(Region region, byte[] publicKey, byte[] unencryptedPrivateKey, String keyName) throws JSchException;
 
     void terminate(AwsInstance host);
 
     SSHKeyPair getSSHKeyPair(Region region, String keyName);
+    
+    byte[] getDescryptedPrivateKey(SSHKeyPair keyPair) throws JSchException;
 
     void addSSHKeyPair(SSHKeyPair keyPair);
 
@@ -88,7 +92,7 @@ public interface AwsLandscape<ShardingKey, MetricsT extends ApplicationProcessMe
      * 
      * @return the key ID as string, usually starting with the prefix "key-"
      */
-    SSHKeyPair createKeyPair(Region region, String keyName);
+    SSHKeyPair createKeyPair(Region region, String keyName) throws JSchException;
 
     Instance getInstance(String instanceId, Region region);
 }

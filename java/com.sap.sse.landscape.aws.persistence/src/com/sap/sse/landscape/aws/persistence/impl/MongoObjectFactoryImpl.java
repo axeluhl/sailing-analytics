@@ -27,7 +27,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         keyPairDocument.put(FieldNames.SSH_KEY_PAIR_CREATOR_NAME.name(), keyPair.getCreatorName());
         keyPairDocument.put(FieldNames.SSH_KEY_PAIR_CREATION_DATE.name(), keyPair.getCreationTime().asMillis());
         keyPairDocument.put(FieldNames.SSH_KEY_PAIR_PUBLIC_KEY.name(), keyPair.getPublicKey());
-        keyPairDocument.put(FieldNames.SSH_KEY_PAIR_PRIVATE_KEY.name(), keyPair.getPrivateKey());
+        keyPairDocument.put(FieldNames.SSH_KEY_PAIR_ENCRYPTED_PRIVATE_KEY.name(), keyPair.getEncryptedPrivateKey());
         db.getCollection(CollectionNames.SSH_KEY_PAIRS.name()).withWriteConcern(WriteConcern.ACKNOWLEDGED)
                 .replaceOne(query, keyPairDocument, new UpdateOptions().upsert(true));
     }

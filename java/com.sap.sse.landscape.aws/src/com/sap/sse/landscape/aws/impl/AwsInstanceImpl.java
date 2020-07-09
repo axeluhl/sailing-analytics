@@ -71,7 +71,7 @@ public class AwsInstanceImpl implements AwsInstance {
         final SSHKeyPair keyPair = landscape.getSSHKeyPair(getRegion(), keyName);
         final JSch jsch = new JSch();
         JSch.setLogger(new JCraftLogAdapter());
-        jsch.addIdentity(keyName, keyPair.getPrivateKey(), keyPair.getPublicKey(), /* TODO passphrase */ null);
+        jsch.addIdentity(keyName, landscape.getDescryptedPrivateKey(keyPair), keyPair.getPublicKey(), /* TODO passphrase */ null);
         final InetAddress address = getAddress();
         if (address == null) {
             throw new IllegalStateException("Instance "+getInstanceId()+" doesn't have a public IP address");

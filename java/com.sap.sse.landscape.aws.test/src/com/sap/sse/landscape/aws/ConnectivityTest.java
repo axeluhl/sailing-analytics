@@ -33,6 +33,15 @@ import com.sap.sse.landscape.ssh.SSHKeyPair;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ec2.model.KeyPairInfo;
 
+/**
+ * Tests for the AWS SDK landscape wrapper in bundle {@code com.sap.sse.landscape.aws}. To run these tests
+ * successfully it is necessary to have valid AWS credentials for region {@code EU_WEST_2} that allow the
+ * AWS user account to create keys and launch instances, etc. These are to be provided as explained
+ * in the documentation of {@link AwsLandscape#obtain()}.
+ * 
+ * @author Axel Uhl (D043530)
+ *
+ */
 public class ConnectivityTest {
     private static final Logger logger = Logger.getLogger(ConnectivityTest.class.getName());
     private AwsLandscape<String, ApplicationProcessMetrics> landscape;
@@ -168,7 +177,7 @@ public class ConnectivityTest {
         }
     }
 
-    private void createKeyPair(final String keyName) {
+    private void createKeyPair(final String keyName) throws JSchException {
         final SSHKeyPair sshKeyPair = landscape.createKeyPair(region, keyName);
         assertNotNull(sshKeyPair);
         assertEquals(keyName, sshKeyPair.getName());

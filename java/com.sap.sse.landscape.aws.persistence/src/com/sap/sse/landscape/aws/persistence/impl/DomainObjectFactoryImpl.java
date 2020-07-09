@@ -29,7 +29,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             final String creatorName = (String) ((Document) o).get(FieldNames.SSH_KEY_PAIR_CREATOR_NAME.name());
             final long creationDateMillis = ((Number) ((Document) o).get(FieldNames.SSH_KEY_PAIR_CREATION_DATE.name())).longValue();
             final String name = (String) ((Document) o).get(FieldNames.SSH_KEY_PAIR_NAME.name());
-            final Binary privKey = (Binary) ((Document) o).get(FieldNames.SSH_KEY_PAIR_PRIVATE_KEY.name());
+            final Binary privKey = (Binary) ((Document) o).get(FieldNames.SSH_KEY_PAIR_ENCRYPTED_PRIVATE_KEY.name());
             final byte[] privateKey = privKey==null?null:privKey.getData();
             final Binary pubKey = (Binary)  ((Document) o).get(FieldNames.SSH_KEY_PAIR_PUBLIC_KEY.name());
             final byte[] publicKey = pubKey==null?null:pubKey.getData();
