@@ -124,7 +124,13 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
 
         @Override
         public void visit(RaceLogRevokeEvent event) {
-            final RaceLogEvent revokedEvent = raceLog.getEventById(event.getRevokedEventId());
+            final RaceLogEvent revokedEvent;
+            raceLog.lockForRead();
+            try {
+                revokedEvent = raceLog.getEventById(event.getRevokedEventId());
+            } finally {
+                raceLog.unlockAfterRead();
+            }
             if (revokedEvent != null) {
                 if (revokedEvent instanceof RaceLogFinishPositioningConfirmedEvent) {
                     final RaceLogFinishPositioningConfirmedEvent revokedResultsEvent = (RaceLogFinishPositioningConfirmedEvent) revokedEvent;

@@ -90,6 +90,6 @@ public class FileUploadServlet extends AbstractFileUploadServlet {
         // in the browser unchanged.
         resp.setContentType("text/html");
         resp.setCharacterEncoding("UTF-8");
-        resp.getWriter().append(resultList.toJSONString());
+        resultList.writeJSONString(resp.getWriter());
     }
 }

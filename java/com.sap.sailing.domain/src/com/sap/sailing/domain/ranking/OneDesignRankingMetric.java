@@ -170,7 +170,7 @@ public class OneDesignRankingMetric extends NonPerformanceCurveRankingMetric {
                     }
 
                     @Override
-                    public Duration getActualRaceDuration() {
+                    public Duration getTimeElapsed() {
                         final TimePoint startOfRace = getTrackedRace().getStartOfRace();
                         final Duration result;
                         if (startOfRace == null) {
@@ -186,7 +186,7 @@ public class OneDesignRankingMetric extends NonPerformanceCurveRankingMetric {
                      */
                     @Override
                     public Duration getCorrectedTime() {
-                        return getActualRaceDuration();
+                        return getTimeElapsed();
                     }
 
                     @Override
