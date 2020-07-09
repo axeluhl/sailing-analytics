@@ -83,8 +83,6 @@ public class RaceStateService extends Service {
 
         super.onCreate();
 
-        Notification notification = setupNotification(null);
-        startForeground(NotificationHelper.getNotificationId(), notification);
         ExLog.i(this, TAG, "Started.");
     }
 
@@ -160,6 +158,7 @@ public class RaceStateService extends Service {
         managedIntents.clear();
 
         ExLog.i(this, TAG, "All races unregistered.");
+        stopForeground(true);
     }
 
     public void unregisterRace(ManagedRace race) {
@@ -178,7 +177,7 @@ public class RaceStateService extends Service {
             }
             managedIntents.remove(race.getId());
         } else {
-            ExLog.w(this, TAG, "Couldn't find any managed intents for race "+race.getId());
+            ExLog.w(this, TAG, "Couldn't find any managed intents for race " + race.getId());
         }
         ExLog.i(this, TAG, "Race " + race.getId() + " unregistered");
         updateNotification();
@@ -203,33 +202,33 @@ public class RaceStateService extends Service {
 
         if (action != null) {
             switch (action) {
-            case AppConstants.INTENT_ACTION_CLEAR_RACES:
-                handleClearRaces();
-                break;
-
-            case AppConstants.INTENT_ACTION_CLEANUP_RACES:
-                handleCleanupRaces();
-                break;
-
-            default:
-                String id = intent.getStringExtra(AppConstants.INTENT_EXTRA_RACE_ID);
-                ManagedRace race = dataManager.getDataStore().getRace(id);
-                if (race == null) {
-                    ExLog.w(this, TAG, "No race for id " + id);
-                    return;
-                }
-
-                switch (action) {
-                case AppConstants.INTENT_ACTION_ALARM_ACTION:
-                    long timePoint = intent.getLongExtra(AppConstants.INTENT_EXTRA_TIMEPOINT_MILLIS, 0);
-                    String eventName = intent.getStringExtra(AppConstants.INTENT_EXTRA_EVENTNAME);
-                    RaceStateEvent event = new RaceStateEventImpl(new MillisecondsTimePoint(timePoint),
-                            RaceStateEvents.valueOf(eventName));
-                    ExLog.i(this, TAG, String.format("Processing %s", event.toString()));
-                    race.getState().processStateEvent(event);
-                    clearAlarmByName(race, event.getEventName());
+                case AppConstants.INTENT_ACTION_CLEAR_RACES:
+                    handleClearRaces();
                     break;
-                }
+
+                case AppConstants.INTENT_ACTION_CLEANUP_RACES:
+                    handleCleanupRaces();
+                    break;
+
+                default:
+                    String id = intent.getStringExtra(AppConstants.INTENT_EXTRA_RACE_ID);
+                    ManagedRace race = dataManager.getDataStore().getRace(id);
+                    if (race == null) {
+                        ExLog.w(this, TAG, "No race for id " + id);
+                        return;
+                    }
+
+                    switch (action) {
+                        case AppConstants.INTENT_ACTION_ALARM_ACTION:
+                            long timePoint = intent.getLongExtra(AppConstants.INTENT_EXTRA_TIMEPOINT_MILLIS, 0);
+                            String eventName = intent.getStringExtra(AppConstants.INTENT_EXTRA_EVENTNAME);
+                            RaceStateEvent event = new RaceStateEventImpl(new MillisecondsTimePoint(timePoint),
+                                    RaceStateEvents.valueOf(eventName));
+                            ExLog.i(this, TAG, String.format("Processing %s", event.toString()));
+                            race.getState().processStateEvent(event);
+                            clearAlarmByName(race, event.getEventName());
+                            break;
+                    }
             }
         }
     }
@@ -288,7 +287,10 @@ public class RaceStateService extends Service {
         int numRaces = managedIntents.keySet().size();
         String content = getString(R.string.service_text_num_races, numRaces);
         Notification notification = setupNotification(content);
-        startForeground(NotificationHelper.getNotificationId(), notification);
+        if (numRaces > 0) {
+            ExLog.i(this, TAG, "Starting foreground");
+            startForeground(NotificationHelper.getNotificationId(), notification);
+        }
     }
 
     public void registerRace(ManagedRace race) {
@@ -338,7 +340,7 @@ public class RaceStateService extends Service {
     }
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
-    /* package */ void setAlarm(ManagedRace race, RaceStateEvent event) {
+        /* package */ void setAlarm(ManagedRace race, RaceStateEvent event) {
         PendingIntent intent = createAlarmPendingIntent(race, event);
         managedIntents.get(race.getId()).add(Pair.create(intent, event.getEventName()));
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {

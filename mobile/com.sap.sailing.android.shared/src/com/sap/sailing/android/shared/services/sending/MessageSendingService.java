@@ -243,7 +243,6 @@ public class MessageSendingService extends Service implements MessageSendingList
         CharSequence name = getString(R.string.service_info);
         NotificationHelper.createNotificationChannel(this, NotificationHelper.getNotificationChannelId(), name);
 
-        startForeground(NotificationHelper.getNotificationId(), NotificationHelper.getNotification(this, NotificationHelper.getNotificationChannelId()));
         ExLog.i(this, TAG, "Sending Service on Create.");
     }
 

@@ -161,7 +161,6 @@ public class TrackingService extends Service implements LocationListener {
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, UPDATE_INTERVAL_IN_MILLIS_DEFAULT,
                 minLocationUpdateDistanceInMeters, this);
         ExLog.i(this, TAG, "Started Tracking");
-        showNotification();
 
         prefs.setTrackerIsTracking(true);
         prefs.setTrackerIsTrackingCheckinDigest(checkinDigest);
@@ -393,20 +392,6 @@ public class TrackingService extends Service implements LocationListener {
     @Override
     public void onProviderEnabled(String provider) {
         // provider (GPS) (re)enabled by the user while tracking
-    }
-
-    private void showNotification() {
-        // Starting in Android 8.0 (API level 26), all notifications must be assigned to a channel
-        CharSequence name = getText(R.string.service_info);
-        NotificationHelper.createNotificationChannel(this, NotificationHelper.getNotificationChannelId(), name);
-
-        Intent intent = new Intent(this, TrackingActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
-
-        Notification notification = NotificationHelper.getNotification(this, NotificationHelper.getNotificationChannelId(), getText(R.string.app_name),
-                getString(R.string.tracking_notification_text, event.name), pendingIntent);
-        startForeground(NotificationHelper.getNotificationId(), notification);
     }
 
     public void registerGPSQualityListener(GPSQualityListener listener) {

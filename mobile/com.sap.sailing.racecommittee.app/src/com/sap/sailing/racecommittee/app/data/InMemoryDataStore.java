@@ -55,8 +55,10 @@ public enum InMemoryDataStore implements DataStore {
         if (mContext == null) {
             mContext = context.getApplicationContext();
         }
-        Intent intent = new Intent(mContext, RaceStateService.class);
-        mContext.bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+        if (!mBound) {
+            Intent intent = new Intent(mContext, RaceStateService.class);
+            mContext.bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+        }
     }
 
     @Override
