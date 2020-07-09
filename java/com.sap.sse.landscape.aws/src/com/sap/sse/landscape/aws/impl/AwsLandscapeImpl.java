@@ -14,6 +14,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.landscape.AvailabilityZone;
+import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.MachineImage;
 import com.sap.sse.landscape.SecurityGroup;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
@@ -50,6 +51,12 @@ import software.amazon.awssdk.services.ec2.model.RunInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.RunInstancesResponse;
 import software.amazon.awssdk.services.ec2.model.TerminateInstancesRequest;
 import software.amazon.awssdk.services.route53.Route53Client;
+import software.amazon.awssdk.services.route53.model.Change;
+import software.amazon.awssdk.services.route53.model.ChangeAction;
+import software.amazon.awssdk.services.route53.model.ChangeBatch;
+import software.amazon.awssdk.services.route53.model.ChangeResourceRecordSetsRequest;
+import software.amazon.awssdk.services.route53.model.ResourceRecord;
+import software.amazon.awssdk.services.route53.model.ResourceRecordSet;
 
 public class AwsLandscapeImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics> implements AwsLandscape<ShardingKey, MetricsT> {
     private static final Logger logger = Logger.getLogger(AwsLandscapeImpl.class.getName());
@@ -130,8 +137,21 @@ public class AwsLandscapeImpl<ShardingKey, MetricsT extends ApplicationProcessMe
                 .iterator().next().instances().iterator().next();
     }
 
-    private Route53Client getRoute53Client(Region region) {
-        return getClient(Route53Client.builder(), region); // ...although the region shouldn't really matter for S3
+    private Route53Client getRoute53Client() {
+        return Route53Client.create();
+    }
+    
+    @Override
+    public void setDNSRecordToHost(String hostname, Host host) {
+        // TODO figure out a good way to define the base wildcard domain such as *.sapsailing.com
+        final String domain = "sapsailing.com";
+        final String ipAddressAsString = host.getAddress().getHostAddress();
+        getRoute53Client().changeResourceRecordSets(ChangeResourceRecordSetsRequest.builder().hostedZoneId(domain)
+                .changeBatch(ChangeBatch.builder().changes(Change.builder().action(ChangeAction.UPSERT)
+                        .resourceRecordSet(ResourceRecordSet.builder().name(hostname)
+                                .resourceRecords(ResourceRecord.builder().value(ipAddressAsString).build()).build())
+                        .build()).build())
+                .build());
     }
     
     @Override

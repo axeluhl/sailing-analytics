@@ -95,4 +95,6 @@ public interface AwsLandscape<ShardingKey, MetricsT extends ApplicationProcessMe
     SSHKeyPair createKeyPair(Region region, String keyName) throws JSchException;
 
     Instance getInstance(String instanceId, Region region);
+
+    void setDNSRecordToHost(String hostname, Host host);
 }
