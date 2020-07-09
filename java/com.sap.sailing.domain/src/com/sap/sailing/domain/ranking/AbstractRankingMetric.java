@@ -60,7 +60,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
         /**
          * Usually the difference between {@link #timePoint} and the start of the race
          */
-        private final Duration actualRaceDuration;
+        private final Duration timeElapsed;
         
         /**
          * The corrected time for the {@link #competitor}, assuming the race ended at {@link #timePoint}. This
@@ -83,13 +83,13 @@ public abstract class AbstractRankingMetric implements RankingMetric {
         private final Duration correctedTimeAtEstimatedArrivalAtCompetitorFarthestAhead;
 
         public CompetitorRankingInfoImpl(TimePoint timePoint, Competitor competitor, Distance windwardDistanceSailed,
-                Duration actualRaceDuration, Duration correctedTime, Duration estimatedActualDurationToCompetitorFarthestAhead,
+                Duration timeElapsed, Duration correctedTime, Duration estimatedActualDurationToCompetitorFarthestAhead,
                 Duration correctedTimeAtEstimatedArrivalAtCompetitorFarthestAhead) {
             super();
             this.timePoint = timePoint;
             this.competitor = competitor;
             this.windwardDistanceSailed = windwardDistanceSailed;
-            this.actualRaceDuration = actualRaceDuration;
+            this.timeElapsed = timeElapsed;
             this.correctedTime = correctedTime;
             this.estimatedActualDurationToCompetitorFarthestAhead = estimatedActualDurationToCompetitorFarthestAhead;
             this.correctedTimeAtEstimatedArrivalAtCompetitorFarthestAhead = correctedTimeAtEstimatedArrivalAtCompetitorFarthestAhead;
@@ -111,8 +111,8 @@ public abstract class AbstractRankingMetric implements RankingMetric {
         }
 
         @Override
-        public Duration getActualRaceDuration() {
-            return actualRaceDuration;
+        public Duration getTimeElapsed() {
+            return timeElapsed;
         }
 
         @Override
@@ -337,8 +337,9 @@ public abstract class AbstractRankingMetric implements RankingMetric {
             // calculate actual time it takes who to reach the end of the leg starting at timePoint:
             final TimePoint whosLegFinishTime = legWho.getFinishTime();
             if (whosLegFinishTime != null && !whosLegFinishTime.after(timePoint)) {
-                // who's leg finishing time is known and is already reached at timePoint; we don't need to extrapolate
-                toEndOfLegOrTo = timePoint.until(whosLegFinishTime);
+                // who's leg finishing time is known and is already reached at timePoint; we don't need to extrapolate;
+                // "who" needs no more time at timePoint to reach the end of the leg
+                toEndOfLegOrTo = Duration.NULL;
             } else {
                 // estimate who's leg finishing time by extrapolating with the average VMG (if available) or the current VMG
                 // (if no average VMG can currently be computed, e.g., because the time point is exactly at the leg start)

@@ -367,7 +367,7 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
     void getLeaderboardGroupNamesAndIdsAsStringsFromRemoteServer(String host, String username, String password,
             AsyncCallback<Map<String, String>> leaderboardGroups);
 
-    void getCompetitors(boolean filterCompetitorsWithBoat, boolean filterCompetitorsWithoutBoat, AsyncCallback<Iterable<CompetitorDTO>> asyncCallback);
+    void getCompetitors(boolean ignoreCompetitorsWithBoat, boolean ignoreCompetitorsWithoutBoat, AsyncCallback<Iterable<CompetitorDTO>> asyncCallback);
 
     void getCompetitorsOfLeaderboard(String leaderboardName, AsyncCallback<Iterable<CompetitorDTO>> asyncCallback);
 
