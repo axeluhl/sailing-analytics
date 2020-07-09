@@ -81,6 +81,8 @@
         <module>com.sap.sse.test</module>
 	<module>com.sap.sse.landscape</module>
         <module>com.sap.sse.landscape.aws</module>
+        <module>com.sap.sse.landscape.aws.test</module>
+        <module>com.sap.sse.landscape.aws.persistence</module>
         <module>com.sap.sse.jersey.jaxbdependencyfragment</module>
         <module>com.sap.sse.jettyextensions</module>
         <module>com.sap.sailing.routeconverterjava11extension</module>
