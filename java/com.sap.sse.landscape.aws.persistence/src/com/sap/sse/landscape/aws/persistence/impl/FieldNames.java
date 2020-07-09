@@ -1,0 +1,5 @@
+package com.sap.sse.landscape.aws.persistence.impl;
+
+public enum FieldNames {
+    SSH_KEY_PAIR_REGION_ID, SSH_KEY_PAIR_CREATOR_NAME, SSH_KEY_PAIR_CREATION_DATE, SSH_KEY_PAIR_NAME, SSH_KEY_PAIR_PRIVATE_KEY, SSH_KEY_PAIR_PUBLIC_KEY
+}

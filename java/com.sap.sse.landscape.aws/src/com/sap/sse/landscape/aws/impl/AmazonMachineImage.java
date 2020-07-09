@@ -9,6 +9,7 @@ import java.util.TimeZone;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.landscape.MachineImage;
 import com.sap.sse.landscape.Region;
+import com.sap.sse.landscape.aws.AwsInstance;
 
 import software.amazon.awssdk.services.ec2.model.Image;
 

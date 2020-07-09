@@ -8,11 +8,12 @@ import com.sap.sse.landscape.Region;
 import com.sap.sse.landscape.SecurityGroup;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.aws.impl.AmazonMachineImage;
-import com.sap.sse.landscape.aws.impl.AwsInstance;
 import com.sap.sse.landscape.aws.impl.AwsLandscapeImpl;
+import com.sap.sse.landscape.ssh.SSHKeyPair;
 
 import software.amazon.awssdk.services.cloudwatch.CloudWatchClient;
 import software.amazon.awssdk.services.ec2.Ec2Client;
+import software.amazon.awssdk.services.ec2.model.Instance;
 import software.amazon.awssdk.services.ec2.model.KeyPairInfo;
 import software.amazon.awssdk.services.route53.Route53Client;
 
@@ -41,23 +42,31 @@ public interface AwsLandscape<ShardingKey, MetricsT extends ApplicationProcessMe
     }
     
     /**
-     * Launches a new {@link Host} from a given image into the availability zone specified and controls
-     * network access to that instance by setting the security groups specified for the resulting host.
+     * Launches a new {@link Host} from a given image into the availability zone specified and controls network access
+     * to that instance by setting the security groups specified for the resulting host.
+     * 
+     * @param keyName
+     *            the SSH key pair name to use when launching; this will grant root access with the corresponding
+     *            private key; see also {@link #getKeyPairInfo(Region, String)}
      */
-    default AwsInstance launchHost(MachineImage<AwsInstance> fromImage, AvailabilityZone az, Iterable<SecurityGroup> securityGroups) {
-        return launchHosts(1, fromImage, az, securityGroups).iterator().next();
+    default AwsInstance launchHost(MachineImage<AwsInstance> fromImage, AvailabilityZone az, String keyName, Iterable<SecurityGroup> securityGroups) {
+        return launchHosts(1, fromImage, az, keyName, securityGroups).iterator().next();
     }
 
     /**
      * Launches a number of new {@link Host}s from a given image into the availability zone specified and controls
      * network access to that instance by setting the security groups specified for the resulting host.
+     * 
+     * @param keyName
+     *            the SSH key pair name to use when launching; this will grant root access with the corresponding
+     *            private key; see also {@link #getKeyPairInfo(Region, String)}
      */
     Iterable<AwsInstance> launchHosts(int numberOfHostsToLaunch, MachineImage<AwsInstance> fromImage, AvailabilityZone az,
-            Iterable<SecurityGroup> securityGroups);
+            String keyName, Iterable<SecurityGroup> securityGroups);
     
     AmazonMachineImage getImage(Region region, String imageId);
     
-    KeyPairInfo getKeyPair(Region region, String keyName);
+    KeyPairInfo getKeyPairInfo(Region region, String keyName);
     
     void deleteKeyPair(Region region, String keyName);
     
@@ -67,4 +76,19 @@ public interface AwsLandscape<ShardingKey, MetricsT extends ApplicationProcessMe
     String importKeyPair(Region region, byte[] publicKey, String keyName);
 
     void terminate(AwsInstance host);
+
+    SSHKeyPair getSSHKeyPair(Region region, String keyName);
+
+    void addSSHKeyPair(SSHKeyPair keyPair);
+
+    /**
+     * Creates a key pair with the given name in the region specified and obtains the key details and stores them in
+     * this landscape persistently, such that {@link #getKeyPairInfo(Region, String)} as well as
+     * {@link #getSSHKeyPair(Region, String)} will be able to obtain (information on) the key.
+     * 
+     * @return the key ID as string, usually starting with the prefix "key-"
+     */
+    SSHKeyPair createKeyPair(Region region, String keyName);
+
+    Instance getInstance(String instanceId, Region region);
 }
