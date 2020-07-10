@@ -32,6 +32,22 @@
                          When logging into a server without administration rights the event management entry will point to the value configured with the system property com.sap.sailing.eventmanagement.url (default: https://my.sapsailing.com). </li>
                         <li>Fixed the passing through of a new mark's short name; so far, erroneously, the long name was stored
                             also as the short name when using the AdminConsole to create a new mark.</li>
+                        <li>Added boat classes Spaekhugger, Scan Kap 99, and Dansk BB 10M.</li>
+                        <li>Fixed an internal locking problem that led to errors when trying to revoke a regatta log event, such as when
+                            removing a device mapping from a regatta.</li>
+                        <li>The <tt>/sailingserver/api/v1/regattas/{regattaname}/competitors</tt> endpoint now tells the effective,
+                            not the competitor-local handicap values which may have been adjusted at regatta level, overriding the
+                            default values that the competitor object provides. Compare with
+                            <tt>/sailingserver/api/v1/competitors/{competitorId}</tt>.</li>
+                        <li>Fixed a problem with assigning existing competitors (with boats) to regattas that are
+                            configured for competitors changing boats across races. Previously, competitors used
+                            in regattas where competitors don't change boats were not selectable for regattas
+                            where competitors <em>do</em> change boats. This is now changes such that competitors
+                            with boat assignments can also be used (without their boat assignments) in regattas
+                            where competitors change boats.</li>
+                        <li>Added boat class "Wayfarer"</li>
+                        <li>Fixed an issue with the <tt>/sailingserver/api/v1/boatclasses</tt> REST API which now delivers
+                            all known boat classes, regardless of whether any polar data exists for them or not.</li>
                     </ul>
                     <h2 class="articleSubheadline">June 2020</h2>
                     <ul class="bulletList">

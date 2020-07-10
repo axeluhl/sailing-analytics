@@ -65,7 +65,7 @@ public interface RankingMetric extends Serializable {
          * Usually the difference between {@link #timePoint} and the start of the race; <code>null</code> if the
          * race start time is not known.
          */
-        Duration getActualRaceDuration();
+        Duration getTimeElapsed();
     
         /**
          * The corrected time for the {@link #competitor}, assuming the race ended at {@link #timePoint}. This
@@ -82,7 +82,7 @@ public interface RankingMetric extends Serializable {
         
         default Duration getEstimatedActualDurationFromRaceStartToCompetitorFarthestAhead() {
             final Duration estimatedActualDurationFromTimePointToCompetitorFarthestAhead = getEstimatedActualDurationFromTimePointToCompetitorFarthestAhead();
-            final Duration actualTime = getActualRaceDuration();
+            final Duration actualTime = getTimeElapsed();
             return actualTime == null ? null :
                 estimatedActualDurationFromTimePointToCompetitorFarthestAhead == null ? null :
                     actualTime.plus(estimatedActualDurationFromTimePointToCompetitorFarthestAhead);
