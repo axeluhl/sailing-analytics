@@ -18,7 +18,7 @@ import java.util.stream.StreamSupport;
 
 /**
  * A dialog to exclude events from the list of loaded events of remote sailing server instance. Events are included by
- * default on UI. If user excludes the event it will not be loaded from the remote saling server and will not be visible
+ * default on UI. If user excludes the event it will not be loaded from the remote sailing server and will not be visible
  * on the requesting server
  * 
  * @author Dmitry Bilyk
@@ -61,21 +61,26 @@ public class RemoteSailingServerEventsExclusionDialog extends DataEntryDialog<Re
             return flowPanel;
         }
         formGrid = new Grid(events.size() + 1, 3);
-        formGrid.setWidget(0, 0, new Label(stringMessages.eventName()));
-        formGrid.setWidget(0, 1, new Label(stringMessages.included()));
-        formGrid.setWidget(0, 2, new Label(stringMessages.excluded()));
         formGrid.setCellSpacing(3);
+        createGridHeader();
         for (int i = 0; i < events.size(); i++) {
             EventBaseDTO eventBaseDTO = events.get(i);
-            formGrid.setWidget(i + 1, 0, new Label(eventBaseDTO.getName()));
+            int eventPosition = i + 1;
+            formGrid.setWidget(eventPosition, 0, new Label(eventBaseDTO.getName()));
             String radioGroupName = eventBaseDTO.getId().toString();
             RadioButton includedRadio = new RadioButton(radioGroupName);
             RadioButton excludedRadio = new RadioButton(radioGroupName);
             includedRadio.setValue(true);
-            formGrid.setWidget(i + 1, 1, includedRadio);
-            formGrid.setWidget(i + 1, 2, excludedRadio);
+            formGrid.setWidget(eventPosition, 1, includedRadio);
+            formGrid.setWidget(eventPosition, 2, excludedRadio);
         }
         return formGrid;
+    }
+
+    private void createGridHeader() {
+        formGrid.setWidget(0, 0, new Label(stringMessages.eventName()));
+        formGrid.setWidget(0, 1, new Label(stringMessages.included()));
+        formGrid.setWidget(0, 2, new Label(stringMessages.excluded()));
     }
 
 }
