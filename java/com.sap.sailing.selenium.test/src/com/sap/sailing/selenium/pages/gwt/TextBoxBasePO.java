@@ -29,7 +29,7 @@ public abstract class TextBoxBasePO extends AbstractInputPO {
             @Override
             public boolean getAsBoolean() {
                 try {
-                    return Objects.equal(getText(), expected);
+                    return getWebElement().isDisplayed() && Objects.equal(getText(), expected);
                 } catch (Exception e) {
                     return false;
                 }

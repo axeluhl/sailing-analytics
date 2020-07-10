@@ -47,7 +47,7 @@ public class ListBoxPO extends AbstractInputPO {
             @Override
             public boolean getAsBoolean() {
                 try {
-                    return Objects.equal(getSelectedOptionValue(), expected);
+                    return getWebElement().isDisplayed() && Objects.equal(getSelectedOptionValue(), expected);
                 } catch (Exception e) {
                     return false;
                 }

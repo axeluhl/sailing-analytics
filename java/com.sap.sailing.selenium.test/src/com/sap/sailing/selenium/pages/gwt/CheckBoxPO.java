@@ -51,7 +51,7 @@ public class CheckBoxPO extends AbstractInputPO {
             @Override
             public boolean getAsBoolean() {
                 try {
-                    return isSelected() == expected;
+                    return getWebElement().isDisplayed() && isSelected() == expected;
                 } catch (Exception e) {
                     return false;
                 }
@@ -76,7 +76,23 @@ public class CheckBoxPO extends AbstractInputPO {
      * @see WebElement#isSelected()
      */
     public boolean isSelected() {
+        checkVisibility();
         return this.input.isSelected();
+    }
+    
+    public void checkVisibility() {
+        if (!getWebElement().isDisplayed()) {
+            waitUntil(new BooleanSupplier() {
+                @Override
+                public boolean getAsBoolean() {
+                    try {
+                        return getWebElement().isDisplayed();
+                    } catch (Exception e) {
+                        return false;
+                    }
+                }
+            });
+        }
     }
     
     /**
