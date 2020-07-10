@@ -98,17 +98,40 @@ public interface AwsLandscape<ShardingKey, MetricsT extends ApplicationProcessMe
 
     Instance getInstance(String instanceId, Region region);
 
+    /**
+     * @param hostname the fully-qualified host name
+     */
     ChangeInfo setDNSRecordToHost(String hostedZoneId, String hostname, Host host);
+
+    /**
+     * @param hostname the fully-qualified host name
+     */
+    ChangeInfo setDNSRecordToApplicationLoadBalancer(String hostedZoneId, String hostname, ApplicationLoadBalancer alb);
 
     String getDefaultDNSHostedZoneId();
 
+    /**
+     * @param hostname the fully-qualified host name
+     */
     ChangeInfo setDNSRecordToValue(String hostedZoneId, String hostname, String value);
 
+    /**
+     * @param hostname
+     *            the fully-qualified host name
+     * @param value
+     *            the address to which the record to remove did resolve the hostname, e.g., the value passed to the
+     *            {@link #setDNSRecordToValue(String, String, String)} earlier
+     */
     ChangeInfo removeDNSRecord(String hostedZoneId, String hostname, RRType type, String value);
 
     /**
-     * Removes the A record for {@code hostname}
-     * @param value TODO
+     * Removes the A record (IPv4 address) for {@code hostname}
+     * 
+     * @param hostname
+     *            the fully-qualified host name
+     * @param value
+     *            the address to which the record to remove did resolve the hostname, e.g., the value passed to the
+     *            {@link #setDNSRecordToValue(String, String, String)} earlier
      */
     ChangeInfo removeDNSRecord(String hostedZoneId, String hostname, String value);
     

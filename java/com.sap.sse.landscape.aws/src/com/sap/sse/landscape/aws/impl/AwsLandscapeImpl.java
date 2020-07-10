@@ -20,6 +20,7 @@ import com.sap.sse.landscape.SecurityGroup;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ApplicationReplicaSet;
 import com.sap.sse.landscape.application.Scope;
+import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.persistence.DomainObjectFactory;
@@ -150,12 +151,17 @@ public class AwsLandscapeImpl<ShardingKey, MetricsT extends ApplicationProcessMe
     
     @Override
     public ChangeInfo setDNSRecordToHost(String hostedZoneId, String hostname, Host host) {
-        // TODO figure out a good way to define the hosted zone / ID
-//        final String hostedZoneId = "Z2JYWXYWLLRLTE";
         final String ipAddressAsString = host.getPublicAddress().getHostAddress();
         return setDNSRecordToValue(hostedZoneId, hostname, ipAddressAsString);
     }
     
+    @Override
+    public ChangeInfo setDNSRecordToApplicationLoadBalancer(String hostedZoneId, String hostname,
+            ApplicationLoadBalancer alb) {
+        final String dnsName = alb.getDNSName();
+        return setDNSRecord(hostedZoneId, hostname, RRType.CNAME, dnsName);
+    }
+
     @Override
     public ChangeInfo setDNSRecordToValue(String hostedZoneId, String hostname, String value) {
         return setDNSRecord(hostedZoneId, hostname, RRType.A, value);
