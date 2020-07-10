@@ -774,42 +774,6 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
 
     private List<HasCell<LeaderboardRowDTO, ?>> getCellListForEditableCompetitorColumn() {
         List<HasCell<LeaderboardRowDTO, ?>> result = new ArrayList<HasCell<LeaderboardRowDTO, ?>>();
-        result.add(new HasCell<LeaderboardRowDTO, String>() {
-            private final ButtonCell cell = new ButtonCell();
-            @Override
-            public Cell<String> getCell() {
-                return cell;
-            }
-
-            @Override
-            public FieldUpdater<LeaderboardRowDTO, String> getFieldUpdater() {
-                return new FieldUpdater<LeaderboardRowDTO, String>() {
-                    @Override
-                    public void update(int index, final LeaderboardRowDTO row, String value) {
-                        getSailingService().suppressCompetitorInLeaderboard(getLeaderboardName(), row.competitor.getIdAsString(),
-                                /* suppressed */ true,
-                                new AsyncCallback<Void>() {
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                getErrorReporter().reportError("Error trying to suppress competitor "+row.competitor.getName()+
-                                        " in leaderboard "+getLeaderboardName());
-                            }
-
-                            @Override
-                            public void onSuccess(Void result) {
-                                // force a reload of the entire editable leaderboard to hide the now suppressed competitor
-                                loadCompleteLeaderboard(/* showProgress */ true);
-                            }
-                        });
-                    }
-                };
-            }
-
-            @Override
-            public String getValue(LeaderboardRowDTO object) {
-                return stringMessages.suppress();
-            }
-        });
         final class OptionalBoldRenderer implements SafeHtmlRenderer<String> {
             private LeaderboardRowDTO currentRow;
 
@@ -830,6 +794,7 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
                     builder.appendHtmlConstant("<b>");
                 }
                 builder.appendEscaped(value);
+                builder.appendHtmlConstant("&nbsp;");
                 if (isDisplayNameSet()) {
                     builder.appendHtmlConstant("</b>");
                 }
@@ -915,11 +880,70 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
                 return stringMessages.edit();
             }
         });
+        result.add(new HasCell<LeaderboardRowDTO, String>() {
+            private final ButtonCell cell = new ButtonCell();
+            @Override
+            public Cell<String> getCell() {
+                return cell;
+            }
+
+            @Override
+            public FieldUpdater<LeaderboardRowDTO, String> getFieldUpdater() {
+                return new FieldUpdater<LeaderboardRowDTO, String>() {
+                    @Override
+                    public void update(int index, final LeaderboardRowDTO row, String value) {
+                        getSailingService().suppressCompetitorInLeaderboard(getLeaderboardName(), row.competitor.getIdAsString(),
+                                /* suppressed */ true,
+                                new AsyncCallback<Void>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                getErrorReporter().reportError("Error trying to suppress competitor "+row.competitor.getName()+
+                                        " in leaderboard "+getLeaderboardName());
+                            }
+
+                            @Override
+                            public void onSuccess(Void result) {
+                                // force a reload of the entire editable leaderboard to hide the now suppressed competitor
+                                loadCompleteLeaderboard(/* showProgress */ true);
+                            }
+                        });
+                    }
+                };
+            }
+
+            @Override
+            public String getValue(LeaderboardRowDTO object) {
+                return stringMessages.suppress();
+            }
+        });
         return result;
     }
     
     private List<HasCell<LeaderboardRowDTO, ?>> getCellListForEditableCarryColumn() {
         List<HasCell<LeaderboardRowDTO, ?>> result = new ArrayList<HasCell<LeaderboardRowDTO, ?>>();
+        final EditTextCell carryTextCell = new EditTextCell();
+        final FieldUpdater<LeaderboardRowDTO, String> fieldUpdater = new FieldUpdater<LeaderboardRowDTO, String>() {
+            @Override
+            public void update(final int rowIndex, final LeaderboardRowDTO row, final String value) {
+                updateCarriedPoints(rowIndex, row, value==null||value.length()==0 ? null : Double.valueOf(value.trim()));
+            }
+        };
+        result.add(new HasCell<LeaderboardRowDTO, String>() {
+            @Override
+            public Cell<String> getCell() {
+                return carryTextCell;
+            }
+
+            @Override
+            public FieldUpdater<LeaderboardRowDTO, String> getFieldUpdater() {
+                return fieldUpdater;
+            }
+
+            @Override
+            public String getValue(LeaderboardRowDTO object) {
+                return object.carriedPoints == null ? "" : scoreFormat.format(object.carriedPoints) + " ";
+            }
+        });
         result.add(new HasCell<LeaderboardRowDTO, String>() {
             private final ButtonCell cell = new ButtonCell();
             @Override
@@ -949,29 +973,6 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
             @Override
             public String getValue(LeaderboardRowDTO object) {
                 return stringMessages.edit();
-            }
-        });
-        final EditTextCell carryTextCell = new EditTextCell();
-        final FieldUpdater<LeaderboardRowDTO, String> fieldUpdater = new FieldUpdater<LeaderboardRowDTO, String>() {
-            @Override
-            public void update(final int rowIndex, final LeaderboardRowDTO row, final String value) {
-                updateCarriedPoints(rowIndex, row, value==null||value.length()==0 ? null : Double.valueOf(value.trim()));
-            }
-        };
-        result.add(new HasCell<LeaderboardRowDTO, String>() {
-            @Override
-            public Cell<String> getCell() {
-                return carryTextCell;
-            }
-
-            @Override
-            public FieldUpdater<LeaderboardRowDTO, String> getFieldUpdater() {
-                return fieldUpdater;
-            }
-
-            @Override
-            public String getValue(LeaderboardRowDTO object) {
-                return object.carriedPoints == null ? "" : scoreFormat.format(object.carriedPoints);
             }
         });
         return result;
