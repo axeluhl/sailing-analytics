@@ -1,5 +1,7 @@
 package com.sap.sse.landscape.aws;
 
+import com.sap.sse.common.Named;
+
 /**
  * Represents an AWS Application Load Balancer (ALB). When created, a default configuration with the following
  * attributes should be considered: {@code access_logs.s3.enabled==true}, then setting the {@code access_logs.s3.bucket}
@@ -11,7 +13,7 @@ package com.sap.sse.landscape.aws;
  * @author Axel Uhl (D043530)
  *
  */
-public interface ApplicationLoadBalancer {
+public interface ApplicationLoadBalancer extends Named {
     /**
      * The DNS name of this load balancer; can be used, e.g., to set a CNAME DNS record pointing
      * to this load balancer.

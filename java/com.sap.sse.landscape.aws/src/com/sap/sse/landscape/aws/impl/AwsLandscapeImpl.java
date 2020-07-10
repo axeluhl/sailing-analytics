@@ -39,10 +39,13 @@ import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.CreateKeyPairRequest;
 import software.amazon.awssdk.services.ec2.model.CreateKeyPairResponse;
 import software.amazon.awssdk.services.ec2.model.DeleteKeyPairRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeAvailabilityZonesRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeAvailabilityZonesResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeImagesRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeImagesResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeKeyPairsRequest;
+import software.amazon.awssdk.services.ec2.model.Filter;
 import software.amazon.awssdk.services.ec2.model.ImportKeyPairRequest;
 import software.amazon.awssdk.services.ec2.model.Instance;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
@@ -51,6 +54,12 @@ import software.amazon.awssdk.services.ec2.model.Placement;
 import software.amazon.awssdk.services.ec2.model.RunInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.RunInstancesResponse;
 import software.amazon.awssdk.services.ec2.model.TerminateInstancesRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.ElasticLoadBalancingV2Client;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.CreateLoadBalancerRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.CreateLoadBalancerResponse;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeLoadBalancersRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.SubnetMapping;
 import software.amazon.awssdk.services.route53.Route53Client;
 import software.amazon.awssdk.services.route53.model.Change;
 import software.amazon.awssdk.services.route53.model.ChangeAction;
@@ -136,6 +145,30 @@ public class AwsLandscapeImpl<ShardingKey, MetricsT extends ApplicationProcessMe
     
     private Ec2Client getEc2Client(Region region) {
         return getClient(Ec2Client.builder(), region);
+    }
+    
+    private ElasticLoadBalancingV2Client getLoadBalancingClient(Region region) {
+        return getClient(ElasticLoadBalancingV2Client.builder(), region);
+    }
+    
+    @Override
+    public ApplicationLoadBalancer createLoadBalancer(String name, com.sap.sse.landscape.Region region) {
+        Region awsRegion = getRegion(region);
+        final ElasticLoadBalancingV2Client client = getLoadBalancingClient(awsRegion);
+        final Iterable<AvailabilityZone> availabilityZones = getAvailabilityZones(region);
+        final CreateLoadBalancerResponse response = client
+                .createLoadBalancer(CreateLoadBalancerRequest.builder().name(name)
+                        .subnetMappings(SubnetMapping.builder().subnetMappings)
+                        .build());
+        return new ApplicationLoadBalancerImpl(response.loadBalancers().iterator().next());
+    }
+
+    @Override
+    public ApplicationLoadBalancer getLoadBalancer(String loadBalancerArn, com.sap.sse.landscape.Region region) {
+        final LoadBalancer loadBalancer = getLoadBalancingClient(getRegion(region))
+                .describeLoadBalancers(DescribeLoadBalancersRequest.builder().loadBalancerArns(loadBalancerArn).build())
+                .loadBalancers().iterator().next();
+        return new ApplicationLoadBalancerImpl(loadBalancer);
     }
     
     @Override
@@ -298,5 +331,16 @@ public class AwsLandscapeImpl<ShardingKey, MetricsT extends ApplicationProcessMe
 
     private Region getRegion(com.sap.sse.landscape.Region region) {
         return Region.of(region.getId());
+    }
+
+    @Override
+    public Iterable<AvailabilityZone> getAvailabilityZones(com.sap.sse.landscape.Region awsRegion) {
+        final DescribeAvailabilityZonesResponse zones = getEc2Client(getRegion(awsRegion)).describeAvailabilityZones(
+                DescribeAvailabilityZonesRequest.builder().filters(Filter.builder().name(name))build());
+        final List<software.amazon.awssdk.services.ec2.model.AvailabilityZone> azs      = zones.availabilityZones();
+        for (final software.amazon.awssdk.services.ec2.model.AvailabilityZone az : azs) {
+            az.
+        }
+        return Util.map(zones.availabilityZones(), AwsAvailabilityZoneImpl::new);
     }
 }

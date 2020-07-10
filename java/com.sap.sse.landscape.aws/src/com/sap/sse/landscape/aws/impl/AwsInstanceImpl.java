@@ -149,7 +149,7 @@ public class AwsInstanceImpl implements AwsInstance {
 
     @Override
     public AvailabilityZone getAvailabilityZone() {
-        return new AwsAvailabilityZone(getInstance().placement().availabilityZone(), getRegion());
+        return new AwsAvailabilityZoneImpl(getInstance().placement().availabilityZone(), getRegion());
     }
 
     private Region getRegion() {

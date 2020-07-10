@@ -16,6 +16,7 @@ import software.amazon.awssdk.services.cloudwatch.CloudWatchClient;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.Instance;
 import software.amazon.awssdk.services.ec2.model.KeyPairInfo;
+import software.amazon.awssdk.services.elasticloadbalancingv2.ElasticLoadBalancingV2Client;
 import software.amazon.awssdk.services.route53.Route53Client;
 import software.amazon.awssdk.services.route53.model.ChangeInfo;
 import software.amazon.awssdk.services.route53.model.RRType;
@@ -136,4 +137,10 @@ public interface AwsLandscape<ShardingKey, MetricsT extends ApplicationProcessMe
     ChangeInfo removeDNSRecord(String hostedZoneId, String hostname, String value);
     
     ChangeInfo getUpdatedChangeInfo(ChangeInfo changeInfo);
+    
+    ApplicationLoadBalancer getLoadBalancer(String loadBalancerArn, Region region);
+
+    ApplicationLoadBalancer createLoadBalancer(String name, Region region);
+
+    Iterable<AvailabilityZone> getAvailabilityZones(Region awsRegion);
 }

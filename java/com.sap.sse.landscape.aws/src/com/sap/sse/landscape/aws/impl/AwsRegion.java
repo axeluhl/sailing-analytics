@@ -3,8 +3,10 @@ package com.sap.sse.landscape.aws.impl;
 import com.sap.sse.landscape.AvailabilityZone;
 import com.sap.sse.landscape.Region;
 import com.sap.sse.landscape.SecurityGroup;
+import com.sap.sse.landscape.aws.AwsLandscape;
 
 public class AwsRegion implements Region {
+    private AwsLandscape<?, ?> landscape;
     private final String id;
     
     public AwsRegion(String id) {
@@ -22,8 +24,7 @@ public class AwsRegion implements Region {
 
     @Override
     public Iterable<AvailabilityZone> getAvailabilityZones() {
-        // TODO Implement AwsRegion.getAvailabilityZones(...)
-        return null;
+        return landscape.getAvailabilityZones(this);
     }
 
     @Override
