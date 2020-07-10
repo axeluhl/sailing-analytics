@@ -10,6 +10,8 @@ import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.landscape.AvailabilityZone;
 import com.sap.sse.landscape.Log;
 import com.sap.sse.landscape.Metrics;
@@ -43,13 +45,23 @@ public class AwsInstanceImpl implements AwsInstance {
     }
 
     @Override
-    public InetAddress getAddress() {
+    public InetAddress getPublicAddress() {
         try {
             final String publicIpAddress = getInstance().publicIpAddress();
             return publicIpAddress==null?null:InetAddress.getByName(publicIpAddress);
         } catch (UnknownHostException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public InetAddress getPublicAddress(Duration timeoutNullMeaningForever) {
+        InetAddress result;
+        final TimePoint started = TimePoint.now();
+        while ((result = getPublicAddress()) == null &&
+                (timeoutNullMeaningForever == null ||
+                 started.until(TimePoint.now()).compareTo(timeoutNullMeaningForever) < 0));
+        return result;
     }
 
     /**
@@ -72,7 +84,7 @@ public class AwsInstanceImpl implements AwsInstance {
         final JSch jsch = new JSch();
         JSch.setLogger(new JCraftLogAdapter());
         jsch.addIdentity(keyName, landscape.getDescryptedPrivateKey(keyPair), keyPair.getPublicKey(), /* TODO passphrase */ null);
-        final InetAddress address = getAddress();
+        final InetAddress address = getPublicAddress();
         if (address == null) {
             throw new IllegalStateException("Instance "+getInstanceId()+" doesn't have a public IP address");
         }

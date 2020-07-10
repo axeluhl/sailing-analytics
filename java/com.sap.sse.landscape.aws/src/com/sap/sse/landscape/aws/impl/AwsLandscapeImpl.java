@@ -54,16 +54,22 @@ import software.amazon.awssdk.services.route53.Route53Client;
 import software.amazon.awssdk.services.route53.model.Change;
 import software.amazon.awssdk.services.route53.model.ChangeAction;
 import software.amazon.awssdk.services.route53.model.ChangeBatch;
+import software.amazon.awssdk.services.route53.model.ChangeInfo;
 import software.amazon.awssdk.services.route53.model.ChangeResourceRecordSetsRequest;
+import software.amazon.awssdk.services.route53.model.ChangeResourceRecordSetsResponse;
+import software.amazon.awssdk.services.route53.model.GetChangeRequest;
+import software.amazon.awssdk.services.route53.model.RRType;
 import software.amazon.awssdk.services.route53.model.ResourceRecord;
 import software.amazon.awssdk.services.route53.model.ResourceRecordSet;
 
 public class AwsLandscapeImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics> implements AwsLandscape<ShardingKey, MetricsT> {
     private static final Logger logger = Logger.getLogger(AwsLandscapeImpl.class.getName());
+    private static final long DEFAULT_DNS_TTL_MILLIS = 60000l;
     private final String accessKeyId;
     private final String secretAccessKey;
     private final MongoObjectFactory mongoObjectFactory;
     private ConcurrentMap<Pair<String, String>, SSHKeyPair> sshKeyPairs;
+    private final AwsRegion globalRegion;
     
     /**
      * Used for the symmetric encryption / decryption of private SSH keys. See also
@@ -83,6 +89,7 @@ public class AwsLandscapeImpl<ShardingKey, MetricsT extends ApplicationProcessMe
         this.privateKeyEncryptionPassphrase = ("aw4raif87l"+"098sf;;50").getBytes();
         this.accessKeyId = accessKeyId;
         this.secretAccessKey = secretAccessKey;
+        this.globalRegion = new AwsRegion(Region.AWS_GLOBAL);
         this.mongoObjectFactory = mongoObjectFactory;
         this.sshKeyPairs = new ConcurrentHashMap<Util.Pair<String,String>, SSHKeyPair>();
         for (final SSHKeyPair keyPair : domainObjectFactory.loadSSHKeyPairs()) {
@@ -138,22 +145,60 @@ public class AwsLandscapeImpl<ShardingKey, MetricsT extends ApplicationProcessMe
     }
 
     private Route53Client getRoute53Client() {
-        return Route53Client.create();
+        return Route53Client.builder().region(getRegion(globalRegion)).build();
     }
     
     @Override
-    public void setDNSRecordToHost(String hostname, Host host) {
-        // TODO figure out a good way to define the base wildcard domain such as *.sapsailing.com
-        final String domain = "sapsailing.com";
-        final String ipAddressAsString = host.getAddress().getHostAddress();
-        getRoute53Client().changeResourceRecordSets(ChangeResourceRecordSetsRequest.builder().hostedZoneId(domain)
-                .changeBatch(ChangeBatch.builder().changes(Change.builder().action(ChangeAction.UPSERT)
-                        .resourceRecordSet(ResourceRecordSet.builder().name(hostname)
-                                .resourceRecords(ResourceRecord.builder().value(ipAddressAsString).build()).build())
-                        .build()).build())
-                .build());
+    public ChangeInfo setDNSRecordToHost(String hostedZoneId, String hostname, Host host) {
+        // TODO figure out a good way to define the hosted zone / ID
+//        final String hostedZoneId = "Z2JYWXYWLLRLTE";
+        final String ipAddressAsString = host.getPublicAddress().getHostAddress();
+        return setDNSRecordToValue(hostedZoneId, hostname, ipAddressAsString);
     }
     
+    @Override
+    public ChangeInfo setDNSRecordToValue(String hostedZoneId, String hostname, String value) {
+        return setDNSRecord(hostedZoneId, hostname, RRType.A, value);
+    }
+
+    // TODO should the default DNS hosted zone ID for a landscape be configurable? persistent? A property at all?
+    @Override
+    public String getDefaultDNSHostedZoneId() {
+//      final String hostedZoneId = "Z2JYWXYWLLRLTE"; // TODO sapsailing.com.
+        return "Z1Z1ID6TP8HVB2"; // TODO test zone "wiesen-weg.de."
+    }
+
+    private ChangeInfo setDNSRecord(String hostedZoneId, String hostname, RRType type, String value) {
+        final ChangeResourceRecordSetsResponse response = getRoute53Client()
+                .changeResourceRecordSets(
+                        ChangeResourceRecordSetsRequest.builder().hostedZoneId(hostedZoneId)
+                                .changeBatch(ChangeBatch.builder().changes(Change.builder().action(ChangeAction.UPSERT)
+                                        .resourceRecordSet(ResourceRecordSet.builder().name(hostname).type(type).ttl(DEFAULT_DNS_TTL_MILLIS)
+                                                .resourceRecords(ResourceRecord.builder().value(value).build()).build())
+                                        .build()).build())
+                                .build());
+        return response.changeInfo();
+    }
+
+    @Override
+    public ChangeInfo removeDNSRecord(String hostedZoneId, String hostname, String value) {
+        return removeDNSRecord(hostedZoneId, hostname, RRType.A, value);
+    }
+
+    @Override
+    public ChangeInfo removeDNSRecord(String hostedZoneId, String hostname, RRType type, String value) {
+        return getRoute53Client().changeResourceRecordSets(ChangeResourceRecordSetsRequest.builder().hostedZoneId(hostedZoneId)
+                .changeBatch(ChangeBatch.builder().changes(Change.builder().action(ChangeAction.DELETE)
+                        .resourceRecordSet(ResourceRecordSet.builder().name(hostname).type(type).ttl(DEFAULT_DNS_TTL_MILLIS)
+                                .resourceRecords(ResourceRecord.builder().value(value).build()).build()).build()).build()).build()).
+                changeInfo();
+    }
+
+    @Override
+    public ChangeInfo getUpdatedChangeInfo(ChangeInfo changeInfo) {
+        return getRoute53Client().getChange(GetChangeRequest.builder().id(changeInfo.id()).build()).changeInfo();
+    }
+
     @Override
     public AmazonMachineImage getImage(com.sap.sse.landscape.Region region, String imageId) {
         final DescribeImagesResponse response = getEc2Client(getRegion(region))

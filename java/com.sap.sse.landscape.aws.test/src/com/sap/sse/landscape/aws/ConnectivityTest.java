@@ -3,6 +3,7 @@ package com.sap.sse.landscape.aws;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -13,6 +14,7 @@ import java.net.InetAddress;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
+import java.util.Random;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -23,6 +25,7 @@ import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.KeyPair;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.aws.impl.AmazonMachineImage;
@@ -32,6 +35,8 @@ import com.sap.sse.landscape.ssh.SSHKeyPair;
 
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ec2.model.KeyPairInfo;
+import software.amazon.awssdk.services.route53.model.ChangeInfo;
+import software.amazon.awssdk.services.route53.model.ChangeStatus;
 
 /**
  * Tests for the AWS SDK landscape wrapper in bundle {@code com.sap.sse.landscape.aws}. To run these tests
@@ -134,11 +139,7 @@ public class ConnectivityTest {
             logger.info("Created instance with ID "+host.getInstanceId());
             logger.info("Waiting for public IP address...");
             // wait for public IPv4 address to become available:
-            int publicIpAddressWaitAttempts = 10;
-            InetAddress address = null;
-            while ((address=host.getAddress()) == null && --publicIpAddressWaitAttempts > 0) {
-                Thread.sleep(1000);
-            };
+            InetAddress address = host.getPublicAddress(Duration.ONE_SECOND.times(10));
             assertNotNull(address);
             logger.info("Obtained public IP address "+address);
             Channel shellChannel = null;
@@ -188,5 +189,23 @@ public class ConnectivityTest {
         final AmazonMachineImage image = landscape.getImage(region, "ami-01b4b27a5699e33e6");
         assertEquals(TimePoint.of(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz").parse("2020-07-08T12:41:06+0200")),
                 image.getCreatedAt());
+    }
+    
+    @Test
+    public void setDNSRecordTest() {
+        final String hostname = "my-test-host-"+new Random().nextInt()+".wiesen-weg.de.";
+        final String ipAddress = "1.2.3.4";
+        try {
+            ChangeInfo changeInfo = landscape.setDNSRecordToValue(landscape.getDefaultDNSHostedZoneId(), hostname, ipAddress);
+            int attempts = 10;
+            while ((changeInfo=landscape.getUpdatedChangeInfo(changeInfo)).status() != ChangeStatus.INSYNC && --attempts > 0) {
+                Thread.sleep(5000);
+            };
+            assertEquals(ChangeStatus.INSYNC, changeInfo.status());
+        } catch (Exception e) {
+            fail(e.getMessage());
+        } finally {
+            landscape.removeDNSRecord(landscape.getDefaultDNSHostedZoneId(), hostname, ipAddress);
+        }
     }
 }

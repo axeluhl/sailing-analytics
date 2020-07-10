@@ -17,6 +17,8 @@ import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.Instance;
 import software.amazon.awssdk.services.ec2.model.KeyPairInfo;
 import software.amazon.awssdk.services.route53.Route53Client;
+import software.amazon.awssdk.services.route53.model.ChangeInfo;
+import software.amazon.awssdk.services.route53.model.RRType;
 
 /**
  * A simplified view onto the AWS SDK API that is geared towards specific ways and patterns of managing an application
@@ -96,5 +98,19 @@ public interface AwsLandscape<ShardingKey, MetricsT extends ApplicationProcessMe
 
     Instance getInstance(String instanceId, Region region);
 
-    void setDNSRecordToHost(String hostname, Host host);
+    ChangeInfo setDNSRecordToHost(String hostedZoneId, String hostname, Host host);
+
+    String getDefaultDNSHostedZoneId();
+
+    ChangeInfo setDNSRecordToValue(String hostedZoneId, String hostname, String value);
+
+    ChangeInfo removeDNSRecord(String hostedZoneId, String hostname, RRType type, String value);
+
+    /**
+     * Removes the A record for {@code hostname}
+     * @param value TODO
+     */
+    ChangeInfo removeDNSRecord(String hostedZoneId, String hostname, String value);
+    
+    ChangeInfo getUpdatedChangeInfo(ChangeInfo changeInfo);
 }
