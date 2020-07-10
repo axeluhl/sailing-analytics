@@ -24,7 +24,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -332,14 +331,16 @@ public class RemoteSailingServerSet {
         });
     }
 
-    private URL getEventsURL(RemoteSailingServerReference remoteServerBaseURL) throws MalformedURLException {
-        String eventsEndpointName = "/events";
-        List<UUID> excludedEventIds = remoteServerBaseURL.getExcludedEventIds();
-        if (excludedEventIds != null && !excludedEventIds.isEmpty()) {
-            eventsEndpointName = eventsEndpointName + "?excludedEvents=" + String.join(",",
-                    excludedEventIds.stream().map(element -> element.toString()).collect(Collectors.toList()));
+    private URL getEventsURL(RemoteSailingServerReference remoteServerRef) throws MalformedURLException {
+        final String basePath = "/events";
+        final Iterable<UUID> excludedEventIds = remoteServerRef.getExcludedEventIds();
+        final String eventsEndpointName;
+        if (excludedEventIds != null && !Util.isEmpty(excludedEventIds)) {
+            eventsEndpointName = basePath + "?excludedEvents=" + Util.join(",", Util.map(excludedEventIds, uuid->uuid.toString()));
+        } else {
+            eventsEndpointName = basePath;
         }
-        return getEndpointUrl(remoteServerBaseURL.getURL(), eventsEndpointName);
+        return getEndpointUrl(remoteServerRef.getURL(), eventsEndpointName);
     }
     
     private URL getStatisticsByYearURL(URL remoteServerBaseURL) throws MalformedURLException {

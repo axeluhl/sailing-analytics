@@ -27,21 +27,17 @@ public class UpdateSailingServerReferenceExcludedEvents
 
     @Override
     public RemoteSailingServerReference internalApplyTo(RacingEventService toState) throws Exception {
-        RemoteSailingServerReference result = toState.updateRemoteSailingServerReferenceExcludedEventIds(serverName,
-                excludedEventIds);
+        RemoteSailingServerReference result = toState.updateRemoteSailingServerReferenceExcludedEventIds(serverName, excludedEventIds);
         return result;
     }
 
     @Override
     public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<?> serverOp) {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<?> clientOp) {
-        // TODO Auto-generated method stub
         return null;
     }
-
 }

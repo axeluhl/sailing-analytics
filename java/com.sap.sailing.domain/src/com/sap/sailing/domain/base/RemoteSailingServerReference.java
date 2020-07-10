@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.base;
 
 import java.net.URL;
-import java.util.List;
 import java.util.UUID;
 
 import com.sap.sse.common.Named;
@@ -15,5 +14,6 @@ import com.sap.sse.common.Named;
  */
 public interface RemoteSailingServerReference extends Named {
     URL getURL();
-    List<UUID> getExcludedEventIds();
+    Iterable<UUID> getExcludedEventIds();
+    void addExcludedEventIds(Iterable<UUID> eventIdsToExclude);
 }

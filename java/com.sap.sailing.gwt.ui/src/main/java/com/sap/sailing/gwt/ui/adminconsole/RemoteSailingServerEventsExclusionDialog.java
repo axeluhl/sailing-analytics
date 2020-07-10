@@ -17,9 +17,9 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 /**
- * A dialog to exclude events from the list of loaded events of remote sailing server instance. Events are included by
- * default on UI. If user excludes the event it will not be loaded from the remote sailing server and will not be visible
- * on the requesting server
+ * A dialog to exclude events from the list of loaded events of a remote sailing server instance. Events are included by
+ * default on UI. If the user excludes the event it will not be loaded from the remote sailing server and will not be visible
+ * on the requesting server.
  * 
  * @author Dmitry Bilyk
  *

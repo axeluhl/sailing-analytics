@@ -1616,7 +1616,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             final List<UUID> eventIdsToExclude) {
         RemoteSailingServerReference result = getRemoteServerReferenceByName(name);
         if (result != null) {
-            result.getExcludedEventIds().addAll(eventIdsToExclude);
+            result.addExcludedEventIds(eventIdsToExclude);
             mongoObjectFactory.storeSailingServer(result);
         }
         return result;
