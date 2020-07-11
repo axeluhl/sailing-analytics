@@ -1,6 +1,7 @@
 package com.sap.sse.landscape.aws;
 
 import com.sap.sse.common.Named;
+import com.sap.sse.landscape.Region;
 
 /**
  * Represents an AWS Application Load Balancer (ALB). When created, a default configuration with the following
@@ -25,4 +26,8 @@ public interface ApplicationLoadBalancer extends Named {
     void addRules(Iterable<LoadBalancerRule> rulesToAdd);
     
     void deleteRules(Iterable<LoadBalancerRule> rulesToDelete);
+
+    Region getRegion();
+
+    String getArn();
 }

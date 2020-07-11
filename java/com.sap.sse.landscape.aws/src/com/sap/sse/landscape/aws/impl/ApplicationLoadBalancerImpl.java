@@ -9,8 +9,11 @@ public class ApplicationLoadBalancerImpl implements ApplicationLoadBalancer {
     private static final long serialVersionUID = -5297220031399131769L;
     
     final LoadBalancer loadBalancer;
+
+    private final com.sap.sse.landscape.Region region;
     
-    public ApplicationLoadBalancerImpl(LoadBalancer loadBalancer) {
+    public ApplicationLoadBalancerImpl(com.sap.sse.landscape.Region region, LoadBalancer loadBalancer) {
+        this.region = region;
         this.loadBalancer = loadBalancer;
     }
 
@@ -22,6 +25,16 @@ public class ApplicationLoadBalancerImpl implements ApplicationLoadBalancer {
     @Override
     public String getDNSName() {
         return loadBalancer.dnsName();
+    }
+
+    @Override
+    public String getArn() {
+        return loadBalancer.loadBalancerArn();
+    }
+
+    @Override
+    public com.sap.sse.landscape.Region getRegion() {
+        return region;
     }
 
     @Override

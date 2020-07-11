@@ -16,8 +16,8 @@ import com.sap.sse.landscape.AvailabilityZone;
 import com.sap.sse.landscape.Log;
 import com.sap.sse.landscape.Metrics;
 import com.sap.sse.landscape.Process;
-import com.sap.sse.landscape.Region;
 import com.sap.sse.landscape.SecurityGroup;
+import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.ssh.JCraftLogAdapter;
@@ -28,10 +28,10 @@ import software.amazon.awssdk.services.ec2.model.Instance;
 
 public class AwsInstanceImpl implements AwsInstance {
     private final String instanceId;
-    private final AvailabilityZone availabilityZone;
+    private final AwsAvailabilityZone availabilityZone;
     private final AwsLandscape<?, ?> landscape;
     
-    public AwsInstanceImpl(String instanceId, AvailabilityZone availabilityZone, AwsLandscape<?, ?> landscape) {
+    public AwsInstanceImpl(String instanceId, AwsAvailabilityZone availabilityZone, AwsLandscape<?, ?> landscape) {
         this.instanceId = instanceId;
         this.availabilityZone = availabilityZone;
         this.landscape = landscape;
@@ -149,10 +149,10 @@ public class AwsInstanceImpl implements AwsInstance {
 
     @Override
     public AvailabilityZone getAvailabilityZone() {
-        return new AwsAvailabilityZoneImpl(getInstance().placement().availabilityZone(), getRegion());
+        return availabilityZone;
     }
 
-    private Region getRegion() {
+    private AwsRegion getRegion() {
         return availabilityZone.getRegion();
     }
 

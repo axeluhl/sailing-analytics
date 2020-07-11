@@ -29,7 +29,6 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.aws.impl.AmazonMachineImage;
-import com.sap.sse.landscape.aws.impl.AwsAvailabilityZoneImpl;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.ssh.SSHKeyPair;
 
@@ -63,7 +62,7 @@ public class ConnectivityTest {
     @Test
     public void testConnectivity() {
         final AwsInstance host = landscape.launchHost(landscape.getImage(region, "ami-01b4b27a5699e33e6"),
-                new AwsAvailabilityZoneImpl("eu-west-2b", region), "Axel", Collections.singleton(()->"sg-0b2afd48960251280"));
+                landscape.getAvailabilityZoneByName(region, "eu-west-2b"), "Axel", Collections.singleton(()->"sg-0b2afd48960251280"));
         try {
             assertNotNull(host);
         } finally {
@@ -133,7 +132,7 @@ public class ConnectivityTest {
 
     private void testSshConnectWithKey(final String keyName) throws InterruptedException, JSchException {
         final AwsInstance host = landscape.launchHost(landscape.getImage(region, "ami-01b4b27a5699e33e6"),
-                new AwsAvailabilityZoneImpl("eu-west-2b", region), keyName, Collections.singleton(()->"sg-0b2afd48960251280"));
+                landscape.getAvailabilityZoneByName(region, "eu-west-2b"), keyName, Collections.singleton(()->"sg-0b2afd48960251280"));
         try {
             assertNotNull(host);
             logger.info("Created instance with ID "+host.getInstanceId());
@@ -213,7 +212,11 @@ public class ConnectivityTest {
     public void createEmptyLoadBalancerTest() {
         final String albName = "MyAlb"+new Random().nextInt();
         final ApplicationLoadBalancer alb = landscape.createLoadBalancer(albName, region);
-        assertNotNull(alb);
-        assertEquals(albName, alb.getName());
+        try {
+            assertNotNull(alb);
+            assertEquals(albName, alb.getName());
+        } finally {
+            landscape.deleteLoadBalancer(alb);
+        }
     }
 }

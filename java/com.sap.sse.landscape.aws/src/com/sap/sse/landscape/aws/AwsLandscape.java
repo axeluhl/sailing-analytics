@@ -10,6 +10,7 @@ import com.sap.sse.landscape.SecurityGroup;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.aws.impl.AmazonMachineImage;
 import com.sap.sse.landscape.aws.impl.AwsLandscapeImpl;
+import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.ssh.SSHKeyPair;
 
 import software.amazon.awssdk.services.cloudwatch.CloudWatchClient;
@@ -54,7 +55,7 @@ public interface AwsLandscape<ShardingKey, MetricsT extends ApplicationProcessMe
      *            the SSH key pair name to use when launching; this will grant root access with the corresponding
      *            private key; see also {@link #getKeyPairInfo(Region, String)}
      */
-    default AwsInstance launchHost(MachineImage<AwsInstance> fromImage, AvailabilityZone az, String keyName, Iterable<SecurityGroup> securityGroups) {
+    default AwsInstance launchHost(MachineImage<AwsInstance> fromImage, AwsAvailabilityZone az, String keyName, Iterable<SecurityGroup> securityGroups) {
         return launchHosts(1, fromImage, az, keyName, securityGroups).iterator().next();
     }
 
@@ -66,7 +67,7 @@ public interface AwsLandscape<ShardingKey, MetricsT extends ApplicationProcessMe
      *            the SSH key pair name to use when launching; this will grant root access with the corresponding
      *            private key; see also {@link #getKeyPairInfo(Region, String)}
      */
-    Iterable<AwsInstance> launchHosts(int numberOfHostsToLaunch, MachineImage<AwsInstance> fromImage, AvailabilityZone az,
+    Iterable<AwsInstance> launchHosts(int numberOfHostsToLaunch, MachineImage<AwsInstance> fromImage, AwsAvailabilityZone az,
             String keyName, Iterable<SecurityGroup> securityGroups);
     
     AmazonMachineImage getImage(Region region, String imageId);
@@ -143,4 +144,8 @@ public interface AwsLandscape<ShardingKey, MetricsT extends ApplicationProcessMe
     ApplicationLoadBalancer createLoadBalancer(String name, Region region);
 
     Iterable<AvailabilityZone> getAvailabilityZones(Region awsRegion);
+
+    AwsAvailabilityZone getAvailabilityZoneByName(AwsRegion region, String availabilityZoneName);
+
+    void deleteLoadBalancer(ApplicationLoadBalancer alb);
 }
