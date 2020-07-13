@@ -1,5 +1,7 @@
 package com.sap.sse.landscape.aws;
 
+import java.util.Map;
+
 import com.jcraft.jsch.JSchException;
 import com.sap.sse.landscape.AvailabilityZone;
 import com.sap.sse.landscape.Host;
@@ -11,13 +13,16 @@ import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.aws.impl.AmazonMachineImage;
 import com.sap.sse.landscape.aws.impl.AwsLandscapeImpl;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
+import com.sap.sse.landscape.aws.impl.AwsTargetGroupImpl;
 import com.sap.sse.landscape.ssh.SSHKeyPair;
 
 import software.amazon.awssdk.services.cloudwatch.CloudWatchClient;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.Instance;
+import software.amazon.awssdk.services.ec2.model.InstanceType;
 import software.amazon.awssdk.services.ec2.model.KeyPairInfo;
 import software.amazon.awssdk.services.elasticloadbalancingv2.ElasticLoadBalancingV2Client;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealth;
 import software.amazon.awssdk.services.route53.Route53Client;
 import software.amazon.awssdk.services.route53.model.ChangeInfo;
 import software.amazon.awssdk.services.route53.model.RRType;
@@ -50,25 +55,24 @@ public interface AwsLandscape<ShardingKey, MetricsT extends ApplicationProcessMe
     /**
      * Launches a new {@link Host} from a given image into the availability zone specified and controls network access
      * to that instance by setting the security groups specified for the resulting host.
-     * 
      * @param keyName
      *            the SSH key pair name to use when launching; this will grant root access with the corresponding
      *            private key; see also {@link #getKeyPairInfo(Region, String)}
      */
-    default AwsInstance launchHost(MachineImage<AwsInstance> fromImage, AwsAvailabilityZone az, String keyName, Iterable<SecurityGroup> securityGroups) {
-        return launchHosts(1, fromImage, az, keyName, securityGroups).iterator().next();
+    default AwsInstance launchHost(MachineImage<AwsInstance> fromImage, InstanceType instanceType,
+            AwsAvailabilityZone az, String keyName, Iterable<SecurityGroup> securityGroups) {
+        return launchHosts(1, fromImage, instanceType, az, keyName, securityGroups).iterator().next();
     }
 
     /**
      * Launches a number of new {@link Host}s from a given image into the availability zone specified and controls
      * network access to that instance by setting the security groups specified for the resulting host.
-     * 
      * @param keyName
      *            the SSH key pair name to use when launching; this will grant root access with the corresponding
      *            private key; see also {@link #getKeyPairInfo(Region, String)}
      */
-    Iterable<AwsInstance> launchHosts(int numberOfHostsToLaunch, MachineImage<AwsInstance> fromImage, AwsAvailabilityZone az,
-            String keyName, Iterable<SecurityGroup> securityGroups);
+    Iterable<AwsInstance> launchHosts(int numberOfHostsToLaunch, MachineImage<AwsInstance> fromImage, InstanceType instanceType,
+            AwsAvailabilityZone az, String keyName, Iterable<SecurityGroup> securityGroups);
     
     AmazonMachineImage getImage(Region region, String imageId);
     
@@ -148,4 +152,19 @@ public interface AwsLandscape<ShardingKey, MetricsT extends ApplicationProcessMe
     AwsAvailabilityZone getAvailabilityZoneByName(AwsRegion region, String availabilityZoneName);
 
     void deleteLoadBalancer(ApplicationLoadBalancer alb);
+
+    /**
+     * Creates a target group with a default configuration that includes a health check URL.
+     */
+    TargetGroup createTargetGroup(AwsRegion region, String targetGroupName, int port, String healthCheckPath, int healthCheckPort);
+
+    default TargetGroup getTargetGroup(AwsRegion region, String targetGroupName, String targetGroupArn) {
+        return new AwsTargetGroupImpl(this, region, targetGroupName, targetGroupArn);
+    }
+
+    software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup getAwsTargetGroup(AwsRegion region, String targetGroupName);
+    
+    Map<AwsInstance, TargetHealth> getTargetHealthDescriptions(TargetGroup targetGroup);
+
+    void deleteTargetGroup(TargetGroup targetGroup);
 }

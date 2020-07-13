@@ -2,6 +2,7 @@ package com.sap.sse.landscape.aws.impl;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,6 +25,7 @@ import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
+import com.sap.sse.landscape.aws.TargetGroup;
 import com.sap.sse.landscape.aws.persistence.DomainObjectFactory;
 import com.sap.sse.landscape.aws.persistence.MongoObjectFactory;
 import com.sap.sse.landscape.aws.persistence.PersistenceFactory;
@@ -54,13 +56,21 @@ import software.amazon.awssdk.services.ec2.model.RunInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.RunInstancesResponse;
 import software.amazon.awssdk.services.ec2.model.Subnet;
 import software.amazon.awssdk.services.ec2.model.TerminateInstancesRequest;
+import software.amazon.awssdk.services.ec2.model.Vpc;
 import software.amazon.awssdk.services.elasticloadbalancingv2.ElasticLoadBalancingV2Client;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.CreateLoadBalancerRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.CreateLoadBalancerResponse;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.CreateTargetGroupRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.DeleteLoadBalancerRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DeleteTargetGroupRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeLoadBalancersRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTargetGroupsRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTargetHealthRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.SubnetMapping;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealth;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetTypeEnum;
 import software.amazon.awssdk.services.route53.Route53Client;
 import software.amazon.awssdk.services.route53.model.Change;
 import software.amazon.awssdk.services.route53.model.ChangeAction;
@@ -322,8 +332,8 @@ public class AwsLandscapeImpl<ShardingKey, MetricsT extends ApplicationProcessMe
     }
 
     @Override
-    public Iterable<AwsInstance> launchHosts(int numberOfHostsToLaunch, MachineImage<AwsInstance> fromImage, AwsAvailabilityZone az,
-            String keyName, Iterable<SecurityGroup> securityGroups) {
+    public Iterable<AwsInstance> launchHosts(int numberOfHostsToLaunch, MachineImage<AwsInstance> fromImage,
+            InstanceType instanceType, AwsAvailabilityZone az, String keyName, Iterable<SecurityGroup> securityGroups) {
         if (!fromImage.getRegion().equals(az.getRegion())) {
             throw new IllegalArgumentException("Trying to launch an instance in region "+az.getRegion()+
                     " with image "+fromImage+" that lives in region "+fromImage.getRegion()+" which is different."+
@@ -334,7 +344,7 @@ public class AwsLandscapeImpl<ShardingKey, MetricsT extends ApplicationProcessMe
             .imageId(fromImage.getId().toString())
             .minCount(numberOfHostsToLaunch)
             .maxCount(numberOfHostsToLaunch)
-            .instanceType(InstanceType.T3_SMALL).keyName(keyName)
+            .instanceType(instanceType).keyName(keyName)
             .placement(Placement.builder().availabilityZone(az.getName()).build())
             .securityGroupIds(Util.mapToArrayList(securityGroups, sg->sg.getId())).build();
         logger.info("Launching instance(s): "+launchRequest);
@@ -361,5 +371,55 @@ public class AwsLandscapeImpl<ShardingKey, MetricsT extends ApplicationProcessMe
     public Iterable<AvailabilityZone> getAvailabilityZones(com.sap.sse.landscape.Region awsRegion) {
         return Util.map(getEc2Client(getRegion(awsRegion)).describeAvailabilityZones().availabilityZones(),
                 AwsAvailabilityZoneImpl::new);
+    }
+
+    @Override
+    public TargetGroup createTargetGroup(AwsRegion region, String targetGroupName, int port, String healthCheckPath, int healthCheckPort) {
+        final String targetGroupArn = getLoadBalancingClient(getRegion(region)).createTargetGroup(CreateTargetGroupRequest.builder()
+                .name(targetGroupName)
+                .healthyThresholdCount(2)
+                .healthCheckTimeoutSeconds(4)
+                .healthCheckEnabled(true)
+                .healthCheckIntervalSeconds(5)
+                .healthCheckPath(healthCheckPath)
+                .healthCheckPort(""+healthCheckPort)
+                .port(port)
+                // FIXME what about stickiness?
+                .vpcId(getVpcId(region))
+                .protocol(port == 80 ? ProtocolEnum.HTTP : ProtocolEnum.HTTPS)
+                .targetType(TargetTypeEnum.INSTANCE)
+                .build()).targetGroups().iterator().next().targetGroupArn();
+        return new AwsTargetGroupImpl(this, region, targetGroupName, targetGroupArn);
+    }
+    
+    private String getVpcId(AwsRegion region) {
+        Vpc vpc = getEc2Client(getRegion(region)).describeVpcs().vpcs().stream().filter(myVpc->myVpc.isDefault()).findAny().
+                orElseThrow(()->new IllegalStateException("No default VPC found in region "+region));
+        return vpc.vpcId();
+    }
+
+    @Override
+    public software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup getAwsTargetGroup(AwsRegion region, String targetGroupName) {
+        return getLoadBalancingClient(getRegion(region)).describeTargetGroups(DescribeTargetGroupsRequest.builder()
+                        .names(targetGroupName).build()).targetGroups().iterator().next();
+    }
+    
+    @Override
+    public void deleteTargetGroup(TargetGroup targetGroup) {
+        getLoadBalancingClient(getRegion(targetGroup.getRegion())).deleteTargetGroup(DeleteTargetGroupRequest.builder().targetGroupArn(
+                targetGroup.getTargetGroupArn()).build());
+    }
+
+    @Override
+    public Map<AwsInstance, TargetHealth> getTargetHealthDescriptions(TargetGroup targetGroup) {
+        final Map<AwsInstance, TargetHealth> result = new HashMap<>();
+        final Region region = getRegion(targetGroup.getRegion());
+        getLoadBalancingClient(region)
+                .describeTargetHealth(DescribeTargetHealthRequest.builder().build()).targetHealthDescriptions().forEach(
+                targetHealthDescription->result.put(
+                        new AwsInstanceImpl(targetHealthDescription.target().id(),
+                                getAvailabilityZoneByName(targetGroup.getRegion(), targetHealthDescription.target().availabilityZone()), this),
+                                targetHealthDescription.targetHealth()));
+        return result;
     }
 }

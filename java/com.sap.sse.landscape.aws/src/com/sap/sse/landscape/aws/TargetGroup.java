@@ -1,8 +1,12 @@
 package com.sap.sse.landscape.aws;
 
 import java.util.Collections;
+import java.util.Map;
 
 import com.sap.sse.common.Named;
+import com.sap.sse.landscape.aws.impl.AwsRegion;
+
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealth;
 
 /**
  * Represents a target group that can be configured as the forwarding target of a {@link LoadBalancerRule}.
@@ -11,7 +15,9 @@ import com.sap.sse.common.Named;
  *
  */
 public interface TargetGroup extends Named {
-    Iterable<AwsInstance> getRegisteredTargets();
+    AwsRegion getRegion();
+    
+    Map<AwsInstance, TargetHealth> getRegisteredTargets();
     
     default void addTarget(AwsInstance target) {
         addTargets(Collections.singleton(target));
@@ -24,4 +30,6 @@ public interface TargetGroup extends Named {
     }
     
     void removeTargets(Iterable<AwsInstance> targets);
+
+    String getTargetGroupArn();
 }

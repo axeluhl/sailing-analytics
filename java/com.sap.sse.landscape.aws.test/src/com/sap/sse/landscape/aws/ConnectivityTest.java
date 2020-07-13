@@ -33,6 +33,7 @@ import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.ssh.SSHKeyPair;
 
 import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.ec2.model.InstanceType;
 import software.amazon.awssdk.services.ec2.model.KeyPairInfo;
 import software.amazon.awssdk.services.route53.model.ChangeInfo;
 import software.amazon.awssdk.services.route53.model.ChangeStatus;
@@ -62,7 +63,7 @@ public class ConnectivityTest {
     @Test
     public void testConnectivity() {
         final AwsInstance host = landscape.launchHost(landscape.getImage(region, "ami-01b4b27a5699e33e6"),
-                landscape.getAvailabilityZoneByName(region, "eu-west-2b"), "Axel", Collections.singleton(()->"sg-0b2afd48960251280"));
+                InstanceType.T3_SMALL, landscape.getAvailabilityZoneByName(region, "eu-west-2b"), "Axel", Collections.singleton(()->"sg-0b2afd48960251280"));
         try {
             assertNotNull(host);
         } finally {
@@ -132,7 +133,7 @@ public class ConnectivityTest {
 
     private void testSshConnectWithKey(final String keyName) throws InterruptedException, JSchException {
         final AwsInstance host = landscape.launchHost(landscape.getImage(region, "ami-01b4b27a5699e33e6"),
-                landscape.getAvailabilityZoneByName(region, "eu-west-2b"), keyName, Collections.singleton(()->"sg-0b2afd48960251280"));
+                InstanceType.T3_SMALL, landscape.getAvailabilityZoneByName(region, "eu-west-2b"), keyName, Collections.singleton(()->"sg-0b2afd48960251280"));
         try {
             assertNotNull(host);
             logger.info("Created instance with ID "+host.getInstanceId());
@@ -217,6 +218,18 @@ public class ConnectivityTest {
             assertEquals(albName, alb.getName());
         } finally {
             landscape.deleteLoadBalancer(alb);
+        }
+    }
+    
+    @Test
+    public void createAndDeleteTargetGroupTest() {
+        final String targetGroupName = "TestTargetGroup-"+new Random().nextInt();
+        final TargetGroup targetGroup = landscape.createTargetGroup(region, targetGroupName, 80, "/gwt/status", 80);
+        try {
+            final TargetGroup fetchedTargetGroup = landscape.getTargetGroup(region, targetGroupName, targetGroup.getTargetGroupArn());
+            assertEquals(targetGroupName, fetchedTargetGroup.getName());
+        } finally {
+            landscape.deleteTargetGroup(targetGroup);
         }
     }
 }
