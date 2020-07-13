@@ -33,7 +33,7 @@
   color: #f6f9fc;
   white-space: nowrap;
 }
-@media (min-width: 64.2em) {
+@media (min-width: 61em) {
   .siteheader_logo_title {
     display: inline;
   }
@@ -101,7 +101,7 @@
 }
 .search_textfield {
   display: none;
-  width: 8em;
+  width: 13.333333333333334em;
   padding: 0.357142857142857em 2.857142857142857em 0.357142857142857em 0.357142857142857em;
   border: 1px solid #666;
   font-size: 0.933333333333333em;
@@ -116,9 +116,7 @@
     display: inline-block;
   }
 }
-.search_textfield:focus {
-  width: 13.333333333333334em;
-}
+
 .search_button {
   width: 2.666666666666667em !important;
   height: 1em !important;

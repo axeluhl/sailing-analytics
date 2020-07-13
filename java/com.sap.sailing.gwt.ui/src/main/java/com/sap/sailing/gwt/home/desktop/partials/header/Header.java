@@ -29,6 +29,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
@@ -105,8 +106,6 @@ public class Header extends Composite implements HeaderConstants {
             this.dropdownHandler = dropdownHandler;
             this.headerNavigationIcon = headerNavigationIcon;
             this.menuToDropDownItemMap = menuToDropDownItemMap;
-            // initialize visibility for drop down
-            refreshVisibility();
         }
 
         @Override
@@ -134,7 +133,17 @@ public class Header extends Composite implements HeaderConstants {
                 this.dropdownHandler.setVisible(false);
             }
         }
-        
+
+        public void refreshVisibility(int delayMillis) {
+            new Timer() {
+
+                @Override
+                public void run() {
+                    refreshVisibility();
+                }
+            }.schedule(delayMillis);
+        }
+
     }
 
     private static HeaderUiBinder uiBinder = GWT.create(HeaderUiBinder.class);
@@ -145,6 +154,18 @@ public class Header extends Composite implements HeaderConstants {
         this.navigator = navigator;
         HeaderResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
+        
+        Map<Anchor,Anchor> menuToDropDownItemMap = new HashMap<>();
+        menuToDropDownItemMap.put(startPageLink, startPageLinkMenu);
+        menuToDropDownItemMap.put(eventsPageLink, eventsPageLinkMenu);
+        menuToDropDownItemMap.put(solutionsPageLink, solutionsPageLinkMenu);
+        menuToDropDownItemMap.put(adminConsolePageLink, adminConsolePageLinkMenu);
+        menuToDropDownItemMap.put(dataMiningPageLink,dataMiningPageLinkMenu);
+        headerNavigationDropDownMenuContainer.getStyle().setDisplay(Display.NONE);
+        final DropdownHandler dropdownHandler = new DropdownHandler(headerNavigationIcon, headerNavigationDropDownMenuContainer);
+        menuItemVisibilityHandler = new MenuItemVisibilityHandler(menuToDropDownItemMap, dropdownHandler, headerNavigationIcon);
+        Window.addResizeHandler(menuItemVisibilityHandler);
+        
         links = Arrays.asList(new Anchor[] { startPageLink, eventsPageLink, solutionsPageLink, adminConsolePageLink, dataMiningPageLink });
         homeNavigation = navigator.getHomeNavigation();
         eventsNavigation = navigator.getEventsNavigation();
@@ -188,6 +209,10 @@ public class Header extends Composite implements HeaderConstants {
             menuItemVisibilityHandler.refreshVisibility();
         });
         searchText.getElement().setAttribute("placeholder", StringMessages.INSTANCE.headerSearchPlaceholder());
+        searchText.addFocusHandler((focusEvent) -> menuItemVisibilityHandler.refreshVisibility(370));
+        searchText.addBlurHandler(blurEvent -> {
+            menuItemVisibilityHandler.refreshVisibility(370);
+        });
         searchText.addKeyPressHandler(new KeyPressHandler() {
             @Override
             public void onKeyPress(KeyPressEvent event) {
@@ -218,18 +243,8 @@ public class Header extends Composite implements HeaderConstants {
         eventsPageLinkMenu.addClickHandler(this::goToEvents);
         solutionsPageLinkMenu.addClickHandler(this::goToSolutions);
         //remaining entries please see at registration for AuthenticationContextEvent 
-        
-        Map<Anchor,Anchor> menuToDropDownItemMap = new HashMap<>();
-        menuToDropDownItemMap.put(startPageLink, startPageLinkMenu);
-        menuToDropDownItemMap.put(eventsPageLink, eventsPageLinkMenu);
-        menuToDropDownItemMap.put(solutionsPageLink, solutionsPageLinkMenu);
-        menuToDropDownItemMap.put(adminConsolePageLink, adminConsolePageLinkMenu);
-        menuToDropDownItemMap.put(dataMiningPageLink,dataMiningPageLinkMenu);
-        
-        
-        headerNavigationDropDownMenuContainer.getStyle().setDisplay(Display.NONE);
-        menuItemVisibilityHandler = new MenuItemVisibilityHandler(menuToDropDownItemMap, new DropdownHandler(headerNavigationIcon, headerNavigationDropDownMenuContainer), headerNavigationIcon);
-        Window.addResizeHandler(menuItemVisibilityHandler);
+        // refresh after UI has been put into place
+        menuItemVisibilityHandler.refreshVisibility();
     }
 
     @UiHandler("startPageLink")
