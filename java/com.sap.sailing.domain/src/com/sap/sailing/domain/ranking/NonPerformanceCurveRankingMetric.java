@@ -86,7 +86,7 @@ public abstract class NonPerformanceCurveRankingMetric extends AbstractRankingMe
                 final Duration actualRaceDuration = startOfRace.until(timePoint);
                 final Waypoint finish = getTrackedRace().getRace().getCourse().getLastWaypoint();
                 for (Competitor competitor : getCompetitors()) {
-                    // accomodate also for the possibility of an empty course (finish==null)
+                    // accommodate also for the possibility of an empty course (finish==null)
                     final MarkPassing finishMarkPassing =  finish == null ? null : getTrackedRace().getMarkPassing(competitor, finish);
                     final Duration timeElapsed;
                     if (finishMarkPassing != null && finishMarkPassing.getTimePoint().before(timePoint)) {
