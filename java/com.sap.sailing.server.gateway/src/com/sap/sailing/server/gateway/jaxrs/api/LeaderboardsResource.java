@@ -1095,7 +1095,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                     }
                 }
             }
-            result = Response.ok(jsonResultArray.toJSONString()).build();
+            result = Response.ok(streamingOutput(jsonResultArray)).build();
         }
         return result;
     }
@@ -1344,8 +1344,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             JSONObject jsonCompetitor = serializer.serialize(new Pair<>(c, boat));
             result.add(jsonCompetitor);
         }
-        String json = result.toJSONString();
-        return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+        return Response.ok(streamingOutput(result)).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
     }
 
     private int compareDistanceFromStartLine(TrackedRace trackedRace, Iterable<Position> startWaypointMarkPositions,

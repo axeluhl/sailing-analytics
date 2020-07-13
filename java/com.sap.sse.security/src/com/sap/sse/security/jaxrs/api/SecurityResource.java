@@ -296,7 +296,7 @@ public class SecurityResource extends AbstractSecurityResource {
             entry.put("permission", permissionAsString);
             entry.put("granted", SecurityUtils.getSubject().isPermitted(permissionAsString));
         }
-        return Response.ok(result.toJSONString(), MediaType.APPLICATION_JSON_TYPE).build(); 
+        return Response.ok(streamingOutput(result), MediaType.APPLICATION_JSON_TYPE).build(); 
     }
 
     Response respondToRemoveAccessTokenForUser(final String username) {

@@ -74,7 +74,11 @@ public interface BoatClassImageResources extends ClientBundle {
     
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/B_ONE.png")
     @ImageOptions(preventInlining = true)
-    ImageResource BOne();
+    ImageResource BOneIcon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/BB10M.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource BB10MIcon();
 
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/BAVARIA_CRUISER_41S.png")
     @ImageOptions(preventInlining = true)
@@ -315,6 +319,10 @@ public interface BoatClassImageResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/RS_TERA.png")
     @ImageOptions(preventInlining = true)
     ImageResource RSTeraIcon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/SCAN_KAP_99.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource ScanKap99Icon();
     
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/SONAR.png")
     @ImageOptions(preventInlining = true)
@@ -331,6 +339,10 @@ public interface BoatClassImageResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/SOLING.png")
     @ImageOptions(preventInlining = true)
     ImageResource SolingIcon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/SPAEKHUGGER.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource SpaekhuggerIcon();
 
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/STAR.png")
     @ImageOptions(preventInlining = true)
@@ -491,6 +503,10 @@ public interface BoatClassImageResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/VIPER_640.png")
     @ImageOptions(preventInlining = true)
     ImageResource Viper640Icon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/WAYFARER.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource WayfarerIcon();
 
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/WETA.png")
     @ImageOptions(preventInlining = true)

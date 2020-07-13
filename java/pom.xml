@@ -232,6 +232,7 @@
         <module>com.sap.sailing.polars.datamining.shared</module>
         <module>com.sap.sailing.polars.test</module>
 		<module>org.mp4parser.isoparser</module>
+        <module>com.amazon.aws.aws-java-api</module>
         <!--
         com.sap.sailing.targetplatform.base
         left out on purpose: only invoke maven manually to build target platform

@@ -19,25 +19,25 @@ public abstract class AbstractCompetitorRegistrationDialog extends DataEntryDial
     protected final SailingServiceAsync sailingService;
     protected final StringMessages stringMessages;
     protected final String leaderboardName;
-    protected final boolean canBoatsOfCompetitorsChangePerRace;
     protected final CompetitorRegistrationsPanel competitorRegistrationsPanel;
 
-    public AbstractCompetitorRegistrationDialog(SailingServiceWriteAsync sailingServiceWrite, final UserService userService, StringMessages stringMessages,
-            ErrorReporter errorReporter, boolean editable,
+    public AbstractCompetitorRegistrationDialog(SailingServiceWriteAsync sailingServiceWrite,
+            final UserService userService, StringMessages stringMessages, ErrorReporter errorReporter, boolean editable,
             com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<Set<CompetitorDTO>> callback,
-            String leaderboardName, boolean canBoatsOfCompetitorsChangePerRace, String boatClass, String okButtonMessage,
-            Validator<Set<CompetitorDTO>> validator) {
+            String leaderboardName, boolean canBoatsOfCompetitorsChangePerRace, String boatClass,
+            String okButtonMessage, Validator<Set<CompetitorDTO>> validator) {
         super(stringMessages.registerCompetitors(), /* messsage */null, okButtonMessage, stringMessages.cancel(),
                 validator, callback);
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
         this.sailingService = sailingServiceWrite;
         this.leaderboardName = leaderboardName;
-        this.canBoatsOfCompetitorsChangePerRace = canBoatsOfCompetitorsChangePerRace;
-        this.competitorRegistrationsPanel = new CompetitorRegistrationsPanel(sailingServiceWrite, userService, stringMessages, errorReporter, editable, leaderboardName, canBoatsOfCompetitorsChangePerRace, boatClass,
-                ()->validateAndUpdate(), getRegisteredCompetitorsRetriever(), /* restrictPoolToLeaderboard */ false, getAdditionalWidgetsToInsertAboveCompetitorTables(stringMessages));
+        this.competitorRegistrationsPanel = new CompetitorRegistrationsPanel(sailingServiceWrite, userService,
+                stringMessages, errorReporter, editable, leaderboardName, canBoatsOfCompetitorsChangePerRace, boatClass,
+                () -> validateAndUpdate(), getRegisteredCompetitorsRetriever(), /* restrictPoolToLeaderboard */ false,
+                getAdditionalWidgetsToInsertAboveCompetitorTables(stringMessages));
     }
-    
+
     @Override
     protected Widget getAdditionalWidget() {
         return competitorRegistrationsPanel;
@@ -49,6 +49,6 @@ public abstract class AbstractCompetitorRegistrationDialog extends DataEntryDial
     }
 
     protected abstract Consumer<AsyncCallback<Collection<CompetitorDTO>>> getRegisteredCompetitorsRetriever();
-    
+
     protected abstract Widget[] getAdditionalWidgetsToInsertAboveCompetitorTables(StringMessages stringMessages);
 }
