@@ -49,10 +49,14 @@ public class DefaultTenantRequestFilter implements Filter {
             setDefaultTenantForRequest(request.getServletContext(), defaultTenantGroupId);
             logger.info("executing request " + httpRequest.getRequestURI() + " with divergent tenant group "
                     + defaultTenantGroupId);
-        } else {
-            setDefaultTenantForRequest(request.getServletContext(), null);
         }
-        chain.doFilter(request, response);
+        try {
+            chain.doFilter(request, response);
+        } finally {
+            if (defaultTenantGroupId != null) {
+                setDefaultTenantForRequest(request.getServletContext(), null);
+            }
+        }
     }
 
     @Override
