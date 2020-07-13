@@ -335,7 +335,7 @@ public class AwsLandscapeImpl<ShardingKey, MetricsT extends ApplicationProcessMe
             .minCount(numberOfHostsToLaunch)
             .maxCount(numberOfHostsToLaunch)
             .instanceType(InstanceType.T3_SMALL).keyName(keyName)
-            .placement(Placement.builder().availabilityZone(az.getId()).build())
+            .placement(Placement.builder().availabilityZone(az.getName()).build())
             .securityGroupIds(Util.mapToArrayList(securityGroups, sg->sg.getId())).build();
         logger.info("Launching instance(s): "+launchRequest);
         final RunInstancesResponse response = getEc2Client(getRegion(az.getRegion())).runInstances(launchRequest);
