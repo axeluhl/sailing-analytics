@@ -65,8 +65,6 @@ public interface BasicUserStore extends UserGroupProvider, Named {
 
     void removeRoleFromUser(String username, Role role) throws UserManagementException;
 
-    Iterable<WildcardPermission> getPermissionsFromUser(String username) throws UserManagementException;
-
     void removePermissionFromUser(String username, WildcardPermission permission) throws UserManagementException;
 
     void addPermissionForUser(String username, WildcardPermission permission) throws UserManagementException;

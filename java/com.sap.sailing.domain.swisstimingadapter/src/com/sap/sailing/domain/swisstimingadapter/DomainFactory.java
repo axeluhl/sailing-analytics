@@ -70,8 +70,6 @@ public interface DomainFactory {
     
     MarkPassing createMarkPassing(TimePoint timePoint, Waypoint waypoint, Competitor competitor);
 
-    void removeRace(String raceID);
-
     RaceType getRaceTypeFromRaceID(String raceID);
 
     RaceTrackingConnectivityParameters createTrackingConnectivityParameters(String hostname, int port, String raceID,
@@ -92,4 +90,6 @@ public interface DomainFactory {
      */
     void addUpdateHandlers(String updateURL, String username, String password, Serializable eventId,
             RaceDefinition raceDefinition, DynamicTrackedRace trackedRace) throws URISyntaxException;
+
+    Map<Competitor, Boat> createCompetitorsAndBoats(StartList startList, String raceId, BoatClass boatClass, RaceTrackingHandler raceTrackHandler);
 }

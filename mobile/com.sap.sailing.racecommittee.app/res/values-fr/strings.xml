@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="no"?><resources xmlns:tools="http://schemas.android.com/tools">
+<?xml version="1.0" encoding="UTF-8"?><resources xmlns:tools="http://schemas.android.com/tools">
 
     <string-array name="empty_array" tools:ignore="UnusedResources"/>
     <string name="empty"/>
@@ -9,7 +9,7 @@
     
     
     <string name="url_google_geocoder">"http://maps.googleapis.com/maps/api/geocode/json?address="</string>
-    <string name="urlpart_google_geocoder_sensor">"?sensor=true"</string>
+    <string name="urlpart_google_geocoder_sensor">"\?sensor=true"</string>
     <string name="running_on_course">"(sur le parcours %s)"</string>
     <string name="course_design_number_waypoints">"Le parcours comporte %d points de cheminement."</string>
     
@@ -385,7 +385,6 @@
     <string name="finishing_started">"Premier à l\'arrivée à %1$s"</string>
     <string name="finishing_started_since">"(%s)"</string>
     <string name="finishing_done">"Affaler maintenant"</string>
-
     <string name="finished_recording">"Enregistrement"</string>
     <string name="finished_replay">"Répéter enregistrement vocal"</string>
     <string name="finished_list">"Liste des arrivées"</string>
@@ -566,4 +565,7 @@
 
     <string name="competitor_merge_error_message">"Ce concurrent a été modifié à partir d\'un autre appareil et vous avez modifié les mêmes données. Vérifiez que ces données sont bien correctes."</string>
 
+    <string name="finishing_revoke">"Annuler"</string>
+    <string name="error_revoke_finished">"Vous ne pouvez pas annuler l\'heure de fermeture de la ligne d\'arrivée."</string>
+    <string name="error_revoke_finishing">"Vous ne pouvez pas annuler l\'heure d\'arrivée du premier."</string>
 </resources>

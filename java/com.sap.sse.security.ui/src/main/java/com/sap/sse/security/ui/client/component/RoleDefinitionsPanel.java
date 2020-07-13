@@ -214,12 +214,12 @@ public class RoleDefinitionsPanel extends VerticalPanel {
         });
         final DialogConfig<RoleDefinitionDTO> config = EditOwnershipDialog.create(userManagementService, type,
                 roleDefinition -> updateRoleDefinitions(), stringMessages);
-        roleActionColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, config::openDialog);
+        roleActionColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, config::openOwnershipDialog);
         final EditACLDialog.DialogConfig<RoleDefinitionDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementService(), type, roleDefinition -> updateRoleDefinitions(),
                 stringMessages);
         roleActionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                configACL::openDialog);
+                configACL::openACLDialog);
 
         table.addColumn(roleSelectionCheckboxColumn, roleSelectionCheckboxColumn.getHeader());
         table.addColumn(roleDefinitionNameColumn, stringMessages.name());

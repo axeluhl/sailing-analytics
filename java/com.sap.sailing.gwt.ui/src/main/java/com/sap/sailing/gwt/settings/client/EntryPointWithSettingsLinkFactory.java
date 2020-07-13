@@ -47,13 +47,16 @@ public class EntryPointWithSettingsLinkFactory extends AbstractEntryPointWithSet
         return linkWithSettingsGenerator.createUrl(settings);
     }
     
-    public static String createRaceBoardLinkWithDefaultSettings(UUID eventId, String leaderboardName, String leaderboardGroupName, String regattaName, String raceName) {
-        return createRaceBoardLinkWithDefaultSettings(eventId, leaderboardName, leaderboardGroupName, regattaName, raceName, null);
+    public static String createRaceBoardLinkWithDefaultSettings(UUID eventId, String leaderboardName,
+            String leaderboardGroupName, UUID leaderboardGroupId, String regattaName, String raceName) {
+        return createRaceBoardLinkWithDefaultSettings(eventId, leaderboardName, leaderboardGroupName,
+                leaderboardGroupId, regattaName, raceName, null);
     }
     
-    public static String createRaceBoardLinkWithDefaultSettings(UUID eventId, String leaderboardName, String leaderboardGroupName, String regattaName, String raceName, String mode) {
+    public static String createRaceBoardLinkWithDefaultSettings(UUID eventId, String leaderboardName, String leaderboardGroupName, 
+            UUID leadeboardGroupId, String regattaName, String raceName, String mode) {
         RaceboardContextDefinition raceboardContext = new RaceboardContextDefinition(regattaName,
-                raceName, leaderboardName, leaderboardGroupName, eventId, mode);
+                raceName, leaderboardName, leaderboardGroupName, leadeboardGroupId, eventId, mode);
         RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = new RaceBoardPerspectiveOwnSettings();
         PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings = new PerspectiveCompositeSettings<>(
                 perspectiveOwnSettings, Collections.emptyMap());

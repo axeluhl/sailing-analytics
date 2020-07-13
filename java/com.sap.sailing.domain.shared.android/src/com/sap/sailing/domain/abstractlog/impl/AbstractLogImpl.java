@@ -33,13 +33,13 @@ import com.sap.sse.util.impl.ArrayListNavigableSet;
 
 /**
  * {@link Track} implementation for {@link AbstractLogEvent}s.
- * 
+ *
  * <p>
  * {@link TrackImpl#getDummyFix(com.sap.sailing.domain.common.TimePoint)} is not overridden, see
  * {@link RaceLogEventComparator} for sorting when interface methods like
  * {@link Track#getFirstFixAfter(com.sap.sailing.domain.common.TimePoint)} are used.
  * </p>
- * 
+ *
  */
 public abstract class AbstractLogImpl<EventT extends AbstractLogEvent<VisitorT>, VisitorT>
 extends TrackImpl<EventT> implements AbstractLog<EventT, VisitorT> {
@@ -52,7 +52,7 @@ extends TrackImpl<EventT> implements AbstractLog<EventT, VisitorT> {
      * Clients can use the {@link #add(RaceLogEvent, UUID)} method
      */
     private transient Map<UUID, Set<EventT>> eventsDeliveredToClient = new HashMap<UUID, Set<EventT>>();
-    
+
     private Map<Serializable, EventT> eventsById = new HashMap<Serializable, EventT>();
 
     private final Serializable id;
@@ -67,7 +67,7 @@ extends TrackImpl<EventT> implements AbstractLog<EventT, VisitorT> {
 
     /**
      * Initializes a new {@link RaceLogImpl}.
-     * 
+     *
      * @param nameForReadWriteLock
      *            name of lock.
      */
@@ -82,7 +82,7 @@ extends TrackImpl<EventT> implements AbstractLog<EventT, VisitorT> {
     public Serializable getId() {
         return this.id;
     }
-    
+
     protected void onSuccessfulAdd(EventT event, boolean notifyListeners) {
         revokeIfNecessary(event);
         eventsById.put(event.getId(), event);
@@ -90,7 +90,7 @@ extends TrackImpl<EventT> implements AbstractLog<EventT, VisitorT> {
             notifyListenersAboutReceive(event);
         }
     }
-    
+
     protected boolean add(EventT event, boolean notifyListeners) {
         boolean isAdded = false;
         lockForWrite();
@@ -107,7 +107,7 @@ extends TrackImpl<EventT> implements AbstractLog<EventT, VisitorT> {
         }
         return isAdded;
     }
-    
+
     @Override
     public boolean add(EventT event) {
         return add(event, true);
@@ -117,7 +117,7 @@ extends TrackImpl<EventT> implements AbstractLog<EventT, VisitorT> {
     public boolean load(EventT event) {
         return add(event, false);
     }
-    
+
     private void revokeIfNecessary(EventT newEvent) {
         if (newEvent instanceof RevokeEvent) {
             RevokeEvent<?> revokeEvent = (RevokeEvent<?>) newEvent;
@@ -134,7 +134,7 @@ extends TrackImpl<EventT> implements AbstractLog<EventT, VisitorT> {
             }
         }
     }
-    
+
     private void checkIfSuccessfullyRevokes(RevokeEvent<?> revokeEvent) throws NotRevokableException {
         lockForRead();
         EventT revokedEvent;
@@ -166,7 +166,7 @@ extends TrackImpl<EventT> implements AbstractLog<EventT, VisitorT> {
         add(event);
         return getEventsToDeliver(clientId, event);
     }
-    
+
     @Override
     public Iterable<EventT> getEventsToDeliver(UUID clientId) {
         return getEventsToDeliver(clientId, null);
@@ -311,25 +311,15 @@ extends TrackImpl<EventT> implements AbstractLog<EventT, VisitorT> {
         assertReadLock();
         return eventsById.get(id);
     }
-    
+
     @Override
     public NavigableSet<EventT> getUnrevokedEvents() {
-        return new PartialNavigableSetView<EventT>(super.getInternalFixes()) {
-            @Override
-            protected boolean isValid(EventT e) {
-            	return ! (e instanceof RevokeEvent) && ! revokedEventIds.contains(e.getId());
-            }
-        };
+        return new FilteredPartialNavigableSetView<>(super.getInternalFixes(), new RevokedValidator<>(revokedEventIds));
     }
-    
+
     @Override
     public NavigableSet<EventT> getUnrevokedEventsDescending() {
-        return new PartialNavigableSetView<EventT>(super.getInternalFixes().descendingSet()) {
-            @Override
-            protected boolean isValid(EventT e) {
-            	return ! (e instanceof RevokeEvent) && ! revokedEventIds.contains(e.getId());
-            }
-        };
+        return new FilteredPartialNavigableSetView<EventT>(super.getInternalFixes().descendingSet(), new RevokedValidator<>(revokedEventIds));
     }
 
     @Override
@@ -375,14 +365,14 @@ extends TrackImpl<EventT> implements AbstractLog<EventT, VisitorT> {
             unlockAfterWrite();
         }
     }
-    
+
     @Override
     public void revokeEvent(AbstractLogEventAuthor author, EventT toRevoke) throws NotRevokableException {
         revokeEvent(author, toRevoke, null);
     }
-    
+
     protected abstract EventT createRevokeEvent(AbstractLogEventAuthor author, EventT toRevoke, String reason);
-    
+
     @Override
     public void revokeEvent(AbstractLogEventAuthor author, EventT toRevoke, String reason) throws NotRevokableException {
         if (toRevoke == null) {
@@ -391,5 +381,44 @@ extends TrackImpl<EventT> implements AbstractLog<EventT, VisitorT> {
         EventT revokeEvent = createRevokeEvent(author, toRevoke, reason);
         checkIfSuccessfullyRevokes((RevokeEvent<?>) revokeEvent);
         add(revokeEvent);
+    }
+
+    @FunctionalInterface
+    public interface NavigableSetViewValidator<T> {
+        boolean isValid(T item);
+    }
+
+    /**
+     * Considers an event valid if it is not a {@link RevokeEvent} and is not contained in the set of events passed to
+     * the constructor that have been revoked.
+     */
+    public static class RevokedValidator<EventT extends AbstractLogEvent<VisitorT>, VisitorT> implements NavigableSetViewValidator<EventT> {
+        final Set<Serializable> revokedEventIds;
+
+        public RevokedValidator(Set<Serializable> revokedEventIds) {
+            this.revokedEventIds = revokedEventIds;
+        }
+
+        @Override
+        public boolean isValid(EventT item) {
+            return !(item instanceof RevokeEvent) && !revokedEventIds.contains(item.getId());
+        }
+    }
+
+    public static class FilteredPartialNavigableSetView<T> extends PartialNavigableSetView<T> {
+        private final NavigableSetViewValidator<T> validator;
+
+        public FilteredPartialNavigableSetView(NavigableSet<T> set, final NavigableSetViewValidator<T> validator) {
+            super(set);
+            if (validator == null) {
+                throw new NullPointerException();
+            }
+            this.validator = validator;
+        }
+
+        @Override
+        protected boolean isValid(T t) {
+            return validator.isValid(t);
+        }
     }
 }

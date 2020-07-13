@@ -24,11 +24,11 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseTemplateJsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CourseTemplateJsonSerializer;
-import com.sap.sailing.shared.server.gateway.jaxrs.AbstractSailingServerResource;
+import com.sap.sailing.shared.server.gateway.jaxrs.SharedAbstractSailingServerResource;
 import com.sun.jersey.api.client.ClientResponse.Status;
 
 @Path("/v1/coursetemplates")
-public class CourseTemplateResource extends AbstractSailingServerResource {
+public class CourseTemplateResource extends SharedAbstractSailingServerResource {
     
     private final JsonSerializer<CourseTemplate> courseTemplateSerializer;
     
@@ -58,8 +58,7 @@ public class CourseTemplateResource extends AbstractSailingServerResource {
         for (CourseTemplate courseTemplate : courseTemplateList) {
             result.add(courseTemplateSerializer.serialize(courseTemplate));
         }
-        final String json = result.toJSONString();
-        return Response.ok(json).build();
+        return Response.ok(streamingOutput(result)).build();
     }
 
     @GET
@@ -70,10 +69,8 @@ public class CourseTemplateResource extends AbstractSailingServerResource {
         if (courseTemplate == null) {
             return getCourseTemplateNotFoundErrorResponse();
         }
-        
-        final JSONObject serializedMarkedProperties = courseTemplateSerializer.serialize(courseTemplate);
-        final String json = serializedMarkedProperties.toJSONString();
-        return Response.ok(json).build();
+        final JSONObject serializedMarkProperties = courseTemplateSerializer.serialize(courseTemplate);
+        return Response.ok(streamingOutput(serializedMarkProperties)).build();
     }
 
     @POST
@@ -95,9 +92,8 @@ public class CourseTemplateResource extends AbstractSailingServerResource {
                 deserializedCourseTemplate.getDefaultMarkRolesForMarkTemplates(),
                 deserializedCourseTemplate.getDefaultMarkTemplatesForMarkRoles(), deserializedCourseTemplate.getRepeatablePart(),
                 deserializedCourseTemplate.getTags(), deserializedCourseTemplate.getOptionalImageURL(), deserializedCourseTemplate.getDefaultNumberOfLaps());
-        final JSONObject serializedMarkedProperties = courseTemplateSerializer.serialize(createdCourseTemplate);
-        final String jsonResult = serializedMarkedProperties.toJSONString();
-        return Response.ok(jsonResult).build();
+        final JSONObject serializedMarkProperties = courseTemplateSerializer.serialize(createdCourseTemplate);
+        return Response.ok(streamingOutput(serializedMarkProperties)).build();
     }
 
     @DELETE

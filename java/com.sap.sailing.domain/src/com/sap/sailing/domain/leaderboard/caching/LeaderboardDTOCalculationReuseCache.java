@@ -101,7 +101,7 @@ public class LeaderboardDTOCalculationReuseCache implements WindLegTypeAndLegBea
      * thereof. This course will have any tracked leg adapters replaced by fixed leg descriptions with a fixed TWA and
      * distance as obtained upon the first call for the {@link #timePoint} from the underlying {@link TrackedRace}.
      */
-    private ORCPerformanceCurveCourse totalCourse;
+    private final ConcurrentHashMap<TrackedRace, ORCPerformanceCurveCourse> totalCourse;
     
     private final ConcurrentHashMap<Triple<TrackedRace, Waypoint, TimePoint>, Position> approximateWaypointPositions;
     
@@ -156,6 +156,7 @@ public class LeaderboardDTOCalculationReuseCache implements WindLegTypeAndLegBea
         approximateWaypointPositions = new ConcurrentHashMap<>();
         this.performanceCurvesPerCompetitor = new ConcurrentHashMap<>();
         this.impliedWindPerCompetitor = new ConcurrentHashMap<>();
+        this.totalCourse = new ConcurrentHashMap<>();
         this.timePoint = timePoint;
     }
     
@@ -214,10 +215,7 @@ public class LeaderboardDTOCalculationReuseCache implements WindLegTypeAndLegBea
 
     @Override
     public ORCPerformanceCurveCourse getTotalCourse(TrackedRace raceContext, Supplier<ORCPerformanceCurveCourse> totalCourseSupplier) {
-        if (totalCourse == null) {
-            totalCourse = fixORCPerformanceCurveCourse(totalCourseSupplier.get(), /* cache */ this);
-        }
-        return totalCourse;
+        return totalCourse.computeIfAbsent(raceContext, key->fixORCPerformanceCurveCourse(totalCourseSupplier.get(), /* cache */ this));
     }
 
     private ORCPerformanceCurveCourse fixORCPerformanceCurveCourse(ORCPerformanceCurveCourse course, ORCPerformanceCurveCache cache) {
@@ -327,7 +325,9 @@ public class LeaderboardDTOCalculationReuseCache implements WindLegTypeAndLegBea
         Wind result = trackedLegAverageWindCache.get(leg);
         if (result == null) {
             result = averageWindForLegSupplier.apply(leg);
-            trackedLegAverageWindCache.put(leg, result);
+            if (result != null) {
+                trackedLegAverageWindCache.put(leg, result);
+            }
         }
         return result;
     }

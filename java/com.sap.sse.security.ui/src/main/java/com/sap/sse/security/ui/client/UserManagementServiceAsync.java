@@ -15,7 +15,6 @@ import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.dto.AccessControlListAnnotationDTO;
 import com.sap.sse.security.shared.dto.AccessControlListDTO;
-import com.sap.sse.security.shared.dto.OwnershipAnnotationDTO;
 import com.sap.sse.security.shared.dto.OwnershipDTO;
 import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
 import com.sap.sse.security.shared.dto.RolesAndPermissionsForUserDTO;
@@ -32,23 +31,13 @@ public interface UserManagementServiceAsync {
             QualifiedObjectIdentifier idOfOwnedObject, String displayNameOfOwnedObject,
             AsyncCallback<OwnershipDTO> callback);
     
-    void getOwnership(QualifiedObjectIdentifier idOfOwnedObject, AsyncCallback<OwnershipAnnotationDTO> callback);
-
     void getAccessControlLists(AsyncCallback<Collection<AccessControlListAnnotationDTO>> callback);
-
-    void getAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, AsyncCallback<AccessControlListAnnotationDTO> callback);
 
     void getAccessControlListWithoutPruning(QualifiedObjectIdentifier idOfAccessControlledObject,
             AsyncCallback<AccessControlListDTO> updateAclAsyncCallback);
 
     void overrideAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, AccessControlListDTO acl,
             AsyncCallback<AccessControlListDTO> updateAclAsyncCallback);
-
-    void addToAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, String permission, String name,
-            AsyncCallback<AccessControlListDTO> callback);
-
-    void removeFromAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, String permission,
-            String name, AsyncCallback<AccessControlListDTO> callback);
 
     /**
      * Returns those user groups the requesting user can read
@@ -78,8 +67,6 @@ public interface UserManagementServiceAsync {
      */
     void getUserList(AsyncCallback<Collection<UserDTO>> callback);
 
-    void getUserByName(String username, AsyncCallback<UserDTO> callback);
-    
     /**
      * Returns true if a user associated to the given username even if the current user cannot see the existing user.
      */
@@ -140,15 +127,9 @@ public interface UserManagementServiceAsync {
     void getAllPreferences(String username, final AsyncCallback<Map<String, String>> callback);
 
     /**
-     * Obtains an access token for the user specified by {@code username}. The caller needs to
-     * have role {@link DefaultRoles#ADMIN} or be authorized as the user identified by {@code username}
-     * in order to be permitted to retrieve the access token. 
-     */
-    void getAccessToken(String username, AsyncCallback<String> markedAsyncCallback);
-
-    /**
-     * Like {@link #getAccessToken(String, AsyncCallback)}, only that instead of returning {@code null} a
-     * new access token will be created and returned.
+     * * Obtains an access token for the user specified by {@code username}. The caller needs to have role
+     * {@link DefaultRoles#ADMIN} or be authorized as the user identified by {@code username} in order to be permitted
+     * to retrieve the access token, a new access token will be created and returned.
      */
     void getOrCreateAccessToken(String username, AsyncCallback<String> callback);
 

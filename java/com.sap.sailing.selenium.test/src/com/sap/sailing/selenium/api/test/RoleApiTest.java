@@ -27,7 +27,7 @@ public class RoleApiTest extends AbstractSeleniumTest {
 
     @Before
     public void setUp() {
-        clearState(getContextRoot());
+        clearState(getContextRoot(), /* headless */ true);
     }
 
     @Test
@@ -134,5 +134,18 @@ public class RoleApiTest extends AbstractSeleniumTest {
                 roleCreated3.getPermissions(), roleCreated3.getName(), true));
         final Role roleUpdated3 = roleApi.getRole(adminCtx, roleCreated3.getId());
         assertTrue("role3 should be transitive after update", roleUpdated3.isTransitive());
+    }
+
+    @Test
+    public void createRoleWithDuplicateNameShouldFailTest() {
+        final String roleName = "DUPLICATE_CHECK_ROLE";
+        final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
+        roleApi.createRole(adminCtx, roleName);
+        try {
+            roleApi.createRole(adminCtx, roleName);
+            fail();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -330,7 +330,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends AbstractTestStorin
     @Test
     public void testStoreAndRetrieveRegattaWithRaceLogStartTimeEvent() {
 
-        RaceLogStartTimeEvent event = new RaceLogStartTimeEventImpl(now, author, 0, now);
+        RaceLogStartTimeEvent event = new RaceLogStartTimeEventImpl(now, author, 0, now, /* courseAreaId */ null);
 
         addAndStoreRaceLogEvent(regatta, raceColumnName, event);
 

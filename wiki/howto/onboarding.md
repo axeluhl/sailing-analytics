@@ -17,7 +17,7 @@ Steps to build and run the Race Analysis Suite below)
 6. RabbitMQ, download from [http://www.rabbitmq.com](http://www.rabbitmq.com). Requires Erlang to be installed. RabbitMQ installer will assist in installing Erlang. Some sources report that there may be trouble with latest versions of RabbitMQ. In some cases, McAffee seems to block the installation of the latest version on SAP hardware; in other cases connection problems to newest versions have been reported. We know that version 3.6.8 works well. [https://github.com/rabbitmq/rabbitmq-server/releases/tag/rabbitmq_v3_6_8](https://github.com/rabbitmq/rabbitmq-server/releases/tag/rabbitmq_v3_6_8) is the link.
 7. JDK 1.8 (Java SE 8), [http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html) --- Alternatively you can use the SAPJVM 1.8: Go to [http://sapjvm.wdf.sap.corp:1080/downloads](http://sapjvm.wdf.sap.corp:1080/downloads), select JVM 1.8, extract the downloaded .zip into desired location (e.g. C:\Program Files\Java), then Go to Window -> Preferences -> Java -> Installed JREs and add the VM.
 8. Maven 3.1.1 (or higher), [http://maven.apache.org](http://maven.apache.org)
-9. GWT SDK 2.8.2 ([http://www.gwtproject.org/download.html](http://www.gwtproject.org/download.html))
+9. GWT SDK 2.9.0 ([http://www.gwtproject.org/download.html](http://www.gwtproject.org/download.html))
 10. Standalone Android SDK (see section "Additional steps required for Android projects"). OPTIONALLY: You may additionally install Android Studio ([https://developer.android.com/tools/studio/index.html](https://developer.android.com/tools/studio/index.html)) or IntelliJ IDEA ([https://www.jetbrains.com/idea/download/](https://www.jetbrains.com/idea/download/)).
 
 #### Automatic Eclipse plugin installation
@@ -114,6 +114,7 @@ The primary Git repository for the project is hosted on sapsailing.com. It is mi
 4. On clear workspace additional steps should be performed once:
   1. Run "GWT Dashboards SDM" launch configuration. After successful start, launch configuration can be stopped.
   2. Run "GWT Security SDM" launch configuration. After successful start, launch configuration can be stopped.
+  3. Run "GWT xdStorage Sample SDM" launch configuration. After successful start, launch configuration can be stopped.
 5. Run the Race Analysis Suite
   * Start the MongoDB (cd /somePathTo MongoDB/mongodb/bin; rm c:/data/SAP/sailing/mongodb/mongod.lock; ./mongod --dbpath c:/data/SAP/sailing/mongodb)  
   * Start the appropriate Eclipse launch configuration (e.g. 'Sailing Server (no Proxy)') You´ll find this in the debug dropdown

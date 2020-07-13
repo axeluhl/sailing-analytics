@@ -40,12 +40,10 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer<MetaLeaderb
             MetaLeaderboardPerspectiveLifecycle lifecycle,
             PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings,
             Function<String, SailingServiceAsync> sailingServiceFactory, AsyncActionsExecutor asyncActionsExecutor, 
-            Timer timer, String preselectedLeaderboardName,
-            String leaderboardGroupName, String metaLeaderboardName, ErrorReporter errorReporter,
+            Timer timer, String preselectedLeaderboardName, String metaLeaderboardName, ErrorReporter errorReporter,
             StringMessages stringMessages, DetailType chartDetailType, Iterable<DetailType> availableDetailTypes) {
         this(parent, componentContext, lifecycle, settings, new CompetitorSelectionModel(/* hasMultiSelection */true),
-                sailingServiceFactory, asyncActionsExecutor, timer,
-                preselectedLeaderboardName, leaderboardGroupName, metaLeaderboardName,
+                sailingServiceFactory, asyncActionsExecutor, timer, preselectedLeaderboardName, metaLeaderboardName,
                 errorReporter, stringMessages, chartDetailType, availableDetailTypes);
     }
     
@@ -55,8 +53,7 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer<MetaLeaderb
             PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings,
             CompetitorSelectionModel competitorSelectionModel, Function<String, SailingServiceAsync> sailingServiceFactory,
             AsyncActionsExecutor asyncActionsExecutor, Timer timer,
-            String preselectedLeaderboardName, String leaderboardGroupName,
-            String metaLeaderboardName, ErrorReporter errorReporter, StringMessages stringMessages,
+            String preselectedLeaderboardName, String metaLeaderboardName, ErrorReporter errorReporter, StringMessages stringMessages,
             DetailType chartDetailType, Iterable<DetailType> availableDetailTypes) {
         super(parent, componentContext, lifecycle, settings, competitorSelectionModel, asyncActionsExecutor, timer,
                 stringMessages);
@@ -64,8 +61,7 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer<MetaLeaderb
         final SailingServiceAsync sailingServiceForMetaLeaderboard = sailingServiceFactory.apply(metaLeaderboardName);
         init(new MultiRaceLeaderboardPanel(this, componentContext, sailingServiceForMetaLeaderboard, asyncActionsExecutor,
                         settings.findSettingsByComponentId(LeaderboardPanelLifecycle.ID), /* isEmbedded */ false,
-                        competitorSelectionModel, timer,
-                        leaderboardGroupName, metaLeaderboardName, errorReporter, stringMessages,
+                        competitorSelectionModel, timer, metaLeaderboardName, errorReporter, stringMessages,
                         settings.getPerspectiveOwnSettings().isShowRaceDetails(), /* competitorSearchTextBox */ null,
                         /* showSelectionCheckbox */ true, /* raceTimesInfoProvider */null,
                         settings.getPerspectiveOwnSettings().isAutoExpandLastRaceColumn(), /* adjustTimerDelay */ true,
