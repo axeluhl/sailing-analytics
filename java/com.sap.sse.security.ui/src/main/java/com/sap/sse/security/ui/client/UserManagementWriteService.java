@@ -19,7 +19,7 @@ import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.oauth.shared.OAuthException;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
-public interface UserManagementServiceWrite extends UserManagementService {
+public interface UserManagementWriteService extends UserManagementService {
 
     UserGroupDTO createUserGroup(String name)
             throws UserGroupManagementException, UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;

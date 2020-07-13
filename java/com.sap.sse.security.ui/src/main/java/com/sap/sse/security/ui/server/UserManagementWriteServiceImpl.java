@@ -47,13 +47,13 @@ import com.sap.sse.security.shared.impl.SecuredSecurityTypes.UserActions;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.shared.impl.UserGroupImpl;
-import com.sap.sse.security.ui.client.UserManagementServiceWrite;
+import com.sap.sse.security.ui.client.UserManagementWriteService;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.oauth.shared.OAuthException;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
-public class UserManagementServiceWriteImpl extends UserManagementServiceImpl implements UserManagementServiceWrite {
-    private static final Logger logger = Logger.getLogger(UserManagementServiceWriteImpl.class.getName());
+public class UserManagementWriteServiceImpl extends UserManagementServiceImpl implements UserManagementWriteService {
+    private static final Logger logger = Logger.getLogger(UserManagementWriteServiceImpl.class.getName());
     
     @Override
     public RoleDefinitionDTO createRoleDefinition(String roleDefinitionIdAsString, String name) {

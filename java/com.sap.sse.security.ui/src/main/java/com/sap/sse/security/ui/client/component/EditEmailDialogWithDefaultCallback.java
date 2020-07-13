@@ -9,6 +9,7 @@ import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.EntryPointLinkFactory;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
+import com.sap.sse.security.ui.client.UserManagementWriteServiceAsync;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 /**
@@ -20,18 +21,14 @@ import com.sap.sse.security.ui.client.i18n.StringMessages;
  *
  */
 public class EditEmailDialogWithDefaultCallback extends EditEmailDialog {
-    public EditEmailDialogWithDefaultCallback(final StringMessages stringMessages,
-            final UserManagementServiceAsync userManagementService, UserDTO user) {
-        this(stringMessages, userManagementService, user, /* additional callback */ null);
-    }
     
     public EditEmailDialogWithDefaultCallback(final StringMessages stringMessages,
-            final UserManagementServiceAsync userManagementService, UserDTO user,
+            final UserManagementWriteServiceAsync userManagementWriteService, UserDTO user,
             final AsyncCallback<UserData> callback) {
-        super(stringMessages, userManagementService, user, new DialogCallback<UserData>() {
+        super(stringMessages, userManagementWriteService, user, new DialogCallback<UserData>() {
             @Override
             public void ok(final UserData userData) {
-                userManagementService.updateSimpleUserEmail(userData.getUsername(), userData.getEmail(),
+                userManagementWriteService.updateSimpleUserEmail(userData.getUsername(), userData.getEmail(),
                         EntryPointLinkFactory.createEmailValidationLink(new HashMap<String, String>()),
                         new MarkedAsyncCallback<Void>(
                         new AsyncCallback<Void>() {

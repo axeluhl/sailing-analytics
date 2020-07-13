@@ -15,7 +15,7 @@ import com.sap.sse.security.shared.dto.WildcardPermissionWithSecurityDTO;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
-public interface UserManagementServiceWriteAsync extends UserManagementServiceAsync {
+public interface UserManagementWriteServiceAsync extends UserManagementServiceAsync {
 
     void createUserGroup(String name, AsyncCallback<UserGroupDTO> callback);
     

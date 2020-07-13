@@ -127,7 +127,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingWriteEntryPoint
             /** Changes the default tenant for the current user. */
             private void changeDefaultTenantForCurrentUser(final StrippedUserGroupDTO serverTenant) {
                 final UserDTO user = getUserService().getCurrentUser();
-                getUserService().getUserManagementService().updateUserProperties(user.getName(), user.getFullName(),
+                getUserManagementWriteService().updateUserProperties(user.getName(), user.getFullName(),
                         user.getCompany(), user.getLocale(), serverTenant.getId().toString(),
                         new AsyncCallback<UserDTO>() {
                             @Override
