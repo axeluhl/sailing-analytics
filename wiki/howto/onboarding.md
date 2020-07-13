@@ -140,10 +140,9 @@ Copy the settings.xml **and** the toolchains.xml from the top-level git folder t
 - Configure Eclipse to use Chrome or Firefox as the default browser
 - Install the GWT Browser Plugin for the GWT Development mode <del>(Chrome or Firefox; as of this writing (2013-11-05), Firefox is the only platform where the plug-in runs stably)</del> (As of 2016-08-31 Firefox is the only browser supporting the GWT plugin, you have to download Firefox version 24 for it to work)
 - Use SAP JVM Profiler. If you used the script above and installed the SAPJVM instead of the jdk, you can now open the profiling perspective by clicking on Window -> Perspective -> Open Perspective -> Profiling)
-- Make sure you run Eclipse with a JRE containing javax/xml/bind, otherwise you will not be able to use the SDM. See [https://github.com/sdbg/sdbg/pull/162](https://github.com/sdbg/sdbg/pull/162). Add the following two lines above the `-vmargs` in your eclipse.ini:
-
-    -vm
-    <path/to/jre/bin/java
+- Make sure you run Eclipse with a JRE containing javax/xml/bind, otherwise you will not be able to use the SDM. See [https://github.com/sdbg/sdbg/pull/162](https://github.com/sdbg/sdbg/pull/162). Add the following two lines above the `-vmargs` in your eclipse.ini:    
+`-vm`    
+`<path/to/jre/bin/java`    
 
 #### Git usage troubleshooting
 
