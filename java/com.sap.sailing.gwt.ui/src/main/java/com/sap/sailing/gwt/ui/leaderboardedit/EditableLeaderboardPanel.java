@@ -372,6 +372,35 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
         }
     }
     
+    private class ReasonForMaxPointsTextViewProvider extends AbstractRowUpdateWhiteboardProducerThatHasCell<LeaderboardRowDTO, String> {
+        private final String raceColumnName;
+        
+        protected ReasonForMaxPointsTextViewProvider(String raceColumnName) {
+            this.raceColumnName = raceColumnName;
+        }
+
+        @Override
+        public Cell<String> getCell() {
+            return new TextCell();
+        }
+
+        @Override
+        public FieldUpdater<LeaderboardRowDTO, String> getFieldUpdater() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public String getValue(LeaderboardRowDTO object) {
+            LeaderboardEntryDTO leaderboardEntryDTO = object.fieldsByRaceColumnName.get(raceColumnName);
+            MaxPointsReason reasonForMaxPoints = null;
+            if (leaderboardEntryDTO != null) {
+                reasonForMaxPoints = leaderboardEntryDTO.reasonForMaxPoints;
+            }
+            return reasonForMaxPoints == null || reasonForMaxPoints == MaxPointsReason.NONE ? "" : " " + reasonForMaxPoints.name();
+        }
+    }
+    
     private class UncorrectedTotalPointsViewProvider extends AbstractRowUpdateWhiteboardProducerThatHasCell<LeaderboardRowDTO, String> {
         private final String raceColumnName;
         
@@ -395,7 +424,7 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
             LeaderboardEntryDTO leaderboardEntryDTO = object.fieldsByRaceColumnName.get(raceColumnName);
             String result = "";
             if (leaderboardEntryDTO != null && leaderboardEntryDTO.totalPointsUncorrected != null) {
-                result="("+scoreFormat.format(leaderboardEntryDTO.totalPointsUncorrected)+")";
+                result=" ("+scoreFormat.format(leaderboardEntryDTO.totalPointsUncorrected)+")";
             }
             return result;
         }
@@ -459,7 +488,7 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
                     getWhiteboardOwner().whiteboardProduced(whiteboard);
                     addBusyTask();
                     getSailingService().updateLeaderboardScoreCorrection(getLeaderboardName(), row.competitor.getIdAsString(), raceColumnName,
-                            value == null || value.trim().length() == 0 ? null : value.trim().equals("n/a") ? null
+                            value == null || value.trim().length() == 0 ? null : value.trim().equals("-") ? null
                                     : Double.valueOf(value.trim()), getLeaderboardDisplayDate(),
                             new AsyncCallback<Util.Triple<Double, Double, Boolean>>() {
                         @Override
@@ -489,7 +518,7 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
         @Override
         public String getValue(LeaderboardRowDTO object) {
             LeaderboardEntryDTO leaderboardEntryDTO = object.fieldsByRaceColumnName.get(raceColumnName);
-            String result = "n/a";
+            String result = "-";
             if (leaderboardEntryDTO != null && leaderboardEntryDTO.totalPoints != null) {
                 result = scoreFormat.format(leaderboardEntryDTO.totalPoints);
             }
@@ -1004,9 +1033,11 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
         List<RowUpdateWhiteboardProducerThatAlsoHasCell<LeaderboardRowDTO, ?>> list =
                 new ArrayList<RowUpdateWhiteboardProducerThatAlsoHasCell<LeaderboardRowDTO, ?>>();
         final MaxPointsDropDownCellProvider maxPointsDropDownCellProvider = new MaxPointsDropDownCellProvider(race.getRaceColumnName());
-        list.add(maxPointsDropDownCellProvider);
+        //list.add(maxPointsDropDownCellProvider);
         final TotalPointsEditCellProvider totalPointsEditCellProvider = new TotalPointsEditCellProvider(race.getRaceColumnName());
         list.add(totalPointsEditCellProvider);
+        final ReasonForMaxPointsTextViewProvider testViewProvider = new ReasonForMaxPointsTextViewProvider(race.getRaceColumnName());
+        list.add(testViewProvider);
         final UncorrectedTotalPointsViewProvider uncorrectedViewProvider = new UncorrectedTotalPointsViewProvider(race.getRaceColumnName());
         list.add(uncorrectedViewProvider);
         list.add(new MaxPointsReasonAndTotalPointsEditButtonCell(stringMessages, race.getRaceColumnName(),
