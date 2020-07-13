@@ -31,13 +31,13 @@ public class CheckoutOption extends JavaScriptObject {
                 return Promise.resolve(JSON.parse(hostedPageJSONString));
             },
             success : function(hostedPageId) {
-                onSuccess.@com.sap.sailing.gwt.ui.client.subscription.CheckoutOption.SuccessCallback::call(Ljava/lang/String;)(hostedPageId);
+                onSuccess.@com.sap.sailing.gwt.ui.client.subscription.chargebee.CheckoutOption.SuccessCallback::call(Ljava/lang/String;)(hostedPageId);
             },
             error : function(error) {
-                onError.@com.sap.sailing.gwt.ui.client.subscription.CheckoutOption.ErrorCallback::call(Ljava/lang/String;)(error.message ? error.message : error);
+                onError.@com.sap.sailing.gwt.ui.client.subscription.chargebee.CheckoutOption.ErrorCallback::call(Ljava/lang/String;)(error.message ? error.message : error);
             },
             close : function() {
-                onClose.@com.sap.sailing.gwt.ui.client.subscription.CheckoutOption.CloseCallback::call()();
+                onClose.@com.sap.sailing.gwt.ui.client.subscription.chargebee.CheckoutOption.CloseCallback::call()();
             }
         };
     }-*/;

@@ -165,7 +165,7 @@
 	<servlet>
         <display-name>Subscription Service</display-name>
         <servlet-name>SubscriptionService</servlet-name>
-        <servlet-class>com.sap.sailing.gwt.ui.server.subscription.SubscriptionServiceImpl</servlet-class>
+        <servlet-class>com.sap.sailing.gwt.ui.server.subscription.chargebee.SubscriptionServiceImpl</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>SubscriptionService</servlet-name>
