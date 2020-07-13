@@ -6203,7 +6203,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-  //READ
     public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
         ShardingType identifiedShardingType = null;
         try {
