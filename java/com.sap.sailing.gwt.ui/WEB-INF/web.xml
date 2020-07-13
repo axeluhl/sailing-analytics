@@ -161,6 +161,15 @@
 		<servlet-name>UserManagementService</servlet-name>
 		<url-pattern>/service/usermanagement</url-pattern>
 	</servlet-mapping>
+    <servlet>
+        <display-name>User Management Write Service</display-name>
+        <servlet-name>UserManagementWriteService</servlet-name>
+        <servlet-class>com.sap.sse.security.ui.server.UserManagementWriteServiceImpl</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>UserManagementWriteService</servlet-name>
+        <url-pattern>/service/usermanagementmaster</url-pattern>
+    </servlet-mapping>
 
 	<!-- enabling remote logging -->
 	<servlet>
