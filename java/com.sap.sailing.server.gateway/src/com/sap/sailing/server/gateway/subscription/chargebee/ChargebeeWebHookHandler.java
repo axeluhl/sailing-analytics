@@ -6,6 +6,8 @@ import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.subject.Subject;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.ParseException;
@@ -34,26 +36,30 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
 
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response) {
-        try {
-            final Object requestBody = JSONValue.parseWithException(request.getReader());
-            final JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
-            logger.log(Level.INFO, "Payment service webhook data: " + requestObject.toJSONString());
-            final SubscriptionWebHookEvent event = new SubscriptionWebHookEvent(requestObject);
-            if (!event.isValidEvent()) {
-                throw new IllegalArgumentException("Invalid webhook event");
-            }
-            final User user = getUser(event.getCustomerId());
-            if (user != null && !isOutdatedEvent(event, user.getSubscription())) {
-                processEvent(event, user);
-            }
-            sendSuccess(response);
-        } catch (ParseException e) {
-            logger.log(Level.SEVERE, "Failed to parse subscription webhook event data", e);
-            sendFail(response);
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, "Failed to proccess subscription webhook event", e);
-            sendFail(response);
-        }
+        Subject subject = SecurityUtils.getSubject();
+        logger.log(Level.INFO, "Principle: " + subject.getPrincipal().toString());
+        sendSuccess(response);
+//        try {
+//            
+//            final Object requestBody = JSONValue.parseWithException(request.getReader());
+//            final JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
+//            logger.log(Level.INFO, "Payment service webhook data: " + requestObject.toJSONString());
+//            final SubscriptionWebHookEvent event = new SubscriptionWebHookEvent(requestObject);
+//            if (!event.isValidEvent()) {
+//                throw new IllegalArgumentException("Invalid webhook event");
+//            }
+//            final User user = getUser(event.getCustomerId());
+//            if (user != null && !isOutdatedEvent(event, user.getSubscription())) {
+//                processEvent(event, user);
+//            }
+//            sendSuccess(response);
+//        } catch (ParseException e) {
+//            logger.log(Level.SEVERE, "Failed to parse subscription webhook event data", e);
+//            sendFail(response);
+//        } catch (Exception e) {
+//            logger.log(Level.SEVERE, "Failed to proccess subscription webhook event", e);
+//            sendFail(response);
+//        }
     }
 
     private boolean isOutdatedEvent(SubscriptionWebHookEvent event, Subscription userSubscription) {
