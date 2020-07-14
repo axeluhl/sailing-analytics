@@ -73,7 +73,6 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
             public void onFailure(Throwable caught) {
                 GWT.log("Qrcode generation failed: ", caught);
             }
-
             @Override
             public void onSuccess(String result) {
                 GWT.log("Qrcode generated for url: " + url);
@@ -190,7 +189,6 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
             windChartCheckBox = createCheckbox(stringMessages.windChartCheckBoxLabel());
             windChartCheckBox.setValue(true);
             windChartCheckBox.addClickHandler(new ClickHandler() {
-
                 @Override
                 public void onClick(ClickEvent event) {
                     updateLink();
@@ -209,7 +207,6 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
             maneuverCheckBox = createCheckbox(stringMessages.maneuverCheckBoxLabel());
             maneuverCheckBox.setValue(true);
             maneuverCheckBox.addClickHandler(new ClickHandler() {
-
                 @Override
                 public void onClick(ClickEvent event) {
                     updateLink();
@@ -219,7 +216,6 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
             zoomCheckBox = createCheckbox(stringMessages.zoomCheckBoxLabel());
             zoomCheckBox.setValue(true);
             zoomCheckBox.addClickHandler(new ClickHandler() {
-                
                 @Override
                 public void onClick(ClickEvent event) {
                     updateLink();
