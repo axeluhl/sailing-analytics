@@ -53,9 +53,9 @@
         <td>curl -X POST http://127.0.0.1:8889/sailingserver/api/v1/masterdataimport -d "targetServerUrl=127.0.0.1:8888" -d "uuids[]=75e86618-8b0f-4291-9661-6b2a1fa47dff" -d "override=false" -d "compress=true" -d "exportWind=false" -d "exportDeviceConfigs=false" -d "exportTrackedRacesAndStartTracking=false" -d "targetServerUsername=admin" -d "targetServerPassword=admin" -H "Authorization: Basic YWRtaW46YWRtaW4="<br>
         produces output:<pre>
         {
-        "LeaderboardgroupsImported": [
-            "MyTestEventWithStrangeCharact/er*s"
-        ],
+         "LeaderboardgroupsImported": {
+           "75e86618-8b0f-4291-9661-6b2a1fa47dff": "MyTestEventWithStrangeCharact/er*s",
+         },
         "ImportedFrom": "127.0.0.1:8888",
         "override": false,
         "exportWind": false,

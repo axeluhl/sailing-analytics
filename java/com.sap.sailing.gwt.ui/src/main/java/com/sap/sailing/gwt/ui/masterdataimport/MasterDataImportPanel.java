@@ -52,8 +52,10 @@ public class MasterDataImportPanel extends VerticalPanel {
     private TextBox hostBox;
     private Button importLeaderboardGroupsButton;
     private Button fetchIdsButton;   
-
-    private Map<String, String> allLeaderboardGroupsMap;
+    /**
+     * A map containing a leaderboardgroup UUID as key and the name of that leaderboard group as value.
+     */
+    private Map<String, String> allLeaderboardGroupsNameAndIdsMap;
 
     private final StringMessages stringMessages;
     private String currentHost;
@@ -325,8 +327,8 @@ public class MasterDataImportPanel extends VerticalPanel {
                     @Override
                     public void onSuccess(Map<String, String> result) {
                         clearListBox();
-                        allLeaderboardGroupsMap = result;
-                        fillLeaderboardGroupListBox(allLeaderboardGroupsMap);
+                        allLeaderboardGroupsNameAndIdsMap = result;
+                        fillLeaderboardGroupListBox(allLeaderboardGroupsNameAndIdsMap);
                         changeButtonStateAccordingToApplicationState();
                         if (!filterBox.getValue().isEmpty()) {
                             filterLeaderboardGroupList();
@@ -414,7 +416,7 @@ public class MasterDataImportPanel extends VerticalPanel {
                 return Collections.singleton(t);
             } 
         };
-        Map<String, String> filteredMap = allLeaderboardGroupsMap.entrySet().stream()
+        Map<String, String> filteredMap = allLeaderboardGroupsNameAndIdsMap.entrySet().stream()
                 .filter(entry -> matcher.matches(filterTexts, entry.getValue()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         fillLeaderboardGroupListBox(filteredMap);
