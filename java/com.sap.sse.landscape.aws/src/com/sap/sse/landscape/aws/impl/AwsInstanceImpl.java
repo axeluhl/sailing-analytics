@@ -6,6 +6,7 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.logging.Logger;
 
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelSftp;
@@ -30,6 +31,7 @@ import com.sap.sse.landscape.ssh.YesUserInfo;
 import software.amazon.awssdk.services.ec2.model.Instance;
 
 public class AwsInstanceImpl implements AwsInstance {
+    private final static Logger logger = Logger.getLogger(AwsInstanceImpl.class.getName());
     private static final String ROOT_USER_NAME = "root";
     private final String instanceId;
     private final AwsAvailabilityZone availabilityZone;
@@ -101,7 +103,7 @@ public class AwsInstanceImpl implements AwsInstance {
      * @see #createSshChannel(String)
      */
     @Override
-    public SshShellCommandChannel createRootSshChannel() throws JSchException, IOException {
+    public SshShellCommandChannel createRootSshChannel() throws JSchException, IOException, InterruptedException {
         return createSshChannel(ROOT_USER_NAME);
     }
     
@@ -114,11 +116,13 @@ public class AwsInstanceImpl implements AwsInstance {
      * {@link PipedInputStream} wrapped around a {@link PipedOutputStream} which you set to the channel.
      */
     @Override
-    public SshShellCommandChannel createSshChannel(String sshUserName) throws JSchException, IOException {
+    public SshShellCommandChannel createSshChannel(String sshUserName) throws JSchException, IOException, InterruptedException {
         return new SshShellCommandChannelImpl(createSshChannelInternal(sshUserName, "shell"));
     }
     
     private Channel createSshChannelInternal(String sshUserName, String channelType) throws JSchException, IOException {
+        logger.info("Creating SSH "+channelType+" channel for SSH user "+sshUserName+
+                " to instance with ID "+getInstanceId());
         final Session session = createSshSession(sshUserName);
         session.setUserInfo(new YesUserInfo());
         session.connect(/* timeout in millis */ 5000);

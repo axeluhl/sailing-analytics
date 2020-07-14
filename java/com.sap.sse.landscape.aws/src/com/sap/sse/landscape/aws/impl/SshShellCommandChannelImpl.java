@@ -5,17 +5,21 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Random;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.landscape.aws.SshShellCommandChannel;
 
 
 public class SshShellCommandChannelImpl implements SshShellCommandChannel {
+    private static final Logger logger = Logger.getLogger(SshShellCommandChannelImpl.class.getName());
     private static final Pattern DEFAULT_PROMPT_PATTERN = Pattern.compile("^\\[.*\\]# $", Pattern.MULTILINE);
     private final Channel channel;
     private final Pattern promptPattern;
@@ -27,11 +31,11 @@ public class SshShellCommandChannelImpl implements SshShellCommandChannel {
      *            the result of a {@link Session#openChannel(String)} call; the channel is assumed to not yet be
      *            {@link Channel#connect() connected}
      */
-    public SshShellCommandChannelImpl(Channel channel) throws IOException, JSchException {
+    public SshShellCommandChannelImpl(Channel channel) throws IOException, JSchException, InterruptedException {
         this(channel, DEFAULT_PROMPT_PATTERN);
     }
     
-    public SshShellCommandChannelImpl(Channel channel, Pattern promptPattern) throws IOException, JSchException {
+    public SshShellCommandChannelImpl(Channel channel, Pattern promptPattern) throws IOException, JSchException, InterruptedException {
         super();
         this.channel = channel;
         this.promptPattern = promptPattern;
@@ -41,26 +45,24 @@ public class SshShellCommandChannelImpl implements SshShellCommandChannel {
     }
 
     @Override
-    public byte[] sendCommandLineSynchronously(String commandLine) throws IOException, InterruptedException {
+    public byte[] sendCommandLineSynchronously(String commandLine) throws IOException, InterruptedException, JSchException {
         new Thread(()->{
             try {
                 outputStream.write((commandLine+"\n").getBytes());
                 outputStream.flush();
-            } catch (IOException e) {
+                logger.info("Sent command \""+commandLine+"\" to "+getHost());
+            } catch (IOException | JSchException e) {
                 throw new RuntimeException(e);
             }
         }).start();
-        // wait a bit for echoed command to become available:
-        int attempts = 10;
-        while (inputStream.available() == 0 && --attempts > 0) {
-            Thread.sleep(10);
-        }
+        waitForAvailableInput(Duration.ONE_SECOND);
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         final ByteArrayOutputStream echo = new ByteArrayOutputStream();
         // assume the command line got echoed; read it because we don't want it as part of the output
         for (int i=0; i<commandLine.length() && inputStream.available() > 0; i++) {
             echo.write(inputStream.read());
         }
+        logger.info("Read echoed command \""+echo+"\" from host "+getHost());
         int read = readFirstAfterSkippingEol();
         do {
             if (read != -1) {
@@ -68,6 +70,7 @@ public class SshShellCommandChannelImpl implements SshShellCommandChannel {
             }
         } while (inputStream.available() > 0 && (read=inputStream.read()) != -1);
         final String outputAsString = bos.toString();
+        logger.info("Read command output \""+outputAsString+"\" from host "+getHost());
         // assume that we've read the prompt; strip it off:
         final Matcher m = promptPattern.matcher(outputAsString);
         int index = 0;
@@ -78,7 +81,27 @@ public class SshShellCommandChannelImpl implements SshShellCommandChannel {
             endOfPrompt = m.end();
             index = endOfPrompt;
         }
-        return outputAsString.substring(0, startOfPrompt).getBytes();
+        String outputWithoutTrailingPrompt = outputAsString.substring(0, startOfPrompt);
+        logger.info("Output after stripping off trailing prompt: \""+
+                outputWithoutTrailingPrompt+"\"");
+        return outputWithoutTrailingPrompt.getBytes();
+    }
+
+    private String getHost() throws JSchException {
+        return channel.getSession().getHost();
+    }
+
+    /**
+     * Waits in 10ms increments up to {@code timeout} for input on the {@link #inputStream}
+     * to become available.
+     */
+    private void waitForAvailableInput(Duration timeout) throws IOException, InterruptedException {
+        // wait a bit for echoed command to become available:
+        final Duration interval = Duration.ONE_MILLISECOND.times(10);
+        double runs = timeout.divide(interval);
+        while (inputStream.available() == 0 && --runs > 0) {
+            Thread.sleep(interval.asMillis());
+        }
     }
 
     private int readFirstAfterSkippingEol() throws IOException {
@@ -105,9 +128,9 @@ public class SshShellCommandChannelImpl implements SshShellCommandChannel {
      * the channel's {@link Channel#getOutputStream()}, then connects and uses the streams to send an "echo" command
      * with a generated "stanza" which is then waited for on the channel's {@link Channel#getInputStream() input
      * stream}.
-     * @return 
      */
-    private Pair<InputStream, OutputStream> waitUntilShellResponse() throws IOException, JSchException {
+    private Pair<InputStream, OutputStream> waitUntilShellResponse() throws IOException, JSchException, InterruptedException {
+        logger.info("Waiting for SSH shell response from host "+getHost());
         final String randomStanza = "Stanza-"+new Random().nextLong();
         final String randomStanzaEchoCommand = "echo \""+randomStanza+"\"\n";
         final InputStream inputStream = channel.getInputStream();
@@ -117,6 +140,7 @@ public class SshShellCommandChannelImpl implements SshShellCommandChannel {
             try {
                 outputStream.write(randomStanzaEchoCommand.getBytes());
                 outputStream.flush();
+                logger.info("Sent random stanza echo command: \""+randomStanzaEchoCommand+"\"");
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -138,15 +162,25 @@ public class SshShellCommandChannelImpl implements SshShellCommandChannel {
         if (i != randomStanzaBytesToLookFor.length+1) { // the +1 covers the line separator read
             throw new IllegalStateException("The shell seems unresponsive. You may want to close the channel "+channel);
         } else {
+            logger.info("Found stanza "+randomStanza);
             consumePrompt(inputStream);
         }
         return new Pair<>(inputStream, outputStream);
     }
     
-    private void consumePrompt(InputStream inputStream) throws IOException {
+    private void consumePrompt(InputStream inputStream) throws IOException, InterruptedException {
         // TODO consider automatic construction of a prompt pattern based on what we see here
-        while (inputStream.available() > 0) {
-            inputStream.read();
+        final Duration timeout = Duration.ONE_SECOND;
+        final TimePoint start = TimePoint.now();
+        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        while (!promptPattern.matcher(bos.toString()).find() && start.plus(timeout).after(TimePoint.now())) {
+            while (inputStream.available() == 0 && start.plus(timeout).after(TimePoint.now())) {
+                Thread.sleep(10);
+            }
+            if (inputStream.available() > 0) {
+                bos.write(inputStream.read());
+            }
         }
+        logger.info("Consumed as prompt: "+bos);
     }
 }

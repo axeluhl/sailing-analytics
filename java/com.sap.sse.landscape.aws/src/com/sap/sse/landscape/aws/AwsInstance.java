@@ -20,14 +20,14 @@ public interface AwsInstance extends Host {
      * commands to sent to the server, and a {@link PipedInputStream} wrapped around a {@link PipedOutputStream} which
      * you set to the channel.
      */
-    SshShellCommandChannel createSshChannel(String sshUserName) throws JSchException, IOException;
+    SshShellCommandChannel createSshChannel(String sshUserName) throws JSchException, IOException, InterruptedException;
 
     /**
      * Connects to an SSH session for the "root" user with a "shell" channel
      * 
      * @see #createSshChannel(String)
      */
-    SshShellCommandChannel createRootSshChannel() throws JSchException, IOException;
+    SshShellCommandChannel createRootSshChannel() throws JSchException, IOException, InterruptedException;
     
     ChannelSftp createSftpChannel(String sshUserName) throws JSchException, IOException;
 
