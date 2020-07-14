@@ -145,7 +145,7 @@ public class MasterDataImportPanel extends VerticalPanel {
     }
 
     protected void importLeaderboardGroups() {
-        String[] leaderboardGroupIds = createLeaderBoardGroupNamesFromListBox();
+        String[] leaderboardGroupIds = createLeaderboardGroupIdsFromListBox();
         final Label overallName = new Label(stringMessages.overallProgress() + ":");
         this.add(overallName);
         final CustomProgressBar overallProgressBar = CustomProgressBar.determinate();
@@ -294,7 +294,7 @@ public class MasterDataImportPanel extends VerticalPanel {
 
     }
 
-    private String[] createLeaderBoardGroupNamesFromListBox() {
+    private String[] createLeaderboardGroupIdsFromListBox() {
         List<String> names = new ArrayList<String>();
         for (int i = 0; i < leaderboardgroupListBox.getItemCount(); i++) {
             if (leaderboardgroupListBox.isItemSelected(i)) {
@@ -326,7 +326,7 @@ public class MasterDataImportPanel extends VerticalPanel {
                     public void onSuccess(Map<String, String> result) {
                         clearListBox();
                         allLeaderboardGroupsMap = result;
-                        fillLeaderboardgroupListBox(allLeaderboardGroupsMap);
+                        fillLeaderboardGroupListBox(allLeaderboardGroupsMap);
                         changeButtonStateAccordingToApplicationState();
                         if (!filterBox.getValue().isEmpty()) {
                             filterLeaderboardGroupList();
@@ -417,11 +417,11 @@ public class MasterDataImportPanel extends VerticalPanel {
         Map<String, String> filteredMap = allLeaderboardGroupsMap.entrySet().stream()
                 .filter(entry -> matcher.matches(filterTexts, entry.getValue()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-        fillLeaderboardgroupListBox(filteredMap);
+        fillLeaderboardGroupListBox(filteredMap);
         changeButtonStateAccordingToApplicationState();
     }
 
-    private void fillLeaderboardgroupListBox(Map<String, String> leaderboardGroupsMap) {
+    private void fillLeaderboardGroupListBox(Map<String, String> leaderboardGroupsMap) {
         final List<Pair<String, String>> list = new ArrayList<>();
         for (final String key : leaderboardGroupsMap.keySet()) {
             list.add(new Pair<>(leaderboardGroupsMap.get(key), key));
