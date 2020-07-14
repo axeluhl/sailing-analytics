@@ -145,7 +145,7 @@ public class MasterDataImportPanel extends VerticalPanel {
     }
 
     protected void importLeaderboardGroups() {
-        String[] leaderboardGroupIds = createLeaderboardGroupIdsFromListBox();
+        UUID[] leaderboardGroupIds = createLeaderboardGroupIdsFromListBox();
         final Label overallName = new Label(stringMessages.overallProgress() + ":");
         this.add(overallName);
         final CustomProgressBar overallProgressBar = CustomProgressBar.determinate();
@@ -294,14 +294,14 @@ public class MasterDataImportPanel extends VerticalPanel {
 
     }
 
-    private String[] createLeaderboardGroupIdsFromListBox() {
-        List<String> names = new ArrayList<String>();
+    private UUID[] createLeaderboardGroupIdsFromListBox() {
+        List<UUID> uuids = new ArrayList<UUID>();
         for (int i = 0; i < leaderboardgroupListBox.getItemCount(); i++) {
             if (leaderboardgroupListBox.isItemSelected(i)) {
-                names.add(leaderboardgroupListBox.getValue(i));
+                uuids.add(UUID.fromString(leaderboardgroupListBox.getValue(i)));
             }
         }
-        return names.toArray(new String[names.size()]);
+        return uuids.toArray(new UUID[uuids.size()]);
     }
 
     protected void fireIdRequestsAndFillLists() {
