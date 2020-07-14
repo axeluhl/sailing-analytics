@@ -384,8 +384,8 @@ public class MasterDataImportTest {
         String nickName = "Angie";
         leaderboard.setDisplayName(competitorToSuppress, nickName);
         // Serialize
-        List<String> groupUuidsToExport = new ArrayList<String>();
-        groupUuidsToExport.add(group.getId().toString());
+        List<UUID> groupUuidsToExport = new ArrayList<UUID>();
+        groupUuidsToExport.add(group.getId());
         RacingEventService destService;
         DomainFactory domainFactory;
         DummyMasterDataRessource spyResource = spyResource(new DummyMasterDataRessource(), sourceService);
@@ -621,11 +621,11 @@ public class MasterDataImportTest {
         leaderboard.getScoreCorrection().setMaxPointsReason(competitor, raceColumn, maxPointsReason);
 
         // Serialize
-        List<String> groupNamesToExport = new ArrayList<String>();
-        groupNamesToExport.add(group.getId().toString());
+        List<UUID> groupIdsToExport = new ArrayList<UUID>();
+        groupIdsToExport.add(group.getId());
 
         RacingEventService destService;
-        Response response = masterDataResource.getMasterDataByLeaderboardGroups(groupNamesToExport, false, true, false, false);
+        Response response = masterDataResource.getMasterDataByLeaderboardGroups(groupIdsToExport, false, true, false, false);
         StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         UUID randomUUID = UUID.randomUUID();
@@ -789,14 +789,14 @@ public class MasterDataImportTest {
         windTrackOnSource.add(new WindImpl(p, at, windSpeedWithBearing));
 
         // Serialize
-        List<String> groupNamesToExport = new ArrayList<String>();
-        groupNamesToExport.add(group.getId().toString());
+        List<UUID> groupIdsToExport = new ArrayList<UUID>();
+        groupIdsToExport.add(group.getId());
 
         RacingEventService destService;
         DomainFactory domainFactory;
         DummyMasterDataRessource spyResource = spyResource(new DummyMasterDataRessource(), sourceService);
         Mockito.doReturn(securityService).when(spyResource).getSecurityService();
-        Response response = spyResource.getMasterDataByLeaderboardGroups(groupNamesToExport, false, true, false, false);
+        Response response = spyResource.getMasterDataByLeaderboardGroups(groupIdsToExport, false, true, false, false);
         StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         UUID randomUUID = UUID.randomUUID();
@@ -956,11 +956,11 @@ public class MasterDataImportTest {
         raceColumn.getRaceLog(testFleet1).add(finishPositioningConfirmedEvent);
         storedLogUUIDs.add(finishPositioningConfirmedEvent.getId());
         // Serialize
-        List<String> groupNamesToExport = new ArrayList<String>();
-        groupNamesToExport.add(group.getId().toString());
+        List<UUID> groupIdsToExport = new ArrayList<UUID>();
+        groupIdsToExport.add(group.getId());
         RacingEventService destService;
         DomainFactory domainFactory;
-        Response response = masterDataResource.getMasterDataByLeaderboardGroups(groupNamesToExport, false, true, false, false);
+        Response response = masterDataResource.getMasterDataByLeaderboardGroups(groupIdsToExport, false, true, false, false);
         StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         UUID randomUUID = UUID.randomUUID();
@@ -1097,11 +1097,11 @@ public class MasterDataImportTest {
         String nickName = "Angie";
         leaderboard.setDisplayName(competitorToSuppress, nickName);
         // Serialize
-        List<String> groupNamesToExport = new ArrayList<String>();
-        groupNamesToExport.add(group.getId().toString());
+        List<UUID> groupIdsToExport = new ArrayList<UUID>();
+        groupIdsToExport.add(group.getId());
         RacingEventService destService;
         DomainFactory domainFactory;
-        Response response = masterDataResource.getMasterDataByLeaderboardGroups(groupNamesToExport, false, true, false, false);
+        Response response = masterDataResource.getMasterDataByLeaderboardGroups(groupIdsToExport, false, true, false, false);
         StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         UUID randomUUID = UUID.randomUUID();
@@ -1279,11 +1279,11 @@ public class MasterDataImportTest {
         String nickName = "Angie";
         leaderboard.setDisplayName(competitorToSuppress, nickName);
         // Serialize
-        List<String> groupNamesToExport = new ArrayList<String>();
-        groupNamesToExport.add(group.getId().toString());
+        List<UUID> groupIdsToExport = new ArrayList<UUID>();
+        groupIdsToExport.add(group.getId());
         RacingEventService destService;
         DomainFactory domainFactory;
-        Response response = masterDataResource.getMasterDataByLeaderboardGroups(groupNamesToExport, false, true, false, false);
+        Response response = masterDataResource.getMasterDataByLeaderboardGroups(groupIdsToExport, false, true, false, false);
         StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         UUID randomUUID = UUID.randomUUID();
@@ -1427,12 +1427,11 @@ public class MasterDataImportTest {
         /* displayName */null, false, leaderboardNames, null, null);
 
         // Serialize
-        List<String> groupNamesToExport = new ArrayList<String>();
-        groupNamesToExport.add(group.getId().toString());
-
+        List<UUID> groupIdsToExport = new ArrayList<UUID>();
+        groupIdsToExport.add(group.getId());
         RacingEventService destService;
         DomainFactory domainFactory;
-        Response response = masterDataResource.getMasterDataByLeaderboardGroups(groupNamesToExport, false, true, false, false);
+        Response response = masterDataResource.getMasterDataByLeaderboardGroups(groupIdsToExport, false, true, false, false);
         StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         UUID randomUUID = UUID.randomUUID();
@@ -1558,12 +1557,12 @@ public class MasterDataImportTest {
         leaderboard.setDisplayName(competitorToSuppress, nickName);
 
         // Serialize
-        List<String> groupNamesToExport = new ArrayList<String>();
-        groupNamesToExport.add(group.getId().toString());
+        List<UUID> groupIdsToExport = new ArrayList<UUID>();
+        groupIdsToExport.add(group.getId());
 
         RacingEventService destService;
         DomainFactory domainFactory;
-        Response response = masterDataResource.getMasterDataByLeaderboardGroups(groupNamesToExport, false, true, false, false);
+        Response response = masterDataResource.getMasterDataByLeaderboardGroups(groupIdsToExport, false, true, false, false);
         StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         UUID randomUUID = UUID.randomUUID();
@@ -1689,12 +1688,12 @@ public class MasterDataImportTest {
         leaderboard.setDisplayName(competitorToSuppress, nickName);
 
         // Serialize
-        List<String> groupNamesToExport = new ArrayList<String>();
-        groupNamesToExport.add(group.getId().toString());
+        List<UUID> groupIdsToExport = new ArrayList<UUID>();
+        groupIdsToExport.add(group.getId());
 
         RacingEventService destService;
         DomainFactory domainFactory;
-        Response response = masterDataResource.getMasterDataByLeaderboardGroups(groupNamesToExport, false, true, false, false);
+        Response response = masterDataResource.getMasterDataByLeaderboardGroups(groupIdsToExport, false, true, false, false);
         StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         UUID randomUUID = UUID.randomUUID();
@@ -1791,13 +1790,13 @@ public class MasterDataImportTest {
                 overallLeaderboardDiscardThresholds, ScoringSchemeType.LOW_POINT);
 
         // Serialize
-        List<String> groupNamesToExport = Collections.singletonList(leaderboardGroup.getId().toString());
+        List<UUID> groupIdsToExport = Collections.singletonList(leaderboardGroup.getId());
 
         RacingEventService destService;
         DomainFactory domainFactory;
         DummyMasterDataRessource spyResource = spyResource(new DummyMasterDataRessource(), sourceService);
         Mockito.doReturn(securityService).when(spyResource).getSecurityService();
-        Response response = spyResource.getMasterDataByLeaderboardGroups(groupNamesToExport, false, true, false, false);
+        Response response = spyResource.getMasterDataByLeaderboardGroups(groupIdsToExport, false, true, false, false);
         StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         UUID randomUUID = UUID.randomUUID();
@@ -1911,13 +1910,13 @@ public class MasterDataImportTest {
         raceColumn.setTrackedRace(testFleet1, trackedRace);
 
         // Serialize
-        List<String> groupNamesToExport = new ArrayList<String>();
-        groupNamesToExport.add(group1.getId().toString());
-        groupNamesToExport.add(group2.getId().toString());
+        List<UUID> groupIdsToExport = new ArrayList<UUID>();
+        groupIdsToExport.add(group1.getId());
+        groupIdsToExport.add(group2.getId());
 
         RacingEventService destService;
         DomainFactory domainFactory;
-        Response response = masterDataResource.getMasterDataByLeaderboardGroups(groupNamesToExport, false, true, false, false);
+        Response response = masterDataResource.getMasterDataByLeaderboardGroups(groupIdsToExport, false, true, false, false);
         StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         UUID randomUUID = UUID.randomUUID();
@@ -1980,12 +1979,12 @@ public class MasterDataImportTest {
         metaLeaderboard.getRaceColumns().iterator().next().setFactor(factor);
 
         // Serialize
-        List<String> groupNamesToExport = new ArrayList<String>();
-        groupNamesToExport.add(sourceGroup.getId().toString());
+        List<UUID> groupIdsToExport = new ArrayList<UUID>();
+        groupIdsToExport.add(sourceGroup.getId());
 
         RacingEventService destService;
         DomainFactory domainFactory;
-        Response response = masterDataResource.getMasterDataByLeaderboardGroups(groupNamesToExport, false, true, false, false);
+        Response response = masterDataResource.getMasterDataByLeaderboardGroups(groupIdsToExport, false, true, false, false);
         StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         UUID randomUUID = UUID.randomUUID();
@@ -2161,12 +2160,12 @@ public class MasterDataImportTest {
         leaderboard.setDisplayName(competitorToSuppress, nickName);
 
         // Serialize
-        List<String> groupNamesToExport = new ArrayList<String>();
-        groupNamesToExport.add(group.getId().toString());
+        List<UUID> groupIdsToExport = new ArrayList<UUID>();
+        groupIdsToExport.add(group.getId());
 
         RacingEventService destService;
         DomainFactory domainFactory;
-        Response response = masterDataResource.getMasterDataByLeaderboardGroups(groupNamesToExport, false, true, false, false);
+        Response response = masterDataResource.getMasterDataByLeaderboardGroups(groupIdsToExport, false, true, false, false);
         StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         UUID randomUUID = UUID.randomUUID();

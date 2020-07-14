@@ -27,7 +27,7 @@
         <td>Mandatory parameters:</td>
         <td>
             <div>targetServerUrlAsString, the remote server from which to import.</div>
-            <div>names[], the names of the leaderboardgroups to be requested from the remote server.</div>
+            <div>uuids[], the UUIDs of the leaderboardgroups to be requested from the remote server.</div>
             <div>override, whether to override a leaderboardgroup already available on the server.</div>
             <div>compress, use only if remote server instance is at least running with commit 0fbf6071dea125bec4a56dee55d61c99def4a62e.</div>
             <div>exportWind, if false no wind data will be imported.</div>
@@ -50,12 +50,12 @@
     </tr>
     <tr>
         <td>Example:</td>
-        <td>curl -X POST http://127.0.0.1:8889/sailingserver/api/v1/masterdataimport -d "targetServerUrl=127.0.0.1:8888" -d "names[]=xyz" -d "override=false" -d "compress=true" -d "exportWind=false" -d "exportDeviceConfigs=false" -d "exportTrackedRacesAndStartTracking=false" -d "targetServerUsername=admin" -d "targetServerPassword=admin" -H "Authorization: Basic YWRtaW46YWRtaW4="<br>
+        <td>curl -X POST http://127.0.0.1:8889/sailingserver/api/v1/masterdataimport -d "targetServerUrl=127.0.0.1:8888" -d "uuids[]=75e86618-8b0f-4291-9661-6b2a1fa47dff" -d "override=false" -d "compress=true" -d "exportWind=false" -d "exportDeviceConfigs=false" -d "exportTrackedRacesAndStartTracking=false" -d "targetServerUsername=admin" -d "targetServerPassword=admin" -H "Authorization: Basic YWRtaW46YWRtaW4="<br>
         produces output:<pre>
         {
         "LeaderboardgroupsImported": [
-            "xyz"
-            ],
+            "MyTestEventWithStrangeCharact/er*s"
+        ],
         "ImportedFrom": "127.0.0.1:8888",
         "override": false,
         "exportWind": false,

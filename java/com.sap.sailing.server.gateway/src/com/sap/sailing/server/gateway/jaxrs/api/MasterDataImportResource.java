@@ -14,6 +14,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.shiro.authz.UnauthorizedException;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
@@ -35,14 +36,14 @@ public class MasterDataImportResource extends AbstractSailingServerResource {
             @FormParam("targetServerUsername") String targetServerUsername,
             @FormParam("targetServerPassword") String targetServerPassword,
             @FormParam("targetServerBearerToken") String targetServerBearerToken,
-            @FormParam("names[]") List<String> requestedLeaderboardGroups, 
+            @FormParam("uuids[]") List<UUID> requestedLeaderboardGroupIds, 
             @FormParam("override") Boolean override,
             @FormParam("compress") Boolean compress, 
             @FormParam("exportWind") Boolean exportWind,
             @FormParam("exportDeviceConfigs") Boolean exportDeviceConfigs,
             @FormParam("exportTrackedRacesAndStartTracking") Boolean exportTrackedRacesAndStartTracking) {
         Response response = null;
-        if (!Util.hasLength(targetServerUrlAsString) || requestedLeaderboardGroups.isEmpty() || override == null
+        if (!Util.hasLength(targetServerUrlAsString) || requestedLeaderboardGroupIds.isEmpty() || override == null
                 || compress == null || exportWind == null || exportDeviceConfigs == null
                 || exportTrackedRacesAndStartTracking == null
                 || ((Util.hasLength(targetServerUsername) && Util.hasLength(targetServerPassword))
@@ -50,14 +51,15 @@ public class MasterDataImportResource extends AbstractSailingServerResource {
             response = Response.status(Status.BAD_REQUEST).build();
         } else {
             final UUID importMasterDataUid = UUID.randomUUID();
+            final JSONArray importedLeaderboardGroupNames = getLeaderboardGroupNamesFromIdList(requestedLeaderboardGroupIds);
             try {
                 getSecurityService().checkCurrentUserServerPermission(ServerActions.CAN_IMPORT_MASTERDATA);
                 getService().importMasterData(targetServerUrlAsString,
-                        requestedLeaderboardGroups.toArray(new String[requestedLeaderboardGroups.size()]), override,
+                        requestedLeaderboardGroupIds.toArray(new UUID[requestedLeaderboardGroupIds.size()]), override,
                         compress, exportWind, exportDeviceConfigs, targetServerUsername, targetServerPassword,
                         targetServerBearerToken, exportTrackedRacesAndStartTracking, importMasterDataUid);
                 final JSONObject jsonResponse = new JSONObject();
-                jsonResponse.put("LeaderboardgroupsImported", requestedLeaderboardGroups);
+                jsonResponse.put("LeaderboardgroupsImported", importedLeaderboardGroupNames);
                 jsonResponse.put("ImportedFrom", targetServerUrlAsString);
                 jsonResponse.put("override", override);
                 jsonResponse.put("exportWind", exportWind);
@@ -77,5 +79,13 @@ public class MasterDataImportResource extends AbstractSailingServerResource {
             }
         }
         return response;
+    }
+    
+    private JSONArray getLeaderboardGroupNamesFromIdList(List<UUID> uuidList) {
+        JSONArray result = new JSONArray();
+        for (UUID uuid : uuidList) {
+            result.add((getService().getLeaderboardGroupByID(uuid).getName()));
+        }
+        return result;
     }
 }
