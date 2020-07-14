@@ -154,7 +154,8 @@ public interface AwsLandscape<ShardingKey, MetricsT extends ApplicationProcessMe
     void deleteLoadBalancer(ApplicationLoadBalancer alb);
 
     /**
-     * Creates a target group with a default configuration that includes a health check URL.
+     * Creates a target group with a default configuration that includes a health check URL. Stickiness is enabled with
+     * the default duration of one day. The load balancing algorithm is set to {@code least_outstanding_requests}.
      */
     TargetGroup createTargetGroup(AwsRegion region, String targetGroupName, int port, String healthCheckPath, int healthCheckPort);
 

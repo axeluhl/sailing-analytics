@@ -67,8 +67,10 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeLoad
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTargetGroupsRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTargetHealthRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.ModifyTargetGroupAttributesRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.SubnetMapping;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupAttribute;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealth;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetTypeEnum;
 import software.amazon.awssdk.services.route53.Route53Client;
@@ -375,20 +377,28 @@ public class AwsLandscapeImpl<ShardingKey, MetricsT extends ApplicationProcessMe
 
     @Override
     public TargetGroup createTargetGroup(AwsRegion region, String targetGroupName, int port, String healthCheckPath, int healthCheckPort) {
-        final String targetGroupArn = getLoadBalancingClient(getRegion(region)).createTargetGroup(CreateTargetGroupRequest.builder()
+        final ElasticLoadBalancingV2Client loadBalancingClient = getLoadBalancingClient(getRegion(region));
+        final software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup targetGroup =
+                loadBalancingClient.createTargetGroup(CreateTargetGroupRequest.builder()
                 .name(targetGroupName)
                 .healthyThresholdCount(2)
+                .unhealthyThresholdCount(2)
                 .healthCheckTimeoutSeconds(4)
                 .healthCheckEnabled(true)
                 .healthCheckIntervalSeconds(5)
                 .healthCheckPath(healthCheckPath)
                 .healthCheckPort(""+healthCheckPort)
                 .port(port)
-                // FIXME what about stickiness?
                 .vpcId(getVpcId(region))
                 .protocol(port == 80 ? ProtocolEnum.HTTP : ProtocolEnum.HTTPS)
                 .targetType(TargetTypeEnum.INSTANCE)
-                .build()).targetGroups().iterator().next().targetGroupArn();
+                .build()).targetGroups().iterator().next();
+        final String targetGroupArn = targetGroup.targetGroupArn();
+        loadBalancingClient.modifyTargetGroupAttributes(ModifyTargetGroupAttributesRequest.builder()
+                .targetGroupArn(targetGroupArn)
+                .attributes(TargetGroupAttribute.builder().key("stickiness.enabled").value("true").build(),
+                            TargetGroupAttribute.builder().key("load_balancing.algorithm.type").value("least_outstanding_requests")
+                            .build()).build());
         return new AwsTargetGroupImpl(this, region, targetGroupName, targetGroupArn);
     }
     
