@@ -54,8 +54,6 @@ public interface MongoObjectFactory {
      */
     void removeLeaderboard(String leaderboardName);
 
-    void renameLeaderboard(String oldName, String newName);
-
     /**
      * Stores the group, if it doesn't exist or updates it. Leaderboards in the group, which aren't stored in the
      * database, will be stored. If the leaderboard group has an {@link LeaderboardGroup#getOverallLeaderboard() overall
@@ -64,14 +62,14 @@ public interface MongoObjectFactory {
     void storeLeaderboardGroup(LeaderboardGroup leaderboardGroup);
     
     /**
-     * Removes the group with the name <code>groupName</code> from the database.
+     * Removes the group with the ID <code>leaderboardGroupId</code> from the database.
      */
-    void removeLeaderboardGroup(String groupName);
+    void removeLeaderboardGroup(UUID leaderboardGroupId);
 
     /**
-     * Renames the group with the name <code>oldName</code>.
+     * Renames the group with the ID <code>leaderboardGroupId</code>.
      */
-    void renameLeaderboardGroup(String oldName, String newName);
+    void renameLeaderboardGroup(UUID leaderboardGroupId, String newName);
 
     /**
      * Stores the event with its name, venue and the venue's course areas, as well as the links to the

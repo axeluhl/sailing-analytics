@@ -123,7 +123,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             try {
                 final Document deviceIdDocument = dbObject.get(FieldNames.MARK_PROPERTIES_TRACKING_DEVICE_IDENTIFIER.name(), Document.class);
                 final DeviceIdentifier deviceIdentifier = deviceIdDocument == null ? null : loadDeviceId(deviceIdentifierServiceFinder, deviceIdDocument);
-                builder.withDeviceId(deviceIdentifier);
+                if (deviceIdentifier != null) {
+                    builder.withDeviceId(deviceIdentifier);
+                }
             } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
                 logger.log(Level.WARNING, "Could not load deviceId for MarkProperties", e);
             }

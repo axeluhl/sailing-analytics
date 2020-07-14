@@ -45,7 +45,7 @@ name to make sure you get to the event you're interested in.
         <td>Migrates an existing event</td>
     </tr>
 	<tr>
-		<td><a href="eventGetDoc.html">/api/v1/events</a></td>
+		<td><a href="eventsGetDoc.html">/api/v1/events</a></td>
 		<td>Gets all events</td>
 	</tr>
 	<tr>
@@ -173,6 +173,14 @@ name to make sure you get to the event you're interested in.
 		<td>/api/v1/regattas/{regattaname}/competitors/{competitorId}/remove</td>
 		<td>Removes a competitor from a regatta (POST)</td>
 	</tr>
+	<tr>
+		<td><a href="regattaUpdateCompetitorToDHandicapPostDoc.html">/api/v1/regattas/{regattaname}/competitors/{competitorId}/updateToDHandicap</a></td>
+		<td>Updates a competitor's time on distance allowance per nautical mile handicap value. (POST)</td>
+	</tr>
+	<tr>
+		<td><a href="regattaUpdateCompetitorToTHandicapPostDoc.html">/api/v1/regattas/{regattaname}/competitors/{competitorId}/updateToTHandicap</a></td>
+		<td>Updates a competitor's time on time handicap value. (POST)</td>
+	</tr>
     <tr>
         <td><a href="regattasTrackingDevicesGet.html">/api/v1/regattas/{regattaName}/tracking_devices</a></td>
         <td>Gets the status for all GPS trackers associated to a regatta (GET)</td>
@@ -282,6 +290,10 @@ name to make sure you get to the event you're interested in.
 		<td>Gets the details of a competitor</td>
 	</tr>
 	<tr>
+        <td><a href="competitorUpdateDoc.html">/api/v1/competitors/{id}</a></td>
+        <td>Updates the details of a competitor</td>
+    </tr>
+	<tr>
 		<td><a href="competitorTeamGetDoc.html">/api/v1/competitors/{id}/team</a></td>
 		<td>Gets the details of a competitor's team</td>
 	</tr>
@@ -347,22 +359,6 @@ name to make sure you get to the event you're interested in.
     <tr>
         <td><a href="tagsCRUDDoc.html">/api/v1/{leaderboard}/{racecolumn}/{fleet}/tags</a></td>
         <td>Gets, creates, updates and deletes tags.</td>
-    </tr>
-    <tr>
-        <td><a href="preferencesPut.html">/api/v1/preferences/{SETTINGS_KEY}</a></td>
-        <td>Stores a document into the preferences of a user</td>
-    </tr>
-    <tr>
-        <td><a href="preferencesGet.html">/api/v1/preferences/{SETTINGS_KEY}</a></td>
-        <td>Retrives a document that was stored into the preferences of a user</td>
-    </tr>
-    <tr>
-        <td><a href="preferencesDelete.html">/api/v1/preferences/{SETTINGS_KEY}</a></td>
-        <td>Removes a document from the preferences of a user</td>
-    </tr>
-    <tr>
-        <td><a href="usergroupsGet.html">/api/v1/usergroups/</a></td>
-        <td>Lists all usergroups and their id's the current user is part of, required to obtain id's for migration for example</td>
     </tr>
     <tr>
         <td><a href="status.html">/api/v1/status</a></td>

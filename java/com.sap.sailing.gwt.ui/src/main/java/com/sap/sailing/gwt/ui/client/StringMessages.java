@@ -294,6 +294,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String detailsOfLeaderboardGroup();
     String abort();
     String noLeaderboardGroupWithNameFound(String groupName);
+    String noLeaderboardGroupWithIdFound(String groupId);
     String overview();
     String welcomeToSailingAnalytics();
     String welcomeToSailingAnalyticsBody();
@@ -976,6 +977,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String editCompetitor();
     String pleaseEnterASailNumber();
     String pleaseEnterASailNumberOrABoatName();
+    String addCompetitor();
+    String editCompetitorWithBoat();
+    String withBoat();
     String successfullyAllowedCompetitorReset(String names);
     String successfullyAllowedBoatReset(String names);
     String allowReload();
@@ -985,7 +989,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String rerunQueryAfterRefresh();
     String refreshIntervalMustntBeEmpty();
     String selectionTables();
-
     String addConfiguration();
     String noConfigurations();
     String errorRetrievingConfiguration();
@@ -1158,7 +1161,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String videos();
     String image();
     String images();
+    String imagesWithCount(int number);
     String video();
+    String videosWithCount(int number);
     String flagImageURL();
     String imageURLs();
     String videoURLs();
@@ -2352,6 +2357,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String wayPointMarkInSequenceMissing();
     String defaultNumberOfLaps();
     String invalidImageURL();
+    String invalidURL();
     String setDeviceIdentifier();
     String setPosition();
     String spareMarksAndTheirOptionalDefaultMarkRoles();
@@ -2376,6 +2382,10 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String confirmUnsettingPositionForMarkProperties(String name);
     String useOfficialResultsForAutomaticUpdates();
     String keepEmptyForDefaultUserAndPassword();
+    String autoRestartTrackingUponCompetitorSetChange();
     String whitelabelFooterLanguage();
     String whitelabelSailing();
+    String unableToLoadCourseAreas(String message);
+    String insufficientPermissions();
+    String manageEvents();
 }

@@ -1,6 +1,8 @@
 
 package com.sap.sailing.gwt.ui.raceboard;
 
+import static com.sap.sailing.gwt.ui.client.SailingServiceHelper.createSailingServiceWriteInstance;
+
 import java.util.Collections;
 
 import com.google.gwt.core.client.GWT;
@@ -19,7 +21,7 @@ import com.sap.sailing.gwt.common.communication.routing.ProvidesLeaderboardRouti
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceboardContextDefinition;
 import com.sap.sailing.gwt.settings.client.utils.StoredSettingsLocationFactory;
-import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
+import com.sap.sailing.gwt.ui.client.AbstractSailingReadEntryPoint;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.MediaService;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
@@ -40,7 +42,7 @@ import com.sap.sse.security.ui.authentication.generic.sapheader.SAPHeaderWithAut
 import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorage;
 import com.sap.sse.security.ui.settings.StoredSettingsLocation;
 
-public class RaceBoardEntryPoint extends AbstractSailingEntryPoint implements ProvidesLeaderboardRouting {
+public class RaceBoardEntryPoint extends AbstractSailingReadEntryPoint implements ProvidesLeaderboardRouting {
 
     /**
      * Controls the predefined mode into which to switch or configure the race viewer.
@@ -64,7 +66,9 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint implements Pr
         } else {
             getSailingService().getRaceboardData(raceboardContextDefinition.getRegattaName(),
                     raceboardContextDefinition.getRaceName(), raceboardContextDefinition.getLeaderboardName(),
-                    raceboardContextDefinition.getLeaderboardGroupName(), raceboardContextDefinition.getEventId(),
+                    raceboardContextDefinition.getLeaderboardGroupName(),
+                    raceboardContextDefinition.getLeaderboardGroupId(),
+                    raceboardContextDefinition.getEventId(),
                     new AbstractRaceBoardAsyncCallback<RaceboardDataDTO>() {
                         @Override
                         public void onSuccess(RaceboardDataDTO raceboardData) {
@@ -152,9 +156,11 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint implements Pr
                 getSailingService(), mediaService, getUserService(), asyncActionsExecutor,
                 raceboardData.getCompetitorAndTheirBoats(), timer, selectedRace.getRaceIdentifier(),
                 raceboardContextDefinition.getLeaderboardName(), raceboardContextDefinition.getLeaderboardGroupName(),
+                raceboardContextDefinition.getLeaderboardGroupId(),
                 raceboardContextDefinition.getEventId(), RaceBoardEntryPoint.this, getStringMessages(), userAgent,
                 raceTimesInfoProvider, showChartMarkEditMediaButtonsAndVideo, true, availableDetailTypes,
-                raceboardData.getLeaderboard(), selectedRace, raceboardData.getTrackingConnectorInfo());
+                raceboardData.getLeaderboard(), selectedRace, raceboardData.getTrackingConnectorInfo(),
+                createSailingServiceWriteInstance() /* create write instance for later admin usage */);
         RootLayoutPanel.get().add(raceBoardPerspective.getEntryWidget());
 
         if (raceBoardMode != null) {

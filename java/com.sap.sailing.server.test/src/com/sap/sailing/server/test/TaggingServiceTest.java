@@ -5,8 +5,6 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Logger;
@@ -47,11 +45,9 @@ import com.sap.sailing.server.tagging.TaggingServiceImpl;
 import com.sap.sailing.server.testsupport.SecurityBundleTestWrapper;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.common.mail.MailException;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
-import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 
@@ -85,8 +81,7 @@ public class TaggingServiceTest {
     private static SubjectThreadState threadState;
 
     @BeforeClass
-    public synchronized static void setUpClass()
-            throws MalformedURLException, IOException, InterruptedException, UserManagementException, MailException, UserGroupManagementException {
+    public synchronized static void setUpClass() throws Exception {
         logger.info("current thread: "+Thread.currentThread());
         MongoDBService.INSTANCE.getDB().drop();
         // setup racing service and racelog
@@ -103,13 +98,11 @@ public class TaggingServiceTest {
         securityService.createSimpleUser(username, email, password, fullName, company, Locale.ENGLISH, null,
                 securityService.getDefaultTenantForCurrentUser());
         ThreadContext.unbindSubject(); // ensure that a new subject is created that knows the current security manager
-
-        subject = SecurityUtils.getSubject();
+        subject = SecurityUtils.getSubject(); // this also binds the Subject to the ThreadContext
         subject.login(new UsernamePasswordToken(username, password));
         threadState = new SubjectThreadState(subject);
         // setup tagging service
         taggingService = Mockito.spy(new TaggingServiceImpl(racingService));
-
         Mockito.doReturn(securityService).when(racingService).getSecurityService();
         Mockito.doReturn(taggingService).when(racingService).getTaggingService();
     }

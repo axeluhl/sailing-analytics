@@ -12,7 +12,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sse.common.Util.Pair;
@@ -50,7 +50,7 @@ public class RaceLogTrackingCourseDefinitionDialog extends
         }
     }
 
-    public RaceLogTrackingCourseDefinitionDialog(final SailingServiceAsync sailingService,
+    public RaceLogTrackingCourseDefinitionDialog(final SailingServiceWriteAsync sailingServiceWrite,
             final StringMessages stringMessages, final ErrorReporter errorReporter, final String leaderboardName,
             final String raceColumnName, final String fleetName,
             DialogCallback<Result> callback, final UserService userService) {
@@ -69,7 +69,7 @@ public class RaceLogTrackingCourseDefinitionDialog extends
                 },
                 callback);
         this.stringMessages = stringMessages;
-        courseManagementWidget = new RaceLogCourseManagementWidget(sailingService, errorReporter, stringMessages,
+        courseManagementWidget = new RaceLogCourseManagementWidget(sailingServiceWrite, errorReporter, stringMessages,
                 leaderboardName, raceColumnName, fleetName, userService);
         priorityBox = createIntegerBox(/* default priority: race officer */ 1, /* visibleLength */ 1);
         refreshButton = new Button(stringMessages.refresh());

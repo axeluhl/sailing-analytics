@@ -29,7 +29,7 @@ import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
 import com.sap.sailing.gwt.ui.adminconsole.WaypointCreationDialog.DefaultPassingInstructionProvider;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sailing.gwt.ui.shared.GateDTO;
@@ -57,7 +57,7 @@ public abstract class CourseManagementWidget implements IsWidget {
     protected final ControlPointTableWrapper<RefreshableSingleSelectionModel<ControlPointDTO>> multiMarkControlPoints;
     protected final WaypointTableWrapper<RefreshableSingleSelectionModel<WaypointDTO>> waypoints;
     protected final Grid mainPanel;
-    protected final SailingServiceAsync sailingService;
+    protected final SailingServiceWriteAsync sailingServiceWrite;
     protected final ErrorReporter errorReporter;
     protected final StringMessages stringMessages;
     protected final HorizontalPanel waypointsBtnsPanel;
@@ -134,9 +134,9 @@ public abstract class CourseManagementWidget implements IsWidget {
      *            ORC PCS leg data. By default, these actions are enabled, particularly to cover the case where this
      *            widget is used without an existing {@code TrackedRace} and only with a race log.
      */
-    public CourseManagementWidget(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
+    public CourseManagementWidget(final SailingServiceWriteAsync sailingServiceWrite, ErrorReporter errorReporter,
             final StringMessages stringMessages, final UserService userService, final Supplier<Boolean> showOrcPcsLegEditActions) {
-        this.sailingService = sailingService;
+        this.sailingServiceWrite = sailingServiceWrite;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
         this.userService = userService;
@@ -145,11 +145,11 @@ public abstract class CourseManagementWidget implements IsWidget {
         mainPanel.setCellPadding(5);
         mainPanel.getRowFormatter().setVerticalAlign(0, HasVerticalAlignment.ALIGN_TOP);
         waypoints = new WaypointTableWrapper<RefreshableSingleSelectionModel<WaypointDTO>>(
-                /* multiSelection */ false, sailingService, stringMessages, errorReporter);
+                /* multiSelection */ false, sailingServiceWrite, stringMessages, errorReporter);
         multiMarkControlPoints = new ControlPointTableWrapper<RefreshableSingleSelectionModel<ControlPointDTO>>(
-                /* multiSelection */ false, sailingService, stringMessages, errorReporter);
+                /* multiSelection */ false, sailingServiceWrite, stringMessages, errorReporter);
         marks = new MarkTableWrapper<RefreshableMultiSelectionModel<MarkDTO>>(
-                /* multiSelection */ true, sailingService, stringMessages, errorReporter);
+                /* multiSelection */ true, sailingServiceWrite, stringMessages, errorReporter);
         marks.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
@@ -182,7 +182,7 @@ public abstract class CourseManagementWidget implements IsWidget {
                 waypoint -> createOrcPcsLegEventForLegEndingAt(waypoint));
         waypointsActionColumn.addAction(WaypointImagesBarCell.ACTION_ORC_PCS_DEFINE_ALL_LEGS, DefaultActions.UPDATE,
                 waypoint -> createOrcPcsLegEventsForAllLegs());
-        waypoints.getTable().addColumn(waypointsActionColumn);
+        waypoints.addColumn(waypointsActionColumn);
         waypoints.getSelectionModel().addSelectionChangeHandler(new Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
@@ -359,7 +359,7 @@ public abstract class CourseManagementWidget implements IsWidget {
     }
 
     private void addMultiMarkControlPoint() {
-        new GateCreationDialog(sailingService, errorReporter, stringMessages, tableRes,
+        new GateCreationDialog(sailingServiceWrite, errorReporter, stringMessages, tableRes,
                 marks.getDataProvider().getList(), new DataEntryDialog.DialogCallback<GateDTO>() {
             @Override
             public void cancel() {}
@@ -376,7 +376,7 @@ public abstract class CourseManagementWidget implements IsWidget {
         allControlPoints.addAll(multiMarkControlPoints.getDataProvider().getList());
         allControlPoints.addAll(marks.getDataProvider().getList());
         final int insertIndex = getInsertIndex(waypoints, beforeSelection);
-        new WaypointCreationDialog(sailingService, errorReporter, stringMessages, tableRes, allControlPoints,
+        new WaypointCreationDialog(sailingServiceWrite, errorReporter, stringMessages, tableRes, allControlPoints,
                 new DefaultPassingInstructionProvider() {
                     @Override
                     public PassingInstruction getDefaultPassingInstruction(int numberOfMarksInControlPoint, String controlPointIdAsString) {
@@ -418,7 +418,7 @@ public abstract class CourseManagementWidget implements IsWidget {
     public abstract void refresh();
     
     protected void updateWaypointsAndControlPoints(RaceCourseDTO raceCourseDTO, String leaderboardName) {
-        this.sailingService.getLeaderboardWithSecurity(leaderboardName,
+        this.sailingServiceWrite.getLeaderboardWithSecurity(leaderboardName,
                 new AsyncCallback<StrippedLeaderboardDTOWithSecurity>() {
                     @Override
                     public void onFailure(Throwable caught) {

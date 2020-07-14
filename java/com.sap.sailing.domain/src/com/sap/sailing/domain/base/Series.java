@@ -57,10 +57,6 @@ public interface Series extends SeriesBase {
     
     RaceColumnInSeries addRaceColumn(int insertIndex, String raceColumnName, TrackedRegattaRegistry trackedRegattaRegistry);
 
-    void moveRaceColumnUp(String raceColumnName);
-    
-    void moveRaceColumnDown(String raceColumnName);
-    
     void removeRaceColumn(String raceColumnName);
     
     /**

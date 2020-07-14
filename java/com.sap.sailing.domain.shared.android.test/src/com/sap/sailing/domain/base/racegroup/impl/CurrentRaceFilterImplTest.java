@@ -66,7 +66,7 @@ public class CurrentRaceFilterImplTest {
         _505Series.add(new SeriesWithRowsImpl("Default", /* isMedal */ false, /* isFleetsCanRunInParallel */ false, _505RaceRows));
         final RaceGroup _505 = new RaceGroupImpl("505", /* displayName */ null,
                 new BoatClassImpl(BoatClassMasterdata._5O5.getDisplayName(), BoatClassMasterdata._5O5), /* canBoatsOfCompetitorsChangePerRace */ false,
-                /* courseArea */ null, _505Series, /* regattaConfiguration */ null);
+                _505Series, /* regattaConfiguration */ null);
         return _505;
     }
 
@@ -76,7 +76,7 @@ public class CurrentRaceFilterImplTest {
         yesSeries.add(new SeriesWithRowsImpl("Default", /* isMedal */ false, /* isFleetsCanRunInParallel */ true, yesRaceRows));
         final RaceGroup yes = new RaceGroupImpl("YES", /* displayName */ null,
                 new BoatClassImpl(BoatClassMasterdata._470.getDisplayName(), BoatClassMasterdata._470), /* canBoatsOfCompetitorsChangePerRace */ false,
-                /* courseArea */ null, yesSeries, /* regattaConfiguration */ null);
+                yesSeries, /* regattaConfiguration */ null);
         return yes;
     }
 
@@ -90,7 +90,7 @@ public class CurrentRaceFilterImplTest {
         isafSeries.add(new SeriesWithRowsImpl("Medal", /* isMedal */ true, /* isFleetsCanRunInParallel */ true, isafMedalRaceRows));
         final RaceGroup isaf = new RaceGroupImpl("ISAF", /* displayName */ null,
                 new BoatClassImpl(BoatClassMasterdata._470.getDisplayName(), BoatClassMasterdata._470), /* canBoatsOfCompetitorsChangePerRace */ false,
-                /* courseArea */ null, isafSeries, /* regattaConfiguration */ null);
+                isafSeries, /* regattaConfiguration */ null);
         return isaf;
     }
 
@@ -110,7 +110,7 @@ public class CurrentRaceFilterImplTest {
         essSeries.add(new SeriesWithRowsImpl("Day 4", /* isMedal */ false, /* isFleetsCanRunInParallel */ true, essDay4RaceRows));
         final RaceGroup ess = new RaceGroupImpl("ESS", /* displayName */ null,
                 new BoatClassImpl(BoatClassMasterdata.EXTREME_40.getDisplayName(), BoatClassMasterdata.EXTREME_40), /* canBoatsOfCompetitorsChangePerRace */ false,
-                /* courseArea */ null, essSeries, /* regattaConfiguration */ null);
+                essSeries, /* regattaConfiguration */ null);
         return ess;
     }
 
@@ -120,7 +120,7 @@ public class CurrentRaceFilterImplTest {
         leagueSeries.add(new SeriesWithRowsImpl("Default", /* isMedal */ false, /* isFleetsCanRunInParallel */ false, leagueRaceRows));
         final RaceGroup league = new RaceGroupImpl("League", /* displayName */ null,
                 new BoatClassImpl(BoatClassMasterdata.J70.getDisplayName(), BoatClassMasterdata.J70), /* canBoatsOfCompetitorsChangePerRace */ false,
-                /* courseArea */ null, leagueSeries, /* regattaConfiguration */ null);
+                leagueSeries, /* regattaConfiguration */ null);
         return league;
     }
 

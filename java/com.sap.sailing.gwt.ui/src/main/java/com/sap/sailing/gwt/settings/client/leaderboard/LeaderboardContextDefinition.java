@@ -11,17 +11,11 @@ public class LeaderboardContextDefinition extends AbstractGenericSerializableSet
     
     private transient UUIDSetting eventId;
     private transient StringSetting leaderboardName;
-    private transient StringSetting leaderboardGroupName;
     private transient StringSetting displayName;
 
     public LeaderboardContextDefinition() {
     }
     
-    public LeaderboardContextDefinition(String leaderboardName, String displayName, String leaderboardGroupName) {
-        this(leaderboardName, displayName);
-        this.leaderboardGroupName.setValue(leaderboardGroupName);
-    }
-
     public LeaderboardContextDefinition(String leaderboardName, String displayName) {
         this.leaderboardName.setValue(leaderboardName);
         this.displayName.setValue(displayName);
@@ -31,7 +25,6 @@ public class LeaderboardContextDefinition extends AbstractGenericSerializableSet
     protected void addChildSettings() {
         eventId = new UUIDSetting("eventId", this);
         leaderboardName = new StringSetting("name", this);
-        leaderboardGroupName = new StringSetting("leaderboardGroupName", this);
         displayName = new StringSetting("displayName", this);
     }
     public UUID getEventId() {
@@ -39,9 +32,6 @@ public class LeaderboardContextDefinition extends AbstractGenericSerializableSet
     }
     public String getLeaderboardName() {
         return leaderboardName.getValue();
-    }
-    public String getLeaderboardGroupName() {
-        return leaderboardGroupName.getValue();
     }
     public String getDisplayName() {
         return displayName.getValue();

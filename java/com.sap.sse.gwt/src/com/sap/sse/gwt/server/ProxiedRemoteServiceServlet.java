@@ -147,8 +147,8 @@ public abstract class ProxiedRemoteServiceServlet extends RemoteServiceServlet {
         final TimePoint afterSendingResultToResponse = MillisecondsTimePoint.now();
         final Triple<RPCRequest, TimePoint, TimePoint> startAndEndOfProcessing = processingStartAndFinishTime.get();
         if (startAndEndOfProcessing == null) {
-            logger.warning("A non-POST request with method "+req.getMethod()+" from address "+req.getRemoteAddr()
-                +" was processed. No timing information available.");
+            logger.warning("A request with method "+req.getMethod()+" from address "+req.getRemoteAddr()
+                +" was processed. No timing information available. Perhaps there was an IncompatibleRemoteServiceException thrown, so the call was not processed.");
         } else {
             final Duration totalTime = startAndEndOfProcessing.getB().until(afterSendingResultToResponse);
             if (totalTime.compareTo(LOG_REQUESTS_TAKING_LONGER_THAN) > 0) {

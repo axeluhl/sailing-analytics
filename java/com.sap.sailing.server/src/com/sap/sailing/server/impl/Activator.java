@@ -158,6 +158,7 @@ public class Activator implements BundleActivator {
      */
     protected void registerPreferenceConvertersForUserStore(BundleContext context) {
         Dictionary<String, String> properties = new Hashtable<String, String>();
+        // it's okay to re-use the properties Dictionary for several registrations because the registry clones its contents
         properties.put(PreferenceConverter.KEY_PARAMETER_NAME, CompetitorNotificationPreferences.PREF_NAME);
         registrations.add(context.registerService(PreferenceConverter.class,
                 new GenericJSONPreferenceConverter<>(() -> new CompetitorNotificationPreferences(racingEventService)),

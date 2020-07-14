@@ -24,6 +24,10 @@ public class Competitor extends JsonWrapper {
         return get("shortName");
     }
 
+    public String getColor() {
+        return get("displayColor");
+    }
+
     public String getNationality() {
         return get("nationality");
     }
@@ -34,6 +38,18 @@ public class Competitor extends JsonWrapper {
 
     public String getNationalityISO3() {
         return get("nationalityISO3");
+    }
+
+    public String getFlagImageUri() {
+        return get("flagImageUri");
+    }
+
+    public Number getTimeOnTimeFactor() {
+        return get("timeOnTimeFactor");
+    }
+
+    public Number getTimeOnDistanceAllowanceInSecondsPerNauticalMile() {
+        return get("timeOnDistanceAllowanceInSecondsPerNauticalMile");
     }
 
     public Team getTeam() {
@@ -51,13 +67,16 @@ public class Competitor extends JsonWrapper {
         }
 
         public String getName() {
-            return get("name");
+            return getJson() != null ? get("name") : null;
         }
 
         public String getNationality() {
-            return (String) ((JSONObject) get("nationality")).get("IOC");
+            return getJson() != null ? (String) ((JSONObject) get("nationality")).get("IOC") : null;
         }
 
+        public String getTeamImageUri() {
+            return getJson() != null ? get("imageUri") : null;
+        }
     }
 
     public class Boat extends JsonWrapper {

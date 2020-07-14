@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.List;
 import java.util.Set;
+
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -13,7 +14,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.UrlDTO;
 import com.sap.sse.common.Util.Pair;
@@ -31,7 +32,7 @@ import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
  * @author Tim Hessenmüller (D062243)
  */
 public class ResultImportUrlsListComposite extends Composite {
-    private final SailingServiceAsync sailingService;
+    private final SailingServiceWriteAsync sailingServiceWrite;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
 
@@ -39,9 +40,9 @@ public class ResultImportUrlsListComposite extends Composite {
 
     private final ResultImportUrlsTableWrapper<RefreshableMultiSelectionModel<UrlDTO>> table;
 
-    public ResultImportUrlsListComposite(SailingServiceAsync sailingServiceAsync, UserService userService,
+    public ResultImportUrlsListComposite(SailingServiceWriteAsync sailingServiceWriteAsync, UserService userService,
             ErrorReporter errorReporter, StringMessages stringMessages) {
-        this.sailingService = sailingServiceAsync;
+        this.sailingServiceWrite = sailingServiceWriteAsync;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
 
@@ -50,7 +51,7 @@ public class ResultImportUrlsListComposite extends Composite {
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService,
                 SecuredDomainType.RESULT_IMPORT_URL);
 
-        table = new ResultImportUrlsTableWrapper<>(sailingServiceAsync, userService, stringMessages, errorReporter);
+        table = new ResultImportUrlsTableWrapper<>(sailingServiceWriteAsync, userService, stringMessages, errorReporter);
         final Button add = buttonPanel.addCreateAction(stringMessages.add(), this::addUrl);
         add.setEnabled(false);
 
@@ -80,7 +81,7 @@ public class ResultImportUrlsListComposite extends Composite {
                 urlSampleLabel.setText(provider == null || provider.equals("null") ? "" : provider);
             }
         });
-        sailingService.getUrlResultProviderNamesAndOptionalSampleURL(new AsyncCallback<List<Pair<String, String>>>() {
+        sailingServiceWrite.getUrlResultProviderNamesAndOptionalSampleURL(new AsyncCallback<List<Pair<String, String>>>() {
             @Override
             public void onSuccess(List<Pair<String, String>> urlProviderNamesAndOptionalSampleURL) {
                 urlProviderListBox.clear();
@@ -108,11 +109,11 @@ public class ResultImportUrlsListComposite extends Composite {
     }
 
     private void addUrl() {
-        new ResultImportUrlAddDialog(getSelectedProviderName(), sailingService, stringMessages,
+        new ResultImportUrlAddDialog(getSelectedProviderName(), sailingServiceWrite, stringMessages,
                 new DataEntryDialog.DialogCallback<UrlDTO>() {
                     @Override
                     public void ok(UrlDTO url) {
-                        sailingService.addResultImportUrl(getSelectedProviderName(), url, new AsyncCallback<Void>() {
+                        sailingServiceWrite.addResultImportUrl(getSelectedProviderName(), url, new AsyncCallback<Void>() {
                             @Override
                             public void onSuccess(Void result) {
                                 Notification.notify(stringMessages.successfullyUpdatedResultImportUrls(),
@@ -136,7 +137,7 @@ public class ResultImportUrlsListComposite extends Composite {
     private void removeUrls(Set<UrlDTO> set) {
         if (set != null && set.size() > 0) {
             String providerName = getSelectedProviderName();
-            sailingService.removeResultImportURLs(providerName, set, new AsyncCallback<Void>() {
+            sailingServiceWrite.removeResultImportURLs(providerName, set, new AsyncCallback<Void>() {
                 @Override
                 public void onSuccess(Void result) {
                     Notification.notify(stringMessages.successfullyUpdatedResultImportUrls(), NotificationType.INFO);

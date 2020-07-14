@@ -159,7 +159,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
     private void login() {
         DataStore dataStore = dataManager.getDataStore();
         dataStore.setEventUUID(mSelectedEventId);
-        dataStore.setCourseUUID(mSelectedCourseAreaUUID);
+        dataStore.setCourseAreaId(mSelectedCourseAreaUUID);
         switchToRacingActivity();
     }
 
@@ -308,7 +308,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         DataStore dataStore = dataManager.getDataStore();
 
         // Check if the user has been logged in before and if so bring him directly to the racing activity
-        mSelectedCourseAreaUUID = dataStore.getCourseUUID();
+        mSelectedCourseAreaUUID = dataStore.getCourseAreaId();
         mSelectedEventId = dataStore.getEventUUID();
         if (mSelectedEventId != null && mSelectedCourseAreaUUID != null) {
             if (preferences.getAccessToken() != null) {

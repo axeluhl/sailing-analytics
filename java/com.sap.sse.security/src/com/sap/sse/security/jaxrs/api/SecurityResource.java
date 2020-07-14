@@ -54,7 +54,7 @@ public class SecurityResource extends AbstractSecurityResource {
         result.put("principal", subject.getPrincipal().toString());
         result.put("authenticated", subject.isAuthenticated());
         result.put("remembered", subject.isRemembered());
-        return Response.ok(result.toJSONString(), MediaType.APPLICATION_JSON_TYPE).build();
+        return Response.ok(streamingOutput(result), MediaType.APPLICATION_JSON_TYPE).build();
     }
 
     /**
@@ -183,7 +183,7 @@ public class SecurityResource extends AbstractSecurityResource {
             result.put("fullName", user.getFullName());
             result.put("email", user.getEmail());
             result.put("company", user.getCompany());
-            return Response.ok(result.toJSONString()).build();
+            return Response.ok(streamingOutput(result)).build();
         } else {
             return Response.status(Status.UNAUTHORIZED).build();
         }
@@ -296,7 +296,7 @@ public class SecurityResource extends AbstractSecurityResource {
             entry.put("permission", permissionAsString);
             entry.put("granted", SecurityUtils.getSubject().isPermitted(permissionAsString));
         }
-        return Response.ok(result.toJSONString(), MediaType.APPLICATION_JSON_TYPE).build(); 
+        return Response.ok(streamingOutput(result), MediaType.APPLICATION_JSON_TYPE).build(); 
     }
 
     Response respondToRemoveAccessTokenForUser(final String username) {
@@ -333,6 +333,6 @@ public class SecurityResource extends AbstractSecurityResource {
             }
         }
         response.put("access_token", accessToken);
-        return Response.ok(response.toJSONString(), MediaType.APPLICATION_JSON_TYPE).build();
+        return Response.ok(streamingOutput(response), MediaType.APPLICATION_JSON_TYPE).build();
     }
 }

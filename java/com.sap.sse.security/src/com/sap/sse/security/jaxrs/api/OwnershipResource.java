@@ -124,7 +124,7 @@ public class OwnershipResource extends AbstractSecurityResource {
         result.put(KEY_GROUP_ID, existingOwnership == null || existingOwnership.getAnnotation().getTenantOwner() == null ? null : existingOwnership.getAnnotation().getTenantOwner().getId().toString());
         result.put(KEY_USERNAME, existingOwnership == null || existingOwnership.getAnnotation().getUserOwner() == null ? null : existingOwnership.getAnnotation().getUserOwner().getName());
         result.put(KEY_DISPLAY_NAME, existingOwnership == null || existingOwnership.getDisplayNameOfAnnotatedObject() == null ? null : existingOwnership.getDisplayNameOfAnnotatedObject());
-        return Response.ok(result.toJSONString()).build();
+        return Response.ok(streamingOutput(result)).build();
     }
 
     @Path("{objectType}/{typeRelativeObjectId}/acl")
@@ -151,7 +151,7 @@ public class OwnershipResource extends AbstractSecurityResource {
                 actionsForGroup.put(KEY_ACTIONS, actions);
             }
         }
-        return Response.ok(result.toJSONString()).build();
+        return Response.ok(streamingOutput(result)).build();
     }
 
     @Path("{objectType}/{typeRelativeObjectId}/acl")

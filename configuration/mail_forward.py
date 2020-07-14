@@ -15,11 +15,10 @@ import boto3
 import email
 import re
 import json
+import magic
 from botocore.exceptions import ClientError
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from email.mime.application import MIMEApplication
-
+from email.parser import Parser
+from email.policy import default
 
 region = os.environ['Region']
 
@@ -33,24 +32,45 @@ def get_message_from_s3(bucket_name, object_key):
     return file
 
 def create_message(file):
-    sender = os.environ['MailSender']
-    recipientList = json.loads(os.environ["MailRecipientsJSON"])
-    mailobject = email.message_from_string(file.decode('utf-8'))
-    # Uncomment the following to print all available headers, if needed:
-    # print(mailobject.keys())
-    # Set all X- headers
+    senderMap = json.loads(os.environ["MailSenderJSON"])
+    recipientMap = json.loads(os.environ["MailRecipientsJSON"])
+    # Check encoding, uses https://pypi.org/project/python-magic/, similar to unix "file" command.
+    m = magic.Magic(mime_encoding=True)
+    encoding = m.from_buffer(file)
+    mailobject = email.message_from_string(file.decode(encoding))
+    # Define sender, either from 'To'-Header or from 'Cc'-Header
+    sender = None
+    # Check 'To'-Header
+    toHeader = Parser(policy=default).parsestr('To: ' + mailobject['To'])
+    for x in toHeader['to'].addresses:
+        if x.addr_spec in recipientMap:
+            recipientList = recipientMap.get(x.addr_spec)
+            sender = senderMap.get(x.addr_spec, x.addr_spec)
+    # Check 'Cc'-Header
+    if sender is None:
+        if mailobject['Cc']:
+            ccHeader = Parser(policy=default).parsestr('Cc: ' + mailobject['Cc'])
+            for x in ccHeader['cc'].addresses:
+                if x.addr_spec in recipientMap:
+                    recipientList = recipientMap.get(x.addr_spec)
+                    sender = senderMap.get(x.addr_spec, x.addr_spec)
+        # Bcc mail, there is no header so find address from 'Received'-Header
+        else:
+            receivedString = re.search(r'\<(.*?)\>', ''.join(mailobject.get_all('Received'))).group(1)
+            if receivedString in recipientMap:
+                recipientList = recipientMap.get(receivedString)
+                sender = senderMap.get(receivedString, receivedString)
+    # Change original headers to X-
     mailobject['X-From'] = mailobject['From']
     if not mailobject['Reply-To']:
         mailobject['Reply-To'] = mailobject['From']
     mailobject['X-To'] = mailobject['To']
     mailobject['X-Return-Path'] = mailobject['Return-Path']
-    # Remove original headers and set to SES Value
-    del mailobject['From']
-    mailobject['From'] = sender
-    del mailobject['To']
-    mailobject['To'] = ','.join(recipientList)
-    del mailobject['Return-Path']
-    mailobject['Return-Path'] = sender
+    # Replace original headers and set to SES Value
+    del mailobject['DKIM-Signature']
+    mailobject.replace_header('From', sender)
+    mailobject.replace_header('Return-Path', sender)
+    mailobject.replace_header('To', ','.join(recipientList))
     message = {
         "Source": sender,
         "Destinations": recipientList,
@@ -59,7 +79,6 @@ def create_message(file):
     return message
 
 def send_email(message):
-    aws_region = os.environ['Region']
     # Create a new SES client.
     client_ses = boto3.client('ses', region)
     # Send the email.
@@ -78,12 +97,16 @@ def send_email(message):
     except ClientError as e:
         output = e.response['Error']['Message']
     else:
-        output = "Email sent! Message ID: " + response['MessageId']
+        # Modify output message
+        if re.search(r'\<(.*?)\>', message['Source']):
+            fromString = ','.join(re.findall(r'\<(.*?)\>', message['Source']))
+        else: 
+            fromString = message['Source']
+        output = "Email for: " + fromString + " forwarded to: " + ', '.join(message['Destinations']) + "! Message ID: " + response['MessageId']
     return output
 
 def lambda_handler(event, context):
-    # Get the unique ID of the message. This corresponds to the name of the file
-    # in S3.
+    # Get the unique ID of the message. This corresponds to the name of the file in S3.
     sns = event['Records'][0]['Sns']
     message = json.loads(sns['Message'])
     bucket_name = message['receipt']['action']['bucketName']
