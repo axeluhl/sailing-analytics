@@ -1,10 +1,15 @@
 package com.sap.sse.landscape.aws.impl;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Random;
 
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.JSch;
@@ -116,6 +121,48 @@ public class AwsInstanceImpl implements AwsInstance {
         session.connect(/* timeout in millis */ 5000);
         final Channel shellChannel = session.openChannel("shell");
         return shellChannel;
+    }
+    
+    @Override
+    public void waitUntilShellResponse(com.jcraft.jsch.Channel sshShellChannel) throws IOException, JSchException {
+        final String randomStanza = "Stanza-"+new Random().nextLong();
+        final String randomStanzaEchoCommand = "echo \""+randomStanza+"\"\n";
+        final InputStream inputStream = sshShellChannel.getInputStream();
+        final OutputStream outputStream = sshShellChannel.getOutputStream();
+        sshShellChannel.connect(/* timeout in millis */ 5000);
+        new Thread(()->{
+            try {
+                outputStream.write(randomStanzaEchoCommand.getBytes());
+                outputStream.flush();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }).start();
+        final byte[] randomStanzaBytesToLookFor = randomStanza.getBytes();
+        int i=0;
+        int read;
+        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        // <= because we'd like to match the line separator at the end
+        while (i<=randomStanzaBytesToLookFor.length && (read=inputStream.read())!=-1) {
+            bos.write((byte) read);
+            if ((i >= randomStanzaBytesToLookFor.length && (char) read != '"')
+                    || (i < randomStanzaBytesToLookFor.length && (byte) read == randomStanzaBytesToLookFor[i])) {
+                i++;
+            } else {
+                i = 0;
+            }
+        }
+        if (i != randomStanzaBytesToLookFor.length+1) { // the +1 covers the line separator read
+            throw new IllegalStateException("The shell seems unresponsive. You may want to close the channel "+sshShellChannel);
+        } else {
+            consumePrompt(inputStream);
+        }
+    }
+
+    private void consumePrompt(InputStream inputStream) throws IOException {
+        while (inputStream.available() > 0) {
+            inputStream.read();
+        }
     }
 
     @Override

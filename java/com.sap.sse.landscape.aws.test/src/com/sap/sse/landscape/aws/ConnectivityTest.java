@@ -5,7 +5,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -117,21 +116,21 @@ public class ConnectivityTest {
     }
     
     @Test
-    public void testSshConnectWithCreatedKey() throws JSchException, InterruptedException {
+    public void testSshConnectWithCreatedKey() throws JSchException, InterruptedException, IOException {
         final String keyName = "MyKey-"+UUID.randomUUID();
         createKeyPair(keyName);
         testSshConnectWithKey(keyName);
     }
 
     @Test
-    public void testSshConnectWithImportedKey() throws JSchException, InterruptedException {
+    public void testSshConnectWithImportedKey() throws JSchException, InterruptedException, IOException {
         final String keyName = "MyKey-"+UUID.randomUUID();
         final KeyPair keyPair = KeyPair.genKeyPair(new JSch(), KeyPair.RSA, 4096);
         landscape.importKeyPair(region, getPublicKeyBytes(keyPair), getPrivateKeyBytes(keyPair, /* passphrase */ null), keyName);
         testSshConnectWithKey(keyName);
     }
 
-    private void testSshConnectWithKey(final String keyName) throws InterruptedException, JSchException {
+    private void testSshConnectWithKey(final String keyName) throws InterruptedException, JSchException, IOException {
         final AwsInstance host = landscape.launchHost(landscape.getImage(region, "ami-01b4b27a5699e33e6"),
                 InstanceType.T3_SMALL, landscape.getAvailabilityZoneByName(region, "eu-west-2b"), keyName, Collections.singleton(()->"sg-0b2afd48960251280"));
         try {
@@ -144,7 +143,7 @@ public class ConnectivityTest {
             logger.info("Obtained public IP address "+address);
             Channel shellChannel = null;
             int sshConnectAttempts = 10;
-            while (sshConnectAttempts-- > 0) {
+            while (shellChannel == null && sshConnectAttempts-- > 0) {
                 try {
                     shellChannel = host.createRootSshChannel();
                 } catch (JSchException e) {
@@ -155,23 +154,9 @@ public class ConnectivityTest {
                 }
             }
             assertNotNull(shellChannel);
-            logger.info("Shell channel connected. Sending commands...");
-            final ByteArrayOutputStream shellOutput = new ByteArrayOutputStream();
-            final ByteArrayInputStream shellInput = new ByteArrayInputStream("pwd\nexit\n".getBytes());
-            shellChannel.setOutputStream(shellOutput);
-            shellChannel.setInputStream(shellInput);
-            shellChannel.connect(/* timeout in millis */ 5000);
-            int attempts = 0;
-            boolean foundPwdOutput = false;
-            while (!foundPwdOutput && attempts < 10) {
-                Thread.sleep(10000);
-                // (?s) means . also matches line separators
-                // (?m) means that we'd like to match a multi-line string
-                foundPwdOutput = new String(shellOutput.toByteArray()).matches("(?s)(?m).*^/root$.*");
-                attempts++;
-            }
+            logger.info("Shell channel connected. Waiting for it to become responsive...");
+            host.waitUntilShellResponse(shellChannel);
             shellChannel.disconnect();
-            assertTrue(foundPwdOutput);
         } finally {
             landscape.terminate(host);
             landscape.deleteKeyPair(region, keyName);
