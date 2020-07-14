@@ -45,7 +45,7 @@ public class MasterDataImportResource extends AbstractSailingServerResource {
         if (!Util.hasLength(targetServerUrlAsString) || requestedLeaderboardGroups.isEmpty() || override == null
                 || compress == null || exportWind == null || exportDeviceConfigs == null
                 || exportTrackedRacesAndStartTracking == null
-                || ((Util.hasLength(targetServerUsername) && Util.hasLength(targetServerUsername))
+                || ((Util.hasLength(targetServerUsername) && Util.hasLength(targetServerPassword))
                         && Util.hasLength(targetServerBearerToken))) {
             response = Response.status(Status.BAD_REQUEST).build();
         } else {
