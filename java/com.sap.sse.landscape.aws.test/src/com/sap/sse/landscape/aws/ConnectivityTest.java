@@ -20,7 +20,6 @@ import java.util.logging.Logger;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.KeyPair;
@@ -138,10 +137,10 @@ public class ConnectivityTest {
             logger.info("Created instance with ID "+host.getInstanceId());
             logger.info("Waiting for public IP address...");
             // wait for public IPv4 address to become available:
-            InetAddress address = host.getPublicAddress(Duration.ONE_SECOND.times(10));
+            InetAddress address = host.getPublicAddress(Duration.ONE_SECOND.times(20));
             assertNotNull(address);
             logger.info("Obtained public IP address "+address);
-            Channel shellChannel = null;
+            SshShellCommandChannel shellChannel = null;
             int sshConnectAttempts = 10;
             while (shellChannel == null && sshConnectAttempts-- > 0) {
                 try {
@@ -155,12 +154,17 @@ public class ConnectivityTest {
             }
             assertNotNull(shellChannel);
             logger.info("Shell channel connected. Waiting for it to become responsive...");
-            host.waitUntilShellResponse(shellChannel);
+            byte[] output = shellChannel.sendCommandLineSynchronously("pwd");
+            assertEquals("/root\n", turnAllLineSeparatorsIntoLineFeed(new String(output)));
             shellChannel.disconnect();
         } finally {
             landscape.terminate(host);
             landscape.deleteKeyPair(region, keyName);
         }
+    }
+
+    private String turnAllLineSeparatorsIntoLineFeed(String string) {
+        return string.replaceAll("\n\r", "\n").replaceAll("\r\n", "\n").replaceAll("\r", "\n");
     }
 
     private void createKeyPair(final String keyName) throws JSchException {
