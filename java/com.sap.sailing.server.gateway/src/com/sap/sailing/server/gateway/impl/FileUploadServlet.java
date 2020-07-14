@@ -35,7 +35,7 @@ public class FileUploadServlet extends AbstractFileUploadServlet {
     /**
      * The maximum size of an image uploaded by a user as a team image, in megabytes (1024*1024 bytes)
      */
-    private static final int MAX_SIZE_IN_MB = 500;
+    private static final int MAX_SIZE_IN_MB = 8192;
 
     @Override
     protected void process(List<FileItem> fileItems, HttpServletRequest req, HttpServletResponse resp) throws UnsupportedEncodingException, IOException {
@@ -90,6 +90,6 @@ public class FileUploadServlet extends AbstractFileUploadServlet {
         // in the browser unchanged.
         resp.setContentType("text/html");
         resp.setCharacterEncoding("UTF-8");
-        resp.getWriter().append(resultList.toJSONString());
+        resultList.writeJSONString(resp.getWriter());
     }
 }
