@@ -10,7 +10,6 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import com.google.gwt.aria.client.Roles;
 import com.sap.sse.common.Util;
 import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.shared.impl.Ownership;
