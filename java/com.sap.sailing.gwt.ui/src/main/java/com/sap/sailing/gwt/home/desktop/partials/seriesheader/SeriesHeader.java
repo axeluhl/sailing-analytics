@@ -22,6 +22,7 @@ import com.sap.sailing.gwt.home.desktop.places.fakeseries.SeriesView.Presenter;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.resources.SharedHomeResources;
 import com.sap.sailing.gwt.home.shared.utils.LabelTypeUtil;
+import com.sap.sailing.gwt.home.shared.utils.LogoUtil;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.LinkUtil;
 
@@ -64,6 +65,21 @@ public class SeriesHeader extends Composite {
             @Override
             public String getLongText(String url) {
                 return StringMessages.INSTANCE.seriesSharingLongText(series.getDisplayName(), url);
+            }
+
+            @Override
+            public String getImageUrl() {
+                return LogoUtil.resolveLogoURL(series);
+            }
+
+            @Override
+            public String getTitle() {
+                return series.getDisplayName();
+            }
+
+            @Override
+            public String getDescription() {
+                return getShortText();
             }
         });
     }

@@ -90,11 +90,26 @@ public class EventHeader extends Composite {
                 String dateString = EventDatesFormatterUtil.formatDateRangeWithYear(event.getStartDate(), event.getEndDate());
                 return StringMessages.INSTANCE.eventSharingLongText(event.getDisplayName(), event.getLocationOrVenue(), dateString, url);
             }
+
+            @Override
+            public String getImageUrl() {
+                return LogoUtil.resolveLogoURL(event);
+            }
+
+            @Override
+            public String getTitle() {
+                return event.getDisplayName();
+            }
+
+            @Override
+            public String getDescription() {
+                return event.getDescription() != null ? event.getDescription() : getShortText();
+            }
         });
     }
 
     private void initFields() {
-        LogoUtil.setEventLogo(eventLogo, event);
+        LogoUtil.setLogo(eventLogo, event);
         if (presenter.showRegattaMetadata()) {
             presenter.getCurrentEventNavigation().configureAnchorElement(eventLogoAnchorUi);
         }
