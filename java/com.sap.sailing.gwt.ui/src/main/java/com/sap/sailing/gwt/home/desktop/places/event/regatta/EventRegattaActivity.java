@@ -57,7 +57,6 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
                     new Timer(PlayModes.Live, PlayStates.Paused, delayBetweenAutoAdvancesInMilliseconds),
                     clientFactory.getErrorReporter(), flagImageResolver));
         }
-        
         initNavigationPath(navigationPathDisplay);
     }
     

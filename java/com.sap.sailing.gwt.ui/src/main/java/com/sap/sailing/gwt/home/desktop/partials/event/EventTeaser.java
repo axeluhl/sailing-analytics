@@ -57,8 +57,7 @@ public class EventTeaser extends Composite {
                     placeNavigation.goToPlace();
                 }
             }
-        });;
-
+        });
         updateUI();
     }
 
