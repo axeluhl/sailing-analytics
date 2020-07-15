@@ -137,10 +137,10 @@ public class CompetitorInfoOverlays implements QuickFlagDataListener {
      * a {@link #speedsInKnots} is required in order to produce the speed/course information.
      */
     private String createInfoText(CompetitorDTO competitorDTO) {
-        StringBuilder infoText = new StringBuilder();
+        final StringBuilder infoText = new StringBuilder();
         infoText.append(competitorDTO.getShortInfo()).append("\n");
-        Double lastSpeedInKnots = getLastSpeedInKnots(competitorDTO);
-        if(lastSpeedInKnots != null) {
+        final Double lastSpeedInKnots = getLastSpeedInKnots(competitorDTO);
+        if (lastSpeedInKnots != null) {
             infoText.append(NumberFormatterFactory.getDecimalFormat(1).format(getLastSpeedInKnots(competitorDTO))).append(" ")
             .append(stringMessages.knotsUnit()).append("\n");
         }
@@ -192,5 +192,4 @@ public class CompetitorInfoOverlays implements QuickFlagDataListener {
             competitorInfoOverlay.draw();
         }
     }
-
 }
