@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import com.google.gwt.aria.client.Roles;
 import com.sap.sse.common.Util;
 import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.shared.impl.Ownership;
@@ -31,6 +32,10 @@ public class PermissionChecker {
         GRANTED,
         REVOKED,
         NONE
+    }
+    
+    public interface AclResolver<A extends SecurityAccessControlList<?>, O extends AbstractOwnership<?, ?>> {
+        Iterable<A> resolveAcls(O ownershipOrNull, String type, Iterable<String> identifiersOrNull);
     }
     
     private static final BiFunction<WildcardPermission, WildcardPermission, Boolean> impliesChecker = WildcardPermission::implies;
@@ -75,7 +80,33 @@ public class PermissionChecker {
             WildcardPermission permission, U user,
             Iterable<G> groupsOfWhichUserIsMember, U allUser,
             Iterable<G> groupsOfWhichAllUserIsMember, O ownership, A acl) {
+        PermissionState result = checkAcl(permission, groupsOfWhichUserIsMember, groupsOfWhichAllUserIsMember, acl);
+
+        // anonymous can only grant it if not already decided by acl
+        if (result == PermissionState.NONE) {
+            PermissionState anonymous = checkUserPermissions(permission, allUser, groupsOfWhichAllUserIsMember,
+                    ownership, impliesChecker, /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true);
+            if (anonymous == PermissionState.GRANTED) {
+                result = anonymous;
+            }
+        }
+        if (result == PermissionState.NONE) {
+            result = checkUserPermissions(permission, user, groupsOfWhichUserIsMember, ownership, impliesChecker,
+                    /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true);
+        }
+        return result == PermissionState.GRANTED;
+    }
+
+    private static <A extends SecurityAccessControlList<G>, G extends SecurityUserGroup<?>> PermissionState checkAcl(
+            WildcardPermission permission, Iterable<G> groupsOfWhichUserIsMember,
+            Iterable<G> groupsOfWhichAllUserIsMember, A acl) {
         List<Set<String>> parts = permission.getParts();
+        return checkAcl(permission, groupsOfWhichUserIsMember, groupsOfWhichAllUserIsMember, acl, parts);
+    }
+
+    private static <G extends SecurityUserGroup<?>, A extends SecurityAccessControlList<G>> PermissionState checkAcl(
+            WildcardPermission permission, Iterable<G> groupsOfWhichUserIsMember,
+            Iterable<G> groupsOfWhichAllUserIsMember, A acl, List<Set<String>> parts) {
         // permission has at least data object type and action as parts
         // and data object part only has one sub-part
         if (parts.get(0).size() != 1) {
@@ -100,20 +131,7 @@ public class PermissionChecker {
             Util.addAll(groupsOfWhichAllUserIsMember, allGroups);
             result = acl.hasPermission(action, allGroups);
         }
-
-        // anonymous can only grant it if not already decided by acl
-        if (result == PermissionState.NONE) {
-            PermissionState anonymous = checkUserPermissions(permission, allUser, groupsOfWhichAllUserIsMember,
-                    ownership, impliesChecker, /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true);
-            if (anonymous == PermissionState.GRANTED) {
-                result = anonymous;
-            }
-        }
-        if (result == PermissionState.NONE) {
-            result = checkUserPermissions(permission, user, groupsOfWhichUserIsMember, ownership, impliesChecker,
-                    /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true);
-        }
-        return result == PermissionState.GRANTED;
+        return result;
     }
 
     /**
@@ -176,8 +194,8 @@ public class PermissionChecker {
      */
     public static <RD extends RoleDefinition, R extends AbstractRole<RD, G, UR>, O extends AbstractOwnership<G, UR>, UR extends UserReference, U extends SecurityUser<RD, R, G>, G extends SecurityUserGroup<RD>, A extends SecurityAccessControlList<G>> boolean checkMetaPermission(
             WildcardPermission permission,
-            Iterable<HasPermissions> allPermissionTypes, U user, U allUser, O ownership) {
-        return checkMetaPermissionInternal(permission, allPermissionTypes, user, allUser, wp -> ownership);
+            Iterable<HasPermissions> allPermissionTypes, U user, U allUser, O ownership, AclResolver<A, O> aclResolver) {
+        return checkMetaPermissionInternal(permission, allPermissionTypes, user, allUser, wp -> ownership, aclResolver);
     }
     
     /**
@@ -199,7 +217,7 @@ public class PermissionChecker {
      */
     public static <RD extends RoleDefinition, R extends AbstractRole<RD, G, UR>, O extends AbstractOwnership<G, UR>, UR extends UserReference, U extends SecurityUser<RD, R, G>, G extends SecurityUserGroup<RD>, A extends SecurityAccessControlList<G>> boolean checkMetaPermissionWithOwnershipResolution(
             WildcardPermission permission, Iterable<HasPermissions> allPermissionTypes, U user, U allUser,
-            Function<QualifiedObjectIdentifier, O> ownershipResolver) {
+            Function<QualifiedObjectIdentifier, O> ownershipResolver, AclResolver<A, O> aclResolver) {
         return checkMetaPermissionInternal(permission, allPermissionTypes, user, allUser, wp -> {
             final Iterable<QualifiedObjectIdentifier> qualifiedObjectIdentifiers = wp.getQualifiedObjectIdentifiers();
             final O ownership;
@@ -216,17 +234,40 @@ public class PermissionChecker {
                 }
             }
             return ownership;
-        });
+        }, aclResolver);
     }
     
     private static <RD extends RoleDefinition, R extends AbstractRole<RD, G, UR>, O extends AbstractOwnership<G, UR>, UR extends UserReference, U extends SecurityUser<RD, R, G>, G extends SecurityUserGroup<RD>, A extends SecurityAccessControlList<G>> boolean checkMetaPermissionInternal(
             WildcardPermission permission,
-            Iterable<HasPermissions> allPermissionTypes, U user, U allUser, Function<WildcardPermission, O> ownershipResolver) {
+            Iterable<HasPermissions> allPermissionTypes, U user, U allUser, Function<WildcardPermission, O> ownershipResolver, AclResolver<A, O> aclResolver) {
         assert permission != null;
         assert allPermissionTypes != null;
         final Set<WildcardPermission> effectivePermissionsToCheck = expandSingleWildcardPermissionToDistinctPermissions(permission, allPermissionTypes, true);
         for (WildcardPermission effectiveWildcardPermissionToCheck : effectivePermissionsToCheck) {
+            // Ownership may be null in case of an unqualified meta permission check
+            // That's the case when e.g. assigning an unqualified role to a user
             final O ownership = ownershipResolver.apply(effectiveWildcardPermissionToCheck);
+            if (ownership != null) {
+                List<Set<String>> wildcardPermissionParts = effectiveWildcardPermissionToCheck.getParts();
+                // expanded permissions always have a single non-wildcard type part
+                String type = wildcardPermissionParts.get(0).iterator().next();
+                boolean identifierWildcard;
+                Set<String> identifiers;
+                if (wildcardPermissionParts.size() >= 3) {
+                    identifiers = wildcardPermissionParts.get(2);
+                    identifierWildcard = WildcardPermission.WILDCARD_TOKEN.equals(identifiers.iterator().next());
+                } else {
+                    identifiers = Collections.emptySet();
+                    identifierWildcard = true;
+                }
+                final Iterable<A> acls = aclResolver.resolveAcls(ownership, type, identifierWildcard ? null : identifiers);
+                for (A acl : acls) {
+                    if (checkAcl(effectiveWildcardPermissionToCheck, getGroupsOfUser(user), getGroupsOfUser(allUser),
+                            acl) == PermissionState.REVOKED) {
+                        return false;
+                    }
+                }
+            }
             if (checkUserPermissions(effectiveWildcardPermissionToCheck, user, getGroupsOfUser(user), ownership,
                     impliesChecker, /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true) != PermissionState.GRANTED
                     && checkUserPermissions(effectiveWildcardPermissionToCheck, allUser, getGroupsOfUser(allUser),

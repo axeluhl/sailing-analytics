@@ -149,6 +149,7 @@ import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.HasPermissionsProvider;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.PermissionChecker;
+import com.sap.sse.security.shared.PermissionChecker.AclResolver;
 import com.sap.sse.security.shared.PredefinedRoles;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
@@ -236,6 +237,41 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     private String baseUrlForCrossDomainStorage;
     
     private final transient Set<SecurityInitializationCustomizer> customizers = ConcurrentHashMap.newKeySet();
+    
+    // TODO Bug 5239: a more efficient implementation is possible using reverse mappings in AccessControlStore
+    private AclResolver<AccessControlList, Ownership> aclResolver = new AclResolver<AccessControlList, Ownership>() {
+        @Override
+        public Iterable<AccessControlList> resolveAcls(
+                Ownership ownership, String type, Iterable<String> identifiers) {
+            final Set<AccessControlList> result = new HashSet<>();
+            for (AccessControlListAnnotation annotation : accessControlStore
+                    .getAccessControlLists()) {
+                if (!annotation.getIdOfAnnotatedObject().getTypeIdentifier().equals(type)) {
+                    continue;
+                }
+                if (identifiers != null && !Util.contains(identifiers, annotation.getIdOfAnnotatedObject().getTypeRelativeObjectIdentifier().toString())) {
+                    continue;
+                }
+                // If ownership is given, we can exclude objects not owned by the user or group
+                if (ownership != null) {
+                    final OwnershipAnnotation ownershipOfObject = accessControlStore
+                            .getOwnership(annotation.getIdOfAnnotatedObject());
+                    if (ownershipOfObject != null) {
+                        final User userOwner = ownership.getUserOwner();
+                        final UserGroup tenantOwner = ownership.getTenantOwner();
+                        if (!(userOwner != null && userOwner
+                                .equals(ownershipOfObject.getAnnotation().getUserOwner()))
+                                && !(tenantOwner != null && tenantOwner.equals(
+                                        ownershipOfObject.getAnnotation().getTenantOwner()))) {
+                            continue;
+                        }
+                    }
+                }
+                result.add(annotation.getAnnotation());
+            }
+            return result;
+        }
+    };
     
     static {
         shiroConfiguration = new Ini();
@@ -1953,7 +1989,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             return PermissionChecker.isPermitted(permissionToCheck, getCurrentUser(), getAllUser(), ownership, null);
         } else {
             return PermissionChecker.checkMetaPermission(permissionToCheck,
-                    hasPermissionsProvider.getAllHasPermissions(), getCurrentUser(), getAllUser(), ownership);
+                    hasPermissionsProvider.getAllHasPermissions(), getCurrentUser(), getAllUser(), ownership,
+                    aclResolver);
         }
     }
     
@@ -1973,7 +2010,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                     qualifiedObjectId -> {
                         OwnershipAnnotation ownershipAnnotation = accessControlStore.getOwnership(qualifiedObjectId);
                         return ownershipAnnotation == null ? null : ownershipAnnotation.getAnnotation();
-                    });
+                    }, aclResolver);
         }
     }
     

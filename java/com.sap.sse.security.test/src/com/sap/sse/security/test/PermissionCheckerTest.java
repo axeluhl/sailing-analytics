@@ -27,6 +27,7 @@ import com.sap.sse.security.interfaces.UserStore;
 import com.sap.sse.security.shared.AdminRole;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.PermissionChecker.AclResolver;
 import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
@@ -45,6 +46,14 @@ import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 
 public class PermissionCheckerTest {
+    private final AclResolver<AccessControlList, Ownership> noopAclResolver = new AclResolver<AccessControlList, Ownership>() {
+        
+        @Override
+        public Iterable<AccessControlList> resolveAcls(Ownership ownership, String type,
+                Iterable<String> identifiers) {
+            return Collections.emptySet();
+        }
+    };
     private final UUID eventId = UUID.randomUUID();
     private final WildcardPermission eventReadPermission = SecuredDomainType.EVENT
             .getPermissionForTypeRelativeIdentifier(DefaultActions.READ,
@@ -294,7 +303,7 @@ public class PermissionCheckerTest {
         for (WildcardPermission p : grantedPermissions) {
             user.addPermission(p);
         }
-        boolean result = PermissionChecker.checkMetaPermission(permissionToCheck, allHasPermissions, user, null, null);
+        boolean result = PermissionChecker.checkMetaPermission(permissionToCheck, allHasPermissions, user, null, null, noopAclResolver);
         for (WildcardPermission p : grantedPermissions) {
             user.removePermission(p);
         }
@@ -309,19 +318,19 @@ public class PermissionCheckerTest {
         WildcardPermission permissionToCheck = type1.getPermissionForTypeRelativeIdentifier(DefaultActions.READ,
                 new TypeRelativeObjectIdentifier("someid"));
         // The assigned role is qualified by the tenant. This makes a check without ownership fail
-        assertFalse(PermissionChecker.checkMetaPermission(permissionToCheck, allHasPermissions, user, null, null));
+        assertFalse(PermissionChecker.checkMetaPermission(permissionToCheck, allHasPermissions, user, null, null, noopAclResolver));
         // In addition a check with ownership without tentant will also fail
         assertFalse(PermissionChecker.checkMetaPermission(permissionToCheck, allHasPermissions, user, null,
-                new Ownership(user, null)));
+                new Ownership(user, null), noopAclResolver));
         // A check with the wrong tentant owner will also fail
         assertFalse(PermissionChecker.checkMetaPermission(permissionToCheck, allHasPermissions, user, null,
-                new Ownership(user, adminTenant)));
+                new Ownership(user, adminTenant), noopAclResolver));
         
         // Only an ownership with a tenant owner matching the roles qualification makes the check succeed
         assertTrue(PermissionChecker.checkMetaPermission(permissionToCheck, allHasPermissions, user, null,
-                new Ownership(null, userTenant)));
+                new Ownership(null, userTenant), noopAclResolver));
         assertTrue(PermissionChecker.checkMetaPermission(permissionToCheck, allHasPermissions, user, null,
-                new Ownership(user, userTenant)));
+                new Ownership(user, userTenant), noopAclResolver));
     }
     
     @Test
@@ -334,7 +343,7 @@ public class PermissionCheckerTest {
         // wildcard for the action part
         assertTrue(PermissionChecker.checkMetaPermissionWithOwnershipResolution(
                 WildcardPermission.builder().withTypes(type1).withIds(objectId).build(), allHasPermissions, user, null,
-                id -> new Ownership(null, userTenant)));
+                id -> new Ownership(null, userTenant), noopAclResolver));
     }
     
     @Test
@@ -354,7 +363,7 @@ public class PermissionCheckerTest {
         };
         
         BooleanSupplier permissionCheck = () -> PermissionChecker.checkMetaPermissionWithOwnershipResolution(permissionToCheck, allHasPermissions,
-                user, null, ownershipResolver);
+                user, null, ownershipResolver, noopAclResolver);
         
         assertFalse(permissionCheck.getAsBoolean());
         // Not the right qualification -> check still fails
@@ -387,7 +396,7 @@ public class PermissionCheckerTest {
         };
         
         BooleanSupplier permissionCheck = () -> PermissionChecker.checkMetaPermissionWithOwnershipResolution(permissionToCheck, allHasPermissions,
-                user, null, ownershipResolver);
+                user, null, ownershipResolver, noopAclResolver);
         
         assertFalse(permissionCheck.getAsBoolean());
         user.addRole(new Role(rd, userTenant, null));
