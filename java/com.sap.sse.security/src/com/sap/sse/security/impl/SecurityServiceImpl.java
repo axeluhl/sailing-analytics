@@ -2534,7 +2534,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (user != null) {
             Subscription currentSubscription = user.getSubscription();
             if (shouldUpdateUserRolesForSubscription(currentSubscription, newSubscription)) {
-                updateUserRolesOnSubscriptionChange(username, currentSubscription, newSubscription);
+                updateUserRolesOnSubscriptionChange(user, currentSubscription, newSubscription);
             }
             user.setSubscription(newSubscription);
             store.updateUser(user);
@@ -2544,9 +2544,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         }
     }
 
-    private void updateUserRolesOnSubscriptionChange(String username, Subscription currentSubscription,
+    private void updateUserRolesOnSubscriptionChange(User user, Subscription currentSubscription,
             Subscription newSubscription) throws UserManagementException {
-        logger.log(Level.INFO, "Update user subscription roles for user "+username);
+        logger.log(Level.INFO, "Update user subscription roles for user " + user.getName());
         if (currentSubscription != null && currentSubscription.getPlanId() != null
                 && currentSubscription.isActiveSubscription()) {
             SubscriptionPlan currentPlan = SubscriptionPlanHolder.getInstance()
@@ -2556,7 +2556,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 for (UUID roleDefId : roleDefinitionIds) {
                     // see also bug5300: this works, based on the AbstractRole.equals definition,
                     // as long as no qualified roles are assigned
-                    store.removeRoleFromUser(username, new Role(getRoleDefinition(roleDefId)));
+                    store.removeRoleFromUser(user.getName(), new Role(getRoleDefinition(roleDefId), null, user));
                 }
             }
         }
@@ -2566,7 +2566,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 UUID[] roleDefinitionIds = newPlan.getRoleDefinitionIds();
                 for (UUID roleDefId : roleDefinitionIds) {
                     // see also bug5300: we may want to support qualified roles, too, in the future
-                    store.addRoleForUser(username, new Role(getRoleDefinition(roleDefId)));
+                    store.addRoleForUser(user.getName(), new Role(getRoleDefinition(roleDefId), null, user));
                 }
             }
         }
