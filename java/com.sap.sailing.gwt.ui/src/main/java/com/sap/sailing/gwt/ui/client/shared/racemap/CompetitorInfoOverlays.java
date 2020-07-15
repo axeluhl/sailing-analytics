@@ -139,8 +139,11 @@ public class CompetitorInfoOverlays implements QuickFlagDataListener {
     private String createInfoText(CompetitorDTO competitorDTO) {
         StringBuilder infoText = new StringBuilder();
         infoText.append(competitorDTO.getShortInfo()).append("\n");
-        infoText.append(NumberFormatterFactory.getDecimalFormat(1).format(getLastSpeedInKnots(competitorDTO))).append(" ")
-                .append(stringMessages.knotsUnit()).append("\n");
+        Double lastSpeedInKnots = getLastSpeedInKnots(competitorDTO);
+        if(lastSpeedInKnots != null) {
+            infoText.append(NumberFormatterFactory.getDecimalFormat(1).format(getLastSpeedInKnots(competitorDTO))).append(" ")
+            .append(stringMessages.knotsUnit()).append("\n");
+        }
         final Integer rank = ranks.get(competitorDTO.getIdAsString());
         if (rank != null && rank != 0) {
             infoText.append(stringMessages.rank()).append(" : ").append(rank);
