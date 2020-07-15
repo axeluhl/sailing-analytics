@@ -16,13 +16,15 @@ public class RemoteSailingServerReferenceImpl extends NamedImpl implements Remot
 
     /** the URL of the server */
     private final URL url;
-    private final Set<UUID> excludedEventIds;
+    private Boolean include;
+    private final Set<UUID> selectedEventIds;
     
-    public RemoteSailingServerReferenceImpl(String name, URL url, List<UUID> excludedEventIds) {
+    public RemoteSailingServerReferenceImpl(String name, URL url, Boolean include, List<UUID> selectedEventIds) {
         super(name);
         this.url = url;
+        this.include = include;
         // ensure the list is really immutable by copying it and handing out only unmodifiableList wrappers for it
-        this.excludedEventIds = new HashSet<>(excludedEventIds);
+        this.selectedEventIds = new HashSet<>(selectedEventIds);
     }
 
     @Override
@@ -31,12 +33,23 @@ public class RemoteSailingServerReferenceImpl extends NamedImpl implements Remot
     }
 
     @Override
-    public Iterable<UUID> getExcludedEventIds() {
-        return Collections.unmodifiableSet(excludedEventIds);
+    public Boolean getInclude() {
+        return include;
     }
-    
+
     @Override
-    public void addExcludedEventIds(Iterable<UUID> eventIdsToExclude) {
-        Util.addAll(eventIdsToExclude, excludedEventIds);
+    public void setInclude(Boolean include) {
+        this.include = include;
+    }
+
+    @Override
+    public Set<UUID> getSelectedEventIds() {
+        return Collections.unmodifiableSet(selectedEventIds);
+    }
+
+    @Override
+    public void updateSelectedEventIds(Iterable<UUID> selectedEventIds) {
+        this.selectedEventIds.clear();
+        Util.addAll(selectedEventIds, this.selectedEventIds);
     }
 }

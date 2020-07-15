@@ -376,7 +376,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *         callers to iterate over the iterable returned, and no risk of a {@link ConcurrentModificationException}
      *         exists
      */
-    Iterable<Event> getExcludedEvents(List<UUID> includedEventIds);
+    Iterable<Event> getEventsSelectively(boolean include, List<UUID> includedEventIds);
 
     /**
      * Creates a new event with the name <code>eventName</code>, the venue <code>venue</code> and the regattas with the
@@ -454,8 +454,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *            the list of event id's
      * @return the updated remote sailing server reference
      */
-    RemoteSailingServerReference updateRemoteSailingServerReferenceExcludedEventIds(String name,
-            List<UUID> eventIdsToExclude);
+    RemoteSailingServerReference updateRemoteSailingServerReferenceWithSelectedEventIds(String name,
+            Boolean include, List<UUID> eventIdsToExclude);
 
     void removeRemoteSailingServerReference(String name);
 
@@ -696,6 +696,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     Util.Pair<Iterable<EventBase>, Exception> updateRemoteServerEventCacheSynchronously(
             RemoteSailingServerReference ref, boolean forceUpdate);
+    
+    Util.Pair<Iterable<EventBase>, Exception> getCompleteRemoteServerReference(RemoteSailingServerReference ref);
 
     /**
      * Searches the content of this server, not that of any remote servers referenced by any {@link RemoteSailingServerReference}s.

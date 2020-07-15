@@ -298,7 +298,18 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
     void addRemoteSailingServerReference(RemoteSailingServerReferenceDTO sailingServer,
             AsyncCallback<RemoteSailingServerReferenceDTO> callback);
     
-    void updateRemoteSailingServerReferenceEcludedEventIds(RemoteSailingServerReferenceDTO sailingServer,
+    /*
+     * Updates {@link RemoteSailingServerReferenceDTO} sailingServer instance based on user selection regarding
+     * inclusion type and selected events.
+     */
+    void updateRemoteSailingServerReferenceSelectedEventIds(RemoteSailingServerReferenceDTO sailingServer,
+            AsyncCallback<RemoteSailingServerReferenceDTO> callback);
+
+    /*
+     * Loads remote sailing server data with all events not filtered by selection in order to show the full list of
+     * events on {@link RemoteSailingServerEventsSelectionDialog} dialog.
+     */
+    void getCompleteRemoteServerReference(String sailingServerName,
             AsyncCallback<RemoteSailingServerReferenceDTO> callback);
 
     void getResultImportUrls(String resultProviderName, AsyncCallback<List<UrlDTO>> callback);

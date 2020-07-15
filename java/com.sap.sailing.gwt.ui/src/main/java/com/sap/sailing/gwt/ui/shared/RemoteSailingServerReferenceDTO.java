@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.shared;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -10,7 +9,8 @@ public class RemoteSailingServerReferenceDTO extends NamedDTO {
     private static final long serialVersionUID = -4209262742778693873L;
     private String url;
     private Iterable<EventBaseDTO> events;
-    private List<EventBaseDTO> excludedEvents;
+    private Boolean include;
+    private List<EventBaseDTO> selectedEvents;
 
     /**
      * The error message is usually filled in case {@link #events} is <code>null</code> and gives a hint about the
@@ -24,24 +24,26 @@ public class RemoteSailingServerReferenceDTO extends NamedDTO {
     }
 
     public RemoteSailingServerReferenceDTO(String name, String url) {
-        this(name, url, Collections.<EventBaseDTO> emptyList());
+        this(name, url, null, Collections.<EventBaseDTO> emptyList(), Collections.<EventBaseDTO> emptyList());
     }
 
-    public RemoteSailingServerReferenceDTO(String name, String url, Iterable<EventBaseDTO> events) {
-        this(name, url, events, /* error message */ null);
+    public RemoteSailingServerReferenceDTO(String name, String url, Boolean include,
+            List<EventBaseDTO> selectedEventIds, Iterable<EventBaseDTO> events) {
+        this(name, url, include, selectedEventIds, events, /* error message */ null);
     }
 
-    public RemoteSailingServerReferenceDTO(String name, String url, Iterable<EventBaseDTO> events,
-            String lastErrorMessage) {
+    public RemoteSailingServerReferenceDTO(String name, String url, Boolean include,
+            List<EventBaseDTO> selectedEventIds, Iterable<EventBaseDTO> events, String lastErrorMessage) {
         super(name);
         this.url = url;
         this.events = events;
-        this.excludedEvents = new ArrayList<>();
+        this.include = include;
+        this.selectedEvents = selectedEventIds;
         this.lastErrorMessage = lastErrorMessage;
     }
 
     public RemoteSailingServerReferenceDTO(String name, String url, String lastErrorMessage) {
-        this(name, url, /* events */ null, lastErrorMessage);
+        this(name, url, /* include */ null, /* selectedEventIds */ null, /* events */ null, lastErrorMessage);
     }
 
     public String getUrl() {
@@ -52,12 +54,21 @@ public class RemoteSailingServerReferenceDTO extends NamedDTO {
         return events;
     }
 
-    public List<EventBaseDTO> getExcludedEvents() {
-        return excludedEvents;
+    public Boolean getInclude() {
+        return include;
     }
 
-    public void addExcludedEvents(List<EventBaseDTO> excludedEvents) {
-        this.excludedEvents.addAll(excludedEvents);
+    public void setInclude(Boolean include) {
+        this.include = include;
+    }
+
+    public List<EventBaseDTO> getSelectedEvents() {
+        return selectedEvents;
+    }
+
+    public void updateSelectedEvents(List<EventBaseDTO> selectedEvents) {
+        this.selectedEvents.clear();
+        this.selectedEvents.addAll(selectedEvents);
     }
 
     public String getLastErrorMessage() {

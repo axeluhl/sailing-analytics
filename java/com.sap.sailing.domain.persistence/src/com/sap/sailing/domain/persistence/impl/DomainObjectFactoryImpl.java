@@ -26,7 +26,6 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import org.bson.Document;
 import org.bson.json.JsonMode;
@@ -1132,14 +1131,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private RemoteSailingServerReference loadRemoteSailingSever(Document serverDBObject) {
         RemoteSailingServerReference result = null;
         String name = (String) serverDBObject.get(FieldNames.SERVER_NAME.name());
-        String urlAsString = (String) serverDBObject.get(FieldNames.SERVER_URL.name());
+        Boolean include = (Boolean) serverDBObject.get(FieldNames.INCLUDE.name());
         @SuppressWarnings("unchecked")
-        List<String> excludedEventIdsAsString = (List<String>) serverDBObject.get(FieldNames.EXCLUDED_EVENT_IDS.name());
-        List<UUID> excludedEventIds = excludedEventIdsAsString.stream().map(element -> UUID.fromString(element))
-                .collect(Collectors.toList());
+        List<UUID> selectedEventIds = (List<UUID>) serverDBObject.get(FieldNames.SELECTED_EVENT_IDS.name());
+        String urlAsString = (String) serverDBObject.get(FieldNames.SERVER_URL.name());
         try {
             URL serverUrl = new URL(urlAsString);
-            result = new RemoteSailingServerReferenceImpl(name, serverUrl, excludedEventIds);
+            result = new RemoteSailingServerReferenceImpl(name, serverUrl, include, selectedEventIds);
         } catch (MalformedURLException e) {
             logger.log(Level.SEVERE, "Can't load the sailing server with URL " + urlAsString, e);
         }

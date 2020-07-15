@@ -579,17 +579,20 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         Document serverDBObject = new Document();
         serverDBObject.put(FieldNames.SERVER_NAME.name(), server.getName());
         serverDBObject.put(FieldNames.SERVER_URL.name(), server.getURL().toExternalForm());
-        serverDBObject.put(FieldNames.EXCLUDED_EVENT_IDS.name(), server.getExcludedEventIds());
+        serverDBObject.put(FieldNames.INCLUDE.name(), server.getInclude());
+        serverDBObject.put(FieldNames.SELECTED_EVENT_IDS.name(), server.getSelectedEventIds());
         serverCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, serverDBObject, new UpdateOptions().upsert(true));
     }
     
     @Override
-    public void updateSailingServerExcludedEventIds(final String serverName, final List<UUID> eventIdsToExclude) {
+    public void updateSailingServerSelectedEventIds(final String serverName, final Boolean include,
+            final List<UUID> selectedEventIds) {
         MongoCollection<Document> serverCollection = database.getCollection(CollectionNames.SAILING_SERVERS.name());
         Document query = new Document();
         query.put(FieldNames.SERVER_NAME.name(), serverName);
         Document serverDBObject = new Document();
-        serverDBObject.put(FieldNames.EXCLUDED_EVENT_IDS.name(), eventIdsToExclude);
+        serverDBObject.put(FieldNames.INCLUDE.name(), include);
+        serverDBObject.put(FieldNames.SELECTED_EVENT_IDS.name(), selectedEventIds);
         serverCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, serverDBObject,
                 new UpdateOptions().upsert(true));
     }

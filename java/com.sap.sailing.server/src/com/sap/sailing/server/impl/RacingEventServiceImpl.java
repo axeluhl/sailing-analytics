@@ -1605,18 +1605,19 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public RemoteSailingServerReference addRemoteSailingServerReference(String name, URL url) {
-        RemoteSailingServerReference result = new RemoteSailingServerReferenceImpl(name, url, new ArrayList<UUID>());
+        RemoteSailingServerReference result = new RemoteSailingServerReferenceImpl(name, url, null, new ArrayList<UUID>());
         remoteSailingServerSet.add(result);
         mongoObjectFactory.storeSailingServer(result);
         return result;
     }
 
     @Override
-    public RemoteSailingServerReference updateRemoteSailingServerReferenceExcludedEventIds(final String name,
-            final List<UUID> eventIdsToExclude) {
+    public RemoteSailingServerReference updateRemoteSailingServerReferenceWithSelectedEventIds(final String name,
+            final Boolean include, final List<UUID> selectedEventIds) {
         RemoteSailingServerReference result = getRemoteServerReferenceByName(name);
         if (result != null) {
-            result.addExcludedEventIds(eventIdsToExclude);
+            result.updateSelectedEventIds(selectedEventIds);
+            result.setInclude(include);
             mongoObjectFactory.storeSailingServer(result);
         }
         return result;
@@ -1637,6 +1638,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             RemoteSailingServerReference ref, boolean forceUpdate) {
         return remoteSailingServerSet.getEventsOrException(ref, forceUpdate);
     }
+    
+    @Override
+    public com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception> getCompleteRemoteServerReference(
+            RemoteSailingServerReference ref) {
+        return remoteSailingServerSet.getEventsComplete(ref);
+    }
 
     @Override
     public void removeRemoteSailingServerReference(String name) {
@@ -1650,9 +1657,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public Iterable<Event> getExcludedEvents(final List<UUID> excludedEventIds) {
-        return Collections.unmodifiableCollection(eventsById.values().stream()
-                .filter(element -> !excludedEventIds.contains(element.getId())).collect(Collectors.toList()));
+    public Iterable<Event> getEventsSelectively(final boolean include, final List<UUID> selectedEventIds) {
+        return Collections.unmodifiableCollection(
+                eventsById.values().stream().filter(element -> include ? selectedEventIds.contains(element.getId())
+                        : !selectedEventIds.contains(element.getId())).collect(Collectors.toList()));
     }
 
     @Override

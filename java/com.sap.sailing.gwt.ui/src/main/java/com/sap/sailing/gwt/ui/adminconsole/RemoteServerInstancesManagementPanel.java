@@ -179,33 +179,46 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
                 removeSailingServers(toDelete);
             }
         });
-        actionsColumn.addAction(ACTION_UPDATE, ServerActions.CONFIGURE_REMOTE_INSTANCES, e -> {
-            new RemoteSailingServerEventsExclusionDialog(e, stringMessages,
-                    new DialogCallback<RemoteSailingServerReferenceDTO>() {
+        actionsColumn.addAction(ACTION_UPDATE, ServerActions.CONFIGURE_REMOTE_INSTANCES, loadedSalingServer -> {
+            sailingService.getCompleteRemoteServerReference(loadedSalingServer.getName(),
+                    new AsyncCallback<RemoteSailingServerReferenceDTO>() {
 
                         @Override
-                        public void ok(RemoteSailingServerReferenceDTO editedObject) {
-                            sailingService.updateRemoteSailingServerReferenceEcludedEventIds(editedObject,
-                                    new AsyncCallback<RemoteSailingServerReferenceDTO>() {
+                        public void onSuccess(RemoteSailingServerReferenceDTO completeServerReference) {
+                            new RemoteSailingServerEventsSelectionDialog(completeServerReference, loadedSalingServer,
+                                    stringMessages, new DialogCallback<RemoteSailingServerReferenceDTO>() {
 
                                         @Override
-                                        public void onSuccess(RemoteSailingServerReferenceDTO result) {
-                                            refreshSailingServerList();
+                                        public void ok(RemoteSailingServerReferenceDTO editedObject) {
+                                            sailingService.updateRemoteSailingServerReferenceSelectedEventIds(
+                                                    editedObject, new AsyncCallback<RemoteSailingServerReferenceDTO>() {
+
+                                                        @Override
+                                                        public void onSuccess(RemoteSailingServerReferenceDTO result) {
+                                                            refreshSailingServerList();
+                                                        }
+
+                                                        @Override
+                                                        public void onFailure(Throwable caught) {
+                                                            errorReporter.reportError(
+                                                                    "Error trying to update remote server with selected events: "
+                                                                            + caught.getMessage());
+                                                        }
+                                                    });
                                         }
 
                                         @Override
-                                        public void onFailure(Throwable caught) {
-                                            errorReporter.reportError(
-                                                    "Error trying to update remote server events exclusions: "
-                                                            + caught.getMessage());
+                                        public void cancel() {
                                         }
-                                    });
+                                    }).show();
                         }
 
                         @Override
-                        public void cancel() {
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError(
+                                    "Error trying to load complete remote server reference: " + caught.getMessage());
                         }
-                    }).show();
+                    });
         });
         return actionsColumn;
     }

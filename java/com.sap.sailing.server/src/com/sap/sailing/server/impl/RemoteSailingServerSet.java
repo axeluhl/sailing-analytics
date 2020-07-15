@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -242,12 +243,28 @@ public class RemoteSailingServerSet {
 
     private Util.Pair<Iterable<EventBase>, Exception> updateRemoteServerEventCacheSynchronously(
             RemoteSailingServerReference ref) {
+        Util.Pair<Iterable<EventBase>, Exception> result = loadEventsForRemoteServerReference(ref.getName(),
+                ref.getInclude(), ref.getSelectedEventIds(), ref.getURL());
+        final Pair<Iterable<EventBase>, Exception> finalResult = result;
+        LockUtil.executeWithWriteLock(lock, () -> {
+            // check that the server was not removed while no lock was held
+            if (remoteSailingServers.containsValue(ref)) {
+                cachedEventsForRemoteSailingServers.put(ref, finalResult);
+            } else {
+                logger.fine("Omitted update for " + ref + " as it was removed");
+            }
+        });
+        return result;
+    }
+    
+    private Util.Pair<Iterable<EventBase>, Exception> loadEventsForRemoteServerReference(final String serverName,
+            final Boolean include, final Set<UUID> selectedEvents, final URL url) {
         BufferedReader bufferedReader = null;
         Util.Pair<Iterable<EventBase>, Exception> result;
         try {
             try {
-                URL eventsURL = getEventsURL(ref);
-                logger.fine("Updating events for remote server " + ref + " from URL " + eventsURL);
+                URL eventsURL = getEventsURL(include, selectedEvents, url);
+                logger.fine("Updating events for remote server " + serverName + " from URL " + eventsURL);
                 URLConnection urlConnection = HttpUrlConnectionHelper.redirectConnection(eventsURL);
                 bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream(), "UTF-8"));
                 JSONParser parser = new JSONParser();
@@ -269,19 +286,10 @@ public class RemoteSailingServerSet {
                 }
             }
         } catch (IOException | ParseException e) {
-            logger.log(Level.INFO, "Exception trying to fetch events from remote server " + ref + ": " + e.getMessage(),
-                    e);
+            logger.log(Level.INFO,
+                    "Exception trying to fetch events from remote server " + serverName + ": " + e.getMessage(), e);
             result = new Util.Pair<Iterable<EventBase>, Exception>(/* events */ null, e);
         }
-        final Pair<Iterable<EventBase>, Exception> finalResult = result;
-        LockUtil.executeWithWriteLock(lock, () -> {
-            // check that the server was not removed while no lock was held
-            if (remoteSailingServers.containsValue(ref)) {
-                cachedEventsForRemoteSailingServers.put(ref, finalResult);
-            } else {
-                logger.fine("Omitted update for " + ref + " as it was removed");
-            }
-        });
         return result;
     }
 
@@ -331,16 +339,17 @@ public class RemoteSailingServerSet {
         });
     }
 
-    private URL getEventsURL(RemoteSailingServerReference remoteServerRef) throws MalformedURLException {
+    private URL getEventsURL(final Boolean include, final Set<UUID> selectedEvents, final URL url)
+            throws MalformedURLException {
         final String basePath = "/events";
-        final Iterable<UUID> excludedEventIds = remoteServerRef.getExcludedEventIds();
         final String eventsEndpointName;
-        if (excludedEventIds != null && !Util.isEmpty(excludedEventIds)) {
-            eventsEndpointName = basePath + "?excludedEvents=" + Util.join(",", Util.map(excludedEventIds, uuid->uuid.toString()));
+        if (include != null) {
+            eventsEndpointName = basePath + "?include=" + String.valueOf(include) + "&selectedEvents=" + String
+                    .join(",", selectedEvents.stream().map(uuid -> uuid.toString()).collect(Collectors.toList()));
         } else {
             eventsEndpointName = basePath;
         }
-        return getEndpointUrl(remoteServerRef.getURL(), eventsEndpointName);
+        return getEndpointUrl(url, eventsEndpointName);
     }
     
     private URL getStatisticsByYearURL(URL remoteServerBaseURL) throws MalformedURLException {
@@ -398,6 +407,15 @@ public class RemoteSailingServerSet {
             LockUtil.unlockAfterWrite(lock);
         }
         return updateRemoteServerEventCacheSynchronously(ref);
+    }
+
+    /**
+     * Loads complete list of events for given remote reference server by sending {@link Boolean} include parameter with
+     * <code>null</code> value.
+     */
+    public Util.Pair<Iterable<EventBase>, Exception> getEventsComplete(RemoteSailingServerReference ref) {
+        return loadEventsForRemoteServerReference(ref.getName(), /* include */ null, /* selectedEventIds */ null,
+                ref.getURL());
     }
 
     public Iterable<RemoteSailingServerReference> getLiveRemoteServerReferences() {

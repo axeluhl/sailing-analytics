@@ -109,14 +109,18 @@ public interface MongoObjectFactory {
     void storeSailingServer(RemoteSailingServerReference server);
 
     /**
-     * Stores the list of excluded from being loading event id's for remote sailing server
+     * Stores the list of selected events for remote sailing server. If <code>include</code> parameter is not set then
+     * all events are loaded, if it's set to <code>true</code> then selected events are loaded inclusively, if to
+     * <code>false</code> then exclusively.
      * 
      * @param name
      *            to get target sailing server by
-     * @param eventIdsToExclude
+     * @param include
+     *            the flag determining whether to load events inclusively, exclusively or load them all
+     * @param selectedEventIds
      *            the list of event id's to exclude from being loading
      */
-    void updateSailingServerExcludedEventIds(String name, List<UUID> eventIdsToExclude);
+    void updateSailingServerSelectedEventIds(String name, Boolean include, List<UUID> selectedEventIds);
 
     void removeSailingServer(String name);
 

@@ -291,14 +291,14 @@ public class EventsResource extends AbstractSailingServerResource {
     @GET
     @Produces("application/json;charset=UTF-8")
     public Response getEvents(@QueryParam("showNonPublic") String showNonPublic,
-            @QueryParam("excludedEvents") String excludedEvents) {
+            @QueryParam("include") Boolean include, @QueryParam("selectedEvents") String eventIds) {
         JsonSerializer<EventBase> eventSerializer = new EventBaseJsonSerializer(
                 new VenueJsonSerializer(new CourseAreaJsonSerializer()), new LeaderboardGroupBaseJsonSerializer(),
                 new TrackingConnectorInfoJsonSerializer());
         JSONArray result = new JSONArray();
         Iterable<Event> events;
-        if (excludedEvents != null) {
-            events = getService().getExcludedEvents(Stream.of(excludedEvents.split(","))
+        if (include != null) {
+            events = getService().getEventsSelectively(include, Stream.of(eventIds.split(","))
                     .map(element -> UUID.fromString(element)).collect(Collectors.toList()));
         } else {
             events = getService().getAllEvents();
