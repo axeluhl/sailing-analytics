@@ -117,6 +117,7 @@ public class AwsInstanceImpl implements AwsInstance {
      */
     @Override
     public SshShellCommandChannel createSshChannel(String sshUserName) throws JSchException, IOException, InterruptedException {
+        // TODO use "exec" channel type for plain command execution, producing a ChannelExec instance
         return new SshShellCommandChannelImpl(createSshChannelInternal(sshUserName, "shell"));
     }
     
