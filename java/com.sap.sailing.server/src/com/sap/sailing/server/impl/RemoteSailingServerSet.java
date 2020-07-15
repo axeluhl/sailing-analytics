@@ -24,7 +24,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -345,7 +344,7 @@ public class RemoteSailingServerSet {
         final String eventsEndpointName;
         if (include != null) {
             eventsEndpointName = basePath + "?include=" + String.valueOf(include) + "&selectedEvents=" + String
-                    .join(",", selectedEvents.stream().map(uuid -> uuid.toString()).collect(Collectors.toList()));
+                    .join(",", Util.joinStrings(",", Util.map(selectedEvents, uuid -> uuid.toString())));
         } else {
             eventsEndpointName = basePath;
         }
