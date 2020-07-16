@@ -3,7 +3,7 @@ package com.sap.sailing.domain.persistence;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -116,11 +116,11 @@ public interface MongoObjectFactory {
      * @param name
      *            to get target sailing server by
      * @param include
-     *            the flag determining whether to load events inclusively, exclusively or load them all
+     *            the flag determining whether to load events inclusively or exclusively
      * @param selectedEventIds
      *            the list of event id's to exclude from being loading
      */
-    void updateSailingServerSelectedEventIds(String name, Boolean include, List<UUID> selectedEventIds);
+    void updateSailingServer(String name, boolean include, Set<UUID> selectedEventIds);
 
     void removeSailingServer(String name);
 

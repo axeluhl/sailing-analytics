@@ -372,11 +372,11 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     Iterable<Event> getAllEvents();
     
     /**
-     * @return a thread-safe copy of the service events filtered by {@link includedEventIds} parameter; it's safe for
-     *         callers to iterate over the iterable returned, and no risk of a {@link ConcurrentModificationException}
-     *         exists
+     * @return a thread-safe copy of the service events filtered by {@link eventIdsAsString} parameter with taking
+     *         {@link boolean} include parameter into account; it's safe for callers to iterate over the iterable
+     *         returned, and no risk of a {@link ConcurrentModificationException} exists
      */
-    Iterable<Event> getEventsSelectively(boolean include, List<UUID> includedEventIds);
+    Iterable<Event> getEventsSelectively(boolean include, String eventIdsAsString);
 
     /**
      * Creates a new event with the name <code>eventName</code>, the venue <code>venue</code> and the regattas with the
@@ -443,19 +443,21 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     Map<RemoteSailingServerReference, Util.Pair<Iterable<EventBase>, Exception>> getPublicEventsOfAllSailingServers();
 
-    RemoteSailingServerReference addRemoteSailingServerReference(String name, URL url);
-    
+    RemoteSailingServerReference addRemoteSailingServerReference(String name, URL url, boolean include);
+
     /**
-     * Updates the list of event id's which are excluded from loading from remote sailing server
+     * Updates the include flag and selected events id's for remote sailing server with the given name
      * 
      * @param name
      *            is used to find the target remote sailing server reference by
-     * @param eventIdsToExclude
-     *            the list of event id's
+     * @param include
+     *            flag which determining the inclusion factor for selected events
+     * @param selectedEventIds
+     *            the list of selected event id's
      * @return the updated remote sailing server reference
      */
-    RemoteSailingServerReference updateRemoteSailingServerReferenceWithSelectedEventIds(String name,
-            Boolean include, List<UUID> eventIdsToExclude);
+    RemoteSailingServerReference updateRemoteSailingServerReference(String name, boolean include,
+            Set<UUID> selectedEventIds);
 
     void removeRemoteSailingServerReference(String name);
 

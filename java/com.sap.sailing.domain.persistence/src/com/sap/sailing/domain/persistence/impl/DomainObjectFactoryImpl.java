@@ -1137,7 +1137,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         String urlAsString = (String) serverDBObject.get(FieldNames.SERVER_URL.name());
         try {
             URL serverUrl = new URL(urlAsString);
-            result = new RemoteSailingServerReferenceImpl(name, serverUrl, include, selectedEventIds);
+            result = new RemoteSailingServerReferenceImpl(name, serverUrl, include == null ? false : include,
+                    selectedEventIds == null ? new HashSet<UUID>() : new HashSet<UUID>(selectedEventIds));
         } catch (MalformedURLException e) {
             logger.log(Level.SEVERE, "Can't load the sailing server with URL " + urlAsString, e);
         }

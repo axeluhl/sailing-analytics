@@ -190,8 +190,8 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
 
                                         @Override
                                         public void ok(RemoteSailingServerReferenceDTO editedObject) {
-                                            sailingService.updateRemoteSailingServerReferenceSelectedEventIds(
-                                                    editedObject, new AsyncCallback<RemoteSailingServerReferenceDTO>() {
+                                            sailingService.updateRemoteSailingServerReference(editedObject,
+                                                    new AsyncCallback<RemoteSailingServerReferenceDTO>() {
 
                                                         @Override
                                                         public void onSuccess(RemoteSailingServerReferenceDTO result) {

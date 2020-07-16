@@ -268,7 +268,7 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
     RemoteSailingServerReferenceDTO addRemoteSailingServerReference(RemoteSailingServerReferenceDTO sailingServer)
             throws UnauthorizedException, Exception;
     
-    RemoteSailingServerReferenceDTO updateRemoteSailingServerReferenceSelectedEventIds(
+    RemoteSailingServerReferenceDTO updateRemoteSailingServerReference(
             RemoteSailingServerReferenceDTO sailingServer) throws UnauthorizedException, Exception;
     
     RemoteSailingServerReferenceDTO getCompleteRemoteServerReference(String sailingServerName)

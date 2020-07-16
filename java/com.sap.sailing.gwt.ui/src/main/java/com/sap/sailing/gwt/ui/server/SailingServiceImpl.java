@@ -425,7 +425,7 @@ import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.interfaces.SimulationService;
 import com.sap.sailing.server.operationaltransformation.AddRemoteSailingServerReference;
 import com.sap.sailing.server.operationaltransformation.RemoveRemoteSailingServerReference;
-import com.sap.sailing.server.operationaltransformation.UpdateSailingServerReferenceSelectedEvents;
+import com.sap.sailing.server.operationaltransformation.UpdateSailingServerReference;
 import com.sap.sailing.server.operationaltransformation.UpdateServerConfiguration;
 import com.sap.sailing.server.security.SailingViewerRole;
 import com.sap.sailing.shared.server.SharedSailingData;
@@ -3710,13 +3710,14 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             eventDTOs = null;
             final Exception exception = eventsOrException.getB();
             sailingServerDTO = new RemoteSailingServerReferenceDTO(serverRef.getName(),
-                    serverRef.getURL().toExternalForm(), exception==null?null:exception.getMessage());
+                    serverRef.getURL().toExternalForm(), serverRef.isInclude(),
+                    exception == null ? null : exception.getMessage());
         } else {
             eventDTOs = convertToEventDTOs(events);
             List<EventBaseDTO> selectedEventBaseDTOs = serverRef.getSelectedEventIds().stream()
                     .map(element -> new EventBaseDTO(element)).collect(Collectors.toList());
             sailingServerDTO = new RemoteSailingServerReferenceDTO(serverRef.getName(),
-                    serverRef.getURL().toExternalForm(), serverRef.getInclude(), selectedEventBaseDTOs, eventDTOs);
+                    serverRef.getURL().toExternalForm(), serverRef.isInclude(), selectedEventBaseDTOs, eventDTOs);
         }
         return sailingServerDTO;
     }
@@ -4204,7 +4205,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             expandedURL = "https://" + sailingServer.getUrl();
         }
         URL serverURL = new URL(expandedURL);
-        RemoteSailingServerReference serverRef = getService().apply(new AddRemoteSailingServerReference(sailingServer.getName(), serverURL));
+        RemoteSailingServerReference serverRef = getService().apply(new AddRemoteSailingServerReference(sailingServer.getName(), serverURL, sailingServer.isInclude()));
         com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception> eventsOrException = getService()
                 .updateRemoteServerEventCacheSynchronously(serverRef, false);
         return createRemoteSailingServerReferenceDTO(serverRef, eventsOrException);
@@ -4213,14 +4214,14 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     
     @Override
     // ??
-    public RemoteSailingServerReferenceDTO updateRemoteSailingServerReferenceSelectedEventIds(
+    public RemoteSailingServerReferenceDTO updateRemoteSailingServerReference(
             final RemoteSailingServerReferenceDTO sailingServer) throws MalformedURLException {
         getSecurityService().checkCurrentUserUpdatePermission(getServerInfo());
         RemoteSailingServerReference serverRef = getService()
-                .apply(new UpdateSailingServerReferenceSelectedEvents(sailingServer.getName(),
-                        sailingServer.getInclude(), sailingServer.getSelectedEvents().stream().map(element -> {
+                .apply(new UpdateSailingServerReference(sailingServer.getName(),
+                        sailingServer.isInclude(), sailingServer.getSelectedEvents().stream().map(element -> {
                             return (UUID) element.getId();
-                        }).collect(Collectors.toList())));
+                        }).collect(Collectors.toSet())));
         com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception> eventsOrException = getService()
                 .updateRemoteServerEventCacheSynchronously(serverRef, true);
         return createRemoteSailingServerReferenceDTO(serverRef, eventsOrException);

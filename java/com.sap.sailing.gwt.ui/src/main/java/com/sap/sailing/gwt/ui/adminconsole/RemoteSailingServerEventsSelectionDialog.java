@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -20,12 +18,14 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 /**
- * A dialog to set up events inclusion for given remote sailing server instance. By default all events are loaded and
- * {@link notSelected} radio button is checked. There is a checkBox per event. If {@link include} radio is selected then
- * just selected events will be loaded. If {@link exclude} radio is selected then selected events will not be loaded.
+ * A dialog to set up events inclusion for given remote sailing server instance. There is a checkBox per event. If
+ * <code>includeRadio</code> is selected then just selected events will be loaded. If <code>excludeRadio</code> is
+ * selected then selected events will not be loaded. For existing remote server instances by default
+ * <code>excludeRadio</code> is selected with an empty list of selected events. For newly created instances
+ * <code>include</code> flag is set to <code>true</code> by default with an empty selection list of events.
  * {@link completeRemoteServerReference} constructor parameter is a remote server DTO with all events loaded. It's
  * loaded on the fly at the moment user enters this dialog. {@link referenceDTO} field is a remote server instance which
- * is persisted in database having the list of selected events and {@link include} flag persisted.
+ * is persisted in database having the list of selected events and {@link include} flag.
  * 
  * @author Dmitry Bilyk
  *
@@ -36,7 +36,6 @@ public class RemoteSailingServerEventsSelectionDialog extends DataEntryDialog<Re
     private List<EventBaseDTO> allEvents;
     private List<EventBaseDTO> selectedEvents;
     private RemoteSailingServerReferenceDTO referenceDTO;
-    private RadioButton notSelectedRadio;
     private RadioButton includeRadio;
     private RadioButton excludeRadio;
 
@@ -62,13 +61,7 @@ public class RemoteSailingServerEventsSelectionDialog extends DataEntryDialog<Re
             }
         }
 
-        if (notSelectedRadio.getValue()) {
-            referenceDTO.setInclude(null);
-        } else if (includeRadio.getValue()) {
-            referenceDTO.setInclude(true);
-        } else {
-            referenceDTO.setInclude(false);
-        }
+        referenceDTO.setInclude(includeRadio.getValue());
         referenceDTO.updateSelectedEvents(selectedEvents);
         return referenceDTO;
     }
@@ -102,52 +95,14 @@ public class RemoteSailingServerEventsSelectionDialog extends DataEntryDialog<Re
     private void createEventsInclusionTypePanel(final VerticalPanel mainPanel) {
         HorizontalPanel eventsSelectionPanel = new HorizontalPanel();
         String eventsSelectionRadioGroupName = "eventsInclusionRadioGroup";
-        notSelectedRadio = new RadioButton(eventsSelectionRadioGroupName, stringMessages.notSelected());
         includeRadio = new RadioButton(eventsSelectionRadioGroupName, stringMessages.include());
         excludeRadio = new RadioButton(eventsSelectionRadioGroupName, stringMessages.exclude());
 
-        addValueChangedHandlers();
-
-        eventsSelectionPanel.add(notSelectedRadio);
         eventsSelectionPanel.add(includeRadio);
         eventsSelectionPanel.add(excludeRadio);
-        updateInclusionSelection();
+        includeRadio.setValue(referenceDTO.isInclude());
+        excludeRadio.setValue(!referenceDTO.isInclude());
         mainPanel.add(eventsSelectionPanel);
-    }
-
-    private void updateInclusionSelection() {
-        if (referenceDTO.getInclude() == null) {
-            notSelectedRadio.setValue(true);
-            setEventsSelectionGridEnabled(false);
-        } else if (referenceDTO.getInclude()) {
-            includeRadio.setValue(true);
-            setEventsSelectionGridEnabled(true);
-        } else {
-            excludeRadio.setValue(true);
-            setEventsSelectionGridEnabled(true);
-        }
-    }
-
-    private void addValueChangedHandlers() {
-        notSelectedRadio.addValueChangeHandler(event -> {
-            if (event.getValue()) {
-                setEventsSelectionGridEnabled(false);
-            }
-        });
-        includeRadio.addValueChangeHandler(selectedValueChangeHandler());
-        excludeRadio.addValueChangeHandler(selectedValueChangeHandler());
-    }
-
-    private ValueChangeHandler<Boolean> selectedValueChangeHandler() {
-        return event -> {
-            setEventsSelectionGridEnabled(event.getValue());
-        };
-    }
-
-    private void setEventsSelectionGridEnabled(final boolean enabled) {
-        Style gridStyle = eventsSelectionGrid.getElement().getStyle();
-        gridStyle.setProperty("opacity", enabled ? "1" : "0.6");
-        gridStyle.setProperty("pointerEvents", enabled ? "auto" : "none");
     }
 
 }

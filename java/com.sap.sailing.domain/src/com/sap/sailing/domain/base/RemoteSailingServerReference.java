@@ -8,9 +8,8 @@ import com.sap.sse.common.Named;
 
 /**
  * Represents a {@link URL}-based reference to a remote server. {@link List<UUID>} represents the list of event id's
- * which are selected for inclusion or exclusion. {@link Boolean include} flag determines whether selected events will
- * be included or excluded during loading process. If it's not present (equals to null) then all events will be loaded
- * from remote server instance.
+ * which are selected for inclusion or exclusion. {@link boolean include} flag determines whether selected events will
+ * be included or excluded during loading process.
  * 
  * @author Frank
  * 
@@ -18,9 +17,9 @@ import com.sap.sse.common.Named;
 public interface RemoteSailingServerReference extends Named {
     URL getURL();
 
-    Boolean getInclude();
+    boolean isInclude();
 
-    void setInclude(Boolean include);
+    void setInclude(boolean include);
 
     Set<UUID> getSelectedEventIds();
 

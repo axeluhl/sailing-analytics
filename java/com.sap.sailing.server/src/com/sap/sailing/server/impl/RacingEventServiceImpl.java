@@ -46,6 +46,7 @@ import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 
 import javax.management.InstanceAlreadyExistsException;
@@ -1604,16 +1605,17 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public RemoteSailingServerReference addRemoteSailingServerReference(String name, URL url) {
-        RemoteSailingServerReference result = new RemoteSailingServerReferenceImpl(name, url, null, new ArrayList<UUID>());
+    public RemoteSailingServerReference addRemoteSailingServerReference(String name, URL url, boolean include) {
+        RemoteSailingServerReference result = new RemoteSailingServerReferenceImpl(name, url, include,
+                new HashSet<UUID>());
         remoteSailingServerSet.add(result);
         mongoObjectFactory.storeSailingServer(result);
         return result;
     }
 
     @Override
-    public RemoteSailingServerReference updateRemoteSailingServerReferenceWithSelectedEventIds(final String name,
-            final Boolean include, final List<UUID> selectedEventIds) {
+    public RemoteSailingServerReference updateRemoteSailingServerReference(final String name, final boolean include,
+            final Set<UUID> selectedEventIds) {
         RemoteSailingServerReference result = getRemoteServerReferenceByName(name);
         if (result != null) {
             result.updateSelectedEventIds(selectedEventIds);
@@ -1657,10 +1659,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public Iterable<Event> getEventsSelectively(final boolean include, final List<UUID> selectedEventIds) {
-        return Collections.unmodifiableCollection(
-                eventsById.values().stream().filter(element -> include ? selectedEventIds.contains(element.getId())
-                        : !selectedEventIds.contains(element.getId())).collect(Collectors.toList()));
+    public Iterable<Event> getEventsSelectively(final boolean include, final String eventIdsString) {
+        List<UUID> eventIds = Stream.of(eventIdsString.split(","))
+                .map(eventIdAsString -> UUID.fromString(eventIdAsString)).collect(Collectors.toList());
+        return Collections.unmodifiableCollection(eventsById.values().stream()
+                .filter(element -> include ? eventIds.contains(element.getId()) : !eventIds.contains(element.getId()))
+                .collect(Collectors.toList()));
     }
 
     @Override

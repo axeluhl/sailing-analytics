@@ -243,7 +243,7 @@ public class RemoteSailingServerSet {
     private Util.Pair<Iterable<EventBase>, Exception> updateRemoteServerEventCacheSynchronously(
             RemoteSailingServerReference ref) {
         Util.Pair<Iterable<EventBase>, Exception> result = loadEventsForRemoteServerReference(ref.getName(),
-                ref.getInclude(), ref.getSelectedEventIds(), ref.getURL());
+                ref.isInclude(), ref.getSelectedEventIds(), ref.getURL());
         final Pair<Iterable<EventBase>, Exception> finalResult = result;
         LockUtil.executeWithWriteLock(lock, () -> {
             // check that the server was not removed while no lock was held
@@ -257,7 +257,7 @@ public class RemoteSailingServerSet {
     }
     
     private Util.Pair<Iterable<EventBase>, Exception> loadEventsForRemoteServerReference(final String serverName,
-            final Boolean include, final Set<UUID> selectedEvents, final URL url) {
+            final boolean include, final Set<UUID> selectedEvents, final URL url) {
         BufferedReader bufferedReader = null;
         Util.Pair<Iterable<EventBase>, Exception> result;
         try {
@@ -338,15 +338,14 @@ public class RemoteSailingServerSet {
         });
     }
 
-    private URL getEventsURL(final Boolean include, final Set<UUID> selectedEvents, final URL url)
+    private URL getEventsURL(final boolean include, final Set<UUID> selectedEvents, final URL url)
             throws MalformedURLException {
         final String basePath = "/events";
-        final String eventsEndpointName;
-        if (include != null) {
-            eventsEndpointName = basePath + "?include=" + String.valueOf(include) + "&selectedEvents=" + String
-                    .join(",", Util.joinStrings(",", Util.map(selectedEvents, uuid -> uuid.toString())));
-        } else {
-            eventsEndpointName = basePath;
+        String eventsEndpointName = null;
+        eventsEndpointName = basePath + "?include=" + String.valueOf(include);
+        if (selectedEvents != null && !selectedEvents.isEmpty()) {
+            eventsEndpointName = eventsEndpointName + "&selectedEvents="
+                    + String.join(",", Util.joinStrings(",", Util.map(selectedEvents, uuid -> uuid.toString())));
         }
         return getEndpointUrl(url, eventsEndpointName);
     }
@@ -409,12 +408,11 @@ public class RemoteSailingServerSet {
     }
 
     /**
-     * Loads complete list of events for given remote reference server by sending {@link Boolean} include parameter with
-     * <code>null</code> value.
+     * Loads complete list of events for given remote reference server by sending {@link boolean} include parameter with
+     * <code>false</code> value.
      */
     public Util.Pair<Iterable<EventBase>, Exception> getEventsComplete(RemoteSailingServerReference ref) {
-        return loadEventsForRemoteServerReference(ref.getName(), /* include */ null, /* selectedEventIds */ null,
-                ref.getURL());
+        return loadEventsForRemoteServerReference(ref.getName(), false, /* selectedEventIds */ null, ref.getURL());
     }
 
     public Iterable<RemoteSailingServerReference> getLiveRemoteServerReferences() {

@@ -9,7 +9,7 @@ public class RemoteSailingServerReferenceDTO extends NamedDTO {
     private static final long serialVersionUID = -4209262742778693873L;
     private String url;
     private Iterable<EventBaseDTO> events;
-    private Boolean include;
+    private boolean include;
     private List<EventBaseDTO> selectedEvents;
 
     /**
@@ -24,15 +24,15 @@ public class RemoteSailingServerReferenceDTO extends NamedDTO {
     }
 
     public RemoteSailingServerReferenceDTO(String name, String url) {
-        this(name, url, null, Collections.<EventBaseDTO> emptyList(), Collections.<EventBaseDTO> emptyList());
+        this(name, url, true, Collections.<EventBaseDTO> emptyList(), Collections.<EventBaseDTO> emptyList());
     }
 
-    public RemoteSailingServerReferenceDTO(String name, String url, Boolean include,
+    public RemoteSailingServerReferenceDTO(String name, String url, boolean include,
             List<EventBaseDTO> selectedEventIds, Iterable<EventBaseDTO> events) {
         this(name, url, include, selectedEventIds, events, /* error message */ null);
     }
 
-    public RemoteSailingServerReferenceDTO(String name, String url, Boolean include,
+    public RemoteSailingServerReferenceDTO(String name, String url, boolean include,
             List<EventBaseDTO> selectedEventIds, Iterable<EventBaseDTO> events, String lastErrorMessage) {
         super(name);
         this.url = url;
@@ -42,8 +42,8 @@ public class RemoteSailingServerReferenceDTO extends NamedDTO {
         this.lastErrorMessage = lastErrorMessage;
     }
 
-    public RemoteSailingServerReferenceDTO(String name, String url, String lastErrorMessage) {
-        this(name, url, /* include */ null, /* selectedEventIds */ null, /* events */ null, lastErrorMessage);
+    public RemoteSailingServerReferenceDTO(String name, String url, boolean include, String lastErrorMessage) {
+        this(name, url, include, /* selectedEventIds */ null, /* events */ null, lastErrorMessage);
     }
 
     public String getUrl() {
@@ -54,11 +54,11 @@ public class RemoteSailingServerReferenceDTO extends NamedDTO {
         return events;
     }
 
-    public Boolean getInclude() {
+    public boolean isInclude() {
         return include;
     }
 
-    public void setInclude(Boolean include) {
+    public void setInclude(boolean include) {
         this.include = include;
     }
 

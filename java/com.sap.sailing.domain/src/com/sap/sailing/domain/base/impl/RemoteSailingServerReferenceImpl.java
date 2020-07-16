@@ -2,8 +2,6 @@ package com.sap.sailing.domain.base.impl;
 
 import java.net.URL;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -16,15 +14,15 @@ public class RemoteSailingServerReferenceImpl extends NamedImpl implements Remot
 
     /** the URL of the server */
     private final URL url;
-    private Boolean include;
+    private boolean include;
     private final Set<UUID> selectedEventIds;
-    
-    public RemoteSailingServerReferenceImpl(String name, URL url, Boolean include, List<UUID> selectedEventIds) {
+
+    public RemoteSailingServerReferenceImpl(String name, URL url, boolean include, Set<UUID> selectedEventIds) {
         super(name);
         this.url = url;
         this.include = include;
         // ensure the list is really immutable by copying it and handing out only unmodifiableList wrappers for it
-        this.selectedEventIds = new HashSet<>(selectedEventIds);
+        this.selectedEventIds = selectedEventIds;
     }
 
     @Override
@@ -33,18 +31,18 @@ public class RemoteSailingServerReferenceImpl extends NamedImpl implements Remot
     }
 
     @Override
-    public Boolean getInclude() {
+    public boolean isInclude() {
         return include;
     }
 
     @Override
-    public void setInclude(Boolean include) {
+    public void setInclude(boolean include) {
         this.include = include;
     }
 
     @Override
     public Set<UUID> getSelectedEventIds() {
-        return Collections.unmodifiableSet(selectedEventIds);
+        return selectedEventIds != null ? Collections.unmodifiableSet(selectedEventIds) : Collections.emptySet();
     }
 
     @Override

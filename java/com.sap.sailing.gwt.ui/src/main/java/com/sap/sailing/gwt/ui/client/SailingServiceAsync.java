@@ -302,7 +302,7 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
      * Updates {@link RemoteSailingServerReferenceDTO} sailingServer instance based on user selection regarding
      * inclusion type and selected events.
      */
-    void updateRemoteSailingServerReferenceSelectedEventIds(RemoteSailingServerReferenceDTO sailingServer,
+    void updateRemoteSailingServerReference(RemoteSailingServerReferenceDTO sailingServer,
             AsyncCallback<RemoteSailingServerReferenceDTO> callback);
 
     /*
