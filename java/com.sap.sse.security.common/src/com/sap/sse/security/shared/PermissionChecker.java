@@ -14,6 +14,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.Role;
+import com.sap.sse.security.shared.impl.UserGroup;
 
 /**
  * The {@link PermissionChecker} is an implementation of the permission checking algorithm also described in <a href=
@@ -33,7 +34,22 @@ public class PermissionChecker {
         NONE
     }
     
+    /**
+     * {@link AclResolver} is used to resolve all relevant ACLs during meta permission check.
+     */
     public interface AclResolver<A extends SecurityAccessControlList<?>, O extends AbstractOwnership<?, ?>> {
+        /**
+         * Resolved all relevant ACLs during meta permission check. Relevant ACLs are determined on several constraints:
+         * <ul>
+         *      <li>The security type is required to be given. Due to the fact that the meta permission check expands the permission to distinct permissions regarding the type and action part,
+         *      the effective check always takes place for one type only. This means, the type is always known.
+         *      <li>An ownership may be given. This is the ownership that can be derived from an expanded permission, if this permission includes an ID. In cases where a qualified permission is granted
+         *      (e.g. adding a qualified {@link Role} or adding a {@link Role} to a {@link UserGroup}), this ownership can be directly derived by the qualification because the check only affects objects
+         *      that are appropriately owned. Knowing the ownership means, ACLs are only relevant for the meta permission check if the associated object is owned as defined by the given ownership.
+         *      <li>A set of identifiers may be given in addition to the type. If the meta permission to check includes distinct identifiers, we can enumerate the objects based on the type (we always have this one)
+         *      and identifiers, which means, a direct lookup for the ACLs by {@link QualifiedObjectIdentifier} is possible.
+         * </ul>
+         */
         Iterable<A> resolveAcls(O ownershipOrNull, String type, Iterable<String> identifiersOrNull);
     }
     
