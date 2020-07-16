@@ -24,7 +24,6 @@ public class ChargebeeSubscriptionPermissionsAuthorizationFilter extends Subscri
             if (!event.isValidEvent()) {
                 throw new IllegalArgumentException("Invalid webhook event");
             }
-            logger.log(Level.INFO, "event username: " + event.getCustomerId());
             return event.getCustomerId();
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Subscription permission checking error", e);
