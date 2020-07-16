@@ -3,7 +3,6 @@ package com.sap.sailing.server.gateway.jaxrs.api;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -20,11 +19,12 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.util.RemoteServerUtil;
 
 @Path ("/v1/scopemigration")
@@ -33,6 +33,7 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
 
     private static final String MDI_PATH = "/sailingserver/api/v1/masterdataimport";
     private static final String COMPARESERVERS_PATH = "/sailingserver/api/v1/compareservers";
+    private static final String REMOTESERVERREFERENCEADD_PATH = "/sailingserver/api/v1/remoteserverreference/add";
     
     public MigrateLeaderboardgroupResource() {
     }
@@ -52,24 +53,38 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
             @FormParam("bearer1") String bearer1,
             @FormParam("bearer2") String bearer2) {
         Response response = null;
-        final String baseServerBearerToken = getService().getOrCreateTargetServerBearerToken(baseServer, user1, password1, bearer1);
-        final String dedicatedServerBearerToken = getService().getOrCreateTargetServerBearerToken(dedicatedServer, user2, password2, bearer2);
+        final String baseServerBearerToken = getService().getOrCreateTargetServerBearerToken(baseServer, user1,
+                password1, bearer1);
+        final String dedicatedServerBearerToken = getService().getOrCreateTargetServerBearerToken(dedicatedServer,
+                user2, password2, bearer2);
         try {
-            doMDI(baseServer, dedicatedServer, requestedLeaderboardGroups, baseServerBearerToken,
-                    dedicatedServerBearerToken);
-            response = Response.ok(streamingOutput(doCompareServers(baseServer, dedicatedServer,
-                    dedicatedServerBearerToken, baseServerBearerToken, requestedLeaderboardGroups))).build();
+            final JSONObject result = new JSONObject();
+            final Util.Pair<JSONObject, Number> mdi = doMDI(baseServer, dedicatedServer, requestedLeaderboardGroups,
+                    baseServerBearerToken, dedicatedServerBearerToken);
+            final Util.Pair<JSONObject, Number> compareServers = doCompareServers(baseServer, dedicatedServer,
+                    dedicatedServerBearerToken, baseServerBearerToken, requestedLeaderboardGroups);
+            final Util.Pair<JSONObject, Number> remoteServerReferenceAdd = doRemoteServerReferenceAdd(dedicatedServer,
+                    baseServer, dedicatedServerBearerToken);
+            result.put("MDI", mdi.getA());
+            result.put("CompareServers", compareServers.getA());
+            result.put("RemoteServerReferenceAdd", remoteServerReferenceAdd.getA());
+            if (mdi.getB().intValue() != 200 || compareServers.getB().intValue() != 200
+                    || remoteServerReferenceAdd.getB().intValue() != 200) {
+                response = Response.status(Status.CONFLICT).entity(streamingOutput(result)).build();
+            } else {
+                response = Response.ok(streamingOutput(result)).build();
+            }
         } catch (Exception e) {
             response = returnInternalServerError(e);
         }
         return response;
     }
     
-    private void doMDI(String baseServerHostAsString, String dedicatedServerHostAsString,
+    private Util.Pair<JSONObject, Number> doMDI(String baseServerHostAsString, String dedicatedServerHostAsString,
             Set<String> leaderboardGroupIds, String baseServerBearerToken, String dedicatedServerBearerToken)
             throws Exception {
-        final HttpURLConnection mdiConnection = createHttpUrlConnection(baseServerHostAsString,
-                dedicatedServerHostAsString, dedicatedServerBearerToken, MDI_PATH);
+        final HttpURLConnection mdiConnection = createHttpUrlConnection(dedicatedServerHostAsString,
+                dedicatedServerBearerToken, MDI_PATH);
         final StringJoiner form = new StringJoiner("&");
         form.add("targetServerUrl=" + baseServerHostAsString);
         form.add("override=false");
@@ -89,13 +104,16 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
             os.write(out);
             os.flush();
         }
+        final JSONObject json = parseInputStreamToJsonAndLog(mdiConnection);
+        Util.Pair<JSONObject, Number> result = new Util.Pair<>(json, mdiConnection.getResponseCode());
+        return result;
     }
 
-    private JSONObject doCompareServers(String baseServerHostAsString, String dedicatedServerHostAsString,
-            String dedicatedServerBearerToken, String baseServerBearerToken, Set<String> leaderboardGroupIds)
-            throws Exception {
-        final HttpURLConnection compareServersConnection = createHttpUrlConnection(baseServerHostAsString,
-                dedicatedServerHostAsString, dedicatedServerBearerToken, COMPARESERVERS_PATH);
+    private Util.Pair<JSONObject, Number> doCompareServers(String baseServerHostAsString,
+            String dedicatedServerHostAsString, String dedicatedServerBearerToken, String baseServerBearerToken,
+            Set<String> leaderboardGroupIds) throws Exception {
+        final HttpURLConnection compareServersConnection = createHttpUrlConnection(dedicatedServerHostAsString,
+                dedicatedServerBearerToken, COMPARESERVERS_PATH);
         final StringJoiner form = new StringJoiner("&");
         form.add("server1=" + baseServerHostAsString);
         form.add("server2=" + dedicatedServerHostAsString);
@@ -105,19 +123,47 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
         byte[] out = form.toString().getBytes(StandardCharsets.UTF_8);
         int length = out.length;
         compareServersConnection.setFixedLengthStreamingMode(length);
-        compareServersConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
         compareServersConnection.connect();
         try (OutputStream os = compareServersConnection.getOutputStream()) {
             os.write(out);
             os.flush();
         }
-        final JSONParser parser = new JSONParser();
-        final JSONObject result = (JSONObject) parser
-                .parse(new InputStreamReader(compareServersConnection.getInputStream(), "UTF-8"));
+        final JSONObject json = parseInputStreamToJsonAndLog(compareServersConnection);
+        final Util.Pair<JSONObject, Number> result = new Pair<JSONObject, Number>(json,
+                compareServersConnection.getResponseCode());
         return result;
     }
 
-    private HttpURLConnection createHttpUrlConnection(String baseServerHostAsString, String dedicatedServerHostAsString,
+    private Util.Pair<JSONObject, Number> doRemoteServerReferenceAdd(String dedicateServerHostAsString,
+            String baseServerHostAsString, String dedicatedServerBearerToken) throws Exception {
+        final HttpURLConnection remoteServerReferenceAddConnection = createHttpUrlConnection(dedicateServerHostAsString,
+                dedicatedServerBearerToken, REMOTESERVERREFERENCEADD_PATH);
+        final StringJoiner form = new StringJoiner("&");
+        form.add("remoteServerUrl=" + baseServerHostAsString);
+        form.add("remoteServerName=" + baseServerHostAsString);
+        byte[] out = form.toString().getBytes(StandardCharsets.UTF_8);
+        int length = out.length;
+        remoteServerReferenceAddConnection.setFixedLengthStreamingMode(length);
+        remoteServerReferenceAddConnection.connect();
+        try (OutputStream os = remoteServerReferenceAddConnection.getOutputStream()) {
+            os.write(out);
+            os.flush();
+        }
+        final JSONObject json = parseInputStreamToJsonAndLog(remoteServerReferenceAddConnection);
+        final Util.Pair<JSONObject, Number> result = new Pair<JSONObject, Number>(json,
+                remoteServerReferenceAddConnection.getResponseCode());
+        return result;
+    }
+
+    private JSONObject parseInputStreamToJsonAndLog(HttpURLConnection connection) throws Exception {
+        final JSONParser parser = new JSONParser();
+        final JSONObject json = (JSONObject) parser
+                .parse(new InputStreamReader(connection.getInputStream(), "UTF-8"));
+        logger.info(json.toString());
+        return json;
+    }
+
+    private HttpURLConnection createHttpUrlConnection(String dedicatedServerHostAsString,
             String dedicatedServerBearerToken, String path) throws Exception {
         final URL url = RemoteServerUtil
                 .createRemoteServerUrl(RemoteServerUtil.createBaseUrl(dedicatedServerHostAsString), path, null);
@@ -132,13 +178,14 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
     private StringJoiner addLeaderboardGroupIdsToStringJoiner(Set<String> leaderboardGroupIds) {
         final StringJoiner form = new StringJoiner("&");
         for (String uuid : leaderboardGroupIds) {
-            form.add("uuids[]=" + uuid);
+            form.add("UUID[]=" + uuid);
         }
         return form;
     }
-    
+
     private Response returnInternalServerError(Throwable e) {
-        final Response response = Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.toString()).build();
+        final Response response = Response.status(Status.INTERNAL_SERVER_ERROR)
+                .entity(e.toString() + "\nSee server log for detailed information.").build();
         logger.severe(e.toString());
         return response;
     }
