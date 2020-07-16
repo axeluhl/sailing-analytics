@@ -14,7 +14,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.shiro.authz.UnauthorizedException;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
@@ -51,7 +50,6 @@ public class MasterDataImportResource extends AbstractSailingServerResource {
             response = Response.status(Status.BAD_REQUEST).build();
         } else {
             final UUID importMasterDataUid = UUID.randomUUID();
-            final JSONArray importedLeaderboardGroupNames = getLeaderboardGroupNamesFromIdList(requestedLeaderboardGroupIds);
             try {
                 getSecurityService().checkCurrentUserServerPermission(ServerActions.CAN_IMPORT_MASTERDATA);
                 getService().importMasterData(targetServerUrlAsString,
@@ -59,7 +57,7 @@ public class MasterDataImportResource extends AbstractSailingServerResource {
                         compress, exportWind, exportDeviceConfigs, targetServerUsername, targetServerPassword,
                         targetServerBearerToken, exportTrackedRacesAndStartTracking, importMasterDataUid);
                 final JSONObject jsonResponse = new JSONObject();
-                jsonResponse.put("LeaderboardgroupsImported", importedLeaderboardGroupNames);
+                jsonResponse.put("LeaderboardgroupsImported", getLeaderboardGroupNamesFromIdList(requestedLeaderboardGroupIds));
                 jsonResponse.put("ImportedFrom", targetServerUrlAsString);
                 jsonResponse.put("override", override);
                 jsonResponse.put("exportWind", exportWind);
@@ -81,10 +79,10 @@ public class MasterDataImportResource extends AbstractSailingServerResource {
         return response;
     }
     
-    private JSONArray getLeaderboardGroupNamesFromIdList(List<UUID> uuidList) {
-        JSONArray result = new JSONArray();
+    private JSONObject getLeaderboardGroupNamesFromIdList(List<UUID> uuidList) {
+        JSONObject result = new JSONObject();
         for (UUID uuid : uuidList) {
-            result.add((getService().getLeaderboardGroupByID(uuid).getName()));
+            result.put(uuid, getService().getLeaderboardGroupByID(uuid).getName());
         }
         return result;
     }
