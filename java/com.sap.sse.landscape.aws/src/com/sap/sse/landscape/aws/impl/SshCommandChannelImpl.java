@@ -10,11 +10,11 @@ import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
-import com.sap.sse.landscape.aws.SshShellCommandChannel;
+import com.sap.sse.landscape.aws.SshCommandChannel;
 
 
-public class SshShellCommandChannelImpl implements SshShellCommandChannel {
-    private static final Logger logger = Logger.getLogger(SshShellCommandChannelImpl.class.getName());
+public class SshCommandChannelImpl implements SshCommandChannel {
+    private static final Logger logger = Logger.getLogger(SshCommandChannelImpl.class.getName());
     private final ChannelExec channel;
     private InputStream stdout;
     
@@ -23,7 +23,7 @@ public class SshShellCommandChannelImpl implements SshShellCommandChannel {
      *            the result of a {@link Session#openChannel(String)} call; the channel is assumed to not yet be
      *            {@link Channel#connect() connected}
      */
-    public SshShellCommandChannelImpl(ChannelExec channel) throws IOException, JSchException, InterruptedException {
+    public SshCommandChannelImpl(ChannelExec channel) throws IOException, JSchException, InterruptedException {
         this.channel = channel;
     }
 

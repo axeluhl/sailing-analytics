@@ -140,7 +140,7 @@ public class ConnectivityTest {
             InetAddress address = host.getPublicAddress(Duration.ONE_SECOND.times(20));
             assertNotNull(address);
             logger.info("Obtained public IP address "+address);
-            SshShellCommandChannel shellChannel = null;
+            SshCommandChannel shellChannel = null;
             int sshConnectAttempts = 20;
             while (shellChannel == null && sshConnectAttempts-- > 0) {
                 try {

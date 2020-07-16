@@ -24,7 +24,7 @@ import com.sap.sse.landscape.SecurityGroup;
 import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
-import com.sap.sse.landscape.aws.SshShellCommandChannel;
+import com.sap.sse.landscape.aws.SshCommandChannel;
 import com.sap.sse.landscape.ssh.JCraftLogAdapter;
 import com.sap.sse.landscape.ssh.SSHKeyPair;
 import com.sap.sse.landscape.ssh.YesUserInfo;
@@ -104,7 +104,7 @@ public class AwsInstanceImpl implements AwsInstance {
      * @see #createSshChannel(String)
      */
     @Override
-    public SshShellCommandChannel createRootSshChannel() throws JSchException, IOException, InterruptedException {
+    public SshCommandChannel createRootSshChannel() throws JSchException, IOException, InterruptedException {
         return createSshChannel(ROOT_USER_NAME);
     }
     
@@ -117,8 +117,8 @@ public class AwsInstanceImpl implements AwsInstance {
      * {@link PipedInputStream} wrapped around a {@link PipedOutputStream} which you set to the channel.
      */
     @Override
-    public SshShellCommandChannel createSshChannel(String sshUserName) throws JSchException, IOException, InterruptedException {
-        return new SshShellCommandChannelImpl((ChannelExec) createSshChannelInternal(sshUserName, "exec"));
+    public SshCommandChannel createSshChannel(String sshUserName) throws JSchException, IOException, InterruptedException {
+        return new SshCommandChannelImpl((ChannelExec) createSshChannelInternal(sshUserName, "exec"));
     }
     
     private Channel createSshChannelInternal(String sshUserName, String channelType) throws JSchException, IOException {

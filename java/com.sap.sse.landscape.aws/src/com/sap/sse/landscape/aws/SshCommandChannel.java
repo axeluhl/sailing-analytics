@@ -11,7 +11,7 @@ import com.jcraft.jsch.JSchException;
  * @author Axel Uhl (D043530)
  *
  */
-public interface SshShellCommandChannel {
+public interface SshCommandChannel {
     /**
      * @param commandLine
      *            the command without any trailing line separator
