@@ -424,7 +424,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String remoteServerInstances();
     String remoteServerEventsSelection();
     String eventsListIsEmpty();
-    String notSelected();
     String include();
     String exclude();
     String localServer();
