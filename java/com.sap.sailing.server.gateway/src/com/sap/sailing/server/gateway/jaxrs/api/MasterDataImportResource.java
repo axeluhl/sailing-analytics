@@ -35,14 +35,14 @@ public class MasterDataImportResource extends AbstractSailingServerResource {
             @FormParam("targetServerUsername") String targetServerUsername,
             @FormParam("targetServerPassword") String targetServerPassword,
             @FormParam("targetServerBearerToken") String targetServerBearerToken,
-            @FormParam("names[]") List<String> requestedLeaderboardGroups, 
+            @FormParam("uuids[]") List<UUID> requestedLeaderboardGroupIds, 
             @FormParam("override") Boolean override,
             @FormParam("compress") Boolean compress, 
             @FormParam("exportWind") Boolean exportWind,
             @FormParam("exportDeviceConfigs") Boolean exportDeviceConfigs,
             @FormParam("exportTrackedRacesAndStartTracking") Boolean exportTrackedRacesAndStartTracking) {
         Response response = null;
-        if (!Util.hasLength(targetServerUrlAsString) || requestedLeaderboardGroups.isEmpty() || override == null
+        if (!Util.hasLength(targetServerUrlAsString) || requestedLeaderboardGroupIds.isEmpty() || override == null
                 || compress == null || exportWind == null || exportDeviceConfigs == null
                 || exportTrackedRacesAndStartTracking == null
                 || ((Util.hasLength(targetServerUsername) && Util.hasLength(targetServerUsername))
@@ -53,11 +53,11 @@ public class MasterDataImportResource extends AbstractSailingServerResource {
             try {
                 getSecurityService().checkCurrentUserServerPermission(ServerActions.CAN_IMPORT_MASTERDATA);
                 getService().importMasterData(targetServerUrlAsString,
-                        requestedLeaderboardGroups.toArray(new String[requestedLeaderboardGroups.size()]), override,
+                        requestedLeaderboardGroupIds.toArray(new UUID[requestedLeaderboardGroupIds.size()]), override,
                         compress, exportWind, exportDeviceConfigs, targetServerUsername, targetServerPassword,
                         targetServerBearerToken, exportTrackedRacesAndStartTracking, importMasterDataUid);
                 final JSONObject jsonResponse = new JSONObject();
-                jsonResponse.put("LeaderboardgroupsImported", requestedLeaderboardGroups);
+                jsonResponse.put("LeaderboardgroupsImported", getLeaderboardGroupNamesFromIdList(requestedLeaderboardGroupIds));
                 jsonResponse.put("ImportedFrom", targetServerUrlAsString);
                 jsonResponse.put("override", override);
                 jsonResponse.put("exportWind", exportWind);
@@ -77,5 +77,13 @@ public class MasterDataImportResource extends AbstractSailingServerResource {
             }
         }
         return response;
+    }
+    
+    private JSONObject getLeaderboardGroupNamesFromIdList(List<UUID> uuidList) {
+        JSONObject result = new JSONObject();
+        for (UUID uuid : uuidList) {
+            result.put(uuid, getService().getLeaderboardGroupByID(uuid).getName());
+        }
+        return result;
     }
 }

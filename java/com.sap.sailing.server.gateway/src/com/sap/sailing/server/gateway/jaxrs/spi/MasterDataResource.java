@@ -54,7 +54,7 @@ public class MasterDataResource extends AbstractSailingServerResource {
     
     @GET
     @Produces("application/x-java-serialized-object")
-    public Response getMasterDataByLeaderboardGroups(@QueryParam("uuids[]") List<String> requestedLeaderboardGroupsUuids,
+    public Response getMasterDataByLeaderboardGroups(@QueryParam("uuids[]") List<UUID> requestedLeaderboardGroupsUuids,
             @QueryParam("compress") Boolean compress, @QueryParam("exportWind") Boolean exportWind,
             @QueryParam("exportDeviceConfigs") Boolean exportDeviceConfigs,
             @QueryParam("exportTrackedRacesAndStartTracking") Boolean exportTrackedRacesAndStartTracking)
@@ -90,8 +90,8 @@ public class MasterDataResource extends AbstractSailingServerResource {
         } else {
             // Add all requested LeaderboardGroups.
             // The request will fail due to missing LeaderboardGroup READ permissions.
-            for (String uuid : requestedLeaderboardGroupsUuids) {
-                LeaderboardGroup group = allLeaderboardGroups.get(UUID.fromString(uuid));
+            for (UUID uuid : requestedLeaderboardGroupsUuids) {
+                LeaderboardGroup group = allLeaderboardGroups.get(uuid);
                 if (group != null) {
                     if (!securityService.hasCurrentUserReadPermission(group)) {
                         throw new AuthorizationException(
