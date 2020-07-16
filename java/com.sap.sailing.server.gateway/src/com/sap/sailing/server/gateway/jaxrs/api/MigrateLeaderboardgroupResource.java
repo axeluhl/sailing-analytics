@@ -34,6 +34,7 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
     private static final String MDI_PATH = "/sailingserver/api/v1/masterdataimport";
     private static final String COMPARESERVERS_PATH = "/sailingserver/api/v1/compareservers";
     private static final String REMOTESERVERREFERENCEADD_PATH = "/sailingserver/api/v1/remoteserverreference/add";
+    private static final String REMOTESERVERREFERENCEDELETE_PATH = "/sailingserver/api/v1/remoteserverreference/remove";
     
     public MigrateLeaderboardgroupResource() {
     }
@@ -42,7 +43,7 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces("application/json;charset=UTF-8")
-    public Response migrateLeaderboardGroup(
+    public Response moveToDedicatedServer(
             @FormParam("server1") String baseServer,
             @FormParam("server2") String dedicatedServer,
             @FormParam("UUID[]") Set<String> requestedLeaderboardGroups,
@@ -80,20 +81,75 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
         return response;
     }
     
-    private Util.Pair<JSONObject, Number> doMDI(String baseServerHostAsString, String dedicatedServerHostAsString,
-            Set<String> leaderboardGroupIds, String baseServerBearerToken, String dedicatedServerBearerToken)
+    @Path ("/movetoarchiveserver")
+    @POST
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces("application/json;charset=UTF-8")
+    public Response moveToArchive(
+            @FormParam("archive") String archiveServer,
+            @FormParam("dedicated") String dedicatedServer,
+            @FormParam("UUID[]") Set<String> requestedLeaderboardGroups,
+            @FormParam("user1") String user1,
+            @FormParam("user2") String user2,
+            @FormParam("password1") String password1,
+            @FormParam("password2") String password2,
+            @FormParam("bearer1") String bearer1,
+            @FormParam("bearer2") String bearer2) {
+        Response response = null;
+        final String archiveServerBearerToken = getService().getOrCreateTargetServerBearerToken(archiveServer, user1,
+                password1, bearer1);
+        final String dedicatedServerBearerToken = getService().getOrCreateTargetServerBearerToken(dedicatedServer,
+                user2, password2, bearer2);
+        try {
+            final JSONObject result = new JSONObject();
+            final Util.Pair<JSONObject, Number> mdi = doMDI(dedicatedServer, archiveServer, requestedLeaderboardGroups,
+                    dedicatedServerBearerToken, archiveServerBearerToken);
+            final Util.Pair<JSONObject, Number> compareServers = doCompareServers(dedicatedServer, archiveServer,
+                    archiveServerBearerToken, dedicatedServerBearerToken, requestedLeaderboardGroups);
+            final Util.Pair<JSONObject, Number> remoteServerReferenceRemove = doRemoteServerReferenceRemove(
+                    dedicatedServer, archiveServer, dedicatedServerBearerToken);
+            result.put("MDI", mdi.getA());
+            result.put("CompareServers", compareServers.getA());
+            result.put("RemoteServerReferenceRemoved", remoteServerReferenceRemove.getA());
+            if (mdi.getB().intValue() != 200 || compareServers.getB().intValue() != 200
+                    || remoteServerReferenceRemove.getB().intValue() != 200) {
+                response = Response.status(Status.CONFLICT).entity(streamingOutput(result)).build();
+            } else {
+                response = Response.ok(streamingOutput(result)).build();
+            }
+        } catch (Exception e) {
+            response = returnInternalServerError(e);
+        }
+        return response;
+    }
+    
+    /**
+     * 
+     * @param remoteServerHostAsString 
+     *          the server from which to import / the exporting server
+     * @param dedicatedServerHostAsString
+     *          the server where to import to 
+     * @param leaderboardGroupIds
+     *          leaderboardgroup UUIDs to import
+     * @param remoteServerBearerToken
+     *          authentication towards the exporting server
+     * @param dedicatedServerBearerToken
+     *          authentication towards the importing server
+     */
+    private Util.Pair<JSONObject, Number> doMDI(String remoteServerHostAsString, String dedicatedServerHostAsString,
+            Set<String> leaderboardGroupIds, String remoteServerBearerToken, String dedicatedServerBearerToken)
             throws Exception {
         final HttpURLConnection mdiConnection = createHttpUrlConnection(dedicatedServerHostAsString,
                 dedicatedServerBearerToken, MDI_PATH);
         final StringJoiner form = new StringJoiner("&");
-        form.add("targetServerUrl=" + baseServerHostAsString);
+        form.add("remoteServer=" + remoteServerHostAsString);
         form.add("override=false");
         form.add("compress=true");
         form.add("exportWind=true");
         // TODO: Think about device configs
         form.add("exportDeviceConfigs=false");
         form.add("exportTrackedRacesAndStartTracking=true");
-        form.add("targetServerBearerToken=" + URLEncoder.encode(baseServerBearerToken, "utf-8"));
+        form.add("remoteServerBearerToken=" + URLEncoder.encode(remoteServerBearerToken, "utf-8"));
         form.add(addLeaderboardGroupIdsToStringJoiner(leaderboardGroupIds).toString());
         byte[] out = form.toString().getBytes(StandardCharsets.UTF_8);
         int length = out.length;
@@ -155,6 +211,22 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
         return result;
     }
 
+    private Util.Pair<JSONObject, Number> doRemoteServerReferenceRemove(String serverFromWhichToDelete,
+            String serverNameToDelete, String serverFromWhichToDeleteBearerToken) throws Exception {
+        final HttpURLConnection remoteServerReferenceDelete = createHttpUrlConnection(serverFromWhichToDelete,
+                serverFromWhichToDeleteBearerToken, REMOTESERVERREFERENCEDELETE_PATH);
+        byte[] out = ("remoteServerName=" + serverNameToDelete).getBytes(StandardCharsets.UTF_8);
+        int length = out.length;
+        remoteServerReferenceDelete.setFixedLengthStreamingMode(length);
+        try (OutputStream os = remoteServerReferenceDelete.getOutputStream()) {
+            os.write(out);
+            os.flush();
+        }
+        final JSONObject json = parseInputStreamToJsonAndLog(remoteServerReferenceDelete);
+        final Util.Pair<JSONObject, Number> result = new Pair<JSONObject, Number>(json, remoteServerReferenceDelete.getResponseCode());
+        return result;
+    }
+
     private JSONObject parseInputStreamToJsonAndLog(HttpURLConnection connection) throws Exception {
         final JSONParser parser = new JSONParser();
         final JSONObject json = (JSONObject) parser
@@ -185,7 +257,7 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
 
     private Response returnInternalServerError(Throwable e) {
         final Response response = Response.status(Status.INTERNAL_SERVER_ERROR)
-                .entity(e.toString() + "\nSee server log for detailed information.").build();
+                .entity(e.toString() + "\nYou might have a inconsistent state. See server log(s) for detailed information.").build();
         logger.severe(e.toString());
         return response;
     }

@@ -1,0 +1,78 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <link href='../../../../sailing-fontface-1.0.cache.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+    <title>SAP Sailing Analytics Webservices API Version 1.0</title>
+</head>
+<body>
+<h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
+<h2>URL: /api/v1/scopemigration/movetoarchiveserver</h2>
+
+<b>Description:</b>
+<p>This endpoint is used to move a leaderboard group set from a dedicated server to an archive server.</p>
+<br/>
+<table>
+    <tr>
+        <td>Webservice Type:</td>
+        <td>POST</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>json</td>
+    </tr>
+    <tr>
+        <td>Mandatory parameters:</td>
+        <td>
+            <div>archive, the host name of the archive server.</div>
+            <div>dedicated, the host name of the dedicated server (where the groups currently live).</div>
+            <div>UUID[], a set of leaderboardgroup UUIDs.</div>
+            <div>user1, username for archive server.</div>
+            <div>user2, username for dedicated server.</div>
+            <div>password1, password for user1 on archive server.</div>
+            <div>password2, password for user2 on dedicated server.</div>
+            <div>bearer1, bearer token for user1 on archive server, to provide instead of username and password.</div>
+            <div>bearer2, bearer token for user2 on dedicated server, see bearer1.</div>
+        </td>
+    </tr>
+    <tr>
+        <td>Request method:</td>
+        <td>POST</td>
+    </tr>
+    <tr>
+        <td>Example:</td>
+        <td>curl -X POST localhost:8889/sailingserver/api/v1/scopemigration/movetoarchiveserver -d "user1=admin" -d "user2=admin" -d "password2=admin" -d "password1=admin" -d "UUID[]=75e86618-8b0f-4291-9661-6b2a1fa47dff" -d "archive=localhost:8888" -d "dedicated=localhost:8889" -H "Authorization: Basic YWRtaW46YWRtaW4="<br>
+        produces output:<pre>
+        {
+          "MDI": {
+            "LeaderboardgroupsImported": {
+              "75e86618-8b0f-4291-9661-6b2a1fa47dff": "MyTestEventWithStrangeCharact/er*s"
+            },
+            "ImportedFrom": "localhost:8889",
+            "override": false,
+            "exportWind": true,
+            "exportDeviceConfigs": false,
+            "exportTrackedRacesAndStartTracking": true
+          },
+          "CompareServers": {
+            "localhost:8888": [],
+            "localhost:8889": []
+          },
+          "RemoteServerReferenceRemoved": {
+            "remoteServerNameRemoved": "localhost:8888",
+            "remoteServerUrlRemoved": "http://localhost:8888",
+            "remoteServerEventsRemoved": [
+              "Hempel World Cup Series 2019 - Genoa, Italy"
+            ]
+          }
+        }
+        </pre>
+        </td>
+    </tr>
+</table>
+<div style="height: 1em;"></div>
+<a href="index.html">Back to Web Service Overview</a> 
+</body>
+</html>
