@@ -231,7 +231,7 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
         final JSONParser parser = new JSONParser();
         final JSONObject json = (JSONObject) parser
                 .parse(new InputStreamReader(connection.getInputStream(), "UTF-8"));
-        logger.info(json.toString());
+        logger.info(connection.getURL().toString() + " returned: " + json.toString());
         return json;
     }
 
