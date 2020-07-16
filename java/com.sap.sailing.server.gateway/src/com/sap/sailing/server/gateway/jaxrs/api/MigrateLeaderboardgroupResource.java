@@ -1,7 +1,9 @@
 package com.sap.sailing.server.gateway.jaxrs.api;
 
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -18,6 +20,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sse.security.util.RemoteServerUtil;
 
@@ -25,6 +31,8 @@ import com.sap.sse.security.util.RemoteServerUtil;
 public class MigrateLeaderboardgroupResource extends AbstractSailingServerResource {
     private static final Logger logger = Logger.getLogger(MigrateLeaderboardgroupResource.class.getName());
 
+    private static final String MDI_PATH = "/sailingserver/api/v1/masterdataimport";
+    private static final String COMPARESERVERS_PATH = "/sailingserver/api/v1/compareservers";
     
     public MigrateLeaderboardgroupResource() {
     }
@@ -49,38 +57,30 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
         try {
             doMDI(baseServer, dedicatedServer, requestedLeaderboardGroups, baseServerBearerToken,
                     dedicatedServerBearerToken);
+            response = Response.ok(streamingOutput(doCompareServers(baseServer, dedicatedServer,
+                    dedicatedServerBearerToken, baseServerBearerToken, requestedLeaderboardGroups))).build();
         } catch (Exception e) {
             response = returnInternalServerError(e);
         }
-        
-        
         return response;
     }
     
-
     private void doMDI(String baseServerHostAsString, String dedicatedServerHostAsString,
             Set<String> leaderboardGroupIds, String baseServerBearerToken, String dedicatedServerBearerToken)
             throws Exception {
-        final URL mdiUrl = RemoteServerUtil.createRemoteServerUrl(
-                RemoteServerUtil.createBaseUrl(dedicatedServerHostAsString), "/sailingserver/api/v1/masterdataimport",
-                null);
-        final HttpURLConnection mdiConnection = (HttpURLConnection) mdiUrl.openConnection();
-        mdiConnection.setRequestProperty("Authorization", "Bearer " + dedicatedServerBearerToken);
-        mdiConnection.setRequestMethod("POST");
-        mdiConnection.setDoOutput(true);
-        final StringJoiner query = new StringJoiner("&");
-        query.add("targetServerUrl=" + baseServerHostAsString);
-        query.add("override=false");
-        query.add("compress=true");
-        query.add("exportWind=true");
+        final HttpURLConnection mdiConnection = createHttpUrlConnection(baseServerHostAsString,
+                dedicatedServerHostAsString, dedicatedServerBearerToken, MDI_PATH);
+        final StringJoiner form = new StringJoiner("&");
+        form.add("targetServerUrl=" + baseServerHostAsString);
+        form.add("override=false");
+        form.add("compress=true");
+        form.add("exportWind=true");
         // TODO: Think about device configs
-        query.add("exportDeviceConfigs=false");
-        query.add("exportTrackedRacesAndStartTracking=true");
-        query.add("targetServerBearerToken=" + URLEncoder.encode(baseServerBearerToken, "utf-8"));
-        for (String uuid : leaderboardGroupIds) {
-            query.add("uuids[]=" + uuid);
-        }
-        byte[] out = query.toString().getBytes(StandardCharsets.UTF_8);
+        form.add("exportDeviceConfigs=false");
+        form.add("exportTrackedRacesAndStartTracking=true");
+        form.add("targetServerBearerToken=" + URLEncoder.encode(baseServerBearerToken, "utf-8"));
+        form.add(addLeaderboardGroupIdsToStringJoiner(leaderboardGroupIds).toString());
+        byte[] out = form.toString().getBytes(StandardCharsets.UTF_8);
         int length = out.length;
         mdiConnection.setFixedLengthStreamingMode(length);
         mdiConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
@@ -90,10 +90,55 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
             os.flush();
         }
     }
+
+    private JSONObject doCompareServers(String baseServerHostAsString, String dedicatedServerHostAsString,
+            String dedicatedServerBearerToken, String baseServerBearerToken, Set<String> leaderboardGroupIds)
+            throws Exception {
+        final HttpURLConnection compareServersConnection = createHttpUrlConnection(baseServerHostAsString,
+                dedicatedServerHostAsString, dedicatedServerBearerToken, COMPARESERVERS_PATH);
+        final StringJoiner form = new StringJoiner("&");
+        form.add("server1=" + baseServerHostAsString);
+        form.add("server2=" + dedicatedServerHostAsString);
+        form.add("bearer1=" + URLEncoder.encode(baseServerBearerToken, "utf-8"));
+        form.add("bearer2=" + URLEncoder.encode(dedicatedServerBearerToken, "utf-8"));
+        form.add(addLeaderboardGroupIdsToStringJoiner(leaderboardGroupIds).toString());
+        byte[] out = form.toString().getBytes(StandardCharsets.UTF_8);
+        int length = out.length;
+        compareServersConnection.setFixedLengthStreamingMode(length);
+        compareServersConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+        compareServersConnection.connect();
+        try (OutputStream os = compareServersConnection.getOutputStream()) {
+            os.write(out);
+            os.flush();
+        }
+        final JSONParser parser = new JSONParser();
+        final JSONObject result = (JSONObject) parser
+                .parse(new InputStreamReader(compareServersConnection.getInputStream(), "UTF-8"));
+        return result;
+    }
+
+    private HttpURLConnection createHttpUrlConnection(String baseServerHostAsString, String dedicatedServerHostAsString,
+            String dedicatedServerBearerToken, String path) throws Exception {
+        final URL url = RemoteServerUtil
+                .createRemoteServerUrl(RemoteServerUtil.createBaseUrl(dedicatedServerHostAsString), path, null);
+        final HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+        urlConnection.setRequestProperty("Authorization", "Bearer " + dedicatedServerBearerToken);
+        urlConnection.setRequestMethod("POST");
+        urlConnection.setDoOutput(true);
+        urlConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+        return urlConnection;
+    }
     
+    private StringJoiner addLeaderboardGroupIdsToStringJoiner(Set<String> leaderboardGroupIds) {
+        final StringJoiner form = new StringJoiner("&");
+        for (String uuid : leaderboardGroupIds) {
+            form.add("uuids[]=" + uuid);
+        }
+        return form;
+    }
     
     private Response returnInternalServerError(Throwable e) {
-        final Response response = Response.status(Status.INTERNAL_SERVER_ERROR).build();
+        final Response response = Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.toString()).build();
         logger.severe(e.toString());
         return response;
     }
