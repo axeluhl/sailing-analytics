@@ -9,6 +9,7 @@ import java.net.UnknownHostException;
 import java.util.logging.Logger;
 
 import com.jcraft.jsch.Channel;
+import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
@@ -89,7 +90,7 @@ public class AwsInstanceImpl implements AwsInstance {
         final SSHKeyPair keyPair = landscape.getSSHKeyPair(getRegion(), keyName);
         final JSch jsch = new JSch();
         JSch.setLogger(new JCraftLogAdapter());
-        jsch.addIdentity(keyName, landscape.getDescryptedPrivateKey(keyPair), keyPair.getPublicKey(), /* TODO passphrase */ null);
+        jsch.addIdentity(keyName, landscape.getDescryptedPrivateKey(keyPair), keyPair.getPublicKey(), /* passphrase */ null);
         final InetAddress address = getPublicAddress();
         if (address == null) {
             throw new IllegalStateException("Instance "+getInstanceId()+" doesn't have a public IP address");
@@ -117,8 +118,7 @@ public class AwsInstanceImpl implements AwsInstance {
      */
     @Override
     public SshShellCommandChannel createSshChannel(String sshUserName) throws JSchException, IOException, InterruptedException {
-        // TODO use "exec" channel type for plain command execution, producing a ChannelExec instance
-        return new SshShellCommandChannelImpl(createSshChannelInternal(sshUserName, "shell"));
+        return new SshShellCommandChannelImpl((ChannelExec) createSshChannelInternal(sshUserName, "exec"));
     }
     
     private Channel createSshChannelInternal(String sshUserName, String channelType) throws JSchException, IOException {

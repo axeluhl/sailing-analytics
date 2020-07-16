@@ -141,7 +141,7 @@ public class ConnectivityTest {
             assertNotNull(address);
             logger.info("Obtained public IP address "+address);
             SshShellCommandChannel shellChannel = null;
-            int sshConnectAttempts = 10;
+            int sshConnectAttempts = 20;
             while (shellChannel == null && sshConnectAttempts-- > 0) {
                 try {
                     shellChannel = host.createRootSshChannel();
@@ -154,9 +154,8 @@ public class ConnectivityTest {
             }
             assertNotNull(shellChannel);
             logger.info("Shell channel connected. Waiting for it to become responsive...");
-            byte[] output = shellChannel.sendCommandLineSynchronously("pwd");
-            assertEquals("/root\n", turnAllLineSeparatorsIntoLineFeed(new String(output)));
-            shellChannel.disconnect();
+            shellChannel.sendCommandLineSynchronously("pwd", System.err);
+            assertEquals("/root\n", turnAllLineSeparatorsIntoLineFeed(new String(shellChannel.getStreamContentsAsByteArray())));
         } finally {
             landscape.terminate(host);
             landscape.deleteKeyPair(region, keyName);
