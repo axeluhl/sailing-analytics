@@ -27,6 +27,7 @@ public class SharingButtons extends Composite {
     private static final String OG_TYPE = "og:type";
     private static final String OG_TITLE = "og:title";
     private static final String OG_DESCRIPTION = "og:description";
+    private static final String OG_URL = "og:url";
     private static SharingButtonsUiBinder uiBinder = GWT.create(SharingButtonsUiBinder.class);
 
     interface SharingButtonsUiBinder extends UiBinder<Widget, SharingButtons> {
@@ -81,6 +82,10 @@ public class SharingButtons extends Composite {
         imageMetaTag.setAttribute(RDFA_ATTRIBUTE_IDENTIFIER, OG_IMAGE);
         imageMetaTag.setContent(provider.getImageUrl());
         metaElements.add(imageMetaTag);
+        final MetaElement urlMetaTag = findOrCreateMetaElement(OG_URL, document);
+        urlMetaTag.setAttribute(RDFA_ATTRIBUTE_IDENTIFIER, OG_URL);
+        urlMetaTag.setContent(Window.Location.getHref());
+        metaElements.add(urlMetaTag);
         appendMetaElements(metaElements);
     }
 
