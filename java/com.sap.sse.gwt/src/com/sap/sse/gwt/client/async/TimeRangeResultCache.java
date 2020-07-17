@@ -18,10 +18,9 @@ import com.sap.sse.common.Util.Pair;
  * results. In the context of a {@link TimeRangeActionsExecutor} such a cache is responsible for managing the requests
  * for a single {@code Key}, such as a competitor or a boat class.
  * <p>
- * 
+ *
  * Before making a request for a time range, the executor has to call
- * {@link #trimAndRegisterRequest(TimeRange, boolean)}. When {@code false} is used for the {@code forceTimeRange}
- * parameter, this cache will
+ * {@link #trimAndRegisterRequest(TimeRange, boolean)}.
  *
  * @param <Result>
  *            type of the results of the remote calls which are to be cached
@@ -40,14 +39,18 @@ public class TimeRangeResultCache<Result> {
      * trimming.
      * <p>
      *
-     * This request keeps track of whether it {@link #hasResult() has received a result}. It furthermore manages a set
-     * of {@link AsyncCallback} callbacks that will be triggered exactly once when a result has been
-     * {@link #setResult(Pair) received} for this request.
+     * Dependent requests are represented as a <b>Petri Net</b>. {@link Request}s are vertices and {@link #childrenSet}
+     * and {@link #parentSet} make up doubly-linked edges. {@link Result}s are tokens which get handled by a transition
+     * function implemented in {@link #notifyActionSuccessIfHasAllResults()}.
      * <p>
      *
-     * Dependent requests are represented as a petri net. {@link Request}s are vertices and {@link #childrenSet} and
-     * {@link #parentSet} make up doubly-linked edges. {@link Result}s are tokens which get handled by a transition
-     * function implemented in {@link #notifyActionSuccessIfHasAllResults()}.
+     * To keep things organized a "child" {@link Request} will never act on its own but always notify its "parent"
+     * {@link Request}s to act on its behalf. For this reason most methods are written from the "parents" perspective.
+     * <p>
+     *
+     * This request keeps track of whether it {@link #hasResult() has received a result}. It furthermore manages a set
+     * of {@link AsyncCallback} {@link #callback} that will be triggered <b>exactly once</b> when a result has been
+     * {@link #setResult(Pair) received} for this request.
      */
     protected class Request {
         private final TimeRangeAsyncAction<?, ?> action;
@@ -72,20 +75,27 @@ public class TimeRangeResultCache<Result> {
         /**
          * Obtains all other requests (excluding {@code this} request) of which all or parts of their results are
          * required to combine them with the results of this trimmed request into a result that reflects the response to
-         * the original request from which this request was derived by trimming.
+         * the original request {@link #action} from which this request was derived by trimming.
          */
         public Set<Request> getChildrenSet() {
             return childrenSet;
         }
 
         /**
-         * Might immediately call {@link #notifyActionSuccessIfHasAllResults()}.
+         * Adds a {@link List} of {@link Request}s to this one indicating that this {@link Request} is dependent on
+         * their {@link Result}s.
+         * <p>
+         * Might immediately call {@link #notifyActionSuccessIfHasAllResults()} if all children have their results.
+         *
+         * @throws IllegalStateException
+         *             if invoked after {@link #callback} has been called.
          */
-        public void addChildren(List<Request> requests) {
+        public void addChildren(List<Request> requests) throws IllegalStateException {
             if (callbackWasCalled) {
                 throw new IllegalStateException("Children may not be added after results have been submitted!");
             }
-            childrenWithoutResultCounter++; // This will later be undone and serves the purpose of delaying the call to notifyActionSuccessIfHasAllResults until all children have been added
+            childrenWithoutResultCounter++; // This will later be undone and serves the purpose of delaying the call to
+                                            // notifyActionSuccessIfHasAllResults until all children have been added
             for (Request request : requests) {
                 assert !this.equals(request);
                 final boolean notPresentBefore = childrenSet.add(request);
@@ -98,6 +108,10 @@ public class TimeRangeResultCache<Result> {
             notifyActionSuccessIfHasAllResults();
         }
 
+        /**
+         * Clears {@link #childrenSet} and evicts the removed {@link Request}s from
+         * {@link TimeRangeResultCache#requestCache} if they are no longer needed.
+         */
         private void releaseChildren() {
             for (Request child : childrenSet) {
                 child.removeParent(this);
@@ -108,10 +122,20 @@ public class TimeRangeResultCache<Result> {
             childrenSet.clear();
         }
 
+        /**
+         * Obtains all {@link Request}s that still depend on this one. Those {@link Request}s will be notified by this
+         * one once it receives its {@link Result}.
+         */
         public Set<Request> getParentSet() {
             return parentSet;
         }
 
+        /**
+         * Adds a new parent to {@link #parentSet}.
+         *
+         * @param parent
+         *            {@link Request} to add as a parent. Must not be {@code this}.
+         */
         private void addParent(Request parent) {
             assert !this.equals(parent);
             final boolean notPresentBefore = parentSet.add(parent);
@@ -124,31 +148,58 @@ public class TimeRangeResultCache<Result> {
             parentSet.remove(parent);
         }
 
+        /**
+         * This method is to be called if {@code this} {@link Request} has received its {@link Result}. This
+         * {@link Request} will subsequently notify its parent {@link Request}s.
+         * <p>
+         * If all children have their {@link Result}s the {@link #callback} will be notified.
+         *
+         * @param result
+         *            this {@link Request}'s {@link Result}
+         */
         public void onSuccess(Result result) {
             setResult(result);
             notifyActionSuccessIfHasAllResults();
             parentSet.forEach(parent -> parent.onChildSuccess());
         }
 
+        /**
+         * This method is to be called if an error occurred while getting {@code this} {@link Request}'s {@link Result}.
+         * After calling the {@link #callback} the parents will be notified.
+         *
+         * @param caught
+         *            {@link Throwable} that occurred
+         */
         public void onFailure(Throwable caught) {
             notifyActionFailure(caught);
-            Set<Request> parents = new HashSet<>(parentSet); //TODO ConcurrentModificationError
+            HashSet<Request> parents = new HashSet<>(parentSet); // onChildFailure will remove elements from parentSet
             parents.forEach(parent -> parent.onChildFailure(caught));
         }
 
+        /**
+         * To be called by a child when it receives it's {@link Result} via {@link #onSuccess(Object)}.
+         */
         private void onChildSuccess() {
             childrenWithoutResultCounter--;
             notifyActionSuccessIfHasAllResults();
         }
 
+        /**
+         * To be called by a child when it encounters an error and is informed of this in {@link #onFailure(Throwable)}.
+         *
+         * @param caught
+         *            {@link Throwable} that occurred
+         */
         private void onChildFailure(Throwable caught) {
-            // TODO
-            notifyActionFailure(caught);
+            notifyActionFailure(new Throwable("Child encountered an error", caught));
         }
 
+        /**
+         * Notifies {@link #callback} <b>once</b> if all needed {@link Result}s are available.<p>
+         * Implements the transition function used by this Petri Net.
+         */
         private void notifyActionSuccessIfHasAllResults() {
             if (!callbackWasCalled && hasResult && childrenWithoutResultCounter <= 0) {
-                // TODO
                 List<Pair<TimeRange, Result>> results = new ArrayList<>(childrenSet.size() + 1);
                 results.add(new Pair<>(getTrimmedTimeRange(), getResult()));
                 for (Request child : childrenSet) {
@@ -163,8 +214,13 @@ public class TimeRangeResultCache<Result> {
             }
         }
 
+        /**
+         * Notifies {@link #callback} of an error that occurred.
+         *
+         * @param caught
+         *            {@link Throwable} that was encountered.
+         */
         private void notifyActionFailure(Throwable caught) {
-            //TODO
             if (!callbackWasCalled) {
                 callback.onFailure(caught);
                 callbackWasCalled = true;
@@ -175,46 +231,68 @@ public class TimeRangeResultCache<Result> {
             }
         }
 
+        /**
+         * Determines if this {@link Request} can be evicted from the cache.
+         * @return {@code true} if it can be evicted
+         */
         protected boolean canBeEvicted() {
             return callbackWasCalled && parentSet.isEmpty();
         }
 
+        /**
+         * Obtains the {@link Result} of this {@link Request}.
+         * @return {@code null} if {@link #hasResult()} is {@code false}
+         */
         public Result getResult() {
             return result;
         }
 
         /**
          * Sets the result for this request's total time range; {@link #hasResult()} will return {@code true} after this
-         * method returns, and {@link #getResult()} will return {@code result} from then on. All callbacks that were
-         * registered using {@link #registerOnResultCallback(AsyncCallback)} up to this time will be
-         * {@link AsyncCallback#onSuccess(Object) notified}.
+         * method returns, and {@link #getResult()} will return {@code result} from then on.
          */
         private void setResult(Result result) {
             this.hasResult = true;
             this.result = result;
         }
 
+        /**
+         * @return {@code true} if a {@link Result} has been set.
+         */
         public boolean hasResult() {
             return hasResult;
         }
 
+        /**
+         * Obtains the {@link TimeRange} originally requested by the {@link #action}.
+         */
         public TimeRange getActionTimeRange() {
             return actionTimeRange;
         }
 
+        /**
+         * Obtains the {@link TimeRange} that {@link #getActionTimeRange()} was trimmed to due to other {@link Request}s
+         * in cache.
+         */
         public TimeRange getTrimmedTimeRange() {
             return trimmedTimeRange;
         }
 
+        /**
+         * Sets the trimmed {@link TimeRange}.
+         *
+         * @param timeRange
+         *            trimmed {@link TimeRange}
+         */
         public void setTrimmedTimeRange(TimeRange timeRange) {
             this.trimmedTimeRange = timeRange;
         }
     }
 
     /**
-     * The size-limited {@link Request} cache. The keys are the time ranges that may have resulted from trimming and
-     * represent those time ranges for which requests are effectively made. The corresponding value {@link Request}
-     * object captures {@link Request#getChildrenSet() requests on which the request depends} after having been trimmed.
+     * The {@link Request} cache. The keys are the actions for which requests are effectively made. The corresponding
+     * value {@link Request} object captures {@link Request#getChildrenSet() requests on which the request depends}
+     * after having been trimmed.
      */
     private final Map<TimeRangeAsyncAction<?, ?>, Request> requestCache = new HashMap<>(CACHE_SIZE);
 
@@ -236,9 +314,13 @@ public class TimeRangeResultCache<Result> {
      * to trim subsequent requests.
      *
      * @param toTrim
-     *            {@link TimeRange} to request.
+     *            {@link TimeRange} to request
      * @param forceTimeRange
-     *            if {@code false} the request will be optimized with cached results.
+     *            if {@code false} the request will be optimized with cached results
+     * @param action
+     *            {@link TimeRangeAsyncAction} that this request belongs to
+     * @param callback
+     *            {@link AsyncCallback} which will be called exactly once when all needed {@link Result}s are ready
      * @return {@link TimeRange} to effectively request (potentially trimmed from {@code toTrim}) or {@code null} if no
      *         request is to be made since the results are cached.
      */
@@ -259,21 +341,10 @@ public class TimeRangeResultCache<Result> {
      * Registers that a request has returned with a result and collects all other needed cached results that are needed
      * to construct a complete, time-contiguous {@link Result}.
      *
-     * @param effectiveRequestTimeRange
-     *            {@link TimeRange} that the request that now returned a result was trimmed to.
+     * @param action
+     *            {@link TimeRangeAsyncAction} that the request corresponds to
      * @param result
-     *            {@link Result} of the trimmed request; this result will be cached, keyed by its trimmed
-     *            {@code timeRange}
-     * @param callbackIfResultsAreMissing
-     *            {@link AsyncCallback}{@code <Void>} to call {@link AsyncCallback#onSuccess(Object)} on once a request
-     *            this one depends on and which was still in transit returns. Note that this then does not imply that
-     *            all requests needed to fulfill the original request have delivered their result yet; the same may
-     *            happen again for another dependency when trying again later.
-     * @return {@link List} of {@link TimeRange}, {@link Result} {@link Pair}s that contain all data needed to construct
-     *         a time-continuous {@link Result} object, or {@code null} if not all results on which the request for
-     *         {@code effectiveRequestTimeRange} depended have been received yet; in this case the
-     *         {@code callbackIfResultsAreMissing} will later receive a callback if one (but maybe not all) of those
-     *         results has been received.
+     *            {@link Result} of the trimmed request; this result will be cached
      */
     public void registerResult(TimeRangeAsyncAction<?, ?> action, Result result) {
         Request request = requestCache.get(action);
@@ -286,8 +357,10 @@ public class TimeRangeResultCache<Result> {
     /**
      * Removes the failed request from cache.
      *
-     * @param timeRange
-     *            effective {@link TimeRange} of failed request (result of potential trimming)
+     * @param action
+     *            corresponding {@link TimeRangeAsyncAction}
+     * @param cause
+     *            {@link Throwable} that occurred
      */
     public void registerFailure(TimeRangeAsyncAction<?, ?> action, Throwable cause) {
         Request request = requestCache.get(action);
@@ -300,21 +373,15 @@ public class TimeRangeResultCache<Result> {
      * Trims a request based on cached results, returning a potentially trimmed time range that reflects which part(s)
      * is/are missing from the cache. For simplicity {@code toTrim} will currently not be split up into multiple
      * TimeRanges if a part in the middle is cached.
-     * <p>
-     * 
-     * 
      *
-     * @param toTrim
-     *            {@link TimeRange} to trim.
      * @param request
-     *            {@link Request} to attach dependencies to that reflect of which other requests the results are
-     *            required in order to fulfill the request for the complete {@code toTrim} time range
-     * @param rangesToTrimWith
-     *            {@link TimeRange}s that {@code toTrim} will be trimmed against.
+     *            {@link Request} to trim and attach dependencies to that reflect of which other requests the results
+     *            are required in order to fulfill the request
      * @return {@link TimeRange} which to request because it is not covered by {@code rangesToTrimWith} or {@code null}
      *         if no request to the server is to be made.
      */
     private TimeRange trimTimeRangeAndAttachDeps(Request request) {
+        //TODO There is a lot of potential for improvements here
         TimeRange toTrim = request.getActionTimeRange();
         List<Request> rangesToTrimWithAsList = new LinkedList<>(); //TODO Profile against ArrayList (swap and remove)
         requestCache.values().forEach(rangesToTrimWithAsList::add);
