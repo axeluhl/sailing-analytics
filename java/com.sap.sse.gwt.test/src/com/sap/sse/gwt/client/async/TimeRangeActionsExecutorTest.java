@@ -1,6 +1,7 @@
 package com.sap.sse.gwt.client.async;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -54,16 +55,16 @@ public class TimeRangeActionsExecutorTest {
             }
         }, new TimeRangeAsyncCallback<Map<String, Integer>, Integer, String>() {
             @Override
-            public Map<String, Integer> unzipResults(Map<String, Integer> result) {
+            public Map<String, Integer> unzipResult(Map<String, Integer> result) {
                 return result;
             }
 
             @Override
-            public void onSuccess(Map<String, Pair<TimeRange, Integer>> results) {
+            public void onSuccess(Map<String, Integer> result) {
                 callbackHasRun.set(true);
-                assertEquals(2, results.size());
-                for (Map.Entry<String, Pair<TimeRange, Integer>> result : results.entrySet()) {
-                    assertEquals(result.getKey().length(), result.getValue().getB().intValue());
+                assertEquals(2, result.size());
+                for (Map.Entry<String, Integer> entry : result.entrySet()) {
+                    assertEquals(entry.getKey().length(), entry.getValue().intValue());
                 }
             }
 
@@ -75,6 +76,11 @@ public class TimeRangeActionsExecutorTest {
             @Override
             public Integer joinSubResults(TimeRange timeRange, List<Pair<TimeRange, Integer>> toJoin) {
                 return toJoin.get(0).getB();
+            }
+
+            @Override
+            public Map<String, Integer> zipSubResults(Map<String, Integer> subResultMap) {
+                return subResultMap;
             }
         });
         assertTrue(actionHasRun.get());
@@ -105,13 +111,13 @@ public class TimeRangeActionsExecutorTest {
         }, new TimeRangeAsyncCallback<Map<String, Integer>, Integer, String>() {
 
             @Override
-            public Map<String, Integer> unzipResults(Map<String, Integer> result) {
+            public Map<String, Integer> unzipResult(Map<String, Integer> result) {
                 return result;
             }
 
             @Override
-            public void onSuccess(Map<String, Pair<TimeRange, Integer>> results) {
-                assertEquals(Integer.valueOf(1), results.get("x").getB());
+            public void onSuccess(Map<String, Integer> result) {
+                assertEquals(Integer.valueOf(1), result.get("x"));
             }
 
             @Override
@@ -122,6 +128,11 @@ public class TimeRangeActionsExecutorTest {
             @Override
             public Integer joinSubResults(TimeRange timeRange, List<Pair<TimeRange, Integer>> toJoin) {
                 return toJoin.stream().mapToInt(Pair::getB).sum();
+            }
+
+            @Override
+            public Map<String, Integer> zipSubResults(Map<String, Integer> subResultMap) {
+                return subResultMap;
             }
         });
         // Fire off second request which requires the results from the first request but that one is still in transit
@@ -144,17 +155,15 @@ public class TimeRangeActionsExecutorTest {
         }, new TimeRangeAsyncCallback<Map<String, Integer>, Integer, String>() {
 
             @Override
-            public Map<String, Integer> unzipResults(Map<String, Integer> result) {
+            public Map<String, Integer> unzipResult(Map<String, Integer> result) {
                 return result;
             }
 
             @Override
-            public void onSuccess(Map<String, Pair<TimeRange, Integer>> results) {
-                Pair<TimeRange, Integer> result = results.get("x");
-                assertNotNull(result);
-                assertEquals(timeRange, result.getA());
-                assertEquals(Integer.valueOf(3), result.getB());
-                callbackHasRun.set(true);
+            public void onSuccess(Map<String, Integer> result) {
+                assertNotNull(result.get("x"));
+                assertEquals(Integer.valueOf(3), result.get("x"));
+                assertFalse(callbackHasRun.getAndSet(true));
             }
 
             @Override
@@ -165,6 +174,11 @@ public class TimeRangeActionsExecutorTest {
             @Override
             public Integer joinSubResults(TimeRange timeRange, List<Pair<TimeRange, Integer>> toJoin) {
                 return toJoin.stream().mapToInt(Pair::getB).sum();
+            }
+
+            @Override
+            public Map<String, Integer> zipSubResults(Map<String, Integer> subResultMap) {
+                return subResultMap;
             }
         });
         // After the second request has finished the first one now gets answered
