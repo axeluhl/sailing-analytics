@@ -44,9 +44,10 @@ public class DefaultTenantRequestFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
+        final SecurityService securityService = getSecurityService(request.getServletContext());
         final String defaultTenantGroupId = httpRequest.getHeader(DEFAULT_TENANT_GROUP_ID_HEADER_KEY);
         if (defaultTenantGroupId != null) {
-            setDefaultTenantForRequest(request.getServletContext(), defaultTenantGroupId);
+            securityService.setTemporaryDefaultTenant(UUID.fromString(defaultTenantGroupId));
             logger.info("executing request " + httpRequest.getRequestURI() + " with divergent tenant group "
                     + defaultTenantGroupId);
         }
@@ -54,18 +55,13 @@ public class DefaultTenantRequestFilter implements Filter {
             chain.doFilter(request, response);
         } finally {
             if (defaultTenantGroupId != null) {
-                setDefaultTenantForRequest(request.getServletContext(), null);
+                securityService.setTemporaryDefaultTenant(null);
             }
         }
     }
 
     @Override
     public void destroy() {
-    }
-
-    private void setDefaultTenantForRequest(final ServletContext ctx, final String defaultTenantGroupId) {
-        getSecurityService(ctx)
-                .setTemporaryDefaultTenant(defaultTenantGroupId != null ? UUID.fromString(defaultTenantGroupId) : null);
     }
 
     private SecurityService getSecurityService(final ServletContext ctx) {
