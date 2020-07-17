@@ -252,7 +252,7 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
                 displayGroupsInReverseOrder, Collections.singletonList(leaderboard.getName()),
                 overallLeaderboardDiscardThresholds, ScoringSchemeType.LOW_POINT);
         // Serialize
-        List<String> groupUuidsToExport = Collections.singletonList(leaderboardGroup.getId().toString());
+        List<UUID> groupUuidsToExport = Collections.singletonList(leaderboardGroup.getId());
         final DomainFactory domainFactory;
         DummyMasterDataResource spyResource = spyResource(new DummyMasterDataResource(), sourceService);
         Mockito.doReturn(securityService).when(spyResource).getSecurityService();

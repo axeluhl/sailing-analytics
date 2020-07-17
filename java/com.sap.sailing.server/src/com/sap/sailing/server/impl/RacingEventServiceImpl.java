@@ -4933,7 +4933,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public void importMasterData(final String urlAsString, final String[] leaderboardGroupIds, final boolean override,
+    public void importMasterData(final String urlAsString, final UUID[] leaderboardGroupIds, final boolean override,
             final boolean compress, final boolean exportWind, final boolean exportDeviceConfigurations,
             final String targetServerUsername, final String targetServerPassword, final String targetServerBearerToken,
             final boolean exportTrackedRacesAndStartTracking, final UUID importOperationId) throws IllegalArgumentException {
@@ -5033,13 +5033,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
     }
     
-    private String createLeaderboardQuery(String[] leaderboardGroupIds, boolean compress, boolean exportWind,
+    private String createLeaderboardQuery(UUID[] leaderboardGroupIds, boolean compress, boolean exportWind,
             boolean exportDeviceConfigurations, boolean exportTrackedRacesAndStartTracking)
             throws UnsupportedEncodingException {
         StringBuffer queryStringBuffer = new StringBuffer("");
-        for (int i = 0; i < leaderboardGroupIds.length; i++) {
-            String encodedGroupName = URLEncoder.encode(leaderboardGroupIds[i], "UTF-8");
-            queryStringBuffer.append("uuids[]=" + encodedGroupName + "&");
+        for (UUID uuid : leaderboardGroupIds) {
+            queryStringBuffer.append("uuids[]=" + uuid + "&");
         }
         queryStringBuffer.append(String.format("compress=%s&exportWind=%s&exportDeviceConfigs=%s&exportTrackedRacesAndStartTracking=%s", compress,
                 exportWind, exportDeviceConfigurations, exportTrackedRacesAndStartTracking));
