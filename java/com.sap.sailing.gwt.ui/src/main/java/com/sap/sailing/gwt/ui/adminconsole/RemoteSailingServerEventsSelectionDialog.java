@@ -1,5 +1,8 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -53,10 +56,10 @@ public class RemoteSailingServerEventsSelectionDialog extends DataEntryDialog<Re
 
     @Override
     protected RemoteSailingServerReferenceDTO getResult() {
-        List<EventBaseDTO> selectedEvents = new ArrayList<>();
+        final List<EventBaseDTO> selectedEvents = new ArrayList<>();
         for (int i = 0; i < allEvents.size(); i++) {
-            CheckBox selecteEventCheckBox = (CheckBox) eventsSelectionGrid.getWidget(i, 1);
-            if (selecteEventCheckBox.getValue()) {
+            CheckBox selectEventCheckBox = (CheckBox) eventsSelectionGrid.getWidget(i, 1);
+            if (selectEventCheckBox.getValue()) {
                 selectedEvents.add(allEvents.get(i));
             }
         }
@@ -73,11 +76,37 @@ public class RemoteSailingServerEventsSelectionDialog extends DataEntryDialog<Re
             return null;
         }
         eventsSelectionGrid = new Grid(allEvents.size(), 2);
-        VerticalPanel mainPanel = new VerticalPanel();
+        final VerticalPanel mainPanel = new VerticalPanel();
         mainPanel.setSpacing(10);
         createEventsInclusionTypePanel(mainPanel);
+        addMultiSelectionPanel(mainPanel);
         setupEventsSelectionForm(mainPanel);
         return mainPanel;
+    }
+
+    private void addMultiSelectionPanel(final VerticalPanel mainPanel) {
+        final HorizontalPanel multiSelectionPanel = new HorizontalPanel();
+        multiSelectionPanel.setSpacing(3);
+        final Button selectAllButton = new Button(stringMessages.selectAll());
+        selectAllButton.addClickHandler(createMultiSelectionHandler(true));
+        final Button deselectAllButton = new Button(stringMessages.deselectAll());
+        deselectAllButton.addClickHandler(createMultiSelectionHandler(false));
+        multiSelectionPanel.add(selectAllButton);
+        multiSelectionPanel.add(deselectAllButton);
+        mainPanel.add(multiSelectionPanel);
+    }
+
+    private ClickHandler createMultiSelectionHandler(final boolean checked) {
+        return new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                for (int i = 0; i < eventsSelectionGrid.getRowCount(); i++) {
+                    CheckBox selectEventCheckBox = (CheckBox) eventsSelectionGrid.getWidget(i, 1);
+                    selectEventCheckBox.setValue(checked);
+                }
+            }
+        };
     }
 
     private void setupEventsSelectionForm(final VerticalPanel mainPanel) {
