@@ -523,7 +523,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (tenantGroupId != null || getCurrentUser() == null) {
             final UserGroup tenantGroup = getUserGroup(tenantGroupId);
             if (tenantGroup == null) {
-                temporaryDefaultTenant.set(null);
+                temporaryDefaultTenant.remove();
             } else {
                 if (Util.contains(getUserGroupsOfUser(getCurrentUser()), tenantGroup)) {
                     temporaryDefaultTenant.set(tenantGroup);
@@ -533,7 +533,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 }
             }
         } else {
-            temporaryDefaultTenant.set(null);
+            temporaryDefaultTenant.remove();
         }
     }
 
