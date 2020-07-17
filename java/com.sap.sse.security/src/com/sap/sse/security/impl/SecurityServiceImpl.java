@@ -242,14 +242,14 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     private AclResolver<AccessControlList, Ownership> aclResolver = new AclResolver<AccessControlList, Ownership>() {
         @Override
         public Iterable<AccessControlList> resolveAcls(
-                Ownership ownership, String type, Iterable<String> identifiers) {
+                Ownership ownership, String type, Iterable<String> objectIdentifiersAsString) {
             final Set<AccessControlList> result = new HashSet<>();
             for (AccessControlListAnnotation annotation : accessControlStore
                     .getAccessControlLists()) {
                 if (!annotation.getIdOfAnnotatedObject().getTypeIdentifier().equals(type)) {
                     continue;
                 }
-                if (identifiers != null && !Util.contains(identifiers, annotation.getIdOfAnnotatedObject().getTypeRelativeObjectIdentifier().toString())) {
+                if (objectIdentifiersAsString != null && !Util.contains(objectIdentifiersAsString, annotation.getIdOfAnnotatedObject().getTypeRelativeObjectIdentifier().toString())) {
                     continue;
                 }
                 // If ownership is given, we can exclude objects not owned by the user or group

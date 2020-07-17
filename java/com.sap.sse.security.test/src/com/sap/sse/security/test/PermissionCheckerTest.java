@@ -50,7 +50,7 @@ public class PermissionCheckerTest {
         
         @Override
         public Iterable<AccessControlList> resolveAcls(Ownership ownership, String type,
-                Iterable<String> identifiers) {
+                Iterable<String> objectIdentifiersAsString) {
             return Collections.emptySet();
         }
     };
