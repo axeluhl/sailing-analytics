@@ -15,11 +15,12 @@ import com.sap.sse.common.Util.Pair;
  * <ol>
  * <li>{@link TimeRangeAsyncAction} gets executed with a compound request for potentially several keys and returns a
  * compound server response of type {@code Result}
- * <li>The response gets split up into {@link SubResult}s by {@link Key} by {@link #unzipResults(Object)}.
+ * <li>The response gets split up into {@link SubResult}s by {@link Key} by {@link #unzipResult(Object)}.
  * <li>By {@link Key} the {@link SubResult}s get cached and get put into {@link #joinSubResults(TimeRange, List)} along
  * with all other required cached {@link SubResult}s.</li>
- * <li>The completed {@link SubResult}s returned by {@link #joinSubResults(TimeRange, List)} get collected and put into
- * {@link #onSuccess(Map)}.</li>
+ * <li>The completed {@link SubResult}s returned by {@link #joinSubResults(TimeRange, List)} get collected and zipped
+ * by {@link #zipSubResults(Map)}.</li>
+ * <li>Finally the {@link Result} is given to {@link #onSuccess(Object)}.
  * </ol>
  *
  * @param <Result>
@@ -36,12 +37,25 @@ import com.sap.sse.common.Util.Pair;
 public interface TimeRangeAsyncCallback<Result, SubResult, Key> {
     /**
      * Splits up a server response into {@link SubResult}s by {@link Key}.
+     * Inverse operation of {@link #zipSubResults()}.
      *
      * @param result
      *            {@link Result} returned by server.
      * @return {@link Map} of {@link Key} {@link SubResult} pairs.
+     * @see #zipSubResults()
      */
-    Map<Key, SubResult> unzipResults(Result result);
+    Map<Key, SubResult> unzipResult(Result result);
+
+    /**
+     * Combines {@link SubResult}s by {@link Key} into a {@link Result}.
+     * Inverse operation of {@link #unzipResult(Object)}.
+     *
+     * @param subResultMap
+     *            {@link Map} of {@link SubResult}s by {@link Key} to be combined.
+     * @return {@link Result}
+     * @see #unzipResult(Object)
+     */
+    Result zipSubResults(Map<Key, SubResult> subResultMap);
 
     /**
      * Joins possibly multiple {@link SubResult}s with different {@link TimeRange}s together to form the originally
@@ -56,13 +70,12 @@ public interface TimeRangeAsyncCallback<Result, SubResult, Key> {
     SubResult joinSubResults(TimeRange timeRange, List<Pair<TimeRange, SubResult>> toJoin);
 
     /**
-     * Called after successful request and joining of {@link SubResult}s.<br>
-     * It might be useful to apply the reverse operation of {@link #unzipResults(Object)} to {@code results}.
+     * Called after successful request and joining of {@link SubResult}s.
      *
-     * @param results
+     * @param result
      *            result of the remote procedure call.
      */
-    void onSuccess(Map<Key, Pair<TimeRange, SubResult>> results);
+    void onSuccess(Result result);
 
     /**
      * Called when an exception occurs.
