@@ -207,10 +207,7 @@ public class TimeRangeResultCache<Result> {
                 }
                 callback.onSuccess(results);
                 callbackWasCalled = true;
-                releaseChildren();
-                if (canBeEvicted()) {
-                    TimeRangeResultCache.this.evictRequestFromCache(this);
-                }
+                releaseChildrenAndEvictSelf();
             }
         }
 
@@ -224,10 +221,7 @@ public class TimeRangeResultCache<Result> {
             if (!callbackWasCalled) {
                 callback.onFailure(caught);
                 callbackWasCalled = true;
-                releaseChildren();
-                if (canBeEvicted()) {
-                    TimeRangeResultCache.this.evictRequestFromCache(this);
-                }
+                releaseChildrenAndEvictSelf();
             }
         }
 
@@ -237,6 +231,16 @@ public class TimeRangeResultCache<Result> {
          */
         protected boolean canBeEvicted() {
             return callbackWasCalled && parentSet.isEmpty();
+        }
+
+        /**
+         * Calls {@link #releaseChildren()} and then removes itself from the cache if no longer needed.
+         */
+        private void releaseChildrenAndEvictSelf() {
+            releaseChildren();
+            if (canBeEvicted()) {
+                TimeRangeResultCache.this.evictRequestFromCache(this);
+            }
         }
 
         /**
