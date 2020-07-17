@@ -60,6 +60,7 @@ public class TimeRangeActionsExecutor<Result, SubResult, Key> {
     private final class ExecutorCallback implements AsyncCallback<Result> {
         private final TimeRangeAsyncAction<Result, Key> action;
         private final TimeRangeAsyncCallback<Result, SubResult, Key> callback;
+        private boolean callbackWasCalled = false;
         private final Map<Key, TimeRange> requestedTimeRangeMap;
         private final Map<Key, List<Pair<TimeRange, SubResult>>> subResultsMap;
 
@@ -87,23 +88,45 @@ public class TimeRangeActionsExecutor<Result, SubResult, Key> {
         @Override
         public void onFailure(Throwable caught) {
             requestedTimeRangeMap.keySet().forEach(key -> getSubResultCache(key).registerFailure(action, caught));
-            callback.onFailure(caught);
+            if (!callbackWasCalled) {
+                callback.onFailure(caught);
+                callbackWasCalled = true;
+            }
         }
 
+        /**
+         * Called by a corresponding {@link TimeRangeResultCache#Request} once it has collected all needed
+         * {@link SubResult}s.
+         *
+         * @param key
+         *            {@link Key} of the {@link TimeRangeResultCache#Request}
+         * @param results
+         *            {@link TimeRange} and {@link SubResult} {@link Pair}s that cover the requested {@link TimeRange}
+         */
         public void onSubResultSuccess(Key key, List<Pair<TimeRange, SubResult>> results) {
             subResultsMap.put(key, results);
-            if (subResultsMap.size() == requestedTimeRangeMap.size()) {
+            if (!callbackWasCalled && subResultsMap.size() == requestedTimeRangeMap.size()) {
                 final Map<Key, SubResult> unzippedResult = new HashMap<>(subResultsMap.size());
                 for (Map.Entry<Key, List<Pair<TimeRange, SubResult>>> entry : subResultsMap.entrySet()) {
                     TimeRange requestedTimeRange = requestedTimeRangeMap.get(entry.getKey());
                     unzippedResult.put(entry.getKey(), callback.joinSubResults(requestedTimeRange, entry.getValue()));
                 }
                 callback.onSuccess(callback.zipSubResults(unzippedResult));
+                callbackWasCalled = true;
             }
         }
 
+        /**
+         * Called by a corresponding {@link TimeRangeResultCache#Request} once an error occurs.
+         *
+         * @param caught
+         *            {@link Throwable} that occurred
+         */
         public void onSubResultFailure(Throwable caught) {
-            //TODO
+            if (!callbackWasCalled) {
+                callback.onFailure(caught);
+                callbackWasCalled = true;
+            }
         }
     }
 
