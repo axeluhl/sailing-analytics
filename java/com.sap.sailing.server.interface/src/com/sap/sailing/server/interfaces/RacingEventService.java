@@ -958,7 +958,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * targetServerPassword or targetServerBearerToken. If neither of those are provided the method will try to create
      * or get the bearer token for the current user.
      */
-    void importMasterData(final String urlAsString, final String[] leaderboardGroupIds, final boolean override,
+    void importMasterData(final String urlAsString, final UUID[] leaderboardGroupIds, final boolean override,
             final boolean compress, final boolean exportWind, final boolean exportDeviceConfigurations,
             String targetServerUsername, String targetServerPassword, String targetServerBearerToken,
             final boolean exportTrackedRacesAndStartTracking, final UUID importOperationId) throws IllegalArgumentException;
