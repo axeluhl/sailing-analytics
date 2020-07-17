@@ -139,7 +139,7 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
     private Util.Pair<JSONObject, Number> doMDI(String remoteServerHostAsString, String dedicatedServerHostAsString,
             Set<String> leaderboardGroupIds, String remoteServerBearerToken, String dedicatedServerBearerToken)
             throws Exception {
-        final HttpURLConnection mdiConnection = createHttpUrlConnection(dedicatedServerHostAsString,
+        final HttpURLConnection mdiConnection = createHttpUrlConnectionWithBearerToken(dedicatedServerHostAsString,
                 dedicatedServerBearerToken, MDI_PATH);
         final StringJoiner form = new StringJoiner("&");
         form.add("remoteServer=" + remoteServerHostAsString);
@@ -165,16 +165,15 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
         return result;
     }
 
-    private Util.Pair<JSONObject, Number> doCompareServers(String baseServerHostAsString,
-            String dedicatedServerHostAsString, String dedicatedServerBearerToken, String baseServerBearerToken,
-            Set<String> leaderboardGroupIds) throws Exception {
-        final HttpURLConnection compareServersConnection = createHttpUrlConnection(dedicatedServerHostAsString,
-                dedicatedServerBearerToken, COMPARESERVERS_PATH);
+    private Util.Pair<JSONObject, Number> doCompareServers(String server1, String server2, String bearer1,
+            String bearer2, Set<String> leaderboardGroupIds) throws Exception {
+        final HttpURLConnection compareServersConnection = createHttpUrlConnectionWithBearerToken(server2, bearer1,
+                COMPARESERVERS_PATH);
         final StringJoiner form = new StringJoiner("&");
-        form.add("server1=" + baseServerHostAsString);
-        form.add("server2=" + dedicatedServerHostAsString);
-        form.add("bearer1=" + URLEncoder.encode(baseServerBearerToken, "utf-8"));
-        form.add("bearer2=" + URLEncoder.encode(dedicatedServerBearerToken, "utf-8"));
+        form.add("server1=" + server1);
+        form.add("server2=" + server2);
+        form.add("bearer1=" + URLEncoder.encode(bearer2, "utf-8"));
+        form.add("bearer2=" + URLEncoder.encode(bearer1, "utf-8"));
         form.add(addLeaderboardGroupIdsToStringJoiner(leaderboardGroupIds).toString());
         byte[] out = form.toString().getBytes(StandardCharsets.UTF_8);
         int length = out.length;
@@ -190,13 +189,13 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
         return result;
     }
 
-    private Util.Pair<JSONObject, Number> doRemoteServerReferenceAdd(String dedicateServerHostAsString,
-            String baseServerHostAsString, String dedicatedServerBearerToken) throws Exception {
-        final HttpURLConnection remoteServerReferenceAddConnection = createHttpUrlConnection(dedicateServerHostAsString,
-                dedicatedServerBearerToken, REMOTESERVERREFERENCEADD_PATH);
+    private Util.Pair<JSONObject, Number> doRemoteServerReferenceAdd(String serverToAddTo, String serverToBeAdded,
+            String serverToAddToToken) throws Exception {
+        final HttpURLConnection remoteServerReferenceAddConnection = createHttpUrlConnectionWithBearerToken(
+                serverToAddTo, serverToAddToToken, REMOTESERVERREFERENCEADD_PATH);
         final StringJoiner form = new StringJoiner("&");
-        form.add("remoteServerUrl=" + baseServerHostAsString);
-        form.add("remoteServerName=" + baseServerHostAsString);
+        form.add("remoteServerUrl=" + serverToBeAdded);
+        form.add("remoteServerName=" + serverToBeAdded);
         byte[] out = form.toString().getBytes(StandardCharsets.UTF_8);
         int length = out.length;
         remoteServerReferenceAddConnection.setFixedLengthStreamingMode(length);
@@ -213,7 +212,7 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
 
     private Util.Pair<JSONObject, Number> doRemoteServerReferenceRemove(String serverFromWhichToDelete,
             String serverNameToDelete, String serverFromWhichToDeleteBearerToken) throws Exception {
-        final HttpURLConnection remoteServerReferenceDelete = createHttpUrlConnection(serverFromWhichToDelete,
+        final HttpURLConnection remoteServerReferenceDelete = createHttpUrlConnectionWithBearerToken(serverFromWhichToDelete,
                 serverFromWhichToDeleteBearerToken, REMOTESERVERREFERENCEDELETE_PATH);
         byte[] out = ("remoteServerName=" + serverNameToDelete).getBytes(StandardCharsets.UTF_8);
         int length = out.length;
@@ -235,18 +234,18 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
         return json;
     }
 
-    private HttpURLConnection createHttpUrlConnection(String dedicatedServerHostAsString,
-            String dedicatedServerBearerToken, String path) throws Exception {
-        final URL url = RemoteServerUtil
-                .createRemoteServerUrl(RemoteServerUtil.createBaseUrl(dedicatedServerHostAsString), path, null);
+    private HttpURLConnection createHttpUrlConnectionWithBearerToken(String serverHost, String serverToken,
+            String serverPath) throws Exception {
+        final URL url = RemoteServerUtil.createRemoteServerUrl(RemoteServerUtil.createBaseUrl(serverHost), serverPath,
+                null);
         final HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-        urlConnection.setRequestProperty("Authorization", "Bearer " + dedicatedServerBearerToken);
+        urlConnection.setRequestProperty("Authorization", "Bearer " + serverToken);
         urlConnection.setRequestMethod("POST");
         urlConnection.setDoOutput(true);
         urlConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
         return urlConnection;
     }
-    
+
     private StringJoiner addLeaderboardGroupIdsToStringJoiner(Set<String> leaderboardGroupIds) {
         final StringJoiner form = new StringJoiner("&");
         for (String uuid : leaderboardGroupIds) {
@@ -256,8 +255,9 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
     }
 
     private Response returnInternalServerError(Throwable e) {
-        final Response response = Response.status(Status.INTERNAL_SERVER_ERROR)
-                .entity(e.toString() + "\nYou might have a inconsistent state. See server log(s) for detailed information.").build();
+        final Response response = Response.status(Status.INTERNAL_SERVER_ERROR).entity(
+                e.toString() + "\nYou might have a inconsistent state. See server log(s) for detailed information.")
+                .build();
         logger.severe(e.toString());
         return response;
     }
