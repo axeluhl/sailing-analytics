@@ -160,7 +160,7 @@ public class Header extends Composite implements HeaderConstants {
         menuToDropDownItemMap.put(eventsPageLink, eventsPageLinkMenu);
         menuToDropDownItemMap.put(solutionsPageLink, solutionsPageLinkMenu);
         menuToDropDownItemMap.put(adminConsolePageLink, adminConsolePageLinkMenu);
-        menuToDropDownItemMap.put(dataMiningPageLink,dataMiningPageLinkMenu);
+        menuToDropDownItemMap.put(dataMiningPageLink, dataMiningPageLinkMenu);
         headerNavigationDropDownMenuContainer.getStyle().setDisplay(Display.NONE);
         final DropdownHandler dropdownHandler = new DropdownHandler(headerNavigationIcon, headerNavigationDropDownMenuContainer);
         menuItemVisibilityHandler = new MenuItemVisibilityHandler(menuToDropDownItemMap, dropdownHandler, headerNavigationIcon);
@@ -244,7 +244,7 @@ public class Header extends Composite implements HeaderConstants {
         solutionsPageLinkMenu.addClickHandler(this::goToSolutions);
         //remaining entries please see at registration for AuthenticationContextEvent 
         // refresh after UI has been put into place
-        menuItemVisibilityHandler.refreshVisibility();
+        menuItemVisibilityHandler.refreshVisibility(100);
     }
 
     @UiHandler("startPageLink")
