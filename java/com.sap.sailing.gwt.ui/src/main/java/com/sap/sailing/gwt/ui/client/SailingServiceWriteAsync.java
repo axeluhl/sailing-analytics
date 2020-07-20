@@ -487,7 +487,7 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
             boolean autoRestartTrackingUponCompetitorSetChange, String registrationLinkSecret,
             CompetitorRegistrationType registrationType, AsyncCallback<Void> callback);
 
-    void importMasterData(String host, String[] leaderboardGroupIds, boolean override, boolean compress, boolean exportWind,
+    void importMasterData(String host, UUID[] leaderboardGroupIds, boolean override, boolean compress, boolean exportWind,
             boolean exportDeviceConfigurations, String targetServerUsername, String targetServerPassword,
             boolean exportTrackedRacesAndStartTracking, AsyncCallback<UUID> asyncCallback);
 

@@ -1544,7 +1544,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     }
 
     @Override
-    public UUID importMasterData(final String urlAsString, final String[] leaderboardGroupIds, final boolean override,
+    public UUID importMasterData(final String urlAsString, final UUID[] leaderboardGroupIds, final boolean override,
             final boolean compress, final boolean exportWind, final boolean exportDeviceConfigurations,
             String targetServerUsername, String targetServerPassword,
             final boolean exportTrackedRacesAndStartTracking) {
