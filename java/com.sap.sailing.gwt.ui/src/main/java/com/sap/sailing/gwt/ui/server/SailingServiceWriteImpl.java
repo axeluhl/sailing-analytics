@@ -1269,16 +1269,16 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                 new Callable<EventDTO>() {
                     @Override
                     public EventDTO call() throws Exception {
-                        TimePoint startTimePoint = startDate != null ? new MillisecondsTimePoint(startDate) : null;
-                        TimePoint endTimePoint = endDate != null ? new MillisecondsTimePoint(endDate) : null;
-                        URL officialWebsiteURL = officialWebsiteURLAsString != null
-                                ? new URL(officialWebsiteURLAsString)
-                                : null;
-                        URL baseURL = baseURLAsString != null ? new URL(baseURLAsString) : null;
-                        Map<Locale, URL> sailorsInfoWebsiteURLs = convertToLocalesAndUrls(
+                        final TimePoint startTimePoint = startDate != null ? new MillisecondsTimePoint(startDate) : null;
+                        final TimePoint endTimePoint = endDate != null ? new MillisecondsTimePoint(endDate) : null;
+                                final URL officialWebsiteURL = officialWebsiteURLAsString != null
+                                        ? new URL(officialWebsiteURLAsString)
+                                        : null;
+                                final URL baseURL = baseURLAsString != null ? new URL(baseURLAsString) : null;
+                        final Map<Locale, URL> sailorsInfoWebsiteURLs = convertToLocalesAndUrls(
                                 sailorsInfoWebsiteURLsByLocaleName);
-                        List<ImageDescriptor> eventImages = convertToImages(images);
-                        List<VideoDescriptor> eventVideos = convertToVideos(videos);
+                        final List<ImageDescriptor> eventImages = convertToImages(images);
+                        final List<VideoDescriptor> eventVideos = convertToVideos(videos);
                         getService().apply(new CreateEvent(eventName, eventDescription, startTimePoint, endTimePoint,
                                 venue, isPublic, eventUuid, officialWebsiteURL, baseURL, sailorsInfoWebsiteURLs,
                                 eventImages, eventVideos, leaderboardGroupIds));
