@@ -242,7 +242,7 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
 
     void allowCompetitorResetToDefaults(List<CompetitorDTO> competitors);
 
-    UUID importMasterData(String host, String[] leaderboardGroupIds, boolean override, boolean compress, boolean exportWind,
+    UUID importMasterData(String host, UUID[] leaderboardGroupIds, boolean override, boolean compress, boolean exportWind,
             boolean exportDeviceConfigurations, String targetServerUsername, String targetServerPassword,
             boolean exportTrackedRacesAndStartTracking) throws UnauthorizedException;
 
