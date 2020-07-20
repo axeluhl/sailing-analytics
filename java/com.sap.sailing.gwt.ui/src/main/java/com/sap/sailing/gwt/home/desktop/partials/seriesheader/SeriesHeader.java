@@ -12,7 +12,6 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.event.EventAndLeaderboardReferenceWithStateDTO;
-import com.sap.sailing.gwt.home.communication.event.EventMetadataDTO;
 import com.sap.sailing.gwt.home.communication.event.EventState;
 import com.sap.sailing.gwt.home.communication.fakeseries.EventSeriesViewDTO;
 import com.sap.sailing.gwt.home.desktop.partials.sharing.SharingButtons;
@@ -23,6 +22,7 @@ import com.sap.sailing.gwt.home.desktop.places.fakeseries.SeriesView.Presenter;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.resources.SharedHomeResources;
 import com.sap.sailing.gwt.home.shared.utils.LabelTypeUtil;
+import com.sap.sailing.gwt.home.shared.utils.LogoUtil;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.LinkUtil;
 
@@ -69,8 +69,7 @@ public class SeriesHeader extends Composite {
 
             @Override
             public String getImageUrl() {
-                EventMetadataDTO mostRecentEventInSeries = series.getEventsDescending().get(0);
-                return mostRecentEventInSeries.getThumbnailImageURL();
+                return LogoUtil.resolveLogoURL(series);
             }
 
             @Override

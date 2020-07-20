@@ -93,7 +93,7 @@ public class EventHeader extends Composite {
 
             @Override
             public String getImageUrl() {
-                return event.getThumbnailImageURL();
+                return LogoUtil.resolveLogoURL(event);
             }
 
             @Override
