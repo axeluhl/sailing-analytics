@@ -109,7 +109,25 @@ Be carefull to match rabbitmq-password as key, as this is defined within the hel
 
 ## Sailing Analytics
 
-There is a helm chart for the sailing analytics in ```/helm-charts/sap-sailing-analytics``` along with some values in ```values.yaml```.  
+There is a helm chart for the sailing analytics in ```/helm-charts/sap-sailing-analytics``` along with some values in ```values.yaml```. 
+
+### Sailing Analytics Operator
+Using operator-sdk[11] there is a operator deployed into the garderner cluster. The CRD is within /sapsailing-operator/deploy/crds. To use create a resource yaml and apply it with kubectl apply -f. This will spin up a master-replica set, together with the according services. You may change some values of an already deployed resource, e.g. the number of replicas.
+Configured within the operator is an antiaffinity for the master and replica pods.
+
+## Monitoring
+There is a prometheus and a grafana deployed in the namespace "monitoring". They have been deployed by using the helm-charts provided under the helm-charts folder. The values have been modified. However there is still some configuration work to do.
+
+To access grafana run ```helm status -n monitoring grafana```, read the instructions on how to connect. To connect prometheus as datasource to grafana run helm status for the prometheus release and add the service DNS name to grafana as datasource, format for the datasource is: ```url:port```.
+
+The rabbitMQ and the mongoDB deployments are already connected to prometheus. Still work in progress is the node metrics, as gardener collects them in a special way.
+
+## Ingress / AWS ALB ingress controller
+Zalando has made an effort to open-source an AWS ALB ingress controller that is capable of changing listener rules on a given ALB, see[12]. This looks like a better fit to our needs, compared with the standard AWS ALB ingress controller that deploys an ALB for each ingress resource, see[13].
+
+To be able to isolate access to AWS in different containers you need to solve the problem that AWS adds IAM profiles to whole nodes, instead of containers, see context here[14]. Therefore kube2iam could be a solution.
+
+To deploy the current state of the kube-ingress controller apply ```ingress-serviceaccount.yaml``` and ```aws-alb-ingress-controller.yaml```. Before that you will need a IAM role that you provide to the controller, the role needs the policy specified in ```aws-alb-ingress-controller-policy.json```. Also you will need to add an access key and secret as ENV variables to the pods created by the container.
 
 ### Tips:
 - [install kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 
@@ -143,6 +161,9 @@ complete -F __start_helm h
 [8] https://github.com/helm/charts/tree/master/stable/mongodb-replicaset#configuration    
 [9] https://github.com/gardener/gardener/blob/master/example/90-shoot.yaml    
 [10] https://kubernetes.io/docs/concepts/storage/storage-classes/#the-storageclass-resource
+[11] https://sdk.operatorframework.io/docs/helm/quickstart/
+[12] https://github.com/zalando-incubator/kube-ingress-aws-controller
+[13] https://github.com/kubernetes-sigs/aws-alb-ingress-controller
 
 
 [1]: https://cloud.google.com/blog/products/containers-kubernetes/best-practices-for-building-kubernetes-operators-and-stateful-apps
@@ -155,4 +176,6 @@ complete -F __start_helm h
 [8]: https://github.com/helm/charts/tree/master/stable/mongodb-replicaset#configuration
 [9]: https://github.com/gardener/gardener/blob/master/example/90-shoot.yaml
 [10]: https://kubernetes.io/docs/concepts/storage/storage-classes/#the-storageclass-resource
-
+[11]: https://sdk.operatorframework.io/docs/helm/quickstart/
+[12]: https://github.com/zalando-incubator/kube-ingress-aws-controller
+[13]: https://github.com/kubernetes-sigs/aws-alb-ingress-controller
