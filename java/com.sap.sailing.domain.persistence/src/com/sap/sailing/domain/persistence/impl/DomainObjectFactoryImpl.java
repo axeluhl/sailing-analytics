@@ -1130,11 +1130,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     private RemoteSailingServerReference loadRemoteSailingSever(Document serverDBObject) {
         RemoteSailingServerReference result = null;
-        String name = (String) serverDBObject.get(FieldNames.SERVER_NAME.name());
-        Boolean include = (Boolean) serverDBObject.get(FieldNames.INCLUDE.name());
+        final String name = (String) serverDBObject.get(FieldNames.SERVER_NAME.name());
+        final Boolean include = (Boolean) serverDBObject.get(FieldNames.INCLUDE.name());
         @SuppressWarnings("unchecked")
-        List<UUID> selectedEventIds = (List<UUID>) serverDBObject.get(FieldNames.SELECTED_EVENT_IDS.name());
-        String urlAsString = (String) serverDBObject.get(FieldNames.SERVER_URL.name());
+        final List<UUID> selectedEventIds = (List<UUID>) serverDBObject.get(FieldNames.SELECTED_EVENT_IDS.name());
+        final String urlAsString = (String) serverDBObject.get(FieldNames.SERVER_URL.name());
         try {
             URL serverUrl = new URL(urlAsString);
             result = new RemoteSailingServerReferenceImpl(name, serverUrl, include == null ? false : include,

@@ -63,7 +63,6 @@ public class RemoteSailingServerEventsSelectionDialog extends DataEntryDialog<Re
                 selectedEvents.add(allEvents.get(i));
             }
         }
-
         referenceDTO.setInclude(includeRadio.getValue());
         referenceDTO.updateSelectedEvents(selectedEvents);
         return referenceDTO;
@@ -71,17 +70,20 @@ public class RemoteSailingServerEventsSelectionDialog extends DataEntryDialog<Re
 
     @Override
     protected Widget getAdditionalWidget() {
+        final Widget result;
         if (allEvents.isEmpty()) {
             getStatusLabel().setText(stringMessages.eventsListIsEmpty());
-            return null;
+            result = null;
+        } else {
+            eventsSelectionGrid = new Grid(allEvents.size(), 2);
+            final VerticalPanel mainPanel = new VerticalPanel();
+            mainPanel.setSpacing(10);
+            createEventsInclusionTypePanel(mainPanel);
+            addMultiSelectionPanel(mainPanel);
+            setupEventsSelectionForm(mainPanel);
+            result = mainPanel;
         }
-        eventsSelectionGrid = new Grid(allEvents.size(), 2);
-        final VerticalPanel mainPanel = new VerticalPanel();
-        mainPanel.setSpacing(10);
-        createEventsInclusionTypePanel(mainPanel);
-        addMultiSelectionPanel(mainPanel);
-        setupEventsSelectionForm(mainPanel);
-        return mainPanel;
+        return result;
     }
 
     private void addMultiSelectionPanel(final VerticalPanel mainPanel) {
@@ -98,7 +100,6 @@ public class RemoteSailingServerEventsSelectionDialog extends DataEntryDialog<Re
 
     private ClickHandler createMultiSelectionHandler(final boolean checked) {
         return new ClickHandler() {
-
             @Override
             public void onClick(ClickEvent event) {
                 for (int i = 0; i < eventsSelectionGrid.getRowCount(); i++) {
@@ -126,12 +127,10 @@ public class RemoteSailingServerEventsSelectionDialog extends DataEntryDialog<Re
         String eventsSelectionRadioGroupName = "eventsInclusionRadioGroup";
         includeRadio = new RadioButton(eventsSelectionRadioGroupName, stringMessages.include());
         excludeRadio = new RadioButton(eventsSelectionRadioGroupName, stringMessages.exclude());
-
         eventsSelectionPanel.add(includeRadio);
         eventsSelectionPanel.add(excludeRadio);
         includeRadio.setValue(referenceDTO.isInclude());
         excludeRadio.setValue(!referenceDTO.isInclude());
         mainPanel.add(eventsSelectionPanel);
     }
-
 }
