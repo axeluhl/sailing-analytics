@@ -15,8 +15,7 @@ UPDATE_SITE_PROJECT=${WORKSPACE}/java/com.amazon.aws.aws-java-api.updatesite
 WRAPPER_BUNDLE="${WORKSPACE}/java/com.amazon.aws.aws-java-api"
 cd ${WRAPPER_BUNDLE}
 echo "Downloading libraries..."
-# TODO re-enable
-#${WORKSPACE}/gradlew downloadLibs
+${WORKSPACE}/gradlew downloadLibs
 cd ${LIB}
 VERSION=`ls -1 aws-core-*.jar | grep -v -- -sources | sed -e 's/aws-core-\([.0-9]*\)\.jar/\1/'`
 echo VERSION=${VERSION}
