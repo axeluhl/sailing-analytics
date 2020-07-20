@@ -29,7 +29,7 @@
           <g:Anchor ui:field="dataMiningPageLink"
             styleName="{local_res.css.sitenavigation_link}" text="{i18n.dataMining}" target="dataMiningWindow"/>
         </nav>
-        <nav class="{local_res.css.sitenavigation_fixed}">
+        <nav class="{local_res.css.sitenavigation_fixed}" ui:field="rightMenuPanel">
         <!-- -->
             <g:Anchor ui:field="headerNavigationIcon" styleName="{local_res.css.sitenavigation_link} {local_res.css.header_navigation_icon}"></g:Anchor>
             <div ui:field="headerNavigationDropDownMenuContainer" class="{local_res.css.sitenavigation_dropdown_container}">

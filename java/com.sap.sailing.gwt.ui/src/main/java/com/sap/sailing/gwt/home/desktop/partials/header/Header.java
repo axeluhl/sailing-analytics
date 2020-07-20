@@ -13,10 +13,12 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.Style.Display;
+import com.google.gwt.dom.client.Text;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyPressEvent;
@@ -80,6 +82,7 @@ public class Header extends Composite implements HeaderConstants {
     @UiField Button searchButton;
     @UiField Anchor headerNavigationIcon;
     @UiField Element headerNavigationDropDownMenuContainer;
+    @UiField Element rightMenuPanel;
     
     @UiField Anchor usermenu;
     
@@ -101,11 +104,13 @@ public class Header extends Composite implements HeaderConstants {
         private final Map<Anchor,Anchor> menuToDropDownItemMap;
         private final Anchor headerNavigationIcon;
         private final DropdownHandler dropdownHandler;
+        private final Element rightMenuPanel;
 
-        public MenuItemVisibilityHandler(Map<Anchor,Anchor> menuToDropDownItemMap, DropdownHandler dropdownHandler, Anchor headerNavigationIcon) {
+        public MenuItemVisibilityHandler(Map<Anchor,Anchor> menuToDropDownItemMap, DropdownHandler dropdownHandler, Anchor headerNavigationIcon, Element rightMenuPanel) {
             this.dropdownHandler = dropdownHandler;
             this.headerNavigationIcon = headerNavigationIcon;
             this.menuToDropDownItemMap = menuToDropDownItemMap;
+            this.rightMenuPanel = rightMenuPanel;
         }
 
         @Override
@@ -117,8 +122,10 @@ public class Header extends Composite implements HeaderConstants {
             int offsetTop = anchor.getElement().getOffsetTop();
             return offsetTop < visibiltyThreshold;
         }
+        
 
         public void refreshVisibility() {
+            LOG.info("refesh visibility");
             int noOfVisibleItems = 0;
             for (Map.Entry<Anchor, Anchor> item : menuToDropDownItemMap.entrySet()) {
                 Anchor menuAnchor = item.getKey();
@@ -136,12 +143,31 @@ public class Header extends Composite implements HeaderConstants {
 
         public void refreshVisibility(int delayMillis) {
             new Timer() {
-
                 @Override
                 public void run() {
                     refreshVisibility();
                 }
             }.schedule(delayMillis);
+        }
+
+        public void refreshVisibilityDeferred() {
+            Anchor anchor = (Anchor)menuToDropDownItemMap.values().toArray()[0];
+            Element element = anchor.getElement();
+            redraw(element);
+            Scheduler.get().scheduleDeferred(this::refreshVisibility);
+        }
+
+        private void redraw(Element element) {
+            Text dummyText = element.getOwnerDocument().createTextNode(" ");
+            element.appendChild(dummyText);
+            String strDisplay = element.getStyle().getDisplay();
+            Display display = strDisplay == null || strDisplay.equals("") ? Display.INITIAL : Display.valueOf(strDisplay.toUpperCase());
+            element.getStyle().setDisplay(Display.NONE);
+
+            Scheduler.get().scheduleDeferred(() -> {
+                element.removeChild(dummyText);
+                element.getStyle().setDisplay(display);
+            });
         }
 
     }
@@ -161,11 +187,16 @@ public class Header extends Composite implements HeaderConstants {
         menuToDropDownItemMap.put(solutionsPageLink, solutionsPageLinkMenu);
         menuToDropDownItemMap.put(adminConsolePageLink, adminConsolePageLinkMenu);
         menuToDropDownItemMap.put(dataMiningPageLink, dataMiningPageLinkMenu);
+        
+        startPageLink.getElement().setId("startPageLink");
+        eventsPageLink.getElement().setId("eventsPageLink");
+        solutionsPageLink.getElement().setId("solutionsPageLink");
+        adminConsolePageLink.getElement().setId("adminConsolePageLink");
+        dataMiningPageLink.getElement().setId("dataMiningPageLink");
         headerNavigationDropDownMenuContainer.getStyle().setDisplay(Display.NONE);
         final DropdownHandler dropdownHandler = new DropdownHandler(headerNavigationIcon, headerNavigationDropDownMenuContainer);
-        menuItemVisibilityHandler = new MenuItemVisibilityHandler(menuToDropDownItemMap, dropdownHandler, headerNavigationIcon);
+        menuItemVisibilityHandler = new MenuItemVisibilityHandler(menuToDropDownItemMap, dropdownHandler, headerNavigationIcon, rightMenuPanel);
         Window.addResizeHandler(menuItemVisibilityHandler);
-        
         links = Arrays.asList(new Anchor[] { startPageLink, eventsPageLink, solutionsPageLink, adminConsolePageLink, dataMiningPageLink });
         homeNavigation = navigator.getHomeNavigation();
         eventsNavigation = navigator.getEventsNavigation();
@@ -206,7 +237,7 @@ public class Header extends Composite implements HeaderConstants {
             } else {
                 dataMiningPageLink.getElement().getStyle().setDisplay(Display.NONE);
             }
-            menuItemVisibilityHandler.refreshVisibility();
+            menuItemVisibilityHandler.refreshVisibilityDeferred();
         });
         searchText.getElement().setAttribute("placeholder", StringMessages.INSTANCE.headerSearchPlaceholder());
         searchText.addFocusHandler((focusEvent) -> menuItemVisibilityHandler.refreshVisibility(370));
@@ -244,7 +275,7 @@ public class Header extends Composite implements HeaderConstants {
         solutionsPageLinkMenu.addClickHandler(this::goToSolutions);
         //remaining entries please see at registration for AuthenticationContextEvent 
         // refresh after UI has been put into place
-        menuItemVisibilityHandler.refreshVisibility(100);
+        menuItemVisibilityHandler.refreshVisibilityDeferred();
     }
 
     @UiHandler("startPageLink")
