@@ -19,6 +19,9 @@ spec:
         app: {{ template "sapsailing-app-name" . }}
         role: {{ .Values.master.role }}
         environment: {{ .Values.environment }}
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9102"
     spec:
       containers:
       - name: sailing
@@ -33,6 +36,11 @@ spec:
 {{- if .Values.master.resources }}
 {{- tpl (toYaml .Values.master.resources) . | nindent 10 }}
 {{- end }}
+        volumeMounts:
+        - name: prometheus-java-agent
+          mountPath: /alessandro
+        - name: prometheus-java-agent-config
+          mountPath: /alessandro/config
         env:
         - name: MONGODB_URI
           value: {{ template "mongodb-connection-string-master" . }}
@@ -47,7 +55,7 @@ spec:
         - name: SERVER_NAME
           value: {{ template "sapsailing-app-name" . }}-{{ .Values.master.role }}
         - name: ADDITIONAL_JAVA_ARGS
-          value: -Dcom.sun.management.jmxremote
+          value: -javaagent:/alessandro/jmx_prometheus_javaagent-0.13.0.jar=9102:/alessandro/config/jmx-prometheus-config.yaml
         livenessProbe:
           httpGet:
             path: /
@@ -60,5 +68,12 @@ spec:
             - ./status
           initialDelaySeconds: 10
           periodSeconds: 30
+      volumes:
+        - name: prometheus-java-agent
+          configMap:
+            name: prometheus-java-agent-binary
+        - name: prometheus-java-agent-config
+          configMap:
+            name: prometheus-java-agent-config
       imagePullSecrets:
       - name: {{ .Values.imagePullSecret }}

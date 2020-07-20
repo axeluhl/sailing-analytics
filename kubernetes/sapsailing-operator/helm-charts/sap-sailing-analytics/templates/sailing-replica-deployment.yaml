@@ -19,6 +19,9 @@ spec:
         app: {{ template "sapsailing-app-name" . }}
         role: {{ .Values.replica.role }}
         environment: {{ .Values.environment }}
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9102"
     spec:
     # AntiAffinity between replicas and associated master
       affinity:
@@ -80,6 +83,11 @@ spec:
 {{- if .Values.replica.resources }}
 {{- tpl (toYaml .Values.replica.resources) . | nindent 10 }}
 {{- end }}
+        volumeMounts:
+        - name: prometheus-java-agent
+          mountPath: /alessandro
+        - name: prometheus-java-agent-config
+          mountPath: /alessandro/config
         env:
         - name: MONGODB_URI
           value: {{ template "mongodb-connection-string-replica" . }}
@@ -110,7 +118,7 @@ spec:
         - name: REPLICATION_CHANNEL
           value: {{ template "sapsailing-app-name" . }}-{{ .Values.replica.role }}
         - name: ADDITIONAL_JAVA_ARGS
-          value: -Dcom.sun.management.jmxremote
+          value: -javaagent:/alessandro/jmx_prometheus_javaagent-0.13.0.jar=9102:/alessandro/config/jmx-prometheus-config.yaml
         livenessProbe:
           httpGet:
             path: /
@@ -123,5 +131,12 @@ spec:
             - ./status
           initialDelaySeconds: 10
           periodSeconds: 30
+      volumes:
+        - name: prometheus-java-agent
+          configMap:
+            name: prometheus-java-agent-binary
+        - name: prometheus-java-agent-config
+          configMap:
+            name: prometheus-java-agent-config
       imagePullSecrets:
       - name: {{ .Values.imagePullSecret }}
