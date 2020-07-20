@@ -129,6 +129,37 @@ To access grafana run ```helm status -n monitoring grafana```, read the instruct
 
 The rabbitMQ and the mongoDB deployments are already connected to prometheus. Still work in progress is the node metrics, as gardener collects them in a special way.
 
+### Prometheus exporter for JMX beans
+To connect JMX with Prometheus use the `prometheus/jmx_exporter`[14]. I use Kubernetes configmaps[15] to provide the Sailing Analytics container with the neccessary files. So first create the configmap (the files are provided in /kubernetes folder):
+```
+k create configmap prometheus-java-agent --from-file=jmx-prometheus-config.yaml --from-file=jmx_prometheus_javaagent-0.13.0.jar
+```
+After that provide the container spec with a volume:
+```
+volumes:
+ - name: prometheus-java-agent
+   configMap:
+    name: prometheus-java-agent
+```
+Mount that volume into the pod:
+```
+volumeMounts:
+ - name: prometheus-java-agent
+   mountPath: /home/sailing/servers/server/configuration/prometheus-java-agent
+```
+Add an additional Java Parameter through an env variable:
+```
+- name: ADDITIONAL_JAVA_ARGS
+  value: -javaagent:/home/sailing/servers/server/configuration/prometheus-java-agent/jmx_prometheus_javaagent-0.13.0.jar=9102:/home/sailing/servers/server/configuration/prometheus-java-agent/jmx-prometheus-config.yaml
+```
+Add an annotation to the metadata of the pod, to let prometheus know to collect data (make sure you use the same port as specified in the Java Args):
+```
+annotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "9102"
+```
+Do not forget to build and update the operator, if you are using it.
+
 ## Ingress / AWS ALB ingress controller
 Zalando has made an effort to open-source an AWS ALB ingress controller that is capable of changing listener rules on a given ALB, see[12]. This looks like a better fit to our needs, compared with the standard AWS ALB ingress controller that deploys an ALB for each ingress resource, see[13].
 
@@ -171,7 +202,8 @@ complete -F __start_helm h
 [11] https://sdk.operatorframework.io/docs/helm/quickstart/
 [12] https://github.com/zalando-incubator/kube-ingress-aws-controller
 [13] https://github.com/kubernetes-sigs/aws-alb-ingress-controller
-
+[14] https://github.com/prometheus/jmx_exporter
+[15] https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/
 
 [1]: https://cloud.google.com/blog/products/containers-kubernetes/best-practices-for-building-kubernetes-operators-and-stateful-apps
 [2]: https://book.kubebuilder.io/quick-start.html
@@ -186,3 +218,5 @@ complete -F __start_helm h
 [11]: https://sdk.operatorframework.io/docs/helm/quickstart/
 [12]: https://github.com/zalando-incubator/kube-ingress-aws-controller
 [13]: https://github.com/kubernetes-sigs/aws-alb-ingress-controller
+[14]: https://github.com/prometheus/jmx_exporter
+[15]: https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/
