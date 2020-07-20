@@ -20,13 +20,9 @@ public abstract class LogoUtil {
      * @param eventLogoUi {@link Element} where the logo is set
      * @param event {@link EventViewDTO} providing data
      */
-    public static void setLogo(Element eventLogoUi, HasLogo event) {
-        String logoUrl = resolveLogoURL(event);
+    public static void setEventLogo(Element eventLogoUi, HasLogo event) {
+        String logoUrl = event.getLogoImage() != null ? event.getLogoImage().getSourceRef() : DEFAULT_EVENT_LOGO.asString();
         setLogoAndTitle(eventLogoUi, logoUrl, event.getDisplayName());
-    }
-
-    public static String resolveLogoURL(HasLogo event) {
-        return event.getLogoImage() != null ? event.getLogoImage().getSourceRef() : DEFAULT_EVENT_LOGO.asString();
     }
 
     private static void setLogoAndTitle(Element logoUi, String logoUrl, String logoTitle) {

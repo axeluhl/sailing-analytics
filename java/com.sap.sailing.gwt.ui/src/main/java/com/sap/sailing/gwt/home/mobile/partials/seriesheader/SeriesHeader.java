@@ -37,7 +37,7 @@ public class SeriesHeader extends Composite {
     }
 
     private void setUiFieldValues(EventSeriesViewDTO event, PlaceNavigation<?> logoNavigation) {
-        LogoUtil.setLogo(eventLogoUi, event);
+        LogoUtil.setEventLogo(eventLogoUi, event);
         if (logoNavigation != null) {
             logoNavigation.configureAnchorElement(eventLogoUi);
         }

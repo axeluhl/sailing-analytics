@@ -47,7 +47,7 @@ public class EventHeader extends Composite {
             nameSeparatorUi.removeFromParent();
         }
         LabelTypeUtil.renderLabelType(eventStateUi, event.getState().getStateMarker());
-        LogoUtil.setLogo(eventLogoUi, event);
+        LogoUtil.setEventLogo(eventLogoUi, event);
         if (logoNavigation != null) {
             logoNavigation.configureAnchorElement(eventLogoUi);
         }
