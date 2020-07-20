@@ -115,6 +115,13 @@ There is a helm chart for the sailing analytics in ```/helm-charts/sap-sailing-a
 Using operator-sdk[11] there is a operator deployed into the garderner cluster. The CRD is within /sapsailing-operator/deploy/crds. To use create a resource yaml and apply it with kubectl apply -f. This will spin up a master-replica set, together with the according services. You may change some values of an already deployed resource, e.g. the number of replicas.
 Configured within the operator is an antiaffinity for the master and replica pods.
 
+#### How-to change specs
+To change something in the charts and then apply it to the operator you have to do the following steps:
+- Change and save the files in `sapsailing-operator/helm-charts/sap-sailing-analytics/templates`
+- Build and push the operator `operator-sdk build alstolten/sapsailing-operator:v0.xx.xx` followed by `docker push alstolten/sapsailing-operator:0.xx.xx`
+- Change the `sapsailing-operator/deploy/operator.yaml` to use the new tag/version and apply the file to the cluster
+
+
 ## Monitoring
 There is a prometheus and a grafana deployed in the namespace "monitoring". They have been deployed by using the helm-charts provided under the helm-charts folder. The values have been modified. However there is still some configuration work to do.
 

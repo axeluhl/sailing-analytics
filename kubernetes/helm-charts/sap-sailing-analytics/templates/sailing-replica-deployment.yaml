@@ -109,6 +109,8 @@ spec:
           value: {{ template "sapsailing-app-name" . }}-{{ .Values.replica.role }}
         - name: REPLICATION_CHANNEL
           value: {{ template "sapsailing-app-name" . }}-{{ .Values.replica.role }}
+        - name: ADDITIONAL_JAVA_ARGS
+          value: -Dcom.sun.management.jmxremote
         livenessProbe:
           httpGet:
             path: /

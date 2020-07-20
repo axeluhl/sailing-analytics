@@ -46,6 +46,8 @@ spec:
           value: "{{ .Values.rabbitmq.port }}"
         - name: SERVER_NAME
           value: {{ template "sapsailing-app-name" . }}-{{ .Values.master.role }}
+        - name: ADDITIONAL_JAVA_ARGS
+          value: -Dcom.sun.management.jmxremote
         livenessProbe:
           httpGet:
             path: /
