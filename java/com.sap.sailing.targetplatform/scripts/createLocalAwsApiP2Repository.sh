@@ -16,6 +16,7 @@ TARGET_DEFINITION="${WORKSPACE}/java/com.sap.sailing.targetplatform/definitions/
 WRAPPER_BUNDLE="${WORKSPACE}/java/com.amazon.aws.aws-java-api"
 cd ${WRAPPER_BUNDLE}
 echo "Downloading libraries..."
+rm -rf ${LIB}/*
 ${WORKSPACE}/gradlew downloadLibs
 cd ${LIB}
 VERSION=`ls -1 aws-core-*.jar | grep -v -- -sources | sed -e 's/aws-core-\([.0-9]*\)\.jar/\1/'`
@@ -81,7 +82,7 @@ mkdir -p ${UPDATE_SITE_PROJECT}/plugins/aws-sdk
 mv bin/com.amazon.aws.aws-java-api-${VERSION}.jar ${UPDATE_SITE_PROJECT}/plugins/aws-sdk
 cd ${UPDATE_SITE_PROJECT}
 echo "Patching update site's feature.xml..."
-sed -i -e 's/version="[0-9.]*"/version="'${VERSION}'"/' ${FEATURE_XML}
+sed -i -e 's/^\( *\)version="[0-9.]*"/\1version="'${VERSION}'"/' ${FEATURE_XML}
 echo "Building update site..."
 mvn clean install
 echo "Patching SDK version in target platform definition ${TARGET_DEFINITION}..."
