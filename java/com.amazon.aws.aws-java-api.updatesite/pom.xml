@@ -13,7 +13,7 @@
 		pom. Therefore, the parent was not set here - which means we have to define 
 		$tycho-version again. -->
 	<groupId>com.amazon.aws</groupId>
-	<version>2.13.50</version>
+	<version>1.0.0-SNAPSHOT</version>
 	<artifactId>com.amazon.aws.aws-java-api.updatesite</artifactId>
 	<build>
 		<plugins>
