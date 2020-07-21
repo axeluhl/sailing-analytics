@@ -9,7 +9,6 @@ import java.util.Map.Entry;
 import java.util.WeakHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -52,16 +51,12 @@ public class KnowsExecutorAndTracingGetImpl<V> extends HasTracingGetImpl<V> impl
      * that they can be set just before this task is run.
      */
     public KnowsExecutorAndTracingGetImpl() {
-        AtomicReference<WeakHashMap<ThreadLocal<Object>, Object>> threadLocalValuesToInheritValue = new AtomicReference<>(
-                null);
+        WeakHashMap<ThreadLocal<Object>, Object> threadLocalValuesToInheritValue = new WeakHashMap<>();
         final Thread currentThread = Thread.currentThread();
         handleThreadLocals(currentThread, inheritableThreadLocalsField, (key, value) -> {
-            if (threadLocalValuesToInheritValue.get() == null) {
-                threadLocalValuesToInheritValue.set(new WeakHashMap<>());
-            }
-            threadLocalValuesToInheritValue.get().put(key, value);
+            threadLocalValuesToInheritValue.put(key, value);
         });
-        threadLocalValuesToInherit = threadLocalValuesToInheritValue.get();
+        threadLocalValuesToInherit = threadLocalValuesToInheritValue;
     }
     
     @Override
@@ -85,24 +80,24 @@ public class KnowsExecutorAndTracingGetImpl<V> extends HasTracingGetImpl<V> impl
 
     private void handleThreadLocals(final Thread thread, final Field threadLocalSourceField, final BiConsumer<ThreadLocal<Object>, Object> valueHandler) {
         try {
-            final Object inheritableThreadLocals = inheritableThreadLocalsField.get(thread);
-            if (inheritableThreadLocals != null) {
+            final Object threadLocals = threadLocalSourceField.get(thread);
+            if (threadLocals != null) {
                 
-                final Method expungeStaleEntries = inheritableThreadLocals.getClass().getDeclaredMethod("expungeStaleEntries");
+                final Method expungeStaleEntries = threadLocals.getClass().getDeclaredMethod("expungeStaleEntries");
                 expungeStaleEntries.setAccessible(true);
-                expungeStaleEntries.invoke(inheritableThreadLocals);
-                final Field tableField = inheritableThreadLocals.getClass().getDeclaredField("table");
+                expungeStaleEntries.invoke(threadLocals);
+                final Field tableField = threadLocals.getClass().getDeclaredField("table");
                 tableField.setAccessible(true);
-                final Object[] table = (Object[]) tableField.get(inheritableThreadLocals);
+                final Object[] table = (Object[]) tableField.get(threadLocals);
                 for (int j = 0; j < table.length; j++) {
                     final WeakReference<?> entry = (WeakReference<?>) table[j];
                     if (entry != null) {
                         @SuppressWarnings("unchecked")
-                        final InheritableThreadLocal<Object> key = (InheritableThreadLocal<Object>) entry.get();
+                        final ThreadLocal<Object> key = (ThreadLocal<Object>) entry.get();
                         if (key != null) {
                             final Field valueField = entry.getClass().getDeclaredField("value");
                             valueField.setAccessible(true);
-                            final Object value = childValueMethod.invoke(key, valueField.get(entry));
+                            final Object value = key instanceof InheritableThreadLocal ? childValueMethod.invoke(key, valueField.get(entry)) : key.get();
                             valueHandler.accept(key, value);
                         }
                     }

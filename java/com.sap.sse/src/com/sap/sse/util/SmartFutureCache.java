@@ -372,6 +372,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
                     }
                     gettingThreads.clear();
                     tracingGetHelper.removeInheritableThreadLocalValues();
+                    tracingGetHelper.removeThreadLocalValues();
                 }
             } catch (Exception e) {
                 // cache won't be updated

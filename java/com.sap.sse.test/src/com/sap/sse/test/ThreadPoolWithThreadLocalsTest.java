@@ -86,8 +86,11 @@ public class ThreadPoolWithThreadLocalsTest {
         final InheritableThreadLocal<String> itl = new InheritableThreadLocal<>();
         itl.set("top secret");
         final Thread thread1 = executor.submit(() -> {
+            logger.info("" + 
+                    containsThreadLocalWithValue(Thread.currentThread(), "top secret", inheritableThreadLocalsField));
             return Thread.currentThread();
         }).get();
+        assertEquals("top secret", itl.get());
         itl.remove();
         Thread thread2 = null;
         while (thread1 != thread2) {
