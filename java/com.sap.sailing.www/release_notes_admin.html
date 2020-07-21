@@ -45,6 +45,14 @@
                             where competitors <em>do</em> change boats. This is now changes such that competitors
                             with boat assignments can also be used (without their boat assignments) in regattas
                             where competitors change boats.</li>
+                        <li>Added boat class "Wayfarer"</li>
+                        <li>Fixed an issue with the <tt>/sailingserver/api/v1/boatclasses</tt> REST API which now delivers
+                            all known boat classes, regardless of whether any polar data exists for them or not.</li>
+                        <li>The file upload size limit was increased to a more contemporary 8GB.</li>
+                        <li>Added a field <tt>courseAreaId</tt> to the REST API output for regattas which now tells
+                            for each race in the regatta on which course area it saw its last start attempt.</li>
+                        <li>When creating or editing an event, URLs entered without protocol will now automatically be
+                            completed with "https://" as the protocol specification to avoid unnecessary errors.</li>
                     </ul>
                     <h2 class="articleSubheadline">June 2020</h2>
                     <ul class="bulletList">

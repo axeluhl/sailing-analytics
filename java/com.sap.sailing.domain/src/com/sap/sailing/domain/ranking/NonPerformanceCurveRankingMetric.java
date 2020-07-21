@@ -84,12 +84,23 @@ public abstract class NonPerformanceCurveRankingMetric extends AbstractRankingMe
             final TimePoint startOfRace = getTrackedRace().getStartOfRace();
             if (startOfRace != null) {
                 final Duration actualRaceDuration = startOfRace.until(timePoint);
+                final Waypoint finish = getTrackedRace().getRace().getCourse().getLastWaypoint();
                 for (Competitor competitor : getCompetitors()) {
+                    // accommodate also for the possibility of an empty course (finish==null)
+                    final MarkPassing finishMarkPassing =  finish == null ? null : getTrackedRace().getMarkPassing(competitor, finish);
+                    final Duration timeElapsed;
+                    if (finishMarkPassing != null && finishMarkPassing.getTimePoint().before(timePoint)) {
+                        // competitor has already finished the race at timePoint; so the time elapsed for that competitor stops counting
+                        // at the finish mark passing:
+                        timeElapsed = startOfRace.until(finishMarkPassing.getTimePoint());
+                    } else {
+                        timeElapsed = actualRaceDuration;
+                    }
                     // TODO bug5110: we cannot compute the following if at timePoint the position of either of the two competitors involved is unknown; we can, however, do this if timePoint is after the two finish mark passings, or if the competitorFarthestAhead has already finished at timePoint and the position of "competitor" is known.
                     final Duration predictedDurationToReachWindwardPositionOfCompetitorFarthestAhead = getPredictedDurationToReachWindwardPositionOf(
                             competitor, competitorFarthestAhead, timePoint, cache);
                     final Duration totalEstimatedDurationSinceRaceStartToCompetitorFarthestAhead = predictedDurationToReachWindwardPositionOfCompetitorFarthestAhead == null ? null
-                            : actualRaceDuration.plus(predictedDurationToReachWindwardPositionOfCompetitorFarthestAhead);
+                            : timeElapsed.plus(predictedDurationToReachWindwardPositionOfCompetitorFarthestAhead);
                     final Duration calculatedEstimatedTimeWhenReachingCompetitorFarthestAhead = totalEstimatedDurationSinceRaceStartToCompetitorFarthestAhead == null ? null
                             : getCalculatedTime(
                                     competitor,
@@ -103,7 +114,7 @@ public abstract class NonPerformanceCurveRankingMetric extends AbstractRankingMe
                                     .getTrack(competitor).getEstimatedPosition(timePoint, /* extrapolated */true),
                             getTrackedRace().getTimeSailedSinceRaceStart(competitor, timePoint), totalWindwardDistanceTraveled);
                     RankingMetric.CompetitorRankingInfo rankingInfo = new CompetitorRankingInfoImpl(timePoint, competitor,
-                            getWindwardDistanceTraveled(competitor, timePoint, cache), actualRaceDuration, calculatedTime,
+                            getWindwardDistanceTraveled(competitor, timePoint, cache), timeElapsed, calculatedTime,
                             predictedDurationToReachWindwardPositionOfCompetitorFarthestAhead,
                             calculatedEstimatedTimeWhenReachingCompetitorFarthestAhead);
                     result.put(competitor, rankingInfo);
@@ -180,14 +191,7 @@ public abstract class NonPerformanceCurveRankingMetric extends AbstractRankingMe
             final Competitor who = legWho.getCompetitor();
             final Competitor to = legTo.getCompetitor();
             if (who == to) {
-                // the same competitor requires no time to reach its own position; it's already there;
-                // however, if the competitor has already finished the leg at or before timePoint, the duration will
-                // have to be negative, even if who==to
-                if (isAssumedToHaveFinishedLeg(timePoint, legWho)) {
-                    result = timePoint.until(legWho.getFinishTime());
-                } else {
-                    result = Duration.NULL;
-                }
+                result = Duration.NULL;
             } else {
                 assert getTrackedRace().getRace().getCourse().getIndexOfWaypoint(legWho.getLeg().getFrom()) <= getTrackedRace()
                         .getRace().getCourse().getIndexOfWaypoint(legTo.getLeg().getFrom());
