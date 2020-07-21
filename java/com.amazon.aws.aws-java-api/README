@@ -1,4 +1,5 @@
 TL;DR
+Keep this project CLOSED in Eclipse unless updating the AWS SDK for the target platform.
 Use ${workspace}/java/com.sap.sailing.targetplatform/scripts/createLocalAwsApiP2Repository.sh
 
 Details:
