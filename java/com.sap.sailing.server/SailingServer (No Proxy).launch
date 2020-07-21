@@ -33,6 +33,7 @@
 <stringAttribute key="profilingTraceType-PERFORMANCE_HOTSPOT_TRACE" value="KEY_IGNORE_SLEEPING_THREADS%CTX_KEY%false%CTX_ENTRY%KEY_APPLICATION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_SESSION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_ENABLEMENT%CTX_KEY%true%CTX_ENTRY%KEY_USER_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_REQUEST_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_TENANT_FILTER%CTX_KEY%*%CTX_ENTRY%"/>
 <stringAttribute key="profilingTraceType-SYNCHRONIZATION_TRACE" value="KEY_APPLICATION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_SESSION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_ENABLEMENT%CTX_KEY%false%CTX_ENTRY%KEY_USER_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_REQUEST_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_TENANT_FILTER%CTX_KEY%*%CTX_ENTRY%"/>
 <setAttribute key="selected_target_bundles">
+<setEntry value="com.amazon.aws.aws-java-api@default:default"/>
 <setEntry value="com.fasterxml.jackson.core.jackson-annotations@default:default"/>
 <setEntry value="com.fasterxml.jackson.core.jackson-core@default:default"/>
 <setEntry value="com.fasterxml.jackson.core.jackson-databind@default:default"/>
@@ -114,7 +115,6 @@
 <setEntry value="slf4j.jdk14@default:false"/>
 </setAttribute>
 <setAttribute key="selected_workspace_bundles">
-<setEntry value="com.amazon.aws.aws-java-api@default:default"/>
 <setEntry value="com.google.gwt.servlet@default:default"/>
 <setEntry value="com.googlecode.java-diff-utils@default:default"/>
 <setEntry value="com.sap.sailing.barbados.resultimport@4:true"/>

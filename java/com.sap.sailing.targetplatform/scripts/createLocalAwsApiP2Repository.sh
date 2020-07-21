@@ -10,8 +10,9 @@ CLASSPATH_FILE=".classpath"
 MANIFEST_FILE="MANIFEST.MF"
 BUILD_PROPERTIES_FILE="build.properties"
 WORKSPACE=`realpath \`dirname $0\`/../../..`
-echo WORKSPACE: $WORKSPACE
 UPDATE_SITE_PROJECT=${WORKSPACE}/java/com.amazon.aws.aws-java-api.updatesite
+FEATURE_XML=${UPDATE_SITE_PROJECT}/features/aws-sdk/feature.xml
+TARGET_DEFINITION="${WORKSPACE}/java/com.sap.sailing.targetplatform/definitions/race-analysis-p2-remote.target"
 WRAPPER_BUNDLE="${WORKSPACE}/java/com.amazon.aws.aws-java-api"
 cd ${WRAPPER_BUNDLE}
 echo "Downloading libraries..."
@@ -79,4 +80,12 @@ cd ..
 mvn clean install
 mv bin/com.amazon.aws.aws-java-api-${VERSION}.jar ${UPDATE_SITE_PROJECT}/plugins/aws-sdk
 cd ${UPDATE_SITE_PROJECT}
+echo "Patching update site's feature.xml..."
+sed -i -e 's/version="[0-9.]*"/version="'${VERSION}'"/' ${FEATURE_XML}
+echo "Building update site..."
 mvn clean install
+echo "Patching SDK version in target platform definition ${TARGET_DEFINITION}..."
+sed -i -e 's/<unit id="com.amazon.aws.aws-java-api.feature.group" version="[0-9.]*"\/>/<unit id="com.amazon.aws.aws-java-api.feature.group" version="'${VERSION}'"\/>/' ${TARGET_DEFINITION}
+echo "You may test your target platform locally by creating race-analysis-p2-local.target by running the script createLocalTargetDef.sh."
+echo "You can also try a Hudson build with the -v option, generating and using the local target platform during the build."
+echo "When all this works, update the P2 repository at p2.sapsailing.com using the script uploadAwsApiRepositoryToServer.sh."
