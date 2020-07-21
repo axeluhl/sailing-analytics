@@ -12,5 +12,5 @@ import java.util.concurrent.ThreadPoolExecutor;
  */
 public interface KnowsExecutor {
     void setExecutorThisTaskIsScheduledFor(ThreadPoolExecutor executorThisTaskIsScheduledFor);
-    Map<InheritableThreadLocal<Object>, Object> getThreadLocalValuesToInherit();
+    Map<ThreadLocal<Object>, Object> getThreadLocalValuesToInherit();
 }

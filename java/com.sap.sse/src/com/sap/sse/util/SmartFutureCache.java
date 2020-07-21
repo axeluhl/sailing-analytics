@@ -250,7 +250,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
         }
 
         @Override
-        public Map<InheritableThreadLocal<Object>, Object> getThreadLocalValuesToInherit() {
+        public Map<ThreadLocal<Object>, Object> getThreadLocalValuesToInherit() {
             return tracingGetHelper.getThreadLocalValuesToInherit();
         }
 
