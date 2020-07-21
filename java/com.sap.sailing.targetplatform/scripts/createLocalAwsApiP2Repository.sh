@@ -16,8 +16,7 @@ TARGET_DEFINITION="${WORKSPACE}/java/com.sap.sailing.targetplatform/definitions/
 WRAPPER_BUNDLE="${WORKSPACE}/java/com.amazon.aws.aws-java-api"
 cd ${WRAPPER_BUNDLE}
 echo "Downloading libraries..."
-# TODO re-enable
-#${WORKSPACE}/gradlew downloadLibs
+${WORKSPACE}/gradlew downloadLibs
 cd ${LIB}
 VERSION=`ls -1 aws-core-*.jar | grep -v -- -sources | sed -e 's/aws-core-\([.0-9]*\)\.jar/\1/'`
 echo VERSION=${VERSION}
@@ -78,6 +77,7 @@ echo >>${WRAPPER_BUNDLE}/${BUILD_PROPERTIES_FILE}
 echo "Building the wrapper bundle..."
 cd ..
 mvn clean install
+mkdir -p ${UPDATE_SITE_PROJECT}/plugins/aws-sdk
 mv bin/com.amazon.aws.aws-java-api-${VERSION}.jar ${UPDATE_SITE_PROJECT}/plugins/aws-sdk
 cd ${UPDATE_SITE_PROJECT}
 echo "Patching update site's feature.xml..."

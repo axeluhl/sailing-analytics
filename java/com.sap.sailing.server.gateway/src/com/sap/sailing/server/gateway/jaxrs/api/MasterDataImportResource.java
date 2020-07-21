@@ -35,7 +35,7 @@ public class MasterDataImportResource extends AbstractSailingServerResource {
             @FormParam("targetServerUsername") String targetServerUsername,
             @FormParam("targetServerPassword") String targetServerPassword,
             @FormParam("targetServerBearerToken") String targetServerBearerToken,
-            @FormParam("uuids[]") List<UUID> requestedLeaderboardGroupIds, 
+            @FormParam("UUID[]") List<UUID> requestedLeaderboardGroupIds, 
             @FormParam("override") Boolean override,
             @FormParam("compress") Boolean compress, 
             @FormParam("exportWind") Boolean exportWind,

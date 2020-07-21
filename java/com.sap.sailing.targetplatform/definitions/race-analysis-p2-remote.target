@@ -274,6 +274,7 @@
 <plugin id="routeconverter"/>
 <plugin id="slf4j.api"/>
 <plugin id="slf4j.jdk14"/>
+<plugin id="com.amazon.aws.aws-java-api"/>
 <plugin id="com.jcraft.jsch"/>
 <plugin id="com.jcraft.jsch.source"/>
 <plugin id="com.fasterxml.jackson.core.jackson-databind.source"/>
