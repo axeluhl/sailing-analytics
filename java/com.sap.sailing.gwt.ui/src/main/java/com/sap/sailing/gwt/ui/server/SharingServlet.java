@@ -36,7 +36,8 @@ public class SharingServlet extends HttpServlet {
 
     private static final String PATH_SEPARATOR = "/";
     private static final String DEFAULT_TITLE = "SAP Sailing";
-    private static final String DEFAULT_DESCRIPTION = "Sailing provides the perfect platform for SAP to showcase solutions and help the sport run like never before.";
+    private static final String DEFAULT_DESCRIPTION = "Help sailors analyze performance and optimize strategy &#8226; Bring fans closer to the action " +
+            "&#8226; Provide the media with information and insights to deliver a greater informed commentary";
     private static final String DEFAULT_IMAGE_URL = "https://www.sapsailing.com/gwt/com.sap.sailing.gwt.home.Home/5A1CE55C422F0249466090CC8E55CC96.cache.jpg";
     private final ConcurrentHashMap<String, byte[]> cache = new ConcurrentHashMap<>();
 
