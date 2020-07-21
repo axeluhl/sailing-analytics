@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.8"?>
-<target name="Race Analysis Target" sequenceNumber="154">
+<target name="Race Analysis Target" sequenceNumber="156">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="javax.ws.rs" version="1.1.1.v20130318-1750"/>
@@ -121,6 +121,10 @@
 <unit id="com.sap.sailing.target.shiro.feature.group" version="1.0.0"/>
 <unit id="com.sap.sailing.target.test.feature.group" version="1.0.0"/>
 <repository location="https://p2.sapsailing.com/p2/sailing/"/>
+</location>
+<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
+<unit id="com.amazon.aws.aws-java-api.feature.group" version="2.13.50"/>
+<repository location="https://p2.sapsailing.com/p2/aws-sdk/"/>
 </location>
 </locations>
 <includeBundles>
@@ -270,6 +274,7 @@
 <plugin id="routeconverter"/>
 <plugin id="slf4j.api"/>
 <plugin id="slf4j.jdk14"/>
+<plugin id="com.amazon.aws.aws-java-api"/>
 <plugin id="com.jcraft.jsch"/>
 	<plugin id="com.jcraft.jsch.source"/>
 	<plugin id="com.fasterxml.jackson.core.jackson-databind.source"/>
