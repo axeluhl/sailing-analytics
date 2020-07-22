@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.8"?>
-<target name="Race Analysis Target" sequenceNumber="152">
+<target name="Race Analysis Target" sequenceNumber="156">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="javax.ws.rs" version="1.1.1.v20130318-1750"/>
@@ -59,6 +59,8 @@
 <unit id="org.jdom.source" version="1.1.1.v201101151400"/>
 <unit id="org.objectweb.asm" version="5.0.1.v201404251740"/>
 <unit id="org.objectweb.asm.source" version="5.0.1.v201404251740"/>
+<unit id="com.jcraft.jsch" version="0.1.54.v20170116-1932"/>
+<unit id="com.jcraft.jsch.source" version="0.1.54.v20170116-1932"/>
 <repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20180905201904/repository/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
@@ -120,6 +122,10 @@
 <unit id="com.sap.sailing.target.test.feature.group" version="1.0.0"/>
 <repository location="https://p2.sapsailing.com/p2/sailing/"/>
 </location>
+<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
+<unit id="com.amazon.aws.aws-java-api.feature.group" version="2.13.58"/>
+<repository location="https://p2.sapsailing.com/p2/aws-sdk/"/>
+</location>
 </locations>
 <includeBundles>
 <plugin id="com.fasterxml.jackson.core.jackson-annotations"/>
@@ -138,8 +144,8 @@
 <plugin id="jackson-mapper-asl"/>
 <plugin id="javax.security.auth.message"/>
 <plugin id="javax.security.auth.message.source"/>
-<plugin id="javax.servlet" version="3.1.0.v201410161800"/>
-<plugin id="javax.servlet.source" version="3.1.0.v201410161800"/>
+<plugin id="javax.servlet"/>
+<plugin id="javax.servlet.source"/>
 <plugin id="javax.validation"/>
 <plugin id="javax.validation.source"/>
 <plugin id="javax.ws.rs"/>
@@ -268,6 +274,19 @@
 <plugin id="routeconverter"/>
 <plugin id="slf4j.api"/>
 <plugin id="slf4j.jdk14"/>
+<plugin id="com.amazon.aws.aws-java-api"/>
+<plugin id="com.jcraft.jsch"/>
+<plugin id="com.jcraft.jsch.source"/>
+<plugin id="com.fasterxml.jackson.core.jackson-databind.source"/>
+<plugin id="com.fasterxml.jackson.core.jackson-core.source"/>
+<plugin id="com.fasterxml.jackson.core.jackson-annotations.source"/>
+<plugin id="org.apache.commons.codec.source"/>
+<plugin id="org.apache.poi.ooxml.schemas.source"/>
+<plugin id="org.apache.poi.ooxml.source"/>
+<plugin id="org.apache.poi.source"/>
+<plugin id="org.apache.xmlbeans.source"/>
+<plugin id="org.dom4j.source"/>
+<plugin id="com.amazon.aws.aws-java-api"/>
 </includeBundles>
 <targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 </target>

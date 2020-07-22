@@ -53,6 +53,17 @@
                             for each race in the regatta on which course area it saw its last start attempt.</li>
                         <li>When creating or editing an event, URLs entered without protocol will now automatically be
                             completed with "https://" as the protocol specification to avoid unnecessary errors.</li>
+                        <li>Remote Server Instance management has been made more selective. So far, all public events
+                            ("list on homepage == Yes") on a remote server were featured in the referencing server's
+                            event list and stage, as well as in a search operation. Now, administrators can pick and choose
+                            from the public event list on the remote server which ones to expose on the referencing side.
+                            The list can be including or excluding. Existing remote server references are handled as having
+                            and "excluding" with an empty list of events excluded, giving the classic behavior of drawing
+                            from all events. When creating new remote references, from now on they will be created as
+                            "including" starting out with an empty event list. The administrator hence has to pick events
+                            to feature explicitly, and new events added on the remote side will no longer automatically show
+                            on the referencing side. An "excluding" remote reference needs to be set up for this "legacy"
+                            behavior.</li>
                     </ul>
                     <h2 class="articleSubheadline">June 2020</h2>
                     <ul class="bulletList">

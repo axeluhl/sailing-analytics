@@ -16,7 +16,6 @@ import com.sap.sailing.selenium.api.event.SecurityApi.User;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class SecurityApiTest extends AbstractSeleniumTest {
-
     private static final String USERNAME = "max";
     private static final String USERNAME_FULL = "Max Mustermann";
 
@@ -30,12 +29,9 @@ public class SecurityApiTest extends AbstractSeleniumTest {
     @Test
     public void testCreateAndGetUser() {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
-
         final AccessToken createUserResponse = securityApi.createUser(adminCtx, "max", USERNAME_FULL, null, "start123");
-
         assertEquals("Responded username of createUser is different!", USERNAME, createUserResponse.getUsername());
         assertNotNull("Token is missing in reponse!", createUserResponse.getAccessToken());
-
         User getUserResponse = securityApi.getUser(adminCtx, USERNAME);
         assertEquals("Responded username of getUser is different!", USERNAME, getUserResponse.getUsername());
     }
@@ -43,7 +39,6 @@ public class SecurityApiTest extends AbstractSeleniumTest {
     @Test
     public void testSayHello() {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
-
         final Hello hello = securityApi.sayHello(adminCtx);
         assertEquals("Responded principal of hello is different!", "admin", hello.getPrincipal());
         assertEquals("Responded authenticated of hello is different!", true, hello.isAuthenticated());
