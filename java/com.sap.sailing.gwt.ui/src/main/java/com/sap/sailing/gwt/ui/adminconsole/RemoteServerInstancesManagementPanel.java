@@ -182,17 +182,14 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
         actionsColumn.addAction(ACTION_UPDATE, ServerActions.CONFIGURE_REMOTE_INSTANCES, loadedSalingServer -> {
             sailingService.getCompleteRemoteServerReference(loadedSalingServer.getName(),
                     new AsyncCallback<RemoteSailingServerReferenceDTO>() {
-
                         @Override
                         public void onSuccess(RemoteSailingServerReferenceDTO completeServerReference) {
                             new RemoteSailingServerEventsSelectionDialog(completeServerReference, loadedSalingServer,
                                     stringMessages, new DialogCallback<RemoteSailingServerReferenceDTO>() {
-
                                         @Override
                                         public void ok(RemoteSailingServerReferenceDTO editedObject) {
                                             sailingService.updateRemoteSailingServerReference(editedObject,
                                                     new AsyncCallback<RemoteSailingServerReferenceDTO>() {
-
                                                         @Override
                                                         public void onSuccess(RemoteSailingServerReferenceDTO result) {
                                                             refreshSailingServerList();
