@@ -9,12 +9,14 @@ LIB=lib
 CLASSPATH_FILE=".classpath"
 MANIFEST_FILE="MANIFEST.MF"
 BUILD_PROPERTIES_FILE="build.properties"
-WORKSPACE=`realpath \`dirname $0\`/../../..`
+WORKSPACE=`realpath \`dirname $0\`/../..`
 UPDATE_SITE_PROJECT=${WORKSPACE}/java/com.amazon.aws.aws-java-api.updatesite
 FEATURE_XML=${UPDATE_SITE_PROJECT}/features/aws-sdk/feature.xml
 TARGET_DEFINITION="${WORKSPACE}/java/com.sap.sailing.targetplatform/definitions/race-analysis-p2-remote.target"
 WRAPPER_BUNDLE="${WORKSPACE}/java/com.amazon.aws.aws-java-api"
 cd ${WRAPPER_BUNDLE}
+echo "Creating .project file from dot_project template to allow for Eclipse workspace import..."
+cp dot_project .project
 echo "Downloading libraries..."
 rm -rf ${LIB}/*
 ${WORKSPACE}/gradlew downloadLibs
