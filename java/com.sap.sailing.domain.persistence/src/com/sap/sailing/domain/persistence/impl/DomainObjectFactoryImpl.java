@@ -1137,8 +1137,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final String urlAsString = (String) serverDBObject.get(FieldNames.SERVER_URL.name());
         try {
             URL serverUrl = new URL(urlAsString);
+            // if the INCLUDE field is not present, assume "false", meaning that the list of "selected" events
+            // which the most likely is also missing (we assume we're reading an old record that isn't aware
+            // of per-event includes/excludes) will therefore exclude no event, leading to backward-compatible
+            // behavior of considering all events found across that reference.
             result = new RemoteSailingServerReferenceImpl(name, serverUrl, include == null ? false : include,
-                    selectedEventIds == null ? new HashSet<UUID>() : new HashSet<UUID>(selectedEventIds));
+                    selectedEventIds == null ? Collections.emptySet() : selectedEventIds);
         } catch (MalformedURLException e) {
             logger.log(Level.SEVERE, "Can't load the sailing server with URL " + urlAsString, e);
         }

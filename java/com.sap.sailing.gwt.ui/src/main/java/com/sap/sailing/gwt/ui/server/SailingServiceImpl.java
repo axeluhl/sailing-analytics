@@ -3688,19 +3688,18 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
      * to <code>http://sapsailing.com</code>.
      * @throws MalformedURLException 
      */
-  //READ
+    //READ
     private URL getRequestBaseURL() throws MalformedURLException {
         final URL url = new URL(getThreadLocalRequest().getRequestURL().toString());
         final URL baseURL = getBaseURL(url);
         return baseURL;
     }
 
-  //READ
+    //READ
     private URL getBaseURL(URL url) throws MalformedURLException {
         return new URL(url.getProtocol(), url.getHost(), url.getPort(), /* file */ "");
     }
 
-  //READ
     private RemoteSailingServerReferenceDTO createRemoteSailingServerReferenceDTO(
             final RemoteSailingServerReference serverRef,
             final com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception> eventsOrException) {
@@ -3715,14 +3714,14 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                     exception == null ? null : exception.getMessage());
         } else {
             eventDTOs = convertToEventDTOs(events);
-            List<UUID> selectedEventIds = new ArrayList<UUID>(serverRef.getSelectedEventIds());
+            final List<UUID> selectedEventIds = new ArrayList<>(serverRef.getSelectedEventIds());
             sailingServerDTO = new RemoteSailingServerReferenceDTO(serverRef.getName(),
                     serverRef.getURL().toExternalForm(), serverRef.isInclude(), selectedEventIds, eventDTOs);
         }
         return sailingServerDTO;
     }
     
-  //READ
+    //READ
     private Iterable<EventBaseDTO> convertToEventDTOs(Iterable<EventBase> events) {
         List<EventBaseDTO> result = new ArrayList<>();
         for (EventBase event : events) {

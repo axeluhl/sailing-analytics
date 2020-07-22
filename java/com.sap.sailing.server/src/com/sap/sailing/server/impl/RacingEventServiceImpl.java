@@ -1606,8 +1606,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public RemoteSailingServerReference addRemoteSailingServerReference(String name, URL url, boolean include) {
-        RemoteSailingServerReference result = new RemoteSailingServerReferenceImpl(name, url, include,
-                new HashSet<UUID>());
+        RemoteSailingServerReference result = new RemoteSailingServerReferenceImpl(name, url, include, /* IDs of included/excluded events */ Collections.emptySet());
         remoteSailingServerSet.add(result);
         mongoObjectFactory.storeSailingServer(result);
         return result;
