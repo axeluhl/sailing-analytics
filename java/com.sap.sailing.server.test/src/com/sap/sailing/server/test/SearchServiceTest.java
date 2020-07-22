@@ -296,7 +296,7 @@ public class SearchServiceTest {
     
     @Test
     public void testSimpleSearchByCompetitorName() {
-        Result<LeaderboardSearchResult> searchResults = server.search(new KeywordQuery(Arrays.asList(new String[] { "Tobi" })));
+        Result<LeaderboardSearchResult> searchResults = server.search(new KeywordQuery(Arrays.asList(new String[] { "Tobi" })), null, null);
         assertEquals(1, Util.size(searchResults.getHits()));
         Regatta foundRegatta = searchResults.getHits().iterator().next().getRegatta();
         assertSame(pfingstbusch29er, foundRegatta);
@@ -304,7 +304,7 @@ public class SearchServiceTest {
 
     @Test
     public void testSimpleSearchByCompetitorName2() {
-        Result<LeaderboardSearchResult> searchResults = server.search(new KeywordQuery(Arrays.asList(new String[] { "Hasso" })));
+        Result<LeaderboardSearchResult> searchResults = server.search(new KeywordQuery(Arrays.asList(new String[] { "Hasso" })), null, null);
         assertEquals(1, Util.size(searchResults.getHits()));
         Regatta foundRegatta = searchResults.getHits().iterator().next().getRegatta();
         assertSame(aalRegatta, foundRegatta);
@@ -312,7 +312,7 @@ public class SearchServiceTest {
 
     @Test
     public void testSimpleSearchByVenueName() {
-        Result<LeaderboardSearchResult> searchResults = server.search(new KeywordQuery(Arrays.asList(new String[] { "Flensburg" })));
+        Result<LeaderboardSearchResult> searchResults = server.search(new KeywordQuery(Arrays.asList(new String[] { "Flensburg" })), null, null);
         assertEquals(1, Util.size(searchResults.getHits()));
         Regatta foundRegatta = searchResults.getHits().iterator().next().getRegatta();
         assertSame(aalRegatta, foundRegatta);
@@ -320,7 +320,7 @@ public class SearchServiceTest {
 
     @Test
     public void testSimpleSearchByVenueName2() {
-        Result<LeaderboardSearchResult> searchResults = server.search(new KeywordQuery(Arrays.asList(new String[] { "Kiel" })));
+        Result<LeaderboardSearchResult> searchResults = server.search(new KeywordQuery(Arrays.asList(new String[] { "Kiel" })), null, null);
         assertEquals(2, Util.size(searchResults.getHits()));
         final Iterator<LeaderboardSearchResult> iterator = searchResults.getHits().iterator();
         final LeaderboardSearchResult firstMatch = iterator.next();
@@ -335,7 +335,7 @@ public class SearchServiceTest {
 
     @Test
     public void testMultipleMatchesSortedCorrectly() {
-        Result<LeaderboardSearchResult> searchResults = server.search(new KeywordQuery(Arrays.asList(new String[] { "Buhl" })));
+        Result<LeaderboardSearchResult> searchResults = server.search(new KeywordQuery(Arrays.asList(new String[] { "Buhl" })), null, null);
         assertEquals(2, Util.size(searchResults.getHits()));
         final Iterator<LeaderboardSearchResult> iter = searchResults.getHits().iterator();
         final LeaderboardSearchResult firstMatch = iter.next();
@@ -351,7 +351,7 @@ public class SearchServiceTest {
     @Test
     public void testSerializeAndDeserializeSearchResult() throws JsonDeserializationException {
         Result<LeaderboardSearchResult> searchResults = server
-                .search(new KeywordQuery(Arrays.asList(new String[] { "Buhl" })));
+                .search(new KeywordQuery(Arrays.asList(new String[] { "Buhl" })), null, null);
         LeaderboardGroupBaseJsonSerializer leaderboardGroupBaseJsonSerializer = new LeaderboardGroupBaseJsonSerializer();
         LeaderboardSearchResultJsonSerializer serializer = new LeaderboardSearchResultJsonSerializer(
                 new EventBaseJsonSerializer(new VenueJsonSerializer(new CourseAreaJsonSerializer()),

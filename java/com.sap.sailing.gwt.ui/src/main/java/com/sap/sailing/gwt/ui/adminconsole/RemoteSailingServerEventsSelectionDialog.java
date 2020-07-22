@@ -16,7 +16,9 @@ import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -37,7 +39,7 @@ public class RemoteSailingServerEventsSelectionDialog extends DataEntryDialog<Re
     protected StringMessages stringMessages;
     private Grid eventsSelectionGrid;
     private List<EventBaseDTO> allEvents;
-    private List<EventBaseDTO> selectedEvents;
+    private List<UUID> selectedEvents;
     private RemoteSailingServerReferenceDTO referenceDTO;
     private RadioButton includeRadio;
     private RadioButton excludeRadio;
@@ -50,17 +52,17 @@ public class RemoteSailingServerEventsSelectionDialog extends DataEntryDialog<Re
         this.stringMessages = stringMessages;
         this.referenceDTO = referenceDTO;
         this.allEvents = StreamSupport.stream(completeRemoteServerReference.getEvents().spliterator(), false)
-                .collect(Collectors.toList());
+                .sorted(Comparator.comparing(EventBaseDTO::getName)).collect(Collectors.toList());
         this.selectedEvents = referenceDTO.getSelectedEvents();
     }
 
     @Override
     protected RemoteSailingServerReferenceDTO getResult() {
-        final List<EventBaseDTO> selectedEvents = new ArrayList<>();
+        final List<UUID> selectedEvents = new ArrayList<>();
         for (int i = 0; i < allEvents.size(); i++) {
             CheckBox selectEventCheckBox = (CheckBox) eventsSelectionGrid.getWidget(i, 1);
             if (selectEventCheckBox.getValue()) {
-                selectedEvents.add(allEvents.get(i));
+                selectedEvents.add((UUID) allEvents.get(i).getId());
             }
         }
 
@@ -116,7 +118,7 @@ public class RemoteSailingServerEventsSelectionDialog extends DataEntryDialog<Re
             eventsSelectionGrid.setWidget(i, 0, new Label(eventBaseDTO.getName()));
             CheckBox eventCheckBox = new CheckBox();
             eventsSelectionGrid.setWidget(i, 1, eventCheckBox);
-            eventCheckBox.setValue(selectedEvents.contains(allEvents.get(i)));
+            eventCheckBox.setValue(selectedEvents.contains(allEvents.get(i).getId()));
         }
         mainPanel.add(eventsSelectionGrid);
     }

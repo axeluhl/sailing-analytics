@@ -296,20 +296,7 @@ public class EventsResource extends AbstractSailingServerResource {
                 new VenueJsonSerializer(new CourseAreaJsonSerializer()), new LeaderboardGroupBaseJsonSerializer(),
                 new TrackingConnectorInfoJsonSerializer());
         JSONArray result = new JSONArray();
-        Iterable<Event> events;
-        if (include == null) {
-            events = getService().getAllEvents();
-        } else {
-            if (eventIds != null && !eventIds.isEmpty()) {
-                events = getService().getEventsSelectively(include, eventIds);
-            } else {
-                if (include) {
-                    events = Collections.emptyList();
-                } else {
-                    events = getService().getAllEvents();
-                }
-            }
-        }
+        Iterable<Event> events = getService().getEventsSelectively(include, eventIds);
         for (Event event : events) {
             if (getSecurityService().hasCurrentUserReadPermission(event)
                     && ((showNonPublic != null && Boolean.valueOf(showNonPublic)) || event.isPublic())) {

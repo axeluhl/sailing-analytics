@@ -3714,10 +3714,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                     exception == null ? null : exception.getMessage());
         } else {
             eventDTOs = convertToEventDTOs(events);
-            List<EventBaseDTO> selectedEventBaseDTOs = serverRef.getSelectedEventIds().stream()
-                    .map(element -> new EventBaseDTO(element)).collect(Collectors.toList());
+            List<UUID> selectedEventIds = new ArrayList<UUID>(serverRef.getSelectedEventIds());
             sailingServerDTO = new RemoteSailingServerReferenceDTO(serverRef.getName(),
-                    serverRef.getURL().toExternalForm(), serverRef.isInclude(), selectedEventBaseDTOs, eventDTOs);
+                    serverRef.getURL().toExternalForm(), serverRef.isInclude(), selectedEventIds, eventDTOs);
         }
         return sailingServerDTO;
     }
@@ -4220,7 +4219,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         RemoteSailingServerReference serverRef = getService()
                 .apply(new UpdateSailingServerReference(sailingServer.getName(),
                         sailingServer.isInclude(), sailingServer.getSelectedEvents().stream().map(element -> {
-                            return (UUID) element.getId();
+                            return (UUID) element;
                         }).collect(Collectors.toSet())));
         com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception> eventsOrException = getService()
                 .updateRemoteServerEventCacheSynchronously(serverRef, true);

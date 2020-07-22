@@ -77,10 +77,6 @@ public class EventBaseDTO extends NamedDTO implements WithID, IsSerializable {
         sailorsInfoWebsiteURLs = new HashMap<>();
     }
 
-    public EventBaseDTO(UUID id) {
-        this.id = id;
-    }
-
     @Override
     public boolean equals(Object o) {
         return Util.equalsWithNull(this.getId(), ((EventBaseDTO) o).getId());

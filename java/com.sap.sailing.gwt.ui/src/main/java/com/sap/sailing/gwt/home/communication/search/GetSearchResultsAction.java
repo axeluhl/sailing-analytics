@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.home.communication.search;
 
 import java.net.URL;
+import java.util.Set;
+import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.LeaderboardSearchResultBase;
@@ -47,23 +49,24 @@ public class GetSearchResultsAction implements SailingAction<ListResult<SearchRe
         RacingEventService service = ctx.getRacingEventService();
         final ListResult<SearchResultDTO> result;
         if (remoteServerName == null) {
-            result = getListResult(service.search(searchQuery), ctx.getRequestBaseURL(), false);
+            result = getListResult(service.search(searchQuery, null, null), ctx.getRequestBaseURL(), null, null, false);
         } else {
             RemoteSailingServerReference remoteServer = service.getRemoteServerReferenceByName(remoteServerName);
-            result = getListResult(service.searchRemotely(remoteServerName, searchQuery), remoteServer.getURL(), true);
+            result = getListResult(service.searchRemotely(remoteServerName, searchQuery), remoteServer.getURL(),
+                    remoteServer.isInclude(), remoteServer.getSelectedEventIds(), true);
         }
         return result;
     }
 
     @GwtIncompatible
     private <T extends LeaderboardSearchResultBase> ListResult<SearchResultDTO> getListResult(Result<T> result,
-            URL baseUrl, boolean isOnRemoteServer) {
+            URL baseUrl, Boolean include, Set<UUID> selectedEventIds, boolean isOnRemoteServer) {
         ListResult<SearchResultDTO> resultList = new ListResult<>();
         if (result != null) {
             for (T hit : result.getHits()) {
                 // TODO: for now filter all results where we no event is defined
                 if (hit.getEvents() != null && !Util.isEmpty(hit.getEvents())) {
-                    resultList.addValue(new SearchResultDTO(hit, baseUrl, isOnRemoteServer));
+                    resultList.addValue(new SearchResultDTO(hit, baseUrl, isOnRemoteServer, include, selectedEventIds));
                 }
             }
         }

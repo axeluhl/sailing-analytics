@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -278,7 +279,15 @@ public class RemoteSailingServerSet {
                     EventBase event = deserializer.deserialize(eventAsJson);
                     events.add(event);
                 }
-                result = new Util.Pair<Iterable<EventBase>, Exception>(events, /* exception */ null);
+                if (selectedEvents != null) {
+                    Set<EventBase> filteredEvents = events.stream()
+                            .filter(element -> include ? selectedEvents.contains(element.getId())
+                                    : !selectedEvents.contains(element.getId()))
+                            .collect(Collectors.toSet());
+                    result = new Util.Pair<Iterable<EventBase>, Exception>(filteredEvents, /* exception */ null);
+                } else {
+                    result = new Util.Pair<Iterable<EventBase>, Exception>(events, /* exception */ null);
+                }
             } finally {
                 if (bufferedReader != null) {
                     bufferedReader.close();

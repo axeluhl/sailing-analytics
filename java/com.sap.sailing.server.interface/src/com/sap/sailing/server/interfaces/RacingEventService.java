@@ -376,7 +376,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *         {@link boolean} include parameter into account; it's safe for callers to iterate over the iterable
      *         returned, and no risk of a {@link ConcurrentModificationException} exists
      */
-    Iterable<Event> getEventsSelectively(boolean include, String eventIdsAsString);
+    Iterable<Event> getEventsSelectively(Boolean include, String eventIdsAsString);
 
     /**
      * Creates a new event with the name <code>eventName</code>, the venue <code>venue</code> and the regattas with the
@@ -705,7 +705,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * Searches the content of this server, not that of any remote servers referenced by any {@link RemoteSailingServerReference}s.
      */
     @Override
-    Result<LeaderboardSearchResult> search(KeywordQuery query);
+    Result<LeaderboardSearchResult> search(KeywordQuery query, Boolean include, String eventIdsAsString);
 
     /**
      * Searches a specific remote server whose reference has the {@link RemoteSailingServerReference#getName() name}

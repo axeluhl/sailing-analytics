@@ -7,5 +7,5 @@ package com.sap.sse.common.search;
  *
  */
 public interface Searchable<H extends Hit, Q extends Query> {
-    Result<H> search(Q query);
+    Result<H> search(Q query, Boolean include, String eventIdsAsString);
 }

@@ -47,6 +47,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 import java.util.zip.GZIPInputStream;
 
 import javax.management.InstanceAlreadyExistsException;
@@ -1659,12 +1660,26 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public Iterable<Event> getEventsSelectively(final boolean include, final String eventIdsString) {
-        List<UUID> eventIds = Stream.of(eventIdsString.split(","))
-                .map(eventIdAsString -> UUID.fromString(eventIdAsString)).collect(Collectors.toList());
-        return Collections.unmodifiableCollection(eventsById.values().stream()
-                .filter(element -> include ? eventIds.contains(element.getId()) : !eventIds.contains(element.getId()))
-                .collect(Collectors.toList()));
+    public Iterable<Event> getEventsSelectively(final Boolean include, final String eventIdsAsString) {
+        Iterable<Event> events;
+        if (include == null) {
+            events = getAllEvents();
+        } else {
+            if (eventIdsAsString != null && !eventIdsAsString.isEmpty()) {
+                List<UUID> eventIds = Stream.of(eventIdsAsString.split(","))
+                        .map(eventIdAsString -> UUID.fromString(eventIdsAsString)).collect(Collectors.toList());
+                events = Collections.unmodifiableCollection(eventsById.values().stream()
+                        .filter(element -> include ? eventIds.contains(element.getId()) : !eventIds.contains(element.getId()))
+                        .collect(Collectors.toList()));
+            } else {
+                if (include) {
+                    events = Collections.emptyList();
+                } else {
+                    events = getAllEvents();
+                }
+            }
+        }
+        return events; 
     }
 
     @Override
@@ -4275,10 +4290,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public Result<LeaderboardSearchResult> search(KeywordQuery query) {
+    public Result<LeaderboardSearchResult> search(KeywordQuery query, Boolean include, String eventIdsAsString) {
         long start = System.currentTimeMillis();
         logger.info("Searching local server for " + query);
-        Result<LeaderboardSearchResult> result = new RegattaByKeywordSearchService().search(this, query);
+        Result<LeaderboardSearchResult> result = new RegattaByKeywordSearchService().search(this, query, include,
+                eventIdsAsString);
         logger.fine("Search for " + query + " took " + (System.currentTimeMillis() - start) + "ms");
         return result;
     }
@@ -4295,8 +4311,18 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             BufferedReader bufferedReader = null;
             try {
                 try {
-                    final URL eventsURL = new URL(remoteRef.getURL(), "sailingserver/api/v1/search?q="
-                            + URLEncoder.encode(query.toString(), "UTF-8"));
+                    final String basePath = "/sailingserver/api/v1/search";
+                    boolean include = remoteRef.isInclude();
+                    Set<UUID> selectedEvents = remoteRef.getSelectedEventIds();
+                    String eventsEndpointName = null;
+                    eventsEndpointName = basePath + "?q=" + URLEncoder.encode(query.toString(), "UTF-8");
+                    eventsEndpointName = eventsEndpointName + "&include=" + String.valueOf(include);
+                    if (selectedEvents != null && !selectedEvents.isEmpty()) {
+                        eventsEndpointName = eventsEndpointName + "&selectedEvents=" + String.join(",",
+                                Util.joinStrings(",", Util.map(selectedEvents, uuid -> uuid.toString())));
+                    }
+                    final URL eventsURL = new URL(remoteRef.getURL(), eventsEndpointName);
+
                     logger.info("Searching remote server " + remoteRef + " for " + query);
                     URLConnection urlConnection = HttpUrlConnectionHelper.redirectConnection(eventsURL);
                     bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream(), "UTF-8"));

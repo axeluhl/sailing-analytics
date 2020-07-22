@@ -2,6 +2,9 @@ package com.sap.sailing.gwt.ui.shared;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import com.sap.sse.security.shared.dto.NamedDTO;
 
@@ -10,7 +13,7 @@ public class RemoteSailingServerReferenceDTO extends NamedDTO {
     private String url;
     private Iterable<EventBaseDTO> events;
     private boolean include;
-    private List<EventBaseDTO> selectedEvents;
+    private List<UUID> selectedEvents;
 
     /**
      * The error message is usually filled in case {@link #events} is <code>null</code> and gives a hint about the
@@ -24,16 +27,16 @@ public class RemoteSailingServerReferenceDTO extends NamedDTO {
     }
 
     public RemoteSailingServerReferenceDTO(String name, String url) {
-        this(name, url, true, Collections.<EventBaseDTO> emptyList(), Collections.<EventBaseDTO> emptyList());
+        this(name, url, true, Collections.<UUID> emptyList(), Collections.<EventBaseDTO> emptyList());
     }
 
     public RemoteSailingServerReferenceDTO(String name, String url, boolean include,
-            List<EventBaseDTO> selectedEventIds, Iterable<EventBaseDTO> events) {
+            List<UUID> selectedEventIds, Iterable<EventBaseDTO> events) {
         this(name, url, include, selectedEventIds, events, /* error message */ null);
     }
 
     public RemoteSailingServerReferenceDTO(String name, String url, boolean include,
-            List<EventBaseDTO> selectedEventIds, Iterable<EventBaseDTO> events, String lastErrorMessage) {
+            List<UUID> selectedEventIds, Iterable<EventBaseDTO> events, String lastErrorMessage) {
         super(name);
         this.url = url;
         this.events = events;
@@ -53,6 +56,13 @@ public class RemoteSailingServerReferenceDTO extends NamedDTO {
     public Iterable<EventBaseDTO> getEvents() {
         return events;
     }
+    
+    public Iterable<EventBaseDTO> getInclusiveEvents() {
+        return StreamSupport.stream(events.spliterator(), false)
+                .filter(element -> include ? selectedEvents.contains(element.getId())
+                        : !selectedEvents.contains(element.getId()))
+                .collect(Collectors.toList());
+    }
 
     public boolean isInclude() {
         return include;
@@ -62,11 +72,11 @@ public class RemoteSailingServerReferenceDTO extends NamedDTO {
         this.include = include;
     }
 
-    public List<EventBaseDTO> getSelectedEvents() {
+    public List<UUID> getSelectedEvents() {
         return selectedEvents;
     }
 
-    public void updateSelectedEvents(List<EventBaseDTO> selectedEvents) {
+    public void updateSelectedEvents(List<UUID> selectedEvents) {
         this.selectedEvents.clear();
         this.selectedEvents.addAll(selectedEvents);
     }

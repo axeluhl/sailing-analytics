@@ -35,15 +35,16 @@ public class SearchResource extends AbstractSailingServerResource {
                 leaderboardGroupSerializer);
     }
     
-    private Result<LeaderboardSearchResult> search(KeywordQuery query) {
-        return getService().search(query);
+    private Result<LeaderboardSearchResult> search(KeywordQuery query, Boolean include, String eventIdsAsString) {
+        return getService().search(query, include, eventIdsAsString);
     }
     
     @GET
     @Produces("application/json;charset=UTF-8")
-    public Response search(@QueryParam("q") String keywords) {
+    public Response search(@QueryParam("q") String keywords, @QueryParam("include") Boolean include,
+            @QueryParam("selectedEvents") String eventIds) {
         KeywordQuery query = new KeywordQuery(Util.splitAlongWhitespaceRespectingDoubleQuotedPhrases(keywords));
-        Iterable<LeaderboardSearchResult> searchResults = search(query).getHits();
+        Iterable<LeaderboardSearchResult> searchResults = search(query, include, eventIds).getHits();
         JSONArray jsonSearchResults = new JSONArray();
         for (LeaderboardSearchResult searchResult : searchResults) {
             if (searchResult.getLeaderboard() == null || getSecurityService().hasCurrentUserReadPermission(searchResult.getLeaderboard())) {
