@@ -44,8 +44,8 @@ public class SeriesContext {
 
     public UUID getSeriesId() {
         if(leaderboardGroupId != null) {
-            GWT.log("Access to seriesid! when leaderboardgroupid exist!" + seriesId + " lid " + leaderboardGroupId);
-            GWT.debugger();
+            GWT.log("Access to seriesid! Use leaderboardgroupid instead"
+                    + " seriesId:" + seriesId + "; lid: " + leaderboardGroupId);
         }
         return seriesId;
     }
