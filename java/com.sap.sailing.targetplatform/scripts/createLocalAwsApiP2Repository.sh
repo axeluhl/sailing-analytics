@@ -79,6 +79,7 @@ echo "Building the wrapper bundle..."
 cd ..
 mvn clean install
 mkdir -p ${UPDATE_SITE_PROJECT}/plugins/aws-sdk
+rm -rf ${UPDATE_SITE_PROJECT}/plugins/aws-sdk/*
 mv bin/com.amazon.aws.aws-java-api-${VERSION}.jar ${UPDATE_SITE_PROJECT}/plugins/aws-sdk
 cd ${UPDATE_SITE_PROJECT}
 echo "Patching update site's feature.xml..."
