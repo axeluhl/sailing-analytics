@@ -1,7 +1,11 @@
 TL;DR
 Keep this project CLOSED in Eclipse unless updating the AWS SDK for the target platform.
-To open, rename dot_project to .project and import into Eclipse workspace.
-To build or upgrade, use ${workspace}/java/com.sap.sailing.targetplatform/scripts/createLocalAwsApiP2Repository.sh
+To make this into a valid Eclipse and compilable Maven project, run
+	./createLocalAwsApiP2Repository.sh
+which will download all JARs required, generates MANIFEST.MF, build.properties, and .classpath
+files and aligns the version specification in all related artifacts such as feature.xml,
+target platform definition, and pom.xml accordingly, then builds a local P2 repository
+that serves as alocal update site for the AWS SDK.
 
 Details:
 
