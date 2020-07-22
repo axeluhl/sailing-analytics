@@ -1,9 +1,0 @@
-Manifest-Version: 1.0
-Bundle-ManifestVersion: 2
-Bundle-Name: aws-java-api
-Bundle-SymbolicName: com.amazon.aws.aws-java-api
-Bundle-Version: 2.13.50
-Bundle-Vendor: Amazon
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Bundle-ClassPath: .
-Automatic-Module-Name: com.amazon.aws.aws-java-api

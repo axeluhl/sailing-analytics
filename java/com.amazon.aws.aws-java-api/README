@@ -1,7 +1,7 @@
 TL;DR
 Keep this project CLOSED in Eclipse unless updating the AWS SDK for the target platform.
 To open, rename dot_project to .project and import into Eclipse workspace.
-Then use ${workspace}/java/com.sap.sailing.targetplatform/scripts/createLocalAwsApiP2Repository.sh
+To build or upgrade, use ${workspace}/java/com.sap.sailing.targetplatform/scripts/createLocalAwsApiP2Repository.sh
 
 Details:
 
@@ -34,7 +34,12 @@ build path settings, expand the code JAR's tree node in the "Libraries" tab, sel
 sub-node, click the "Edit" button and select the source JAR that got downloaded. Don't forget to add the
 source JAR to the git repository.
 
-This project is intended to remain CLOSED in the Eclipse workspace. It is only intended to construct an
+This project is intended to remain CLOSED in the Eclipse workspace. An exception may be if you'd like to
+do an upgrade or add a JAR and see if the workspace still builds after those changes. In this case, rename the
+dot_project file to .project, import the project into your workspace, and it will take precedence over the
+bundle with the same ID from the target platform.
+
+The bundle is otherwise mainly intended to construct an
 OSGi wrapper bundle which becomes part of the target platform and is uploaded to the p2 repository
 at http://p2.sapsailing.com/p2/aws-sdk. Its lib/ folder is .gitignore'd so we don't add the large libraries
 to git.
