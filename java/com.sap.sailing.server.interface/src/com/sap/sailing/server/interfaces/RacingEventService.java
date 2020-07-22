@@ -105,7 +105,6 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
 import com.sap.sse.common.search.Searchable;
 import com.sap.sse.filestorage.FileStorageManagementService;
@@ -143,7 +142,8 @@ import com.sap.sse.shared.media.VideoDescriptor;
  *
  */
 public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetcher, RegattaRegistry, RaceFetcher,
-        LeaderboardRegistry, EventResolver, LeaderboardGroupResolver, TrackerManager, Searchable<LeaderboardSearchResult, KeywordQuery>,
+        LeaderboardRegistry, EventResolver, LeaderboardGroupResolver, TrackerManager,
+        Searchable<LeaderboardSearchResult, KeywordQueryWithOptionalEventQualification>,
         ReplicableWithObjectInputStream<RacingEventService, RacingEventServiceOperation<?>>, RaceLogAndTrackedRaceResolver,
         SensorFixStoreSupplier, WindFinderReviewedSpotsCollectionIdProvider {
     @Override
@@ -372,11 +372,11 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     Iterable<Event> getAllEvents();
     
     /**
-     * @return a thread-safe copy of the service events filtered by {@link eventIdsAsString} parameter with taking
-     *         {@link boolean} include parameter into account; it's safe for callers to iterate over the iterable
+     * @return a thread-safe copy of the service events filtered by {@link eventIds} parameter with taking the
+     *         {@code include} include parameter into account; it's safe for callers to iterate over the iterable
      *         returned, and no risk of a {@link ConcurrentModificationException} exists
      */
-    Iterable<Event> getEventsSelectively(Boolean include, String eventIdsAsString);
+    Iterable<Event> getEventsSelectively(boolean include, Iterable<UUID> eventIds);
 
     /**
      * Creates a new event with the name <code>eventName</code>, the venue <code>venue</code> and the regattas with the
@@ -384,7 +384,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * 
      * @param eventName
      *            The name of the new event
-     * @param eventDescription TODO
      * @param startDate
      *            The start date of the event
      * @param endDate
@@ -705,7 +704,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * Searches the content of this server, not that of any remote servers referenced by any {@link RemoteSailingServerReference}s.
      */
     @Override
-    Result<LeaderboardSearchResult> search(KeywordQuery query, Boolean include, String eventIdsAsString);
+    Result<LeaderboardSearchResult> search(KeywordQueryWithOptionalEventQualification query);
 
     /**
      * Searches a specific remote server whose reference has the {@link RemoteSailingServerReference#getName() name}
@@ -713,7 +712,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * <code>null</code> is returned. Otherwise, a non-<code>null</code> and possibly empty search result set is
      * returned.
      */
-    Result<LeaderboardSearchResultBase> searchRemotely(String remoteServerReferenceName, KeywordQuery query);
+    Result<LeaderboardSearchResultBase> searchRemotely(String remoteServerReferenceName, KeywordQueryWithOptionalEventQualification query);
 
     /**
      * Gets the configuration of the local sailing server instances.

@@ -24,7 +24,7 @@ public class SearchResultDTO implements DTO {
     
     @GwtIncompatible
     public SearchResultDTO(LeaderboardSearchResultBase hit, URL baseUrl, boolean isOnRemoteServer, Boolean include,
-            Set<UUID> selectedEventIds) {
+            Set<UUID> eventIds) {
         this.leaderboardName = hit.getLeaderboard().getName();
         this.displayName = hit.getLeaderboard().getDisplayName() != null ? hit.getLeaderboard().getDisplayName()
                 : (hit.getRegattaName() != null ? hit.getRegattaName() : leaderboardName);
@@ -35,10 +35,10 @@ public class SearchResultDTO implements DTO {
             if (include == null) {
                 events.add(eventDTO);
             } else {
-                if (selectedEventIds != null) {
-                    if (include && selectedEventIds.contains((UUID) event.getId())) {
+                if (eventIds != null) {
+                    if (include && eventIds.contains((UUID) event.getId())) {
                         events.add(eventDTO);
-                    } else if (!include && !selectedEventIds.contains((UUID) event.getId())) {
+                    } else if (!include && !eventIds.contains((UUID) event.getId())) {
                         events.add(eventDTO);
                     }
                 }

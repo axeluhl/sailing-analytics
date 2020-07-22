@@ -26,6 +26,7 @@ import com.sap.sailing.domain.common.tagging.RaceLogNotFoundException;
 import com.sap.sailing.domain.common.tagging.ServiceNotFoundException;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.server.interfaces.KeywordQueryWithOptionalEventQualification;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.interfaces.TaggingService;
 import com.sap.sse.common.Util;
@@ -47,15 +48,14 @@ import com.sap.sse.common.search.ResultImpl;
 public class RegattaByKeywordSearchService {
     private static final Logger logger = Logger.getLogger(RegattaByKeywordSearchService.class.getName());
     
-    Result<LeaderboardSearchResult> search(final RacingEventService racingEventService, KeywordQuery query,
-            final Boolean include, final String eventIdsAsString) {
+    Result<LeaderboardSearchResult> search(final RacingEventService racingEventService, KeywordQueryWithOptionalEventQualification query) {
         ResultImpl<LeaderboardSearchResult> result = new ResultImpl<>(query, new LeaderboardSearchResultRanker(racingEventService));
         final Map<LeaderboardGroup, Set<Event>> eventsForLeaderboardGroup = new HashMap<>();
         final Map<Leaderboard, Set<LeaderboardGroup>> leaderboardGroupsForLeaderboard = new HashMap<>();
         final Map<CourseArea, Event> eventForCourseArea = new HashMap<>();
         final Map<Event, Set<String>> stringsForEvent = new HashMap<>();
         final Map<LeaderboardGroup, Set<String>> stringsForLeaderboardGroup = new HashMap<>();
-        for (final Event event : racingEventService.getEventsSelectively(include, eventIdsAsString)) {
+        for (final Event event : racingEventService.getEventsSelectively(query.isInclude(), query.getEventUUIDs())) {
             final Set<String> s4e = new HashSet<>();
             s4e.add(event.getName());
             s4e.add(event.getVenue().getName());

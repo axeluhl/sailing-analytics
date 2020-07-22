@@ -291,7 +291,7 @@ public class EventsResource extends AbstractSailingServerResource {
     @GET
     @Produces("application/json;charset=UTF-8")
     public Response getEvents(@QueryParam("showNonPublic") String showNonPublic, @QueryParam("include") Boolean include,
-            @QueryParam("selectedEvents") String eventIds) {
+            @QueryParam("id") List<UUID> eventIds) {
         JsonSerializer<EventBase> eventSerializer = new EventBaseJsonSerializer(
                 new VenueJsonSerializer(new CourseAreaJsonSerializer()), new LeaderboardGroupBaseJsonSerializer(),
                 new TrackingConnectorInfoJsonSerializer());

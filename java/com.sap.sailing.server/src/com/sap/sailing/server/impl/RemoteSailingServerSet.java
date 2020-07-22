@@ -263,7 +263,7 @@ public class RemoteSailingServerSet {
         Util.Pair<Iterable<EventBase>, Exception> result;
         try {
             try {
-                URL eventsURL = getEventsURL(include, selectedEvents, url);
+                final URL eventsURL = getEventsURL(include, selectedEvents, url);
                 logger.fine("Updating events for remote server " + serverName + " from URL " + eventsURL);
                 URLConnection urlConnection = HttpUrlConnectionHelper.redirectConnection(eventsURL);
                 bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream(), "UTF-8"));
@@ -350,13 +350,14 @@ public class RemoteSailingServerSet {
     private URL getEventsURL(final boolean include, final Set<UUID> selectedEvents, final URL url)
             throws MalformedURLException {
         final String basePath = "/events";
-        String eventsEndpointName = null;
-        eventsEndpointName = basePath + "?include=" + String.valueOf(include);
-        if (selectedEvents != null && !selectedEvents.isEmpty()) {
-            eventsEndpointName = eventsEndpointName + "&selectedEvents="
-                    + String.join(",", Util.joinStrings(",", Util.map(selectedEvents, uuid -> uuid.toString())));
+        final StringBuilder eventsEndpointName = new StringBuilder(basePath);
+        eventsEndpointName.append("?include=").append(include);
+        if (selectedEvents != null) {
+            for (final UUID eventId : selectedEvents) {
+                eventsEndpointName.append("&id=").append(eventId.toString());
+            }
         }
-        return getEndpointUrl(url, eventsEndpointName);
+        return getEndpointUrl(url, eventsEndpointName.toString());
     }
     
     private URL getStatisticsByYearURL(URL remoteServerBaseURL) throws MalformedURLException {
@@ -418,10 +419,11 @@ public class RemoteSailingServerSet {
 
     /**
      * Loads complete list of events for given remote reference server by sending {@link boolean} include parameter with
-     * <code>false</code> value.
+     * <code>false</code> value and an empty exclude list. Can be used, e.g., by a UI letting the user select which events
+     * to pick for inclusion/exclusion.
      */
     public Util.Pair<Iterable<EventBase>, Exception> getEventsComplete(RemoteSailingServerReference ref) {
-        return loadEventsForRemoteServerReference(ref.getName(), false, /* selectedEventIds */ null, ref.getURL());
+        return loadEventsForRemoteServerReference(ref.getName(), false, /* eventIds */ null, ref.getURL());
     }
 
     public Iterable<RemoteSailingServerReference> getLiveRemoteServerReferences() {
