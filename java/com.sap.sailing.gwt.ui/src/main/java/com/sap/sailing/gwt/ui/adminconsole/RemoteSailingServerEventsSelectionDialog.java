@@ -1,5 +1,13 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
@@ -14,13 +22,6 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
-
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 /**
  * A dialog to set up events inclusion for given remote sailing server instance. There is a checkBox per event. If
@@ -51,7 +52,8 @@ public class RemoteSailingServerEventsSelectionDialog extends DataEntryDialog<Re
                 callback);
         this.stringMessages = stringMessages;
         this.referenceDTO = referenceDTO;
-        this.allEvents = StreamSupport.stream(completeRemoteServerReference.getEvents().spliterator(), false)
+        this.allEvents = completeRemoteServerReference.getEvents() == null ? Collections.emptyList() :
+            StreamSupport.stream(completeRemoteServerReference.getEvents().spliterator(), false)
                 .sorted(Comparator.comparing(EventBaseDTO::getName)).collect(Collectors.toList());
         this.selectedEvents = referenceDTO.getSelectedEvents();
     }
@@ -75,16 +77,14 @@ public class RemoteSailingServerEventsSelectionDialog extends DataEntryDialog<Re
         final Widget result;
         if (allEvents.isEmpty()) {
             getStatusLabel().setText(stringMessages.eventsListIsEmpty());
-            result = null;
-        } else {
-            eventsSelectionGrid = new Grid(allEvents.size(), 2);
-            final VerticalPanel mainPanel = new VerticalPanel();
-            mainPanel.setSpacing(10);
-            createEventsInclusionTypePanel(mainPanel);
-            addMultiSelectionPanel(mainPanel);
-            setupEventsSelectionForm(mainPanel);
-            result = mainPanel;
         }
+        eventsSelectionGrid = new Grid(allEvents.size(), 2);
+        final VerticalPanel mainPanel = new VerticalPanel();
+        mainPanel.setSpacing(10);
+        createEventsInclusionTypePanel(mainPanel);
+        addMultiSelectionPanel(mainPanel);
+        setupEventsSelectionForm(mainPanel);
+        result = mainPanel;
         return result;
     }
 
