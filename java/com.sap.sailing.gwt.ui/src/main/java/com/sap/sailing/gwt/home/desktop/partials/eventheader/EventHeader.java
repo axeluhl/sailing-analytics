@@ -24,6 +24,7 @@ import com.sap.sailing.gwt.home.desktop.partials.sharing.SharingMetadataProvider
 import com.sap.sailing.gwt.home.desktop.places.event.EventView;
 import com.sap.sailing.gwt.home.desktop.places.event.EventView.PlaceCallback;
 import com.sap.sailing.gwt.home.desktop.places.event.EventView.Presenter;
+import com.sap.sailing.gwt.home.shared.places.ShareablePlaceContext;
 import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.shared.utils.DropdownHandler;
 import com.sap.sailing.gwt.home.shared.utils.EventDatesFormatterUtil;
@@ -89,6 +90,11 @@ public class EventHeader extends Composite {
                 // TODO regatta details?
                 String dateString = EventDatesFormatterUtil.formatDateRangeWithYear(event.getStartDate(), event.getEndDate());
                 return StringMessages.INSTANCE.eventSharingLongText(event.getDisplayName(), event.getLocationOrVenue(), dateString, url);
+            }
+            
+            @Override
+            public ShareablePlaceContext getContext() {
+                return presenter.getCtx();
             }
         });
     }

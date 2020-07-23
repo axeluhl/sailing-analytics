@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.shared.places.event;
 
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.RegattaAnalyticsDataManager;
+import com.sap.sailing.gwt.home.shared.places.ShareablePlaceContext;
 
 /**
  * Common context used by the different tabs in the event place.
@@ -8,7 +9,7 @@ import com.sap.sailing.gwt.home.desktop.places.event.regatta.RegattaAnalyticsDat
  * @author pgtaboada
  *
  */
-public class EventContext {
+public class EventContext implements ShareablePlaceContext {
     private String eventId;
     private String regattaId;
     private RegattaAnalyticsDataManager regattaAnalyticsManager;
@@ -47,5 +48,18 @@ public class EventContext {
     public EventContext withRegattaAnalyticsManager(RegattaAnalyticsDataManager regattaAnalyticsManager) {
         this.regattaAnalyticsManager = regattaAnalyticsManager;
         return this;
+    }
+
+    @Override
+    public String getContextAsPathParameters() {
+        if(eventId != null) {
+            String path = "/events/" + eventId;
+            if(regattaId != null) {
+                path += "/regattas/" +regattaId;
+            }
+            return path;
+        }else {
+            return null;
+        }
     }
 }

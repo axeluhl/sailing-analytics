@@ -20,6 +20,7 @@ import com.sap.sailing.gwt.home.desktop.places.event.regatta.overviewtab.Regatta
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.SeriesView;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.SeriesView.Presenter;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.places.ShareablePlaceContext;
 import com.sap.sailing.gwt.home.shared.resources.SharedHomeResources;
 import com.sap.sailing.gwt.home.shared.utils.LabelTypeUtil;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -65,6 +66,12 @@ public class SeriesHeader extends Composite {
             public String getLongText(String url) {
                 return StringMessages.INSTANCE.seriesSharingLongText(series.getDisplayName(), url);
             }
+
+            @Override
+            public ShareablePlaceContext getContext() {
+                return presenter.getCtx();
+            }
+            
         });
     }
 
