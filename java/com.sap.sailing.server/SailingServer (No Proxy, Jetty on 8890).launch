@@ -205,7 +205,6 @@
 <setEntry value="com.sap.sse.security.interface@default:default"/>
 <setEntry value="com.sap.sse.jettyextensions@default:default"/>
 <setEntry value="com.sap.sse.replication.persistence@default:default"/>
-<setEntry value="com.amazon.aws.aws-java-api@default:default"/>
 <setEntry value="com.sap.sse.landscape@default:default"/>
 <setEntry value="com.sap.sse.landscape.aws@default:default"/>
 <setEntry value="com.sap.sse.landscape.aws.persistence@default:default"/>
