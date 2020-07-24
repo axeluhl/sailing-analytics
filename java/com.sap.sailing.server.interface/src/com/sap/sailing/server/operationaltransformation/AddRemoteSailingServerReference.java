@@ -16,16 +16,18 @@ public class AddRemoteSailingServerReference extends AbstractRacingEventServiceO
 	private static final long serialVersionUID = -226327171479379243L;
 	private final String serverName; 
 	private final URL serverUrl;
+	private final boolean include;
 	
-    public AddRemoteSailingServerReference(String serverName, URL serverUrl) {
+    public AddRemoteSailingServerReference(String serverName, URL serverUrl, boolean include) {
         super();
         this.serverName = serverName;
         this.serverUrl = serverUrl;
+        this.include = include;
     }
 
     @Override
     public RemoteSailingServerReference internalApplyTo(RacingEventService toState) throws Exception {
-        RemoteSailingServerReference result = toState.addRemoteSailingServerReference(serverName, serverUrl);
+        RemoteSailingServerReference result = toState.addRemoteSailingServerReference(serverName, serverUrl, include);
         return result;
     }
 

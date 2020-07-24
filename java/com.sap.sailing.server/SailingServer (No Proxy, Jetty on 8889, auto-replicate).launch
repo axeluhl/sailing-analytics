@@ -105,6 +105,8 @@
 <setEntry value="javax.xml.stream@default:default"/>
 <setEntry value="javax.xml.ws@default:default"/>
 <setEntry value="org.eclipse.osgi.util@default:default"/>
+<setEntry value="com.jcraft.jsch@default:default"/>
+<setEntry value="com.amazon.aws.aws-java-api@default:default"/>
 </setAttribute>
 <setAttribute key="selected_workspace_bundles">
 <setEntry value="com.sap.sailing.geocoding@default:default"/>
@@ -205,7 +207,9 @@
 <setEntry value="com.sap.sse.security.interface@default:default"/>
 <setEntry value="com.sap.sse.jettyextensions@default:default"/>
 <setEntry value="com.sap.sse.replication.persistence@default:default"/>
-<setEntry value="com.amazon.aws.aws-java-api@default:default"/>
+<setEntry value="com.sap.sse.landscape@default:default"/>
+<setEntry value="com.sap.sse.landscape.aws@default:default"/>
+<setEntry value="com.sap.sse.landscape.aws.persistence@default:default"/>
 </setAttribute>
 <booleanAttribute key="show_selected_only" value="false"/>
 <booleanAttribute key="tracing" value="false"/>

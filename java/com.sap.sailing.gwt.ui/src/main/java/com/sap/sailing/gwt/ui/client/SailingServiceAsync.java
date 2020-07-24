@@ -297,6 +297,20 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
 
     void addRemoteSailingServerReference(RemoteSailingServerReferenceDTO sailingServer,
             AsyncCallback<RemoteSailingServerReferenceDTO> callback);
+    
+    /*
+     * Updates {@link RemoteSailingServerReferenceDTO} sailingServer instance based on user selection regarding
+     * inclusion type and selected events.
+     */
+    void updateRemoteSailingServerReference(RemoteSailingServerReferenceDTO sailingServer,
+            AsyncCallback<RemoteSailingServerReferenceDTO> callback);
+
+    /*
+     * Loads remote sailing server data with all events not filtered by selection in order to show the full list of
+     * events on {@link RemoteSailingServerEventsSelectionDialog} dialog.
+     */
+    void getCompleteRemoteServerReference(String sailingServerName,
+            AsyncCallback<RemoteSailingServerReferenceDTO> callback);
 
     void getResultImportUrls(String resultProviderName, AsyncCallback<List<UrlDTO>> callback);
 
@@ -367,7 +381,7 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
     void getLeaderboardGroupNamesAndIdsAsStringsFromRemoteServer(String host, String username, String password,
             AsyncCallback<Map<String, String>> leaderboardGroups);
 
-    void getCompetitors(boolean filterCompetitorsWithBoat, boolean filterCompetitorsWithoutBoat, AsyncCallback<Iterable<CompetitorDTO>> asyncCallback);
+    void getCompetitors(boolean ignoreCompetitorsWithBoat, boolean ignoreCompetitorsWithoutBoat, AsyncCallback<Iterable<CompetitorDTO>> asyncCallback);
 
     void getCompetitorsOfLeaderboard(String leaderboardName, AsyncCallback<Iterable<CompetitorDTO>> asyncCallback);
 

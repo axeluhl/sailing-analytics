@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
@@ -579,7 +580,22 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         Document serverDBObject = new Document();
         serverDBObject.put(FieldNames.SERVER_NAME.name(), server.getName());
         serverDBObject.put(FieldNames.SERVER_URL.name(), server.getURL().toExternalForm());
+        serverDBObject.put(FieldNames.INCLUDE.name(), server.isInclude());
+        serverDBObject.put(FieldNames.SELECTED_EVENT_IDS.name(), server.getSelectedEventIds());
         serverCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, serverDBObject, new UpdateOptions().upsert(true));
+    }
+    
+    @Override
+    public void updateSailingServer(final String serverName, final boolean include,
+            final Set<UUID> selectedEventIds) {
+        MongoCollection<Document> serverCollection = database.getCollection(CollectionNames.SAILING_SERVERS.name());
+        Document query = new Document();
+        query.put(FieldNames.SERVER_NAME.name(), serverName);
+        Document serverDBObject = new Document();
+        serverDBObject.put(FieldNames.INCLUDE.name(), include);
+        serverDBObject.put(FieldNames.SELECTED_EVENT_IDS.name(), selectedEventIds);
+        serverCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, serverDBObject,
+                new UpdateOptions().upsert(true));
     }
 
     @Override
