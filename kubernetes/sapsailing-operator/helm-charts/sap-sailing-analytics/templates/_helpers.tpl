@@ -31,3 +31,10 @@ Define master service name
 {{- define "sailing-master-service-name" }}
 {{- template "sapsailing-app-name" . }}-{{ .Values.master.role }}-service
 {{- end }}
+
+{{/*
+Define replica service name
+*/}}
+{{- define "sailing-replica-service-name" }}
+{{- template "sapsailing-app-name" . }}-{{ .Values.replica.role }}-service
+{{- end }}
