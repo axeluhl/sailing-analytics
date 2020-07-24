@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="com.amazon.aws.aws-java-api"
+      label="AWS API"
+      version="2.13.58"
+      provider-name="Amazon">
+
+   <plugin
+         id="com.amazon.aws.aws-java-api"
+         download-size="0"
+         install-size="0"
+         version="2.13.58"
+         unpack="false"/>
+
+</feature>

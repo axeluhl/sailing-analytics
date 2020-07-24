@@ -1,0 +1,58 @@
+# Default values for sap-sailing-analytics.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Value of the "app"-tag. Currently used as identifier of a set (similar as a dedicated server setup). If not specified here defaults to the helm release name. It is also used as the mongodb name.
+#app: test
+
+# Specify environment
+environment: sailing
+
+# Image used to build
+image:
+  repository: donaldduck70/sapsailing
+  tag: latest
+  pullPolicy: Always
+
+# Name of the Kubernetes secret that should be used to pull the images
+imagePullSecret: dockerhubsecret
+
+### Environment setup
+## General
+# Mongodb: specify the name of the service that exposes the mongodb replicaset and the replica set name.
+mongodb:
+  mongodbService: mongo-live-rs-client
+  replicaSetName: rs0
+# RabbitMq: specifiy the name of the service that exposes the rabbitMq
+rabbitmq:
+  host: rabbitmq
+  port: 5672
+# Master
+master:
+  role: sailing-master  
+  # Optional
+  # resources:
+  #  requests:
+  #    memory: "6Gi"
+  #    cpu: "500m"
+  #  limits:
+  #    memory: "12Gi"
+  #    cpu: "2" 
+
+# Replicas
+replica:
+  role: sailing-replica
+  count: 2
+  replicateOnStart: 'com.sap.sailing.server.impl.RacingEventServiceImpl,com.sap.sse.security.impl.SecurityServiceImpl,com.sap.sse.filestorage.impl.FileStorageManagementServiceImpl,com.sap.sse.mail.impl.MailServiceImpl,com.sap.sailing.polars.impl.PolarDataServiceImpl,com.sap.sailing.domain.racelogtracking.impl.fixtracker.RegattaLogFixTrackerRegattaListener,com.sap.sailing.windestimation.integration.WindEstimationFactoryServiceImpl'
+  replicateMasterBearerToken: 
+  replicateMasterUsername: admin
+  replicateMasterPassword: admin
+  # Optional
+  # resources:
+  #  requests:
+  #    memory: "6Gi"
+  #    cpu: "500m"
+  #  limits:
+  #    memory: "12Gi"
+  #    cpu: "2" 
+

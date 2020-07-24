@@ -63,7 +63,7 @@ public class MasterDataResource extends AbstractSailingServerResource {
         User user = securityService.getCurrentUser();
         securityService.checkCurrentUserServerPermission(ServerActions.CAN_EXPORT_MASTERDATA);
         final long startTime = System.currentTimeMillis();
-        logger.info("Masterdataexport has started; requesting user: "+user);
+        logger.info("Masterdataexport has started; requesting user: "+user.getName());
         if (compress == null) {
             compress = false;
         }

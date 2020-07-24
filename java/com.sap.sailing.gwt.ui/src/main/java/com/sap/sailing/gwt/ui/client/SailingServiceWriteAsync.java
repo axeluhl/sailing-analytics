@@ -40,6 +40,7 @@ import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
 import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
 import com.sap.sailing.gwt.ui.adminconsole.RaceLogSetTrackingTimesDTO;
+import com.sap.sailing.gwt.ui.adminconsole.RemoteSailingServerEventsSelectionDialog;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
@@ -247,6 +248,20 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void removeSailingServers(Set<String> toRemove, AsyncCallback<Void> callback);
 
     void addRemoteSailingServerReference(RemoteSailingServerReferenceDTO sailingServer,
+            AsyncCallback<RemoteSailingServerReferenceDTO> callback);
+
+    /**
+     * Updates {@link RemoteSailingServerReferenceDTO} sailingServer instance based on user selection regarding
+     * inclusion type and selected events.
+     */
+    void updateRemoteSailingServerReference(RemoteSailingServerReferenceDTO sailingServer,
+            AsyncCallback<RemoteSailingServerReferenceDTO> callback);
+
+    /**
+     * Loads remote sailing server data with all events not filtered by selection in order to show the full list of
+     * events on {@link RemoteSailingServerEventsSelectionDialog} dialog.
+     */
+    void getCompleteRemoteServerReference(String sailingServerName,
             AsyncCallback<RemoteSailingServerReferenceDTO> callback);
 
     /**
