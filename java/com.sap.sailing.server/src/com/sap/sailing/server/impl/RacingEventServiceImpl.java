@@ -5132,14 +5132,17 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             final TrackedRegatta trackedRegatta = getTrackedRegatta(regatta);
             if (trackedRegatta != null) {
                 trackedRegatta.lockTrackedRacesForRead();
-                for (TrackedRace trackedRace : trackedRegatta.getTrackedRaces()) {
-                    final TrackedRaceStatusEnum status = trackedRace.getStatus().getStatus();
-                    if (status == TrackedRaceStatusEnum.ERROR || status == TrackedRaceStatusEnum.LOADING
-                            || status == TrackedRaceStatusEnum.PREPARED) {
-                        return false;
+                try {
+                    for (TrackedRace trackedRace : trackedRegatta.getTrackedRaces()) {
+                        final TrackedRaceStatusEnum status = trackedRace.getStatus().getStatus();
+                        if (status == TrackedRaceStatusEnum.ERROR || status == TrackedRaceStatusEnum.LOADING
+                                || status == TrackedRaceStatusEnum.PREPARED) {
+                            return false;
+                        }
                     }
+                } finally {
+                    trackedRegatta.unlockTrackedRacesAfterRead();
                 }
-                trackedRegatta.unlockTrackedRacesAfterRead();
             }
         }
         return true;
