@@ -970,8 +970,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     /**
      * Returns true if no tracked race is in the state of {@link TrackedRaceStatusEnum} <code>PREPARED</code>,
      * <code>LOADING</code> or <code>ERROR</code>
-     * 
-     * @return
      */
     boolean allTrackedRacesLoaded();
 }
