@@ -15,6 +15,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.server.interfaces.RacingEventService;
+import com.sap.sse.common.Util;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.replication.ReplicationStatus;
 
@@ -50,8 +51,13 @@ public class StatusServlet extends HttpServlet {
         if (replicationStatus != null) {
             result.put("replication", replicationStatus.toJSONObject());
         }
-        final boolean available = service.getNumberOfTrackedRacesRestored() >= service.getNumberOfTrackedRacesToRestore() &&
+        boolean available = service.getNumberOfTrackedRacesRestored() >= service.getNumberOfTrackedRacesToRestore() &&
                 (replicationStatus == null || replicationStatus.isAvailable());
+        final String trackedRacesLoaded = req.getParameter("trackedRacesLoaded") == null ? null
+                : req.getParameter("trackedRacesLoaded");
+        if (Util.hasLength(trackedRacesLoaded) && trackedRacesLoaded.equals("true")) {
+            available = available && service.allTrackedRacesLoaded();
+        }
         result.put("available", available);
         resp.setStatus(available ? HttpServletResponse.SC_OK : HttpServletResponse.SC_SERVICE_UNAVAILABLE);
         resp.setContentType(MediaType.APPLICATION_JSON + ";charset=UTF-8");

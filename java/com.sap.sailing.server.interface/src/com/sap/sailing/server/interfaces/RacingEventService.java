@@ -60,6 +60,7 @@ import com.sap.sailing.domain.common.RegattaFetcher;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.WindFinderReviewedSpotsCollectionIdProvider;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.domain.common.media.MediaTrack;
@@ -965,4 +966,12 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     void addOrReplaceExpeditionDeviceConfiguration(UUID deviceConfigurationId, String name, Integer expeditionBoatId);
 
     void removeExpeditionDeviceConfiguration(UUID deviceUuid);
+    
+    /**
+     * Returns true if no tracked race is in the state of {@link TrackedRaceStatusEnum} <code>PREPARED</code>,
+     * <code>LOADING</code> or <code>ERROR</code>
+     * 
+     * @return
+     */
+    boolean allTrackedRacesLoaded();
 }
