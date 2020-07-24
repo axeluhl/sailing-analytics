@@ -1,0 +1,29 @@
+apiVersion: charts.helm.k8s.io/v1alpha1
+kind: SapSailingAnalytics
+metadata:
+  name: kw2019
+spec:
+  # Default values copied from <project_dir>/helm-charts/sap-sailing-analytics/values.yaml
+  
+  environment: sailing
+  image:
+    pullPolicy: Always
+    repository: donaldduck70/sapsailing
+    tag: latest
+  imagePullSecret: dockerhubsecret
+  master:
+    role: sailing-master
+  mongodb:
+    mongodbService: mongo-live-rs-client
+    replicaSetName: rs0
+  rabbitmq:
+    host: rabbitmq
+    port: 5672
+  replica:
+    count: 2
+    replicateMasterBearerToken: null
+    replicateMasterPassword: admin
+    replicateMasterUsername: admin
+    replicateOnStart: com.sap.sailing.server.impl.RacingEventServiceImpl,com.sap.sse.security.impl.SecurityServiceImpl,com.sap.sse.filestorage.impl.FileStorageManagementServiceImpl,com.sap.sse.mail.impl.MailServiceImpl,com.sap.sailing.polars.impl.PolarDataServiceImpl,com.sap.sailing.domain.racelogtracking.impl.fixtracker.RegattaLogFixTrackerRegattaListener,com.sap.sailing.windestimation.integration.WindEstimationFactoryServiceImpl
+    role: sailing-replica
+  

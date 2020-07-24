@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ScheduledExecutorService;
@@ -23,6 +24,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -241,12 +243,28 @@ public class RemoteSailingServerSet {
 
     private Util.Pair<Iterable<EventBase>, Exception> updateRemoteServerEventCacheSynchronously(
             RemoteSailingServerReference ref) {
+        Util.Pair<Iterable<EventBase>, Exception> result = loadEventsForRemoteServerReference(ref.getName(),
+                ref.isInclude(), ref.getSelectedEventIds(), ref.getURL());
+        final Pair<Iterable<EventBase>, Exception> finalResult = result;
+        LockUtil.executeWithWriteLock(lock, () -> {
+            // check that the server was not removed while no lock was held
+            if (remoteSailingServers.containsValue(ref)) {
+                cachedEventsForRemoteSailingServers.put(ref, finalResult);
+            } else {
+                logger.fine("Omitted update for " + ref + " as it was removed");
+            }
+        });
+        return result;
+    }
+    
+    private Util.Pair<Iterable<EventBase>, Exception> loadEventsForRemoteServerReference(final String serverName,
+            final boolean include, final Set<UUID> selectedEvents, final URL url) {
         BufferedReader bufferedReader = null;
         Util.Pair<Iterable<EventBase>, Exception> result;
         try {
             try {
-                final URL eventsURL = getEventsURL(ref.getURL());
-                logger.fine("Updating events for remote server " + ref + " from URL " + eventsURL);
+                final URL eventsURL = getEventsURL(include, selectedEvents, url);
+                logger.fine("Updating events for remote server " + serverName + " from URL " + eventsURL);
                 URLConnection urlConnection = HttpUrlConnectionHelper.redirectConnection(eventsURL);
                 bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream(), "UTF-8"));
                 JSONParser parser = new JSONParser();
@@ -261,26 +279,25 @@ public class RemoteSailingServerSet {
                     EventBase event = deserializer.deserialize(eventAsJson);
                     events.add(event);
                 }
-                result = new Util.Pair<Iterable<EventBase>, Exception>(events, /* exception */ null);
+                if (selectedEvents != null) {
+                    Set<EventBase> filteredEvents = events.stream()
+                            .filter(element -> include ? selectedEvents.contains(element.getId())
+                                    : !selectedEvents.contains(element.getId()))
+                            .collect(Collectors.toSet());
+                    result = new Util.Pair<Iterable<EventBase>, Exception>(filteredEvents, /* exception */ null);
+                } else {
+                    result = new Util.Pair<Iterable<EventBase>, Exception>(events, /* exception */ null);
+                }
             } finally {
                 if (bufferedReader != null) {
                     bufferedReader.close();
                 }
             }
         } catch (IOException | ParseException e) {
-            logger.log(Level.INFO, "Exception trying to fetch events from remote server " + ref + ": " + e.getMessage(),
-                    e);
+            logger.log(Level.INFO,
+                    "Exception trying to fetch events from remote server " + serverName + ": " + e.getMessage(), e);
             result = new Util.Pair<Iterable<EventBase>, Exception>(/* events */ null, e);
         }
-        final Pair<Iterable<EventBase>, Exception> finalResult = result;
-        LockUtil.executeWithWriteLock(lock, () -> {
-            // check that the server was not removed while no lock was held
-            if (remoteSailingServers.containsValue(ref)) {
-                cachedEventsForRemoteSailingServers.put(ref, finalResult);
-            } else {
-                logger.fine("Omitted update for " + ref + " as it was removed");
-            }
-        });
         return result;
     }
 
@@ -330,8 +347,17 @@ public class RemoteSailingServerSet {
         });
     }
 
-    private URL getEventsURL(URL remoteServerBaseURL) throws MalformedURLException {
-        return getEndpointUrl(remoteServerBaseURL, "/events");
+    private URL getEventsURL(final boolean include, final Set<UUID> selectedEvents, final URL url)
+            throws MalformedURLException {
+        final String basePath = "/events";
+        final StringBuilder eventsEndpointName = new StringBuilder(basePath);
+        eventsEndpointName.append("?include=").append(include);
+        if (selectedEvents != null) {
+            for (final UUID eventId : selectedEvents) {
+                eventsEndpointName.append("&id=").append(eventId.toString());
+            }
+        }
+        return getEndpointUrl(url, eventsEndpointName.toString());
     }
     
     private URL getStatisticsByYearURL(URL remoteServerBaseURL) throws MalformedURLException {
@@ -375,17 +401,29 @@ public class RemoteSailingServerSet {
     /**
      * Synchronously fetches the latest events list for the remote server reference specified. The result is cached. If
      * <code>ref</code> was not yet part of this remote sailing server reference set, it is automatically added.
+     * 
+     * @param <code>forceUpdate</code>
+     *            is used to trigger cache update in case the list of excluded events is changed
      */
-    public Util.Pair<Iterable<EventBase>, Exception> getEventsOrException(RemoteSailingServerReference ref) {
+    public Util.Pair<Iterable<EventBase>, Exception> getEventsOrException(RemoteSailingServerReference ref, boolean forceUpdate) {
         LockUtil.lockForWrite(lock);
         try {
-            if (!remoteSailingServers.containsKey(ref.getName())) {
+            if (forceUpdate || !remoteSailingServers.containsKey(ref.getName())) {
                 remoteSailingServers.put(ref.getName(), ref);
             }
         } finally {
             LockUtil.unlockAfterWrite(lock);
         }
         return updateRemoteServerEventCacheSynchronously(ref);
+    }
+
+    /**
+     * Loads complete list of events for given remote reference server by sending {@link boolean} include parameter with
+     * <code>false</code> value and an empty exclude list. Can be used, e.g., by a UI letting the user select which events
+     * to pick for inclusion/exclusion.
+     */
+    public Util.Pair<Iterable<EventBase>, Exception> getEventsComplete(RemoteSailingServerReference ref) {
+        return loadEventsForRemoteServerReference(ref.getName(), false, /* eventIds */ null, ref.getURL());
     }
 
     public Iterable<RemoteSailingServerReference> getLiveRemoteServerReferences() {
