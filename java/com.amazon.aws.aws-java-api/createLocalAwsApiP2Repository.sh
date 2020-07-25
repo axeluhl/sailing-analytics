@@ -6,6 +6,10 @@
 # be tested with the local target platform definition. If everything works fine, the uploadAwsApiRepositoryToServer.sh script
 # can be used to update the repository contents at p2.sapsailing.com with the updated local target platform repository contents.
 LIB=lib
+JAR=`which jar`
+if [ "$JAR" = "" ]; then
+  JAR="$JAVA_HOME/bin/jar"
+fi
 CLASSPATH_FILE=".classpath"
 MANIFEST_FILE="MANIFEST.MF"
 BUILD_PROPERTIES_FILE="build.properties"
@@ -62,7 +66,7 @@ echo -n ".
 Automatic-Module-Name: com.amazon.aws.aws-java-api
 Export-Package:" >>${WRAPPER_BUNDLE}/META-INF/${MANIFEST_FILE}
 PACKAGES=$(for l in ${LIBS}; do
-  jar tvf ${l} | grep "\.class\>" | sed -e 's/^.* \([^ ]*\)$/\1/' -e 's/\/[^/]*\.class\>//' | grep "^software/amazon"
+  "$JAR" tvf ${l} | grep "\.class\>" | sed -e 's/^.* \([^ ]*\)$/\1/' -e 's/\/[^/]*\.class\>//' | grep "^software/amazon"
 done | sort -u | tr / . )
 for p in `echo "${PACKAGES}" | while read i; do echo $i | sed -e 's/^\([-a-zA-Z0-9_.]*\)\>.*$/\1/'; done | head --lines=-1`; do
    echo " ${p}," >>${WRAPPER_BUNDLE}/META-INF/${MANIFEST_FILE}
