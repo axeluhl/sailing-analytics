@@ -44,6 +44,7 @@ echo "Patching version ${VERSION} into pom.xml..."
 # exclude SNAPSHOT version used for the parent pom; only match the explicit SDK version
 sed -i -e 's/<version>\([0-9.]*\)<\/version>/<version>'${VERSION}'<\/version>/' ${WRAPPER_BUNDLE}/pom.xml
 echo "Generating the META-INF/MANIFEST.MF file..."
+mkdir -p "${WRAPPER_BUNDLE}/META-INF"
 echo -n "Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: aws-java-api
