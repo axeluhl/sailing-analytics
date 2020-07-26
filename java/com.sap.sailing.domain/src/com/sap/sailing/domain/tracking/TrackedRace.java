@@ -346,6 +346,8 @@ public interface TrackedRace
     /**
      * If the <code>waypoint</code> only has one {@link #getMarks() mark}, its position at time <code>timePoint</code>
      * is returned. Otherwise, the center of gravity between the mark positions is computed and returned.
+     * 
+     * @return {@code null} in case no position is found for any of the waypoint's marks
      */
     default Position getApproximatePosition(Waypoint waypoint, TimePoint timePoint) {
         return getApproximatePosition(waypoint, timePoint, new NonCachingMarkPositionAtTimePointCache(this, timePoint));
@@ -359,6 +361,7 @@ public interface TrackedRace
      * @param markPositionCache
      *            a cache for this {@link MarkPositionAtTimePointCache#getTrackedRace() race} and the
      *            {@link MarkPositionAtTimePointCache#getTimePoint() timePoint} passed
+     * @return {@code null} in case no position is found for any of the waypoint's marks
      */
     Position getApproximatePosition(Waypoint waypoint, TimePoint timePoint,
             MarkPositionAtTimePointCache markPositionCache);

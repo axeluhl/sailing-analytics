@@ -19,7 +19,6 @@ import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.dto.AccessControlListAnnotationDTO;
 import com.sap.sse.security.shared.dto.AccessControlListDTO;
-import com.sap.sse.security.shared.dto.OwnershipAnnotationDTO;
 import com.sap.sse.security.shared.dto.OwnershipDTO;
 import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
 import com.sap.sse.security.shared.dto.RolesAndPermissionsForUserDTO;
@@ -37,21 +36,6 @@ public interface UserManagementService extends RemoteService {
             String displayNameOfOwnedObject) throws org.apache.shiro.authz.UnauthorizedException;
 
     Collection<AccessControlListAnnotationDTO> getAccessControlLists()
-            throws UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;
-
-    AccessControlListAnnotationDTO getAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject)
-            throws org.apache.shiro.authz.UnauthorizedException;
-
-    AccessControlListDTO updateAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
-            Map<String, Set<String>> permissionStrings)
-            throws UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;
-
-    AccessControlListDTO addToAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
-            String groupOrTenantIdAsString, String action)
-            throws UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;
-
-    AccessControlListDTO removeFromAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
-            String groupOrTenantIdAsString, String action)
             throws UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;
 
     Collection<UserGroupDTO> getUserGroups() throws org.apache.shiro.authz.UnauthorizedException;
@@ -81,8 +65,6 @@ public interface UserManagementService extends RemoteService {
             throws UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;
 
     Collection<UserDTO> getUserList() throws UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;
-
-    UserDTO getUserByName(String username) throws UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;
 
     RoleDefinitionDTO createRoleDefinition(String roleDefinitionIdAsString, String name)
             throws org.apache.shiro.authz.UnauthorizedException;
@@ -175,8 +157,6 @@ public interface UserManagementService extends RemoteService {
     Map<String, String> getAllPreferences(String username)
             throws UserManagementException, UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;
 
-    String getAccessToken(String username) throws UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;
-
     String getOrCreateAccessToken(String username)
             throws UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;
 
@@ -188,9 +168,6 @@ public interface UserManagementService extends RemoteService {
 
     public Triple<UserDTO, UserDTO, ServerInfoDTO> verifySocialUser(CredentialDTO credential)
             throws OAuthException, org.apache.shiro.authz.UnauthorizedException;
-
-    OwnershipAnnotationDTO getOwnership(QualifiedObjectIdentifier idOfOwnedObject)
-            throws org.apache.shiro.authz.UnauthorizedException;
 
     AccessControlListDTO overrideAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
             AccessControlListDTO acl) throws UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;

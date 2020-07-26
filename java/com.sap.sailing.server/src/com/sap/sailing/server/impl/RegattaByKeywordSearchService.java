@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,6 +26,7 @@ import com.sap.sailing.domain.common.tagging.RaceLogNotFoundException;
 import com.sap.sailing.domain.common.tagging.ServiceNotFoundException;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.server.interfaces.KeywordQueryWithOptionalEventQualification;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.interfaces.TaggingService;
 import com.sap.sse.common.Util;
@@ -46,14 +48,14 @@ import com.sap.sse.common.search.ResultImpl;
 public class RegattaByKeywordSearchService {
     private static final Logger logger = Logger.getLogger(RegattaByKeywordSearchService.class.getName());
     
-    Result<LeaderboardSearchResult> search(final RacingEventService racingEventService, KeywordQuery query) {
+    Result<LeaderboardSearchResult> search(final RacingEventService racingEventService, KeywordQueryWithOptionalEventQualification query) {
         ResultImpl<LeaderboardSearchResult> result = new ResultImpl<>(query, new LeaderboardSearchResultRanker(racingEventService));
         final Map<LeaderboardGroup, Set<Event>> eventsForLeaderboardGroup = new HashMap<>();
         final Map<Leaderboard, Set<LeaderboardGroup>> leaderboardGroupsForLeaderboard = new HashMap<>();
         final Map<CourseArea, Event> eventForCourseArea = new HashMap<>();
         final Map<Event, Set<String>> stringsForEvent = new HashMap<>();
         final Map<LeaderboardGroup, Set<String>> stringsForLeaderboardGroup = new HashMap<>();
-        for (final Event event : racingEventService.getAllEvents()) {
+        for (final Event event : racingEventService.getEventsSelectively(query.isInclude(), query.getEventUUIDs())) {
             final Set<String> s4e = new HashSet<>();
             s4e.add(event.getName());
             s4e.add(event.getVenue().getName());
@@ -127,10 +129,11 @@ public class RegattaByKeywordSearchService {
                         }
                     }
                 }
-                final Event eventByDefaultCourseArea = eventForCourseArea.get(leaderboard.getDefaultCourseArea());
-                if (eventByDefaultCourseArea != null) {
-                    leaderboardStrings.addAll(stringsForEvent.get(eventByDefaultCourseArea));
-                }
+                final Optional<Event> eventByDefaultCourseArea = StreamSupport
+                        .stream(leaderboard.getCourseAreas().spliterator(), /* parallel */ false)
+                        .filter(ca -> eventForCourseArea.containsKey(ca)).findFirst()
+                        .map(ca -> eventForCourseArea.get(ca));
+                eventByDefaultCourseArea.ifPresent(e -> leaderboardStrings.addAll(stringsForEvent.get(e)));
                 return leaderboardStrings;
             }
         };
@@ -153,30 +156,34 @@ public class RegattaByKeywordSearchService {
      * series. In bug3348 a change was made to show all events associated to a leaderboard in the search results. This
      * lead to an "explosion of results" as there were potentially n results referencing n events instead of each result
      * only referencing the associated event.
+     * <p>
      * 
      * This filters the events to be associated to a leaderboard. If the leaderboardGroup has a OverallLeaderboard (in
      * case of a series), there is a special matching to find the right event. If a leaderboard has a defaultCourseArea,
      * the event hosting this CourseArea is the right one. If this reference isn't given or the CourseArea doesn't
      * belong to an event of the series, the fallback behavior is causing all events to be returned.
+     * <p>
      * 
      * This doesn't affect any leaderboard's event set if the leaderboard isn't part of a series.
+     * <p>
      * 
-     * @param leaderboard the leaderboard to get the matching events for
-     * @param leaderboardGroup the LeaderboardGroup hosting the leaderboard
-     * @param events all events hosting the LeaderboardGroup; may be {@code null}; if {@code null}, result will be {@code null}
+     * @param leaderboard
+     *            the leaderboard to get the matching events for
+     * @param leaderboardGroup
+     *            the LeaderboardGroup hosting the leaderboard
+     * @param events
+     *            all events hosting the LeaderboardGroup; may be {@code null}; if {@code null}, result will be
+     *            {@code null}
      * @return the best matching events for the given Leaderboard/LeaderboardGroup
      */
     private Set<Event> filterEventsForLeaderboard(Leaderboard leaderboard, LeaderboardGroup leaderboardGroup, Set<Event> events) {
         final Set<Event> result;
         if (events != null && leaderboardGroup.hasOverallLeaderboard()) {
-            CourseArea defaultCourseArea = leaderboard.getDefaultCourseArea();
             Set<Event> preResult = null;
-            if (defaultCourseArea != null) {
-                for (Event event : events) {
-                    if (Util.contains(event.getVenue().getCourseAreas(), defaultCourseArea)) {
-                        preResult = Collections.singleton(event);
-                        break;
-                    }
+            for (Event event : events) {
+                if (Util.containsAny(event.getVenue().getCourseAreas(), leaderboard.getCourseAreas())) {
+                    preResult = Collections.singleton(event);
+                    break;
                 }
             }
             result = preResult;
@@ -199,10 +206,11 @@ public class RegattaByKeywordSearchService {
                 }
             }
         }
-        final Event eventByCourseArea = eventForCourseArea.get(matchingLeaderboard.getDefaultCourseArea());
-        if (eventByCourseArea != null) {
-            result.add(eventByCourseArea);
-        }
+        final Optional<Event> eventByDefaultCourseArea = StreamSupport
+                .stream(matchingLeaderboard.getCourseAreas().spliterator(), /* parallel */ false)
+                .filter(ca -> eventForCourseArea.containsKey(ca)).findFirst()
+                .map(ca -> eventForCourseArea.get(ca));
+        eventByDefaultCourseArea.ifPresent(e -> result.add(e));
         return result;
     }
 }

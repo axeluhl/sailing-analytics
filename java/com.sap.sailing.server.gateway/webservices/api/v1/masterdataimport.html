@@ -1,0 +1,72 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <link href='../../../../sailing-fontface-1.0.cache.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+    <title>SAP Sailing Analytics Webservices API Version 1.0</title>
+</head>
+<body>
+<h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
+<h2>URL: /api/v1/masterdataimport</h2>
+
+<b>Description:</b>
+<p>Triggers a Master Data Import from a remote server. If no target server authentication is provided the master data import will be triggered with the current user context.</p>
+<br/>
+<table>
+    <tr>
+        <td>Webservice Type:</td>
+        <td>POST</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>json</td>
+    </tr>
+    <tr>
+        <td>Mandatory parameters:</td>
+        <td>
+            <div>targetServerUrlAsString, the remote server from which to import.</div>
+            <div>UUID[], the UUIDs of the leaderboardgroups to be requested from the remote server.</div>
+            <div>override, whether to override a leaderboardgroup already available on the server.</div>
+            <div>compress, use only if remote server instance is at least running with commit 0fbf6071dea125bec4a56dee55d61c99def4a62e.</div>
+            <div>exportWind, if false no wind data will be imported.</div>
+            <div>exportDeviceConfigs, if true exports all the device configurations for the race manager app.</div>
+            <div>exportTrackedRacesAndStartTracking, if true exports all the tracked races and starts the tracking.</div>
+        </td>
+    </tr>
+    <tr>
+        <td>Optional parameters:</td>
+        <td>
+            <div>targetServerUsername</div>
+            <div>targetServerPassword</div>
+            <div>targetServerBearerToken</div>
+            Use either username and password or bearer token, not all three parameters.
+        </td>
+    </tr>
+    <tr>
+        <td>Request method:</td>
+        <td>POST</td>
+    </tr>
+    <tr>
+        <td>Example:</td>
+        <td>curl -X POST http://127.0.0.1:8889/sailingserver/api/v1/masterdataimport -d "targetServerUrl=127.0.0.1:8888" -d "UUID[]=75e86618-8b0f-4291-9661-6b2a1fa47dff" -d "override=false" -d "compress=true" -d "exportWind=false" -d "exportDeviceConfigs=false" -d "exportTrackedRacesAndStartTracking=false" -d "targetServerUsername=admin" -d "targetServerPassword=admin" -H "Authorization: Basic YWRtaW46YWRtaW4="<br>
+        produces output:<pre>
+        {
+         "LeaderboardgroupsImported": {
+           "75e86618-8b0f-4291-9661-6b2a1fa47dff": "MyTestEventWithStrangeCharact/er*s",
+         },
+        "ImportedFrom": "127.0.0.1:8888",
+        "override": false,
+        "exportWind": false,
+        "exportDeviceConfigs": false,
+        "exportTrackedRacesAndStartTracking": false
+        }
+        </pre>
+        </td>
+    </tr>
+</table>
+<div style="height: 1em;"></div>
+<a href="index.html">Back to Web Service Overview</a> 
+</body>
+</html>

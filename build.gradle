@@ -13,7 +13,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.6.1'
+        classpath 'com.android.tools.build:gradle:3.6.3'
         classpath "com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.8.3"
         classpath "org.ajoberstar:grgit:2.3.0"
     }
@@ -37,9 +37,9 @@ allprojects {
     tasks.withType(JavaCompile) {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
-        options.encoding = 'UTF-8'
+        options.encoding = "UTF-8"
     }
-    defaultTasks 'clean', 'assemble'
+    defaultTasks "clean", "assemble"
 }
 
 // dependency versions for all sub modules

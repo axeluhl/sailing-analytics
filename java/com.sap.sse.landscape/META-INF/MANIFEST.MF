@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Landscape
+Bundle-SymbolicName: com.sap.sse.landscape
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: SAP
+Automatic-Module-Name: com.sap.sse.landscape
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Export-Package: com.sap.sse.landscape,
+ com.sap.sse.landscape.application,
+ com.sap.sse.landscape.mongodb,
+ com.sap.sse.landscape.rabbitmq,
+ com.sap.sse.landscape.ssh
+Require-Bundle: com.sap.sse.common,
+ com.jcraft.jsch;bundle-version="0.1.54"

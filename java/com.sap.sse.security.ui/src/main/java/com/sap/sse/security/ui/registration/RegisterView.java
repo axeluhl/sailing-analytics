@@ -3,6 +3,8 @@ package com.sap.sse.security.ui.registration;
 import java.util.HashMap;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.ImageElement;
+import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
@@ -20,6 +22,7 @@ import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.controls.PasswordTextBoxWithWatermark;
 import com.sap.sse.gwt.client.controls.TextBoxWithWatermark;
 import com.sap.sse.gwt.client.dialog.DialogUtils;
+import com.sap.sse.gwt.shared.ClientConfiguration;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.EntryPointLinkFactory;
@@ -43,6 +46,7 @@ public class RegisterView extends Composite {
     @UiField TextBoxWithWatermark emailTextBox;
     @UiField PasswordTextBoxWithWatermark passwordTextBox;
     @UiField PasswordTextBoxWithWatermark password2TextBox;
+    @UiField ImageElement logoImage;
 
     public RegisterView(UserManagementServiceAsync userManagementService, StringMessages stringMessages, String appName) {
         this.userManagementService = userManagementService;
@@ -74,6 +78,9 @@ public class RegisterView extends Composite {
         password2TextBox.addKeyUpHandler(keyUpHandler);
         
         DialogUtils.linkEnterToButton(signUpButton, usernameTextBox, emailTextBox, passwordTextBox, password2TextBox);
+        if (!ClientConfiguration.getInstance().isBrandingActive()) {
+            logoImage.getStyle().setDisplay(Display.NONE);
+        }
     }
 
     @UiHandler("signUpButton")

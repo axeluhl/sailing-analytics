@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -326,6 +327,8 @@ public class Util {
         final T result;
         if (isEmpty(iterable)) {
             result = null;
+        } else if (iterable instanceof SortedSet) {
+            result = ((SortedSet<T>) iterable).last();
         } else {
             result = get(iterable, size(iterable)-1);
         }
@@ -359,7 +362,13 @@ public class Util {
             }
         });
     }
-    
+
+    public static <S, T> ArrayList<T> mapToArrayList(final Iterable<S> iterable, final Mapper<S, T> mapper) {
+        final ArrayList<T> result = new ArrayList<>();
+        addAll(map(iterable, mapper), result);
+        return result;
+    }
+
     public static <T> Iterable<T> filter(final Iterable<T> iterable, final Predicate<T> predicate) {
         return StreamSupport.stream(iterable.spliterator(), /* parallel */ false).filter(predicate)::iterator;
     }
@@ -382,6 +391,22 @@ public class Util {
             }
             return false;
         }
+    }
+    
+    /**
+     * @return {@code true} if {@code ts} {@link #contains(Iterable, Object) contains} at least one of the elements in
+     *         {@code isAnyOfTheseContained}. This means in particular that if {@code isAnyOfTheseContained} is
+     *         {@code null} or is empty, {@code false} will result.
+     */
+    public static <T> boolean containsAny(Iterable<T> ts, Iterable<T> isAnyOfTheseContained) {
+        if (isAnyOfTheseContained != null) {
+            for (final T t : isAnyOfTheseContained) {
+                if (contains(ts, t)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -537,25 +562,16 @@ public class Util {
         return joinStrings(separator, Arrays.asList(strings));
     }
 
-    public static String join(String separator, Object... objects) {
-        final String[] strings = new String[objects.length];
-        int i=0;
-        for (Object o : objects) {
-            strings[i++] = o.toString();
-        }
-        return joinStrings(separator, Arrays.asList(strings));
-    }
-
-    public static String joinStrings(String separator, Iterable<String> strings) {
+    public static String joinStrings(String separator, Iterable<? extends Object> objects) {
         StringBuilder result = new StringBuilder();
         boolean first = true;
-        for (String string : strings) {
+        for (Object object : objects) {
             if (first) {
                 first = false;
             } else {
                 result.append(separator);
             }
-            result.append(string);
+            result.append(String.valueOf(object));
         }
         return result.toString();
     }
@@ -754,10 +770,21 @@ public class Util {
         return result;
     }
 
-    public static <T> List<T> asList(Iterable<T> visibleCourseAreas) {
-        ArrayList<T> list = new ArrayList<T>();
-        addAll(visibleCourseAreas, list);
+    public static <T> List<T> asList(Iterable<T> iterable) {
+        final List<T> list = new ArrayList<>();
+        addAll(iterable, list);
         return list;
+    }
+    
+    public static <T> Set<T> asSet(Iterable<T> iterable) {
+        final Set<T> result;
+        if (iterable instanceof Set<?>) {
+            result = (Set<T>) iterable;
+        } else {
+            result = new HashSet<>();
+            addAll(iterable, result);
+        }
+        return result;
     }
 
     public static <T> List<T> cloneListOrNull(List<T> list) {
@@ -940,5 +967,31 @@ public class Util {
      */
     public static <T> Stream<T> stream(Iterable<T> iterable) {
         return StreamSupport.stream(iterable.spliterator(), /* parallel */ false);
+    }
+    
+    /**
+     * Checks whether a given String is <code>null</code> or empty.
+     * 
+     * @param str
+     *            String to check
+     * @return <code>false</code> if empty or <code>null</code>, otherwise <code>true</code>.
+     */
+    public static boolean hasLength(String str) {
+        final boolean result;
+        if (str == null) {
+            result = false;
+        } else {
+            result = !str.isEmpty();
+        }
+        return result;
+    }
+
+    /**
+     * Compares two iterable sequences based on {@link Set} semantics. If both objects turn out to be {@link Set}s,
+     * the {@link Set#equals(Object)} method will be used. Otherwise, non-{@link Set} objects will be filled into
+     * temporary {@link Set} objects and then compared as sets.
+     */
+    public static <T> boolean setEquals(Iterable<T> a, Iterable<T> b) {
+        return asSet(a).equals(asSet(b));
     }
 }

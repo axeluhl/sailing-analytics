@@ -42,4 +42,12 @@
     <servlet-name>CreateSessionServlet</servlet-name>
     <url-pattern>/createSession</url-pattern>
   </servlet-mapping>
+  <servlet>
+    <servlet-name>WhitelabelSwitchServlet</servlet-name>
+    <servlet-class>com.sap.sailing.server.gateway.test.support.WhitelabelSwitchServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>WhitelabelSwitchServlet</servlet-name>
+    <url-pattern>/switch/whitelabel/*</url-pattern>
+  </servlet-mapping>
 </web-app>

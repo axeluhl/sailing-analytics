@@ -162,7 +162,14 @@ else
   export JAVA_8_ARGS="-XX:ThreadPriorityPolicy=2 -XX:+UseG1GC ${LOGGING_ARGS}"
   JAVA_VERSION_SPECIFIC_ARGS=$JAVA_8_ARGS
 fi
+
+# White labeling: use -Dcom.sap.sse.debranding=true to remove branding images and text
+#ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Dcom.sap.sse.debranding=true"
 ADDITIONAL_JAVA_ARGS="$JAVA_VERSION_SPECIFIC_ARGS $ADDITIONAL_JAVA_ARGS -Dpersistentcompetitors.clear=false -Drestore.tracked.races=true -Dpolardata.source.url=https://www.sapsailing.com -Dwindestimation.source.url=https://www.sapsailing.com -XX:MaxGCPauseMillis=500"
+
+
+# Custom event management URL: use -Dcom.sap.sailing.eventmanagement.url  to modify hardcoded default, e.g https://dev.sapsailing.com
+#ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Dcom.sap.sailing.eventmanagement.url=https://dev.sapsailing.com"
 
 # To enable the use of the shared SecurityService and SharedSailingData from security-service.sapsailing.com, uncomment and fill in the following:
 #ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Dsecurity.sharedAcrossSubdomainsOf=sapsailing.com -Dsecurity.baseUrlForCrossDomainStorage=https://security-service.sapsailing.com -Dgwt.acceptableCrossDomainStorageRequestOriginRegexp=https?://(.*\.)?sapsailing\.com(:[0-9]*)?$"

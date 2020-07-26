@@ -26,7 +26,7 @@ import com.sap.sailing.gwt.settings.client.leaderboard.MetaLeaderboardPerspectiv
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiCompetitorLeaderboardChartLifecycle;
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiCompetitorLeaderboardChartSettings;
 import com.sap.sailing.gwt.settings.client.utils.StoredSettingsLocationFactory;
-import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
+import com.sap.sailing.gwt.ui.client.AbstractSailingReadEntryPoint;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceHelper;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -44,7 +44,7 @@ import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorage;
 import com.sap.sse.security.ui.settings.StoredSettingsLocation;
 
-public class LeaderboardEntryPoint extends AbstractSailingEntryPoint implements ProvidesLeaderboardRouting {
+public class LeaderboardEntryPoint extends AbstractSailingReadEntryPoint implements ProvidesLeaderboardRouting {
     public static final long DEFAULT_REFRESH_INTERVAL_MILLIS = 3000l;
 
     private static final Logger logger = Logger.getLogger(LeaderboardEntryPoint.class.getName());
@@ -52,7 +52,6 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint implements 
     private StringMessages stringmessages = StringMessages.INSTANCE;
     private UUID eventId;
     private String leaderboardName;
-    private String leaderboardGroupName;
     private AbstractLeaderboardDTO leaderboardDTO;
     private LeaderboardContextDefinition leaderboardContextDefinition;
 
@@ -66,7 +65,6 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint implements 
         eventId = leaderboardContextDefinition.getEventId();
 
         leaderboardName = leaderboardContextDefinition.getLeaderboardName();
-        leaderboardGroupName = leaderboardContextDefinition.getLeaderboardGroupName();
 
         if (leaderboardName != null) {
             if (eventId == null) {
@@ -158,7 +156,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint implements 
                                             final MetaLeaderboardViewer leaderboardViewer = new MetaLeaderboardViewer(
                                                     null, context, rootComponentLifeCycle, defaultSettings,
                                                     sailingServiceFactory, new AsyncActionsExecutor(), timer, null,
-                                                    leaderboardGroupName, leaderboardName, LeaderboardEntryPoint.this,
+                                                    leaderboardName, LeaderboardEntryPoint.this,
                                                     getStringMessages(), getActualChartDetailType(defaultSettings),
                                                     result);
                                             createUi(leaderboardViewer, defaultSettings, timer,
@@ -200,8 +198,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint implements 
                                                             final MultiRaceLeaderboardViewer leaderboardViewer = new MultiRaceLeaderboardViewer(
                                                                     null, context, rootComponentLifeCycle,
                                                                     defaultSettings, sailingServiceFactory,
-                                                                    new AsyncActionsExecutor(), timer,
-                                                                    leaderboardGroupName, leaderboardName,
+                                                                    new AsyncActionsExecutor(), timer, leaderboardName,
                                                                     LeaderboardEntryPoint.this, getStringMessages(),
                                                                     getActualChartDetailType(defaultSettings), result);
                                                             createUi(leaderboardViewer, defaultSettings, timer,

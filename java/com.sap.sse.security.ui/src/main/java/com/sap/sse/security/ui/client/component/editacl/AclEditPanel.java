@@ -61,6 +61,8 @@ public class AclEditPanel extends Composite {
     
     interface AclEditPanelUiBinder extends UiBinder<Widget, AclEditPanel> {
     }
+    
+    private static final boolean showDeniedActions = false;
 
     @UiField
     FlowPanel userGroupCellListPanelUi;
@@ -126,8 +128,11 @@ public class AclEditPanel extends Composite {
                 IconResources.INSTANCE.removeIcon(), actionNames, stringMessages.deniedActionName());
         deniedActionsEditor.addValueChangeHandler(e -> userGroupsWithDeniedActions
                 .put(userGroupSelectionModel.getSelectedObject(), toDeniedActionSet(e.getValue())));
-        permissionsCellListPanelUi.add(deniedActionsContainer = createActionsContainer(stringMessages.deniedActions(),
-                deniedActionsEditor, AclDialogResources.INSTANCE.css().deniedActionsTable()));
+        deniedActionsContainer = createActionsContainer(stringMessages.deniedActions(),
+                deniedActionsEditor, AclDialogResources.INSTANCE.css().deniedActionsTable());
+        if (showDeniedActions) {
+            permissionsCellListPanelUi.add(deniedActionsContainer);
+        }
 
         userGroupSelectionModel.addSelectionChangeHandler(event -> {
             StrippedUserGroupDTO userGroup = userGroupSelectionModel.getSelectedObject();
@@ -203,8 +208,10 @@ public class AclEditPanel extends Composite {
         deniedActionsContainer.setVisible(userGroupSelected);
         if (userGroupSelected) {
             allowedActionsEditor.setValue(userGroupsWithAllowedActions.get(selectedUserGroup), false);
-            deniedActionsEditor.setValue(
-                    removeExclamationMarkFromStrings(userGroupsWithDeniedActions.get(selectedUserGroup)), false);
+            if (showDeniedActions) {
+                deniedActionsEditor.setValue(
+                        removeExclamationMarkFromStrings(userGroupsWithDeniedActions.get(selectedUserGroup)), false);
+            }
         }
     }
 

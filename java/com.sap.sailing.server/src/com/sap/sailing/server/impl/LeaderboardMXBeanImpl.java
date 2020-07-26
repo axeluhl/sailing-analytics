@@ -28,16 +28,12 @@ public class LeaderboardMXBeanImpl implements LeaderboardMXBean {
 
     @Override
     public ObjectName getObjectName() throws MalformedObjectNameException {
-        return new ObjectName("com.sap.sailing:type=Leaderboard,name="+escapeIllegalObjectNameCharacters(leaderboard.getName()));
+        return new ObjectName("com.sap.sailing:type=Leaderboard,name="+ObjectName.quote((leaderboard.getName())));
     }
     
     @Override
     public String getName() {
         return leaderboard.getName();
-    }
-
-    private String escapeIllegalObjectNameCharacters(String name) {
-        return name.replaceAll("[:/,]", "_");
     }
 
     @Override

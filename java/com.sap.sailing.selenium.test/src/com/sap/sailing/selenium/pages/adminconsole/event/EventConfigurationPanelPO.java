@@ -78,14 +78,14 @@ public class EventConfigurationPanelPO extends PageArea {
     
     public void createEventWithDefaultLeaderboardGroupRegattaAndDefaultLeaderboard(String eventName, String eventDesc,
             String venue, Date eventStartDate, Date eventEndDate, boolean isPublic, String regattaName, String boatClass,
-            Date regattaStartDate, Date regattaEndDate, boolean useOverallLeaderboard, String...courseAreaNames) {
+            Date regattaStartDate, Date regattaEndDate, boolean useOverallLeaderboard, String... courseAreaNames) {
         createEvent(eventName, eventDesc, venue, eventStartDate, eventEndDate, isPublic, courseAreaNames).pressYes();
         LeaderboardGroupCreateDialogPO leaderboardGroupCreateDialogPO = getPO(LeaderboardGroupCreateDialogPO::new, ID_CREATE_DEFAULT_LEADERBOARD_GROUP_DIALOG);
         leaderboardGroupCreateDialogPO.setUseOverallLeaderboard(useOverallLeaderboard);
         leaderboardGroupCreateDialogPO.pressOk();
         waitForPO(ConfirmDialogPO::new, ID_CREATE_DEFAULT_REGATTA_CONFIRM_DIALOG, 5).pressYes();
-        if(courseAreaNames.length > 0) {
-            createRegatta(regattaName, boatClass, regattaStartDate, regattaEndDate, eventName, "Default").pressOk();
+        if (courseAreaNames.length > 0) {
+            createRegatta(regattaName, boatClass, regattaStartDate, regattaEndDate, eventName, courseAreaNames).pressOk();
         } else {
             createRegatta(regattaName, boatClass, regattaStartDate, regattaEndDate).pressOk();
         }
@@ -131,11 +131,12 @@ public class EventConfigurationPanelPO extends PageArea {
         return waitForPO(ConfirmDialogPO::new, ID_CREATE_DEFAULT_LEADERBOARD_GROUP_CONFIRM_DIALOG, 5);
     }
     
-    private ConfirmDialogPO createRegatta(String name, String boatClass, Date start, Date end, String eventToLink, String courseAreaToLink) {
+    private ConfirmDialogPO createRegatta(String name, String boatClass, Date start, Date end, String eventToLink,
+            String[] courseAreasToLink) {
         RegattaCreateDialogPO createDialog = getPO(RegattaCreateDialogPO::new, ID_REGATTA_CREATE_DIALOG);
         createDialog.setValues(name, boatClass, start, end);
-        if(eventToLink != null && courseAreaToLink != null) {
-            createDialog.setEventAndCourseArea(eventToLink, courseAreaToLink);
+        if (eventToLink != null && courseAreasToLink != null) {
+            createDialog.setEventAndCourseArea(eventToLink, courseAreasToLink);
         }
         createDialog.pressOk();
         return waitForPO(ConfirmDialogPO::new, ID_CREATE_DEFAULT_REGATTA_LEADERBOARD_CONFIRM_DIALOG, 30);

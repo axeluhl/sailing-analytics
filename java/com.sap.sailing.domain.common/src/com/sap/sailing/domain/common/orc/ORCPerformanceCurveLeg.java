@@ -15,6 +15,12 @@ public interface ORCPerformanceCurveLeg extends Serializable {
      */
     Bearing getTwa();
     
+    /**
+     * Same as {@link #getTwa()}, but with the possibility to pass a cache that can remember the results
+     * of computing the wind for a specific leg across a certain computing scope.
+     */
+    Bearing getTwa(AverageWindOnLegCache cache);
+    
     String toString();
     
     ORCPerformanceCurveLegTypes getType();

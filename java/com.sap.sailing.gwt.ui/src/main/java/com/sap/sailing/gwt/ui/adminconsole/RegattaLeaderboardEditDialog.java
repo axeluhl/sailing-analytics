@@ -13,10 +13,7 @@ public class RegattaLeaderboardEditDialog extends RegattaLeaderboardDialog {
             DialogCallback<LeaderboardDescriptor> callback) {
         super(stringConstants.editRegattaLeaderboard(), leaderboardDescriptor, existingRegattas, stringConstants, errorReporter,
                 new RegattaLeaderboardDialog.LeaderboardParameterValidator(stringConstants, otherExistingLeaderboards), callback);
-        nameTextBox = createTextBox(leaderboardDescriptor.getName());
         displayNameTextBox = createTextBox(leaderboardDescriptor.getDisplayName());
-        nameTextBox.setEnabled(false);
-        nameTextBox.setVisibleLength(50);
         displayNameTextBox.setVisibleLength(50);
         regattaListBox = createSortedRegattaListBox(existingRegattas, leaderboardDescriptor.getRegattaName());
         regattaListBox.setEnabled(false);

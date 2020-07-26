@@ -1,10 +1,10 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import java.text.SimpleDateFormat;
 
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.domain.impl.Result;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
@@ -18,10 +18,10 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class RaceFinishingFragment extends BaseFragment {
 
-    private SimpleDateFormat mDateFormat;
     private TextView mFinishingSince;
 
     public static RaceFinishingFragment newInstance() {
@@ -36,7 +36,6 @@ public class RaceFinishingFragment extends BaseFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.race_finishing, container, false);
 
-        mDateFormat = new SimpleDateFormat("HH:mm:ss", getResources().getConfiguration().locale);
         mFinishingSince = ViewHelper.get(layout, R.id.first_vessel_since);
 
         ImageView flag = ViewHelper.get(layout, R.id.flag);
@@ -46,6 +45,7 @@ public class RaceFinishingFragment extends BaseFragment {
         }
 
         Button down = ViewHelper.get(layout, R.id.flag_down);
+
         if (down != null) {
             down.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -55,7 +55,18 @@ public class RaceFinishingFragment extends BaseFragment {
                 }
             });
         }
-
+        Button revoke = ViewHelper.get(layout, R.id.flag_finishing_revoke);
+        if (revoke != null) {
+            revoke.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    final Result result = getRace().revokeFinishing(preferences.getAuthor());
+                    if (result.hasError()) {
+                        Toast.makeText(getActivity(), result.getMessage(getActivity()), Toast.LENGTH_LONG).show();
+                    }
+                }
+            });
+        }
         return layout;
     }
 
@@ -67,7 +78,7 @@ public class RaceFinishingFragment extends BaseFragment {
             TextView first_vessel = ViewHelper.get(getView(), R.id.first_vessel);
             if (first_vessel != null && getRaceState() != null && getRaceState().getFinishingTime() != null) {
                 first_vessel.setText(getString(R.string.finishing_started,
-                        mDateFormat.format(getRaceState().getFinishingTime().asDate())));
+                        TimeUtils.formatTime(getRaceState().getFinishingTime())));
             }
         }
         notifyTick(MillisecondsTimePoint.now());
