@@ -571,7 +571,7 @@ public class Util {
             } else {
                 result.append(separator);
             }
-            result.append(object.toString());
+            result.append(String.valueOf(object));
         }
         return result.toString();
     }

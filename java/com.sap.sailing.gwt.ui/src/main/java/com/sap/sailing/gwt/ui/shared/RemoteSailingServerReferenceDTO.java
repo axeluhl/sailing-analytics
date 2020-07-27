@@ -33,11 +33,13 @@ public class RemoteSailingServerReferenceDTO extends NamedDTO {
     public RemoteSailingServerReferenceDTO(String name, String url, boolean include,
             List<UUID> selectedEventIds, Iterable<EventBaseDTO> events) {
         this(name, url, include, selectedEventIds, events, /* error message */ null);
+        assert events != null;
     }
 
     public RemoteSailingServerReferenceDTO(String name, String url, boolean include,
             List<UUID> selectedEventIds, Iterable<EventBaseDTO> events, String lastErrorMessage) {
         super(name);
+        assert selectedEventIds != null;
         this.url = url;
         this.events = events;
         this.include = include;
@@ -46,7 +48,7 @@ public class RemoteSailingServerReferenceDTO extends NamedDTO {
     }
 
     public RemoteSailingServerReferenceDTO(String name, String url, boolean include, String lastErrorMessage) {
-        this(name, url, include, /* selectedEventIds */ null, /* events */ null, lastErrorMessage);
+        this(name, url, include, /* selectedEventIds */ Collections.emptyList(), /* events */ Collections.emptySet(), lastErrorMessage);
     }
 
     public String getUrl() {
