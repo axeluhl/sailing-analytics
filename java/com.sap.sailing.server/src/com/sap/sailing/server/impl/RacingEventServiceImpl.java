@@ -555,6 +555,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     
     private final AtomicInteger numberOfTrackedRacesRestored;
     
+    private final AtomicInteger numberOfTrackedRacesRestoredDoneLoading;
+    
     private final AtomicInteger numberOfTrackedRacesStillLoading;
     
     private final ServiceTracker<ResultUrlRegistry, ResultUrlRegistry> resultUrlRegistryServiceTracker;
@@ -806,6 +808,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         this.currentlyFillingFromInitialLoad = false;
         this.securityServiceTracker = securityServiceTracker;
         this.numberOfTrackedRacesRestored = new AtomicInteger();
+        this.numberOfTrackedRacesRestoredDoneLoading = new AtomicInteger();
         this.numberOfTrackedRacesStillLoading = new AtomicInteger();
         this.resultUrlRegistryServiceTracker = resultUrlRegistryServiceTracker;
         this.scoreCorrectionProviderServiceTracker = scoreCorrectionProviderServiceTracker;
@@ -938,24 +941,26 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         numberOfTrackedRacesToRestore = getDomainObjectFactory().loadConnectivityParametersForRacesToRestore(params -> {
             try {
                 final RaceHandle handle = addRace(/* addToRegatta==null means "default regatta" */ null, params, /* no timeout during mass loading */ -1,
-                        new DefaultRaceTrackingHandler() {
-                    @Override
-                            public DynamicTrackedRace createTrackedRace(TrackedRegatta trackedRegatta,
-                                    RaceDefinition raceDefinition, Iterable<Sideline> sidelines, WindStore windStore,
-                                    long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
-                                    long millisecondsOverWhichToAverageSpeed,
-                                    DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
-                                    boolean useMarkPassingCalculator, RaceLogAndTrackedRaceResolver raceLogResolver,
-                                    Optional<ThreadLocalTransporter> threadLocalTransporter,
-                                    TrackingConnectorInfo trackingConnectorInfo) {
-                        final DynamicTrackedRace trackedRace = super.createTrackedRace(trackedRegatta, raceDefinition, sidelines, windStore,
-                                        delayToLiveInMillis, millisecondsOverWhichToAverageWind,
-                                        millisecondsOverWhichToAverageSpeed, raceDefinitionSetToUpdate,
-                                        useMarkPassingCalculator, raceLogResolver, threadLocalTransporter, trackingConnectorInfo);
-                        getSecurityService().migrateOwnership(trackedRace);
-                        return trackedRace;
-                    }
-                });
+                    new DefaultRaceTrackingHandler() {
+                        @Override
+                        public DynamicTrackedRace createTrackedRace(TrackedRegatta trackedRegatta,
+                                RaceDefinition raceDefinition, Iterable<Sideline> sidelines, WindStore windStore,
+                                long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
+                                long millisecondsOverWhichToAverageSpeed,
+                                DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
+                                boolean useMarkPassingCalculator, RaceLogAndTrackedRaceResolver raceLogResolver,
+                                Optional<ThreadLocalTransporter> threadLocalTransporter,
+                                TrackingConnectorInfo trackingConnectorInfo) {
+                            final DynamicTrackedRace trackedRace = super.createTrackedRace(trackedRegatta, raceDefinition, sidelines, windStore,
+                                            delayToLiveInMillis, millisecondsOverWhichToAverageWind,
+                                            millisecondsOverWhichToAverageSpeed, raceDefinitionSetToUpdate,
+                                            useMarkPassingCalculator, raceLogResolver, threadLocalTransporter, trackingConnectorInfo);
+                            getSecurityService().migrateOwnership(trackedRace);
+                            trackedRace.runWhenDoneLoading(
+                                    ()->numberOfTrackedRacesRestoredDoneLoading.incrementAndGet());
+                            return trackedRace;
+                        }
+                    });
                 final RaceDefinition race = handle.getRace(RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS); // try to not flood servers during restore by waiting for race to appear
                 if (race == null) {
                     logger.warning("Race for tracker " + handle.getRaceTracker() + " with ID "
@@ -5146,5 +5151,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public int getNumberOfTrackedRacesStillLoading() {
         return numberOfTrackedRacesStillLoading.get();
+    }
+
+    @Override
+    public int getNumberOfTrackedRacesRestoredDoneLoading() {
+        return numberOfTrackedRacesRestoredDoneLoading.get();
     }
 }

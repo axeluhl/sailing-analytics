@@ -50,6 +50,8 @@ public class StatusServlet extends HttpServlet {
         result.put("numberofracestorestore", numberOfTrackedRacesToRestore);
         final int numberOfTrackedRacesRestored = service.getNumberOfTrackedRacesRestored();
         result.put("numberofracesrestored", numberOfTrackedRacesRestored);
+        final int numberOfTrackedRacesRestoredDoneLoading = service.getNumberOfTrackedRacesRestoredDoneLoading();
+        result.put("numberofracesrestoreddoneloading", numberOfTrackedRacesRestoredDoneLoading);
         final int numberOfTrackedRacesStillLoading = service.getNumberOfTrackedRacesStillLoading();
         result.put("numberofracesstillloading", numberOfTrackedRacesStillLoading);
         final ReplicationService replicationService = getReplicationService(servletContext);
@@ -60,7 +62,7 @@ public class StatusServlet extends HttpServlet {
         boolean available = numberOfTrackedRacesRestored >= numberOfTrackedRacesToRestore
                 && (replicationStatus == null || replicationStatus.isAvailable());
         if (waitUntilRacesLoaded) {
-            available = available && numberOfTrackedRacesStillLoading == 0;
+            available = available && numberOfTrackedRacesRestoredDoneLoading == numberOfTrackedRacesToRestore;
         }
         result.put("available", available);
         resp.setStatus(available ? HttpServletResponse.SC_OK : HttpServletResponse.SC_SERVICE_UNAVAILABLE);

@@ -60,7 +60,6 @@ import com.sap.sailing.domain.common.RegattaFetcher;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
-import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.WindFinderReviewedSpotsCollectionIdProvider;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.domain.common.media.MediaTrack;
@@ -968,8 +967,13 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     void removeExpeditionDeviceConfiguration(UUID deviceUuid);
     
     /**
-     * Returns the number of tracked races that are <code>NOT</code> in {@link TrackedRaceStatusEnum}
-     * <code>ERROR</code>, <code>PREPARED</code> or <code>LOADING</code> state.
+     * Returns the number of tracked races that are not {@link TrackedRace#hasFinishedLoading() done with loading}.
      */
     int getNumberOfTrackedRacesStillLoading();
+
+    /**
+     * Returns the number of tracked races restored during server start-up that are
+     * {@link TrackedRace#hasFinishedLoading() done with loading}.
+     */
+    int getNumberOfTrackedRacesRestoredDoneLoading();
 }

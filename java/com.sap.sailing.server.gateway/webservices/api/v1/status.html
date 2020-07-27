@@ -43,7 +43,9 @@ with the "replica" attribute, and if it is "false" check this endpoint.
     </tr>
     <tr>
         <td>Optional parameters:</td>
-        <td>None</td>
+        <td>waitUntilRacesLoaded: if <tt>true</tt>, the overall status will be reported
+            as available only if all races that are to be restored have also finished
+            their loading process and moved to state TRACKING, FINISHED, or ERROR.</td>
     </tr>
     <tr>
         <td>Request method:</td>
