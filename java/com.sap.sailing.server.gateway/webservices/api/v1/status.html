@@ -61,56 +61,57 @@ with the "replica" attribute, and if it is "false" check this endpoint.
     	<td>Example Response:</td>
     	<td>
         <pre>
-		{
-		  "numberofracestorestore": 1,
-		  "numberofracesrestored": 1,
-		  "numberofracesstillloading": 0,
-		  "replication": {
-		    "replica": false,
-		    "replicationstarting": false,
-		    "suspended": false,
-		    "stopped": false,
-		    "messagequeuelength": 0,
-		    "operationqueuelengths": [],
-		    "totaloperationqueuelength": 0,
-		    "replicables": [
-		      {
-		        "id": "com.sap.sse.filestorage.impl.FileStorageManagementServiceImpl",
-		        "initialloadrunning": false
-		      },
-		      {
-		        "id": "com.sap.sailing.shared.server.impl.SharedSailingDataImpl",
-		        "initialloadrunning": false
-		      },
-		      {
-		        "id": "com.sap.sse.mail.impl.MailServiceImpl",
-		        "initialloadrunning": false
-		      },
-		      {
-		        "id": "com.sap.sailing.polars.impl.PolarDataServiceImpl",
-		        "initialloadrunning": false
-		      },
-		      {
-		        "id": "com.sap.sailing.domain.racelogtracking.impl.fixtracker.RegattaLogFixTrackerRegattaListener",
-		        "initialloadrunning": false
-		      },
-		      {
-		        "id": "com.sap.sse.security.impl.SecurityServiceImpl",
-		        "initialloadrunning": false
-		      },
-		      {
-		        "id": "com.sap.sailing.windestimation.integration.WindEstimationFactoryServiceImpl",
-		        "initialloadrunning": false
-		      },
-		      {
-		        "id": "com.sap.sailing.server.impl.RacingEventServiceImpl",
-		        "initialloadrunning": false
-		      }
-		    ],
-		    "available": true
-		  },
-		  "available": true
-		}
+			{
+			  "numberofracestorestore": 48,
+			  "numberofracesrestored": 48,
+			  "numberofracesrestoreddoneloading": 48,
+			  "numberofracesstillloading": 0,
+			  "replication": {
+			    "replica": false,
+			    "replicationstarting": false,
+			    "suspended": false,
+			    "stopped": false,
+			    "messagequeuelength": 0,
+			    "operationqueuelengths": [],
+			    "totaloperationqueuelength": 0,
+			    "replicables": [
+			      {
+			        "id": "com.sap.sse.filestorage.impl.FileStorageManagementServiceImpl",
+			        "initialloadrunning": false
+			      },
+			      {
+			        "id": "com.sap.sailing.shared.server.impl.SharedSailingDataImpl",
+			        "initialloadrunning": false
+			      },
+			      {
+			        "id": "com.sap.sse.mail.impl.MailServiceImpl",
+			        "initialloadrunning": false
+			      },
+			      {
+			        "id": "com.sap.sailing.domain.racelogtracking.impl.fixtracker.RegattaLogFixTrackerRegattaListener",
+			        "initialloadrunning": false
+			      },
+			      {
+			        "id": "com.sap.sailing.polars.impl.PolarDataServiceImpl",
+			        "initialloadrunning": false
+			      },
+			      {
+			        "id": "com.sap.sse.security.impl.SecurityServiceImpl",
+			        "initialloadrunning": false
+			      },
+			      {
+			        "id": "com.sap.sailing.windestimation.integration.WindEstimationFactoryServiceImpl",
+			        "initialloadrunning": false
+			      },
+			      {
+			        "id": "com.sap.sailing.server.impl.RacingEventServiceImpl",
+			        "initialloadrunning": false
+			      }
+			    ],
+			    "available": true
+			  },
+			  "available": true
+			}
         </pre>
         </td>
     </tr>
