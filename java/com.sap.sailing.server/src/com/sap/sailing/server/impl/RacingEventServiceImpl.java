@@ -5128,6 +5128,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public boolean allTrackedRacesLoaded() {
+        boolean result = true;
         for (Regatta regatta : getAllRegattas()) {
             final TrackedRegatta trackedRegatta = getTrackedRegatta(regatta);
             if (trackedRegatta != null) {
@@ -5137,14 +5138,18 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                         final TrackedRaceStatusEnum status = trackedRace.getStatus().getStatus();
                         if (status == TrackedRaceStatusEnum.ERROR || status == TrackedRaceStatusEnum.LOADING
                                 || status == TrackedRaceStatusEnum.PREPARED) {
-                            return false;
+                            result = false;
+                            break;
                         }
                     }
                 } finally {
                     trackedRegatta.unlockTrackedRacesAfterRead();
                 }
+                if (result = false) {
+                    break;
+                }
             }
         }
-        return true;
+        return result;
     }
 }
