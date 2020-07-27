@@ -971,5 +971,5 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * Returns the number of tracked races that are <code>NOT</code> in {@link TrackedRaceStatusEnum}
      * <code>ERROR</code>, <code>PREPARED</code> or <code>LOADING</code> state.
      */
-    int getNumberOfTrackedRacesLoaded();
+    int getNumberOfTrackedRacesStillLoading();
 }

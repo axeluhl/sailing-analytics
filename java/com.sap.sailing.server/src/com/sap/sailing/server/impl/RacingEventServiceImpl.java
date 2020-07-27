@@ -438,7 +438,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     /**
      * A set based on a concurrent hash map, therefore being thread safe
      */
-    private Set<DynamicTrackedRegatta> regattasObservedForDefaultLeaderboard = Collections
+    private Set<DynamicTrackedRegatta> regattasObservedWithRaceAdditionListener = Collections
             .newSetFromMap(new ConcurrentHashMap<DynamicTrackedRegatta, Boolean>());
 
     private final MongoObjectFactory mongoObjectFactory;
@@ -555,7 +555,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     
     private final AtomicInteger numberOfTrackedRacesRestored;
     
-    private final AtomicInteger numberOfTrackedRacesLoaded;
+    private final AtomicInteger numberOfTrackedRacesStillLoading;
     
     private final ServiceTracker<ResultUrlRegistry, ResultUrlRegistry> resultUrlRegistryServiceTracker;
 
@@ -806,7 +806,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         this.currentlyFillingFromInitialLoad = false;
         this.securityServiceTracker = securityServiceTracker;
         this.numberOfTrackedRacesRestored = new AtomicInteger();
-        this.numberOfTrackedRacesLoaded = new AtomicInteger(-1);
+        this.numberOfTrackedRacesStillLoading = new AtomicInteger();
         this.resultUrlRegistryServiceTracker = resultUrlRegistryServiceTracker;
         this.scoreCorrectionProviderServiceTracker = scoreCorrectionProviderServiceTracker;
         this.scoreCorrectionListenersByLeaderboard = new ConcurrentHashMap<>();
@@ -2069,9 +2069,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 trackingConnectorInfo);
     }
 
-    private void ensureRegattaIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(
-            DynamicTrackedRegatta trackedRegatta) {
-        if (regattasObservedForDefaultLeaderboard.add(trackedRegatta)) {
+    private void ensureRegattaHasRaceAdditionListener(DynamicTrackedRegatta trackedRegatta) {
+        if (regattasObservedWithRaceAdditionListener.add(trackedRegatta)) {
             trackedRegatta.addRaceListener(new RaceAdditionListener(),
                     /* ThreadLocalTransporter */ Optional.empty(), // registering for synchronous callbacks; no thread locals need to be transported
                     /* register for synchronous execution in order to ensure that any replication-related effects happen before
@@ -2080,8 +2079,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
     }
 
-    private void stopObservingRegattaForRedaultLeaderboardAndAutoLeaderboardLinking(DynamicTrackedRegatta trackedRegatta) {
-        regattasObservedForDefaultLeaderboard.remove(trackedRegatta);
+    private void stopObservingRegattaWithRaceAdditionListener(DynamicTrackedRegatta trackedRegatta) {
+        regattasObservedWithRaceAdditionListener.remove(trackedRegatta);
     }
 
     /**
@@ -2089,11 +2088,19 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      * service, the service adds the tracked race to the default leaderboard and links it to the leaderboard columns
      * that were previously connected to it. Additionally, a {@link RaceChangeListener} is added to the
      * {@link TrackedRace} which is responsible for triggering the replication of all relevant changes to the tracked
-     * race. When a tracked race is removed, the {@link TrackedRaceReplicatorAndNotifier} that was added as listener to that
-     * tracked race is removed again.
+     * race. When a tracked race is removed, the {@link TrackedRaceReplicatorAndNotifier} that was added as listener to
+     * that tracked race is removed again.
+     * <p>
      * 
      * A {@link PolarFixCacheUpdater} is added to every race so that polar fixes are aggregated when new GPS fixes
      * arrive.
+     * <p>
+     * 
+     * Furthermore, the {@link RacingEventServiceImpl#numberOfTrackedRacesStillLoading} counter is adjusted based
+     * on the {@link TrackedRace#getStatus() race status}. If a tracked race is removed and it hasn't been fully loaded
+     * yet, the counter is decremented. If a new race is added, the counter is incremented and a function will be
+     * {@link TrackedRace#runWhenDoneLoading(Runnable) executed when the race is fully loaded} which will decrement
+     * it again.
      * 
      * @author Axel Uhl (d043530)
      * 
@@ -2120,6 +2127,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             if (polarFixCacheUpdater != null) {
                 trackedRace.removeListener(polarFixCacheUpdater);
             }
+            trackedRace.runSynchronizedOnStatus(()->{
+                if (!trackedRace.hasFinishedLoading()) {
+                    numberOfTrackedRacesStillLoading.decrementAndGet();
+                }
+            });
         }
 
         @Override
@@ -2143,6 +2155,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 trackedRace.setWindEstimation(
                         windEstimationFactoryService.createIncrementalWindEstimationTrack(trackedRace));
             }
+            numberOfTrackedRacesStillLoading.incrementAndGet();
+            trackedRace.runWhenDoneLoading(()->numberOfTrackedRacesStillLoading.decrementAndGet());
         }
     }
     
@@ -2958,7 +2972,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 result = new DynamicTrackedRegattaImpl(regatta);
                 replicate(new TrackRegatta(regatta.getRegattaIdentifier()));
                 regattaTrackingCache.put(regatta, result);
-                ensureRegattaIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(result);
+                ensureRegattaHasRaceAdditionListener(result);
                 trackedRegattaListener.regattaAdded(result);
             }
             return result;
@@ -2982,7 +2996,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         } finally {
             LockUtil.unlockAfterWrite(regattaTrackingCacheLock);
         }
-        stopObservingRegattaForRedaultLeaderboardAndAutoLeaderboardLinking(trackedRegatta);
+        stopObservingRegattaWithRaceAdditionListener(trackedRegatta);
         trackedRegattaListener.regattaRemoved(trackedRegatta);
     }
 
@@ -3297,7 +3311,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
 
         logger.info("Serializing regattas observed...");
-        oos.writeObject(regattasObservedForDefaultLeaderboard);
+        oos.writeObject(regattasObservedWithRaceAdditionListener);
         logger.info("Serializing regatta tracking cache...");
         oos.writeObject(regattaTrackingCache);
         logger.info("Serializing leaderboard groups...");
@@ -3383,7 +3397,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         // old leaderboards takes place which then don't match the new ones
         logger.info("Reading all dynamic tracked regattas...");
         for (DynamicTrackedRegatta trackedRegattaToObserve : (Set<DynamicTrackedRegatta>) ois.readObject()) {
-            ensureRegattaIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(trackedRegattaToObserve);
+            ensureRegattaHasRaceAdditionListener(trackedRegattaToObserve);
         }
 
         logger.info("Reading all of the regatta tracking cache...");
@@ -3512,7 +3526,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         } finally {
             LockUtil.unlockAfterWrite(regattasByNameLock);
         }
-        regattasObservedForDefaultLeaderboard.clear();
+        regattasObservedWithRaceAdditionListener.clear();
 
         if (raceTrackersByRegatta != null && !raceTrackersByRegatta.isEmpty()) {
             for (DynamicTrackedRegatta regatta : regattaTrackingCache.values()) {
@@ -5130,29 +5144,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
     
     @Override
-    public int getNumberOfTrackedRacesLoaded() {
-        if (numberOfTrackedRacesLoaded < numberOfTrackedRacesRestored.get()) {
-            numberOfTrackedRacesLoaded = 0;
-            for (Regatta regatta : getAllRegattas()) {
-                final TrackedRegatta trackedRegatta = getTrackedRegatta(regatta);
-                if (trackedRegatta != null) {
-                    trackedRegatta.lockTrackedRacesForRead();
-                    try {
-                        for (TrackedRace trackedRace : trackedRegatta.getTrackedRaces()) {
-                            final TrackedRaceStatusEnum status = trackedRace.getStatus().getStatus();
-                            if (status == TrackedRaceStatusEnum.ERROR || status == TrackedRaceStatusEnum.LOADING
-                                    || status == TrackedRaceStatusEnum.PREPARED) {
-                                break;
-                            } else {
-                                numberOfTrackedRacesLoaded = numberOfTrackedRacesLoaded + 1;
-                            }
-                        }
-                    } finally {
-                        trackedRegatta.unlockTrackedRacesAfterRead();
-                    }
-                }
-            }
-        }
-        return numberOfTrackedRacesLoaded;
+    public int getNumberOfTrackedRacesStillLoading() {
+        return numberOfTrackedRacesStillLoading.get();
     }
 }

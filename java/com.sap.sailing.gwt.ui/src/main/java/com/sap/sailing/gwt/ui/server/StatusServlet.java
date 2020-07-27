@@ -15,11 +15,11 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.server.interfaces.RacingEventService;
-import com.sap.sse.common.Util;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.replication.ReplicationStatus;
 
 public class StatusServlet extends HttpServlet {
+    private static final String WAIT_UNTIL_RACES_LOADED = "waitUntilRacesLoaded";
     private static final long serialVersionUID = -8896724182560416457L;
 
     protected <T> T getService(Class<T> clazz) {
@@ -44,27 +44,23 @@ public class StatusServlet extends HttpServlet {
         final ServletContext servletContext = req.getServletContext();
         final JSONObject result = new JSONObject();
         final RacingEventService service = getService(servletContext);
-        final String trackedRacesLoaded = req.getParameter("trackedRacesLoaded") == null ? null
-                : req.getParameter("trackedRacesLoaded");
-        boolean getNumberOfTrackedRacesLoaded = false;
-        if (Util.hasLength(trackedRacesLoaded) && trackedRacesLoaded.equals("true")) {
-            getNumberOfTrackedRacesLoaded = true;
-        }
-        result.put("numberofracestorestore", service.getNumberOfTrackedRacesToRestore());
-        result.put("numberofracesrestored", service.getNumberOfTrackedRacesRestored());
-        if (getNumberOfTrackedRacesLoaded) {
-            result.put("numberofracesloaded", service.getNumberOfTrackedRacesLoaded());
-        }
+        final String waitUntilRacesLoadedString = req.getParameter(WAIT_UNTIL_RACES_LOADED);
+        boolean waitUntilRacesLoaded = Boolean.valueOf(waitUntilRacesLoadedString);
+        final long numberOfTrackedRacesToRestore = service.getNumberOfTrackedRacesToRestore();
+        result.put("numberofracestorestore", numberOfTrackedRacesToRestore);
+        final int numberOfTrackedRacesRestored = service.getNumberOfTrackedRacesRestored();
+        result.put("numberofracesrestored", numberOfTrackedRacesRestored);
+        final int numberOfTrackedRacesStillLoading = service.getNumberOfTrackedRacesStillLoading();
+        result.put("numberofracesstillloading", numberOfTrackedRacesStillLoading);
         final ReplicationService replicationService = getReplicationService(servletContext);
         final ReplicationStatus replicationStatus = replicationService == null ? null : replicationService.getStatus();
         if (replicationStatus != null) {
             result.put("replication", replicationStatus.toJSONObject());
         }
-        boolean available = service.getNumberOfTrackedRacesRestored() >= service.getNumberOfTrackedRacesToRestore()
+        boolean available = numberOfTrackedRacesRestored >= numberOfTrackedRacesToRestore
                 && (replicationStatus == null || replicationStatus.isAvailable());
-        if (getNumberOfTrackedRacesLoaded) {
-            available = available
-                    && service.getNumberOfTrackedRacesLoaded() >= service.getNumberOfTrackedRacesToRestore();
+        if (waitUntilRacesLoaded) {
+            available = available && numberOfTrackedRacesStillLoading == 0;
         }
         result.put("available", available);
         resp.setStatus(available ? HttpServletResponse.SC_OK : HttpServletResponse.SC_SERVICE_UNAVAILABLE);
