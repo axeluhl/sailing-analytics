@@ -167,6 +167,7 @@ public class Header extends Composite implements HeaderConstants {
             Scheduler.get().scheduleDeferred(() -> {
                 element.removeChild(dummyText);
                 element.getStyle().setDisplay(display);
+                Scheduler.get().scheduleDeferred(this::refreshVisibility);
             });
         }
 
