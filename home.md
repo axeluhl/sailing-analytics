@@ -162,8 +162,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 
 ## Internal services (not related to wiki but useful)
 
-* [Bugzilla Issue Tracking System](http://bugzilla.sapsailing.com/bugzilla/)
+* [Bugzilla Issue Tracking System](https://bugzilla.sapsailing.com/bugzilla/)
 * [GIT Repository (SAP)](ssh://git.wdf.sap.corp:29418/SAPSail/sapsailingcapture.git)
-* [Maven Repository Browser](http://maven.sapsailing.com/maven/) (see [[how to setup repository for Android builds|wiki/info/mobile/racecommittee-app-environment]])
-* [Main Sailing Website](http://www.sapsailing.com)
-* [Visitor Statistics](http://analysis.sapsailing.com/)
+* [Maven Repository Browser](https://maven.sapsailing.com/maven/) (see [[how to setup repository for Android builds|wiki/info/mobile/racecommittee-app-environment]])
+* [Main Sailing Website](https://www.sapsailing.com)
