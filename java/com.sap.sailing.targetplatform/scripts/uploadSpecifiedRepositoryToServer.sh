@@ -8,18 +8,14 @@
 # Examples:
 #   ./uploadSpecifedRepositoryToServer.sh sailing com.sap.sailing.targetplatform.base
 #   ./uploadSpecifedRepositoryToServer.sh aws-sdk com.amazon.aws.aws-java-api.updatesite
-
 set -u
-
 USER="trac"
 SERVER="sapsailing.com"
 REPO_HOME="/home/trac/p2-repositories"
 PORT=22
 REPO_NAME=$1
 LOCAL_REPO_PROJECT=$2
-
 DATE=`date +%s`
-
 options='u:h:p:'
 while getopts $options option
 do
@@ -31,7 +27,7 @@ do
             exit 4;;
     esac
 done
-
+WORKSPACE=`realpath \`dirname $0\`/../../..`
 echo "Performing backup of old repository to $REPO_HOME/${REPO_NAME}.backup.$DATE..."
 ssh -p $PORT $USER@$SERVER "cp -r $REPO_HOME/${REPO_NAME} $REPO_HOME/${REPO_NAME}.backup.$DATE"
 
@@ -39,7 +35,7 @@ echo "Removing old p2-repository"
 ssh -p $PORT $USER@$SERVER "rm -rf $REPO_HOME/${REPO_NAME}"
 
 echo "Uploading local repository to $REPO_HOME/${REPO_NAME}"
-scp -P $PORT -r ../../${LOCAL_REPO_PROJECT}/target/repository $USER@$SERVER:$REPO_HOME/${REPO_NAME}
+scp -P $PORT -r "${WORKSPACE}/java/${LOCAL_REPO_PROJECT}/target/repository" $USER@$SERVER:$REPO_HOME/${REPO_NAME}
 
 echo "Making readable for everyone..."
 ssh -p $PORT $USER@$SERVER "chmod -R 775 $REPO_HOME/${REPO_NAME}"
