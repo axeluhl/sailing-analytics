@@ -25,23 +25,22 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.NotFoundException;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.server.interfaces.RacingEventService;
-import com.sap.sse.debranding.ClientConfigurationServlet;
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.shared.media.ImageDescriptor;
 
 public class SharingServlet extends HttpServlet {
+    private static final String DEFAULT_TEASER_URL = "/bin/com/sap/sailing/gwt/home/shared/default_stage_event_teaser.jpg";
+    private static final String SHARED_PROXY_RESOURCE = "/com/sap/sailing/gwt/ui/opengraph/SharedProxy.html";
     private static final long serialVersionUID = 6990478954607011261L;
-    private static final Logger logger = Logger.getLogger(ClientConfigurationServlet.class.getName());
+    private static final Logger logger = Logger.getLogger(SharingServlet.class.getName());
 
-    private static final String GWT_HOME_HTML = "/gwt/Home.html";
-    private static final String SHARED_PROXY_HTML = "/SharedProxy.html";
+    private static final String GWT_PREFIX = "/gwt";
+    private static final String HOME_HTML = "/Home.html";
     private static final String EVENTS = "events";
     private static final Object SERIES = "series";
     private static final String PATH_SEPARATOR = "/";
     private static final String DEFAULT_TITLE = "SAP Sailing";
     private static final String DEFAULT_DESCRIPTION = "Help sailors analyze performance and optimize strategy &#8226; Bring fans closer to the action " +
             "&#8226; Provide the media with information and insights to deliver a greater informed commentary";
-    private static final String DEFAULT_IMAGE_URL = "https://www.sapsailing.com/gwt/com.sap.sailing.gwt.home.Home/5A1CE55C422F0249466090CC8E55CC96.cache.jpg";
     
     private final ConcurrentHashMap<String, byte[]> cache = new ConcurrentHashMap<>();
 
@@ -75,13 +74,12 @@ public class SharingServlet extends HttpServlet {
             if ((cachedPage = cache.get(pathInfo)) != null) {
                 resp.getOutputStream().write(cachedPage);
             } else {
-                ServletContext servletContext = this.getServletContext();
-                try (InputStream in = servletContext.getResourceAsStream(SHARED_PROXY_HTML)) {
+                ClassLoader classLoader = getClass().getClassLoader();
+                try (InputStream in = classLoader.getResourceAsStream(SHARED_PROXY_RESOURCE)) {
                     String content = readInputStreamToString(in);
                     final ServletContext reqServletContext = req.getServletContext();
-                    String resourceAdress = "http://" + req.getLocalAddr() + ":" + req.getLocalPort() + GWT_HOME_HTML;
                     final Map<String, String> createReplacementMap = createReplacementMap(pathInfo, reqServletContext,
-                            resourceAdress);
+                            req, classLoader);
                     for (Map.Entry<String, String> item : createReplacementMap.entrySet()) {
                         content = content.replace("${" + item.getKey() + "}", item.getValue());
                     }
@@ -114,16 +112,18 @@ public class SharingServlet extends HttpServlet {
     }
 
     private Map<String, String> createReplacementMap(String pathInfo, ServletContext servletContext,
-            String resourceAdress) throws Exception {
+            HttpServletRequest req, ClassLoader classLoader) throws Exception {
         final SecurityService securityService = getSecurityService(servletContext);
         final RacingEventService eventService = getEventService(servletContext);
         final Map<String, String> map = new HashMap<>();
         final String[] split = pathInfo.replaceFirst(PATH_SEPARATOR, "").split(PATH_SEPARATOR);
         int splitLength = split.length;
-        String placeUrl = resourceAdress;
+        String fullLocalAddress = "http://" + req.getLocalAddr() + ":" + req.getLocalPort() + GWT_PREFIX;
+        String redirectAdrress = fullLocalAddress + HOME_HTML;
+        String placeUrl = redirectAdrress;
         String title = DEFAULT_TITLE;
         String description = DEFAULT_DESCRIPTION;
-        String imageUrl = DEFAULT_IMAGE_URL;
+        String imageUrl = fullLocalAddress + DEFAULT_TEASER_URL;
         // The first path variable in the pattern is the type of resource. Either series or event
         if (splitLength > 1 && EVENTS.equals(split[0])) {
             if(splitLength == 4 && split[2] != null) {
@@ -141,10 +141,7 @@ public class SharingServlet extends HttpServlet {
                 if (eventDescription != null && !eventDescription.equals("")) {
                     description = eventDescription;
                 }
-                for (ImageDescriptor imageDescription : event.getImages()) {
-                    imageUrl = imageDescription.getURL().toString();
-                    break;
-                }
+                //TODO: Add event specific images, if they are approved to be shared.
                 // The item at third position will always be regattas if present.
                 // TODO: change to UUID, when regattaIdentifiers are changed
                 if(splitLength == 4 && split[2] != null) {
