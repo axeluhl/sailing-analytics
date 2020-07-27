@@ -1301,4 +1301,17 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public TrackingConnectorInfo getTrackingConnectorInfo() {
         return null;
     }
+
+    @Override
+    public void runWhenDoneLoading(Runnable runnable) {
+    }
+
+    @Override
+    public void runSynchronizedOnStatus(Runnable runnable) {
+    }
+
+    @Override
+    public boolean hasFinishedLoading() {
+        return false;
+    }
 }
