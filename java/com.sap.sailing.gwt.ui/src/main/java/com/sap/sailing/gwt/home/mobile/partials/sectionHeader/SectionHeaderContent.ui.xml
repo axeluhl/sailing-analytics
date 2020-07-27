@@ -3,7 +3,7 @@
 	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
 	<ui:with field="local_res" type="com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderResources" />
-    <ui:with field="shr" type="com.sap.sailing.gwt.home.shared.resources.SharedHomeResources" />
+    <ui:with field="shr" type="com.sap.sailing.gwt.home.shared.SharedHomeResources" />
     <g:HTMLPanel>
         <a style="display:block;" ui:field="headerMainUi">
             <div class="{local_res.css.sectionheader_item}" ui:field="headerLeftUi">
