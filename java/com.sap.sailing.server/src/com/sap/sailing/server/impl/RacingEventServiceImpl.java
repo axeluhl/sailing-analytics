@@ -555,7 +555,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     
     private final AtomicInteger numberOfTrackedRacesRestored;
     
-    private int numberOfTrackedRacesLoaded;
+    private final AtomicInteger numberOfTrackedRacesLoaded;
     
     private final ServiceTracker<ResultUrlRegistry, ResultUrlRegistry> resultUrlRegistryServiceTracker;
 
@@ -806,6 +806,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         this.currentlyFillingFromInitialLoad = false;
         this.securityServiceTracker = securityServiceTracker;
         this.numberOfTrackedRacesRestored = new AtomicInteger();
+        this.numberOfTrackedRacesLoaded = new AtomicInteger(-1);
         this.resultUrlRegistryServiceTracker = resultUrlRegistryServiceTracker;
         this.scoreCorrectionProviderServiceTracker = scoreCorrectionProviderServiceTracker;
         this.scoreCorrectionListenersByLeaderboard = new ConcurrentHashMap<>();
