@@ -555,6 +555,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     
     private final AtomicInteger numberOfTrackedRacesRestored;
     
+    private int numberOfTrackedRacesLoaded;
+    
     private final ServiceTracker<ResultUrlRegistry, ResultUrlRegistry> resultUrlRegistryServiceTracker;
 
     private final ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> scoreCorrectionProviderServiceTracker;
@@ -5125,31 +5127,31 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
 
     }
-
+    
     @Override
-    public boolean allTrackedRacesLoaded() {
-        boolean result = true;
-        for (Regatta regatta : getAllRegattas()) {
-            final TrackedRegatta trackedRegatta = getTrackedRegatta(regatta);
-            if (trackedRegatta != null) {
-                trackedRegatta.lockTrackedRacesForRead();
-                try {
-                    for (TrackedRace trackedRace : trackedRegatta.getTrackedRaces()) {
-                        final TrackedRaceStatusEnum status = trackedRace.getStatus().getStatus();
-                        if (status == TrackedRaceStatusEnum.ERROR || status == TrackedRaceStatusEnum.LOADING
-                                || status == TrackedRaceStatusEnum.PREPARED) {
-                            result = false;
-                            break;
+    public int getNumberOfTrackedRacesLoaded() {
+        if (numberOfTrackedRacesLoaded < numberOfTrackedRacesRestored.get()) {
+            numberOfTrackedRacesLoaded = 0;
+            for (Regatta regatta : getAllRegattas()) {
+                final TrackedRegatta trackedRegatta = getTrackedRegatta(regatta);
+                if (trackedRegatta != null) {
+                    trackedRegatta.lockTrackedRacesForRead();
+                    try {
+                        for (TrackedRace trackedRace : trackedRegatta.getTrackedRaces()) {
+                            final TrackedRaceStatusEnum status = trackedRace.getStatus().getStatus();
+                            if (status == TrackedRaceStatusEnum.ERROR || status == TrackedRaceStatusEnum.LOADING
+                                    || status == TrackedRaceStatusEnum.PREPARED) {
+                                break;
+                            } else {
+                                numberOfTrackedRacesLoaded = numberOfTrackedRacesLoaded + 1;
+                            }
                         }
+                    } finally {
+                        trackedRegatta.unlockTrackedRacesAfterRead();
                     }
-                } finally {
-                    trackedRegatta.unlockTrackedRacesAfterRead();
-                }
-                if (result = false) {
-                    break;
                 }
             }
         }
-        return result;
+        return numberOfTrackedRacesLoaded;
     }
 }

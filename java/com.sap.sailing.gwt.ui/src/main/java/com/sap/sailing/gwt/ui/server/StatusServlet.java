@@ -44,19 +44,27 @@ public class StatusServlet extends HttpServlet {
         final ServletContext servletContext = req.getServletContext();
         final JSONObject result = new JSONObject();
         final RacingEventService service = getService(servletContext);
+        final String trackedRacesLoaded = req.getParameter("trackedRacesLoaded") == null ? null
+                : req.getParameter("trackedRacesLoaded");
+        boolean getNumberOfTrackedRacesLoaded = false;
+        if (Util.hasLength(trackedRacesLoaded) && trackedRacesLoaded.equals("true")) {
+            getNumberOfTrackedRacesLoaded = true;
+        }
         result.put("numberofracestorestore", service.getNumberOfTrackedRacesToRestore());
         result.put("numberofracesrestored", service.getNumberOfTrackedRacesRestored());
+        if (getNumberOfTrackedRacesLoaded) {
+            result.put("numberofracesloaded", service.getNumberOfTrackedRacesLoaded());
+        }
         final ReplicationService replicationService = getReplicationService(servletContext);
         final ReplicationStatus replicationStatus = replicationService == null ? null : replicationService.getStatus();
         if (replicationStatus != null) {
             result.put("replication", replicationStatus.toJSONObject());
         }
-        boolean available = service.getNumberOfTrackedRacesRestored() >= service.getNumberOfTrackedRacesToRestore() &&
-                (replicationStatus == null || replicationStatus.isAvailable());
-        final String trackedRacesLoaded = req.getParameter("trackedRacesLoaded") == null ? null
-                : req.getParameter("trackedRacesLoaded");
-        if (Util.hasLength(trackedRacesLoaded) && trackedRacesLoaded.equals("true")) {
-            available = available && service.allTrackedRacesLoaded();
+        boolean available = service.getNumberOfTrackedRacesRestored() >= service.getNumberOfTrackedRacesToRestore()
+                && (replicationStatus == null || replicationStatus.isAvailable());
+        if (getNumberOfTrackedRacesLoaded) {
+            available = available
+                    && service.getNumberOfTrackedRacesLoaded() >= service.getNumberOfTrackedRacesToRestore();
         }
         result.put("available", available);
         resp.setStatus(available ? HttpServletResponse.SC_OK : HttpServletResponse.SC_SERVICE_UNAVAILABLE);

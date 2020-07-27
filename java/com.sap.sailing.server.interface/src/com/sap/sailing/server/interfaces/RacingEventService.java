@@ -968,8 +968,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     void removeExpeditionDeviceConfiguration(UUID deviceUuid);
     
     /**
-     * Returns true if no tracked race is in the state of {@link TrackedRaceStatusEnum} <code>PREPARED</code>,
-     * <code>LOADING</code> or <code>ERROR</code>
+     * Returns the number of tracked races that are <code>NOT</code> in {@link TrackedRaceStatusEnum}
+     * <code>ERROR</code>, <code>PREPARED</code> or <code>LOADING</code> state.
      */
-    boolean allTrackedRacesLoaded();
+    int getNumberOfTrackedRacesLoaded();
 }
