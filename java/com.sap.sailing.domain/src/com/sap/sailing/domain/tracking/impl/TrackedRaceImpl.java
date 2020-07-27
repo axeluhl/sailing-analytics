@@ -3003,19 +3003,25 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     public boolean hasFinishedLoading() {
         synchronized (getStatusNotifier()) {
             final TrackedRaceStatusEnum status = getStatus().getStatus();
-            return (status != TrackedRaceStatusEnum.PREPARED && status != TrackedRaceStatusEnum.LOADING && status == TrackedRaceStatusEnum.ERROR);
+            return hasFinishedLoading(status);
         }
     }
     
+    private boolean hasFinishedLoading(TrackedRaceStatusEnum status) {
+        return (status != TrackedRaceStatusEnum.PREPARED && status != TrackedRaceStatusEnum.LOADING && status != TrackedRaceStatusEnum.ERROR);
+    }
+    
     @Override
-    public void runWhenDoneLoading(Runnable runnable) {
+    public void runWhenDoneLoading(final Runnable runnable) {
         synchronized (getStatusNotifier()) {
             if (!hasFinishedLoading()) {
                 addListener(new AbstractRaceChangeListener() {
                     @Override
                     public void statusChanged(TrackedRaceStatus newStatus, TrackedRaceStatus oldStatus) {
-                        removeListener(this);
-                        runnable.run();
+                        if (hasFinishedLoading(newStatus.getStatus())) {
+                            removeListener(this);
+                            runnable.run();
+                        }
                     }
                 });
             } else {
