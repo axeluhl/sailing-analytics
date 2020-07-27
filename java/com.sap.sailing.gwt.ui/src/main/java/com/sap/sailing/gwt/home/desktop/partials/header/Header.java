@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.ImageElement;
@@ -115,7 +116,7 @@ public class Header extends Composite implements HeaderConstants {
 
         @Override
         public void onResize(ResizeEvent event) {
-            refreshVisibility();
+            refreshVisibilityDeferred();
         }
 
         private boolean isVisibilityInMenuBar(Anchor anchor) {
@@ -124,7 +125,7 @@ public class Header extends Composite implements HeaderConstants {
         }
         
 
-        public void refreshVisibility() {
+        private void refreshVisibility() {
             LOG.info("refesh visibility");
             int noOfVisibleItems = 0;
             for (Map.Entry<Anchor, Anchor> item : menuToDropDownItemMap.entrySet()) {
@@ -141,7 +142,7 @@ public class Header extends Composite implements HeaderConstants {
             }
         }
 
-        public void refreshVisibility(int delayMillis) {
+        private void refreshVisibility(int delayMillis) {
             new Timer() {
                 @Override
                 public void run() {
@@ -151,6 +152,7 @@ public class Header extends Composite implements HeaderConstants {
         }
 
         public void refreshVisibilityDeferred() {
+            LOG.info("refesh visibility deferred");
             Anchor anchor = (Anchor)menuToDropDownItemMap.values().toArray()[0];
             Element element = anchor.getElement();
             redraw(element);
@@ -169,6 +171,8 @@ public class Header extends Composite implements HeaderConstants {
                 element.getStyle().setDisplay(display);
                 Scheduler.get().scheduleDeferred(this::refreshVisibility);
             });
+            Scheduler.get().scheduleEntry((ScheduledCommand)this::refreshVisibility);
+            Scheduler.get().scheduleFinally((ScheduledCommand)this::refreshVisibility);
         }
 
     }
