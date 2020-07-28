@@ -287,6 +287,7 @@
 <plugin id="org.apache.xmlbeans.source"/>
 <plugin id="org.dom4j.source"/>
 <plugin id="com.amazon.aws.aws-java-api"/>
+<plugin id="com.amazon.aws.aws-java-api.source"/>
 </includeBundles>
 <targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 </target>
