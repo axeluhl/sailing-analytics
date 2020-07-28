@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.authz.UnauthorizedException;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -183,15 +182,6 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
      */
     void fillRaceLogsFromPairingListTemplate(final String leaderboardName, final int flightMultiplier,
             final List<String> selectedFlightNames,PairingListDTO pairingListDTO, AsyncCallback<Void> callback);
-
-    /**
-     * Checks whether the user may cut the race identified by {@code radeIdentifier} into multiple races. For this, it
-     * has to be found and it has to be a "smartphone-tracked" race with a valid start-of-tracking time. If not,
-     * {@code false} will be returned. If the user it not <em>permitted</em> to slice the race, e.g., because no
-     * permission has been granted to modify the leaderboard or regatta, an {@link AuthorizationException} will be
-     * thrown.
-     */
-    void canSliceRace(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<Boolean> callback);
 
     void sliceRace(RegattaAndRaceIdentifier raceIdentifier, String newRaceColumnName, TimePoint sliceFrom, TimePoint sliceTo,
             AsyncCallback<RegattaAndRaceIdentifier> callback);

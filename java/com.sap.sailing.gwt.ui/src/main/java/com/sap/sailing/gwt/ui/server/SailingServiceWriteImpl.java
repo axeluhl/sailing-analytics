@@ -2750,28 +2750,6 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     }
 
     @Override
-    public boolean canSliceRace(RegattaAndRaceIdentifier raceIdentifier) {
-        final Regatta regatta = getService().getRegattaByName(raceIdentifier.getRegattaName());
-        final Leaderboard regattaLeaderboard = getService().getLeaderboardByName(raceIdentifier.getRegattaName());
-        final DynamicTrackedRace trackedRace = getService().getTrackedRace(raceIdentifier);
-        getSecurityService().checkCurrentUserUpdatePermission(raceIdentifier);
-        getSecurityService().checkCurrentUserUpdatePermission(regattaLeaderboard);
-        getSecurityService().checkCurrentUserUpdatePermission(regatta);
-
-        final boolean result;
-        if (regatta == null || !(regattaLeaderboard instanceof RegattaLeaderboard) || trackedRace == null
-                || trackedRace.getStartOfTracking() == null || !isSmartphoneTrackingEnabled(trackedRace)) {
-            result = false;
-        } else {
-            final Pair<RaceColumn, Fleet> raceColumnAndFleetOfRaceToSlice = regattaLeaderboard
-                    .getRaceColumnAndFleet(trackedRace);
-            result = (raceColumnAndFleetOfRaceToSlice != null); // is the TrackedRace associated to the given
-                                                                // RegattaLeaderboard?
-        }
-        return result;
-    }
-
-    @Override
     public RegattaAndRaceIdentifier sliceRace(RegattaAndRaceIdentifier raceIdentifier, String newRaceColumnName,
             TimePoint sliceFrom, TimePoint sliceTo) throws ServiceException {
         SecurityUtils.getSubject().checkPermission(

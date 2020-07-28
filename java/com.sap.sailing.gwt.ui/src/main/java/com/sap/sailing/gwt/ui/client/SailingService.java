@@ -48,6 +48,7 @@ import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogExcep
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.impl.PreciseCompactGPSFixMovingImpl.PreciseCompactPosition;
 import com.sap.sailing.domain.common.windfinder.SpotDTO;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
 import com.sap.sailing.gwt.ui.client.shared.charts.MarkPositionService.MarkTrackDTO;
 import com.sap.sailing.gwt.ui.shared.AccountWithSecurityDTO;
@@ -587,4 +588,10 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
     List<CourseTemplateDTO> getCourseTemplates();
 
     List<MarkRoleDTO> getMarkRoles();
+
+    /**
+     * Returns {@code true} if the given race can be sliced. Only Smarthphone tracked races can be sliced. In addition
+     * the race must be part of a {@link RegattaLeaderboard}.
+     */
+    boolean canSliceRace(RegattaAndRaceIdentifier raceIdentifier) throws UnauthorizedException;
 }

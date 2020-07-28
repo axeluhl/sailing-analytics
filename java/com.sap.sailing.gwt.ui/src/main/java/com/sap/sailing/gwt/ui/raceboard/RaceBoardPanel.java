@@ -420,7 +420,7 @@ public class RaceBoardPanel
                     errorReporter, true, true, leaderboardGroupName, leaderboardGroupId, leaderboardName);
             competitorChart.setVisible(false);
             competitorChart.updateSettings(multiCompetitorRaceChartSettings);
-            new SliceRaceHandler(sailingServiceWrite, userService, errorReporter, competitorChart, selectedRaceIdentifier,
+            new SliceRaceHandler(sailingServiceWrite, sailingService, userService, errorReporter, competitorChart, selectedRaceIdentifier,
                     leaderboardGroupName, leaderboardGroupId, leaderboardName, event, leaderboard, raceDTO, stringMessages);
             componentsForSideBySideViewer.add(competitorChart);
             windChart = new WindChart(this, getComponentContext(), windChartLifecycle, sailingService,

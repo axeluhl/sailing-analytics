@@ -602,12 +602,6 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
     SuccessInfo updateTag(String leaderboardName, String raceColumnName, String fleetName, TagDTO tagToUpdate,
             String tag, String comment, String imageURL, String resizedImageURL, boolean visibleForPublic)
             throws UnauthorizedException;
-    /**
-     * Returns {@code true} if the given race can be sliced. Only Smarthphone tracked races can be sliced. In addition
-     * the race must be part of a {@link RegattaLeaderboard}.
-     */
-    boolean canSliceRace(RegattaAndRaceIdentifier raceIdentifier) throws UnauthorizedException;
-    
 
     /**
      * @param raceLogFrom
