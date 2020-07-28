@@ -32,3 +32,8 @@ To spin up the docker container (above) once a week to renew the SSL cert a cron
 # Apache
 
 Apache config is kept in `/etc/httpd/conf.d/000-main.conf` and `/etc/httpd/conf.d/000-macros.conf`.
+
+
+# TODO
+* Move cronjob in own file in `/home/certbot` symlinked to git repo (`configuration` folder).
+* Move sail-insight.com contents into git repo and provide instructions on how to build dist files. symlink into  `/home/trac/sail-insight-website`. tbd.
