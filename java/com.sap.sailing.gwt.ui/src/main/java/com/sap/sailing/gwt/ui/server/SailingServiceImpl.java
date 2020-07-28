@@ -425,6 +425,7 @@ import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.interfaces.SimulationService;
 import com.sap.sailing.server.operationaltransformation.AddRemoteSailingServerReference;
 import com.sap.sailing.server.operationaltransformation.RemoveRemoteSailingServerReference;
+import com.sap.sailing.server.operationaltransformation.UpdateSailingServerReference;
 import com.sap.sailing.server.operationaltransformation.UpdateServerConfiguration;
 import com.sap.sailing.server.security.SailingViewerRole;
 import com.sap.sailing.shared.server.SharedSailingData;
@@ -3687,19 +3688,18 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
      * to <code>http://sapsailing.com</code>.
      * @throws MalformedURLException 
      */
-  //READ
+    //READ
     private URL getRequestBaseURL() throws MalformedURLException {
         final URL url = new URL(getThreadLocalRequest().getRequestURL().toString());
         final URL baseURL = getBaseURL(url);
         return baseURL;
     }
 
-  //READ
+    //READ
     private URL getBaseURL(URL url) throws MalformedURLException {
         return new URL(url.getProtocol(), url.getHost(), url.getPort(), /* file */ "");
     }
 
-  //READ
     private RemoteSailingServerReferenceDTO createRemoteSailingServerReferenceDTO(
             final RemoteSailingServerReference serverRef,
             final com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception> eventsOrException) {
@@ -3710,17 +3710,18 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             eventDTOs = null;
             final Exception exception = eventsOrException.getB();
             sailingServerDTO = new RemoteSailingServerReferenceDTO(serverRef.getName(),
-                    serverRef.getURL().toExternalForm(), exception==null?null:exception.getMessage());
+                    serverRef.getURL().toExternalForm(), serverRef.isInclude(),
+                    exception == null ? null : exception.getMessage());
         } else {
             eventDTOs = convertToEventDTOs(events);
-            sailingServerDTO = new RemoteSailingServerReferenceDTO(
-                    serverRef.getName(), serverRef
-                            .getURL().toExternalForm(), eventDTOs);
+            final List<UUID> selectedEventIds = new ArrayList<>(serverRef.getSelectedEventIds());
+            sailingServerDTO = new RemoteSailingServerReferenceDTO(serverRef.getName(),
+                    serverRef.getURL().toExternalForm(), serverRef.isInclude(), selectedEventIds, eventDTOs);
         }
         return sailingServerDTO;
     }
     
-  //READ
+    //READ
     private Iterable<EventBaseDTO> convertToEventDTOs(Iterable<EventBase> events) {
         List<EventBaseDTO> result = new ArrayList<>();
         for (EventBase event : events) {
@@ -4205,10 +4206,37 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             expandedURL = "https://" + sailingServer.getUrl();
         }
         URL serverURL = new URL(expandedURL);
-        RemoteSailingServerReference serverRef = getService().apply(new AddRemoteSailingServerReference(sailingServer.getName(), serverURL));
-        com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception> eventsOrException = getService().updateRemoteServerEventCacheSynchronously(serverRef);
+        RemoteSailingServerReference serverRef = getService().apply(new AddRemoteSailingServerReference(sailingServer.getName(), serverURL, sailingServer.isInclude()));
+        com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception> eventsOrException = getService()
+                .updateRemoteServerEventCacheSynchronously(serverRef, false);
         return createRemoteSailingServerReferenceDTO(serverRef, eventsOrException);
         
+    }
+    
+    @Override
+    // ??
+    public RemoteSailingServerReferenceDTO updateRemoteSailingServerReference(
+            final RemoteSailingServerReferenceDTO sailingServer) throws MalformedURLException {
+        getSecurityService().checkCurrentUserUpdatePermission(getServerInfo());
+        RemoteSailingServerReference serverRef = getService()
+                .apply(new UpdateSailingServerReference(sailingServer.getName(),
+                        sailingServer.isInclude(), sailingServer.getSelectedEvents().stream().map(element -> {
+                            return (UUID) element;
+                        }).collect(Collectors.toSet())));
+        com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception> eventsOrException = getService()
+                .updateRemoteServerEventCacheSynchronously(serverRef, true);
+        return createRemoteSailingServerReferenceDTO(serverRef, eventsOrException);
+    }
+
+    @Override
+    // ??
+    public RemoteSailingServerReferenceDTO getCompleteRemoteServerReference(final String sailingServerName)
+            throws MalformedURLException {
+        getSecurityService().checkCurrentUserUpdatePermission(getServerInfo());
+        RemoteSailingServerReference serverRef = getService().getRemoteServerReferenceByName(sailingServerName);
+        com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception> eventsOrException = getService()
+                .getCompleteRemoteServerReference(serverRef);
+        return createRemoteSailingServerReferenceDTO(serverRef, eventsOrException);
     }
 
     @Override
