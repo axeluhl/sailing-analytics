@@ -1,27 +1,20 @@
+.emptySubscriptionsLabel {
+	color: #777;
+}
 .bottomButton {
 	margin-top: 20px;
-}
-.textRow {
-	margin-top: 5px;
-}
-.trialText {
-    color: #ff0000;
-}
-.errorText{
-	color: #ff0000;
-}
-.blueText {
-	color: #0000ff;
 }
 .planInputContainer {
 	margin-top: 10px;
 }
-.plansLabel {
+.sectionLabel {
   display: block;
   width: 100%;
   font-weight: 600;
-  margin-bottom: 0.4em;
+  margin-bottom: 0.8em;
+  margin-top: 1.5em;
   padding: 0;
+  font-size: 1.5rem;
 }
 .plansInput {
   display: block;

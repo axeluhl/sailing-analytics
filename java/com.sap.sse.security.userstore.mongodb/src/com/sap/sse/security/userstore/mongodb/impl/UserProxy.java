@@ -210,12 +210,17 @@ public class UserProxy implements User {
     }
 
     @Override
-    public void setSubscription(Subscription subscription) {
+    public Subscription[] getSubscriptions() {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public Subscription getSubscription() {
+    public void setSubscriptions(Subscription[] subscriptions) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Subscription getSubscriptionByPlan(String planId) {
         throw new UnsupportedOperationException();
     }
 }

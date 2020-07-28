@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.ui.server.subscription.chargebee;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
@@ -22,6 +24,7 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sailing.gwt.ui.client.subscription.chargebee.SubscriptionService;
 import com.sap.sailing.gwt.ui.shared.subscription.chargebee.HostedPageResultDTO;
 import com.sap.sailing.gwt.ui.shared.subscription.chargebee.SubscriptionDTO;
+import com.sap.sailing.gwt.ui.shared.subscription.chargebee.SubscriptionItem;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.Subscription;
@@ -65,30 +68,17 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
 
         try {
             User user = getCurrentUser();
-
-            if (isUserSubscribedToPlan(user.getSubscription(), planId)) {
+            if (isUserSubscribedToPlan(user, planId)) {
                 response.setError("User has already subscribed to "
                         + SubscriptionPlanHolder.getInstance().getPlan(planId).getName() + " plan");
                 return response;
             }
-
-            Result result;
-
-            if (!hasUserSubscription(user.getSubscription())) {
-                Pair<String, String> usernames = getUserFirstAndLastName(user.getFullName());
-                String locale = user.getLocaleOrDefault().getLanguage();
-
-                // Make a checkout-new request
-                result = HostedPage.checkoutNew().customerId(user.getName()).customerEmail(user.getEmail())
-                        .customerFirstName(usernames.getA()).customerLastName(usernames.getB()).customerLocale(locale)
-                        .subscriptionPlanId(planId).billingAddressFirstName(usernames.getA())
-                        .billingAddressLastName(usernames.getB()).billingAddressCountry("US").request();
-            } else {
-                // Make a checkout-existing request
-                result = HostedPage.checkoutExisting().subscriptionId(user.getSubscription().getSubscriptionId())
-                        .subscriptionPlanId(planId).request();
-            }
-
+            Pair<String, String> usernames = getUserFirstAndLastName(user.getFullName());
+            String locale = user.getLocaleOrDefault().getLanguage();
+            Result result = HostedPage.checkoutNew().customerId(user.getName()).customerEmail(user.getEmail())
+                    .customerFirstName(usernames.getA()).customerLastName(usernames.getB()).customerLocale(locale)
+                    .subscriptionPlanId(planId).billingAddressFirstName(usernames.getA())
+                    .billingAddressLastName(usernames.getB()).billingAddressCountry("US").request();
             response.setHostedPageJSONString(result.hostedPage().toJson());
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error in generating Chargebee hosted page data ", e);
@@ -100,7 +90,7 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
 
     @Override
     public SubscriptionDTO updatePlanSuccess(String hostedPageId) {
-        SubscriptionDTO subscriptionDto = new SubscriptionDTO();
+        SubscriptionDTO subscriptionDto;
 
         try {
             User user = getCurrentUser();
@@ -118,15 +108,10 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
 
             getSecurityService().updateUserSubscription(user.getName(), subscription);
 
-            subscriptionDto.setPlanId(subscription.getPlanId());
-            subscriptionDto.setTrialStart(subscription.getTrialStart());
-            subscriptionDto.setTrialEnd(subscription.getTrialEnd());
-            subscriptionDto.setSubscriptionStatus(subscription.getSubscriptionStatus());
-            subscriptionDto.setPaymentStatus(subscription.getPaymentStatus());
+            subscriptionDto = getSubscription();
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error in saving subscription ", e);
-
-            subscriptionDto.setError(e.getMessage());
+            subscriptionDto = new SubscriptionDTO(null, e.getMessage());
         }
 
         return subscriptionDto;
@@ -134,47 +119,48 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
 
     @Override
     public SubscriptionDTO getSubscription() {
-        SubscriptionDTO subscriptionDto = new SubscriptionDTO();
+        SubscriptionDTO subscriptionDto = null;
         try {
             final User user = getCurrentUser();
-            final Subscription subscription = user.getSubscription();
-            if (subscription == null || subscription.getPlanId() == null || subscription.getPlanId().isEmpty()) {
-                return null;
+            final Subscription[] subscriptions = user.getSubscriptions();
+            if (subscriptions != null && subscriptions.length > 0) {
+                List<SubscriptionItem> itemList = new ArrayList<SubscriptionItem>();
+                for (Subscription subscription : subscriptions) {
+                    if (StringUtils.isNotEmpty(subscription.getSubscriptionId())) {
+                        itemList.add(new SubscriptionItem(subscription.getPlanId(), subscription.getTrialStart(),
+                                subscription.getTrialEnd(), subscription.getSubscriptionStatus(),
+                                subscription.getPaymentStatus()));
+                    }
+                }
+                if (!itemList.isEmpty()) {
+                    subscriptionDto = new SubscriptionDTO(itemList.toArray(new SubscriptionItem[0]), null);
+                }
             }
-            subscriptionDto.setPlanId(subscription.getPlanId());
-            subscriptionDto.setSubscriptionStatus(subscription.getSubscriptionStatus());
-            subscriptionDto.setPaymentStatus(subscription.getPaymentStatus());
-            subscriptionDto.setTrialStart(subscription.getTrialStart());
-            subscriptionDto.setTrialEnd(subscription.getTrialEnd());
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error in getting subscription ", e);
-
-            subscriptionDto.setError(e.getMessage());
+            subscriptionDto = new SubscriptionDTO(null, e.getMessage());
         }
 
         return subscriptionDto;
     }
 
     @Override
-    public boolean cancelSubscription() {
+    public boolean cancelSubscription(String planId) {
         try {
             User user = getCurrentUser();
-            Subscription subscription = user.getSubscription();
-            if (subscription == null) {
+            Subscription subscription = user.getSubscriptionByPlan(planId);
+            if (!isValidSubscription(subscription)) {
                 return true;
             }
 
-            String subscriptionId = subscription.getSubscriptionId();
-            if (subscriptionId != null && !subscriptionId.isEmpty()) {
-                Result result = cancel(subscriptionId).request();
-                if (!result.subscription().status().name().toLowerCase()
-                        .equals(ChargebeeSubscription.SUBSCRIPTION_STATUS_CANCELLED)) {
-                    return false;
-                }
+            Result result = cancel(subscription.getSubscriptionId()).request();
+            if (!result.subscription().status().name().toLowerCase()
+                    .equals(ChargebeeSubscription.SUBSCRIPTION_STATUS_CANCELLED)) {
+                return false;
             }
 
-            Subscription newSubscription = ChargebeeSubscription
-                    .createEmptySubscription(subscription.getLatestEventTime(), System.currentTimeMillis() / 1000);
+            Subscription newSubscription = ChargebeeSubscription.createEmptySubscription(subscription.getPlanId(),
+                    subscription.getLatestEventTime(), System.currentTimeMillis() / 1000);
             getSecurityService().updateUserSubscription(user.getName(), newSubscription);
             return true;
         } catch (Exception e) {
@@ -212,13 +198,13 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
         return StringUtils.isNotEmpty(planId) && SubscriptionPlanHolder.getInstance().getPlan(planId) != null;
     }
 
-    private boolean isUserSubscribedToPlan(Subscription userSubscription, String planId) {
-        return userSubscription != null && userSubscription.getPlanId() != null
-                && userSubscription.getPlanId().equals(planId);
+    private boolean isUserSubscribedToPlan(User user, String planId) {
+        Subscription subscription = user.getSubscriptionByPlan(planId);
+        return isValidSubscription(subscription);
     }
 
-    private boolean hasUserSubscription(Subscription userSubscription) {
-        return userSubscription != null && userSubscription.getPlanId() != null;
+    private boolean isValidSubscription(Subscription subscription) {
+        return subscription != null && StringUtils.isNotEmpty(subscription.getSubscriptionId());
     }
 
     private Pair<String, String> getUserFirstAndLastName(String fullName) {

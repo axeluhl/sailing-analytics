@@ -113,7 +113,9 @@ public interface User extends SecurityUser<RoleDefinition, Role, UserGroup> {
 
     String createRandomSecret();
 
-    void setSubscription(Subscription subscription);
-
-    Subscription getSubscription();
+    Subscription[] getSubscriptions();
+    
+    void setSubscriptions(Subscription[] subscriptions);
+    
+    Subscription getSubscriptionByPlan(String planId);
 }

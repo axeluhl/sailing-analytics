@@ -6,13 +6,8 @@ import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.subject.Subject;
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
-import org.json.simple.parser.ParseException;
+import org.apache.commons.lang.StringUtils;
 
-import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.subscription.SubscriptionWebHookHandler;
 import com.sap.sailing.server.gateway.subscription.SubscriptionWebHookServlet;
 import com.sap.sse.security.shared.Subscription;
@@ -37,38 +32,43 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response) {
         try {
-            
-            final Object requestBody = JSONValue.parseWithException(request.getReader());
-            final JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
-            logger.log(Level.INFO, "Payment service webhook data: " + requestObject.toJSONString());
-            final SubscriptionWebHookEvent event = new SubscriptionWebHookEvent(requestObject);
-            if (!event.isValidEvent()) {
-                throw new IllegalArgumentException("Invalid webhook event");
-            }
+            final SubscriptionWebHookEvent event = (SubscriptionWebHookEvent) request.getAttribute("event");
             final User user = getUser(event.getCustomerId());
-            if (user != null && !isOutdatedEvent(event, user.getSubscription())) {
+            if (user != null && !isOutdatedEvent(event, user)) {
                 processEvent(event, user);
             }
             sendSuccess(response);
-        } catch (ParseException e) {
-            logger.log(Level.SEVERE, "Failed to parse subscription webhook event data", e);
-            sendFail(response);
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Failed to proccess subscription webhook event", e);
             sendFail(response);
         }
     }
 
-    private boolean isOutdatedEvent(SubscriptionWebHookEvent event, Subscription userSubscription) {
+    private boolean isOutdatedEvent(SubscriptionWebHookEvent event, User user) {
         final long occuredAt = event.getEventOccurredAt();
-        return userSubscription != null && (occuredAt < userSubscription.getLatestEventTime()
-                || occuredAt < userSubscription.getManuallyUpdatedAt());
+        final String planId = event.getPlanId();
+        if (StringUtils.isNotEmpty(planId)) {
+            Subscription subscription = user.getSubscriptionByPlan(planId);
+            return subscription != null && (occuredAt < subscription.getLatestEventTime()
+                    || occuredAt < subscription.getManuallyUpdatedAt());
+        } else {
+            Subscription[] subscriptions = user.getSubscriptions();
+            if (subscriptions != null && subscriptions.length > 0) {
+                for (Subscription subscription : subscriptions) {
+                    if (occuredAt < subscription.getLatestEventTime()
+                            || occuredAt < subscription.getManuallyUpdatedAt()) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
     }
 
     private void processEvent(SubscriptionWebHookEvent event, User user) throws UserManagementException {
         final SubscriptionWebHookEventType eventType = event.getEventType();
         if (eventType != null) {
-            final Subscription userSubscription = user.getSubscription();
+            final Subscription userSubscription = user.getSubscriptionByPlan(event.getPlanId());
             switch (eventType) {
             case CUSTOMER_DELETED:
                 updateUserSubscription(user, buildEmptySubscription(userSubscription, event));
@@ -92,7 +92,7 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
     }
 
     private Subscription buildEmptySubscription(Subscription currentSubscription, SubscriptionWebHookEvent event) {
-        return ChargebeeSubscription.createEmptySubscription(event.getEventOccurredAt(),
+        return ChargebeeSubscription.createEmptySubscription(event.getPlanId(), event.getEventOccurredAt(),
                 currentSubscription != null ? currentSubscription.getManuallyUpdatedAt() : 0);
     }
 

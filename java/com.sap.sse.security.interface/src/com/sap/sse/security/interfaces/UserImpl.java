@@ -89,7 +89,7 @@ public class UserImpl extends SecurityUserImpl<RoleDefinition, Role, UserGroup, 
     
     private List<Role> roleListForSerialization;
 
-    private Subscription subscription;
+    private Subscription[] subscriptions;
 
     public UserImpl(String name, String email, Map<String, UserGroup> defaultTenantForServer,
             UserGroupProvider userGroupProvider, Account... accounts) {
@@ -380,12 +380,24 @@ public class UserImpl extends SecurityUserImpl<RoleDefinition, Role, UserGroup, 
     }
 
     @Override
-    public Subscription getSubscription() {
-        return subscription;
+    public Subscription[] getSubscriptions() {
+        return subscriptions;
     }
 
     @Override
-    public void setSubscription(Subscription subscription) {
-        this.subscription = subscription;
+    public void setSubscriptions(Subscription[] subscriptions) {
+        this.subscriptions = subscriptions;
+    }
+
+    @Override
+    public Subscription getSubscriptionByPlan(String planId) {
+        if (planId != null && !planId.equals("") && subscriptions != null && subscriptions.length > 0) {
+            for (Subscription subscription : subscriptions) {
+                if (subscription.getPlanId() != null && subscription.getPlanId().equals(planId)) {
+                    return subscription;
+                }
+            }
+        }
+        return null;
     }
 }

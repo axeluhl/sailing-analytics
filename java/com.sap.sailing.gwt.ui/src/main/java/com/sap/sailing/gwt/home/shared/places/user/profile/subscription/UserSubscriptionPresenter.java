@@ -71,24 +71,7 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
     @Override
     public void loadSubscription() {
         view.onStartLoadSubscription();
-
-        clientFactory.getSubscriptionService().getSubscription(new AsyncCallback<SubscriptionDTO>() {
-
-            @Override
-            public void onSuccess(SubscriptionDTO result) {
-                if (result != null && result.getError() != null && !result.getError().isEmpty()) {
-                    showError(StringMessages.INSTANCE.errorLoadingUserSubscription(result.getError()));
-                    return;
-                }
-
-                view.updateView(result);
-            }
-
-            @Override
-            public void onFailure(Throwable caught) {
-                showError(StringMessages.INSTANCE.errorLoadingUserSubscription(caught.getMessage()));
-            }
-        });
+        fetchSubscription();
     }
 
     @Override
@@ -125,8 +108,8 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
     }
 
     @Override
-    public void cancelSubscription() {
-        clientFactory.getSubscriptionService().cancelSubscription(new AsyncCallback<Boolean>() {
+    public void cancelSubscription(String planId) {
+        clientFactory.getSubscriptionService().cancelSubscription(planId, new AsyncCallback<Boolean>() {
 
             @Override
             public void onSuccess(Boolean result) {
@@ -134,13 +117,32 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
                     showError(StringMessages.INSTANCE.failedCancelSubscription());
                     return;
                 }
-
-                view.updateView(null);
+                fetchSubscription();
             }
 
             @Override
             public void onFailure(Throwable caught) {
                 showError(StringMessages.INSTANCE.errorCancelSubscription(caught.getMessage()));
+            }
+        });
+    }
+
+    private void fetchSubscription() {
+        clientFactory.getSubscriptionService().getSubscription(new AsyncCallback<SubscriptionDTO>() {
+
+            @Override
+            public void onSuccess(SubscriptionDTO result) {
+                if (result != null && result.getError() != null && !result.getError().isEmpty()) {
+                    showError(StringMessages.INSTANCE.errorLoadingUserSubscription(result.getError()));
+                    return;
+                }
+
+                view.updateView(result);
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                showError(StringMessages.INSTANCE.errorLoadingUserSubscription(caught.getMessage()));
             }
         });
     }

@@ -16,5 +16,5 @@ public interface SubscriptionServiceAsync {
 
     public void getSubscription(AsyncCallback<SubscriptionDTO> callback);
 
-    void cancelSubscription(AsyncCallback<Boolean> callback);
+    void cancelSubscription(String planId, AsyncCallback<Boolean> callback);
 }

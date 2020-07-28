@@ -29,7 +29,7 @@ public class SubscriptionWebHookEvent {
     }
 
     public boolean isValidEvent() {
-        return eventId != null && eventType != null;
+        return eventId != null;
     }
 
     public String getEventId() {
@@ -41,7 +41,8 @@ public class SubscriptionWebHookEvent {
         try {
             return SubscriptionWebHookEventType.valueOf(eventTypeAsUppercaseString);
         } catch (NullPointerException | IllegalArgumentException e) {
-            logger.warning("Exception trying to extract subscription event type "+eventTypeAsUppercaseString+": "+e.getMessage());
+            logger.warning("Exception trying to extract subscription event type " + eventTypeAsUppercaseString + ": "
+                    + e.getMessage());
             return null;
         }
     }
@@ -130,7 +131,7 @@ public class SubscriptionWebHookEvent {
     private String toLowerCase(String str) {
         return str != null ? str.toLowerCase() : null;
     }
-    
+
     private String toUpperCase(String str) {
         return str != null ? str.toUpperCase() : null;
     }

@@ -56,7 +56,7 @@ public class FieldNames {
         VALIDATION_SECRET,
         DEFAULT_TENANT_SERVER,
         DEFAULT_TENANT_GROUP,
-        SUBSCRIPTION;
+        SUBSCRIPTIONS;
     }
     
     public static enum Settings {

@@ -230,7 +230,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             defaultTennants.add(tenant);
         }
         dbUser.put(FieldNames.User.DEFAULT_TENANT_IDS.name(), defaultTennants);
-        dbUser.put(FieldNames.User.SUBSCRIPTION.name(), createSubscriptionObject(user.getSubscription()));
+        dbUser.put(FieldNames.User.SUBSCRIPTIONS.name(), createSubscriptions(user.getSubscriptions()));
         usersCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, dbUser, new UpdateOptions().upsert(true));
     }
     
@@ -334,21 +334,27 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return dbSettingTypes;
     }
 
-    private Document createSubscriptionObject(Subscription subscription) {
-        final Document result;
-        if (subscription != null) {
-            result = new Document();
-            result.put(FieldNames.Subscription.SUBSCRIPTION_ID.name(), subscription.getSubscriptionId());
-            result.put(FieldNames.Subscription.PLAN_ID.name(), subscription.getPlanId());
-            result.put(FieldNames.Subscription.CUSTOMER_ID.name(), subscription.getCustomerId());
-            result.put(FieldNames.Subscription.TRIAL_START.name(), subscription.getTrialStart());
-            result.put(FieldNames.Subscription.TRIAL_END.name(), subscription.getTrialEnd());
-            result.put(FieldNames.Subscription.SUBSCRIPTION_STATUS.name(), subscription.getSubscriptionStatus());
-            result.put(FieldNames.Subscription.PAYMENT_STATUS.name(), subscription.getPaymentStatus());
-            result.put(FieldNames.Subscription.SUBSCRIPTION_CREATED_AT.name(), subscription.getSubscriptionCreatedAt());
-            result.put(FieldNames.Subscription.SUBSCRIPTION_UPDATED_AT.name(), subscription.getSubscriptionUpdatedAt());
-            result.put(FieldNames.Subscription.LATEST_EVENT_TIME.name(), subscription.getLatestEventTime());
-            result.put(FieldNames.Subscription.MANUAL_UPDATED_AT.name(), subscription.getManuallyUpdatedAt());
+    private BasicDBList createSubscriptions(Subscription[] subscriptions) {
+        final BasicDBList result;
+        if (subscriptions != null) {
+            result = new BasicDBList();
+            for (Subscription subscription : subscriptions) {
+                final Document doc = new Document();
+                doc.put(FieldNames.Subscription.SUBSCRIPTION_ID.name(), subscription.getSubscriptionId());
+                doc.put(FieldNames.Subscription.PLAN_ID.name(), subscription.getPlanId());
+                doc.put(FieldNames.Subscription.CUSTOMER_ID.name(), subscription.getCustomerId());
+                doc.put(FieldNames.Subscription.TRIAL_START.name(), subscription.getTrialStart());
+                doc.put(FieldNames.Subscription.TRIAL_END.name(), subscription.getTrialEnd());
+                doc.put(FieldNames.Subscription.SUBSCRIPTION_STATUS.name(), subscription.getSubscriptionStatus());
+                doc.put(FieldNames.Subscription.PAYMENT_STATUS.name(), subscription.getPaymentStatus());
+                doc.put(FieldNames.Subscription.SUBSCRIPTION_CREATED_AT.name(),
+                        subscription.getSubscriptionCreatedAt());
+                doc.put(FieldNames.Subscription.SUBSCRIPTION_UPDATED_AT.name(),
+                        subscription.getSubscriptionUpdatedAt());
+                doc.put(FieldNames.Subscription.LATEST_EVENT_TIME.name(), subscription.getLatestEventTime());
+                doc.put(FieldNames.Subscription.MANUAL_UPDATED_AT.name(), subscription.getManuallyUpdatedAt());
+                result.add(doc);
+            }
         } else {
             result = null;
         }

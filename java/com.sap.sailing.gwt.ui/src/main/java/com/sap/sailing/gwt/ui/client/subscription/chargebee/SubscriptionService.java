@@ -37,6 +37,8 @@ public interface SubscriptionService extends RemoteService {
 
     /**
      * Cancel current user subscription
+     * 
+     * @param planId id of canceled plan
      */
-    public boolean cancelSubscription();
+    public boolean cancelSubscription(String planId);
 }

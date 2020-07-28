@@ -9,8 +9,8 @@ public class ChargebeeSubscription extends Subscription {
 
     private static final long serialVersionUID = -3682427457347116687L;
 
-    public static Subscription createEmptySubscription(long latestEventTime, long manualUpdatedAt) {
-        return new ChargebeeSubscription(null, null, null, 0, 0, null, null, 0, 0, latestEventTime, manualUpdatedAt);
+    public static Subscription createEmptySubscription(String planId, long latestEventTime, long manualUpdatedAt) {
+        return new ChargebeeSubscription(null, planId, null, 0, 0, null, null, 0, 0, latestEventTime, manualUpdatedAt);
     }
 
     public ChargebeeSubscription(String subscriptionId, String planId, String customerId, long trialStart,

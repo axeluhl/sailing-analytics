@@ -1,0 +1,50 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui"
+            xmlns:um="urn:import:com.sap.sailing.gwt.home.shared.usermanagement.decorator"
+            xmlns:c="urn:import:com.google.gwt.user.cellview.client">
+    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:with field="planName" type="java.lang.String" />
+    <ui:with field="subscriptionStatus" type="java.lang.String" />
+    <ui:with field="trial" type="java.lang.String" />
+    <ui:with field="paymentStatus" type="java.lang.String" />
+    <ui:with field="subscriptionStatusCssClass" type="java.lang.String" />
+    <ui:with field="paymentStatusCssClass" type="java.lang.String" />
+    <ui:with field="trialCssClass" type="java.lang.String" />
+    <ui:style field="style" type="com.sap.sailing.gwt.home.desktop.places.user.profile.subscriptiontab.SubscriptionCell.Style">
+        .subscriptionContainer {
+		    margin-bottom: 25px;
+		}
+		.textRow {
+		    margin-top: 5px;
+		}
+		.trialText {
+		    color: #ff0000;
+		}
+		.errorText{
+		    color: #ff0000;
+		}
+		.blueText {
+		    color: #0000ff;
+		}
+		.hide {
+            display: none;
+        }
+        .cancelButton {
+            margin-top: 10px;
+        }
+    </ui:style>
+    <div class="{style.subscriptionContainer}">
+        <div>Subscription plan: <span><ui:text from="{planName}" /></span></div>
+        <div class="{style.textRow} {subscriptionStatusCssClass}">
+           Subscription status: <span><ui:text from="{subscriptionStatus}" /></span>
+        </div>
+        <div ui:field="trialDivUi" class="{style.textRow} {style.trialText} {trialCssClass}"><ui:text from="{trial}" /></div>
+        <div ui:field="paymentStatusDivUi" class="{style.textRow} {paymentStatusCssClass}">
+            Payment charge status: <span><ui:text from="{paymentStatus}" /></span>
+        </div>
+        <button ui:field="cancelButton" class="{res.mainCss.button} {res.mainCss.buttonprimary} {style.cancelButton}">
+          <ui:text from="{i18n.cancelSubscription}" />
+        </button>
+    </div>
+</ui:UiBinder>

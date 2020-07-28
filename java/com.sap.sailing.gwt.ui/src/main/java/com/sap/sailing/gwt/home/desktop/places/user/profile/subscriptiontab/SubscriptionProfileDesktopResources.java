@@ -15,17 +15,11 @@ public interface SubscriptionProfileDesktopResources extends ClientBundle {
     SubscriptionProfileCss css();
 
     public interface SubscriptionProfileCss extends CssResource {
+        String emptySubscriptionsLabel();
+        
         String bottomButton();
-
-        String trialText();
-
-        String textRow();
-
-        String errorText();
-
-        String blueText();
-
-        String plansLabel();
+        
+        String sectionLabel();
 
         String plansInput();
 

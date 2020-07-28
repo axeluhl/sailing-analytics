@@ -36,6 +36,7 @@ import javax.servlet.Filter;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.IncorrectCredentialsException;
@@ -2532,16 +2533,50 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             throws UserManagementException {
         User user = getUserByName(username);
         if (user != null) {
-            Subscription currentSubscription = user.getSubscription();
-            if (shouldUpdateUserRolesForSubscription(currentSubscription, newSubscription)) {
-                updateUserRolesOnSubscriptionChange(user, currentSubscription, newSubscription);
+            String newSubscriptionPlanId = newSubscription.getPlanId();
+            if (StringUtils.isNotEmpty(newSubscriptionPlanId)) {
+                Subscription currentSubscription = user.getSubscriptionByPlan(newSubscriptionPlanId);
+                if (shouldUpdateUserRolesForSubscription(currentSubscription, newSubscription)) {
+                    updateUserRolesOnSubscriptionChange(user, currentSubscription, newSubscription);
+                }
+
+                user.setSubscriptions(buildNewUserSubscriptions(user, newSubscription));
+            } else {
+                user.setSubscriptions(new Subscription[] { newSubscription });
             }
-            user.setSubscription(newSubscription);
+
             store.updateUser(user);
             return null;
         } else {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
+    }
+
+    private Subscription[] buildNewUserSubscriptions(User user, Subscription newSubscription) {
+        Subscription[] newUserSubscriptions = null;
+        Subscription[] subscriptions = user.getSubscriptions();
+        if (newSubscription != null) {
+            if (subscriptions == null || subscriptions.length == 0) {
+                newUserSubscriptions = new Subscription[] { newSubscription };
+            } else {
+                int i = 0;
+                for (Subscription subscription : subscriptions) {
+                    if (subscription.getPlanId().equals(newSubscription.getPlanId())) {
+                        subscriptions[i] = newSubscription;
+                        newUserSubscriptions = subscriptions;
+                        break;
+                    }
+                    i++;
+                }
+                if (i == subscriptions.length) {
+                    newUserSubscriptions = Arrays.copyOf(subscriptions, subscriptions.length + 1);
+                    newUserSubscriptions[newUserSubscriptions.length - 1] = newSubscription;
+                }
+            }
+        } else {
+            newUserSubscriptions = subscriptions;
+        }
+        return newUserSubscriptions;
     }
 
     private void updateUserRolesOnSubscriptionChange(User user, Subscription currentSubscription,
@@ -2554,8 +2589,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             if (currentPlan != null) {
                 UUID[] roleDefinitionIds = currentPlan.getRoleDefinitionIds();
                 for (UUID roleDefId : roleDefinitionIds) {
-                    // see also bug5300: this works, based on the AbstractRole.equals definition,
-                    // as long as no qualified roles are assigned
                     store.removeRoleFromUser(user.getName(), new Role(getRoleDefinition(roleDefId), null, user));
                 }
             }
@@ -2565,7 +2598,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             if (newPlan != null) {
                 UUID[] roleDefinitionIds = newPlan.getRoleDefinitionIds();
                 for (UUID roleDefId : roleDefinitionIds) {
-                    // see also bug5300: we may want to support qualified roles, too, in the future
                     store.addRoleForUser(user.getName(), new Role(getRoleDefinition(roleDefId), null, user));
                 }
             }
@@ -2584,7 +2616,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             result = true;
         } else {
             result = newSubscription != null && currentSubscription != null
-                && newSubscription.isActiveSubscription() != currentSubscription.isActiveSubscription();
+                    && newSubscription.isActiveSubscription() != currentSubscription.isActiveSubscription();
         }
         return result;
     }
@@ -2594,24 +2626,33 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
      */
     private boolean isUserSubscriptionPlanChanged(Subscription currentSubscription, Subscription newSubscription) {
         final boolean result;
-        if ((currentSubscription == null || currentSubscription.getPlanId() == null)
-                && (newSubscription == null || newSubscription.getPlanId() == null)) {
+        if ((currentSubscription == null || currentSubscription.getSubscriptionId() == null)
+                && (newSubscription == null || newSubscription.getSubscriptionId() == null)) {
             result = false;
         } else {
             String currentPlan = null;
             String newPlan = null;
+            String currentSubscriptionId = null;
+            String newSubscriptionId = null;
             if (currentSubscription != null) {
                 currentPlan = currentSubscription.getPlanId();
+                currentSubscriptionId = currentSubscription.getSubscriptionId();
             }
             if (newSubscription != null) {
                 newPlan = newSubscription.getPlanId();
+                newSubscriptionId = newSubscription.getSubscriptionId();
             }
-            if (currentPlan == null && newPlan == null) {
-                result = false;
-            } else if (currentPlan != null && newPlan != null) {
-                result = !currentPlan.equals(newPlan);
-            } else {
+            if ((currentSubscriptionId == null && newSubscriptionId != null)
+                    || (currentSubscriptionId != null && newSubscriptionId == null)) {
                 result = true;
+            } else {
+                if (currentPlan == null && newPlan == null) {
+                    result = false;
+                } else if (currentPlan != null && newPlan != null) {
+                    result = !currentPlan.equals(newPlan);
+                } else {
+                    result = true;
+                }
             }
         }
         return result;

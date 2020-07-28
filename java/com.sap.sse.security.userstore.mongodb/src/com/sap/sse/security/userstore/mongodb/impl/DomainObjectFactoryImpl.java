@@ -360,8 +360,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             // is also only interested in the object's ID
             new MongoObjectFactoryImpl(db).storeUser(result);
         }
-        final Document subscriptionDoc = (Document) userDBObject.get(FieldNames.User.SUBSCRIPTION.name());
-        result.setSubscription(loadSubscription(subscriptionDoc));
+        final List<?> subscriptionDocs = (List<?>) userDBObject.get(FieldNames.User.SUBSCRIPTIONS.name());
+        result.setSubscriptions(loadSubscriptions(subscriptionDocs));
         return result;
     }
 
@@ -507,28 +507,31 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
 
-    private Subscription loadSubscription(Document subscriptionDoc) {
-        final Subscription result;
-        if (subscriptionDoc != null) {
-            String customerId = subscriptionDoc.getString(FieldNames.Subscription.CUSTOMER_ID.name());
-            String planId = subscriptionDoc.getString(FieldNames.Subscription.PLAN_ID.name());
-            String subscriptionStatus = subscriptionDoc.getString(FieldNames.Subscription.SUBSCRIPTION_STATUS.name());
-            String subscriptionId = subscriptionDoc.getString(FieldNames.Subscription.SUBSCRIPTION_ID.name());
-            long trialStart = subscriptionDoc.getLong(FieldNames.Subscription.TRIAL_START.name());
-            long trialEnd = subscriptionDoc.getLong(FieldNames.Subscription.TRIAL_END.name());
-            String paymentStatus = subscriptionDoc.getString(FieldNames.Subscription.PAYMENT_STATUS.name());
-            long subscriptionCreatedAt = subscriptionDoc
-                    .getLong(FieldNames.Subscription.SUBSCRIPTION_CREATED_AT.name());
-            long subscriptionUpdatedAt = subscriptionDoc
-                    .getLong(FieldNames.Subscription.SUBSCRIPTION_UPDATED_AT.name());
-            long latestEventTime = subscriptionDoc.getLong(FieldNames.Subscription.LATEST_EVENT_TIME.name());
-            long manualUpdatedAt = subscriptionDoc.getLong(FieldNames.Subscription.MANUAL_UPDATED_AT.name());
-            result = new ChargebeeSubscription(subscriptionId, planId, customerId, trialStart, trialEnd,
-                    subscriptionStatus, paymentStatus, subscriptionCreatedAt, subscriptionUpdatedAt, latestEventTime,
-                    manualUpdatedAt);
+    private Subscription[] loadSubscriptions(List<?> subscriptionsDoc) {
+        final Subscription[] subscriptions;
+        if (subscriptionsDoc != null) {
+            subscriptions = new Subscription[subscriptionsDoc.size()];
+            int i = 0;
+            for (Object o : subscriptionsDoc) {
+                final Document doc = (Document) o;
+                final String customerId = doc.getString(FieldNames.Subscription.CUSTOMER_ID.name());
+                final String planId = doc.getString(FieldNames.Subscription.PLAN_ID.name());
+                final String subscriptionStatus = doc.getString(FieldNames.Subscription.SUBSCRIPTION_STATUS.name());
+                final String subscriptionId = doc.getString(FieldNames.Subscription.SUBSCRIPTION_ID.name());
+                final long trialStart = doc.getLong(FieldNames.Subscription.TRIAL_START.name());
+                final long trialEnd = doc.getLong(FieldNames.Subscription.TRIAL_END.name());
+                final String paymentStatus = doc.getString(FieldNames.Subscription.PAYMENT_STATUS.name());
+                final long subscriptionCreatedAt = doc.getLong(FieldNames.Subscription.SUBSCRIPTION_CREATED_AT.name());
+                final long subscriptionUpdatedAt = doc.getLong(FieldNames.Subscription.SUBSCRIPTION_UPDATED_AT.name());
+                final long latestEventTime = doc.getLong(FieldNames.Subscription.LATEST_EVENT_TIME.name());
+                final long manualUpdatedAt = doc.getLong(FieldNames.Subscription.MANUAL_UPDATED_AT.name());
+                subscriptions[i++] = new ChargebeeSubscription(subscriptionId, planId, customerId, trialStart, trialEnd,
+                        subscriptionStatus, paymentStatus, subscriptionCreatedAt, subscriptionUpdatedAt,
+                        latestEventTime, manualUpdatedAt);
+            }
         } else {
-            result = null;
+            subscriptions = null;
         }
-        return result;
+        return subscriptions;
     }
 }
