@@ -133,6 +133,16 @@
 		<url-pattern>/service/media</url-pattern>
 	</servlet-mapping>
 
+    <servlet>
+            <display-name>Media Service Write</display-name>
+        <servlet-name>MediaServiceWrite</servlet-name>
+        <servlet-class>com.sap.sailing.gwt.ui.server.MediaServiceWriteImpl</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>MediaServiceWrite</servlet-name>
+        <url-pattern>/service/mediamaster</url-pattern>
+    </servlet-mapping>
+
 	<servlet>
 	    <display-name>Simulator Service</display-name>
 	    <servlet-name>SimulatorService</servlet-name>

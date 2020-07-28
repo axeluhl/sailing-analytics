@@ -55,6 +55,7 @@ import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.FlagImageResolverImpl;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
+import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.RaceCompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.RaceCompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimePanel;
@@ -139,6 +140,7 @@ public class RaceBoardPanel
     private final SailingServiceAsync sailingService;
     private SailingServiceWriteAsync sailingServiceWrite;
     private final MediaServiceAsync mediaService;
+    private final MediaServiceWriteAsync mediaServiceWrite;
     private final UUID eventId;
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
@@ -210,19 +212,21 @@ public class RaceBoardPanel
     public RaceBoardPanel(Component<?> parent,
             ComponentContext<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>> componentContext,
             RaceBoardPerspectiveLifecycle lifecycle,
-            PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings,
-            SailingServiceAsync sailingService, MediaServiceAsync mediaService, UserService userService,
+            PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings, SailingServiceAsync sailingService,
+            MediaServiceAsync mediaService, MediaServiceWriteAsync mediaServiceWrite, UserService userService,
             AsyncActionsExecutor asyncActionsExecutor, Map<CompetitorDTO, BoatDTO> competitorsAndTheirBoats,
             Timer timer, RegattaAndRaceIdentifier selectedRaceIdentifier, String leaderboardName,
-            String leaderboardGroupName, UUID leaderboardGroupId, UUID eventId, ErrorReporter errorReporter, final StringMessages stringMessages,
-            UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider,
-            boolean showChartMarkEditMediaButtonsAndVideo, boolean showHeaderPanel,
-            Iterable<DetailType> availableDetailTypes, StrippedLeaderboardDTOWithSecurity leaderboardDTO,
-            final RaceWithCompetitorsAndBoatsDTO raceDTO, TrackingConnectorInfoDTO trackingConnectorInfo, SailingServiceWriteAsync sailingServiceWrite) {
+            String leaderboardGroupName, UUID leaderboardGroupId, UUID eventId, ErrorReporter errorReporter,
+            final StringMessages stringMessages, UserAgentDetails userAgent,
+            RaceTimesInfoProvider raceTimesInfoProvider, boolean showChartMarkEditMediaButtonsAndVideo,
+            boolean showHeaderPanel, Iterable<DetailType> availableDetailTypes,
+            StrippedLeaderboardDTOWithSecurity leaderboardDTO, final RaceWithCompetitorsAndBoatsDTO raceDTO,
+            TrackingConnectorInfoDTO trackingConnectorInfo, SailingServiceWriteAsync sailingServiceWrite) {
         super(parent, componentContext, lifecycle, settings);
         this.sailingService = sailingService;
         this.sailingServiceWrite = sailingServiceWrite;
         this.mediaService = mediaService;
+        this.mediaServiceWrite = mediaServiceWrite;
         this.stringMessages = stringMessages;
         this.raceTimesInfoProvider = raceTimesInfoProvider;
         this.errorReporter = errorReporter;
@@ -456,8 +460,9 @@ public class RaceBoardPanel
             componentsForSideBySideViewer.add(editMarkPositionPanel);
         }
         mediaPlayerManagerComponent = new MediaPlayerManagerComponent(this, getComponentContext(), mediaPlayerLifecycle,
-                sailingServiceWrite, selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, userService,
-                stringMessages, errorReporter, userAgent, this, mediaPlayerSettings, raceDTO);
+                sailingServiceWrite, selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService,
+                mediaServiceWrite, userService, stringMessages, errorReporter, userAgent, this, mediaPlayerSettings,
+                raceDTO);
         final LeaderboardWithSecurityFetcher asyncFetcher = new LeaderboardWithSecurityFetcher() {
             @Override
             public void getLeaderboardWithSecurity(Consumer<StrippedLeaderboardDTOWithSecurity> consumer) {
