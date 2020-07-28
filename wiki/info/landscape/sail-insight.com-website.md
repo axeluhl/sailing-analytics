@@ -18,6 +18,9 @@ The resulting certificates are placed int the folder `/etc/letsencrypt/live/sail
 
 To spin up the docker container (above) once a week to renew the SSL cert a cronjob runs the renew script as user 'certbot' once a week.
 
+`# Check if sail-insight.com cert needs renewing
+0 1 * * Thu su -u certbot docker run -it --rm --name certbot -v "/etc/letsencrypt:/etc/letsencrypt" -v "/var/lib/letsencrypt:/var/lib/letsencrypt" -v "/home/trac/sail-insight-website/:/home/trac/sail-insight-website" certbot/certbot renew && service httpd reload`
+
 # Apache
 
 Apache config is kept in `/etc/httpd/conf.d/000-main.conf` and `/etc/httpd/conf.d/000-macros.conf`.
