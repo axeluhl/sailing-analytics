@@ -53,6 +53,7 @@ import com.sap.sse.security.ui.oauth.shared.OAuthException;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
 public class UserManagementWriteServiceImpl extends UserManagementServiceImpl implements UserManagementWriteService {
+    private static final long serialVersionUID = -8123229851467370537L;
     private static final Logger logger = Logger.getLogger(UserManagementWriteServiceImpl.class.getName());
     
     @Override

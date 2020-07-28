@@ -46,9 +46,10 @@ public class DispatchRPCImpl<CTX extends DispatchContext> implements DispatchSys
         
         DispatchRPCAsync<CTX> dispatcher = dispatchReadRPC;
         if (action instanceof BatchAction) {
+            @SuppressWarnings({ "rawtypes", "unchecked" }) // no typing is needed here
             List<Action> actions = ((BatchAction) action).getActions();
             if (actions != null) {
-                for (Action a : actions) {
+                for (Action<?,?> a : actions) {
                     if (a instanceof HasWriteAction) {
                         dispatcher = dispatchWriteRPC;
                         break;
