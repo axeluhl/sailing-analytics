@@ -253,8 +253,6 @@ public class TestAbortingHeavyLoadQuery {
         
         executor = ThreadPoolUtil.INSTANCE
                 .createBackgroundTaskThreadPoolExecutor(ExecutorPoolSize, this.getClass().getName());
-//        executor = new ThreadPoolExecutor(ExecutorPoolSize, ExecutorPoolSize, 0, TimeUnit.MILLISECONDS, new PriorityBlockingQueue<>());
-//        executor = new ThreadPoolExecutor(ExecutorPoolSize, ExecutorPoolSize, 0, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
         processors = new ArrayList<>();
         unfinishedInstructions = ConcurrentHashMap.newKeySet();
         
