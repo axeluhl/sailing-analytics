@@ -45,6 +45,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
 import javax.management.InstanceAlreadyExistsException;
@@ -237,6 +238,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.TrackingConnectorInfo
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
 import com.sap.sailing.server.interfaces.CourseAndMarkConfigurationFactory;
 import com.sap.sailing.server.interfaces.DataImportLockWithProgress;
+import com.sap.sailing.server.interfaces.KeywordQueryWithOptionalEventQualification;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.interfaces.SimulationService;
 import com.sap.sailing.server.interfaces.TaggingService;
@@ -305,7 +307,6 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
 import com.sap.sse.common.search.ResultImpl;
 import com.sap.sse.common.util.NaturalComparator;
@@ -1603,10 +1604,22 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public RemoteSailingServerReference addRemoteSailingServerReference(String name, URL url) {
-        RemoteSailingServerReference result = new RemoteSailingServerReferenceImpl(name, url);
+    public RemoteSailingServerReference addRemoteSailingServerReference(String name, URL url, boolean include) {
+        RemoteSailingServerReference result = new RemoteSailingServerReferenceImpl(name, url, include, /* IDs of included/excluded events */ Collections.emptySet());
         remoteSailingServerSet.add(result);
         mongoObjectFactory.storeSailingServer(result);
+        return result;
+    }
+
+    @Override
+    public RemoteSailingServerReference updateRemoteSailingServerReference(final String name, final boolean include,
+            final Set<UUID> selectedEventIds) {
+        RemoteSailingServerReference result = getRemoteServerReferenceByName(name);
+        if (result != null) {
+            result.updateSelectedEventIds(selectedEventIds);
+            result.setInclude(include);
+            mongoObjectFactory.storeSailingServer(result);
+        }
         return result;
     }
 
@@ -1622,8 +1635,14 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception> updateRemoteServerEventCacheSynchronously(
+            RemoteSailingServerReference ref, boolean forceUpdate) {
+        return remoteSailingServerSet.getEventsOrException(ref, forceUpdate);
+    }
+    
+    @Override
+    public com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception> getCompleteRemoteServerReference(
             RemoteSailingServerReference ref) {
-        return remoteSailingServerSet.getEventsOrException(ref);
+        return remoteSailingServerSet.getEventsComplete(ref);
     }
 
     @Override
@@ -1635,6 +1654,23 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public Iterable<Event> getAllEvents() {
         return Collections.unmodifiableCollection(new ArrayList<Event>(eventsById.values()));
+    }
+
+    @Override
+    public Iterable<Event> getEventsSelectively(final boolean include, final Iterable<UUID> eventIds) {
+        Iterable<Event> events;
+        if (eventIds != null && !Util.isEmpty(eventIds)) {
+            events = Collections.unmodifiableCollection(Util.stream(getAllEvents())
+                    .filter(element -> include ? Util.contains(eventIds, element.getId()) : !Util.contains(eventIds, element.getId()))
+                    .collect(Collectors.toList()));
+        } else {
+            if (include) {
+                events = Collections.emptyList();
+            } else {
+                events = getAllEvents();
+            }
+        }
+        return events; 
     }
 
     @Override
@@ -4245,7 +4281,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public Result<LeaderboardSearchResult> search(KeywordQuery query) {
+    public Result<LeaderboardSearchResult> search(KeywordQueryWithOptionalEventQualification query) {
         long start = System.currentTimeMillis();
         logger.info("Searching local server for " + query);
         Result<LeaderboardSearchResult> result = new RegattaByKeywordSearchService().search(this, query);
@@ -4254,7 +4290,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public Result<LeaderboardSearchResultBase> searchRemotely(String remoteServerReferenceName, KeywordQuery query) {
+    public Result<LeaderboardSearchResultBase> searchRemotely(String remoteServerReferenceName, KeywordQueryWithOptionalEventQualification query) {
         long start = System.currentTimeMillis();
         ResultImpl<LeaderboardSearchResultBase> result = null;
         RemoteSailingServerReference remoteRef = remoteSailingServerSet
@@ -4265,8 +4301,18 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             BufferedReader bufferedReader = null;
             try {
                 try {
-                    final URL eventsURL = new URL(remoteRef.getURL(), "sailingserver/api/v1/search?q="
-                            + URLEncoder.encode(query.toString(), "UTF-8"));
+                    final String basePath = "/sailingserver/api/v1/search";
+                    boolean include = remoteRef.isInclude();
+                    final Set<UUID> selectedEventIds = remoteRef.getSelectedEventIds();
+                    final StringBuilder eventsEndpointName = new StringBuilder(basePath);
+                    eventsEndpointName.append("?q=").append(URLEncoder.encode(query.toString(), "UTF-8"));
+                    eventsEndpointName.append("&include=").append(include);
+                    if (selectedEventIds != null) {
+                        for (final UUID selectedEventId : selectedEventIds) {
+                            eventsEndpointName.append("&eventId=").append(selectedEventId.toString());
+                        }
+                    }
+                    final URL eventsURL = new URL(remoteRef.getURL(), eventsEndpointName.toString());
                     logger.info("Searching remote server " + remoteRef + " for " + query);
                     URLConnection urlConnection = HttpUrlConnectionHelper.redirectConnection(eventsURL);
                     bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream(), "UTF-8"));
@@ -4933,7 +4979,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public void importMasterData(final String urlAsString, final String[] leaderboardGroupIds, final boolean override,
+    public void importMasterData(final String urlAsString, final UUID[] leaderboardGroupIds, final boolean override,
             final boolean compress, final boolean exportWind, final boolean exportDeviceConfigurations,
             final String targetServerUsername, final String targetServerPassword, final String targetServerBearerToken,
             final boolean exportTrackedRacesAndStartTracking, final UUID importOperationId) throws IllegalArgumentException {
@@ -5033,13 +5079,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
     }
     
-    private String createLeaderboardQuery(String[] leaderboardGroupIds, boolean compress, boolean exportWind,
+    private String createLeaderboardQuery(UUID[] leaderboardGroupIds, boolean compress, boolean exportWind,
             boolean exportDeviceConfigurations, boolean exportTrackedRacesAndStartTracking)
             throws UnsupportedEncodingException {
         StringBuffer queryStringBuffer = new StringBuffer("");
-        for (int i = 0; i < leaderboardGroupIds.length; i++) {
-            String encodedGroupName = URLEncoder.encode(leaderboardGroupIds[i], "UTF-8");
-            queryStringBuffer.append("uuids[]=" + encodedGroupName + "&");
+        for (UUID uuid : leaderboardGroupIds) {
+            queryStringBuffer.append("uuids[]=" + uuid + "&");
         }
         queryStringBuffer.append(String.format("compress=%s&exportWind=%s&exportDeviceConfigs=%s&exportTrackedRacesAndStartTracking=%s", compress,
                 exportWind, exportDeviceConfigurations, exportTrackedRacesAndStartTracking));

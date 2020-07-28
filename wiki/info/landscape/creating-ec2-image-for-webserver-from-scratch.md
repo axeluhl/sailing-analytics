@@ -19,7 +19,7 @@ Then carry out these steps:
 * launch the NFS service once using `service nfs start`
 * run the following command in order to obtain this feature required by Bugzilla:
 ```
-cpan install Date::Parse Email::Address Email::Send DBI Geo::IP::PurePerl Math::Random::ISAAC
+cpan install Date::Parse Email::Address Email::Send DBI Geo::IP::PurePerl Math::Random::ISAAC IO::Socket::SSL
 ```
 The libraries end up under `/root/perl5/lib/perl5`. For use by AWStats, read access to this path is required for the Apache web server. In particular, ensure that `/root` has read permissions for all.
 * run the following commands to install missing Perl modules:
@@ -39,7 +39,7 @@ The libraries end up under `/root/perl5/lib/perl5`. For use by AWStats, read acc
 /usr/bin/perl install-module.pl File::MimeInfo::Magic
 /usr/bin/perl install-module.pl File::Copy::Recursive
 ```
-Those modules were installed to `/root/perl5/lib/perl5` but for some reason any `SetEnv PERL5LIB` directive in the Apache configuration for the bugzilla `VirtualHost` section seemd to remain ignored. Therefore, after installing all modules required, I copied all contents of `/root/perl5/lib/perl` to `/usr/local/share/perl5` to make them found through the `@INC` variable.
+Those modules were installed to `/root/perl5/lib/perl5` but for some reason any `SetEnv PERL5LIB` directive in the Apache configuration for the bugzilla `VirtualHost` section seemd to remain ignored. Therefore, after installing all modules required, I copied all contents of `/root/perl5/lib/perl5` to `/usr/local/share/perl5` to make them found through the `@INC` variable.
 * Ensure that `/root/perl5/lib/perl5` is part of the `PERL5LIB` variable setting in the AWStats virtual host configuration in `/etc/httpd/conf.d/awstats.conf` as follows:
 ```
         <IfModule mod_env.c>
