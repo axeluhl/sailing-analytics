@@ -19,7 +19,7 @@ Then carry out these steps:
 * launch the NFS service once using `service nfs start`
 * run the following command in order to obtain this feature required by Bugzilla:
 ```
-cpan install Date::Parse Email::Address Email::Send DBI Geo::IP::PurePerl Math::Random::ISAAC
+cpan install Date::Parse Email::Address Email::Send DBI Geo::IP::PurePerl Math::Random::ISAAC IO::Socket::SSL
 ```
 The libraries end up under `/root/perl5/lib/perl5`. For use by AWStats, read access to this path is required for the Apache web server. In particular, ensure that `/root` has read permissions for all.
 * run the following commands to install missing Perl modules:
