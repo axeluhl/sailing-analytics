@@ -52,7 +52,6 @@ import com.sap.sse.util.ThreadPoolUtil;
 public class DataMiningFrameworkActivator implements BundleActivator {
     private static final Logger logger = Logger.getLogger(DataMiningFrameworkActivator.class.getName());
     private static final String STRING_MESSAGES_BASE_NAME = "stringmessages/StringMessages";
-    private static final int THREAD_POOL_SIZE = ThreadPoolUtil.INSTANCE.getReasonableThreadPoolSize();
     
     private static DataMiningFrameworkActivator INSTANCE;
 
@@ -70,7 +69,8 @@ public class DataMiningFrameworkActivator implements BundleActivator {
     }
 
     private ModifiableDataMiningServer createDataMiningServer() {
-        ExecutorService executor = new DataMiningExecutorService(THREAD_POOL_SIZE);
+        ExecutorService executor = ThreadPoolUtil.INSTANCE
+                .createBackgroundTaskThreadPoolExecutor(DataMiningServer.class.getName());
         FunctionRegistry functionRegistry = new FunctionManager();
         DataSourceProviderRegistry dataSourceProviderRegistry = new DataSourceProviderManager();
         DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry = new DataRetrieverChainDefinitionManager();
