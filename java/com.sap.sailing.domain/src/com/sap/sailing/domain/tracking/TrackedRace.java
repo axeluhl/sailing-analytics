@@ -1256,4 +1256,28 @@ public interface TrackedRace
      * may be {@code null}, particularly in test set-ups
      */
     TrackingConnectorInfo getTrackingConnectorInfo();
+
+    /**
+     * Under synchronization with the {@link #getStatus() race status} checks if the race {@link #hasFinishedLoading()
+     * has already finished loading}. If so, {@code runnable} is invoked. Otherwise, a {@link RaceChangeListener} is
+     * {@link #addListener(RaceChangeListener) added} to this race, observing the race status and calling
+     * {@code runnable} when the race has finished loading.
+     * <p>
+     * 
+     * A race is considered to have finished loading when it is not in either of the states
+     * {@link TrackedRaceStatusEnum#PREPARED}, {@link TrackedRaceStatusEnum#LOADING}, or
+     * {@link TrackedRaceStatusEnum#ERROR}.
+     * 
+     * @param runnable
+     *            must not be {@code null}
+     */
+    void runWhenDoneLoading(Runnable runnable);
+
+    /**
+     * Executes the {@code callable} under synchronization with the {@link #getStatus() race status}; in other words,
+     * while the callable executes, the race status of this race cannot be updated.
+     */
+    void runSynchronizedOnStatus(Runnable runnable);
+
+    boolean hasFinishedLoading();
 }
