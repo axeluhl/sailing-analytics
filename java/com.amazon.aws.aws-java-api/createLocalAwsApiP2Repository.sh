@@ -100,6 +100,7 @@ echo "Manifest-Version: 1.0
 Bundle-SymbolicName: com.amazon.aws.aws-java-api.source
 Bundle-Name: AWS SDK Sources
 Bundle-Version: ${VERSION}
+Eclipse-SourceBundle: com.amazon.aws.aws-java-api;version=\"${VERSION}\"
 Bundle-ManifestVersion: 2" >${SOURCE_JAR_MANIFEST}
 jar cvfm com.amazon.aws.aws-java-api.source_${VERSION}.jar ${SOURCE_JAR_MANIFEST} software/
 rm ${SOURCE_JAR_MANIFEST}
