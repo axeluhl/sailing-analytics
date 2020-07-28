@@ -1,7 +1,11 @@
 package com.sap.sailing.gwt.home.shared.places.event;
 
+import java.nio.charset.StandardCharsets;
+
+import com.gargoylesoftware.htmlunit.util.UrlUtils;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.RegattaAnalyticsDataManager;
 import com.sap.sailing.gwt.home.shared.places.ShareablePlaceContext;
+import com.sap.sse.gwt.client.URLEncoder;
 
 /**
  * Common context used by the different tabs in the event place.
@@ -55,7 +59,7 @@ public class EventContext implements ShareablePlaceContext {
         if(eventId != null) {
             String path = "/events/" + eventId;
             if(regattaId != null) {
-                path += "/regattas/" +regattaId;
+                path += "/regattas/" +  URLEncoder.encode(regattaId);
             }
             return path;
         }else {
