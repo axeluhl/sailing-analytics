@@ -77,7 +77,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingWriteEntryPoint
     protected void doOnModuleLoad() {
         Highcharts.ensureInjectedWithMore();
         super.doOnModuleLoad();
-        EntryPointHelper.registerASyncService((ServiceDefTarget) mediaServiceWrite, RemoteServiceMappingConstants.mediaServiceRemotePath, HEADER_FORWARD_TO_MASTER);
+        EntryPointHelper.registerASyncService((ServiceDefTarget) mediaServiceWrite, RemoteServiceMappingConstants.mediaServiceWriteRemotePath, HEADER_FORWARD_TO_MASTER);
         getUserService().executeWithServerInfo(this::createUI);
         getUserService().addUserStatusEventHandler((u, p) -> checkPublicServerNonPublicUserWarning());
     }
