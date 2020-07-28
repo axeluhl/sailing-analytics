@@ -118,7 +118,7 @@ public class SharingServlet extends HttpServlet {
         final Map<String, String> map = new HashMap<>();
         final String[] split = pathInfo.replaceFirst(PATH_SEPARATOR, "").split(PATH_SEPARATOR);
         int splitLength = split.length;
-        String fullLocalAddress = "http://" + req.getLocalAddr() + ":" + req.getLocalPort() + GWT_PREFIX;
+        String fullLocalAddress = "http://" + req.getServerName() + ":" + req.getServerPort() + GWT_PREFIX;
         String redirectAdrress = fullLocalAddress + HOME_HTML;
         String placeUrl = redirectAdrress;
         String title = DEFAULT_TITLE;
