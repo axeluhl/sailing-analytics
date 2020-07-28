@@ -17,6 +17,8 @@ Availability will be reported as "true" if all races to be restored have
 appeared. There may still be some data retrieval going on, so for the server
 truly to be available, after having received available:true for the first time,
 add some leeway that corresponds to the typical race load time.</p>
+<p>You can request to obtain available:true only in case all races that are to be restored
+have finished loading. For this, set the <tt>waitUntilRacesLoaded</tt> parameter to <tt>true</tt>.</p>
 <p>Furthermore, consider the "replica" attribute in the response. It may start
 out as "false" although initial replication has been requested. See also the
 <tt>/replication/replication?action=STATUS</tt> API which provide comprehensive
