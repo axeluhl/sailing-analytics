@@ -24,6 +24,7 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.text.shared.SafeHtmlRenderer;
+import com.google.gwt.text.shared.SimpleSafeHtmlRenderer;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.CellTable.Resources;
 import com.google.gwt.user.cellview.client.Column;
@@ -36,7 +37,10 @@ import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.datepicker.client.DateBox;
@@ -527,7 +531,6 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
     }
     
     private class MaxPointsReasonAndTotalPointsEditButtonCell extends AbstractRowUpdateWhiteboardProducerThatHasCell<LeaderboardRowDTO, String> {
-        private final ButtonCell cell = new ButtonCell();
         private final String raceColumnName;
         private final StringMessages stringMessages;
         private final MaxPointsDropDownCellProvider maxPointsDropDownCellProvider;
@@ -545,10 +548,11 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
             this.maxPointsDropDownCellProvider = maxPointsDropDownCellProvider;
             this.totalPointsEditCellProvider = totalPointsEditCellProvider;
         }
+        
 
         @Override
         public ButtonCell getCell() {
-            return cell;
+            return new EditButtonCell(stringMessages.edit());
         }
 
         @Override
@@ -611,11 +615,13 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
                 }
             };
         }
+        
 
         @Override
         public String getValue(LeaderboardRowDTO object) {
-            return stringMessages.edit();
+            return "";//stringMessages.edit();
         }
+        
     }
 
     public EditableLeaderboardPanel(final SailingServiceWriteAsync sailingServiceWrite, AsyncActionsExecutor asyncActionsExecutor,
@@ -626,6 +632,8 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
                 leaderboardName, errorReporter, stringMessages, /* showRaceDetails */ true, new ClassicLeaderboardStyle(),
                 FlagImageResolverImpl.get(), availableDetailTypes);
         this.sailingServiceWrite = sailingServiceWrite;
+        this.setStyleName("editableLeaderboardPanel");
+        this.getLeaderboardTable().setStyleName("editableLeaderboardTable");
         suppressedCompetitorsShown = new ListDataProvider<>(new ArrayList<>());
         suppressedCompetitorsTable = createSuppressedCompetitorsTable();
         ImageResource importIcon = resources.importIcon();
@@ -653,7 +661,7 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
         
         
 
-        Grid scoreCorrectionInfoGrid = new Grid(3,4);
+        FlexTable scoreCorrectionInfoGrid = new FlexTable();
         scoreCorrectionInfoGrid.setCellPadding(3);
         scoreCorrectionInfoGrid.setWidget(0,  0, new Label(stringMessages.lastScoreCorrectionsTime() + ":"));
         lastScoreCorrectionTimeBox = new DateBox();
@@ -661,10 +669,12 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
 
         scoreCorrectionInfoGrid.setWidget(1,  0, new Label(stringMessages.lastScoreCorrectionsComment() + ":"));
         lastScoreCorrectionCommentBox = new TextBox();
+        lastScoreCorrectionCommentBox.setWidth("100%");
         scoreCorrectionInfoGrid.setWidget(1,  1, lastScoreCorrectionCommentBox);
+        scoreCorrectionInfoGrid.getFlexCellFormatter().setColSpan(1, 1, 2);
 
         final Button saveScoreCorrectionInfoBtn = new Button(stringMessages.save());
-        scoreCorrectionInfoGrid.setWidget(2,  1, saveScoreCorrectionInfoBtn);
+        scoreCorrectionInfoGrid.setWidget(1,  2, saveScoreCorrectionInfoBtn);
 
         saveScoreCorrectionInfoBtn.addClickHandler(new ClickHandler() {
             @Override
@@ -697,7 +707,7 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
                 loadCompleteLeaderboard(/* showProgress */ true);
             }
         });
-        scoreCorrectionInfoGrid.setWidget(0, 3, showUncorrectedTotalPointsCheckbox);
+        scoreCorrectionInfoGrid.setWidget(0, 4, showUncorrectedTotalPointsCheckbox);
 
         setScoreCorrectionDefaultTimeBtn.addClickHandler(new ClickHandler() {
             @Override
@@ -706,7 +716,9 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
             }
         });
         getContentPanel().insert(scoreCorrectionInfoGrid, 0);
-        getContentPanel().add(new Label(stringMessages.suppressedCompetitors() + ":"));
+        Label suppressedCompetitorsLabel = new Label(stringMessages.suppressedCompetitors() + ":");
+        suppressedCompetitorsLabel.addStyleName("suppressedCompetitorsLabel");
+        getContentPanel().add(suppressedCompetitorsLabel);
         getContentPanel().add(suppressedCompetitorsTable);
 
         // add a dedicated settings button that allows users to remove columns if needed; the settings
@@ -735,7 +747,7 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
                 }));
         result.addColumn(suppressedCompetitorColumn, suppressedCompetitorColumn.getHeader());
         suppressedCompetitorColumn.setSortable(true);
-        final Column<CompetitorDTO, String> unsuppressButtonColumn = new Column<CompetitorDTO, String>(new ButtonCell()) {
+        final Column<CompetitorDTO, String> unsuppressButtonColumn = new Column<CompetitorDTO, String>(new SuppressButtonCell()) {
             @Override
             public String getValue(CompetitorDTO object) {
                 return stringMessages.unsuppress();
@@ -764,6 +776,7 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
         sortHandler.setComparator(suppressedSailIDColumn, suppressedSailIDColumn.getComparator());
         sortHandler.setComparator(suppressedCompetitorColumn, suppressedCompetitorColumn.getComparator());
         result.addColumnSortHandler(sortHandler);
+        result.setStyleName("suppressedCompetitorsTable");
         return result;
     }
 
@@ -860,7 +873,7 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
             }
         });
         result.add(new HasCell<LeaderboardRowDTO, String>() {
-            private final ButtonCell cell = new ButtonCell();
+            private final ButtonCell cell = new EditButtonCell(stringMessages.edit());
             @Override
             public Cell<String> getCell() {
                 return cell;
@@ -906,13 +919,14 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
 
             @Override
             public String getValue(LeaderboardRowDTO object) {
-                return stringMessages.edit();
+                return "";//stringMessages.edit();
             }
         });
         result.add(new HasCell<LeaderboardRowDTO, String>() {
-            private final ButtonCell cell = new ButtonCell();
+            private final ButtonCell cell = new SuppressButtonCell();
             @Override
             public Cell<String> getCell() {
+                
                 return cell;
             }
 
@@ -974,7 +988,7 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
             }
         });
         result.add(new HasCell<LeaderboardRowDTO, String>() {
-            private final ButtonCell cell = new ButtonCell();
+            private final ButtonCell cell = new EditButtonCell(stringMessages.edit());
             @Override
             public Cell<String> getCell() {
                 return cell;
@@ -1001,7 +1015,7 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
 
             @Override
             public String getValue(LeaderboardRowDTO object) {
-                return stringMessages.edit();
+                return "";//stringMessages.edit();
             }
         });
         return result;
@@ -1079,6 +1093,51 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
 
     public SailingServiceWriteAsync getSailingService() {
         return sailingServiceWrite;
+    }
+    
+    /**
+     * Special edit button with edit icon and title to save space in data table.
+     */
+    final class EditButtonCell extends ButtonCell {
+        
+        private final String title;
+        
+        public EditButtonCell(String title) {
+            super(SimpleSafeHtmlRenderer.getInstance());
+            this.title = title;
+        }
+        
+        @Override
+        public void render(Context context, SafeHtml data, SafeHtmlBuilder sb) {
+            sb.appendHtmlConstant("<button class=\"editButton\" type=\"button\" tabindex=\"-1\" title=\"");
+            sb.appendEscaped(title);
+            sb.appendHtmlConstant("\">");
+            if (data != null) {
+              sb.append(data);
+            }
+            sb.appendHtmlConstant("</button>");
+        }
+        
+    }
+    
+    /**
+     * Special edit button with edit icon and title to save space in data table.
+     */
+    final class SuppressButtonCell extends ButtonCell {
+        
+        public SuppressButtonCell() {
+            super(SimpleSafeHtmlRenderer.getInstance());
+        }
+        
+        @Override
+        public void render(Context context, SafeHtml data, SafeHtmlBuilder sb) {
+            sb.appendHtmlConstant("<button class=\"suppressButton\" type=\"button\" tabindex=\"-1\">");
+            if (data != null) {
+              sb.append(data);
+            }
+            sb.appendHtmlConstant("</button>");
+        }
+        
     }
     
 }

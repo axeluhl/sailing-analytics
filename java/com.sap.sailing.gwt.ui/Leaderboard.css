@@ -174,3 +174,34 @@ table button {
 
 .busyIndicator-Circle {
 }
+
+/* quick fix general styles editable leaderboard */
+.editableLeaderboardPanel {
+	padding: 5px;
+}
+.suppressedCompetitorsLabel {
+	margin-top: 10px;
+	margin-bottom: 5px;
+}
+
+/* quick fix to hide unused selection row of editable leaderboard table */
+table.editableLeaderboardTable tr th:first-child { display: none; }
+table.editableLeaderboardTable tr td:first-child { display: none; }
+
+/* edit button of editable leaderboard table */
+.editableLeaderboardTable .editButton {
+  border: none; /* Remove borders */
+  color: white; /* White text */
+  padding: 0; 
+  cursor: pointer; /* Mouse pointer on hover */
+  background: url(images/edit.png) left center no-repeat;
+  width: 16px;
+  height: 16px;
+}
+
+.editableLeaderboardTable .suppressButton, .suppressedCompetitorsTable .suppressButton {
+  padding: 0 2px; 
+  cursor: pointer; /* Mouse pointer on hover */
+  height: 18px;
+  font-size: 10px;
+}
