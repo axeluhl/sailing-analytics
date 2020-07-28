@@ -342,11 +342,9 @@
           <groupId>org.eclipse.tycho</groupId>
           <artifactId>tycho-compiler-plugin</artifactId>
           <configuration>
-            <!-- Toolchan stuff doesn't work on Lean DI,
-                 so we need to hard-code Java 1.7 (Android 5.1 SDK isn't compatible with Java 8)
-                 compatibility for all builds. -->
-            <source>1.7</source>
-            <target>1.7</target>
+            <!-- TODO validate that 1.8 is OK also in the SAP-internal Android build -->
+            <source>1.8</source>
+            <target>1.8</target>
           </configuration>
         </plugin>
       </plugins>
