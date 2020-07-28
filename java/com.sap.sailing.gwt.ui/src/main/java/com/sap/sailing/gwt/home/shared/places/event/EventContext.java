@@ -1,8 +1,5 @@
 package com.sap.sailing.gwt.home.shared.places.event;
 
-import java.nio.charset.StandardCharsets;
-
-import com.gargoylesoftware.htmlunit.util.UrlUtils;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.RegattaAnalyticsDataManager;
 import com.sap.sailing.gwt.home.shared.places.ShareablePlaceContext;
 import com.sap.sse.gwt.client.URLEncoder;
