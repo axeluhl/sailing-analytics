@@ -49,11 +49,11 @@ public class AmazonS3FileStorageServiceImpl extends BaseFileStorageServiceImpl i
     private static final String regionRetrievalHost = "s3-eu-west-1.amazonaws.com";
 
     private final FileStorageServicePropertyImpl accessId = new FileStorageServicePropertyImpl("accessId", false,
-            "s3AccessIdDesc");
+            /* isPassword */ false, "s3AccessIdDesc");
     private final FileStorageServicePropertyImpl accessKey = new FileStorageServicePropertyImpl("accessKey", false,
-            "s3AccessKeyDesc");
+            /* isPassword */ true, "s3AccessKeyDesc");
     private final FileStorageServicePropertyImpl bucketName = new FileStorageServicePropertyImpl("bucketName", true,
-            "s3BucketNameDesc");
+            /* isPassword */ false, "s3BucketNameDesc");
 
     public AmazonS3FileStorageServiceImpl(BundleContext bundleContext) {
         super(NAME, "s3Desc", bundleContext);
