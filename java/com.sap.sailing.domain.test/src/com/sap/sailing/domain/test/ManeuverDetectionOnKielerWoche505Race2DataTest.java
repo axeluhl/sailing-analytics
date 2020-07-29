@@ -2,7 +2,6 @@ package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -38,7 +37,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class ManeuverDetectionOnKielerWoche505Race2DataTest extends OnlineTracTracBasedTest {
+public class ManeuverDetectionOnKielerWoche505Race2DataTest extends AbstractManeuverDetectionTestCase {
 
     public ManeuverDetectionOnKielerWoche505Race2DataTest() throws MalformedURLException, URISyntaxException {
     }
@@ -103,17 +102,4 @@ public class ManeuverDetectionOnKielerWoche505Race2DataTest extends OnlineTracTr
         c.set(2011, 6-1, 23, 16, 22, 25);
         assertManeuver(maneuvers, ManeuverType.JIBE, Tack.PORT, new MillisecondsTimePoint(c.getTime()), /* tolerance in milliseconds */ 5000);
     }
-
-    private void assertManeuver(Iterable<Maneuver> maneuvers, ManeuverType type, Tack newTack,
-            MillisecondsTimePoint timePoint, int toleranceInMilliseconds) {
-        for (Maneuver maneuver : maneuvers) {
-            if (maneuver.getType() == type && (newTack == null || newTack == maneuver.getNewTack()) &&
-                    Math.abs(maneuver.getTimePoint().asMillis() - timePoint.asMillis()) <= toleranceInMilliseconds) {
-                return;
-            }
-        }
-        fail("Didn't find maneuver type " + type + (newTack == null ? "" : " to new tack " + newTack) + " in "
-                + toleranceInMilliseconds + "ms around " + timePoint);
-    }
-
 }
