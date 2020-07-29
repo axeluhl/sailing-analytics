@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.8"?>
-<target name="Race Analysis Target" sequenceNumber="156">
+<target name="Race Analysis Target" sequenceNumber="157">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="javax.ws.rs" version="1.1.1.v20130318-1750"/>
@@ -123,7 +123,7 @@
 <repository location="https://p2.sapsailing.com/p2/sailing/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="com.amazon.aws.aws-java-api.feature.group" version="2.13.58"/>
+<unit id="com.amazon.aws.aws-java-api.feature.group" version="2.13.61"/>
 <repository location="https://p2.sapsailing.com/p2/aws-sdk/"/>
 </location>
 </locations>
@@ -287,6 +287,7 @@
 <plugin id="org.apache.xmlbeans.source"/>
 <plugin id="org.dom4j.source"/>
 <plugin id="com.amazon.aws.aws-java-api"/>
+<plugin id="com.amazon.aws.aws-java-api.source"/>
 </includeBundles>
 <targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 </target>

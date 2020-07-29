@@ -965,4 +965,15 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     void addOrReplaceExpeditionDeviceConfiguration(UUID deviceConfigurationId, String name, Integer expeditionBoatId);
 
     void removeExpeditionDeviceConfiguration(UUID deviceUuid);
+    
+    /**
+     * Returns the number of tracked races that are not {@link TrackedRace#hasFinishedLoading() done with loading}.
+     */
+    int getNumberOfTrackedRacesStillLoading();
+
+    /**
+     * Returns the number of tracked races restored during server start-up that are
+     * {@link TrackedRace#hasFinishedLoading() done with loading}.
+     */
+    int getNumberOfTrackedRacesRestoredDoneLoading();
 }

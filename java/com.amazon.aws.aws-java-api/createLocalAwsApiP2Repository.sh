@@ -6,12 +6,17 @@
 # be tested with the local target platform definition. If everything works fine, the uploadAwsApiRepositoryToServer.sh script
 # can be used to update the repository contents at p2.sapsailing.com with the updated local target platform repository contents.
 LIB=lib
+JAR=`which jar`
+if [ "$JAR" = "" ]; then
+  JAR="$JAVA_HOME/bin/jar"
+fi
 CLASSPATH_FILE=".classpath"
 MANIFEST_FILE="MANIFEST.MF"
 BUILD_PROPERTIES_FILE="build.properties"
 WORKSPACE=`realpath \`dirname $0\`/../..`
 UPDATE_SITE_PROJECT=${WORKSPACE}/java/com.amazon.aws.aws-java-api.updatesite
 FEATURE_XML=${UPDATE_SITE_PROJECT}/features/aws-sdk/feature.xml
+SITE_XML=${UPDATE_SITE_PROJECT}/site.xml
 TARGET_DEFINITION="${WORKSPACE}/java/com.sap.sailing.targetplatform/definitions/race-analysis-p2-remote.target"
 WRAPPER_BUNDLE="${WORKSPACE}/java/com.amazon.aws.aws-java-api"
 cd ${WRAPPER_BUNDLE}
@@ -44,6 +49,7 @@ echo "Patching version ${VERSION} into pom.xml..."
 # exclude SNAPSHOT version used for the parent pom; only match the explicit SDK version
 sed -i -e 's/<version>\([0-9.]*\)<\/version>/<version>'${VERSION}'<\/version>/' ${WRAPPER_BUNDLE}/pom.xml
 echo "Generating the META-INF/MANIFEST.MF file..."
+mkdir -p "${WRAPPER_BUNDLE}/META-INF"
 echo -n "Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: aws-java-api
@@ -61,7 +67,7 @@ echo -n ".
 Automatic-Module-Name: com.amazon.aws.aws-java-api
 Export-Package:" >>${WRAPPER_BUNDLE}/META-INF/${MANIFEST_FILE}
 PACKAGES=$(for l in ${LIBS}; do
-  jar tvf ${l} | grep "\.class\>" | sed -e 's/^.* \([^ ]*\)$/\1/' -e 's/\/[^/]*\.class\>//' | grep "^software/amazon"
+  "$JAR" tvf ${l} | grep "\.class\>" | sed -e 's/^.* \([^ ]*\)$/\1/' -e 's/\/[^/]*\.class\>//' | grep "^software/amazon"
 done | sort -u | tr / . )
 for p in `echo "${PACKAGES}" | while read i; do echo $i | sed -e 's/^\([-a-zA-Z0-9_.]*\)\>.*$/\1/'; done | head --lines=-1`; do
    echo " ${p}," >>${WRAPPER_BUNDLE}/META-INF/${MANIFEST_FILE}
@@ -82,10 +88,30 @@ cd ..
 mvn clean install
 mkdir -p ${UPDATE_SITE_PROJECT}/plugins/aws-sdk
 rm -rf ${UPDATE_SITE_PROJECT}/plugins/aws-sdk/*
-mv bin/com.amazon.aws.aws-java-api-${VERSION}.jar ${UPDATE_SITE_PROJECT}/plugins/aws-sdk
+mv bin/com.amazon.aws.aws-java-api-${VERSION}.jar ${UPDATE_SITE_PROJECT}/plugins/aws-sdk/
+echo "Unpacking source bundles..."
+cd ${LIB}
+for l in *-sources.jar; do
+  jar xvf $l software
+done
+echo "Creating sources JAR..."
+SOURCE_JAR_MANIFEST=source-manifest.mf
+echo "Manifest-Version: 1.0
+Bundle-SymbolicName: com.amazon.aws.aws-java-api.source
+Bundle-Name: AWS SDK Sources
+Bundle-Version: ${VERSION}
+Eclipse-SourceBundle: com.amazon.aws.aws-java-api;version=\"${VERSION}\"
+Bundle-ManifestVersion: 2" >${SOURCE_JAR_MANIFEST}
+jar cvfm com.amazon.aws.aws-java-api.source_${VERSION}.jar ${SOURCE_JAR_MANIFEST} software/
+rm ${SOURCE_JAR_MANIFEST}
+echo "Removing extracted sources..."
+rm -rf software
+mv com.amazon.aws.aws-java-api.source_${VERSION}.jar ${UPDATE_SITE_PROJECT}/plugins/aws-sdk
 cd ${UPDATE_SITE_PROJECT}
 echo "Patching update site's feature.xml..."
 sed -i -e 's/^\( *\)version="[0-9.]*"/\1version="'${VERSION}'"/' ${FEATURE_XML}
+echo "Patching update site's site.xml..."
+sed -i -e 's/com.amazon.aws.aws-java-api\(\.source\)\?_\([0-9.]*\)\.jar/com.amazon.aws.aws-java-api\1_'${VERSION}'.jar/' -e '/feature url=/s/version="[0-9.]*"/version="'${VERSION}'"/' ${SITE_XML}
 echo "Building update site..."
 mvn clean install
 echo "Patching SDK version in target platform definition ${TARGET_DEFINITION}..."
