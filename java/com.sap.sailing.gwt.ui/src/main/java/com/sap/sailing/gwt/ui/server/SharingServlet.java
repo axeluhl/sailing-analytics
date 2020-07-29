@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,6 +25,7 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.NotFoundException;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.security.SecurityService;
 
@@ -39,9 +41,9 @@ public class SharingServlet extends HttpServlet {
     private static final Object SERIES = "series";
     private static final String PATH_SEPARATOR = "/";
     private static final String DEFAULT_TITLE = "SAP Sailing";
-    private static final String DEFAULT_DESCRIPTION = "Help sailors analyze performance and optimize strategy &#8226; Bring fans closer to the action " +
-            "&#8226; Provide the media with information and insights to deliver a greater informed commentary";
-    
+    private static final String DEFAULT_DESCRIPTION = "Help sailors analyze performance and optimize strategy &#8226; Bring fans closer to the action "
+            + "&#8226; Provide the media with information and insights to deliver a greater informed commentary";
+
     private final ConcurrentHashMap<String, byte[]> cache = new ConcurrentHashMap<>();
 
     protected <T> T getService(Class<T> clazz) {
@@ -124,9 +126,9 @@ public class SharingServlet extends HttpServlet {
         String imageUrl = DEFAULT_TEASER_URL;
         // The first path variable in the pattern is the type of resource. Either series or event
         if (splitLength > 1 && EVENTS.equals(split[0])) {
-            if(splitLength == 4 && split[2] != null) {
+            if (splitLength == 4 && split[2] != null) {
                 placeUrl += "#/regatta/overview";
-            }else {
+            } else {
                 placeUrl += "#/event";
             }
             final UUID eventId = UUID.fromString(split[1]);
@@ -139,27 +141,30 @@ public class SharingServlet extends HttpServlet {
                 if (eventDescription != null && !eventDescription.equals("")) {
                     description = eventDescription;
                 }
-                //TODO: Add event specific images, if they are approved to be shared.
+                final String specificTeaserImageUrl = findSpecificTeaserImageUrl(event);
+                if (specificTeaserImageUrl != null) {
+                    imageUrl = specificTeaserImageUrl;
+                }
                 // The item at third position will always be regattas if present.
                 // TODO: change to UUID, when regattaIdentifiers are changed
-                if(splitLength == 4 && split[2] != null) {
+                if (splitLength == 4 && split[2] != null) {
                     final String regattaIdentifier = split[3];
-                    Regatta regatta = eventService.getRegattaByName(regattaIdentifier);
+                    final Regatta regatta = eventService.getRegattaByName(regattaIdentifier);
                     if (regatta != null) {
                         placeUrl += "&regattaId=" + regattaIdentifier;
-//                                + URLEncoder.encode(regattaIdentifier, StandardCharsets.UTF_8.toString());
-                    }else {
+                        // + URLEncoder.encode(regattaIdentifier, StandardCharsets.UTF_8.toString());
+                    } else {
                         throw new NotFoundException("No regatta with identifier:" + regattaIdentifier);
                     }
                 }
             } else {
                 throw new NotFoundException("No event with id:" + eventId);
             }
-        } else if(splitLength == 2 && SERIES.equals(split[0])){
+        } else if (splitLength == 2 && SERIES.equals(split[0])) {
             placeUrl += "#/series";
             final UUID leaderboardGroupId = UUID.fromString(split[1]);
             final LeaderboardGroup leaderboardGroup = eventService.getLeaderboardGroupByID(leaderboardGroupId);
-            if(leaderboardGroup != null) {
+            if (leaderboardGroup != null) {
                 securityService.checkCurrentUserReadPermission(leaderboardGroup);
                 placeUrl += "/:leaderboardGroupId=" + leaderboardGroupId;
                 title = leaderboardGroup.getName();
@@ -167,9 +172,16 @@ public class SharingServlet extends HttpServlet {
                 if (lbgDescription != null && !lbgDescription.equals("")) {
                     description = lbgDescription;
                 }
-                //TODO: find image for series.
+                final List<Event> eventsForSeriesOrdered = HomeServiceUtil.getEventsForSeriesOrdered(leaderboardGroup, eventService);
+                if(!eventsForSeriesOrdered.isEmpty()) {
+                    final Event event = eventsForSeriesOrdered.get(eventsForSeriesOrdered.size() -1);
+                    final String specificTeaserImageUrl = findSpecificTeaserImageUrl(event);
+                    if(specificTeaserImageUrl != null) {
+                        imageUrl = specificTeaserImageUrl;
+                    }
+                }
             }
-        }else {
+        } else {
             throw new IllegalArgumentException("path did not contain appropriate amount of arguments");
         }
         map.put("title", title);
@@ -178,5 +190,18 @@ public class SharingServlet extends HttpServlet {
         map.put("redirect_url", placeUrl);
         map.put("image", imageUrl);
         return map;
+    }
+
+    private String findSpecificTeaserImageUrl(final Event event) {
+        final String thumbnailUrl = HomeServiceUtil.findEventThumbnailImageUrlAsString(event);
+        if(thumbnailUrl != null) {
+            return thumbnailUrl;
+        }else {
+            final String stageImageUrl = HomeServiceUtil.getStageImageURLAsString(event);
+            if(stageImageUrl != null) {
+                return stageImageUrl;
+            }
+        }
+        return null;
     }
 }
