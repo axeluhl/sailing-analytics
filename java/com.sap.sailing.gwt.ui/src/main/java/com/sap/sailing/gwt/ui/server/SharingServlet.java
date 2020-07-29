@@ -28,7 +28,7 @@ import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.security.SecurityService;
 
 public class SharingServlet extends HttpServlet {
-    private static final String DEFAULT_TEASER_URL = "/bin/com/sap/sailing/gwt/home/shared/default_stage_event_teaser.jpg";
+    private static final String DEFAULT_TEASER_URL = "http://media.sapsailing.com/2014/505Worlds/Images_Homepage/505Worlds2014_eventteaser.jpg";
     private static final String SHARED_PROXY_RESOURCE = "/com/sap/sailing/gwt/ui/opengraph/SharedProxy.html";
     private static final long serialVersionUID = 6990478954607011261L;
     private static final Logger logger = Logger.getLogger(SharingServlet.class.getName());
@@ -118,12 +118,10 @@ public class SharingServlet extends HttpServlet {
         final Map<String, String> map = new HashMap<>();
         final String[] split = pathInfo.replaceFirst(PATH_SEPARATOR, "").split(PATH_SEPARATOR);
         int splitLength = split.length;
-        String fullLocalAddress = "http://" + req.getServerName() + ":" + req.getServerPort() + GWT_PREFIX;
-        String redirectAdrress = fullLocalAddress + HOME_HTML;
-        String placeUrl = redirectAdrress;
+        String placeUrl = "http://" + req.getServerName() + ":" + req.getServerPort() + GWT_PREFIX + HOME_HTML;
         String title = DEFAULT_TITLE;
         String description = DEFAULT_DESCRIPTION;
-        String imageUrl = fullLocalAddress + DEFAULT_TEASER_URL;
+        String imageUrl = DEFAULT_TEASER_URL;
         // The first path variable in the pattern is the type of resource. Either series or event
         if (splitLength > 1 && EVENTS.equals(split[0])) {
             if(splitLength == 4 && split[2] != null) {
