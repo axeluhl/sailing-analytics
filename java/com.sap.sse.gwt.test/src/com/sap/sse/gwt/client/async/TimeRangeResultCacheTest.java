@@ -18,8 +18,8 @@ import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util.Pair;
 
 public class TimeRangeResultCacheTest {
-    private static <R> AsyncCallback<List<Pair<TimeRange, R>>> getCallback(boolean assertSuccess) {
-        return new AsyncCallback<List<Pair<TimeRange, R>>>() {
+    private static AsyncCallback<Void> getCallback(boolean assertSuccess) {
+        return new AsyncCallback<Void>() {
             private boolean triggered = false;
             @Override
             public void onFailure(Throwable caught) {
@@ -29,7 +29,7 @@ public class TimeRangeResultCacheTest {
                 }
             }
             @Override
-            public void onSuccess(List<Pair<TimeRange, R>> result) {
+            public void onSuccess(Void result) {
                 assertTriggeredOnce();
                 if (!assertSuccess) {
                     assertTrue("Expected onFailure but got onSuccess", false); // Fail test
@@ -61,27 +61,37 @@ public class TimeRangeResultCacheTest {
         TimeRangeAsyncAction<Void, Integer> action = getDummyAction();
         final AtomicBoolean callbackHasRun = new AtomicBoolean(false);
         assertEquals(0, cache.getCacheSize());
-        assertEquals(timeRange, cache.trimAndRegisterRequest(timeRange, /* force */ false, action, new AsyncCallback<List<Pair<TimeRange,Void>>>() {
+        assertEquals(timeRange, cache.trimAndRegisterRequest(timeRange, /* force */ false, action, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
                 assertTrue(false);
             }
             @Override
-            public void onSuccess(List<Pair<TimeRange, Void>> result) {
+            public void onSuccess(Void result) {
                 List<Pair<TimeRange, Void>> expectedResult = new ArrayList<>(1);
                 expectedResult.add(new Pair<>(timeRange, null));
-                assertArrayEquals(expectedResult.toArray(), result.toArray());
+                assertArrayEquals(expectedResult.toArray(), cache.getResults(action).toArray());
                 assertFalse(callbackHasRun.getAndSet(true)); // Fails if run more than once
             }
         }));
         assertEquals(1, cache.getCacheSize());
         cache.registerResult(action, null);
-        assertEquals(0, cache.getCacheSize());
+        assertEquals(0, cache.getCacheSize()); // Request gets removed by cache.getResults(action) in callback
         assertTrue(callbackHasRun.get());
     }
 
     @Test
     public void testDependentRequests() {
+        /* Request graph:
+
+            first (completes)
+              |  \
+              |   second (fails)
+              |  /
+            third (successful but does not complete action because of second)
+              |
+            fourth (completes action since third is successful)
+        */
         TimeRangeResultCache<Void> cache = new TimeRangeResultCache<>();
         final TimeRangeAsyncAction<Void, Integer> firstAction = getDummyAction();
         final TimeRangeAsyncAction<Void, Integer> secondAction = getDummyAction();
@@ -111,7 +121,8 @@ public class TimeRangeResultCacheTest {
         cache.registerResult(fourthAction, null);
         assertEquals(2, cache.getCacheSize());
         cache.registerResult(thirdAction, null);
-        assertEquals(0, cache.getCacheSize());
+        assertEquals(2, cache.getCacheSize());
+        cache.getResults(fourthAction);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -180,10 +191,10 @@ public class TimeRangeResultCacheTest {
         final AtomicBoolean callbackHasRun = new AtomicBoolean(false);
         assertEquals(leftRange, cache.trimAndRegisterRequest(leftRange, true, leftAction, getCallback(true)));
         assertEquals(outsideRange, cache.trimAndRegisterRequest(outsideRange, true, outsideAction, getCallback(true)));
-        TimeRange trimmedRange = cache.trimAndRegisterRequest(requestedRange, /* force */ false, requestAction, new AsyncCallback<List<Pair<TimeRange,Integer>>>() {
+        TimeRange trimmedRange = cache.trimAndRegisterRequest(requestedRange, /* force */ false, requestAction, new AsyncCallback<Void>() {
             @Override
-            public void onSuccess(List<Pair<TimeRange, Integer>> result) {
-                assertArrayEquals(expectedResult.toArray(), result.toArray());
+            public void onSuccess(Void result) {
+                assertArrayEquals(expectedResult.toArray(), cache.getResults(requestAction).toArray());
                 assertFalse(callbackHasRun.getAndSet(true));
             }
             @Override
