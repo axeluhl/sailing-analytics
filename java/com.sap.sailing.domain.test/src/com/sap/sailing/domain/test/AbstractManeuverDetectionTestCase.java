@@ -54,7 +54,8 @@ public abstract class AbstractManeuverDetectionTestCase extends OnlineTracTracBa
                 return;
             }
         }
-        fail("Didn't find maneuver type " + maneuverType + " in " + toleranceInMillis + "ms around " + maneuverTimePoint);
+        fail("Didn't find maneuver type " + maneuverType + " in " + toleranceInMillis + "ms around " + maneuverTimePoint
+                + "; maneuvers found instead: " + maneuverList);
     }
 
     /**

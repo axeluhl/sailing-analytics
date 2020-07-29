@@ -52,7 +52,7 @@ public class ManeuverDetectionOnKielerWoche505Race2DataTest extends OnlineTracTr
                 new ReceiverType[] { ReceiverType.MARKPASSINGS, ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS });
         OnlineTracTracBasedTest.fixApproximateMarkPositionsForWindReadOut(getTrackedRace(), new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime()));
         getTrackedRace().recordWind(new WindImpl(/* position */ null, MillisecondsTimePoint.now(),
-                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(70))), new WindSourceImpl(WindSourceType.WEB));
+                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(60))), new WindSourceImpl(WindSourceType.WEB));
     }
     
     @Test
