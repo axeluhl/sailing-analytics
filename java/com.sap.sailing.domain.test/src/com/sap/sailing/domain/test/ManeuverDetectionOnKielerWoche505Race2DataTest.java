@@ -8,12 +8,14 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.TimeZone;
+import java.util.logging.Logger;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -34,10 +36,13 @@ import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class ManeuverDetectionOnKielerWoche505Race2DataTest extends AbstractManeuverDetectionTestCase {
+    private static final Logger logger = Logger
+            .getLogger(ManeuverDetectionOnKielerWoche505Race2DataTest.class.getName());
 
     public ManeuverDetectionOnKielerWoche505Race2DataTest() throws MalformedURLException, URISyntaxException {
     }
@@ -52,6 +57,9 @@ public class ManeuverDetectionOnKielerWoche505Race2DataTest extends AbstractMane
         OnlineTracTracBasedTest.fixApproximateMarkPositionsForWindReadOut(getTrackedRace(), new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime()));
         getTrackedRace().recordWind(new WindImpl(/* position */ null, MillisecondsTimePoint.now(),
                 new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(60))), new WindSourceImpl(WindSourceType.WEB));
+        logger.info("Waiting for things to settle in, such as wind updates...");
+        Thread.sleep(2000);
+        logger.info("...hopefully all is settled now.");
     }
     
     @Test
@@ -84,6 +92,8 @@ public class ManeuverDetectionOnKielerWoche505Race2DataTest extends AbstractMane
         NavigableSet<MarkPassing> hassosMarkPassings = getTrackedRace().getMarkPassings(hasso);
         Iterable<Maneuver> maneuvers = getTrackedRace().getManeuvers(hasso, hassosMarkPassings.first().getTimePoint(),
                 hassosMarkPassings.last().getTimePoint(), /* waitForLatest */ true);
+        maneuversInvalid = new ArrayList<Maneuver>();
+        Util.addAll(maneuvers, maneuversInvalid);
         Calendar c = new GregorianCalendar(TimeZone.getTimeZone("Europe/Berlin"));
         c.clear();
         c.set(2011, 6-1, 23, 16, 5, 47);
