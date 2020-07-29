@@ -36,7 +36,6 @@ import javax.servlet.Filter;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.IncorrectCredentialsException;
@@ -2534,17 +2533,11 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         User user = getUserByName(username);
         if (user != null) {
             String newSubscriptionPlanId = newSubscription.getPlanId();
-            if (StringUtils.isNotEmpty(newSubscriptionPlanId)) {
-                Subscription currentSubscription = user.getSubscriptionByPlan(newSubscriptionPlanId);
-                if (shouldUpdateUserRolesForSubscription(currentSubscription, newSubscription)) {
-                    updateUserRolesOnSubscriptionChange(user, currentSubscription, newSubscription);
-                }
-
-                user.setSubscriptions(buildNewUserSubscriptions(user, newSubscription));
-            } else {
-                user.setSubscriptions(new Subscription[] { newSubscription });
+            Subscription currentSubscription = user.getSubscriptionByPlan(newSubscriptionPlanId);
+            if (shouldUpdateUserRolesForSubscription(currentSubscription, newSubscription)) {
+                updateUserRolesOnSubscriptionChange(user, currentSubscription, newSubscription);
             }
-
+            user.setSubscriptions(buildNewUserSubscriptions(user, newSubscription));
             store.updateUser(user);
             return null;
         } else {
@@ -2552,16 +2545,26 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         }
     }
 
+    /**
+     * Build new subscription list for user from new subscription. This might update a subscription model, or add new
+     * one to user's subscription list
+     * 
+     * @param user
+     *            User
+     * @param newSubscription
+     *            New subscription
+     * @return new subscription list for user
+     */
     private Subscription[] buildNewUserSubscriptions(User user, Subscription newSubscription) {
         Subscription[] newUserSubscriptions = null;
         Subscription[] subscriptions = user.getSubscriptions();
         if (newSubscription != null) {
-            if (subscriptions == null || subscriptions.length == 0) {
+            if (subscriptions == null || subscriptions.length == 0 || !newSubscription.hasPlan()) {
                 newUserSubscriptions = new Subscription[] { newSubscription };
             } else {
                 int i = 0;
                 for (Subscription subscription : subscriptions) {
-                    if (subscription.getPlanId().equals(newSubscription.getPlanId())) {
+                    if (!subscription.hasPlan() || subscription.getPlanId().equals(newSubscription.getPlanId())) {
                         subscriptions[i] = newSubscription;
                         newUserSubscriptions = subscriptions;
                         break;
@@ -2579,27 +2582,55 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         return newUserSubscriptions;
     }
 
+    /**
+     * Add or remove subscription plan's roles for user
+     * 
+     * @param user
+     *            User
+     * @param currentSubscription
+     *            current user subscription
+     * @param newSubscription
+     *            new user subscription
+     * @throws UserManagementException
+     */
     private void updateUserRolesOnSubscriptionChange(User user, Subscription currentSubscription,
             Subscription newSubscription) throws UserManagementException {
         logger.log(Level.INFO, "Update user subscription roles for user " + user.getName());
-        if (currentSubscription != null && currentSubscription.getPlanId() != null
-                && currentSubscription.isActiveSubscription()) {
-            SubscriptionPlan currentPlan = SubscriptionPlanHolder.getInstance()
-                    .getPlan(currentSubscription.getPlanId());
-            if (currentPlan != null) {
-                UUID[] roleDefinitionIds = currentPlan.getRoleDefinitionIds();
-                for (UUID roleDefId : roleDefinitionIds) {
-                    store.removeRoleFromUser(user.getName(), new Role(getRoleDefinition(roleDefId), null, user));
-                }
+        // in case new subscription has no planId, it means user doesn't subscribe to any plans
+        // so all plan's roles assigned to the user must be removed
+        if (newSubscription != null && !newSubscription.hasPlan()) {
+            SubscriptionPlan[] plans = SubscriptionPlanHolder.getInstance().getPlanList();
+            for (SubscriptionPlan plan : plans) {
+                removeUserPlanRoles(user, plan);
+            }
+        } else {
+            if (currentSubscription != null && currentSubscription.hasPlan()
+                    && currentSubscription.isActiveSubscription()) {
+                SubscriptionPlan currentPlan = SubscriptionPlanHolder.getInstance()
+                        .getPlan(currentSubscription.getPlanId());
+                removeUserPlanRoles(user, currentPlan);
+            }
+            if (newSubscription != null && newSubscription.hasPlan() && newSubscription.isActiveSubscription()) {
+                SubscriptionPlan newPlan = SubscriptionPlanHolder.getInstance().getPlan(newSubscription.getPlanId());
+                addUserPlanRoles(user, newPlan);
             }
         }
-        if (newSubscription != null && newSubscription.getPlanId() != null && newSubscription.isActiveSubscription()) {
-            SubscriptionPlan newPlan = SubscriptionPlanHolder.getInstance().getPlan(newSubscription.getPlanId());
-            if (newPlan != null) {
-                UUID[] roleDefinitionIds = newPlan.getRoleDefinitionIds();
-                for (UUID roleDefId : roleDefinitionIds) {
-                    store.addRoleForUser(user.getName(), new Role(getRoleDefinition(roleDefId), null, user));
-                }
+    }
+
+    private void removeUserPlanRoles(User user, SubscriptionPlan plan) throws UserManagementException {
+        if (plan != null) {
+            UUID[] roleDefinitionIds = plan.getRoleDefinitionIds();
+            for (UUID roleDefId : roleDefinitionIds) {
+                store.removeRoleFromUser(user.getName(), new Role(getRoleDefinition(roleDefId), null, user));
+            }
+        }
+    }
+
+    private void addUserPlanRoles(User user, SubscriptionPlan plan) throws UserManagementException {
+        if (plan != null) {
+            UUID[] roleDefinitionIds = plan.getRoleDefinitionIds();
+            for (UUID roleDefId : roleDefinitionIds) {
+                store.addRoleForUser(user.getName(), new Role(getRoleDefinition(roleDefId), null, user));
             }
         }
     }
@@ -2626,9 +2657,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
      */
     private boolean isUserSubscriptionPlanChanged(Subscription currentSubscription, Subscription newSubscription) {
         final boolean result;
-        if ((currentSubscription == null || currentSubscription.getSubscriptionId() == null)
-                && (newSubscription == null || newSubscription.getSubscriptionId() == null)) {
-            result = false;
+        if (!newSubscription.hasPlan()) {
+            result = true;
         } else {
             String currentPlan = null;
             String newPlan = null;

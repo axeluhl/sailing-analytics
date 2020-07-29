@@ -136,6 +136,10 @@ public abstract class Subscription implements Serializable {
         return manualUpdatedAt;
     }
 
+    public boolean hasPlan() {
+        return planId != null && !planId.isEmpty();
+    }
+
     /**
      * Check if subscription is active, base on this user will gain roles for the subscription
      * 

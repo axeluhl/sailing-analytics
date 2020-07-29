@@ -44,25 +44,45 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
         }
     }
 
+    /**
+     * 
+     * @return {@code true} if event occurred at time is less than latest user subscription updated time
+     */
     private boolean isOutdatedEvent(SubscriptionWebHookEvent event, User user) {
         final long occuredAt = event.getEventOccurredAt();
         final String planId = event.getPlanId();
+        boolean isOutdated = false;
         if (StringUtils.isNotEmpty(planId)) {
             Subscription subscription = user.getSubscriptionByPlan(planId);
-            return subscription != null && (occuredAt < subscription.getLatestEventTime()
-                    || occuredAt < subscription.getManuallyUpdatedAt());
+            if (subscription != null) {
+                isOutdated = isOutdatedEventTime(occuredAt, subscription);
+            } else {
+                Subscription[] subscriptions = user.getSubscriptions();
+                if (subscriptions != null && subscriptions.length > 0) {
+                    for (Subscription sub : subscriptions) {
+                        if (!sub.hasPlan() && isOutdatedEventTime(occuredAt, sub)) {
+                            isOutdated = true;
+                            break;
+                        }
+                    }
+                }
+            }
         } else {
             Subscription[] subscriptions = user.getSubscriptions();
             if (subscriptions != null && subscriptions.length > 0) {
                 for (Subscription subscription : subscriptions) {
-                    if (occuredAt < subscription.getLatestEventTime()
-                            || occuredAt < subscription.getManuallyUpdatedAt()) {
-                        return true;
+                    if (isOutdatedEventTime(occuredAt, subscription)) {
+                        isOutdated = true;
+                        break;
                     }
                 }
             }
-            return false;
         }
+        return isOutdated;
+    }
+
+    private boolean isOutdatedEventTime(long occuredAt, Subscription subscription) {
+        return occuredAt < subscription.getLatestEventTime() || occuredAt < subscription.getManuallyUpdatedAt();
     }
 
     private void processEvent(SubscriptionWebHookEvent event, User user) throws UserManagementException {
