@@ -105,7 +105,6 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
 import com.sap.sse.common.search.Searchable;
 import com.sap.sse.filestorage.FileStorageManagementService;
@@ -143,7 +142,8 @@ import com.sap.sse.shared.media.VideoDescriptor;
  *
  */
 public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetcher, RegattaRegistry, RaceFetcher,
-        LeaderboardRegistry, EventResolver, LeaderboardGroupResolver, TrackerManager, Searchable<LeaderboardSearchResult, KeywordQuery>,
+        LeaderboardRegistry, EventResolver, LeaderboardGroupResolver, TrackerManager,
+        Searchable<LeaderboardSearchResult, KeywordQueryWithOptionalEventQualification>,
         ReplicableWithObjectInputStream<RacingEventService, RacingEventServiceOperation<?>>, RaceLogAndTrackedRaceResolver,
         SensorFixStoreSupplier, WindFinderReviewedSpotsCollectionIdProvider {
     @Override
@@ -370,6 +370,13 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *         the iterable returned, and no risk of a {@link ConcurrentModificationException} exists
      */
     Iterable<Event> getAllEvents();
+    
+    /**
+     * @return a thread-safe copy of the service events filtered by {@link eventIds} parameter with taking the
+     *         {@code include} include parameter into account; it's safe for callers to iterate over the iterable
+     *         returned, and no risk of a {@link ConcurrentModificationException} exists
+     */
+    Iterable<Event> getEventsSelectively(boolean include, Iterable<UUID> eventIds);
 
     /**
      * Creates a new event with the name <code>eventName</code>, the venue <code>venue</code> and the regattas with the
@@ -377,7 +384,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * 
      * @param eventName
      *            The name of the new event
-     * @param eventDescription TODO
      * @param startDate
      *            The start date of the event
      * @param endDate
@@ -436,7 +442,21 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     Map<RemoteSailingServerReference, Util.Pair<Iterable<EventBase>, Exception>> getPublicEventsOfAllSailingServers();
 
-    RemoteSailingServerReference addRemoteSailingServerReference(String name, URL url);
+    RemoteSailingServerReference addRemoteSailingServerReference(String name, URL url, boolean include);
+
+    /**
+     * Updates the include flag and selected events id's for remote sailing server with the given name
+     * 
+     * @param name
+     *            is used to find the target remote sailing server reference by
+     * @param include
+     *            flag which determining the inclusion factor for selected events
+     * @param selectedEventIds
+     *            the list of selected event id's
+     * @return the updated remote sailing server reference
+     */
+    RemoteSailingServerReference updateRemoteSailingServerReference(String name, boolean include,
+            Set<UUID> selectedEventIds);
 
     void removeRemoteSailingServerReference(String name);
 
@@ -671,16 +691,20 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     void setDataImportDeleteProgressFromMapTimerWithoutReplication(UUID importOperationId);
 
     /**
-     * For the reference to a remote sailing server, updates its events cache and returns the event list
-     * or, if fetching the event list from the remote server did fail, the exception for which it failed.
+     * For the reference to a remote sailing server, updates its events cache and returns the event list or, if fetching
+     * the event list from the remote server did fail, the exception for which it failed. If {@link forceUpdate}
+     * parameter is <code>true</code> then remote server will be replaced in cache
      */
-    Util.Pair<Iterable<EventBase>, Exception> updateRemoteServerEventCacheSynchronously(RemoteSailingServerReference ref);
+    Util.Pair<Iterable<EventBase>, Exception> updateRemoteServerEventCacheSynchronously(
+            RemoteSailingServerReference ref, boolean forceUpdate);
+    
+    Util.Pair<Iterable<EventBase>, Exception> getCompleteRemoteServerReference(RemoteSailingServerReference ref);
 
     /**
      * Searches the content of this server, not that of any remote servers referenced by any {@link RemoteSailingServerReference}s.
      */
     @Override
-    Result<LeaderboardSearchResult> search(KeywordQuery query);
+    Result<LeaderboardSearchResult> search(KeywordQueryWithOptionalEventQualification query);
 
     /**
      * Searches a specific remote server whose reference has the {@link RemoteSailingServerReference#getName() name}
@@ -688,7 +712,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * <code>null</code> is returned. Otherwise, a non-<code>null</code> and possibly empty search result set is
      * returned.
      */
-    Result<LeaderboardSearchResultBase> searchRemotely(String remoteServerReferenceName, KeywordQuery query);
+    Result<LeaderboardSearchResultBase> searchRemotely(String remoteServerReferenceName, KeywordQueryWithOptionalEventQualification query);
 
     /**
      * Gets the configuration of the local sailing server instances.
@@ -941,4 +965,15 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     void addOrReplaceExpeditionDeviceConfiguration(UUID deviceConfigurationId, String name, Integer expeditionBoatId);
 
     void removeExpeditionDeviceConfiguration(UUID deviceUuid);
+    
+    /**
+     * Returns the number of tracked races that are not {@link TrackedRace#hasFinishedLoading() done with loading}.
+     */
+    int getNumberOfTrackedRacesStillLoading();
+
+    /**
+     * Returns the number of tracked races restored during server start-up that are
+     * {@link TrackedRace#hasFinishedLoading() done with loading}.
+     */
+    int getNumberOfTrackedRacesRestoredDoneLoading();
 }
