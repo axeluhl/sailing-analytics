@@ -79,6 +79,10 @@
       <modules>
         <module>com.sap.sse</module>
         <module>com.sap.sse.test</module>
+	<module>com.sap.sse.landscape</module>
+        <module>com.sap.sse.landscape.aws</module>
+        <module>com.sap.sse.landscape.aws.test</module>
+        <module>com.sap.sse.landscape.aws.persistence</module>
         <module>com.sap.sse.jersey.jaxbdependencyfragment</module>
         <module>com.sap.sse.jettyextensions</module>
         <module>com.sap.sailing.routeconverterjava11extension</module>
@@ -226,13 +230,12 @@
         <module>com.sap.sailing.feature.p2build</module>
         <module>com.sap.sailing.polars</module>
         <module>com.sap.sailing.windestimation</module>
-		<module>com.sap.sailing.windestimation.lab</module>
-		<module>com.sap.sailing.windestimation.test</module>
+        <module>com.sap.sailing.windestimation.lab</module>
+        <module>com.sap.sailing.windestimation.test</module>
         <module>com.sap.sailing.polars.datamining</module>
         <module>com.sap.sailing.polars.datamining.shared</module>
         <module>com.sap.sailing.polars.test</module>
-		<module>org.mp4parser.isoparser</module>
-        <module>com.amazon.aws.aws-java-api</module>
+        <module>org.mp4parser.isoparser</module>
         <!--
         com.sap.sailing.targetplatform.base
         left out on purpose: only invoke maven manually to build target platform
@@ -339,11 +342,9 @@
           <groupId>org.eclipse.tycho</groupId>
           <artifactId>tycho-compiler-plugin</artifactId>
           <configuration>
-            <!-- Toolchan stuff doesn't work on Lean DI,
-                 so we need to hard-code Java 1.7 (Android 5.1 SDK isn't compatible with Java 8)
-                 compatibility for all builds. -->
-            <source>1.7</source>
-            <target>1.7</target>
+            <!-- TODO validate that 1.8 is OK also in the SAP-internal Android build -->
+            <source>1.8</source>
+            <target>1.8</target>
           </configuration>
         </plugin>
       </plugins>
