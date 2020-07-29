@@ -81,8 +81,6 @@ public class ClientConfigurationServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         final boolean deBrandingActive = Boolean.valueOf(System.getProperty(DEBRANDING_PROPERTY_NAME, "false"));
         final String servletPath = req.getServletPath();
-        final String hostName = req.getServerName();
-        final String hostNameAndPort = "http://" + hostName + ":" + req.getServerPort();
         final byte[] cachedPage;
         final String pageKey = generateKey(servletPath, deBrandingActive);
         resp.setContentType(MediaType.TEXT_HTML);
@@ -92,7 +90,7 @@ public class ClientConfigurationServlet extends HttpServlet {
             try (InputStream in = this.getServletContext().getResourceAsStream(servletPath)) {
                 byte[] buffer = IOUtils.toByteArray(in);
                 String content = new String(buffer);
-                for (Map.Entry<String, String> item : createReplacementMap(deBrandingActive, hostName, hostNameAndPort).entrySet()) {
+                for (Map.Entry<String, String> item : createReplacementMap(deBrandingActive).entrySet()) {
                     content = content.replace("${" + item.getKey() + "}", item.getValue());
                 }
                 byte[] bytes = content.getBytes();
@@ -109,7 +107,7 @@ public class ClientConfigurationServlet extends HttpServlet {
         return servletPath + "_" + active;
     }
 
-    private Map<String,String> createReplacementMap(boolean deBrandingActive, String hostName, String hostNameAndPort) {
+    private Map<String,String> createReplacementMap(boolean deBrandingActive) {
         final Map<String,String> map = new HashMap<>();
         final String title;
         final String whitelabeled;
@@ -123,8 +121,6 @@ public class ClientConfigurationServlet extends HttpServlet {
         map.put("SAP", title);
         map.put("debrandingActive", Boolean.toString(deBrandingActive));
         map.put("whitelabeled", whitelabeled);
-        map.put("hostNameAndPort", hostNameAndPort);
-        map.put("displayUrl", hostName);
         return map;
     }
 }
