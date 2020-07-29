@@ -7,19 +7,26 @@ import com.sap.sse.filestorage.FileStorageServiceProperty;
 public class FileStorageServicePropertyImpl implements FileStorageServiceProperty {
     private static final long serialVersionUID = -8418630141746910125L;
     private final boolean isRequired;
+    private final boolean isPassword;
     private final String name;
     private final String descriptionKey;
     private String value;
     
-    public FileStorageServicePropertyImpl(String name, boolean isRequired, String descriptionKey) {
+    public FileStorageServicePropertyImpl(String name, boolean isRequired, boolean isPassword, String descriptionKey) {
         this.name = name;
         this.descriptionKey = descriptionKey;
         this.isRequired = isRequired;
+        this.isPassword = isPassword;
     }
 
     @Override
     public boolean isRequired() {
         return isRequired;
+    }
+
+    @Override
+    public boolean isPassword() {
+        return isPassword;
     }
 
     @Override
