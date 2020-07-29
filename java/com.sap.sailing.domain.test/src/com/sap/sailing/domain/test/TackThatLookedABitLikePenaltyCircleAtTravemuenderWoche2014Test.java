@@ -56,7 +56,7 @@ public class TackThatLookedABitLikePenaltyCircleAtTravemuenderWoche2014Test exte
                         ReceiverType.MARKPOSITIONS, ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS });
         getTrackedRace().recordWind(
                 new WindImpl(/* position */null, new MillisecondsTimePoint(dateFormat.parse("07/25/2014-13:08:17")),
-                        new KnotSpeedWithBearingImpl(12.8, new DegreeBearingImpl(46))),
+                        new KnotSpeedWithBearingImpl(12.8, new DegreeBearingImpl(46).reverse())),
                 new WindSourceImpl(WindSourceType.WEB));
     }
     
