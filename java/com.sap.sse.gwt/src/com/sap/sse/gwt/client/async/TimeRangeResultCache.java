@@ -54,7 +54,7 @@ public class TimeRangeResultCache<Result> {
      */
     protected class Request {
         private final TimeRangeAsyncAction<?, ?> action;
-        private final AsyncCallback<List<Pair<TimeRange, Result>>> callback;
+        private final AsyncCallback<Void> callback;
         private boolean callbackWasCalled = false;
         private final TimeRange actionTimeRange;
         private TimeRange trimmedTimeRange;
@@ -63,9 +63,9 @@ public class TimeRangeResultCache<Result> {
         private int childrenWithoutResultCounter = 0;
         private boolean hasResult = false;
         private Result result = null;
+        private boolean actionResultRetrieved = false;
 
-        public Request(TimeRange timeRange, AsyncCallback<List<Pair<TimeRange, Result>>> callback,
-                TimeRangeAsyncAction<?, ?> action) {
+        public Request(TimeRange timeRange, AsyncCallback<Void> callback, TimeRangeAsyncAction<?, ?> action) {
             this.actionTimeRange = timeRange;
             this.trimmedTimeRange = timeRange;
             this.callback = callback;
@@ -200,14 +200,8 @@ public class TimeRangeResultCache<Result> {
          */
         private void notifyActionSuccessIfHasAllResults() {
             if (!callbackWasCalled && hasResult && childrenWithoutResultCounter <= 0) {
-                List<Pair<TimeRange, Result>> results = new ArrayList<>(childrenSet.size() + 1);
-                results.add(new Pair<>(getTrimmedTimeRange(), getResult()));
-                for (Request child : childrenSet) {
-                    results.add(new Pair<>(child.getTrimmedTimeRange(), child.getResult()));
-                }
-                callback.onSuccess(results);
                 callbackWasCalled = true;
-                releaseChildrenAndEvictSelf();
+                callback.onSuccess(null);
             }
         }
 
@@ -219,8 +213,8 @@ public class TimeRangeResultCache<Result> {
          */
         private void notifyActionFailure(Throwable caught) {
             if (!callbackWasCalled) {
-                callback.onFailure(caught);
                 callbackWasCalled = true;
+                callback.onFailure(caught);
                 releaseChildrenAndEvictSelf();
             }
         }
@@ -236,11 +230,36 @@ public class TimeRangeResultCache<Result> {
         /**
          * Calls {@link #releaseChildren()} and then removes itself from the cache if no longer needed.
          */
-        private void releaseChildrenAndEvictSelf() {
+        protected void releaseChildrenAndEvictSelf() {
             releaseChildren();
+            callbackWasCalled = true;
             if (canBeEvicted()) {
                 TimeRangeResultCache.this.evictRequestFromCache(this);
             }
+        }
+
+        /**
+         * Collects and returns the needed {@link Result}s to complete the {@link #action}.
+         *
+         * @throws IllegalStateException
+         *             if the callback has not been notified yet or if the results are being retrieved a second time
+         */
+        public List<Pair<TimeRange, Result>> getActionResult() throws IllegalStateException {
+            if (!callbackWasCalled) {
+                throw new IllegalStateException("Callback was not called yet");
+            }
+            if (actionResultRetrieved) {
+                throw new IllegalStateException(
+                        "Results have been retrieved already and the dependencies have been released");
+            }
+            List<Pair<TimeRange, Result>> actionResults = new ArrayList<>(childrenSet.size() + 1);
+            actionResults.add(new Pair<>(getTrimmedTimeRange(), getResult()));
+            for (Request child : childrenSet) {
+                actionResults.add(new Pair<>(child.getTrimmedTimeRange(), child.getResult()));
+            }
+            releaseChildrenAndEvictSelf();
+            actionResultRetrieved = true;
+            return actionResults;
         }
 
         /**
@@ -265,6 +284,13 @@ public class TimeRangeResultCache<Result> {
          */
         public boolean hasResult() {
             return hasResult;
+        }
+
+        /**
+         * @return {@code true} if {@link #onFailure(Throwable)} has been called.
+         */
+        public boolean hasFailed() {
+            return callbackWasCalled && !hasResult;
         }
 
         /**
@@ -324,12 +350,13 @@ public class TimeRangeResultCache<Result> {
      * @param action
      *            {@link TimeRangeAsyncAction} that this request belongs to
      * @param callback
-     *            {@link AsyncCallback} which will be called exactly once when all needed {@link Result}s are ready
+     *            {@link AsyncCallback} which will be called exactly once when all needed {@link Result}s are ready.<br>
+     *            The {@link Result}s can be retrieved using {@link #getResults(TimeRangeAsyncAction)}.
      * @return {@link TimeRange} to effectively request (potentially trimmed from {@code toTrim}) or {@code null} if no
      *         request is to be made since the results are cached.
      */
     public TimeRange trimAndRegisterRequest(TimeRange toTrim, boolean forceTimeRange, TimeRangeAsyncAction<?, ?> action,
-            AsyncCallback<List<Pair<TimeRange, Result>>> callback) {
+            AsyncCallback<Void> callback) {
         final Request request = new Request(toTrim, callback, action);
         final TimeRange effectivePotentiallyTrimmedRequest = !forceTimeRange ? trimTimeRangeAndAttachDeps(request)
                 : toTrim;
@@ -374,6 +401,40 @@ public class TimeRangeResultCache<Result> {
     }
 
     /**
+     * Retrieves the needed {@link Result}s to answer the {@code action}.
+     * <p>
+     * This method is <b>only to be called once</b> after the {@link AsyncCallback} passed to
+     * {@link #trimAndRegisterRequest(TimeRange, boolean, TimeRangeAsyncAction, AsyncCallback)} was called indicating
+     * that the {@link Result}s are ready.
+     *
+     * @param action
+     *            corresponding {@link TimeRangeAsyncAction}
+     * @return {@link Pair}s of {@link TimeRange}s and {@link Result}s which together cover the {@link TimeRange}
+     *         requested by {@code action}
+     */
+    public List<Pair<TimeRange, Result>> getResults(TimeRangeAsyncAction<?, ?> action) throws IllegalArgumentException {
+        Request request = requestCache.get(action);
+        if (request == null) {
+            throw new IllegalArgumentException("No request found for action: " + action.toString());
+        }
+        return request.getActionResult();
+    }
+
+    /**
+     * Informs a {@link Request} that its {@link Result}s are no longer needed.
+     *
+     * @param action
+     *            corresponding {@link TimeRangeAsyncAction}
+     */
+    public void removeRequest(TimeRangeAsyncAction<?, ?> action) throws IllegalArgumentException {
+        Request request = requestCache.get(action);
+        if (request == null) {
+            throw new IllegalArgumentException("No request found for action: " + action.toString());
+        }
+        request.releaseChildrenAndEvictSelf();
+    }
+
+    /**
      * Trims a request based on cached results, returning a potentially trimmed time range that reflects which part(s)
      * is/are missing from the cache. For simplicity {@code toTrim} will currently not be split up into multiple
      * TimeRanges if a part in the middle is cached.
@@ -396,7 +457,7 @@ public class TimeRangeResultCache<Result> {
             while (iter.hasNext()) {
                 final Request element = iter.next();
                 final TimeRange trimWith = element.getTrimmedTimeRange();
-                if (trimWith != null) {
+                if (trimWith != null && !element.hasFailed()) {
                     final boolean rangeAfter = toTrim.from().after(trimWith.to()) || toTrim.from().equals(trimWith.to());
                     final boolean fromAfter = toTrim.from().after(trimWith.from());
                     final boolean fromIncluded = fromAfter || toTrim.from().equals(trimWith.from());

@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.common.TimeRange;
@@ -62,7 +64,7 @@ public class TimeRangeActionsExecutor<Result, SubResult, Key> {
         private final TimeRangeAsyncCallback<Result, SubResult, Key> callback;
         private boolean callbackWasCalled = false;
         private final Map<Key, TimeRange> requestedTimeRangeMap;
-        private final Map<Key, List<Pair<TimeRange, SubResult>>> subResultsMap;
+        private final Set<Key> subResultsReadySet;
 
         private ExecutorCallback(TimeRangeAsyncAction<Result, Key> action,
                 Collection<Pair<Key, TimeRange>> requestedTimeRanges,
@@ -71,7 +73,7 @@ public class TimeRangeActionsExecutor<Result, SubResult, Key> {
             this.callback = callback;
             this.requestedTimeRangeMap = new HashMap<>(requestedTimeRanges.size());
             requestedTimeRanges.forEach(pair -> requestedTimeRangeMap.put(pair.getA(), pair.getB()));
-            this.subResultsMap = new HashMap<>(requestedTimeRanges.size());
+            this.subResultsReadySet = new HashSet<>(requestedTimeRanges.size());
         }
 
         @Override
@@ -100,19 +102,20 @@ public class TimeRangeActionsExecutor<Result, SubResult, Key> {
          *
          * @param key
          *            {@link Key} of the {@link TimeRangeResultCache#Request}
-         * @param results
-         *            {@link TimeRange} and {@link SubResult} {@link Pair}s that cover the requested {@link TimeRange}
          */
-        public void onSubResultSuccess(Key key, List<Pair<TimeRange, SubResult>> results) {
-            subResultsMap.put(key, results);
-            if (!callbackWasCalled && subResultsMap.size() == requestedTimeRangeMap.size()) {
-                final Map<Key, SubResult> unzippedResult = new HashMap<>(subResultsMap.size());
-                for (Map.Entry<Key, List<Pair<TimeRange, SubResult>>> entry : subResultsMap.entrySet()) {
-                    TimeRange requestedTimeRange = requestedTimeRangeMap.get(entry.getKey());
-                    unzippedResult.put(entry.getKey(), callback.joinSubResults(requestedTimeRange, entry.getValue()));
+        public void onSubResultSuccess(Key key) {
+            if (!callbackWasCalled) {
+                subResultsReadySet.add(key);
+                if (subResultsReadySet.size() == requestedTimeRangeMap.size()) {
+                    final Map<Key, SubResult> unzippedResult = new HashMap<>(subResultsReadySet.size());
+                    for (Key k : subResultsReadySet) {
+                        final TimeRange requestedTimeRange = requestedTimeRangeMap.get(k);
+                        final List<Pair<TimeRange, SubResult>> subResults = getSubResultCache(k).getResults(action);
+                        unzippedResult.put(k, callback.joinSubResults(requestedTimeRange, subResults));
+                    }
+                    callback.onSuccess(callback.zipSubResults(unzippedResult));
+                    callbackWasCalled = true;
                 }
-                callback.onSuccess(callback.zipSubResults(unzippedResult));
-                callbackWasCalled = true;
             }
         }
 
@@ -122,8 +125,13 @@ public class TimeRangeActionsExecutor<Result, SubResult, Key> {
          * @param caught
          *            {@link Throwable} that occurred
          */
-        public void onSubResultFailure(Throwable caught) {
+        public void onSubResultFailure(Key key, Throwable caught) {
             if (!callbackWasCalled) {
+                for (Key k : requestedTimeRangeMap.keySet()) {
+                    if (!key.equals(k)) {
+                        getSubResultCache(k).removeRequest(action);
+                    }
+                }
                 callback.onFailure(caught);
                 callbackWasCalled = true;
             }
@@ -198,14 +206,14 @@ public class TimeRangeActionsExecutor<Result, SubResult, Key> {
         for (Pair<Key, TimeRange> part : requestedTimeRanges) {
             final TimeRangeResultCache<SubResult> cache = getSubResultCache(part.getA());
             TimeRange potentiallyTrimmedTimeRange = cache.trimAndRegisterRequest(part.getB(), forceTimeRange, action,
-                    new AsyncCallback<List<Pair<TimeRange,SubResult>>>() {
+                    new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
-                            execCallback.onSubResultFailure(caught);
+                            execCallback.onSubResultFailure(part.getA(), caught);
                         }
                         @Override
-                        public void onSuccess(List<Pair<TimeRange, SubResult>> result) {
-                            execCallback.onSubResultSuccess(part.getA(), result);
+                        public void onSuccess(Void result) {
+                            execCallback.onSubResultSuccess(part.getA());
                         }
             });
             if (potentiallyTrimmedTimeRange != null) {
