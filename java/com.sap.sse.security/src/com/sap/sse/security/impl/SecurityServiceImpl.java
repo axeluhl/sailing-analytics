@@ -246,6 +246,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             final Set<AccessControlList> result = new HashSet<>();
             for (AccessControlListAnnotation annotation : accessControlStore
                     .getAccessControlLists()) {
+                // TODO bug5239: introduce shadow hash maps for ACLs that map by object type
                 if (!annotation.getIdOfAnnotatedObject().getTypeIdentifier().equals(type)) {
                     continue;
                 }
@@ -254,6 +255,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                     continue;
                 }
                 // If ownership is given, we can exclude objects not owned by the user or group
+                // TODO bug5239: introduce shadow hash maps for ACLs that map by ownership
                 if (ownership != null) {
                     final OwnershipAnnotation ownershipOfObject = accessControlStore
                             .getOwnership(annotation.getIdOfAnnotatedObject());
