@@ -16,7 +16,7 @@ import com.sap.sse.filestorage.impl.FileStorageServicePropertyImpl;
 public class DummyFileStorageService extends BaseFileStorageServiceImpl implements FileStorageService {
     public static final String NAME = "dummy";
     public static final String PROPERTY_NAME = "p";
-    public final FileStorageServicePropertyImpl property = new FileStorageServicePropertyImpl(PROPERTY_NAME, false, "");
+    public final FileStorageServicePropertyImpl property = new FileStorageServicePropertyImpl(PROPERTY_NAME, false, /* isPassword */ false, "");
 
     private static final long serialVersionUID = -3871744982404841496L;
 

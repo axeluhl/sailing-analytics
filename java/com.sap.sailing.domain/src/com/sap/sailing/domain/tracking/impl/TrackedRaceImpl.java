@@ -3017,7 +3017,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 addListener(new AbstractRaceChangeListener() {
                     @Override
                     public void statusChanged(TrackedRaceStatus newStatus, TrackedRaceStatus oldStatus) {
+                        logger.info("race "+this+" went from "+oldStatus+" to "+newStatus);
                         if (hasFinishedLoading(newStatus.getStatus())) {
+                            logger.info("race "+this+" is considered having finished loading; running "+runnable);
                             removeListener(this);
                             runnable.run();
                         }
