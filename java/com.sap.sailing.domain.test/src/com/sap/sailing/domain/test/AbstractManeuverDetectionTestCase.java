@@ -47,6 +47,8 @@ public abstract class AbstractManeuverDetectionTestCase extends OnlineTracTracBa
      */
     protected void assertManeuver(Iterable<Maneuver> maneuverList, ManeuverType maneuverType,
             TimePoint maneuverTimePoint, int toleranceInMillis) {
+        assertManeuver(maneuverList, maneuverType, /* new tack doesn't matter */ null,
+                maneuverTimePoint, toleranceInMillis);
     }
 
     /**
