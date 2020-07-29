@@ -71,7 +71,7 @@ public class TackThatLookedABitLikePenaltyCircleAtTravemuenderWoche2014Test exte
     }
 
     private void assertTack(String competitorName, final String from, final String to,
-            final String penaltyTimePoint) throws ParseException, NoWindException {
+            final String maneuverTimePoint) throws ParseException, NoWindException {
         Competitor competitor = getCompetitorByName(competitorName);
         Date fromDate = dateFormat.parse(from);
         Date toDate = dateFormat.parse(to);
@@ -87,6 +87,6 @@ public class TackThatLookedABitLikePenaltyCircleAtTravemuenderWoche2014Test exte
                 assertTrue(Math.abs(maneuver.getDirectionChangeInDegrees()) < 700); // the second penalty has to count for its own
             }
         }
-        assertManeuver(maneuvers, ManeuverType.TACK, new MillisecondsTimePoint(dateFormat.parse(penaltyTimePoint)), 5000);
+        assertManeuver(maneuvers, ManeuverType.TACK, new MillisecondsTimePoint(dateFormat.parse(maneuverTimePoint)), 5000);
     }
 }
