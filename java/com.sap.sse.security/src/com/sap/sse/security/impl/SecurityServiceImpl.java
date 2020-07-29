@@ -249,6 +249,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 if (!annotation.getIdOfAnnotatedObject().getTypeIdentifier().equals(type)) {
                     continue;
                 }
+                // TODO bug5239: if object IDs are provided, ACLs should be looked up straight from the combination of type and object ID through accessControlStore.getAccessControlList(QualifiedObjectIdentifier)
                 if (objectIdentifiersAsString != null && !Util.contains(objectIdentifiersAsString, annotation.getIdOfAnnotatedObject().getTypeRelativeObjectIdentifier().toString())) {
                     continue;
                 }

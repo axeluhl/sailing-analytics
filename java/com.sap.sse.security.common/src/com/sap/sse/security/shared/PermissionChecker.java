@@ -265,6 +265,8 @@ public class PermissionChecker {
         assert allPermissionTypes != null;
         final Set<WildcardPermission> effectivePermissionsToCheck = expandSingleWildcardPermissionToDistinctPermissions(
                 permission, allPermissionTypes, /* expand multiple to single object IDs */ true);
+        final Iterable<G> groupsOfUser = getGroupsOfUser(user);
+        final Iterable<G> groupsOfAllUser = getGroupsOfUser(allUser);
         for (WildcardPermission effectiveWildcardPermissionToCheck : effectivePermissionsToCheck) {
             // Ownership may be null in case of an unqualified meta permission check
             // That's the case when e.g. assigning an unqualified role to a user
@@ -284,15 +286,14 @@ public class PermissionChecker {
                 }
                 final Iterable<A> acls = aclResolver.resolveAcls(ownership, type, identifierWildcard ? null : identifiers);
                 for (A acl : acls) {
-                    if (checkAcl(effectiveWildcardPermissionToCheck, getGroupsOfUser(user), getGroupsOfUser(allUser),
-                            acl) == PermissionState.REVOKED) {
+                    if (checkAcl(effectiveWildcardPermissionToCheck, groupsOfUser, groupsOfAllUser, acl) == PermissionState.REVOKED) {
                         return false;
                     }
                 }
             }
-            if (checkUserPermissions(effectiveWildcardPermissionToCheck, user, getGroupsOfUser(user), ownership,
+            if (checkUserPermissions(effectiveWildcardPermissionToCheck, user, groupsOfUser, ownership,
                     impliesChecker, /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true) != PermissionState.GRANTED
-                    && checkUserPermissions(effectiveWildcardPermissionToCheck, allUser, getGroupsOfUser(allUser),
+                    && checkUserPermissions(effectiveWildcardPermissionToCheck, allUser, groupsOfAllUser,
                             ownership, impliesChecker, /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true) != PermissionState.GRANTED) {
                 return false;
             }
