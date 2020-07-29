@@ -451,4 +451,18 @@
          version="2.7.7"
          unpack="false"/>
 
+   <plugin
+         id="com.jcraft.jsch"
+         download-size="0"
+         install-size="0"
+         version="0.1.54.v20170116-1932"
+         unpack="false"/>
+
+   <plugin
+         id="com.amazon.aws.aws-java-api"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
 </feature>
