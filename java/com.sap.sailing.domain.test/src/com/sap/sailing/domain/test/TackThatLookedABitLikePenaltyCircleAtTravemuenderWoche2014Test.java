@@ -14,6 +14,7 @@ import java.util.Date;
 import java.util.logging.Logger;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -73,7 +74,7 @@ public class TackThatLookedABitLikePenaltyCircleAtTravemuenderWoche2014Test exte
      * this track at this point is that the COG doesn't really match up with the actual lat/lon changes. That's
      * why maneuver recognition during what really was a penalty circle is a challenge.
      */
-//    @Ignore("Together with bug5239 this test has become too brittle. Outlier elimination is not deterministic and the track used in this test has outliers. Depending on which one is classified as outlier first, either two tacks or one penalty circle result")
+    @Ignore("Together with bug5239 this test has become too brittle. Outlier elimination is not deterministic and the track used in this test has outliers. Depending on which one is classified as outlier first, either two tacks or one penalty circle result")
     @Test
     public void testTackForTruswellAndPascoe() throws ParseException, NoWindException {
         assertTack("Truswell/Pascoe", "07/25/2014-13:08:00", "07/25/2014-13:09:00", "07/25/2014-13:08:10");
