@@ -358,11 +358,10 @@ public class TimeRangeResultCache<SubResult> {
     public TimeRange trimAndRegisterRequest(TimeRange toTrim, boolean forceTimeRange, TimeRangeAsyncAction<?, ?> action,
             AsyncCallback<Void> callback) {
         final Request request = trimTimeRangeAndAttachDeps(toTrim, callback, action, forceTimeRange);
-        final TimeRange effectivePotentiallyTrimmedRequest = request.getTrimmedTimeRange();
-        // null signals that the result is already present
         // cache the request which is expected to not yet have a result
         requestCache.put(action, request);
-        return effectivePotentiallyTrimmedRequest;
+        // null signals that the result is already present
+        return request == null ? null : request.getTrimmedTimeRange();
     }
 
     /**
@@ -457,24 +456,24 @@ public class TimeRangeResultCache<SubResult> {
                 final Request element = iter.next();
                 final TimeRange trimWith = element.getTrimmedTimeRange();
                 if (trimWith != null && !element.hasFailed()) {
-                    final boolean rangeAfter = toTrim.from().after(trimWith.to()) || toTrim.from().equals(trimWith.to());
-                    final boolean fromAfter = toTrim.from().after(trimWith.from());
-                    final boolean fromIncluded = fromAfter || toTrim.from().equals(trimWith.from());
-                    final boolean rangeBefore = toTrim.to().before(trimWith.from()) || toTrim.to().equals(trimWith.from());
-                    final boolean toBefore = toTrim.to().before(trimWith.to());
-                    final boolean toIncluded = toBefore || toTrim.to().equals(trimWith.to());
+                    final boolean rangeAfter = potentiallyTrimmed.from().after(trimWith.to()) || potentiallyTrimmed.from().equals(trimWith.to());
+                    final boolean fromAfter = potentiallyTrimmed.from().after(trimWith.from());
+                    final boolean fromIncluded = fromAfter || potentiallyTrimmed.from().equals(trimWith.from());
+                    final boolean rangeBefore = potentiallyTrimmed.to().before(trimWith.from()) || potentiallyTrimmed.to().equals(trimWith.from());
+                    final boolean toBefore = potentiallyTrimmed.to().before(trimWith.to());
+                    final boolean toIncluded = toBefore || potentiallyTrimmed.to().equals(trimWith.to());
                     if (rangeAfter || rangeBefore) {
-                        // toTrim and trimWith do not touch at all; Do not consider in following iterations 
+                        // potentiallyTrimmed and trimWith do not touch at all; Do not consider in following iterations 
                         iter.remove();
                     } else if (fromIncluded && toIncluded) {
-                        // toTrim is completely included in trimWith
+                        // potentiallyTrimmed is completely included in trimWith
                         childrenList.add(element);
                         potentiallyTrimmed = null;
-                        break iterationsLoop; // toTrim has been completely trimmed away
+                        break iterationsLoop; // potentiallyTrimmed has been completely trimmed away
                     } else if (fromIncluded || toIncluded) {
-                        // toTrim overlaps trimWith but only on one side i.e. trimWith is not included in toTrim
+                        // potentiallyTrimmed overlaps trimWith but only on one side i.e. trimWith is not included in potentiallyTrimmed
                         childrenList.add(element);
-                        potentiallyTrimmed = toTrim.subtract(trimWith).iterator().next();
+                        potentiallyTrimmed = potentiallyTrimmed.subtract(trimWith).iterator().next();
                         iter.remove();
                         rangeWasTrimmedThisIteration = true;
                     }
