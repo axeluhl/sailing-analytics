@@ -76,15 +76,6 @@ public class TimeRangeResultCache<SubResult> {
         }
 
         /**
-         * Obtains all other requests (excluding {@code this} request) of which all or parts of their results are
-         * required to combine them with the results of this trimmed request into a result that reflects the response to
-         * the original request {@link #action} from which this request was derived by trimming.
-         */
-        public Set<Request> getChildrenSet() {
-            return Collections.unmodifiableSet(childrenSet);
-        }
-
-        /**
          * Adds a {@link List} of {@link Request}s to this one indicating that this {@link Request} is dependent on
          * their {@link SubResult}s.
          * <p>
@@ -97,8 +88,6 @@ public class TimeRangeResultCache<SubResult> {
             if (callbackWasCalled) {
                 throw new IllegalStateException("Children may not be added after results have been submitted!");
             }
-            childrenWithoutResultCounter++; // This will later be undone and serves the purpose of delaying the call to
-                                            // notifyActionSuccessIfHasAllResults until all children have been added
             for (Request request : requests) {
                 if (this.equals(request)) {
                     throw new IllegalArgumentException("Cannot add myself as my own child!");
@@ -109,9 +98,17 @@ public class TimeRangeResultCache<SubResult> {
                 }
                 request.addParent(this); // Will immediately decrement childrenWithoutResultCounter if result is present
             }
-            childrenWithoutResultCounter--;
         }
 
+        /**
+         * Obtains all other requests (excluding {@code this} request) of which all or parts of their results are
+         * required to combine them with the results of this trimmed request into a result that reflects the response to
+         * the original request {@link #action} from which this request was derived by trimming.
+         */
+        public Set<Request> getChildrenSet() {
+            return Collections.unmodifiableSet(childrenSet);
+        }
+        
         /**
          * Clears {@link #childrenSet} and evicts the removed {@link Request}s from
          * {@link TimeRangeResultCache#requestCache} if they are no longer needed.
