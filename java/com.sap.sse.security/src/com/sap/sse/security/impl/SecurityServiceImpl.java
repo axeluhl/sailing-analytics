@@ -244,8 +244,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         public Iterable<AccessControlList> resolveAcls(
                 Ownership ownership, String type, Iterable<String> objectIdentifiersAsString) {
             final Set<AccessControlList> result = new HashSet<>();
-            for (AccessControlListAnnotation annotation : accessControlStore
-                    .getAccessControlLists()) {
+            for (AccessControlListAnnotation annotation : accessControlStore.getAccessControlLists()) {
                 // TODO bug5239: introduce shadow hash maps for ACLs that map by object type
                 if (!annotation.getIdOfAnnotatedObject().getTypeIdentifier().equals(type)) {
                     continue;

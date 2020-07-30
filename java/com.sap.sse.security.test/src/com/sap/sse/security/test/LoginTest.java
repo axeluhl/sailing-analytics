@@ -32,14 +32,21 @@ import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.impl.Activator;
 import com.sap.sse.security.impl.SecurityServiceImpl;
 import com.sap.sse.security.interfaces.AccessControlStore;
+import com.sap.sse.security.shared.AdminRole;
+import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.PermissionChecker;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 import com.sap.sse.security.shared.impl.AccessControlList;
 import com.sap.sse.security.shared.impl.QualifiedObjectIdentifierImpl;
 import com.sap.sse.security.shared.impl.Role;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.shared.impl.UserGroupImpl;
@@ -70,7 +77,7 @@ public class LoginTest {
         accessControlStore = new AccessControlStoreImpl(userStore);
         Activator.setTestStores(userStore, accessControlStore);
         Thread.currentThread().setContextClassLoader(getClass().getClassLoader()); // to enable shiro to find classes from com.sap.sse.security
-        securityService = new SecurityServiceImpl(userStore, accessControlStore);
+        securityService = new SecurityServiceImpl(/* mailServiceTracker */ null, userStore, accessControlStore, SecuredSecurityTypes::getAllInstances);
         Activator.setSecurityService(securityService);
     }
 
@@ -104,11 +111,58 @@ public class LoginTest {
         permissionMap.put(null, new HashSet<>(Arrays.asList(new String[] { "!READ", "UPDATE" })));
         AccessControlList acl = securityService.overrideAccessControlList(
                 QualifiedObjectIdentifierImpl.fromDBWithoutEscaping("someid/more"), permissionMap);
-
         Map<UserGroup, Set<String>> result = acl.getActionsByUserGroup();
-
         Assert.assertThat(result.get(defaultUserGroup), Matchers.contains("!READ", "UPDATE"));
         Assert.assertThat(result.get(null), Matchers.contains("UPDATE"));
+    }
+    
+    @Test
+    public void testDenialInAclAffectsMetaPermissionCheck() throws UserManagementException, MailException, UserGroupManagementException {
+        final WithQualifiedObjectIdentifier my = new WithQualifiedObjectIdentifier() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getName() {
+                return "my";
+            }
+            
+            @Override
+            public HasPermissions getPermissionType() {
+                return SecuredSecurityTypes.SERVER;
+            }
+            
+            @Override
+            public QualifiedObjectIdentifier getIdentifier() {
+                return getPermissionType().getQualifiedObjectIdentifier(new TypeRelativeObjectIdentifier(getName()));
+            }
+        };
+        securityService.initialize(); // create admin user/tenant
+        final String username = "TheNewUser";
+        final String password = "Humba";
+        final User admin = securityService.getUserByName("admin");
+        final UserGroup adminTenant = securityService.getUserGroupByName("admin-tenant");
+        securityService.createSimpleUser(username, "u@a.b", password, username, /* company */ null,
+                /* locale */ null, /* validationBaseURL */ null, /* owning group */ null);
+        final UserGroup defaultUserGroup = securityService.getUserGroupByName(username + SecurityService.TENANT_SUFFIX);
+        final QualifiedObjectIdentifier myId = my.getIdentifier();
+        // grant admin role to user unqualified, implying READ on all objects including the "my" SERVER
+        securityService.addRoleForUser(username, new Role(securityService.getOrCreateRoleDefinitionFromPrototype(AdminRole.getInstance())));
+        securityService.login(username, password);
+        securityService.setOwnership(myId, admin, adminTenant);
+        // check explicit permission:
+        assertTrue(securityService.hasCurrentUserExplicitPermissions(my, ServerActions.READ_REPLICATOR));
+        // check for meta-permission SERVER:*:*
+        assertTrue(securityService.hasCurrentUserMetaPermissionWithOwnershipLookup(
+                WildcardPermission.builder().withTypes(SecuredSecurityTypes.SERVER).build()));
+        // now add an ACL to the "my" server that disallows READ_REPLICATOR for the user's default group
+        Map<UserGroup, Set<String>> permissionMap = new HashMap<>();
+        permissionMap.put(defaultUserGroup, new HashSet<>(Arrays.asList(new String[] { "!READ_REPLICATOR" })));
+        securityService.overrideAccessControlList(myId, permissionMap);
+        // now the user is expected to have lost the READ_REPLICATOR permission on "my"
+        assertFalse(securityService.hasCurrentUserExplicitPermissions(my, ServerActions.READ_REPLICATOR));
+        // and therefore no meta-permission (permission to grant) for SERVER:*:* anymore:
+        assertFalse(securityService.hasCurrentUserMetaPermissionWithOwnershipLookup(
+                WildcardPermission.builder().withTypes(SecuredSecurityTypes.SERVER).build()));
     }
     
     @Test

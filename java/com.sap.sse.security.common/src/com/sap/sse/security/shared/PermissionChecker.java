@@ -133,7 +133,6 @@ public class PermissionChecker {
             throw new WrongPermissionFormatException(permission);
         }
         PermissionState result = PermissionState.NONE;
-        
         // 1. check ACL
         if (acl != null) {
             // if no specific action is requested then this translates to a request for all permissions ("*")
@@ -271,24 +270,24 @@ public class PermissionChecker {
             // Ownership may be null in case of an unqualified meta permission check
             // That's the case when e.g. assigning an unqualified role to a user
             final O ownership = ownershipResolver.apply(effectiveWildcardPermissionToCheck);
-            if (ownership != null) {
-                final List<Set<String>> wildcardPermissionParts = effectiveWildcardPermissionToCheck.getParts();
-                // expanded permissions always have a single non-wildcard type part
-                final String type = wildcardPermissionParts.get(0).iterator().next();
-                final boolean identifierWildcard;
-                final Set<String> identifiers;
-                if (wildcardPermissionParts.size() >= 3) {
-                    identifiers = wildcardPermissionParts.get(2);
-                    identifierWildcard = WildcardPermission.WILDCARD_TOKEN.equals(identifiers.iterator().next());
-                } else {
-                    identifiers = Collections.emptySet();
-                    identifierWildcard = true;
-                }
-                final Iterable<A> acls = aclResolver.resolveAcls(ownership, type, identifierWildcard ? null : identifiers);
-                for (A acl : acls) {
-                    if (checkAcl(effectiveWildcardPermissionToCheck, groupsOfUser, groupsOfAllUser, acl) == PermissionState.REVOKED) {
-                        return false;
-                    }
+            final List<Set<String>> wildcardPermissionParts = effectiveWildcardPermissionToCheck.getParts();
+            // expanded permissions always have a single non-wildcard type part
+            final String type = wildcardPermissionParts.get(0).iterator().next();
+            final boolean identifierWildcard;
+            final Set<String> identifiers;
+            if (wildcardPermissionParts.size() >= 3) {
+                identifiers = wildcardPermissionParts.get(2);
+                identifierWildcard = WildcardPermission.WILDCARD_TOKEN.equals(identifiers.iterator().next());
+            } else {
+                identifiers = Collections.emptySet();
+                identifierWildcard = true;
+            }
+            // TODO bug5239 for resolveAcls, all effectivePermissionsToCheck can be collated based on their types and object IDs; the action can be ignored; no need to repeat this for different actions
+            final Iterable<A> acls = aclResolver.resolveAcls(ownership, type, identifierWildcard ? null : identifiers);
+            // TODO bug5239: it would probably be more efficient to stop at the first ACL that revokes any permission 
+            for (A acl : acls) {
+                if (checkAcl(effectiveWildcardPermissionToCheck, groupsOfUser, groupsOfAllUser, acl) == PermissionState.REVOKED) {
+                    return false;
                 }
             }
             if (checkUserPermissions(effectiveWildcardPermissionToCheck, user, groupsOfUser, ownership,
