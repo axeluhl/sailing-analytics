@@ -57,8 +57,10 @@ import com.sap.sse.common.Util.Pair;
  */
 public class TimeRangeActionsExecutor<Result, SubResult, Key> {
     /**
-     * Callback called by {@link TimeRangeActionsExecutor#executor} upon receiving an answer from the server
-     * for a potentially trimmed request
+     * Callback called by {@link TimeRangeActionsExecutor#executor} upon receiving an answer from the server for a
+     * potentially trimmed request. The compound {@code Result} is {@link TimeRangeAsyncCallback#unzipResult(Object)
+     * split} into the {@code SubResult}s per {@code Key} and disseminated to the respective
+     * {@link TimeRangeResultCache} objects.
      */
     private final class ExecutorCallback implements AsyncCallback<Result> {
         private final TimeRangeAsyncAction<Result, Key> action;
@@ -99,7 +101,15 @@ public class TimeRangeActionsExecutor<Result, SubResult, Key> {
 
         /**
          * Called by a corresponding {@link TimeRangeResultCache#Request} once it has collected all needed
-         * {@link SubResult}s.
+         * {@link SubResult}s. If this was the last key of all keys requested for which the result was delivered, the
+         * potentially several sub-results per each key requested are retrieved from the cache and are
+         * {@link TimeRangeAsyncCallback#joinSubResults(TimeRange, List) joined} into a single {@code SubResult} per key
+         * (joining the time ranges of the results of potentially several trimmed requests) which are then
+         * {@link TimeRangeAsyncCallback#zipSubResults(Map) combined} into a single compound {@code Result} object.
+         * <p>
+         * 
+         * This {@code Result} object is then sent to the {@link #callback}'s
+         * {@link TimeRangeAsyncCallback#onSuccess(Object)} method.
          *
          * @param key
          *            {@link Key} of the {@link TimeRangeResultCache#Request}

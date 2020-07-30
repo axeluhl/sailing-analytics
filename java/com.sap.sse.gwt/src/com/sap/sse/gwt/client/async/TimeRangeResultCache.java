@@ -101,7 +101,7 @@ public class TimeRangeResultCache<SubResult> {
                                             // notifyActionSuccessIfHasAllResults until all children have been added
             for (Request request : requests) {
                 if (this.equals(request)) {
-                    throw new IllegalArgumentException("Cannot add itself as child!");
+                    throw new IllegalArgumentException("Cannot add myself as my own child!");
                 }
                 final boolean notPresentBefore = childrenSet.add(request);
                 if (notPresentBefore) {
@@ -110,7 +110,6 @@ public class TimeRangeResultCache<SubResult> {
                 request.addParent(this); // Will immediately decrement childrenWithoutResultCounter if result is present
             }
             childrenWithoutResultCounter--;
-            notifyActionSuccessIfHasAllResults();
         }
 
         /**
@@ -184,7 +183,11 @@ public class TimeRangeResultCache<SubResult> {
         }
 
         /**
-         * To be called by a child when it receives it's {@link SubResult} via {@link #onSuccess(Object)}.
+         * To be called by a child when it receives its {@link SubResult} via {@link #onSuccess(Object)}.
+         * Note that the child's sub-result may be a part only of what the child has requested; yet,
+         * the dependency to the child has been taking into account only the child's immediate "trimmed"
+         * request and not any of the child's transitive dependencies. Therefore, the child's own request
+         * success is what we're interested in here.
          */
         private void onChildSuccess() {
             childrenWithoutResultCounter--;
@@ -260,8 +263,8 @@ public class TimeRangeResultCache<SubResult> {
                         "Results have been retrieved already and the dependencies have been released");
             }
             List<Pair<TimeRange, SubResult>> actionResults = new ArrayList<>(childrenSet.size() + 1);
-            actionResults.add(new Pair<>(getTrimmedTimeRange(), getResult()));
-            for (Request child : childrenSet) {
+            actionResults.add(new Pair<>(getTrimmedTimeRange(), getResult())); // add this request's own result...
+            for (Request child : childrenSet) { // ...as well as all children's results
                 actionResults.add(new Pair<>(child.getTrimmedTimeRange(), child.getResult()));
             }
             releaseChildrenAndEvictSelf();
@@ -443,7 +446,7 @@ public class TimeRangeResultCache<SubResult> {
      */
     private Request trimTimeRangeAndAttachDeps(final TimeRange toTrim, AsyncCallback<Void> callback,
             TimeRangeAsyncAction<?, ?> action, boolean forceTimeRange) {
-        //TODO There is a lot of potential for improvements here
+        // TODO There is a lot of potential for improvements here
         TimeRange potentiallyTrimmed = toTrim;
         List<Request> rangesToTrimWithAsList = new LinkedList<>(requestCache.values());
         List<Request> childrenList = new ArrayList<>();
