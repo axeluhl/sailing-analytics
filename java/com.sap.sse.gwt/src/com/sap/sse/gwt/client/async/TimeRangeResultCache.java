@@ -365,10 +365,8 @@ public class TimeRangeResultCache<Result> {
         final TimeRange effectivePotentiallyTrimmedRequest = !forceTimeRange ? trimTimeRangeAndAttachDeps(request)
                 : toTrim;
         // null signals that the result is already present
-        if (effectivePotentiallyTrimmedRequest != null) {
-            // cache the request which is expected to not yet have a result
-            requestCache.put(action, request);
-        }
+        // cache the request which is expected to not yet have a result
+        requestCache.put(action, request);
         return effectivePotentiallyTrimmedRequest;
     }
 
