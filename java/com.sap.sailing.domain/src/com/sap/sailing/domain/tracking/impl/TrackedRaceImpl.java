@@ -759,7 +759,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     private SmartFutureCache<Competitor, List<Maneuver>, EmptyUpdateInterval> createManeuverCache() {
         return new SmartFutureCache<Competitor, List<Maneuver>, EmptyUpdateInterval>(
                 new AbstractCacheUpdater<Competitor, List<Maneuver>, EmptyUpdateInterval>() {
-
                     @Override
                     public List<Maneuver> computeCacheUpdate(Competitor competitor, EmptyUpdateInterval updateInterval)
                             throws NoWindException {
@@ -778,7 +777,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                             return Collections.emptyList();
                         }
                     }
-                }, /* nameForLocks */"Maneuver cache for race " + getRace().getName());
+                }, /* nameForLocks */ "Maneuver cache for race " + getRace().getName());
     }
     
     /**
@@ -2919,12 +2918,17 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     /**
-     * Changes to the {@link #status} variable are synchronized on the {@link #statusNotifier} field.
-     * 
-     * @return
+     * Changes to the {@link #status} variable are synchronized on the {@link #statusNotifier} field
      */
     protected Object getStatusNotifier() {
         return statusNotifier;
+    }
+    
+    @Override
+    public void runSynchronizedOnStatus(Runnable runnable) {
+        synchronized (getStatusNotifier()) {
+            runnable.run();
+        }
     }
 
     protected void setStatus(TrackedRaceStatus newStatus) {
@@ -2990,6 +2994,39 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     logger.info("waitUntilNotLoading on tracked race " + this + " interrupted: " + e.getMessage()
                             + ". Continuing to wait.");
                 }
+            }
+        }
+    }
+    
+    @Override
+    public boolean hasFinishedLoading() {
+        synchronized (getStatusNotifier()) {
+            final TrackedRaceStatusEnum status = getStatus().getStatus();
+            return hasFinishedLoading(status);
+        }
+    }
+    
+    private boolean hasFinishedLoading(TrackedRaceStatusEnum status) {
+        return (status != TrackedRaceStatusEnum.PREPARED && status != TrackedRaceStatusEnum.LOADING && status != TrackedRaceStatusEnum.ERROR);
+    }
+    
+    @Override
+    public void runWhenDoneLoading(final Runnable runnable) {
+        synchronized (getStatusNotifier()) {
+            if (!hasFinishedLoading()) {
+                addListener(new AbstractRaceChangeListener() {
+                    @Override
+                    public void statusChanged(TrackedRaceStatus newStatus, TrackedRaceStatus oldStatus) {
+                        logger.info("race "+this+" went from "+oldStatus+" to "+newStatus);
+                        if (hasFinishedLoading(newStatus.getStatus())) {
+                            logger.info("race "+this+" is considered having finished loading; running "+runnable);
+                            removeListener(this);
+                            runnable.run();
+                        }
+                    }
+                });
+            } else {
+                runnable.run();
             }
         }
     }

@@ -18,7 +18,7 @@ We distinguish two cases: adding a 3rd-party bundle to the target platform and a
 * Test the new overall target platform
  * by setting the race-analysis-p2-local.target as target platform in the IDE
  * by running the local maven build via ''buildAndUpdateProduct.sh -v build'' (the ''-v'' switch builds and uses the local p2 repository)
-* The admin of the central p2 repository (currently at sapsailing.com) must now replace the content of the central server /home/trac/p2-repositories/sailing with the content of the new local base p2 repository (com.sap.sailing.targetplatform/base/gen/p2), using the 'uploadRepositoryToServer.sh' script
+* The admin of the central p2 repository (currently at sapsailing.com) must now replace the content of the central server /home/trac/p2-repositories/sailing with the content of the new local base p2 repository (com.sap.sailing.targetplatform.base/target/repository), using the 'uploadRepositoryToServer.sh' script
 * Reload the target platform in the IDE
 
 ## Adding or Upgrading Bundles from a p2 Repository
@@ -37,6 +37,73 @@ From the list shown, pick the bundle you need and add it to the '*.target' file,
 * Add the URL of the remote p2 repository to all target definition files in com.sap.sailing.targetplatform/defintions
 * Select the features of the p2 repository you want to use in the project
 * Reload the target platform
+
+## Working with the Amazon AWS SDK Java API
+
+A Java API exists for the Amazon Web Services (AWS) in the form of a modular Software Development Kit (SDK). It can be found, e.g., on Maven Central, under the group ID ``software.amazon.awssdk``. A core module and various service-specific modules exist, e.g., for load balancing, Route 53 DNS handling, or the EC2 base infrastructure. Source JARs are available for the API, too, and the API has further dependencies to other artifacts. None of these artifacts is OSGi-enabled.
+
+In order to use the SDK in our OSGi context, we decided to build a wrapper bundle that aggregates all the artifacts we need in a ``lib/`` folder and exports all ``software.amazon.awssdk`` packages. In order not to have to add all current and future versions of these JAR files as binaries to our Git repository we decided to make the wrapper bundle part of our target platform and offer a dedicated update site for it which can be upgraded quickly and without blowing up the Git repository size.
+
+This works very similar how we build and promote the update site holding all other bundles for which we didn't find public P2 update sites serving them, only that in addition we use an additional project to build the actual wrapper bundle which then becomes part of the update site (which so far serves exactly only this one bundle). The following elements are relevant in this process:
+
+- java/com.amazon.aws.aws-java-api: the project folder for building the wrapper bundle
+
+- java/com.amazon.aws.aws-java-api/build.gradle: specifies which version and which components of the SDK to wrap, and for which components to also include the source JARs
+
+- java/com.amazon.aws.aws-java-api/createLocalAwsApiP2Repository.sh: script to evaluate the ``build.gradle`` file, download the SDK JARs, generate all Eclipse project structures, update the version specification in other relevant artifacts such as the target platform definition, the feature.xml specification in the update site configuration, and the pom.xml Maven file, build the wrapper bundle, copy it to the update site project's ``plugins`` folder and build the update site.
+
+- java/com.amazon.aws.aws-java-api.updatesite: the project used to build the local P2 update site to which the SDK wrapper bundle is moved after a successful build; running the project's Maven build constructs the local update site under the folder ``target/repository``
+
+### Using the Local Wrapper Bundle Project Instead of the Bundle from the Central Target Platform
+If you want to make modifications to the SDK wrapper bundle that you would like to work with in your local Eclipse environment before upgrading the central update site, you can prepare the wrapper bundle project for import into your Eclipse workspace as follows.
+In a Bash shell environment, change directory to ``java/com.amazon.aws.aws-java-api``. There, run
+
+```
+    ./createLocalAwsApiP2Repository.sh
+```
+
+This will make the current folder an Eclipse-importable project, with a ``.project`` file, a valid ``META-INF/MANIFEST.MF`` OSGi manifest, an according ``build.properties`` and ``.classpath`` file reflecting the set of JAR files and source attachment JARs constituting the part of the SDK that the wrapper bundle is to expose. During the process, the version specifier entered in ``build.gradle`` (e.g., 2.13.50) will be copied to all other relevant places, such as the ``race-analysis-p2-remote.target`` target platform definition file, the update site specification's ``feature.xml`` file and the ``pom.xml`` file of the wrapper bundle project that you're currently in. A Maven build will start, building the wrapper bundle JAR file which will then be moved to the update site sibling project at ``java/com.amazon.aws.aws-java-api.updatesite`` where it ends in the ``plugins/aws-sdk`` folder. Then, a Maven build of the update site project is triggered, which effectively runs a Tycho update site assembly, producing a local update site repository under ``java/com.amazon.aws.aws-java-api.updatesite/target/repository``.
+
+Now you have two ways of consuming the local SDK wrapper bundle
+
+- You can import the ``java/com.amazon.aws.aws-java-api`` project into your workspace where the OSGi bundle it represents will take precedence over the equal-named bundle coming from the target platform pointing at the central update site. This way you can keep making adjustments relatively easy, e.g., by adjusting ``build.gradle``, running ``./createLocalAwsApiP2Repository.sh`` again and simply refreshing the project as the script has updated your OSGi manifest, build.properties and .classpath accordingly.
+- You can create and use an adjusted local target platform definition by running the script ``java/com.sap.sailing.targetplatform/scripts/createLocalTargetDef.sh`` which will generate a copy of ``race-analysis-p2-remote.target`` called ``race-analysis-p2-local.target`` which uses the two local update sites under ``java/com.sap.sailing.targetplatform.base/target/repository`` and ``java/com.amazon.aws.aws-java-api.updatesite/target/repository`` instead of their central counterparts from ``http://p2.sapsailing.com/p2``. This approach is a bit more heavy-weight as particularly in Eclipse target platform modifications feel a bit brittle and in some cases require Eclipse restarts or other tricks to get reflected.
+
+### Building and Uploading the Update Site for the AWS SDK
+
+After having run the ``java/com.amazon.aws.aws-java-api/createLocalAwsApiP2Repository.sh`` script you have a full-fledged update site locally under ``java/com.amazon.aws.aws-java-api.updatesite/target/repository``. To upload it into the central P2 repository under ``http://p2.sapsailing.com/p2/aws-sdk`` use the script ``java/com.sap.sailing.targetplatform/scripts/uploadAwsApiRepositoryToServer.sh``. It will create a backup copy of the existing update site and then replace it with the one you have created locally.
+
+### Upgrading the SDK to a New Release or Adding Components
+
+Adjust the version number in the file ``java/com.amazon.aws.aws-java-api/build.gradle`` and/or adjust the list of components you'd like to include in the wrapper bundle. You should be able to find a line of this form:
+
+```gradle
+    implementation platform('software.amazon.awssdk:bom:2.13.58')
+```
+
+Adjust the version specifier at the end to what you'd like to have.
+
+Add more components by adding more lines, such as
+
+    implementation 'software.amazon.awssdk:ec2'
+
+and repeat the process as needed. To cause the download of source JARs which can then be attached, add lines such as the following to the dependencies section:
+
+    implementation group: 'software.amazon.awssdk', name: 's3', classifier: 'sources'
+
+This example will fetch the source JAR corresponding to the s3 code JAR. 
+
+Then run the ``java/com.amazon.aws.aws-java-api/createLocalAwsApiP2Repository.sh`` script again to produce an updated local target platform. You can then, as described in the previous sections, work with ``java/com.amazon.aws.aws-java-api`` project in Eclipse, or you generate and use a local target platform definition file that uses your locally-generated P2 update site containing your upgraded SDK wrapper bundle.
+
+If you want to make your changes available to others, commit the changes that the ``createLocalAwsApiP2Repository.sh`` script has facilitated (this does on purpose not include the manifest, build.properties or .classpath file of the wrapper bundle project which are always generated from scratch by the script, but does include the version specifier changes in other files) and upload the P2 update site to the central update site web server using the ``java/com.sap.sailing.targetplatform/scripts/uploadAwsApiRepositoryToServer.sh`` script. Then inform fellow developers about the change because unless they now merge your changes, their target platforms will fail to resolve the SDK wrapper bundle which now has a different version.
+
+### Using Hudson to Validate Changes to the SDK Wrapper Bundle not yet Pushed to the Update Site
+
+The build script ``configuration/buildAndUpdateProduct.sh`` has a ``-v`` option that can be used to run the build using a target platform that references the P2 update sites built according to the specification in the workspace instead of the central P2 update sites at ``http://p2.sapsailing.com/p2``. Besides the AWS SDK update site there is our default base P2 update site that is built by the project ``java/com.sap.sailing.targetplatform.base``.
+
+If you plan to test any changes to the AWS SDK with a full CI build before updating the P2 update site on ``http://p2.sapsailing.com/p2/aws-sdk`` you can make your adjustments to ``java/com.amazon.aws.aws-java-api/build.gradle`` and commit them *without* running the ``java/com.amazon.aws.aws-java-api/createLocalAwsApiP2Repository.sh`` script first. This way, when building with the ``-v`` option, the build script will run the ``createLocalAwsApiP2Repository.sh`` script during the build, constructing the update site in the build's workspace and using it for the build going forward.
+
+**_Note_**: Should you have made a change to the version specifier in ``build.gradle`` and should you have run the ``createLocalAwsApiP2Repository.sh`` script locally to test the changes locally before submitting your changes for CI testing, make sure to **_not_** commit the changes to the ``race-analysis-p2-remote.target`` file. It would otherwise lead to a failure when trying to resolve the target platform during the build of the SDK wrapper bundle itself because that new version cannot yet be resolved in the existing P2 repositories.
 
 ## Adding a GWT RPC Service
 

@@ -597,6 +597,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	    echo "Maven version used: `mvn --version`"
             echo "JAVA_HOME used: $JAVA_HOME"
 	    (cd com.sap.$PROJECT_TYPE.targetplatform.base; mvn -fae -s $MAVEN_SETTINGS $clean compile 2>&1 | tee -a $START_DIR/build.log)
+	    (cd com.amazon.aws.aws-java-api; ./createLocalAwsApiP2Repository.sh | tee -a $START_DIR/build.log)
 	    # now get the exit status from mvn, and not that of tee which is what $? contains now
 	    MVN_EXIT_CODE=${PIPESTATUS[0]}
 	    echo "Maven exit code is $MVN_EXIT_CODE"
@@ -604,7 +605,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	    (cd com.sap.$PROJECT_TYPE.targetplatform/scripts; ./createLocalTargetDef.sh)
 	    extra="$extra -Dp2-local" # activates the p2-target.local profile in java/pom.xml
 	else
-	    echo "INFO: Using remote p2 repo (http://p2.sapsailing.com/p2/sailing/)"
+	    echo "INFO: Using remote p2 repos (http://p2.sapsailing.com/p2/sailing/ and http://p2.sapsailing.com/p2/aws-sdk/)"
         fi
 
     # back to root!
