@@ -30,11 +30,8 @@ public class DispatchRPCImpl<CTX extends DispatchContext> implements DispatchSys
     private long clientServerOffset = 0;
     
     public DispatchRPCImpl(String dispatchRPCPath) {
-        //((ServiceDefTarget) dispatchRPC).setServiceEntryPoint(dispatchRPCPath);
-        
         EntryPointHelper.registerASyncService((ServiceDefTarget) dispatchReadRPC, dispatchRPCPath, HEADER_FORWARD_TO_REPLICA);
         EntryPointHelper.registerASyncService((ServiceDefTarget) dispatchWriteRPC, dispatchRPCPath, HEADER_FORWARD_TO_MASTER);
-        
     }
 
     @Override

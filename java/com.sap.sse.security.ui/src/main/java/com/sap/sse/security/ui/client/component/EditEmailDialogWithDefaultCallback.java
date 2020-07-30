@@ -8,12 +8,11 @@ import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.EntryPointLinkFactory;
-import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserManagementWriteServiceAsync;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 /**
- * Forwards the e-mail update request to a {@link UserManagementServiceAsync} and uses notifications to show success or
+ * Forwards the e-mail update request to a {@link UserManagementWriteServiceAsync} and uses notifications to show success or
  * failure of the server-side update after calling back to an optional additional callback that can be provided to the
  * constructor.
  * 

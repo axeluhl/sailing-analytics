@@ -25,7 +25,7 @@ public class ForgotPasswordDialog extends AbstractUserDialog {
     }
 
     /**
-     * Uses a default callback handler that triggers {@link UserManagementServiceAsync#resetPassword(String, String, String, AsyncCallback)} when
+     * Uses a default callback handler that triggers {@link UserManagementWriteServiceAsync#resetPassword(String, String, String, AsyncCallback)} when
      * the user confirms the dialog.
      */
     public ForgotPasswordDialog(final StringMessages stringMessages, final UserManagementWriteServiceAsync userManagementWriteService, UserDTO user) {
