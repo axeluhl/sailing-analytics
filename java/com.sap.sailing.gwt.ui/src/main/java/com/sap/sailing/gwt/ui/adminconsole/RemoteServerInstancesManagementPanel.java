@@ -29,7 +29,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
@@ -47,7 +47,7 @@ import com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell;
 import com.sap.sse.security.ui.client.component.SelectedElementsCountingButton;
 
 public class RemoteServerInstancesManagementPanel extends SimplePanel {
-    private final SailingServiceAsync sailingService;
+    private final SailingServiceWriteAsync sailingService;
     private final UserService userService;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
@@ -57,7 +57,7 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
     private LabeledAbstractFilterablePanel<RemoteSailingServerReferenceDTO> filteredServerTablePanel;
     private final CaptionPanel remoteServersPanel;
 
-    public RemoteServerInstancesManagementPanel(SailingServiceAsync sailingService, final UserService userService,
+    public RemoteServerInstancesManagementPanel(SailingServiceWriteAsync sailingService, final UserService userService,
             ErrorReporter errorReporter, StringMessages stringMessages, CellTableWithCheckboxResources tableResources) {
         this.sailingService = sailingService;
         this.userService = userService;
