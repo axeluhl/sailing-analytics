@@ -17,20 +17,21 @@ import com.sap.sse.common.Util.Pair;
 /**
  * An Executor for efficient, asynchronous execution of {@link TimeRangeAsyncAction}s. This executor operates on
  * {@link TimeRangeAsyncAction}s which specify the wanted {@link TimeRange} by {@link Key} with
- * {@link TimeRangeAsyncAction#getTimeRanges()} and are expected to return a {@code Result}. The {@link Key} could,
- * e.g., be a competitor or a boat class.
+ * {@link TimeRangeAsyncAction#getTimeRanges()} and are expected to return a {@code Result} when their
+ * {@link TimeRangeAsyncAction#execute(Collection, AsyncCallback)} is invoked. The {@link Key} could, e.g., be a
+ * competitor or a boat class.
  * <p>
  * 
- * This executor manages and optimizes concurrent requests for the same {@code Key} that have overlapping time ranges.
+ * This executor manages and optimizes concurrent requests for equal {@code Key}s that have overlapping time ranges.
  * This way, redundant requests for the same data can be avoided. This executor collects the results of the overlapping
  * concurrent requests and uses them to satisfy each individual client request as if they had all been executed in their
  * entirety.
  * <p>
  * 
- * Each of the {@link TimeRange}s is then trimmed against the {@link TimeRaneResultCache cache} of returned and
- * outstanding requests for the respective {@code Key}. After having received the server responses for all time ranges
- * required to satisfy a {@link TimeRangeAsyncAction} the trimmed results are combined and the
- * {@link TimeRangeAsyncCallback callback} is invoked.
+ * Each of the {@link TimeRange}s is trimmed against the {@link TimeRaneResultCache cache} of returned and outstanding
+ * requests for the respective {@code Key}. After having received the server responses for all time ranges required to
+ * satisfy a {@link TimeRangeAsyncAction} the trimmed results are combined and the {@link TimeRangeAsyncCallback
+ * callback} is invoked.
  * <p>
  * 
  * For the actual execution this class relies on an {@link AsyncActionsExecutor}.
@@ -203,32 +204,27 @@ public class TimeRangeActionsExecutor<Result, SubResult, Key> {
         final Collection<Pair<Key, TimeRange>> requestedTimeRanges = action.getTimeRanges();
         final ExecutorCallback execCallback = new ExecutorCallback(action, requestedTimeRanges, callback);
         final List<Pair<Key, TimeRange>> trimmedTimeRanges = new ArrayList<>(requestedTimeRanges.size());
-        for (Pair<Key, TimeRange> part : requestedTimeRanges) {
-            final TimeRangeResultCache<SubResult> cache = getSubResultCache(part.getA());
-            TimeRange potentiallyTrimmedTimeRange = cache.trimAndRegisterRequest(part.getB(), forceTimeRange, action,
+        for (final Pair<Key, TimeRange> subRequest : requestedTimeRanges) {
+            final TimeRangeResultCache<SubResult> cache = getSubResultCache(subRequest.getA());
+            final TimeRange potentiallyTrimmedTimeRange = cache.trimAndRegisterRequest(subRequest.getB(), forceTimeRange, action,
                     new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
-                            execCallback.onSubResultFailure(part.getA(), caught);
+                            execCallback.onSubResultFailure(subRequest.getA(), caught);
                         }
                         @Override
                         public void onSuccess(Void result) {
-                            execCallback.onSubResultSuccess(part.getA());
+                            execCallback.onSubResultSuccess(subRequest.getA());
                         }
             });
             if (potentiallyTrimmedTimeRange != null) {
-                trimmedTimeRanges.add(new Pair<>(part.getA(), potentiallyTrimmedTimeRange));
+                trimmedTimeRanges.add(new Pair<>(subRequest.getA(), potentiallyTrimmedTimeRange));
             }
         }
         executor.execute(cb -> action.execute(trimmedTimeRanges, cb), actionCategory, execCallback);
     }
 
     private TimeRangeResultCache<SubResult> getSubResultCache(Key key) {
-        TimeRangeResultCache<SubResult> cache = cacheMap.get(key);
-        if (cache == null) {
-            cache = new TimeRangeResultCache<>();
-            cacheMap.put(key, cache);
-        }
-        return cache;
+        return cacheMap.computeIfAbsent(key, k->new TimeRangeResultCache<>());
     }
 }

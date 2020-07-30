@@ -1,6 +1,7 @@
 package com.sap.sse.gwt.client.async;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -22,12 +23,12 @@ import com.sap.sse.common.Util.Pair;
  * Before making a request for a time range, the executor has to call
  * {@link #trimAndRegisterRequest(TimeRange, boolean)}.
  *
- * @param <Result>
+ * @param <SubResult>
  *            type of the results of the remote calls which are to be cached
  * @see TimeRangeActionsExecutor
  * @author Tim Hessenmüller (D062243)
  */
-public class TimeRangeResultCache<Result> {
+public class TimeRangeResultCache<SubResult> {
     private static final int TRIM_MAX_ITERATIONS = 20;
     private static final int CACHE_SIZE = 32;
 
@@ -40,17 +41,17 @@ public class TimeRangeResultCache<Result> {
      * <p>
      *
      * Dependent requests are represented as a <b>Petri Net</b>. {@link Request}s are vertices and {@link #childrenSet}
-     * and {@link #parentSet} make up doubly-linked edges. {@link Result}s are tokens which get handled by a transition
-     * function implemented in {@link #notifyActionSuccessIfHasAllResults()}.
+     * and {@link #parentSet} make up doubly-linked edges. {@link SubResult}s are tokens which get handled by a
+     * transition function implemented in {@link #notifyActionSuccessIfHasAllResults()}.
      * <p>
      *
      * To keep things organized a "child" {@link Request} will never act on its own but always notify its "parent"
      * {@link Request}s to act on its behalf. For this reason most methods are written from the "parents" perspective.
      * <p>
      *
-     * This request keeps track of whether it {@link #hasResult() has received a result}. It furthermore manages a set
-     * of {@link AsyncCallback} {@link #callback} that will be triggered <b>exactly once</b> when a result has been
-     * {@link #setResult(Pair) received} for this request.
+     * This request keeps track of whether it {@link #hasResult() has received a result}. It furthermore manages a
+     * {@link #callback} that will be triggered <b>exactly once</b> when a result has been {@link #setResult(Pair)
+     * received} for this request.
      */
     protected class Request {
         private final TimeRangeAsyncAction<?, ?> action;
@@ -62,14 +63,16 @@ public class TimeRangeResultCache<Result> {
         private final Set<Request> childrenSet = new HashSet<>();
         private int childrenWithoutResultCounter = 0;
         private boolean hasResult = false;
-        private Result result = null;
+        private SubResult result = null;
         private boolean actionResultRetrieved = false;
 
-        public Request(TimeRange timeRange, AsyncCallback<Void> callback, TimeRangeAsyncAction<?, ?> action) {
+        public Request(TimeRange timeRange, TimeRange trimmedTimeRange, AsyncCallback<Void> callback,
+                TimeRangeAsyncAction<?, ?> action, Iterable<TimeRangeResultCache<SubResult>.Request> childrenList) {
             this.actionTimeRange = timeRange;
-            this.trimmedTimeRange = timeRange;
+            this.trimmedTimeRange = trimmedTimeRange;
             this.callback = callback;
             this.action = action;
+            addChildren(childrenList);
         }
 
         /**
@@ -78,19 +81,19 @@ public class TimeRangeResultCache<Result> {
          * the original request {@link #action} from which this request was derived by trimming.
          */
         public Set<Request> getChildrenSet() {
-            return childrenSet;
+            return Collections.unmodifiableSet(childrenSet);
         }
 
         /**
          * Adds a {@link List} of {@link Request}s to this one indicating that this {@link Request} is dependent on
-         * their {@link Result}s.
+         * their {@link SubResult}s.
          * <p>
          * Might immediately call {@link #notifyActionSuccessIfHasAllResults()} if all children have their results.
          *
          * @throws IllegalStateException
          *             if invoked after {@link #callback} has been called.
          */
-        public void addChildren(List<Request> requests) throws IllegalStateException {
+        private void addChildren(Iterable<Request> requests) throws IllegalStateException {
             if (callbackWasCalled) {
                 throw new IllegalStateException("Children may not be added after results have been submitted!");
             }
@@ -126,7 +129,7 @@ public class TimeRangeResultCache<Result> {
 
         /**
          * Obtains all {@link Request}s that still depend on this one. Those {@link Request}s will be notified by this
-         * one once it receives its {@link Result}.
+         * one once it receives its {@link SubResult}.
          */
         public Set<Request> getParentSet() {
             return parentSet;
@@ -153,22 +156,22 @@ public class TimeRangeResultCache<Result> {
         }
 
         /**
-         * This method is to be called if {@code this} {@link Request} has received its {@link Result}. This
+         * This method is to be called if {@code this} {@link Request} has received its {@link SubResult}. This
          * {@link Request} will subsequently notify its parent {@link Request}s.
          * <p>
-         * If all children have their {@link Result}s the {@link #callback} will be notified.
+         * If all children have their {@link SubResult}s the {@link #callback} will be notified.
          *
          * @param result
-         *            this {@link Request}'s {@link Result}
+         *            this {@link Request}'s {@link SubResult}
          */
-        public void onSuccess(Result result) {
+        public void onSuccess(SubResult result) {
             setResult(result);
             notifyActionSuccessIfHasAllResults();
             parentSet.forEach(parent -> parent.onChildSuccess());
         }
 
         /**
-         * This method is to be called if an error occurred while getting {@code this} {@link Request}'s {@link Result}.
+         * This method is to be called if an error occurred while getting {@code this} {@link Request}'s {@link SubResult}.
          * After calling the {@link #callback} the parents will be notified.
          *
          * @param caught
@@ -181,7 +184,7 @@ public class TimeRangeResultCache<Result> {
         }
 
         /**
-         * To be called by a child when it receives it's {@link Result} via {@link #onSuccess(Object)}.
+         * To be called by a child when it receives it's {@link SubResult} via {@link #onSuccess(Object)}.
          */
         private void onChildSuccess() {
             childrenWithoutResultCounter--;
@@ -199,7 +202,7 @@ public class TimeRangeResultCache<Result> {
         }
 
         /**
-         * Notifies {@link #callback} <b>once</b> if all needed {@link Result}s are available.<p>
+         * Notifies {@link #callback} <b>once</b> if all needed {@link SubResult}s are available.<p>
          * Implements the transition function used by this Petri Net.
          */
         private void notifyActionSuccessIfHasAllResults() {
@@ -243,12 +246,12 @@ public class TimeRangeResultCache<Result> {
         }
 
         /**
-         * Collects and returns the needed {@link Result}s to complete the {@link #action}.
+         * Collects and returns the needed {@link SubResult}s to complete the {@link #action}.
          *
          * @throws IllegalStateException
          *             if the callback has not been notified yet or if the results are being retrieved a second time
          */
-        public List<Pair<TimeRange, Result>> getActionResult() throws IllegalStateException {
+        public List<Pair<TimeRange, SubResult>> getActionResult() throws IllegalStateException {
             if (!callbackWasCalled) {
                 throw new IllegalStateException("Callback was not called yet");
             }
@@ -256,7 +259,7 @@ public class TimeRangeResultCache<Result> {
                 throw new IllegalStateException(
                         "Results have been retrieved already and the dependencies have been released");
             }
-            List<Pair<TimeRange, Result>> actionResults = new ArrayList<>(childrenSet.size() + 1);
+            List<Pair<TimeRange, SubResult>> actionResults = new ArrayList<>(childrenSet.size() + 1);
             actionResults.add(new Pair<>(getTrimmedTimeRange(), getResult()));
             for (Request child : childrenSet) {
                 actionResults.add(new Pair<>(child.getTrimmedTimeRange(), child.getResult()));
@@ -267,10 +270,10 @@ public class TimeRangeResultCache<Result> {
         }
 
         /**
-         * Obtains the {@link Result} of this {@link Request}.
+         * Obtains the {@link SubResult} of this {@link Request}.
          * @return {@code null} if {@link #hasResult()} is {@code false}
          */
-        public Result getResult() {
+        public SubResult getResult() {
             return result;
         }
 
@@ -278,13 +281,13 @@ public class TimeRangeResultCache<Result> {
          * Sets the result for this request's total time range; {@link #hasResult()} will return {@code true} after this
          * method returns, and {@link #getResult()} will return {@code result} from then on.
          */
-        private void setResult(Result result) {
+        private void setResult(SubResult result) {
             this.hasResult = true;
             this.result = result;
         }
 
         /**
-         * @return {@code true} if a {@link Result} has been set.
+         * @return {@code true} if a {@link SubResult} has been set.
          */
         public boolean hasResult() {
             return hasResult;
@@ -310,16 +313,6 @@ public class TimeRangeResultCache<Result> {
          */
         public TimeRange getTrimmedTimeRange() {
             return trimmedTimeRange;
-        }
-
-        /**
-         * Sets the trimmed {@link TimeRange}.
-         *
-         * @param timeRange
-         *            trimmed {@link TimeRange}
-         */
-        public void setTrimmedTimeRange(TimeRange timeRange) {
-            this.trimmedTimeRange = timeRange;
         }
     }
 
@@ -354,16 +347,15 @@ public class TimeRangeResultCache<Result> {
      * @param action
      *            {@link TimeRangeAsyncAction} that this request belongs to
      * @param callback
-     *            {@link AsyncCallback} which will be called exactly once when all needed {@link Result}s are ready.<br>
-     *            The {@link Result}s can be retrieved using {@link #getResults(TimeRangeAsyncAction)}.
+     *            {@link AsyncCallback} which will be called exactly once when all needed {@link SubResult}s are ready.<br>
+     *            The {@link SubResult}s can be retrieved using {@link #getResults(TimeRangeAsyncAction)}.
      * @return {@link TimeRange} to effectively request (potentially trimmed from {@code toTrim}) or {@code null} if no
      *         request is to be made since the results are cached.
      */
     public TimeRange trimAndRegisterRequest(TimeRange toTrim, boolean forceTimeRange, TimeRangeAsyncAction<?, ?> action,
             AsyncCallback<Void> callback) {
-        final Request request = new Request(toTrim, callback, action);
-        final TimeRange effectivePotentiallyTrimmedRequest = !forceTimeRange ? trimTimeRangeAndAttachDeps(request)
-                : toTrim;
+        final Request request = trimTimeRangeAndAttachDeps(toTrim, callback, action, forceTimeRange);
+        final TimeRange effectivePotentiallyTrimmedRequest = request.getTrimmedTimeRange();
         // null signals that the result is already present
         // cache the request which is expected to not yet have a result
         requestCache.put(action, request);
@@ -372,14 +364,14 @@ public class TimeRangeResultCache<Result> {
 
     /**
      * Registers that a request has returned with a result and collects all other needed cached results that are needed
-     * to construct a complete, time-contiguous {@link Result}.
+     * to construct a complete, time-contiguous {@link SubResult}.
      *
      * @param action
      *            {@link TimeRangeAsyncAction} that the request corresponds to
      * @param result
-     *            {@link Result} of the trimmed request; this result will be cached
+     *            {@link SubResult} of the trimmed request; this result will be cached
      */
-    public void registerResult(TimeRangeAsyncAction<?, ?> action, Result result) {
+    public void registerResult(TimeRangeAsyncAction<?, ?> action, SubResult result) {
         Request request = requestCache.get(action);
         if (request == null) {
             throw new IllegalArgumentException("Attempted to register result for non-existent request: " + action.toString());
@@ -403,18 +395,18 @@ public class TimeRangeResultCache<Result> {
     }
 
     /**
-     * Retrieves the needed {@link Result}s to answer the {@code action}.
+     * Retrieves the needed {@link SubResult}s to answer the {@code action}.
      * <p>
      * This method is <b>only to be called once</b> after the {@link AsyncCallback} passed to
      * {@link #trimAndRegisterRequest(TimeRange, boolean, TimeRangeAsyncAction, AsyncCallback)} was called indicating
-     * that the {@link Result}s are ready.
+     * that the {@link SubResult}s are ready.
      *
      * @param action
      *            corresponding {@link TimeRangeAsyncAction}
-     * @return {@link Pair}s of {@link TimeRange}s and {@link Result}s which together cover the {@link TimeRange}
+     * @return {@link Pair}s of {@link TimeRange}s and {@link SubResult}s which together cover the {@link TimeRange}
      *         requested by {@code action}
      */
-    public List<Pair<TimeRange, Result>> getResults(TimeRangeAsyncAction<?, ?> action) throws IllegalArgumentException {
+    public List<Pair<TimeRange, SubResult>> getResults(TimeRangeAsyncAction<?, ?> action) throws IllegalArgumentException {
         Request request = requestCache.get(action);
         if (request == null) {
             throw new IllegalArgumentException("No request found for action: " + action.toString());
@@ -423,7 +415,7 @@ public class TimeRangeResultCache<Result> {
     }
 
     /**
-     * Informs a {@link Request} that its {@link Result}s are no longer needed.
+     * Informs a {@link Request} that its {@link SubResult}s are no longer needed.
      *
      * @param action
      *            corresponding {@link TimeRangeAsyncAction}
@@ -437,19 +429,22 @@ public class TimeRangeResultCache<Result> {
     }
 
     /**
-     * Trims a request based on cached results, returning a potentially trimmed time range that reflects which part(s)
-     * is/are missing from the cache. For simplicity {@code toTrim} will currently not be split up into multiple
-     * TimeRanges if a part in the middle is cached.
+     * Create a potentially trimmed request based on cached results, returning a {@link Request} with a potentially
+     * trimmed time range that reflects which part(s) is/are missing from the cache. For simplicity {@code toTrim} will
+     * currently not be split up into multiple TimeRanges if a part in the middle is cached.
      *
-     * @param request
-     *            {@link Request} to trim and attach dependencies to that reflect of which other requests the results
-     *            are required in order to fulfill the request
-     * @return {@link TimeRange} which to request because it is not covered by {@code rangesToTrimWith} or {@code null}
-     *         if no request to the server is to be made.
+     * @param toTrim
+     *            the time range to try to trim; can lead to attaching dependencies to the resulting request that
+     *            reflect of which other requests the results are required in order to fulfill the request
+     * @return a request with a {@link Request#getTrimmedTimeRange() trimmed time range} that may be smaller than
+     *         {@code toTrim} if parts of the range requested were found in the cache; in that case, corresponding
+     *         dependencies have been added to the request. Returns {@code null} if no request to the server is to be
+     *         made.
      */
-    private TimeRange trimTimeRangeAndAttachDeps(Request request) {
+    private Request trimTimeRangeAndAttachDeps(final TimeRange toTrim, AsyncCallback<Void> callback,
+            TimeRangeAsyncAction<?, ?> action, boolean forceTimeRange) {
         //TODO There is a lot of potential for improvements here
-        TimeRange toTrim = request.getActionTimeRange();
+        TimeRange potentiallyTrimmed = toTrim;
         List<Request> rangesToTrimWithAsList = new LinkedList<>(requestCache.values());
         List<Request> childrenList = new ArrayList<>();
         iterationsLoop: for (int i = 0; i < TRIM_MAX_ITERATIONS; i++) {
@@ -471,12 +466,12 @@ public class TimeRangeResultCache<Result> {
                     } else if (fromIncluded && toIncluded) {
                         // toTrim is completely included in trimWith
                         childrenList.add(element);
-                        toTrim = null;
+                        potentiallyTrimmed = null;
                         break iterationsLoop; // toTrim has been completely trimmed away
                     } else if (fromIncluded || toIncluded) {
                         // toTrim overlaps trimWith but only on one side i.e. trimWith is not included in toTrim
                         childrenList.add(element);
-                        toTrim = toTrim.subtract(trimWith).iterator().next();
+                        potentiallyTrimmed = toTrim.subtract(trimWith).iterator().next();
                         iter.remove();
                         rangeWasTrimmedThisIteration = true;
                     }
@@ -489,8 +484,7 @@ public class TimeRangeResultCache<Result> {
                 break iterationsLoop;
             }
         }
-        request.setTrimmedTimeRange(toTrim);
-        request.addChildren(childrenList);
-        return toTrim;
+        final Request request = potentiallyTrimmed == null ? null : new Request(toTrim, potentiallyTrimmed, callback, action, childrenList);
+        return request;
     }
 }
