@@ -617,7 +617,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             }
         }
         setEmptyAccessControlList(idOfAccessControlledObject, displayNameOfAccessControlledObject);
-        
         for (Map.Entry<UserGroup, Set<String>> entry : permissionMap.entrySet()) {
             final UserGroup userGroup = entry.getKey();
             final Set<String> actionsToSet;
