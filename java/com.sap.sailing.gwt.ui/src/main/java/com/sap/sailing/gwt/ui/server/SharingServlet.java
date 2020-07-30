@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.server;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +24,6 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.common.NotFoundException;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.server.interfaces.RacingEventService;
@@ -85,7 +85,7 @@ public class SharingServlet extends HttpServlet {
                     for (Map.Entry<String, String> item : createReplacementMap.entrySet()) {
                         content = content.replace("${" + item.getKey() + "}", item.getValue());
                     }
-                    final byte[] bytes = content.getBytes();
+                    final byte[] bytes = content.getBytes(Charset.forName("UTF-8"));
                     resp.getOutputStream().write(bytes);
                     cache.computeIfAbsent(pathInfo, key -> bytes);
                 } catch (Exception e) {
@@ -119,7 +119,7 @@ public class SharingServlet extends HttpServlet {
         final RacingEventService eventService = getEventService(servletContext);
         final Map<String, String> map = new HashMap<>();
         final String[] split = pathInfo.replaceFirst(PATH_SEPARATOR, "").split(PATH_SEPARATOR);
-        int splitLength = split.length;
+        final int splitLength = split.length;
         final String serverAddress = "http://" + req.getServerName() + ":" + req.getServerPort();
         String placeUrl = serverAddress + GWT_PREFIX + HOME_HTML;
         String title = DEFAULT_TITLE;
