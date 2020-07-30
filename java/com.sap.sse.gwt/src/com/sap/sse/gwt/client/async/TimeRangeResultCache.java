@@ -97,7 +97,9 @@ public class TimeRangeResultCache<Result> {
             childrenWithoutResultCounter++; // This will later be undone and serves the purpose of delaying the call to
                                             // notifyActionSuccessIfHasAllResults until all children have been added
             for (Request request : requests) {
-                assert !this.equals(request);
+                if (this.equals(request)) {
+                    throw new IllegalArgumentException("Cannot add itself as child!");
+                }
                 final boolean notPresentBefore = childrenSet.add(request);
                 if (notPresentBefore) {
                     childrenWithoutResultCounter++;
@@ -137,7 +139,9 @@ public class TimeRangeResultCache<Result> {
          *            {@link Request} to add as a parent. Must not be {@code this}.
          */
         private void addParent(Request parent) {
-            assert !this.equals(parent);
+            if (this.equals(parent)) {
+                throw new IllegalArgumentException("Cannot add itself as parent!");
+            }
             final boolean notPresentBefore = parentSet.add(parent);
             if (notPresentBefore && hasResult) {
                 parent.onChildSuccess();
@@ -448,8 +452,7 @@ public class TimeRangeResultCache<Result> {
     private TimeRange trimTimeRangeAndAttachDeps(Request request) {
         //TODO There is a lot of potential for improvements here
         TimeRange toTrim = request.getActionTimeRange();
-        List<Request> rangesToTrimWithAsList = new LinkedList<>(); //TODO Profile against ArrayList (swap and remove)
-        requestCache.values().forEach(rangesToTrimWithAsList::add);
+        List<Request> rangesToTrimWithAsList = new LinkedList<>(requestCache.values());
         List<Request> childrenList = new ArrayList<>();
         iterationsLoop: for (int i = 0; i < TRIM_MAX_ITERATIONS; i++) {
             boolean rangeWasTrimmedThisIteration = false;
