@@ -120,7 +120,8 @@ public class SharingServlet extends HttpServlet {
         final Map<String, String> map = new HashMap<>();
         final String[] split = pathInfo.replaceFirst(PATH_SEPARATOR, "").split(PATH_SEPARATOR);
         int splitLength = split.length;
-        String placeUrl = "http://" + req.getServerName() + ":" + req.getServerPort() + GWT_PREFIX + HOME_HTML;
+        final String serverAddress = "http://" + req.getServerName() + ":" + req.getServerPort();
+        String placeUrl = serverAddress + GWT_PREFIX + HOME_HTML;
         String title = DEFAULT_TITLE;
         String description = DEFAULT_DESCRIPTION;
         String imageUrl = DEFAULT_TEASER_URL;
@@ -152,13 +153,12 @@ public class SharingServlet extends HttpServlet {
                     final Regatta regatta = eventService.getRegattaByName(regattaIdentifier);
                     if (regatta != null) {
                         placeUrl += "&regattaId=" + regattaIdentifier;
-                        // + URLEncoder.encode(regattaIdentifier, StandardCharsets.UTF_8.toString());
                     } else {
-                        throw new NotFoundException("No regatta with identifier:" + regattaIdentifier);
+                        placeUrl = serverAddress;
                     }
                 }
             } else {
-                throw new NotFoundException("No event with id:" + eventId);
+                placeUrl = serverAddress;
             }
         } else if (splitLength == 2 && SERIES.equals(split[0])) {
             placeUrl += "#/series";
@@ -180,9 +180,11 @@ public class SharingServlet extends HttpServlet {
                         imageUrl = specificTeaserImageUrl;
                     }
                 }
+            }else {
+                placeUrl = serverAddress;
             }
         } else {
-            throw new IllegalArgumentException("path did not contain appropriate amount of arguments");
+            placeUrl = serverAddress;
         }
         map.put("title", title);
         map.put("description", description);
