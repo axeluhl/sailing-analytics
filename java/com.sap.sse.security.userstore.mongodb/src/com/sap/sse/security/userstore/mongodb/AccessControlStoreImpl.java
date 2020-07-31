@@ -414,11 +414,11 @@ public class AccessControlStoreImpl implements AccessControlStore {
                     }
                     userGroupToOwnership.remove(effectiveUserGroup);
                 }
-
                 Set<AccessControlListAnnotation> knownACLEntries = userGroupToAccessControlListAnnotation
                         .get(effectiveUserGroup);
                 if (knownACLEntries != null) {
                     for (AccessControlListAnnotation acl : knownACLEntries) {
+                        acl.getAnnotation().setPermissions(effectiveUserGroup, Collections.emptySet());
                         internalRemoveUserGroupToACLMapping(effectiveUserGroup, acl);
                         mongoObjectFactory.storeAccessControlList(acl);
                     }
