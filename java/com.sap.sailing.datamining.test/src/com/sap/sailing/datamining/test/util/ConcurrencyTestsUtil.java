@@ -5,13 +5,12 @@ import static org.junit.Assert.fail;
 import java.util.concurrent.ExecutorService;
 
 import com.sap.sse.datamining.components.Processor;
-import com.sap.sse.util.ThreadPoolUtil;
+import com.sap.sse.datamining.impl.DataMiningExecutorService;
 
 public class ConcurrencyTestsUtil {
 
     private static final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors(), 3);
-    private static final ExecutorService executor = ThreadPoolUtil.INSTANCE
-            .createBackgroundTaskThreadPoolExecutor(THREAD_POOL_SIZE, ConcurrencyTestsUtil.class.getName());
+    private static final ExecutorService executor = new DataMiningExecutorService(THREAD_POOL_SIZE);
 
     public static ExecutorService getExecutor() {
         return executor;

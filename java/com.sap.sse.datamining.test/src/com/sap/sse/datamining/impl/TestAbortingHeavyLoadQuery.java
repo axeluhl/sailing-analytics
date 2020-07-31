@@ -45,7 +45,6 @@ import com.sap.sse.datamining.shared.data.QueryResultState;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.datamining.test.util.components.StatefulBlockingInstruction;
 import com.sap.sse.datamining.test.util.components.StatefulProcessorInstruction;
-import com.sap.sse.util.ThreadPoolUtil;
 
 /**
  * Integration test aborting a query with simulated heavy load instructions. Uses a highly customized processor chain
@@ -250,9 +249,7 @@ public class TestAbortingHeavyLoadQuery {
         if (RecordExecution) {
             executionRecord = new ConcurrentLinkedQueue<>();
         }
-        
-        executor = ThreadPoolUtil.INSTANCE
-                .createBackgroundTaskThreadPoolExecutor(ExecutorPoolSize, this.getClass().getName());
+        executor = new DataMiningExecutorService(ExecutorPoolSize);
         processors = new ArrayList<>();
         unfinishedInstructions = ConcurrentHashMap.newKeySet();
         
