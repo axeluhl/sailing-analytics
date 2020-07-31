@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import org.apache.shiro.subject.PrincipalCollection;
@@ -27,8 +28,8 @@ import com.sap.sse.security.interfaces.UserStore;
 import com.sap.sse.security.shared.AdminRole;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
-import com.sap.sse.security.shared.PermissionChecker.AclResolver;
 import com.sap.sse.security.shared.PermissionChecker;
+import com.sap.sse.security.shared.PermissionChecker.AclResolver;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RoleDefinitionImpl;
@@ -48,9 +49,10 @@ import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 public class PermissionCheckerTest {
     private final AclResolver<AccessControlList, Ownership> noopAclResolver = new AclResolver<AccessControlList, Ownership>() {
         @Override
-        public Iterable<AccessControlList> resolveAcls(Ownership ownership, String type,
-                Iterable<String> objectIdentifiersAsString) {
-            return Collections.emptySet();
+        public Iterable<AccessControlList> resolveAclsAndCheckIfAnyMatches(Ownership ownership, String type,
+                Iterable<String> objectIdentifiersAsString, Predicate<AccessControlList> check,
+                Iterable<AccessControlList> allAclsForTypeAndObjectIdsOrNull) {
+            return Collections.emptySet(); // assuming an empty ACL set
         }
     };
     private final UUID eventId = UUID.randomUUID();

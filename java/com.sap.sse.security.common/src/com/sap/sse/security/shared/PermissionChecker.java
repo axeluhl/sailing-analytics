@@ -9,9 +9,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
+import com.google.gwt.aria.client.Roles;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.security.shared.HasPermissions.Action;
+import com.sap.sse.security.shared.impl.AccessControlList;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.UserGroup;
@@ -39,7 +43,16 @@ public class PermissionChecker {
      */
     public interface AclResolver<A extends SecurityAccessControlList<?>, O extends AbstractOwnership<?, ?>> {
         /**
-         * Resolved all relevant ACLs during meta permission check. Relevant ACLs are determined on several constraints:
+         * Resolves all relevant ACLs during meta permission check and searches for the first ACL to match the
+         * {@code filterCondition}. If and only if at least one such ACL is found, {@code null} is returned. As this
+         * could happen before having discovered all applicable ACLs for the {@code type} /
+         * {@code objectIdentifiersAsStringOrNull} combination, the full set of ACLs isn't known in this case. However,
+         * if no ACL matched the {@code filterCondition}, all ACLs applicable to the {@code type} /
+         * {@code objectIdentifiersAsStringOrNull} combination have been scanned and can be returned for caching, to be
+         * passed in for future invocations for the same combination of type and object ID.
+         * <p>
+         * 
+         * Relevant ACLs are determined on several constraints:
          * <ul>
          * <li>The security type is required to be given. Due to the fact that the meta permission check expands the
          * permission to distinct permissions regarding the type and action part, the effective check always takes place
@@ -54,8 +67,21 @@ public class PermissionChecker {
          * check includes distinct identifiers, we can enumerate the objects based on the type (we always have this one)
          * and identifiers, which means, a direct lookup for the ACLs by {@link QualifiedObjectIdentifier} is possible.
          * </ul>
+         * 
+         * @param filterCondition
+         *            if any of the ACLs found matches this predicate, {@code true} is returned; {@code false} otherwise
+         * 
+         * @param allAclsForTypeAndObjectIdsOrNull
+         *            if not {@code null} these ACLs are assumed to be the full set of ACLs applicable to the combination
+         *            of {@code type} and {@code objectIdentifiersAsStringOrNull}. In this case a potentially expensive
+         *            computation to determine those can be avoided. If {@code null}, the ACLs need to be determined here.
+         * 
+         * @return {@code null} if any of the ACLs found passed the {@code filterCondition}; the set of
+         *         {@link AccessControlList}s relevant for the combination of {@code type} and
+         *         {@code objectIdentifiersAsStringOrNull} otherwise
          */
-        Iterable<A> resolveAcls(O ownershipOrNull, String type, Iterable<String> objectIdentifiersAsStringOrNull);
+        Iterable<AccessControlList> resolveAclsAndCheckIfAnyMatches(O ownershipOrNull, String type, Iterable<String> objectIdentifiersAsStringOrNull,
+                Predicate<A> filterCondition, Iterable<AccessControlList> allAclsForTypeAndObjectIdsOrNull);
     }
     
     private static final BiFunction<WildcardPermission, WildcardPermission, Boolean> impliesChecker = WildcardPermission::implies;
@@ -101,7 +127,6 @@ public class PermissionChecker {
             Iterable<G> groupsOfWhichUserIsMember, U allUser,
             Iterable<G> groupsOfWhichAllUserIsMember, O ownership, A acl) {
         PermissionState result = checkAcl(permission, groupsOfWhichUserIsMember, groupsOfWhichAllUserIsMember, acl);
-
         // anonymous can only grant it if not already decided by acl
         if (result == PermissionState.NONE) {
             PermissionState anonymous = checkUserPermissions(permission, allUser, groupsOfWhichAllUserIsMember,
@@ -266,6 +291,9 @@ public class PermissionChecker {
                 permission, allPermissionTypes, /* expand multiple to single object IDs */ true);
         final Iterable<G> groupsOfUser = getGroupsOfUser(user);
         final Iterable<G> groupsOfAllUser = getGroupsOfUser(allUser);
+        // for resolveAcls, all effectivePermissionsToCheck can be collated based on their types and object IDs; the action can be ignored;
+        // this map remembers for which type/object-id combinations the check has already been performed
+        final Map<Triple<String, Set<String>, O>, Iterable<AccessControlList>> typesAndIdsAndOwnershipsWithFullSetOfAcls = new HashMap<>();
         for (WildcardPermission effectiveWildcardPermissionToCheck : effectivePermissionsToCheck) {
             // Ownership may be null in case of an unqualified meta permission check
             // That's the case when e.g. assigning an unqualified role to a user
@@ -282,13 +310,18 @@ public class PermissionChecker {
                 identifiers = Collections.emptySet();
                 identifierWildcard = true;
             }
-            // TODO bug5239 for resolveAcls, all effectivePermissionsToCheck can be collated based on their types and object IDs; the action can be ignored; no need to repeat this for different actions
-            final Iterable<A> acls = aclResolver.resolveAcls(ownership, type, identifierWildcard ? null : identifiers);
-            // TODO bug5239: it would probably be more efficient to stop at the first ACL that revokes any permission 
-            for (A acl : acls) {
-                if (checkAcl(effectiveWildcardPermissionToCheck, groupsOfUser, groupsOfAllUser, acl) == PermissionState.REVOKED) {
-                    return false;
-                }
+            final Triple<String, Set<String>, O> collationKeyBasedOnTypeAndObjectIdAndOwnership = new Triple<>(type, identifiers, ownership);
+            final Iterable<AccessControlList> aclsFromPreviousRunForSameTypeAndObjectIds =
+                    typesAndIdsAndOwnershipsWithFullSetOfAcls.get(collationKeyBasedOnTypeAndObjectIdAndOwnership);
+            final Iterable<AccessControlList> acls = aclResolver.resolveAclsAndCheckIfAnyMatches(ownership, type,
+                    identifierWildcard ? null : identifiers,
+                    acl->checkAcl(effectiveWildcardPermissionToCheck, groupsOfUser, groupsOfAllUser, acl) == PermissionState.REVOKED,
+                    aclsFromPreviousRunForSameTypeAndObjectIds);
+            if (acls == null) { // this means an ACL was found that REVOKED the permission
+                return false;
+            } else if (aclsFromPreviousRunForSameTypeAndObjectIds == null) {
+                // now we have the full scan of ACLs for the type/object-id combination; cache it
+                typesAndIdsAndOwnershipsWithFullSetOfAcls.put(collationKeyBasedOnTypeAndObjectIdAndOwnership, acls);
             }
             if (checkUserPermissions(effectiveWildcardPermissionToCheck, user, groupsOfUser, ownership,
                     impliesChecker, /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true) != PermissionState.GRANTED

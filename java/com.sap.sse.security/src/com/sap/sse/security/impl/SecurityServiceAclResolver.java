@@ -1,9 +1,11 @@
 package com.sap.sse.security.impl;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.function.Predicate;
 
 import com.sap.sse.common.Util;
+import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.interfaces.AccessControlStore;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.OwnershipAnnotation;
@@ -14,6 +16,18 @@ import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 
 // TODO Bug 5239: a more efficient implementation is possible using reverse mappings in AccessControlStore
+/**
+ * An {@link AclResolver} implementation backed by the {@link SecurityService}'s {@link AccessControlStore}. It makes
+ * use of an explicit ACL set passed, e.g., from a cache, or otherwise will use the {@link AccessControlStore} to
+ * determine the ACLs that apply based on the object type, optional object IDs, as well as ownerships. Shortcut
+ * evaluation is applied in both cases (provided or computed ACLs), looking for the first ACL that matches a predicate.
+ * If such an ACL is found, {@code null} is returned. Otherwise, in the provided case, the ACL set provided is returned
+ * unmodified, whereas in the computed case, the full ACL set for the context of ownership, type and object IDs computed
+ * is returned.
+ * 
+ * @author Axel Uhl (D043530)
+ *
+ */
 public class SecurityServiceAclResolver implements AclResolver<AccessControlList, Ownership> {
     private final AccessControlStore accessControlStore;
 
@@ -22,9 +36,26 @@ public class SecurityServiceAclResolver implements AclResolver<AccessControlList
     }
 
     @Override
-    public Iterable<AccessControlList> resolveAcls(
-            Ownership ownership, String type, Iterable<String> objectIdentifiersAsString) {
-        final Set<AccessControlList> result = new HashSet<>();
+    public Iterable<AccessControlList> resolveAclsAndCheckIfAnyMatches(
+            Ownership ownership, String type, Iterable<String> objectIdentifiersAsString,
+            Predicate<AccessControlList> filterCondition, Iterable<AccessControlList> allAclsForTypeAndObjectIdsOrNull) {
+        final Iterable<AccessControlList> result;
+        if (allAclsForTypeAndObjectIdsOrNull == null) {
+            result = enumerateAndCheckApplicableAcls(ownership, type, objectIdentifiersAsString, filterCondition);
+        } else {
+            for (AccessControlList acl : allAclsForTypeAndObjectIdsOrNull) {
+                if (filterCondition.test(acl)) {
+                    return null;
+                }
+            }
+            result = allAclsForTypeAndObjectIdsOrNull;
+        }
+        return result;
+    }
+    
+    private Iterable<AccessControlList> enumerateAndCheckApplicableAcls(Ownership ownership, String type,
+            Iterable<String> objectIdentifiersAsString, Predicate<AccessControlList> filterCondition) {
+        final List<AccessControlList> result = new LinkedList<>();
         for (AccessControlListAnnotation annotation : accessControlStore.getAccessControlLists()) {
             // TODO bug5239: introduce shadow hash maps for ACLs that map by object type
             if (!annotation.getIdOfAnnotatedObject().getTypeIdentifier().equals(type)) {
@@ -49,7 +80,11 @@ public class SecurityServiceAclResolver implements AclResolver<AccessControlList
                     }
                 }
             }
-            result.add(annotation.getAnnotation());
+            final AccessControlList acl = annotation.getAnnotation();
+            if (filterCondition.test(acl)) {
+                return null;
+            }
+            result.add(acl);
         }
         return result;
     }
