@@ -104,6 +104,7 @@ public class AccessControlStoreImpl implements AccessControlStore {
     }
 
     private void internalAddACL(AccessControlListAnnotation acl) {
+        assert lockForManagementMappings.isWriteLockedByCurrentThread();
         accessControlLists.put(acl.getIdOfAnnotatedObject(), acl);
         for (UserGroup owner : acl.getAnnotation().getActionsByUserGroup().keySet()) {
             internalMapUserGroupToACL(owner, acl);
@@ -139,9 +140,9 @@ public class AccessControlStoreImpl implements AccessControlStore {
             final String displayNameOfAccessControlledObject) {
         return LockUtil.executeWithWriteLockAndResult(lockForManagementMappings,
                 new RunnableWithResult<AccessControlListAnnotation>() {
-
                     @Override
                     public AccessControlListAnnotation run() {
+                        removeAccessControlList(idOfAccessControlledObject);
                         AccessControlListAnnotation acl = new AccessControlListAnnotation(new AccessControlList(),
                                 idOfAccessControlledObject, displayNameOfAccessControlledObject);
                         accessControlLists.put(idOfAccessControlledObject, acl);
@@ -166,6 +167,7 @@ public class AccessControlStoreImpl implements AccessControlStore {
     }
 
     private AccessControlListAnnotation getOrCreateAcl(QualifiedObjectIdentifier idOfAccessControlledObject) {
+        assert lockForManagementMappings.isWriteLockedByCurrentThread();
         return accessControlLists.computeIfAbsent(idOfAccessControlledObject,
                 id->new AccessControlListAnnotation(new AccessControlList(), id, /* display name */ null));
     }
@@ -199,34 +201,33 @@ public class AccessControlStoreImpl implements AccessControlStore {
         });
     }
 
-    private void internalMapUserGroupToACL(final UserGroup userGroup2, final AccessControlListAnnotation acl) {
+    private void internalMapUserGroupToACL(final UserGroup userGroup, final AccessControlListAnnotation acl) {
         if (!lockForManagementMappings.isWriteLockedByCurrentThread()) {
             throw new IllegalStateException("Current thread has no write lock!");
         }
-
-        final UserGroup userGroup = userGroup2 == null ? NULL_GROUP : userGroup2;
+        final UserGroup effectiveUserGroup = userGroup == null ? NULL_GROUP : userGroup;
         Set<AccessControlListAnnotation> currentACLsContainingGroup = userGroupToAccessControlListAnnotation
-                .get(userGroup);
+                .get(effectiveUserGroup);
         if (currentACLsContainingGroup == null) {
             currentACLsContainingGroup = Collections
                     .newSetFromMap(new ConcurrentHashMap<AccessControlListAnnotation, Boolean>());
-            userGroupToAccessControlListAnnotation.put(userGroup, currentACLsContainingGroup);
+            userGroupToAccessControlListAnnotation.put(effectiveUserGroup, currentACLsContainingGroup);
         }
         currentACLsContainingGroup.add(acl);
     }
 
-    private void internalRemoveUserGroupToACLMapping(final UserGroup userGroup2,
+    private void internalRemoveUserGroupToACLMapping(final UserGroup userGroup,
             final AccessControlListAnnotation acl) {
         if (!lockForManagementMappings.isWriteLockedByCurrentThread()) {
             throw new IllegalStateException("Current thread has no write lock!");
         }
-        final UserGroup userGroup = userGroup2 == null ? NULL_GROUP : userGroup2;
+        final UserGroup effectiveUserGroup = userGroup == null ? NULL_GROUP : userGroup;
         Set<AccessControlListAnnotation> currentACLsContainingGroup = userGroupToAccessControlListAnnotation
-                .get(userGroup);
+                .get(effectiveUserGroup);
         if (currentACLsContainingGroup != null) {
             currentACLsContainingGroup.remove(acl);
             if (currentACLsContainingGroup.isEmpty()) {
-                userGroupToAccessControlListAnnotation.remove(userGroup);
+                userGroupToAccessControlListAnnotation.remove(effectiveUserGroup);
             }
         }
     }
@@ -394,12 +395,12 @@ public class AccessControlStoreImpl implements AccessControlStore {
     }
 
     @Override
-    public void removeAllOwnershipsFor(final UserGroup userGroup2) {
-        final UserGroup userGroup = userGroup2 == null ? NULL_GROUP : userGroup2;
+    public void removeAllOwnershipsFor(final UserGroup userGroup) {
+        final UserGroup effectiveUserGroup = userGroup == null ? NULL_GROUP : userGroup;
         LockUtil.executeWithWriteLock(lockForManagementMappings, new Runnable() {
             @Override
             public void run() {
-                Set<OwnershipAnnotation> knownOwnerships = userGroupToOwnership.get(userGroup);
+                Set<OwnershipAnnotation> knownOwnerships = userGroupToOwnership.get(effectiveUserGroup);
                 if (knownOwnerships != null) {
                     // do not use setOwnership, we know the user will not change, and we can use the more effective
                     // remove
@@ -411,17 +412,17 @@ public class AccessControlStoreImpl implements AccessControlStore {
                         ownerships.put(ownership.getIdOfAnnotatedObject(), groupLessOwnership);
                         mongoObjectFactory.storeOwnership(groupLessOwnership);
                     }
-                    userGroupToOwnership.remove(userGroup);
+                    userGroupToOwnership.remove(effectiveUserGroup);
                 }
 
                 Set<AccessControlListAnnotation> knownACLEntries = userGroupToAccessControlListAnnotation
-                        .get(userGroup);
+                        .get(effectiveUserGroup);
                 if (knownACLEntries != null) {
                     for (AccessControlListAnnotation acl : knownACLEntries) {
-                        internalRemoveUserGroupToACLMapping(userGroup, acl);
+                        internalRemoveUserGroupToACLMapping(effectiveUserGroup, acl);
                         mongoObjectFactory.storeAccessControlList(acl);
                     }
-                    userGroupToAccessControlListAnnotation.remove(userGroup);
+                    userGroupToAccessControlListAnnotation.remove(effectiveUserGroup);
                 }
             }
         });
