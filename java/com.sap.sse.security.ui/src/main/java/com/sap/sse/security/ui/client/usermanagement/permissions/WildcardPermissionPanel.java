@@ -90,7 +90,7 @@ public class WildcardPermissionPanel extends HorizontalPanel
             if (selectedPermission != null) {
                 UserDTO selectedUser = this.userSelectionModel.getSelectedObject();
                 if (selectedUser != null) {
-                    userService.getUserManagementService().addPermissionForUser(selectedUser.getName(),
+                    userService.getUserManagementWriteService().addPermissionForUser(selectedUser.getName(),
                             selectedPermission, new AsyncCallback<SuccessInfo>() {
                                 @Override
                                 public void onFailure(Throwable caught) {

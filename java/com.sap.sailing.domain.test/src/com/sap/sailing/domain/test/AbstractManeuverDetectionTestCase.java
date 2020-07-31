@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.TimeZone;
 
 import com.sap.sailing.domain.common.ManeuverType;
+import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -33,7 +34,7 @@ public abstract class AbstractManeuverDetectionTestCase extends OnlineTracTracBa
 
     /**
      * Checks that a maneuver of the type <code>maneuverType</code> to the time of <code>maneuverTimePoint</code> does
-     * exist.
+     * exist. The new tack is not verified.
      * 
      * @param maneuverList
      *            The whole list of maneuvers to search for that maneuver type.
@@ -46,15 +47,39 @@ public abstract class AbstractManeuverDetectionTestCase extends OnlineTracTracBa
      */
     protected void assertManeuver(Iterable<Maneuver> maneuverList, ManeuverType maneuverType,
             TimePoint maneuverTimePoint, int toleranceInMillis) {
+        assertManeuver(maneuverList, maneuverType, /* new tack doesn't matter */ null,
+                maneuverTimePoint, toleranceInMillis);
+    }
+
+    /**
+     * Checks that a maneuver of the type <code>maneuverType</code> to the time of <code>maneuverTimePoint</code> does
+     * exist. The new tack is not verified.
+     * 
+     * @param maneuverList
+     *            The whole list of maneuvers to search for that maneuver type.
+     * @param maneuverType
+     *            The type of maneuver that should have happened to the given time point.
+     * @param newTack
+     *            the new tack on which the boat is expected to be after the maneuver; if {@code null}, the new tack is
+     *            not verified
+     * @param maneuverTimePoint
+     *            The time point the maneuver type should have happened.
+     * @param toleranceInMillis
+     *            The tolerance of time, the maneuver should have happened in milliseconds.
+     */
+    protected void assertManeuver(Iterable<Maneuver> maneuverList, ManeuverType maneuverType, Tack newTack,
+            TimePoint maneuverTimePoint, int toleranceInMillis) {
         for (Maneuver maneuver : maneuverList) {
             assertNotNull(maneuver.getTimePoint());
             if (maneuver.getType() == maneuverType
+                    && (newTack == null || newTack == maneuver.getNewTack())
                     && Math.abs(maneuver.getTimePoint().asMillis() - maneuverTimePoint.asMillis()) <= toleranceInMillis) {
                 maneuversInvalid.remove(maneuver);
                 return;
             }
         }
-        fail("Didn't find maneuver type " + maneuverType + " in " + toleranceInMillis + "ms around " + maneuverTimePoint);
+        fail("Didn't find maneuver type " + maneuverType + " in " + toleranceInMillis + "ms around " + maneuverTimePoint
+                + "; maneuvers found instead: " + maneuverList);
     }
 
     /**

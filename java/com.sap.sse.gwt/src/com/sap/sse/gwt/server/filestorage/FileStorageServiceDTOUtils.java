@@ -16,7 +16,7 @@ import com.sap.sse.gwt.shared.filestorage.FileStorageServicePropertyErrorsDTO;
 
 public class FileStorageServiceDTOUtils {    
     public static FileStorageServicePropertyDTO convert(FileStorageServiceProperty p, Locale locale) {
-        return new FileStorageServicePropertyDTO(p.isRequired(), p.getName(), p.getValue(), p.getDescription(locale));
+        return new FileStorageServicePropertyDTO(p.isRequired(), p.isPassword(), p.getName(), p.isPassword() ? null : p.getValue(), p.getDescription(locale));
     }
     
     public static FileStorageServicePropertyErrorsDTO convert(InvalidPropertiesException e, Locale locale) {

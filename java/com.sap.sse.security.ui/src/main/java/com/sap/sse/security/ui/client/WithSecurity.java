@@ -8,5 +8,7 @@ package com.sap.sse.security.ui.client;
 public interface WithSecurity {
     public UserManagementServiceAsync getUserManagementService();
     
+    public UserManagementWriteServiceAsync getUserManagementWriteService();
+    
     public UserService getUserService();
 }

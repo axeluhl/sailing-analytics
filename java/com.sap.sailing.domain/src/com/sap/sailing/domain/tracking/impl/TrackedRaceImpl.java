@@ -759,7 +759,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     private SmartFutureCache<Competitor, List<Maneuver>, EmptyUpdateInterval> createManeuverCache() {
         return new SmartFutureCache<Competitor, List<Maneuver>, EmptyUpdateInterval>(
                 new AbstractCacheUpdater<Competitor, List<Maneuver>, EmptyUpdateInterval>() {
-
                     @Override
                     public List<Maneuver> computeCacheUpdate(Competitor competitor, EmptyUpdateInterval updateInterval)
                             throws NoWindException {
@@ -778,7 +777,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                             return Collections.emptyList();
                         }
                     }
-                }, /* nameForLocks */"Maneuver cache for race " + getRace().getName());
+                }, /* nameForLocks */ "Maneuver cache for race " + getRace().getName());
     }
     
     /**
@@ -3018,7 +3017,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 addListener(new AbstractRaceChangeListener() {
                     @Override
                     public void statusChanged(TrackedRaceStatus newStatus, TrackedRaceStatus oldStatus) {
+                        logger.info("race "+this+" went from "+oldStatus+" to "+newStatus);
                         if (hasFinishedLoading(newStatus.getStatus())) {
+                            logger.info("race "+this+" is considered having finished loading; running "+runnable);
                             removeListener(this);
                             runnable.run();
                         }
