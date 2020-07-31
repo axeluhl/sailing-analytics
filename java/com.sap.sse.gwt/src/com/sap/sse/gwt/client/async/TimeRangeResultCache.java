@@ -362,7 +362,7 @@ public class TimeRangeResultCache<SubResult> {
     }
 
     /**
-     * Registers that a request has returned with a result and collects all other needed cached results that are needed
+     * Registers that a request has returned with a result and collects all other cached results that are needed
      * to construct a complete, time-contiguous {@link SubResult}.
      *
      * @param action
