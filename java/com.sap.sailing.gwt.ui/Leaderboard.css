@@ -190,11 +190,15 @@ table.editableLeaderboardTable tr td:first-child { display: none; }
 
 /* edit button of editable leaderboard table */
 .editableLeaderboardTable .editButton {
-  border: none; /* Remove borders */
-  color: white; /* White text */
   padding: 0; 
+  margin-left: 3px;
   cursor: pointer; /* Mouse pointer on hover */
-  background: url(images/edit.png) left center no-repeat;
+  width: 20px;
+  height: 20px;
+  display: flex;
+}
+.editableLeaderboardTable .editButton span {
+  background: url(images/edit.png) center center no-repeat;
   width: 16px;
   height: 16px;
 }
@@ -202,6 +206,38 @@ table.editableLeaderboardTable tr td:first-child { display: none; }
 .editableLeaderboardTable .suppressButton, .suppressedCompetitorsTable .suppressButton {
   padding: 0 2px; 
   cursor: pointer; /* Mouse pointer on hover */
-  height: 18px;
+  height: 20px;
   font-size: 10px;
+}
+
+.editableLeaderboardTable .raceCell div {
+	white-space: nowrap;
+}
+
+.editableLeaderboardTable .raceCell span {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.editableLeaderboardTable .accumulatedCell div {
+    white-space: nowrap;
+}
+
+.editableLeaderboardTable .accumulatedCell span {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.editableLeaderboardTable .competitorNameCell div {
+    white-space: nowrap;
+    display: flex;
+}
+
+.editableLeaderboardTable .competitorNameCell div span {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.editableLeaderboardTable .competitorNameCell div span:first-child {
+    width: 100%;
 }

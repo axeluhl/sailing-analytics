@@ -112,12 +112,14 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
     private class EditableCarryColumn extends CarryColumn {
         public EditableCarryColumn() {
             super(new CompositeCell<LeaderboardRowDTO>(getCellListForEditableCarryColumn()));
+            this.setCellStyleNames("accumulatedCell");
         }
     }
 
     private class EditableCompetitorColumn extends CompetitorColumn {
         public EditableCompetitorColumn(List<HasCell<LeaderboardRowDTO, ?>> cells, CompetitorColumnBase<LeaderboardRowDTO> base) {
             super(new CompositeCell<LeaderboardRowDTO>(cells), base);
+            this.setCellStyleNames("competitorNameCell");
         }
 
         @Override
@@ -135,6 +137,7 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
     private class SuppressedShortInfoColumn extends LeaderboardSortableColumnWithMinMax<CompetitorDTO, String> {
         protected SuppressedShortInfoColumn() {
             super(new TextCell(), SortingOrder.ASCENDING, EditableLeaderboardPanel.this);
+            this.setCellStyleNames("competitorInfoCell");
         }
 
         /**
@@ -190,6 +193,7 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
 
         protected SuppressedCompetitorColumn(CompetitorColumnBase<CompetitorDTO> base) {
             super(base.getCell(getLeaderboard()), SortingOrder.ASCENDING, EditableLeaderboardPanel.this);
+            this.setCellStyleNames("suppressedCompetitorCell");
             this.base = base;
         }
 
@@ -279,6 +283,7 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
                     /* expandable */ false, // we don't want leg expansion when editing scores
                     new CompositeCellRememberingRenderingContextAndObject(cellList), SortingOrder.NONE,
                     RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE);
+            this.setCellStyleNames("raceCell");
             for (RowUpdateWhiteboardProducer<LeaderboardRowDTO> rowUpdateWhiteboardProducer : cellList) {
                 rowUpdateWhiteboardProducer.setWhiteboardOwner(this);
             }
@@ -850,8 +855,10 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
             @Override
             public void render(Context context, String value, SafeHtmlBuilder sb) {
                 renderer.setCurrentRow((LeaderboardRowDTO) context.getKey());
-                super.render(context, value, sb);
+                super.render(context, value, sb);    
+                
             }
+            
         };
         result.add(new HasCell<LeaderboardRowDTO, String>() {
             @Override
@@ -867,6 +874,43 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
             @Override
             public String getValue(LeaderboardRowDTO row) {
                 return getLeaderboard().getDisplayName(row.competitor);
+            }
+        });
+        result.add(new HasCell<LeaderboardRowDTO, String>() {
+            private final ButtonCell cell = new SuppressButtonCell();
+            @Override
+            public Cell<String> getCell() {
+                
+                return cell;
+            }
+
+            @Override
+            public FieldUpdater<LeaderboardRowDTO, String> getFieldUpdater() {
+                return new FieldUpdater<LeaderboardRowDTO, String>() {
+                    @Override
+                    public void update(int index, final LeaderboardRowDTO row, String value) {
+                        getSailingService().suppressCompetitorInLeaderboard(getLeaderboardName(), row.competitor.getIdAsString(),
+                                /* suppressed */ true,
+                                new AsyncCallback<Void>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                getErrorReporter().reportError("Error trying to suppress competitor "+row.competitor.getName()+
+                                        " in leaderboard "+getLeaderboardName());
+                            }
+
+                            @Override
+                            public void onSuccess(Void result) {
+                                // force a reload of the entire editable leaderboard to hide the now suppressed competitor
+                                loadCompleteLeaderboard(/* showProgress */ true);
+                            }
+                        });
+                    }
+                };
+            }
+
+            @Override
+            public String getValue(LeaderboardRowDTO object) {
+                return stringMessages.suppress();
             }
         });
         result.add(new HasCell<LeaderboardRowDTO, String>() {
@@ -917,43 +961,6 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
             @Override
             public String getValue(LeaderboardRowDTO object) {
                 return "";//stringMessages.edit();
-            }
-        });
-        result.add(new HasCell<LeaderboardRowDTO, String>() {
-            private final ButtonCell cell = new SuppressButtonCell();
-            @Override
-            public Cell<String> getCell() {
-                
-                return cell;
-            }
-
-            @Override
-            public FieldUpdater<LeaderboardRowDTO, String> getFieldUpdater() {
-                return new FieldUpdater<LeaderboardRowDTO, String>() {
-                    @Override
-                    public void update(int index, final LeaderboardRowDTO row, String value) {
-                        getSailingService().suppressCompetitorInLeaderboard(getLeaderboardName(), row.competitor.getIdAsString(),
-                                /* suppressed */ true,
-                                new AsyncCallback<Void>() {
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                getErrorReporter().reportError("Error trying to suppress competitor "+row.competitor.getName()+
-                                        " in leaderboard "+getLeaderboardName());
-                            }
-
-                            @Override
-                            public void onSuccess(Void result) {
-                                // force a reload of the entire editable leaderboard to hide the now suppressed competitor
-                                loadCompleteLeaderboard(/* showProgress */ true);
-                            }
-                        });
-                    }
-                };
-            }
-
-            @Override
-            public String getValue(LeaderboardRowDTO object) {
-                return stringMessages.suppress();
             }
         });
         return result;
@@ -1108,11 +1115,11 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
         public void render(Context context, SafeHtml data, SafeHtmlBuilder sb) {
             sb.appendHtmlConstant("<button class=\"editButton\" type=\"button\" tabindex=\"-1\" title=\"");
             sb.appendEscaped(title);
-            sb.appendHtmlConstant("\">");
+            sb.appendHtmlConstant("\"><span>");
             if (data != null) {
               sb.append(data);
             }
-            sb.appendHtmlConstant("</button>");
+            sb.appendHtmlConstant("</span></button>");
         }
         
     }
