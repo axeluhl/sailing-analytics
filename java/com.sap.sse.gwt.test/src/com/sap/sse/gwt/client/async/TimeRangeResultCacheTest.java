@@ -166,10 +166,19 @@ public class TimeRangeResultCacheTest {
     @Test
     public void testTrimRequestElimination() {
         TimeRangeResultCache<Void> cache = new TimeRangeResultCache<>();
+        final TimeRangeAsyncAction<Void, Integer> requestAction = getDummyAction();
+        final TimeRangeAsyncAction<Void, Integer> surroundingAction = getDummyAction();
         final TimeRange requestRange =          new MilliTimeRange(150_000L, 250_000L);
         final TimeRange surroundingRange =      new MilliTimeRange(100_000L, 300_000L);
-        assertEquals(surroundingRange, cache.trimAndRegisterRequest(surroundingRange, true, getDummyAction(), getCallback(true)));
-        assertEquals(null, cache.trimAndRegisterRequest(requestRange, false, getDummyAction(), getCallback(true)));
+        assertEquals(surroundingRange, cache.trimAndRegisterRequest(surroundingRange, true, surroundingAction, getCallback(true)));
+        assertEquals(null, cache.trimAndRegisterRequest(requestRange, false, requestAction, getCallback(true)));
+        assertEquals(2, cache.getCacheSize());
+        cache.registerResult(surroundingAction, null);
+        cache.getResults(surroundingAction);
+        assertEquals(2, cache.getCacheSize());
+        cache.registerResult(requestAction, null);
+        cache.getResults(requestAction);
+        assertEquals(0, cache.getCacheSize());
     }
 
     @Test
