@@ -43,6 +43,7 @@ import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 import com.sap.sse.security.shared.impl.AccessControlList;
+import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.QualifiedObjectIdentifierImpl;
 import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
@@ -140,7 +141,8 @@ public class LoginTest {
         final String username = "TheNewUser";
         final String password = "Humba";
         final User admin = securityService.getUserByName("admin");
-        final UserGroup adminTenant = securityService.getUserGroupByName("admin-tenant");
+        final RoleDefinition adminRoleDefinition = securityService.getOrCreateRoleDefinitionFromPrototype(AdminRole.getInstance());
+        final UserGroup adminTenant = securityService.getUserGroupByName(admin.getName()+SecurityService.TENANT_SUFFIX);
         securityService.createSimpleUser(username, "u@a.b", password, username, /* company */ null,
                 /* locale */ null, /* validationBaseURL */ null, /* owning group */ null);
         final UserGroup defaultUserGroup = securityService.getUserGroupByName(username + SecurityService.TENANT_SUFFIX);
@@ -166,6 +168,9 @@ public class LoginTest {
         // and therefore no meta-permission (permission to grant) for SERVER:*:my anymore:
         assertFalse(securityService.hasCurrentUserMetaPermissionWithOwnershipLookup(
                 WildcardPermission.builder().withTypes(SecuredSecurityTypes.SERVER).withIds(myId.getTypeRelativeObjectIdentifier()).build()));
+        // and therefore no meta-permission (permission to grant) role "admin" qualified to the default user group:
+        assertFalse(securityService.hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(
+                adminRoleDefinition, new Ownership(/* user */ null, adminTenant)));
     }
     
     @Test
