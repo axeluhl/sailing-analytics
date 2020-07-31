@@ -11,7 +11,6 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import com.google.gwt.aria.client.Roles;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.security.shared.HasPermissions.Action;
@@ -469,7 +468,7 @@ public class PermissionChecker {
      *            check this needs to call {@link WildcardPermission#impliesAny(WildcardPermission)).
      * @param matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven
      *            If {@code false} and no ownership is given, all associated {@link Role Roles} of an user are checked.
-     *            For a normal permission check, this needs to be {@code true}, because Qualified {@link Roles Roles}
+     *            For a normal permission check, this needs to be {@code true}, because Qualified {@link Role Roles}
      *            can not grant unqualified permissions. In case of an any check it is necessary to include all
      *            qualified roles of an user, because even a qualified {@link Role} may grant any of the included
      *            permissions. in this case, the parameter is intended to be {@code false}.
@@ -557,7 +556,7 @@ public class PermissionChecker {
      *            check this needs to call {@link WildcardPermission#impliesAny(WildcardPermission)).
      * @param matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven
      *            If {@code false} and no ownership is given, all associated {@link Role Roles} of an user are checked.
-     *            For a normal permission check, this needs to be {@code true}, because Qualified {@link Roles Roles}
+     *            For a normal permission check, this needs to be {@code true}, because Qualified {@link Role Roles}
      *            can not grant unqualified permissions. In case of an any check it is necessary to include all
      *            qualified roles of an user, because even a qualified {@link Role} may grant any of the included
      *            permissions.
