@@ -365,7 +365,7 @@ public class TimeRangeResultCache<SubResult> {
         // cache the request which is expected to not yet have a result
         requestCache.put(action, request);
         // null signals that the result is already present
-        return request == null ? null : request.getTrimmedTimeRange();
+        return request.getTrimmedTimeRange();
     }
 
     /**
@@ -444,8 +444,8 @@ public class TimeRangeResultCache<SubResult> {
      *            reflect of which other requests the results are required in order to fulfill the request
      * @return a request with a {@link Request#getTrimmedTimeRange() trimmed time range} that may be smaller than
      *         {@code toTrim} if parts of the range requested were found in the cache; in that case, corresponding
-     *         dependencies have been added to the request. Returns {@code null} if no request to the server is to be
-     *         made.
+     *         dependencies have been added to the request. The returned request's {@link Request#getTrimmedTimeRange()
+     *         trimmed time range} will be {@code null} if no request to the server is to be made.
      */
     private Request trimTimeRangeAndAttachDeps(final TimeRange toTrim, AsyncCallback<Void> callback,
             TimeRangeAsyncAction<?, ?> action, boolean forceTimeRange) {
@@ -490,7 +490,7 @@ public class TimeRangeResultCache<SubResult> {
                 break iterationsLoop;
             }
         }
-        final Request request = potentiallyTrimmed == null ? null : new Request(toTrim, potentiallyTrimmed, callback, action, childrenList);
+        final Request request = new Request(toTrim, potentiallyTrimmed, callback, action, childrenList);
         return request;
     }
 }
