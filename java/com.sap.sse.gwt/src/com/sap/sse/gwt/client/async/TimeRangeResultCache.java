@@ -239,7 +239,6 @@ public class TimeRangeResultCache<SubResult> {
          */
         protected void releaseChildrenAndEvictSelf() {
             releaseChildren();
-            callbackWasCalled = true;
             if (canBeEvicted()) {
                 TimeRangeResultCache.this.evictRequestFromCache(this);
             }
@@ -262,6 +261,9 @@ public class TimeRangeResultCache<SubResult> {
             List<Pair<TimeRange, SubResult>> actionResults = new ArrayList<>(childrenSet.size() + 1);
             actionResults.add(new Pair<>(getTrimmedTimeRange(), getResult())); // add this request's own result...
             for (Request child : childrenSet) { // ...as well as all children's results
+                if (!child.hasResult()) {
+                    throw new IllegalStateException("Child request has no result although one is expected to be there.");
+                }
                 actionResults.add(new Pair<>(child.getTrimmedTimeRange(), child.getResult()));
             }
             releaseChildrenAndEvictSelf();
@@ -338,7 +340,8 @@ public class TimeRangeResultCache<SubResult> {
     /**
      * Trims the requested {@link TimeRange} against results that are already cached or requested and registers the
      * trimmed {@link TimeRange} with the cache as a request that will be made and that therefore shall already be used
-     * to trim subsequent requests.
+     * to trim subsequent requests. Trimming considers only the effective, trimmed time ranges of the requests in the cache and
+     * hence, no transitive dependencies across requests will be created.
      *
      * @param toTrim
      *            {@link TimeRange} to request
@@ -348,7 +351,8 @@ public class TimeRangeResultCache<SubResult> {
      *            {@link TimeRangeAsyncAction} that this request belongs to
      * @param callback
      *            {@link AsyncCallback} which will be called exactly once when all needed {@link SubResult}s are ready.<br>
-     *            The {@link SubResult}s can be retrieved using {@link #getResults(TimeRangeAsyncAction)}.
+     *            The {@link SubResult}s can be retrieved using {@link #getResults(TimeRangeAsyncAction)}. Can be used,
+     *            e.g., to notify the {@code TimeRangeActionsExecutor.ExecutorCallback}'s {@code onSubResultSuccess} method.
      * @return {@link TimeRange} to effectively request (potentially trimmed from {@code toTrim}) or {@code null} if no
      *         request is to be made since the results are cached.
      */
@@ -367,15 +371,15 @@ public class TimeRangeResultCache<SubResult> {
      *
      * @param action
      *            {@link TimeRangeAsyncAction} that the request corresponds to
-     * @param result
+     * @param subResult
      *            {@link SubResult} of the trimmed request; this result will be cached
      */
-    public void registerResult(TimeRangeAsyncAction<?, ?> action, SubResult result) {
+    public void registerResult(TimeRangeAsyncAction<?, ?> action, SubResult subResult) {
         Request request = requestCache.get(action);
         if (request == null) {
             throw new IllegalArgumentException("Attempted to register result for non-existent request: " + action.toString());
         }
-        request.onSuccess(result); // notifies all callbacks that were waiting for this result
+        request.onSuccess(subResult); // notifies all callbacks that were waiting for this result
     }
 
     /**
