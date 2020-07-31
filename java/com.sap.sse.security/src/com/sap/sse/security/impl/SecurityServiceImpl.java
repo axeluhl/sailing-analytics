@@ -238,42 +238,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     
     private final transient Set<SecurityInitializationCustomizer> customizers = ConcurrentHashMap.newKeySet();
     
-    // TODO Bug 5239: a more efficient implementation is possible using reverse mappings in AccessControlStore
-    private AclResolver<AccessControlList, Ownership> aclResolver = new AclResolver<AccessControlList, Ownership>() {
-        @Override
-        public Iterable<AccessControlList> resolveAcls(
-                Ownership ownership, String type, Iterable<String> objectIdentifiersAsString) {
-            final Set<AccessControlList> result = new HashSet<>();
-            for (AccessControlListAnnotation annotation : accessControlStore.getAccessControlLists()) {
-                // TODO bug5239: introduce shadow hash maps for ACLs that map by object type
-                if (!annotation.getIdOfAnnotatedObject().getTypeIdentifier().equals(type)) {
-                    continue;
-                }
-                // TODO bug5239: if object IDs are provided, ACLs should be looked up straight from the combination of type and object ID through accessControlStore.getAccessControlList(QualifiedObjectIdentifier)
-                if (objectIdentifiersAsString != null && !Util.contains(objectIdentifiersAsString, annotation.getIdOfAnnotatedObject().getTypeRelativeObjectIdentifier().toString())) {
-                    continue;
-                }
-                // If ownership is given, we can exclude objects not owned by the user or group
-                // TODO bug5239: introduce shadow hash maps for ACLs that map by ownership
-                if (ownership != null) {
-                    final OwnershipAnnotation ownershipOfObject = accessControlStore
-                            .getOwnership(annotation.getIdOfAnnotatedObject());
-                    if (ownershipOfObject != null) {
-                        final User userOwner = ownership.getUserOwner();
-                        final UserGroup tenantOwner = ownership.getTenantOwner();
-                        if (!(userOwner != null && userOwner
-                                .equals(ownershipOfObject.getAnnotation().getUserOwner()))
-                                && !(tenantOwner != null && tenantOwner.equals(
-                                        ownershipOfObject.getAnnotation().getTenantOwner()))) {
-                            continue;
-                        }
-                    }
-                }
-                result.add(annotation.getAnnotation());
-            }
-            return result;
-        }
-    };
+    private final AclResolver<AccessControlList, Ownership> aclResolver;
     
     static {
         shiroConfiguration = new Ini();
@@ -349,8 +314,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         logger.info("Created: " + securityManager);
         SecurityUtils.setSecurityManager(securityManager);
         this.securityManager = securityManager;
+        aclResolver = new SecurityServiceAclResolver(accessControlStore);
     }
-
+    
     private ReplicatingCacheManager loadReplicationCacheManagerContents() {
         logger.info("Loading session cache manager contents");
         int count = 0;
