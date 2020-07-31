@@ -106,7 +106,7 @@ public abstract class AbstractAccessControlList<G extends SecurityUserGroup<?>>
         }
         for (final Entry<G, Set<WildcardPermission>> allowedEntry : deniedActionsByUserGroup.entrySet()) {
             for (final WildcardPermission permission : allowedEntry.getValue()) {
-                Util.addToValueSet(result, allowedEntry.getKey(), "!"+permission.toString());
+                Util.addToValueSet(result, allowedEntry.getKey(), invertAction(permission.toString()));
             }
         }
         return result;
@@ -120,13 +120,7 @@ public abstract class AbstractAccessControlList<G extends SecurityUserGroup<?>>
      * Removes a leading ! if there is one; otherwise prefixes the action with a !
      */
     private String invertAction(String action) {
-        final String result;
-        if (isDeniedAction(action)) {
-            result = action.substring(1);
-        } else {
-            result = "!"+action;
-        }
-        return result;
+        return SecurityAccessControlList.invertAction(action);
     }
     
     private boolean denyPermission(G userGroup, String action) {
