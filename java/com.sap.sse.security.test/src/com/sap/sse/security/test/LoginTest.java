@@ -163,6 +163,9 @@ public class LoginTest {
         // and therefore no meta-permission (permission to grant) for SERVER:*:* anymore:
         assertFalse(securityService.hasCurrentUserMetaPermissionWithOwnershipLookup(
                 WildcardPermission.builder().withTypes(SecuredSecurityTypes.SERVER).build()));
+        // and therefore no meta-permission (permission to grant) for SERVER:*:my anymore:
+        assertFalse(securityService.hasCurrentUserMetaPermissionWithOwnershipLookup(
+                WildcardPermission.builder().withTypes(SecuredSecurityTypes.SERVER).withIds(myId.getTypeRelativeObjectIdentifier()).build()));
     }
     
     @Test
