@@ -88,6 +88,8 @@ public class TimeRangeResultCache<SubResult> {
             if (callbackWasCalled) {
                 throw new IllegalStateException("Children may not be added after results have been submitted!");
             }
+            childrenWithoutResultCounter++; // This will later be undone and serves the purpose of delaying the call to
+                                            // notifyActionSuccessIfHasAllResults until all children have been added
             for (Request request : requests) {
                 if (this.equals(request)) {
                     throw new IllegalArgumentException("Cannot add myself as my own child!");
@@ -98,6 +100,7 @@ public class TimeRangeResultCache<SubResult> {
                 }
                 request.addParent(this); // Will immediately decrement childrenWithoutResultCounter if result is present
             }
+            childrenWithoutResultCounter--;
         }
 
         /**
