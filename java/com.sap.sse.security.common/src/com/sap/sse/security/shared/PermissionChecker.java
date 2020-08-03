@@ -79,7 +79,7 @@ public class PermissionChecker {
          *         {@link AccessControlList}s relevant for the combination of {@code type} and
          *         {@code objectIdentifiersAsStringOrNull} otherwise
          */
-        Iterable<AccessControlList> resolveAclsAndCheckIfAnyMatches(O ownershipOrNull, String type, Iterable<String> objectIdentifiersAsStringOrNull,
+        Iterable<AccessControlList> resolveDenyingAclsAndCheckIfAnyMatches(O ownershipOrNull, String type, Iterable<String> objectIdentifiersAsStringOrNull,
                 Predicate<A> filterCondition, Iterable<AccessControlList> allAclsForTypeAndObjectIdsOrNull);
     }
     
@@ -310,17 +310,17 @@ public class PermissionChecker {
                 identifierWildcard = true;
             }
             final Triple<String, Set<String>, O> collationKeyBasedOnTypeAndObjectIdAndOwnership = new Triple<>(type, identifiers, ownership);
-            final Iterable<AccessControlList> aclsFromPreviousRunForSameTypeAndObjectIds =
+            final Iterable<AccessControlList> denyingAclsFromPreviousRunForSameTypeAndObjectIds =
                     typesAndIdsAndOwnershipsWithFullSetOfAcls.get(collationKeyBasedOnTypeAndObjectIdAndOwnership);
-            final Iterable<AccessControlList> acls = aclResolver.resolveAclsAndCheckIfAnyMatches(ownership, type,
+            final Iterable<AccessControlList> denyingAcls = aclResolver.resolveDenyingAclsAndCheckIfAnyMatches(ownership, type,
                     identifierWildcard ? null : identifiers,
                     acl->checkAcl(effectiveWildcardPermissionToCheck, groupsOfUser, groupsOfAllUser, acl) == PermissionState.REVOKED,
-                    aclsFromPreviousRunForSameTypeAndObjectIds);
-            if (acls == null) { // this means an ACL was found that REVOKED the permission
+                    denyingAclsFromPreviousRunForSameTypeAndObjectIds);
+            if (denyingAcls == null) { // this means an ACL was found that REVOKED the permission
                 return false;
-            } else if (aclsFromPreviousRunForSameTypeAndObjectIds == null) {
+            } else if (denyingAclsFromPreviousRunForSameTypeAndObjectIds == null) {
                 // now we have the full scan of ACLs for the type/object-id combination; cache it
-                typesAndIdsAndOwnershipsWithFullSetOfAcls.put(collationKeyBasedOnTypeAndObjectIdAndOwnership, acls);
+                typesAndIdsAndOwnershipsWithFullSetOfAcls.put(collationKeyBasedOnTypeAndObjectIdAndOwnership, denyingAcls);
             }
             if (checkUserPermissions(effectiveWildcardPermissionToCheck, user, groupsOfUser, ownership,
                     impliesChecker, /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true) != PermissionState.GRANTED

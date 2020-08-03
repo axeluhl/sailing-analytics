@@ -121,10 +121,20 @@ public abstract class AbstractAccessControlList<G extends SecurityUserGroup<?>>
     }
 
     @Override
+    public Map<G, Set<WildcardPermission>> getAllowedActions() {
+        return Collections.unmodifiableMap(allowedActionsByUserGroup);
+    }
+
+    @Override
     public Set<String> getDeniedActions(UserGroup group) {
         return Util.asSet(Util.map(
                 deniedActionsByUserGroup.get(group)==null?Collections.emptySet():deniedActionsByUserGroup.get(group),
                         wp->wp.toString()));
+    }
+
+    @Override
+    public Map<G, Set<WildcardPermission>> getDeniedActions() {
+        return Collections.unmodifiableMap(deniedActionsByUserGroup);
     }
 
     private boolean isDeniedAction(String action) {

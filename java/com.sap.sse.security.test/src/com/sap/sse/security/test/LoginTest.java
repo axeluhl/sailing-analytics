@@ -168,7 +168,18 @@ public class LoginTest {
         // and therefore no meta-permission (permission to grant) for SERVER:*:my anymore:
         assertFalse(securityService.hasCurrentUserMetaPermissionWithOwnershipLookup(
                 WildcardPermission.builder().withTypes(SecuredSecurityTypes.SERVER).withIds(myId.getTypeRelativeObjectIdentifier()).build()));
-        // and therefore no meta-permission (permission to grant) role "admin" qualified to the default user group:
+        // The current user belongs to defaultUserGroup for which READ_REPLICATOR has been denied on SERVER/my. However,
+        // the SERVER/my object is owned by the admin-tenant group. Wanting to grant a role qualified to the defaultUserGroup
+        // would entail permissions only for objects owned by the defaultUserGroup, hence not for SERVER/my; so the
+        // denial of READ_REPLICATOR shouldn't matter for granting the "admin" role qualified to objects owned by
+        // group defaultUserGroup:
+        assertTrue(securityService.hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(
+                adminRoleDefinition, new Ownership(/* user */ null, defaultUserGroup)));
+        // granting role "admin" qualified to the "admin-tenant" group, however, should not be allowed
+        // because a denying ACL entry exists for the SERVER/my object owned by the "admin-tenant" group that
+        // denies READ_REPLICATOR for users who belong to group defaultUserGroup.
+        // (As a matter of fact, granting this role would be possible if the receiver of the role did *not*
+        // belong to the defaultUserGroup...)
         assertFalse(securityService.hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(
                 adminRoleDefinition, new Ownership(/* user */ null, adminTenant)));
     }

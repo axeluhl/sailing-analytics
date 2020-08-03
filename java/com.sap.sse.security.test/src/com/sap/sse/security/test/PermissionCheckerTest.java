@@ -49,8 +49,8 @@ import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 public class PermissionCheckerTest {
     private final AclResolver<AccessControlList, Ownership> noopAclResolver = new AclResolver<AccessControlList, Ownership>() {
         @Override
-        public Iterable<AccessControlList> resolveAclsAndCheckIfAnyMatches(Ownership ownership, String type,
-                Iterable<String> objectIdentifiersAsString, Predicate<AccessControlList> check,
+        public Iterable<AccessControlList> resolveDenyingAclsAndCheckIfAnyMatches(Ownership ownershipOrNull,
+                String type, Iterable<String> objectIdentifiersAsStringOrNull, Predicate<AccessControlList> filterCondition,
                 Iterable<AccessControlList> allAclsForTypeAndObjectIdsOrNull) {
             return Collections.emptySet(); // assuming an empty ACL set
         }

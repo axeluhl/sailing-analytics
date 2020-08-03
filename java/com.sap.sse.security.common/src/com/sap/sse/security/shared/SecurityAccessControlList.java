@@ -102,15 +102,19 @@ public interface SecurityAccessControlList<G extends SecurityUserGroup<?>> exten
     /**
      * Returns the actions explicitly <em>allowed</em> by this ACL for the {@code group} specified.
      * 
-     * @return {@code null} or an empty or a non-empty set
+     * @return never {@code null}, but an empty or a non-empty set
      */
     Set<String> getAllowedActions(UserGroup group);
 
     /**
      * Returns the actions explicitly <em>denied</em> by this ACL for the {@code group} specified.
      * 
-     * @return {@code null} or an empty or a non-empty set
+     * @return never {@code null}, but an empty or a non-empty set
      */
     Set<String> getDeniedActions(UserGroup group);
+
+    Map<G, Set<WildcardPermission>> getDeniedActions();
+
+    Map<G, Set<WildcardPermission>> getAllowedActions();
 
 }

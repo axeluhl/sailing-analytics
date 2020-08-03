@@ -77,9 +77,9 @@ public interface AccessControlStore extends Named {
     Set<AccessControlListAnnotation> getAccessControlListsForGroup(UserGroup group);
 
     /**
-     * For testing purposes. The map returned is used primarily internally by the access control store to perform
-     * meta-permission checks which are influenced by negative (or denying) ACL entries. May return {@code null} in case
-     * no ACL has rules for the {@code group}.
+     * The map returned is used primarily internally by the access control store to perform meta-permission checks which
+     * are influenced by negative (or denying) ACL entries. May return {@code null} in case no ACL has rules for the
+     * {@code group}.
      */
     Map<UserGroup, Set<QualifiedObjectIdentifier>> getAccessControlListsWithDenials(String typeIdentifier);
 }
