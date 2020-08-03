@@ -6,9 +6,11 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.net.UnknownHostException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.junit.Before;
@@ -101,12 +103,70 @@ public class AccessControlStoreTest {
     }
     
     @Test
-    public void testSetEmptyAccessControlListToReplaceExisting() throws UserGroupManagementException {
-        accessControlStore.addAclPermission(testId, adminTenant, "READ");
+    public void testSetEmptyAccessControlListToReplaceExistingPositive() throws UserGroupManagementException {
+        accessControlStore.addAclPermission(testId, adminTenant, "READ"); // a positive, allowing ACL entry
+        // expecting not to find anything in the denying structure:
+        assertTrue(accessControlStore.getAccessControlListsWithDenials(testId.getTypeIdentifier()) == null || accessControlStore.getAccessControlListsWithDenials(testId.getTypeIdentifier()).isEmpty());
+        // but a record should exist in the per-group ACLs:
         assertNotNull(accessControlStore.getAccessControlListsForGroup(adminTenant));
         assertEquals(1, accessControlStore.getAccessControlListsForGroup(adminTenant).size());
         accessControlStore.setEmptyAccessControlList(testId, "The test object's ACL");
         assertTrue(accessControlStore.getAccessControlListsForGroup(adminTenant) == null || accessControlStore.getAccessControlListsForGroup(adminTenant).isEmpty());
+        assertTrue(accessControlStore.getAccessControlListsWithDenials(testId.getTypeIdentifier()) == null || accessControlStore.getAccessControlListsWithDenials(testId.getTypeIdentifier()).isEmpty());
+    }
+    
+    @Test
+    public void testSetActionsOnAclToReplaceExistingPositive() throws UserGroupManagementException {
+        accessControlStore.addAclPermission(testId, adminTenant, "READ"); // a positive, allowing ACL entry
+        // expecting not to find anything in the denying structure:
+        assertTrue(accessControlStore.getAccessControlListsWithDenials(testId.getTypeIdentifier()) == null || accessControlStore.getAccessControlListsWithDenials(testId.getTypeIdentifier()).isEmpty());
+        // but a record should exist in the per-group ACLs:
+        assertNotNull(accessControlStore.getAccessControlListsForGroup(adminTenant));
+        assertEquals(1, accessControlStore.getAccessControlListsForGroup(adminTenant).size());
+        accessControlStore.setAclPermissions(testId, adminTenant, Collections.singleton("!READ"));
+        // now we should still see a per-group entry, but now additionally the denial-by-type-and-group should have an entry, too:
+        assertNotNull(accessControlStore.getAccessControlListsForGroup(adminTenant));
+        assertEquals(1, accessControlStore.getAccessControlListsForGroup(adminTenant).size());
+        final Set<QualifiedObjectIdentifier> objectIdsWithNegativeACL = accessControlStore.getAccessControlListsWithDenials(testId.getTypeIdentifier()).get(adminTenant);
+        assertEquals(1, objectIdsWithNegativeACL.size());
+        assertEquals(testId, objectIdsWithNegativeACL.iterator().next());
+    }
+    
+    @Test
+    public void testSetEmptyAccessControlListToReplaceExistingNegative() throws UserGroupManagementException {
+        accessControlStore.addAclPermission(testId, adminTenant, "!READ"); // a negative, denying ACL entry
+        // expecting to find something in the denying structure:
+        assertNotNull(accessControlStore.getAccessControlListsWithDenials(testId.getTypeIdentifier()));
+        final Set<QualifiedObjectIdentifier> objectIdsWithNegativeACL = accessControlStore.getAccessControlListsWithDenials(testId.getTypeIdentifier()).get(adminTenant);
+        assertEquals(1, objectIdsWithNegativeACL.size());
+        assertEquals(testId, objectIdsWithNegativeACL.iterator().next());
+        assertEquals("!READ", accessControlStore.getAccessControlList(testId).getAnnotation().getActionsByUserGroup().get(adminTenant).iterator().next());
+        // a record should also exist in the per-group ACLs:
+        assertNotNull(accessControlStore.getAccessControlListsForGroup(adminTenant));
+        assertEquals(1, accessControlStore.getAccessControlListsForGroup(adminTenant).size());
+        accessControlStore.setEmptyAccessControlList(testId, "The test object's ACL");
+        assertTrue(accessControlStore.getAccessControlListsForGroup(adminTenant) == null || accessControlStore.getAccessControlListsForGroup(adminTenant).isEmpty());
+        assertTrue(accessControlStore.getAccessControlListsWithDenials(testId.getTypeIdentifier()) == null || accessControlStore.getAccessControlListsWithDenials(testId.getTypeIdentifier()).isEmpty());
+    }
+    
+    @Test
+    public void testSetActionsToReplaceExistingNegative() throws UserGroupManagementException {
+        accessControlStore.addAclPermission(testId, adminTenant, "!READ"); // a negative, denying ACL entry
+        // expecting to find something in the denying structure:
+        assertNotNull(accessControlStore.getAccessControlListsWithDenials(testId.getTypeIdentifier()));
+        final Set<QualifiedObjectIdentifier> objectIdsWithNegativeACL = accessControlStore.getAccessControlListsWithDenials(testId.getTypeIdentifier()).get(adminTenant);
+        assertEquals(1, objectIdsWithNegativeACL.size());
+        assertEquals(testId, objectIdsWithNegativeACL.iterator().next());
+        assertEquals("!READ", accessControlStore.getAccessControlList(testId).getAnnotation().getActionsByUserGroup().get(adminTenant).iterator().next());
+        // a record should also exist in the per-group ACLs:
+        assertNotNull(accessControlStore.getAccessControlListsForGroup(adminTenant));
+        assertEquals(1, accessControlStore.getAccessControlListsForGroup(adminTenant).size());
+        accessControlStore.setAclPermissions(testId, adminTenant, Collections.singleton("READ"));
+        // still expect a record for the group
+        assertNotNull(accessControlStore.getAccessControlListsForGroup(adminTenant));
+        assertEquals(1, accessControlStore.getAccessControlListsForGroup(adminTenant).size());
+        // but not for the denials
+        assertTrue(accessControlStore.getAccessControlListsWithDenials(testId.getTypeIdentifier()) == null || accessControlStore.getAccessControlListsWithDenials(testId.getTypeIdentifier()).isEmpty());
     }
     
     @Test
