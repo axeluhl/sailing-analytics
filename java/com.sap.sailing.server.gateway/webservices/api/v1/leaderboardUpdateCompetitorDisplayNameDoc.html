@@ -9,11 +9,10 @@
 </head>
 <body>
 <h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
-<h2>URL: /api/v1/leaderboard/{name}/updateCompetitorDisplayName</h2>
+<h2>URL: /api/v1/leaderboard/{name}/update</h2>
 
 <b>Description:</b>
-<p>The service can modify or clear the display name of a competitor used in the scope of a leaderboard. The request requires
-the <tt>LEADERBOARD:UPDATE</tt> permission on the respective leaderboard.</p>
+<p>The service can modify some of the details of a leaderboard. Currently this allows to update the discarding thresholds of a leaderboard and the leaderboard display name.</p>
 <br/>
 <table>
 	<tr>
@@ -22,31 +21,46 @@ the <tt>LEADERBOARD:UPDATE</tt> permission on the respective leaderboard.</p>
 	</tr>
 	<tr>
 		<td>Output format:</td>
-		<td>None</td>
+		<td>Json</td>
 	</tr>
 	<tr>
 		<td>Mandatory parameters:</td>
-		<td>competitorId: the ID of the competitor whose display name to update for the respective leaderboard</td>
+		<td>None</td>
 	</tr>
 	<tr>
 		<td>Optional parameters:</td>
-		<td>displayName: If provided, the display name is set to the value specified. Otherwise, the display
-		    name for the competitor is cleared in the scope of the selected leaderboard, so the original competitor
-		    name will be used to display the competitor.</td>
+		<td>None</td>
 	</tr>
 	<tr>
 		<td>Request method:</td>
 		<td>POST</td>
 	</tr>
 	<tr>
-		<td>Example:</td>
-		<td>
-		<pre>
-		curl -i -X POST "http://admin:admin@127.0.0.1:8888/sailingserver/api/v1/leaderboards/1.%20Segel-Bundesliga%202020%20-%20Kiel%20(1)/updateCompetitorDisplayName?competitorId=103bb5e0-a513-4f4f-857e-1f047b3eb956&displayName=SomeName"
-		</pre>
-		Response: Status 200
+		<td>Payload:</td>
+		
+		<td>format: json<br /> *(optional) resultDiscardingThresholds: if
+			parameter is absent or value is null, the discarding thresholds will
+			not change. If passing an empty array the discarding thresholds
+			will be cleared.<br/>
+			*(optional) leaderboardDisplayName: if parameter is absent
+			the displayName will not change.
 		</td>
 	</tr>
+	<tr>
+		<td>Example:</td>
+		<td><a
+			href="http://www.sapsailing.com/sailingserver/api/v1/leaderboards/505 Worlds 2013/update">http://www.sapsailing.com/sailingserver/api/v1/leaderboards/505
+				Worlds 2013/update</a><br/>
+		Request: 
+		<pre>
+		{
+		  "resultDiscardingThresholds":[1,2],
+		  "leaderboardDisplayName":"505 Worlds 2014"
+		}
+		</pre>
+		Response: Status 200
+		
+		</tr>
 	</table>
 <div style="height: 1em;"></div>
 <a href="index.html">Back to Web Service Overview</a> 
