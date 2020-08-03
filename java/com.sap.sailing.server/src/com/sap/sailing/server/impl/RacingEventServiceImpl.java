@@ -5053,7 +5053,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             serverAddress = RemoteServerUtil.createRemoteServerUrl(base, masterDataPath, query);
             // the response can take a very long time for MDI that include foiling data or such
             connection = HttpUrlConnectionHelper.redirectConnectionWithBearerToken(serverAddress,
-                    Duration.ONE_HOUR.times(2), token);
+                    Duration.ONE_HOUR.times(2), /* HTTP method */ "POST", token);
             createOrUpdateDataImportProgressWithReplication(importOperationId, 0.02,
                     DataImportSubProgress.CONNECTION_ESTABLISH, 0.5);
             if (compress) {

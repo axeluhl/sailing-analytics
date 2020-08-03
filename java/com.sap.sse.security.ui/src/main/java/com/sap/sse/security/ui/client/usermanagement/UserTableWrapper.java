@@ -44,6 +44,7 @@ import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.ui.client.EntryPointLinkFactory;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
+import com.sap.sse.security.ui.client.UserManagementWriteServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
 import com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell;
@@ -160,7 +161,7 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
         userActionColumn.addAction(ACTION_UPDATE, UPDATE, user -> editUser(user, additionalPermissions));
         userActionColumn.addAction(ACTION_DELETE, DELETE, user -> {
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveUser(user.getName()))) {
-                getUserManagementService().deleteUser(user.getName(), new AsyncCallback<SuccessInfo>() {
+                getUserManagementWriteService().deleteUser(user.getName(), new AsyncCallback<SuccessInfo>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         deletingUserFailed(user, caught.getMessage());
@@ -277,7 +278,7 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
         final UserEditDialog dialog = new UserEditDialog(originalUser, new DialogCallback<UserDTO>() {
             @Override
             public void ok(final UserDTO user) {
-                getUserManagementService().updateUserProperties(user.getName(), user.getFullName(), user.getCompany(),
+                getUserManagementWriteService().updateUserProperties(user.getName(), user.getFullName(), user.getCompany(),
                         user.getLocale(),
                         user.getDefaultTenant() != null ? user.getDefaultTenant().getId().toString() : null,
                         new AsyncCallback<UserDTO>() {
@@ -307,7 +308,7 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
                             }
                         });
                 if (!originalUser.getEmail().equals(user.getEmail())) {
-                    getUserManagementService().updateSimpleUserEmail(user.getName(), user.getEmail(),
+                    getUserManagementWriteService().updateSimpleUserEmail(user.getName(), user.getEmail(),
                             EntryPointLinkFactory.createEmailValidationLink(new HashMap<String, String>()),
                             new AsyncCallback<Void>() {
                                 @Override
@@ -334,5 +335,9 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
 
     private UserManagementServiceAsync getUserManagementService() {
         return userService.getUserManagementService();
+    }
+    
+    private UserManagementWriteServiceAsync getUserManagementWriteService() {
+        return userService.getUserManagementWriteService();
     }
 }

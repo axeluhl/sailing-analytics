@@ -194,6 +194,17 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends GPSFixTrackImpl<Item
         }
     }
     
+    private double getSmoothenedSpeedRatio(Speed s1, Speed s2) {
+        final double speedToPreviousFactor;
+        final double offsetForSmallSpeedsInKnots = 0.5;
+        if (s1.compareTo(s2) >= 0) {
+            speedToPreviousFactor = (s1.getKnots() + offsetForSmallSpeedsInKnots) / (s2.getKnots() + offsetForSmallSpeedsInKnots);
+        } else {
+            speedToPreviousFactor = (s2.getKnots() + offsetForSmallSpeedsInKnots) / (s1.getKnots() + offsetForSmallSpeedsInKnots);
+        }
+        return speedToPreviousFactor;
+    }
+    
     /**
      * In addition to the base class implementation, we may have the speed and bearing as measured by the device (the
      * special speed/bearing combination 0.0/0.0 is simply ignored, as are fix-provided speed values that exceed
@@ -220,12 +231,7 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends GPSFixTrackImpl<Item
             while (previous != null && !foundValidPreviousFixInRange && e.getTimePoint().asMillis() - previous.getTimePoint().asMillis() <= getMillisecondsOverWhichToAverageSpeed()) {
                 speedToPrevious = previous.getPosition().getDistance(e.getPosition())
                         .inTime(e.getTimePoint().asMillis() - previous.getTimePoint().asMillis());
-                final double speedToPreviousFactor;
-                if (speedToPrevious.getMetersPerSecond() >= e.getSpeed().getMetersPerSecond()) {
-                    speedToPreviousFactor = speedToPrevious.getMetersPerSecond() / e.getSpeed().getMetersPerSecond();
-                } else {
-                    speedToPreviousFactor = e.getSpeed().getMetersPerSecond() / speedToPrevious.getMetersPerSecond();
-                }
+                final double speedToPreviousFactor = getSmoothenedSpeedRatio(speedToPrevious, e.getSpeed());
                 foundValidPreviousFixInRange = (maxSpeedForSmoothing == null || speedToPrevious.compareTo(maxSpeedForSmoothing) <= 0)
                         && (!fixHasValidSogAndCog || speedToPreviousFactor <= MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING);
                 previous = rawFixes.lower(previous);
@@ -240,12 +246,7 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends GPSFixTrackImpl<Item
                 while (next != null && !foundValidNextFixInRange && next.getTimePoint().asMillis() - e.getTimePoint().asMillis() <= getMillisecondsOverWhichToAverageSpeed()) {
                     speedToNext = e.getPosition().getDistance(next.getPosition())
                             .inTime(next.getTimePoint().asMillis() - e.getTimePoint().asMillis());
-                    final double speedToNextFactor;
-                    if (speedToNext.getMetersPerSecond() >= e.getSpeed().getMetersPerSecond()) {
-                        speedToNextFactor = speedToNext.getMetersPerSecond() / e.getSpeed().getMetersPerSecond();
-                    } else {
-                        speedToNextFactor = e.getSpeed().getMetersPerSecond() / speedToNext.getMetersPerSecond();
-                    }
+                    final double speedToNextFactor = getSmoothenedSpeedRatio(speedToNext, e.getSpeed());
                     foundValidNextFixInRange = (maxSpeedForSmoothing == null || speedToNext.compareTo(maxSpeedForSmoothing) <= 0)
                             && (!fixHasValidSogAndCog || speedToNextFactor <= MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING);
                     next = rawFixes.higher(next);
