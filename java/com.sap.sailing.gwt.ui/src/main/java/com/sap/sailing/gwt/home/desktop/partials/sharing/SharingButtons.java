@@ -4,14 +4,20 @@ import static com.google.gwt.dom.client.Style.Display.NONE;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.UrlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.shared.places.ShareablePlaceContext;
+import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.shared.ClientConfiguration;
 
 public class SharingButtons extends Composite {
@@ -27,6 +33,7 @@ public class SharingButtons extends Composite {
     @UiField AnchorElement mail;
     @UiField AnchorElement twitter;
     @UiField AnchorElement facebook;
+    @UiField Button copyToClipBoard;
 
     public SharingButtons() {
         SharingButtonsResources.INSTANCE.css().ensureInjected();
@@ -53,5 +60,20 @@ public class SharingButtons extends Composite {
         final UrlBuilder facebookLink = new UrlBuilder().setProtocol("https").setHost("www.facebook.com")
                 .setPath("sharer/sharer.php").setParameter("u", urlToShare);
         facebook.setHref(facebookLink.buildString());
+        copyToClipBoard.removeStyleDependentName("gwt-button");
+        copyToClipBoard.removeStyleDependentName("gwt-Button:visited");
+        copyToClipBoard.removeStyleName("button");
+        copyToClipBoard.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                copyToClipboard(urlToShare);
+                Notification.notify(StringMessages.INSTANCE.sharingLinkCopied(), NotificationType.INFO);
+            }
+        });
     }
+    
+    public static native void copyToClipboard(String text) /*-{
+        window.focus();
+        navigator.clipboard.writeText(text);
+    }-*/;
 }

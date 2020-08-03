@@ -20,6 +20,7 @@ public interface SharingButtonsResources extends SharedHomeResources {
         String eventheader_sharing_itememail();
         String eventheader_sharing_itemtwitter();
         String eventheader_sharing_itemfacebook();
+        String eventheader_sharing_itemcopytoclipboard();
     }
 
 }

@@ -1154,6 +1154,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String sharingMailTooltip();
     String sharingTwitterTooltip();
     String sharingFacebookTooltip();
+    String sharingCopyToClipBoardTooltip();
     String eventSharingShortText(String eventName, String venue, String dateString);
     String eventSharingLongText(String eventName, String venue, String dateString, String url);
     String seriesSharingShortText(String seriesName);
@@ -2392,4 +2393,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String unableToLoadCourseAreas(String message);
     String insufficientPermissions();
     String manageEvents();
+    String sharingLinkCopied();
 }
