@@ -10,7 +10,11 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
+import com.sap.sailing.gwt.home.mobile.partials.sharing.SharingButtons;
+import com.sap.sailing.gwt.home.mobile.partials.sharing.SharingMetadataProvider;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.places.ShareablePlaceContext;
+import com.sap.sailing.gwt.home.shared.places.event.EventContext;
 import com.sap.sailing.gwt.home.shared.utils.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.home.shared.utils.LabelTypeUtil;
 import com.sap.sailing.gwt.home.shared.utils.LogoUtil;
@@ -31,6 +35,7 @@ public class EventHeader extends Composite {
     @UiField DivElement eventLocationUi;
     @UiField DivElement eventHeader;
     @UiField DataByLogo dataByLogo;
+    @UiField SharingButtons sharingButtons;
 
     public EventHeader(EventViewDTO event, String optionalRegattaDisplayName, PlaceNavigation<?> logoNavigation) {
         EventHeaderResources.INSTANCE.css().ensureInjected();
@@ -57,5 +62,15 @@ public class EventHeader extends Composite {
         }
         eventDateUi.setInnerText(EventDatesFormatterUtil.formatDateRangeWithYear(event.getStartDate(), event.getEndDate()));
         eventLocationUi.setInnerText(event.getLocationAndVenueAndCountry());
+    }
+    
+    public void setupSharing(EventContext ctx) {
+        sharingButtons.setUp(new SharingMetadataProvider() {
+            
+            @Override
+            public ShareablePlaceContext getContext() {
+                return ctx;
+            }
+        });
     }
 }

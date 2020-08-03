@@ -1,0 +1,59 @@
+.eventheader_sharing {
+  text-align: right;
+  padding: 1.333333333333333em 0 !important;
+  display: inline-block;
+  float: right;
+}
+.eventheader_sharing_item {
+  display: inline-block;
+  height: 2.666666666666667em;
+  width: 2.666666666666667em;
+  margin-left: 0.333333333333333em;
+  background-position: center center;
+  background-repeat: no-repeat;
+  border-radius: 5px;
+}
+
+.eventheader_sharing_itemcopytoclipboard {
+  position: relative;
+  background-color: light-grey;
+}
+.eventheader_sharing_itemcopytoclipboard:after {
+  content: "C";
+  width: 50%;
+  height: 50%;
+  top: 25%;
+  left: 25%;
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  border: none;
+  background-color: #efaa00;
+}
+
+.eventheader_sharing_itemcopytoclipboard:hover,
+.eventheader_sharing_itemcopytoclipboard:focus {
+  background-color: #d89a00;
+}
+
+.eventheader_sharing_itemshare {
+  position: relative;
+  background-color: light-grey;
+}
+.eventheader_sharing_itemshare:after {
+  content: "S";
+  width: 50%;
+  height: 50%;
+  top: 25%;
+  left: 25%;
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  border: none;
+  background-color: #efaa00;
+}
+
+.eventheader_sharing_itemshare:hover,
+.eventheader_sharing_itemshare:focus {
+  background-color: #d89a00;
+}

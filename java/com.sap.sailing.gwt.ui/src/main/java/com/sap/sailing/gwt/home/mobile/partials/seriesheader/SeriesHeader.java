@@ -10,7 +10,11 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.event.EventAndLeaderboardReferenceWithStateDTO;
 import com.sap.sailing.gwt.home.communication.fakeseries.EventSeriesViewDTO;
+import com.sap.sailing.gwt.home.mobile.partials.sharing.SharingButtons;
+import com.sap.sailing.gwt.home.mobile.partials.sharing.SharingMetadataProvider;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.places.ShareablePlaceContext;
+import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesContext;
 import com.sap.sailing.gwt.home.shared.utils.LabelTypeUtil;
 import com.sap.sailing.gwt.home.shared.utils.LogoUtil;
 
@@ -24,6 +28,7 @@ public class SeriesHeader extends Composite {
     @UiField DivElement eventStateUi;
     @UiField AnchorElement eventLogoUi;
     @UiField DivElement locationsUi;
+    @UiField SharingButtons sharingButtons;
 
     public SeriesHeader(EventSeriesViewDTO event) {
         this(event, null);
@@ -56,5 +61,14 @@ public class SeriesHeader extends Composite {
             }
         }
         locationsUi.setInnerText(locationsBuilder.toString());
+    }
+    
+    public void setupSharing(SeriesContext seriesContext) {
+        sharingButtons.setUp(new SharingMetadataProvider() {
+            @Override
+            public ShareablePlaceContext getContext() {
+                return seriesContext;
+            }
+        });
     }
 }

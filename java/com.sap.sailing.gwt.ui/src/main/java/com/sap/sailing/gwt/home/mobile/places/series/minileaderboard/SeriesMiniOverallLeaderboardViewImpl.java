@@ -36,6 +36,7 @@ public class SeriesMiniOverallLeaderboardViewImpl extends Composite implements S
         this.currentPresenter = presenter;
         minileaderboardUi = new MinileaderboardBox(true, flagImageResolver);
         eventHeaderUi = new SeriesHeader(presenter.getSeriesDTO(), presenter.getSeriesNavigation());
+        eventHeaderUi.setupSharing(presenter.getCtx());
         initWidget(uiBinder.createAndBindUi(this));
         RefreshManager refreshManager = new LifecycleRefreshManager(this, currentPresenter.getDispatch());
         refreshManager.add(minileaderboardUi, new GetMiniOverallLeaderbordAction(presenter.getCtx().getLeaderboardGroupId(),
