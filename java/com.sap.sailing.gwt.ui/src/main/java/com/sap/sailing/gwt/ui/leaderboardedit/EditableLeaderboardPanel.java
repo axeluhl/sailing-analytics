@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.cell.client.ButtonCell;
 import com.google.gwt.cell.client.Cell;
@@ -15,6 +16,8 @@ import com.google.gwt.cell.client.HasCell;
 import com.google.gwt.cell.client.SelectionCell;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -32,6 +35,7 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.SafeHtmlHeader;
 import com.google.gwt.user.cellview.client.TextHeader;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Anchor;
@@ -39,6 +43,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.datepicker.client.DateBox;
 import com.google.gwt.view.client.ListDataProvider;
@@ -60,6 +65,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.ClassicLeaderboardStyle;
 import com.sap.sailing.gwt.ui.leaderboard.CompetitorColumnBase;
 import com.sap.sailing.gwt.ui.leaderboard.CompetitorFetcher;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSortableColumnWithMinMax;
 import com.sap.sailing.gwt.ui.leaderboard.MultiRaceLeaderboardPanel;
 import com.sap.sse.common.InvertibleComparator;
@@ -84,6 +90,7 @@ import com.sap.sse.gwt.client.useragent.UserAgentDetails;
  *
  */
 public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
+
     private static EditableLeaderboardResources resources = GWT.create(EditableLeaderboardResources.class);
 
     final DateBox lastScoreCorrectionTimeBox;
@@ -93,6 +100,9 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
     final private ListDataProvider<CompetitorDTO> suppressedCompetitorsShown;
 
     private CheckBox showUncorrectedTotalPointsCheckbox;
+    
+    private ListBox raceListBox;
+    private String raceListSelection;
     
     private final SailingServiceWriteAsync sailingServiceWrite; 
     
@@ -633,6 +643,7 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
                 new CompetitorSelectionModel(/* hasMultiSelection */true),
                 leaderboardName, errorReporter, stringMessages, /* showRaceDetails */ true, new ClassicLeaderboardStyle(),
                 FlagImageResolverImpl.get(), availableDetailTypes);
+        
         this.sailingServiceWrite = sailingServiceWrite;
         this.setStyleName("editableLeaderboardPanel");
         this.getLeaderboardTable().setStyleName("editableLeaderboardTable");
@@ -709,7 +720,8 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
                 loadCompleteLeaderboard(/* showProgress */ true);
             }
         });
-        scoreCorrectionInfoGrid.setWidget(0, 4, showUncorrectedTotalPointsCheckbox);
+        scoreCorrectionInfoGrid.getFlexCellFormatter().setColSpan(0, 5, 2);
+        scoreCorrectionInfoGrid.setWidget(0, 5, showUncorrectedTotalPointsCheckbox);
 
         setScoreCorrectionDefaultTimeBtn.addClickHandler(new ClickHandler() {
             @Override
@@ -730,7 +742,69 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
         settingsAnchor.setTitle(stringMessages.settings());
         settingsAnchor.addClickHandler(new SettingsClickHandler(stringMessages));
         getRefreshAndSettingsPanel().add(settingsAnchor);
+        
+        
+        scoreCorrectionInfoGrid.setWidget(1,  4, new Label("Race Selection" + ":"));
+        raceListBox = new ListBox();
+        raceListBox.addChangeHandler(new ChangeHandler() {
+            
+            @Override
+            public void onChange(ChangeEvent event) {
+                handleRaceChangeEvent(raceListBox);
+            }
+        });
+        scoreCorrectionInfoGrid.setWidget(1, 5, raceListBox);
+        raceListSelection = Window.Location.getParameter("selectedRace");
 
+    }
+    
+    /**
+     * Updates the table based on the selection box of selected race.
+     */
+    private void updateRaceListSelectionBox() {
+        List<String> items = currentSettings.getNamesOfRaceColumnsToShow();
+        if (items != null) {
+            // get map of currently visible race columns mapped to race name
+            Map<String, Column<LeaderboardRowDTO, ?>> columnMap = new HashMap<>();
+            for (int i = 0; i < getLeaderboardTable().getColumnCount(); i++) {
+                Column<LeaderboardRowDTO, ?> currentColumn = getLeaderboardTable().getColumn(i);
+                if (currentColumn instanceof LeaderboardPanel.RaceColumn) {
+                    RaceColumnDTO raceInLeaderboard = ((RaceColumn<?>) currentColumn).getRace();
+                    if (raceInLeaderboard != null) {
+                        columnMap.put(raceInLeaderboard.getName(), currentColumn);
+                    }
+                }
+            }
+            if (!columnMap.containsKey(raceListSelection)) {
+                // if race name in raceListSelection is not available, set to showAll ('')
+                raceListSelection = "";
+            }
+            // reset list box
+            raceListBox.clear();
+            raceListBox.addItem(stringMessages.showAll(), "");
+            
+            for (int i=0; i<items.size(); i++) {
+                String raceName = items.get(i);
+                if (raceListSelection != null && raceListSelection.length() > 0 && !raceListSelection.equals(raceName)) {
+                    // remove other columns from table if a specific race is selected in list box
+                    removeColumn(columnMap.get(raceName));
+                }
+                raceListBox.addItem(raceName);
+                if (raceListSelection != null && raceListSelection.equals(raceName)) {
+                    // select option if raceListSelection is equals to raceName
+                    raceListBox.setSelectedIndex(i + 1);
+                }
+            }
+        }
+    }
+    
+    /**
+     * Handles the change of a race selection. Will set the raceListSelection by selection of list box 
+     * and then trigger an update of settings which will reload the table with only selected column.
+     */
+    private void handleRaceChangeEvent(ListBox raceListBox) {
+        raceListSelection = raceListBox.getSelectedValue();
+        updateSettings(currentSettings);
     }
 
     private CellTable<CompetitorDTO> createSuppressedCompetitorsTable() {
@@ -1083,6 +1157,7 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
             for (CompetitorDTO suppressedCompetitor : leaderboard.getSuppressedCompetitors()) {
                 suppressedCompetitorsShown.getList().add(suppressedCompetitor);
             }
+            updateRaceListSelectionBox();
         }
     }
 
