@@ -1,5 +1,6 @@
 package com.sap.sse.security.shared.impl;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -110,6 +111,20 @@ public abstract class AbstractAccessControlList<G extends SecurityUserGroup<?>>
             }
         }
         return result;
+    }
+    
+    @Override
+    public Set<String> getAllowedActions(UserGroup group) {
+        return Util.asSet(Util.map(
+                allowedActionsByUserGroup.get(group)==null?Collections.emptySet():allowedActionsByUserGroup.get(group),
+                        wp->wp.toString()));
+    }
+
+    @Override
+    public Set<String> getDeniedActions(UserGroup group) {
+        return Util.asSet(Util.map(
+                deniedActionsByUserGroup.get(group)==null?Collections.emptySet():deniedActionsByUserGroup.get(group),
+                        wp->wp.toString()));
     }
 
     private boolean isDeniedAction(String action) {

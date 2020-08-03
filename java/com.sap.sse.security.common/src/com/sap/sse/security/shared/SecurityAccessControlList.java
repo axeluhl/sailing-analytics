@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
 
+import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.shared.impl.UserGroupImpl;
 
 /**
@@ -97,5 +98,19 @@ public interface SecurityAccessControlList<G extends SecurityUserGroup<?>> exten
         }
         return result;
     }
+
+    /**
+     * Returns the actions explicitly <em>allowed</em> by this ACL for the {@code group} specified.
+     * 
+     * @return {@code null} or an empty or a non-empty set
+     */
+    Set<String> getAllowedActions(UserGroup group);
+
+    /**
+     * Returns the actions explicitly <em>denied</em> by this ACL for the {@code group} specified.
+     * 
+     * @return {@code null} or an empty or a non-empty set
+     */
+    Set<String> getDeniedActions(UserGroup group);
 
 }

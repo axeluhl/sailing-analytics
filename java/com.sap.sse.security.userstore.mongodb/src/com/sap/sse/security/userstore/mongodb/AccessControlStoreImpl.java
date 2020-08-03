@@ -242,9 +242,21 @@ public class AccessControlStoreImpl implements AccessControlStore {
             userGroupToAccessControlListAnnotation.put(effectiveUserGroup, currentACLsContainingGroup);
         }
         currentACLsContainingGroup.add(acl);
+        final String type = acl.getIdOfAnnotatedObject().getTypeIdentifier();
         // FIXME bug5239: add if an action is denied; remove if no action denied for group
-        final Map<UserGroup, Set<QualifiedObjectIdentifier>> aclsByGroupForEvent = accessControlListsWithDenials.computeIfAbsent(acl.getIdOfAnnotatedObject().getTypeIdentifier(), key->new HashMap<>());
-        Util.addToValueSet(aclsByGroupForEvent, userGroup, acl.getIdOfAnnotatedObject());
+        Map<UserGroup, Set<QualifiedObjectIdentifier>> aclsByGroupForType = accessControlListsWithDenials.get(type);
+        final Set<String> deniedActions = acl.getAnnotation().getDeniedActions(userGroup);
+        if (deniedActions == null || deniedActions.isEmpty()) {
+            if (aclsByGroupForType != null) {
+                Util.removeFromValueSet(aclsByGroupForType, userGroup, acl.getIdOfAnnotatedObject());
+            }
+        } else {
+            if (aclsByGroupForType == null) {
+                aclsByGroupForType = new HashMap<>();
+                accessControlListsWithDenials.put(type, aclsByGroupForType);
+                Util.addToValueSet(aclsByGroupForType, userGroup, acl.getIdOfAnnotatedObject());
+            }
+        }
     }
 
     private void internalRemoveUserGroupToACLMapping(final UserGroup userGroup,
