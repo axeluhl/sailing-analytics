@@ -32,6 +32,8 @@ import com.sap.sse.security.shared.impl.UserGroupImpl;
  *
  */
 public interface SecurityAccessControlList<G extends SecurityUserGroup<?>> extends Serializable {
+    String DENY_PREFIX = "!";
+
     /**
      * Checks whether this access control list grants the {@code user} the permission to execute {@code action} on the
      * object to which this ACL pertains.
@@ -80,7 +82,20 @@ public interface SecurityAccessControlList<G extends SecurityUserGroup<?>> exten
      * @return {@code true} if it is a denied action, {@code false} otherwise
      */
     static boolean isDeniedAction(String action) {
-        return action.startsWith("!");
+        return action.startsWith(DENY_PREFIX);
+    }
+
+    /**
+     * Removes a leading ! (see {@link #DENY_PREFIX}) if there is one; otherwise prefixes the action with a !
+     */
+    static String invertAction(String action) {
+        final String result;
+        if (isDeniedAction(action)) {
+            result = action.substring(DENY_PREFIX.length());
+        } else {
+            result = DENY_PREFIX+action;
+        }
+        return result;
     }
 
 }
