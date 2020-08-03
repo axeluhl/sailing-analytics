@@ -60,20 +60,33 @@ public class SharingButtons extends Composite {
         final UrlBuilder facebookLink = new UrlBuilder().setProtocol("https").setHost("www.facebook.com")
                 .setPath("sharer/sharer.php").setParameter("u", urlToShare);
         facebook.setHref(facebookLink.buildString());
-        copyToClipBoard.removeStyleDependentName("gwt-button");
-        copyToClipBoard.removeStyleDependentName("gwt-Button:visited");
-        copyToClipBoard.removeStyleName("button");
-        copyToClipBoard.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                copyToClipboard(urlToShare);
-                Notification.notify(StringMessages.INSTANCE.sharingLinkCopied(), NotificationType.INFO);
-            }
-        });
+        if (clientHasNavigatorCopyToClipboardSupport()) {
+            copyToClipBoard.removeStyleDependentName("gwt-button");
+            copyToClipBoard.removeStyleDependentName("gwt-Button:visited");
+            copyToClipBoard.removeStyleName("button");
+            copyToClipBoard.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    copyToClipboard(urlToShare);
+                    Notification.notify(StringMessages.INSTANCE.sharingLinkCopied(), NotificationType.INFO);
+                }
+            });
+        } else {
+            copyToClipBoard.setVisible(false);
+        }
     }
     
     public static native void copyToClipboard(String text) /*-{
         window.focus();
         navigator.clipboard.writeText(text);
+    }-*/;
+    
+    public static native boolean clientHasNavigatorCopyToClipboardSupport() /*-{
+        window.focus();
+        if (navigator && navigator.clipboard && navigator.clipboard.writeText) {
+            return true;
+        } else {
+            return false;
+        }
     }-*/;
 }
