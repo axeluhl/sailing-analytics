@@ -15,45 +15,52 @@
 }
 
 .eventheader_sharing_itemcopytoclipboard {
+  float: right;
   position: relative;
-  background-color: light-grey;
+  margin-left: 0.5em;
+  font-size: 1rem;
+  background-color: #A9A9A9 ;
 }
 .eventheader_sharing_itemcopytoclipboard:after {
-  content: "C";
+  content: "";
+  position: absolute;
   width: 50%;
   height: 50%;
   top: 25%;
   left: 25%;
+  background-image: resourceUrl("copyIcon");
   background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
   border: none;
-  background-color: #efaa00;
 }
 
 .eventheader_sharing_itemcopytoclipboard:hover,
 .eventheader_sharing_itemcopytoclipboard:focus {
-  background-color: #d89a00;
+  background-color: #808080;
 }
 
 .eventheader_sharing_itemshare {
+  float: right;
   position: relative;
-  background-color: light-grey;
+  margin-left: 0.5em;
+  font-size: 1rem;
+  background-color: #A9A9A9 ;
 }
 .eventheader_sharing_itemshare:after {
-  content: "S";
+  content: "";
+  position: absolute;
   width: 50%;
   height: 50%;
   top: 25%;
   left: 25%;
+  background-image: resourceUrl("sharingIcon");
   background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
   border: none;
-  background-color: #efaa00;
 }
 
-.eventheader_sharing_itemshare:hover,
-.eventheader_sharing_itemshare:focus {
-  background-color: #d89a00;
+.eventheader_sharing_itemshare:hover{
+  background-color: #808080;
 }

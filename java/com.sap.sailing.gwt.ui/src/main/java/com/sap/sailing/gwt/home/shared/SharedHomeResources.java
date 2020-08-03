@@ -75,4 +75,10 @@ public interface SharedHomeResources extends CommonIcons {
 
     @Source("raw_gps_fixes.png")
     ImageResource gpsFixes();
+    
+    @Source("../../ui/client/images/share.png")
+    ImageResource sharingIcon();
+    
+    @Source("../../ui/client/images/copy.png")
+    ImageResource copyIcon();
 }

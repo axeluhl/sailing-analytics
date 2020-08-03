@@ -53,23 +53,26 @@
 
 .eventheader_sharing_itemcopytoclipboard {
   float: right;
+  position: relative;
   margin-left: 0.5em;
   font-size: 1rem;
+  background-color: #A9A9A9 ;
 }
 .eventheader_sharing_itemcopytoclipboard:after {
-  content: "C";
+  content: "";
+  position: absolute;
   width: 50%;
   height: 50%;
   top: 25%;
   left: 25%;
+  background-image: resourceUrl("copyIcon");
   background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
   border: none;
-  
 }
 
 .eventheader_sharing_itemcopytoclipboard:hover,
 .eventheader_sharing_itemcopytoclipboard:focus {
-  background-color: #d89a00;
+  background-color: #808080;
 }
