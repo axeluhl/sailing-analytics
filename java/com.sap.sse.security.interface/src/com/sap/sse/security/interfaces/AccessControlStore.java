@@ -67,4 +67,11 @@ public interface AccessControlStore extends Named {
     void removeAllOwnershipsFor(User user);
 
     void loadACLsAndOwnerships();
+
+    /**
+     * For testing purposes. The set returned is used primarily internally by the access control store to clean up
+     * when a {@link UserGroup} has been removed. It is exposed here for tests to validate that this auxiliary structure
+     * is maintained properly. May return {@code null} in case no ACL has rules for the {@code group}.
+     */
+    Set<AccessControlListAnnotation> getAccessControlListsForGroup(UserGroup group);
 }

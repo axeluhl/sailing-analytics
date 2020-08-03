@@ -1,5 +1,6 @@
 package com.sap.sse.security.test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -48,6 +49,7 @@ public class AccessControlStoreTest {
     private UserStore userStore;
     private AccessControlStore accessControlStore;
     private User testOwner;
+    private UserGroup adminTenant;
 
     @Before
     public void setUp() throws UnknownHostException, MongoException, UserGroupManagementException {
@@ -60,8 +62,7 @@ public class AccessControlStoreTest {
         db.getCollection(CollectionNames.USER_GROUPS.name()).drop();
         db.getCollection(CollectionNames.USERS.name()).drop();
         newStores();
-        
-        UserGroup adminTenant = new UserGroupImpl(UUID.randomUUID(), "admin-tenant");
+        adminTenant = new UserGroupImpl(UUID.randomUUID(), "admin-tenant");
         Map<String, UserGroup> defaultTenantForUser = new HashMap<>();
         defaultTenantForUser.put("dummyServer", adminTenant);
         testOwner = new UserImpl("admin", "admin@sapsailing.com", defaultTenantForUser,
@@ -97,6 +98,15 @@ public class AccessControlStoreTest {
         newStores();
         assertNotNull(accessControlStore.getAccessControlList(testId));
         assertTrue(accessControlStore.getAccessControlList(testId).getAnnotation().getActionsByUserGroup().get(null).contains("READ"));
+    }
+    
+    @Test
+    public void testSetEmptyAccessControlListToReplaceExisting() throws UserGroupManagementException {
+        accessControlStore.addAclPermission(testId, adminTenant, "READ");
+        assertNotNull(accessControlStore.getAccessControlListsForGroup(adminTenant));
+        assertEquals(1, accessControlStore.getAccessControlListsForGroup(adminTenant).size());
+        accessControlStore.setEmptyAccessControlList(testId, "The test object's ACL");
+        assertTrue(accessControlStore.getAccessControlListsForGroup(adminTenant) == null || accessControlStore.getAccessControlListsForGroup(adminTenant).isEmpty());
     }
     
     @Test
