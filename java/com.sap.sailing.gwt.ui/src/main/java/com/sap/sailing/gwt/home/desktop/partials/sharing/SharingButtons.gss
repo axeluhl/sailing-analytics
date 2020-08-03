@@ -52,8 +52,9 @@
 }
 
 .eventheader_sharing_itemcopytoclipboard {
-  position: relative;
-  background-color: light-grey;
+  float: right;
+  margin-left: 0.5em;
+  font-size: 1rem;
 }
 .eventheader_sharing_itemcopytoclipboard:after {
   content: "C";
@@ -65,7 +66,7 @@
   background-position: center;
   background-repeat: no-repeat;
   border: none;
-  background-color: #efaa00;
+  
 }
 
 .eventheader_sharing_itemcopytoclipboard:hover,
