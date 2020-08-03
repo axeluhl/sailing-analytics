@@ -150,8 +150,9 @@ public class SharingServlet extends HttpServlet {
                 // TODO: change to UUID, when regattaIdentifiers are changed
                 if (splitLength == 4 && split[2] != null) {
                     final String regattaIdentifier = split[3];
-                    final Regatta regatta = eventService.getRegattaByName(regattaIdentifier);
-                    if (regatta != null) {
+                    if (eventService.getLeaderboardByName(regattaIdentifier) != null) {
+                        placeUrl += "&regattaId=" + regattaIdentifier;
+                    } else if (eventService.getRegattaByName(regattaIdentifier) != null) {
                         placeUrl += "&regattaId=" + regattaIdentifier;
                     } else {
                         placeUrl = serverAddress;
