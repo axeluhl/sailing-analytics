@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.home.desktop.app;
 
 import static com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants.mediaServiceRemotePath;
 import static com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants.mediaServiceWriteRemotePath;
+import static com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants.subscriptionServiceRemotePath;
 import static com.sap.sse.gwt.shared.RpcConstants.HEADER_FORWARD_TO_MASTER;
 import static com.sap.sse.gwt.shared.RpcConstants.HEADER_FORWARD_TO_REPLICA;
 
@@ -39,8 +40,7 @@ public abstract class AbstractApplicationClientFactory<ATLV extends ApplicationT
         sailingService = SailingServiceHelper.createSailingServiceInstance();
         mediaService = GWT.create(MediaService.class);
         subscriptionService = GWT.create(SubscriptionService.class);
-        EntryPointHelper.registerASyncService((ServiceDefTarget) subscriptionService,
-                RemoteServiceMappingConstants.subscriptionServiceRemotePath);
+        EntryPointHelper.registerASyncService((ServiceDefTarget) subscriptionService, subscriptionServiceRemotePath);
         EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService, mediaServiceRemotePath,
                 HEADER_FORWARD_TO_REPLICA);
         mediaServiceWrite = GWT.create(MediaServiceWrite.class);
