@@ -560,7 +560,6 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
             this.maxPointsDropDownCellProvider = maxPointsDropDownCellProvider;
             this.totalPointsEditCellProvider = totalPointsEditCellProvider;
         }
-        
 
         @Override
         public ButtonCell getCell() {
@@ -627,13 +626,11 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
                 }
             };
         }
-        
 
         @Override
         public String getValue(LeaderboardRowDTO object) {
             return "";//stringMessages.edit();
         }
-        
     }
 
     public EditableLeaderboardPanel(final SailingServiceWriteAsync sailingServiceWrite, AsyncActionsExecutor asyncActionsExecutor,
@@ -643,14 +640,13 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
                 new CompetitorSelectionModel(/* hasMultiSelection */true),
                 leaderboardName, errorReporter, stringMessages, /* showRaceDetails */ true, new ClassicLeaderboardStyle(),
                 FlagImageResolverImpl.get(), availableDetailTypes);
-        
         this.sailingServiceWrite = sailingServiceWrite;
         this.setStyleName("editableLeaderboardPanel");
         this.getLeaderboardTable().setStyleName("editableLeaderboardTable");
         suppressedCompetitorsShown = new ListDataProvider<>(new ArrayList<>());
         suppressedCompetitorsTable = createSuppressedCompetitorsTable();
-        ImageResource importIcon = resources.importIcon();
-        Anchor importAnchor = new Anchor(AbstractImagePrototype.create(importIcon).getSafeHtml());
+        final ImageResource importIcon = resources.importIcon();
+        final Anchor importAnchor = new Anchor(AbstractImagePrototype.create(importIcon).getSafeHtml());
         getRefreshAndSettingsPanel().insert(importAnchor, 0);
         importAnchor.setTitle(stringMessages.importOfficialResults());
         importAnchor.addClickHandler(new ClickHandler() {
@@ -659,11 +655,12 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
                 sailingServiceWrite.getScoreCorrectionProviderNames(new AsyncCallback<Iterable<String>>() {
                     @Override
                     public void onSuccess(Iterable<String> providerNames) {
-                        ResultSelectionAndApplyDialog dialog = new ResultSelectionAndApplyDialog(EditableLeaderboardPanel.this, providerNames, getSailingService(), 
-                                stringMessages, getErrorReporter());
+                        ResultSelectionAndApplyDialog dialog = new ResultSelectionAndApplyDialog(
+                                EditableLeaderboardPanel.this, providerNames, getSailingService(), stringMessages,
+                                getErrorReporter());
                         dialog.show();
                     }
-                    
+
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError(stringMessages.errorGettingScoreCorrectionProvider(caught.getMessage()));
@@ -671,31 +668,25 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
                 });
             }
         });
-        
-        
-
-        FlexTable scoreCorrectionInfoGrid = new FlexTable();
+        final FlexTable scoreCorrectionInfoGrid = new FlexTable();
         scoreCorrectionInfoGrid.setCellPadding(3);
         scoreCorrectionInfoGrid.setWidget(0,  0, new Label(stringMessages.lastScoreCorrectionsTime() + ":"));
         lastScoreCorrectionTimeBox = new DateBox();
         scoreCorrectionInfoGrid.setWidget(0,  1, lastScoreCorrectionTimeBox);
-
         scoreCorrectionInfoGrid.setWidget(1,  0, new Label(stringMessages.lastScoreCorrectionsComment() + ":"));
         lastScoreCorrectionCommentBox = new TextBox();
         lastScoreCorrectionCommentBox.setWidth("100%");
         scoreCorrectionInfoGrid.setWidget(1,  1, lastScoreCorrectionCommentBox);
         scoreCorrectionInfoGrid.getFlexCellFormatter().setColSpan(1, 1, 2);
-
         final Button saveScoreCorrectionInfoBtn = new Button(stringMessages.save());
         scoreCorrectionInfoGrid.setWidget(1,  2, saveScoreCorrectionInfoBtn);
-
         saveScoreCorrectionInfoBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 final String lastScoreCorrectionComment = lastScoreCorrectionCommentBox.getText();
                 final Date lastScoreCorrectionTime = lastScoreCorrectionTimeBox.getValue();
-
-                sailingServiceWrite.updateLeaderboardScoreCorrectionMetadata(getLeaderboardName(), lastScoreCorrectionTime, lastScoreCorrectionComment, new AsyncCallback<Void>() {
+                sailingServiceWrite.updateLeaderboardScoreCorrectionMetadata(getLeaderboardName(),
+                        lastScoreCorrectionTime, lastScoreCorrectionComment, new AsyncCallback<Void>() {
                     @Override
                     public void onSuccess(Void noarg) {
                         updateScoreCorrectionInformation(lastScoreCorrectionComment, lastScoreCorrectionTime);
@@ -709,7 +700,6 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
                 });
             }
         });
-
         final Button setScoreCorrectionDefaultTimeBtn = new Button(stringMessages.setTimeToNow());
         setScoreCorrectionDefaultTimeBtn.addStyleName("inlineButton");
         scoreCorrectionInfoGrid.setWidget(0, 2, setScoreCorrectionDefaultTimeBtn);
@@ -722,7 +712,6 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
         });
         scoreCorrectionInfoGrid.getFlexCellFormatter().setColSpan(0, 5, 2);
         scoreCorrectionInfoGrid.setWidget(0, 5, showUncorrectedTotalPointsCheckbox);
-
         setScoreCorrectionDefaultTimeBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -730,24 +719,20 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
             }
         });
         getContentPanel().insert(scoreCorrectionInfoGrid, 0);
-        Label suppressedCompetitorsLabel = new Label(stringMessages.suppressedCompetitors() + ":");
+        final Label suppressedCompetitorsLabel = new Label(stringMessages.suppressedCompetitors() + ":");
         suppressedCompetitorsLabel.addStyleName("suppressedCompetitorsLabel");
         getContentPanel().add(suppressedCompetitorsLabel);
         getContentPanel().add(suppressedCompetitorsTable);
-
         // add a dedicated settings button that allows users to remove columns if needed; the settings
         // button has disappeared as the LeaderboardPanel switched to the use of the more general Component
         // framework with its own handling of component and settings visibility
-        Anchor settingsAnchor = new Anchor(AbstractImagePrototype.create(getSettingsIcon()).getSafeHtml());
+        final Anchor settingsAnchor = new Anchor(AbstractImagePrototype.create(getSettingsIcon()).getSafeHtml());
         settingsAnchor.setTitle(stringMessages.settings());
         settingsAnchor.addClickHandler(new SettingsClickHandler(stringMessages));
         getRefreshAndSettingsPanel().add(settingsAnchor);
-        
-        
         scoreCorrectionInfoGrid.setWidget(1,  4, new Label("Race Selection" + ":"));
         raceListBox = new ListBox();
         raceListBox.addChangeHandler(new ChangeHandler() {
-            
             @Override
             public void onChange(ChangeEvent event) {
                 handleRaceChangeEvent(raceListBox);
@@ -755,7 +740,6 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
         });
         scoreCorrectionInfoGrid.setWidget(1, 5, raceListBox);
         raceListSelection = Window.Location.getParameter("selectedRace");
-
     }
     
     /**
@@ -765,11 +749,11 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
         List<String> items = currentSettings.getNamesOfRaceColumnsToShow();
         if (items != null) {
             // get map of currently visible race columns mapped to race name
-            Map<String, Column<LeaderboardRowDTO, ?>> columnMap = new HashMap<>();
+            final Map<String, Column<LeaderboardRowDTO, ?>> columnMap = new HashMap<>();
             for (int i = 0; i < getLeaderboardTable().getColumnCount(); i++) {
-                Column<LeaderboardRowDTO, ?> currentColumn = getLeaderboardTable().getColumn(i);
+                final Column<LeaderboardRowDTO, ?> currentColumn = getLeaderboardTable().getColumn(i);
                 if (currentColumn instanceof LeaderboardPanel.RaceColumn) {
-                    RaceColumnDTO raceInLeaderboard = ((RaceColumn<?>) currentColumn).getRace();
+                    final RaceColumnDTO raceInLeaderboard = ((RaceColumn<?>) currentColumn).getRace();
                     if (raceInLeaderboard != null) {
                         columnMap.put(raceInLeaderboard.getName(), currentColumn);
                     }
@@ -782,10 +766,10 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
             // reset list box
             raceListBox.clear();
             raceListBox.addItem(stringMessages.showAll(), "");
-            
             for (int i=0; i<items.size(); i++) {
-                String raceName = items.get(i);
-                if (raceListSelection != null && raceListSelection.length() > 0 && !raceListSelection.equals(raceName)) {
+                final String raceName = items.get(i);
+                if (raceListSelection != null && raceListSelection.length() > 0
+                        && !raceListSelection.equals(raceName)) {
                     // remove other columns from table if a specific race is selected in list box
                     removeColumn(columnMap.get(raceName));
                 }
@@ -922,17 +906,13 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
                 this.currentRow = currentRow;
             }
         }
-
         final OptionalBoldRenderer renderer = new OptionalBoldRenderer();
-
         final EditTextCell cellForCompetitorName = new EditTextCell(renderer) {
             @Override
             public void render(Context context, String value, SafeHtmlBuilder sb) {
                 renderer.setCurrentRow((LeaderboardRowDTO) context.getKey());
                 super.render(context, value, sb);    
-                
             }
-            
         };
         result.add(new HasCell<LeaderboardRowDTO, String>() {
             @Override
@@ -954,7 +934,6 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
             private final ButtonCell cell = new SuppressButtonCell();
             @Override
             public Cell<String> getCell() {
-                
                 return cell;
             }
 
@@ -963,21 +942,21 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
                 return new FieldUpdater<LeaderboardRowDTO, String>() {
                     @Override
                     public void update(int index, final LeaderboardRowDTO row, String value) {
-                        getSailingService().suppressCompetitorInLeaderboard(getLeaderboardName(), row.competitor.getIdAsString(),
-                                /* suppressed */ true,
-                                new AsyncCallback<Void>() {
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                getErrorReporter().reportError("Error trying to suppress competitor "+row.competitor.getName()+
-                                        " in leaderboard "+getLeaderboardName());
-                            }
+                        getSailingService().suppressCompetitorInLeaderboard(getLeaderboardName(),
+                                row.competitor.getIdAsString(), /* suppressed */ true, new AsyncCallback<Void>() {
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        getErrorReporter().reportError("Error trying to suppress competitor "
+                                                + row.competitor.getName() + " in leaderboard " + getLeaderboardName());
+                                    }
 
-                            @Override
-                            public void onSuccess(Void result) {
-                                // force a reload of the entire editable leaderboard to hide the now suppressed competitor
-                                loadCompleteLeaderboard(/* showProgress */ true);
-                            }
-                        });
+                                    @Override
+                                    public void onSuccess(Void result) {
+                                        // force a reload of the entire editable leaderboard to hide the now suppressed
+                                        // competitor
+                                        loadCompleteLeaderboard(/* showProgress */ true);
+                                    }
+                                });
                     }
                 };
             }
