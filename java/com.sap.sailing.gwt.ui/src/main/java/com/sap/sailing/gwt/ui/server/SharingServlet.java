@@ -23,6 +23,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.server.interfaces.RacingEventService;
@@ -149,12 +151,18 @@ public class SharingServlet extends HttpServlet {
                 // TODO: change to UUID, when regattaIdentifiers are changed
                 if (splitLength == 4 && split[2] != null) {
                     final String regattaIdentifier = split[3];
-                    if (eventService.getLeaderboardByName(regattaIdentifier) != null) {
+                    Leaderboard leaderboardByName = eventService.getLeaderboardByName(regattaIdentifier);
+                    if (leaderboardByName != null) {
                         placeUrl += "&regattaId=" + regattaIdentifier;
-                    } else if (eventService.getRegattaByName(regattaIdentifier) != null) {
-                        placeUrl += "&regattaId=" + regattaIdentifier;
+                        title = leaderboardByName.getDisplayName();
                     } else {
-                        placeUrl = serverAddress;
+                        Regatta regattaByName = eventService.getRegattaByName(regattaIdentifier);
+                        if (regattaByName != null) {
+                            placeUrl += "&regattaId=" + regattaIdentifier;
+                            title = regattaByName.getName();
+                        } else {
+                            placeUrl = serverAddress;
+                        }
                     }
                 }
             } else {
