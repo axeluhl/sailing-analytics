@@ -49,7 +49,7 @@ public class SharingButtons extends Composite {
         }
         final String hostName = Window.Location.getHost();
         final ShareablePlaceContext context = provider.getContext();
-        final String urlToShare = hostName + SHARING_URL_PREFIX + context.getContextAsPathParameters();
+        final String urlToShare = "http://" + hostName + SHARING_URL_PREFIX + context.getContextAsPathParameters();
         final String shortText = provider.getShortText();
         final String longText = provider.getLongText(urlToShare);
         final UrlBuilder mailtoLink = new UrlBuilder().setProtocol("mailto").setParameter("subject", shortText).setParameter("body", longText);
