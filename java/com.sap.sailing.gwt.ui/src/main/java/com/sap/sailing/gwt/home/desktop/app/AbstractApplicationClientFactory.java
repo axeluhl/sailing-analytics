@@ -1,5 +1,10 @@
 package com.sap.sailing.gwt.home.desktop.app;
 
+import static com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants.mediaServiceRemotePath;
+import static com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants.mediaServiceWriteRemotePath;
+import static com.sap.sse.gwt.shared.RpcConstants.HEADER_FORWARD_TO_MASTER;
+import static com.sap.sse.gwt.shared.RpcConstants.HEADER_FORWARD_TO_REPLICA;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
@@ -10,7 +15,8 @@ import com.sap.sailing.gwt.common.communication.routing.ProvidesLeaderboardRouti
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.ui.client.MediaService;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
-import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
+import com.sap.sailing.gwt.ui.client.MediaServiceWrite;
+import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceHelper;
 import com.sap.sailing.gwt.ui.client.subscription.chargebee.SubscriptionService;
@@ -22,6 +28,7 @@ public abstract class AbstractApplicationClientFactory<ATLV extends ApplicationT
         extends SecureClientFactoryImpl<ATLV> implements DesktopClientFactory {
     private final SailingServiceAsync sailingService;
     private final MediaServiceAsync mediaService;
+    private final MediaServiceWriteAsync mediaServiceWrite;
     private final DesktopPlacesNavigator navigator;
     private final SubscriptionServiceAsync subscriptionService;
 
@@ -32,10 +39,13 @@ public abstract class AbstractApplicationClientFactory<ATLV extends ApplicationT
         sailingService = SailingServiceHelper.createSailingServiceInstance();
         mediaService = GWT.create(MediaService.class);
         subscriptionService = GWT.create(SubscriptionService.class);
-        EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService,
-                RemoteServiceMappingConstants.mediaServiceRemotePath);
         EntryPointHelper.registerASyncService((ServiceDefTarget) subscriptionService,
                 RemoteServiceMappingConstants.subscriptionServiceRemotePath);
+        EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService, mediaServiceRemotePath,
+                HEADER_FORWARD_TO_REPLICA);
+        mediaServiceWrite = GWT.create(MediaServiceWrite.class);
+        EntryPointHelper.registerASyncService((ServiceDefTarget) mediaServiceWrite, mediaServiceWriteRemotePath,
+                HEADER_FORWARD_TO_MASTER);
         getUserService().addKnownHasPermissions(SecuredDomainType.getAllInstances());
     }
 
@@ -61,6 +71,11 @@ public abstract class AbstractApplicationClientFactory<ATLV extends ApplicationT
     @Override
     public MediaServiceAsync getMediaService() {
         return mediaService;
+    }
+
+    @Override
+    public MediaServiceWriteAsync getMediaServiceWrite() {
+        return mediaServiceWrite;
     }
 
     @Override
