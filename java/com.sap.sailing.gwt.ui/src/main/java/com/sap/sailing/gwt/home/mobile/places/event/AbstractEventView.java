@@ -26,6 +26,7 @@ import com.sap.sailing.gwt.home.mobile.partials.simpleinfoblock.SimpleInfoBlock;
 import com.sap.sailing.gwt.home.mobile.places.QuickfinderPresenter;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.partials.windfinder.WindfinderControl;
+import com.sap.sailing.gwt.home.shared.places.event.EventContext;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManager;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManagerWithErrorAndBusy;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -46,8 +47,8 @@ public abstract class AbstractEventView<P extends EventViewBase.Presenter> exten
         @UiField(provided = true) WindfinderControl windfinderUi;
         @UiField SimplePanel viewContentUi;
         
-        private AbstractEventViewLayout(EventViewDTO event, String regattaName, PlaceNavigation<?> logoNavigation) {
-            this.eventHeaderUi = new EventHeader(event, regattaName, logoNavigation);
+        private AbstractEventViewLayout(EventContext eventContext, EventViewDTO event, String regattaName, PlaceNavigation<?> logoNavigation) {
+            this.eventHeaderUi = new EventHeader(eventContext, event, regattaName, logoNavigation);
             this.windfinderUi = new WindfinderControl(SpotDTO::getCurrentlyMostAppropriateUrl);
         }
     }
@@ -67,7 +68,7 @@ public abstract class AbstractEventView<P extends EventViewBase.Presenter> exten
         this.currentPresenter = presenter;
         String regattaName = showRegattaName ? currentPresenter.getRegatta().getDisplayName() : null;
         PlaceNavigation<?> logoNavigation = enableLogoNavigation ? currentPresenter.getEventNavigation() : null;
-        this.layout = new AbstractEventViewLayout(currentPresenter.getEventDTO(), regattaName, logoNavigation);
+        this.layout = new AbstractEventViewLayout(currentPresenter.getCtx(), currentPresenter.getEventDTO(), regattaName, logoNavigation);
         initWidget(uiBinder.createAndBindUi(this.layout));
         if (supportsRefresh) {
             this.refreshManager = new RefreshManagerWithErrorAndBusy(contentRoot, layout.viewContentUi,
@@ -76,7 +77,6 @@ public abstract class AbstractEventView<P extends EventViewBase.Presenter> exten
             this.refreshManager = null;
             layout.viewContentUi.setWidget(contentRoot);
         }
-        layout.eventHeaderUi.setupSharing(currentPresenter.getCtx());
     }
     
     protected void setViewContent(Widget contentWidget) {

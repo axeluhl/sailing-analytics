@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.shared.partials.shared.SharingMetadataProvider;
 import com.sap.sailing.gwt.home.shared.places.ShareablePlaceContext;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.Notification;
@@ -51,8 +52,7 @@ public class SharingButtons extends Composite {
         final ShareablePlaceContext context = provider.getContext();
         final String urlToShare = "http://" + hostName + SHARING_URL_PREFIX + context.getContextAsPathParameters();
         final String shortText = provider.getShortText();
-        final String longText = provider.getLongText(urlToShare);
-        final UrlBuilder mailtoLink = new UrlBuilder().setProtocol("mailto").setParameter("subject", shortText).setParameter("body", longText);
+        final UrlBuilder mailtoLink = new UrlBuilder().setProtocol("mailto").setParameter("subject", shortText);
         // URLBuilder encodes spaces in parameters using "+" instead of "%20". This causes problems in Mail programs that do not decode "+" as space.
         mail.setHref(mailtoLink.buildString().replace("+", "%20"));
         final UrlBuilder twitterLink = new UrlBuilder().setProtocol("https").setHost("twitter.com").setPath("intent/tweet").setParameter("text", shortText).setParameter("url", urlToShare).setParameter("short_url_length", "8");

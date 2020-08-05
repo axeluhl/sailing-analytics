@@ -20,10 +20,10 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.communication.eventview.HasRegattaMetadata;
 import com.sap.sailing.gwt.home.desktop.partials.sharing.SharingButtons;
-import com.sap.sailing.gwt.home.desktop.partials.sharing.SharingMetadataProvider;
 import com.sap.sailing.gwt.home.desktop.places.event.EventView;
 import com.sap.sailing.gwt.home.desktop.places.event.EventView.PlaceCallback;
 import com.sap.sailing.gwt.home.desktop.places.event.EventView.Presenter;
+import com.sap.sailing.gwt.home.shared.partials.shared.SharingMetadataProvider;
 import com.sap.sailing.gwt.home.shared.places.ShareablePlaceContext;
 import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.shared.utils.DropdownHandler;
@@ -83,13 +83,6 @@ public class EventHeader extends Composite {
                 // TODO regatta details?
                 String dateString = EventDatesFormatterUtil.formatDateRangeWithYear(event.getStartDate(), event.getEndDate());
                 return StringMessages.INSTANCE.eventSharingShortText(event.getDisplayName(), event.getLocationOrVenue(), dateString);
-            }
-
-            @Override
-            public String getLongText(String url) {
-                // TODO regatta details?
-                String dateString = EventDatesFormatterUtil.formatDateRangeWithYear(event.getStartDate(), event.getEndDate());
-                return StringMessages.INSTANCE.eventSharingLongText(event.getDisplayName(), event.getLocationOrVenue(), dateString, url);
             }
             
             @Override
@@ -169,7 +162,9 @@ public class EventHeader extends Composite {
             hide(dropdownTitle);
         } else {
             dropdownEventName.setInnerText(nameToShow);
-            LabelTypeUtil.renderLabelType(dropdownEventState, presenter.showRegattaMetadata() ? presenter.getRegattaMetadata().getState().getStateMarker() : event.getState().getStateMarker());
+            LabelTypeUtil.renderLabelType(dropdownEventState,
+                    presenter.showRegattaMetadata() ? presenter.getRegattaMetadata().getState().getStateMarker()
+                            : event.getState().getStateMarker());
             UIObject.ensureDebugId(dropdownEventState, "EventStateLabelDiv");
             hide(staticTitle);
             initDropdown();

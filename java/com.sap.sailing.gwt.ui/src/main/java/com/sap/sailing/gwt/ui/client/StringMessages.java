@@ -1156,9 +1156,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String sharingFacebookTooltip();
     String sharingCopyToClipBoardTooltip();
     String eventSharingShortText(String eventName, String venue, String dateString);
-    String eventSharingLongText(String eventName, String venue, String dateString, String url);
     String seriesSharingShortText(String seriesName);
-    String seriesSharingLongText(String seriesName, String url);
     String competitorsAnalytics();
     String mediaNoContent();
     String media();

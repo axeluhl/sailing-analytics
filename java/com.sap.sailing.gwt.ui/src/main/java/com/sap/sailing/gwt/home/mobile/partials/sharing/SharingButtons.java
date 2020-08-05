@@ -12,6 +12,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.shared.partials.shared.SharingMetadataProvider;
 import com.sap.sailing.gwt.home.shared.places.ShareablePlaceContext;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.Notification;
@@ -54,7 +55,7 @@ public class SharingButtons extends Composite {
             shareButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
-                    share(urlToShare);
+                    share(urlToShare, provider.getShortText());
                 }
             });
 
@@ -81,9 +82,12 @@ public class SharingButtons extends Composite {
         navigator.clipboard.writeText(text);
     }-*/;
 
-    public static native void share(String text) /*-{
+    public static native void share(String url, String text) /*-{
         window.focus();
-        navigator.share(text);
+        navigator.share({
+            url: url,
+            text: text
+        });
     }-*/;
 
     public static native boolean clientHasNavigatorShareSupport() /*-{
