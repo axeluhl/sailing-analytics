@@ -11,7 +11,6 @@ public interface SharingButtonsResources extends SharedHomeResources {
     LocalCss css();
     
     public interface LocalCss extends CssResource {
-        String eventheader_sharing();
         String eventheader_sharing_item();
         String eventheader_sharing_itemcopytoclipboard();
         String eventheader_sharing_itemshare();
