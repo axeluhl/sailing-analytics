@@ -82,10 +82,12 @@ public class WindFinderTrackerFactoryImpl implements WindFinderTrackerFactory {
     public WindTracker createWindTracker(DynamicTrackedRegatta trackedRegatta, RaceDefinition race,
             boolean correctByDeclination, SecurityService optionalSecurityService) throws Exception {
         final WindTracker result;
+        // obtain the tracked race before synchronizing on the windTrackerPerRace; otherwise, a deadlock may
+        // occur. See also https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=5308#c11.
+        final DynamicTrackedRace trackedRace = trackedRegatta.getTrackedRace(race);
         synchronized (windTrackerPerRace) {
             final WindTracker existingWindTrackerForRace = getExistingWindTracker(race);
             if (existingWindTrackerForRace == null) {
-                final DynamicTrackedRace trackedRace = trackedRegatta.getTrackedRace(race);
                 result = new WindFinderWindTracker(trackedRace, this);
                 windTrackerPerRace.put(race, result);
             } else {

@@ -50,11 +50,11 @@ import com.sap.sailing.domain.common.media.MediaUtil;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.adminconsole.multivideo.MultiURLChangeDialog;
 import com.sap.sailing.gwt.ui.adminconsole.multivideo.MultiVideoDialog;
-import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
+import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.MediaTracksRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.NewMediaWithRaceSelectionDialog;
 import com.sap.sailing.gwt.ui.client.media.TimeFormatUtil;
@@ -94,11 +94,11 @@ import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
     private static AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
     
-    private final SailingServiceAsync sailingService;
+    private final SailingServiceWriteAsync sailingServiceWrite;
     private final LabeledAbstractFilterablePanel<MediaTrackWithSecurityDTO> filterableMediaTracks;
     private List<MediaTrackWithSecurityDTO> allMediaTracks;
     private final RegattaRefresher regattaRefresher;
-    private final MediaServiceAsync mediaService;
+    private final MediaServiceWriteAsync mediaServiceWrite;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
     private final UserService userService;
@@ -109,17 +109,17 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
     private RefreshableMultiSelectionModel<MediaTrackWithSecurityDTO> refreshableSelectionModel;
     private final FileStorageServiceConnectionTestObservable storageServiceAvailable;
 
-    public MediaPanel(Set<RegattasDisplayer> regattasDisplayers, SailingServiceAsync sailingService,
-            RegattaRefresher regattaRefresher, MediaServiceAsync mediaService, ErrorReporter errorReporter,
-            StringMessages stringMessages, final UserService userService) {
+    public MediaPanel(Set<RegattasDisplayer> regattasDisplayers, SailingServiceWriteAsync sailingServiceWrite,
+            RegattaRefresher regattaRefresher, MediaServiceWriteAsync mediaServiceWrite,
+            ErrorReporter errorReporter, StringMessages stringMessages, final UserService userService) {
         this.regattasDisplayers = regattasDisplayers;
-        this.sailingService = sailingService;
+        this.sailingServiceWrite = sailingServiceWrite;
         this.userService = userService;
         this.regattaRefresher = regattaRefresher;
-        this.mediaService = mediaService;  
+        this.mediaServiceWrite = mediaServiceWrite;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
-        this.storageServiceAvailable = new FileStorageServiceConnectionTestObservable(sailingService);
+        this.storageServiceAvailable = new FileStorageServiceConnectionTestObservable(sailingServiceWrite);
         AccessControlledButtonPanel buttonAndFilterPanel = new AccessControlledButtonPanel(userService,
                 SecuredDomainType.MEDIA_TRACK);
         add(buttonAndFilterPanel);
@@ -140,7 +140,7 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
         buttonAndFilterPanel.addCreateAction(stringMessages.multiVideoLinking(), new Command() {
             @Override
             public void execute() {
-                new MultiVideoDialog(sailingService, mediaService, stringMessages, errorReporter, new Runnable() {
+                new MultiVideoDialog(sailingServiceWrite, mediaServiceWrite, stringMessages, errorReporter, new Runnable() {
 
                     @Override
                     public void run() {
@@ -158,7 +158,7 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
                 if (selected.isEmpty()) {
                     Notification.notify(stringMessages.noSelection(), NotificationType.ERROR);
                 } else {
-                    new MultiURLChangeDialog(mediaService, stringMessages, selected, errorReporter, new Runnable() {
+                    new MultiURLChangeDialog(mediaServiceWrite, stringMessages, selected, errorReporter, new Runnable() {
                         @Override
                         public void run() {
                             loadMediaTracks();
@@ -218,7 +218,7 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
     @Override
     public void loadMediaTracks() {
         mediaTrackListDataProvider.getList().clear();
-        mediaService.getAllMediaTracks(new AsyncCallback<Iterable<MediaTrackWithSecurityDTO>>() {
+        mediaServiceWrite.getAllMediaTracks(new AsyncCallback<Iterable<MediaTrackWithSecurityDTO>>() {
             @Override
             public void onFailure(Throwable t) {
                 errorReporter.reportError(t.toString());
@@ -355,7 +355,7 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
                 String oldtitle = mediaTrack.title;
                 // Called when the user changes the value.
                 mediaTrack.title = newTitle;
-                mediaService.updateTitle(mediaTrack, new AsyncCallback<Void>() {
+                mediaServiceWrite.updateTitle(mediaTrack, new AsyncCallback<Void>() {
 
                     @Override
                     public void onFailure(Throwable t) {
@@ -394,7 +394,7 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
                     return;
                 }
                 mediaTrack.url = newUrl;
-                mediaService.updateUrl(mediaTrack, new AsyncCallback<Void>() {
+                mediaServiceWrite.updateUrl(mediaTrack, new AsyncCallback<Void>() {
 
                     @Override
                     public void onFailure(Throwable t) {
@@ -448,7 +448,7 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
                 } else {
                     //no op
                 }
-                mediaService.updateRace(mediaTrack, new AsyncCallback<Void>() {
+                mediaServiceWrite.updateRace(mediaTrack, new AsyncCallback<Void>() {
 
                     @Override
                     public void onFailure(Throwable t) {
@@ -493,7 +493,7 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
                                 .toString()));
                     }
                 }
-                mediaService.updateStartTime(mediaTrack, new AsyncCallback<Void>() {
+                mediaServiceWrite.updateStartTime(mediaTrack, new AsyncCallback<Void>() {
 
                     @Override
                     public void onFailure(Throwable t) {
@@ -538,7 +538,7 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
                         errorReporter.reportError(stringMessages.mediaDateFormatError("Duration hh:mm:ss.xxx"));
                     }
                 }
-                mediaService.updateDuration(mediaTrack, new AsyncCallback<Void>() {
+                mediaServiceWrite.updateDuration(mediaTrack, new AsyncCallback<Void>() {
 
                     @Override
                     public void onFailure(Throwable t) {
@@ -580,23 +580,19 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
                 removeMediaTrack(mediaTrack);
             }
         });
-        final EditOwnershipDialog.DialogConfig<MediaTrackWithSecurityDTO> configOwnership = EditOwnershipDialog.create(
-                userService.getUserManagementService(), type,
-                mediaTrack -> {
-                    /* no refresh action */},
-                stringMessages);
-
+        final EditOwnershipDialog.DialogConfig<MediaTrackWithSecurityDTO> configOwnership = EditOwnershipDialog
+                .create(userService.getUserManagementService(), type, mediaTrack -> mediaTrackListDataProvider.refresh(), stringMessages);
         final EditACLDialog.DialogConfig<MediaTrackWithSecurityDTO> configACL = EditACLDialog.create(
-                userService.getUserManagementService(), type, mediaTrack -> mediaTrack.getAccessControlList(), stringMessages);
+                userService.getUserManagementService(), type, mediaTrack -> mediaTrack.getAccessControlList(),
+                stringMessages);
         actionsColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, configOwnership::openOwnershipDialog);
         actionsColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 mediaTrack -> configACL.openACLDialog(mediaTrack));
         mediaTracksTable.addColumn(actionsColumn, stringMessages.actions());
-
     }
 
     protected void removeMediaTrack(MediaTrack mediaTrack) {
-        mediaService.deleteMediaTrack(mediaTrack, new AsyncCallback<Void>() {
+        mediaServiceWrite.deleteMediaTrack(mediaTrack, new AsyncCallback<Void>() {
 
             @Override
             public void onFailure(Throwable t) {
@@ -611,8 +607,8 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
     }
 
     private void addUrlMediaTrack() {
-        NewMediaWithRaceSelectionDialog dialog = new NewMediaWithRaceSelectionDialog(mediaService,
-                getDefaultStartTime(), stringMessages, sailingService, userService, errorReporter, regattaRefresher,
+        NewMediaWithRaceSelectionDialog dialog = new NewMediaWithRaceSelectionDialog(mediaServiceWrite,
+                getDefaultStartTime(), stringMessages, sailingServiceWrite, userService, errorReporter, regattaRefresher,
                 regattasDisplayers, storageServiceAvailable, new DialogCallback<MediaTrack>() {
 
                     @Override
@@ -622,7 +618,7 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
 
                     @Override
                     public void ok(final MediaTrack mediaTrack) {
-                        mediaService.addMediaTrack(mediaTrack, new AsyncCallback<MediaTrackWithSecurityDTO>() {
+                        mediaServiceWrite.addMediaTrack(mediaTrack, new AsyncCallback<MediaTrackWithSecurityDTO>() {
 
                             @Override
                             public void onFailure(Throwable t) {
@@ -653,7 +649,7 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
     }
 
     private Date getLatestDate() {
-        sailingService.getRegattas(new MarkedAsyncCallback<List<RegattaDTO>>(new AsyncCallback<List<RegattaDTO>>() {
+        sailingServiceWrite.getRegattas(new MarkedAsyncCallback<List<RegattaDTO>>(new AsyncCallback<List<RegattaDTO>>() {
             @Override
             public void onSuccess(List<RegattaDTO> result) {
                latestDate = getDateFromLatestRegatta(result); 
@@ -705,7 +701,7 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
     public void openAssignedRacesDialog(final Context context, final Element parent,
             final ValueUpdater<String> valueUpdater) {
         final MediaTrackWithSecurityDTO mediaTrack = (MediaTrackWithSecurityDTO) context.getKey();
-        final AssignRacesToMediaDialog dialog = new AssignRacesToMediaDialog(sailingService, userService, mediaTrack,
+        final AssignRacesToMediaDialog dialog = new AssignRacesToMediaDialog(sailingServiceWrite, userService, mediaTrack,
                 errorReporter,
                 regattaRefresher, stringMessages, null, new DialogCallback<Set<RegattaAndRaceIdentifier>>() {
 

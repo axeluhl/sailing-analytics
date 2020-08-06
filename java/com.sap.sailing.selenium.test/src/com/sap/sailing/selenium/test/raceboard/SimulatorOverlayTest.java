@@ -112,7 +112,7 @@ public class SimulatorOverlayTest extends AbstractSeleniumTest {
             IgtimiAccountsManagementPanelPO igtimiAccountsManagementPanel = adminConsole.goToIgtimi();
             igtimiAccountsManagementPanel.addAccount(getIgtimiAccountUser(), getIgtimiAccountPassword());
             WindPanelPO windPanel = adminConsole.goToWind();
-            windPanel.importWindFromIgtimi(/* waiting up to 10 min */ 10 * 60);
+            windPanel.importWindFromIgtimi(/* waiting up to 10 min */ 15 * 60);
         }
         {
             RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), REGATTA_49ER_WITH_SUFFIX,

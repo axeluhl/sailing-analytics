@@ -362,7 +362,13 @@ public class Util {
             }
         });
     }
-    
+
+    public static <S, T> ArrayList<T> mapToArrayList(final Iterable<S> iterable, final Mapper<S, T> mapper) {
+        final ArrayList<T> result = new ArrayList<>();
+        addAll(map(iterable, mapper), result);
+        return result;
+    }
+
     public static <T> Iterable<T> filter(final Iterable<T> iterable, final Predicate<T> predicate) {
         return StreamSupport.stream(iterable.spliterator(), /* parallel */ false).filter(predicate)::iterator;
     }
@@ -385,6 +391,22 @@ public class Util {
             }
             return false;
         }
+    }
+    
+    /**
+     * @return {@code true} if {@code ts} {@link #contains(Iterable, Object) contains} at least one of the elements in
+     *         {@code isAnyOfTheseContained}. This means in particular that if {@code isAnyOfTheseContained} is
+     *         {@code null} or is empty, {@code false} will result.
+     */
+    public static <T> boolean containsAny(Iterable<T> ts, Iterable<T> isAnyOfTheseContained) {
+        if (isAnyOfTheseContained != null) {
+            for (final T t : isAnyOfTheseContained) {
+                if (contains(ts, t)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -540,25 +562,16 @@ public class Util {
         return joinStrings(separator, Arrays.asList(strings));
     }
 
-    public static String join(String separator, Object... objects) {
-        final String[] strings = new String[objects.length];
-        int i=0;
-        for (Object o : objects) {
-            strings[i++] = o.toString();
-        }
-        return joinStrings(separator, Arrays.asList(strings));
-    }
-
-    public static String joinStrings(String separator, Iterable<String> strings) {
+    public static String joinStrings(String separator, Iterable<? extends Object> objects) {
         StringBuilder result = new StringBuilder();
         boolean first = true;
-        for (String string : strings) {
+        for (Object object : objects) {
             if (first) {
                 first = false;
             } else {
                 result.append(separator);
             }
-            result.append(string);
+            result.append(String.valueOf(object));
         }
         return result.toString();
     }

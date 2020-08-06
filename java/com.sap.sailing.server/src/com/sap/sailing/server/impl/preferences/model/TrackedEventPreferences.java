@@ -7,7 +7,6 @@ public class TrackedEventPreferences extends AbstractGenericSerializableSettings
 
     private static final long serialVersionUID = -290209497308646446L;
 
-    // TODO: setting preference title
     public static final String PREF_NAME = SailingPreferences.TRACKED_EVENTS_PREFERENCES;
 
     private transient SettingsList<TrackedEventPreference> trackedEvents;

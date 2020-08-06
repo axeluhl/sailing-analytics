@@ -38,18 +38,17 @@ public class LeaderboardDTOCacheInvalidationTest {
                 /* addOverallDetails */ false, /* trackedRegattaRegistry */ null, DomainFactory.INSTANCE,
                 /* fillTotalPointsUncorrected */ false);
         assertEquals(oldName, dto.getName());
-        l.setName(newName);
+        l.setDisplayName(newName);
         LeaderboardDTO dtoNew = l.getLeaderboardDTO(now, Collections.<String> emptySet(),
                 /* addOverallDetails */ false, /* trackedRegattaRegistry */ null, DomainFactory.INSTANCE,
                 /* fillTotalPointsUncorrected */ false);
-        assertEquals(newName, dtoNew.getName());
+        assertEquals(newName, dtoNew.getDisplayName());
     }
 
     @Test
     public void testFlexibleLeaderboardDisplayNameChangeInvalidatesCache()
             throws NoWindException, InterruptedException, ExecutionException {
         final String name = "My Flexible Leaderboard";
-        final String newName = "New Name of Flexible Leaderboard";
         final String oldDisplayName = "D1";
         final String newDisplayName = "D2";
         final TimePoint now = MillisecondsTimePoint.now();
@@ -62,11 +61,6 @@ public class LeaderboardDTOCacheInvalidationTest {
                 /* addOverallDetails */ false, /* trackedRegattaRegistry */ null, DomainFactory.INSTANCE,
                 /* fillTotalPointsUncorrected */ false);
         assertEquals(name, seriesLbDtoBeforeDisplayNameIsSet.getRaceList().iterator().next().getName());
-        l.setName(newName);
-        LeaderboardDTO seriesLbDtoBeforeDisplayNameIsSetAndAfterNameWasChanged = seriesLb.getLeaderboardDTO(now, Collections.<String> emptySet(),
-                /* addOverallDetails */ false, /* trackedRegattaRegistry */ null, DomainFactory.INSTANCE,
-                /* fillTotalPointsUncorrected */ false);
-        assertEquals(newName, seriesLbDtoBeforeDisplayNameIsSetAndAfterNameWasChanged.getRaceList().iterator().next().getName());
         l.setDisplayName(oldDisplayName);
         LeaderboardDTO dto = l.getLeaderboardDTO(now, Collections.<String> emptySet(),
                 /* addOverallDetails */ false, /* trackedRegattaRegistry */ null, DomainFactory.INSTANCE,

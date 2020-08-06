@@ -1,8 +1,8 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.UUID;
 
 import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.dom.client.OptionElement;
@@ -23,6 +23,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.client.DataEntryDialogWithDateTimeBox;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -30,7 +31,6 @@ import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.common.client.RandomString;
 import com.sap.sailing.gwt.ui.leaderboard.RankingMetricTypeFormatter;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
-import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
@@ -56,7 +56,7 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
     protected final DateAndTimeInput startDateBox;
     protected final DateAndTimeInput endDateBox;
     protected final ListBox scoringSchemeListBox;
-    protected final ListBox courseAreaListBox;
+    protected final CourseAreaSelection courseAreaSelection;
     protected final ListBox sailingEventsListBox;
     protected final CheckBox useStartTimeInferenceCheckBox;
     protected final CheckBox controlTrackingFromStartAndFinishTimesCheckBox;
@@ -112,9 +112,9 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         autoRestartTrackingUponCompetitorSetChangeCheckBox.setValue(regatta.autoRestartTrackingUponCompetitorSetChange);
         buoyZoneRadiusInHullLengthsDoubleBox = createDoubleBox(regatta.buoyZoneRadiusInHullLengths, 10);
         buoyZoneRadiusInHullLengthsDoubleBox.ensureDebugId("BuoyZoneRadiusInHullLengthsDoubleBox");
-        courseAreaListBox = createListBox(false);
-        courseAreaListBox.ensureDebugId("CourseAreaListBox");
-        courseAreaListBox.setEnabled(false);
+        courseAreaSelection = new CourseAreaSelection(stringMessages, this);
+        courseAreaSelection.ensureDebugId("CourseAreaListBox");
+        courseAreaSelection.setEnabled(false);
         this.seriesEditor = createSeriesEditor(series);
         setupEventAndCourseAreaListBoxes(stringMessages);
         competitorRegistrationTypeListBox = createListBox(false);
@@ -236,7 +236,7 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         formGrid.setWidget(4, 0, new Label(stringMessages.event() + ":"));
         formGrid.setWidget(4, 1, sailingEventsListBox);
         formGrid.setWidget(5, 0, new Label(stringMessages.courseArea() + ":"));
-        formGrid.setWidget(5, 1, courseAreaListBox);
+        formGrid.setWidget(5, 1, courseAreaSelection);
         formGrid.setWidget(6, 0, new Label(stringMessages.useStartTimeInference() + ":"));
         formGrid.setWidget(6, 1, useStartTimeInferenceCheckBox);
         formGrid.setWidget(7, 0, new Label(stringMessages.controlTrackingFromStartAndFinishTimes() + ":"));
@@ -254,13 +254,8 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
     }
 
     protected void setCourseAreaInRegatta(RegattaDTO regatta) {
-        CourseAreaDTO courseArea = getSelectedCourseArea();
-        if (courseArea == null) {
-            regatta.defaultCourseAreaUuid = null;
-        } else {
-            regatta.defaultCourseAreaUuid = courseArea.id;
-            regatta.defaultCourseAreaName = courseArea.getName();
-        }
+        regatta.courseAreas = new ArrayList<>();
+        Util.addAll(getSelectedCourseAreas(), regatta.courseAreas);
     }
 
     public ScoringSchemeType getSelectedScoringSchemeType() {
@@ -271,33 +266,31 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         return null;
     }
 
-    private boolean isCourseAreaInEvent(EventDTO event, UUID courseAreaId) {
+    private boolean isAnyOfTheCourseAreasInEvent(EventDTO event, Iterable<CourseAreaDTO> courseAreas) {
+        final boolean result;
         if (event.venue == null) {
-            return false;
+            result = false;
+        } else {
+            result = Util.containsAny(event.venue.getCourseAreas(), courseAreas);
         }
-        for (CourseAreaDTO courseArea : event.venue.getCourseAreas()) {
-            if (courseArea.id.equals(courseAreaId)) {
-                return true;
-            }
-        }
-        return false;
+        return result;
     }
     
     private void setupEventAndCourseAreaListBoxes(StringMessages stringMessages) {
-        sailingEventsListBox.addItem(stringMessages.selectSailingEvent());
+        sailingEventsListBox.addItem(stringMessages.selectSailingEvent(), stringMessages.selectSailingEvent());
         for (EventDTO event : Util.sortNamedCollection(existingEvents)) {
-            sailingEventsListBox.addItem(event.getName());
+            sailingEventsListBox.addItem(event.getName(), event.getId().toString());
             if (defaultEvent != null) {
-                if (defaultEvent.getName().equals(event.getName())) {
+                if (defaultEvent.getId().equals(event.getId())) {
                     sailingEventsListBox.setSelectedIndex(sailingEventsListBox.getItemCount() - 1);
                     fillCourseAreaListBox(event);
-                    //select default course area, 2 elements as first is please select course area string
-                    if (courseAreaListBox.getItemCount() == 2){
-                        courseAreaListBox.setSelectedIndex(1);
+                    if (event.venue.getCourseAreas().size() == 1) {
+                        // select the single course area as the default:
+                        courseAreaSelection.setSelected(event.venue.getCourseAreas().iterator().next(), true);
                     }
                 }
-            } else { 
-                if (isCourseAreaInEvent(event, regatta.defaultCourseAreaUuid)) {
+            } else {
+                if (isAnyOfTheCourseAreasInEvent(event, regatta.courseAreas)) {
                     sailingEventsListBox.setSelectedIndex(sailingEventsListBox.getItemCount() - 1);
                     fillCourseAreaListBox(event);
                 }
@@ -316,23 +309,22 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
     }
 
     protected void setCourseAreaSelection() {
-        EventDTO selectedEvent = getSelectedEvent();
-        courseAreaListBox.clear();
-        courseAreaListBox.setEnabled(false);
+        final EventDTO selectedEvent = getSelectedEvent();
+        courseAreaSelection.removeAll();
+        courseAreaSelection.setEnabled(false);
         if (selectedEvent != null) {
             fillCourseAreaListBox(selectedEvent);
         }
     }
 
     protected void fillCourseAreaListBox(EventDTO selectedEvent) {
-        courseAreaListBox.addItem(stringMessages.selectCourseArea());
-        for (CourseAreaDTO courseArea : selectedEvent.venue.getCourseAreas()) {
-            courseAreaListBox.addItem(courseArea.getName(), courseArea.id.toString());
-            if (courseArea.id.equals(regatta.defaultCourseAreaUuid)) {
-                courseAreaListBox.setSelectedIndex(courseAreaListBox.getItemCount() - 1);
-            }
+        for (final CourseAreaDTO courseAreaInEvent : selectedEvent.venue.getCourseAreas()) {
+            courseAreaSelection.addCourseArea(courseAreaInEvent);
         }
-        courseAreaListBox.setEnabled(true);
+        for (final CourseAreaDTO courseAreaForRegatta : regatta.courseAreas) {
+            courseAreaSelection.setSelected(courseAreaForRegatta, true);
+        }
+        courseAreaSelection.setEnabled(true);
     }
 
     public EventDTO getSelectedEvent() {
@@ -341,7 +333,7 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         if (selIndex > 0) { // the zero index represents the 'no selection' text
             String itemValue = sailingEventsListBox.getValue(selIndex);
             for (EventDTO eventDTO : existingEvents) {
-                if (eventDTO.getName().equals(itemValue)) {
+                if (eventDTO.getId().toString().equals(itemValue)) {
                     result = eventDTO;
                     break;
                 }
@@ -350,20 +342,8 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         return result;
     }
 
-    public CourseAreaDTO getSelectedCourseArea() {
-        CourseAreaDTO result = null;
-        EventDTO event = getSelectedEvent();
-        int selIndex = courseAreaListBox.getSelectedIndex();
-        if (selIndex > 0 && event != null) { // the zero index represents the 'no selection' text
-            String selectedCourseAreaIdAsString = courseAreaListBox.getValue(selIndex);
-            for (CourseAreaDTO courseAreaDTO : event.venue.getCourseAreas()) {
-                if (courseAreaDTO.id.toString().equals(selectedCourseAreaIdAsString)) {
-                    result = courseAreaDTO;
-                    break;
-                }
-            }
-        }
-        return result;
+    public Iterable<CourseAreaDTO> getSelectedCourseAreas() {
+        return courseAreaSelection.getSelectedCourseAreas();
     }
     
     public RegattaDTO getRegattaDTO() {

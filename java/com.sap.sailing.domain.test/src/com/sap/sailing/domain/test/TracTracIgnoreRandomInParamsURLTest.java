@@ -2,6 +2,7 @@ package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -82,6 +83,6 @@ public class TracTracIgnoreRandomInParamsURLTest {
                 new URI("tcp://event.tractrac.com:4400"), new URI("tcp://event.tractrac.com:4401"));
         Object id2 = TracTracRaceTrackerImpl.createID(new URL("http://event.tractrac.com/events/event_20150707_erEuropean/clientparams.php?event=event_20150707_erEuropean&race=777b1420-07c1-0132-0cec-60a44ce903c3&random=769909699"),
                 new URI("tcp://event.tractrac.com:4412"), new URI("tcp://event.tractrac.com:4413"));
-        assertFalse(id1.equals(id2));
+        assertTrue(id1.equals(id2)); // with the fix for bug 5308 we now assume that the live and stored URI are insignificant for the tracker ID
     }
 }

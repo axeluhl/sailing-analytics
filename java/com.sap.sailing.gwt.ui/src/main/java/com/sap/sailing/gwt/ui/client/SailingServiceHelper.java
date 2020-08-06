@@ -1,5 +1,8 @@
 package com.sap.sailing.gwt.ui.client;
 
+import static com.sap.sse.gwt.shared.RpcConstants.HEADER_FORWARD_TO_MASTER;
+import static com.sap.sse.gwt.shared.RpcConstants.HEADER_FORWARD_TO_REPLICA;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.sap.sse.gwt.client.EntryPointHelper;
@@ -18,6 +21,14 @@ public abstract class SailingServiceHelper {
     public static SailingServiceAsync createSailingServiceInstance() {
         return createSailingServiceInstance(true, null);
     }
+    
+    /**
+     * Creates a new {@link SailingServiceWriteAsync} instance, should be used when code resides in the same bundle as the sailing service code.
+     */
+    public static SailingServiceWriteAsync createSailingServiceWriteInstance() {
+        return createSailingServiceWriteInstance(/* same bundle */ true, /* no routing provider required, no sharding for write requests */ null);
+    }
+    
     /**
      * Creates a new {@link SailingServiceAsync} instance.
      * 
@@ -42,17 +53,38 @@ public abstract class SailingServiceHelper {
     public static SailingServiceAsync createSailingServiceInstance(boolean sameBundle, ServiceRoutingProvider routingProvider) {
         final SailingServiceAsync service = GWT.create(SailingService.class);
         final ServiceDefTarget serviceToRegister = (ServiceDefTarget) service;
-        
         final StringBuilder servicePath = new StringBuilder(RemoteServiceMappingConstants.sailingServiceRemotePath);
         if (routingProvider != null) {
             servicePath.append(routingProvider.routingSuffixPath());
         }
-        
         final String servicePathWithRoutingSuffix = servicePath.toString();
         if (sameBundle) {
-            EntryPointHelper.registerASyncService(serviceToRegister, servicePathWithRoutingSuffix);
+            EntryPointHelper.registerASyncService(serviceToRegister, servicePathWithRoutingSuffix, HEADER_FORWARD_TO_REPLICA);
         } else {
-            EntryPointHelper.registerASyncService(serviceToRegister, RemoteServiceMappingConstants.WEB_CONTEXT_PATH, servicePathWithRoutingSuffix);
+            EntryPointHelper.registerASyncService(serviceToRegister, RemoteServiceMappingConstants.WEB_CONTEXT_PATH, servicePathWithRoutingSuffix, HEADER_FORWARD_TO_REPLICA);
+        }
+        return service;
+    }
+    
+    /**
+     * Creates a new {@link SailingServiceWriteAsync} instance that uses a routing provider, for code in same bundle.
+     */
+    public static SailingServiceWriteAsync createSailingServiceWriteInstance(ServiceRoutingProvider routingProvider) {
+        return createSailingServiceWriteInstance(/* same bundle */ true, routingProvider);
+    }
+    
+    public static SailingServiceWriteAsync createSailingServiceWriteInstance(boolean sameBundle, ServiceRoutingProvider routingProvider) {
+        final SailingServiceWriteAsync service = GWT.create(SailingServiceWrite.class);
+        final ServiceDefTarget serviceToRegister = (ServiceDefTarget) service;
+        final StringBuilder servicePath = new StringBuilder(RemoteServiceMappingConstants.sailingServiceWriteRemotePath);
+        if (routingProvider != null) {
+            servicePath.append(routingProvider.routingSuffixPath());
+        }
+        final String servicePathWithRoutingSuffix = servicePath.toString();
+        if (sameBundle) {
+            EntryPointHelper.registerASyncService(serviceToRegister, servicePathWithRoutingSuffix, HEADER_FORWARD_TO_MASTER);
+        } else {
+            EntryPointHelper.registerASyncService(serviceToRegister, RemoteServiceMappingConstants.WEB_CONTEXT_PATH, servicePathWithRoutingSuffix, HEADER_FORWARD_TO_MASTER);
         }
         return service;
     }

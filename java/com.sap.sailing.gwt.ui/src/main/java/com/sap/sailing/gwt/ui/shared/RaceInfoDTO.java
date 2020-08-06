@@ -10,7 +10,6 @@ import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 
 public class RaceInfoDTO implements IsSerializable {
     public interface RaceInfoExtensionDTO extends IsSerializable {
-        
     }
     
     public static class GateStartInfoDTO implements RaceInfoExtensionDTO {

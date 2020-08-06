@@ -19,6 +19,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
@@ -44,10 +45,10 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
     private final BoatClassDTO boatClass;
     
     public ResultSelectionAndApplyDialog(EditableLeaderboardPanel leaderboardPanel, Iterable<String> scoreCorrectionProviderNames, 
-            SailingServiceAsync sailingService, StringMessages stringMessages, ErrorReporter errorReporter) {
+            SailingServiceWriteAsync sailingServiceWrite, StringMessages stringMessages, ErrorReporter errorReporter) {
         super(stringMessages.importOfficialResults(), null, stringMessages.ok(), stringMessages.cancel(), new Validator(stringMessages),
-                new Callback(sailingService, leaderboardPanel, errorReporter, stringMessages));
-        this.sailingService = sailingService;
+                new Callback(sailingServiceWrite, leaderboardPanel, errorReporter, stringMessages));
+        this.sailingService = sailingServiceWrite;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
         boatClass = leaderboardPanel.getLeaderboard().getBoatClass();
@@ -194,13 +195,13 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
     
     private static class Callback implements DialogCallback<Util.Triple<String, String, Util.Pair<String, Date>>> {
         private final EditableLeaderboardPanel leaderboardPanel;
-        private final SailingServiceAsync sailingService;
+        private final SailingServiceWriteAsync sailingServiceWrite;
         private final StringMessages stringMessages;
         private final ErrorReporter errorReporter;
         
-        public Callback(SailingServiceAsync sailingService, EditableLeaderboardPanel leaderboardPanel, ErrorReporter errorReporter,
+        public Callback(SailingServiceWriteAsync sailingServiceWrite, EditableLeaderboardPanel leaderboardPanel, ErrorReporter errorReporter,
                 StringMessages stringMessages) {
-            this.sailingService = sailingService;
+            this.sailingServiceWrite = sailingServiceWrite;
             this.leaderboardPanel = leaderboardPanel;
             this.stringMessages = stringMessages;
             this.errorReporter = errorReporter;
@@ -218,7 +219,7 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
             final String boatClassName = providerNameAndEventNameBoatClassNameCapturedWhen.getC().getA();
             final Date timePointWhenResultPublished = providerNameAndEventNameBoatClassNameCapturedWhen.getC().getB();
             leaderboardPanel.addBusyTask();
-            sailingService.getScoreCorrections(scoreCorrectionProviderName, eventName, boatClassName, timePointWhenResultPublished,
+            sailingServiceWrite.getScoreCorrections(scoreCorrectionProviderName, eventName, boatClassName, timePointWhenResultPublished,
                     new AsyncCallback<RegattaScoreCorrectionDTO>() {
                         @Override
                         public void onFailure(Throwable caught) {
@@ -230,8 +231,8 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
                         @Override
                         public void onSuccess(RegattaScoreCorrectionDTO result) {
                             leaderboardPanel.removeBusyTask();
-                            new MatchAndApplyScoreCorrectionsDialog(leaderboardPanel, stringMessages, sailingService,
-                                    errorReporter, result).show();
+                                    new MatchAndApplyScoreCorrectionsDialog(leaderboardPanel, stringMessages,
+                                            sailingServiceWrite, errorReporter, result).show();
                         }
             });
         }

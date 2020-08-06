@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
+import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -94,7 +95,8 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
                                 /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
                                 /* registrationLinkSecret */ null, startDate, endDate, closedRegattaUuid, series,
                                 /* persistent */ true,
-                                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null,
+                                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT),
+                                /* course area ID */ (Serializable) null,
                                 /* buoyZoneRadiusInHullLengths */2.0, /* useStartTimeInference */ true,
                                 /* controlTrackingFromStartAndFinishTimes */ false, /* autoRestartTrackingUponCompetitorSetChange */ false, OneDesignRankingMetric::new);
                     }
@@ -107,7 +109,8 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
                                 /* canBoatsOfCompetitorsChangePerRace */ true,
                                 CompetitorRegistrationType.OPEN_UNMODERATED, secret, startDate, endDate,
                                 UUID.randomUUID(), series, /* persistent */ true,
-                                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null,
+                                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT),
+                                /* course area ID */ (Serializable) null,
                                 /* buoyZoneRadiusInHullLengths */2.0, /* useStartTimeInference */ true,
                                 /* controlTrackingFromStartAndFinishTimes */ false, /* autoRestartTrackingUponCompetitorSetChange */ false, OneDesignRankingMetric::new);
                     }

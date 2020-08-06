@@ -329,7 +329,7 @@ public class TransientCompetitorAndBoatStoreImpl implements CompetitorAndBoatSto
     public Competitor updateCompetitor(String idAsString, String newName, String newShortName, Color newDisplayColor, String newEmail,
             Nationality newNationality, URI newTeamImageUri, URI newFlagImageUri,
             Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String newSearchTag, boolean storePersistently) {
-        DynamicCompetitor competitor = getExistingCompetitorByIdAsString(idAsString);
+        final DynamicCompetitor competitor = getExistingCompetitorByIdAsString(idAsString);
         if (competitor != null) {
             LockUtil.lockForWrite(lock);
             try {

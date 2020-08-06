@@ -64,6 +64,7 @@ import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
+import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
@@ -125,6 +126,7 @@ import com.sap.sailing.server.gateway.serialization.coursedata.impl.GateJsonSeri
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorAndBoatJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.FlatGPSFixJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.MarkJsonSerializerWithPosition;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.BaseRaceLogEventSerializer;
@@ -134,6 +136,7 @@ import com.sap.sailing.server.hierarchy.SailingHierarchyOwnershipUpdater;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.operationaltransformation.RemoveAndUntrackRace;
 import com.sap.sailing.server.operationaltransformation.StopTrackingRace;
+import com.sap.sailing.server.operationaltransformation.UpdateCompetitorDisplayNameInLeaderboard;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboard;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardMaxPointsReason;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardScoreCorrection;
@@ -311,15 +314,46 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                 }
             }
             getService().apply(new UpdateLeaderboard(/* leaderboardName */ leaderboard.getName(),
-                    /* newLeaderboardName */ leaderboard.getName(), newLeaderboardDisplayName,
-                    resultDiscardingThresholds,
-                    leaderboard.getDefaultCourseArea() != null ? leaderboard.getDefaultCourseArea().getId() : null));
+                    newLeaderboardDisplayName, resultDiscardingThresholds,
+                    Util.map(leaderboard.getCourseAreas(), CourseArea::getId)));
         } else {
             return Response.status(Status.NOT_FOUND).entity(
                     "Could not find a leaderboard with name '" + StringEscapeUtils.escapeHtml(leaderboardName) + "'.")
                     .type(MediaType.TEXT_PLAIN).build();
         }
         return Response.ok().header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+    }
+    
+    @POST
+    @Path("{name}/updateCompetitorDisplayName")
+    public Response updateCompetitorDisplayName(@PathParam("name") String leaderboardName,
+            @QueryParam("competitorId") String competitorIdAsString,
+            @QueryParam("displayName") String competitorDisplayName) {
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (!isValidLeaderboard(leaderboard)) {
+            logger.warning("Leaderboard does not exist or does not hold a RegattaLog");
+            return Response.status(Status.INTERNAL_SERVER_ERROR)
+                    .entity("Leaderboard does not exist or does not hold a RegattaLog").type(MediaType.TEXT_PLAIN)
+                    .build();
+        }
+        Response response;
+        if (getSecurityService().hasCurrentUserUpdatePermission(leaderboard)) {
+            final Competitor competitor;
+            // find competitor
+            if (competitorIdAsString == null || (competitor = leaderboard.getCompetitorByIdAsString(competitorIdAsString)) == null) {
+                logger.warning("No competitor found for id " + competitorIdAsString);
+                return Response.status(Status.BAD_REQUEST)
+                        .entity("No competitor found for id " + StringEscapeUtils.escapeHtml(competitorIdAsString))
+                        .type(MediaType.TEXT_PLAIN).build();
+            }
+            getService().apply(new UpdateCompetitorDisplayNameInLeaderboard(leaderboardName, competitorIdAsString, competitorDisplayName));
+            logger.fine("Successfully set display name for competitor with ID " + competitorIdAsString + " named "
+                    + competitor.getName() + " in leaderboard " + leaderboardName + " to " + competitorDisplayName);
+            response = Response.status(Status.OK).build();
+        } else {
+            response = Response.status(Status.FORBIDDEN).build();
+        }
+        return response;
     }
 
     @POST
@@ -559,7 +593,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                 getSecurityService().checkCurrentUserHasOneOfExplicitPermissions(competitor,
                         SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS);
             }
-            JSONObject json = CompetitorsResource.getCompetitorJSON(competitor);
+            JSONObject json = new CompetitorJsonSerializer().serialize(competitor);
             json.put("displayName", leaderboard.getDisplayName(competitor));
             response = Response.ok(streamingOutput(json)).build();
         }
@@ -1094,7 +1128,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                     }
                 }
             }
-            result = Response.ok(jsonResultArray.toJSONString()).build();
+            result = Response.ok(streamingOutput(jsonResultArray)).build();
         }
         return result;
     }
@@ -1219,7 +1253,8 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             @QueryParam(BaseRaceLogEventSerializer.FIELD_AUTHOR_PRIORITY) Integer authorPriority,
             @QueryParam(BaseRaceLogEventSerializer.FIELD_PASS_ID) Integer passId,
             @QueryParam(RaceLogStartTimeEventSerializer.FIELD_START_TIME) Long startTime,
-            @QueryParam(RaceLogStartProcedureChangedEventSerializer.FIELD_START_PROCEDURE_TYPE) String racingProcedure) {
+            @QueryParam(RaceLogStartProcedureChangedEventSerializer.FIELD_START_PROCEDURE_TYPE) String racingProcedure,
+            @QueryParam(RaceLogStartTimeEventSerializer.FIELD_COURSE_AREA_ID_AS_STRING) String courseAreaIdAsString) {
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard == null) {
             return Response.status(Status.NOT_FOUND)
@@ -1244,7 +1279,8 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         final TimePoint effectiveStartTime = getService().setStartTimeAndProcedure(
                 leaderboardName, raceColumnName, fleetName, authorName, authorPriority, passId, MillisecondsTimePoint.now(),
                 new MillisecondsTimePoint(startTime),
-                racingProcedure==null?null:RacingProcedureType.valueOf(racingProcedure));
+                racingProcedure==null?null:RacingProcedureType.valueOf(racingProcedure),
+                        courseAreaIdAsString==null?null:UUID.fromString(courseAreaIdAsString));
         final JSONObject responseJson = new JSONObject();
         responseJson.put("startTimeAsMillis", effectiveStartTime.asMillis());
         return Response.ok(streamingOutput(responseJson)).build();
@@ -1341,8 +1377,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             JSONObject jsonCompetitor = serializer.serialize(new Pair<>(c, boat));
             result.add(jsonCompetitor);
         }
-        String json = result.toJSONString();
-        return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+        return Response.ok(streamingOutput(result)).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
     }
 
     private int compareDistanceFromStartLine(TrackedRace trackedRace, Iterable<Position> startWaypointMarkPositions,

@@ -414,12 +414,12 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     }
 
                     @Override
-                    public CourseArea getDefaultCourseArea() {
+                    public Iterable<CourseArea> getCourseAreas() {
                         return null;
                     }
 
                     @Override
-                    public void setDefaultCourseArea(CourseArea newCourseArea) {
+                    public void setCourseAreas(Iterable<CourseArea> newCourseAreas) {
                     }
 
                     @Override
@@ -516,12 +516,12 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     }
 
                     @Override
-                    public Double getTimeOnTimeFactor(Competitor competitor) {
+                    public Double getTimeOnTimeFactor(Competitor competitor, Optional<Runnable> changeCallback) {
                         return null;
                     }
 
                     @Override
-                    public Duration getTimeOnDistanceAllowancePerNauticalMile(Competitor competitor) {
+                    public Duration getTimeOnDistanceAllowancePerNauticalMile(Competitor competitor, Optional<Runnable> changeCallback) {
                         return null;
                     }
 
@@ -1300,5 +1300,18 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     @Override
     public TrackingConnectorInfo getTrackingConnectorInfo() {
         return null;
+    }
+
+    @Override
+    public void runWhenDoneLoading(Runnable runnable) {
+    }
+
+    @Override
+    public void runSynchronizedOnStatus(Runnable runnable) {
+    }
+
+    @Override
+    public boolean hasFinishedLoading() {
+        return false;
     }
 }

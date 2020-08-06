@@ -377,24 +377,19 @@ public class PathImpl implements Path, Serializable {
     }
 
     public static boolean saveToGpxFile(Path path, String fileName) {
-
         if (path == null) {
             return false;
         }
-
         List<TimedPositionWithSpeed> pathPoints = path.getPathPoints();
         if (pathPoints == null || pathPoints.isEmpty()) {
             return false;
         }
-
         TimedPositionWithSpeed timedPoint = null;
         Position point = null;
         int noOfPoints = pathPoints.size();
         Format formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         StringBuffer buffer = new StringBuffer();
-
         buffer.append("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\r\n<gpx xmlns=\"http://www.topografix.com/GPX/1/1\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd\">\r\n\t<trk>\r\n\t\t<name>GPSPolyPath</name>\r\n\t\t<trkseg>");
-
         for (int index = 0; index < noOfPoints; index++) {
             timedPoint = pathPoints.get(index);
             point = timedPoint.getPosition();
@@ -402,23 +397,17 @@ public class PathImpl implements Path, Serializable {
                     + "\">\r\n\t\t\t\t<ele>0</ele>\r\n\t\t\t\t<time>"
                     + formatter.format(timedPoint.getTimePoint().asDate()) + "</time>\r\n\t\t\t</trkpt>");
         }
-
         buffer.append("\r\n\t\t</trkseg>\r\n\t</trk>\r\n</gpx>\r\n");
-
         String content = buffer.toString();
-
         try {
-
             FileWriter writer = new FileWriter(fileName);
             BufferedWriter output = new BufferedWriter(writer, 32768);
-
             try {
                 output.write(content);
             } finally {
                 output.close();
                 writer.close();
             }
-
         } catch (IOException e) {
             return false;
         }

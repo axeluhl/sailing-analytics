@@ -71,6 +71,7 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
+import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifierImpl;
@@ -572,7 +573,7 @@ public class ExpeditionAllInOneImporter {
                 startOfTracking, endOfTracking, regatta, regattaLeaderboard, raceColumn, fleet);
         if (startTime != null) {
             final RaceLog raceLog = raceColumn.getRaceLog(raceColumn.getFleets().iterator().next());
-            raceLog.add(new RaceLogStartTimeEventImpl(startTime, service.getServerAuthor(), /* priority */ 0, startTime));
+            raceLog.add(new RaceLogStartTimeEventImpl(startTime, service.getServerAuthor(), /* priority */ 0, startTime, /* courseAreaId */ null));
         }
         return new Triple<>(trackedRace, raceColumnName, fleetName);
     }
@@ -762,7 +763,9 @@ public class ExpeditionAllInOneImporter {
                 /* can boats of competitors change */ false, CompetitorRegistrationType.CLOSED,
                 /* registrationLinkSecret */ UUID.randomUUID().toString(), /* start date */ null, /* end date */ null,
                 UUID.randomUUID(),
-                regattaCreationParameters, true, scoringScheme, courseAreaId, buoyZoneRadiusInHullLengths, /* use start time inference */ true,
+                regattaCreationParameters, true, scoringScheme,
+                courseAreaId==null?Collections.emptySet():Collections.singleton(courseAreaId),
+                buoyZoneRadiusInHullLengths, /* use start time inference */ true,
                 /* control tracking from start and finish times */ false,
                 /* autoRestartTrackingUponCompetitorSetChange */ false, rankingMetric));
         this.ensureBoatClassDetermination(regatta);
@@ -770,16 +773,29 @@ public class ExpeditionAllInOneImporter {
         return regatta;
     }
 
-    private void createLeaderboardGroupAndAddItToTheEvent(final String leaderboardGroupName, final String regattaNameAndleaderboardName,
-            final String description, final Event event) {
+    private void createLeaderboardGroupAndAddItToTheEvent(final String leaderboardGroupName,
+            final String regattaNameAndleaderboardName, final String description, final Event event) {
         UUID newGroupid = UUID.randomUUID();
-        final LeaderboardGroup leaderboardGroup = service
-                .apply(new CreateLeaderboardGroup(newGroupid, leaderboardGroupName,
-                description, null, false, Collections.singletonList(regattaNameAndleaderboardName), null, null));
+        final LeaderboardGroup leaderboardGroup = securityService
+                .setOwnershipCheckPermissionForObjectCreationAndRevertOnError(SecuredDomainType.LEADERBOARD_GROUP,
+                        LeaderboardGroupImpl.getTypeRelativeObjectIdentifier(newGroupid),
+                        /* securityDisplayName */ null, new Callable<LeaderboardGroup>() {
+                            @Override
+                            public LeaderboardGroup call() throws Exception {
+                                CreateLeaderboardGroup createLeaderboardGroup = new CreateLeaderboardGroup(newGroupid,
+                                        leaderboardGroupName, description, /* displayName */ null,
+                                        /* displayGroupsInReverseOrder */ false,
+                                        Collections.singletonList(regattaNameAndleaderboardName),
+                                        /* overallLeaderboardDiscardThresholds */ null,
+                                        /* overallLeaderboardScoringSchemeType */ null);
+                                return service.apply(createLeaderboardGroup);
+                            }
+                        });
         service.apply(new UpdateEvent(event.getId(), event.getName(), event.getDescription(), event.getStartDate(),
                 event.getEndDate(), event.getVenue().getName(), event.isPublic(),
                 Collections.singleton(leaderboardGroup.getId()), event.getOfficialWebsiteURL(), event.getBaseURL(),
-                event.getSailorsInfoWebsiteURLs(), event.getImages(), event.getVideos(), event.getWindFinderReviewedSpotsCollectionIds()));
+                event.getSailorsInfoWebsiteURLs(), event.getImages(), event.getVideos(),
+                event.getWindFinderReviewedSpotsCollectionIds()));
     }
 
     private DynamicTrackedRace createTrackedRaceAndSetupRaceTimes(final List<ErrorImportDTO> errors,

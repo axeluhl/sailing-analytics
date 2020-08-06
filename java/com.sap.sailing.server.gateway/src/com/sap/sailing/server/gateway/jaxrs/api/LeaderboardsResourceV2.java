@@ -1,7 +1,5 @@
 package com.sap.sailing.server.gateway.jaxrs.api;
 
-import java.io.IOException;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -44,6 +42,7 @@ import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.LegEntryDTO;
 import com.sap.sailing.domain.common.sharding.ShardingType;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonConstants;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.sharding.ShardingContext;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -103,11 +102,8 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                     } else {
                         jsonLeaderboard = createEmptyLeaderboardJson(leaderboard, resultState, maxCompetitorsCount, skip);
                     }
-                    StringWriter sw = new StringWriter();
-                    jsonLeaderboard.writeJSONString(sw);
-                    String json = sw.getBuffer().toString();
-                    response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
-                } catch (NoWindException | InterruptedException | ExecutionException | IOException e) {
+                    response = Response.ok(streamingOutput(jsonLeaderboard)).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+                } catch (NoWindException | InterruptedException | ExecutionException e) {
                     response = Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage())
                             .type(MediaType.TEXT_PLAIN).build();
                 }
@@ -320,7 +316,9 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 DetailType.RACE_CURRENT_LEG,
                 DetailType.OVERALL_MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS,
                 DetailType.LEG_VELOCITY_MADE_GOOD_IN_KNOTS,
-                DetailType.LEG_WINDWARD_DISTANCE_TO_GO_IN_METERS };
+                DetailType.LEG_WINDWARD_DISTANCE_TO_GO_IN_METERS,
+                DetailType.OVERALL_TIME_ON_TIME_FACTOR,
+                DetailType.OVERALL_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE };
     }
 
     private DetailType[] getAvailableOverallDetailColumnTypes() {
@@ -453,6 +451,14 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 if (currentLegEntry != null && currentLegEntry.velocityMadeGoodInKnots != null) {
                     value = currentLegEntry.velocityMadeGoodInKnots;
                 }
+                break;
+            case OVERALL_TIME_ON_TIME_FACTOR:
+                name = CompetitorJsonConstants.FIELD_TIME_ON_TIME_FACTOR;
+                value = leaderboardRowDTO.effectiveTimeOnTimeFactor;
+                break;
+            case OVERALL_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE:
+                name = CompetitorJsonConstants.FIELD_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE;
+                value = leaderboardRowDTO.effectiveTimeOnDistanceAllowancePerNauticalMile == null ? null : leaderboardRowDTO.effectiveTimeOnDistanceAllowancePerNauticalMile.asSeconds();
                 break;
             default:
                 name = null;

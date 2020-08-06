@@ -18,7 +18,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.adminconsole.AbstractLeaderboardConfigPanel.RaceColumnDTOAndFleetDTOWithNameBasedEquality;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sse.common.Util.Triple;
@@ -58,7 +58,7 @@ public class RaceSlotSelectionPanel extends HorizontalPanel {
     
     private final RefreshableSingleSelectionModel<StrippedLeaderboardDTOWithSecurity> leaderboardSelectionModel;
 
-    public RaceSlotSelectionPanel(final SailingServiceAsync sailingService, final UserService userService,
+    public RaceSlotSelectionPanel(final SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
             final StringMessages stringMessages, final ErrorReporter errorReporter, final boolean multiSelection,
             Iterable<StrippedLeaderboardDTOWithSecurity> availableLeaderboards, RaceColumnDTOAndFleetDTOWithNameBasedEquality preselected) {
         final Resources tableRes = GWT.create(AdminConsoleTableResources.class);
@@ -136,7 +136,7 @@ public class RaceSlotSelectionPanel extends HorizontalPanel {
         filteredLeaderboardList.addDataDisplay(leaderboardTable);
         leaderboardSelectionModel.addSelectionChangeHandler(e->updateRaceColumnTableAfterLeaderboardSelectionChange());
         raceColumnTable = new RaceTableWrapper<RefreshableSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>>(
-                sailingService, stringMessages, errorReporter, multiSelection);
+                sailingServiceWrite, stringMessages, errorReporter, multiSelection);
         raceColumnTable.asWidget().ensureDebugId("RaceColumnInRaceSlotSelectionPanelTable");
         final Grid tableGrid = new Grid(2, 2);
         tableGrid.setWidget(0, 0, filterLeaderboardPanel);

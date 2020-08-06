@@ -117,6 +117,9 @@ public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
         }
         result.put(CompetitorJsonConstants.FIELD_NAME, competitor.getName());
         result.put(CompetitorJsonConstants.FIELD_SHORT_NAME, competitor.getShortName());
+        if (competitor.hasBoat()) {
+            result.put(CompetitorJsonConstants.FIELD_SAIL_ID, ((CompetitorWithBoat) competitor).getBoat().getSailID());
+        }
         Color color = getColor(competitor);
         result.put(CompetitorJsonConstants.FIELD_DISPLAY_COLOR, color == null ? null : color.getAsHtml());
         if (serializeNonPublicFields) {

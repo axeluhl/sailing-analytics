@@ -9,6 +9,7 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.Event.NativePreviewHandler;
 import com.google.gwt.user.client.EventListener;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.web.bindery.event.shared.HandlerRegistration;
 
 public class DropdownHandler {
@@ -30,6 +31,16 @@ public class DropdownHandler {
                 show();
             }
 
+        });
+    }
+    
+    public DropdownHandler(FocusWidget dropdownTrigger, Element dropdownContainer) {
+        this.dropdownContainer = dropdownContainer;
+        dropdownTrigger.addClickHandler(event -> {
+            if (dropdownShown) {
+                return;
+            }
+            show();
         });
     }
     

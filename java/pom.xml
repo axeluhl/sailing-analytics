@@ -32,10 +32,10 @@
          (see Bugzilla: https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=3859). -->
     <!-- Most likely, serialization/replication will fail with tycho versions based on Eclipse Neon R (4.6.0). -->
     <tycho-version>1.6.0</tycho-version>
-    <gwt.version>2.8.2</gwt.version>
+    <gwt.version>2.9.0</gwt.version>
     <!-- gwt-maven-plugin is typically in sync with the GWT version. But sometimes versions need extra time after a new GWT release. -->
-    <gwt.plugin.version>2.8.2</gwt.plugin.version>
-    <gwt.minVersion>2.8.0</gwt.minVersion>
+    <gwt.plugin.version>2.9.0</gwt.plugin.version>
+    <gwt.minVersion>2.9.0</gwt.minVersion>
     <gwt.workers>2</gwt.workers>
     <p2-target>race-analysis-p2-remote</p2-target><!--can be overidden through p2-target.local profile -->
     <!-- QUESTION: Which properties or settings are system dependent and differ across different machines/environments? QUESTION:
@@ -79,6 +79,10 @@
       <modules>
         <module>com.sap.sse</module>
         <module>com.sap.sse.test</module>
+	<module>com.sap.sse.landscape</module>
+        <module>com.sap.sse.landscape.aws</module>
+        <module>com.sap.sse.landscape.aws.test</module>
+        <module>com.sap.sse.landscape.aws.persistence</module>
         <module>com.sap.sse.jersey.jaxbdependencyfragment</module>
         <module>com.sap.sse.jettyextensions</module>
         <module>com.sap.sailing.routeconverterjava11extension</module>
@@ -204,7 +208,6 @@
         <module>com.sap.sailing.server.gateway.test.support</module>
         <module>com.sap.sailing.server.gateway.serialization.test</module>
         <module>com.sap.sailing.server.replication.test</module>
-        <module>com.sap.sailing.gwt.ui.test</module>
         <module>com.sap.sailing.mongodb.test</module>
         <module>com.googlecode.java-diff-utils.test</module>
         <module>com.sap.sailing.kiworesultimport.test</module>
@@ -227,12 +230,12 @@
         <module>com.sap.sailing.feature.p2build</module>
         <module>com.sap.sailing.polars</module>
         <module>com.sap.sailing.windestimation</module>
-		<module>com.sap.sailing.windestimation.lab</module>
-		<module>com.sap.sailing.windestimation.test</module>
+        <module>com.sap.sailing.windestimation.lab</module>
+        <module>com.sap.sailing.windestimation.test</module>
         <module>com.sap.sailing.polars.datamining</module>
         <module>com.sap.sailing.polars.datamining.shared</module>
         <module>com.sap.sailing.polars.test</module>
-		<module>org.mp4parser.isoparser</module>
+        <module>org.mp4parser.isoparser</module>
         <!--
         com.sap.sailing.targetplatform.base
         left out on purpose: only invoke maven manually to build target platform
@@ -339,11 +342,9 @@
           <groupId>org.eclipse.tycho</groupId>
           <artifactId>tycho-compiler-plugin</artifactId>
           <configuration>
-            <!-- Toolchan stuff doesn't work on Lean DI,
-                 so we need to hard-code Java 1.7 (Android 5.1 SDK isn't compatible with Java 8)
-                 compatibility for all builds. -->
-            <source>1.7</source>
-            <target>1.7</target>
+            <!-- TODO validate that 1.8 is OK also in the SAP-internal Android build -->
+            <source>1.8</source>
+            <target>1.8</target>
           </configuration>
         </plugin>
       </plugins>

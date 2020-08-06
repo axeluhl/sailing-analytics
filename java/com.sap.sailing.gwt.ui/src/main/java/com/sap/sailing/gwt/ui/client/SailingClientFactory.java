@@ -18,5 +18,7 @@ public interface SailingClientFactory extends ClientFactory, WithSecurity, WithS
 
     MediaServiceAsync getMediaService();
 
+    MediaServiceWriteAsync getMediaServiceWrite();
+
     ErrorView createErrorView(String errorMessage, Throwable errorReason);
 }
