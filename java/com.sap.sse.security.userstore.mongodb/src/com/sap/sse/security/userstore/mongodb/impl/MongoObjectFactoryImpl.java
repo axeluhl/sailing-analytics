@@ -338,7 +338,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         final BasicDBList result;
         if (subscriptions != null) {
             result = new BasicDBList();
-            for (Subscription subscription : subscriptions) {
+            for (final Subscription subscription : subscriptions) {
                 final Document doc = new Document();
                 doc.put(FieldNames.Subscription.SUBSCRIPTION_ID.name(), subscription.getSubscriptionId());
                 doc.put(FieldNames.Subscription.PLAN_ID.name(), subscription.getPlanId());

@@ -51,7 +51,6 @@ public class UserSubscription extends Composite implements UserSubscriptionView 
     public UserSubscription(UserSubscriptionView.Presenter presenter) {
         initSubscriptionCellList(presenter);
         initWidget(uiBinder.createAndBindUi(this));
-
         presenter.setView(this);
         this.presenter = presenter;
     }
