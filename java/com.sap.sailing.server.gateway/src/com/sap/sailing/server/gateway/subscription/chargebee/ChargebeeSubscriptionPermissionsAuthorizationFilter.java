@@ -29,7 +29,7 @@ public class ChargebeeSubscriptionPermissionsAuthorizationFilter extends Subscri
             return event.getCustomerId();
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Subscription permission checking error", e);
+            return null;
         }
-        return null;
     }
 }
