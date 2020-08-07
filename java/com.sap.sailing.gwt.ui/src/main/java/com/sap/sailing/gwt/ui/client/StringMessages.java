@@ -501,6 +501,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String publicationUrl();
     String suppress();
     String isListedOnHomepage();
+    String raceSelection();
     String unsuppress();
     String suppressedCompetitors();
     String pleaseSelectASeries();

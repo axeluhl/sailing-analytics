@@ -16,6 +16,7 @@ BUILD_PROPERTIES_FILE="build.properties"
 WORKSPACE=`realpath \`dirname $0\`/../..`
 UPDATE_SITE_PROJECT=${WORKSPACE}/java/com.amazon.aws.aws-java-api.updatesite
 FEATURE_XML=${UPDATE_SITE_PROJECT}/features/aws-sdk/feature.xml
+SITE_XML=${UPDATE_SITE_PROJECT}/site.xml
 TARGET_DEFINITION="${WORKSPACE}/java/com.sap.sailing.targetplatform/definitions/race-analysis-p2-remote.target"
 WRAPPER_BUNDLE="${WORKSPACE}/java/com.amazon.aws.aws-java-api"
 cd ${WRAPPER_BUNDLE}
@@ -87,10 +88,30 @@ cd ..
 mvn clean install
 mkdir -p ${UPDATE_SITE_PROJECT}/plugins/aws-sdk
 rm -rf ${UPDATE_SITE_PROJECT}/plugins/aws-sdk/*
-mv bin/com.amazon.aws.aws-java-api-${VERSION}.jar ${UPDATE_SITE_PROJECT}/plugins/aws-sdk
+mv bin/com.amazon.aws.aws-java-api-${VERSION}.jar ${UPDATE_SITE_PROJECT}/plugins/aws-sdk/
+echo "Unpacking source bundles..."
+cd ${LIB}
+for l in *-sources.jar; do
+  "${JAR}" xvf $l software
+done
+echo "Creating sources JAR..."
+SOURCE_JAR_MANIFEST=source-manifest.mf
+echo "Manifest-Version: 1.0
+Bundle-SymbolicName: com.amazon.aws.aws-java-api.source
+Bundle-Name: AWS SDK Sources
+Bundle-Version: ${VERSION}
+Eclipse-SourceBundle: com.amazon.aws.aws-java-api;version=\"${VERSION}\"
+Bundle-ManifestVersion: 2" >${SOURCE_JAR_MANIFEST}
+"${JAR}" cvfm com.amazon.aws.aws-java-api.source_${VERSION}.jar ${SOURCE_JAR_MANIFEST} software/
+rm ${SOURCE_JAR_MANIFEST}
+echo "Removing extracted sources..."
+rm -rf software
+mv com.amazon.aws.aws-java-api.source_${VERSION}.jar ${UPDATE_SITE_PROJECT}/plugins/aws-sdk
 cd ${UPDATE_SITE_PROJECT}
 echo "Patching update site's feature.xml..."
 sed -i -e 's/^\( *\)version="[0-9.]*"/\1version="'${VERSION}'"/' ${FEATURE_XML}
+echo "Patching update site's site.xml..."
+sed -i -e 's/com.amazon.aws.aws-java-api\(\.source\)\?_\([0-9.]*\)\.jar/com.amazon.aws.aws-java-api\1_'${VERSION}'.jar/' -e '/feature url=/s/version="[0-9.]*"/version="'${VERSION}'"/' ${SITE_XML}
 echo "Building update site..."
 mvn clean install
 echo "Patching SDK version in target platform definition ${TARGET_DEFINITION}..."

@@ -7,7 +7,7 @@ import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.EntryPointLinkFactory;
-import com.sap.sse.security.ui.client.UserManagementServiceAsync;
+import com.sap.sse.security.ui.client.UserManagementWriteServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.client.usermanagement.UserManagementPanel.UserCreatedEventHandler;
@@ -21,13 +21,13 @@ import com.sap.sse.security.ui.client.usermanagement.UserManagementPanel.UserCre
 // TODO: Add input fields for full name, company and locale information!
 public class CreateUserDialog extends AbstractUserDialog {
     public CreateUserDialog(final StringMessages stringMessages,
-            final UserManagementServiceAsync userManagementService, final Iterable<UserCreatedEventHandler> handlers,
+            final UserManagementWriteServiceAsync userManagementWriteService, final Iterable<UserCreatedEventHandler> handlers,
             final UserService userService) {
-        super(stringMessages, stringMessages.createUser(), userManagementService, /* start with no user */null,
+        super(stringMessages, stringMessages.createUser(), userManagementWriteService, /* start with no user */null,
                 new DialogCallback<UserData>() {
                     @Override
                     public void ok(UserData usernameEmailPassword) {
-                        userManagementService
+                        userManagementWriteService
                                 .createSimpleUser(usernameEmailPassword.getUsername(),
                                         usernameEmailPassword.getEmail(), usernameEmailPassword.getPassword(),
                                         /* TOOD fullName */ null, /* TODO company */ null, /* TODO locale */ null,

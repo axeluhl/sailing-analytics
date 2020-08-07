@@ -697,11 +697,13 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
     }
 
     private void startTracking() {
-        setStatusAndProgress(TrackedRaceStatusEnum.TRACKING, 0.0);
+        // start out LOADING; if no mappings are found, the final updateStatusAndProgress() will recognize and switch to TRACKING
+        setStatusAndProgress(TrackedRaceStatusEnum.LOADING, 0.0);
         this.deviceMappings = new FixLoaderDeviceMappings(trackedRace.getAttachedRegattaLogs(),
                 trackedRace.getRace().getName());
         trackedRace.addListener(raceChangeListener);
         this.deviceMappings.updateMappings();
+        updateStatusAndProgress(); // will switch to TRACKING immediately if no loading jobs are running based on the device mappings found
     }
 
     private void loadFixesForExtendedTimeRange(final TimeRange extendedTimeRange) {

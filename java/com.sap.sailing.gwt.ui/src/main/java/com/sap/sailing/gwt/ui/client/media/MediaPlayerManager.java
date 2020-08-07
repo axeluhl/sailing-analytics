@@ -8,6 +8,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaTrackWithSecurityDTO;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
+import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
@@ -84,6 +85,8 @@ public interface MediaPlayerManager {
     RegattaAndRaceIdentifier getCurrentRace();
 
     MediaServiceAsync getMediaService();
+
+    MediaServiceWriteAsync getMediaServiceWrite();
 
     ErrorReporter getErrorReporter();
 
