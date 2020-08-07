@@ -1,8 +1,6 @@
 package com.sap.sailing.windestimation.model;
 
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import javax.swing.JOptionPane;
@@ -25,6 +23,7 @@ import com.sap.sailing.windestimation.model.regressor.twdtransition.DistanceBase
 import com.sap.sailing.windestimation.model.regressor.twdtransition.DurationBasedTwdTransitionRegressorModelContext;
 import com.sap.sailing.windestimation.model.regressor.twdtransition.DurationBasedTwdTransitionRegressorModelContext.DurationValueRange;
 import com.sap.sailing.windestimation.util.LoggingUtil;
+import com.sap.sse.util.ThreadPoolUtil;
 
 /**
  * 
@@ -139,8 +138,8 @@ public class SimpleModelsTrainingPart1 {
     }
 
     private static void createNewThreadPool() {
-        executorService = new ThreadPoolExecutor(NUMBER_OF_THREADS, NUMBER_OF_THREADS, 0, TimeUnit.MILLISECONDS,
-                new ArrayBlockingQueue<>(NUMBER_OF_THREADS), new ThreadPoolExecutor.CallerRunsPolicy());
+        executorService = ThreadPoolUtil.INSTANCE.createForegroundTaskThreadPoolExecutor(NUMBER_OF_THREADS,
+                SimpleModelsTrainingPart1.class.getName());
     }
 
     /**

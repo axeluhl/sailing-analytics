@@ -13,8 +13,6 @@ import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
@@ -33,7 +31,6 @@ import com.sap.sse.replication.ReplicablesProvider;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationReceiver;
 import com.sap.sse.util.ThreadPoolUtil;
-import com.sap.sse.util.impl.ThreadFactoryWithPriority;
 
 /**
  * Receives {@link OperationWithResult} objects from a message queue and {@link Replicable#apply(OperationWithResult)
@@ -93,13 +90,6 @@ public class ReplicationReceiverImpl implements ReplicationReceiver, Runnable {
     private boolean suspended;
     
     private boolean stopped = false;
-    
-    /**
-     * When many updates are triggered in a short period of time by a single thread, ensure that the single thread
-     * providing the updates is not outperformed by all the re-calculations happening here. Leave at least one
-     * core to other things, but by using at least three threads ensure that no simplistic deadlocks may occur.
-     */
-    private static final int THREAD_POOL_SIZE = ThreadPoolUtil.INSTANCE.getReasonableThreadPoolSize();
 
     /**
      * If permitted by the security manager, this is the <code>_queue</code> field accessor for the {@link QueueingConsumer}
@@ -113,11 +103,8 @@ public class ReplicationReceiverImpl implements ReplicationReceiver, Runnable {
      * Used for the parallel execution of operations that don't
      * {@link RacingEventServiceOperation#requiresSynchronousExecution()}.
      */
-    private final static Executor executor = new ThreadPoolExecutor(/* corePoolSize */ THREAD_POOL_SIZE,
-            /* maximumPoolSize */ THREAD_POOL_SIZE,
-            /* keepAliveTime */ 60, TimeUnit.SECONDS,
-            /* workQueue */ new LinkedBlockingQueue<Runnable>(),
-            /* thread factory */ new ThreadFactoryWithPriority(Thread.NORM_PRIORITY, /* daemon */ true));
+    private final static Executor executor = ThreadPoolUtil.INSTANCE
+            .createBackgroundTaskThreadPoolExecutor(ReplicationReceiverImpl.class.getName());
 
     /**
      * @param master
