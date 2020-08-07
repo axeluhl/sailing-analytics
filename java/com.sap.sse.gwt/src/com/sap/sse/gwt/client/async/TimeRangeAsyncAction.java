@@ -1,10 +1,9 @@
 package com.sap.sse.gwt.client.async;
 
-import java.util.Collection;
+import java.util.Map;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.common.TimeRange;
-import com.sap.sse.common.Util.Pair;
 
 /**
  * An action that will asynchronously execute a remote procedure that is parameterized by time ranges keyed by a set of
@@ -14,7 +13,7 @@ import com.sap.sse.common.Util.Pair;
  * {@link TimeRangeActionsExecutor#execute(TimeRangeAsyncAction, TimeRangeAsyncCallback) executed} by a
  * {@link TimeRangeActionsExecutor}, that executor can trim the request time ranges based on cached requests, avoiding
  * redundant requests for overlapping time ranges. After the executor has trimmed the requests the executor will call
- * this action's {@link #execute(Collection, AsyncCallback)} method with the trimmed time ranges.
+ * this action's {@link #execute(Map<Key,TimeRange>, AsyncCallback)} method with the trimmed time ranges.
  * <p>
  * 
  * The benefit of using this approach over making a straight call to the remote procedure is that the
@@ -38,12 +37,12 @@ public interface TimeRangeAsyncAction<Result, Key> {
      * @param callback
      *            {@link AsyncCallback} to give response to.
      */
-    void execute(Collection<Pair<Key, TimeRange>> timeRanges, AsyncCallback<Result> callback);
+    void execute(Map<Key, TimeRange> timeRanges, AsyncCallback<Result> callback);
 
     /**
      * Gets the wanted {@link TimeRange}s per {@link Key}.
      *
      * @return wanted {@link TimeRange} for each wanted {@link Key}.
      */
-    Collection<Pair<Key, TimeRange>> getTimeRanges();
+    Map<Key, TimeRange> getTimeRanges();
 }

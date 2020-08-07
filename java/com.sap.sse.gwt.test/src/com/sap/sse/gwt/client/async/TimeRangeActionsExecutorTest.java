@@ -36,22 +36,22 @@ public class TimeRangeActionsExecutorTest {
         final AtomicBoolean callbackHasRun = new AtomicBoolean(false);
         exec.execute(new TimeRangeAsyncAction<Map<String, Integer>, String>() {
             @Override
-            public void execute(Collection<Pair<String, TimeRange>> timeRanges,
+            public void execute(Map<String, TimeRange> timeRanges,
                     AsyncCallback<Map<String, Integer>> callback) {
                 actionHasRun.set(true);
                 Map<String, Integer> results = new HashMap<>();
-                for (Pair<String, TimeRange> channel : timeRanges) {
-                    results.put(channel.getA(), channel.getA().length());
+                for (final String key : timeRanges.keySet()) {
+                    results.put(key, key.length());
                 }
                 callback.onSuccess(results);
             }
 
             @Override
-            public Collection<Pair<String, TimeRange>> getTimeRanges() {
-                Collection<Pair<String, TimeRange>> channels = new ArrayList<>();
-                channels.add(new Pair<>("a", new MilliTimeRange(0, 1)));
-                channels.add(new Pair<>("bb", new MilliTimeRange(1, 2)));
-                return channels;
+            public Map<String, TimeRange> getTimeRanges() {
+                final Map<String, TimeRange> timeRangeMap = new HashMap<>();
+                timeRangeMap.put("a", new MilliTimeRange(0, 1));
+                timeRangeMap.put("bb", new MilliTimeRange(1, 2));
+                return timeRangeMap;
             }
         }, new TimeRangeAsyncCallback<Map<String, Integer>, Integer, String>() {
             @Override
@@ -96,17 +96,17 @@ public class TimeRangeActionsExecutorTest {
         // Fire off first request which will simulate a long round trip time
         exec.execute(new TimeRangeAsyncAction<Map<String, Integer>, String>() {
             @Override
-            public void execute(Collection<Pair<String, TimeRange>> timeRanges,
+            public void execute(Map<String, TimeRange> timeRanges,
                     AsyncCallback<Map<String, Integer>> callback) {
                 // Don't call callback now
                 lateCallback.set(callback);
             }
 
             @Override
-            public Collection<Pair<String, TimeRange>> getTimeRanges() {
-                List<Pair<String, TimeRange>> timeRanges = new ArrayList<>();
-                timeRanges.add(new Pair<>("x", TimeRangeImpl.create(100_000L, 120_000L)));
-                return timeRanges;
+            public Map<String, TimeRange> getTimeRanges() {
+                final Map<String, TimeRange> timeRangeMap = new HashMap<>(1);
+                timeRangeMap.put("x", TimeRangeImpl.create(100_000L, 120_000L));
+                return timeRangeMap;
             }
         }, new TimeRangeAsyncCallback<Map<String, Integer>, Integer, String>() {
 
@@ -139,7 +139,7 @@ public class TimeRangeActionsExecutorTest {
         final TimeRange timeRange = TimeRangeImpl.create(110_000L, 130_000L);
         exec.execute(new TimeRangeAsyncAction<Map<String, Integer>, String>() {
             @Override
-            public void execute(Collection<Pair<String, TimeRange>> timeRanges,
+            public void execute(Map<String, TimeRange> timeRanges,
                     AsyncCallback<Map<String, Integer>> callback) {
                 Map<String, Integer> result = new HashMap<>();
                 result.put("x", 2);
@@ -147,10 +147,10 @@ public class TimeRangeActionsExecutorTest {
             }
 
             @Override
-            public Collection<Pair<String, TimeRange>> getTimeRanges() {
-                List<Pair<String, TimeRange>> timeRanges = new ArrayList<>();
-                timeRanges.add(new Pair<>("x", timeRange));
-                return timeRanges;
+            public Map<String, TimeRange> getTimeRanges() {
+                final Map<String, TimeRange> timeRangeMap = new HashMap<>();
+                timeRangeMap.put("x", timeRange);
+                return timeRangeMap;
             }
         }, new TimeRangeAsyncCallback<Map<String, Integer>, Integer, String>() {
 

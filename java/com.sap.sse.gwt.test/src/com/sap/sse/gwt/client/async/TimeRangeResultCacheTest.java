@@ -6,9 +6,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.Test;
@@ -44,12 +44,12 @@ public class TimeRangeResultCacheTest {
     private static <R, K> TimeRangeAsyncAction<R, K> getDummyAction() {
         return new TimeRangeAsyncAction<R, K>() {
             @Override
-            public void execute(Collection<Pair<K, TimeRange>> timeRanges, AsyncCallback<R> callback) {
+            public void execute(Map<K, TimeRange> timeRanges, AsyncCallback<R> callback) {
                 // Nop
             }
             @Override
-            public Collection<Pair<K, TimeRange>> getTimeRanges() {
-                return Collections.emptyList();
+            public Map<K, TimeRange> getTimeRanges() {
+                return Collections.emptyMap();
             }
         };
     }

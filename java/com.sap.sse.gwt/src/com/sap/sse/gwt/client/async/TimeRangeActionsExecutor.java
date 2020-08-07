@@ -18,7 +18,7 @@ import com.sap.sse.common.Util.Pair;
  * An Executor for efficient, asynchronous execution of {@link TimeRangeAsyncAction}s. This executor operates on
  * {@link TimeRangeAsyncAction}s which specify the wanted {@link TimeRange} by {@link Key} with
  * {@link TimeRangeAsyncAction#getTimeRanges()} and are expected to return a {@code Result} when their
- * {@link TimeRangeAsyncAction#execute(Collection, AsyncCallback)} is invoked. The {@link Key} could, e.g., be a
+ * {@link TimeRangeAsyncAction#execute(Map<Key,TimeRange>, AsyncCallback)} is invoked. The {@link Key} could, e.g., be a
  * competitor or a boat class.
  * <p>
  * 
@@ -70,12 +70,11 @@ public class TimeRangeActionsExecutor<Result, SubResult, Key> {
         private final Set<Key> subResultsReadySet;
 
         private ExecutorCallback(TimeRangeAsyncAction<Result, Key> action,
-                Collection<Pair<Key, TimeRange>> requestedTimeRanges,
+                Map<Key, TimeRange> requestedTimeRanges,
                 TimeRangeAsyncCallback<Result, SubResult, Key> callback) {
             this.action = action;
             this.callback = callback;
-            this.requestedTimeRangeMap = new HashMap<>(requestedTimeRanges.size());
-            requestedTimeRanges.forEach(pair -> requestedTimeRangeMap.put(pair.getA(), pair.getB()));
+            this.requestedTimeRangeMap = new HashMap<>(requestedTimeRanges);
             this.subResultsReadySet = new HashSet<>(requestedTimeRanges.size());
         }
 
@@ -211,24 +210,24 @@ public class TimeRangeActionsExecutor<Result, SubResult, Key> {
         if (callback == null) {
             throw new IllegalArgumentException("callback must not be null!");
         }
-        final Collection<Pair<Key, TimeRange>> requestedTimeRanges = action.getTimeRanges();
+        final Map<Key, TimeRange> requestedTimeRanges = action.getTimeRanges();
         final ExecutorCallback execCallback = new ExecutorCallback(action, requestedTimeRanges, callback);
-        final List<Pair<Key, TimeRange>> trimmedTimeRanges = new ArrayList<>(requestedTimeRanges.size());
-        for (final Pair<Key, TimeRange> subRequest : requestedTimeRanges) {
-            final TimeRangeResultCache<SubResult> cache = getSubResultCache(subRequest.getA());
-            final TimeRange potentiallyTrimmedTimeRange = cache.trimAndRegisterRequest(subRequest.getB(), forceTimeRange, action,
+        final Map<Key, TimeRange> trimmedTimeRanges = new HashMap<>(requestedTimeRanges.size());
+        for (final Map.Entry<Key, TimeRange> subRequest : requestedTimeRanges.entrySet()) {
+            final TimeRangeResultCache<SubResult> cache = getSubResultCache(subRequest.getKey());
+            final TimeRange potentiallyTrimmedTimeRange = cache.trimAndRegisterRequest(subRequest.getValue(), forceTimeRange, action,
                     new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
-                            execCallback.onSubResultFailure(subRequest.getA(), caught);
+                            execCallback.onSubResultFailure(subRequest.getKey(), caught);
                         }
                         @Override
                         public void onSuccess(Void result) {
-                            execCallback.onSubResultSuccess(subRequest.getA());
+                            execCallback.onSubResultSuccess(subRequest.getKey());
                         }
             });
             if (potentiallyTrimmedTimeRange != null) {
-                trimmedTimeRanges.add(new Pair<>(subRequest.getA(), potentiallyTrimmedTimeRange));
+                trimmedTimeRanges.put(subRequest.getKey(), potentiallyTrimmedTimeRange);
             }
         }
         executor.execute(cb -> action.execute(trimmedTimeRanges, cb), actionCategory, execCallback);
