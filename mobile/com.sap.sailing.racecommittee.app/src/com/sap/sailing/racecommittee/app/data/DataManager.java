@@ -14,7 +14,6 @@ public abstract class DataManager implements ReadonlyDataManager {
 
     public static ReadonlyDataManager create(Context context) {
         DataStore dataStore = InMemoryDataStore.INSTANCE;
-        dataStore.setContext(context);
         if (AppPreferences.on(context).isOfflineMode()) {
             return new OfflineDataManager(context, dataStore, dataStore.getDomainFactory());
         }
@@ -42,13 +41,13 @@ public abstract class DataManager implements ReadonlyDataManager {
     }
 
     /**
-     * {@link InMemoryDataStore#clearRaces()} ()}, fires the {@link AppConstants#INTENT_ACTION_CLEAR_RACES} intent which is expected to
+     * {@link InMemoryDataStore#clearRaces(Context)}, fires the {@link AppConstants#INTENT_ACTION_CLEAR_RACES} intent which is expected to
      * be handled by the {@link RaceStateService} which responds by unregistering all its races, stopping to listen on
      * and poll their race logs and by clearing the data store's races collection.
      * {@link InMemoryDataStore#reset()} resets the data store properly.
      */
     public void resetAll() {
-        InMemoryDataStore.INSTANCE.clearRaces();
+        InMemoryDataStore.INSTANCE.clearRaces(context);
         InMemoryDataStore.INSTANCE.reset();
     }
 }

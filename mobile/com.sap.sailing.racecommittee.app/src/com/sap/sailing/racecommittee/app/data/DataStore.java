@@ -18,8 +18,6 @@ import java.util.UUID;
 
 public interface DataStore {
 
-    void setContext(Context context);
-
     void reset();
 
     SharedDomainFactory getDomainFactory();
@@ -46,7 +44,7 @@ public interface DataStore {
 
     void addRace(int index, ManagedRace race);
 
-    void removeRace(ManagedRace race);
+    void removeRace(Context context, ManagedRace race);
 
     ManagedRace getRace(String id);
 
@@ -56,9 +54,9 @@ public interface DataStore {
 
     boolean hasRace(SimpleRaceLogIdentifier id);
 
-    void registerRaces(Collection<ManagedRace> races);
+    void registerRaces(Context context, Collection<ManagedRace> races);
 
-    void clearRaces();
+    void clearRaces(Context context);
 
     Collection<Mark> getMarks(RaceGroup raceGroup);
 

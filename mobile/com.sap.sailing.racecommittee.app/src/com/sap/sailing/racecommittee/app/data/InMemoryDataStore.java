@@ -31,7 +31,6 @@ import java.util.UUID;
 public enum InMemoryDataStore implements DataStore {
     INSTANCE;
 
-    private Context mContext;
     private LinkedHashMap<Serializable, EventBase> eventsById;
     private LinkedHashMap<SimpleRaceLogIdentifier, ManagedRace> managedRaceById;
     private LinkedHashMap<RaceGroup, LinkedHashMap<Serializable, Mark>> marksData;
@@ -43,13 +42,6 @@ public enum InMemoryDataStore implements DataStore {
 
     InMemoryDataStore() {
         reset();
-    }
-
-    @Override
-    public void setContext(Context context) {
-        if (mContext == null) {
-            mContext = context.getApplicationContext();
-        }
     }
 
     @Override
@@ -120,9 +112,12 @@ public enum InMemoryDataStore implements DataStore {
     @Override
     public CourseArea getCourseArea(Serializable id) {
         for (EventBase event : eventsById.values()) {
-            for (CourseArea courseArea : getCourseAreas(event)) {
-                if (courseArea.getId().equals(id)) {
-                    return courseArea;
+            final Collection<CourseArea> courseAreas = getCourseAreas(event);
+            if (courseAreas != null) {
+                for (CourseArea courseArea : courseAreas) {
+                    if (courseArea.getId().equals(id)) {
+                        return courseArea;
+                    }
                 }
             }
         }
@@ -132,9 +127,12 @@ public enum InMemoryDataStore implements DataStore {
     @Override
     public boolean hasCourseArea(Serializable id) {
         for (EventBase event : eventsById.values()) {
-            for (CourseArea courseArea : getCourseAreas(event)) {
-                if (courseArea.getId().equals(id)) {
-                    return true;
+            final Collection<CourseArea> courseAreas = getCourseAreas(event);
+            if (courseAreas != null) {
+                for (CourseArea courseArea : courseAreas) {
+                    if (courseArea.getId().equals(id)) {
+                        return true;
+                    }
                 }
             }
         }
@@ -192,8 +190,8 @@ public enum InMemoryDataStore implements DataStore {
     }
 
     @Override
-    public void removeRace(ManagedRace race) {
-        unregisterRace(race);
+    public void removeRace(Context context, ManagedRace race) {
+        unregisterRace(context, race);
         managedRaceById.remove(convertManagedRaceIdentifierToSimpleRaceLogIdentifier(race.getIdentifier()));
     }
 
@@ -288,7 +286,7 @@ public enum InMemoryDataStore implements DataStore {
 
     @Override
     public Set<RaceGroup> getRaceGroups() {
-        Set<RaceGroup> raceGroups = new HashSet<RaceGroup>();
+        Set<RaceGroup> raceGroups = new HashSet<>();
         for (ManagedRace race : getRaces()) {
             raceGroups.add(race.getRaceGroup());
         }
@@ -326,27 +324,27 @@ public enum InMemoryDataStore implements DataStore {
     }
 
     @Override
-    public void registerRaces(Collection<ManagedRace> races) {
+    public void registerRaces(Context context, Collection<ManagedRace> races) {
         for (ManagedRace race : races) {
-            final Intent registerIntent = new Intent(mContext, RaceStateService.class);
+            final Intent registerIntent = new Intent(context, RaceStateService.class);
             registerIntent.setAction(AppConstants.INTENT_ACTION_REGISTER_RACE);
             registerIntent.putExtra(AppConstants.INTENT_EXTRA_RACE_ID, race.getId());
-            mContext.startService(registerIntent);
+            context.startService(registerIntent);
         }
     }
 
     @Override
-    public void clearRaces() {
+    public void clearRaces(Context context) {
         managedRaceById.clear();
-        final Intent intent = new Intent(mContext, RaceStateService.class);
+        final Intent intent = new Intent(context, RaceStateService.class);
         intent.setAction(AppConstants.INTENT_ACTION_CLEAR_RACES);
-        mContext.startService(intent);
+        context.startService(intent);
     }
 
-    private void unregisterRace(ManagedRace race) {
-        final Intent intent = new Intent(mContext, RaceStateService.class);
+    private void unregisterRace(Context context, ManagedRace race) {
+        final Intent intent = new Intent(context, RaceStateService.class);
         intent.setAction(AppConstants.INTENT_ACTION_UNREGISTER_RACE);
         intent.putExtra(AppConstants.INTENT_EXTRA_RACE_ID, race.getId());
-        mContext.startService(intent);
+        context.startService(intent);
     }
 }

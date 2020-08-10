@@ -7,7 +7,6 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
@@ -45,15 +44,6 @@ import java.util.Map.Entry;
 public class RaceStateService extends Service {
 
     private final static String TAG = RaceStateService.class.getName();
-
-    /**
-     * Binder for this {@link RaceStateService}.
-     */
-    public class RaceStateServiceBinder extends Binder {
-        public RaceStateService getService() {
-            return RaceStateService.this;
-        }
-    }
 
     private AlarmManager alarmManager;
 
@@ -103,7 +93,7 @@ public class RaceStateService extends Service {
         if (intent == null) {
             ExLog.i(this, TAG, "Restarted.");
         } else {
-            handleStartCommand(intent);
+            handleStartCommand(intent, startId);
         }
 
         // We want this service to continue running until it is explicitly
@@ -113,15 +103,23 @@ public class RaceStateService extends Service {
 
     @Override
     public void onDestroy() {
-        unregisterAllRaces();
+        if (!managedIntents.isEmpty()) {
+            unregisterAllRaces();
+        }
+        stopForeground(true);
     }
 
-    private void handleStartCommand(Intent intent) {
+    private void handleStartCommand(Intent intent, int startId) {
         String action = intent.getAction();
         ExLog.i(this, TAG, String.format("Command action '%s' received.", action));
 
+        if (action == null) {
+            return;
+        }
+
         if (AppConstants.INTENT_ACTION_CLEAR_RACES.equals(action)) {
             handleClearRaces();
+            stopSelf(startId);
         } else {
             String id = intent.getStringExtra(AppConstants.INTENT_EXTRA_RACE_ID);
             ManagedRace race = dataManager.getDataStore().getRace(id);
@@ -272,7 +270,10 @@ public class RaceStateService extends Service {
     @TargetApi(Build.VERSION_CODES.KITKAT)
         /* package */ void setAlarm(ManagedRace race, RaceStateEvent event) {
         PendingIntent intent = createAlarmPendingIntent(race, event);
-        managedIntents.get(race.getId()).add(Pair.create(intent, event.getEventName()));
+        final List<Pair<PendingIntent, RaceStateEvents>> intents = managedIntents.get(race.getId());
+        if (intents != null) {
+            intents.add(Pair.create(intent, event.getEventName()));
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             alarmManager.setExact(AlarmManager.RTC_WAKEUP, event.getTimePoint().asMillis(), intent);
         } else {
@@ -284,10 +285,12 @@ public class RaceStateService extends Service {
     /* package */ void clearAlarmByName(ManagedRace race, RaceStateEvents stateEventName) {
         List<Pair<PendingIntent, RaceStateEvents>> intents = managedIntents.get(race.getId());
         Pair<PendingIntent, RaceStateEvents> toBeRemoved = null;
-        for (Pair<PendingIntent, RaceStateEvents> intentPair : intents) {
-            if (intentPair.second.equals(stateEventName)) {
-                toBeRemoved = intentPair;
-                break;
+        if (intents != null) {
+            for (Pair<PendingIntent, RaceStateEvents> intentPair : intents) {
+                if (intentPair.second.equals(stateEventName)) {
+                    toBeRemoved = intentPair;
+                    break;
+                }
             }
         }
         if (toBeRemoved != null) {

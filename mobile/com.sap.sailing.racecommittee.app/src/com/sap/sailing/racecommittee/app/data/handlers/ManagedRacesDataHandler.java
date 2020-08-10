@@ -1,13 +1,11 @@
 package com.sap.sailing.racecommittee.app.data.handlers;
 
 import android.content.Context;
-import android.content.Intent;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult.ResolutionFailed;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.services.RaceStateService;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -36,15 +34,10 @@ public class ManagedRacesDataHandler extends DataHandler<Collection<ManagedRace>
     @Override
     public void onResult(Collection<ManagedRace> data, boolean isCached) {
         if (!isCached) {
-            manager.getDataStore().clearRaces();
-            if (data.isEmpty()) {
-                final Intent intent = new Intent(context, RaceStateService.class);
-                context.stopService(intent);
-                return;
-            }
+            manager.getDataStore().clearRaces(context);
             manager.addRaces(data);
             calcRaceState(data);
-            manager.getDataStore().registerRaces(data);
+            manager.getDataStore().registerRaces(context, data);
         }
     }
 
