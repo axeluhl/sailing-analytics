@@ -95,7 +95,7 @@ public class MessageSendingService extends Service implements MessageSendingList
      * Can be used to keep messages from being sent; the race manager app, for example, uses this to avoid sending
      * messages back to the server that were received from the server in the first place.
      */
-    private Set<Serializable> suppressedMessageIds = new HashSet<Serializable>();
+    private Set<Serializable> suppressedMessageIds = new HashSet<>();
 
     private APIConnectivityListener apiConnectivityListener;
 
@@ -248,18 +248,7 @@ public class MessageSendingService extends Service implements MessageSendingList
 
     @Override
     public void onDestroy() {
-        stopForeground(true);
-        stopSelf();
         ExLog.i(this, TAG, "Message Sending Service is being destroyed.");
-        super.onDestroy();
-    }
-
-    @Override
-    public void onTaskRemoved(Intent rootIntent) {
-        super.onTaskRemoved(rootIntent);
-        stopForeground(true);
-        stopSelf();
-        ExLog.i(this, TAG, "Message Sending Service is being removed.");
     }
 
     @Override
@@ -269,17 +258,17 @@ public class MessageSendingService extends Service implements MessageSendingList
             return START_STICKY;
         }
         ExLog.i(this, TAG, "Sending Service is called by following intent: " + intent.getAction());
-        handleCommand(intent, startId);
+        handleCommand(intent);
         // We want this service to continue running until it is explicitly
         // stopped, so return sticky.
         return START_STICKY;
     }
 
-    private void handleCommand(Intent intent, int startId) {
+    private void handleCommand(Intent intent) {
         String action = intent.getAction();
-        if (action.equals(getString(R.string.intent_send_saved_intents))) {
+        if (getString(R.string.intent_send_saved_intents).equals(action)) {
             handleDelayedMessages();
-        } else if (action.equals(getString(R.string.intent_send_message))) {
+        } else if (getString(R.string.intent_send_message).equals(action)) {
             handleSendMessages(intent);
         }
     }
@@ -443,7 +432,7 @@ public class MessageSendingService extends Service implements MessageSendingList
 
     public static String getRaceLogEventSendAndReceiveUrl(Context context, final String raceGroupName,
             final String raceName, final String fleetName) throws UnsupportedEncodingException {
-        String url = String.format(
+        return String.format(
                 "%s/sailingserver/rc/racelog?" + RaceLogServletConstants.PARAMS_LEADERBOARD_NAME + "=%s&"
                         + RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME + "=%s&"
                         + RaceLogServletConstants.PARAMS_RACE_FLEET_NAME + "=%s&"
@@ -452,7 +441,6 @@ public class MessageSendingService extends Service implements MessageSendingList
                         R.string.preference_server_url_default),
                 URLEncoder.encode(raceGroupName, charsetName), URLEncoder.encode(raceName, charsetName),
                 URLEncoder.encode(fleetName, charsetName), uuid);
-        return url;
     }
 
     /**
@@ -493,9 +481,9 @@ public class MessageSendingService extends Service implements MessageSendingList
      * Listener interface for reporting of connectivity and number of unsent GPS-fixes.
      */
     public interface APIConnectivityListener {
-        public void apiConnectivityUpdated(APIConnectivity apiConnectivity);
+        void apiConnectivityUpdated(APIConnectivity apiConnectivity);
 
-        public void setUnsentGPSFixesCount(int count);
+        void setUnsentGPSFixesCount(int count);
     }
 
     /**
@@ -520,11 +508,10 @@ public class MessageSendingService extends Service implements MessageSendingList
 
     public static String getRacePositionsUrl(Context context, final String regattaName, final String raceName)
             throws UnsupportedEncodingException {
-        String url = String.format("%s/sailingserver/api/v1/regattas/%s/races/%s/marks/positions",
+        return String.format("%s/sailingserver/api/v1/regattas/%s/races/%s/marks/positions",
                 PrefUtils.getString(context, R.string.preference_server_url_key,
                         R.string.preference_server_url_default),
                 URLEncoder.encode(regattaName, charsetName).replace("+", "%20"),
                 URLEncoder.encode(raceName, charsetName.replace("+", "%20")));// ,
-        return url;
     }
 }

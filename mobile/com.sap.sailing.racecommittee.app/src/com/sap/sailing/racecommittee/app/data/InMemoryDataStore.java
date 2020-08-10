@@ -1,12 +1,7 @@
 package com.sap.sailing.racecommittee.app.data;
 
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import android.content.Context;
+import android.content.Intent;
 
 import com.sap.sailing.android.shared.util.CollectionUtils;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
@@ -18,17 +13,20 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.impl.SharedDomainFactoryImpl;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
+import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
 import com.sap.sailing.racecommittee.app.domain.impl.FleetIdentifierImpl;
 import com.sap.sailing.racecommittee.app.services.RaceStateService;
 import com.sap.sse.common.Util.Triple;
 
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
-import android.os.IBinder;
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 public enum InMemoryDataStore implements DataStore {
     INSTANCE;
@@ -43,9 +41,6 @@ public enum InMemoryDataStore implements DataStore {
     private Serializable eventUUID;
     private UUID courseAreaId;
 
-    private RaceStateService mService;
-    private boolean mBound;
-
     InMemoryDataStore() {
         reset();
     }
@@ -54,10 +49,6 @@ public enum InMemoryDataStore implements DataStore {
     public void setContext(Context context) {
         if (mContext == null) {
             mContext = context.getApplicationContext();
-        }
-        if (!mBound) {
-            Intent intent = new Intent(mContext, RaceStateService.class);
-            mContext.bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
         }
     }
 
@@ -71,11 +62,6 @@ public enum InMemoryDataStore implements DataStore {
 
         eventUUID = null;
         courseAreaId = null;
-
-        if (mContext != null && mBound) {
-            mContext.unbindService(mConnection);
-            mBound = false;
-        }
     }
 
     @Override
@@ -339,34 +325,28 @@ public enum InMemoryDataStore implements DataStore {
         courseAreaId = uuid;
     }
 
+    @Override
     public void registerRaces(Collection<ManagedRace> races) {
-        //TODO Log
-        if (mBound) {
-            for (ManagedRace race : races) {
-                mService.registerRace(race);
-            }
+        for (ManagedRace race : races) {
+            final Intent registerIntent = new Intent(mContext, RaceStateService.class);
+            registerIntent.setAction(AppConstants.INTENT_ACTION_REGISTER_RACE);
+            registerIntent.putExtra(AppConstants.INTENT_EXTRA_RACE_ID, race.getId());
+            mContext.startService(registerIntent);
         }
+    }
+
+    @Override
+    public void clearRaces() {
+        managedRaceById.clear();
+        final Intent intent = new Intent(mContext, RaceStateService.class);
+        intent.setAction(AppConstants.INTENT_ACTION_CLEAR_RACES);
+        mContext.startService(intent);
     }
 
     private void unregisterRace(ManagedRace race) {
-        if (mBound) {
-            mService.unregisterRace(race);
-        }
+        final Intent intent = new Intent(mContext, RaceStateService.class);
+        intent.setAction(AppConstants.INTENT_ACTION_UNREGISTER_RACE);
+        intent.putExtra(AppConstants.INTENT_EXTRA_RACE_ID, race.getId());
+        mContext.startService(intent);
     }
-
-    private ServiceConnection mConnection = new ServiceConnection() {
-
-        @Override
-        public void onServiceConnected(ComponentName className, IBinder service) {
-            //TODO Log
-            RaceStateService.RaceStateServiceBinder binder = (RaceStateService.RaceStateServiceBinder) service;
-            mService = binder.getService();
-            mBound = true;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            mBound = false;
-        }
-    };
 }
