@@ -96,7 +96,7 @@ public class UserRoleDefinitionPanel extends HorizontalPanel
             if (role != null) {
                 UserDTO selectedUser = this.userSelectionModel.getSelectedObject();
                 if (selectedUser != null) {
-                    userService.getUserManagementService().addRoleToUser(selectedUser.getName(), userInput.getText(),
+                    userService.getUserManagementWriteService().addRoleToUser(selectedUser.getName(), userInput.getText(),
                             role.getId(), tenantInput.getText(), new AsyncCallback<SuccessInfo>() {
                                 @Override
                                 public void onFailure(Throwable caught) {

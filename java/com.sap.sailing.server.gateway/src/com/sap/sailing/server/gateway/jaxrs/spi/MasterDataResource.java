@@ -17,7 +17,7 @@ import java.util.UUID;
 import java.util.logging.Logger;
 import java.util.zip.GZIPOutputStream;
 
-import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -52,9 +52,9 @@ public class MasterDataResource extends AbstractSailingServerResource {
     
     private static final Logger logger = Logger.getLogger(MasterDataResource.class.getName());
     
-    @GET
+    @POST
     @Produces("application/x-java-serialized-object")
-    public Response getMasterDataByLeaderboardGroups(@QueryParam("uuids[]") List<String> requestedLeaderboardGroupsUuids,
+    public Response getMasterDataByLeaderboardGroups(@QueryParam("uuids[]") List<UUID> requestedLeaderboardGroupsUuids,
             @QueryParam("compress") Boolean compress, @QueryParam("exportWind") Boolean exportWind,
             @QueryParam("exportDeviceConfigs") Boolean exportDeviceConfigs,
             @QueryParam("exportTrackedRacesAndStartTracking") Boolean exportTrackedRacesAndStartTracking)
@@ -63,7 +63,7 @@ public class MasterDataResource extends AbstractSailingServerResource {
         User user = securityService.getCurrentUser();
         securityService.checkCurrentUserServerPermission(ServerActions.CAN_EXPORT_MASTERDATA);
         final long startTime = System.currentTimeMillis();
-        logger.info("Masterdataexport has started; requesting user: "+user);
+        logger.info("Masterdataexport has started; requesting user: "+user.getName());
         if (compress == null) {
             compress = false;
         }
@@ -90,8 +90,8 @@ public class MasterDataResource extends AbstractSailingServerResource {
         } else {
             // Add all requested LeaderboardGroups.
             // The request will fail due to missing LeaderboardGroup READ permissions.
-            for (String uuid : requestedLeaderboardGroupsUuids) {
-                LeaderboardGroup group = allLeaderboardGroups.get(UUID.fromString(uuid));
+            for (UUID uuid : requestedLeaderboardGroupsUuids) {
+                LeaderboardGroup group = allLeaderboardGroups.get(uuid);
                 if (group != null) {
                     if (!securityService.hasCurrentUserReadPermission(group)) {
                         throw new AuthorizationException(

@@ -13,6 +13,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.json.simple.parser.ParseException;
 import org.osgi.util.tracker.ServiceTracker;
@@ -31,6 +33,8 @@ import com.sap.sse.util.ServiceTrackerFactory;
 import com.sap.sse.util.ThreadPoolUtil;
 
 public class WindFinderTrackerFactoryImpl implements WindFinderTrackerFactory {
+    private static final Logger logger = Logger.getLogger(WindFinderTrackerFactoryImpl.class.getName());
+    
     private final Map<RaceDefinition, WindTracker> windTrackerPerRace;
     
     /**
@@ -60,8 +64,12 @@ public class WindFinderTrackerFactoryImpl implements WindFinderTrackerFactory {
                     ()->{
                         final ConcurrentMap<String, ReviewedSpotsCollection> result = new ConcurrentHashMap<>();
                         reviewedSpotsCollectionIdProvider.getService();
-                        for (final ReviewedSpotsCollection c : loadSpotCollectionsFromProvider(/* lookupInCache */ false)) {
-                            result.put(c.getId(), c);
+                        try {
+                            for (final ReviewedSpotsCollection c : loadSpotCollectionsFromProvider(/* lookupInCache */ false)) {
+                                result.put(c.getId(), c);
+                            }
+                        } catch (Exception e) {
+                            logger.log(Level.SEVERE, "Problem loading WindFinder spot collections", e);
                         }
                         return result;
                     }, /*delay*/ 0, TimeUnit.MILLISECONDS);

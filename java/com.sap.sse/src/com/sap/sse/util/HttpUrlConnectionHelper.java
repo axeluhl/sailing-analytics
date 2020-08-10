@@ -25,7 +25,28 @@ public class HttpUrlConnectionHelper {
      * Redirects the connection using the <code>Location</code> header.
      */
     public static URLConnection redirectConnectionWithBearerToken(URL url, String optionalBearerToken) throws MalformedURLException, IOException {
-        return redirectConnectionWithBearerToken(url, Duration.ONE_MINUTE.times(10), optionalBearerToken);
+        return redirectConnectionWithBearerToken(url, Duration.ONE_MINUTE.times(10), /* default HTTP method */ null, optionalBearerToken);
+    }
+    
+    /**
+     * Redirects the connection using the <code>Location</code> header.
+     */
+    public static URLConnection redirectConnectionWithBearerToken(URL url, String optionalRequestMethod,
+            String optionalBearerToken) throws MalformedURLException, IOException {
+        return redirectConnectionWithBearerToken(url, Duration.ONE_MINUTE.times(10), optionalRequestMethod, optionalBearerToken);
+    }
+    
+    /**
+     * Redirects the connection using the <code>Location</code> header. Make sure to set
+     * the timeout if you expect the response to take longer.
+     */
+    public static URLConnection redirectConnectionWithBearerToken(URL url, Duration timeout, String optionalRequestMethod, String optionalBearerToken)
+            throws MalformedURLException, IOException {
+        return redirectConnection(url, timeout, optionalRequestMethod, t -> {
+            if (optionalBearerToken != null && !optionalBearerToken.isEmpty()) {
+                t.setRequestProperty("Authorization", "Bearer " + optionalBearerToken);
+            }
+        });
     }
     
     /**
@@ -34,11 +55,7 @@ public class HttpUrlConnectionHelper {
      */
     public static URLConnection redirectConnectionWithBearerToken(URL url, Duration timeout, String optionalBearerToken)
             throws MalformedURLException, IOException {
-        return redirectConnection(url, timeout, t -> {
-            if (optionalBearerToken != null && !optionalBearerToken.isEmpty()) {
-                t.setRequestProperty("Authorization", "Bearer " + optionalBearerToken);
-            }
-        });
+        return redirectConnectionWithBearerToken(url, timeout, /* request method */ null, optionalBearerToken);
     }
     
     /**

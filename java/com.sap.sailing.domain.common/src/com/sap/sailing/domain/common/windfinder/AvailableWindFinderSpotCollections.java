@@ -23,7 +23,8 @@ public enum AvailableWindFinderSpotCollections {
     MUEGGELSEE("mueggelsee"),
     TEGERNSEE("tegernsee"),
     TORTOLA("tortola"),
-    AUCKLAND("auckland");
+    AUCKLAND("auckland"),
+    AARHUS("aarhus");
 
     private final String name;
 
