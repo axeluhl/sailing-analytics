@@ -181,7 +181,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     // TODO Bug 5239: remove, once we allow denied ACLs again
     private static final boolean supportDeniedActions = true;
 
-    private final Set<String> migratedHasPermissionTypes = new ConcurrentSkipListSet<>();;
+    private final Set<String> migratedHasPermissionTypes = new ConcurrentSkipListSet<>();
 
     private CachingSecurityManager securityManager;
     
