@@ -199,6 +199,7 @@ public class SharingServlet extends HttpServlet {
         map.put("display_url", placeUrl);
         map.put("redirect_url", placeUrl);
         map.put("image", imageUrl);
+        map.put("redirect_url_fallback", placeUrl);
         return map;
     }
 
