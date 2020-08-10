@@ -69,7 +69,7 @@ public class RoleDefinitionTableWrapper extends
             final UserGroupDTO selectedObject = TableWrapper.getSingleSelectedUserGroup(userGroupSelectionModel);
             final boolean value = !rolePair.getB().booleanValue();
             if (selectedObject != null) {
-                userService.getUserManagementService().putRoleDefintionToUserGroup(selectedObject.getId().toString(),
+                userService.getUserManagementWriteService().putRoleDefintionToUserGroup(selectedObject.getId().toString(),
                         rolePair.getA().getId().toString(), value, new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable caught) {
@@ -90,7 +90,7 @@ public class RoleDefinitionTableWrapper extends
             final UserGroupDTO selectedObject = TableWrapper.getSingleSelectedUserGroup(userGroupSelectionModel);
             if (selectedObject != null) {
                 if (Window.confirm(stringMessages.doYouReallyWantToRemoveRole(rolePair.getA().getName()))) {
-                    userService.getUserManagementService().removeRoleDefinitionFromUserGroup(
+                    userService.getUserManagementWriteService().removeRoleDefinitionFromUserGroup(
                             selectedObject.getId().toString(), rolePair.getA().getId().toString(),
                             new AsyncCallback<Void>() {
 

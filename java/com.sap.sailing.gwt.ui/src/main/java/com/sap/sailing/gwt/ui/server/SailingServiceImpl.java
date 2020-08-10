@@ -423,8 +423,6 @@ import com.sap.sailing.server.gateway.deserialization.racelog.impl.ORCCertificat
 import com.sap.sailing.server.gateway.serialization.LeaderboardGroupConstants;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.interfaces.SimulationService;
-import com.sap.sailing.server.operationaltransformation.AddRemoteSailingServerReference;
-import com.sap.sailing.server.operationaltransformation.RemoveRemoteSailingServerReference;
 import com.sap.sailing.server.operationaltransformation.UpdateServerConfiguration;
 import com.sap.sailing.server.security.SailingViewerRole;
 import com.sap.sailing.shared.server.SharedSailingData;
@@ -483,6 +481,7 @@ import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.security.Action;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.SessionUtils;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
@@ -3686,20 +3685,19 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
      * to <code>http://sapsailing.com</code>.
      * @throws MalformedURLException 
      */
-  //READ
+    //READ
     private URL getRequestBaseURL() throws MalformedURLException {
         final URL url = new URL(getThreadLocalRequest().getRequestURL().toString());
         final URL baseURL = getBaseURL(url);
         return baseURL;
     }
 
-  //READ
+    //READ
     private URL getBaseURL(URL url) throws MalformedURLException {
         return new URL(url.getProtocol(), url.getHost(), url.getPort(), /* file */ "");
     }
 
-  //READ
-    private RemoteSailingServerReferenceDTO createRemoteSailingServerReferenceDTO(
+    protected RemoteSailingServerReferenceDTO createRemoteSailingServerReferenceDTO(
             final RemoteSailingServerReference serverRef,
             final com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception> eventsOrException) {
         final Iterable<EventBase> events = eventsOrException.getA();
@@ -3709,17 +3707,18 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             eventDTOs = null;
             final Exception exception = eventsOrException.getB();
             sailingServerDTO = new RemoteSailingServerReferenceDTO(serverRef.getName(),
-                    serverRef.getURL().toExternalForm(), exception==null?null:exception.getMessage());
+                    serverRef.getURL().toExternalForm(), serverRef.isInclude(),
+                    exception == null ? null : exception.getMessage());
         } else {
             eventDTOs = convertToEventDTOs(events);
-            sailingServerDTO = new RemoteSailingServerReferenceDTO(
-                    serverRef.getName(), serverRef
-                            .getURL().toExternalForm(), eventDTOs);
+            final List<UUID> selectedEventIds = new ArrayList<>(serverRef.getSelectedEventIds());
+            sailingServerDTO = new RemoteSailingServerReferenceDTO(serverRef.getName(),
+                    serverRef.getURL().toExternalForm(), serverRef.isInclude(), selectedEventIds, eventDTOs);
         }
         return sailingServerDTO;
     }
     
-  //READ
+    //READ
     private Iterable<EventBaseDTO> convertToEventDTOs(Iterable<EventBase> events) {
         List<EventBaseDTO> result = new ArrayList<>();
         for (EventBase event : events) {
@@ -3827,7 +3826,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             if (entry.getValue() != null) {
                 try {
                     eventURLs.put(toLocale(entry.getKey()), new URL(entry.getValue()));
-                } catch(Exception e) {
+                } catch (Exception e) {
+                    logger.warning("User "+SessionUtils.getPrincipal()+
+                            " provided "+entry.getValue()+" as URL which didn't parse");
                     // broken URLs or Locales are not being stored
                 }
             }
@@ -4180,32 +4181,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             result.add(dto);
         }
         return result;
-    }
-
-    @Override
-    //??
-    public void removeSailingServers(Set<String> namesOfSailingServersToRemove) throws Exception {
-        getSecurityService().checkCurrentUserUpdatePermission(getServerInfo());
-        for (String serverName : namesOfSailingServersToRemove) {
-            getService().apply(new RemoveRemoteSailingServerReference(serverName));
-        }
-    }
-
-    @Override
-    //??
-    public RemoteSailingServerReferenceDTO addRemoteSailingServerReference(RemoteSailingServerReferenceDTO sailingServer) throws MalformedURLException {
-        getSecurityService().checkCurrentUserUpdatePermission(getServerInfo());
-        final String expandedURL;
-        if (sailingServer.getUrl().contains("//")) {
-            expandedURL = sailingServer.getUrl();
-        } else {
-            expandedURL = "https://" + sailingServer.getUrl();
-        }
-        URL serverURL = new URL(expandedURL);
-        RemoteSailingServerReference serverRef = getService().apply(new AddRemoteSailingServerReference(sailingServer.getName(), serverURL));
-        com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception> eventsOrException = getService().updateRemoteServerEventCacheSynchronously(serverRef);
-        return createRemoteSailingServerReferenceDTO(serverRef, eventsOrException);
-        
     }
 
     @Override
@@ -6231,7 +6206,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-  //READ
     public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
         ShardingType identifiedShardingType = null;
         try {
@@ -6778,14 +6752,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 waypointTemplate.getPassingInstruction());
     }
 
-    @Override
-    //READ
-    public void removeCourseTemplates(Collection<UUID> courseTemplateUuids) {
-        for (UUID uuid : courseTemplateUuids) {
-            getSharedSailingData().deleteCourseTemplate(getSharedSailingData().getCourseTemplateById(uuid));
-        }
-    }
-
     //READ
     protected WaypointTemplate convertToWaypointTemplate(WaypointTemplateDTO waypointTemplate, final MarkRolePairFactory markRolePairFactory) {
         final List<MarkRole> resolvedMarkRoles = waypointTemplate.getMarkRolesForControlPoint().stream()
@@ -6839,5 +6805,27 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         }
         return result;
     
+    }
+
+    @Override
+    public boolean canSliceRace(RegattaAndRaceIdentifier raceIdentifier) {
+        final Regatta regatta = getService().getRegattaByName(raceIdentifier.getRegattaName());
+        final Leaderboard regattaLeaderboard = getService().getLeaderboardByName(raceIdentifier.getRegattaName());
+        final DynamicTrackedRace trackedRace = getService().getTrackedRace(raceIdentifier);
+        getSecurityService().checkCurrentUserUpdatePermission(raceIdentifier);
+        getSecurityService().checkCurrentUserUpdatePermission(regattaLeaderboard);
+        getSecurityService().checkCurrentUserUpdatePermission(regatta);
+    
+        final boolean result;
+        if (regatta == null || !(regattaLeaderboard instanceof RegattaLeaderboard) || trackedRace == null
+                || trackedRace.getStartOfTracking() == null || !isSmartphoneTrackingEnabled(trackedRace)) {
+            result = false;
+        } else {
+            final Pair<RaceColumn, Fleet> raceColumnAndFleetOfRaceToSlice = regattaLeaderboard
+                    .getRaceColumnAndFleet(trackedRace);
+            result = (raceColumnAndFleetOfRaceToSlice != null); // is the TrackedRace associated to the given
+                                                                // RegattaLeaderboard?
+        }
+        return result;
     }
 }

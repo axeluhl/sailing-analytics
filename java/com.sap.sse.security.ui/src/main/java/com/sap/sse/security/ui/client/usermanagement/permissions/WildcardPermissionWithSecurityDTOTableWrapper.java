@@ -77,7 +77,7 @@ public class WildcardPermissionWithSecurityDTOTableWrapper extends
         userActionColumn.addAction(ACTION_DELETE, DELETE, selectedPermission -> {
             UserDTO selectedObject = userSelectionModel.getSelectedObject();
             if (selectedObject != null) {
-                userService.getUserManagementService().removePermissionFromUser(selectedObject.getName(),
+                userService.getUserManagementWriteService().removePermissionFromUser(selectedObject.getName(),
                         selectedPermission, new AsyncCallback<SuccessInfo>() {
                             @Override
                             public void onFailure(Throwable caught) {

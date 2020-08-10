@@ -146,6 +146,7 @@ public class BoatClassImageResolver {
         boatClassIconsMap.put(BoatClassMasterdata.VENT_D_OUEST.getDisplayName(), imageResources.VentdOuestIcon());
         boatClassIconsMap.put(BoatClassMasterdata.VIPER_640.getDisplayName(), imageResources.Viper640Icon());
         boatClassIconsMap.put(BoatClassMasterdata.VX_ONE.getDisplayName(), imageResources.VXOneIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.WAYFARER.getDisplayName(), imageResources.WayfarerIcon());
         boatClassIconsMap.put(BoatClassMasterdata.WETA.getDisplayName(), imageResources.WetaIcon());
         boatClassIconsMap.put(BoatClassMasterdata.X_99.getDisplayName(), imageResources.X99Icon());
         boatClassIconsMap.put(BoatClassMasterdata.RUNNING.getDisplayName(), imageResources.RunningIcon());

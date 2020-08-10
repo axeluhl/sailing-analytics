@@ -1,5 +1,8 @@
 package com.sap.sailing.server.gateway.jaxrs.api;
 
+import java.util.List;
+import java.util.UUID;
+
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -19,8 +22,8 @@ import com.sap.sailing.server.gateway.serialization.impl.LeaderboardGroupBaseJso
 import com.sap.sailing.server.gateway.serialization.impl.LeaderboardSearchResultJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.TrackingConnectorInfoJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.VenueJsonSerializer;
+import com.sap.sailing.server.interfaces.KeywordQueryWithOptionalEventQualification;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
 
 @Path("/v1/search")
@@ -35,14 +38,17 @@ public class SearchResource extends AbstractSailingServerResource {
                 leaderboardGroupSerializer);
     }
     
-    private Result<LeaderboardSearchResult> search(KeywordQuery query) {
+    private Result<LeaderboardSearchResult> search(KeywordQueryWithOptionalEventQualification query) {
         return getService().search(query);
     }
     
     @GET
     @Produces("application/json;charset=UTF-8")
-    public Response search(@QueryParam("q") String keywords) {
-        KeywordQuery query = new KeywordQuery(Util.splitAlongWhitespaceRespectingDoubleQuotedPhrases(keywords));
+    public Response search(@QueryParam("q") String keywords, @QueryParam("include") Boolean include,
+            @QueryParam("eventId") List<UUID> eventIds) {
+        KeywordQueryWithOptionalEventQualification query = new KeywordQueryWithOptionalEventQualification(
+                Util.splitAlongWhitespaceRespectingDoubleQuotedPhrases(keywords), include == null ? false : include,
+                eventIds);
         Iterable<LeaderboardSearchResult> searchResults = search(query).getHits();
         JSONArray jsonSearchResults = new JSONArray();
         for (LeaderboardSearchResult searchResult : searchResults) {

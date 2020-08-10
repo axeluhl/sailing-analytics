@@ -86,7 +86,8 @@ public abstract class NonPerformanceCurveRankingMetric extends AbstractRankingMe
                 final Duration actualRaceDuration = startOfRace.until(timePoint);
                 final Waypoint finish = getTrackedRace().getRace().getCourse().getLastWaypoint();
                 for (Competitor competitor : getCompetitors()) {
-                    final MarkPassing finishMarkPassing = getTrackedRace().getMarkPassing(competitor, finish);
+                    // accommodate also for the possibility of an empty course (finish==null)
+                    final MarkPassing finishMarkPassing =  finish == null ? null : getTrackedRace().getMarkPassing(competitor, finish);
                     final Duration timeElapsed;
                     if (finishMarkPassing != null && finishMarkPassing.getTimePoint().before(timePoint)) {
                         // competitor has already finished the race at timePoint; so the time elapsed for that competitor stops counting
@@ -198,8 +199,8 @@ public abstract class NonPerformanceCurveRankingMetric extends AbstractRankingMe
                 // when "who" has sailed (or is extrapolated) beyond the end of the leg without having received a mark passing.
                 // In this case we want to assume that it will take "who" approximately that long again to reach back to
                 // the waypoint to actually pass it; so we use the absolute duration instead.
-                final Duration toEndOfLegOrTo = getPredictedDurationToEndOfLegOrTo(timePoint, legWho, legWho.getTrackedLeg().getTrackedLeg(to), cache).
-                        abs();
+                final Duration signedDuration = getPredictedDurationToEndOfLegOrTo(timePoint, legWho, legWho.getTrackedLeg().getTrackedLeg(to), cache);
+                final Duration toEndOfLegOrTo = signedDuration == null ? null : signedDuration.abs();
                 if (toEndOfLegOrTo == null) {
                     result = null;
                 } else {

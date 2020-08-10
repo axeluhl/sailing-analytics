@@ -268,7 +268,6 @@ public class RegattasResource extends AbstractSailingServerResource {
     @Produces("application/json;charset=UTF-8")
     public Response getRegattas() {
         RegattaJsonSerializer regattaJsonSerializer = new RegattaJsonSerializer(getSecurityService());
-
         JSONArray regattasJson = new JSONArray();
         for (Regatta regatta : getService().getAllRegattas()) {
             if (getSecurityService().hasCurrentUserReadPermission(regatta)) {
@@ -293,7 +292,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 getSecurityService().checkCurrentUserReadPermission(regatta);
             }
             SeriesJsonSerializer seriesJsonSerializer = new SeriesJsonSerializer(new FleetJsonSerializer(
-                    new ColorJsonSerializer()));
+                    new ColorJsonSerializer()), getService());
             JsonSerializer<Regatta> regattaSerializer = new RegattaJsonSerializer(seriesJsonSerializer, null, null, getSecurityService());
             JSONObject serializedRegatta = regattaSerializer.serialize(regatta);
             response = Response.ok(streamingOutput(serializedRegatta)).build();
@@ -351,7 +350,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                     buoyZoneRadiusInHullLengths, useStartTimeInference, controlTrackingFromStartAndFinishTimes,
                     autoRestartTrackingUponCompetitorSetChange, registrationLinkSecret, competitorRegistrationType));
             SeriesJsonSerializer seriesJsonSerializer = new SeriesJsonSerializer(
-                    new FleetJsonSerializer(new ColorJsonSerializer()));
+                    new FleetJsonSerializer(new ColorJsonSerializer()), getService());
             JsonSerializer<Regatta> regattaSerializer = new RegattaJsonSerializer(seriesJsonSerializer, null, null,
                     getSecurityService());
             JSONObject serializedRegatta = regattaSerializer.serialize(regatta);
