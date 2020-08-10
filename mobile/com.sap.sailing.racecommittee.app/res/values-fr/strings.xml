@@ -568,4 +568,9 @@
     <string name="finishing_revoke">"Annuler"</string>
     <string name="error_revoke_finished">"Vous ne pouvez pas annuler l\'heure de fermeture de la ligne d\'arrivée."</string>
     <string name="error_revoke_finishing">"Vous ne pouvez pas annuler l\'heure d\'arrivée du premier."</string>
+    <string-array name="sort_regattas">
+        <item>by Name</item>
+        <item>by Date</item>
+    </string-array>
+    <string name="sort_regattas_prompt">Sort by</string>
 </resources>

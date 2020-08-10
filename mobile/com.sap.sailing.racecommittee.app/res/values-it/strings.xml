@@ -568,4 +568,9 @@
     <string name="finishing_revoke">"Revoca"</string>
     <string name="error_revoke_finished">"Impossibile revocare l\'ora di conclusione"</string>
     <string name="error_revoke_finishing">"Impossibile revocare l\'ora di fine"</string>
+    <string-array name="sort_regattas">
+        <item>by Name</item>
+        <item>by Date</item>
+    </string-array>
+    <string name="sort_regattas_prompt">Sort by</string>
 </resources>

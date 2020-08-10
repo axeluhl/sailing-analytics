@@ -540,4 +540,9 @@
     <string name="finishing_revoke">Widerrufen</string>
     <string name="error_revoke_finished">Widerruf des Zeitpunktes des Rennendes nicht möglich</string>
     <string name="error_revoke_finishing">Widerruf des Zeitpunktes des Beginns des Zieleinlaufs nicht möglich</string>
+    <string-array name="sort_regattas">
+        <item>by Name</item>
+        <item>by Date</item>
+    </string-array>
+    <string name="sort_regattas_prompt">Sort by</string>
 </resources>

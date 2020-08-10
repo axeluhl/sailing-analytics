@@ -568,4 +568,8 @@
     <string name="finishing_revoke">"撤销"</string>
     <string name="error_revoke_finished">"无法撤销完成时间"</string>
     <string name="error_revoke_finishing">"无法撤销结束时间"</string>
+    <string-array name="sort_regattas">
+        <item>by Name</item>
+        <item>by Date</item>
+    </string-array>
 </resources>

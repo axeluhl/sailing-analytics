@@ -568,4 +568,9 @@
     <string name="finishing_revoke">"取消"</string>
     <string name="error_revoke_finished">"フィニッシュ時刻の取消ができません"</string>
     <string name="error_revoke_finishing">"フィニッシュ予定時刻の取消ができません"</string>
+    <string-array name="sort_regattas">
+        <item>by Name</item>
+        <item>by Date</item>
+    </string-array>
+    <string name="sort_regattas_prompt">Sort by</string>
 </resources>

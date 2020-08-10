@@ -9,7 +9,9 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Spinner;
 
 import com.sap.sailing.android.shared.data.http.UnauthorizedException;
 import com.sap.sailing.domain.base.EventBase;
@@ -26,11 +28,14 @@ import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.FragmentAttachedDi
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.LoadFailedDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
 import com.sap.sse.common.Named;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
@@ -42,6 +47,12 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
     private ItemSelectedListener<T> listener;
     private CheckedItemAdapter listAdapter;
     private int mSelectedIndex = -1;
+    private enum ItemsSort {
+        Name,
+        Date
+    }
+
+    private ItemsSort itemsSort = ItemsSort.Name;
 
     protected abstract ItemSelectedListener<T> attachListener(Activity activity);
 
@@ -50,6 +61,10 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
 
     private void loadItems() {
         setupLoader();
+    }
+
+    boolean isSupportsSorting(){
+        return false;
     }
 
     @Override
@@ -64,6 +79,28 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
             if (mSelectedIndex >= 0) {
                 listAdapter.setCheckedPosition(mSelectedIndex);
             }
+        }
+        if (isSupportsSorting()) {
+            final LayoutInflater layoutInflater = LayoutInflater.from(requireContext());
+            final View header = layoutInflater.inflate(R.layout.list_header, null, false);
+            final Spinner sortOrder = header.findViewById(R.id.list_order);
+            sortOrder.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    if (position == 0) {
+                        itemsSort = ItemsSort.Name;
+                    } else {
+                        itemsSort = ItemsSort.Date;
+                    }
+                    displaySorted();
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+
+                }
+            });
+            getListView().addHeaderView(header);
         }
         getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         setListAdapter(listAdapter);
@@ -124,17 +161,35 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
         // TODO: Quickfix for 2889
         if (data != null) {
             namedList.addAll(data);
-            Collections.sort(namedList, new NaturalNamedComparator<T>());
-            for (Named named : namedList) {
-                CheckedItem item = new CheckedItem();
-                item.setText(named.getName());
-                item.setSubtext(getEventSubText(named));
-                checkedItems.add(item);
-            }
-            listAdapter.notifyDataSetChanged();
+            displaySorted();
         }
 
         showProgressBar(false);
+    }
+
+    private void displaySorted() {
+        checkedItems.clear();
+        switch (itemsSort) {
+            case Name:
+                Collections.sort(namedList, new NaturalNamedComparator<T>());
+                break;
+            case Date:
+                Collections.sort(namedList, new Comparator<Named>() {
+                    @Override
+                    public int compare(Named o1, Named o2) {
+                        return getEventDate(o2).compareTo(getEventDate(o1));
+                    }
+                });
+                break;
+        }
+
+        for (Named named : namedList) {
+            CheckedItem item = new CheckedItem();
+            item.setText(named.getName());
+            item.setSubtext(getEventSubText(named));
+            checkedItems.add(item);
+        }
+        listAdapter.notifyDataSetChanged();
     }
 
     private String getEventSubText(Named named) {
@@ -165,6 +220,17 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
             }
         }
         return subText;
+    }
+
+    private TimePoint getEventDate(Named named) {
+
+        if (named instanceof EventBase) {
+            EventBase eventBase = (EventBase) named;
+            if (eventBase.getStartDate() != null) {
+                return eventBase.getStartDate();
+            }
+        }
+        return new MillisecondsTimePoint(0);
     }
 
     @Override

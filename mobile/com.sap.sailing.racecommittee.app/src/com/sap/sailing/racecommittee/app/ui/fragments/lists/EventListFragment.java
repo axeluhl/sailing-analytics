@@ -36,6 +36,11 @@ public class EventListFragment extends NamedListFragment<EventBase> {
     }
 
     @Override
+    boolean isSupportsSorting() {
+        return true;
+    }
+
+    @Override
     public DialogResultListener getListener() {
         return (DialogResultListener) getActivity();
     }
