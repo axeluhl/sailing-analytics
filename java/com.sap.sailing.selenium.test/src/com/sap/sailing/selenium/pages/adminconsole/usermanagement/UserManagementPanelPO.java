@@ -14,6 +14,8 @@ import com.sap.sailing.selenium.pages.gwt.GenericCellTablePO;
 public class UserManagementPanelPO extends PageArea {
     @FindBy(how = BySeleniumId.class, using = "UsersTable")
     private WebElement userTable;
+    @FindBy(how = BySeleniumId.class, using = "CreateUserButton")
+    private WebElement createUserButton;
 
     public UserManagementPanelPO(WebDriver driver, WebElement element) {
         super(driver, element);
@@ -23,16 +25,14 @@ public class UserManagementPanelPO extends PageArea {
         return new GenericCellTablePO<>(this.driver, this.userTable, DataEntryPO.class);
     }
 
-    private DataEntryPO findUser(final String username) {
+    public DataEntryPO findUser(final String username) {
         final CellTablePO<DataEntryPO> table = getUserTable();
-
         for (DataEntryPO entry : table.getEntries()) {
             final String name = entry.getColumnContent("Username");
             if (username.equals(name)) {
                 return entry;
             }
         }
-
         return null;
     }
 
@@ -46,10 +46,16 @@ public class UserManagementPanelPO extends PageArea {
         }
         return null;
     }
+    
+    public CreateUserDialogPO getCreateUserDialog() {
+        createUserButton.click();
+        final WebElement dialog = findElementBySeleniumId(this.driver, "CreateUserDialog");
+        return new CreateUserDialogPO(this.driver, dialog);
+    }
 
     public ChangePasswordDialogPO getChangePasswordDialog() {
         final WebElement dialog = findElementBySeleniumId(this.driver, "ChangePasswordDialog");
         return new ChangePasswordDialogPO(this.driver, dialog);
     }
-
+    
 }

@@ -62,9 +62,10 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
                 /* multiSelection */ true, /* enablePager */ true, tableResources);
         buttonPanel.addUnsecuredAction(stringMessages.refresh(),
                 () -> userList.refreshUserList((Callback<Iterable<UserDTO>, Throwable>) null, false));
-        buttonPanel.addCreateActionWithoutServerCreateObjectPermissionCheck(stringMessages.createUser(),
+        Button createUserButton = buttonPanel.addCreateActionWithoutServerCreateObjectPermissionCheck(stringMessages.createUser(),
                 () -> new CreateUserDialog(stringMessages, userManagementWriteService, userCreatedHandlers, userService)
                         .show());
+        createUserButton.ensureDebugId("CreateUserButton");
         userNameTextbox = buttonPanel.addUnsecuredTextBox(stringMessages.username());
         final Button editRolesAndPermissionsForUserButton = buttonPanel.addUnsecuredAction(
                 stringMessages.editRolesAndPermissionsForUser(""),
