@@ -10,16 +10,16 @@ import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.WebElement;
 
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.selenium.api.core.ApiContext;
 import com.sap.sailing.selenium.api.event.EventApi;
 import com.sap.sailing.selenium.api.event.SecurityApi;
-import com.sap.sailing.selenium.pages.adminconsole.AclPopupPO;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.event.EventConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.event.EventConfigurationPanelPO.EventEntryPO;
+import com.sap.sailing.selenium.pages.adminconsole.security.AclActionInputPO;
+import com.sap.sailing.selenium.pages.adminconsole.security.AclPopupPO;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class AclRevokeAnonymousTest extends AbstractSeleniumTest {
@@ -51,8 +51,8 @@ public class AclRevokeAnonymousTest extends AbstractSeleniumTest {
         EventEntryPO eventEntry = eventPanel.getEventEntry(EVENT_NAME);
         AclPopupPO aclPopup = eventEntry.openAclPopup();
         aclPopup.addUserGroup(""); // add empty user group -> anonymous group
-        WebElement deniedInput = aclPopup.getDeniedActionsInput();
-        WebElement allowedInput = aclPopup.getAllowedActionsInput();
+        AclActionInputPO deniedInput = aclPopup.getDeniedActionsInput();
+        AclActionInputPO allowedInput = aclPopup.getAllowedActionsInput();
         Assert.assertThat(deniedInput.isEnabled(), Matchers.equalTo(false));
         Assert.assertThat(allowedInput.isEnabled(), Matchers.equalTo(true));
         

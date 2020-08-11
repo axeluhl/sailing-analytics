@@ -1,4 +1,4 @@
-package com.sap.sailing.selenium.pages.adminconsole;
+package com.sap.sailing.selenium.pages.adminconsole.security;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -23,14 +23,12 @@ public class AclPopupPO extends PageArea {
         driver.findElement(new BySeleniumId(ADD_USER_GROUP_BUTTON)).click();
     }
 
-    public WebElement getDeniedActionsInput() {
-        WebElement parent = context.findElement(new BySeleniumId(DENIED_ACTIONS_CONTAINER));
-        return parent.findElement(new BySeleniumId(INPUT_SUGGEST_BOX));
+    public AclActionInputPO getDeniedActionsInput() {
+        return new AclActionInputPO(driver, context.findElement(new BySeleniumId(DENIED_ACTIONS_CONTAINER)));
     }
 
-    public WebElement getAllowedActionsInput() {
-        WebElement parent = context.findElement(new BySeleniumId(ALLOWED_ACTIONS_CONTAINER));
-        return parent.findElement(new BySeleniumId(INPUT_SUGGEST_BOX));
+    public AclActionInputPO getAllowedActionsInput() {
+        return new AclActionInputPO(driver, context.findElement(new BySeleniumId(ALLOWED_ACTIONS_CONTAINER)));
     }
 
 }
