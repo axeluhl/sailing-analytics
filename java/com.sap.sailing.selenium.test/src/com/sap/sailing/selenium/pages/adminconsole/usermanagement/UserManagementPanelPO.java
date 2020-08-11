@@ -58,4 +58,16 @@ public class UserManagementPanelPO extends PageArea {
         return new ChangePasswordDialogPO(this.driver, dialog);
     }
     
+    public UserRoleDefinitionPanelPO getUserRolesPO() {
+        final WebElement userRoles = findElementBySeleniumId(this.driver, "UserRoleDefinitionPanel");
+        return new UserRoleDefinitionPanelPO(this.driver, userRoles);
+    }
+    
+    public void selectUser(String name) {
+        final CellTablePO<DataEntryPO> table = getUserTable();
+        final DataEntryPO findUser = findUser(name);
+        if(findUser != null) {
+            table.selectEntry(findUser);
+        }
+    }
 }

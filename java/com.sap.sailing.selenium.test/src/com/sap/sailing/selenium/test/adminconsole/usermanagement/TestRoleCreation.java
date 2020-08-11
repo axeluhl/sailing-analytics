@@ -7,14 +7,14 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
-import com.sap.sailing.selenium.pages.adminconsole.usermanagement.CreateUserDialogPO;
 import com.sap.sailing.selenium.pages.adminconsole.usermanagement.UserManagementPanelPO;
+import com.sap.sailing.selenium.pages.adminconsole.usermanagement.UserRoleDefinitionPanelPO;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
-public class TestUserCreation extends AbstractSeleniumTest {
-    private static final String TEST_USER_PASSWORD = "test1";
-    private static final String TEST_USER_MAIL = "test@test.com";
-    private static final String TEST_USER_NAME = "testUser";
+public class TestRoleCreation extends AbstractSeleniumTest {
+    private static final String TEST_USER_NAME = "admin";
+    private static final String TEST_ROLE = "spectator";
+    private static final String TEST_GROUP = "";
 
     @Override
     @Before
@@ -26,12 +26,14 @@ public class TestUserCreation extends AbstractSeleniumTest {
     @Test
     public void testOpenCreateBoatDialog() {
         final UserManagementPanelPO userManagementPanel = goToUserManagementPanel();
-        assertNull(userManagementPanel.findUser(TEST_USER_NAME));
-        final CreateUserDialogPO createUserdialog = userManagementPanel.getCreateUserDialog();
-        assertNotNull(createUserdialog);
-        createUserdialog.setValues(TEST_USER_NAME, TEST_USER_MAIL, TEST_USER_PASSWORD, TEST_USER_PASSWORD);
-        createUserdialog.clickOkButtonOrThrow();
         assertNotNull(userManagementPanel.findUser(TEST_USER_NAME));
+        userManagementPanel.selectUser(TEST_USER_NAME);
+        final UserRoleDefinitionPanelPO userRolesPO = userManagementPanel.getUserRolesPO();
+        assertNull(userRolesPO.findRole(TEST_ROLE));
+        userRolesPO.enterNewRoleValues(TEST_ROLE, null, TEST_USER_NAME);
+        userRolesPO.clickAddButtonOrThrow();
+        userManagementPanel.selectUser(TEST_USER_NAME);
+        assertNotNull(userRolesPO.findRole(TEST_ROLE + ":"+ TEST_GROUP + ":" + TEST_USER_NAME));
     }
 
     private UserManagementPanelPO goToUserManagementPanel() {
