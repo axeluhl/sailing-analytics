@@ -70,4 +70,9 @@ public class UserManagementPanelPO extends PageArea {
             table.selectEntry(findUser);
         }
     }
+
+    public WildcardPermissionPanelPO getUserPermissionsPO() {
+        final WebElement userRoles = findElementBySeleniumId(this.driver, "WildcardPermissionPanel");
+        return new WildcardPermissionPanelPO(this.driver, userRoles);
+    }
 }
