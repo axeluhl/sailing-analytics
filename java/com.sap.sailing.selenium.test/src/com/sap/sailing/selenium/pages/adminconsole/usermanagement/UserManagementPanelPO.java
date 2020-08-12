@@ -16,6 +16,12 @@ public class UserManagementPanelPO extends PageArea {
     private WebElement userTable;
     @FindBy(how = BySeleniumId.class, using = "CreateUserButton")
     private WebElement createUserButton;
+    
+    @FindBy(how = BySeleniumId.class, using = "UserNameTextbox")
+    private WebElement userNameTextbox;
+    
+    @FindBy(how = BySeleniumId.class, using = "EditRolesAndPermissionsForUserButton")
+    private WebElement editRolesAndPermissionsForUserButton;
 
     public UserManagementPanelPO(WebDriver driver, WebElement element) {
         super(driver, element);
@@ -80,5 +86,12 @@ public class UserManagementPanelPO extends PageArea {
     public WildcardPermissionPanelPO getUserPermissionsPO() {
         final WebElement userRoles = findElementBySeleniumId(this.driver, "WildcardPermissionPanel");
         return new WildcardPermissionPanelPO(this.driver, userRoles);
+    }
+    
+    public EditRolesAndPermissionsForUserDialogPO openEditRolesAndPermissionsDialogForUser(String username) {
+        userNameTextbox.sendKeys(username);
+        editRolesAndPermissionsForUserButton.click();
+        waitForElement("EditUserRolesAndPermissionsDialog");
+        return new EditRolesAndPermissionsForUserDialogPO(driver, findElementBySeleniumId(this.driver, "EditUserRolesAndPermissionsDialog"));
     }
 }

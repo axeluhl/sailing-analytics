@@ -67,9 +67,11 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
                         .show());
         createUserButton.ensureDebugId("CreateUserButton");
         userNameTextbox = buttonPanel.addUnsecuredTextBox(stringMessages.username());
+        userNameTextbox.ensureDebugId("UserNameTextbox");
         final Button editRolesAndPermissionsForUserButton = buttonPanel.addUnsecuredAction(
                 stringMessages.editRolesAndPermissionsForUser(""),
                 () -> showRolesAndPermissionsEditDialog(userService, tableResources, errorReporter));
+        editRolesAndPermissionsForUserButton.ensureDebugId("EditRolesAndPermissionsForUserButton");
         userNameTextbox.addKeyUpHandler(
                 e -> editRolesAndPermissionsForUserButton.setEnabled(!userNameTextbox.getText().isEmpty()));
         editRolesAndPermissionsForUserButton.setEnabled(false);
