@@ -70,7 +70,7 @@ public class UserManagementPanelPO extends PageArea {
         return new ChangePasswordDialogPO(this.driver, dialog);
     }
     
-    public UserRoleDefinitionPanelPO getUserRolesPO() {
+    public UserRoleDefinitionPanelPO getUserRoles() {
         return waitForChildPO(UserRoleDefinitionPanelPO::new, "UserRoleDefinitionPanel");
     }
     
@@ -82,7 +82,7 @@ public class UserManagementPanelPO extends PageArea {
         }
     }
 
-    public WildcardPermissionPanelPO getUserPermissionsPO() {
+    public WildcardPermissionPanelPO getUserPermissions() {
         return waitForChildPO(WildcardPermissionPanelPO::new, "WildcardPermissionPanel");
     }
     

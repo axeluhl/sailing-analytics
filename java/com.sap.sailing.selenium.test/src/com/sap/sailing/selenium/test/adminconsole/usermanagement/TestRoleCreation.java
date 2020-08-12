@@ -28,7 +28,7 @@ public class TestRoleCreation extends AbstractSeleniumTest {
         final UserManagementPanelPO userManagementPanel = goToUserManagementPanel();
         assertNotNull(userManagementPanel.findUser(TEST_USER_NAME));
         userManagementPanel.selectUser(TEST_USER_NAME);
-        final UserRoleDefinitionPanelPO userRolesPO = userManagementPanel.getUserRolesPO();
+        final UserRoleDefinitionPanelPO userRolesPO = userManagementPanel.getUserRoles();
         assertNull(userRolesPO.findRole(TEST_ROLE));
         userRolesPO.enterNewRoleValues(TEST_ROLE, null, TEST_USER_NAME);
         userRolesPO.clickAddButtonOrThrow();

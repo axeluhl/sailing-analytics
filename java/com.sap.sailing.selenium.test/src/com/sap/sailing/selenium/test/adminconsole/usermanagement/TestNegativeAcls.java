@@ -53,7 +53,7 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         // user1 may only add other users' tenants to an ACL if this group is readable
         // adding permission USER_GROUP:READ:* just makes all groups readable to user 1
         userManagementPanel.selectUser(USER1_NAME);
-        userManagementPanel.getUserPermissionsPO().addPermission(USER_GROUP_READ_PERMISSION);
+        userManagementPanel.getUserPermissions().addPermission(USER_GROUP_READ_PERMISSION);
         
         // FIXME hack to wait until the permission is saved -> please implement proper wait
         // at the moment, user management panel loses selection when saving a permission

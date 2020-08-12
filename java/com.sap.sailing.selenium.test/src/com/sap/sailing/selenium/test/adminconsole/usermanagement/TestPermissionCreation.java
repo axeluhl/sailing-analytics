@@ -27,7 +27,7 @@ public class TestPermissionCreation extends AbstractSeleniumTest {
         final UserManagementPanelPO userManagementPanel = goToUserManagementPanel();
         assertNotNull(userManagementPanel.findUser(TEST_USER_NAME));
         userManagementPanel.selectUser(TEST_USER_NAME);
-        final WildcardPermissionPanelPO wildcardPermissionPanelPO = userManagementPanel.getUserPermissionsPO();
+        final WildcardPermissionPanelPO wildcardPermissionPanelPO = userManagementPanel.getUserPermissions();
         assertNull(wildcardPermissionPanelPO.findPermission(TEST_PERMISSION));
         wildcardPermissionPanelPO.enterNewPermissionValue(TEST_PERMISSION);
         wildcardPermissionPanelPO.clickAddButtonOrThrow();
