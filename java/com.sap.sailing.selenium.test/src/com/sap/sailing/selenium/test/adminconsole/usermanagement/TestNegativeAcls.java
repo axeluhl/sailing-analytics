@@ -15,6 +15,7 @@ import com.sap.sailing.selenium.pages.adminconsole.security.AclPopupPO;
 import com.sap.sailing.selenium.pages.adminconsole.usermanagement.EditRolesAndPermissionsForUserDialogPO;
 import com.sap.sailing.selenium.pages.adminconsole.usermanagement.UserManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.usermanagement.UserRoleDefinitionPanelPO;
+import com.sap.sailing.selenium.pages.adminconsole.usermanagement.WildcardPermissionPanelPO;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 /**
@@ -30,6 +31,7 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
     private static final String USER_ROLE = "user";
     private static final String UPDATE_ACTION = "UPDATE";
     private static final String USER_GROUP_READ_PERMISSION = "USER_GROUP:READ:*";
+    private static final String EVENT_ALL_PERMISSION_PREFIX = "EVENT:*:";
 
     @Override
     @Before
@@ -70,17 +72,7 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         setUpAuthenticatedSession(getWebDriver(), USER1_NAME, USER1_NAME);
         // user1 creates an event
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
-        final EventConfigurationPanelPO eventsPanel = adminConsole.goToEvents();
-        eventsPanel.createEmptyEvent(EVENT_NAME, EVENT_NAME, EVENT_NAME,
-                Date.from(ZonedDateTime.now().minus(Duration.ofDays(1l)).toInstant()),
-                Date.from(ZonedDateTime.now().plus(Duration.ofDays(1l)).toInstant()), true);
-        EventEntryPO eventEntry = eventsPanel.getEventEntry(EVENT_NAME);
-        
-        // user1 adds a negative ACL for user2-tenant
-        final AclPopupPO aclPopup = eventEntry.openAclPopup();
-        aclPopup.addUserGroup(USER2_TENANT);
-        aclPopup.getDeniedActionsInput().addAction(UPDATE_ACTION);
-        aclPopup.clickOkButtonOrThrow();
+        addEventWithNegativeAclForGroup(adminConsole, USER2_TENANT);
         
         // user1 gives user2 the user role for objects owned by user1
         UserManagementPanelPO userManagement = adminConsole.goToUserManagement();
@@ -102,10 +94,57 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         userRoles.clickAddButtonAndExpectPermissionError();
     }
     
+    @Test
+    public void testUserWithNegativeAclCantGiveAPermissionToAnotherUser() {
+        clearSession(getWebDriver());
+        setUpAuthenticatedSession(getWebDriver(), USER1_NAME, USER1_NAME);
+        // user1 creates an event
+        AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
+        String eventId = addEventWithNegativeAclForGroup(adminConsole, USER2_TENANT);
+        String eventAllPermission = EVENT_ALL_PERMISSION_PREFIX + eventId;
+        
+        // user1 gives user2 the permission "EVENT:*:<event-id>"
+        UserManagementPanelPO userManagement = adminConsole.goToUserManagement();
+        EditRolesAndPermissionsForUserDialogPO editRolesAndPermissionsDialogForUser = userManagement.openEditRolesAndPermissionsDialogForUser(USER2_NAME);
+        WildcardPermissionPanelPO userPermissions = editRolesAndPermissionsDialogForUser.getUserPermissions();
+        userPermissions.addPermission(eventAllPermission);
+        editRolesAndPermissionsDialogForUser.clickOkButtonOrThrow();
+        
+        clearSession(getWebDriver());
+        setUpAuthenticatedSession(getWebDriver(), USER2_NAME, USER2_NAME);
+        // user2 tries to give the permission "EVENT:*:<event-id>" to user3
+        userManagement = AdminConsolePage.goToPage(getWebDriver(), getContextRoot()).goToUserManagement();
+        editRolesAndPermissionsDialogForUser = userManagement.openEditRolesAndPermissionsDialogForUser(USER3_NAME);
+        userPermissions = editRolesAndPermissionsDialogForUser.getUserPermissions();
+        userPermissions.enterNewPermissionValue(eventAllPermission);
+        // this is expected to fail because the negative ACL on the event
+        // causes user2 to not have all permissions implied by the wildcard permission
+        userPermissions.clickAddButtonAndExpectPermissionError();
+    }
+    
     // TODO additional test cases required for:
     // adding a User to a UserGroup that has a Role associated
-    // adding a direct permission to a user
     // adding a Role to a UserGroup
     // adding a Permission to a Role that is granted to a user in a specific qualification
     // adding a Permission to a Role that is already added to a UserGroup
+
+    /**
+     * @return the UUID of the newly created event.
+     */
+    private String addEventWithNegativeAclForGroup(AdminConsolePage adminConsole, String groupToUseForNegativeAcl) {
+        final EventConfigurationPanelPO eventsPanel = adminConsole.goToEvents();
+        eventsPanel.createEmptyEvent(EVENT_NAME, EVENT_NAME, EVENT_NAME,
+                Date.from(ZonedDateTime.now().minus(Duration.ofDays(1l)).toInstant()),
+                Date.from(ZonedDateTime.now().plus(Duration.ofDays(1l)).toInstant()), true);
+        EventEntryPO eventEntry = eventsPanel.getEventEntry(EVENT_NAME);
+        final String eventUUID = eventEntry.getUUID();
+        
+        // user1 adds a negative ACL for user2-tenant
+        final AclPopupPO aclPopup = eventEntry.openAclPopup();
+        aclPopup.addUserGroup(groupToUseForNegativeAcl);
+        aclPopup.getDeniedActionsInput().addAction(UPDATE_ACTION);
+        aclPopup.clickOkButtonOrThrow();
+        
+        return eventUUID;
+    }
 }
