@@ -17,6 +17,10 @@ import com.sap.sailing.selenium.pages.adminconsole.usermanagement.UserManagement
 import com.sap.sailing.selenium.pages.adminconsole.usermanagement.UserRoleDefinitionPanelPO;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
+/**
+ * Test cases to ensure that a negative ACL prevents a permission to be given if the ACL affects the permission in
+ * question. There are several cases where such a negative ACL may affect a meta permission check.
+ */
 public class TestNegativeAcls extends AbstractSeleniumTest {
     private static final String USER1_NAME = "user1";
     private static final String USER2_NAME = "user2";
@@ -44,11 +48,15 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         userManagementPanel.createUserWithEualUsernameAndPassword(USER2_NAME);
         userManagementPanel.createUserWithEualUsernameAndPassword(USER3_NAME);
         
-        // user1 may only add other users' tenant to an ACL if this group is readable
+        // user1 may only add other users' tenants to an ACL if this group is readable
         // adding permission USER_GROUP:READ:* just makes all groups readable to user 1
         userManagementPanel.selectUser(USER1_NAME);
         userManagementPanel.getUserPermissionsPO().addPermission(USER_GROUP_READ_PERMISSION);
-        // FIXME hack, please implement proper wait
+        
+        // FIXME hack to wait until the permission is saved -> please implement proper wait
+        // at the moment, user management panel loses selection when saving a permission
+        // this in fact prevents to wait for the permission to appear in the permission CellTable
+        // after the UI is changed to keep selection, we could easily implement this using a FluentWait
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
@@ -60,16 +68,21 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
     public void testUserWithNegativeAclCantGiveARoleToAnotherUser() {
         clearSession(getWebDriver());
         setUpAuthenticatedSession(getWebDriver(), USER1_NAME, USER1_NAME);
+        // user1 creates an event
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         final EventConfigurationPanelPO eventsPanel = adminConsole.goToEvents();
         eventsPanel.createEmptyEvent(EVENT_NAME, EVENT_NAME, EVENT_NAME,
                 Date.from(ZonedDateTime.now().minus(Duration.ofDays(1l)).toInstant()),
                 Date.from(ZonedDateTime.now().plus(Duration.ofDays(1l)).toInstant()), true);
         EventEntryPO eventEntry = eventsPanel.getEventEntry(EVENT_NAME);
+        
+        // user1 adds a negative ACL for user2-tenant
         final AclPopupPO aclPopup = eventEntry.openAclPopup();
         aclPopup.addUserGroup(USER2_TENANT);
         aclPopup.getDeniedActionsInput().addAction(UPDATE_ACTION);
         aclPopup.clickOkButtonOrThrow();
+        
+        // user1 gives user2 the user role for objects owned by user1
         UserManagementPanelPO userManagement = adminConsole.goToUserManagement();
         EditRolesAndPermissionsForUserDialogPO openEditRolesAndPermissionsDialogForUser = userManagement.openEditRolesAndPermissionsDialogForUser(USER2_NAME);
         UserRoleDefinitionPanelPO userRoles = openEditRolesAndPermissionsDialogForUser.getUserRolesPO();
@@ -79,10 +92,13 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         
         clearSession(getWebDriver());
         setUpAuthenticatedSession(getWebDriver(), USER2_NAME, USER2_NAME);
+        // user2 tries to give the user role for objects owned by user1 to user3
         userManagement = AdminConsolePage.goToPage(getWebDriver(), getContextRoot()).goToUserManagement();
         openEditRolesAndPermissionsDialogForUser = userManagement.openEditRolesAndPermissionsDialogForUser(USER3_NAME);
         userRoles = openEditRolesAndPermissionsDialogForUser.getUserRolesPO();
         userRoles.enterNewRoleValues(USER_ROLE, "", USER1_NAME);
+        // this is expected to fail because the negative ACL on one of user1's events
+        // causes user 2 to not have all permissions implied by the user role
         userRoles.clickAddButtonAndExpectPermissionError();
     }
 }
