@@ -4,9 +4,9 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import com.sap.sailing.selenium.core.BySeleniumId;
-import com.sap.sailing.selenium.pages.PageArea;
+import com.sap.sailing.selenium.pages.common.DataEntryDialogPO;
 
-public class AclPopupPO extends PageArea {
+public class AclPopupPO extends DataEntryDialogPO {
 
     public static final String INPUT_SUGGEST_BOX = "InputSuggestBox";
     public static final String ALLOWED_ACTIONS_CONTAINER = "allowedActionsContainer";
