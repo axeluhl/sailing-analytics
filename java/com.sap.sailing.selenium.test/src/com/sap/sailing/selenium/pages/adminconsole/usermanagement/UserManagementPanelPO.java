@@ -70,9 +70,8 @@ public class UserManagementPanelPO extends PageArea {
         return new ChangePasswordDialogPO(this.driver, dialog);
     }
     
-    public UserRoleDefinitionPanelPO getUserRolesPO() {
-        final WebElement userRoles = findElementBySeleniumId(this.driver, "UserRoleDefinitionPanel");
-        return new UserRoleDefinitionPanelPO(this.driver, userRoles);
+    public UserRoleDefinitionPanelPO getUserRoles() {
+        return waitForChildPO(UserRoleDefinitionPanelPO::new, "UserRoleDefinitionPanel");
     }
     
     public void selectUser(String name) {
@@ -83,15 +82,13 @@ public class UserManagementPanelPO extends PageArea {
         }
     }
 
-    public WildcardPermissionPanelPO getUserPermissionsPO() {
-        final WebElement userRoles = findElementBySeleniumId(this.driver, "WildcardPermissionPanel");
-        return new WildcardPermissionPanelPO(this.driver, userRoles);
+    public WildcardPermissionPanelPO getUserPermissions() {
+        return waitForChildPO(WildcardPermissionPanelPO::new, "WildcardPermissionPanel");
     }
     
     public EditRolesAndPermissionsForUserDialogPO openEditRolesAndPermissionsDialogForUser(String username) {
         userNameTextbox.sendKeys(username);
         editRolesAndPermissionsForUserButton.click();
-        waitForElement("EditUserRolesAndPermissionsDialog");
-        return new EditRolesAndPermissionsForUserDialogPO(driver, findElementBySeleniumId(this.driver, "EditUserRolesAndPermissionsDialog"));
+        return waitForPO(EditRolesAndPermissionsForUserDialogPO::new, "EditUserRolesAndPermissionsDialog");
     }
 }

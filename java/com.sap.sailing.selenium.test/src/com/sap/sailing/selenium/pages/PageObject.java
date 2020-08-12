@@ -513,6 +513,20 @@ public class PageObject {
      * 
      * @param supplier {@link PageAreaSupplier} used to instantiate the {@link PageArea}
      * @param seleniumId the selenium id of the desired element
+     * @return {@link PageArea} representing the first matching element
+     * 
+     * @see #findElementBySeleniumId(SearchContext, String)
+     */
+    protected <T extends PageArea> T waitForPO(PageAreaSupplier<T> supplier, String seleniumId) {
+        return waitForPO(supplier, seleniumId, DEFAULT_WAIT_TIMEOUT_SECONDS);
+    }
+    
+    /**
+     * Waits for the element with the given seleniumId and returns a {@link PageArea} instance representing the element. The 
+     * {@link WebDriver} is used as search context.
+     * 
+     * @param supplier {@link PageAreaSupplier} used to instantiate the {@link PageArea}
+     * @param seleniumId the selenium id of the desired element
      * @param timeoutInSeconds the timeout in seconds to wait for the element
      * @return {@link PageArea} representing the first matching element
      * 
@@ -532,8 +546,22 @@ public class PageObject {
      * 
      * @see #findElementBySeleniumId(String)
      */
+    protected <T extends PageArea> T waitForChildPO(PageAreaSupplier<T> supplier, String seleniumId) {
+        return supplier.get(driver, waitForElementBySeleniumId(context, seleniumId, DEFAULT_WAIT_TIMEOUT_SECONDS));
+    }
+    
+    /**
+     * Returns a {@link PageArea} instance representing the element with the specified selenium id in the search
+     * context of this page area.
+     * 
+     * @param supplier {@link PageAreaSupplier} used to instantiate the {@link PageArea}
+     * @param seleniumId the selenium id of the desired element
+     * @return {@link PageArea} representing the first matching element
+     * 
+     * @see #findElementBySeleniumId(String)
+     */
     protected <T extends PageArea> T getChildPO(PageAreaSupplier<T> supplier, String seleniumId) {
-        return supplier.get(driver, findElementBySeleniumId(seleniumId));
+        return supplier.get(driver, findElementBySeleniumId(context, seleniumId));
     }
     
     protected interface PageAreaSupplier<T extends PageArea> {

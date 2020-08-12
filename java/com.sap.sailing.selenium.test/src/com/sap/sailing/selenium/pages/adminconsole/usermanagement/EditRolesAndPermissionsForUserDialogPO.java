@@ -16,12 +16,12 @@ public class EditRolesAndPermissionsForUserDialogPO extends DataEntryDialogPO {
         super(driver, element);
     }
 
-    public WildcardPermissionPanelPO getUserPermissionsPO() {
-        return new WildcardPermissionPanelPO(this.driver, findElementBySeleniumId(getWebElement(), "WildcardPermissionPanel"));
+    public WildcardPermissionPanelPO getUserPermissions() {
+        return getChildPO(WildcardPermissionPanelPO::new, "WildcardPermissionPanel");
     }
     
-    public UserRoleDefinitionPanelPO getUserRolesPO() {
-        return new UserRoleDefinitionPanelPO(this.driver, findElementBySeleniumId(getWebElement(), "UserRoleDefinitionPanel"));
+    public UserRoleDefinitionPanelPO getUserRoles() {
+        return getChildPO(UserRoleDefinitionPanelPO::new, "UserRoleDefinitionPanel");
     }
 
 }

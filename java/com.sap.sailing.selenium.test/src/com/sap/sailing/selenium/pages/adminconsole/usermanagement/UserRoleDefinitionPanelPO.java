@@ -30,12 +30,12 @@ public class UserRoleDefinitionPanelPO extends PageArea {
         super(driver, element);
     }
 
-    private CellTablePO<DataEntryPO> getUserTable() {
+    private CellTablePO<DataEntryPO> getRoleTable() {
         return new GenericCellTablePO<>(this.driver, this.roleTable, DataEntryPO.class);
     }
 
     public DataEntryPO findRole(final String roleName) {
-        final CellTablePO<DataEntryPO> table = getUserTable();
+        final CellTablePO<DataEntryPO> table = getRoleTable();
         for (DataEntryPO entry : table.getEntries()) {
             final String name = entry.getColumnContent(TABLE_ROLE_NAME_COLUMN);
             if (roleName.equals(name)) {

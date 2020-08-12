@@ -15,22 +15,22 @@ import com.sap.sailing.selenium.pages.gwt.SuggestBoxPO;
 public class WildcardPermissionPanelPO extends PageArea {
     private static final String TABLE_PERMISSION_COLUMN = "Permission";
     @FindBy(how = BySeleniumId.class, using = "addPermissionButton")
-    private WebElement addRoleButton;
+    private WebElement addButton;
     @FindBy(how = BySeleniumId.class, using = "suggestPermission")
-    private WebElement roleNameInput;
+    private WebElement permissionInput;
     @FindBy(how = BySeleniumId.class, using = "WildcardPermissionWithSecurityDTOTable")
-    private WebElement roleTable;
+    private WebElement permissionTable;
     
     public WildcardPermissionPanelPO(WebDriver driver, WebElement element) {
         super(driver, element);
     }
 
-    private CellTablePO<DataEntryPO> getUserTable() {
-        return new GenericCellTablePO<>(this.driver, this.roleTable, DataEntryPO.class);
+    private CellTablePO<DataEntryPO> getPermissionTable() {
+        return new GenericCellTablePO<>(this.driver, this.permissionTable, DataEntryPO.class);
     }
 
     public DataEntryPO findPermission(final String permissionName) {
-        final CellTablePO<DataEntryPO> table = getUserTable();
+        final CellTablePO<DataEntryPO> table = getPermissionTable();
         for (DataEntryPO entry : table.getEntries()) {
             final String name = entry.getColumnContent(TABLE_PERMISSION_COLUMN);
             if (permissionName.equals(name)) {
@@ -46,14 +46,23 @@ public class WildcardPermissionPanelPO extends PageArea {
     }
 
     public void enterNewPermissionValue(String permissionName) {
-        SuggestBoxPO.create(driver, roleNameInput).appendText(permissionName);
+        SuggestBoxPO.create(driver, permissionInput).appendText(permissionName);
     }
     
     public void clickAddButtonOrThrow() {
-        if (!addRoleButton.isEnabled()) {
+        if (!addButton.isEnabled()) {
             throw new ElementNotSelectableException("Add Button was disabled");
         } else {
-            addRoleButton.click();
+            addButton.click();
         }
+    }
+    
+    public void clickAddButtonAndExpectPermissionError() {
+        if (!addButton.isEnabled()) {
+            throw new ElementNotSelectableException("Add Button was disabled");
+        } else {
+            addButton.click();
+        }
+        waitForAlertContainingMessageAndAccept("Not permitted to grant permission");
     }
 }
