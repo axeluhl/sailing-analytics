@@ -58,4 +58,13 @@ public class UserRoleDefinitionPanelPO extends PageArea {
             addRoleButton.click();
         }
     }
+    
+    public void clickAddButtonAndExpectPermissionError() {
+        if (!addRoleButton.isEnabled()) {
+            throw new ElementNotSelectableException("Add Button was disabled");
+        } else {
+            addRoleButton.click();
+        }
+        waitForAlertContainingMessageAndAccept("You are not allowed to grant this role");
+    }
 }

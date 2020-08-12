@@ -587,8 +587,35 @@ public class PageObject {
      * Waits for an alert box to appear and accepts the alert. If no alert shows up, an Exception is thrown.
      */
     protected void waitForAlertAndAccept(int timeoutInSeconds) {
-        final Alert expectedAlert = new WebDriverWait(driver, timeoutInSeconds).until(ExpectedConditions.alertIsPresent());
-        expectedAlert.accept();
+        waitForAlert(timeoutInSeconds).accept();
+    }
+    
+    /**
+     * Waits for an alert box to appear and accepts the alert if the given message is contained in the alert box. If no
+     * alert shows up or the message does not match, an Exception is thrown.
+     */
+    protected void waitForAlertContainingMessageAndAccept(String message) {
+        waitForAlertContainingMessageAndAccept(DEFAULT_WAIT_TIMEOUT_SECONDS, message);
+    }
+    
+    /**
+     * Waits for an alert box to appear and accepts the alert if the given message is contained in the alert box. If no
+     * alert shows up or the message does not match, an Exception is thrown.
+     */
+    protected void waitForAlertContainingMessageAndAccept(int timeoutInSeconds, String message) {
+        Alert alert = waitForAlert(timeoutInSeconds);
+        if (!alert.getText().contains(message)) {
+            throw new RuntimeException("The expected message '" + message + "' does not math the actual message '"
+                    + alert.getText() + "' in the alert.");
+        }
+        alert.accept();
+    }
+    
+    /**
+     * Waits for an alert box to appear. If no alert shows up, an Exception is thrown.
+     */
+    protected Alert waitForAlert(int timeoutInSeconds) {
+        return new WebDriverWait(driver, timeoutInSeconds).until(ExpectedConditions.alertIsPresent());
     }
     
     protected void waitForAlertAndAccept(String expectedMessage) {
