@@ -109,6 +109,7 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
     // adding a Role to a UserGroup
     // adding a Permission to a Role that is granted to a user in a specific qualification
     // adding a Permission to a Role that is already added to a UserGroup
+    // a user tries to leave a UserGroup which is affected by a negative ACL
 
     /**
      * @return the UUID of the newly created event.
