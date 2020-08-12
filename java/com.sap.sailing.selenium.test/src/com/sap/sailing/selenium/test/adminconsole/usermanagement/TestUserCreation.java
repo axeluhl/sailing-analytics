@@ -13,7 +13,7 @@ import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class TestUserCreation extends AbstractSeleniumTest {
     private static final String TEST_USER_PASSWORD = "test1";
-    private static final String TEST_USER_MAIL = "test@test.com";
+    private static final String TEST_USER_MAIL = "";
     private static final String TEST_USER_NAME = "testUser";
 
     @Override
