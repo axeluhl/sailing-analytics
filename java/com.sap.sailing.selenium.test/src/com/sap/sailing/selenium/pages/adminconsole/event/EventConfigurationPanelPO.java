@@ -44,6 +44,10 @@ public class EventConfigurationPanelPO extends PageArea {
             return getColumnContent("Event");
         }
         
+        public String getUUID() {
+            return getColumnContent("ID");
+        }
+        
         public String getEventURL() {
             return getWebElement().findElement(By.xpath(".//td/div/a")).getAttribute("href");
         }
