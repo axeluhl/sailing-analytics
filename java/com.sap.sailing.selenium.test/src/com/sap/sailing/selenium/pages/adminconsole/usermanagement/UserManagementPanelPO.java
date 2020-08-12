@@ -87,6 +87,7 @@ public class UserManagementPanelPO extends PageArea {
     }
     
     public EditRolesAndPermissionsForUserDialogPO openEditRolesAndPermissionsDialogForUser(String username) {
+        userNameTextbox.clear();
         userNameTextbox.sendKeys(username);
         editRolesAndPermissionsForUserButton.click();
         return waitForPO(EditRolesAndPermissionsForUserDialogPO::new, "EditUserRolesAndPermissionsDialog");
