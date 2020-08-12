@@ -13,8 +13,9 @@ import com.sap.sailing.selenium.pages.gwt.GenericCellTablePO;
 public class RoleDefinitionsPanelPO extends PageArea {
     private static final String CREATE_ROLE_DIALOG = "RoleDefinitionCreationDialog";
     
-    @FindBy(how = BySeleniumId.class, using = "RoleTable")
+    @FindBy(how = BySeleniumId.class, using = "RolesCellTable")
     private WebElement roleTable;
+    
     @FindBy(how = BySeleniumId.class, using = "CreateRoleButton")
     private WebElement createRoleButton;
     
