@@ -10,7 +10,9 @@ import com.sap.sailing.selenium.pages.gwt.CellTablePO;
 import com.sap.sailing.selenium.pages.gwt.DataEntryPO;
 import com.sap.sailing.selenium.pages.gwt.GenericCellTablePO;
 
-public class RoleDefinitionPanelPO extends PageArea {
+public class RoleDefinitionsPanelPO extends PageArea {
+    private static final String CREATE_ROLE_DIALOG = "RoleDefinitionCreationDialog";
+    
     @FindBy(how = BySeleniumId.class, using = "RoleTable")
     private WebElement roleTable;
     @FindBy(how = BySeleniumId.class, using = "CreateRoleButton")
@@ -19,7 +21,7 @@ public class RoleDefinitionPanelPO extends PageArea {
     @FindBy(how = BySeleniumId.class, using = "RemoveRoleButton")
     private WebElement removeRoleButton;
     
-    public RoleDefinitionPanelPO(WebDriver driver, WebElement element) {
+    public RoleDefinitionsPanelPO(WebDriver driver, WebElement element) {
         super(driver, element);
     }
 
@@ -37,5 +39,9 @@ public class RoleDefinitionPanelPO extends PageArea {
         }
         return null;
     }
-    
+    public RoleDefinitionCreationDialogPO getCreateRoleDialog() {
+        createRoleButton.click();
+        final WebElement dialog = findElementBySeleniumId(this.driver, CREATE_ROLE_DIALOG);
+        return new RoleDefinitionCreationDialogPO(this.driver, dialog);
+    }
 }
