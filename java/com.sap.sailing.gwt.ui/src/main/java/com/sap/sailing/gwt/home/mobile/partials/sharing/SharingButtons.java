@@ -50,7 +50,7 @@ public class SharingButtons extends Composite {
         final String hostName = Window.Location.getHost();
         final ShareablePlaceContext context = provider.getContext();
         final String urlToShare = "http://" + hostName + SHARING_URL_PREFIX + context.getContextAsPathParameters();
-        if (clientHasNavigatorShareSupport()) {
+        if (true) {
             copyToClipBoard.setVisible(false);
             shareButton.addClickHandler(new ClickHandler() {
                 @Override

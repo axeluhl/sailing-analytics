@@ -10,6 +10,7 @@
   z-index: 999;
   right: 25px;
   bottom: 25px;
+  background-size: contain;
   background-color: rgb(0, 143, 204) !important;
 }
 
@@ -25,7 +26,7 @@ eventheader_sharing_item:focus{
   content: "";
   position: absolute;
   width: 50%;
-  height: 50%;
+  height: 50%;,
   top: 25%;
   left: 25%;
   background-image: resourceUrl("copyIcon");
@@ -36,18 +37,6 @@ eventheader_sharing_item:focus{
 }
 
 .eventheader_sharing_itemshare {
-}
-
-.eventheader_sharing_itemshare:after {
-  content: "";
-  position: absolute;
-  width: 50%;
-  height: 50%;
-  top: 25%;
-  left: 25%;
   background-image: resourceUrl("sharingIcon");
-  background-size: contain;
-  background-position: center;
-  background-repeat: no-repeat;
-  border: none;
+  background-size: 50%;
 }
