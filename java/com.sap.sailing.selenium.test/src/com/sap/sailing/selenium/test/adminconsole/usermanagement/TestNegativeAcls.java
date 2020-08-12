@@ -53,16 +53,6 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         // user1 may only add other users' tenants to an ACL if this group is readable
         // adding permission USER_GROUP:READ:* just makes all groups readable to user 1
         userManagementPanel.grantPermissionToUser(USER1_NAME, USER_GROUP_READ_PERMISSION);
-        
-        // FIXME hack to wait until the permission is saved -> please implement proper wait
-        // at the moment, user management panel loses selection when saving a permission
-        // this in fact prevents to wait for the permission to appear in the permission CellTable
-        // after the UI is changed to keep selection, we could easily implement this using a FluentWait
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     @Test

@@ -48,6 +48,7 @@ public class UserRoleDefinitionPanelPO extends PageArea {
     public void addRole(String rolename, String groupname, String username) {
         enterNewRoleValues(rolename, groupname, username);
         clickAddButtonOrThrow();
+        waitUntil(() -> findRole(rolename + ":" + groupname + ":" + username) != null);
     }
     
     public void enterNewRoleValues(String rolename, String groupname, String username) {

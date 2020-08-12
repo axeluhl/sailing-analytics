@@ -43,6 +43,7 @@ public class WildcardPermissionPanelPO extends PageArea {
     public void addPermission(String permissionName) {
         enterNewPermissionValue(permissionName);
         clickAddButtonOrThrow();
+        waitUntil(() -> findPermission(permissionName) != null);
     }
 
     public void enterNewPermissionValue(String permissionName) {
