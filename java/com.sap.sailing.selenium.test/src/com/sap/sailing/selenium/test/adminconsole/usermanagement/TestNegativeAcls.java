@@ -52,8 +52,7 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         
         // user1 may only add other users' tenants to an ACL if this group is readable
         // adding permission USER_GROUP:READ:* just makes all groups readable to user 1
-        userManagementPanel.selectUser(USER1_NAME);
-        userManagementPanel.getUserPermissions().addPermission(USER_GROUP_READ_PERMISSION);
+        userManagementPanel.grantPermissionToUser(USER1_NAME, USER_GROUP_READ_PERMISSION);
         
         // FIXME hack to wait until the permission is saved -> please implement proper wait
         // at the moment, user management panel loses selection when saving a permission
@@ -76,18 +75,14 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         
         // user1 gives user2 the user role for objects owned by user1
         UserManagementPanelPO userManagement = adminConsole.goToUserManagement();
-        EditRolesAndPermissionsForUserDialogPO editRolesAndPermissionsDialogForUser = userManagement.openEditRolesAndPermissionsDialogForUser(USER2_NAME);
-        UserRoleDefinitionPanelPO userRoles = editRolesAndPermissionsDialogForUser.getUserRoles();
-        userRoles.enterNewRoleValues(USER_ROLE, "", USER1_NAME);
-        userRoles.clickAddButtonOrThrow();
-        editRolesAndPermissionsDialogForUser.clickOkButtonOrThrow();
+        userManagement.grantRoleToUserWithUserQualification(USER2_NAME, USER_ROLE, USER1_NAME);
         
         clearSession(getWebDriver());
         setUpAuthenticatedSession(getWebDriver(), USER2_NAME, USER2_NAME);
         // user2 tries to give the user role for objects owned by user1 to user3
         userManagement = AdminConsolePage.goToPage(getWebDriver(), getContextRoot()).goToUserManagement();
-        editRolesAndPermissionsDialogForUser = userManagement.openEditRolesAndPermissionsDialogForUser(USER3_NAME);
-        userRoles = editRolesAndPermissionsDialogForUser.getUserRoles();
+        EditRolesAndPermissionsForUserDialogPO editRolesAndPermissionsDialogForUser = userManagement.openEditRolesAndPermissionsDialogForUser(USER3_NAME);
+        UserRoleDefinitionPanelPO userRoles = editRolesAndPermissionsDialogForUser.getUserRoles();
         userRoles.enterNewRoleValues(USER_ROLE, "", USER1_NAME);
         // this is expected to fail because the negative ACL on one of user1's events
         // causes user 2 to not have all permissions implied by the user role
@@ -105,17 +100,14 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         
         // user1 gives user2 the permission "EVENT:*:<event-id>"
         UserManagementPanelPO userManagement = adminConsole.goToUserManagement();
-        EditRolesAndPermissionsForUserDialogPO editRolesAndPermissionsDialogForUser = userManagement.openEditRolesAndPermissionsDialogForUser(USER2_NAME);
-        WildcardPermissionPanelPO userPermissions = editRolesAndPermissionsDialogForUser.getUserPermissions();
-        userPermissions.addPermission(eventAllPermission);
-        editRolesAndPermissionsDialogForUser.clickOkButtonOrThrow();
+        userManagement.grantPermissionToUser(USER2_NAME, eventAllPermission);
         
         clearSession(getWebDriver());
         setUpAuthenticatedSession(getWebDriver(), USER2_NAME, USER2_NAME);
         // user2 tries to give the permission "EVENT:*:<event-id>" to user3
         userManagement = AdminConsolePage.goToPage(getWebDriver(), getContextRoot()).goToUserManagement();
-        editRolesAndPermissionsDialogForUser = userManagement.openEditRolesAndPermissionsDialogForUser(USER3_NAME);
-        userPermissions = editRolesAndPermissionsDialogForUser.getUserPermissions();
+        EditRolesAndPermissionsForUserDialogPO editRolesAndPermissionsDialogForUser = userManagement.openEditRolesAndPermissionsDialogForUser(USER3_NAME);
+        WildcardPermissionPanelPO userPermissions = editRolesAndPermissionsDialogForUser.getUserPermissions();
         userPermissions.enterNewPermissionValue(eventAllPermission);
         // this is expected to fail because the negative ACL on the event
         // causes user2 to not have all permissions implied by the wildcard permission

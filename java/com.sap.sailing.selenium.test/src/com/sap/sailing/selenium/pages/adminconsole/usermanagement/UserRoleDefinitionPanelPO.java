@@ -45,6 +45,11 @@ public class UserRoleDefinitionPanelPO extends PageArea {
         return null;
     }
 
+    public void addRole(String rolename, String groupname, String username) {
+        enterNewRoleValues(rolename, groupname, username);
+        clickAddButtonOrThrow();
+    }
+    
     public void enterNewRoleValues(String rolename, String groupname, String username) {
         SuggestBoxPO.create(driver, roleNameInput).appendText(rolename);
         TextBoxPO.create(driver, tenantInput).appendText(groupname);

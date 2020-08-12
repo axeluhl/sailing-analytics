@@ -91,4 +91,22 @@ public class UserManagementPanelPO extends PageArea {
         editRolesAndPermissionsForUserButton.click();
         return waitForPO(EditRolesAndPermissionsForUserDialogPO::new, "EditUserRolesAndPermissionsDialog");
     }
+    
+    public void grantRoleToUserWithUserQualification(String userToGrantRole, String roleName, String userQualification) {
+        grantRoleToUser(userToGrantRole, roleName, "", userQualification);
+    }
+    
+    private void grantRoleToUser(String userToGrantRole, String roleName, String groupQualification, String userQualification) {
+        final EditRolesAndPermissionsForUserDialogPO editRolesAndPermissionsDialogForUser = openEditRolesAndPermissionsDialogForUser(userToGrantRole);
+        UserRoleDefinitionPanelPO userRoles = editRolesAndPermissionsDialogForUser.getUserRoles();
+        userRoles.addRole(roleName, groupQualification, userQualification);
+        editRolesAndPermissionsDialogForUser.clickOkButtonOrThrow();
+    }
+    
+    public void grantPermissionToUser(String userToGrantPermission, String permission) {
+        final EditRolesAndPermissionsForUserDialogPO editRolesAndPermissionsDialogForUser = openEditRolesAndPermissionsDialogForUser(userToGrantPermission);
+        WildcardPermissionPanelPO userPermissions = editRolesAndPermissionsDialogForUser.getUserPermissions();
+        userPermissions.addPermission(permission);
+        editRolesAndPermissionsDialogForUser.clickOkButtonOrThrow();
+    }
 }
