@@ -84,18 +84,18 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         
         // user1 gives user2 the user role for objects owned by user1
         UserManagementPanelPO userManagement = adminConsole.goToUserManagement();
-        EditRolesAndPermissionsForUserDialogPO openEditRolesAndPermissionsDialogForUser = userManagement.openEditRolesAndPermissionsDialogForUser(USER2_NAME);
-        UserRoleDefinitionPanelPO userRoles = openEditRolesAndPermissionsDialogForUser.getUserRolesPO();
+        EditRolesAndPermissionsForUserDialogPO editRolesAndPermissionsDialogForUser = userManagement.openEditRolesAndPermissionsDialogForUser(USER2_NAME);
+        UserRoleDefinitionPanelPO userRoles = editRolesAndPermissionsDialogForUser.getUserRoles();
         userRoles.enterNewRoleValues(USER_ROLE, "", USER1_NAME);
         userRoles.clickAddButtonOrThrow();
-        openEditRolesAndPermissionsDialogForUser.clickOkButtonOrThrow();
+        editRolesAndPermissionsDialogForUser.clickOkButtonOrThrow();
         
         clearSession(getWebDriver());
         setUpAuthenticatedSession(getWebDriver(), USER2_NAME, USER2_NAME);
         // user2 tries to give the user role for objects owned by user1 to user3
         userManagement = AdminConsolePage.goToPage(getWebDriver(), getContextRoot()).goToUserManagement();
-        openEditRolesAndPermissionsDialogForUser = userManagement.openEditRolesAndPermissionsDialogForUser(USER3_NAME);
-        userRoles = openEditRolesAndPermissionsDialogForUser.getUserRolesPO();
+        editRolesAndPermissionsDialogForUser = userManagement.openEditRolesAndPermissionsDialogForUser(USER3_NAME);
+        userRoles = editRolesAndPermissionsDialogForUser.getUserRoles();
         userRoles.enterNewRoleValues(USER_ROLE, "", USER1_NAME);
         // this is expected to fail because the negative ACL on one of user1's events
         // causes user 2 to not have all permissions implied by the user role
