@@ -7,11 +7,15 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.Window.ScrollEvent;
+import com.google.gwt.user.client.Window.ScrollHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.mobile.partials.sharing.SharingButtonsResources.LocalCss;
 import com.sap.sailing.gwt.home.shared.partials.shared.SharingMetadataProvider;
 import com.sap.sailing.gwt.home.shared.places.ShareablePlaceContext;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -50,7 +54,7 @@ public class SharingButtons extends Composite {
         final String hostName = Window.Location.getHost();
         final ShareablePlaceContext context = provider.getContext();
         final String urlToShare = "http://" + hostName + SHARING_URL_PREFIX + context.getContextAsPathParameters();
-        if (true) {
+        if (clientHasNavigatorShareSupport()) {
             copyToClipBoard.setVisible(false);
             shareButton.addClickHandler(new ClickHandler() {
                 @Override
@@ -58,7 +62,6 @@ public class SharingButtons extends Composite {
                     share(urlToShare, provider.getShortText());
                 }
             });
-
         } else if (clientHasNavigatorCopyToClipboardSupport()) {
             shareButton.setVisible(false);
             copyToClipBoard.removeStyleDependentName("gwt-button");
@@ -75,6 +78,22 @@ public class SharingButtons extends Composite {
             shareButton.setVisible(false);
             copyToClipBoard.setVisible(false);
         }
+        final LocalCss css = SharingButtonsResources.INSTANCE.css();
+        Timer fadeOutSharingButtonsTimer = new Timer() {
+            @Override
+            public void run() {
+                htmlPanel.removeStyleName(css.eventheader_sharing_faded_in());
+                htmlPanel.addStyleName(css.eventheader_sharing_faded_out());
+            }
+        };
+        Window.addWindowScrollHandler(new ScrollHandler() {
+            @Override
+            public void onWindowScroll(ScrollEvent event) {
+                htmlPanel.removeStyleName(css.eventheader_sharing_faded_out());
+                htmlPanel.addStyleName(css.eventheader_sharing_faded_in());
+                fadeOutSharingButtonsTimer.schedule(2000);
+            }
+        });
     }
 
     public static native void copyToClipboard(String text) /*-{

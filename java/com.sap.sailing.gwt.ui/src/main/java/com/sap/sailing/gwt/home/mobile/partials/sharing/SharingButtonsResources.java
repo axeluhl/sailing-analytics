@@ -14,6 +14,9 @@ public interface SharingButtonsResources extends SharedHomeResources {
         String eventheader_sharing_item();
         String eventheader_sharing_itemcopytoclipboard();
         String eventheader_sharing_itemshare();
+        String eventheader_sharing_container();
+        String eventheader_sharing_faded_out();
+        String eventheader_sharing_faded_in();
     }
 
 }
