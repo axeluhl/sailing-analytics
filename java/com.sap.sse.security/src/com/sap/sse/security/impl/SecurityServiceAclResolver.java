@@ -66,7 +66,7 @@ public class SecurityServiceAclResolver implements AclResolver<AccessControlList
             for (final String id : objectIdentifiersAsString) {
                 final QualifiedObjectIdentifierImpl idOfAccessControlledObject = new QualifiedObjectIdentifierImpl(type, new TypeRelativeObjectIdentifier(id));
                 final AccessControlListAnnotation acl = accessControlStore.getAccessControlList(idOfAccessControlledObject);
-                if (Util.filter(acl.getAnnotation().getDeniedActions().entrySet(), e->!e.getValue().isEmpty()).iterator().hasNext() &&
+                if (acl != null && Util.filter(acl.getAnnotation().getDeniedActions().entrySet(), e->!e.getValue().isEmpty()).iterator().hasNext() &&
                         (ownershipSpecification == null || doesOwnershipSpecificationMatchThatOfObject(ownershipSpecification, idOfAccessControlledObject))) {
                     // found at least one denied action for at least one group and where the optional ownership specification, if provided,
                     // matches the access-controlled object's ownership
