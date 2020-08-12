@@ -56,4 +56,13 @@ public class WildcardPermissionPanelPO extends PageArea {
             addRoleButton.click();
         }
     }
+    
+    public void clickAddButtonAndExpectPermissionError() {
+        if (!addRoleButton.isEnabled()) {
+            throw new ElementNotSelectableException("Add Button was disabled");
+        } else {
+            addRoleButton.click();
+        }
+        waitForAlertContainingMessageAndAccept("Not permitted to grant permission");
+    }
 }
