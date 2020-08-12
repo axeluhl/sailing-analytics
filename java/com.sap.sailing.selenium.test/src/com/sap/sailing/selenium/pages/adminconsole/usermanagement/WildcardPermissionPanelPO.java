@@ -39,6 +39,11 @@ public class WildcardPermissionPanelPO extends PageArea {
         }
         return null;
     }
+    
+    public void addPermission(String permissionName) {
+        enterNewPermissionValue(permissionName);
+        clickAddButtonOrThrow();
+    }
 
     public void enterNewPermissionValue(String permissionName) {
         SuggestBoxPO.create(driver, roleNameInput).appendText(permissionName);

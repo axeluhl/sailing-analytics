@@ -52,6 +52,12 @@ public class UserManagementPanelPO extends PageArea {
         final WebElement dialog = findElementBySeleniumId(this.driver, "CreateUserDialog");
         return new CreateUserDialogPO(this.driver, dialog);
     }
+    
+    public void createUserWithEualUsernameAndPassword(String usernameAndPassword) {
+        final CreateUserDialogPO createUserDialog = getCreateUserDialog();
+        createUserDialog.setValues(usernameAndPassword, "", usernameAndPassword, usernameAndPassword);
+        createUserDialog.clickOkButtonOrThrow();
+    }
 
     public ChangePasswordDialogPO getChangePasswordDialog() {
         final WebElement dialog = findElementBySeleniumId(this.driver, "ChangePasswordDialog");
