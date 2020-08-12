@@ -18,6 +18,7 @@ import com.sap.sailing.selenium.pages.adminconsole.igtimi.IgtimiAccountsManageme
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardGroupConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaStructureManagementPanelPO;
+import com.sap.sailing.selenium.pages.adminconsole.roles.RoleDefinitionsPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesBoatsPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesCompetitorsPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesManagementPanelPO;
@@ -35,6 +36,9 @@ import com.sap.sailing.selenium.pages.adminconsole.wind.WindPanelPO;
 public class AdminConsolePage extends HostPageWithAuthentication {
     private static final Logger logger = Logger.getLogger(AdminConsolePage.class.getName());
     private static final String PAGE_TITLE = "SAP Sailing Analytics Administration Console"; //$NON-NLS-1$
+
+    private static final String ROLE_DEFINITIONS_TAB_LABEL = "Roles";
+    private static final String ROLE_DEFINITIONS_TAB_IDENTIFIER = "RoleDefinitionsPanel";
     
     private static final String EVENTS_TAB_LABEL = "Events"; //$NON-NLS-1$
     private static final String EVENTS_TAB_IDENTIFIER = "EventManagement"; //$NON-NLS-1$
@@ -116,6 +120,12 @@ public class AdminConsolePage extends HostPageWithAuthentication {
         goToTab(ADVANCED_PARENT_LABEL, ADVANCED_TAB_PARENT_IDENTIFIER, true);
         return new UserManagementPanelPO(this.driver,
                 goToTab(USER_MANAGEMENT_PANEL_TAB_LABEL, USER_MANAGEMENT_PANEL_TAB_IDENTIFIER, false));
+    }
+    
+    public RoleDefinitionsPanelPO goToRoleDefinitions() {
+        goToTab(ADVANCED_PARENT_LABEL, ADVANCED_TAB_PARENT_IDENTIFIER, true);
+        return new RoleDefinitionsPanelPO(this.driver,
+                goToTab(ROLE_DEFINITIONS_TAB_LABEL, ROLE_DEFINITIONS_TAB_IDENTIFIER, false));
     }
 
     public RegattaStructureManagementPanelPO goToRegattaStructure() {

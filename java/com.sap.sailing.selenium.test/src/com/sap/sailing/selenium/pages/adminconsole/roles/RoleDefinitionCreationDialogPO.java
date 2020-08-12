@@ -6,7 +6,7 @@ import org.openqa.selenium.WebElement;
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.common.DataEntryDialogPO;
-import com.sap.sailing.selenium.pages.gwt.SuggestBoxPO;
+import com.sap.sailing.selenium.pages.gwt.StringListEditorCompositePO;
 import com.sap.sailing.selenium.pages.gwt.TextBoxPO;
 
 public class RoleDefinitionCreationDialogPO extends DataEntryDialogPO {
@@ -20,8 +20,11 @@ public class RoleDefinitionCreationDialogPO extends DataEntryDialogPO {
         super(driver, element);
     }
     
-    public void setValues(String name, String permissions) {
+    public void setName(String name) {
         TextBoxPO.create(driver, roleNameInput).appendText(name);
-        SuggestBoxPO.create(driver, permissionsInput).appendText(permissions);
+    }
+    
+    public void addPermission(String permission) {
+        StringListEditorCompositePO.create(driver, permissionsInput).addNewValue(permission);
     }
 }

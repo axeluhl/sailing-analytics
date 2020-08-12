@@ -75,6 +75,7 @@ public class RoleDefinitionsPanel extends VerticalPanel {
     
     public RoleDefinitionsPanel(StringMessages stringMessages, UserService userService,
             CellTableWithCheckboxResources tableResources, ErrorReporter errorReporter) {
+        this.ensureDebugId(this.getClass().getSimpleName());
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
         this.userService = userService;
