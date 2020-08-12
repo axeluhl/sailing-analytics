@@ -19,7 +19,7 @@ public class AclActionInputPO extends PageArea {
         super(driver, element);
     }
     
-    void addAction(String name) {
+    public void addAction(String name) {
         SuggestBoxPO.create(driver, inputSuggestBox).appendText(name);
         addButton.click();
     }
