@@ -101,4 +101,11 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         // causes user 2 to not have all permissions implied by the user role
         userRoles.clickAddButtonAndExpectPermissionError();
     }
+    
+    // TODO additional test cases required for:
+    // adding a User to a UserGroup that has a Role associated
+    // adding a direct permission to a user
+    // adding a Role to a UserGroup
+    // adding a Permission to a Role that is granted to a user in a specific qualification
+    // adding a Permission to a Role that is already added to a UserGroup
 }
