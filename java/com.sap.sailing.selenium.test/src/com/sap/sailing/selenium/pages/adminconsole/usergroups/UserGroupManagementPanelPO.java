@@ -10,7 +10,7 @@ import com.sap.sailing.selenium.pages.gwt.CellTablePO;
 import com.sap.sailing.selenium.pages.gwt.DataEntryPO;
 import com.sap.sailing.selenium.pages.gwt.GenericCellTablePO;
 
-public class UserGroupDefinitionsPanelPO extends PageArea {
+public class UserGroupManagementPanelPO extends PageArea {
     private static final String CREATE_ROLE_DIALOG = "CreateUserGroupDialog";
     
     @FindBy(how = BySeleniumId.class, using = "UserGroupWithSecurityDTOTable")
@@ -19,7 +19,7 @@ public class UserGroupDefinitionsPanelPO extends PageArea {
     @FindBy(how = BySeleniumId.class, using = "CreateGroupButton")
     private WebElement createGroupButton;
     
-    public UserGroupDefinitionsPanelPO(WebDriver driver, WebElement element) {
+    public UserGroupManagementPanelPO(WebDriver driver, WebElement element) {
         super(driver, element);
     }
 
@@ -37,9 +37,9 @@ public class UserGroupDefinitionsPanelPO extends PageArea {
         }
         return null;
     }
-    public UserGroupDefinitionCreationDialogPO getCreateGroupDialog() {
+    public UserGroupCreationDialogPO getCreateGroupDialog() {
         createGroupButton.click();
         final WebElement dialog = findElementBySeleniumId(this.driver, CREATE_ROLE_DIALOG);
-        return new UserGroupDefinitionCreationDialogPO(this.driver, dialog);
+        return new UserGroupCreationDialogPO(this.driver, dialog);
     }
 }

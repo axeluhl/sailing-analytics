@@ -7,8 +7,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
-import com.sap.sailing.selenium.pages.adminconsole.usergroups.UserGroupDefinitionCreationDialogPO;
-import com.sap.sailing.selenium.pages.adminconsole.usergroups.UserGroupDefinitionsPanelPO;
+import com.sap.sailing.selenium.pages.adminconsole.usergroups.UserGroupCreationDialogPO;
+import com.sap.sailing.selenium.pages.adminconsole.usergroups.UserGroupManagementPanelPO;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class TestUserGroupCreation extends AbstractSeleniumTest {
@@ -23,16 +23,16 @@ public class TestUserGroupCreation extends AbstractSeleniumTest {
 
     @Test
     public void testOpenCreateBoatDialog() {
-        final UserGroupDefinitionsPanelPO userGroupManagementPanel = goToUserGroupDefinitionsPanel();
+        final UserGroupManagementPanelPO userGroupManagementPanel = goToUserGroupDefinitionsPanel();
         assertNull(userGroupManagementPanel.findGroup(TEST_GROUP_NAME));
-        final UserGroupDefinitionCreationDialogPO createUserdialog = userGroupManagementPanel.getCreateGroupDialog();
+        final UserGroupCreationDialogPO createUserdialog = userGroupManagementPanel.getCreateGroupDialog();
         assertNotNull(createUserdialog);
         createUserdialog.setName(TEST_GROUP_NAME);
         createUserdialog.clickOkButtonOrThrow();
         assertNotNull(userGroupManagementPanel.findGroup(TEST_GROUP_NAME));
     }
 
-    private UserGroupDefinitionsPanelPO goToUserGroupDefinitionsPanel() {
+    private UserGroupManagementPanelPO goToUserGroupDefinitionsPanel() {
         final AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         return adminConsole.goToUserGroupDefinitions();
     }

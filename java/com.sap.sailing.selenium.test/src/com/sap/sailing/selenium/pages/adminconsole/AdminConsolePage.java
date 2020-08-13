@@ -23,7 +23,7 @@ import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesBoatsPan
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesCompetitorsPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanelPO;
-import com.sap.sailing.selenium.pages.adminconsole.usergroups.UserGroupDefinitionsPanelPO;
+import com.sap.sailing.selenium.pages.adminconsole.usergroups.UserGroupManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.usermanagement.UserManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.wind.WindPanelPO;
 
@@ -126,9 +126,9 @@ public class AdminConsolePage extends HostPageWithAuthentication {
                 goToTab(USER_MANAGEMENT_PANEL_TAB_LABEL, USER_MANAGEMENT_PANEL_TAB_IDENTIFIER, false));
     }
     
-    public UserGroupDefinitionsPanelPO goToUserGroupDefinitions() {
+    public UserGroupManagementPanelPO goToUserGroupDefinitions() {
         goToTab(ADVANCED_PARENT_LABEL, ADVANCED_TAB_PARENT_IDENTIFIER, true);
-        return new UserGroupDefinitionsPanelPO(this.driver,
+        return new UserGroupManagementPanelPO(this.driver,
                 goToTab(ADVANCED_USER_GROUP_MANAGEMENT_LABEL, ADVANCED_USER_GROUP_MANAGEMENT_IDENTIFIER, false));
     }
     

@@ -8,12 +8,12 @@ import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.common.DataEntryDialogPO;
 import com.sap.sailing.selenium.pages.gwt.TextBoxPO;
 
-public class UserGroupDefinitionCreationDialogPO extends DataEntryDialogPO {
+public class UserGroupCreationDialogPO extends DataEntryDialogPO {
 
     @FindBy(how = BySeleniumId.class, using = "GroupNameInput")
     private WebElement groupNameInput;
 
-    protected UserGroupDefinitionCreationDialogPO(WebDriver driver, WebElement element) {
+    protected UserGroupCreationDialogPO(WebDriver driver, WebElement element) {
         super(driver, element);
     }
     

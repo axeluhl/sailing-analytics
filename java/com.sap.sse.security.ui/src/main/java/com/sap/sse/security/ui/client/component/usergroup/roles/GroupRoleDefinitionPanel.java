@@ -34,7 +34,7 @@ import com.sap.sse.security.ui.client.component.UserGroupListDataProvider;
 import com.sap.sse.security.ui.client.component.UserGroupListDataProvider.UserGroupListDataProviderChangeHandler;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
-public class UserGroupRoleDefinitionPanel extends Composite
+public class GroupRoleDefinitionPanel extends Composite
         implements Handler, ChangeHandler, KeyUpHandler, UserGroupListDataProviderChangeHandler {
 
     private final RoleDefinitionTableWrapper roleDefinitionTableWrapper;
@@ -43,7 +43,7 @@ public class UserGroupRoleDefinitionPanel extends Composite
     private final UserGroupRoleResources userGroupRoleResources = GWT.create(UserGroupRoleResources.class);
     private final RoleDefinitionSuggestOracle oracle;
 
-    public UserGroupRoleDefinitionPanel(final UserService userService, final StringMessages stringMessages,
+    public GroupRoleDefinitionPanel(final UserService userService, final StringMessages stringMessages,
             Iterable<HasPermissions> additionalPermissions, ErrorReporter errorReporter,
             CellTableWithCheckboxResources tableResources,
             final MultiSelectionModel<UserGroupDTO> userGroupSelectionModel,

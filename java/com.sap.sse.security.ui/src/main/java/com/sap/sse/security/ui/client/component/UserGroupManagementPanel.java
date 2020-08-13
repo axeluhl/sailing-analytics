@@ -29,7 +29,7 @@ import com.sap.sse.security.shared.dto.UserGroupDTO;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserManagementWriteServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
-import com.sap.sse.security.ui.client.component.usergroup.roles.UserGroupRoleDefinitionPanel;
+import com.sap.sse.security.ui.client.component.usergroup.roles.GroupRoleDefinitionPanel;
 import com.sap.sse.security.ui.client.component.usergroup.users.UserGroupDetailPanel;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.SuccessInfo;
@@ -41,7 +41,7 @@ import com.sap.sse.security.ui.shared.SuccessInfo;
 public class UserGroupManagementPanel extends Composite {
     private final UserGroupListDataProvider userGroupListDataProvider;
     private UserGroupDetailPanel userGroupDetailPanel;
-    private UserGroupRoleDefinitionPanel userGroupRoleDefinitionPanel;
+    private GroupRoleDefinitionPanel userGroupRoleDefinitionPanel;
 
     private final UserGroupTableWrapper userGroupTableWrapper;
 
@@ -120,7 +120,7 @@ public class UserGroupManagementPanel extends Composite {
             CellTableWithCheckboxResources tableResources) {
         userGroupDetailPanel = new UserGroupDetailPanel(userGroupTableWrapper.getSelectionModel(),
                 userGroupListDataProvider, userService, stringMessages, errorReporter, tableResources);
-        userGroupRoleDefinitionPanel = new UserGroupRoleDefinitionPanel(userService,
+        userGroupRoleDefinitionPanel = new GroupRoleDefinitionPanel(userService,
                 stringMessages, additionalPermissions, errorReporter, tableResources,
                 userGroupTableWrapper.getSelectionModel(), userGroupListDataProvider);
 
