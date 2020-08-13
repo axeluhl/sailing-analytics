@@ -23,6 +23,7 @@ import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesBoatsPan
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesCompetitorsPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanelPO;
+import com.sap.sailing.selenium.pages.adminconsole.usergroups.UserGroupDefinitionsPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.usermanagement.UserManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.wind.WindPanelPO;
 
@@ -60,6 +61,9 @@ public class AdminConsolePage extends HostPageWithAuthentication {
     
     private static final String TRACKED_RACES_TAB_LABEL = "Tracked races"; //$NON-NLS-1$
     private static final String TRACKED_RACES_TAB_IDENTIFIER = "TrackedRacesManagement"; //$NON-NLS-1$
+    
+    private static final String ADVANCED_USER_GROUP_MANAGEMENT_LABEL = "User Group Management";
+    private static final String ADVANCED_USER_GROUP_MANAGEMENT_IDENTIFIER = "UserGroupManagementPanel";
     
     private static final String WIND_TAB_LABEL = "Wind"; //$NON-NLS-1$
     private static final String WIND_TAB_IDENTIFIER = "WindPanel"; //$NON-NLS-1$
@@ -120,6 +124,12 @@ public class AdminConsolePage extends HostPageWithAuthentication {
         goToTab(ADVANCED_PARENT_LABEL, ADVANCED_TAB_PARENT_IDENTIFIER, true);
         return new UserManagementPanelPO(this.driver,
                 goToTab(USER_MANAGEMENT_PANEL_TAB_LABEL, USER_MANAGEMENT_PANEL_TAB_IDENTIFIER, false));
+    }
+    
+    public UserGroupDefinitionsPanelPO goToUserGroupDefinitions() {
+        goToTab(ADVANCED_PARENT_LABEL, ADVANCED_TAB_PARENT_IDENTIFIER, true);
+        return new UserGroupDefinitionsPanelPO(this.driver,
+                goToTab(ADVANCED_USER_GROUP_MANAGEMENT_LABEL, ADVANCED_USER_GROUP_MANAGEMENT_IDENTIFIER, false));
     }
     
     public RoleDefinitionsPanelPO goToRoleDefinitions() {
@@ -205,7 +215,7 @@ public class AdminConsolePage extends HostPageWithAuthentication {
         return new LocalServerPO(this.driver,
                 goToTab(ADVANCED_LOCAL_SERVER_LABEL, ADVANCED_LOCAL_SERVER_IDENTIFIER, false));
     }
-
+    
     /**
      * <p>Verifies that the current page is the administration console by checking the title of the page.</p>
      */
@@ -224,4 +234,5 @@ public class AdminConsolePage extends HostPageWithAuthentication {
     private WebElement goToTab(String label, final String id, boolean isVertical) {
         return goToTab(administrationTabPanel, label, id, isVertical ? TabPanelType.VERTICAL_TAB_LAYOUT_PANEL : TabPanelType.TAB_LAYOUT_PANEL);
     }
+
 }

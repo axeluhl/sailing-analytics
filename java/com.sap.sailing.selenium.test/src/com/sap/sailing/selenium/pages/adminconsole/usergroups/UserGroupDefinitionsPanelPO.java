@@ -11,7 +11,7 @@ import com.sap.sailing.selenium.pages.gwt.DataEntryPO;
 import com.sap.sailing.selenium.pages.gwt.GenericCellTablePO;
 
 public class UserGroupDefinitionsPanelPO extends PageArea {
-    private static final String CREATE_ROLE_DIALOG = "UserGroupDefinitionCreationDialog";
+    private static final String CREATE_ROLE_DIALOG = "CreateUserGroupDialog";
     
     @FindBy(how = BySeleniumId.class, using = "UserGroupWithSecurityDTOTable")
     private WebElement groupTable;
@@ -27,7 +27,7 @@ public class UserGroupDefinitionsPanelPO extends PageArea {
         return new GenericCellTablePO<>(this.driver, this.groupTable, DataEntryPO.class);
     }
 
-    public DataEntryPO findRole(final String username) {
+    public DataEntryPO findGroup(final String username) {
         final CellTablePO<DataEntryPO> table = getRoleTable();
         for (DataEntryPO entry : table.getEntries()) {
             final String name = entry.getColumnContent("Group Name");

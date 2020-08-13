@@ -62,6 +62,7 @@ public class UserGroupManagementPanel extends Composite {
         mainPanel.add(createUserGroupDetailsPanel(stringMessages, userManagementWriteService,
                 userService, additionalPermissions, errorReporter, tableResources));
         initWidget(mainPanel);
+        this.ensureDebugId(this.getClass().getSimpleName());
     }
 
     /** Creates the button bar with add/remove/refresh buttons. 
