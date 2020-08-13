@@ -72,6 +72,7 @@ public class UserGroupUsersTableWrapper extends
             }
         });
         table.addColumn(usernameColumn, stringMessages.username());
+        table.ensureDebugId("UserGroupUserDTOTable");
         table.addColumn(actionColumns);
     }
 
