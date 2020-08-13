@@ -143,6 +143,7 @@ public class UserRoleDefinitionPanel extends HorizontalPanel
         captionPanel.add(rolePanel);
         this.setVisible(false);
         add(captionPanel);
+        this.ensureDebugId(this.getClass().getSimpleName());
     }
 
     public void refreshSuggest() {

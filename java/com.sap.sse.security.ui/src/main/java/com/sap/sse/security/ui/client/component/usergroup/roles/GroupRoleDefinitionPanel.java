@@ -76,6 +76,7 @@ public class GroupRoleDefinitionPanel extends Composite
         mainPanel.add(userGroupfilterBox);
         mainPanel.add(scrollPanel);
         initWidget(mainPanel);
+        this.ensureDebugId(this.getClass().getSimpleName());
         this.userGroupSelectionModel.addSelectionChangeHandler(e -> updateOracle());
     }
 
@@ -155,7 +156,6 @@ public class GroupRoleDefinitionPanel extends Composite
                 .setEnabled(!roleDefinitionTableWrapper.getSelectionModel().getSelectedSet().isEmpty()));
         removeButton.setEnabled(false);
         buttonPanel.insertWidgetAtPosition(suggestRole, 0);
-
         return buttonPanel;
     }
 

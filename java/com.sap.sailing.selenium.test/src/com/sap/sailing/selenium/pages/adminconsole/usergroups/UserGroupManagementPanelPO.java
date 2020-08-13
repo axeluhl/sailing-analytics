@@ -23,12 +23,12 @@ public class UserGroupManagementPanelPO extends PageArea {
         super(driver, element);
     }
 
-    private CellTablePO<DataEntryPO> getRoleTable() {
+    private CellTablePO<DataEntryPO> getUserGroupTable() {
         return new GenericCellTablePO<>(this.driver, this.groupTable, DataEntryPO.class);
     }
 
     public DataEntryPO findGroup(final String username) {
-        final CellTablePO<DataEntryPO> table = getRoleTable();
+        final CellTablePO<DataEntryPO> table = getUserGroupTable();
         for (DataEntryPO entry : table.getEntries()) {
             final String name = entry.getColumnContent("Group Name");
             if (username.equals(name)) {
@@ -41,5 +41,21 @@ public class UserGroupManagementPanelPO extends PageArea {
         createGroupButton.click();
         final WebElement dialog = findElementBySeleniumId(this.driver, CREATE_ROLE_DIALOG);
         return new UserGroupCreationDialogPO(this.driver, dialog);
+    }
+    
+    public void selectGroup(String name) {
+        final CellTablePO<DataEntryPO> table = getUserGroupTable();
+        final DataEntryPO findUser = findGroup(name);
+        if(findUser != null) {
+            table.selectEntry(findUser);
+        }
+    }
+    
+    public UserGroupRoleDefinitionPanelPO getUserGroupRoles() {
+        return waitForChildPO(UserGroupRoleDefinitionPanelPO::new, "GroupRoleDefinitionPanel");
+    }
+    
+    public UserGroupUserPanelPO getUserGroupUsers() {
+        return waitForChildPO(UserGroupUserPanelPO::new, "UserGroupDetailPanel");
     }
 }

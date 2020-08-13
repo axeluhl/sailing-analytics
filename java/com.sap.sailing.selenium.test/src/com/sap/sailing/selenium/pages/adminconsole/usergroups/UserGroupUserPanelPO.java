@@ -29,11 +29,11 @@ public class UserGroupUserPanelPO extends PageArea {
         return new GenericCellTablePO<>(this.driver, this.permissionTable, DataEntryPO.class);
     }
 
-    public DataEntryPO findPermission(final String permissionName) {
+    public DataEntryPO findUser(final String userName) {
         final CellTablePO<DataEntryPO> table = getUserTable();
         for (DataEntryPO entry : table.getEntries()) {
             final String name = entry.getColumnContent(TABLE_PERMISSION_COLUMN);
-            if (permissionName.equals(name)) {
+            if (userName.equals(name)) {
                 return entry;
             }
         }
@@ -43,7 +43,7 @@ public class UserGroupUserPanelPO extends PageArea {
     public void addUser(String name) {
         enterNewUser(name);
         clickAddButtonOrThrow();
-        waitUntil(() -> findPermission(name) != null);
+        waitUntil(() -> findUser(name) != null);
     }
 
     public void enterNewUser(String name) {

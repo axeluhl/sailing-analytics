@@ -127,6 +127,7 @@ public class UserGroupDetailPanel extends Composite
         // addUserToGroupPanel.add(tenantUsersPanelCaption);
         addUserToGroupPanel.add(tenantUsersTable);
         initWidget(addUserToGroupPanel);
+        this.ensureDebugId(this.getClass().getSimpleName());
     }
 
     /** Creates the button bar with add/remove/refresh buttons and the SuggestBox. */
