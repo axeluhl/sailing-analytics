@@ -7,7 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
-import com.sap.sailing.selenium.pages.adminconsole.roles.RoleDefinitionCreationDialogPO;
+import com.sap.sailing.selenium.pages.adminconsole.roles.RoleDefinitionCreationAndUpdateDialogPO;
 import com.sap.sailing.selenium.pages.adminconsole.roles.RoleDefinitionsPanelPO;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
@@ -26,7 +26,7 @@ public class TestRoleDefinitionCreation extends AbstractSeleniumTest {
     public void testOpenCreateBoatDialog() throws InterruptedException {
         final RoleDefinitionsPanelPO roleManagementPanel = goToRoleDefinitionPanel();
         assertNull(roleManagementPanel.findRole(TEST_ROLE));
-        final RoleDefinitionCreationDialogPO createRoleDialog = roleManagementPanel.getCreateRoleDialog();
+        final RoleDefinitionCreationAndUpdateDialogPO createRoleDialog = roleManagementPanel.getCreateRoleDialog();
         assertNotNull(createRoleDialog);
         createRoleDialog.setName(TEST_ROLE);
         createRoleDialog.addPermission(TEST_PERMISSION);

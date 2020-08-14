@@ -9,14 +9,14 @@ import com.sap.sailing.selenium.pages.common.DataEntryDialogPO;
 import com.sap.sailing.selenium.pages.gwt.StringListEditorCompositePO;
 import com.sap.sailing.selenium.pages.gwt.TextBoxPO;
 
-public class RoleDefinitionCreationDialogPO extends DataEntryDialogPO {
+public class RoleDefinitionCreationAndUpdateDialogPO extends DataEntryDialogPO {
 
     @FindBy(how = BySeleniumId.class, using = "name")
     private WebElement roleNameInput;
     @FindBy(how = BySeleniumId.class, using = "permissions")
     private WebElement permissionsInput;
 
-    protected RoleDefinitionCreationDialogPO(WebDriver driver, WebElement element) {
+    protected RoleDefinitionCreationAndUpdateDialogPO(WebDriver driver, WebElement element) {
         super(driver, element);
     }
     
@@ -24,7 +24,16 @@ public class RoleDefinitionCreationDialogPO extends DataEntryDialogPO {
         TextBoxPO.create(driver, roleNameInput).appendText(name);
     }
     
+    public StringListEditorCompositePO getPermissionsList() {
+        return StringListEditorCompositePO.create(driver, permissionsInput);
+    }
+    
     public void addPermission(String permission) {
-        StringListEditorCompositePO.create(driver, permissionsInput).addNewValue(permission);
+        getPermissionsList().addNewValue(permission);
+    }
+    
+    public void clickOkButtonAndExpectPermissionError() {
+        clickOkButtonOrThrow();
+        waitForAlertContainingMessageAndAccept("could not be added to group");
     }
 }
