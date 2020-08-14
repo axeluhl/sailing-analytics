@@ -1,5 +1,7 @@
 package com.sap.sailing.selenium.test.adminconsole.usermanagement;
 
+import static org.junit.Assert.assertNotNull;
+
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.Date;
@@ -91,7 +93,8 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         // in this case, it works because user3 isn't affected by the negative ACL
         userManagement = AdminConsolePage.goToPage(getWebDriver(), getContextRoot()).goToUserManagement();
         userManagement.grantRoleToUserWithUserQualification(USER4_NAME, USER_ROLE, USER1_NAME);
-        // TODO assert that the role was successfully added
+        assertNotNull(userManagement.openEditRolesAndPermissionsDialogForUser(USER4_NAME).getUserRoles()
+                .findRole(USER_ROLE + "::" + USER1_NAME));
     }
     
     @Test
@@ -125,7 +128,8 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         // in this case, it works because user3 isn't affected by the negative ACL
         userManagement = AdminConsolePage.goToPage(getWebDriver(), getContextRoot()).goToUserManagement();
         userManagement.grantPermissionToUser(USER4_NAME, eventAllPermission);
-        // TODO assert that the permission was successfully added
+        assertNotNull(userManagement.openEditRolesAndPermissionsDialogForUser(USER4_NAME).getUserPermissions()
+                .findPermission(eventAllPermission));
     }
     
     @Test
@@ -162,7 +166,7 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         // user3 adds user4 to user1-tenant
         // in this case, it works because user3 isn't affected by the negative ACL
         userGroupUsers.addUser(USER4_NAME);
-        // TODO assert that the user was successfully added to the UserGroup
+        assertNotNull(userGroupUsers.findUser(USER4_NAME));
     }
     
     @Test
@@ -201,7 +205,7 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         // user3 adds user4 to user1-tenant
         // in this case, it works because user3 isn't affected by the negative ACL
         userGroupRoles.addRole(USER_ROLE);
-        // TODO assert that the role was successfully added to the UserGroup
+        assertNotNull(userGroupRoles.findRole(USER_ROLE));
     }
     
     // TODO additional test cases required for:
