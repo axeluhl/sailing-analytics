@@ -7,12 +7,16 @@ import java.time.ZonedDateTime;
 import java.util.Date;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.advanced.LocalServerPO;
 import com.sap.sailing.selenium.pages.adminconsole.event.EventConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.event.EventConfigurationPanelPO.EventEntryPO;
+import com.sap.sailing.selenium.pages.adminconsole.roles.RoleDefinitionCreationAndUpdateDialogPO;
+import com.sap.sailing.selenium.pages.adminconsole.roles.RoleDefinitionsPanelPO;
+import com.sap.sailing.selenium.pages.adminconsole.security.AclActionInputPO;
 import com.sap.sailing.selenium.pages.adminconsole.security.AclPopupPO;
 import com.sap.sailing.selenium.pages.adminconsole.usergroups.UserGroupManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.usergroups.UserGroupRoleDefinitionPanelPO;
@@ -37,8 +41,10 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
     private static final String EVENT_NAME = "Demo event";
     private static final String USER_ROLE = "user";
     private static final String UPDATE_ACTION = "UPDATE";
+    private static final String READ_ACTION = "READ";
     private static final String USER_GROUP_READ_PERMISSION = "USER_GROUP:READ:*";
     private static final String EVENT_ALL_PERMISSION_PREFIX = "EVENT:*:";
+    private static final String CUSTOM_ROLE = "custom-role";
 
     @Override
     @Before
@@ -208,9 +214,55 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         assertNotNull(userGroupRoles.findRole(USER_ROLE));
     }
     
+    @Test
+    @Ignore
+    public void testUserWithNegativeAclCantAddPermissionToRoleThatIsAssociatedToAUserGroup() {
+        clearSession(getWebDriver());
+        setUpAuthenticatedSession(getWebDriver(), USER1_NAME, USER1_NAME);
+        // user1 creates an event
+        AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
+        String eventId = addEventWithNegativeAclForGroup(adminConsole, USER2_TENANT);
+        String eventAllPermission = EVENT_ALL_PERMISSION_PREFIX + eventId;
+        
+        RoleDefinitionsPanelPO roleDefinitions = adminConsole.goToRoleDefinitions();
+        RoleDefinitionCreationAndUpdateDialogPO createRoleDialog = roleDefinitions.getCreateRoleDialog();
+        createRoleDialog.setName(CUSTOM_ROLE);
+        createRoleDialog.clickOkButtonOrThrow();
+        
+        AclPopupPO aclPopup = roleDefinitions.findRole(CUSTOM_ROLE).openAclPopup();
+        aclPopup.addUserGroup("");
+        AclActionInputPO allowedActionsInput = aclPopup.getAllowedActionsInput();
+        // adding this ACL ensures that other users may read and update the custom role
+        allowedActionsInput.addAction(READ_ACTION);
+        allowedActionsInput.addAction(UPDATE_ACTION);
+        aclPopup.clickOkButtonOrThrow();
+        
+        UserGroupManagementPanelPO userGroupManagement = adminConsole.goToUserGroupDefinitions();
+        userGroupManagement.findGroup(USER1_TENANT).select();
+        userGroupManagement.getUserGroupRoles().addRole(CUSTOM_ROLE);
+        
+        clearSession(getWebDriver());
+        setUpAuthenticatedSession(getWebDriver(), USER2_NAME, USER2_NAME);
+        // user2 tries to add a permission to custom-role
+        roleDefinitions = AdminConsolePage.goToPage(getWebDriver(), getContextRoot()).goToRoleDefinitions();
+        RoleDefinitionCreationAndUpdateDialogPO updateDialog = roleDefinitions.findRole(CUSTOM_ROLE).openUpdateDialog();
+        updateDialog.addPermission(eventAllPermission);
+        // this is expected to fail because the negative ACL on the event
+        // causes user2 to not have all permissions implied by the permission
+        updateDialog.clickOkButtonAndExpectPermissionError();
+        
+        clearSession(getWebDriver());
+        setUpAuthenticatedSession(getWebDriver(), USER3_NAME, USER3_NAME);
+        roleDefinitions = AdminConsolePage.goToPage(getWebDriver(), getContextRoot()).goToRoleDefinitions();
+        updateDialog = roleDefinitions.findRole(CUSTOM_ROLE).openUpdateDialog();
+        updateDialog.addPermission(eventAllPermission);
+        // in this case, it works because user3 isn't affected by the negative ACL
+        updateDialog.clickOkButtonOrThrow();
+        // TODO assert that adding the permisssion was successful
+    }
+    
     // TODO additional test cases required for:
     // adding a Permission to a Role that is granted to a user in a specific qualification
-    // adding a Permission to a Role that is already added to a UserGroup
     // a user tries to leave a UserGroup which is affected by a negative ACL
 
     /**
