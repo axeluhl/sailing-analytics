@@ -48,7 +48,18 @@ public class UserRoleDefinitionPanelPO extends PageArea {
     public void addRole(String rolename, String groupname, String username) {
         enterNewRoleValues(rolename, groupname, username);
         clickAddButtonOrThrow();
-        waitUntil(() -> findRole(rolename + ":" + groupname + ":" + username) != null);
+        waitUntil(() -> findRole(getRoleName(rolename, groupname, username)) != null);
+    }
+
+    private String getRoleName(String rolename, String groupname, String username) {
+        StringBuilder sb = new StringBuilder(rolename);
+        if (!groupname.isEmpty() || !username.isEmpty()) {
+            sb.append(":" + groupname);
+        }
+        if (!username.isEmpty()) {
+            sb.append(":" + username);
+        }
+        return sb.toString();
     }
     
     public void enterNewRoleValues(String rolename, String groupname, String username) {
