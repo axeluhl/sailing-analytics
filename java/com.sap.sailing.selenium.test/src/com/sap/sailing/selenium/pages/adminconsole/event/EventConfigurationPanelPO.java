@@ -3,7 +3,6 @@ package com.sap.sailing.selenium.pages.adminconsole.event;
 import java.util.Date;
 
 import org.openqa.selenium.By;
-import org.openqa.selenium.By.ByName;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
@@ -12,10 +11,9 @@ import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.PageArea;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardGroupCreateDialogPO;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaCreateDialogPO;
-import com.sap.sailing.selenium.pages.adminconsole.security.AclPopupPO;
+import com.sap.sailing.selenium.pages.adminconsole.security.DataEntryWithSecurityActionsPO;
 import com.sap.sailing.selenium.pages.common.ConfirmDialogPO;
 import com.sap.sailing.selenium.pages.gwt.CellTablePO;
-import com.sap.sailing.selenium.pages.gwt.DataEntryPO;
 import com.sap.sailing.selenium.pages.gwt.GenericCellTablePO;
 import com.sap.sailing.selenium.pages.regattaoverview.RegattaOverviewPage;
 
@@ -30,10 +28,7 @@ public class EventConfigurationPanelPO extends PageArea {
     public static final String ID_LINK_LEADERBORAD_TO_GROUP_DIALOG = "LinkRegattaLeaderboardToLeaderboardGroupOfEventDialog";
     public static final String ID_LINK_EVENT_OVERVIEW_URL_LABEL = "EventOverviewURLLabel";
     
-    public static class EventEntryPO extends DataEntryPO {
-
-        @FindBy(how = ByName.class, using = "CHANGE_ACL")
-        private WebElement aclButton;
+    public static class EventEntryPO extends DataEntryWithSecurityActionsPO {
 
         public EventEntryPO(CellTablePO<?> table, WebElement element) {
             super(table, element);
@@ -50,12 +45,6 @@ public class EventConfigurationPanelPO extends PageArea {
         
         public String getEventURL() {
             return getWebElement().findElement(By.xpath(".//td/div/a")).getAttribute("href");
-        }
-
-        public AclPopupPO openAclPopup() {
-            aclButton.click();
-            waitForElement("AclDialog");
-            return new AclPopupPO(this.driver, driver.findElement(new BySeleniumId(("AclDialog"))));
         }
 
     }
