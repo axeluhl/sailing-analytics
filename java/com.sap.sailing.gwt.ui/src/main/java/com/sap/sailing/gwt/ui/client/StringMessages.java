@@ -154,6 +154,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String raceDetailsToShow();
     String tracking();
     String legDetailsToShow();
+    String showCarryColumn();
+    String showCarryColumnCheckbox();
+    String showCarryColumnTitle();
     String columnMoveUp();
     String columnMoveDown();
     String raceStartTimeColumn();

@@ -16,12 +16,14 @@ import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.common.communication.routing.ProvidesLeaderboardRouting;
+import com.sap.sailing.gwt.settings.client.leaderboard.EditableLeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboardedit.LeaderboardEditContextDefinition;
 import com.sap.sailing.gwt.ui.client.AbstractSailingWriteEntryPoint;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.formfactor.DeviceDetector;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.ui.authentication.decorator.AuthorizedContentDecorator;
@@ -82,7 +84,7 @@ public class LeaderboardEditPage extends AbstractSailingWriteEntryPoint implemen
                                                                                     leaderboardName, null,
                                                                                     LeaderboardEditPage.this,
                                                                                     getStringMessages(), userAgent,
-                                                                                    result);
+                                                                                    result, new EditableLeaderboardSettings(DeviceDetector.isDesktop()));
                                                                             leaderboardPanel.ensureDebugId(
                                                                                     "EditableLeaderboardPanel");
                                                                             return leaderboardPanel;

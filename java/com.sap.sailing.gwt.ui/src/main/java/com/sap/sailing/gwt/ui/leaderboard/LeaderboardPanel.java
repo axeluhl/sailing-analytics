@@ -313,7 +313,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
      */
     Anchor playPause;
 
-    final CompetitorSelectionProvider competitorSelectionProvider;
+    protected final CompetitorSelectionProvider competitorSelectionProvider;
     private final HorizontalPanel filterControlPanel;
     private Label filterStatusLabel;
     private Button filterClearButton;
@@ -3212,7 +3212,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         return needsCarryColumn ? zeroBasedIndexOfCarryColumn + 1 : zeroBasedIndexOfCarryColumn;
     }
 
-    private void ensureNoCarryColumn(int zeroBasedIndexOfCarryColumn) {
+    protected void ensureNoCarryColumn(int zeroBasedIndexOfCarryColumn) {
         if (getLeaderboardTable().getColumnCount() > zeroBasedIndexOfCarryColumn && getLeaderboardTable()
                 .getColumn(zeroBasedIndexOfCarryColumn) instanceof LeaderboardPanel.CarryColumn) {
             removeColumn(zeroBasedIndexOfCarryColumn);
