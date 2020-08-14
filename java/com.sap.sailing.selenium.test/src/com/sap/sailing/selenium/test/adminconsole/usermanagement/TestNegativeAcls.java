@@ -150,7 +150,7 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         userGroupManagement.findGroup(USER1_TENANT).select();
         userGroupUsers.enterNewUser(USER4_NAME);
         // this is expected to fail because the negative ACL on the event
-        // causes user2 to not have all permissions user role given by the UserGroup
+        // causes user2 to not have all permissions of the user role for user1-tenant
         userGroupUsers.clickAddButtonAndExpectPermissionError();
         
         clearSession(getWebDriver());
