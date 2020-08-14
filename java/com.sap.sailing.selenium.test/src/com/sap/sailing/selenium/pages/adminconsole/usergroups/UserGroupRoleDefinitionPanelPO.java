@@ -64,6 +64,6 @@ public class UserGroupRoleDefinitionPanelPO extends PageArea {
         } else {
             addRoleButton.click();
         }
-        waitForAlertContainingMessageAndAccept("You are not allowed to grant this role");
+        waitForAlertContainingMessageAndAccept("could not be added to group");
     }
 }
