@@ -12,6 +12,8 @@ import com.sap.sailing.selenium.pages.adminconsole.advanced.LocalServerPO;
 import com.sap.sailing.selenium.pages.adminconsole.event.EventConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.event.EventConfigurationPanelPO.EventEntryPO;
 import com.sap.sailing.selenium.pages.adminconsole.security.AclPopupPO;
+import com.sap.sailing.selenium.pages.adminconsole.usergroups.UserGroupManagementPanelPO;
+import com.sap.sailing.selenium.pages.adminconsole.usergroups.UserGroupUserPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.usermanagement.EditRolesAndPermissionsForUserDialogPO;
 import com.sap.sailing.selenium.pages.adminconsole.usermanagement.UserManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.usermanagement.UserRoleDefinitionPanelPO;
@@ -27,6 +29,7 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
     private static final String USER2_NAME = "user2";
     private static final String USER3_NAME = "user3";
     private static final String USER4_NAME = "user4";
+    private static final String USER1_TENANT = USER1_NAME + "-tenant";
     private static final String USER2_TENANT = USER2_NAME + "-tenant";
     private static final String EVENT_NAME = "Demo event";
     private static final String USER_ROLE = "user";
@@ -124,8 +127,44 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         // TODO assert that the permission was successfully added
     }
     
+    @Test
+    public void testUserWithNegativeAclCantAddUserToGroup() {
+        clearSession(getWebDriver());
+        setUpAuthenticatedSession(getWebDriver(), USER1_NAME, USER1_NAME);
+        // user1 creates an event
+        AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
+        addEventWithNegativeAclForGroup(adminConsole, USER2_TENANT);
+        
+        // user1 adds the user role to his tenant and adds user2 and user3 as members
+        UserGroupManagementPanelPO userGroupManagement = adminConsole.goToUserGroupDefinitions();
+        userGroupManagement.findGroup(USER1_TENANT).select();
+        userGroupManagement.getUserGroupRoles().addRole(USER_ROLE);
+        userGroupManagement.getUserGroupUsers().addUser(USER2_NAME);
+        userGroupManagement.getUserGroupUsers().addUser(USER3_NAME);
+        
+        clearSession(getWebDriver());
+        setUpAuthenticatedSession(getWebDriver(), USER2_NAME, USER2_NAME);
+        // user2 tries to add user4 as member to user1's tenant
+        userGroupManagement = AdminConsolePage.goToPage(getWebDriver(), getContextRoot()).goToUserGroupDefinitions();
+        UserGroupUserPanelPO userGroupUsers = userGroupManagement.getUserGroupUsers();
+        userGroupManagement.findGroup(USER1_TENANT).select();
+        userGroupUsers.enterNewUser(USER4_NAME);
+        // this is expected to fail because the negative ACL on the event
+        // causes user2 to not have all permissions user role given by the UserGroup
+        userGroupUsers.clickAddButtonAndExpectPermissionError();
+        
+        clearSession(getWebDriver());
+        setUpAuthenticatedSession(getWebDriver(), USER3_NAME, USER3_NAME);
+        userGroupManagement = AdminConsolePage.goToPage(getWebDriver(), getContextRoot()).goToUserGroupDefinitions();
+        userGroupUsers = userGroupManagement.getUserGroupUsers();
+        userGroupManagement.findGroup(USER1_TENANT).select();
+        // user3 adds user4 to user1-tenant
+        // in this case, it works because user3 isn't affected by the negative ACL
+        userGroupUsers.addUser(USER4_NAME);
+        // TODO assert that the user was successfully added to the UserGroup
+    }
+    
     // TODO additional test cases required for:
-    // adding a User to a UserGroup that has a Role associated
     // adding a Role to a UserGroup
     // adding a Permission to a Role that is granted to a user in a specific qualification
     // adding a Permission to a Role that is already added to a UserGroup

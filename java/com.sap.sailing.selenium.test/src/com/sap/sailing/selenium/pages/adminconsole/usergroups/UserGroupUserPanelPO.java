@@ -64,6 +64,6 @@ public class UserGroupUserPanelPO extends PageArea {
         } else {
             addButton.click();
         }
-        waitForAlertContainingMessageAndAccept("Not permitted to add user");
+        waitForAlertContainingMessageAndAccept("Current user does not have all the meta permissions of the user group the user would be added to");
     }
 }
