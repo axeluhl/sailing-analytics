@@ -1,6 +1,5 @@
 package com.sap.sailing.selenium.pages.gwt;
 
-import org.openqa.selenium.ElementNotSelectableException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
@@ -25,13 +24,5 @@ public class StringListEditorCompositePO extends PageArea {
     public void addNewValue(String value) {
         SuggestBoxPO.create(driver, valueInput).appendText(value);
         addValueButton.click();
-    }
-    
-    public void clickAddButtonAndExpectPermissionError() {
-        if (!addValueButton.isEnabled()) {
-            throw new ElementNotSelectableException("Add Button was disabled");
-        } else {
-            addValueButton.click();
-        }
     }
 }
