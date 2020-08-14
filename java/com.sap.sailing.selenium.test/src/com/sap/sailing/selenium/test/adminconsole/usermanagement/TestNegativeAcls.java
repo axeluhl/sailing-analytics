@@ -87,6 +87,7 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         // in this case, it works because user3 isn't affected by the negative ACL
         userManagement = AdminConsolePage.goToPage(getWebDriver(), getContextRoot()).goToUserManagement();
         userManagement.grantRoleToUserWithUserQualification(USER4_NAME, USER_ROLE, USER1_NAME);
+        // TODO assert that the role was successfully added
     }
     
     @Test
@@ -98,7 +99,7 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         String eventId = addEventWithNegativeAclForGroup(adminConsole, USER2_TENANT);
         String eventAllPermission = EVENT_ALL_PERMISSION_PREFIX + eventId;
         
-        // user1 gives user2 the permission "EVENT:*:<event-id>"
+        // user1 gives user2 and user3 the permission "EVENT:*:<event-id>"
         UserManagementPanelPO userManagement = adminConsole.goToUserManagement();
         userManagement.grantPermissionToUser(USER2_NAME, eventAllPermission);
         userManagement.grantPermissionToUser(USER3_NAME, eventAllPermission);
@@ -120,6 +121,7 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         // in this case, it works because user3 isn't affected by the negative ACL
         userManagement = AdminConsolePage.goToPage(getWebDriver(), getContextRoot()).goToUserManagement();
         userManagement.grantPermissionToUser(USER4_NAME, eventAllPermission);
+        // TODO assert that the permission was successfully added
     }
     
     // TODO additional test cases required for:
