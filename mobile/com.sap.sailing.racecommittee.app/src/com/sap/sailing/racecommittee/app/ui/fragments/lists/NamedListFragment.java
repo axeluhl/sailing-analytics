@@ -47,12 +47,13 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
     private ItemSelectedListener<T> listener;
     private CheckedItemAdapter listAdapter;
     private int mSelectedIndex = -1;
+
     private enum ItemsSort {
         Name,
         Date
     }
 
-    private ItemsSort itemsSort = ItemsSort.Name;
+    private ItemsSort itemsSort = ItemsSort.Date;
 
     protected abstract ItemSelectedListener<T> attachListener(Activity activity);
 
@@ -63,7 +64,7 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
         setupLoader();
     }
 
-    boolean isSupportsSorting(){
+    boolean isSupportsSorting() {
         return false;
     }
 
@@ -84,6 +85,7 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
             final LayoutInflater layoutInflater = LayoutInflater.from(requireContext());
             final View header = layoutInflater.inflate(R.layout.list_header, null, false);
             final Spinner sortOrder = header.findViewById(R.id.list_order);
+            sortOrder.setSelection(itemsSort == ItemsSort.Name ? 0 : 1);
             sortOrder.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
