@@ -224,7 +224,6 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         EventEntryPO eventEntry = eventsPanel.getEventEntry(EVENT_NAME);
         final String eventUUID = eventEntry.getUUID();
         
-        // user1 adds a negative ACL for user2-tenant
         final AclPopupPO aclPopup = eventEntry.openAclPopup();
         aclPopup.addUserGroup(groupToUseForNegativeAcl);
         aclPopup.getDeniedActionsInput().addAction(UPDATE_ACTION);
