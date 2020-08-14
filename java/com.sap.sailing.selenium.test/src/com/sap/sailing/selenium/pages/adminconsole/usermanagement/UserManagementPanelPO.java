@@ -97,6 +97,10 @@ public class UserManagementPanelPO extends PageArea {
         grantRoleToUser(userToGrantRole, roleName, "", userQualification);
     }
     
+    public void grantRoleToUserWithGroupQualification(String userToGrantRole, String roleName, String groupQualification) {
+        grantRoleToUser(userToGrantRole, roleName, groupQualification, "");
+    }
+    
     private void grantRoleToUser(String userToGrantRole, String roleName, String groupQualification, String userQualification) {
         final EditRolesAndPermissionsForUserDialogPO editRolesAndPermissionsDialogForUser = openEditRolesAndPermissionsDialogForUser(userToGrantRole);
         UserRoleDefinitionPanelPO userRoles = editRolesAndPermissionsDialogForUser.getUserRoles();
