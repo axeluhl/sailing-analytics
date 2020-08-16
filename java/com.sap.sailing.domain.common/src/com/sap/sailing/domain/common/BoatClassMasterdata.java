@@ -68,6 +68,8 @@ public enum BoatClassMasterdata {
     J70 ("J/70", true, 6.93, 2.25, BoatHullType.MONOHULL, true, "J70", "J-70"),
     J80 ("J/80", true, 8.0, 2.51, BoatHullType.MONOHULL, true, "J80", "J-80"),
     J88 ("J/88", true, 8.9, 1.89, BoatHullType.MONOHULL, true, "J88", "J-88"),
+    J92 ("J/92", true, 9.14, 3.05, BoatHullType.MONOHULL, true, "J92", "J-92"),
+    J92S ("J/92S", true, 9.14, 3.05, BoatHullType.MONOHULL, true, "J92S", "J-92S"),
     J105 ("J/105", true, 10.52, 3.35, BoatHullType.MONOHULL, true, "J105", "J-105"),
     J111 ("J/111", true, 11.1, 3.29, BoatHullType.MONOHULL, true, "J111", "J-111"),
     JK_20 ("20qm Jollenkreuzer", true, 7.75, 2.50, BoatHullType.MONOHULL, true, "JK 20", "JK20", "20er"),
@@ -136,6 +138,7 @@ public enum BoatClassMasterdata {
     VX_ONE ("VX ONE", true, 5.79, 2.19, BoatHullType.MONOHULL, true, "VX-ONE"),
     WAYFARER ("Wayfarer", true, 4.82, 1.85, BoatHullType.MONOHULL, false),
     WETA ("Weta", true, 4.4, 3.5, BoatHullType.TRIMARAN, true, "Weta Trimaran"),
+    X_332 ("X-332", true, 10.06, 3.30, BoatHullType.MONOHULL, true, "X332"),
     X_99 ("X-99", true, 9.96, 2.95, BoatHullType.MONOHULL, true, "X99"),
     
     // multi-class "boat classes"; to be replaced at some later point in time by something like a RegattaClass
