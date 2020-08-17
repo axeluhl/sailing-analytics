@@ -258,7 +258,7 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         updateDialog.addPermission(eventAllPermission);
         // in this case, it works because user3 isn't affected by the negative ACL
         updateDialog.clickOkButtonOrThrow();
-        // TODO assert that adding the permisssion was successful
+        assertTrue(roleDefinitions.findRole(CUSTOM_ROLE).getPermissions().contains(eventAllPermission));
     }
     
     @Test
@@ -308,7 +308,7 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         updateDialog.addPermission(eventAllPermission);
         // in this case, it works because user3 isn't affected by the negative ACL
         updateDialog.clickOkButtonOrThrow();
-        // TODO assert that adding the permisssion was successful
+        assertTrue(roleDefinitions.findRole(CUSTOM_ROLE).getPermissions().contains(eventAllPermission));
     }
     
     /**

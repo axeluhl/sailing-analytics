@@ -1,9 +1,8 @@
 package com.sap.sailing.selenium.pages.adminconsole.roles;
 
-import org.openqa.selenium.By;
+import org.openqa.selenium.By.ByName;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.By.ByName;
 
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
@@ -23,8 +22,8 @@ public class RoleDefinitionsPanelPO extends PageArea {
             super(table, element);
         }
         
-        public String getEventURL() {
-            return getWebElement().findElement(By.xpath(".//td/div/a")).getAttribute("href");
+        public String getPermissions() {
+            return getColumnContent("Permissions");
         }
         
         public RoleDefinitionCreationAndUpdateDialogPO openUpdateDialog() {
