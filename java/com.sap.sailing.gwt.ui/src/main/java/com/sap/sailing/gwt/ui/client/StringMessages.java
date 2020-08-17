@@ -1808,6 +1808,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String appendResult();
     String sampleColor();
     String leaderboardPage();
+    String editableLeaderboardPage();
     String showLiveNow();
     String useOnlyOneOfStartTimeInferenceAndControlTrackingFromStartAndFinishTimes();
     String estimatedDistance();

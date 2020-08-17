@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.settings.client.leaderboard;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.logging.Logger;
 
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sse.common.settings.generic.BooleanSetting;
@@ -10,9 +9,8 @@ import com.sap.sse.common.settings.generic.support.SettingsUtil;
 
 public class EditableLeaderboardSettings extends MultiRaceLeaderboardSettings {
 
-    private static final Logger logger = Logger.getLogger(EditableLeaderboardSettings.class.getName());
-
     private static final long serialVersionUID = -2108718366296960650L;
+    private static final String SHOW_CARRY_COLUMN_KEY = "showCarryColumn";
 
     protected BooleanSetting showCarryColumn;
 
@@ -39,7 +37,7 @@ public class EditableLeaderboardSettings extends MultiRaceLeaderboardSettings {
     @Override
     protected void addChildSettings() {
         super.addChildSettings();
-        showCarryColumn = new BooleanSetting("showCarryColumn",  this, true);
+        showCarryColumn = new BooleanSetting(SHOW_CARRY_COLUMN_KEY,  this, true);
     }
     
     public Boolean getShowCarryColumn() {
@@ -49,7 +47,6 @@ public class EditableLeaderboardSettings extends MultiRaceLeaderboardSettings {
     @Override
     public EditableLeaderboardSettings withNamesOfRaceColumnsToShowDefaults(
             Iterable<String> namesOfRaceColumnsToShow) {
-        logger.info("withNamesOfRaceColumnsToShowDefaults");
         return withNamesOfRaceColumnsToShowDefaults(namesOfRaceColumnsToShow, true);
     }
     
@@ -59,7 +56,6 @@ public class EditableLeaderboardSettings extends MultiRaceLeaderboardSettings {
      */
     public EditableLeaderboardSettings withNamesOfRaceColumnsToShowDefaults(
             final Iterable<String> namesOfRaceColumnsToShow, boolean showCarryDefault) {
-        logger.info("withNamesOfRaceColumnsToShowDefaults: " + showCarryDefault);
         final EditableLeaderboardSettings newSettings = new EditableLeaderboardSettings(showCarryDefault);
         SettingsUtil.copyValuesAndDefaults(this, this, newSettings);
         newSettings.namesOfRaceColumnsToShow.setDefaultValues(namesOfRaceColumnsToShow);

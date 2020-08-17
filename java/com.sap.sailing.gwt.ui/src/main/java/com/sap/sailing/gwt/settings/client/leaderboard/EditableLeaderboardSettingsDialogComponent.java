@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -25,15 +24,14 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 public class EditableLeaderboardSettingsDialogComponent
         extends LeaderboardSettingsDialogComponent<EditableLeaderboardSettings> {
 
-    private static final Logger logger = Logger.getLogger(EditableLeaderboardSettingsDialogComponent.class.getName());
-
     private final Map<String, CheckBox> raceColumnCheckboxes;
     private final List<String> raceAllRaceColumnNames;
     private RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy;
     private CheckBox showCarryColumnCheckbox = new CheckBox();
 
     public EditableLeaderboardSettingsDialogComponent(EditableLeaderboardSettings initialSettings,
-            List<String> allRaceColumnNames, StringMessages stringMessages, Iterable<DetailType> availableDetailTypes, boolean canBoatInfoBeShown) {
+            List<String> allRaceColumnNames, StringMessages stringMessages, Iterable<DetailType> availableDetailTypes, 
+            boolean canBoatInfoBeShown) {
         super(initialSettings, stringMessages, availableDetailTypes, canBoatInfoBeShown);
         this.activeRaceColumnSelectionStrategy = initialSettings.getActiveRaceColumnSelectionStrategy();
         this.raceAllRaceColumnNames = allRaceColumnNames;
@@ -42,9 +40,10 @@ public class EditableLeaderboardSettingsDialogComponent
 
     @Override
     public EditableLeaderboardSettings getResult() {
-        logger.info("showCarryColumnCheckbox " + showCarryColumnCheckbox);
-        List<DetailType> maneuverDetailsToShow = getSelected(maneuverDetailCheckboxes, initialSettings.getManeuverDetailsToShow());
-        List<DetailType> overallDetailsToShow = getSelected(overallDetailCheckboxes, initialSettings.getOverallDetailsToShow());
+        List<DetailType> maneuverDetailsToShow = getSelected(maneuverDetailCheckboxes, 
+                initialSettings.getManeuverDetailsToShow());
+        List<DetailType> overallDetailsToShow = getSelected(overallDetailCheckboxes, 
+                initialSettings.getOverallDetailsToShow());
         List<DetailType> raceDetailsToShow = getSelected(raceDetailCheckboxes, initialSettings.getRaceDetailsToShow());
         List<DetailType> legDetailsToShow = getSelected(legDetailCheckboxes, initialSettings.getLegDetailsToShow());
         List<String> namesOfRaceColumnsToShow = null;
@@ -59,14 +58,17 @@ public class EditableLeaderboardSettingsDialogComponent
         Long delayBetweenAutoAdvancesValue = refreshIntervalInSecondsBox.getValue();
         Integer lastNRacesToShowValue = activeRaceColumnSelectionStrategy == RaceColumnSelectionStrategies.LAST_N
                 ? numberOfLastRacesToShowBox.getValue() : null;
+        Long delayBetweenAutoAdvancesInMilliseconds = 1000l * (delayBetweenAutoAdvancesValue == null 
+                ? 0l : delayBetweenAutoAdvancesValue.longValue());
         final EditableLeaderboardSettings newSettings = new EditableLeaderboardSettings(maneuverDetailsToShow,
                 legDetailsToShow, raceDetailsToShow, overallDetailsToShow, namesOfRaceColumnsToShow,
-                lastNRacesToShowValue,
-                1000l * (delayBetweenAutoAdvancesValue == null ? 0l : delayBetweenAutoAdvancesValue.longValue()),
+                /* numberOfLastRacesToShow */ lastNRacesToShowValue,
+                delayBetweenAutoAdvancesInMilliseconds,
                 activeRaceColumnSelectionStrategy,
                 /* showAddedScores */ showAddedScoresCheckBox.getValue().booleanValue(),
                 showCompetitorShortNameColumnCheckBox.getValue(), showCompetitorFullNameColumnCheckBox.getValue(),
-                showCompetitorBoatInfoColumnCheckBox.getValue(), isCompetitorNationalityColumnVisible.getValue(), showCarryColumnCheckbox.getValue());
+                showCompetitorBoatInfoColumnCheckBox.getValue(), isCompetitorNationalityColumnVisible.getValue(), 
+                showCarryColumnCheckbox.getValue());
         return newSettings;
     }
 
@@ -83,7 +85,8 @@ public class EditableLeaderboardSettingsDialogComponent
         selectedRacesContent.addStyleName("dialogInnerContent");
         selectedRacesPanel.add(selectedRacesContent);
         
-        showCarryColumnCheckbox = createCheckbox(dialog, "Show accumulated column", initialSettings.getShowCarryColumn(), "");
+        showCarryColumnCheckbox = createCheckbox(dialog, stringMessages.showCarryColumn(), 
+                initialSettings.getShowCarryColumn(), stringMessages.showCarryColumnTitle());
 
         // Attention: We need to consider that there are regattas with more than 30 races
         int racesCount = raceAllRaceColumnNames.size();
@@ -179,7 +182,6 @@ public class EditableLeaderboardSettingsDialogComponent
     protected FlowPanel createShowCarryColumnDetailPanel(DataEntryDialog<?> dialog) {
         FlowPanel showCarryColumnDialog = new FlowPanel();
         showCarryColumnDialog.ensureDebugId("ShowCarryColumnSettingsPanel");
-        //TODO: exchange label
         showCarryColumnDialog.add(dialog.createHeadline(stringMessages.showCarryColumn(), true));
         showCarryColumnDialog.addStyleName("SettingsDialogComponent showCarryColumnSettings");
         FlowPanel showCarryColumnDialogContent = new FlowPanel();
@@ -188,7 +190,6 @@ public class EditableLeaderboardSettingsDialogComponent
         FlowPanel showCarryColumnDialogContentSecondLine = new FlowPanel();
         showCarryColumnDialogContentSecondLine.addStyleName("dialogInnerContent");
        
-        // TODO: exchange label
         showCarryColumnCheckbox = dialog.createCheckbox(stringMessages.showCarryColumnCheckbox());
         showCarryColumnCheckbox.setTitle(stringMessages.showCarryColumnTitle());
         showCarryColumnCheckbox.setValue(initialSettings.getShowCarryColumn());
@@ -201,9 +202,8 @@ public class EditableLeaderboardSettingsDialogComponent
 
     @Override
     public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
-        logger.info("getAdditionalWidget");
         FlowPanel dialogPanel = new FlowPanel();
-        dialogPanel.ensureDebugId("LeaderboardSettingsPanel");
+        dialogPanel.ensureDebugId("EditableLeaderboardSettingsPanel");
         dialogPanel.add(createSelectedRacesPanel(dialog));
         dialogPanel.add(createOverallDetailPanel(dialog));
         dialogPanel.add(createRaceDetailPanel(dialog));
@@ -212,10 +212,6 @@ public class EditableLeaderboardSettingsDialogComponent
         dialogPanel.add(createManeuverDetailsPanel(dialog));
         dialogPanel.add(createTimingDetailsPanel(dialog));
         dialogPanel.add(createShowCarryColumnDetailPanel(dialog));
-
-
-        //dialogPanel.add(createOverallDetailPanel(dialog));
-        logger.info("getAdditionalWidget end");
         return dialogPanel;
     }
 
