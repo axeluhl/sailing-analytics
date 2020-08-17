@@ -819,6 +819,11 @@ public class UserStoreImpl implements UserStore {
                 logger.log(Level.SEVERE, e.getMessage(), e);
             }
         }
+        for (UserGroup userGroup : userGroups.values()) {
+            if (userGroup.getRoleDefinitionMap().containsKey(roleToCheck)) {
+                ownerships.add(new Ownership(null, userGroup));
+            }
+        }
         return new Pair<>(false, ownerships);
     }
 
