@@ -5,6 +5,7 @@ import org.openqa.selenium.WebElement;
 
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
+import com.sap.sailing.selenium.pages.adminconsole.common.ErrorDialogPO;
 import com.sap.sailing.selenium.pages.common.DataEntryDialogPO;
 import com.sap.sailing.selenium.pages.gwt.StringListEditorCompositePO;
 import com.sap.sailing.selenium.pages.gwt.TextBoxPO;
@@ -34,6 +35,6 @@ public class RoleDefinitionCreationAndUpdateDialogPO extends DataEntryDialogPO {
     
     public void clickOkButtonAndExpectPermissionError() {
         clickOkButtonOrThrow();
-        waitForAlertContainingMessageAndAccept("could not be added to group");
+        waitForPO(ErrorDialogPO::new, "ErrorDialog", 10).assertTitleContainsTextAndClose("Not permitted to grant permissions for role");
     }
 }

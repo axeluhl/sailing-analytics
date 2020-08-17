@@ -261,10 +261,56 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         // TODO assert that adding the permisssion was successful
     }
     
-    // TODO additional test cases required for:
-    // adding a Permission to a Role that is granted to a user in a specific qualification
-    // a user tries to leave a UserGroup which is affected by a negative ACL
-
+    @Test
+    public void testUserWithNegativeAclCantAddPermissionToRoleThatIsAssociatedToAUser() {
+        clearSession(getWebDriver());
+        setUpAuthenticatedSession(getWebDriver(), USER1_NAME, USER1_NAME);
+        // user1 creates an event
+        AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
+        String eventId = addEventWithNegativeAclForGroup(adminConsole, USER2_TENANT);
+        String eventAllPermission = EVENT_ALL_PERMISSION_PREFIX + eventId;
+        
+        RoleDefinitionsPanelPO roleDefinitions = adminConsole.goToRoleDefinitions();
+        RoleDefinitionCreationAndUpdateDialogPO createRoleDialog = roleDefinitions.getCreateRoleDialog();
+        createRoleDialog.setName(CUSTOM_ROLE);
+        createRoleDialog.clickOkButtonOrThrow();
+        
+        AclPopupPO aclPopup = roleDefinitions.findRole(CUSTOM_ROLE).openAclPopup();
+        aclPopup.addUserGroup("");
+        AclActionInputPO allowedActionsInput = aclPopup.getAllowedActionsInput();
+        // adding this ACL ensures that other users may read and update the custom role
+        allowedActionsInput.addAction(READ_ACTION);
+        allowedActionsInput.addAction(UPDATE_ACTION);
+        aclPopup.clickOkButtonOrThrow();
+        
+        UserManagementPanelPO userManagement = adminConsole.goToUserManagement();
+        // user1 grants EVENT:*:<event-id> permission to user2 and user3 for objects owned by user1
+        userManagement.grantPermissionToUser(USER2_NAME, eventAllPermission);
+        userManagement.grantPermissionToUser(USER3_NAME, eventAllPermission);
+        // user1 grants the custom-role to user4 for objects owned by user1
+        // this role does not grant any permissions initially
+        userManagement.grantRoleToUserWithUserQualification(USER4_NAME, CUSTOM_ROLE, USER1_NAME);
+        
+        clearSession(getWebDriver());
+        setUpAuthenticatedSession(getWebDriver(), USER2_NAME, USER2_NAME);
+        // user2 tries to add a permission to custom-role
+        roleDefinitions = AdminConsolePage.goToPage(getWebDriver(), getContextRoot()).goToRoleDefinitions();
+        RoleDefinitionCreationAndUpdateDialogPO updateDialog = roleDefinitions.findRole(CUSTOM_ROLE).openUpdateDialog();
+        updateDialog.addPermission(eventAllPermission);
+        // this is expected to fail because the negative ACL on the event
+        // causes user2 to not have all permissions implied by the permission
+        updateDialog.clickOkButtonAndExpectPermissionError();
+        
+        clearSession(getWebDriver());
+        setUpAuthenticatedSession(getWebDriver(), USER3_NAME, USER3_NAME);
+        roleDefinitions = AdminConsolePage.goToPage(getWebDriver(), getContextRoot()).goToRoleDefinitions();
+        updateDialog = roleDefinitions.findRole(CUSTOM_ROLE).openUpdateDialog();
+        updateDialog.addPermission(eventAllPermission);
+        // in this case, it works because user3 isn't affected by the negative ACL
+        updateDialog.clickOkButtonOrThrow();
+        // TODO assert that adding the permisssion was successful
+    }
+    
     /**
      * @return the UUID of the newly created event.
      */
