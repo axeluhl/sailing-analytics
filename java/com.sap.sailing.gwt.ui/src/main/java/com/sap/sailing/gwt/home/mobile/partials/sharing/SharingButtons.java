@@ -91,7 +91,7 @@ public class SharingButtons extends Composite {
             public void onWindowScroll(ScrollEvent event) {
                 htmlPanel.removeStyleName(css.eventheader_sharing_faded_out());
                 htmlPanel.addStyleName(css.eventheader_sharing_faded_in());
-                fadeOutSharingButtonsTimer.schedule(2000);
+                fadeOutSharingButtonsTimer.schedule(1500);
             }
         });
     }
