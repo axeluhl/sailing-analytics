@@ -225,18 +225,7 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         String eventId = addEventWithNegativeAclForGroup(adminConsole, USER2_TENANT);
         String eventAllPermission = EVENT_ALL_PERMISSION_PREFIX + eventId;
         
-        RoleDefinitionsPanelPO roleDefinitions = adminConsole.goToRoleDefinitions();
-        RoleDefinitionCreationAndUpdateDialogPO createRoleDialog = roleDefinitions.getCreateRoleDialog();
-        createRoleDialog.setName(CUSTOM_ROLE);
-        createRoleDialog.clickOkButtonOrThrow();
-        
-        AclPopupPO aclPopup = roleDefinitions.findRole(CUSTOM_ROLE).openAclPopup();
-        aclPopup.addUserGroup("");
-        AclActionInputPO allowedActionsInput = aclPopup.getAllowedActionsInput();
-        // adding this ACL ensures that other users may read and update the custom role
-        allowedActionsInput.addAction(READ_ACTION);
-        allowedActionsInput.addAction(UPDATE_ACTION);
-        aclPopup.clickOkButtonOrThrow();
+        createCustomRoleWithReadAndUpdateAclForAll(adminConsole);
         
         UserGroupManagementPanelPO userGroupManagement = adminConsole.goToUserGroupDefinitions();
         userGroupManagement.findGroup(USER1_TENANT).select();
@@ -245,7 +234,7 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         clearSession(getWebDriver());
         setUpAuthenticatedSession(getWebDriver(), USER2_NAME, USER2_NAME);
         // user2 tries to add a permission to custom-role
-        roleDefinitions = AdminConsolePage.goToPage(getWebDriver(), getContextRoot()).goToRoleDefinitions();
+        RoleDefinitionsPanelPO roleDefinitions = AdminConsolePage.goToPage(getWebDriver(), getContextRoot()).goToRoleDefinitions();
         RoleDefinitionCreationAndUpdateDialogPO updateDialog = roleDefinitions.findRole(CUSTOM_ROLE).openUpdateDialog();
         updateDialog.addPermission(eventAllPermission);
         // this is expected to fail because the negative ACL on the event
@@ -271,18 +260,7 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         String eventId = addEventWithNegativeAclForGroup(adminConsole, USER2_TENANT);
         String eventAllPermission = EVENT_ALL_PERMISSION_PREFIX + eventId;
         
-        RoleDefinitionsPanelPO roleDefinitions = adminConsole.goToRoleDefinitions();
-        RoleDefinitionCreationAndUpdateDialogPO createRoleDialog = roleDefinitions.getCreateRoleDialog();
-        createRoleDialog.setName(CUSTOM_ROLE);
-        createRoleDialog.clickOkButtonOrThrow();
-        
-        AclPopupPO aclPopup = roleDefinitions.findRole(CUSTOM_ROLE).openAclPopup();
-        aclPopup.addUserGroup("");
-        AclActionInputPO allowedActionsInput = aclPopup.getAllowedActionsInput();
-        // adding this ACL ensures that other users may read and update the custom role
-        allowedActionsInput.addAction(READ_ACTION);
-        allowedActionsInput.addAction(UPDATE_ACTION);
-        aclPopup.clickOkButtonOrThrow();
+        createCustomRoleWithReadAndUpdateAclForAll(adminConsole);
         
         UserManagementPanelPO userManagement = adminConsole.goToUserManagement();
         // user1 grants EVENT:*:<event-id> permission to user2 and user3 for objects owned by user1
@@ -295,7 +273,7 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         clearSession(getWebDriver());
         setUpAuthenticatedSession(getWebDriver(), USER2_NAME, USER2_NAME);
         // user2 tries to add a permission to custom-role
-        roleDefinitions = AdminConsolePage.goToPage(getWebDriver(), getContextRoot()).goToRoleDefinitions();
+        RoleDefinitionsPanelPO roleDefinitions = AdminConsolePage.goToPage(getWebDriver(), getContextRoot()).goToRoleDefinitions();
         RoleDefinitionCreationAndUpdateDialogPO updateDialog = roleDefinitions.findRole(CUSTOM_ROLE).openUpdateDialog();
         updateDialog.addPermission(eventAllPermission);
         // this is expected to fail because the negative ACL on the event
@@ -312,6 +290,21 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         assertTrue(roleDefinitions.findRole(CUSTOM_ROLE).getPermissions().contains(eventAllPermission));
     }
     
+    private void createCustomRoleWithReadAndUpdateAclForAll(AdminConsolePage adminConsole) {
+        RoleDefinitionsPanelPO roleDefinitions = adminConsole.goToRoleDefinitions();
+        RoleDefinitionCreationAndUpdateDialogPO createRoleDialog = roleDefinitions.getCreateRoleDialog();
+        createRoleDialog.setName(CUSTOM_ROLE);
+        createRoleDialog.clickOkButtonOrThrow();
+        
+        AclPopupPO aclPopup = roleDefinitions.findRole(CUSTOM_ROLE).openAclPopup();
+        aclPopup.addUserGroup("");
+        AclActionInputPO allowedActionsInput = aclPopup.getAllowedActionsInput();
+        // adding this ACL ensures that other users may read and update the custom role
+        allowedActionsInput.addAction(READ_ACTION);
+        allowedActionsInput.addAction(UPDATE_ACTION);
+        aclPopup.clickOkButtonOrThrow();
+    }
+
     /**
      * @return the UUID of the newly created event.
      */
