@@ -1,6 +1,7 @@
 package com.sap.sailing.selenium.test.adminconsole.usermanagement;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
