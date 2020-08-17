@@ -11,12 +11,19 @@ public class EditableLeaderboardSettings extends MultiRaceLeaderboardSettings {
 
     private static final long serialVersionUID = -2108718366296960650L;
     private static final String SHOW_CARRY_COLUMN_KEY = "showCarryColumn";
+    private static final Boolean SHOW_CARRY_COLUMN_DEFAULT = Boolean.TRUE;
 
     protected BooleanSetting showCarryColumn;
 
     public EditableLeaderboardSettings(boolean showCarryColumn) {
         super();
         this.showCarryColumn.setValue(showCarryColumn);
+    }
+
+    public EditableLeaderboardSettings(Iterable<String> namesOfRaceColumnsToShow) {
+        super(namesOfRaceColumnsToShow);
+        this.showCarryColumn.setValue(SHOW_CARRY_COLUMN_DEFAULT);
+        
     }
     
     public EditableLeaderboardSettings(Collection<DetailType> maneuverDetailsToShow,
@@ -37,7 +44,7 @@ public class EditableLeaderboardSettings extends MultiRaceLeaderboardSettings {
     @Override
     protected void addChildSettings() {
         super.addChildSettings();
-        showCarryColumn = new BooleanSetting(SHOW_CARRY_COLUMN_KEY,  this, true);
+        showCarryColumn = new BooleanSetting(SHOW_CARRY_COLUMN_KEY,  this, SHOW_CARRY_COLUMN_DEFAULT);
     }
     
     public Boolean getShowCarryColumn() {
@@ -47,7 +54,7 @@ public class EditableLeaderboardSettings extends MultiRaceLeaderboardSettings {
     @Override
     public EditableLeaderboardSettings withNamesOfRaceColumnsToShowDefaults(
             Iterable<String> namesOfRaceColumnsToShow) {
-        return withNamesOfRaceColumnsToShowDefaults(namesOfRaceColumnsToShow, true);
+        return withNamesOfRaceColumnsToShowDefaults(namesOfRaceColumnsToShow, SHOW_CARRY_COLUMN_DEFAULT);
     }
     
     /**

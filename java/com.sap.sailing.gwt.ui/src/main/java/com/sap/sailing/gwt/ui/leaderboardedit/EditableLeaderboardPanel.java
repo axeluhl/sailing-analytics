@@ -690,7 +690,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel<EditableLeaderboa
 
         @Override
         public String getValue(LeaderboardRowDTO object) {
-            return "";
+            return stringMessages.edit();
         }
     }
 
@@ -1098,7 +1098,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel<EditableLeaderboa
 
             @Override
             public String getValue(LeaderboardRowDTO object) {
-                return "";//stringMessages.edit();
+                return stringMessages.edit();
             }
         });
         return result;
@@ -1160,7 +1160,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel<EditableLeaderboa
 
             @Override
             public String getValue(LeaderboardRowDTO object) {
-                return "";//stringMessages.edit();
+                return stringMessages.edit();
             }
         });
         return result;

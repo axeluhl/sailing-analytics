@@ -188,11 +188,11 @@ table button {
 table.editableLeaderboardTable tr th:first-child { display: none; }
 table.editableLeaderboardTable tr td:first-child { display: none; }
 
-/* edit button of editable leaderboard table */
+/* edit button of editable leaderboard table
 .editableLeaderboardTable .editButton {
   padding: 0; 
   margin-left: 3px;
-  cursor: pointer; /* Mouse pointer on hover */
+  cursor: pointer; 
   width: 20px;
   height: 20px;
   display: flex;
@@ -201,11 +201,19 @@ table.editableLeaderboardTable tr td:first-child { display: none; }
   background: url(images/edit.png) center center no-repeat;
   width: 16px;
   height: 16px;
+} */
+.editableLeaderboardTable .editButton {
+  margin-left: 3px;
+  padding: 0 2px; 
+  cursor: pointer;
+  height: 20px;
+  font-size: 10px;
 }
 
-.editableLeaderboardTable .suppressButton, .suppressedCompetitorsTable .suppressButton {
+.editableLeaderboardTable .suppressButton, 
+.suppressedCompetitorsTable .suppressButton {
   padding: 0 2px; 
-  cursor: pointer; /* Mouse pointer on hover */
+  cursor: pointer;
   height: 20px;
   font-size: 10px;
 }
