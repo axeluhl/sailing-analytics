@@ -16,7 +16,6 @@ import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.Util;
@@ -58,7 +57,6 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
         implements StatisticProvider {
 
     private static final String StatisticProviderStyle = "statisticProvider";
-    private static final String StatisticProviderLabelStyle = "statisticProviderLabel";
     private static final String StatisticProviderElementStyle = "statisticProviderElement";
     private static final String SuggestBoxContainerStyle = "statisticSuggestBoxContainer";
 
@@ -77,7 +75,6 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
     private final List<Component<?>> retrieverLevelSettingsComponents;
 
     private final FlowPanel mainPanel;
-    private final Label labelBetweenAggregatorAndStatistic;
     
     private final Map<String, Set<AggregationProcessorDefinitionDTO>> collectedAggregators;
     private final List<AggregatorGroup> availableAggregators;
@@ -146,10 +143,6 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
         mainPanel = new FlowPanel();
         mainPanel.addStyleName(StatisticProviderStyle);
         mainPanel.add(aggregatorListBox);
-        labelBetweenAggregatorAndStatistic = new Label(getDataMiningStringMessages().of());
-        labelBetweenAggregatorAndStatistic.addStyleName(StatisticProviderLabelStyle);
-        labelBetweenAggregatorAndStatistic.addStyleName("emphasizedLabel");
-        mainPanel.add(labelBetweenAggregatorAndStatistic);
         mainPanel.add(suggestBoxContainer);
     }
 
@@ -327,13 +320,10 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
                 && newAggregator.supportsFunction(identityFunction);
         
         List<? extends ExtractionFunctionWithContext> selectableExtractionFunctions;
-        String labelBetweenAggregatorAndStatisticText = null;
         if (newAggregatorSupportsIdentityFunction) {
             selectableExtractionFunctions = availableIdentityFunctions;
-            labelBetweenAggregatorAndStatisticText = getDataMiningStringMessages().the();
         } else {
             selectableExtractionFunctions = availableStatistics;
-            labelBetweenAggregatorAndStatisticText = getDataMiningStringMessages().of();
         }
         
         ExtractionFunctionWithContext currentExtractionFunction = extractionFunctionSuggestBox.getExtractionFunction();
@@ -353,8 +343,6 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
         }
         extractionFunctionSuggestBox.setSelectableValues(selectableExtractionFunctions);
         extractionFunctionSuggestBox.setGroupingSuggestionsByRetrieverChain(!newAggregatorSupportsIdentityFunction);
-        labelBetweenAggregatorAndStatistic.setText(labelBetweenAggregatorAndStatisticText);
-        
         notifyAggregatorDefinitionListeners();
     }
     
