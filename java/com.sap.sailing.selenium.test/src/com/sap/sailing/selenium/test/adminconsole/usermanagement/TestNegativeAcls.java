@@ -8,7 +8,6 @@ import java.time.ZonedDateTime;
 import java.util.Date;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
@@ -216,7 +215,6 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
     }
     
     @Test
-    @Ignore
     public void testUserWithNegativeAclCantAddPermissionToRoleThatIsAssociatedToAUserGroup() {
         clearSession(getWebDriver());
         setUpAuthenticatedSession(getWebDriver(), USER1_NAME, USER1_NAME);
@@ -224,6 +222,11 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         String eventId = addEventWithNegativeAclForGroup(adminConsole, USER2_TENANT);
         String eventAllPermission = EVENT_ALL_PERMISSION_PREFIX + eventId;
+
+        UserManagementPanelPO userManagement = adminConsole.goToUserManagement();
+        // user1 grants EVENT:*:<event-id> permission to user2 and user3 for objects owned by user1
+        userManagement.grantPermissionToUser(USER2_NAME, eventAllPermission);
+        userManagement.grantPermissionToUser(USER3_NAME, eventAllPermission);
         
         createCustomRoleWithReadAndUpdateAclForAll(adminConsole);
         
