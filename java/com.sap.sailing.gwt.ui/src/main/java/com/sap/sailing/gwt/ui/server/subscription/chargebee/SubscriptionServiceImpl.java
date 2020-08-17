@@ -73,7 +73,7 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
                         + SubscriptionPlanHolder.getInstance().getPlan(planId).getName() + " plan");
                 return response;
             }
-            Pair<String, String> usernames = getUserFirstAndLastName(user.getFullName());
+            Pair<String, String> usernames = getUserFirstAndLastName(user);
             String locale = user.getLocaleOrDefault().getLanguage();
             Result result = HostedPage.checkoutNew().customerId(user.getName()).customerEmail(user.getEmail())
                     .customerFirstName(usernames.getA()).customerLastName(usernames.getB()).customerLocale(locale)
@@ -150,15 +150,13 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
             User user = getCurrentUser();
             Subscription subscription = user.getSubscriptionByPlan(planId);
             if (!isValidSubscription(subscription)) {
-                return true;
+                return true; // TODO why is this returning true here when true is supposed to indicate success?
             }
-
             Result result = cancel(subscription.getSubscriptionId()).request();
             if (!result.subscription().status().name().toLowerCase()
                     .equals(ChargebeeSubscription.SUBSCRIPTION_STATUS_CANCELLED)) {
                 return false;
             }
-
             Subscription newSubscription = ChargebeeSubscription.createEmptySubscription(subscription.getPlanId(),
                     subscription.getLatestEventTime(), System.currentTimeMillis() / 1000);
             getSecurityService().updateUserSubscription(user.getName(), newSubscription);
@@ -207,15 +205,22 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
         return subscription != null && StringUtils.isNotEmpty(subscription.getSubscriptionId());
     }
 
-    private Pair<String, String> getUserFirstAndLastName(String fullName) {
-        String[] userNameParts = fullName.split("\\s+");
-        String firstName = userNameParts[0];
-        String lastName = "";
-        if (userNameParts.length > 1) {
-            lastName = String.join(" ", Arrays.copyOfRange(userNameParts, 1, userNameParts.length));
+    private Pair<String, String> getUserFirstAndLastName(User user) {
+        final Pair<String, String> result;
+        if (user.getFullName() == null || user.getFullName().isEmpty()) {
+            result = new Pair<>(user.getName(), "");
+        } else {
+            final String[] userNameParts = user.getFullName().split("\\s+");
+            final String firstName = userNameParts[0];
+            final String lastName;
+            if (userNameParts.length > 1) {
+                lastName = String.join(" ", Arrays.copyOfRange(userNameParts, 1, userNameParts.length));
+            } else {
+                lastName = "";
+            }
+            result = new Pair<>(firstName, lastName);
         }
-
-        return new Pair<String, String>(firstName, lastName);
+        return result;
     }
 
     private SecurityService getSecurityService() {

@@ -119,7 +119,6 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
     private Subscription buildSubscription(Subscription currentSubscription, SubscriptionWebHookEvent event) {
         String paymentStatus = null;
         String subscriptionStatus = event.getSubscriptionStatus();
-
         if (subscriptionStatus != null
                 && subscriptionStatus.equals(SubscriptionWebHookEvent.SUBSCRIPTION_STATUS_ACTIVE)) {
             paymentStatus = getEventPaymentStatus(event);
@@ -127,7 +126,6 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
                 paymentStatus = currentSubscription.getPaymentStatus();
             }
         }
-
         return new ChargebeeSubscription(event.getSubscriptionId(), event.getPlanId(), event.getCustomerId(),
                 event.getSubscriptionTrialStart(), event.getSubscriptionTrialEnd(), subscriptionStatus, paymentStatus,
                 event.getSubscriptionCreatedAt(), event.getSubscriptionUpdatedAt(), event.getEventOccurredAt(),

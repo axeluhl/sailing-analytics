@@ -2621,6 +2621,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (plan != null) {
             UUID[] roleDefinitionIds = plan.getRoleDefinitionIds();
             for (UUID roleDefId : roleDefinitionIds) {
+                // TODO bug5260: shall the assignment really be qualified for objects owned by the user only? I think no. See addUserPlanRoles(...)
                 store.removeRoleFromUser(user.getName(), new Role(getRoleDefinition(roleDefId), null, user));
             }
         }
@@ -2630,6 +2631,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (plan != null) {
             UUID[] roleDefinitionIds = plan.getRoleDefinitionIds();
             for (UUID roleDefId : roleDefinitionIds) {
+                // TODO bug5260: shall the assignment really be qualified for objects owned by the user only? I think no. See also removeUserPlanRoles(...)
                 store.addRoleForUser(user.getName(), new Role(getRoleDefinition(roleDefId), null, user));
             }
         }

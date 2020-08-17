@@ -83,7 +83,6 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
     public void openCheckout(String planId) {
         clientFactory.getSubscriptionService().generateHostedPageObject(planId,
                 new AsyncCallback<HostedPageResultDTO>() {
-
                     @Override
                     public void onSuccess(HostedPageResultDTO hostedPage) {
                         if (hostedPage.getError() != null && !hostedPage.getError().isEmpty()) {
@@ -110,14 +109,13 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
     @Override
     public void cancelSubscription(String planId) {
         clientFactory.getSubscriptionService().cancelSubscription(planId, new AsyncCallback<Boolean>() {
-
             @Override
             public void onSuccess(Boolean result) {
                 if (!result) {
                     showError(StringMessages.INSTANCE.failedCancelSubscription());
-                    return;
+                } else {
+                    fetchSubscription();
                 }
-                fetchSubscription();
             }
 
             @Override
@@ -129,14 +127,12 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
 
     private void fetchSubscription() {
         clientFactory.getSubscriptionService().getSubscription(new AsyncCallback<SubscriptionDTO>() {
-
             @Override
             public void onSuccess(SubscriptionDTO result) {
                 if (result != null && result.getError() != null && !result.getError().isEmpty()) {
                     showError(StringMessages.INSTANCE.errorLoadingUserSubscription(result.getError()));
                     return;
                 }
-
                 view.updateView(result);
             }
 
@@ -161,7 +157,6 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
                 Chargebee.getInstance().closeAll();
                 showError(StringMessages.INSTANCE.errorSaveSubscription(caught.getMessage()));
             }
-
         });
     }
 
