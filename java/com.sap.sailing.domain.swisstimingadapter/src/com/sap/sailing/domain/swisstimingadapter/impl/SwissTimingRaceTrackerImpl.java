@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.Collection;
@@ -60,13 +61,13 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingHandler;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler.DefaultRaceTrackingHandler;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.TrackingDataLoader;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
-import com.sap.sailing.domain.tracking.RaceTrackingHandler.DefaultRaceTrackingHandler;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
 import com.sap.sailing.domain.tracking.impl.TrackingConnectorInfoImpl;
 import com.sap.sailing.domain.tracking.impl.UpdateHandler;
@@ -187,8 +188,32 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
         }
         // Ensure this is called last, otherwise the connector starts running without having a complete racetracker
         this.connector = factory.getOrCreateSailMasterConnector(connectivityParams.getHostname(),
-                connectivityParams.getPort(), connectivityParams.getRaceID(), connectivityParams.getRaceName(),
-                connectivityParams.getRaceDescription(), connectivityParams.getBoatClass(), this);
+                connectivityParams.getPort(), connectivityParams.getRaceID(), getRaceDataUrl(connectivityParams),
+                connectivityParams.getRaceName(), connectivityParams.getRaceDescription(), connectivityParams.getBoatClass(), this);
+    }
+
+    /**
+     * If a valid hostname/port combination is set in the connectivity parameters, {@code null} is returned. Otherwise,
+     * a {@link URL} is constructed from the {@link SwissTimingTrackingConnectivityParameters#getManage2SailEventUrl()}
+     * by stripping all URL parameters and replacing the last path element which is expected to be a file name for the
+     * {@code .json} file by the {race-id}.log combination, expecting the race data to reside in the same folder as
+     * the JSON file describing the Manage2Sail event.
+     */
+    private URL getRaceDataUrl(SwissTimingTrackingConnectivityParameters connectivityParams) throws MalformedURLException {
+        final URL result;
+        if (connectivityParams.getHostname() == null) {
+            final java.net.URL manage2SailEventURL = new URL(connectivityParams.getManage2SailEventUrl());
+            final String path = manage2SailEventURL.getPath();
+            final String logFile = path.substring(0, path.lastIndexOf('/')+1) + connectivityParams.getRaceID()+".log";
+            if (manage2SailEventURL.getPort() != -1) {
+                result = new java.net.URL(manage2SailEventURL.getProtocol(), manage2SailEventURL.getHost(), manage2SailEventURL.getPort(), logFile);
+            } else {
+                result = new java.net.URL(manage2SailEventURL.getProtocol(), manage2SailEventURL.getHost(), logFile);
+            }
+        } else {
+            result = null;
+        }
+        return result;
     }
 
     @Override

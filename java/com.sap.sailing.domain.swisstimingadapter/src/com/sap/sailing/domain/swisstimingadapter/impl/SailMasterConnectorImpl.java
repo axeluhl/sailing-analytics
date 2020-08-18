@@ -3,8 +3,10 @@ package com.sap.sailing.domain.swisstimingadapter.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
 import java.net.Socket;
 import java.net.SocketException;
+import java.net.URL;
 import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -86,9 +88,27 @@ import com.sap.sse.util.impl.UUIDHelper;
 public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implements SailMasterConnector, Runnable {
     private static final Logger logger = Logger.getLogger(SailMasterConnectorImpl.class.getName());
     
+    /**
+     * If this field has a non-{@code null} value, {@link #host} and {@link #port} are ignored, and no {@code OPN}
+     * message will be sent, and instead data is received only.
+     */
+    private final URL raceDataUrl;
     private final String host;
     private final int port;
+    
+    /**
+     * Will have a socket connecting to {@link #host}:{@link #port} if {@link #host} is not {@code null}. Otherwise,
+     * this socket field will remain {@code null}, and a URL connection is attempted to the {@link #raceDataUrl}.
+     * 
+     * TODO refactor such that there are two specific subclasses of an abstract base class; one dealing with Socket/host/port and the other with a URL connection
+     */
     private Socket socket;
+    
+    /**
+     * If the {@link #socket} is not being used, a {@link HttpURLConnection} is expected to provide the
+     * {@ilnk InputStream} from which this connector reads.
+     */
+    private HttpURLConnection urlConnection;
     private final DateFormat dateFormat;
     private final Set<SailMasterListener> listeners;
     private final Thread receiverThread;
@@ -131,7 +151,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
 
     private Long numberOfStoredMessages;
     
-    public SailMasterConnectorImpl(String host, int port, String raceId, String raceName, String raceDescription, BoatClass boatClass, SwissTimingRaceTrackerImpl swissTimingRaceTracker) throws InterruptedException, ParseException {
+    public SailMasterConnectorImpl(String host, int port, String raceId, URL raceDataUrl, String raceName, String raceDescription, BoatClass boatClass, SwissTimingRaceTrackerImpl swissTimingRaceTracker) throws InterruptedException, ParseException {
         super();
         maxSequenceNumber = -1l;
         this.raceId = raceId; // from this time on, the connector interprets messages for raceID
@@ -141,8 +161,9 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
         this.host = host;
         this.port = port;
-        this.listeners = new HashSet<SailMasterListener>();
-        this.unprocessedMessagesByType = new HashMap<MessageType, BlockingQueue<SailMasterMessage>>();
+        this.raceDataUrl = raceDataUrl;
+        this.listeners = new HashSet<>();
+        this.unprocessedMessagesByType = new HashMap<>();
         this.addSailMasterListener(swissTimingRaceTracker);
         receiverThread = new Thread(this, "SwissTiming SailMaster Receiver");
         receiverThread.start();

@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.swisstimingadapter.impl;
 
+import java.net.URL;
 import java.text.ParseException;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -21,9 +22,9 @@ public class SailMasterLiveSimulatorConnectorImpl extends SailMasterConnectorImp
 
     private long messageDeliveryIntervalInMs = Long.valueOf(System.getProperty("simulateLiveMode.delayInMillis", "250"));
     
-    public SailMasterLiveSimulatorConnectorImpl(String host, int port, String raceId, String raceName, String raceDescription, BoatClass boatClass, SwissTimingRaceTrackerImpl swissTimingRaceTracker)
+    public SailMasterLiveSimulatorConnectorImpl(String host, int port, String raceId, URL raceDataUrl, String raceName, String raceDescription, BoatClass boatClass, SwissTimingRaceTrackerImpl swissTimingRaceTracker)
             throws InterruptedException, ParseException {
-        super(host, port, raceId, raceName, raceDescription, boatClass, swissTimingRaceTracker); // causes original delivery to this.notifyListeners(...)
+        super(host, port, raceId, raceDataUrl, raceName, raceDescription, boatClass, swissTimingRaceTracker); // causes original delivery to this.notifyListeners(...)
         bufferedMessageList = Collections.synchronizedList(new LinkedList<>());
         Thread messageDeliveryThread = new Thread("SailMasterLiveSimulatorConnector") {
             public void run() {
