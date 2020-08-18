@@ -31,4 +31,10 @@ public class AclPopupPO extends DataEntryDialogPO {
         return new AclActionInputPO(driver, context.findElement(new BySeleniumId(ALLOWED_ACTIONS_CONTAINER)));
     }
 
+    @Override
+    public void clickOkButtonOrThrow() {
+        // On Hudson the limited screen height may cause notifications to cover the buttons
+        dismissAllExistingNotifications();
+        super.clickOkButtonOrThrow();
+    }
 }

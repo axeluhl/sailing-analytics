@@ -706,6 +706,28 @@ public class PageObject {
         });
     }
     
+    protected void dismissAllExistingNotifications() {
+        boolean retryNecessary = true;
+        while (retryNecessary) {
+            retryNecessary = false;
+            try {
+                List<WebElement> notificationBar = driver.findElements(By.id("notificationBar"));
+                if (!notificationBar.isEmpty()) {
+                    // we got the enclosing panel
+                    List<WebElement> notifications = notificationBar.get(0).findElements(By.cssSelector("*"));
+                    if (!notifications.isEmpty()) {
+                        for (WebElement messageElement : notifications) {
+                            messageElement.click();
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                // This call can fail temporarily while notifications are being updated
+                retryNecessary = true;
+            }
+        }
+    }
+    
     protected void scrollToView(WebElement webElement) {
         ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(false);", webElement);
     }
