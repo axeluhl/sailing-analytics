@@ -6,9 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.TreeMap;
-import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
@@ -35,7 +33,6 @@ import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.dto.AccessControlListAnnotationDTO;
 import com.sap.sse.security.shared.dto.AccessControlListDTO;
-import com.sap.sse.security.shared.dto.OwnershipDTO;
 import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
 import com.sap.sse.security.shared.dto.RolesAndPermissionsForUserDTO;
 import com.sap.sse.security.shared.dto.StrippedUserDTO;
@@ -43,7 +40,6 @@ import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
 import com.sap.sse.security.shared.dto.WildcardPermissionWithSecurityDTO;
-import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.PermissionAndRoleAssociation;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.User;
@@ -107,18 +103,6 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         Util.addAll(securityDTOFactory.createRoleDefinitionDTOs(getSecurityService().getRoleDefinitions(),
                 getSecurityService()), result);
         return result;
-    }
-
-    @Override
-    public OwnershipDTO setOwnership(final String username, final UUID userGroupId,
-            final QualifiedObjectIdentifier idOfOwnedObject, final String displayNameOfOwnedObject) {
-        SecurityUtils.getSubject()
-                .checkPermission(idOfOwnedObject.getStringPermission(DefaultActions.CHANGE_OWNERSHIP));
-        final User user = getSecurityService().getUserByName(username);
-        // no security check if current user can see the user associated with the given username
-        final Ownership result = getSecurityService().setOwnership(idOfOwnedObject, user,
-                getSecurityService().getUserGroup(userGroupId), displayNameOfOwnedObject);
-        return securityDTOFactory.createOwnershipDTO(result, new HashMap<>(), new HashMap<>());
     }
 
     @Override
@@ -265,31 +249,6 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     public String getOrCreateAccessToken(String username) throws UnauthorizedException {
         getSecurityService().checkCurrentUserUpdatePermission(getUserByName(username));
         return getSecurityService().getOrCreateAccessToken(username);
-    }
-
-    @Override
-    public AccessControlListDTO overrideAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
-            AccessControlListDTO acl) throws UnauthorizedException {
-        if (SecurityUtils.getSubject()
-                .isPermitted(idOfAccessControlledObject.getStringPermission(DefaultActions.CHANGE_ACL))) {
-            
-            Map<UserGroup, Set<String>> aclActionsByGroup = new HashMap<>();
-            for (Entry<StrippedUserGroupDTO, Set<String>> entry : acl.getActionsByUserGroup().entrySet()) {
-                final StrippedUserGroupDTO groupDTO = entry.getKey();
-                final UserGroup userGroup;
-                if (groupDTO == null) {
-                    userGroup = null;
-                } else {
-                    userGroup = getSecurityService().getUserGroup(groupDTO.getId());
-                }
-                aclActionsByGroup.put(userGroup, entry.getValue());
-            }
-
-            return securityDTOFactory.createAccessControlListDTO(getSecurityService()
-                    .overrideAccessControlList(idOfAccessControlledObject, aclActionsByGroup));
-        } else {
-            throw new UnauthorizedException("Not permitted to update the ACL for a user");
-        }
     }
 
     @Override

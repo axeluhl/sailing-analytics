@@ -33,6 +33,8 @@ import com.sap.sse.security.shared.UnauthorizedException;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.dto.AccessControlListDTO;
+import com.sap.sse.security.shared.dto.OwnershipDTO;
 import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
 import com.sap.sse.security.shared.dto.StrippedUserDTO;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
@@ -55,7 +57,19 @@ import com.sap.sse.security.ui.shared.SuccessInfo;
 public class UserManagementWriteServiceImpl extends UserManagementServiceImpl implements UserManagementWriteService {
     private static final long serialVersionUID = -8123229851467370537L;
     private static final Logger logger = Logger.getLogger(UserManagementWriteServiceImpl.class.getName());
-    
+
+    @Override
+    public OwnershipDTO setOwnership(final String username, final UUID userGroupId,
+            final QualifiedObjectIdentifier idOfOwnedObject, final String displayNameOfOwnedObject) {
+        SecurityUtils.getSubject()
+                .checkPermission(idOfOwnedObject.getStringPermission(DefaultActions.CHANGE_OWNERSHIP));
+        final User user = getSecurityService().getUserByName(username);
+        // no security check if current user can see the user associated with the given username
+        final Ownership result = getSecurityService().setOwnership(idOfOwnedObject, user,
+                getSecurityService().getUserGroup(userGroupId), displayNameOfOwnedObject);
+        return securityDTOFactory.createOwnershipDTO(result, new HashMap<>(), new HashMap<>());
+    }
+
     @Override
     public RoleDefinitionDTO createRoleDefinition(String roleDefinitionIdAsString, String name) {
         RoleDefinition role = getSecurityService().setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(
@@ -720,6 +734,31 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
         return new Role(
                 getSecurityService().getRoleDefinition(roleDefinitionId),
                 qualifyingTenantId == null ? null : getSecurityService().getUserGroup(qualifyingTenantId), user);
+    }
+
+    @Override
+    public AccessControlListDTO overrideAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
+            AccessControlListDTO acl) throws UnauthorizedException {
+        if (SecurityUtils.getSubject()
+                .isPermitted(idOfAccessControlledObject.getStringPermission(DefaultActions.CHANGE_ACL))) {
+            
+            Map<UserGroup, Set<String>> aclActionsByGroup = new HashMap<>();
+            for (Entry<StrippedUserGroupDTO, Set<String>> entry : acl.getActionsByUserGroup().entrySet()) {
+                final StrippedUserGroupDTO groupDTO = entry.getKey();
+                final UserGroup userGroup;
+                if (groupDTO == null) {
+                    userGroup = null;
+                } else {
+                    userGroup = getSecurityService().getUserGroup(groupDTO.getId());
+                }
+                aclActionsByGroup.put(userGroup, entry.getValue());
+            }
+
+            return securityDTOFactory.createAccessControlListDTO(getSecurityService()
+                    .overrideAccessControlList(idOfAccessControlledObject, aclActionsByGroup));
+        } else {
+            throw new UnauthorizedException("Not permitted to update the ACL for a user");
+        }
     }
 
 }

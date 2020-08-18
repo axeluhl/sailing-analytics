@@ -7,7 +7,10 @@ import java.util.UUID;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.ServerInfoDTO;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.dto.AccessControlListDTO;
+import com.sap.sse.security.shared.dto.OwnershipDTO;
 import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
@@ -16,6 +19,12 @@ import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
 public interface UserManagementWriteServiceAsync extends UserManagementServiceAsync {
+    void setOwnership(String username, UUID userGroupId,
+            QualifiedObjectIdentifier idOfOwnedObject, String displayNameOfOwnedObject,
+            AsyncCallback<OwnershipDTO> callback);
+
+    void overrideAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, AccessControlListDTO acl,
+            AsyncCallback<AccessControlListDTO> updateAclAsyncCallback);
 
     void createUserGroup(String name, AsyncCallback<UserGroupDTO> callback);
     

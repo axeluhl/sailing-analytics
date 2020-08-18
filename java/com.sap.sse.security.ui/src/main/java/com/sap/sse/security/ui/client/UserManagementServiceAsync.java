@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.common.Util.Triple;
@@ -13,7 +12,6 @@ import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.dto.AccessControlListAnnotationDTO;
 import com.sap.sse.security.shared.dto.AccessControlListDTO;
-import com.sap.sse.security.shared.dto.OwnershipDTO;
 import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
 import com.sap.sse.security.shared.dto.RolesAndPermissionsForUserDTO;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
@@ -22,16 +20,9 @@ import com.sap.sse.security.shared.dto.UserGroupDTO;
 import com.sap.sse.security.ui.shared.SecurityServiceSharingDTO;
 
 public interface UserManagementServiceAsync {
-    void setOwnership(String username, UUID userGroupId,
-            QualifiedObjectIdentifier idOfOwnedObject, String displayNameOfOwnedObject,
-            AsyncCallback<OwnershipDTO> callback);
-    
     void getAccessControlLists(AsyncCallback<Collection<AccessControlListAnnotationDTO>> callback);
 
     void getAccessControlListWithoutPruning(QualifiedObjectIdentifier idOfAccessControlledObject,
-            AsyncCallback<AccessControlListDTO> updateAclAsyncCallback);
-
-    void overrideAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, AccessControlListDTO acl,
             AsyncCallback<AccessControlListDTO> updateAclAsyncCallback);
 
     /**
