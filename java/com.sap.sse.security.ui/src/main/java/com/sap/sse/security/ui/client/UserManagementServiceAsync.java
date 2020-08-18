@@ -17,6 +17,7 @@ import com.sap.sse.security.shared.dto.RolesAndPermissionsForUserDTO;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
+import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.shared.SecurityServiceSharingDTO;
 
 public interface UserManagementServiceAsync {
@@ -76,4 +77,6 @@ public interface UserManagementServiceAsync {
      * across a server landscape with different domain/sub-domain constellations.
      */
     void getSharingConfiguration(AsyncCallback<SecurityServiceSharingDTO> callback);
+
+    void verifySocialUser(CredentialDTO credential, AsyncCallback<Triple<UserDTO, UserDTO, ServerInfoDTO>> markedAsyncCallback);
 }

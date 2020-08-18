@@ -23,6 +23,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.interfaces.Credential;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
@@ -45,6 +46,7 @@ import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.ui.client.UserManagementService;
+import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.shared.SecurityServiceSharingDTO;
 
 public class UserManagementServiceImpl extends RemoteServiceServlet implements UserManagementService {
@@ -323,5 +325,31 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     public SecurityServiceSharingDTO getSharingConfiguration() {
         return new SecurityServiceSharingDTO(getSecurityService().getSharedAcrossSubdomainsOf(),
                 getSecurityService().getBaseUrlForCrossDomainStorage());
+    }
+
+    protected Credential createCredentialFromDTO(CredentialDTO credentialDTO) {
+        Credential credential = new Credential();
+        credential.setAuthProvider(credentialDTO.getAuthProvider());
+        credential.setAuthProviderName(credentialDTO.getAuthProviderName());
+        credential.setEmail(credentialDTO.getEmail());
+        credential.setLoginName(credentialDTO.getLoginName());
+        credential.setPassword(credentialDTO.getPassword());
+        credential.setRedirectUrl(credentialDTO.getRedirectUrl());
+        credential.setState(credentialDTO.getState());
+        credential.setVerifier(credentialDTO.getVerifier());
+        credential.setOauthToken(credentialDTO.getOauthToken());
+        return credential;
+    }
+
+    @Override
+    public Triple<UserDTO, UserDTO, ServerInfoDTO> verifySocialUser(CredentialDTO credentialDTO) {
+        User user = null;
+        try {
+            user = getSecurityService().verifySocialUser(createCredentialFromDTO(credentialDTO));
+        } catch (UserManagementException e) {
+            e.printStackTrace();
+        }
+        final UserDTO userDTO = securityDTOFactory.createUserDTOFromUser(user, getSecurityService());
+        return new Triple<>(userDTO, getAllUser(), getServerInfo());
     }
 }

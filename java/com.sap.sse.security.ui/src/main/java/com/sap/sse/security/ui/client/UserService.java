@@ -223,7 +223,7 @@ public class UserService {
     public void verifySocialUser(final AsyncCallback<UserDTO> callback) throws Exception {
         final String authProviderName = ClientUtils.getAuthProviderNameFromCookie();
         logger.info("Verifying " + authProviderName + " user ...");
-        userManagementWriteService.verifySocialUser(ClientUtils.getCredential(),
+        userManagementService.verifySocialUser(ClientUtils.getCredential(),
                 new MarkedAsyncCallback<Triple<UserDTO, UserDTO, ServerInfoDTO>>(new AsyncCallback<Triple<UserDTO, UserDTO, ServerInfoDTO>>() {
             @Override
             public void onFailure(Throwable caught) {

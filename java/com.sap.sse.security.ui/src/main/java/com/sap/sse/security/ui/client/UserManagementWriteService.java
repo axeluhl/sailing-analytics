@@ -4,9 +4,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.mail.MailException;
-import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.UnauthorizedException;
 import com.sap.sse.security.shared.UserGroupManagementException;
@@ -116,9 +114,6 @@ public interface UserManagementWriteService extends UserManagementService {
     // ------------------------------------------------ OAuth Interface
     // --------------------------------------------------------------
     public String getAuthorizationUrl(CredentialDTO credential)
-            throws OAuthException, org.apache.shiro.authz.UnauthorizedException;
-
-    public Triple<UserDTO, UserDTO, ServerInfoDTO> verifySocialUser(CredentialDTO credential)
             throws OAuthException, org.apache.shiro.authz.UnauthorizedException;
 
     SuccessInfo addRoleToUser(String username, String userQualifierName, UUID roleDefinitionId,

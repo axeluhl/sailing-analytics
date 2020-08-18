@@ -5,8 +5,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sse.common.Util.Triple;
-import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.dto.AccessControlListDTO;
@@ -80,8 +78,6 @@ public interface UserManagementWriteServiceAsync extends UserManagementServiceAs
 
     //------------------------------------------------ OAuth Interface ----------------------------------------------------------------------
     void getAuthorizationUrl(CredentialDTO credential, AsyncCallback<String> callback);
-
-    void verifySocialUser(CredentialDTO credential, AsyncCallback<Triple<UserDTO, UserDTO, ServerInfoDTO>> markedAsyncCallback);
 
     /**
      * Grants the role associated with the given {@code roleDefinitionId}, {@code userQualifierName} and

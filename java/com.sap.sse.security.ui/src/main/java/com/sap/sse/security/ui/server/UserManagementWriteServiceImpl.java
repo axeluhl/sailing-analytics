@@ -21,10 +21,8 @@ import org.apache.shiro.authz.AuthorizationException;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.mail.MailException;
-import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.security.Action;
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.interfaces.Credential;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
@@ -416,18 +414,6 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
     }
 
     @Override
-    public Triple<UserDTO, UserDTO, ServerInfoDTO> verifySocialUser(CredentialDTO credentialDTO) {
-        User user = null;
-        try {
-            user = getSecurityService().verifySocialUser(createCredentialFromDTO(credentialDTO));
-        } catch (UserManagementException e) {
-            e.printStackTrace();
-        }
-        final UserDTO userDTO = securityDTOFactory.createUserDTOFromUser(user, getSecurityService());
-        return new Triple<>(userDTO, getAllUser(), getServerInfo());
-    }
-
-    @Override
     public void addSetting(String key, String clazz, String setting) {
         try {
             getSecurityService().addSetting(key, Class.forName(clazz));
@@ -622,20 +608,6 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
                     + username + " or the user or permission did not exist", /* redirectURL */null, null);
         }
         return successInfo;
-    }
-
-    protected Credential createCredentialFromDTO(CredentialDTO credentialDTO) {
-        Credential credential = new Credential();
-        credential.setAuthProvider(credentialDTO.getAuthProvider());
-        credential.setAuthProviderName(credentialDTO.getAuthProviderName());
-        credential.setEmail(credentialDTO.getEmail());
-        credential.setLoginName(credentialDTO.getLoginName());
-        credential.setPassword(credentialDTO.getPassword());
-        credential.setRedirectUrl(credentialDTO.getRedirectUrl());
-        credential.setState(credentialDTO.getState());
-        credential.setVerifier(credentialDTO.getVerifier());
-        credential.setOauthToken(credentialDTO.getOauthToken());
-        return credential;
     }
 
     protected void sendPasswordChangedMailAsync(final String username) {

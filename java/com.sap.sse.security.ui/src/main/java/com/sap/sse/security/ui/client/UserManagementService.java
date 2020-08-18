@@ -19,6 +19,7 @@ import com.sap.sse.security.shared.dto.RolesAndPermissionsForUserDTO;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
+import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.shared.SecurityServiceSharingDTO;
 
 public interface UserManagementService extends RemoteService {
@@ -74,4 +75,6 @@ public interface UserManagementService extends RemoteService {
     Boolean userGroupExists(String userGroupName) throws org.apache.shiro.authz.UnauthorizedException;
 
     SecurityServiceSharingDTO getSharingConfiguration();
+    
+    Triple<UserDTO, UserDTO, ServerInfoDTO> verifySocialUser(CredentialDTO credentialDTO);
 }
