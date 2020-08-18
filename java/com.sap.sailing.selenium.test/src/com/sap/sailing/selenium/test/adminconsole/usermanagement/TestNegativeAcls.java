@@ -71,10 +71,8 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
 
     @Test
     public void testUserWithNegativeAclCantGiveARoleToAnotherUser() {
-        clearSession(getWebDriver());
-        setUpAuthenticatedSession(getWebDriver(), USER1_NAME, USER1_NAME);
         // user1 creates an event
-        AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
+        AdminConsolePage adminConsole = changeUserAndReloadAdminConsole(USER1_NAME);
         addEventWithNegativeAclForGroup(adminConsole, USER2_TENANT);
         
         // user1 gives user2 and user3 the user role for objects owned by user1
@@ -82,10 +80,8 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         userManagement.grantRoleToUserWithUserQualification(USER2_NAME, USER_ROLE, USER1_NAME);
         userManagement.grantRoleToUserWithUserQualification(USER3_NAME, USER_ROLE, USER1_NAME);
         
-        clearSession(getWebDriver());
-        setUpAuthenticatedSession(getWebDriver(), USER2_NAME, USER2_NAME);
         // user2 tries to give the user role for objects owned by user1 to user3
-        userManagement = AdminConsolePage.goToPage(getWebDriver(), getContextRoot()).goToUserManagement();
+        userManagement = changeUserAndReloadAdminConsole(USER2_NAME).goToUserManagement();
         EditRolesAndPermissionsForUserDialogPO editRolesAndPermissionsDialogForUser = userManagement.openEditRolesAndPermissionsDialogForUser(USER4_NAME);
         UserRoleDefinitionPanelPO userRoles = editRolesAndPermissionsDialogForUser.getUserRoles();
         userRoles.enterNewRoleValues(USER_ROLE, "", USER1_NAME);
@@ -93,11 +89,9 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         // causes user 2 to not have all permissions implied by the user role
         userRoles.clickAddButtonAndExpectPermissionError();
         
-        clearSession(getWebDriver());
-        setUpAuthenticatedSession(getWebDriver(), USER3_NAME, USER3_NAME);
         // user3 grants the user role for objects owned by user1 to user4
         // in this case, it works because user3 isn't affected by the negative ACL
-        userManagement = AdminConsolePage.goToPage(getWebDriver(), getContextRoot()).goToUserManagement();
+        userManagement = changeUserAndReloadAdminConsole(USER3_NAME).goToUserManagement();
         userManagement.grantRoleToUserWithUserQualification(USER4_NAME, USER_ROLE, USER1_NAME);
         assertNotNull(userManagement.openEditRolesAndPermissionsDialogForUser(USER4_NAME).getUserRoles()
                 .findRole(USER_ROLE + "::" + USER1_NAME));
@@ -105,10 +99,8 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
     
     @Test
     public void testUserWithNegativeAclCantGiveAPermissionToAnotherUser() {
-        clearSession(getWebDriver());
-        setUpAuthenticatedSession(getWebDriver(), USER1_NAME, USER1_NAME);
         // user1 creates an event
-        AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
+        AdminConsolePage adminConsole = changeUserAndReloadAdminConsole(USER1_NAME);
         String eventId = addEventWithNegativeAclForGroup(adminConsole, USER2_TENANT);
         String eventAllPermission = EVENT_ALL_PERMISSION_PREFIX + eventId;
         
@@ -117,10 +109,8 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         userManagement.grantPermissionToUser(USER2_NAME, eventAllPermission);
         userManagement.grantPermissionToUser(USER3_NAME, eventAllPermission);
         
-        clearSession(getWebDriver());
-        setUpAuthenticatedSession(getWebDriver(), USER2_NAME, USER2_NAME);
         // user2 tries to give the permission "EVENT:*:<event-id>" to user4
-        userManagement = AdminConsolePage.goToPage(getWebDriver(), getContextRoot()).goToUserManagement();
+        userManagement = changeUserAndReloadAdminConsole(USER2_NAME).goToUserManagement();
         EditRolesAndPermissionsForUserDialogPO editRolesAndPermissionsDialogForUser = userManagement.openEditRolesAndPermissionsDialogForUser(USER4_NAME);
         WildcardPermissionPanelPO userPermissions = editRolesAndPermissionsDialogForUser.getUserPermissions();
         userPermissions.enterNewPermissionValue(eventAllPermission);
@@ -128,11 +118,9 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         // causes user2 to not have all permissions implied by the wildcard permission
         userPermissions.clickAddButtonAndExpectPermissionError();
         
-        clearSession(getWebDriver());
-        setUpAuthenticatedSession(getWebDriver(), USER3_NAME, USER3_NAME);
         // user3 grants permission "EVENT:*:<event-id>" to user4
         // in this case, it works because user3 isn't affected by the negative ACL
-        userManagement = AdminConsolePage.goToPage(getWebDriver(), getContextRoot()).goToUserManagement();
+        userManagement = changeUserAndReloadAdminConsole(USER3_NAME).goToUserManagement();
         userManagement.grantPermissionToUser(USER4_NAME, eventAllPermission);
         assertNotNull(userManagement.openEditRolesAndPermissionsDialogForUser(USER4_NAME).getUserPermissions()
                 .findPermission(eventAllPermission));
@@ -140,10 +128,8 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
     
     @Test
     public void testUserWithNegativeAclCantAddUserToGroup() {
-        clearSession(getWebDriver());
-        setUpAuthenticatedSession(getWebDriver(), USER1_NAME, USER1_NAME);
         // user1 creates an event
-        AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
+        AdminConsolePage adminConsole = changeUserAndReloadAdminConsole(USER1_NAME);
         addEventWithNegativeAclForGroup(adminConsole, USER2_TENANT);
         
         // user1 adds the user role to his tenant and adds user2 and user3 as members
@@ -153,10 +139,8 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         userGroupManagement.getUserGroupUsers().addUser(USER2_NAME);
         userGroupManagement.getUserGroupUsers().addUser(USER3_NAME);
         
-        clearSession(getWebDriver());
-        setUpAuthenticatedSession(getWebDriver(), USER2_NAME, USER2_NAME);
         // user2 tries to add user4 as member to user1's tenant
-        userGroupManagement = AdminConsolePage.goToPage(getWebDriver(), getContextRoot()).goToUserGroupDefinitions();
+        userGroupManagement = changeUserAndReloadAdminConsole(USER2_NAME).goToUserGroupDefinitions();
         UserGroupUserPanelPO userGroupUsers = userGroupManagement.getUserGroupUsers();
         userGroupManagement.findGroup(USER1_TENANT).select();
         userGroupUsers.enterNewUser(USER4_NAME);
@@ -164,9 +148,7 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         // causes user2 to not have all permissions of the user role for user1-tenant
         userGroupUsers.clickAddButtonAndExpectPermissionError();
         
-        clearSession(getWebDriver());
-        setUpAuthenticatedSession(getWebDriver(), USER3_NAME, USER3_NAME);
-        userGroupManagement = AdminConsolePage.goToPage(getWebDriver(), getContextRoot()).goToUserGroupDefinitions();
+        userGroupManagement = changeUserAndReloadAdminConsole(USER3_NAME).goToUserGroupDefinitions();
         userGroupUsers = userGroupManagement.getUserGroupUsers();
         userGroupManagement.findGroup(USER1_TENANT).select();
         // user3 adds user4 to user1-tenant
@@ -177,10 +159,8 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
     
     @Test
     public void testUserWithNegativeAclCantAddRoleToGroup() {
-        clearSession(getWebDriver());
-        setUpAuthenticatedSession(getWebDriver(), USER1_NAME, USER1_NAME);
         // user1 creates an event
-        AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
+        AdminConsolePage adminConsole = changeUserAndReloadAdminConsole(USER1_NAME);
         addEventWithNegativeAclForGroup(adminConsole, USER2_TENANT);
         
         UserGroupManagementPanelPO userGroupManagement = adminConsole.goToUserGroupDefinitions();
@@ -192,10 +172,8 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         userManagement.grantRoleToUserWithGroupQualification(USER2_NAME, USER_ROLE, USER1_TENANT);
         userManagement.grantRoleToUserWithGroupQualification(USER3_NAME, USER_ROLE, USER1_TENANT);
         
-        clearSession(getWebDriver());
-        setUpAuthenticatedSession(getWebDriver(), USER2_NAME, USER2_NAME);
         // user2 tries to add the user role to user1's tenant
-        userGroupManagement = AdminConsolePage.goToPage(getWebDriver(), getContextRoot()).goToUserGroupDefinitions();
+        userGroupManagement = changeUserAndReloadAdminConsole(USER2_NAME).goToUserGroupDefinitions();
         userGroupManagement.findGroup(USER1_TENANT).select();
         UserGroupRoleDefinitionPanelPO userGroupRoles = userGroupManagement.getUserGroupRoles();
         userGroupRoles.enterNewRoleName(USER_ROLE);
@@ -203,9 +181,7 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         // causes user2 to not have all permissions of the user role for user1-tenant
         userGroupRoles.clickAddButtonAndExpectPermissionError();
         
-        clearSession(getWebDriver());
-        setUpAuthenticatedSession(getWebDriver(), USER3_NAME, USER3_NAME);
-        userGroupManagement = AdminConsolePage.goToPage(getWebDriver(), getContextRoot()).goToUserGroupDefinitions();
+        userGroupManagement = changeUserAndReloadAdminConsole(USER3_NAME).goToUserGroupDefinitions();
         userGroupManagement.findGroup(USER1_TENANT).select();
         userGroupRoles = userGroupManagement.getUserGroupRoles();
         // user3 adds user4 to user1-tenant
@@ -216,10 +192,8 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
     
     @Test
     public void testUserWithNegativeAclCantAddPermissionToRoleThatIsAssociatedToAUserGroup() {
-        clearSession(getWebDriver());
-        setUpAuthenticatedSession(getWebDriver(), USER1_NAME, USER1_NAME);
         // user1 creates an event
-        AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
+        AdminConsolePage adminConsole = changeUserAndReloadAdminConsole(USER1_NAME);
         String eventId = addEventWithNegativeAclForGroup(adminConsole, USER2_TENANT);
         String eventAllPermission = EVENT_ALL_PERMISSION_PREFIX + eventId;
 
@@ -234,19 +208,15 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         userGroupManagement.findGroup(USER1_TENANT).select();
         userGroupManagement.getUserGroupRoles().addRole(CUSTOM_ROLE);
         
-        clearSession(getWebDriver());
-        setUpAuthenticatedSession(getWebDriver(), USER2_NAME, USER2_NAME);
         // user2 tries to add a permission to custom-role
-        RoleDefinitionsPanelPO roleDefinitions = AdminConsolePage.goToPage(getWebDriver(), getContextRoot()).goToRoleDefinitions();
+        RoleDefinitionsPanelPO roleDefinitions = changeUserAndReloadAdminConsole(USER2_NAME).goToRoleDefinitions();
         RoleDefinitionCreationAndUpdateDialogPO updateDialog = roleDefinitions.findRole(CUSTOM_ROLE).openUpdateDialog();
         updateDialog.addPermission(eventAllPermission);
         // this is expected to fail because the negative ACL on the event
         // causes user2 to not have all permissions implied by the permission
         updateDialog.clickOkButtonAndExpectPermissionError();
         
-        clearSession(getWebDriver());
-        setUpAuthenticatedSession(getWebDriver(), USER3_NAME, USER3_NAME);
-        roleDefinitions = AdminConsolePage.goToPage(getWebDriver(), getContextRoot()).goToRoleDefinitions();
+        roleDefinitions = changeUserAndReloadAdminConsole(USER3_NAME).goToRoleDefinitions();
         updateDialog = roleDefinitions.findRole(CUSTOM_ROLE).openUpdateDialog();
         updateDialog.addPermission(eventAllPermission);
         // in this case, it works because user3 isn't affected by the negative ACL
@@ -256,10 +226,8 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
     
     @Test
     public void testUserWithNegativeAclCantAddPermissionToRoleThatIsAssociatedToAUser() {
-        clearSession(getWebDriver());
-        setUpAuthenticatedSession(getWebDriver(), USER1_NAME, USER1_NAME);
         // user1 creates an event
-        AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
+        AdminConsolePage adminConsole = changeUserAndReloadAdminConsole(USER1_NAME);
         String eventId = addEventWithNegativeAclForGroup(adminConsole, USER2_TENANT);
         String eventAllPermission = EVENT_ALL_PERMISSION_PREFIX + eventId;
         
@@ -273,24 +241,26 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         // this role does not grant any permissions initially
         userManagement.grantRoleToUserWithUserQualification(USER4_NAME, CUSTOM_ROLE, USER1_NAME);
         
-        clearSession(getWebDriver());
-        setUpAuthenticatedSession(getWebDriver(), USER2_NAME, USER2_NAME);
         // user2 tries to add a permission to custom-role
-        RoleDefinitionsPanelPO roleDefinitions = AdminConsolePage.goToPage(getWebDriver(), getContextRoot()).goToRoleDefinitions();
+        RoleDefinitionsPanelPO roleDefinitions = changeUserAndReloadAdminConsole(USER2_NAME).goToRoleDefinitions();
         RoleDefinitionCreationAndUpdateDialogPO updateDialog = roleDefinitions.findRole(CUSTOM_ROLE).openUpdateDialog();
         updateDialog.addPermission(eventAllPermission);
         // this is expected to fail because the negative ACL on the event
         // causes user2 to not have all permissions implied by the permission
         updateDialog.clickOkButtonAndExpectPermissionError();
         
-        clearSession(getWebDriver());
-        setUpAuthenticatedSession(getWebDriver(), USER3_NAME, USER3_NAME);
-        roleDefinitions = AdminConsolePage.goToPage(getWebDriver(), getContextRoot()).goToRoleDefinitions();
+        roleDefinitions = changeUserAndReloadAdminConsole(USER3_NAME).goToRoleDefinitions();
         updateDialog = roleDefinitions.findRole(CUSTOM_ROLE).openUpdateDialog();
         updateDialog.addPermission(eventAllPermission);
         // in this case, it works because user3 isn't affected by the negative ACL
         updateDialog.clickOkButtonOrThrow();
         assertTrue(roleDefinitions.findRole(CUSTOM_ROLE).getPermissions().contains(eventAllPermission));
+    }
+    
+    private AdminConsolePage changeUserAndReloadAdminConsole(String usernameAndPassword) {
+        clearSession(getWebDriver());
+        setUpAuthenticatedSession(getWebDriver(), usernameAndPassword, usernameAndPassword);
+        return AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
     }
     
     private void createCustomRoleWithReadAndUpdateAclForAll(AdminConsolePage adminConsole) {
