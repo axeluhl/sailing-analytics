@@ -25,7 +25,7 @@ public class HttpUrlConnectionHelper {
      * Redirects the connection using the <code>Location</code> header.
      */
     public static URLConnection redirectConnectionWithBearerToken(URL url, String optionalBearerToken) throws MalformedURLException, IOException {
-        return redirectConnectionWithBearerToken(url, Duration.ONE_MINUTE.times(10), /* default HTTP method */ null, optionalBearerToken);
+        return redirectConnectionWithBearerToken(url, Duration.ONE_MINUTE.times(10), /* default HTTP method */ null, optionalBearerToken, null);
     }
     
     /**
@@ -33,29 +33,49 @@ public class HttpUrlConnectionHelper {
      */
     public static URLConnection redirectConnectionWithBearerToken(URL url, String optionalRequestMethod,
             String optionalBearerToken) throws MalformedURLException, IOException {
-        return redirectConnectionWithBearerToken(url, Duration.ONE_MINUTE.times(10), optionalRequestMethod, optionalBearerToken);
+        return redirectConnectionWithBearerToken(url, Duration.ONE_MINUTE.times(10), optionalRequestMethod, optionalBearerToken, null);
     }
-    
+
     /**
-     * Redirects the connection using the <code>Location</code> header. Make sure to set
-     * the timeout if you expect the response to take longer.
+     * Create a URLConnection with the given parameters. If HTTP redirects are returned it will follow them.
+     * 
+     * @param url the url to connect to
+     * @param timeout the read timeout
+     * @param optionalRequestMethod the request type, ignored when null
+     * @param optionalBearerToken bearer token for auth, ignored when null
+     * @param optionalContentType ttp content type, ignored when null
+     * @return the URLConnection already in open state
+     * @throws MalformedURLException when URL is malformed
+     * @throws IOException general io exception, e.g. connect is failing
      */
-    public static URLConnection redirectConnectionWithBearerToken(URL url, Duration timeout, String optionalRequestMethod, String optionalBearerToken)
+    public static URLConnection redirectConnectionWithBearerToken(URL url, Duration timeout, String optionalRequestMethod, String optionalBearerToken, String optionalContentType)
             throws MalformedURLException, IOException {
         return redirectConnection(url, timeout, optionalRequestMethod, t -> {
             if (optionalBearerToken != null && !optionalBearerToken.isEmpty()) {
                 t.setRequestProperty("Authorization", "Bearer " + optionalBearerToken);
             }
+            if (optionalContentType != null && !optionalContentType.isEmpty()) {
+                t.setRequestProperty("Content-Type", optionalContentType);
+            }
         });
     }
-    
+
+    /**
+     * Redirects the connection using the <code>Location</code> header. Make sure to set
+     * the timeout if you expect the response to take longer.
+     */
+    public static URLConnection redirectConnectionWithBearerToken(URL url, Duration timeout,
+            String optionalRequestMethod, String optionalBearerToken) throws MalformedURLException, IOException {
+        return redirectConnectionWithBearerToken(url, timeout, optionalRequestMethod, optionalBearerToken, null);
+    }
+
     /**
      * Redirects the connection using the <code>Location</code> header. Make sure to set
      * the timeout if you expect the response to take longer.
      */
     public static URLConnection redirectConnectionWithBearerToken(URL url, Duration timeout, String optionalBearerToken)
             throws MalformedURLException, IOException {
-        return redirectConnectionWithBearerToken(url, timeout, /* request method */ null, optionalBearerToken);
+        return redirectConnectionWithBearerToken(url, timeout, /* request method */ null, optionalBearerToken, null);
     }
     
     /**
