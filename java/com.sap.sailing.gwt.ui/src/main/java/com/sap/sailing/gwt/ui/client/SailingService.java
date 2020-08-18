@@ -57,7 +57,6 @@ import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorProviderDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
-import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -70,8 +69,6 @@ import com.sap.sailing.gwt.ui.shared.QRCodeEvent;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogDTO;
-import com.sap.sailing.gwt.ui.shared.RaceLogSetFinishingAndFinishTimeDTO;
-import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceboardDataDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -321,14 +318,6 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
 
     List<DeviceConfigurationWithSecurityDTO> getDeviceConfigurations() throws UnauthorizedException;
 
-    void createOrUpdateDeviceConfiguration(DeviceConfigurationDTO configurationDTO) throws UnauthorizedException;
-
-    boolean setStartTimeAndProcedure(RaceLogSetStartTimeAndProcedureDTO dto)
-            throws UnauthorizedException, NotFoundException;
-
-    Pair<Boolean, Boolean> setFinishingAndEndTime(RaceLogSetFinishingAndFinishTimeDTO dto)
-            throws UnauthorizedException, NotFoundException;
-
     Util.Triple<Date, Integer, RacingProcedureType> getStartTimeAndProcedure(String leaderboardName,
             String raceColumnName, String fleetName) throws UnauthorizedException, NotFoundException;
 
@@ -572,9 +561,6 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
     Map<String, ORCCertificate> getORCCertificateAssignmentsByBoatIdAsString(String leaderboardName, String raceColumnName, String fleetName) throws NotFoundException;
 
     ImpliedWindSource getImpliedWindSource(String leaderboardName, String raceColumnName, String fleetName) throws NotFoundException;
-
-    void setImpliedWindSource(String leaderboardName, String raceColumnName, String fleetName,
-            ImpliedWindSource impliedWindSource) throws NotFoundException;
 
     Map<BoatDTO, Set<ORCCertificate>> getSuggestedORCBoatCertificates(ArrayList<BoatDTO> boats) throws Exception;
 

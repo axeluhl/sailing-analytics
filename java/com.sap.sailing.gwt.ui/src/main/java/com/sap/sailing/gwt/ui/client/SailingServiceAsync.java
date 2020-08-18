@@ -52,7 +52,6 @@ import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorProviderDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
-import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -65,8 +64,6 @@ import com.sap.sailing.gwt.ui.shared.QRCodeEvent;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogDTO;
-import com.sap.sailing.gwt.ui.shared.RaceLogSetFinishingAndFinishTimeDTO;
-import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceboardDataDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -379,26 +376,6 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
     
     void getDeviceConfigurations(AsyncCallback<List<DeviceConfigurationWithSecurityDTO>> asyncCallback);
 
-    void createOrUpdateDeviceConfiguration(DeviceConfigurationDTO configurationDTO, AsyncCallback<Void> callback);
-
-    /**
-     * Sets the a new start time.
-     * 
-     * @param dto
-     *            {@link RaceLogSetStartTimeAndProcedureDTO} identifying the race to set the start time on and the new
-     *            start time.
-     */
-    void setStartTimeAndProcedure(RaceLogSetStartTimeAndProcedureDTO dto, AsyncCallback<Boolean> callback);
-
-    /**
-     * Sets the a new finishing and end time.
-     * 
-     * @param dto
-     *            {@link RaceLogSetFinishingAndFinishTimeDTO} identifying the race and the new finishing and
-     *            end time.
-     */
-    void setFinishingAndEndTime(RaceLogSetFinishingAndFinishTimeDTO editedObject, AsyncCallback<Pair<Boolean, Boolean>> asyncCallback);
-    
     /**
      * Gets the race's current start time, current pass identifier and racing procedure. If no start time is set, the
      * pass identifier will still be returned, but the start time field will be <code>null</code>.
@@ -641,9 +618,6 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
      * (which will have the ranking metric default to {@link OwnMaxImpliedWind}, eventually).
      */
     void getImpliedWindSource(String leaderboardName, String raceColumnName, String fleetName, AsyncCallback<ImpliedWindSource> asyncCallback);
-
-    void setImpliedWindSource(String leaderboardName, String raceColumnName, String fleetName,
-            ImpliedWindSource impliedWindSource, AsyncCallback<Void> callback);
 
     void getSuggestedORCBoatCertificates(ArrayList<BoatDTO> boats, AsyncCallback<Map<BoatDTO, Set<ORCCertificate>>> callback);
 

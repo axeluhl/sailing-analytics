@@ -85,7 +85,6 @@ import com.sap.sailing.domain.abstractlog.orc.RaceLogORCCertificateAssignmentFin
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCImpliedWindSourceFinder;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataAnalyzer;
 import com.sap.sailing.domain.abstractlog.orc.RegattaLogORCCertificateAssignmentFinder;
-import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCImpliedWindSourceEventImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
@@ -139,7 +138,6 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.RacingProcedureConfiguration;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
-import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.ESSConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.GateStartConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.LeagueConfigurationImpl;
@@ -367,8 +365,6 @@ import com.sap.sailing.gwt.ui.shared.RaceInfoDTO.LineStartInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInfoDTO.RaceInfoExtensionDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogEventDTO;
-import com.sap.sailing.gwt.ui.shared.RaceLogSetFinishingAndFinishTimeDTO;
-import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsAndBoatsDTO;
@@ -479,7 +475,6 @@ import com.sap.sse.replication.ReplicaDescriptor;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationService;
-import com.sap.sse.security.Action;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionUtils;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
@@ -4744,26 +4739,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         return configs;
     }
 
-    @Override
-    //READ
-    public void createOrUpdateDeviceConfiguration(DeviceConfigurationDTO configurationDTO) {
-        if (getService().getDeviceConfigurationById(configurationDTO.id) == null) {
-            final DeviceConfiguration configuration = convertToDeviceConfiguration(configurationDTO);
-            getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(configuration.getPermissionType(),
-                    configuration.getIdentifier().getTypeRelativeObjectIdentifier(), configuration.getName(),
-                    new Action() {
-                        @Override
-                        public void run() throws Exception {
-                            getService().createOrUpdateDeviceConfiguration(configuration);
-                        }
-                    });
-        } else {
-            final DeviceConfiguration configuration = convertToDeviceConfiguration(configurationDTO);
-            getSecurityService().checkCurrentUserUpdatePermission(configuration);
-            getService().createOrUpdateDeviceConfiguration(configuration);
-        }
-    }
-
     //READ
     private DeviceConfigurationWithSecurityDTO convertToDeviceConfigurationWithSecurityDTO(
             DeviceConfiguration configuration) {
@@ -4836,15 +4811,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     //READ
-    private DeviceConfigurationImpl convertToDeviceConfiguration(DeviceConfigurationDTO dto) {
-        DeviceConfigurationImpl configuration = new DeviceConfigurationImpl(convertToRegattaConfiguration(dto.regattaConfiguration), dto.id, dto.name);
-        configuration.setAllowedCourseAreaNames(dto.allowedCourseAreaNames);
-        configuration.setResultsMailRecipient(dto.resultsMailRecipient);
-        configuration.setByNameDesignerCourseNames(dto.byNameDesignerCourseNames);
-        return configuration;
-    }
-
-    //READ
     protected RegattaConfiguration convertToRegattaConfiguration(RegattaConfigurationDTO dto) {
         if (dto == null) {
             return null;
@@ -4903,36 +4869,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             RacingProcedureWithConfigurableStartModeFlagConfigurationDTO racingProcedureConfigurationDTO,
             RacingProcedureWithConfigurableStartModeFlagConfigurationImpl config) {
         config.setStartModeFlags(racingProcedureConfigurationDTO.startModeFlags);
-    }
-    
-    @Override
-    //READ
-    public boolean setStartTimeAndProcedure(RaceLogSetStartTimeAndProcedureDTO dto) throws NotFoundException {
-        getSecurityService().checkCurrentUserUpdatePermission(getLeaderboardByName(dto.leaderboardName));
-        TimePoint newStartTime = getService().setStartTimeAndProcedure(dto.leaderboardName, dto.raceColumnName, 
-                dto.fleetName, dto.authorName, dto.authorPriority,
-                dto.passId, new MillisecondsTimePoint(dto.logicalTimePoint), new MillisecondsTimePoint(dto.startTime),
-                dto.racingProcedure, dto.courseAreaId);
-        return new MillisecondsTimePoint(dto.startTime).equals(newStartTime);
-    }
-    
-    @Override
-    //READ
-    public Pair<Boolean, Boolean> setFinishingAndEndTime(RaceLogSetFinishingAndFinishTimeDTO dto)
-            throws NotFoundException {
-        getSecurityService().checkCurrentUserUpdatePermission(getLeaderboardByName(dto.leaderboardName));
-        final MillisecondsTimePoint finishingTimePoint = dto.finishingTime==null?null:new MillisecondsTimePoint(dto.finishingTime);
-        TimePoint newFinsihingTime = getService().setFinishingTime(dto.leaderboardName, dto.raceColumnName, 
-                dto.fleetName, dto.authorName, dto.authorPriority,
-                dto.passId, finishingTimePoint);
-        
-        final TimePoint finishTimePoint = dto.finishTime==null?null:new MillisecondsTimePoint(dto.finishTime);
-        TimePoint newEndTime = getService().setEndTime(dto.leaderboardName, dto.raceColumnName, 
-                dto.fleetName, dto.authorName, dto.authorPriority,
-                dto.passId, finishTimePoint);
-        
-        return new Pair<Boolean, Boolean>(Util.equalsWithNull(finishingTimePoint, newFinsihingTime),
-                Util.equalsWithNull(finishTimePoint, newEndTime));
     }
 
     @Override
@@ -6600,17 +6536,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         return impliedWindSource;
     }
 
-    @Override
-    //READ
-    public void setImpliedWindSource(String leaderboardName, String raceColumnName, String fleetName, ImpliedWindSource impliedWindSource) throws NotFoundException {
-        final Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
-        getService().getSecurityService().checkCurrentUserUpdatePermission(leaderboard);
-        final RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
-        final TimePoint now = MillisecondsTimePoint.now();
-        final RaceLogEvent impliedWindSourceEvent = new RaceLogORCImpliedWindSourceEventImpl(now, now, getService().getServerAuthor(), UUID.randomUUID(), raceLog.getCurrentPassId(), impliedWindSource);
-        raceLog.add(impliedWindSourceEvent);
-    }
-    
     @Override
     //READ
     public Map<BoatDTO, Set<ORCCertificate>> getSuggestedORCBoatCertificates(ArrayList<BoatDTO> boats) throws InterruptedException, ExecutionException {

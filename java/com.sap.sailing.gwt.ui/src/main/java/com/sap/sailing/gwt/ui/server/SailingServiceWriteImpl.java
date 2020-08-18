@@ -142,6 +142,7 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
+import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.CompetitorWithBoatImpl;
@@ -196,6 +197,7 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.domain.common.orc.ImpliedWindSource;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLeg;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
@@ -248,6 +250,7 @@ import com.sap.sailing.gwt.ui.adminconsole.RaceLogSetTrackingTimesDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceWrite;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
+import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
@@ -256,6 +259,8 @@ import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.MigrateGroupOwnerForHierarchyDTO;
+import com.sap.sailing.gwt.ui.shared.RaceLogSetFinishingAndFinishTimeDTO;
+import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
@@ -3526,4 +3531,69 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         return found;
     }
 
+    @Override
+    public void createOrUpdateDeviceConfiguration(DeviceConfigurationDTO configurationDTO) {
+        if (getService().getDeviceConfigurationById(configurationDTO.id) == null) {
+            final DeviceConfiguration configuration = convertToDeviceConfiguration(configurationDTO);
+            getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(configuration.getPermissionType(),
+                    configuration.getIdentifier().getTypeRelativeObjectIdentifier(), configuration.getName(),
+                    new Action() {
+                        @Override
+                        public void run() throws Exception {
+                            getService().createOrUpdateDeviceConfiguration(configuration);
+                        }
+                    });
+        } else {
+            final DeviceConfiguration configuration = convertToDeviceConfiguration(configurationDTO);
+            getSecurityService().checkCurrentUserUpdatePermission(configuration);
+            getService().createOrUpdateDeviceConfiguration(configuration);
+        }
+    }
+
+    private DeviceConfigurationImpl convertToDeviceConfiguration(DeviceConfigurationDTO dto) {
+        DeviceConfigurationImpl configuration = new DeviceConfigurationImpl(convertToRegattaConfiguration(dto.regattaConfiguration), dto.id, dto.name);
+        configuration.setAllowedCourseAreaNames(dto.allowedCourseAreaNames);
+        configuration.setResultsMailRecipient(dto.resultsMailRecipient);
+        configuration.setByNameDesignerCourseNames(dto.byNameDesignerCourseNames);
+        return configuration;
+    }
+    
+
+    @Override
+    public Pair<Boolean, Boolean> setFinishingAndEndTime(RaceLogSetFinishingAndFinishTimeDTO dto)
+            throws NotFoundException {
+        getSecurityService().checkCurrentUserUpdatePermission(getLeaderboardByName(dto.leaderboardName));
+        final MillisecondsTimePoint finishingTimePoint = dto.finishingTime==null?null:new MillisecondsTimePoint(dto.finishingTime);
+        TimePoint newFinsihingTime = getService().setFinishingTime(dto.leaderboardName, dto.raceColumnName, 
+                dto.fleetName, dto.authorName, dto.authorPriority,
+                dto.passId, finishingTimePoint);
+        
+        final TimePoint finishTimePoint = dto.finishTime==null?null:new MillisecondsTimePoint(dto.finishTime);
+        TimePoint newEndTime = getService().setEndTime(dto.leaderboardName, dto.raceColumnName, 
+                dto.fleetName, dto.authorName, dto.authorPriority,
+                dto.passId, finishTimePoint);
+        
+        return new Pair<Boolean, Boolean>(Util.equalsWithNull(finishingTimePoint, newFinsihingTime),
+                Util.equalsWithNull(finishTimePoint, newEndTime));
+    }
+
+    @Override
+    public boolean setStartTimeAndProcedure(RaceLogSetStartTimeAndProcedureDTO dto) throws NotFoundException {
+        getSecurityService().checkCurrentUserUpdatePermission(getLeaderboardByName(dto.leaderboardName));
+        TimePoint newStartTime = getService().setStartTimeAndProcedure(dto.leaderboardName, dto.raceColumnName, 
+                dto.fleetName, dto.authorName, dto.authorPriority,
+                dto.passId, new MillisecondsTimePoint(dto.logicalTimePoint), new MillisecondsTimePoint(dto.startTime),
+                dto.racingProcedure, dto.courseAreaId);
+        return new MillisecondsTimePoint(dto.startTime).equals(newStartTime);
+    }
+
+    @Override
+    public void setImpliedWindSource(String leaderboardName, String raceColumnName, String fleetName, ImpliedWindSource impliedWindSource) throws NotFoundException {
+        final Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        getService().getSecurityService().checkCurrentUserUpdatePermission(leaderboard);
+        final RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
+        final TimePoint now = MillisecondsTimePoint.now();
+        final RaceLogEvent impliedWindSourceEvent = new RaceLogORCImpliedWindSourceEventImpl(now, now, getService().getServerAuthor(), UUID.randomUUID(), raceLog.getCurrentPassId(), impliedWindSource);
+        raceLog.add(impliedWindSourceEvent);
+    }
 }

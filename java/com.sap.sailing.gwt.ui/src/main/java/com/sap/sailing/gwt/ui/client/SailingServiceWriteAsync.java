@@ -35,6 +35,7 @@ import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.TagDTO;
+import com.sap.sailing.domain.common.orc.ImpliedWindSource;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
 import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
@@ -42,6 +43,7 @@ import com.sap.sailing.gwt.ui.adminconsole.RaceLogSetTrackingTimesDTO;
 import com.sap.sailing.gwt.ui.adminconsole.RemoteSailingServerEventsSelectionDialog;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
+import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
@@ -50,6 +52,8 @@ import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.MigrateGroupOwnerForHierarchyDTO;
+import com.sap.sailing.gwt.ui.shared.RaceLogSetFinishingAndFinishTimeDTO;
+import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
@@ -581,5 +585,28 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void closeOpenEndedDeviceMapping(String leaderboardName, DeviceMappingDTO mappingDto, Date closingTimePoint,
             AsyncCallback<Void> asyncCallback);
 
+    void createOrUpdateDeviceConfiguration(DeviceConfigurationDTO configurationDTO, AsyncCallback<Void> callback);
+
+    /**
+     * Sets the a new start time.
+     * 
+     * @param dto
+     *            {@link RaceLogSetStartTimeAndProcedureDTO} identifying the race to set the start time on and the new
+     *            start time.
+     */
+    void setStartTimeAndProcedure(RaceLogSetStartTimeAndProcedureDTO dto, AsyncCallback<Boolean> callback);
+
+    /**
+     * Sets the a new finishing and end time.
+     * 
+     * @param dto
+     *            {@link RaceLogSetFinishingAndFinishTimeDTO} identifying the race and the new finishing and
+     *            end time.
+     */
+    void setFinishingAndEndTime(RaceLogSetFinishingAndFinishTimeDTO editedObject, AsyncCallback<Pair<Boolean, Boolean>> asyncCallback);
+    
+
+    void setImpliedWindSource(String leaderboardName, String raceColumnName, String fleetName,
+            ImpliedWindSource impliedWindSource, AsyncCallback<Void> callback);
 
 }
