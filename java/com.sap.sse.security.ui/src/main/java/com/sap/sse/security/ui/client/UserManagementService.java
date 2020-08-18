@@ -21,6 +21,7 @@ import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.shared.SecurityServiceSharingDTO;
+import com.sap.sse.security.ui.shared.SuccessInfo;
 
 public interface UserManagementService extends RemoteService {
 
@@ -77,4 +78,8 @@ public interface UserManagementService extends RemoteService {
     SecurityServiceSharingDTO getSharingConfiguration();
     
     Triple<UserDTO, UserDTO, ServerInfoDTO> verifySocialUser(CredentialDTO credentialDTO);
+
+    SuccessInfo login(String username, String password) throws org.apache.shiro.authz.UnauthorizedException;
+
+    SuccessInfo logout() throws org.apache.shiro.authz.UnauthorizedException;
 }

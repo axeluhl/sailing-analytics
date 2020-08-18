@@ -13,7 +13,11 @@ import java.util.concurrent.FutureTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpSession;
+
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authc.AuthenticationException;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -48,6 +52,7 @@ import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.ui.client.UserManagementService;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.shared.SecurityServiceSharingDTO;
+import com.sap.sse.security.ui.shared.SuccessInfo;
 
 public class UserManagementServiceImpl extends RemoteServiceServlet implements UserManagementService {
     private static final long serialVersionUID = 4458564336368629101L;
@@ -352,4 +357,36 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         final UserDTO userDTO = securityDTOFactory.createUserDTOFromUser(user, getSecurityService());
         return new Triple<>(userDTO, getAllUser(), getServerInfo());
     }
+
+    @Override
+    public SuccessInfo logout() {
+        logger.info("Logging out user: " + SecurityUtils.getSubject());
+        getSecurityService().logout();
+        getHttpSession().invalidate();
+        final Cookie cookie = new Cookie(UserManagementConstants.LOCALE_COOKIE_NAME, "");
+        cookie.setMaxAge(0);
+        cookie.setPath("/");
+        getThreadLocalResponse().addCookie(cookie);
+        logger.info("Invalidated HTTP session");
+        return new SuccessInfo(true, "Logged out.", /* redirectURL */ null, null);
+    }
+
+    @Override
+    public SuccessInfo login(String username, String password) {
+        try {
+            String redirectURL = getSecurityService().login(username, password);
+            UserDTO user = securityDTOFactory.createUserDTOFromUser(getSecurityService().getUserByName(username),
+                    getSecurityService());
+            return new SuccessInfo(true, "Success. Redirecting to " + redirectURL, redirectURL,
+                    new Triple<>(user, getAllUser(), getServerInfo()));
+        } catch (UserManagementException | AuthenticationException e) {
+            return new SuccessInfo(false, SuccessInfo.FAILED_TO_LOGIN, /* redirectURL */ null, null);
+        }
+    }
+
+    private HttpSession getHttpSession() {
+        return getThreadLocalRequest().getSession();
+    }
+
+
 }

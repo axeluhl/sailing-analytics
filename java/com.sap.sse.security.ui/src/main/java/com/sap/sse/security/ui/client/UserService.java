@@ -203,7 +203,7 @@ public class UserService {
      * signed-in user will remain to be signed in.
      */
     public void login(String username, String password, final AsyncCallback<SuccessInfo> callback) {
-        userManagementWriteService.login(username, password,
+        userManagementService.login(username, password,
                 new MarkedAsyncCallback<SuccessInfo>(new AsyncCallback<SuccessInfo>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -240,7 +240,7 @@ public class UserService {
     }
 
     public void logout() {
-        userManagementWriteService.logout(new AsyncCallback<SuccessInfo>() {
+        userManagementService.logout(new AsyncCallback<SuccessInfo>() {
             @Override
             public void onFailure(Throwable caught) {
                 Notification.notify(stringMessages.couldNotSignOut(caught.getMessage()), NotificationType.ERROR);

@@ -51,8 +51,6 @@ public interface UserManagementWriteService extends UserManagementService {
     void updateRoleDefinition(RoleDefinitionDTO roleWithNewProperties)
             throws UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;
 
-    SuccessInfo login(String username, String password) throws org.apache.shiro.authz.UnauthorizedException;
-
     UserDTO createSimpleUser(String name, String email, String password, String fullName, String company,
             String localeName, String validationBaseURL) throws UserManagementException, MailException,
             UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;
@@ -81,8 +79,6 @@ public interface UserManagementWriteService extends UserManagementService {
 
     Set<SuccessInfo> deleteUsers(Set<String> usernames)
             throws UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;
-
-    SuccessInfo logout() throws org.apache.shiro.authz.UnauthorizedException;
 
     void setSetting(String key, String clazz, String setting) throws org.apache.shiro.authz.UnauthorizedException;
 
@@ -132,5 +128,4 @@ public interface UserManagementWriteService extends UserManagementService {
 
     AccessControlListDTO overrideAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
             AccessControlListDTO acl) throws UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;
-
 }

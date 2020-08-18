@@ -38,10 +38,6 @@ public interface UserManagementWriteServiceAsync extends UserManagementServiceAs
     void removeRoleDefinitionFromUserGroup(String userGroupIdAsString, String roleDefinitionIdAsString,
             AsyncCallback<Void> callback);
 
-    void login(String username, String password, AsyncCallback<SuccessInfo> callback);
-
-    void logout(AsyncCallback<SuccessInfo> callback);
-
     void createSimpleUser(String name, String email, String password, String fullName, String company,
             String localeName, String validationBaseURL, AsyncCallback<UserDTO> callback);
 

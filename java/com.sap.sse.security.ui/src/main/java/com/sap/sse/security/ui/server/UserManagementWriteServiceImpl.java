@@ -11,11 +11,7 @@ import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpSession;
-
 import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authz.AuthorizationException;
 
 import com.sap.sse.common.Util;
@@ -248,32 +244,6 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
             }
         } else {
             throw new UnauthorizedException("Not permitted to remove role definition from group");
-        }
-    }
-    
-    @Override
-    public SuccessInfo logout() {
-        logger.info("Logging out user: " + SecurityUtils.getSubject());
-        getSecurityService().logout();
-        getHttpSession().invalidate();
-        final Cookie cookie = new Cookie(UserManagementConstants.LOCALE_COOKIE_NAME, "");
-        cookie.setMaxAge(0);
-        cookie.setPath("/");
-        getThreadLocalResponse().addCookie(cookie);
-        logger.info("Invalidated HTTP session");
-        return new SuccessInfo(true, "Logged out.", /* redirectURL */ null, null);
-    }
-
-    @Override
-    public SuccessInfo login(String username, String password) {
-        try {
-            String redirectURL = getSecurityService().login(username, password);
-            UserDTO user = securityDTOFactory.createUserDTOFromUser(getSecurityService().getUserByName(username),
-                    getSecurityService());
-            return new SuccessInfo(true, "Success. Redirecting to " + redirectURL, redirectURL,
-                    new Triple<>(user, getAllUser(), getServerInfo()));
-        } catch (UserManagementException | AuthenticationException e) {
-            return new SuccessInfo(false, SuccessInfo.FAILED_TO_LOGIN, /* redirectURL */ null, null);
         }
     }
 
@@ -629,10 +599,6 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
             logger.log(Level.WARNING, e, () -> "Error while parsing locale with name '" + localeName + "'");
             return null;
         }
-    }
-
-    protected HttpSession getHttpSession() {
-        return getThreadLocalRequest().getSession();
     }
 
     /**

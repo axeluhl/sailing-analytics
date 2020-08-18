@@ -19,6 +19,7 @@ import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.shared.SecurityServiceSharingDTO;
+import com.sap.sse.security.ui.shared.SuccessInfo;
 
 public interface UserManagementServiceAsync {
     void getAccessControlLists(AsyncCallback<Collection<AccessControlListAnnotationDTO>> callback);
@@ -79,4 +80,9 @@ public interface UserManagementServiceAsync {
     void getSharingConfiguration(AsyncCallback<SecurityServiceSharingDTO> callback);
 
     void verifySocialUser(CredentialDTO credential, AsyncCallback<Triple<UserDTO, UserDTO, ServerInfoDTO>> markedAsyncCallback);
+
+
+    void login(String username, String password, AsyncCallback<SuccessInfo> callback);
+
+    void logout(AsyncCallback<SuccessInfo> callback);
 }
