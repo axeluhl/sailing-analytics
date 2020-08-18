@@ -72,13 +72,10 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
             String raceDescription, BoatClass boatClass, SwissTimingRaceTrackerImpl swissTimingRaceTracker) throws InterruptedException, ParseException {
         Util.Triple<String, Integer, String> key = new Util.Triple<>(host, port, raceId);
         SailMasterConnector result = connectors.get(key);
-        if (result == null) {
+        if (result == null || result.isStopped()) {
             result = new SailMasterLiveSimulatorConnectorImpl(host, port, raceId, raceName, raceDescription, boatClass, swissTimingRaceTracker);
             connectors.put(key, result);
             // TODO how do connectors get stopped, terminated and removed from the connectors map again?
-        } else if (result.isStopped()) {
-            result = new SailMasterLiveSimulatorConnectorImpl(host, port, raceId, raceName, raceDescription, boatClass, swissTimingRaceTracker);
-            connectors.put(key, result);
         }
         return result;
     }

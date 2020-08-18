@@ -401,7 +401,6 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                         // store a successful configuration in the database for later retrieval
                         final SwissTimingConfigurationWithSecurityDTO updatedDTO = new SwissTimingConfigurationWithSecurityDTO(
                                 selectedObject, result.trackingDataHost, result.trackingDataPort, result.eventName);
-
                         sailingServiceWrite.updateSwissTimingConfiguration(updatedDTO, new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable caught) {
