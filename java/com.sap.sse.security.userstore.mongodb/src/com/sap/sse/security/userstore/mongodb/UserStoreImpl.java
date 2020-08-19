@@ -29,7 +29,6 @@ import com.sap.sse.security.shared.PredefinedRoles;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RoleDefinitionImpl;
 import com.sap.sse.security.shared.RolePrototype;
-import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.UserRole;
@@ -79,13 +78,13 @@ public class UserStoreImpl implements UserStore {
     private final ConcurrentHashMap<String, UserGroup> userGroupsByName;
 
     /**
-     * Protects access to the two maps {@link #userGroupsContainingUser} and {@link #usersInUserGroups} which implement
-     * an efficient lookup for the m:n association between {@link UserGroupImpl#getUsers()} and {@link SecurityUser}.
-     * The collections also contain the relationships for the specialized {@link Tenant} objects which are not part of
-     * {@link #userGroups} but of {@link #tenants}.
+     * Protects access to the maps {@link #userGroupsContainingUser}, {@link #usersInUserGroups}, {@link #userGroups},
+     * {@link #userGroupsByName} and {@link #roleDefinitionsToUserGroups}.<br>
+     * Lock may be aquired when having a lock for {@linkplain usersLock}. If both locks (no matter if read or write) are
+     * required, {@link #usersLock} must always be aquired before aquiring {@link #userGroupsLock}.
      */
-    private final NamedReentrantReadWriteLock userGroupsUserCacheLock = new NamedReentrantReadWriteLock(
-            "User Groups Cache", /* fair */ false);
+    private final NamedReentrantReadWriteLock userGroupsLock = new NamedReentrantReadWriteLock(
+            "User Groups", /* fair */ false);
     private final ConcurrentHashMap<User, Set<UserGroup>> userGroupsContainingUser;
     /**
      * This collection is important in particular to detect changes when {@link #updateUserGroup(UserGroupImpl)} is
@@ -96,6 +95,15 @@ public class UserStoreImpl implements UserStore {
     private final ConcurrentHashMap<RoleDefinition, Set<User>> roleDefinitionsToUsers;
     private final ConcurrentHashMap<RoleDefinition, Set<UserGroup>> roleDefinitionsToUserGroups;
 
+    /**
+     * Protects access to the maps {@link #users}, {@link #usersByEmail}, {@link #roleDefinitionsToUsers},
+     * {@link #usersByAccessToken} and {@link #emailForUsername}.<br>
+     * Must not be locked when already having a lock for {@linkplain userGroupsLock}. If both locks (no matter if read
+     * or write) are required, {@link #usersLock} must always be aquired before aquiring {@link #userGroupsLock}.
+     */
+    private final NamedReentrantReadWriteLock usersLock = new NamedReentrantReadWriteLock(
+            "Users", /* fair */ false);
+    
     private final ConcurrentHashMap<String, User> users;
     private final ConcurrentHashMap<String, Set<User>> usersByEmail;
     private final ConcurrentHashMap<UUID, RoleDefinition> roleDefinitions;
@@ -394,16 +402,13 @@ public class UserStoreImpl implements UserStore {
     }
 
     private void removeAll() {
-        userGroups.clear();
-        userGroupsByName.clear();
-        LockUtil.lockForWrite(userGroupsUserCacheLock);
-        try {
+        LockUtil.executeWithWriteLock(userGroupsLock, () -> {
+            userGroups.clear();
+            userGroupsByName.clear();
             userGroupsContainingUser.clear();
             usersInUserGroups.clear();
             roleDefinitionsToUserGroups.clear();
-        } finally {
-            LockUtil.unlockAfterWrite(userGroupsUserCacheLock);
-        }
+        });
         clearAllPreferenceObjects();
         emailForUsername.clear();
         settings.clear();
@@ -431,8 +436,7 @@ public class UserStoreImpl implements UserStore {
     @Override
     public void replaceContentsFrom(UserStore newUserStore) {
         clear();
-        LockUtil.lockForWrite(userGroupsUserCacheLock);
-        try {
+        LockUtil.executeWithWriteLock(userGroupsLock, () -> {
             for (UserGroup group : newUserStore.getUserGroups()) {
                 userGroups.put(group.getId(), group);
                 userGroupsByName.put(group.getName(), group);
@@ -443,9 +447,7 @@ public class UserStoreImpl implements UserStore {
                     Util.addToValueSet(userGroupsContainingUser, userInGroup, group);
                 }
             }
-        } finally {
-            LockUtil.unlockAfterWrite(userGroupsUserCacheLock);
-        }
+        });
         for (RoleDefinition roleDefinition : newUserStore.getRoleDefinitions()) {
             roleDefinitions.put(roleDefinition.getId(), roleDefinition);
         }
@@ -659,8 +661,7 @@ public class UserStoreImpl implements UserStore {
     @Override
     public void updateUserGroup(UserGroup group) {
         logger.info("Updating user group " + group.getName() + " in DB");
-        LockUtil.lockForWrite(userGroupsUserCacheLock);
-        try {
+        LockUtil.executeWithWriteLock(userGroupsLock, () -> {
             Set<User> usersInGroupBefore = new HashSet<>();
             Util.addAll(usersInUserGroups.get(group), usersInGroupBefore);
             for (final User userNowInUpdatedGroup : group.getUsers()) {
@@ -682,9 +683,7 @@ public class UserStoreImpl implements UserStore {
                 Util.addToValueSet(roleDefinitionsToUserGroups, roleInUserGroup, group,
                         () -> ConcurrentHashMap.newKeySet());
             }
-        } finally {
-            LockUtil.unlockAfterWrite(userGroupsUserCacheLock);
-        }
+        });
         if (mongoObjectFactory != null) {
             mongoObjectFactory.storeUserGroup(group);
         }
@@ -693,12 +692,7 @@ public class UserStoreImpl implements UserStore {
     @Override
     public Iterable<UserGroup> getUserGroupsOfUser(User user) {
         final Iterable<UserGroup> preResult;
-        LockUtil.lockForRead(userGroupsUserCacheLock);
-        try {
-            preResult = userGroupsContainingUser.get(user);
-        } finally {
-            LockUtil.unlockAfterRead(userGroupsUserCacheLock);
-        }
+        preResult = LockUtil.executeWithReadLockAndResult(userGroupsLock, () -> userGroupsContainingUser.get(user));
         return preResult == null ? Collections.<UserGroup> emptySet() : preResult;
     }
 
@@ -710,17 +704,14 @@ public class UserStoreImpl implements UserStore {
         logger.info("Deleting user group: " + userGroup);
         userGroupsByName.remove(userGroup.getName());
         userGroups.remove(userGroup.getId());
-        LockUtil.lockForWrite(userGroupsUserCacheLock);
-        try {
+        LockUtil.executeWithWriteLock(userGroupsLock, () -> {
             for (final User userInDeletedGroup : userGroup.getUsers()) {
                 Util.removeFromValueSet(userGroupsContainingUser, userInDeletedGroup, userGroup);
             }
             usersInUserGroups.remove(userGroup);
             userGroup.getRoleDefinitionMap().keySet()
-                    .forEach(role -> Util.removeFromValueSet(roleDefinitionsToUserGroups, role, userGroup));
-        } finally {
-            LockUtil.unlockAfterWrite(userGroupsUserCacheLock);
-        }
+            .forEach(role -> Util.removeFromValueSet(roleDefinitionsToUserGroups, role, userGroup));
+        });
         deleteUserGroupFromDB(userGroup);
     }
 
@@ -823,33 +814,35 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public Pair<Boolean, Set<Ownership>> getExistingQualificationsForRoleDefinition(RoleDefinition roleToCheck) {
-        final Set<Ownership> ownerships = new HashSet<>();
-        final Set<User> usersHavingRole = roleDefinitionsToUsers.get(roleToCheck);
-        if (usersHavingRole != null) {
-            for (User user : usersHavingRole) {
-                for (Role role : user.getRoles()) {
-                    if (!role.getRoleDefinition().equals(roleToCheck)) {
-                        // wrong role
-                        continue;
-                    }
-                    if (role.getQualifiedForTenant() == null && role.getQualifiedForUser() == null) {
-                        // wildcard rule exists -> return A=true
-                        return new Pair<>(true, null);
-                    } else {
-                        ownerships.add(new Ownership(role.getQualifiedForUser(), role.getQualifiedForTenant()));
+        return LockUtil.executeWithReadLockAndResult(userGroupsLock, () ->{
+            final Set<Ownership> ownerships = new HashSet<>();
+            final Set<User> usersHavingRole = roleDefinitionsToUsers.get(roleToCheck);
+            if (usersHavingRole != null) {
+                for (User user : usersHavingRole) {
+                    for (Role role : user.getRoles()) {
+                        if (!role.getRoleDefinition().equals(roleToCheck)) {
+                            // wrong role
+                            continue;
+                        }
+                        if (role.getQualifiedForTenant() == null && role.getQualifiedForUser() == null) {
+                            // wildcard rule exists -> return A=true
+                            return new Pair<>(true, null);
+                        } else {
+                            ownerships.add(new Ownership(role.getQualifiedForUser(), role.getQualifiedForTenant()));
+                        }
                     }
                 }
             }
-        }
-        final Set<UserGroup> userGroupsHavingRole = roleDefinitionsToUserGroups.get(roleToCheck);
-        if (userGroupsHavingRole != null) {
-            for (UserGroup userGroup : userGroupsHavingRole) {
-                if (userGroup.getRoleDefinitionMap().containsKey(roleToCheck)) {
-                    ownerships.add(new Ownership(null, userGroup));
+            final Set<UserGroup> userGroupsHavingRole = roleDefinitionsToUserGroups.get(roleToCheck);
+            if (userGroupsHavingRole != null) {
+                for (UserGroup userGroup : userGroupsHavingRole) {
+                    if (userGroup.getRoleDefinitionMap().containsKey(roleToCheck)) {
+                        ownerships.add(new Ownership(null, userGroup));
+                    }
                 }
             }
-        }
-        return new Pair<>(false, ownerships);
+            return new Pair<>(false, ownerships);
+        });
     }
 
     @Override
