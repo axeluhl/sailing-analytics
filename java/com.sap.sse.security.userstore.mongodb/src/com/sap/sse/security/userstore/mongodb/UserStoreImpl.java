@@ -92,6 +92,9 @@ public class UserStoreImpl implements UserStore {
      * called.
      */
     private final ConcurrentHashMap<UserGroup, Set<User>> usersInUserGroups;
+    
+    private final ConcurrentHashMap<RoleDefinition, Set<User>> roleDefinitionsToUsers;
+    private final ConcurrentHashMap<RoleDefinition, Set<UserGroup>> roleDefinitionsToUserGroups;
 
     private final ConcurrentHashMap<String, User> users;
     private final ConcurrentHashMap<String, Set<User>> usersByEmail;
@@ -154,6 +157,8 @@ public class UserStoreImpl implements UserStore {
         userGroupsByName = new ConcurrentHashMap<>();
         userGroupsContainingUser = new ConcurrentHashMap<>();
         usersInUserGroups = new ConcurrentHashMap<>();
+        roleDefinitionsToUsers = new ConcurrentHashMap<>();
+        roleDefinitionsToUserGroups = new ConcurrentHashMap<>();
         users = new ConcurrentHashMap<>();
         usersByEmail = new ConcurrentHashMap<>();
         emailForUsername = new ConcurrentHashMap<>();
@@ -213,6 +218,10 @@ public class UserStoreImpl implements UserStore {
         for (User u : domainObjectFactory.loadAllUsers(roleDefinitions, this::convertToNewRoleModel, this.userGroups, this)) {
             users.put(u.getName(), u);
             addToUsersByEmail(u);
+            for (Role roleOfUser : u.getRoles()) {
+                Util.addToValueSet(roleDefinitionsToUsers, roleOfUser.getRoleDefinition(), u,
+                        () -> ConcurrentHashMap.newKeySet());
+            }
         }
         // the users in the groups/tenants are still only proxies; now that the real users have been loaded,
         // replace them based on the username key:
@@ -221,6 +230,10 @@ public class UserStoreImpl implements UserStore {
             for (final User userInGroup : group.getUsers()) {
                 Util.addToValueSet(usersInUserGroups, group, userInGroup);
                 Util.addToValueSet(userGroupsContainingUser, userInGroup, group);
+            }
+            for (RoleDefinition roleInUserGroup : group.getRoleDefinitionMap().keySet()) {
+                Util.addToValueSet(roleDefinitionsToUserGroups, roleInUserGroup, group,
+                        () -> ConcurrentHashMap.newKeySet());
             }
         }
         // FIXME check for non migrated users, those are leftovers that are in some groups but have no user object anymore, remove them from the groups!
@@ -387,6 +400,7 @@ public class UserStoreImpl implements UserStore {
         try {
             userGroupsContainingUser.clear();
             usersInUserGroups.clear();
+            roleDefinitionsToUserGroups.clear();
         } finally {
             LockUtil.unlockAfterWrite(userGroupsUserCacheLock);
         }
@@ -395,6 +409,7 @@ public class UserStoreImpl implements UserStore {
         settings.clear();
         settingTypes.clear();
         users.clear();
+        roleDefinitionsToUsers.clear();
         roleDefinitions.clear();
         usersByEmail.clear();
         usersByAccessToken.clear();
@@ -512,6 +527,8 @@ public class UserStoreImpl implements UserStore {
     public void removeRoleDefinition(RoleDefinition roleDefinition) {
         mongoObjectFactory.deleteRoleDefinition(roleDefinition);
         roleDefinitions.remove(roleDefinition.getId());
+        roleDefinitionsToUsers.remove(roleDefinition);
+        roleDefinitionsToUserGroups.remove(roleDefinition);
     }
 
     @Override
@@ -660,6 +677,11 @@ public class UserStoreImpl implements UserStore {
                     Util.removeFromValueSet(userGroupsContainingUser, userInGroupBefore, group);
                 }
             }
+            Util.removeFromAllValueSets(roleDefinitionsToUserGroups, group);
+            for (RoleDefinition roleInUserGroup : group.getRoleDefinitionMap().keySet()) {
+                Util.addToValueSet(roleDefinitionsToUserGroups, roleInUserGroup, group,
+                        () -> ConcurrentHashMap.newKeySet());
+            }
         } finally {
             LockUtil.unlockAfterWrite(userGroupsUserCacheLock);
         }
@@ -694,6 +716,8 @@ public class UserStoreImpl implements UserStore {
                 Util.removeFromValueSet(userGroupsContainingUser, userInDeletedGroup, userGroup);
             }
             usersInUserGroups.remove(userGroup);
+            userGroup.getRoleDefinitionMap().keySet()
+                    .forEach(role -> Util.removeFromValueSet(roleDefinitionsToUserGroups, role, userGroup));
         } finally {
             LockUtil.unlockAfterWrite(userGroupsUserCacheLock);
         }
@@ -800,9 +824,10 @@ public class UserStoreImpl implements UserStore {
     @Override
     public Pair<Boolean, Set<Ownership>> getExistingQualificationsForRoleDefinition(RoleDefinition roleToCheck) {
         final Set<Ownership> ownerships = new HashSet<>();
-        for (User user : getUsers()) {
-            try {
-                for (Role role : getRolesFromUser(user.getName())) {
+        final Set<User> usersHavingRole = roleDefinitionsToUsers.get(roleToCheck);
+        if (usersHavingRole != null) {
+            for (User user : usersHavingRole) {
+                for (Role role : user.getRoles()) {
                     if (!role.getRoleDefinition().equals(roleToCheck)) {
                         // wrong role
                         continue;
@@ -814,14 +839,14 @@ public class UserStoreImpl implements UserStore {
                         ownerships.add(new Ownership(role.getQualifiedForUser(), role.getQualifiedForTenant()));
                     }
                 }
-            } catch (UserManagementException e) {
-                // user did not exist -> should not happen
-                logger.log(Level.SEVERE, e.getMessage(), e);
             }
         }
-        for (UserGroup userGroup : userGroups.values()) {
-            if (userGroup.getRoleDefinitionMap().containsKey(roleToCheck)) {
-                ownerships.add(new Ownership(null, userGroup));
+        final Set<UserGroup> userGroupsHavingRole = roleDefinitionsToUserGroups.get(roleToCheck);
+        if (userGroupsHavingRole != null) {
+            for (UserGroup userGroup : userGroupsHavingRole) {
+                if (userGroup.getRoleDefinitionMap().containsKey(roleToCheck)) {
+                    ownerships.add(new Ownership(null, userGroup));
+                }
             }
         }
         return new Pair<>(false, ownerships);
@@ -860,6 +885,8 @@ public class UserStoreImpl implements UserStore {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
         user.addRole(role);
+        Util.addToValueSet(roleDefinitionsToUsers, role.getRoleDefinition(), user,
+                () -> ConcurrentHashMap.newKeySet());
         if (mongoObjectFactory != null) {
             mongoObjectFactory.storeUser(user);
         }
@@ -867,10 +894,22 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public void removeRoleFromUser(String name, Role role) throws UserManagementException {
-        if (users.get(name) == null) {
+        final User user = users.get(name);
+        if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
-        users.get(name).removeRole(role);
+        user.removeRole(role);
+        RoleDefinition roleDefinition = role.getRoleDefinition();
+        boolean roleDefinitionStillGrantedToUser = false;
+        for (Role roleOfUser : user.getRoles()) {
+            if (roleDefinition.equals(roleOfUser.getRoleDefinition())) {
+                roleDefinitionStillGrantedToUser = true;
+                break;
+            }
+        }
+        if (!roleDefinitionStillGrantedToUser) {
+            Util.removeFromValueSet(roleDefinitionsToUsers, roleDefinition, user);
+        }
         if (mongoObjectFactory != null) {
             mongoObjectFactory.storeUser(users.get(name));
         }
@@ -901,13 +940,16 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public void deleteUser(String name) throws UserManagementException {
-        if (users.get(name) == null) {
+        final User user = users.get(name);
+        if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
         logger.info("Deleting user: " + users.get(name).toString());
         if (mongoObjectFactory != null) {
-            mongoObjectFactory.deleteUser(users.get(name));
+            mongoObjectFactory.deleteUser(user);
         }
+        user.getRoles()
+                .forEach(role -> Util.removeFromValueSet(roleDefinitionsToUsers, role.getRoleDefinition(), user));
         removeFromUsersByEmail(users.remove(name));
         removeAllPreferencesForUser(name);
     }
