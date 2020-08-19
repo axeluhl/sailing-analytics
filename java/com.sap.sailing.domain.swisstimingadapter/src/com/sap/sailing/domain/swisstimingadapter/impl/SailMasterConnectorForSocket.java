@@ -9,6 +9,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.swisstimingadapter.MessageType;
 
 /**
@@ -88,4 +89,8 @@ public class SailMasterConnectorForSocket extends AbstractSailMasterConnector {
         return socket != null && socket.isConnected();
     }
 
+    @Override
+    protected TrackedRaceStatusEnum getStatusAfterLoadingIsComplete()  {
+        return TrackedRaceStatusEnum.TRACKING; // more stuff can come through the socket
+    }
 }

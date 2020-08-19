@@ -440,18 +440,25 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
     }
 
     @Override
-    public void storedDataProgress(String raceID, double progress) {
+    public void storedDataProgress(String raceID, double progress, TrackedRaceStatusEnum statusAfterLoadingComplete) {
         assert this.raceID.equals(raceID);
         if (isTrackedRaceStillReachable()) {
             final TrackedRaceStatusImpl newStatus;
             if (progress == 0.0) {
                 newStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.PREPARED, 0.0);
             } else if (progress == 1.0) {
-                newStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.TRACKING, progress);
+                newStatus = new TrackedRaceStatusImpl(statusAfterLoadingComplete, progress);
             } else {
                 newStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, progress);
             }
             trackedRace.onStatusChanged(this, newStatus);
+            if (newStatus.getStatus() == TrackedRaceStatusEnum.FINISHED) {
+                try {
+                    trackedRegattaRegistry.stopTracker(getRegatta(), this);
+                } catch (IOException | InterruptedException e) {
+                    logger.log(Level.SEVERE, "Error trying to stop the tracker "+this, e);
+                }
+            }
         }
     }
 

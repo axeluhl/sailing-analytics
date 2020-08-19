@@ -18,6 +18,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.swisstimingadapter.Competitor;
 import com.sap.sailing.domain.swisstimingadapter.Course;
 import com.sap.sailing.domain.swisstimingadapter.Fix;
@@ -195,7 +196,7 @@ public class SwissTimingSailMasterLiveTest implements SailMasterListener {
     }
 
     @Override
-    public void storedDataProgress(String raceID, double progress) {
+    public void storedDataProgress(String raceID, double progress, TrackedRaceStatusEnum statusAfterLoadingComplete) {
     }
 
     @Override

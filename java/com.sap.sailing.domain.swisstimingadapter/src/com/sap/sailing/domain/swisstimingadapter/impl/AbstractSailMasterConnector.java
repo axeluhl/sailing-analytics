@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
@@ -262,13 +263,15 @@ public abstract class AbstractSailMasterConnector extends SailMasterTransceiverI
     private void notifyListenersStoredDataProgress(String raceID, double progress) {
         for (SailMasterListener listener : getListeners()) {
             try {
-                listener.storedDataProgress(raceID, progress);
+                listener.storedDataProgress(raceID, progress, getStatusAfterLoadingIsComplete());
             } catch (Exception e) {
                 logger.info("Exception occurred trying to notify listener "+listener+" about progress "+progress);
                 logger.throwing(AbstractSailMasterConnector.class.getName(), "notifyStoredDataProgress", e);
             }
         }
     }
+
+    protected abstract TrackedRaceStatusEnum getStatusAfterLoadingIsComplete();
     
     private void notifyListenersWND(SailMasterMessage message) {
         // example message: WND|W4702|1|320|5.4

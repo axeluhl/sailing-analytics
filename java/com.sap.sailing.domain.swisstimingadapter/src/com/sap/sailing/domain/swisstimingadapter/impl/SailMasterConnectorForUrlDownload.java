@@ -10,6 +10,7 @@ import java.text.ParseException;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.swisstimingadapter.MessageType;
 import com.sap.sse.util.HttpUrlConnectionHelper;
 
@@ -87,4 +88,8 @@ public class SailMasterConnectorForUrlDownload extends AbstractSailMasterConnect
         }
     }
     
+    @Override
+    protected TrackedRaceStatusEnum getStatusAfterLoadingIsComplete()  {
+        return TrackedRaceStatusEnum.FINISHED; // nothing more to come
+    }
 }

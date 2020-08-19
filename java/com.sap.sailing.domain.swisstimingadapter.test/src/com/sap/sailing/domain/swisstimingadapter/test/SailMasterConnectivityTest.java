@@ -24,6 +24,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.Timeout;
 
+import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.swisstimingadapter.Competitor;
 import com.sap.sailing.domain.swisstimingadapter.Course;
 import com.sap.sailing.domain.swisstimingadapter.Fix;
@@ -111,7 +112,7 @@ public class SailMasterConnectivityTest {
             @Override
             public void receivedAvailableRaces(Iterable<Race> races) {}
             @Override
-            public void storedDataProgress(String raceID, double progress) {}
+            public void storedDataProgress(String raceID, double progress, TrackedRaceStatusEnum statusAfterLoadingComplete) {}
             @Override
             public void receivedWindData(String raceID, int zeroBasedMarkIndex, double windDirectionTrueDegrees, double windSpeedInKnots) {}
             @Override
@@ -153,7 +154,7 @@ public class SailMasterConnectivityTest {
             @Override
             public void receivedAvailableRaces(Iterable<Race> races) {}
             @Override
-            public void storedDataProgress(String raceID, double progress) {}
+            public void storedDataProgress(String raceID, double progress, TrackedRaceStatusEnum statusAfterLoadingComplete) {}
             @Override
             public void receivedWindData(String raceID, int zeroBasedMarkIndex, double windDirectionTrueDegrees, double windSpeedInKnots) {}
             @Override
