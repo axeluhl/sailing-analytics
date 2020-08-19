@@ -3,7 +3,6 @@ package com.sap.sailing.domain.swisstimingadapter.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.text.DateFormat;
@@ -30,6 +29,7 @@ import java.util.stream.Collectors;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
@@ -83,12 +83,9 @@ import com.sap.sse.util.impl.UUIDHelper;
  * @author Axel Uhl (d043530)
  * 
  */
-public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implements SailMasterConnector, Runnable {
-    private static final Logger logger = Logger.getLogger(SailMasterConnectorImpl.class.getName());
+public abstract class AbstractSailMasterConnector extends SailMasterTransceiverImpl implements SailMasterConnector, Runnable {
+    private static final Logger logger = Logger.getLogger(AbstractSailMasterConnector.class.getName());
     
-    private final String host;
-    private final int port;
-    private Socket socket;
     private final DateFormat dateFormat;
     private final Set<SailMasterListener> listeners;
     private final Thread receiverThread;
@@ -131,7 +128,11 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
 
     private Long numberOfStoredMessages;
     
-    public SailMasterConnectorImpl(String host, int port, String raceId, String raceName, String raceDescription, BoatClass boatClass, SwissTimingRaceTrackerImpl swissTimingRaceTracker) throws InterruptedException, ParseException {
+    /**
+     * Subclasses must invoke {@link #startReceiverThread()} in their constructor before the constructor completes, but
+     * usually after finishing the initialization of all their fields.
+     */
+    protected AbstractSailMasterConnector(String raceId, String raceName, String raceDescription, BoatClass boatClass, SwissTimingRaceTrackerImpl swissTimingRaceTracker) throws InterruptedException, ParseException {
         super();
         maxSequenceNumber = -1l;
         this.raceId = raceId; // from this time on, the connector interprets messages for raceID
@@ -139,12 +140,13 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         this.raceDescription = raceDescription;
         this.boatClass = boatClass;
         dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
-        this.host = host;
-        this.port = port;
-        this.listeners = new HashSet<SailMasterListener>();
-        this.unprocessedMessagesByType = new HashMap<MessageType, BlockingQueue<SailMasterMessage>>();
+        this.listeners = new HashSet<>();
+        this.unprocessedMessagesByType = new HashMap<>();
         this.addSailMasterListener(swissTimingRaceTracker);
         receiverThread = new Thread(this, "SwissTiming SailMaster Receiver");
+    }
+
+    protected void startReceiverThread() {
         receiverThread.start();
     }
     
@@ -152,15 +154,15 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         try {
             while (!stopped) {
                 try {
-                    ensureSocketIsOpen(); // the result of this may be that the connector w\s stopped in between, so another check is required
-                    if (!stopped && socket != null) {
-                        String receivedMessage = receiveMessage(socket.getInputStream());
+                    ensureConnected(); // the result of this may be that the connector w\s stopped in between, so another check is required
+                    if (!stopped && isConnected()) {
+                        String receivedMessage = receiveMessage(getInputStream());
                         if (receivedMessage == null) {
+                            logger.info("Reached EOF for "+this+"; disconnecting");
                             // reached EOF; this means the socket is or can be closed
-                            if (socket != null && !socket.isClosed()) {
-                                socket.close();
+                            if (isConnected()) {
+                                disconnect();
                             }
-                            socket = null;
                         } else {
                             SailMasterMessage message = new SailMasterMessageImpl(receivedMessage);
                             // drop race-specific messages for non-tracked races
@@ -188,12 +190,12 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                 } catch (SocketException se) {
                     // This occurs if the socket was closed which may mean the connector was stopped. Check in while
                     logger.info("Caught exception "+se+" during socket operation; setting socket to null");
-                    socket = null;
+                    disconnect();
                     Thread.sleep(1000); // try again in 1s
                 }
             }
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Exception in sail master connector "+SailMasterConnectorImpl.class.getName()+".run for "+this, e);
+            logger.log(Level.SEVERE, "Exception in sail master connector "+AbstractSailMasterConnector.class.getName()+".run for "+this, e);
         }
         logger.info("Stopping Sail Master connector thread for "+this);
         stopped = true;
@@ -261,13 +263,15 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
     private void notifyListenersStoredDataProgress(String raceID, double progress) {
         for (SailMasterListener listener : getListeners()) {
             try {
-                listener.storedDataProgress(raceID, progress);
+                listener.storedDataProgress(raceID, progress, getStatusAfterLoadingIsComplete());
             } catch (Exception e) {
                 logger.info("Exception occurred trying to notify listener "+listener+" about progress "+progress);
-                logger.throwing(SailMasterConnectorImpl.class.getName(), "notifyStoredDataProgress", e);
+                logger.throwing(AbstractSailMasterConnector.class.getName(), "notifyStoredDataProgress", e);
             }
         }
     }
+
+    protected abstract TrackedRaceStatusEnum getStatusAfterLoadingIsComplete();
     
     private void notifyListenersWND(SailMasterMessage message) {
         // example message: WND|W4702|1|320|5.4
@@ -280,7 +284,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                 listener.receivedWindData(raceID, zeroBasedMarkIndex, windDirectionTrueDegrees, windSpeedInKnots);
             } catch (Exception e) {
                 logger.info("Exception occurred trying to notify listener "+listener+" about "+message+": "+e.getMessage());
-                logger.throwing(SailMasterConnectorImpl.class.getName(), "notifyListenersWND", e);
+                logger.throwing(AbstractSailMasterConnector.class.getName(), "notifyListenersWND", e);
             }
         }
     }
@@ -304,7 +308,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                 listener.receivedTimingData(raceID, competitorIdAsString, markIndicesRanksAndTimesSinceStartInMilliseconds);
             } catch (Exception e) {
                 logger.info("Exception occurred trying to notify listener "+listener+" about "+message+": "+e.getMessage());
-                logger.throwing(SailMasterConnectorImpl.class.getName(), "notifyListenersTMD", e);
+                logger.throwing(AbstractSailMasterConnector.class.getName(), "notifyListenersTMD", e);
             }
         }
     }
@@ -316,7 +320,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                 listener.receivedClockAtMark(message.getSections()[1], clockAtMarkResults);
             } catch (Exception e) {
                 logger.info("Exception occurred trying to notify listener "+listener+" about "+message+": "+e.getMessage());
-                logger.throwing(SailMasterConnectorImpl.class.getName(), "notifyListenersCAM", e);
+                logger.throwing(AbstractSailMasterConnector.class.getName(), "notifyListenersCAM", e);
             }
         }
     }
@@ -328,7 +332,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                 listener.receivedStartList(message.getSections()[1], startListMessage);
             } catch (Exception e) {
                 logger.info("Exception occurred trying to notify listener "+listener+" about "+message+": "+e.getMessage());
-                logger.throwing(SailMasterConnectorImpl.class.getName(), "notifyListenersSTL", e);
+                logger.throwing(AbstractSailMasterConnector.class.getName(), "notifyListenersSTL", e);
             }
         }
     }
@@ -340,7 +344,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                 listener.receivedCourseConfiguration(message.getSections()[1], course);
             } catch (Exception e) {
                 logger.info("Exception occurred trying to notify listener "+listener+" about "+message+": "+e.getMessage());
-                logger.throwing(SailMasterConnectorImpl.class.getName(), "notifyListenersCCG", e);
+                logger.throwing(AbstractSailMasterConnector.class.getName(), "notifyListenersCCG", e);
             }
         }
     }
@@ -352,7 +356,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                 listener.receivedAvailableRaces(races);
             } catch (Exception e) {
                 logger.info("Exception occurred trying to notify listener "+listener+" about "+message+": "+e.getMessage());
-                logger.throwing(SailMasterConnectorImpl.class.getName(), "notifyListenersRAC", e);
+                logger.throwing(AbstractSailMasterConnector.class.getName(), "notifyListenersRAC", e);
             }
         }
         // not race specific; no need to notify any listener from raceSpecificListeners
@@ -447,7 +451,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                         millisecondsSinceRaceStart, nextMarkIndexForLeader, distanceToNextMarkForLeader, fixes);
             } catch (Exception e) {
                 logger.info("Exception occurred trying to notify listener "+listener+" about "+message+": "+e.getMessage());
-                logger.throwing(SailMasterConnectorImpl.class.getName(), "notifyListenersRPD", e);
+                logger.throwing(AbstractSailMasterConnector.class.getName(), "notifyListenersRPD", e);
             }
         }
     }
@@ -459,18 +463,10 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
     }
 
     @Override
-    public String toString() {
-        return "SailMasterConnector listening on port "+port+" with socket "+socket+" for race "+raceName+" with ID "+raceId+" ("+raceDescription+")";
-    }
-    
-    @Override
     public void stop() throws IOException {
-        logger.info("Stopping "+this);
         stopped = true;
-        if (socket != null) {
-            socket.close();
-            socket = null;
-        }
+        logger.info("Stopping "+this);
+        disconnect();
         synchronized (this) {
             notifyAll();
         }
@@ -499,13 +495,13 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
     }
 
     public SailMasterMessage sendRequestAndGetResponse(MessageType messageType, String... args) throws UnknownHostException, IOException, InterruptedException {
-        ensureSocketIsOpen();
+        ensureConnected();
         return sendRequestAndGetResponseAssumingSocketIsOpen(messageType, args);
     }
 
     private SailMasterMessage sendRequestAndGetResponseAssumingSocketIsOpen(MessageType messageType, String... args)
             throws IOException, InterruptedException {
-        OutputStream os = socket.getOutputStream();
+        OutputStream os = getOutputStream();
         final SailMasterMessage sailMasterMessage = createSailMasterMessage(messageType, args);
         sendMessage(sailMasterMessage, os);
         return receiveMessage(messageType);
@@ -525,17 +521,18 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         final SailMasterMessage sailMasterMessage = new SailMasterMessageImpl(requestMessage.toString());
         return sailMasterMessage;
     }
+    
+    protected abstract OutputStream getOutputStream() throws IOException;
+    protected abstract InputStream getInputStream() throws IOException;
 
     private final Object ensureSocketIsOpenSemaphor = new Object();
-    private void ensureSocketIsOpen() throws InterruptedException {
+    private void ensureConnected() throws InterruptedException, NumberFormatException, IOException {
         synchronized (ensureSocketIsOpenSemaphor) {
-            while (!stopped && socket == null) {
+            while (!stopped && !isConnected()) {
                 try {
-                    logger.info("Opening socket to " + host + ":" + port + " and sending " + MessageType.OPN.name()
-                            + " message...");
-                    socket = new Socket(host, port);
-                    final OutputStream os = socket.getOutputStream();
-                    final InputStream is = socket.getInputStream();
+                    connect();
+                    final OutputStream os = getOutputStream();
+                    final InputStream is = getInputStream();
                     final SailMasterMessage opnRequest = createSailMasterMessage(MessageType.OPN, raceId);
                     sendMessage(opnRequest, os);
                     SailMasterMessage opnResponse = new SailMasterMessageImpl(receiveMessage(is));
@@ -543,7 +540,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                         logger.info("Recevied non-OK response " + opnResponse + " in "+this+" for our request " + opnRequest
                                 + ". Closing socket and stopping because we have no hope for recovery");
                         stopped = true;
-                        closeSocket();
+                        disconnect();
                     } else {
                         logger.info("Received " + opnResponse + " in "+this+" which seems OK. Continuing with "
                                 + MessageType.LSN.name() + " request...");
@@ -565,7 +562,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                         if (lsnResponse.getType() != MessageType.LSN || !"OK".equals(lsnResponse.getSections()[1])) {
                             logger.info("Received non-OK response " + lsnResponse + " for our request " + lsnRequest
                                     + " in "+this+". Closing socket and trying again in 1s...");
-                            closeAndNullSocketAndWaitABit();
+                            disconnectAndWaitABit();
                         } else {
                             logger.info("Received " + lsnResponse
                                     + " which seems to be OK. I think we're connected in "+this+"!");
@@ -573,28 +570,23 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                     }
                 } catch (IOException e) {
                     logger.log(Level.INFO, "Exception trying to establish connection in "+this+". Trying again in 1s.", e);
-                    closeAndNullSocketAndWaitABit();
+                    disconnectAndWaitABit();
                 }
             }
         }
     }
 
-    private void closeAndNullSocketAndWaitABit() throws InterruptedException {
-        closeSocket();
+    protected abstract void connect() throws IOException;
+
+    protected abstract boolean isConnected() throws IOException;
+
+    protected abstract void disconnect() throws IOException;
+    
+    private void disconnectAndWaitABit() throws InterruptedException, IOException {
+        disconnect();
         Thread.sleep(1000);
     }
-
-    private void closeSocket() {
-        if (socket != null) {
-            try {
-                socket.close();
-            } catch (IOException e) {
-                logger.log(Level.INFO, "Exception trying to close socket. Maybe already closed. Continuing", e);
-            }
-            socket = null;
-        }
-    }
-
+    
     @Override
     public Race getRace() {
         return new RaceImpl(raceId, raceName, raceDescription, boatClass);
@@ -857,5 +849,5 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
     public void disableRacePositionData() throws UnknownHostException, IOException, InterruptedException {
         sendRequestAndGetResponse(MessageType.RPD, "0");
     }
-    
+
 }
