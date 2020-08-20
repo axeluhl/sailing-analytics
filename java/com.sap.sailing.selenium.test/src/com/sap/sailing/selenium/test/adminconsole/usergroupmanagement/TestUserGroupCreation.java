@@ -47,10 +47,14 @@ public class TestUserGroupCreation extends AbstractSeleniumTest {
         userGroupManagementPanel.selectGroup(TEST_GROUP_NAME);
         final UserGroupRoleDefinitionPanelPO userRolesPO = userGroupManagementPanel.getUserGroupRoles();
         assertNull(userRolesPO.findRole(TEST_ROLE));
-        userRolesPO.enterNewRoleName(TEST_ROLE);
-        userRolesPO.clickAddButtonOrThrow();
+        createRole(userRolesPO);
         userGroupManagementPanel.selectGroup(TEST_GROUP_NAME);
         assertNotNull(userRolesPO.findRole(TEST_ROLE));
+    }
+
+    private void createRole(final UserGroupRoleDefinitionPanelPO userRolesPO) {
+        userRolesPO.enterNewRoleName(TEST_ROLE);
+        userRolesPO.clickAddButtonOrThrow();
     }
     
     @Test
@@ -60,10 +64,49 @@ public class TestUserGroupCreation extends AbstractSeleniumTest {
         userGroupManagementPanel.selectGroup(TEST_GROUP_NAME);
         final UserGroupUserPanelPO userGroupUserPanelPO = userGroupManagementPanel.getUserGroupUsers();
         assertNull(userGroupUserPanelPO.findUser(TEST_USER_NAME));
-        userGroupUserPanelPO.enterNewUser(TEST_USER_NAME);
-        userGroupUserPanelPO.clickAddButtonOrThrow();
+        addUserToGroup(userGroupUserPanelPO);
         userGroupManagementPanel.selectGroup(TEST_GROUP_NAME);
         assertNotNull(userGroupUserPanelPO.findUser(TEST_USER_NAME));
+    }
+
+    private void addUserToGroup(final UserGroupUserPanelPO userGroupUserPanelPO) {
+        userGroupUserPanelPO.enterNewUser(TEST_USER_NAME);
+        userGroupUserPanelPO.clickAddButtonOrThrow();
+    }
+    
+    @Test
+    public void testUserGroupDeletion() {
+        final UserGroupManagementPanelPO userGroupManagementPanel = goToUserGroupDefinitionsPanel();
+        createGroup(userGroupManagementPanel);
+        userGroupManagementPanel.deleteGroup(TEST_GROUP_NAME);
+        getWebDriver().switchTo().alert().accept();
+        assertNull(userGroupManagementPanel.findGroup(TEST_GROUP_NAME));
+    }
+    
+    @Test
+    public void testRoleRemoval() {
+        final UserGroupManagementPanelPO userGroupManagementPanel = goToUserGroupDefinitionsPanel();
+        createGroup(userGroupManagementPanel);
+        userGroupManagementPanel.selectGroup(TEST_GROUP_NAME);
+        final UserGroupRoleDefinitionPanelPO userRolesPO = userGroupManagementPanel.getUserGroupRoles();
+        createRole(userRolesPO);
+        userGroupManagementPanel.selectGroup(TEST_GROUP_NAME);
+        userRolesPO.removeRole(TEST_ROLE);
+        userGroupManagementPanel.selectGroup(TEST_GROUP_NAME);
+        assertNull(userRolesPO.findRole(TEST_ROLE));
+    }
+    
+    @Test
+    public void testUserRemoval() {
+        final UserGroupManagementPanelPO userGroupManagementPanel = goToUserGroupDefinitionsPanel();
+        createGroup(userGroupManagementPanel);
+        userGroupManagementPanel.selectGroup(TEST_GROUP_NAME);
+        final UserGroupUserPanelPO userGroupUserPanelPO = userGroupManagementPanel.getUserGroupUsers();
+        addUserToGroup(userGroupUserPanelPO);
+        userGroupManagementPanel.selectGroup(TEST_GROUP_NAME);
+        userGroupUserPanelPO.removeUserFromGroup(TEST_USER_NAME);
+        userGroupManagementPanel.selectGroup(TEST_GROUP_NAME);
+        assertNull(userGroupUserPanelPO.findUser(TEST_USER_NAME));
     }
 
     private UserGroupManagementPanelPO goToUserGroupDefinitionsPanel() {

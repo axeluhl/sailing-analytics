@@ -72,11 +72,11 @@ public class UserGroupManagementPanel extends Composite {
             RefreshableSelectionModel<UserGroupDTO> userGroupSelectionModel) {
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, USER_GROUP);
         buttonPanel.addUnsecuredAction(stringMessages.refresh(), () -> updateUserGroups());
-        Button createGroupButton = buttonPanel.addCreateActionWithoutServerCreateObjectPermissionCheck(stringMessages.createUserGroup(),
+        final Button createGroupButton = buttonPanel.addCreateActionWithoutServerCreateObjectPermissionCheck(stringMessages.createUserGroup(),
                 () -> new CreateUserGroupDialog(stringMessages, userService, userManagementWriteService,
                         userGroupListDataProvider, () -> updateUserGroups()).show());
         createGroupButton.ensureDebugId("CreateGroupButton");
-        buttonPanel.addRemoveAction(stringMessages.removeUserGroup(), userGroupSelectionModel, false, () -> {
+        final Button removeGroupButton = buttonPanel.addRemoveAction(stringMessages.removeUserGroup(), userGroupSelectionModel, false, () -> {
             Set<UserGroupDTO> userGroups = userGroupTableWrapper.getSelectionModel().getSelectedSet();
             if (userGroups == null || userGroups.isEmpty()) {
                 Window.alert(stringMessages.youHaveToSelectAUserGroup());
@@ -108,6 +108,7 @@ public class UserGroupManagementPanel extends Composite {
                 }
             }
         });
+        removeGroupButton.ensureDebugId("DeleteUserGroupButton");
         return buttonPanel;
     }
 

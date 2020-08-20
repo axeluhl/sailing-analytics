@@ -19,6 +19,9 @@ public class UserGroupManagementPanelPO extends PageArea {
     @FindBy(how = BySeleniumId.class, using = "CreateGroupButton")
     private WebElement createGroupButton;
     
+    @FindBy(how = BySeleniumId.class, using = "DeleteUserGroupButton")
+    private WebElement deleteUserGroupButton;
+    
     public UserGroupManagementPanelPO(WebDriver driver, WebElement element) {
         super(driver, element);
     }
@@ -57,5 +60,14 @@ public class UserGroupManagementPanelPO extends PageArea {
     
     public UserGroupUserPanelPO getUserGroupUsers() {
         return waitForChildPO(UserGroupUserPanelPO::new, "UserGroupDetailPanel");
+    }
+    
+    public void deleteGroup(String name) {
+        selectGroup(name);
+        deleteSelectedGroup();
+    }
+    
+    public void deleteSelectedGroup() {
+        deleteUserGroupButton.click();
     }
 }

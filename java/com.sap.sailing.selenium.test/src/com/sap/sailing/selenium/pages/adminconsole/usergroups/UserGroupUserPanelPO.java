@@ -66,4 +66,10 @@ public class UserGroupUserPanelPO extends PageArea {
         }
         waitForAlertContainingMessageAndAccept("Current user does not have all the meta permissions of the user group the user would be added to");
     }
+
+    public void removeUserFromGroup(String name) {
+     // TODO: Identify and add DebugId to Delete Action Buttons.
+        WebElement findElementBySeleniumId = findElementBySeleniumId("DeleteUserButton-" + name);
+        findElementBySeleniumId.click();
+    }
 }

@@ -66,4 +66,10 @@ public class UserGroupRoleDefinitionPanelPO extends PageArea {
         }
         waitForAlertContainingMessageAndAccept("could not be added to group");
     }
+
+    public void removeRole(String name) {
+        // TODO: Identify and add DebugId to Delete Action Buttons.
+        WebElement findElementBySeleniumId = findElementBySeleniumId("DeleteRoleButton-" + name);
+        findElementBySeleniumId.click();
+    }
 }
