@@ -247,7 +247,7 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         userGroupManagement = changeUserAndReloadAdminConsole(USER3_NAME).goToUserGroupDefinitions();
         userGroupManagement.findGroup(USER1_TENANT).select();
         userGroupRoles = userGroupManagement.getUserGroupRoles();
-        // user3 adds user4 to user1-tenant
+        // user3 removes user4 from user1-tenant
         // in this case, it works because user3 isn't affected by the negative ACL
         userGroupRoles.removeRole(USER_ROLE);
         assertNull(userGroupRoles.findRole(USER_ROLE));
