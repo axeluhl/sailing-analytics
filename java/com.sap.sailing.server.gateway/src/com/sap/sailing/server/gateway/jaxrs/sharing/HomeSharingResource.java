@@ -16,6 +16,7 @@ import javax.ws.rs.core.Context;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.security.SecurityService;
@@ -86,20 +87,20 @@ public class HomeSharingResource extends AbstractSailingServerResource {
             if (leaderboardByName != null) {
                 securityService.checkCurrentUserReadPermission(leaderboardByName);
                 title = HomeSharingUtils.findTitle(leaderboardByName);
-                placeUrl = baseUrl.asRegattaPlaceLink(eventId, regattaId);
+                placeUrl = baseUrl.asRegattaPlaceLink(eventId, decodedRegattaId);
             } else {
                 Regatta regattaByName = eventService.getRegattaByName(decodedRegattaId);
                 if (regattaByName != null) {
                     securityService.checkCurrentUserReadPermission(regattaByName);
                     title = HomeSharingUtils.findTitle(leaderboardByName);
-                    placeUrl = baseUrl.asRegattaPlaceLink(eventId, regattaId);
+                    placeUrl = baseUrl.asRegattaPlaceLink(eventId, decodedRegattaId);
                 } else {
                     throw new IllegalArgumentException();
                 }
             }
             final Map<String, String> replacementMap = HomeSharingUtils.createReplacementMap(request, title,
                     description, imageUrl, placeUrl);
-            String content = HomeSharingUtils.loadSharingHTML(this.getClass().getClassLoader(), request);
+            final String content = HomeSharingUtils.loadSharingHTML(this.getClass().getClassLoader(), request);
             return HomeSharingUtils.replaceMetatags(content, replacementMap);
         } else {
             throw new IllegalArgumentException();
@@ -110,7 +111,23 @@ public class HomeSharingResource extends AbstractSailingServerResource {
     @Path("/series/{seriesId}")
     @Produces("text/html")
     public String getSharedSeries(@PathParam("seriesId") String seriesId) {
-        return null;
+        RacingEventService eventService = getService();
+        SecurityService securityService = getSecurityService();
+        final UUID leaderboardGroupId = UUID.fromString(seriesId);
+        final LeaderboardGroup leaderboardGroup = eventService.getLeaderboardGroupByID(leaderboardGroupId);
+        if (leaderboardGroup != null) {
+            securityService.checkCurrentUserReadPermission(leaderboardGroup);
+            final String description = HomeSharingUtils.findDescription(leaderboardGroup);
+            final String imageUrl = HomeSharingUtils.findTeaserImageUrl(leaderboardGroup, eventService);
+            final String title = HomeSharingUtils.findTitle(leaderboardGroup);
+            final String placeUrl = new TokenizedHomePlaceUrl(request).asSeriesPlaceLink(seriesId);
+            final Map<String, String> replacementMap = HomeSharingUtils.createReplacementMap(request, title,
+                    description, imageUrl, placeUrl);
+            final String content = HomeSharingUtils.loadSharingHTML(this.getClass().getClassLoader(), request);
+            return HomeSharingUtils.replaceMetatags(content, replacementMap);
+        }else {
+            throw new IllegalArgumentException();
+        }
     }
 
 }

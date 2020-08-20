@@ -3,7 +3,9 @@ package com.sap.sailing.server.gateway.jaxrs.sharing;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -12,6 +14,8 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.WithDescription;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.common.Named;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.shared.media.ImageDescriptor;
@@ -68,15 +72,36 @@ public class HomeSharingUtils {
      * @return Returns a URL pointing to an image for the event. The first image found is returned in the following
      *         order: 1. Teaser Image 2. Stage Image 3. Default Image (505 Worlds 2014 Teaser)
      */
-    protected static String findTeaserImageUrl(final Event event) {
+    protected static String findTeaserImageUrl(Event event) {
+         String thumbnailUrl = findEventSpecificTeaserImage(event);
+        if(!(thumbnailUrl == null)) {
+            return thumbnailUrl;
+        }else {
+            return DEFAULT_TEASER_URL;
+        }
+    }
+
+    private static String findEventSpecificTeaserImage(Event event) {
         ImageDescriptor findImageWithTag = event.findImageWithTag(MediaTagConstants.TEASER.getName());
-        String thumbnailUrl = DEFAULT_TEASER_URL;
         if (!(findImageWithTag == null)) {
-            thumbnailUrl = findImageWithTag.getURL().toString();
+            return findImageWithTag.getURL().toString();
         } else {
             findImageWithTag = event.findImageWithTag(MediaTagConstants.STAGE.getName());
             if (!(findImageWithTag == null)) {
-                thumbnailUrl = findImageWithTag.getURL().toString();
+                return findImageWithTag.getURL().toString();
+            }
+        }
+        return null;
+    }
+    
+    protected static String findTeaserImageUrl(LeaderboardGroup leaderboardGroup, RacingEventService eventService) {
+        String thumbnailUrl = DEFAULT_TEASER_URL;
+        final List<Event> eventsForSeriesOrdered = getEventsInSeries(leaderboardGroup, eventService);
+        if(!eventsForSeriesOrdered.isEmpty()) {
+            final Event event = eventsForSeriesOrdered.get(eventsForSeriesOrdered.size() -1);
+            final String specificTeaserImageUrl = findEventSpecificTeaserImage(event);
+            if(specificTeaserImageUrl != null) {
+                thumbnailUrl = specificTeaserImageUrl;
             }
         }
         return thumbnailUrl;
@@ -108,5 +133,27 @@ public class HomeSharingUtils {
         replacementMap.put(REPLACEMENT_KEY_IMAGE, imageUrl);
         replacementMap.put(REPLACEMENT_KEY_REDIRECT_URL_FALLBACK, placeUrl);
         return replacementMap;
+    }
+    
+    /**
+     * The given {@link LeaderboardGroup} needs to be one that is used to define a {@link Event} series (e.g. ESS or
+     * Bundesliga). In this case, multiple {@link Event Events} reference the same {@link LeaderboardGroup}. This method
+     * calculates all Events that are associated to the given {@link LeaderboardGroup}.
+     */
+    private static List<Event> getEventsInSeries(LeaderboardGroup overallLeaderboardGroup,
+            RacingEventService service) {
+        List<Event> eventsInSeries = new ArrayList<>();
+        for (Event event : service.getAllEvents()) {
+            if (service.getSecurityService().hasCurrentUserReadPermission(event)) {
+                for (LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
+                    if (service.getSecurityService().hasCurrentUserReadPermission(leaderboardGroup)) {
+                        if (overallLeaderboardGroup.equals(leaderboardGroup)) {
+                            eventsInSeries.add(event);
+                        }
+                    }
+                }
+            }
+        }
+        return eventsInSeries;
     }
 }
