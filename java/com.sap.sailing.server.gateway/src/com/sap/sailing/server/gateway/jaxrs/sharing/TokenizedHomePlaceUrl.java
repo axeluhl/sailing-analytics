@@ -12,7 +12,7 @@ public class TokenizedHomePlaceUrl {
     private static final String GWT_PREFIX = "/gwt";
     private static final String HOME_HTML = "/Home.html";
     private static final String STARTOFPARAMS = "/:";
-    private static final String STARTOFTOKENPATH = "/#";
+    private static final String STARTOFTOKENPATH = "#";
     private static final String EVENT_ID_PARAM = "eventId";
     private static final String REGATTA_ID_PARAM = "regattaId";
     private static final String LEADERBOARD_GROUP_ID_PARAM = "leaderboardGroupId";
@@ -28,40 +28,41 @@ public class TokenizedHomePlaceUrl {
             e.printStackTrace();
         }
     }
-    
+
     public String asEventPlaceLink(String eventId) {
         String url = new String(baseUrl.toString());
         url += STARTOFTOKENPATH + EVENT_PATH;
-        url += addToken(eventId, EVENT_ID_PARAM);
-        return url;
-    }
-    
-    public String asSeriesPlaceLink(String eventId) {
-        String url = new String(baseUrl.toString());
-        url += STARTOFTOKENPATH + SERIES_PATH;
-        url += addToken(eventId, REGATTA_ID_PARAM);
+        url += buildToken(eventId, EVENT_ID_PARAM);
         return url;
     }
 
-    public String asRegattaPlaceLink(String eventId) {
+    public String asSeriesPlaceLink(String eventId) {
         String url = new String(baseUrl.toString());
-        url += STARTOFTOKENPATH + REGATTA_OVERVIEW_PATH;
-        url += addToken(eventId, LEADERBOARD_GROUP_ID_PARAM);
+        url += STARTOFTOKENPATH + SERIES_PATH;
+        url += buildToken(eventId, LEADERBOARD_GROUP_ID_PARAM);
         return url;
     }
-    
-    private String addToken(String tokenId, String tokenKey) {
+
+    public String asRegattaPlaceLink(String eventId, String regattaId) {
         String url = new String(baseUrl.toString());
-        if(!tokenPresent) {
+        url += STARTOFTOKENPATH + REGATTA_OVERVIEW_PATH;
+        url += buildToken(eventId, EVENT_ID_PARAM);
+        url += buildToken(eventId, REGATTA_ID_PARAM);
+        return url;
+    }
+
+    private String buildToken(String tokenId, String tokenKey) {
+        String url = new String();
+        if (!tokenPresent) {
             url += STARTOFPARAMS;
             tokenPresent = true;
-        }else {
+        } else {
             url += "&";
         }
         url += tokenKey + "=" + tokenId;
         return url;
     }
-    
+
     public URL getBaseUrl() {
         return baseUrl;
     }
