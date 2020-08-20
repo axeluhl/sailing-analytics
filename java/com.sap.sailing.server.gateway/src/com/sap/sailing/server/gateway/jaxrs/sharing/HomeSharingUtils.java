@@ -84,7 +84,7 @@ public class HomeSharingUtils {
 
     protected static String findDescription(final WithDescription withDescription) {
         String description = withDescription.getDescription();
-        if (description == null) {
+        if (description == null || description.equals("")) {
             description = DEFAULT_DESCRIPTION;
         }
         return description;
