@@ -25,7 +25,7 @@ public class SharingButtons extends Composite {
 
     private static SharingButtonsUiBinder uiBinder = GWT.create(SharingButtonsUiBinder.class);
     
-    private static String SHARING_URL_PREFIX = "/gwt/shared";
+    private static String SHARING_URL_PREFIX = "/sailingserver/shared/home";
 
     interface SharingButtonsUiBinder extends UiBinder<Widget, SharingButtons> {
     }
