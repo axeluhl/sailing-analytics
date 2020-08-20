@@ -88,4 +88,9 @@ public class UserGroupUserPanelPO extends PageArea {
         final UserEntryPO findUser = findUser(name);
         findUser.deleteUser();
     }
+    
+    public void removeUserFromGroupAndExpectPermissionError(String name) {
+        removeUserFromGroup(name);
+        waitForAlertContainingMessageAndAccept("Current user does not have all the meta permissions of the user group the user would be removed from");
+    }
 }
