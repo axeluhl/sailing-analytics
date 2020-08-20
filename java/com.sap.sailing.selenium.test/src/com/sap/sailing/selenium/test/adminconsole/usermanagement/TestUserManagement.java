@@ -5,9 +5,6 @@ import static org.junit.Assert.assertNull;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.remote.RemoteWebDriver;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.usermanagement.ChangePasswordDialogPO;
@@ -55,10 +52,15 @@ public class TestUserManagement extends AbstractSeleniumTest {
         createUser(userManagementPanel);
         final UserRoleDefinitionPanelPO userRolesPO = userManagementPanel.getUserRoles();
         assertNull(userRolesPO.findRole(TEST_ROLE));
-        userRolesPO.enterNewRoleValues(TEST_ROLE, null, TEST_USER_NAME);
-        userRolesPO.clickAddButtonOrThrow();
+        createRole(userRolesPO);
         userManagementPanel.selectUser(TEST_USER_NAME);
         assertNotNull(userRolesPO.findRole(TEST_ROLE + ":"+ TEST_GROUP + ":" + TEST_USER_NAME));
+    }
+
+
+    private void createRole(final UserRoleDefinitionPanelPO userRolesPO) {
+        userRolesPO.enterNewRoleValues(TEST_ROLE, null, TEST_USER_NAME);
+        userRolesPO.clickAddButtonOrThrow();
     }
     
     @Test
@@ -67,10 +69,15 @@ public class TestUserManagement extends AbstractSeleniumTest {
         createUser(userManagementPanel);
         final WildcardPermissionPanelPO wildcardPermissionPanelPO = userManagementPanel.getUserPermissions();
         assertNull(wildcardPermissionPanelPO.findPermission(TEST_PERMISSION));
-        wildcardPermissionPanelPO.enterNewPermissionValue(TEST_PERMISSION);
-        wildcardPermissionPanelPO.clickAddButtonOrThrow();
+        createPermission(wildcardPermissionPanelPO);
         userManagementPanel.selectUser(TEST_USER_NAME);
         assertNotNull(wildcardPermissionPanelPO.findPermission(TEST_PERMISSION));
+    }
+
+
+    private void createPermission(final WildcardPermissionPanelPO wildcardPermissionPanelPO) {
+        wildcardPermissionPanelPO.enterNewPermissionValue(TEST_PERMISSION);
+        wildcardPermissionPanelPO.clickAddButtonOrThrow();
     }
     
     @Test
@@ -87,12 +94,34 @@ public class TestUserManagement extends AbstractSeleniumTest {
     @Test
     public void testRemoveUser() {
         final UserManagementPanelPO userManagementPanel = goToUserManagementPanel();
-        assertNull(userManagementPanel.findUser(TEST_USER_NAME));
         createUser(userManagementPanel);
-        assertNotNull(userManagementPanel.findUser(TEST_USER_NAME));
         userManagementPanel.deleteUser(TEST_USER_NAME);
         getWebDriver().switchTo().alert().accept();
         assertNull(userManagementPanel.findUser(TEST_USER_NAME));
+    }
+    
+    @Test
+    public void testRemoveUserPermission() {
+        final UserManagementPanelPO userManagementPanel = goToUserManagementPanel();
+        createUser(userManagementPanel);
+        final WildcardPermissionPanelPO wildcardPermissionPanelPO = userManagementPanel.getUserPermissions();
+        createPermission(wildcardPermissionPanelPO);
+        userManagementPanel.selectUser(TEST_USER_NAME);
+        wildcardPermissionPanelPO.deleteEntry(TEST_PERMISSION);
+        userManagementPanel.selectUser(TEST_USER_NAME);
+        assertNull(wildcardPermissionPanelPO.findPermission(TEST_PERMISSION));
+    }
+    
+    @Test
+    public void testRemoveRole() {
+        final UserManagementPanelPO userManagementPanel = goToUserManagementPanel();
+        createUser(userManagementPanel);
+        final UserRoleDefinitionPanelPO userRolesPO = userManagementPanel.getUserRoles();
+        createRole(userRolesPO);
+        userManagementPanel.selectUser(TEST_USER_NAME);
+        userRolesPO.deleteEntry(TEST_ROLE);
+        userManagementPanel.selectUser(TEST_USER_NAME);
+        assertNull(userRolesPO.findRole(TEST_ROLE + ":"+ TEST_GROUP + ":" + TEST_USER_NAME));
     }
 
     private UserManagementPanelPO goToUserManagementPanel() {
