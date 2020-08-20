@@ -5,6 +5,9 @@ import static org.junit.Assert.assertNull;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.remote.RemoteWebDriver;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.usermanagement.ChangePasswordDialogPO;
@@ -29,6 +32,7 @@ public class TestUserManagement extends AbstractSeleniumTest {
         clearState(getContextRoot());
         super.setUp();
     }
+    
 
     @Test
     public void testUserCreation() {
@@ -78,6 +82,17 @@ public class TestUserManagement extends AbstractSeleniumTest {
         final ChangePasswordDialogPO changePasswordDialog = userManagementPanel.getChangePasswordDialog();
         changePasswordDialog.setNewPassword("supersecure");
         changePasswordDialog.clickOkButtonOrThrow();
+    }
+    
+    @Test
+    public void testRemoveUser() {
+        final UserManagementPanelPO userManagementPanel = goToUserManagementPanel();
+        assertNull(userManagementPanel.findUser(TEST_USER_NAME));
+        createUser(userManagementPanel);
+        assertNotNull(userManagementPanel.findUser(TEST_USER_NAME));
+        userManagementPanel.deleteUser(TEST_USER_NAME);
+        getWebDriver().switchTo().alert().accept();
+        assertNull(userManagementPanel.findUser(TEST_USER_NAME));
     }
 
     private UserManagementPanelPO goToUserManagementPanel() {
