@@ -119,7 +119,7 @@ public class TestUserManagement extends AbstractSeleniumTest {
         final UserRoleDefinitionPanelPO userRolesPO = userManagementPanel.getUserRoles();
         createRole(userRolesPO);
         userManagementPanel.selectUser(TEST_USER_NAME);
-        userRolesPO.deleteEntry(TEST_ROLE);
+        userRolesPO.deleteEntry(TEST_ROLE + ":"+ TEST_GROUP + ":" + TEST_USER_NAME);
         userManagementPanel.selectUser(TEST_USER_NAME);
         assertNull(userRolesPO.findRole(TEST_ROLE + ":"+ TEST_GROUP + ":" + TEST_USER_NAME));
     }

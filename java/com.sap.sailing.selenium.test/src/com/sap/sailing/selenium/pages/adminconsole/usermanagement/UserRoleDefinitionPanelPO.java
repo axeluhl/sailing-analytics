@@ -1,5 +1,6 @@
 package com.sap.sailing.selenium.pages.adminconsole.usermanagement;
 
+import org.openqa.selenium.By.ByName;
 import org.openqa.selenium.ElementNotSelectableException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -7,13 +8,29 @@ import org.openqa.selenium.WebElement;
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.PageArea;
+import com.sap.sailing.selenium.pages.adminconsole.security.DataEntryWithSecurityActionsPO;
 import com.sap.sailing.selenium.pages.gwt.CellTablePO;
-import com.sap.sailing.selenium.pages.gwt.DataEntryPO;
 import com.sap.sailing.selenium.pages.gwt.GenericCellTablePO;
 import com.sap.sailing.selenium.pages.gwt.SuggestBoxPO;
 import com.sap.sailing.selenium.pages.gwt.TextBoxPO;
 
 public class UserRoleDefinitionPanelPO extends PageArea {
+    
+    public static class RoleEntryPO extends DataEntryWithSecurityActionsPO {
+
+        @FindBy(how = ByName.class, using = "DELETE")
+        private WebElement deleteButton;
+        
+
+        public RoleEntryPO(CellTablePO<?> table, WebElement element) {
+            super(table, element);
+        }
+        
+        public void deleteRole() {
+            deleteButton.click();
+        }
+    }
+    
     private static final String TABLE_ROLE_NAME_COLUMN = "Role Name";
     @FindBy(how = BySeleniumId.class, using = "addRoleButton")
     private WebElement addRoleButton;
@@ -30,13 +47,13 @@ public class UserRoleDefinitionPanelPO extends PageArea {
         super(driver, element);
     }
 
-    private CellTablePO<DataEntryPO> getRoleTable() {
-        return new GenericCellTablePO<>(this.driver, this.roleTable, DataEntryPO.class);
+    private CellTablePO<RoleEntryPO> getRoleTable() {
+        return new GenericCellTablePO<>(this.driver, this.roleTable, RoleEntryPO.class);
     }
 
-    public DataEntryPO findRole(final String roleName) {
-        final CellTablePO<DataEntryPO> table = getRoleTable();
-        for (DataEntryPO entry : table.getEntries()) {
+    public RoleEntryPO findRole(final String roleName) {
+        final CellTablePO<RoleEntryPO> table = getRoleTable();
+        for (RoleEntryPO entry : table.getEntries()) {
             final String name = entry.getColumnContent(TABLE_ROLE_NAME_COLUMN);
             if (roleName.equals(name)) {
                 return entry;
@@ -86,8 +103,7 @@ public class UserRoleDefinitionPanelPO extends PageArea {
     }
 
     public void deleteEntry(String name) {
-        // TODO: Identify and add DebugId to Delete Action Buttons.
-        WebElement findElementBySeleniumId = findElementBySeleniumId("DeletePermissionButton-" + name);
-        findElementBySeleniumId.click();
+        final RoleEntryPO role = findRole(name);
+        role.deleteRole();
     }
 }
