@@ -194,10 +194,18 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
     }
 
     @Override
-    public void removeUserFromUserGroup(String userGroupIdAsString, String username) throws UnauthorizedException {
+    public void removeUserFromUserGroup(String userGroupIdAsString, String username)
+            throws UnauthorizedException {
         final UserGroup userGroup = getSecurityService().getUserGroup(UUID.fromString(userGroupIdAsString));
-        if (SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.USER_GROUP.getStringPermissionForObject(DefaultActions.DELETE, userGroup))) {
-            getSecurityService().removeUserFromUserGroup(userGroup, getSecurityService().getUserByName(username));
+        if (SecurityUtils.getSubject().isPermitted(
+                SecuredSecurityTypes.USER_GROUP.getStringPermissionForObject(DefaultActions.UPDATE, userGroup))) {
+            if (getSecurityService().hasCurrentUserMetaPermissionsOfRoleDefinitionsWithQualification(
+                    userGroup.getRoleDefinitionMap().keySet(), new Ownership(null, userGroup))) {
+                getSecurityService().removeUserFromUserGroup(userGroup, getSecurityService().getUserByName(username));
+            } else {
+                throw new UnauthorizedException(
+                        "Current user does not have all the meta permissions of the user group the user would be removed from");
+            }
         } else {
             throw new UnauthorizedException("Not permitted to remove user from group");
         }
