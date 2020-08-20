@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.ws.rs.core.UriInfo;
+import javax.servlet.http.HttpServletRequest;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.WithDescription;
@@ -26,17 +26,17 @@ public class HomeSharingUtils {
     private static final String REPLACEMENT_KEY_TITLE = "title";
     private static final Logger logger = Logger.getLogger(HomeSharingUtils.class.getName());
     private static final String DEFAULT_TEASER_URL = "http://media.sapsailing.com/2014/505Worlds/Images_Homepage/505Worlds2014_eventteaser.jpg";
-    private static final String SHARED_PROXY_RESOURCE = "/com/sap/sailing/gwt/ui/opengraph/SharedProxy.html";
+    private static final String SHARED_PROXY_RESOURCE = "/SharedProxy.html";
     private static final String DEFAULT_TITLE = "SAP Sailing";
     private static final String DEFAULT_DESCRIPTION = "Help sailors analyze performance and optimize strategy &#8226; Bring fans closer to the action "
             + "&#8226; Provide the media with information and insights to deliver a greater informed commentary";
 
-    protected static String loadSharingHTML(ClassLoader classLoader, UriInfo context) {
+    protected static String loadSharingHTML(ClassLoader classLoader, HttpServletRequest request) {
         try (InputStream stream = classLoader.getResourceAsStream(SHARED_PROXY_RESOURCE)) {
             String content = readInputStreamToString(stream);
             return content;
         } catch (Exception e) {
-            logger.log(Level.WARNING, "could not process or read resource " + context.getAbsolutePath(), e);
+            logger.log(Level.WARNING, "could not process or read resource " + request.getPathInfo(), e);
             return null;
         }
     }
@@ -58,7 +58,7 @@ public class HomeSharingUtils {
     protected static String replaceMetatags(String content, Map<String, String> replacementMap) {
         String modifiedContent = new String(content);
         for (Map.Entry<String, String> item : replacementMap.entrySet()) {
-            content = content.replace("${" + item.getKey() + "}", item.getValue());
+            modifiedContent = modifiedContent.replace("${" + item.getKey() + "}", item.getValue());
         }
         return modifiedContent;
     }
@@ -101,15 +101,15 @@ public class HomeSharingUtils {
         return name;
     }
 
-    public static Map<String, String> createReplacementMap(UriInfo context, String title, String description, String imageUrl,
-            String placeUrl) {
+    public static Map<String, String> createReplacementMap(HttpServletRequest request, String title, String description,
+            String imageUrl, String placeUrl) {
         final Map<String, String> replacementMap = new HashMap<String, String>();
         replacementMap.put(REPLACEMENT_KEY_TITLE, title);
         replacementMap.put(REPLACEMENT_KEY_DESCRIPTION, description);
         replacementMap.put(REPLACEMENT_KEY_DISPLAY_URL, placeUrl);
         replacementMap.put(REPLACEMENT_KEY_REDIRECT_URL, placeUrl);
         replacementMap.put(REPLACEMENT_KEY_IMAGE, imageUrl);
-        replacementMap.put(REPLACEMENT_KEY_REDIRECT_URL_FALLBACK, new TokenizedHomePlaceUrl(context).getBaseUrl());
+        replacementMap.put(REPLACEMENT_KEY_REDIRECT_URL_FALLBACK, placeUrl);
         return replacementMap;
     }
 }

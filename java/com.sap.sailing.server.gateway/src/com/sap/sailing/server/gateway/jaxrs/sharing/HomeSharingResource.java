@@ -3,12 +3,12 @@ package com.sap.sailing.server.gateway.jaxrs.sharing;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.UriInfo;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
@@ -20,9 +20,10 @@ import com.sap.sse.security.SecurityService;
  */
 @Path("/home")
 public class HomeSharingResource extends AbstractSailingServerResource{
+    
     @Context
-    private UriInfo context;
-
+    private HttpServletRequest request;
+    
     /** Creates a new instance of HelloWorld */
     public HomeSharingResource() {
     }
@@ -44,10 +45,10 @@ public class HomeSharingResource extends AbstractSailingServerResource{
             final String title = event.getName();
             final String description = HomeSharingUtils.findDescription(event);
             final String imageUrl = HomeSharingUtils.findSpecificTeaserImageUrl(event);
-            String placeUrl = new TokenizedHomePlaceUrl(context).asEventUrl(eventId);
-            final Map<String, String> replacementMap = HomeSharingUtils.createReplacementMap(context, title,
+            String placeUrl = new TokenizedHomePlaceUrl(request).asEventPlaceLink(eventId);
+            final Map<String, String> replacementMap = HomeSharingUtils.createReplacementMap(request, title,
                     description, imageUrl, placeUrl);
-            String content = HomeSharingUtils.loadSharingHTML(this.getClass().getClassLoader(), context);
+            String content = HomeSharingUtils.loadSharingHTML(this.getClass().getClassLoader(), request);
             return HomeSharingUtils.replaceMetatags(content, replacementMap);
         } else {
             throw new IllegalArgumentException();

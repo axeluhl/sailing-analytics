@@ -1,10 +1,14 @@
 package com.sap.sailing.server.gateway.jaxrs.sharing;
 
-import java.net.URI;
+import java.net.MalformedURLException;
+import java.net.URL;
 
-import javax.ws.rs.core.UriInfo;
+import javax.servlet.http.HttpServletRequest;
 
 public class TokenizedHomePlaceUrl {
+    private static final String EVENT_PATH = "/event";
+    private static final String SERIES_PATH = "/series";
+    private static final String REGATTA_OVERVIEW_PATH = "/regatta/overview";
     private static final String GWT_PREFIX = "/gwt";
     private static final String HOME_HTML = "/Home.html";
     private static final String STARTOFPARAMS = "/:";
@@ -13,37 +17,41 @@ public class TokenizedHomePlaceUrl {
     private static final String REGATTA_ID_PARAM = "regattaId";
     private static final String LEADERBOARD_GROUP_ID_PARAM = "leaderboardGroupId";
 
-    private String baseUrl;
+    private URL baseUrl;
     private boolean tokenPresent;
-    
-    public TokenizedHomePlaceUrl(UriInfo uri) {
-        final URI baseUri = uri.getBaseUri();
-        this.baseUrl = baseUri + GWT_PREFIX + HOME_HTML;
+
+    public TokenizedHomePlaceUrl(HttpServletRequest request) {
+        try {
+            baseUrl = new URL(request.getScheme(), request.getServerName(), request.getServerPort(),
+                    GWT_PREFIX + HOME_HTML);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
     }
     
-    public String asEventUrl(String eventId) {
-        String url = new String(baseUrl);
-        url += STARTOFTOKENPATH + "/event";
+    public String asEventPlaceLink(String eventId) {
+        String url = new String(baseUrl.toString());
+        url += STARTOFTOKENPATH + EVENT_PATH;
         url += addToken(eventId, EVENT_ID_PARAM);
         return url;
     }
     
-    public String asSeriesUrl(String eventId) {
-        String url = new String(baseUrl);
-        url += STARTOFTOKENPATH + "/series";
+    public String asSeriesPlaceLink(String eventId) {
+        String url = new String(baseUrl.toString());
+        url += STARTOFTOKENPATH + SERIES_PATH;
         url += addToken(eventId, REGATTA_ID_PARAM);
         return url;
     }
 
-    public String asRegattaUrl(String eventId) {
-        String url = new String(baseUrl);
-        url += STARTOFTOKENPATH + "/regatta/overview";
+    public String asRegattaPlaceLink(String eventId) {
+        String url = new String(baseUrl.toString());
+        url += STARTOFTOKENPATH + REGATTA_OVERVIEW_PATH;
         url += addToken(eventId, LEADERBOARD_GROUP_ID_PARAM);
         return url;
     }
     
     private String addToken(String tokenId, String tokenKey) {
-        String url = new String(baseUrl);
+        String url = new String(baseUrl.toString());
         if(!tokenPresent) {
             url += STARTOFPARAMS;
             tokenPresent = true;
@@ -54,7 +62,7 @@ public class TokenizedHomePlaceUrl {
         return url;
     }
     
-    public String getBaseUrl() {
+    public URL getBaseUrl() {
         return baseUrl;
     }
 }
