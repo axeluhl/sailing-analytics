@@ -1,5 +1,8 @@
 package com.sap.sailing.server.gateway.jaxrs.sharing;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.UUID;
 
@@ -11,6 +14,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.security.SecurityService;
@@ -60,7 +65,45 @@ public class HomeSharingResource extends AbstractSailingServerResource {
     @Path("/events/{eventId}/regattas/{regattaId}")
     @Produces("text/html")
     public String getSharedRegatta(@PathParam("eventId") String eventId, @PathParam("regattaId") String regattaId) {
-        return null;
+        RacingEventService eventService = getService();
+        SecurityService securityService = getSecurityService();
+        UUID uuid = UUID.fromString(eventId);
+        final Event event = eventService.getEvent(uuid);
+        if (event != null) {
+            securityService.checkCurrentUserReadPermission(event);
+            final String description = HomeSharingUtils.findDescription(event);
+            final String imageUrl = HomeSharingUtils.findTeaserImageUrl(event);
+            TokenizedHomePlaceUrl baseUrl = new TokenizedHomePlaceUrl(request);
+            String placeUrl = baseUrl.getBaseUrl().toString();
+            String title;
+            String decodedRegattaId;
+            try {
+                decodedRegattaId = URLDecoder.decode(regattaId, StandardCharsets.UTF_8.name());
+            } catch (UnsupportedEncodingException e) {
+                throw new IllegalArgumentException();
+            }
+            Leaderboard leaderboardByName = eventService.getLeaderboardByName(decodedRegattaId);
+            if (leaderboardByName != null) {
+                securityService.checkCurrentUserReadPermission(leaderboardByName);
+                title = HomeSharingUtils.findTitle(leaderboardByName);
+                placeUrl = baseUrl.asRegattaPlaceLink(eventId, regattaId);
+            } else {
+                Regatta regattaByName = eventService.getRegattaByName(decodedRegattaId);
+                if (regattaByName != null) {
+                    securityService.checkCurrentUserReadPermission(regattaByName);
+                    title = HomeSharingUtils.findTitle(leaderboardByName);
+                    placeUrl = baseUrl.asRegattaPlaceLink(eventId, regattaId);
+                } else {
+                    throw new IllegalArgumentException();
+                }
+            }
+            final Map<String, String> replacementMap = HomeSharingUtils.createReplacementMap(request, title,
+                    description, imageUrl, placeUrl);
+            String content = HomeSharingUtils.loadSharingHTML(this.getClass().getClassLoader(), request);
+            return HomeSharingUtils.replaceMetatags(content, replacementMap);
+        } else {
+            throw new IllegalArgumentException();
+        }
     }
 
     @GET

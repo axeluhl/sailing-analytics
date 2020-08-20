@@ -47,7 +47,7 @@ public class TokenizedHomePlaceUrl {
         String url = new String(baseUrl.toString());
         url += STARTOFTOKENPATH + REGATTA_OVERVIEW_PATH;
         url += buildToken(eventId, EVENT_ID_PARAM);
-        url += buildToken(eventId, REGATTA_ID_PARAM);
+        url += buildToken(regattaId, REGATTA_ID_PARAM);
         return url;
     }
 
