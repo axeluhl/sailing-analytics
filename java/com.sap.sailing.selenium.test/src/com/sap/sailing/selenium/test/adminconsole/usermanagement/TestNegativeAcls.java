@@ -186,6 +186,22 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         // in this case, it works because user3 isn't affected by the negative ACL
         userGroupUsers.addUser(USER4_NAME);
         assertNotNull(userGroupUsers.findUser(USER4_NAME));
+        
+        // user2 tries to remove user4 from user1's tenant
+        userGroupManagement = changeUserAndReloadAdminConsole(USER2_NAME).goToUserGroupDefinitions();
+        userGroupUsers = userGroupManagement.getUserGroupUsers();
+        userGroupManagement.findGroup(USER1_TENANT).select();
+        // this is expected to fail because the negative ACL on the event
+        // causes user2 to not have all permissions of the user role for user1-tenant
+        userGroupUsers.removeUserFromGroupAndExpectPermissionError(USER4_NAME);
+        
+        userGroupManagement = changeUserAndReloadAdminConsole(USER3_NAME).goToUserGroupDefinitions();
+        userGroupUsers = userGroupManagement.getUserGroupUsers();
+        userGroupManagement.findGroup(USER1_TENANT).select();
+        // user3 adds user4 to user1-tenant
+        // in this case, it works because user3 isn't affected by the negative ACL
+        userGroupUsers.removeUserFromGroup(USER4_NAME);
+        assertNull(userGroupUsers.findUser(USER4_NAME));
     }
     
     @Test
@@ -219,6 +235,22 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         // in this case, it works because user3 isn't affected by the negative ACL
         userGroupRoles.addRole(USER_ROLE);
         assertNotNull(userGroupRoles.findRole(USER_ROLE));
+        
+        // user2 tries to remove the user role from user1's tenant
+        userGroupManagement = changeUserAndReloadAdminConsole(USER2_NAME).goToUserGroupDefinitions();
+        userGroupManagement.findGroup(USER1_TENANT).select();
+        userGroupRoles = userGroupManagement.getUserGroupRoles();
+        // this is expected to fail because the negative ACL on the event
+        // causes user2 to not have all permissions of the user role for user1-tenant
+        userGroupRoles.removeRoleAndExpectPermissionError(USER_ROLE);
+        
+        userGroupManagement = changeUserAndReloadAdminConsole(USER3_NAME).goToUserGroupDefinitions();
+        userGroupManagement.findGroup(USER1_TENANT).select();
+        userGroupRoles = userGroupManagement.getUserGroupRoles();
+        // user3 adds user4 to user1-tenant
+        // in this case, it works because user3 isn't affected by the negative ACL
+        userGroupRoles.removeRole(USER_ROLE);
+        assertNull(userGroupRoles.findRole(USER_ROLE));
     }
     
     @Test
