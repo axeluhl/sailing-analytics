@@ -16,7 +16,6 @@ import com.sap.sse.common.Named;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.shared.media.ImageDescriptor;
 
-
 public class HomeSharingUtils {
     private static final String REPLACEMENT_KEY_REDIRECT_URL_FALLBACK = "redirect_url_fallback";
     private static final String REPLACEMENT_KEY_IMAGE = "image";
@@ -40,7 +39,7 @@ public class HomeSharingUtils {
             return null;
         }
     }
-    
+
     private static String readInputStreamToString(InputStream in) throws IOException {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         int nRead;
@@ -54,7 +53,7 @@ public class HomeSharingUtils {
         buffer.close();
         return content;
     }
-    
+
     protected static String replaceMetatags(String content, Map<String, String> replacementMap) {
         String modifiedContent = new String(content);
         for (Map.Entry<String, String> item : replacementMap.entrySet()) {
@@ -62,41 +61,39 @@ public class HomeSharingUtils {
         }
         return modifiedContent;
     }
-    
+
     /**
      * 
      * @param event
-     * @return Returns a URL pointing to an image for the event. The first image found is returned in the following order: 
-     * 1. Teaser Image
-     * 2. Stage Image
-     * 3. Default Image (505 Worlds 2014 Teaser)
+     * @return Returns a URL pointing to an image for the event. The first image found is returned in the following
+     *         order: 1. Teaser Image 2. Stage Image 3. Default Image (505 Worlds 2014 Teaser)
      */
-    protected static String findSpecificTeaserImageUrl(final Event event) {
+    protected static String findTeaserImageUrl(final Event event) {
         ImageDescriptor findImageWithTag = event.findImageWithTag(MediaTagConstants.TEASER.getName());
         String thumbnailUrl = DEFAULT_TEASER_URL;
-        if(!(findImageWithTag == null)) {
+        if (!(findImageWithTag == null)) {
             thumbnailUrl = findImageWithTag.getURL().toString();
-        }else {
+        } else {
             findImageWithTag = event.findImageWithTag(MediaTagConstants.STAGE.getName());
-            if(!(findImageWithTag == null)) {
+            if (!(findImageWithTag == null)) {
                 thumbnailUrl = findImageWithTag.getURL().toString();
             }
         }
         return thumbnailUrl;
     }
-    
+
     protected static String findDescription(final WithDescription withDescription) {
         String description = withDescription.getDescription();
-        if(description == null) {
+        if (description == null) {
             description = DEFAULT_DESCRIPTION;
         }
         return description;
     }
-    
+
     protected static String findTitle(Named named) {
         String name = named.getName();
-        if(name == null) {
-           name = DEFAULT_TITLE; 
+        if (name == null) {
+            name = DEFAULT_TITLE;
         }
         return name;
     }

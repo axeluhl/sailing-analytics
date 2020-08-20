@@ -19,17 +19,18 @@ import com.sap.sse.security.SecurityService;
  * Root resource (exposed at "helloworld" path)
  */
 @Path("/home")
-public class HomeSharingResource extends AbstractSailingServerResource{
-    
+public class HomeSharingResource extends AbstractSailingServerResource {
+
     @Context
     private HttpServletRequest request;
-    
+
     /** Creates a new instance of HelloWorld */
     public HomeSharingResource() {
     }
 
     /**
      * Retrieves representation of an instance of helloWorld.HelloWorld
+     * 
      * @return an instance of java.lang.String
      */
     @GET
@@ -44,7 +45,7 @@ public class HomeSharingResource extends AbstractSailingServerResource{
             securityService.checkCurrentUserReadPermission(event);
             final String title = event.getName();
             final String description = HomeSharingUtils.findDescription(event);
-            final String imageUrl = HomeSharingUtils.findSpecificTeaserImageUrl(event);
+            final String imageUrl = HomeSharingUtils.findTeaserImageUrl(event);
             String placeUrl = new TokenizedHomePlaceUrl(request).asEventPlaceLink(eventId);
             final Map<String, String> replacementMap = HomeSharingUtils.createReplacementMap(request, title,
                     description, imageUrl, placeUrl);
@@ -54,19 +55,19 @@ public class HomeSharingResource extends AbstractSailingServerResource{
             throw new IllegalArgumentException();
         }
     }
-    
+
     @GET
     @Path("/events/{eventId}/regattas/{regattaId}")
     @Produces("text/html")
     public String getSharedRegatta(@PathParam("eventId") String eventId, @PathParam("regattaId") String regattaId) {
         return null;
     }
-    
+
     @GET
     @Path("/series/{seriesId}")
     @Produces("text/html")
     public String getSharedSeries(@PathParam("seriesId") String seriesId) {
         return null;
     }
-    
+
 }
