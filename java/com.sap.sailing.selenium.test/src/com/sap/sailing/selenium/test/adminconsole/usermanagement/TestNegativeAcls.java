@@ -1,6 +1,7 @@
 package com.sap.sailing.selenium.test.adminconsole.usermanagement;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.time.Duration;
@@ -42,6 +43,7 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
     private static final String USER_ROLE = "user";
     private static final String UPDATE_ACTION = "UPDATE";
     private static final String READ_ACTION = "READ";
+    private static final String DELETE_ACTION = "DELETE";
     private static final String USER_GROUP_READ_PERMISSION = "USER_GROUP:READ:*";
     private static final String EVENT_ALL_PERMISSION_PREFIX = "EVENT:*:";
     private static final String CUSTOM_ROLE = "custom-role";
@@ -80,10 +82,9 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         userManagement.grantRoleToUserWithUserQualification(USER2_NAME, USER_ROLE, USER1_NAME);
         userManagement.grantRoleToUserWithUserQualification(USER3_NAME, USER_ROLE, USER1_NAME);
         
-        // user2 tries to give the user role for objects owned by user1 to user3
+        // user2 tries to give the user role for objects owned by user1 to user4
         userManagement = changeUserAndReloadAdminConsole(USER2_NAME).goToUserManagement();
-        EditRolesAndPermissionsForUserDialogPO editRolesAndPermissionsDialogForUser = userManagement.openEditRolesAndPermissionsDialogForUser(USER4_NAME);
-        UserRoleDefinitionPanelPO userRoles = editRolesAndPermissionsDialogForUser.getUserRoles();
+        UserRoleDefinitionPanelPO userRoles = userManagement.openEditRolesAndPermissionsDialogForUser(USER4_NAME).getUserRoles();
         userRoles.enterNewRoleValues(USER_ROLE, "", USER1_NAME);
         // this is expected to fail because the negative ACL on one of user1's events
         // causes user 2 to not have all permissions implied by the user role
@@ -93,8 +94,23 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         // in this case, it works because user3 isn't affected by the negative ACL
         userManagement = changeUserAndReloadAdminConsole(USER3_NAME).goToUserManagement();
         userManagement.grantRoleToUserWithUserQualification(USER4_NAME, USER_ROLE, USER1_NAME);
-        assertNotNull(userManagement.openEditRolesAndPermissionsDialogForUser(USER4_NAME).getUserRoles()
-                .findRole(USER_ROLE + "::" + USER1_NAME));
+        String qualifiedRoleName = USER_ROLE + "::" + USER1_NAME;
+        userRoles = userManagement.openEditRolesAndPermissionsDialogForUser(USER4_NAME).getUserRoles();
+        addRUDForAllToAcl(userRoles.findRole(qualifiedRoleName).openAclPopup());
+        
+        // user2 tries to remove the user role for objects owned by user1 from user4
+        userManagement = changeUserAndReloadAdminConsole(USER2_NAME).goToUserManagement();
+        userRoles = userManagement.openEditRolesAndPermissionsDialogForUser(USER4_NAME).getUserRoles();
+        // this is expected to fail because the negative ACL on one of user1's events
+        // causes user 2 to not have all permissions implied by the user role
+        userRoles.findRole(qualifiedRoleName).deleteRoleAndExpectPermissionError();
+        
+        // user3 removes the user role for objects owned by user1 from user4
+        // in this case, it works because user3 isn't affected by the negative ACL
+        userManagement = changeUserAndReloadAdminConsole(USER3_NAME).goToUserManagement();
+        userRoles = userManagement.openEditRolesAndPermissionsDialogForUser(USER4_NAME).getUserRoles();
+        userRoles.findRole(qualifiedRoleName).deleteRole();
+        assertNull(userRoles.findRole(qualifiedRoleName));
     }
     
     @Test
@@ -121,9 +137,24 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         // user3 grants permission "EVENT:*:<event-id>" to user4
         // in this case, it works because user3 isn't affected by the negative ACL
         userManagement = changeUserAndReloadAdminConsole(USER3_NAME).goToUserManagement();
-        userManagement.grantPermissionToUser(USER4_NAME, eventAllPermission);
-        assertNotNull(userManagement.openEditRolesAndPermissionsDialogForUser(USER4_NAME).getUserPermissions()
-                .findPermission(eventAllPermission));
+        editRolesAndPermissionsDialogForUser = userManagement.openEditRolesAndPermissionsDialogForUser(USER4_NAME);
+        userPermissions = editRolesAndPermissionsDialogForUser.getUserPermissions();
+        userPermissions.addPermission(eventAllPermission);
+        addRUDForAllToAcl(userPermissions.findPermission(eventAllPermission).openAclPopup());
+        
+        // user2 tries to remove the permission "EVENT:*:<event-id>" from user4
+        userManagement = changeUserAndReloadAdminConsole(USER2_NAME).goToUserManagement();
+        editRolesAndPermissionsDialogForUser = userManagement.openEditRolesAndPermissionsDialogForUser(USER4_NAME);
+        userPermissions = editRolesAndPermissionsDialogForUser.getUserPermissions();
+        userPermissions.findPermission(eventAllPermission).deletePermissionAndExpectPermissionError();
+        
+        // user3 removes permission "EVENT:*:<event-id>" from user4
+        // in this case, it works because user3 isn't affected by the negative ACL
+        userManagement = changeUserAndReloadAdminConsole(USER3_NAME).goToUserManagement();
+        editRolesAndPermissionsDialogForUser = userManagement.openEditRolesAndPermissionsDialogForUser(USER4_NAME);
+        userPermissions = editRolesAndPermissionsDialogForUser.getUserPermissions();
+        userPermissions.findPermission(eventAllPermission).deletePermission();
+        assertNull(userPermissions.findPermission(eventAllPermission));
     }
     
     @Test
@@ -255,6 +286,14 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         // in this case, it works because user3 isn't affected by the negative ACL
         updateDialog.clickOkButtonOrThrow();
         assertTrue(roleDefinitions.findRole(CUSTOM_ROLE).getPermissions().contains(eventAllPermission));
+    }
+    
+    private void addRUDForAllToAcl(AclPopupPO aclPopup) {
+        aclPopup.addUserGroup("");
+        aclPopup.getAllowedActionsInput().addAction(READ_ACTION);
+        aclPopup.getAllowedActionsInput().addAction(UPDATE_ACTION);
+        aclPopup.getAllowedActionsInput().addAction(DELETE_ACTION);
+        aclPopup.clickOkButtonOrThrow();
     }
     
     private AdminConsolePage changeUserAndReloadAdminConsole(String usernameAndPassword) {
