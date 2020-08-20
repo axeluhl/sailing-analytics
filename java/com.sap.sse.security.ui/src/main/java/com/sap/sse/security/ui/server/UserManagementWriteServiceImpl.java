@@ -533,7 +533,7 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
         } catch (UserManagementException e) {
             successInfo = new SuccessInfo(false,
                     "You are not allowed to revoke this role from user " + username
-                            + " or the username, grou name or role name did not exist.",
+                            + " or the username, group name or role name did not exist.",
                     /* redirectURL */ null, /* userDTO */ null);
         }
         return successInfo;
