@@ -104,7 +104,7 @@ public class ReplicationReceiverImpl implements ReplicationReceiver, Runnable {
      * {@link RacingEventServiceOperation#requiresSynchronousExecution()}.
      */
     private final static Executor executor = ThreadPoolUtil.INSTANCE
-            .createBackgroundTaskThreadPoolExecutor(ReplicationReceiverImpl.class.getName());
+            .createForegroundTaskThreadPoolExecutor(ReplicationReceiverImpl.class.getName());
 
     /**
      * @param master

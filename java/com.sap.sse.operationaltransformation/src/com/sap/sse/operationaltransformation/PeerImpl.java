@@ -104,7 +104,7 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
     }
 
     private ExecutorService createMerger() {
-        return ThreadPoolUtil.INSTANCE.createBackgroundTaskThreadPoolExecutor(1,
+        return ThreadPoolUtil.INSTANCE.createForegroundTaskThreadPoolExecutor(1,
                 this.getClass().getName() + " " + name);
     }
 
