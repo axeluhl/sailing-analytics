@@ -36,5 +36,6 @@ public class AclPopupPO extends DataEntryDialogPO {
         // On Hudson the limited screen height may cause notifications to cover the buttons
         dismissAllExistingNotifications();
         super.clickOkButtonOrThrow();
+        waitForAjaxRequests();
     }
 }
