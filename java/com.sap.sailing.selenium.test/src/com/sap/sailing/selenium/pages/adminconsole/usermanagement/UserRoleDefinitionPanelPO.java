@@ -84,4 +84,10 @@ public class UserRoleDefinitionPanelPO extends PageArea {
         }
         waitForAlertContainingMessageAndAccept("You are not allowed to grant this role");
     }
+
+    public void deleteEntry(String name) {
+        // TODO: Identify and add DebugId to Delete Action Buttons.
+        WebElement findElementBySeleniumId = findElementBySeleniumId("DeletePermissionButton-" + name);
+        findElementBySeleniumId.click();
+    }
 }
