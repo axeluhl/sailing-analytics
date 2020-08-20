@@ -17,11 +17,16 @@ public class UserManagementPanelPO extends PageArea {
     @FindBy(how = BySeleniumId.class, using = "CreateUserButton")
     private WebElement createUserButton;
     
+    @FindBy(how = BySeleniumId.class, using = "DeleteUserButton")
+    private WebElement deleteUserButton;
+    
     @FindBy(how = BySeleniumId.class, using = "UserNameTextbox")
     private WebElement userNameTextbox;
     
     @FindBy(how = BySeleniumId.class, using = "EditRolesAndPermissionsForUserButton")
     private WebElement editRolesAndPermissionsForUserButton;
+    
+    
 
     public UserManagementPanelPO(WebDriver driver, WebElement element) {
         super(driver, element);
@@ -80,6 +85,15 @@ public class UserManagementPanelPO extends PageArea {
         if(findUser != null) {
             table.selectEntry(findUser);
         }
+    }
+    
+    public void deleteUser(String name) {
+        selectUser(name);
+        deleteSelectedUser();
+    }
+    
+    public void deleteSelectedUser() {
+        deleteUserButton.click();
     }
 
     public WildcardPermissionPanelPO getUserPermissions() {
