@@ -48,9 +48,11 @@ public class SharingButtons extends Composite {
         if (!ClientConfiguration.getInstance().isBrandingActive()) {
             return;
         }
-        final String hostName = Window.Location.getHost();
         final ShareablePlaceContext context = provider.getContext();
-        final String urlToShare = "http://" + hostName + SHARING_URL_PREFIX + context.getContextAsPathParameters();
+        final String urlToShare = Window.Location.createUrlBuilder()
+                .setPath(SHARING_URL_PREFIX + context.getContextAsPathParameters())
+                .setHash(null)
+                .buildString();
         final String shortText = provider.getShortText();
         final UrlBuilder mailtoLink = new UrlBuilder().setProtocol("mailto").setParameter("subject", shortText).setParameter("body", urlToShare);
         // URLBuilder encodes spaces in parameters using "+" instead of "%20". This causes problems in Mail programs that do not decode "+" as space.
