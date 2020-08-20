@@ -470,7 +470,7 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
             // get the group tenant the role is qualified for if one exists
             final UserGroup tenant = getOrThrowTenant(tenantQualifierName);
 
-            final Role role = getOrThrowRoleFromIDs(roleDefinitionId, tenant == null ? null : tenant.getId(),
+            final Role role = getOrThrowRoleFromIDsAndCheckMetaPermissions(roleDefinitionId, tenant == null ? null : tenant.getId(),
                     userQualifierName);
 
             final TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(role, user);
@@ -512,7 +512,7 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
             getOrThrowQualifiedUser(userQualifierName);
             // get the group tenant the role is qualified for if one exists
             UserGroup tenant = getOrThrowTenant(tenantQualifierName);
-            Role role = getOrThrowRoleFromIDs(roleDefinitionId, tenant == null ? null : tenant.getId(),
+            Role role = getOrThrowRoleFromIDsAndCheckMetaPermissions(roleDefinitionId, tenant == null ? null : tenant.getId(),
                     userQualifierName);
             final String message = "removed role " + role.getName() + " for user " + username;
             final TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(role, user);
@@ -668,7 +668,7 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
      *             if the current user does not have the meta permission to give this specific, qualified role in this
      *             context.
      */
-    protected Role getOrThrowRoleFromIDs(UUID roleDefinitionId, UUID tenantId, String userQualifierName) throws UserManagementException {
+    protected Role getOrThrowRoleFromIDsAndCheckMetaPermissions(UUID roleDefinitionId, UUID tenantId, String userQualifierName) throws UserManagementException {
         final Role role = createRoleFromIDs(roleDefinitionId, tenantId, userQualifierName);
         if (!getSecurityService().hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(
                 role.getRoleDefinition(), role.getQualificationAsOwnership())) {
