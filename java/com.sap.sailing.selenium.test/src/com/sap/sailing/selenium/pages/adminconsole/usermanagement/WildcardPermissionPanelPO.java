@@ -1,16 +1,15 @@
 package com.sap.sailing.selenium.pages.adminconsole.usermanagement;
 
+import org.openqa.selenium.By.ByName;
 import org.openqa.selenium.ElementNotSelectableException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.By.ByName;
 
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.PageArea;
 import com.sap.sailing.selenium.pages.adminconsole.security.DataEntryWithSecurityActionsPO;
 import com.sap.sailing.selenium.pages.gwt.CellTablePO;
-import com.sap.sailing.selenium.pages.gwt.DataEntryPO;
 import com.sap.sailing.selenium.pages.gwt.GenericCellTablePO;
 import com.sap.sailing.selenium.pages.gwt.SuggestBoxPO;
 
@@ -28,6 +27,11 @@ public class WildcardPermissionPanelPO extends PageArea {
         
         public void deletePermission() {
             deleteButton.click();
+        }
+        
+        public void deletePermissionAndExpectPermissionError() {
+            deletePermission();
+            waitForAlertContainingMessageAndAccept("Could not remove permission");
         }
     }
     
