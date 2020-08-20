@@ -585,6 +585,11 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
         try {
             // check if user exists
             User user = getOrThrowUser(username);
+            // check permissions
+            if (!getSecurityService().hasCurrentUserMetaPermissionWithOwnershipLookup(permission)) {
+                throw new UnauthorizedException(
+                        "Not permitted to grant/revoke permission " + permission + " for user " + user.getName());
+            }
             // revoke permission
             final String message = "Revoked permission " + permission + " for user " + username;
             final TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(permission,
