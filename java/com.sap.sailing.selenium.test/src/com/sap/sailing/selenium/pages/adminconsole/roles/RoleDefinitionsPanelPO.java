@@ -17,6 +17,7 @@ public class RoleDefinitionsPanelPO extends PageArea {
 
         @FindBy(how = ByName.class, using = "UPDATE")
         private WebElement updateButton;
+        
 
         public RoleEntryPO(CellTablePO<?> table, WebElement element) {
             super(table, element);
@@ -32,8 +33,6 @@ public class RoleDefinitionsPanelPO extends PageArea {
         }
     }
     
-    private static final String CREATE_ROLE_DIALOG = "RoleDefinitionCreationDialog";
-    
     @FindBy(how = BySeleniumId.class, using = "RolesCellTable")
     private WebElement roleTable;
     
@@ -42,6 +41,8 @@ public class RoleDefinitionsPanelPO extends PageArea {
     
     @FindBy(how = BySeleniumId.class, using = "RemoveRoleButton")
     private WebElement removeRoleButton;
+    
+    private static final String CREATE_ROLE_DIALOG = "RoleDefinitionCreationDialog";
     
     public RoleDefinitionsPanelPO(WebDriver driver, WebElement element) {
         super(driver, element);
@@ -61,9 +62,26 @@ public class RoleDefinitionsPanelPO extends PageArea {
         }
         return null;
     }
+    
+    public void selectRole(String name) {
+        final CellTablePO<RoleEntryPO> table = getRoleTable();
+        final RoleEntryPO findUser = findRole(name);
+        if(findUser != null) {
+            table.selectEntry(findUser);
+        }
+    }
 
     public RoleDefinitionCreationAndUpdateDialogPO getCreateRoleDialog() {
         createRoleButton.click();
         return waitForPO(RoleDefinitionCreationAndUpdateDialogPO::new, CREATE_ROLE_DIALOG);
+    }
+
+    public void deleteRole(String name) {
+        selectRole(name);
+        deleteSelectedRole();
+    }
+    
+    public void deleteSelectedRole() {
+        removeRoleButton.click();
     }
 }

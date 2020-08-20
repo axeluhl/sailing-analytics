@@ -23,15 +23,28 @@ public class TestRoleDefinitionCreation extends AbstractSeleniumTest {
     }
 
     @Test
-    public void testOpenCreateBoatDialog() throws InterruptedException {
+    public void testRoleCreation() throws InterruptedException {
         final RoleDefinitionsPanelPO roleManagementPanel = goToRoleDefinitionPanel();
         assertNull(roleManagementPanel.findRole(TEST_ROLE));
+        createRole(roleManagementPanel);
+        assertNotNull(roleManagementPanel.findRole(TEST_ROLE));
+    }
+    
+    @Test
+    public void testRoleDeletion() throws InterruptedException {
+        final RoleDefinitionsPanelPO roleManagementPanel = goToRoleDefinitionPanel();
+        createRole(roleManagementPanel);
+        roleManagementPanel.deleteRole(TEST_ROLE);
+        getWebDriver().switchTo().alert().accept();
+        assertNull(roleManagementPanel.findRole(TEST_ROLE));
+    }
+
+    private void createRole(final RoleDefinitionsPanelPO roleManagementPanel) {
         final RoleDefinitionCreationAndUpdateDialogPO createRoleDialog = roleManagementPanel.getCreateRoleDialog();
         assertNotNull(createRoleDialog);
         createRoleDialog.setName(TEST_ROLE);
         createRoleDialog.addPermission(TEST_PERMISSION);
         createRoleDialog.clickOkButtonOrThrow();
-        assertNotNull(roleManagementPanel.findRole(TEST_ROLE));
     }
 
     private RoleDefinitionsPanelPO goToRoleDefinitionPanel() {
