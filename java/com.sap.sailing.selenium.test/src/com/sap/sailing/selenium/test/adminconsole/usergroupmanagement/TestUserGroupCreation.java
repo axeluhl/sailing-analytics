@@ -75,11 +75,13 @@ public class TestUserGroupCreation extends AbstractSeleniumTest {
     }
     
     @Test
-    public void testUserGroupDeletion() {
+    public void testUserGroupDeletion() throws InterruptedException {
         final UserGroupManagementPanelPO userGroupManagementPanel = goToUserGroupDefinitionsPanel();
         createGroup(userGroupManagementPanel);
         userGroupManagementPanel.deleteGroup(TEST_GROUP_NAME);
         getWebDriver().switchTo().alert().accept();
+        Thread.sleep(500);
+        getWebDriver().switchTo().alert().dismiss();
         assertNull(userGroupManagementPanel.findGroup(TEST_GROUP_NAME));
     }
     
@@ -92,6 +94,7 @@ public class TestUserGroupCreation extends AbstractSeleniumTest {
         createRole(userRolesPO);
         userGroupManagementPanel.selectGroup(TEST_GROUP_NAME);
         userRolesPO.removeRole(TEST_ROLE);
+        getWebDriver().switchTo().alert().accept();
         userGroupManagementPanel.selectGroup(TEST_GROUP_NAME);
         assertNull(userRolesPO.findRole(TEST_ROLE));
     }
