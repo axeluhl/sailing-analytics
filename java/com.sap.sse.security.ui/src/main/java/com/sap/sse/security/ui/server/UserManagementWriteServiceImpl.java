@@ -240,6 +240,10 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
             final RoleDefinition roleDefinition = getSecurityService()
                     .getRoleDefinition(UUID.fromString(roleDefinitionIdAsString));
             if (roleDefinition != null) {
+                if (!getSecurityService().hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(roleDefinition,
+                        new Ownership(null, userGroup))) {
+                    throw new UnauthorizedException("Not permitted to remove role definition from group");
+                }
                 getSecurityService().removeRoleDefintionFromUserGroup(userGroup, roleDefinition);
             }
         } else {
