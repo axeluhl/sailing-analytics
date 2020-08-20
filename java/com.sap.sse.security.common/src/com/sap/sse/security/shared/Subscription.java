@@ -146,4 +146,25 @@ public abstract class Subscription implements Serializable {
      * @return true if status subscription is in trial or status is active and user has success payment
      */
     public abstract boolean isActiveSubscription();
+
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder();
+        final String seperator = ", ";
+        builder.append("subscriptionId: ").append(getStringFieldValue(subscriptionId)).append(seperator)
+                .append("planId: ").append(getStringFieldValue(planId)).append(seperator).append("customerId: ")
+                .append(getStringFieldValue(customerId)).append(seperator).append("subscriptionStatus: ")
+                .append(getStringFieldValue(subscriptionStatus)).append(seperator).append("paymentStatus: ")
+                .append(getStringFieldValue(paymentStatus)).append(seperator).append("trialStart: ").append(trialStart)
+                .append(seperator).append("trialEnd: ").append(trialEnd).append(seperator).append("latestEventTime: ")
+                .append(latestEventTime).append(seperator).append("manualUpdatedAt: ").append(manualUpdatedAt)
+                .append(seperator).append("subscriptionCreatedAt: ").append(subscriptionCreatedAt).append(seperator)
+                .append("subscriptionUpdatedAt: ").append(subscriptionUpdatedAt);
+
+        return builder.toString();
+    }
+
+    private String getStringFieldValue(String value) {
+        return (value == null || value.equals("")) ? "empty" : value;
+    }
 }

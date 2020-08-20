@@ -150,7 +150,7 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
             User user = getCurrentUser();
             Subscription subscription = user.getSubscriptionByPlan(planId);
             if (!isValidSubscription(subscription)) {
-                return true; // TODO why is this returning true here when true is supposed to indicate success?
+                return false;
             }
             Result result = cancel(subscription.getSubscriptionId()).request();
             if (!result.subscription().status().name().toLowerCase()

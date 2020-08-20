@@ -1,28 +1,39 @@
 package com.sap.sse.security.shared;
 
-import java.util.UUID;
-
 /**
  * Payment subscription plan
  * 
  * @author Tu Tran
  */
 public enum SubscriptionPlan {
-    STARTER("starter", "Starter", new UUID[] { PredefinedRoles.spectator.getId() }), PREMIUM("premium", "Premium",
-            new UUID[] { PredefinedRoles.moderator.getId() });
+    STARTER("starter", "Starter",
+            new SubscriptionPlanRole[] { new SubscriptionPlanRole(PredefinedRoles.spectator.getId(),
+                    SubscriptionPlanRole.TenantQualification.DEFAULT_QUALIFIED_USER_TENANT,
+                    SubscriptionPlanRole.UserQualification.USER) }), PREMIUM(
+                            "premium", "Premium",
+                            new SubscriptionPlanRole[] { new SubscriptionPlanRole(PredefinedRoles.moderator.getId(),
+                                    SubscriptionPlanRole.TenantQualification.DEFAULT_SUBSCRIBED_USER_TENANT,
+                                    SubscriptionPlanRole.UserQualification.NONE) }),;
 
+    /**
+     * Plan name
+     */
     private String name;
+
+    /**
+     * Plan id
+     */
     private String id;
 
     /**
      * Roles assigned for this plan, if user subscribe to the plan then the user will be assigned these roles
      */
-    private UUID[] roleDefinitionIds;
+    private SubscriptionPlanRole[] roles;
 
-    SubscriptionPlan(String id, String name, UUID[] roleDefinitionIds) {
+    SubscriptionPlan(String id, String name, SubscriptionPlanRole[] roles) {
         this.name = name;
         this.id = id;
-        this.roleDefinitionIds = roleDefinitionIds;
+        this.roles = roles;
     }
 
     public String getName() {
@@ -33,7 +44,7 @@ public enum SubscriptionPlan {
         return id;
     }
 
-    public UUID[] getRoleDefinitionIds() {
-        return this.roleDefinitionIds;
+    public SubscriptionPlanRole[] getRoles() {
+        return this.roles;
     }
 }
