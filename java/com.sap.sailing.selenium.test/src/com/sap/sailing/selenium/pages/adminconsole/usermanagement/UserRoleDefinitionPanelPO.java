@@ -29,6 +29,11 @@ public class UserRoleDefinitionPanelPO extends PageArea {
         public void deleteRole() {
             deleteButton.click();
         }
+        
+        public void deleteRoleAndExpectPermissionError() {
+            deleteRole();
+            waitForAlertContainingMessageAndAccept("You are not allowed to revoke this role from user");
+        }
     }
     
     private static final String TABLE_ROLE_NAME_COLUMN = "Role Name";
