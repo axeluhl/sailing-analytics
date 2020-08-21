@@ -29,29 +29,31 @@ import com.sap.sse.gwt.client.AbstractEntryPoint;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.security.ui.client.IconResources;
+import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserManagementWriteServiceAsync;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 public class SettingsPanel extends LayoutPanel {
 
+    private UserManagementServiceAsync userManagementService;
     private UserManagementWriteServiceAsync userManagementWriteService;
     private Map<String, String> settings = null;
     private Map<String, String> settingTypes = null;
     private Map<String, FlexTable> savedTabs = new HashMap<>();
     private final StringMessages stringMessages;
 
-    public SettingsPanel(UserManagementWriteServiceAsync userManagementWriteService, StringMessages stringMessages) {
+    public SettingsPanel(UserManagementServiceAsync userManagementService, UserManagementWriteServiceAsync userManagementWriteService, StringMessages stringMessages) {
         super();
         setHeight("600px"); // TODO this is ugly; it should be 100%, but then the nested tab panels lead to zero height for this panel's tab panel
         this.stringMessages = stringMessages;
-        //using write service only to get consistent roundtrip
+        this.userManagementService = userManagementService;
         this.userManagementWriteService = userManagementWriteService;
         initComponents();
     }
 
     private void initComponents() {
         clear();
-        userManagementWriteService.getSettingTypes(new AsyncCallback<Map<String, String>>() {
+        userManagementService.getSettingTypes(new AsyncCallback<Map<String, String>>() {
             @Override
             public void onFailure(Throwable caught) {
             }
@@ -62,7 +64,7 @@ public class SettingsPanel extends LayoutPanel {
                 updateSettings();
             }
         });
-        userManagementWriteService.getSettings(new AsyncCallback<Map<String, String>>() {
+        userManagementService.getSettings(new AsyncCallback<Map<String, String>>() {
 
             @Override
             public void onSuccess(Map<String, String> result) {
