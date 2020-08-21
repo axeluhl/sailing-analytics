@@ -70,15 +70,6 @@
         <url-pattern>*.html</url-pattern>
     </servlet-mapping>
 	<servlet>
-	    <display-name>Sharing</display-name>
-	    <servlet-name>Sharing</servlet-name>
-    	<servlet-class>com.sap.sailing.gwt.ui.server.SharingServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>Sharing</servlet-name>
-		<url-pattern>/shared/*</url-pattern>
-	</servlet-mapping>
-	<servlet>
 	    <display-name>Status</display-name>
 	    <servlet-name>Status</servlet-name>
     	<servlet-class>com.sap.sailing.gwt.ui.server.StatusServlet</servlet-class>
