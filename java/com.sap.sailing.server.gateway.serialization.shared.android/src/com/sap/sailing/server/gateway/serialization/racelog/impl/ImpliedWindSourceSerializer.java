@@ -19,29 +19,33 @@ public class ImpliedWindSourceSerializer implements JsonSerializer<ImpliedWindSo
     @Override
     public JSONObject serialize(ImpliedWindSource impliedWindSource) {
         final JSONObject result = new JSONObject();
-        impliedWindSource.accept(new ImpliedWindSourceVisitor<Void>() {
-            @Override
-            public Void visit(FixedSpeedImpliedWind impliedWindSource) {
-                result.put(ORC_IMPLIED_WIND_SOURCE_TYPE, FixedSpeedImpliedWind.class.getSimpleName());
-                result.put(ORC_FIXED_IMPLIED_WIND_SPEED_IN_KNOTS, impliedWindSource.getFixedImpliedWindSpeed() == null ? null : impliedWindSource.getFixedImpliedWindSpeed().getKnots());
-                return null;
-            }
-
-            @Override
-            public Void visit(OtherRaceAsImpliedWindSource impliedWindSource) {
-                result.put(ORC_IMPLIED_WIND_SOURCE_TYPE, OtherRaceAsImpliedWindSource.class.getSimpleName());
-                result.put(ORC_OTHER_RACE_REGATTA_LIKE_NAME, impliedWindSource.getLeaderboardAndRaceColumnAndFleetOfDefiningRace().getA());
-                result.put(ORC_OTHER_RACE_RACE_COLUMN_NAME, impliedWindSource.getLeaderboardAndRaceColumnAndFleetOfDefiningRace().getB());
-                result.put(ORC_OTHER_RACE_FLEET_NAME, impliedWindSource.getLeaderboardAndRaceColumnAndFleetOfDefiningRace().getC());
-                return null;
-            }
-
-            @Override
-            public Void visit(OwnMaxImpliedWind impliedWindSource) {
-                result.put(ORC_IMPLIED_WIND_SOURCE_TYPE, OwnMaxImpliedWind.class.getSimpleName());
-                return null;
-            }
-        });
+        if (impliedWindSource == null) {
+            result.put(ORC_IMPLIED_WIND_SOURCE_TYPE, null);
+        } else {
+            impliedWindSource.accept(new ImpliedWindSourceVisitor<Void>() {
+                @Override
+                public Void visit(FixedSpeedImpliedWind impliedWindSource) {
+                    result.put(ORC_IMPLIED_WIND_SOURCE_TYPE, FixedSpeedImpliedWind.class.getSimpleName());
+                    result.put(ORC_FIXED_IMPLIED_WIND_SPEED_IN_KNOTS, impliedWindSource.getFixedImpliedWindSpeed() == null ? null : impliedWindSource.getFixedImpliedWindSpeed().getKnots());
+                    return null;
+                }
+    
+                @Override
+                public Void visit(OtherRaceAsImpliedWindSource impliedWindSource) {
+                    result.put(ORC_IMPLIED_WIND_SOURCE_TYPE, OtherRaceAsImpliedWindSource.class.getSimpleName());
+                    result.put(ORC_OTHER_RACE_REGATTA_LIKE_NAME, impliedWindSource.getLeaderboardAndRaceColumnAndFleetOfDefiningRace().getA());
+                    result.put(ORC_OTHER_RACE_RACE_COLUMN_NAME, impliedWindSource.getLeaderboardAndRaceColumnAndFleetOfDefiningRace().getB());
+                    result.put(ORC_OTHER_RACE_FLEET_NAME, impliedWindSource.getLeaderboardAndRaceColumnAndFleetOfDefiningRace().getC());
+                    return null;
+                }
+    
+                @Override
+                public Void visit(OwnMaxImpliedWind impliedWindSource) {
+                    result.put(ORC_IMPLIED_WIND_SOURCE_TYPE, OwnMaxImpliedWind.class.getSimpleName());
+                    return null;
+                }
+            });
+        }
         return result;
     }
 }
