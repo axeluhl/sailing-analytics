@@ -2659,19 +2659,16 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         return result;
     }
     
-    //??
     protected RaceLogStore getRaceLogStore() {
         return MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory,
                 domainObjectFactory);
     }
     
-    //??
     protected RegattaLogStore getRegattaLogStore() {
         return MongoRegattaLogStoreFactory.INSTANCE.getMongoRegattaLogStore(
                 mongoObjectFactory, domainObjectFactory);
     }
 
-    //??
     protected SwissTimingReplayService getSwissTimingReplayService() {
         return swissTimingReplayService;
     }
