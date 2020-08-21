@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.settings.client.utils;
 
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardContextDefinition;
+import com.sap.sailing.gwt.settings.client.leaderboardedit.EditableLeaderboardContextDefinition;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceboardContextDefinition;
 import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaOverviewContextDefinition;
 import com.sap.sse.security.ui.settings.StoredSettingsLocation;
@@ -44,9 +45,9 @@ public class StoredSettingsLocationFactory {
     }
 
     public static final StoredSettingsLocation createStoredSettingsLocatorForEditableLeaderboard(
-            String leaderboardName) {
+            EditableLeaderboardContextDefinition editableLeaderboardContextDefinition) {
         return new SailingStoredSettingsLocation(EDITABLE_LEADERBOARD,
-                StoredSettingsLocation.buildDocumentSettingsIdPart(leaderboardName));
+                StoredSettingsLocation.buildDocumentSettingsIdPart(editableLeaderboardContextDefinition.getLeaderboardName()));
     }
 
     public static final StoredSettingsLocation createStoredSettingsLocatorForRegattaOverview(

@@ -16,7 +16,7 @@ import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.common.communication.routing.ProvidesLeaderboardRouting;
-import com.sap.sailing.gwt.settings.client.leaderboard.EditableLeaderboardPerspectiveLifecycle;
+import com.sap.sailing.gwt.settings.client.leaderboard.EditableLeaderboardLifecycle;
 import com.sap.sailing.gwt.settings.client.leaderboard.EditableLeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboardedit.EditableLeaderboardContextDefinition;
 import com.sap.sailing.gwt.settings.client.utils.StoredSettingsLocationFactory;
@@ -43,14 +43,14 @@ public class LeaderboardEditPage extends AbstractSailingWriteEntryPoint implemen
     public static final long DEFAULT_REFRESH_INTERVAL_MILLIS = 3000l;
     
     private String leaderboardName;
+    private EditableLeaderboardContextDefinition editableLeaderboardContextDefinition;
     
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
-        
-        final EditableLeaderboardContextDefinition leaderboardEditContextDefinition = new SettingsToUrlSerializer()
+        this.editableLeaderboardContextDefinition = new SettingsToUrlSerializer()
                 .deserializeFromCurrentLocation(new EditableLeaderboardContextDefinition());
-        leaderboardName = leaderboardEditContextDefinition.getLeaderboardName();
+        leaderboardName = editableLeaderboardContextDefinition.getLeaderboardName();
         
         getSailingService().getLeaderboardNames(new MarkedAsyncCallback<List<String>>(
                 new GetLeaderboardNamesCallback()));
@@ -76,6 +76,7 @@ public class LeaderboardEditPage extends AbstractSailingWriteEntryPoint implemen
     }
     
     private class GetAvailableDetailTypesForLeaderboardCallback implements AsyncCallback<Iterable<DetailType>> {
+        
         @Override
         public void onFailure(Throwable caught) {
             reportError(getStringMessages().getAvailableDetailTypesForLeaderboardError());
@@ -90,8 +91,7 @@ public class LeaderboardEditPage extends AbstractSailingWriteEntryPoint implemen
             AuthorizedContentDecorator authorizedContentDecorator = new GenericAuthorizedContentDecorator(
                     genericSailingAuthentication);
             getSailingService().getLeaderboardWithSecurity(leaderboardName,
-                    new GetLeaderboardWithSecurityCallback(authorizedContentDecorator, result, header) {
-                    });
+                    new GetLeaderboardWithSecurityCallback(authorizedContentDecorator, result, header));
         }
 
     }
@@ -119,9 +119,9 @@ public class LeaderboardEditPage extends AbstractSailingWriteEntryPoint implemen
         public void onSuccess(
                 StrippedLeaderboardDTOWithSecurity leaderboardWithSecurity) {
             final StoredSettingsLocation storageDefinition = StoredSettingsLocationFactory
-                    .createStoredSettingsLocatorForEditableLeaderboard(leaderboardName);
-            EditableLeaderboardPerspectiveLifecycle rootComponentLifeCycle = 
-                    new EditableLeaderboardPerspectiveLifecycle(StringMessages.INSTANCE, leaderboardWithSecurity, 
+                    .createStoredSettingsLocatorForEditableLeaderboard(editableLeaderboardContextDefinition);
+            EditableLeaderboardLifecycle rootComponentLifeCycle = 
+                    new EditableLeaderboardLifecycle(StringMessages.INSTANCE, leaderboardWithSecurity, 
                             getAvailableDetailTypesForLeaderboardResult);
             ComponentContext<EditableLeaderboardSettings> context = 
                     new ComponentContextWithSettingsStorage<>(
