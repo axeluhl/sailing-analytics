@@ -68,6 +68,7 @@ import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.security.SecurityInitializationCustomizer;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.SecurityUrlPathProvider;
 import com.sap.sse.security.interfaces.PreferenceConverter;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.HasPermissionsProvider;
@@ -219,6 +220,7 @@ public class Activator implements BundleActivator {
         mailQueue = new ExecutorMailQueue(mailServiceTracker);
         notificationService = new SailingNotificationServiceImpl(context, mailQueue);
         trackedRegattaListener = new OSGiBasedTrackedRegattaListener(context);
+        context.registerService(SecurityUrlPathProvider.class, new SecurityUrlPathProviderSailingImpl(), /* properties */ null);
         registrations.add(context.registerService(HasPermissionsProvider.class,
                 (HasPermissionsProvider) SecuredDomainType::getAllInstances, null));
         registrations.add(context.registerService(SecurityInitializationCustomizer.class,
