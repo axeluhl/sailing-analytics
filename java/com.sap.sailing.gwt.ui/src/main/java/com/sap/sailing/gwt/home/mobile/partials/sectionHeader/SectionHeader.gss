@@ -10,7 +10,7 @@
 }
 .sectionheader_item {
   padding: 1em;
-  display: inline-block;
+  display: flex;
   vertical-align: middle;
 }
 .sectionheader_itemdoublerow {
@@ -47,6 +47,15 @@
           transform: translateY(-50%);
   border-left: 1px solid #ccc;
 }
+.sectionheader_item_title_label {
+	display: flex;
+}
+.sectionheader_item_title_label div {
+	width: 100%
+}
+.sectionheader_item_title_label div:last-child {
+    width: auto;
+}
 .sectionheader_item_title {
   display: inline-block;
   margin: 0;
@@ -79,6 +88,7 @@
   color: #008fcc;
 }
 .sectionheader_item_indicators {
+  display: flex;
   pointer-events: none;
 }
 .sectionheader_item_arrow {
@@ -112,8 +122,9 @@
           transform: rotate(0deg);
 }
 .sectionheader_item_adjust_title_left {
-  margin-left: 4em;
+  padding-left: 4em;
   position: absolute;
+  width: 100%;
   top: 50%;
   -webkit-transform: translateY(-50%);
      -moz-transform: translateY(-50%);
@@ -124,7 +135,7 @@
 	display: inline;
 }
 .sectionheader_item_adjust_title_right {
-  padding-right: 2.5em;
+  padding-right: 3.5em;
 }
 .sectionheader_element{
     top: 0.666666666666em;
