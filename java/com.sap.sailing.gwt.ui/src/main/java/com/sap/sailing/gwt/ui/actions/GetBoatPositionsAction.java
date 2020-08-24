@@ -63,7 +63,7 @@ public class GetBoatPositionsAction implements TimeRangeAsyncAction<CompactBoatP
             final Date toDate = to.get(entry.getKey());
             if (fromDate != null && toDate != null) {
                 timeRangeByCompetitorId.put(entry.getKey().getIdAsString(),
-                        new TimeRangeImpl(TimePoint.of(fromDate), TimePoint.of(toDate)));
+                        new TimeRangeImpl(TimePoint.of(fromDate), TimePoint.of(toDate), /* toIsInclusive */ true));
             }
         }
         return timeRangeByCompetitorId;

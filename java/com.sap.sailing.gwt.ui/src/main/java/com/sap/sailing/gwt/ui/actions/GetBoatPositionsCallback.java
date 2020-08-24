@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.ui.actions;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -35,11 +37,13 @@ public class GetBoatPositionsCallback
     @Override
     public List<GPSFixDTOWithSpeedWindTackAndLegType> joinSubResults(TimeRange timeRange,
             List<Pair<TimeRange, List<GPSFixDTOWithSpeedWindTackAndLegType>>> toJoin) {
+        final List<Pair<TimeRange, List<GPSFixDTOWithSpeedWindTackAndLegType>>> toJoinSorted = new ArrayList<>(toJoin);
+        toJoinSorted.sort(Comparator.comparing(Pair::getA));
         final List<GPSFixDTOWithSpeedWindTackAndLegType> resultList = new ArrayList<>();
         MultiTimeRange collectedMultiTimeRange = new MultiTimeRangeImpl(new TimeRange[0]);
-        for (final Pair<TimeRange, List<GPSFixDTOWithSpeedWindTackAndLegType>> e : toJoin) {
+        for (final Pair<TimeRange, List<GPSFixDTOWithSpeedWindTackAndLegType>> e : toJoinSorted) {
             final TimeRange potentiallyWantedTimeRange = e.getA().intersection(timeRange);
-            if (potentiallyWantedTimeRange != null) {
+            if (potentiallyWantedTimeRange != null && e.getB() != null) {
                 final MultiTimeRange toCollectMultiTimeRange = new MultiTimeRangeImpl(potentiallyWantedTimeRange)
                         .subtract(collectedMultiTimeRange);
                 if (!toCollectMultiTimeRange.isEmpty()) {
