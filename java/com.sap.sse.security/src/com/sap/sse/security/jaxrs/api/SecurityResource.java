@@ -26,6 +26,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.common.mail.MailException;
+import com.sap.sse.security.SecurityUrlPathProvider;
 import com.sap.sse.security.jaxrs.AbstractSecurityResource;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
@@ -157,7 +158,8 @@ public class SecurityResource extends AbstractSecurityResource {
     }
 
     private String getPasswordResetURL(UriInfo uriInfo) {
-        final String urlPath = SECURITY_UI_URL_PATH+"EditProfile.html";
+        final SecurityUrlPathProvider securityUrlPathProvider = getSecurityUrlPathProvider();
+        final String urlPath = securityUrlPathProvider.getPasswordResetUrlPath();
         return getContextUrl(uriInfo, urlPath);
     }
 

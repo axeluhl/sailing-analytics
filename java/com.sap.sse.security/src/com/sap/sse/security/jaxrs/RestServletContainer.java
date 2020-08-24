@@ -8,6 +8,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.SecurityUrlPathProvider;
 import com.sun.jersey.spi.container.servlet.ServletContainer;
 
 public class RestServletContainer extends ServletContainer {
@@ -17,7 +18,11 @@ public class RestServletContainer extends ServletContainer {
 
     public static final String SECURITY_SERVICE_TRACKER_NAME = "securityServiceTracker";
 
+    public static final String SECURITY_URL_PATH_PROVIDER_NAME = "securityUrlPathProvider";
+
     private ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
+    
+    private ServiceTracker<SecurityUrlPathProvider, SecurityUrlPathProvider> securityUrlPathProvider;
 
     public RestServletContainer() {
         super();
@@ -38,6 +43,9 @@ public class RestServletContainer extends ServletContainer {
         securityServiceTracker = new ServiceTracker<SecurityService, SecurityService>(context, SecurityService.class.getName(), null);
         securityServiceTracker.open();
         config.getServletContext().setAttribute(SECURITY_SERVICE_TRACKER_NAME, securityServiceTracker);
+        securityUrlPathProvider = new ServiceTracker<SecurityUrlPathProvider, SecurityUrlPathProvider>(context, SecurityUrlPathProvider.class.getName(), null);
+        securityUrlPathProvider.open();
+        config.getServletContext().setAttribute(SECURITY_URL_PATH_PROVIDER_NAME, securityUrlPathProvider);
     }
 
     @Override
