@@ -216,6 +216,14 @@ public interface BoatClassImageResources extends ClientBundle {
     @ImageOptions(preventInlining = true)
     ImageResource J88Icon();
 
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/J92.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource J92Icon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/J92S.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource J92SIcon();
+
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/J105.png")
     @ImageOptions(preventInlining = true)
     ImageResource J105Icon();
@@ -380,10 +388,6 @@ public interface BoatClassImageResources extends ClientBundle {
     @ImageOptions(preventInlining = true)
     ImageResource TornadoIcon();
     
-    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/X_99.png")
-    @ImageOptions(preventInlining = true)
-    ImageResource X99Icon();
-
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/DYAS.png")
     @ImageOptions(preventInlining = true)
     ImageResource DyasIcon();
@@ -531,5 +535,13 @@ public interface BoatClassImageResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/VARIANTA.png")
     @ImageOptions(preventInlining = true)
     ImageResource VariantaIcon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/X_99.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource X99Icon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/X_332.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource X332Icon();
 
 }
