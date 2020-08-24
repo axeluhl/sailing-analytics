@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util.Pair;
@@ -73,6 +74,7 @@ public class TimeRangeResultCache<SubResult> {
             this.callback = callback;
             this.action = action;
             addChildren(childrenList);
+            GWT.log("Request created: " + childrenSet.size() + " children, " + Math.round(trimmedTimeRange != null ? trimmedTimeRange.getDuration().divide(timeRange.getDuration()) * 100d : 0d) + "% length");
         }
 
         /**

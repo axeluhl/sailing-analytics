@@ -87,6 +87,7 @@ import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalablePosition;
 import com.sap.sailing.domain.common.windfinder.SpotDTO;
 import com.sap.sailing.gwt.ui.actions.GetBoatPositionsAction;
+import com.sap.sailing.gwt.ui.actions.GetBoatPositionsCallback;
 import com.sap.sailing.gwt.ui.actions.GetPolarAction;
 import com.sap.sailing.gwt.ui.actions.GetRaceMapDataAction;
 import com.sap.sailing.gwt.ui.actions.GetWindInfoAction;
@@ -153,6 +154,7 @@ import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.async.TimeRangeActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
@@ -379,7 +381,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private final CombinedWindPanel combinedWindPanel;
     private final TrueNorthIndicatorPanel trueNorthIndicatorPanel;
     private final FlowPanel topLeftControlsWrapperPanel;
-    
+
+    private final TimeRangeActionsExecutor<CompactBoatPositionsDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>, String> timeRangeActionsExecutor;
     private final AsyncActionsExecutor asyncActionsExecutor;
 
     /**
@@ -594,6 +597,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
         this.raceIdentifier = raceIdentifier;
+        this.timeRangeActionsExecutor = new TimeRangeActionsExecutor<>(asyncActionsExecutor);
         this.asyncActionsExecutor = asyncActionsExecutor;
         this.errorReporter = errorReporter;
         this.timer = timer;
@@ -1247,14 +1251,15 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         ++boatPositionRequestIDCounter, isRedraw, detailTypeChanged));
         // next, if necessary, do the full thing; the two calls have different action classes, so throttling should not drop one for the other
         if (!fromTimesForNonOverlappingTailsCall.keySet().isEmpty()) {
-            asyncActionsExecutor.execute(new GetBoatPositionsAction(sailingService, race, fromTimesForNonOverlappingTailsCall, toTimesForNonOverlappingTailsCall,
-                    /* extrapolate */ true, detailType, leaderboardName, leaderboardGroupName, leaderboardGroupId), GET_RACE_MAP_DATA_CATEGORY,
-                    new MarkedAsyncCallback<>(new AsyncCallback<CompactBoatPositionsDTO>() {
+            timeRangeActionsExecutor.execute(new GetBoatPositionsAction(sailingService, race,
+                    fromTimesForNonOverlappingTailsCall, toTimesForNonOverlappingTailsCall, /* extrapolate */ true,
+                    detailType, leaderboardName, leaderboardGroupName, leaderboardGroupId),
+                    new GetBoatPositionsCallback(new AsyncCallback<CompactBoatPositionsDTO>() {
                         @Override
                         public void onFailure(Throwable t) {
                             errorReporter.reportError("Error obtaining racemap data: " + t.getMessage(), true /*silentMode */);
                         }
-                        
+
                         @Override
                         public void onSuccess(CompactBoatPositionsDTO result) {
                             // Note: the fromAndToAndOverlap.getC() map will be UPDATED by the call to updateBoatPositions for those
@@ -1266,8 +1271,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                                             competitorsByIdAsString), /* updateTailsOnly */ true, detailTypeChanged);
                         }
                     }));
-        }
-        else {
         }
     }
 

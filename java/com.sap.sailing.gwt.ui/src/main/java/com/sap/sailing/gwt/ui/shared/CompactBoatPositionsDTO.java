@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.shared;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,10 +16,20 @@ public class CompactBoatPositionsDTO implements IsSerializable {
     
     public CompactBoatPositionsDTO(Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatPositions) {
         super();
-        this.boatPositions = new HashMap<>();
+        this.boatPositions = new HashMap<>(boatPositions.size());
         for (final Entry<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> e : boatPositions.entrySet()) {
             this.boatPositions.put(e.getKey().getIdAsString(), e.getValue());
         }
+    }
+
+    public static CompactBoatPositionsDTO fromCompetitorIds(Map<String, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatPositionsByCompetitorId) {
+        final CompactBoatPositionsDTO dto = new CompactBoatPositionsDTO(Collections.emptyMap());
+        dto.boatPositions.putAll(boatPositionsByCompetitorId);
+        return dto;
+    }
+
+    public Map<String, List<GPSFixDTOWithSpeedWindTackAndLegType>> getBoatPositions() {
+        return Collections.unmodifiableMap(boatPositions);
     }
 
     public Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> getBoatPositionsForCompetitors(Map<String, CompetitorDTO> competitorsByIdsAsStrings) {
