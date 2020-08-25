@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -25,6 +26,31 @@ public class TimeRangeActionsExecutorTest {
         @Override
         public <T> void execute(AsyncAction<T> action, String category, AsyncCallback<T> callback) {
             action.execute(callback);
+        }
+    }
+
+    private class DelayedTimeRangeAsyncAction<Result, Key> implements TimeRangeAsyncAction<Result, Key> {
+        private final Result result;
+        private final TimeRange timeRange;
+        private final Key key;
+        private Optional<AsyncCallback<Result>> optionalCallback = Optional.empty();
+        public DelayedTimeRangeAsyncAction(Result result, TimeRange timeRange, Key key) {
+            this.result = result;
+            this.timeRange = timeRange;
+            this.key = key;
+        }
+        public void returnResult() {
+            optionalCallback.ifPresent(callback -> callback.onSuccess(result));
+        }
+        @Override
+        public void execute(Map<Key,TimeRange> timeRanges, AsyncCallback<Result> callback) {
+            optionalCallback = Optional.ofNullable(callback);
+        }
+        @Override
+        public Map<Key, TimeRange> getTimeRanges() {
+            final Map<Key, TimeRange> timeRangeMap = new HashMap<>(1);
+            timeRangeMap.put(key, timeRange);
+            return timeRangeMap;
         }
     }
 
@@ -84,6 +110,96 @@ public class TimeRangeActionsExecutorTest {
             }
         });
         assertTrue(actionHasRun.get());
+        assertTrue(callbackHasRun.get());
+    }
+
+    @Test
+    public void testRequestCachedResults() {
+        final TimeRangeActionsExecutor<Map<String, Integer>, Integer, String> exec = new TimeRangeActionsExecutor<>(
+                new MockAsyncActionsExecutor());
+        final String key = "key";
+        final TimeRange firstRange = TimeRangeImpl.create(10_000L, 20_000L);
+        final TimeRange firstKeepAliveRange = TimeRangeImpl.create(8_000L, 12_000L);
+        final TimeRange secondRange = TimeRangeImpl.create(15_000L, 20_000L);
+        final Map<String, Integer> firstResult = new HashMap<>();
+        firstResult.put(key, 1);
+        final DelayedTimeRangeAsyncAction<Map<String, Integer>, String> firstAction = new DelayedTimeRangeAsyncAction<>(
+                firstResult, firstRange, key);
+        final DelayedTimeRangeAsyncAction<Map<String, Integer>, String> secondAction = new DelayedTimeRangeAsyncAction<>(
+                null, secondRange, key);
+        final AtomicBoolean callbackHasRun = new AtomicBoolean(false);
+        exec.execute(firstAction, new TimeRangeAsyncCallback<Map<String, Integer>, Integer, String>() {
+            @Override
+            public Map<String, Integer> zipSubResults(Map<String, Integer> subResultMap) {
+                return subResultMap;
+            }
+            @Override
+            public Map<String, Integer> unzipResult(Map<String, Integer> result) {
+                return result;
+            }
+            @Override
+            public void onSuccess(Map<String, Integer> result) {
+                // Nop
+            }
+            @Override
+            public void onFailure(Throwable caught) {
+                assertTrue(false);
+            }
+            @Override
+            public Integer joinSubResults(TimeRange timeRange, List<Pair<TimeRange, Integer>> toJoin) {
+                return toJoin.stream().mapToInt(Pair::getB).sum();
+            }
+        });
+        exec.execute(new DelayedTimeRangeAsyncAction<>(null, firstKeepAliveRange, key),
+                new TimeRangeAsyncCallback<Map<String, Integer>, Integer, String>() {
+                    @Override
+                    public Map<String, Integer> zipSubResults(Map<String, Integer> subResultMap) {
+                        // Not used
+                        return null;
+                    }
+                    @Override
+                    public Map<String, Integer> unzipResult(Map<String, Integer> result) {
+                        // Not used
+                        return null;
+                    }
+                    @Override
+                    public void onSuccess(Map<String, Integer> result) {
+                        // Not used
+                    }
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        assertTrue(false);
+                    }
+                    @Override
+                    public Integer joinSubResults(TimeRange timeRange, List<Pair<TimeRange, Integer>> toJoin) {
+                        // Not used
+                        return null;
+                    }
+                });
+        firstAction.returnResult();
+        exec.execute(secondAction, new TimeRangeAsyncCallback<Map<String, Integer>, Integer, String>() {
+            @Override
+            public Map<String, Integer> zipSubResults(Map<String, Integer> subResultMap) {
+                return subResultMap;
+            }
+            @Override
+            public Map<String, Integer> unzipResult(Map<String, Integer> result) {
+                return result;
+            }
+            @Override
+            public void onSuccess(Map<String, Integer> result) {
+                assertFalse(callbackHasRun.getAndSet(true));
+            }
+            @Override
+            public void onFailure(Throwable caught) {
+               assertTrue(false);
+            }
+            @Override
+            public Integer joinSubResults(TimeRange timeRange, List<Pair<TimeRange, Integer>> toJoin) {
+                return toJoin.stream().mapToInt(Pair::getB).sum();
+            }
+        });
+        secondAction.returnResult();
         assertTrue(callbackHasRun.get());
     }
 
