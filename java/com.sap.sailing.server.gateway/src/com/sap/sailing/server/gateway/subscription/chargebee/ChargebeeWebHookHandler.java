@@ -10,6 +10,7 @@ import org.apache.commons.lang.StringUtils;
 
 import com.sap.sailing.server.gateway.subscription.SubscriptionWebHookHandler;
 import com.sap.sailing.server.gateway.subscription.SubscriptionWebHookServlet;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.shared.Subscription;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.impl.ChargebeeSubscription;
@@ -82,7 +83,7 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
     }
 
     private boolean isOutdatedEventTime(long occuredAt, Subscription subscription) {
-        return occuredAt < subscription.getLatestEventTime() || occuredAt < subscription.getManuallyUpdatedAt();
+        return occuredAt < subscription.getLatestEventTime() || occuredAt < subscription.getManualUpdatedAt();
     }
 
     private void processEvent(SubscriptionWebHookEvent event, User user) throws UserManagementException {
@@ -107,20 +108,50 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
             case PAYMENT_FAILED:
                 updateUserSubscription(user, buildSubscription(userSubscription, event));
                 break;
+            case PAYMENT_REFUNDED:
+                if (userSubscription.getInvoiceId() != null
+                        && userSubscription.getInvoiceId().equals(event.getInvoiceId())) {
+                    updateUserSubscription(user, buildSubscription(userSubscription, event));
+                }
+                break;
+            case INVOICE_GENERATED:
+                updateSubscriptionInvoice(userSubscription, event);
+                break;
+            case INVOICE_UPDATED:
+                if (userSubscription != null && userSubscription.getInvoiceId() != null
+                        && userSubscription.getInvoiceId().equals(event.getInvoiceId())) {
+                    updateSubscriptionInvoice(userSubscription, event);
+                }
+                break;
             }
         }
     }
 
     private Subscription buildEmptySubscription(Subscription currentSubscription, SubscriptionWebHookEvent event) {
         return ChargebeeSubscription.createEmptySubscription(event.getPlanId(), event.getEventOccurredAt(),
-                currentSubscription != null ? currentSubscription.getManuallyUpdatedAt() : 0);
+                currentSubscription != null ? currentSubscription.getManualUpdatedAt() : 0);
     }
 
     private Subscription buildSubscription(Subscription currentSubscription, SubscriptionWebHookEvent event) {
         String paymentStatus = null;
         String subscriptionStatus = event.getSubscriptionStatus();
+        String transactionType = null;
+        String transactionStatus = null;
+        String invoiceId = null;
+        String invoiceStatus = null;
         if (subscriptionStatus != null
                 && subscriptionStatus.equals(SubscriptionWebHookEvent.SUBSCRIPTION_STATUS_ACTIVE)) {
+            transactionType = event.getTransactionType();
+            if (transactionType == null && currentSubscription != null) {
+                transactionType = currentSubscription.getTransactionType();
+            }
+            transactionStatus = event.getTransactionStatus();
+            if (transactionStatus == null && currentSubscription != null) {
+                transactionStatus = currentSubscription.getTransactionStatus();
+            }
+            Pair<String, String> invoice = getInvoiceData(currentSubscription, event);
+            invoiceId = invoice.getA();
+            invoiceStatus = invoice.getB();
             paymentStatus = getEventPaymentStatus(event);
             if (paymentStatus == null && currentSubscription != null) {
                 paymentStatus = currentSubscription.getPaymentStatus();
@@ -128,8 +159,63 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
         }
         return new ChargebeeSubscription(event.getSubscriptionId(), event.getPlanId(), event.getCustomerId(),
                 event.getSubscriptionTrialStart(), event.getSubscriptionTrialEnd(), subscriptionStatus, paymentStatus,
-                event.getSubscriptionCreatedAt(), event.getSubscriptionUpdatedAt(), event.getEventOccurredAt(),
-                currentSubscription != null ? currentSubscription.getManuallyUpdatedAt() : 0);
+                transactionType, transactionStatus, invoiceId, invoiceStatus, event.getSubscriptionCreatedAt(),
+                event.getSubscriptionUpdatedAt(), event.getEventOccurredAt(),
+                currentSubscription != null ? currentSubscription.getManualUpdatedAt() : 0);
+    }
+
+    /**
+     * Build new subscription from invoice webhook events {@code SubscriptionWebHookEventType#INVOICE_GENERATED}
+     * {@code SubscriptionWebHookEventType#INVOICE_UPDATED}
+     * 
+     * @param currentSubscription
+     *            current user subscription
+     * @param event
+     *            webhook event
+     * @return new subscription
+     */
+    private Subscription updateSubscriptionInvoice(Subscription currentSubscription, SubscriptionWebHookEvent event) {
+        Subscription newSubscription = null;
+        if (currentSubscription != null && StringUtils.isNotEmpty(currentSubscription.getSubscriptionId())
+                && currentSubscription.getSubscriptionId().equals(event.getInvoiceSubscriptionId())
+                && StringUtils.isNotEmpty(currentSubscription.getCustomerId())
+                && currentSubscription.getCustomerId().equals(event.getInvoiceCustomerId())) {
+            Pair<String, String> invoice = getInvoiceData(null, event);
+            String invoiceId = invoice.getA();
+            String invoiceStatus = invoice.getB();
+            String paymentStatus = determinePaymentStatusFromInvoiceStatus(invoiceStatus);
+            newSubscription = new ChargebeeSubscription(currentSubscription.getSubscriptionId(),
+                    currentSubscription.getPlanId(), currentSubscription.getCustomerId(),
+                    currentSubscription.getTrialStart(), currentSubscription.getTrialEnd(),
+                    currentSubscription.getSubscriptionStatus(), paymentStatus,
+                    currentSubscription.getTransactionType(), currentSubscription.getTransactionStatus(), invoiceId,
+                    invoiceStatus, currentSubscription.getSubscriptionCreatedAt(),
+                    currentSubscription.getSubscriptionUpdatedAt(), event.getEventOccurredAt(),
+                    currentSubscription.getManualUpdatedAt());
+        }
+        return newSubscription;
+    }
+
+    /**
+     * Get subscription invoice id and invoice status. If the data do not exist in webhook event then they will get
+     * value from user current subscription if it's not null
+     * 
+     * @param currentSubscription
+     *            current user subscription
+     * @param event
+     *            webhook event
+     * @return subscription invoice id and invoice status
+     */
+    private Pair<String, String> getInvoiceData(Subscription currentSubscription, SubscriptionWebHookEvent event) {
+        String invoiceId = event.getInvoiceId();
+        if (invoiceId == null && currentSubscription != null) {
+            invoiceId = currentSubscription.getInvoiceId();
+        }
+        String invoiceStatus = event.getInvoiceStatus();
+        if (invoiceStatus == null && currentSubscription != null) {
+            invoiceStatus = currentSubscription.getInvoiceStatus();
+        }
+        return new Pair<String, String>(invoiceId, invoiceStatus);
     }
 
     private String getEventPaymentStatus(SubscriptionWebHookEvent event) {
@@ -138,19 +224,25 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
         if (transactionStatus == null) {
             String invoiceStatus = event.getInvoiceStatus();
             if (invoiceStatus != null) {
-                paymentStatus = invoiceStatus.equals(SubscriptionWebHookEvent.INVOICE_STATUS_PAID)
-                        ? Subscription.PAYMENT_STATUS_SUCCESS
-                        : Subscription.PAYMENT_STATUS_NO_SUCCESS;
+                paymentStatus = determinePaymentStatusFromInvoiceStatus(invoiceStatus);
             }
         } else {
             String transactionType = event.getTransactionType();
-            if (transactionType != null && transactionType.equals(SubscriptionWebHookEvent.TRANSACTION_TYPE_PAYMENT)) {
-                paymentStatus = transactionStatus.equals(SubscriptionWebHookEvent.TRANSACTION_STATUS_SUCCESS)
-                        ? Subscription.PAYMENT_STATUS_SUCCESS
-                        : Subscription.PAYMENT_STATUS_NO_SUCCESS;
+            if (transactionType != null && transactionType.equals(ChargebeeSubscription.TRANSACTION_TYPE_PAYMENT)) {
+                paymentStatus = determinePaymentStatusFromTransactionStatus(transactionStatus);
             }
         }
-
         return paymentStatus;
+    }
+
+    private String determinePaymentStatusFromInvoiceStatus(String invoiceStatus) {
+        return invoiceStatus.equals(SubscriptionWebHookEvent.INVOICE_STATUS_PAID) ? Subscription.PAYMENT_STATUS_SUCCESS
+                : Subscription.PAYMENT_STATUS_NO_SUCCESS;
+    }
+
+    private String determinePaymentStatusFromTransactionStatus(String transactionStatus) {
+        return transactionStatus.equals(ChargebeeSubscription.TRANSACTION_STATUS_SUCCESS)
+                ? Subscription.PAYMENT_STATUS_SUCCESS
+                : Subscription.PAYMENT_STATUS_NO_SUCCESS;
     }
 }

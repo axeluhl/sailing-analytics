@@ -13,8 +13,6 @@ public class SubscriptionWebHookEvent {
     private static final Logger logger = Logger.getLogger(SubscriptionWebHookEvent.class.getName());
     public static final String SUBSCRIPTION_STATUS_ACTIVE = "active";
     public static final String INVOICE_STATUS_PAID = "paid";
-    public static final String TRANSACTION_STATUS_SUCCESS = "success";
-    public static final String TRANSACTION_TYPE_PAYMENT = "payment";
 
     private final JSONObject eventJSON;
     private final String eventId;
@@ -95,12 +93,24 @@ public class SubscriptionWebHookEvent {
         return toLowerCase(getJsonValue(content, "transaction", "status"));
     }
 
-    public String getInvoiceStatus() {
-        return toLowerCase(getJsonValue(content, "invoice", "status"));
-    }
-
     public String getTransactionType() {
         return toLowerCase(getJsonValue(content, "transaction", "type"));
+    }
+
+    public String getInvoiceId() {
+        return getJsonValue(content, "invoice", "id");
+    }
+
+    public String getInvoiceCustomerId() {
+        return getJsonValue(content, "invoice", "customer_id");
+    }
+
+    public String getInvoiceSubscriptionId() {
+        return getJsonValue(content, "invoice", "subscription_id");
+    }
+
+    public String getInvoiceStatus() {
+        return toLowerCase(getJsonValue(content, "invoice", "status"));
     }
 
     @SuppressWarnings("unchecked")

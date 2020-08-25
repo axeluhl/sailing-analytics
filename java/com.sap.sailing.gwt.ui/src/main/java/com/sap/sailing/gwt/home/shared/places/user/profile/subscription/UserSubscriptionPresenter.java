@@ -131,9 +131,9 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
             public void onSuccess(SubscriptionDTO result) {
                 if (result != null && result.getError() != null && !result.getError().isEmpty()) {
                     showError(StringMessages.INSTANCE.errorLoadingUserSubscription(result.getError()));
-                    return;
+                } else {
+                    view.updateView(result);
                 }
-                view.updateView(result);
             }
 
             @Override

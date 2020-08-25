@@ -10,8 +10,8 @@ import com.sap.sse.security.shared.impl.User;
  * @author tutran
  */
 public abstract class Subscription implements Serializable {
-    public static String PAYMENT_STATUS_SUCCESS = "success";
-    public static String PAYMENT_STATUS_NO_SUCCESS = "no_success";
+    public static final String PAYMENT_STATUS_SUCCESS = "success";
+    public static final String PAYMENT_STATUS_NO_SUCCESS = "no_success";
 
     private static final long serialVersionUID = 96845123954667808L;
 
@@ -53,6 +53,26 @@ public abstract class Subscription implements Serializable {
     private final String paymentStatus;
 
     /**
+     * Subscription latest invoice id
+     */
+    private final String invoiceId;
+
+    /**
+     * Subscription latest invoice status
+     */
+    private final String invoiceStatus;
+
+    /**
+     * Subscription transaction type
+     */
+    private final String transactionType;
+
+    /**
+     * Subscription transaction status
+     */
+    private final String transactionStatus;
+
+    /**
      * Record the creating timestamp of the subscription
      */
     private final long subscriptionCreatedAt;
@@ -77,7 +97,8 @@ public abstract class Subscription implements Serializable {
     private final long manualUpdatedAt;
 
     public Subscription(String subscriptionId, String planId, String customerId, long trialStart, long trialEnd,
-            String subscriptionStatus, String paymentStatus, long subscriptionCreatedAt, long subscriptionUpdatedAt,
+            String subscriptionStatus, String paymentStatus, String transactionType, String transactionStatus,
+            String invoiceId, String invoiceStatus, long subscriptionCreatedAt, long subscriptionUpdatedAt,
             long latestEventTime, long manualUpdatedAt) {
         this.subscriptionId = subscriptionId;
         this.planId = planId;
@@ -86,6 +107,10 @@ public abstract class Subscription implements Serializable {
         this.trialEnd = trialEnd;
         this.subscriptionStatus = subscriptionStatus;
         this.paymentStatus = paymentStatus;
+        this.transactionType = transactionType;
+        this.transactionStatus = transactionStatus;
+        this.invoiceId = invoiceId;
+        this.invoiceStatus = invoiceStatus;
         this.subscriptionCreatedAt = subscriptionCreatedAt;
         this.subscriptionUpdatedAt = subscriptionUpdatedAt;
         this.latestEventTime = latestEventTime;
@@ -120,6 +145,22 @@ public abstract class Subscription implements Serializable {
         return paymentStatus;
     }
 
+    public String getTransactionType() {
+        return transactionType;
+    }
+
+    public String getTransactionStatus() {
+        return transactionStatus;
+    }
+
+    public String getInvoiceId() {
+        return invoiceId;
+    }
+
+    public String getInvoiceStatus() {
+        return invoiceStatus;
+    }
+
     public long getSubscriptionCreatedAt() {
         return subscriptionCreatedAt;
     }
@@ -132,7 +173,7 @@ public abstract class Subscription implements Serializable {
         return latestEventTime;
     }
 
-    public long getManuallyUpdatedAt() {
+    public long getManualUpdatedAt() {
         return manualUpdatedAt;
     }
 
@@ -155,11 +196,16 @@ public abstract class Subscription implements Serializable {
                 .append("planId: ").append(getStringFieldValue(planId)).append(seperator).append("customerId: ")
                 .append(getStringFieldValue(customerId)).append(seperator).append("subscriptionStatus: ")
                 .append(getStringFieldValue(subscriptionStatus)).append(seperator).append("paymentStatus: ")
-                .append(getStringFieldValue(paymentStatus)).append(seperator).append("trialStart: ").append(trialStart)
-                .append(seperator).append("trialEnd: ").append(trialEnd).append(seperator).append("latestEventTime: ")
-                .append(latestEventTime).append(seperator).append("manualUpdatedAt: ").append(manualUpdatedAt)
-                .append(seperator).append("subscriptionCreatedAt: ").append(subscriptionCreatedAt).append(seperator)
-                .append("subscriptionUpdatedAt: ").append(subscriptionUpdatedAt);
+                .append(getStringFieldValue(paymentStatus)).append(seperator).append("transactionType: ")
+                .append(getStringFieldValue(transactionType)).append(seperator).append("transactionStatus: ")
+                .append(getStringFieldValue(transactionStatus)).append(seperator).append("trialStart: ")
+                .append(trialStart).append(seperator).append("trialEnd: ").append(trialEnd).append(seperator)
+                .append("invoiceId: ").append(getStringFieldValue(invoiceId)).append(seperator)
+                .append("invoiceStatus: ").append(getStringFieldValue(invoiceStatus)).append(seperator)
+                .append("latestEventTime: ").append(latestEventTime).append(seperator).append("manualUpdatedAt: ")
+                .append(manualUpdatedAt).append(seperator).append("subscriptionCreatedAt: ")
+                .append(subscriptionCreatedAt).append(seperator).append("subscriptionUpdatedAt: ")
+                .append(subscriptionUpdatedAt);
 
         return builder.toString();
     }
