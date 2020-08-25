@@ -263,8 +263,13 @@ public class TimeRangeResultCache<SubResult> {
                 throw new IllegalStateException(
                         "Results have been retrieved already and the dependencies have been released");
             }
-            List<Pair<TimeRange, SubResult>> actionResults = new ArrayList<>(childrenSet.size() + 1);
-            actionResults.add(new Pair<>(getTrimmedTimeRange(), getResult())); // add this request's own result...
+            List<Pair<TimeRange, SubResult>> actionResults;
+            if (getTrimmedTimeRange() == null) { // true if this Request is completely covered by others
+                actionResults = new ArrayList<>(childrenSet.size());
+            } else {
+                actionResults = new ArrayList<>(childrenSet.size() + 1);
+                actionResults.add(new Pair<>(getTrimmedTimeRange(), getResult())); // add this request's own result...
+            }
             for (Request child : childrenSet) { // ...as well as all children's results
                 if (!child.hasResult()) {
                     throw new IllegalStateException("Child request has no result although one is expected to be there.");
