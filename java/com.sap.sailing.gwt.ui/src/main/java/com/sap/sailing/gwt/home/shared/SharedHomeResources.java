@@ -80,6 +80,7 @@ public interface SharedHomeResources extends CommonIcons {
     @MimeType("image/svg+xml")
     DataResource sharingIcon();
     
-    @Source("../../ui/client/images/copy.png")
-    ImageResource copyIcon();
+    @Source("../../ui/client/images/flat_copy.svg")
+    @MimeType("image/svg+xml")
+    DataResource copyIcon();
 }
