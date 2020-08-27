@@ -8,6 +8,7 @@ import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.adminconsole.common.ErrorDialogPO;
 import com.sap.sailing.selenium.pages.common.DataEntryDialogPO;
 import com.sap.sailing.selenium.pages.gwt.StringListEditorCompositePO;
+import com.sap.sailing.selenium.pages.gwt.StringListEditorCompositePO.ValueEntryPO;
 import com.sap.sailing.selenium.pages.gwt.TextBoxPO;
 
 public class RoleDefinitionCreationAndUpdateDialogPO extends DataEntryDialogPO {
@@ -31,6 +32,15 @@ public class RoleDefinitionCreationAndUpdateDialogPO extends DataEntryDialogPO {
     
     public void addPermission(String permission) {
         getPermissionsList().addNewValue(permission);
+    }
+    
+    public boolean isPermissionPresent(String permission) {
+        ValueEntryPO findValue = getPermissionsList().findValue(permission);
+        return findValue != null ? true : false;
+    }
+    
+    public void removePermission(String permission) {
+        getPermissionsList().removeValueByName(permission);
     }
     
     public void clickOkButtonAndExpectPermissionError() {
