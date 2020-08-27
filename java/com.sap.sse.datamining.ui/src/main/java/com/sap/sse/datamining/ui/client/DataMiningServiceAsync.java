@@ -22,6 +22,7 @@ import com.sap.sse.datamining.shared.impl.dto.ModifiableStatisticQueryDefinition
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.datamining.shared.impl.dto.ReducedDimensionsDTO;
 import com.sap.sse.datamining.shared.impl.dto.StoredDataMiningQueryDTOImpl;
+import com.sap.sse.datamining.shared.impl.dto.StoredDataMiningReportDTOImpl;
 
 public interface DataMiningServiceAsync {
 
@@ -73,13 +74,6 @@ public interface DataMiningServiceAsync {
     void localize(ModifiableStatisticQueryDefinitionDTO queryDefinition, String localeInfoName,
             AsyncCallback<ModifiableStatisticQueryDefinitionDTO> callback);
 
-    /**
-     * This method does nothing, but is needed to ensure, that some classes for the data mining (like
-     * {@link GenericGroupKey}) is added to the GWT serialization policy.<br />
-     * This is necessary, because the type is somehow hidden from GWT. For Further information look at bug 1503.<br />
-     */
-    void pseudoMethodSoThatSomeClassesAreAddedToTheGWTSerializationPolicy(AsyncCallback<SerializationDummy> callback);
-
     /** Retrieves the {@link StoredDataMiningQueryDTO}s from the back end. */
     void retrieveStoredQueries(AsyncCallback<ArrayList<StoredDataMiningQueryDTOImpl>> callback);
 
@@ -90,6 +84,19 @@ public interface DataMiningServiceAsync {
     /** Removes the {@link StoredDataMiningQueryDTO} if it exists from the back end. */
     void removeStoredQuery(StoredDataMiningQueryDTOImpl query, AsyncCallback<StoredDataMiningQueryDTOImpl> callback);
 
+    void retrieveStoredReports(AsyncCallback<ArrayList<StoredDataMiningReportDTOImpl>> callback);
+
+    void updateOrCreateStoredReport(StoredDataMiningReportDTOImpl report, AsyncCallback<StoredDataMiningReportDTOImpl> callback);
+
+    void removeStoredReport(StoredDataMiningReportDTOImpl report, AsyncCallback<StoredDataMiningReportDTOImpl> callback);
+
     /** Gets the {@link StatisticQueryDefinitionDTO} from the serialized String. */
     void getDeserializedQuery(String serializedQuery, AsyncCallback<ModifiableStatisticQueryDefinitionDTO> callback);
+
+    /**
+     * This method does nothing, but is needed to ensure, that some classes for the data mining (like
+     * {@link GenericGroupKey}) is added to the GWT serialization policy.<br />
+     * This is necessary, because the type is somehow hidden from GWT. For Further information look at bug 1503.<br />
+     */
+    void pseudoMethodSoThatSomeClassesAreAddedToTheGWTSerializationPolicy(AsyncCallback<SerializationDummy> callback);
 }

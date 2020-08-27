@@ -26,6 +26,7 @@ import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthenticat
 import com.sap.sailing.gwt.ui.client.AbstractSailingReadEntryPoint;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.datamining.presentation.TabbedSailingResultsPresenter;
+import com.sap.sailing.gwt.ui.datamining.reports.DataMiningReportStoreControls;
 import com.sap.sailing.gwt.ui.shared.settings.SailingSettingsConstants;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
@@ -120,6 +121,8 @@ public class DataMiningEntryPoint extends AbstractSailingReadEntryPoint {
                     StoredDataMiningQueryDataProvider dataProvider = new StoredDataMiningQueryDataProvider(
                             queryDefinitionProvider, dataMiningService, queryRunner);
                     queryDefinitionProvider.addControl(new StoredDataMiningQueryPanel(dataProvider));
+                    
+                    queryDefinitionProvider.addControl(new DataMiningReportStoreControls());
                 }
 
                 Anchor orientationAnchor = new Anchor(AbstractImagePrototype.create(

@@ -7,5 +7,6 @@ package com.sap.sailing.server.impl.preferences.model;
 public interface SailingPreferences {
     public static final String NOTIFICATION_PREFERENCES_PREFIX = "sailing.notifications.";
     public static final String STORED_DATAMINING_QUERY_PREFERENCES = "sailing.datamining.storedqueries";
+    public static final String STORED_DATAMINING_REPORT_PREFERENCES = "sailing.datamining.storedreports";
     public static final String TRACKED_EVENTS_PREFERENCES = "sailing.profile.trackedevents";
 }
