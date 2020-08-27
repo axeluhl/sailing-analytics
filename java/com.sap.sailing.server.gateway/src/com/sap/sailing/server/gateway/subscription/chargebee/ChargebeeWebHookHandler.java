@@ -106,6 +106,8 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
             case SUBSCRIPTION_ACTIVATED:
             case PAYMENT_SUCCEEDED:
             case PAYMENT_FAILED:
+            case SUBSCRIPTION_PAUSED:
+            case SUBSCRIPTION_RESUMED:
                 updateUserSubscription(user, buildSubscription(userSubscription, event));
                 break;
             case PAYMENT_REFUNDED:
@@ -139,8 +141,7 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
         String transactionStatus = null;
         String invoiceId = null;
         String invoiceStatus = null;
-        if (subscriptionStatus != null
-                && subscriptionStatus.equals(SubscriptionWebHookEvent.SUBSCRIPTION_STATUS_ACTIVE)) {
+        if (subscriptionStatus != null) {
             transactionType = event.getTransactionType();
             if (transactionType == null && currentSubscription != null) {
                 transactionType = currentSubscription.getTransactionType();

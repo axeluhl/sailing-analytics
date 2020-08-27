@@ -6,6 +6,7 @@ public class ChargebeeSubscription extends Subscription {
     public static final String SUBSCRIPTION_STATUS_TRIAL = "in_trial";
     public static final String SUBSCRIPTION_STATUS_ACTIVE = "active";
     public static final String SUBSCRIPTION_STATUS_CANCELLED = "cancelled";
+    public static final String SUBSCRIPTION_STATUS_PAUSED = "paused";
 
     public static final String TRANSACTION_TYPE_PAYMENT = "payment";
     public static final String TRANSACTION_TYPE_REFUND = "refund";

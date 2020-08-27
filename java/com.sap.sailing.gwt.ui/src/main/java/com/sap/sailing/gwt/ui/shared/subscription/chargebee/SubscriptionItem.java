@@ -9,6 +9,7 @@ public class SubscriptionItem implements IsSerializable {
 
     public static final String SUBSCRIPTION_STATUS_TRIAL = "in_trial";
     public static final String SUBSCRIPTION_STATUS_ACTIVE = "active";
+    public static final String SUBSCRIPTION_STATUS_PAUSED = "paused";
 
     public static final String TRANSACTION_TYPE_REFUND = "refund";
 
@@ -89,6 +90,8 @@ public class SubscriptionItem implements IsSerializable {
                 label = StringMessages.INSTANCE.inTrial();
             } else if (subscriptionStatus.equals(SUBSCRIPTION_STATUS_ACTIVE)) {
                 label = StringMessages.INSTANCE.active();
+            } else if (subscriptionStatus.equals(SUBSCRIPTION_STATUS_PAUSED)) {
+                label = StringMessages.INSTANCE.paused();
             }
         }
         return label;
