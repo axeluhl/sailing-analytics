@@ -59,6 +59,7 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity
             SendingServiceAwareActivity activity = mActivity.get();
             if (activity != null) {
                 activity.boundSendingService = false;
+                activity.sendingServiceConnection = null;
             }
         }
 
@@ -89,14 +90,10 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity
 
     private static String TAG = SendingServiceAwareActivity.class.getName();
 
-    public SendingServiceAwareActivity() {
-        sendingServiceConnection = new MessageSendingServiceConnection(this);
-    }
-
     @Override
     public void onStart() {
         super.onStart();
-
+        sendingServiceConnection = new MessageSendingServiceConnection(this);
         Intent intent = new Intent(this, MessageSendingService.class);
         ExLog.i(this, TAG, "bindSendingService");
         bindService(intent, sendingServiceConnection, Context.BIND_AUTO_CREATE);
@@ -107,8 +104,11 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity
         super.onStop();
 
         ExLog.i(this, TAG, "unbindSendingService");
-        unbindService(sendingServiceConnection);
-        boundSendingService = false;
+        if (sendingServiceConnection!=null) {
+            unbindService(sendingServiceConnection);
+            boundSendingService = false;
+            sendingServiceConnection = null;
+        }
     }
 
     protected void updateSendingServiceInformation() {
