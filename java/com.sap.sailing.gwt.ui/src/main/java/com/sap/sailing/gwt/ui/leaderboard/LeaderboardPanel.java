@@ -481,6 +481,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         timer.addTimeListener(this);
 
         totalRankColumn = new TotalRankColumn();
+        totalRankColumn.setCellStyleNames("totalRankColumn");
         leaderboardTable = new FlushableSortedCellTableWithStylableHeaders<LeaderboardRowDTO>(/* pageSize */10000,
                 style.getTableresources());
         leaderboardTable.addCellPreviewHandler(new CellPreviewEvent.Handler<LeaderboardRowDTO>() {

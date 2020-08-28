@@ -92,6 +92,7 @@ import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.AbstractSortableColumnWithMinMax;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.formfactor.DeviceDetector;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
@@ -707,7 +708,14 @@ public class EditableLeaderboardPanel extends LeaderboardPanel<EditableLeaderboa
         this.showCarryColumn = settings.getShowCarryColumn();
         this.sailingServiceWrite = sailingServiceWrite;
         this.setStyleName("editableLeaderboardPanel");
-        this.getLeaderboardTable().setStyleName("editableLeaderboardTable");
+        getContentPanel().addStyleName("editableLeaderboardContentPanel");
+        if (DeviceDetector.isDesktop()) {
+            getContentPanel().addStyleName("desktop"); 
+        } else {
+            getContentPanel().addStyleName("mobile"); 
+            getLeaderboardTable().setWidth("auto");
+        }
+        getLeaderboardTable().setStyleName("editableLeaderboardTable");
         suppressedCompetitorsShown = new ListDataProvider<>(new ArrayList<>());
         suppressedCompetitorsTable = createSuppressedCompetitorsTable();
         final ImageResource importIcon = resources.importIcon();
@@ -777,8 +785,13 @@ public class EditableLeaderboardPanel extends LeaderboardPanel<EditableLeaderboa
                 loadCompleteLeaderboard(/* showProgress */ true);
             }
         });
-        scoreCorrectionInfoGrid.getFlexCellFormatter().setColSpan(0, 5, 2);
-        scoreCorrectionInfoGrid.setWidget(0, 5, showUncorrectedTotalPointsCheckbox);
+        if (DeviceDetector.isDesktop()) {
+            scoreCorrectionInfoGrid.getFlexCellFormatter().setColSpan(0, 5, 2);
+            scoreCorrectionInfoGrid.setWidget(0, 5, showUncorrectedTotalPointsCheckbox);
+        } else {
+            scoreCorrectionInfoGrid.getFlexCellFormatter().setColSpan(3, 1, 2);
+            scoreCorrectionInfoGrid.setWidget(3, 1, showUncorrectedTotalPointsCheckbox);            
+        }
         setScoreCorrectionDefaultTimeBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -797,7 +810,6 @@ public class EditableLeaderboardPanel extends LeaderboardPanel<EditableLeaderboa
         settingsAnchor.setTitle(stringMessages.settings());
         settingsAnchor.addClickHandler(new SettingsClickHandler(stringMessages));
         getRefreshAndSettingsPanel().add(settingsAnchor);
-        scoreCorrectionInfoGrid.setWidget(1,  4, new Label("Race Selection" + ":"));
         raceListBox = new ListBox();
         raceListBox.addChangeHandler(new ChangeHandler() {
             @Override
@@ -805,7 +817,14 @@ public class EditableLeaderboardPanel extends LeaderboardPanel<EditableLeaderboa
                 handleRaceChangeEvent(raceListBox);
             }
         });
-        scoreCorrectionInfoGrid.setWidget(1, 5, raceListBox);
+        if (DeviceDetector.isDesktop()) {
+            scoreCorrectionInfoGrid.setWidget(1, 4, new Label("Race Selection" + ":"));
+            scoreCorrectionInfoGrid.setWidget(1, 5, raceListBox);
+        } else {
+            scoreCorrectionInfoGrid.getFlexCellFormatter().setColSpan(4, 1, 2);
+            scoreCorrectionInfoGrid.setWidget(4, 0, new Label("Race Selection" + ":"));
+            scoreCorrectionInfoGrid.setWidget(4, 1, raceListBox);        
+        }
         raceListSelection = Window.Location.getParameter("selectedRace");
     }
     

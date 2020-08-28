@@ -188,6 +188,19 @@ table button {
 table.editableLeaderboardTable tr th:first-child { display: none; }
 table.editableLeaderboardTable tr td:first-child { display: none; }
 
+.editableLeaderboardContentPanel.mobile {
+    display: inline-block;
+    width: auto;	
+}
+
+.editableLeaderboardContentPanel.mobile .editableLeaderboardTable {
+	width: auto;
+}
+
+.editableLeaderboardContentPanel.mobile .editableLeaderboardTable .totalRankColumn {
+	width: 60px;
+}
+
 /* edit button of editable leaderboard table
 .editableLeaderboardTable .editButton {
   padding: 0; 
