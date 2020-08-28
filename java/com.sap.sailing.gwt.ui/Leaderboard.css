@@ -169,7 +169,7 @@ table button {
 }
 
 .busyIndicator-Simple {
-	margin-top: 7px;	
+	margin-top: 7px;
 }
 
 .busyIndicator-Circle {
@@ -190,7 +190,7 @@ table.editableLeaderboardTable tr td:first-child { display: none; }
 
 .editableLeaderboardContentPanel.mobile {
     display: inline-block;
-    width: auto;	
+    width: auto;
 }
 
 .editableLeaderboardContentPanel.mobile .editableLeaderboardTable {

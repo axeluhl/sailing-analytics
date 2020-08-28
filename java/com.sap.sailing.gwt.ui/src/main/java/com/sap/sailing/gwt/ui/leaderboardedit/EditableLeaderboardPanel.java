@@ -710,9 +710,9 @@ public class EditableLeaderboardPanel extends LeaderboardPanel<EditableLeaderboa
         this.setStyleName("editableLeaderboardPanel");
         getContentPanel().addStyleName("editableLeaderboardContentPanel");
         if (DeviceDetector.isDesktop()) {
-            getContentPanel().addStyleName("desktop"); 
+            getContentPanel().addStyleName("desktop");
         } else {
-            getContentPanel().addStyleName("mobile"); 
+            getContentPanel().addStyleName("mobile");
             getLeaderboardTable().setWidth("auto");
         }
         getLeaderboardTable().setStyleName("editableLeaderboardTable");
@@ -790,7 +790,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel<EditableLeaderboa
             scoreCorrectionInfoGrid.setWidget(0, 5, showUncorrectedTotalPointsCheckbox);
         } else {
             scoreCorrectionInfoGrid.getFlexCellFormatter().setColSpan(3, 1, 2);
-            scoreCorrectionInfoGrid.setWidget(3, 1, showUncorrectedTotalPointsCheckbox);            
+            scoreCorrectionInfoGrid.setWidget(3, 1, showUncorrectedTotalPointsCheckbox);
         }
         setScoreCorrectionDefaultTimeBtn.addClickHandler(new ClickHandler() {
             @Override
@@ -823,7 +823,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel<EditableLeaderboa
         } else {
             scoreCorrectionInfoGrid.getFlexCellFormatter().setColSpan(4, 1, 2);
             scoreCorrectionInfoGrid.setWidget(4, 0, new Label("Race Selection" + ":"));
-            scoreCorrectionInfoGrid.setWidget(4, 1, raceListBox);        
+            scoreCorrectionInfoGrid.setWidget(4, 1, raceListBox);
         }
         raceListSelection = Window.Location.getParameter("selectedRace");
     }
