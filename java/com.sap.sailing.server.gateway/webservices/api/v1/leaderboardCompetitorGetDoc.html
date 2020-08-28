@@ -37,7 +37,59 @@
 	</tr>
 	<tr>
 		<td>Example:</td>
-		<td><a href="https://www.sapsailing.com/sailingserver/api/v1/leaderboards/505%20Worlds%202013/competitors/ccf89da2-ac8c-11e2-89c0-10bf48d758ce">https://www.sapsailing.com/sailingserver/api/v1/leaderboards/505%20Worlds%202013/competitors/ccf89da2-ac8c-11e2-89c0-10bf48d758ce</a></td>
+		<td><a href="https://www.sapsailing.com/sailingserver/api/v1/leaderboards/505%20Worlds%202013/competitors/ccf89da2-ac8c-11e2-89c0-10bf48d758ce">https://www.sapsailing.com/sailingserver/api/v1/leaderboards/505%20Worlds%202013/competitors/ccf89da2-ac8c-11e2-89c0-10bf48d758ce</a></br>
+		    Example result:<br>
+            <pre>
+{
+    "idtype": "java.util.UUID",
+    "id": "d455db1b-fd52-4144-a8e2-3eed503467b0",
+    "name": "Dagobert",
+    "shortName": "D",
+    "sailID": null,
+    "displayColor": "#ABCDEF",
+    "searchTag": "atag",
+    "nationality": "GER",
+    "nationalityISO2": "DE",
+    "nationalityISO3": "DEU",
+    "flagImageUri": "http:\/\/flagimage.url",
+    "team": {
+        "name": "Donald Duck",
+        "coach": null,
+        "sailors": [
+            {
+                "name": "Donald Duck",
+                "description": null,
+                "nationality": {
+                    "IOC": "GER"
+                }
+            }
+        ],
+        "imageUri": "http:\/\/teamimage.url"
+    },
+    "boat": {
+        "idtype": "java.util.UUID",
+        "id": "35712e80-578f-418d-bcbd-9a3d0e391982",
+        "name": "Donald Duck",
+        "sailId": null,
+        "color": null,
+        "boatClass": {
+            "name": "GC 32",
+            "typicallyStartsUpwind": false,
+            "hullLengthInMeters": 10.0,
+            "hullBeamInMeters": 6.0,
+            "displayName": "GC 32",
+            "iconUrl": "\/gwt\/src\/main\/resources\/com\/sap\/sailing\/gwt\/ui\/client\/images\/boatclass\/GC_32.png",
+            "aliasNames": [
+                "GC32",
+                "GC-32"
+            ]
+        }
+    },
+    "timeOnTimeFactor": 2.4,
+    "timeOnDistanceAllowanceInSecondsPerNauticalMile": 10000.0
+}
+        </pre>
+	</td>
 	</tr>
 </table>
 <div style="height: 1em;"></div>

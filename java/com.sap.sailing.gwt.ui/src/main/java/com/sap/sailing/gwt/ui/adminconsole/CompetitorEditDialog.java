@@ -102,7 +102,6 @@ public abstract class CompetitorEditDialog<CompetitorType extends CompetitorDTO>
         this.ensureDebugId("CompetitorEditDialog");
         this.stringMessages = stringMessages;
         this.competitorToEdit = competitorToEdit;
-                        
         this.name = createTextBox(competitorToEdit.getName());
         name.ensureDebugId("NameTextBox");
         this.shortName = createTextBox(competitorToEdit.getShortName());

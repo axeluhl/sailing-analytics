@@ -293,7 +293,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
         courseAreasColumn.setSortable(true);
         leaderboardColumnListHandler.setComparator(courseAreasColumn,
                 (o1, o2) -> new NaturalComparator().compare(Util.joinStrings(", ", Util.map(o1.courseAreas, CourseAreaDTO::getName)),
-                        Util.join(", ", Util.map(o2.courseAreas, CourseAreaDTO::getName))));
+                        Util.joinStrings(", ", Util.map(o2.courseAreas, CourseAreaDTO::getName))));
 
         final HasPermissions type = SecuredDomainType.LEADERBOARD;
         final AccessControlledActionsColumn<StrippedLeaderboardDTOWithSecurity, LeaderboardConfigImagesBarCell> leaderboardActionColumn = create(
@@ -313,8 +313,9 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
         leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_EDIT_COMPETITORS, UPDATE,
                 leaderboardDTO -> {
                     EditCompetitorsDialog editCompetitorsDialog = new EditCompetitorsDialog(sailingServiceWrite, userService,
-                            leaderboardDTO.getName(), stringMessages, errorReporter,
-                            new DialogCallback<List<CompetitorWithBoatDTO>>() {
+                            leaderboardDTO.getName(), leaderboardDTO.boatClassName,
+                            /* createWithBoatByDefault */ !leaderboardDTO.canBoatsOfCompetitorsChangePerRace,
+                            stringMessages, errorReporter, new DialogCallback<List<CompetitorWithBoatDTO>>() {
                                 @Override
                                 public void cancel() {
                                 }
@@ -1013,19 +1014,19 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
         leaderboardSelectionModel.setSelected(result, true);
     }
 
-    private void updateLeaderboard(final String oldLeaderboardName, final LeaderboardDescriptor leaderboardToUpdate) {
-        sailingServiceWrite.updateLeaderboard(oldLeaderboardName, leaderboardToUpdate.getName(),
-                leaderboardToUpdate.getDisplayName(), leaderboardToUpdate.getDiscardThresholds(),
-                leaderboardToUpdate.getCourseAreaIds(), new AsyncCallback<StrippedLeaderboardDTOWithSecurity>() {
+    private void updateLeaderboard(final String leaderboardName, final LeaderboardDescriptor leaderboardToUpdate) {
+        sailingServiceWrite.updateLeaderboard(leaderboardName, leaderboardToUpdate.getDisplayName(),
+                leaderboardToUpdate.getDiscardThresholds(), leaderboardToUpdate.getCourseAreaIds(),
+                new AsyncCallback<StrippedLeaderboardDTOWithSecurity>() {
                     @Override
                     public void onFailure(Throwable t) {
                         errorReporter.reportError(
-                                "Error trying to update leaderboard " + oldLeaderboardName + ": " + t.getMessage());
+                                "Error trying to update leaderboard " + leaderboardName + ": " + t.getMessage());
                     }
 
                     @Override
                     public void onSuccess(StrippedLeaderboardDTOWithSecurity updatedLeaderboard) {
-                        refreshLeaderboardInTable(oldLeaderboardName, updatedLeaderboard);
+                        refreshLeaderboardInTable(leaderboardName, updatedLeaderboard);
                     }
                 });
     }

@@ -23,9 +23,9 @@ public class TrackedRaceCreationResultDialog extends DataEntryDialog<Void> {
     private final VerticalPanel verticalPanel;
 
     public TrackedRaceCreationResultDialog(String title, String message, UUID eventId, String regattaName,
-            String raceName, String leaderboardName, String leaderboardGroupName) {
+            String raceName, String leaderboardName, String leaderboardGroupName, UUID leaderboardGroupId) {
         this(title, message, eventId, regattaName, createSingleRaceList(raceName), leaderboardName,
-                leaderboardGroupName);
+                leaderboardGroupName, leaderboardGroupId);
     }
 
     private static List<Pair<String, String>> createSingleRaceList(String raceName) {
@@ -35,7 +35,8 @@ public class TrackedRaceCreationResultDialog extends DataEntryDialog<Void> {
     }
 
     public TrackedRaceCreationResultDialog(String title, String message, UUID eventId, String regattaName,
-            List<Pair<String, String>> raceNameRaceColumnName, String leaderboardName, String leaderboardGroupName) {
+            List<Pair<String, String>> raceNameRaceColumnName, String leaderboardName, String leaderboardGroupName,
+            UUID leaderboardGroupId) {
         super(title, message, StringMessages.INSTANCE.ok(), StringMessages.INSTANCE.cancel(), /* validator */ null,
                 new DialogCallback<Void>() {
                     @Override
@@ -55,7 +56,7 @@ public class TrackedRaceCreationResultDialog extends DataEntryDialog<Void> {
                     : StringMessages.INSTANCE.importFinishedGotoRaceboard();
             Anchor raceboardAnchor = new Anchor(anchorLabel,
                     EntryPointWithSettingsLinkFactory.createRaceBoardLinkWithDefaultSettings(eventId, leaderboardName,
-                            leaderboardGroupName, regattaName, raceName.getA()));
+                            leaderboardGroupName, leaderboardGroupId, regattaName, raceName.getA()));
             raceboardAnchor.setTarget("_blank");
             verticalPanel.add(raceboardAnchor);
         }

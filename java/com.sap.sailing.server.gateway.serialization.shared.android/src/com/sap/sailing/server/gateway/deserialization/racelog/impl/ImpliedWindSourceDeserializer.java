@@ -24,9 +24,12 @@ public class ImpliedWindSourceDeserializer implements JsonDeserializer<ImpliedWi
     
     @Override
     public ImpliedWindSource deserialize(JSONObject object) throws JsonDeserializationException {
-        final String type = object.get(ImpliedWindSourceSerializer.ORC_IMPLIED_WIND_SOURCE_TYPE).toString();
+        final Object typeObject = object.get(ImpliedWindSourceSerializer.ORC_IMPLIED_WIND_SOURCE_TYPE);
+        final String type = typeObject == null ? null : typeObject.toString();
         final ImpliedWindSource impliedWindSource;
-        if (type.equals(FixedSpeedImpliedWind.class.getSimpleName())) {
+        if (type == null) {
+            impliedWindSource = null;
+        } else if (type.equals(FixedSpeedImpliedWind.class.getSimpleName())) {
             final Number impliedWindSpeedInKnotsAsNumber = (Number) object.get(ImpliedWindSourceSerializer.ORC_FIXED_IMPLIED_WIND_SPEED_IN_KNOTS);
             final Speed impliedWindSpeed = impliedWindSpeedInKnotsAsNumber == null ? null : new KnotSpeedImpl(impliedWindSpeedInKnotsAsNumber.doubleValue());
             impliedWindSource = new FixedSpeedImpliedWindSourceImpl(impliedWindSpeed);

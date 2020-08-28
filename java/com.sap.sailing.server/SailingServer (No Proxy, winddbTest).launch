@@ -6,6 +6,7 @@
 <stringAttribute key="bootstrap" value=""/>
 <stringAttribute key="checked" value="[NONE]"/>
 <booleanAttribute key="clearConfig" value="false"/>
+<booleanAttribute key="com.sap.jvm.profiling.ui.widgets.allowDebugging" value="false"/>
 <stringAttribute key="configLocation" value="${workspace_loc}/target"/>
 <booleanAttribute key="default" value="true"/>
 <booleanAttribute key="default_auto_start" value="true"/>
@@ -23,16 +24,18 @@
 <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-ea -Declipse.ignoreApp=true -Dosgi.noShutdown=true -Dexpedition.udp.port=2010 -Xmx4096m -Dmongo.dbName=winddbTest -Djetty.home=${project_loc:com.sap.sailing.server}/../target/configuration/jetty -Djava.util.logging.config.file=${project_loc:com.sap.sailing.server}/../target/configuration/logging_debug.properties -Dkiwo.results=${project_loc:com.sap.sailing.kiworesultimport.test}/resources -Dpersistentcompetitors.clear=false -XX:+UseMembar"/>
 <stringAttribute key="org.eclipse.jdt.launching.WORKING_DIRECTORY" value="${workspace_loc}"/>
 <stringAttribute key="pde.version" value="3.3"/>
-<stringAttribute key="profilingTraceType-ALLOCATION_TRACE" value="KEY_SESSION_FILTER%CTX_KEY%*%CTX_ENTRY%INCREASE_COUNT%CTX_KEY%8192%CTX_ENTRY%KEY_USER_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_ADAPTIVE%CTX_KEY%false%CTX_ENTRY%KEY_MIN_SIZE%CTX_KEY%32%CTX_ENTRY%KEY_REQUEST_FILTER%CTX_KEY%*%CTX_ENTRY%CLASS_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_MAX_SIZE%CTX_KEY%65536%CTX_ENTRY%KEY_INC_LINE_NRS%CTX_KEY%true%CTX_ENTRY%KEY_APPLICATION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_ENABLEMENT%CTX_KEY%false%CTX_ENTRY%"/>
-<stringAttribute key="profilingTraceType-IO_TRACE" value="KEY_SESSION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_USER_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_REQUEST_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_APPLICATION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_ENABLEMENT%CTX_KEY%false%CTX_ENTRY%"/>
-<stringAttribute key="profilingTraceType-METHOD_PARAMETER_TRACE" value="KEY_SESSION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_USER_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_REQUEST_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_APPLICATION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_ENABLEMENT%CTX_KEY%false%CTX_ENTRY%"/>
-<stringAttribute key="profilingTraceType-NETWORK_TRACE" value="KEY_SESSION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_USER_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_REQUEST_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_RESOLVE_ALL_HOSTS%CTX_KEY%true%CTX_ENTRY%KEY_APPLICATION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_ENABLEMENT%CTX_KEY%false%CTX_ENTRY%"/>
-<stringAttribute key="profilingTraceType-PERFORMANCE_HOTSPOT_TRACE" value="KEY_SESSION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_USER_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_REQUEST_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_IGNORE_SLEEPING_THREADS%CTX_KEY%true%CTX_ENTRY%KEY_APPLICATION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_ENABLEMENT%CTX_KEY%false%CTX_ENTRY%"/>
-<stringAttribute key="profilingTraceType-SYNCHRONIZATION_TRACE" value="KEY_SESSION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_USER_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_REQUEST_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_APPLICATION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_ENABLEMENT%CTX_KEY%false%CTX_ENTRY%"/>
+<stringAttribute key="profilingTraceType-ALLOCATION_TRACE" value="KEY_APPLICATION_FILTER%CTX_KEY%*%CTX_ENTRY%INCREASE_COUNT%CTX_KEY%8192%CTX_ENTRY%KEY_MIN_SIZE%CTX_KEY%32%CTX_ENTRY%KEY_MAX_SIZE%CTX_KEY%65536%CTX_ENTRY%KEY_INC_LINE_NRS%CTX_KEY%true%CTX_ENTRY%KEY_SESSION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_ENABLEMENT%CTX_KEY%false%CTX_ENTRY%CLASS_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_USER_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_REQUEST_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_TENANT_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_ADAPTIVE%CTX_KEY%false%CTX_ENTRY%"/>
+<stringAttribute key="profilingTraceType-IO_TRACE" value="KEY_APPLICATION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_SESSION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_ENABLEMENT%CTX_KEY%false%CTX_ENTRY%KEY_USER_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_REQUEST_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_TENANT_FILTER%CTX_KEY%*%CTX_ENTRY%"/>
+<stringAttribute key="profilingTraceType-METHOD_PARAMETER_TRACE" value="KEY_APPLICATION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_SESSION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_ENABLEMENT%CTX_KEY%false%CTX_ENTRY%KEY_USER_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_REQUEST_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_TENANT_FILTER%CTX_KEY%*%CTX_ENTRY%"/>
+<stringAttribute key="profilingTraceType-NETWORK_TRACE" value="KEY_APPLICATION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_SESSION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_ENABLEMENT%CTX_KEY%false%CTX_ENTRY%KEY_USER_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_REQUEST_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_RESOLVE_ALL_HOSTS%CTX_KEY%true%CTX_ENTRY%KEY_TENANT_FILTER%CTX_KEY%*%CTX_ENTRY%"/>
+<stringAttribute key="profilingTraceType-PERFORMANCE_HOTSPOT_TRACE" value="KEY_IGNORE_SLEEPING_THREADS%CTX_KEY%true%CTX_ENTRY%KEY_APPLICATION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_SESSION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_ENABLEMENT%CTX_KEY%false%CTX_ENTRY%KEY_USER_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_REQUEST_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_TENANT_FILTER%CTX_KEY%*%CTX_ENTRY%"/>
+<stringAttribute key="profilingTraceType-SYNCHRONIZATION_TRACE" value="KEY_APPLICATION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_SESSION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_ENABLEMENT%CTX_KEY%false%CTX_ENTRY%KEY_USER_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_REQUEST_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_TENANT_FILTER%CTX_KEY%*%CTX_ENTRY%"/>
 <setAttribute key="selected_target_bundles">
+<setEntry value="com.amazon.aws.aws-java-api@default:default"/>
 <setEntry value="com.fasterxml.jackson.core.jackson-annotations@default:default"/>
 <setEntry value="com.fasterxml.jackson.core.jackson-core@default:default"/>
 <setEntry value="com.fasterxml.jackson.core.jackson-databind@default:default"/>
+<setEntry value="com.jcraft.jsch@default:default"/>
 <setEntry value="com.rabbitmq.client@default:default"/>
 <setEntry value="com.sun.activation.javax.activation@default:default"/>
 <setEntry value="com.sun.istack.commons-runtime@default:default"/>
@@ -70,7 +73,6 @@
 <setEntry value="org.apache.poi.ooxml.schemas@default:default"/>
 <setEntry value="org.apache.poi.ooxml@default:default"/>
 <setEntry value="org.apache.poi@default:default"/>
-<setEntry value="org.apache.servicemix.bundles.aws-java-sdk@default:default"/>
 <setEntry value="org.apache.servicemix.bundles.ehcache@default:default"/>
 <setEntry value="org.apache.servicemix.bundles.scribe@default:default"/>
 <setEntry value="org.apache.servicemix.bundles.zxing@default:default"/>
@@ -189,6 +191,9 @@
 <setEntry value="com.sap.sse.gwt@default:default"/>
 <setEntry value="com.sap.sse.jersey.jaxbdependencyfragment@default:false"/>
 <setEntry value="com.sap.sse.jettyextensions@default:false"/>
+<setEntry value="com.sap.sse.landscape.aws.persistence@default:default"/>
+<setEntry value="com.sap.sse.landscape.aws@default:default"/>
+<setEntry value="com.sap.sse.landscape@default:default"/>
 <setEntry value="com.sap.sse.mail@5:true"/>
 <setEntry value="com.sap.sse.mongodb@default:default"/>
 <setEntry value="com.sap.sse.operationaltransformation@default:default"/>

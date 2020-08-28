@@ -2,6 +2,7 @@ package com.sap.sailing.server.gateway.jaxrs.api;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -25,6 +26,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -289,19 +291,20 @@ public class EventsResource extends AbstractSailingServerResource {
     
     @GET
     @Produces("application/json;charset=UTF-8")
-    public Response getEvents(@QueryParam("showNonPublic") String showNonPublic) {
+    public Response getEvents(@QueryParam("showNonPublic") String showNonPublic, @QueryParam("include") @DefaultValue("false") Boolean include,
+            @QueryParam("id") List<UUID> eventIds) {
         JsonSerializer<EventBase> eventSerializer = new EventBaseJsonSerializer(
                 new VenueJsonSerializer(new CourseAreaJsonSerializer()), new LeaderboardGroupBaseJsonSerializer(),
                 new TrackingConnectorInfoJsonSerializer());
         JSONArray result = new JSONArray();
-        for (Event event : getService().getAllEvents()) {
+        Iterable<Event> events = getService().getEventsSelectively(include, eventIds);
+        for (Event event : events) {
             if (getSecurityService().hasCurrentUserReadPermission(event)
                     && ((showNonPublic != null && Boolean.valueOf(showNonPublic)) || event.isPublic())) {
                 result.add(eventSerializer.serialize(event));
             }
         }
-        String json = result.toJSONString();
-        return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+        return Response.ok(streamingOutput(result)).build();
     }
 
     @GET
@@ -481,7 +484,14 @@ public class EventsResource extends AbstractSailingServerResource {
         final TimePoint startDate = parseTimePoint(startDateParam, startDateAsMillis, now());
         final TimePoint endDate = parseTimePoint(endDateParam, endDateAsMillis, new MillisecondsTimePoint(addOneWeek(startDate.asDate())));
         URL officialWebsiteURL = officialWebsiteURLParam == null ? null :  toURL(officialWebsiteURLParam);
-        URL baseURL = baseURLParam == null ? uriInfo.getBaseUri().toURL() : toURL(baseURLParam);
+        final URI baseUri = uriInfo.getBaseUri();
+        final int port = baseUri.getPort();
+        // guess the protocol; when behind an SSL-offloading reverse proxy or load balancer, all we'll see is a regular HTTP
+        // request; yet, we'd likely want the client to make requests using HTTPS, unless we see a dedicated port in the request
+        // that is not the HTTPS default port 443:
+        final String scheme = (port >= 0 && port != 443) ? "http" : "https";
+        URL baseURL = baseURLParam == null ? new URL(scheme+":"+baseUri.getSchemeSpecificPart().
+                substring(0, baseUri.getSchemeSpecificPart().length()-baseUri.getPath().length())) : toURL(baseURLParam);
         List<UUID> leaderboardGroupIds = leaderboardGroupIdsListParam == null ? new ArrayList<UUID>() : toUUIDList(leaderboardGroupIdsListParam);
         UUID eventId = UUID.randomUUID();
         // ignoring sailorsInfoWebsiteURLs, images, videos
@@ -527,7 +537,7 @@ public class EventsResource extends AbstractSailingServerResource {
                             /* leaderboardDiscardThresholdsParam */ leaderboardDiscardThresholdsParam, numberOfRacesParam, canBoatsOfCompetitorsChangePerRace,
                             competitorRegistrationType, localCompetitorRegistrationSecret);
                     if (leaderboardGroup != null) {
-                        getService().apply(new UpdateLeaderboardGroup(leaderboardGroup.getName(), leaderboardGroup.getName(),
+                        getService().apply(new UpdateLeaderboardGroup(leaderboardGroup.getId(), leaderboardGroup.getName(),
                                 leaderboardGroup.getDescription(), leaderboardGroup.getDisplayName(),
                                 Collections.singletonList(leaderboard.getName()),
                                 leaderboardGroup.getOverallLeaderboard() == null ? null
@@ -591,7 +601,9 @@ public class EventsResource extends AbstractSailingServerResource {
     private String getDefaultEventName() {
         final String username;
         username = getCurrentUser().getName();
-        return "Session "+username+" "+dateTimeFormat.format(new Date());
+        synchronized (dateTimeFormat) {
+            return "Session "+username+" "+dateTimeFormat.format(new Date());
+        }
     }
 
     private User getCurrentUser() {
@@ -677,7 +689,7 @@ public class EventsResource extends AbstractSailingServerResource {
                 overallLeaderboardDiscardThresholds = resultDiscardingRule.getDiscardIndexResultsStartingWithHowManyRaces();
             }
             
-            getService().updateLeaderboardGroup(defaultLeaderboardGroup.getName(), defaultLeaderboardGroup.getName(), defaultLeaderboardGroup.getDescription(),
+            getService().updateLeaderboardGroup(defaultLeaderboardGroup.getId(), defaultLeaderboardGroup.getName(), defaultLeaderboardGroup.getDescription(),
                     defaultLeaderboardGroup.getDisplayName(), leaderboards, overallLeaderboardDiscardThresholds, 
                     defaultLeaderboardGroup.getOverallLeaderboard()==null?null:defaultLeaderboardGroup.getOverallLeaderboard().getScoringScheme().getType());
         }

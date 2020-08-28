@@ -32,7 +32,7 @@
         <com.sap.sailing.racecommittee.app.ui.views.IntegerEditTextPreference
             android:defaultValue="@integer/preference_polling_interval_default"
             android:key="@string/preference_polling_interval_key"
-            android:numeric="integer"
+            android:dialogLayout="@layout/integer_preference_dialog"
             android:title="@string/settings_polling_interval_header" />
     </PreferenceCategory>
 

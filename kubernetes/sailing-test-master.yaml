@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sailing-test-master
+  labels:
+    app: test
+    role: sailing-deployment
+    environment: sailing
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test
+      role: sailing-master
+      environment: sailing
+  template:
+    metadata:
+      labels:
+        app: test
+        role: sailing-master
+        environment: sailing
+    spec:
+      containers:
+      - name: sailing
+        image: donaldduck70/sapsailing:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8888
+          name: http-port
+        - containerPort: 14888
+          name: telnet-port
+        resources:
+          requests:
+            memory: "6Gi"
+            cpu: "500m"
+          limits:
+            memory: "12Gi"
+            cpu: "2"
+        env:
+        - name: MONGODB_URI
+          value: mongodb://mongo-live-rs-client/test-master?replicaSet=rs0
+        - name: REPLICATION_CHANNEL
+          value: sailing-test-master
+        - name: REPLICATION_HOST
+          value: rabbitmq
+        - name: REPLICATE_MASTER_QUEUE_HOST
+          value: rabbitmq
+        - name: REPLICATE_MASTER_QUEUE_PORT
+          value: '5672'
+        - name: SERVER_NAME
+          value: sailing-test-master
+        livenessProbe:
+          httpGet:
+            path: /
+            port: http-port
+          initialDelaySeconds: 10
+          periodSeconds: 30
+        readinessProbe:
+          exec:
+            command:
+            - ./status
+          initialDelaySeconds: 10
+          periodSeconds: 30
+      imagePullSecrets:
+      - name: dockerhubsecret

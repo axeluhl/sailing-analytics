@@ -294,6 +294,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String detailsOfLeaderboardGroup();
     String abort();
     String noLeaderboardGroupWithNameFound(String groupName);
+    String noLeaderboardGroupWithIdFound(String groupId);
     String overview();
     String welcomeToSailingAnalytics();
     String welcomeToSailingAnalyticsBody();
@@ -421,6 +422,10 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String errorAddingResultImportUrl(String message);
     String eventIdOrUrl();
     String remoteServerInstances();
+    String remoteServerEventsSelection();
+    String eventsListIsEmpty();
+    String include();
+    String exclude();
     String localServer();
     String errorRefreshingSailingServers(String message);
     String successfullyUpdatedSailingServers();
@@ -496,6 +501,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String publicationUrl();
     String suppress();
     String isListedOnHomepage();
+    String raceSelection();
     String unsuppress();
     String suppressedCompetitors();
     String pleaseSelectASeries();
@@ -976,6 +982,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String editCompetitor();
     String pleaseEnterASailNumber();
     String pleaseEnterASailNumberOrABoatName();
+    String addCompetitor();
+    String editCompetitorWithBoat();
+    String withBoat();
     String successfullyAllowedCompetitorReset(String names);
     String successfullyAllowedBoatReset(String names);
     String allowReload();
@@ -985,7 +994,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String rerunQueryAfterRefresh();
     String refreshIntervalMustntBeEmpty();
     String selectionTables();
-
     String addConfiguration();
     String noConfigurations();
     String errorRetrievingConfiguration();
@@ -1158,7 +1166,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String videos();
     String image();
     String images();
+    String imagesWithCount(int number);
     String video();
+    String videosWithCount(int number);
     String flagImageURL();
     String imageURLs();
     String videoURLs();
@@ -2381,4 +2391,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String whitelabelFooterLanguage();
     String whitelabelSailing();
     String unableToLoadCourseAreas(String message);
+    String insufficientPermissions();
+    String manageEvents();
 }

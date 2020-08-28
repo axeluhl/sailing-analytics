@@ -399,7 +399,7 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
                 raceLog.getCurrentPassId(), course, CourseDesignerMode.BY_MARKS));
         final CourseConfiguration<MarkConfigurationResponseAnnotation> courseConfigurationResult = getService().getCourseAndMarkConfigurationFactory()
                 .createCourseConfigurationFromRegatta(course, regatta, raceColumnByName.getTrackedRace(fleetByName),
-                        /* tagsToFilterMarkProperties */ null);
+                        /* tagsToFilterMarkProperties */ Collections.emptyList());
         return Response.ok(streamingOutput(getCourseConfigurationJsonSerializer().serialize(courseConfigurationResult))).build();
     }
 
