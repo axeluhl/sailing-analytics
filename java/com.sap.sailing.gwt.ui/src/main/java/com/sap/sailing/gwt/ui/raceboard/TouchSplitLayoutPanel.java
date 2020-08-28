@@ -42,6 +42,7 @@ import com.google.gwt.user.client.ui.ProvidesResize;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.WidgetCollection;
+import com.sap.sailing.gwt.ui.client.shared.charts.HasAvailabilityCheck;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.shared.components.Component;
@@ -687,6 +688,23 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
                 @Override
                 public void onClick(ClickEvent event) {
                     boolean componentWasVisibleUntilNow = associatedComponent.isVisible();
+                    if (associatedComponent instanceof HasAvailabilityCheck) {
+                        ((HasAvailabilityCheck)associatedComponent).checkBackendAvailability(available->{
+                            if (available) {
+                            proceed(componentViewer, splitter, associatedComponent, splitterTogglerButton,
+                                    componentWasVisibleUntilNow);
+                            }
+                        });
+                    } else {
+                        proceed(componentViewer, splitter, associatedComponent, splitterTogglerButton,
+                                componentWasVisibleUntilNow);
+                    }
+                    
+                }
+
+                private void proceed(final SideBySideComponentViewer componentViewer, final Splitter splitter,
+                        final Component<?> associatedComponent, final Button splitterTogglerButton,
+                        boolean componentWasVisibleUntilNow) {
                     associatedComponent.setVisible(!componentWasVisibleUntilNow);
                     // TODO: Safe to remove style management here? Will also be handled by "componentViewer.forceLayout();" => duplicated style management
                     splitter.setVisible(!componentWasVisibleUntilNow);
