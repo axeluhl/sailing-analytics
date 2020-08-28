@@ -27,7 +27,7 @@ public class StringListEditorCompositePO extends PageArea {
         
         public String getValueEntryName(){
             TextBoxPO textBoxPO = new TextBoxPO(this.driver, valueTextBox);
-            String text = textBoxPO.getWebElement().getAttribute("value");
+            String text = textBoxPO.getValue();
             return text;
         }
     }
