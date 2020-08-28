@@ -49,6 +49,7 @@
 }
 .sectionheader_item_title_label {
 	display: flex;
+	align-items: center;
 }
 .sectionheader_item_title_label div {
 	width: 100%
