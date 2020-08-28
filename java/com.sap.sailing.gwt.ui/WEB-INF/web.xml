@@ -161,6 +161,15 @@
 		<servlet-name>DataMiningService</servlet-name>
 		<url-pattern>/service/datamining</url-pattern>
 	</servlet-mapping>
+    <servlet>
+        <display-name>Data Mining Write Service</display-name>
+        <servlet-name>DataMiningWriteService</servlet-name>
+        <servlet-class>com.sap.sailing.gwt.ui.server.DataMiningWriteServiceImpl</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>DataMiningWriteService</servlet-name>
+        <url-pattern>/service/dataminingmaster</url-pattern>
+    </servlet-mapping>
 	<servlet>
 		<display-name>User Management Service</display-name>
 		<servlet-name>UserManagementService</servlet-name>

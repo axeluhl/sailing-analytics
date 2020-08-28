@@ -5,16 +5,20 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.dto.StoredDataMiningQueryDTO;
 import com.sap.sse.datamining.shared.impl.dto.StoredDataMiningQueryDTOImpl;
 import com.sap.sse.datamining.ui.client.DataMiningServiceAsync;
+import com.sap.sse.datamining.ui.client.DataMiningWriteServiceAsync;
 import com.sap.sse.datamining.ui.client.QueryRunner;
 import com.sap.sse.datamining.ui.client.selection.QueryDefinitionProviderWithControls;
+import com.sap.sse.gwt.client.DefaultErrorReporter;
 
 /**
  * Data provider and presenter for {@link StoredDataMiningQueryPanel}. holds the {@link #queryDefinitions} and handles
@@ -25,15 +29,19 @@ public class StoredDataMiningQueryDataProvider {
 
     private final QueryDefinitionProviderWithControls queryDefinitionProvider;
     private final DataMiningServiceAsync dataMiningService;
+    private final DataMiningWriteServiceAsync dataMiningWriteService;
     private final QueryRunner queryRunner;
+    private final StringMessages stringMessages;
 
     private StoredDataMiningQueryPanel uiPanel;
 
     public StoredDataMiningQueryDataProvider(QueryDefinitionProviderWithControls queryDefinitionProvider,
-            DataMiningServiceAsync dataMiningService, QueryRunner queryRunner) {
+            DataMiningServiceAsync dataMiningService, DataMiningWriteServiceAsync dataMiningWriteService, QueryRunner queryRunner, StringMessages stringMessages) {
         this.queryDefinitionProvider = queryDefinitionProvider;
         this.dataMiningService = dataMiningService;
         this.queryRunner = queryRunner;
+        this.dataMiningWriteService = dataMiningWriteService;
+        this.stringMessages = stringMessages;
     }
 
     /** @return the query currently selected in the query definition provider. */
@@ -45,10 +53,10 @@ public class StoredDataMiningQueryDataProvider {
      * Creates a new stored query with the {@link name} or updates the stored query if it already exists with the new
      * {@link #query}.
      * 
-     * @return true, if stored query was present and this is an update<br/>
+     * @param callback called when operation has completed. Provides true, if stored query was present and this is an update<br/>
      *         false, if a new stored query was created
      */
-    public boolean addOrUpdateQuery(String name, StatisticQueryDefinitionDTO query) {
+    public void addOrUpdateQuery(String name, StatisticQueryDefinitionDTO query, Consumer<Boolean> callback) {
         Optional<StoredDataMiningQueryDTO> findByName = findByName(name);
 
         StoredDataMiningQueryDTO storedQuery;
@@ -65,49 +73,55 @@ public class StoredDataMiningQueryDataProvider {
             update = false;
         }
 
-        dataMiningService.updateOrCreateStoredQuery((StoredDataMiningQueryDTOImpl) storedQuery,
+        dataMiningWriteService.updateOrCreateStoredQuery((StoredDataMiningQueryDTOImpl) storedQuery,
                 new AsyncCallback<StoredDataMiningQueryDTOImpl>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                GWT.log(caught.getMessage(), caught);
-            }
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT.log(caught.getMessage(), caught);
+                        DefaultErrorReporter<StringMessages> errorReporter = new DefaultErrorReporter<>(stringMessages,
+                                false);
+                        errorReporter.reportError(stringMessages.error(), stringMessages.temporarilyUnavailable());
+                    }
 
-            @Override
-            public void onSuccess(StoredDataMiningQueryDTOImpl result) {
-                queryDefinitions.remove(result);
-                queryDefinitions.add(result);
-                updateUi();
-            }
-        });
-        return update;
+                    @Override
+                    public void onSuccess(StoredDataMiningQueryDTOImpl result) {
+                        queryDefinitions.remove(result);
+                        queryDefinitions.add(result);
+                        updateUi();
+                        callback.accept(update);
+                    }
+                });
     }
 
     /**
      * Removes a query by {@link #name}.
-     * 
-     * @return true, if a stored query with the {@link #name} existed<br/>
+     * @param callback executed when operation has completed. Provides true, if a stored query with the {@link #name} existed<br/>
      *         false, if no query with the corresponding name could be found
      */
-    public boolean removeQuery(String name) {
+    public void removeQuery(String name, Consumer<Boolean> callback) {
         Optional<StoredDataMiningQueryDTO> query = findByName(name);
         if (query.isPresent()) {
-            dataMiningService.removeStoredQuery((StoredDataMiningQueryDTOImpl) query.get(),
+            dataMiningWriteService.removeStoredQuery((StoredDataMiningQueryDTOImpl) query.get(),
                     new AsyncCallback<StoredDataMiningQueryDTOImpl>() {
 
                 @Override
                 public void onFailure(Throwable caught) {
                     GWT.log(caught.getMessage(), caught);
+                    DefaultErrorReporter<StringMessages> errorReporter = new DefaultErrorReporter<>(stringMessages,
+                            false);
+                    errorReporter.reportError(stringMessages.error(), stringMessages.temporarilyUnavailable());
                 }
 
                 @Override
                         public void onSuccess(StoredDataMiningQueryDTOImpl result) {
                     queryDefinitions.remove(result);
                     updateUi();
+                    callback.accept(true);
                 }
             });
-            return true;
+        } else {
+            callback.accept(false);
         }
-        return false;
     }
 
     /**

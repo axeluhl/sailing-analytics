@@ -83,13 +83,6 @@ public interface DataMiningServiceAsync {
     /** Retrieves the {@link StoredDataMiningQueryDTO}s from the back end. */
     void retrieveStoredQueries(AsyncCallback<ArrayList<StoredDataMiningQueryDTOImpl>> callback);
 
-    /** Updates or creates a {@link StoredDataMiningQueryDTO} in the back end. */
-    void updateOrCreateStoredQuery(StoredDataMiningQueryDTOImpl query,
-            AsyncCallback<StoredDataMiningQueryDTOImpl> callback);
-
-    /** Removes the {@link StoredDataMiningQueryDTO} if it exists from the back end. */
-    void removeStoredQuery(StoredDataMiningQueryDTOImpl query, AsyncCallback<StoredDataMiningQueryDTOImpl> callback);
-
     /** Gets the {@link StatisticQueryDefinitionDTO} from the serialized String. */
     void getDeserializedQuery(String serializedQuery, AsyncCallback<ModifiableStatisticQueryDefinitionDTO> callback);
 }
