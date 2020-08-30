@@ -8,9 +8,12 @@ import com.sap.sse.datamining.shared.dto.StoredDataMiningReportDTO;
 public class StoredDataMiningReportDTOImpl implements StoredDataMiningReportDTO {
     private static final long serialVersionUID = 9218620680326470175L;
     
-    private final UUID id;
+    private UUID id;
     private String name;
     private DataMiningReportDTO report;
+
+    @SuppressWarnings("unused")
+    private StoredDataMiningReportDTOImpl() { }
 
     public StoredDataMiningReportDTOImpl(UUID id, String name, DataMiningReportDTO report) {
         this.id = id;

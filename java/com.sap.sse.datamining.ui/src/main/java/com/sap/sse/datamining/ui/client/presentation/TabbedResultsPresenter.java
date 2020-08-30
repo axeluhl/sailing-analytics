@@ -1,5 +1,6 @@
 package com.sap.sse.datamining.ui.client.presentation;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,6 +16,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
@@ -130,6 +132,35 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
         }
         presenterTab.getPresenter().showResult(queryDefinition, result);
     }
+    
+    @Override
+    public void showResults(Iterable<Pair<StatisticQueryDefinitionDTO, QueryResultDTO<?>>> results) {
+        // FIXME Somehow a single tab remains
+        new ArrayList<>(tabsMappedById.keySet()).stream().map(tabsMappedById::get).forEach(this::removeTab);
+        
+        for (Pair<StatisticQueryDefinitionDTO, QueryResultDTO<?>> entry: results) {
+            StatisticQueryDefinitionDTO queryDefinition = entry.getA();
+            QueryResultDTO<?> result = entry.getB();
+            
+            ResultsPresenterFactory<?> factory = registeredPresenterFactories.getOrDefault(result.getResultType(), defaultFactory);
+            CloseablePresenterTab presenterTab = addTabAndFocus(factory.createPresenter());
+            
+            presenterTab.setText(result.getResultSignifier());
+            presenterTab.getPresenter().showResult(queryDefinition, result);
+        }
+        
+        // Needed to remove the remaining empty tab
+        for (CloseablePresenterTab tab : tabsMappedById.values()) {
+            if (tabPanel.getWidgetIndex(tab.getPresenter().getEntryWidget()) == 0) {
+                removeTab(tab);
+                break;
+            }
+        }
+    }
+    
+    native void consoleLog( String message) /*-{
+        console.log( "me:" + message );
+    }-*/;
 
     @Override
     public void showError(String presenterId, String error) {

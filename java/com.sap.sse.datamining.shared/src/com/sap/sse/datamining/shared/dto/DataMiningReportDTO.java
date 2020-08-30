@@ -1,10 +1,11 @@
 package com.sap.sse.datamining.shared.dto;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 public interface DataMiningReportDTO extends Serializable {
     
-    Iterable<StatisticQueryDefinitionDTO> getQueryDefinitions();
+    ArrayList<StatisticQueryDefinitionDTO> getQueryDefinitions();
     
     // TODO Add parameters
 

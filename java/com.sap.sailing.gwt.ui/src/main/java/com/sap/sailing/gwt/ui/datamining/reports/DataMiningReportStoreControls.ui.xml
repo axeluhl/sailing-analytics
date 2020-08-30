@@ -17,8 +17,8 @@
         <div class="{style.seperator}" />
         <div class="{style.inline}"><ui:text from='{i18n.loadOrSaveReports}' /></div>
         <g:SuggestBox ui:field="suggestBoxUi" />
-        <g:Button ui:field="saveQueryButtonUi" />
-        <g:Button ui:field="loadQueryButtonUi" />
-        <g:Button ui:field="removeQueryButtonUi" />
+        <g:Button ui:field="saveReportButtonUi" />
+        <g:Button ui:field="loadReportButtonUi" />
+        <g:Button ui:field="removeReportButtonUi" />
     </g:HTMLPanel>
 </ui:UiBinder> 

@@ -27,6 +27,7 @@ import com.sap.sailing.gwt.ui.client.AbstractSailingReadEntryPoint;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.datamining.presentation.TabbedSailingResultsPresenter;
 import com.sap.sailing.gwt.ui.datamining.reports.DataMiningReportStoreControls;
+import com.sap.sailing.gwt.ui.datamining.reports.StoredDataMiningReportsProvider;
 import com.sap.sailing.gwt.ui.shared.settings.SailingSettingsConstants;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
@@ -118,11 +119,12 @@ public class DataMiningEntryPoint extends AbstractSailingReadEntryPoint {
                         queryDefinitionProvider, resultsPresenter);
                 queryDefinitionProvider.addControl(queryRunner.getEntryWidget());
                 if (getUserService().hasServerPermission(ServerActions.DATA_MINING)) {
-                    StoredDataMiningQueryDataProvider dataProvider = new StoredDataMiningQueryDataProvider(
+                    StoredDataMiningQueryDataProvider queryProvider = new StoredDataMiningQueryDataProvider(
                             queryDefinitionProvider, dataMiningService, queryRunner);
-                    queryDefinitionProvider.addControl(new StoredDataMiningQueryPanel(dataProvider));
+                    queryDefinitionProvider.addControl(new StoredDataMiningQueryPanel(queryProvider));
                     
-                    queryDefinitionProvider.addControl(new DataMiningReportStoreControls());
+                    StoredDataMiningReportsProvider reportsProvider = new StoredDataMiningReportsProvider(dataMiningService);
+                    queryDefinitionProvider.addControl(new DataMiningReportStoreControls(session, dataMiningService, reportsProvider, queryDefinitionProvider, resultsPresenter));
                 }
 
                 Anchor orientationAnchor = new Anchor(AbstractImagePrototype.create(

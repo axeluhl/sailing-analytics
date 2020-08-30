@@ -1,14 +1,15 @@
 package com.sap.sailing.gwt.ui.datamining.reports;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.gwt.ui.datamining.StoredDataMiningQueryPanel;
 import com.sap.sse.datamining.shared.dto.DataMiningReportDTO;
 import com.sap.sse.datamining.shared.dto.StoredDataMiningReportDTO;
 import com.sap.sse.datamining.shared.impl.dto.StoredDataMiningReportDTOImpl;
@@ -16,11 +17,17 @@ import com.sap.sse.datamining.ui.client.DataMiningServiceAsync;
 
 public class StoredDataMiningReportsProvider {
     private final Set<StoredDataMiningReportDTO> storedReports = new HashSet<>();
+    private final Set<Consumer<Collection<StoredDataMiningReportDTO>>> listeners = new HashSet<>();
 
     private final DataMiningServiceAsync dataMiningService;
 
     public StoredDataMiningReportsProvider(DataMiningServiceAsync dataMiningService) {
         this.dataMiningService = dataMiningService;
+        reloadReports();
+    }
+    
+    public void addReportsChangedListener(Consumer<Collection<StoredDataMiningReportDTO>> listener) {
+        listeners.add(listener);
     }
 
     /**
@@ -50,12 +57,13 @@ public class StoredDataMiningReportsProvider {
             public void onSuccess(StoredDataMiningReportDTOImpl result) {
                 storedReports.remove(result);
                 storedReports.add(result);
+                listeners.forEach(l -> l.accept(storedReports));
             }
         });
         return wasUpdate;
     }
 
-    public boolean removeQuery(String name) {
+    public boolean removeReport(String name) {
         Optional<StoredDataMiningReportDTO> existingStoredReport = findReportByName(name);
         if (!existingStoredReport.isPresent()) {
             return false;
@@ -71,18 +79,20 @@ public class StoredDataMiningReportsProvider {
                     @Override
                     public void onSuccess(StoredDataMiningReportDTOImpl result) {
                         storedReports.remove(result);
+                        listeners.forEach(l -> l.accept(storedReports));
                     }
                 });
         return true;
     }
 
-    /** Refresh the stored queries and update the {@link StoredDataMiningQueryPanel}. */
-    private void refreshQueries() {
+    /** Reloads the available {@link StoredDataMiningReportDTO stored reports} from the data mining service. */
+    public void reloadReports() {
         dataMiningService.retrieveStoredReports(new AsyncCallback<ArrayList<StoredDataMiningReportDTOImpl>>() {
             @Override
             public void onSuccess(ArrayList<StoredDataMiningReportDTOImpl> result) {
                 storedReports.clear();
                 storedReports.addAll(result);
+                listeners.forEach(l -> l.accept(storedReports));
             }
 
             @Override
@@ -92,14 +102,14 @@ public class StoredDataMiningReportsProvider {
         });
     }
 
-    private Optional<StoredDataMiningReportDTO> findReportByName(final String name) {
+    public Optional<StoredDataMiningReportDTO> findReportByName(final String name) {
         return storedReports.stream().filter(s -> s.getName().equals(name)).findAny();
     }
 
     /**
      * @return true if <code>text</code> is a valid name of a stored report, false otherwise
      */
-    public boolean containsQueryName(String text) {
+    public boolean hasReportWithName(String text) {
         return findReportByName(text).isPresent();
     }
 }

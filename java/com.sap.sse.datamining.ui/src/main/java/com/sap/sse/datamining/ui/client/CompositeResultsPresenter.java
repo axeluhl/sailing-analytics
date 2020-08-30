@@ -1,5 +1,6 @@
 package com.sap.sse.datamining.ui.client;
 
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
@@ -49,7 +50,7 @@ public interface CompositeResultsPresenter<SettingsType extends Settings> extend
     StatisticQueryDefinitionDTO getQueryDefinition(String presenterId);
     
     /**
-     * Displays the given result for the given query definition int the presenter for the given id.
+     * Displays the given result for the given query definition in the presenter for the given id.
      * Does nothing if no presenter for the given id exists. The given result may be <code>null</code>
      * to clear the presenter. The given query definition may be <code>null</code>, but this is
      * discouraged unless the result is also <code>null</code>.
@@ -59,6 +60,14 @@ public interface CompositeResultsPresenter<SettingsType extends Settings> extend
      * @param result The result to display
      */
     void showResult(String presenterId, StatisticQueryDefinitionDTO queryDefinition, QueryResultDTO<?> result);
+    
+    /**
+     * Display the given query result pairs. Any results that are currently displayed will be overridden
+     * and additional child presenters will be created if necessary.
+     * 
+     * @param results The query result pairs to display
+     */
+    void showResults(Iterable<Pair<StatisticQueryDefinitionDTO, QueryResultDTO<?>>> results);
     
     /**
      * Shows the given error in the presenter for the given id. Does nothing if no

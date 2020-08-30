@@ -49,6 +49,7 @@ import com.sap.sailing.server.impl.preferences.model.BoatClassNotificationPrefer
 import com.sap.sailing.server.impl.preferences.model.CompetitorNotificationPreferences;
 import com.sap.sailing.server.impl.preferences.model.SailorProfilePreferences;
 import com.sap.sailing.server.impl.preferences.model.StoredDataMiningQueryPreferences;
+import com.sap.sailing.server.impl.preferences.model.StoredDataMiningReportPreferences;
 import com.sap.sailing.server.impl.preferences.model.TrackedEventPreferences;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.notification.impl.SailingNotificationServiceImpl;
@@ -170,6 +171,9 @@ public class Activator implements BundleActivator {
         properties.put(PreferenceConverter.KEY_PARAMETER_NAME, StoredDataMiningQueryPreferences.PREF_NAME);
         registrations.add(context.registerService(PreferenceConverter.class,
                 new GenericJSONPreferenceConverter<>(StoredDataMiningQueryPreferences::new), properties));
+        properties.put(PreferenceConverter.KEY_PARAMETER_NAME, StoredDataMiningReportPreferences.PREF_NAME);
+        registrations.add(context.registerService(PreferenceConverter.class,
+                new GenericJSONPreferenceConverter<>(StoredDataMiningReportPreferences::new), properties));
         properties.put(PreferenceConverter.KEY_PARAMETER_NAME, SailorProfilePreferences.PREF_NAME);
         registrations.add(context.registerService(PreferenceConverter.class,
                 new GenericJSONPreferenceConverter<>(
