@@ -11,6 +11,7 @@ import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
+import com.sap.sse.security.ui.client.UserManagementWriteServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.CreateUserGroupDialog.UserGroupData;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
@@ -36,13 +37,13 @@ public class CreateUserGroupDialog extends DataEntryDialog<UserGroupData> {
     }
     
     public CreateUserGroupDialog(final StringMessages stringMessages, final UserService userService,
-            final UserManagementServiceAsync userManagementService,
+            final UserManagementWriteServiceAsync userManagementWriteService,
             final UserGroupListDataProvider userGroupListDataProvider, final Runnable runOnSuccess) {
         this(stringMessages, stringMessages.createUserGroup(), stringMessages.enterUserGroupName(),
-                userManagementService, null, new DialogCallback<UserGroupData>() {
+                userManagementWriteService, null, new DialogCallback<UserGroupData>() {
                     @Override
                     public void ok(UserGroupData userGroupData) {
-                        userManagementService.createUserGroup(userGroupData.name, new AsyncCallback<UserGroupDTO>() {
+                        userManagementWriteService.createUserGroup(userGroupData.name, new AsyncCallback<UserGroupDTO>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 Notification.notify(caught.getMessage(), NotificationType.ERROR);

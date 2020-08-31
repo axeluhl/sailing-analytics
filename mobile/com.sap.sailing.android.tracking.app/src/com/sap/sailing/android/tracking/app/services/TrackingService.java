@@ -1,26 +1,26 @@
 package com.sap.sailing.android.tracking.app.services;
 
-import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
-
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.UUID;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import android.app.Service;
+import android.content.Context;
+import android.content.Intent;
+import android.hardware.GeomagneticField;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.os.Binder;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.IBinder;
+import android.os.Looper;
+import android.os.Message;
+import android.widget.Toast;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.android.shared.ui.customviews.GPSQuality;
-import com.sap.sailing.android.shared.util.NotificationHelper;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
-import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
@@ -31,24 +31,19 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 
-import android.app.Notification;
-import android.app.PendingIntent;
-import android.app.Service;
-import android.content.Context;
-import android.content.Intent;
-import android.hardware.GeomagneticField;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
-import android.os.Binder;
-import android.os.Build;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.IBinder;
-import android.os.Looper;
-import android.os.Message;
-import android.widget.Toast;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.UUID;
+
+import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 
 public class TrackingService extends Service implements LocationListener {
 
@@ -71,7 +66,6 @@ public class TrackingService extends Service implements LocationListener {
 
     public final static int UPDATE_INTERVAL_IN_MILLIS_DEFAULT = 1000;
     public final static String GPS_DISABLED_MESSAGE = "gpsDisabled";
-    private float minLocationUpdateDistanceInMeters = 0f;
 
     private String checkinDigest;
     private EventInfo event;
@@ -110,15 +104,6 @@ public class TrackingService extends Service implements LocationListener {
 
     @Override
     public void onCreate() {
-        super.onCreate();
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
-            /**
-             * prior to JellyBean, the minimum time for location updates parameter MIGHT be ignored, so providing a
-             * minimum distance value greater than 0 is recommended
-             */
-            minLocationUpdateDistanceInMeters = .5f;
-        }
-
         locationsQueuedBasedOnSendingInterval = new LinkedHashMap<>();
         prefs = new AppPreferences(this);
 
@@ -158,10 +143,8 @@ public class TrackingService extends Service implements LocationListener {
 
     @SuppressWarnings("MissingPermission")
     private void startTracking() {
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, UPDATE_INTERVAL_IN_MILLIS_DEFAULT,
-                minLocationUpdateDistanceInMeters, this);
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, UPDATE_INTERVAL_IN_MILLIS_DEFAULT, 0f, this);
         ExLog.i(this, TAG, "Started Tracking");
-        showNotification();
 
         prefs.setTrackerIsTracking(true);
         prefs.setTrackerIsTrackingCheckinDigest(checkinDigest);
@@ -344,16 +327,7 @@ public class TrackingService extends Service implements LocationListener {
     @Override
     public void onDestroy() {
         stopTracking();
-        stopForeground(true);
         Toast.makeText(this, R.string.tracker_stopped, Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onTaskRemoved(Intent rootIntent) {
-        super.onTaskRemoved(rootIntent);
-        stopTracking();
-        stopForeground(true);
-        ExLog.i(this, TAG, "Tracking Service is being removed.");
     }
 
     /**
@@ -395,20 +369,6 @@ public class TrackingService extends Service implements LocationListener {
         // provider (GPS) (re)enabled by the user while tracking
     }
 
-    private void showNotification() {
-        // Starting in Android 8.0 (API level 26), all notifications must be assigned to a channel
-        CharSequence name = getText(R.string.service_info);
-        NotificationHelper.createNotificationChannel(this, NotificationHelper.getNotificationChannelId(), name);
-
-        Intent intent = new Intent(this, TrackingActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
-
-        Notification notification = NotificationHelper.getNotification(this, NotificationHelper.getNotificationChannelId(), getText(R.string.app_name),
-                getString(R.string.tracking_notification_text, event.name), pendingIntent);
-        startForeground(NotificationHelper.getNotificationId(), notification);
-    }
-
     public void registerGPSQualityListener(GPSQualityListener listener) {
         gpsQualityListener = listener;
     }
@@ -435,8 +395,7 @@ public class TrackingService extends Service implements LocationListener {
 
         @Override
         public void handleMessage(Message msg) {
-            switch (msg.what) {
-            case NO_LOCATION:
+            if (msg.what == NO_LOCATION) {
                 ExLog.i(getApplicationContext(), TAG, "No Location");
                 Location location = (Location) msg.obj;
                 if (location == null) {
@@ -444,10 +403,6 @@ public class TrackingService extends Service implements LocationListener {
                 }
                 reportGPSQualityBearingAndSpeed(NO_DISTANCE, location.getBearing(), location.getSpeed(),
                         location.getLatitude(), location.getLongitude(), location.getAltitude());
-                break;
-
-            default:
-                super.handleMessage(msg);
             }
         }
     }

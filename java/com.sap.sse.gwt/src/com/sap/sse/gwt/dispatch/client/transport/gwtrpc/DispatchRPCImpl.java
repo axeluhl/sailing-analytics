@@ -1,12 +1,20 @@
 package com.sap.sse.gwt.dispatch.client.transport.gwtrpc;
 
+import static com.sap.sse.gwt.shared.RpcConstants.HEADER_FORWARD_TO_MASTER;
+import static com.sap.sse.gwt.shared.RpcConstants.HEADER_FORWARD_TO_REPLICA;
+
+import java.util.List;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
+import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.dispatch.client.system.DispatchContext;
 import com.sap.sse.gwt.dispatch.client.system.DispatchSystemAsync;
+import com.sap.sse.gwt.dispatch.client.system.batching.BatchAction;
 import com.sap.sse.gwt.dispatch.shared.commands.Action;
+import com.sap.sse.gwt.dispatch.shared.commands.HasWriteAction;
 import com.sap.sse.gwt.dispatch.shared.commands.Result;
 
 /**
@@ -16,12 +24,14 @@ import com.sap.sse.gwt.dispatch.shared.commands.Result;
  */
 public class DispatchRPCImpl<CTX extends DispatchContext> implements DispatchSystemAsync<CTX> {
     
-    private final DispatchRPCAsync<CTX> dispatchRPC = GWT.create(DispatchRPC.class);
+    private final DispatchRPCAsync<CTX> dispatchReadRPC = GWT.create(DispatchRPC.class);
+    private final DispatchRPCAsync<CTX> dispatchWriteRPC = GWT.create(DispatchRPC.class);
 
     private long clientServerOffset = 0;
     
     public DispatchRPCImpl(String dispatchRPCPath) {
-        ((ServiceDefTarget) dispatchRPC).setServiceEntryPoint(dispatchRPCPath);
+        EntryPointHelper.registerASyncService((ServiceDefTarget) dispatchReadRPC, dispatchRPCPath, HEADER_FORWARD_TO_REPLICA);
+        EntryPointHelper.registerASyncService((ServiceDefTarget) dispatchWriteRPC, dispatchRPCPath, HEADER_FORWARD_TO_MASTER);
     }
 
     @Override
@@ -30,7 +40,23 @@ public class DispatchRPCImpl<CTX extends DispatchContext> implements DispatchSys
                 .getCurrentLocale()
                 .getLocaleName());
         final long clientTimeOnRequestStart = System.currentTimeMillis();
-        dispatchRPC.execute(requestWrapper, new AsyncCallback<ResultWrapper<R>>() {
+        
+        DispatchRPCAsync<CTX> dispatcher = dispatchReadRPC;
+        if (action instanceof BatchAction) {
+            @SuppressWarnings({ "rawtypes", "unchecked" }) // no typing is needed here
+            List<Action> actions = ((BatchAction) action).getActions();
+            if (actions != null) {
+                for (Action<?,?> a : actions) {
+                    if (a instanceof HasWriteAction) {
+                        dispatcher = dispatchWriteRPC;
+                        break;
+                    }
+                }
+            }
+        } else if (action instanceof HasWriteAction) {
+            dispatcher = dispatchWriteRPC;
+        }
+        dispatcher.execute(requestWrapper, new AsyncCallback<ResultWrapper<R>>() {
 
             @Override
             public void onFailure(Throwable caught) {

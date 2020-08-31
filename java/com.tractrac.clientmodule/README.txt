@@ -17,6 +17,21 @@ It contains also some files:
  - Manifest.txt -> manifest used to create the test.jar file
 
 ********************************************
+      TracAPI 3.13.4
+********************************************
+This is a final version. It fixes a bug. It keeps the backward compatibility.
+It keeps the backward compatibility.
+
+ Release date: 17/08/2020
+ Build number: 3949342626e65a5d7f19bcc21ebd5146e2b3fdac
+
+ 1) Bugs
+
+  - If a race is not initialized and the race start time is edited, the library invokes
+    the method IRacesListener.abandonRace (Reported by Axe Uhl, 15/08/2020)
+
+
+********************************************
       TracAPI 3.13.3
 ********************************************
 This is a final version. The only difference with the previous version is the JDK used to compile the sources.

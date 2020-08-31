@@ -317,11 +317,11 @@ input.magnifier {
 
 .dataMiningListBox {
 	min-width: 120px;
+	margin-right: 5px;
 }
 
 .queryDefinitionViewerContent {
 	background-color: white;
-	padding: 5px;
 }
 
 .filterDimensionsTitleLabel {

@@ -21,10 +21,10 @@ public abstract class SecureClientFactoryImpl<TLV extends TopLevelView> extends 
     protected SecureClientFactoryImpl(TLV root, EventBus eventBus) {
         this(root, eventBus, new PlaceController(eventBus));
     }
-    
+
     protected SecureClientFactoryImpl(TLV root, EventBus eventBus, PlaceController placeController) {
         super(root, eventBus, placeController);
-        
+
         securityProvider = new DefaultWithSecurityImpl();
     }
 
@@ -32,7 +32,12 @@ public abstract class SecureClientFactoryImpl<TLV extends TopLevelView> extends 
     public UserManagementServiceAsync getUserManagementService() {
         return securityProvider.getUserManagementService();
     }
-    
+
+    @Override
+    public UserManagementWriteServiceAsync getUserManagementWriteService() {
+        return securityProvider.getUserManagementWriteService();
+    }
+
     @Override
     public UserService getUserService() {
         return securityProvider.getUserService();

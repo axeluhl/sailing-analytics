@@ -28,7 +28,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.dto.UserDTO;
-import com.sap.sse.security.ui.client.UserManagementServiceAsync;
+import com.sap.sse.security.ui.client.UserManagementWriteServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
 import com.sap.sse.security.ui.client.component.CreateUserDialog;
@@ -54,7 +54,7 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
 
     public UserManagementPanel(final UserService userService, final StringMessages stringMessages,
             Iterable<HasPermissions> additionalPermissions, ErrorReporter errorReporter, TR tableResources) {
-        final UserManagementServiceAsync userManagementService = userService.getUserManagementService();
+        final UserManagementWriteServiceAsync userManagementWriteService = userService.getUserManagementWriteService();
         final VerticalPanel west = new VerticalPanel();
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, USER);
         west.add(buttonPanel);
@@ -63,7 +63,7 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
         buttonPanel.addUnsecuredAction(stringMessages.refresh(),
                 () -> userList.refreshUserList((Callback<Iterable<UserDTO>, Throwable>) null, false));
         buttonPanel.addCreateActionWithoutServerCreateObjectPermissionCheck(stringMessages.createUser(),
-                () -> new CreateUserDialog(stringMessages, userManagementService, userCreatedHandlers, userService)
+                () -> new CreateUserDialog(stringMessages, userManagementWriteService, userCreatedHandlers, userService)
                         .show());
         userNameTextbox = buttonPanel.addUnsecuredTextBox(stringMessages.username());
         final Button editRolesAndPermissionsForUserButton = buttonPanel.addUnsecuredAction(
@@ -84,7 +84,7 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
             if (Window.confirm(usernamesToDelete.size() == 1
                     ? stringMessages.doYouReallyWantToDeleteUser(usernamesToDelete.iterator().next())
                     : stringMessages.doYouReallyWantToDeleteNUsers(usernamesToDelete.size()))) {
-                userManagementService.deleteUsers(usernamesToDelete, new AsyncCallback<Set<SuccessInfo>>() {
+                userManagementWriteService.deleteUsers(usernamesToDelete, new AsyncCallback<Set<SuccessInfo>>() {
                     @Override
                     public void onSuccess(Set<SuccessInfo> result) {
                         for (UserDTO userToDelete : usersToDelete) {

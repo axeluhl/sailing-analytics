@@ -17,6 +17,7 @@ import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContextImpl;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
+import com.sap.sse.security.ui.client.UserManagementWriteServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.WithSecurity;
@@ -33,7 +34,7 @@ import com.sap.sse.security.ui.shared.SuccessInfo;
  */
 public class AuthenticationManagerImpl implements AuthenticationManager {
     
-    private final UserManagementServiceAsync userManagementService;
+    private final UserManagementWriteServiceAsync userManagementWriteService;
     private final UserService userService;
     private final EventBus eventBus;
     private final String emailConfirmationUrl;
@@ -56,13 +57,13 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
      */
     public AuthenticationManagerImpl(WithSecurity clientFactory, EventBus eventBus,
             String emailConfirmationUrl, String passwordResetUrl) {
-        this(clientFactory.getUserManagementService(), clientFactory.getUserService(), eventBus, emailConfirmationUrl,
+        this(clientFactory.getUserManagementWriteService(), clientFactory.getUserService(), eventBus, emailConfirmationUrl,
                 passwordResetUrl);
     }
     
     /**
      * Creates an {@link AuthenticationManagerImpl} instance based on the given {@link UserService} and its underlying
-     * {@link UserManagementServiceAsync} instance.
+     * {@link UserManagementWriteServiceAsync} instance.
      * 
      * @param userService
      *            the {@link UserService} instance to use
@@ -75,12 +76,12 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
      */
     public AuthenticationManagerImpl(UserService userService, EventBus eventBus, String emailConfirmationUrl,
             String passwordResetUrl) {
-        this(userService.getUserManagementService(), userService, eventBus, emailConfirmationUrl, passwordResetUrl);
+        this(userService.getUserManagementWriteService(), userService, eventBus, emailConfirmationUrl, passwordResetUrl);
     }
     
-    private AuthenticationManagerImpl(UserManagementServiceAsync userManagementService, UserService userService,
+    private AuthenticationManagerImpl(UserManagementWriteServiceAsync userManagementWriteService, UserService userService,
             final EventBus eventBus, String emailConfirmationUrl, String passwordResetUrl) {
-        this.userManagementService = userManagementService;
+        this.userManagementWriteService = userManagementWriteService;
         this.userService = userService;
         this.eventBus = eventBus;
         this.emailConfirmationUrl = emailConfirmationUrl;
@@ -114,7 +115,7 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
     @Override
     public void createAccount(final String name, final String email, final String password, final String fullName,
             final String locale, final String company, SuccessCallback<UserDTO> callback) {
-        userManagementService.createSimpleUser(name, email, password, fullName, company, locale, emailConfirmationUrl,
+        userManagementWriteService.createSimpleUser(name, email, password, fullName, company, locale, emailConfirmationUrl,
                 new AsyncCallbackImpl<UserDTO>(callback) {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -131,7 +132,7 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
     
     @Override
     public void requestPasswordReset(final String username, String eMailAddress, SuccessCallback<Void> callback) {
-        userManagementService.resetPassword(username, eMailAddress, passwordResetUrl, new AsyncCallbackImpl<Void>(callback) {
+        userManagementWriteService.resetPassword(username, eMailAddress, passwordResetUrl, new AsyncCallbackImpl<Void>(callback) {
             @Override
             public void onFailure(Throwable caught) {
                 if (caught instanceof UserManagementException) {
@@ -198,7 +199,7 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
         final UserDTO currentUser = getAuthenticationContext().getCurrentUser();
         final String username = currentUser.getName();
         final String locale = currentUser.getLocale();
-        userManagementService.updateUserProperties(username, fullName, company, localeName, defaultTenantIdAsString,
+        userManagementWriteService.updateUserProperties(username, fullName, company, localeName, defaultTenantIdAsString,
                 new AsyncCallback<UserDTO>() {
             @Override
             public void onFailure(Throwable caught) {

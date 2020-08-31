@@ -9,7 +9,6 @@ import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogPassChangeEventSerializer;
 
 public class RaceLogPassChangeEventSerializerTest extends AbstractEventSerializerTest<RaceLogPassChangeEvent> {
-
     @Override
     protected RaceLogPassChangeEvent createMockEvent() {
         RaceLogPassChangeEvent event = mock(RaceLogPassChangeEvent.class);
@@ -20,5 +19,4 @@ public class RaceLogPassChangeEventSerializerTest extends AbstractEventSerialize
     protected JsonSerializer<RaceLogEvent> createSerializer(JsonSerializer<Competitor> competitorSerializer) {
         return new RaceLogPassChangeEventSerializer(competitorSerializer);
     }
-
 }
