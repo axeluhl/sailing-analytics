@@ -3,7 +3,6 @@ package com.sap.sailing.racecommittee.app.ui.activities;
 import android.annotation.TargetApi;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
@@ -15,11 +14,11 @@ import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.Loader;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewCompat;
-import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.Toolbar;
@@ -41,6 +40,9 @@ import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
+import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
+import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
+import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.ConfigurableStartModeFlagRacingProcedure;
 import com.sap.sailing.domain.base.CourseArea;
@@ -70,8 +72,8 @@ import com.sap.sailing.racecommittee.app.ui.fragments.RaceInfoFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment.RaceListCallbacks;
 import com.sap.sailing.racecommittee.app.ui.fragments.WelcomeFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.chooser.RaceInfoFragmentChooser;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.MainScheduleFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFinishingFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFlagViewerFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceSummaryFragment;
@@ -127,6 +129,7 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
     private Serializable getEventIdFromIntent() {
         if (getIntent() == null || getIntent().getExtras() == null) {
             ExLog.e(this, TAG, "Expected an intent carrying event extras.");
+            return null;
         }
 
         final Serializable eventId = getIntent().getExtras().getSerializable(AppConstants.EXTRA_EVENT_ID);
@@ -210,14 +213,14 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
         dataManager = DataManager.create(this);
         mRaceList = (RaceListFragment) getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         if (toolbar != null) {
             if (AppUtils.with(this).is10inch()) {
                 setOverflowIcon();
                 toolbar.setMinimumHeight(getResources().getDimensionPixelSize(R.dimen.biggerActionBarSize));
             }
             setSupportActionBar(toolbar);
-            mProgressSpinner = (ProgressBar) findViewById(R.id.progress_spinner);
+            mProgressSpinner = findViewById(R.id.progress_spinner);
         }
 
         Serializable courseAreaId = getCourseAreaIdFromIntent();
@@ -248,9 +251,9 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
             }
             loadNavDrawer(courseArea);
             if (savedInstanceState != null) {
-                String raceID = (String) savedInstanceState.getSerializable(RACE);
-                if (raceID != null) {
-                    onRaceItemClicked(dataManager.getDataStore().getRace(raceID));
+                String raceId = savedInstanceState.getString(RACE);
+                if (raceId != null) {
+                    onRaceItemClicked(dataManager.getDataStore().getRace(raceId));
                     return;
                 }
             }
@@ -261,7 +264,6 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
     @Override
     public void onResume() {
         super.onResume();
-
         mReceiver = new IntentReceiver();
         IntentFilter filter = new IntentFilter();
         filter.addAction(AppConstants.ACTION_SHOW_MAIN_CONTENT);
@@ -275,12 +277,11 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
     @Override
     public void onPause() {
         super.onPause();
-
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiver);
     }
 
     private void loadNavDrawer(CourseArea courseArea) {
-        mRaceList.setUp((DrawerLayout) findViewById(R.id.drawer_layout), courseArea.getName(),
+        mRaceList.setUp(findViewById(R.id.drawer_layout), courseArea.getName(),
                 preferences.getAuthor().getName());
     }
 
@@ -362,7 +363,10 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
     @Override
     protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-
+        final String raceId = savedInstanceState.getString(RACE);
+        if (raceId != null) {
+            mSelectedRace = dataManager.getDataStore().getRace(raceId);
+        }
         mWind = (Wind) savedInstanceState.getSerializable(WIND);
         if (mWind != null) {
             onWindEntered(mWind);
@@ -372,10 +376,10 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putSerializable(WIND, mWind);
         if (mSelectedRace != null) {
-            outState.putSerializable(RACE, mSelectedRace.getId());
+            outState.putString(RACE, mSelectedRace.getId());
         }
+        outState.putSerializable(WIND, mWind);
     }
 
     @Override
@@ -424,7 +428,7 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
             }
         }
 
-        getFragmentManager().popBackStackImmediate();
+        getSupportFragmentManager().popBackStackImmediate();
 
         if (infoFragment != null && infoFragment.isFragmentUIActive()) {
             ExLog.i(this, this.getClass().getCanonicalName(), "Returning to RaceInfoFragment from WindFragment");
@@ -463,29 +467,23 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
         builder.setTitle(getString(R.string.race_reset_confirmation_title));
         builder.setMessage(getString(R.string.race_reset_message));
         builder.setCancelable(true);
-        builder.setPositiveButton(getString(R.string.race_reset_confirm), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                ExLog.i(RacingActivity.this, LogEvent.RACE_RESET_YES, mSelectedRace.getId());
-                ExLog.w(RacingActivity.this, TAG,
-                        String.format("Race %s is selected for reset.", mSelectedRace.getId()));
-                Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.race_content);
-                if (fragment != null) {
-                    FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-                    transaction.remove(fragment);
-                    transaction.commit();
-                }
-                mSelectedRace.getState().setAdvancePass(MillisecondsTimePoint.now());
+        builder.setPositiveButton(getString(R.string.race_reset_confirm), (dialog, which) -> {
+            ExLog.i(RacingActivity.this, LogEvent.RACE_RESET_YES, mSelectedRace.getId());
+            ExLog.w(RacingActivity.this, TAG,
+                    String.format("Race %s is selected for reset.", mSelectedRace.getId()));
+            Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.race_content);
+            if (fragment != null) {
+                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                transaction.remove(fragment);
+                transaction.commit();
             }
+            mSelectedRace.getState().setAdvancePass(MillisecondsTimePoint.now());
         });
-        builder.setNegativeButton(getString(R.string.race_reset_cancel), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                if (mSelectedRace != null) {
-                    ExLog.i(RacingActivity.this, LogEvent.RACE_RESET_NO, mSelectedRace.getId());
-                }
-                dialog.cancel();
+        builder.setNegativeButton(getString(R.string.race_reset_cancel), (dialog, which) -> {
+            if (mSelectedRace != null) {
+                ExLog.i(RacingActivity.this, LogEvent.RACE_RESET_NO, mSelectedRace.getId());
             }
+            dialog.cancel();
         });
         builder.create().show();
     }
@@ -592,114 +590,104 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
 
         // artificial delay (to prevent "java.lang.IllegalStateException: Can not perform this action after
         // onSaveInstanceState")
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Fragment content;
-                        Fragment extra = null;
-                        View view;
-                        String action = intent.getAction();
+        runOnUiThread(() -> {
+            Fragment content;
+            Fragment extra = null;
+            View view;
+            String action = intent.getAction();
 
-                        final Fragment parentFragment = getSupportFragmentManager().findFragmentById(R.id.racing_view_container);
-                        if (parentFragment == null) {
-                            return;
-                        }
-                        final FragmentManager fragmentManager = parentFragment.getChildFragmentManager();
-                        final FragmentTransaction transaction = fragmentManager.beginTransaction();
-
-                        if (AppConstants.ACTION_SHOW_MAIN_CONTENT.equals(action)) {
-                            final Fragment fragment = fragmentManager.findFragmentById(R.id.race_edit);
-                            if (fragment != null) {
-                                transaction.remove(fragment);
-                            }
-
-                            view = findViewById(R.id.race_edit);
-                            if (view != null) {
-                                ViewHelper.setSiblingsVisibility(view, View.VISIBLE);
-                                extra = getSupportFragmentManager().findFragmentById(R.id.race_edit);
-                                if (extra != null) {
-                                    transaction.remove(extra);
-                                }
-                            }
-
-                            if (findViewById(R.id.race_content) != null && mSelectedRace != null) {
-                                if (mSelectedRace.getStatus() != RaceLogRaceStatus.FINISHING) {
-                                    content = RaceFlagViewerFragment.newInstance();
-                                } else {
-                                    boolean forced = intent.getBooleanExtra(AppConstants.ACTION_EXTRA_FORCED,
-                                            false);
-                                    if (forced) {
-                                        content = RaceFinishingFragment.newInstance();
-                                    } else {
-                                        RacingProcedureType procedureType = mSelectedRace.getState()
-                                                .getRacingProcedure().getType();
-                                        if (preferences.getRacingProcedureIsResultEntryEnabled(procedureType)) {
-                                            content = TrackingListFragment.newInstance(args, 1);
-                                        } else {
-                                            content = RaceFinishingFragment.newInstance();
-                                        }
-                                    }
-                                }
-                                content.setArguments(args);
-                                transaction.replace(R.id.race_content, content);
-                            }
-                        }
-
-                        if (AppConstants.ACTION_SHOW_SUMMARY_CONTENT.equals(action)) {
-                            final Fragment fragment = fragmentManager.findFragmentById(R.id.race_edit);
-                            if (fragment != null) {
-                                transaction.remove(fragment);
-                            }
-
-                            view = findViewById(R.id.finished_edit);
-                            if (view != null) {
-                                ViewHelper.setSiblingsVisibility(view, View.VISIBLE);
-                                extra = fragmentManager.findFragmentById(R.id.finished_edit);
-                                if (extra != null) {
-                                    transaction.remove(extra);
-                                }
-                            }
-                            if (extra == null && findViewById(R.id.finished_content) != null) {
-                                content = RaceSummaryFragment.newInstance(args);
-                                transaction.replace(R.id.finished_content, content);
-                            }
-                        }
-
-                        if (AppConstants.ACTION_REMOVE_PROTEST.equals(action)) {
-                            view = findViewById(R.id.protest_time_fragment);
-                            if (view != null) {
-                                ViewHelper.setSiblingsVisibility(view, View.VISIBLE);
-                                extra = fragmentManager.findFragmentById(R.id.protest_time_fragment);
-                                if (extra != null) {
-                                    transaction.remove(extra);
-                                }
-                            }
-                        }
-
-                        if (AppConstants.ACTION_SHOW_WELCOME.equals(action)) {
-                            loadWelcomeFragment();
-                        }
-
-                        if (AppConstants.ACTION_RELOAD_RACES.equals(action)) {
-                            loadRaces(dataManager.getDataStore().getCourseArea(getCourseAreaIdFromIntent()));
-                        }
-
-                        transaction.commit();
-                    }
-                });
+            final Fragment parentFragment = getSupportFragmentManager().findFragmentById(R.id.racing_view_container);
+            if (parentFragment == null) {
+                return;
             }
-        }).start();
+            final FragmentManager fragmentManager = parentFragment.getChildFragmentManager();
+            final FragmentTransaction transaction = fragmentManager.beginTransaction();
+
+            if (AppConstants.ACTION_SHOW_MAIN_CONTENT.equals(action)) {
+                final Fragment fragment = fragmentManager.findFragmentById(R.id.race_edit);
+                if (fragment != null) {
+                    transaction.remove(fragment);
+                }
+
+                view = findViewById(R.id.race_edit);
+                if (view != null) {
+                    ViewHelper.setSiblingsVisibility(view, View.VISIBLE);
+                    extra = getSupportFragmentManager().findFragmentById(R.id.race_edit);
+                    if (extra != null) {
+                        transaction.remove(extra);
+                    }
+                }
+
+                if (findViewById(R.id.race_content) != null && mSelectedRace != null) {
+                    if (mSelectedRace.getStatus() != RaceLogRaceStatus.FINISHING) {
+                        content = RaceFlagViewerFragment.newInstance();
+                    } else {
+                        boolean forced = intent.getBooleanExtra(AppConstants.ACTION_EXTRA_FORCED,
+                                false);
+                        if (forced) {
+                            content = RaceFinishingFragment.newInstance();
+                        } else {
+                            RacingProcedureType procedureType = mSelectedRace.getState()
+                                    .getRacingProcedure().getType();
+                            if (preferences.getRacingProcedureIsResultEntryEnabled(procedureType)) {
+                                content = TrackingListFragment.newInstance(args, 1);
+                            } else {
+                                content = RaceFinishingFragment.newInstance();
+                            }
+                        }
+                    }
+                    content.setArguments(args);
+                    transaction.replace(R.id.race_content, content);
+                }
+            }
+
+            if (AppConstants.ACTION_SHOW_SUMMARY_CONTENT.equals(action)) {
+                final Fragment fragment = fragmentManager.findFragmentById(R.id.race_edit);
+                if (fragment != null) {
+                    transaction.remove(fragment);
+                }
+
+                view = findViewById(R.id.finished_edit);
+                if (view != null) {
+                    ViewHelper.setSiblingsVisibility(view, View.VISIBLE);
+                    extra = fragmentManager.findFragmentById(R.id.finished_edit);
+                    if (extra != null) {
+                        transaction.remove(extra);
+                    }
+                }
+                if (extra == null && findViewById(R.id.finished_content) != null) {
+                    content = RaceSummaryFragment.newInstance(args);
+                    transaction.replace(R.id.finished_content, content);
+                }
+            }
+
+            if (AppConstants.ACTION_REMOVE_PROTEST.equals(action)) {
+                view = findViewById(R.id.protest_time_fragment);
+                if (view != null) {
+                    ViewHelper.setSiblingsVisibility(view, View.VISIBLE);
+                    extra = fragmentManager.findFragmentById(R.id.protest_time_fragment);
+                    if (extra != null) {
+                        transaction.remove(extra);
+                    }
+                }
+            }
+
+            if (AppConstants.ACTION_SHOW_WELCOME.equals(action)) {
+                loadWelcomeFragment();
+            }
+
+            if (AppConstants.ACTION_RELOAD_RACES.equals(action)) {
+                loadRaces(dataManager.getDataStore().getCourseArea(getCourseAreaIdFromIntent()));
+            }
+
+            transaction.commit();
+        });
     }
 
     private void setupRegattaSpecificConfiguration() {
         Set<RaceGroup> raceGroups = new HashSet<>();
         for (ManagedRace race : lastSeenRaces) {
-            if (!raceGroups.contains(race.getRaceGroup())) {
-                raceGroups.add(race.getRaceGroup());
-            }
+            raceGroups.add(race.getRaceGroup());
         }
 
         for (RaceGroup raceGroup : raceGroups) {
@@ -733,20 +721,14 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
             AlertDialog.Builder builder = new AlertDialog.Builder(RacingActivity.this);
             builder.setMessage(String.format(getString(R.string.generic_load_failure), ex.getMessage()))
                     .setTitle(getString(R.string.loading_failure)).setCancelable(true)
-                    .setPositiveButton(getString(R.string.retry), new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            setProgressSpinnerVisibility(true);
+                    .setPositiveButton(getString(R.string.retry), (dialog, id) -> {
+                        setProgressSpinnerVisibility(true);
 
-                            ExLog.i(RacingActivity.this, TAG, "Issuing a reload of managed races");
-                            getSupportLoaderManager().restartLoader(RacesLoaderId, null,
-                                    dataManager.createRacesLoader(courseArea.getId(), RaceLoadClient.this));
-                            dialog.cancel();
-                        }
-                    }).setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int id) {
-                    dialog.cancel();
-                }
-            });
+                        ExLog.i(RacingActivity.this, TAG, "Issuing a reload of managed races");
+                        getSupportLoaderManager().restartLoader(RacesLoaderId, null,
+                                dataManager.createRacesLoader(courseArea.getId(), RaceLoadClient.this));
+                        dialog.cancel();
+                    }).setNegativeButton(getString(R.string.cancel), (dialog, id) -> dialog.cancel());
             builder.create().show();
         }
 

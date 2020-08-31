@@ -53,6 +53,12 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
     }
 
     @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        sendIntent(AppConstants.ACTION_TIME_HIDE);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.flag_list, container, false);
 
@@ -63,6 +69,12 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
         }
 
         return view;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        sendIntent(AppConstants.ACTION_TIME_SHOW);
     }
 
     @Override
@@ -77,20 +89,6 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
             replaceFragment(FinishTimeFragment.newInstance(0),
                     getFrameId(requireActivity(), R.id.race_edit, R.id.race_content, true));
         }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-
-        sendIntent(AppConstants.INTENT_ACTION_TIME_SHOW);
     }
 
     public static class FinishTimeFragment extends BaseFragment

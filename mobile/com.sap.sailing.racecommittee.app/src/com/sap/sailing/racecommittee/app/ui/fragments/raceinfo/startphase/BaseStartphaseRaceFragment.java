@@ -1,16 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.startphase;
 
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-
-import com.sap.sailing.android.shared.util.BitmapHelper;
-import com.sap.sailing.android.shared.util.ViewHelper;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.ui.adapters.PanelsAdapter;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseRaceInfoRaceFragment;
-import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
-
 import android.annotation.TargetApi;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -20,6 +9,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+
+import com.sap.sailing.android.shared.util.BitmapHelper;
+import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.adapters.PanelsAdapter;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseRaceInfoRaceFragment;
+import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
+
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 
 public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingProcedure>
         extends BaseRaceInfoRaceFragment<ProcedureType> {
@@ -60,13 +60,10 @@ public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingPro
 
         ImageView nav_prev = ViewHelper.get(layout, R.id.nav_prev);
         if (nav_prev != null) {
-            nav_prev.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    viewPanel(MOVE_DOWN);
-                    if (pager != null) {
-                        pager.setCurrentItem(mActivePage);
-                    }
+            nav_prev.setOnClickListener(v -> {
+                viewPanel(MOVE_DOWN);
+                if (pager != null) {
+                    pager.setCurrentItem(mActivePage);
                 }
             });
         }
@@ -87,19 +84,15 @@ public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingPro
         return layout;
     }
 
-    @Override
-    protected void setupUi() {
-    }
-
     private void markDot(int position) {
         // tint all dots gray
         for (ImageView mDot : mDots) {
-            int tint = ThemeHelper.getColor(getActivity(), R.attr.sap_light_gray);
+            int tint = ThemeHelper.getColor(requireContext(), R.attr.sap_light_gray);
             Drawable drawable = BitmapHelper.getTintedDrawable(getActivity(), R.drawable.ic_dot, tint);
             mDot.setImageDrawable(drawable);
         }
 
-        int tint = ThemeHelper.getColor(getActivity(), R.attr.black);
+        int tint = ThemeHelper.getColor(requireContext(), R.attr.black);
         Drawable drawable = BitmapHelper.getTintedDrawable(getActivity(), R.drawable.ic_dot, tint);
         mDots.get(position).setImageDrawable(drawable);
     }
@@ -109,7 +102,7 @@ public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingPro
         private WeakReference<BaseStartphaseRaceFragment<?>> reference;
 
         public ViewPagerChangeListener(BaseStartphaseRaceFragment<?> fragment) {
-            reference = new WeakReference<BaseStartphaseRaceFragment<?>>(fragment);
+            reference = new WeakReference<>(fragment);
         }
 
         @Override

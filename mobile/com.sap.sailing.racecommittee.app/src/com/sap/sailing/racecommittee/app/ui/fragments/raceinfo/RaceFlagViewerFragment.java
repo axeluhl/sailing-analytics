@@ -1,6 +1,16 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import java.util.List;
+import android.graphics.Color;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
@@ -16,17 +26,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-import android.graphics.Color;
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
-import android.widget.Toast;
+import java.util.List;
 
 public class RaceFlagViewerFragment extends BaseFragment {
 
@@ -66,12 +66,9 @@ public class RaceFlagViewerFragment extends BaseFragment {
 
         mXrayButton = ViewHelper.get(layout, R.id.flag_down);
         if (mXrayButton != null) {
-            mXrayButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    RacingProcedure procedure = getRaceState().getTypedRacingProcedure();
-                    procedure.removeIndividualRecall(MillisecondsTimePoint.now());
-                }
+            mXrayButton.setOnClickListener(v -> {
+                RacingProcedure procedure = getRaceState().getTypedRacingProcedure();
+                procedure.removeIndividualRecall(MillisecondsTimePoint.now());
             });
         }
         mXrayFlag = ViewHelper.get(layout, R.id.flag);
@@ -181,8 +178,8 @@ public class RaceFlagViewerFragment extends BaseFragment {
     }
 
     private RelativeLayout createFlagView(TimePoint now, FlagPoleState poleState, final Flags flag, boolean isNext,
-            boolean lastEntry, boolean isDisplayed, int flagType) {
-        RelativeLayout layout = (RelativeLayout) getActivity().getLayoutInflater().inflate(R.layout.race_flag, mLayout,
+                                          boolean lastEntry, boolean isDisplayed, int flagType) {
+        RelativeLayout layout = (RelativeLayout) requireActivity().getLayoutInflater().inflate(R.layout.race_flag, mLayout,
                 false);
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.MATCH_PARENT, 1.0f);
@@ -203,12 +200,7 @@ public class RaceFlagViewerFragment extends BaseFragment {
         if (flag == Flags.CLASS && getRace().getFleet().getColor() != null) {
             flagView.setBackgroundColor(getFleetColorId());
         }
-        flagView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(v.getContext(), flag.name(), Toast.LENGTH_SHORT).show();
-            }
-        });
+        flagView.setOnClickListener(v -> Toast.makeText(v.getContext(), flag.name(), Toast.LENGTH_SHORT).show());
 
         textView.setText("");
         if (changeAt != null && isNext) {

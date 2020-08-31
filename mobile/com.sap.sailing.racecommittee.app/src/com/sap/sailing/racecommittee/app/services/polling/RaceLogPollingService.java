@@ -60,31 +60,23 @@ public class RaceLogPollingService extends Service
             ExLog.i(this, TAG, "Restarted");
         } else {
             String action = intent.getAction();
-            String extra = intent.getStringExtra(AppConstants.EXTRA_RACE_ID);
-            switch (action) {
-                case AppConstants.ACTION_POLLING_STOP:
-                    stopSelf(startId);
-                    break;
-
-                case AppConstants.ACTION_POLLING_RACE_ADD:
-                    if (TextUtils.isEmpty(extra)) {
-                        ExLog.i(this, TAG, AppConstants.EXTRA_RACE_ID + " was null for " + action);
-                    } else {
-                        registerRace(extra);
-                    }
-                    break;
-
-                case AppConstants.ACTION_POLLING_RACE_REMOVE:
-                    if (TextUtils.isEmpty(extra)) {
-                        ExLog.i(this, TAG, AppConstants.EXTRA_RACE_ID + " was null for " + action);
-                    } else {
-                        unregisterRace(extra);
-                    }
-                    break;
-
-                case AppConstants.ACTION_POLLING_POLL:
-                    poll();
-                    break;
+            String raceId = intent.getStringExtra(AppConstants.EXTRA_RACE_ID);
+            if (AppConstants.ACTION_POLLING_STOP.equals(action)) {
+                stopSelf(startId);
+            } else if (AppConstants.ACTION_POLLING_RACE_ADD.equals(action)) {
+                if (TextUtils.isEmpty(raceId)) {
+                    ExLog.i(this, TAG, AppConstants.EXTRA_RACE_ID + " was null for " + action);
+                } else {
+                    registerRace(raceId);
+                }
+            } else if (AppConstants.ACTION_POLLING_RACE_REMOVE.equals(action)) {
+                if (TextUtils.isEmpty(raceId)) {
+                    ExLog.i(this, TAG, AppConstants.EXTRA_RACE_ID + " was null for " + action);
+                } else {
+                    unregisterRace(raceId);
+                }
+            } else if (AppConstants.ACTION_POLLING_POLL.equals(action)) {
+                poll();
             }
         }
 
@@ -127,8 +119,7 @@ public class RaceLogPollingService extends Service
     /**
      * calculates for the given race id the poll url and add it to the map
      *
-     * @param raceId
-     *            race id
+     * @param raceId race id
      */
     private void registerRace(String raceId) {
         ExLog.i(this, TAG, "registerRace: " + raceId);
@@ -147,8 +138,7 @@ public class RaceLogPollingService extends Service
     /**
      * Remove the {@link ManagedRace}, so it will no longer be part of the polling
      *
-     * @param raceId
-     *            race id
+     * @param raceId race id
      */
     private void unregisterRace(String raceId) {
         ExLog.i(this, TAG, "unregisterRace: " + raceId);
@@ -161,8 +151,7 @@ public class RaceLogPollingService extends Service
     /**
      * Find the {@link ManagedRace} for the given race id in the {@link DataStore}
      *
-     * @param raceId
-     *            race id
+     * @param raceId race id
      * @return {@link ManagedRace} if found, else null
      */
     private ManagedRace getManagedRace(String raceId) {

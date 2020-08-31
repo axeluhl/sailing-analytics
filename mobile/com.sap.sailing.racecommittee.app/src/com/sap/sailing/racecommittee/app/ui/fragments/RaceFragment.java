@@ -164,8 +164,8 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
         return courseName;
     }
 
-    protected @IdRes int getFrameId(Activity activity, @IdRes int defaultFrame, @IdRes int fallbackFrame,
-            boolean changeVisibility) {
+    @IdRes
+    protected static int getFrameId(Activity activity, @IdRes int defaultFrame, @IdRes int fallbackFrame, boolean changeVisibility) {
         int frame = 0;
         View view = activity.findViewById(defaultFrame);
         if (view != null) {
@@ -200,13 +200,13 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
 
         // tint all dots gray
         for (ImageView mDot : mDots) {
-            int tint = ThemeHelper.getColor(getActivity(), R.attr.sap_light_gray);
+            int tint = ThemeHelper.getColor(requireContext(), R.attr.sap_light_gray);
             Drawable drawable = BitmapHelper.getTintedDrawable(getActivity(), R.drawable.ic_dot, tint);
             mDot.setImageDrawable(drawable);
         }
 
         // tint current dot black
-        int tint = ThemeHelper.getColor(getActivity(), R.attr.black);
+        int tint = ThemeHelper.getColor(requireContext(), R.attr.black);
         Drawable drawable = BitmapHelper.getTintedDrawable(getActivity(), R.drawable.ic_dot, tint);
         mDots.get(mActivePage).setImageDrawable(drawable);
 

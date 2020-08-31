@@ -1,7 +1,17 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.panels;
 
-import static com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult.ResolutionFailed.NO_START_TIME_SET;
-
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.BroadcastManager;
@@ -23,24 +33,12 @@ import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.TrackingListFragm
 import com.sap.sailing.racecommittee.app.ui.layouts.TimePanelHeaderLayout;
 import com.sap.sailing.racecommittee.app.ui.views.PanelButton;
 import com.sap.sailing.racecommittee.app.utils.RaceHelper;
-import com.sap.sailing.racecommittee.app.utils.TickSingleton;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.os.Bundle;
-import android.support.v4.content.LocalBroadcastManager;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
+import static com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult.ResolutionFailed.NO_START_TIME_SET;
 
 public class TimePanelFragment extends BasePanelFragment {
 
@@ -60,7 +58,6 @@ public class TimePanelFragment extends BasePanelFragment {
     private ImageView mLinkIcon;
     private Boolean mLinkedRace = null;
 
-    private CompetitorPanelClick mClickListener;
     private TimePoint mLastFinishingTime = null;
 
     public TimePanelFragment() {
@@ -80,12 +77,7 @@ public class TimePanelFragment extends BasePanelFragment {
         mStateListener = new RaceStateChangedListener();
 
         mRaceHeader = ViewHelper.get(layout, R.id.race_content_header);
-        mRaceHeader.setRunnable(new Runnable() {
-            @Override
-            public void run() {
-                new RaceHeaderClick().onClick(null);
-            }
-        });
+        mRaceHeader.setRunnable(() -> new RaceHeaderClick().onClick(null));
 
         mCompetitorList = ViewHelper.get(layout, R.id.button_competitor);
 
@@ -96,7 +88,7 @@ public class TimePanelFragment extends BasePanelFragment {
         mLinkIcon = ViewHelper.get(layout, R.id.linked_race);
         mFirstVesselDuration = ViewHelper.get(layout, R.id.first_vessel_duration);
 
-        if (getArguments().getBoolean(TOGGLED, false)) {
+        if (getArguments() != null && getArguments().getBoolean(TOGGLED)) {
             toggleMarker(layout, R.id.time_marker);
         }
 
@@ -108,16 +100,15 @@ public class TimePanelFragment extends BasePanelFragment {
         super.onActivityCreated(savedInstanceState);
 
         if (preferences.getRacingProcedureIsResultEntryEnabled(getRaceState().getRacingProcedure().getType())) {
-            mClickListener = new CompetitorPanelClick();
-            mCompetitorList.setListener(mClickListener);
+            mCompetitorList.setListener(new CompetitorPanelClick());
             mCompetitorList.setVisibility(View.VISIBLE);
             checkWarnings(getRaceState());
         }
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
+    public void onStart() {
+        super.onStart();
 
         notifyTick(MillisecondsTimePoint.now());
         checkStatus();
@@ -136,8 +127,8 @@ public class TimePanelFragment extends BasePanelFragment {
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
+    public void onStop() {
+        super.onStop();
 
         getRaceState().removeChangedListener(mStateListener);
 
@@ -206,13 +197,13 @@ public class TimePanelFragment extends BasePanelFragment {
     private void uncheckMarker(View view) {
         if (isAdded()) {
             if (!mRaceHeader.equals(view) && !isNormal(mRaceHeader, R.id.time_marker)) {
-                resetFragment(mTimeLock, getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false),
+                resetFragment(mTimeLock, getFrameId(requireActivity(), R.id.race_edit, R.id.race_content, false),
                         StartTimeFragment.class);
                 setMarkerLevel(mRaceHeader, R.id.time_marker, LEVEL_NORMAL);
             }
             if (!mCompetitorList.equals(view)) {
                 resetFragment(mCompetitorList.isLocked(),
-                        getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false), PenaltyFragment.class);
+                        getFrameId(requireActivity(), R.id.race_edit, R.id.race_content, false), PenaltyFragment.class);
                 mCompetitorList.setMarkerLevel(PanelButton.LEVEL_NORMAL);
             }
         }
@@ -220,45 +211,22 @@ public class TimePanelFragment extends BasePanelFragment {
 
     private void checkStatus() {
         switch (getRace().getStatus()) {
-        case UNSCHEDULED:
-            changeVisibility(mTimeLock, null, View.GONE);
-            changeVisibility(mFirstVesselDuration, null, View.GONE);
-            break;
-
-        case PRESCHEDULED:
-            changeVisibility(mTimeLock, null, View.GONE);
-            changeVisibility(mFirstVesselDuration, null, View.GONE);
-            break;
-
-        case SCHEDULED:
-            changeVisibility(mTimeLock, null, View.GONE);
-            changeVisibility(mFirstVesselDuration, null, View.GONE);
-            break;
-
-        case STARTPHASE:
-            changeVisibility(mTimeLock, null, View.GONE);
-            changeVisibility(mFirstVesselDuration, null, View.GONE);
-            break;
-
-        case RUNNING:
-            changeVisibility(mTimeLock, null, View.VISIBLE);
-            changeVisibility(mFirstVesselDuration, null, View.GONE);
-            break;
-
-        case FINISHING:
-            changeVisibility(mTimeLock, null, View.VISIBLE);
-            changeVisibility(mFirstVesselDuration, null, View.VISIBLE);
-            break;
-
-        case FINISHED:
-            changeVisibility(mTimeLock, null, View.VISIBLE);
-            changeVisibility(mFirstVesselDuration, null, View.VISIBLE);
-            break;
-
-        default:
-            changeVisibility(mTimeLock, null, View.VISIBLE);
-            changeVisibility(mFirstVesselDuration, null, View.GONE);
-            break;
+            case UNSCHEDULED:
+            case PRESCHEDULED:
+            case SCHEDULED:
+            case STARTPHASE:
+                changeVisibility(mTimeLock, null, View.GONE);
+                changeVisibility(mFirstVesselDuration, null, View.GONE);
+                break;
+            case FINISHING:
+            case FINISHED:
+                changeVisibility(mTimeLock, null, View.VISIBLE);
+                changeVisibility(mFirstVesselDuration, null, View.VISIBLE);
+                break;
+            default:
+                changeVisibility(mTimeLock, null, View.VISIBLE);
+                changeVisibility(mFirstVesselDuration, null, View.GONE);
+                break;
         }
     }
 
@@ -325,17 +293,17 @@ public class TimePanelFragment extends BasePanelFragment {
         private void toggleFragment() {
             sendIntent(AppConstants.ACTION_TOGGLE, AppConstants.EXTRA_DEFAULT, AppConstants.ACTION_TOGGLE_TIME);
             switch (toggleMarker(container, markerId)) {
-            case 0:
-                sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
-                break;
+                case 0:
+                    sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
+                    break;
 
-            case 1:
-                replaceFragment(StartTimeFragment.newInstance(StartTimeFragment.MODE_TIME_PANEL));
-                break;
+                case 1:
+                    replaceFragment(StartTimeFragment.newInstance(StartTimeFragment.MODE_TIME_PANEL));
+                    break;
 
-            default:
-                ExLog.i(getActivity(), TAG, "Unknown return value");
-                break;
+                default:
+                    ExLog.i(getActivity(), TAG, "Unknown return value");
+                    break;
             }
             disableToggle(container, markerId);
         }
@@ -349,27 +317,27 @@ public class TimePanelFragment extends BasePanelFragment {
         public void onClick(PanelButton view) {
             sendIntent(AppConstants.ACTION_TOGGLE, AppConstants.EXTRA_DEFAULT, AppConstants.ACTION_TOGGLE_COMPETITOR);
             switch (view.toggleMarker()) {
-            case PanelButton.LEVEL_NORMAL:
-                Intent intent = new Intent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
-                intent.putExtra(AppConstants.ACTION_EXTRA_FORCED, true);
-                BroadcastManager.getInstance(getActivity()).addIntent(intent);
-                break;
+                case PanelButton.LEVEL_NORMAL:
+                    Intent intent = new Intent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
+                    intent.putExtra(AppConstants.ACTION_EXTRA_FORCED, true);
+                    BroadcastManager.getInstance(getActivity()).addIntent(intent);
+                    break;
 
-            case PanelButton.LEVEL_TOGGLED:
-                Bundle args = new Bundle();
-                RaceFragment content;
-                args.putSerializable(AppConstants.EXTRA_RACE_ID, getRace().getId());
-                if (getRace().getStatus() != RaceLogRaceStatus.FINISHING) {
-                    content = PenaltyFragment.newInstance();
-                } else {
-                    content = TrackingListFragment.newInstance(args, 1);
-                }
-                replaceFragment(content, R.id.race_content);
-                break;
+                case PanelButton.LEVEL_TOGGLED:
+                    Bundle args = new Bundle();
+                    RaceFragment content;
+                    args.putSerializable(AppConstants.EXTRA_RACE_ID, getRace().getId());
+                    if (getRace().getStatus() != RaceLogRaceStatus.FINISHING) {
+                        content = PenaltyFragment.newInstance();
+                    } else {
+                        content = TrackingListFragment.newInstance(args, 1);
+                    }
+                    replaceFragment(content, R.id.race_content);
+                    break;
 
-            default:
-                ExLog.i(getActivity(), TAG, "Unknown return value");
-                break;
+                default:
+                    ExLog.i(getActivity(), TAG, "Unknown return value");
+                    break;
             }
             view.disableToggle();
         }
@@ -394,15 +362,15 @@ public class TimePanelFragment extends BasePanelFragment {
                     if (intent.getExtras() != null) {
                         String data = intent.getStringExtra(AppConstants.EXTRA_DEFAULT);
                         switch (data) {
-                        case AppConstants.ACTION_TOGGLE_TIME:
-                            uncheckMarker(mRaceHeader);
-                            break;
-                        case AppConstants.ACTION_TOGGLE_COMPETITOR:
-                            uncheckMarker(mCompetitorList);
-                            break;
-                        default:
-                            uncheckMarker(null);
-                            break;
+                            case AppConstants.ACTION_TOGGLE_TIME:
+                                uncheckMarker(mRaceHeader);
+                                break;
+                            case AppConstants.ACTION_TOGGLE_COMPETITOR:
+                                uncheckMarker(mCompetitorList);
+                                break;
+                            default:
+                                uncheckMarker(null);
+                                break;
                         }
                     }
                 }
@@ -424,7 +392,7 @@ public class TimePanelFragment extends BasePanelFragment {
                     }
                 }
 
-                View view = getActivity().findViewById(R.id.race_panel_time);
+                View view = requireActivity().findViewById(R.id.race_panel_time);
                 if (requireActivity().findViewById(R.id.race_edit) == null && view != null) {
                     if (AppConstants.ACTION_TIME_HIDE.equals(action)) {
                         view.setVisibility(View.GONE);

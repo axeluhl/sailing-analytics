@@ -93,49 +93,43 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
     private ReadonlyDataManager dataManager;
     private View progressSpinner;
 
-    private ItemSelectedListener<EventBase> eventSelectionListener = new ItemSelectedListener<EventBase>() {
+    private ItemSelectedListener<EventBase> eventSelectionListener = (sender, event) -> {
 
-        public void itemSelected(Fragment sender, EventBase event) {
+        final Serializable eventId = selectEvent(event);
 
-            final Serializable eventId = selectEvent(event);
+        // FIXME: its weird to have this button setup in here
+        setupSignInButton();
 
-            // FIXME: its weird to have this button setup in here
-            setupSignInButton();
+        // prepare views after the event selection
 
-            // prepare views after the event selection
-
-            // close all currently open list views
-            if (loginListViews != null) {
-                loginListViews.closeAll();
-            }
-            addCourseAreaListFragment(eventId);
-
-            // send intent to open the course area selection list
-            Intent intent = new Intent(AppConstants.ACTION_TOGGLE);
-            intent.putExtra(AppConstants.EXTRA_DEFAULT, AppConstants.ACTION_TOGGLE_AREA);
-            BroadcastManager.getInstance(LoginActivity.this).addIntent(intent);
+        // close all currently open list views
+        if (loginListViews != null) {
+            loginListViews.closeAll();
         }
+        addCourseAreaListFragment(eventId);
+
+        // send intent to open the course area selection list
+        Intent intent = new Intent(AppConstants.ACTION_TOGGLE);
+        intent.putExtra(AppConstants.EXTRA_DEFAULT, AppConstants.ACTION_TOGGLE_AREA);
+        BroadcastManager.getInstance(LoginActivity.this).addIntent(intent);
     };
-    private ItemSelectedListener<CourseArea> courseAreaSelectionListener = new ItemSelectedListener<CourseArea>() {
+    private ItemSelectedListener<CourseArea> courseAreaSelectionListener = (sender, courseArea) -> {
+        ExLog.i(LoginActivity.this, TAG, "Starting view for " + courseArea.getName());
+        ExLog.i(LoginActivity.this, LogEvent.COURSE_SELECTED, courseArea.getName());
 
-        public void itemSelected(Fragment sender, CourseArea courseArea) {
-            ExLog.i(LoginActivity.this, TAG, "Starting view for " + courseArea.getName());
-            ExLog.i(LoginActivity.this, LogEvent.COURSE_SELECTED, courseArea.getName());
+        selectCourseArea(courseArea);
 
-            selectCourseArea(courseArea);
+        // prepare views after area selection
 
-            // prepare views after area selection
-
-            // close all currently open list views
-            if (loginListViews != null) {
-                loginListViews.closeAll();
-            }
-            addAreaPositionListFragment();
-            // send intent to open the position selection list
-            Intent intent = new Intent(AppConstants.ACTION_TOGGLE);
-            intent.putExtra(AppConstants.EXTRA_DEFAULT, AppConstants.ACTION_TOGGLE_POSITION);
-            BroadcastManager.getInstance(LoginActivity.this).addIntent(intent);
+        // close all currently open list views
+        if (loginListViews != null) {
+            loginListViews.closeAll();
         }
+        addAreaPositionListFragment();
+        // send intent to open the position selection list
+        Intent intent = new Intent(AppConstants.ACTION_TOGGLE);
+        intent.putExtra(AppConstants.EXTRA_DEFAULT, AppConstants.ACTION_TOGGLE_POSITION);
+        BroadcastManager.getInstance(LoginActivity.this).addIntent(intent);
     };
 
     public LoginActivity() {
@@ -143,15 +137,12 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
     }
 
     private void setupSignInButton() {
-        sign_in = (Button) findViewById(R.id.login_submit);
+        sign_in = findViewById(R.id.login_submit);
         if (sign_in != null) {
-            sign_in.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    ExLog.i(LoginActivity.this, TAG,
-                            "Logged in: " + eventName + " - " + courseAreaName + " - " + positionName);
-                    login();
-                }
+            sign_in.setOnClickListener(v -> {
+                ExLog.i(LoginActivity.this, TAG,
+                        "Logged in: " + eventName + " - " + courseAreaName + " - " + positionName);
+                login();
             });
         }
     }
@@ -465,12 +456,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
     private void slideUpBackdropDelayed() {
         Handler handler = new Handler();
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                slideUpBackdrop();
-            }
-        };
+        Runnable runnable = () -> slideUpBackdrop();
         handler.postDelayed(runnable, 1000);
     }
 
@@ -489,14 +475,11 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         }
         ObjectAnimator frameAnimation = ObjectAnimator.ofFloat(backdrop, "y", 0, -upperRoom);
         ValueAnimator heightAnimation = ValueAnimator.ofInt(0, upperRoom);
-        heightAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                int val = (Integer) valueAnimator.getAnimatedValue();
-                ViewGroup.LayoutParams lpLogin = loginView.getLayoutParams();
-                lpLogin.height = val;
-                loginView.setLayoutParams(lpLogin);
-            }
+        heightAnimation.addUpdateListener(valueAnimator -> {
+            int val = (Integer) valueAnimator.getAnimatedValue();
+            ViewGroup.LayoutParams lpLogin = loginView.getLayoutParams();
+            lpLogin.height = val;
+            loginView.setLayoutParams(lpLogin);
         });
 
         Collection<Animator> animators = new ArrayList<>();

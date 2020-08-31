@@ -1,6 +1,10 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import java.util.ArrayList;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ListView;
 
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.ViewHelper;
@@ -15,12 +19,7 @@ import com.sap.sailing.racecommittee.app.ui.adapters.checked.StartProcedureItem;
 import com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ListView;
+import java.util.ArrayList;
 
 public class StartProcedureFragment extends BaseFragment {
 
@@ -45,13 +44,7 @@ public class StartProcedureFragment extends BaseFragment {
 
         mHeader = ViewHelper.get(layout, R.id.header);
         if (mHeader != null) {
-            mHeader.setHeaderOnClickListener(new View.OnClickListener() {
-
-                @Override
-                public void onClick(View v) {
-                    goHome();
-                }
-            });
+            mHeader.setHeaderOnClickListener(v -> goHome());
         }
 
         return layout;
@@ -61,16 +54,11 @@ public class StartProcedureFragment extends BaseFragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        if (getView() != null && getArguments() != null) {
-            switch (getArguments().getInt(START_MODE, START_MODE_PRESETUP)) {
-            case START_MODE_PLANNED:
+        if (getArguments() != null && mHeader != null) {
+            if (getArguments().getInt(START_MODE, START_MODE_PRESETUP) == START_MODE_PLANNED) {
                 if (AppUtils.with(getActivity()).isLandscape()) {
                     mHeader.setVisibility(View.GONE);
                 }
-                break;
-
-            default:
-                break;
             }
         }
         RacingProcedure racingProcedure = getRaceState().getRacingProcedure();
@@ -85,19 +73,16 @@ public class StartProcedureFragment extends BaseFragment {
             position++;
         }
 
-        ListView listView = (ListView) getActivity().findViewById(R.id.listView);
+        ListView listView = requireActivity().findViewById(R.id.listView);
         if (listView != null) {
             final CheckedItemAdapter adapter = new CheckedItemAdapter(getActivity(), startProcedure);
             adapter.setCheckedPosition(selected);
             listView.setAdapter(adapter);
-            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    adapter.setCheckedPosition(position);
-                    StartProcedureItem item = (StartProcedureItem) adapter.getItem(position);
-                    if (item != null) {
-                        onClick(item.getProcedureType());
-                    }
+            listView.setOnItemClickListener((parent, view, pos, id) -> {
+                adapter.setCheckedPosition(pos);
+                StartProcedureItem item = (StartProcedureItem) adapter.getItem(pos);
+                if (item != null) {
+                    onClick(item.getProcedureType());
                 }
             });
         }
@@ -106,14 +91,12 @@ public class StartProcedureFragment extends BaseFragment {
     @Override
     public void onResume() {
         super.onResume();
-
         sendIntent(AppConstants.ACTION_TIME_HIDE);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-
         sendIntent(AppConstants.ACTION_TIME_SHOW);
     }
 
