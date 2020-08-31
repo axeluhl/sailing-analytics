@@ -99,8 +99,8 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
         super.onResume();
 
         IntentFilter filter = new IntentFilter();
-        filter.addAction(AppConstants.INTENT_ACTION_TOGGLE);
-        filter.addAction(AppConstants.INTENT_ACTION_RESET);
+        filter.addAction(AppConstants.ACTION_TOGGLE);
+        filter.addAction(AppConstants.ACTION_RESET);
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mListener, filter);
     }
 
@@ -240,20 +240,20 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             switch (action) {
-            case AppConstants.INTENT_ACTION_TOGGLE:
-                String data = intent.getExtras().getString(AppConstants.INTENT_ACTION_EXTRA);
-                if (AppConstants.INTENT_ACTION_TOGGLE_EVENT.equals(data)) {
+            case AppConstants.ACTION_TOGGLE:
+                String data = intent.getExtras().getString(AppConstants.EXTRA_DEFAULT);
+                if (AppConstants.ACTION_TOGGLE_EVENT.equals(data)) {
                     onClick(mEventContainer.getHeader());
                 }
-                if (AppConstants.INTENT_ACTION_TOGGLE_AREA.equals(data)) {
+                if (AppConstants.ACTION_TOGGLE_AREA.equals(data)) {
                     onClick(mCourseAreaContainer.getHeader());
                 }
-                if (AppConstants.INTENT_ACTION_TOGGLE_POSITION.equals(data)) {
+                if (AppConstants.ACTION_TOGGLE_POSITION.equals(data)) {
                     onClick(mPositionContainer.getHeader());
                 }
                 break;
 
-            case AppConstants.INTENT_ACTION_RESET:
+            case AppConstants.ACTION_RESET:
                 mSignUp.setEnabled(false);
                 break;
 

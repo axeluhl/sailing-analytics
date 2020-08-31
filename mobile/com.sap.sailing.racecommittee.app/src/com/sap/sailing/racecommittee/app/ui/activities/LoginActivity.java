@@ -111,8 +111,8 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
             addCourseAreaListFragment(eventId);
 
             // send intent to open the course area selection list
-            Intent intent = new Intent(AppConstants.INTENT_ACTION_TOGGLE);
-            intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_AREA);
+            Intent intent = new Intent(AppConstants.ACTION_TOGGLE);
+            intent.putExtra(AppConstants.EXTRA_DEFAULT, AppConstants.ACTION_TOGGLE_AREA);
             BroadcastManager.getInstance(LoginActivity.this).addIntent(intent);
         }
     };
@@ -132,8 +132,8 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
             }
             addAreaPositionListFragment();
             // send intent to open the position selection list
-            Intent intent = new Intent(AppConstants.INTENT_ACTION_TOGGLE);
-            intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_POSITION);
+            Intent intent = new Intent(AppConstants.ACTION_TOGGLE);
+            intent.putExtra(AppConstants.EXTRA_DEFAULT, AppConstants.ACTION_TOGGLE_POSITION);
             BroadcastManager.getInstance(LoginActivity.this).addIntent(intent);
         }
     };
@@ -165,8 +165,8 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
     private void switchToRacingActivity() {
         Intent intent = new Intent(LoginActivity.this, RacingActivity.class);
-        intent.putExtra(AppConstants.COURSE_AREA_UUID_KEY, mSelectedCourseAreaUUID);
-        intent.putExtra(AppConstants.EventIdTag, mSelectedEventId);
+        intent.putExtra(AppConstants.EXTRA_COURSE_UUID, mSelectedCourseAreaUUID);
+        intent.putExtra(AppConstants.EXTRA_EVENT_ID, mSelectedEventId);
         startActivity(intent);
         finish();
     }
@@ -367,11 +367,11 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         super.onResume();
 
         IntentFilter filter = new IntentFilter();
-        filter.addAction(AppConstants.INTENT_ACTION_RESET);
-        filter.addAction(AppConstants.INTENT_ACTION_VALID_DATA);
+        filter.addAction(AppConstants.ACTION_RESET);
+        filter.addAction(AppConstants.ACTION_VALID_DATA);
         LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, filter);
 
-        BroadcastManager.getInstance(this).addIntent(new Intent(AppConstants.INTENT_ACTION_CHECK_LOGIN));
+        BroadcastManager.getInstance(this).addIntent(new Intent(AppConstants.ACTION_CHECK_LOGIN));
 
         int resultCode = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(getApplicationContext());
         if (!BuildConfig.DEBUG && resultCode != ConnectionResult.SUCCESS) {
@@ -548,9 +548,9 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if (AppConstants.INTENT_ACTION_RESET.equals(action)) {
+            if (AppConstants.ACTION_RESET.equals(action)) {
                 resetData(true);
-            } else if (AppConstants.INTENT_ACTION_VALID_DATA.equals(action)) {
+            } else if (AppConstants.ACTION_VALID_DATA.equals(action)) {
                 if (preferences.needConfigRefresh()) {
                     resetData(true);
                     preferences.setNeedConfigRefresh(false);

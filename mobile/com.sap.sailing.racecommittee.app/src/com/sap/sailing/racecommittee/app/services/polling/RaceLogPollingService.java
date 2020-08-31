@@ -60,29 +60,29 @@ public class RaceLogPollingService extends Service
             ExLog.i(this, TAG, "Restarted");
         } else {
             String action = intent.getAction();
-            String extra = intent.getStringExtra(AppConstants.INTENT_ACTION_EXTRA);
+            String extra = intent.getStringExtra(AppConstants.EXTRA_RACE_ID);
             switch (action) {
-                case AppConstants.INTENT_ACTION_POLLING_STOP:
+                case AppConstants.ACTION_POLLING_STOP:
                     stopSelf(startId);
                     break;
 
-                case AppConstants.INTENT_ACTION_POLLING_RACE_ADD:
+                case AppConstants.ACTION_POLLING_RACE_ADD:
                     if (TextUtils.isEmpty(extra)) {
-                        ExLog.i(this, TAG, "INTENT_ACTION_EXTRA was null for " + action);
+                        ExLog.i(this, TAG, AppConstants.EXTRA_RACE_ID + " was null for " + action);
                     } else {
                         registerRace(extra);
                     }
                     break;
 
-                case AppConstants.INTENT_ACTION_POLLING_RACE_REMOVE:
+                case AppConstants.ACTION_POLLING_RACE_REMOVE:
                     if (TextUtils.isEmpty(extra)) {
-                        ExLog.i(this, TAG, "INTENT_ACTION_EXTRA was null for " + action);
+                        ExLog.i(this, TAG, AppConstants.EXTRA_RACE_ID + " was null for " + action);
                     } else {
                         unregisterRace(extra);
                     }
                     break;
 
-                case AppConstants.INTENT_ACTION_POLLING_POLL:
+                case AppConstants.ACTION_POLLING_POLL:
                     poll();
                     break;
             }
@@ -211,7 +211,7 @@ public class RaceLogPollingService extends Service
         if (mAppPreferences.isPollingActive() && !mRaces.isEmpty()) {
             long time = MillisecondsTimePoint.now().asMillis() + (1000 * mAppPreferences.getPollingInterval());
             Intent intent = new Intent(this, this.getClass());
-            intent.setAction(AppConstants.INTENT_ACTION_POLLING_POLL);
+            intent.setAction(AppConstants.ACTION_POLLING_POLL);
             mPendingIntent = PendingIntent.getService(this, 0, intent, 0);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                 mAlarm.setExact(AlarmManager.RTC_WAKEUP, time, mPendingIntent);

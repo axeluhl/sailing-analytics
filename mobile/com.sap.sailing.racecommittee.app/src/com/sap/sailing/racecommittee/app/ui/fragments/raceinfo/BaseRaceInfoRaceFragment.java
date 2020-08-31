@@ -87,7 +87,7 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
     }
 
     private void showMainContent() {
-        Intent intent = new Intent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+        Intent intent = new Intent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
         BroadcastManager.getInstance(getActivity()).addIntent(intent);
     }
 
@@ -161,7 +161,7 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
             onIndividualRecallChanged(true);
 
             showMainContent();
-            sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
+            sendIntent(AppConstants.ACTION_CLEAR_TOGGLE);
         }
 
         @Override
@@ -171,7 +171,7 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
             onIndividualRecallChanged(false);
 
             showMainContent();
-            sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
+            sendIntent(AppConstants.ACTION_CLEAR_TOGGLE);
         }
     }
 }

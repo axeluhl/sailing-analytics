@@ -107,14 +107,14 @@ public class StartProcedureFragment extends BaseFragment {
     public void onResume() {
         super.onResume();
 
-        sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
+        sendIntent(AppConstants.ACTION_TIME_HIDE);
     }
 
     @Override
     public void onPause() {
         super.onPause();
 
-        sendIntent(AppConstants.INTENT_ACTION_TIME_SHOW);
+        sendIntent(AppConstants.ACTION_TIME_SHOW);
     }
 
     public void onClick(RacingProcedureType procedureType) {
@@ -128,7 +128,7 @@ public class StartProcedureFragment extends BaseFragment {
             openMainScheduleFragment();
         } else {
             if (sameProcedure) {
-                sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
             } else {
                 final ReadonlyDataManager dataManager = OnlineDataManager.create(getActivity());
                 getRaceState().forceNewStartTime(MillisecondsTimePoint.now(), getRaceState().getStartTime(),

@@ -57,7 +57,7 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
 
         AbortFlagsFragment fragment = new AbortFlagsFragment();
         Bundle args = new Bundle();
-        args.putString(AppConstants.FLAG_KEY, flag.name());
+        args.putString(AppConstants.KEY_RACE_FLAG, flag.name());
         args.putString(HEADER_TEXT, headerText);
         fragment.setArguments(args);
         return fragment;
@@ -69,7 +69,7 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
 
         ListView listView = ViewHelper.get(layout, R.id.listView);
         if (listView != null) {
-            Flags flag = Flags.valueOf(getArguments().getString(AppConstants.FLAG_KEY));
+            Flags flag = Flags.valueOf(getArguments().getString(AppConstants.KEY_RACE_FLAG));
             listView.setAdapter(new AbortFlagsAdapter(getActivity(), this, flag));
         }
 
@@ -79,8 +79,8 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
             header.setHeaderOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
-                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                    sendIntent(AppConstants.ACTION_CLEAR_TOGGLE);
+                    sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
                 }
             });
         }
@@ -92,7 +92,7 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
     public void onClick(Flags flag) {
         TimePoint now = MillisecondsTimePoint.now();
         RaceState state = getRaceState();
-        Flags mainFlag = Flags.valueOf(getArguments().getString(AppConstants.FLAG_KEY));
+        Flags mainFlag = Flags.valueOf(getArguments().getString(AppConstants.KEY_RACE_FLAG));
         switch (mainFlag) {
         case AP:
             logFlag(flag);
@@ -138,14 +138,13 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
     @Override
     public void onResume() {
         super.onResume();
-
-        sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
+        sendIntent(AppConstants.ACTION_TIME_HIDE);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        sendIntent(AppConstants.INTENT_ACTION_TIME_SHOW);
+        sendIntent(AppConstants.ACTION_TIME_SHOW);
     }
 
     private abstract class ActionWithNowTimePoint implements Runnable {
@@ -287,9 +286,9 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
                 }
                 if (!racesToAbort.contains(getRace())) {
                     BroadcastManager.getInstance(getActivity())
-                            .addIntent(new Intent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE));
+                            .addIntent(new Intent(AppConstants.ACTION_CLEAR_TOGGLE));
                     BroadcastManager.getInstance(getActivity())
-                            .addIntent(new Intent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT));
+                            .addIntent(new Intent(AppConstants.ACTION_SHOW_MAIN_CONTENT));
                 }
             }
         });

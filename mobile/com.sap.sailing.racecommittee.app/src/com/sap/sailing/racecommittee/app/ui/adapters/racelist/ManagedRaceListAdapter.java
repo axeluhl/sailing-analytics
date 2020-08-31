@@ -172,9 +172,9 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                     holder.protest_image
                             .setImageDrawable(FlagsResources.getFlagDrawable(getContext(), Flags.BRAVO.name(), flag_size));
                     holder.protest_layout.setOnClickListener(v -> {
-                        Intent intent = new Intent(AppConstants.INTENT_ACTION_SHOW_PROTEST);
+                        Intent intent = new Intent(AppConstants.ACTION_SHOW_PROTEST);
                         // TODO don't use toString() to convey semantics and perform check; bug 3617
-                        intent.putExtra(AppConstants.INTENT_ACTION_EXTRA,
+                        intent.putExtra(AppConstants.EXTRA_DEFAULT,
                                 new RaceGroupSeries(header.getRaceGroup(), header.getSeries()).getDisplayName());
                         BroadcastManager.getInstance(getContext()).addIntent(intent);
                     });

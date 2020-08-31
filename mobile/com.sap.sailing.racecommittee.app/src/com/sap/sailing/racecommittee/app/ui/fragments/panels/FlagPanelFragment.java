@@ -127,11 +127,11 @@ public class FlagPanelFragment extends BasePanelFragment {
         getRaceState().addChangedListener(mStateListener);
 
         IntentFilter filter = new IntentFilter();
-        filter.addAction(AppConstants.INTENT_ACTION_TOGGLE);
-        filter.addAction(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, filter);
+        filter.addAction(AppConstants.ACTION_TOGGLE);
+        filter.addAction(AppConstants.ACTION_CLEAR_TOGGLE);
+        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(mReceiver, filter);
 
-        sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
+        sendIntent(AppConstants.ACTION_CLEAR_TOGGLE);
     }
 
     @Override
@@ -345,11 +345,10 @@ public class FlagPanelFragment extends BasePanelFragment {
         }
 
         private void toggleFragment() {
-            sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA,
-                    AppConstants.INTENT_ACTION_TOGGLE_ABANDON);
+            sendIntent(AppConstants.ACTION_TOGGLE, AppConstants.EXTRA_DEFAULT, AppConstants.ACTION_TOGGLE_ABANDON);
             switch (toggleMarker(container, markerId)) {
             case LEVEL_NORMAL:
-                sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
                 break;
 
             case LEVEL_TOGGLED:
@@ -385,11 +384,10 @@ public class FlagPanelFragment extends BasePanelFragment {
         }
 
         private void toggleFragment() {
-            sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA,
-                    AppConstants.INTENT_ACTION_TOGGLE_RECALL);
+            sendIntent(AppConstants.ACTION_TOGGLE, AppConstants.EXTRA_DEFAULT, AppConstants.ACTION_TOGGLE_RECALL);
             switch (toggleMarker(container, markerId)) {
             case LEVEL_NORMAL:
-                sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
                 break;
 
             case LEVEL_TOGGLED:
@@ -425,11 +423,10 @@ public class FlagPanelFragment extends BasePanelFragment {
         }
 
         private void toggleFragment() {
-            sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA,
-                    AppConstants.INTENT_ACTION_TOGGLE_POSTPONE);
+            sendIntent(AppConstants.ACTION_TOGGLE, AppConstants.EXTRA_DEFAULT, AppConstants.ACTION_TOGGLE_POSTPONE);
             switch (toggleMarker(container, markerId)) {
             case LEVEL_NORMAL:
-                sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
                 break;
 
             case LEVEL_TOGGLED:
@@ -465,11 +462,10 @@ public class FlagPanelFragment extends BasePanelFragment {
         }
 
         private void toggleFragment() {
-            sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA,
-                    AppConstants.INTENT_ACTION_TOGGLE_COURSE);
+            sendIntent(AppConstants.ACTION_TOGGLE, AppConstants.EXTRA_DEFAULT, AppConstants.ACTION_TOGGLE_COURSE);
             switch (toggleMarker(container, markerId)) {
             case LEVEL_NORMAL:
-                sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
                 break;
 
             case LEVEL_TOGGLED:
@@ -506,11 +502,10 @@ public class FlagPanelFragment extends BasePanelFragment {
         }
 
         private void toggleFragment() {
-            sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA,
-                    AppConstants.INTENT_ACTION_TOGGLE_BLUE_FIRST);
+            sendIntent(AppConstants.ACTION_TOGGLE, AppConstants.EXTRA_DEFAULT, AppConstants.ACTION_TOGGLE_BLUE_FIRST);
             switch (toggleMarker(container, markerId)) {
             case LEVEL_NORMAL:
-                sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
                 break;
 
             case LEVEL_TOGGLED:
@@ -547,11 +542,10 @@ public class FlagPanelFragment extends BasePanelFragment {
         }
 
         private void toggleFragment() {
-            sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA,
-                    AppConstants.INTENT_ACTION_TOGGLE_BLUE_LAST);
+            sendIntent(AppConstants.ACTION_TOGGLE, AppConstants.EXTRA_DEFAULT, AppConstants.ACTION_TOGGLE_BLUE_LAST);
             switch (toggleMarker(container, markerId)) {
             case LEVEL_NORMAL:
-                sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
                 break;
 
             case LEVEL_TOGGLED:
@@ -570,29 +564,29 @@ public class FlagPanelFragment extends BasePanelFragment {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if (AppConstants.INTENT_ACTION_CLEAR_TOGGLE.equals(action)) {
+            if (AppConstants.ACTION_CLEAR_TOGGLE.equals(action)) {
                 uncheckMarker(new View(context));
             }
-            if (AppConstants.INTENT_ACTION_TOGGLE.equals(action)) {
+            if (AppConstants.ACTION_TOGGLE.equals(action)) {
                 if (intent.getExtras() != null) {
-                    String data = intent.getExtras().getString(AppConstants.INTENT_ACTION_EXTRA);
+                    String data = intent.getExtras().getString(AppConstants.EXTRA_DEFAULT);
                     switch (data) {
-                    case AppConstants.INTENT_ACTION_TOGGLE_ABANDON:
+                    case AppConstants.ACTION_TOGGLE_ABANDON:
                         uncheckMarker(mAbandonFlags);
                         break;
-                    case AppConstants.INTENT_ACTION_TOGGLE_RECALL:
+                    case AppConstants.ACTION_TOGGLE_RECALL:
                         uncheckMarker(mRecallFlags);
                         break;
-                    case AppConstants.INTENT_ACTION_TOGGLE_POSTPONE:
+                    case AppConstants.ACTION_TOGGLE_POSTPONE:
                         uncheckMarker(mPostponeFlags);
                         break;
-                    case AppConstants.INTENT_ACTION_TOGGLE_COURSE:
+                    case AppConstants.ACTION_TOGGLE_COURSE:
                         uncheckMarker(mCourseFlags);
                         break;
-                    case AppConstants.INTENT_ACTION_TOGGLE_BLUE_FIRST:
+                    case AppConstants.ACTION_TOGGLE_BLUE_FIRST:
                         uncheckMarker(mBlueFirstFlag);
                         break;
-                    case AppConstants.INTENT_ACTION_TOGGLE_BLUE_LAST:
+                    case AppConstants.ACTION_TOGGLE_BLUE_LAST:
                         uncheckMarker(mBlueLastFlag);
                         break;
                     default:

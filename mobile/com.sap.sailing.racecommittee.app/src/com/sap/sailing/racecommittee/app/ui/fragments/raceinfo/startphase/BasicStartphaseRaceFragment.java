@@ -16,6 +16,6 @@ public class BasicStartphaseRaceFragment extends BaseStartphaseRaceFragment<Basi
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+        sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
     }
 }

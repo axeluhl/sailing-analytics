@@ -54,7 +54,7 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
 
     public static Bundle createArguments(ManagedRace race) {
         Bundle arguments = new Bundle();
-        arguments.putString(AppConstants.INTENT_EXTRA_RACE_ID, race.getId());
+        arguments.putString(AppConstants.EXTRA_RACE_ID, race.getId());
         return arguments;
     }
 
@@ -73,7 +73,7 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
      */
     protected Bundle getRecentArguments() {
         Bundle args = new Bundle();
-        args.putString(AppConstants.INTENT_EXTRA_RACE_ID, managedRace.getId());
+        args.putString(AppConstants.EXTRA_RACE_ID, managedRace.getId());
         return args;
     }
 
@@ -90,7 +90,7 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         if (getArguments() != null) {
-            String raceId = getArguments().getString(AppConstants.INTENT_EXTRA_RACE_ID);
+            String raceId = getArguments().getString(AppConstants.EXTRA_RACE_ID);
             managedRace = OnlineDataManager.create(getActivity()).getDataStore().getRace(raceId);
             if (managedRace == null) {
                 throw new IllegalStateException("Unable to obtain ManagedRace " + raceId

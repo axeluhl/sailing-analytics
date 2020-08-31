@@ -664,8 +664,8 @@ public class StartTimeFragment extends BaseFragment
                         && getArguments().getInt(START_MODE, START_MODE_PRESETUP) == START_MODE_PRESETUP) {
                     changeFragment();
                 } else {
-                    sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
-                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                    sendIntent(AppConstants.ACTION_CLEAR_TOGGLE);
+                    sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
                 }
                 break;
             case R.id.start_date_button:
@@ -807,9 +807,9 @@ public class StartTimeFragment extends BaseFragment
         fragment.setArguments(args);
         transaction.replace(viewId, fragment);
         transaction.commit();
-        sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
+        sendIntent(AppConstants.ACTION_CLEAR_TOGGLE);
         if (requireActivity().findViewById(R.id.race_edit) != null) {
-            sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+            sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
         }
     }
 }

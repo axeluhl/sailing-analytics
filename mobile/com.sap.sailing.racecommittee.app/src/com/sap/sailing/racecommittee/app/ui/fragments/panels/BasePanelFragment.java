@@ -150,7 +150,7 @@ public abstract class BasePanelFragment extends RaceFragment {
                 Fragment fragment = getFragmentManager().findFragmentById(idRes);
                 if (fragment != null) {
                     if (cls.getCanonicalName().equals(fragment.getClass().getCanonicalName())) {
-                        sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                        sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
                     }
                 }
             }
@@ -162,7 +162,7 @@ public abstract class BasePanelFragment extends RaceFragment {
             Fragment fragment = getFragmentManager().findFragmentById(idRes);
             if (fragment != null) {
                 if (cls.getCanonicalName().equals(fragment.getClass().getCanonicalName())) {
-                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                    sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
                 }
             }
         }

@@ -137,12 +137,12 @@ public class SetupPanelFragment extends BasePanelFragment {
         getRaceState().getRacingProcedure().addChangedListener(mProcedureListener);
 
         IntentFilter filter = new IntentFilter();
-        filter.addAction(AppConstants.INTENT_ACTION_TOGGLE);
-        filter.addAction(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
-        filter.addAction(AppConstants.INTENT_ACTION_UPDATE_SCREEN);
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, filter);
+        filter.addAction(AppConstants.ACTION_TOGGLE);
+        filter.addAction(AppConstants.ACTION_CLEAR_TOGGLE);
+        filter.addAction(AppConstants.ACTION_UPDATE_SCREEN);
+        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(mReceiver, filter);
 
-        sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
+        sendIntent(AppConstants.ACTION_CLEAR_TOGGLE);
     }
 
     @Override
@@ -437,11 +437,10 @@ public class SetupPanelFragment extends BasePanelFragment {
 
         @Override
         public void onClick(PanelButton view) {
-            sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA,
-                    AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE);
+            sendIntent(AppConstants.ACTION_TOGGLE, AppConstants.EXTRA_DEFAULT, AppConstants.ACTION_TOGGLE_PROCEDURE);
             switch (view.toggleMarker()) {
                 case PanelButton.LEVEL_NORMAL:
-                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                    sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
                     break;
 
                 case PanelButton.LEVEL_TOGGLED:
@@ -467,11 +466,10 @@ public class SetupPanelFragment extends BasePanelFragment {
 
         @Override
         public void onClick(PanelButton view) {
-            sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA,
-                    AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE_MORE_MODE);
+            sendIntent(AppConstants.ACTION_TOGGLE, AppConstants.EXTRA_DEFAULT, AppConstants.ACTION_TOGGLE_PROCEDURE_MORE_MODE);
             switch (view.toggleMarker()) {
                 case PanelButton.LEVEL_NORMAL:
-                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                    sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
                     break;
 
                 case PanelButton.LEVEL_TOGGLED:
@@ -496,11 +494,10 @@ public class SetupPanelFragment extends BasePanelFragment {
 
         @Override
         public void onClick(PanelButton view) {
-            sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA,
-                    AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE_MORE_PATHFINDER);
+            sendIntent(AppConstants.ACTION_TOGGLE, AppConstants.EXTRA_DEFAULT, AppConstants.ACTION_TOGGLE_PROCEDURE_MORE_PATHFINDER);
             switch (view.toggleMarker()) {
                 case PanelButton.LEVEL_NORMAL:
-                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                    sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
                     break;
 
                 case PanelButton.LEVEL_TOGGLED:
@@ -526,11 +523,10 @@ public class SetupPanelFragment extends BasePanelFragment {
 
         @Override
         public void onClick(PanelButton view) {
-            sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA,
-                    AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE_MORE_TIMING);
+            sendIntent(AppConstants.ACTION_TOGGLE, AppConstants.EXTRA_DEFAULT, AppConstants.ACTION_TOGGLE_PROCEDURE_MORE_TIMING);
             switch (view.toggleMarker()) {
                 case PanelButton.LEVEL_NORMAL:
-                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                    sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
                     break;
 
                 case PanelButton.LEVEL_TOGGLED:
@@ -568,11 +564,10 @@ public class SetupPanelFragment extends BasePanelFragment {
 
         @Override
         public void onClick(PanelButton view) {
-            sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA,
-                    AppConstants.INTENT_ACTION_TOGGLE_FACTOR);
+            sendIntent(AppConstants.ACTION_TOGGLE, AppConstants.EXTRA_DEFAULT, AppConstants.ACTION_TOGGLE_FACTOR);
             switch (view.toggleMarker()) {
                 case LEVEL_NORMAL:
-                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                    sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
                     break;
 
                 case LEVEL_TOGGLED:
@@ -596,11 +591,10 @@ public class SetupPanelFragment extends BasePanelFragment {
 
         @Override
         public void onClick(PanelButton view) {
-            sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA,
-                    AppConstants.INTENT_ACTION_TOGGLE_COURSE);
+            sendIntent(AppConstants.ACTION_TOGGLE, AppConstants.EXTRA_DEFAULT, AppConstants.ACTION_TOGGLE_COURSE);
             switch (view.toggleMarker()) {
                 case LEVEL_NORMAL:
-                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                    sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
                     break;
 
                 case LEVEL_TOGGLED:
@@ -624,11 +618,10 @@ public class SetupPanelFragment extends BasePanelFragment {
 
         @Override
         public void onClick(PanelButton view) {
-            sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA,
-                    AppConstants.INTENT_ACTION_TOGGLE_WIND);
+            sendIntent(AppConstants.ACTION_TOGGLE, AppConstants.EXTRA_DEFAULT, AppConstants.ACTION_TOGGLE_WIND);
             switch (view.toggleMarker()) {
                 case LEVEL_NORMAL:
-                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                    sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
                     break;
 
                 case LEVEL_TOGGLED:
@@ -652,33 +645,33 @@ public class SetupPanelFragment extends BasePanelFragment {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if (AppConstants.INTENT_ACTION_CLEAR_TOGGLE.equals(action)) {
+            if (AppConstants.ACTION_CLEAR_TOGGLE.equals(action)) {
                 uncheckMarker(null);
             }
 
-            if (AppConstants.INTENT_ACTION_TOGGLE.equals(action)) {
+            if (AppConstants.ACTION_TOGGLE.equals(action)) {
                 if (intent.getExtras() != null) {
-                    String data = intent.getExtras().getString(AppConstants.INTENT_ACTION_EXTRA);
+                    String data = intent.getExtras().getString(AppConstants.EXTRA_DEFAULT);
                     switch (data) {
-                        case AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE:
+                        case AppConstants.ACTION_TOGGLE_PROCEDURE:
                             uncheckMarker(mButtonProcedure);
                             break;
-                        case AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE_MORE_MODE:
+                        case AppConstants.ACTION_TOGGLE_PROCEDURE_MORE_MODE:
                             uncheckMarker(mButtonMode);
                             break;
-                        case AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE_MORE_PATHFINDER:
+                        case AppConstants.ACTION_TOGGLE_PROCEDURE_MORE_PATHFINDER:
                             uncheckMarker(mButtonPathfinder);
                             break;
-                        case AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE_MORE_TIMING:
+                        case AppConstants.ACTION_TOGGLE_PROCEDURE_MORE_TIMING:
                             uncheckMarker(mButtonTiming);
                             break;
-                        case AppConstants.INTENT_ACTION_TOGGLE_FACTOR:
+                        case AppConstants.ACTION_TOGGLE_FACTOR:
                             uncheckMarker(mButtonFactor);
                             break;
-                        case AppConstants.INTENT_ACTION_TOGGLE_COURSE:
+                        case AppConstants.ACTION_TOGGLE_COURSE:
                             uncheckMarker(mButtonCourse);
                             break;
-                        case AppConstants.INTENT_ACTION_TOGGLE_WIND:
+                        case AppConstants.ACTION_TOGGLE_WIND:
                             uncheckMarker(mButtonWind);
                             break;
                         default:
@@ -688,7 +681,7 @@ public class SetupPanelFragment extends BasePanelFragment {
                 }
             }
 
-            if (AppConstants.INTENT_ACTION_UPDATE_SCREEN.equals(action)) {
+            if (AppConstants.ACTION_UPDATE_SCREEN.equals(action)) {
                 refreshPanel();
             }
         }

@@ -562,7 +562,7 @@ public class CourseFragmentMarks extends CourseFragment
             break;
 
         case START_MODE_PLANNED:
-            sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+            sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
             break;
         }
     }

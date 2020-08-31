@@ -24,7 +24,7 @@ public class CourseAreaListFragment extends NamedListFragment<CourseArea> {
     public static CourseAreaListFragment newInstance(Serializable eventId) {
         CourseAreaListFragment fragment = new CourseAreaListFragment();
         Bundle args = new Bundle();
-        args.putSerializable(AppConstants.EventIdTag, eventId);
+        args.putSerializable(AppConstants.EXTRA_EVENT_ID, eventId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -32,7 +32,7 @@ public class CourseAreaListFragment extends NamedListFragment<CourseArea> {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        parentEventId = getArguments().getSerializable(AppConstants.EventIdTag);
+        parentEventId = getArguments().getSerializable(AppConstants.EXTRA_EVENT_ID);
     }
 
     @Override

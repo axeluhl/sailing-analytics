@@ -133,9 +133,9 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
     }
 
     public static void showProtest(Context context, ManagedRace race) {
-        Intent intent = new Intent(AppConstants.INTENT_ACTION_SHOW_PROTEST);
+        Intent intent = new Intent(AppConstants.ACTION_SHOW_PROTEST);
         String extra = new RaceGroupSeries(race.getRaceGroup(), race.getSeries()).getDisplayName();
-        intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, extra);
+        intent.putExtra(AppConstants.EXTRA_DEFAULT, extra);
         BroadcastManager.getInstance(context).addIntent(intent);
     }
 
@@ -241,7 +241,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         mRefresh = view.findViewById(R.id.nav_button);
         if (mRefresh != null) {
             mRefresh.setOnClickListener(v -> BroadcastManager.getInstance(getActivity())
-                    .addIntent(new Intent(AppConstants.INTENT_ACTION_RELOAD_RACES)));
+                    .addIntent(new Intent(AppConstants.ACTION_RELOAD_RACES)));
         }
 
         view.setClickable(true);
@@ -294,7 +294,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         super.onResume();
 
         IntentFilter filter = new IntentFilter();
-        filter.addAction(AppConstants.INTENT_ACTION_SHOW_PROTEST);
+        filter.addAction(AppConstants.ACTION_SHOW_PROTEST);
         LocalBroadcastManager.getInstance(requireContext()).registerReceiver(mReceiver, filter);
     }
 
@@ -519,14 +519,14 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (AppConstants.INTENT_ACTION_SHOW_PROTEST.equals(intent.getAction())) {
-                String raceGroupSeriesDisplayName = intent.getStringExtra(AppConstants.INTENT_ACTION_EXTRA);
+            if (AppConstants.ACTION_SHOW_PROTEST.equals(intent.getAction())) {
+                String raceGroupSeriesDisplayName = intent.getStringExtra(AppConstants.EXTRA_DEFAULT);
                 if (raceGroupSeriesDisplayName != null) {
                     mRunnable = () -> showProtestTimeDialog(raceGroupSeriesDisplayName);
                     closeDrawer();
                 } else {
                     ExLog.e(getActivity(), TAG,
-                            "INTENT_ACTION_SHOW_PROTEST does not carry an INTENT_ACTION_EXTRA with the race group name!");
+                            "INTENT_ACTION_SHOW_PROTEST does not carry an EXTRA_DEFAULT with the race group name!");
                 }
             }
         }

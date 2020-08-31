@@ -263,8 +263,8 @@ public class PenaltyFragment extends BaseFragment
                         mHeader.setHeaderOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
-                                sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
+                                sendIntent(AppConstants.ACTION_CLEAR_TOGGLE);
+                                sendIntent(AppConstants.ACTION_SHOW_SUMMARY_CONTENT);
                             }
                         });
                     } else {
@@ -303,9 +303,9 @@ public class PenaltyFragment extends BaseFragment
 
         initLocalData();
 
-        Intent intent = new Intent(AppConstants.INTENT_ACTION_ON_LIFECYCLE);
-        intent.putExtra(AppConstants.INTENT_ACTION_EXTRA_LIFECYCLE, AppConstants.INTENT_ACTION_EXTRA_START);
-        intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_COMPETITOR);
+        Intent intent = new Intent(AppConstants.ACTION_ON_LIFECYCLE);
+        intent.putExtra(AppConstants.ACTION_EXTRA_LIFECYCLE, AppConstants.ACTION_EXTRA_START);
+        intent.putExtra(AppConstants.EXTRA_DEFAULT, AppConstants.ACTION_TOGGLE_COMPETITOR);
         BroadcastManager.getInstance(getActivity()).addIntent(intent);
     }
 
@@ -323,9 +323,9 @@ public class PenaltyFragment extends BaseFragment
             getRaceState().setFinishPositioningListChanged(MillisecondsTimePoint.now(), diff);
         }
 
-        Intent intent = new Intent(AppConstants.INTENT_ACTION_ON_LIFECYCLE);
-        intent.putExtra(AppConstants.INTENT_ACTION_EXTRA_LIFECYCLE, AppConstants.INTENT_ACTION_EXTRA_STOP);
-        intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_COMPETITOR);
+        Intent intent = new Intent(AppConstants.ACTION_ON_LIFECYCLE);
+        intent.putExtra(AppConstants.ACTION_EXTRA_LIFECYCLE, AppConstants.ACTION_EXTRA_STOP);
+        intent.putExtra(AppConstants.EXTRA_DEFAULT, AppConstants.ACTION_TOGGLE_COMPETITOR);
         BroadcastManager.getInstance(getActivity()).addIntent(intent);
     }
 

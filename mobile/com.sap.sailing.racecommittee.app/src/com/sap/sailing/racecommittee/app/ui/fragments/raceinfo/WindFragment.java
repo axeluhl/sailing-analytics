@@ -255,7 +255,7 @@ public class WindFragment extends BaseFragment
         // disconnect googleApiClient and unregister position poller
         stopLocationUpdates();
         LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(mReceiver);
-        sendIntent(AppConstants.INTENT_ACTION_TIME_SHOW);
+        sendIntent(AppConstants.ACTION_TIME_SHOW);
     }
 
     @Override
@@ -270,13 +270,13 @@ public class WindFragment extends BaseFragment
         mManagedRaces = new ArrayList<>(raceFilter.getCurrentRaces());
         Collections.sort(mManagedRaces, new CurrentRaceComparator());
         mSelectedRaces = new ArrayList<>();
-        sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
+        sendIntent(AppConstants.ACTION_TIME_HIDE);
         // register receiver to be notified if race is tracked
-        IntentFilter filter = new IntentFilter(AppConstants.INTENT_ACTION_IS_TRACKING);
+        IntentFilter filter = new IntentFilter(AppConstants.ACTION_IS_TRACKING);
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, filter);
         // Contact server and ask if race is tracked and map is allowed to show.
         WindHelper.isTrackedRace(getActivity(), getRace());
-        sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
+        sendIntent(AppConstants.ACTION_TIME_HIDE);
 
         startLocationUpdates();
     }
@@ -616,7 +616,7 @@ public class WindFragment extends BaseFragment
         public void onReceive(Context context, Intent intent) {
             Button button = reference.get();
             if (button != null) {
-                button.setEnabled(intent.getBooleanExtra(AppConstants.INTENT_ACTION_IS_TRACKING_EXTRA, false));
+                button.setEnabled(intent.getBooleanExtra(AppConstants.EXTRA_IS_TRACKING, false));
             }
         }
     }

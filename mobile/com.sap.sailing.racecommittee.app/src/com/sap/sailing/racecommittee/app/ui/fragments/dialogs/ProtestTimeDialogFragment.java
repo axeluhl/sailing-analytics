@@ -133,7 +133,7 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
                 mHome.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Intent intent = new Intent(AppConstants.INTENT_ACTION_REMOVE_PROTEST);
+                        Intent intent = new Intent(AppConstants.ACTION_REMOVE_PROTEST);
                         BroadcastManager.getInstance(getActivity()).addIntent(intent);
                     }
                 });

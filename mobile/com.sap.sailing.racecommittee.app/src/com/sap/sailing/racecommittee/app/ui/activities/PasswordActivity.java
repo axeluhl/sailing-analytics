@@ -36,10 +36,10 @@ public class PasswordActivity extends BaseActivity {
     public void onResume() {
         super.onResume();
 
-        BroadcastManager.getInstance(this).addIntent(new Intent(AppConstants.INTENT_ACTION_CHECK_LOGIN));
+        BroadcastManager.getInstance(this).addIntent(new Intent(AppConstants.ACTION_CHECK_LOGIN));
 
         IntentFilter filter = new IntentFilter();
-        filter.addAction(AppConstants.INTENT_ACTION_VALID_DATA);
+        filter.addAction(AppConstants.ACTION_VALID_DATA);
         LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, filter);
     }
 
@@ -58,8 +58,8 @@ public class PasswordActivity extends BaseActivity {
             Intent start;
             if (dataStore.getCourseAreaId() != null) {
                 start = new Intent(PasswordActivity.this, RacingActivity.class);
-                start.putExtra(AppConstants.COURSE_AREA_UUID_KEY, dataStore.getCourseAreaId());
-                start.putExtra(AppConstants.EventIdTag, dataStore.getEventUUID());
+                start.putExtra(AppConstants.EXTRA_COURSE_UUID, dataStore.getCourseAreaId());
+                start.putExtra(AppConstants.EXTRA_EVENT_ID, dataStore.getEventUUID());
             } else {
                 start = new Intent(PasswordActivity.this, LoginActivity.class);
             }

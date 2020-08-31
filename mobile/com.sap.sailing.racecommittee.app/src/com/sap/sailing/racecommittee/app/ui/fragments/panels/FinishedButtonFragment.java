@@ -92,11 +92,11 @@ public class FinishedButtonFragment extends BasePanelFragment {
         super.onResume();
 
         IntentFilter filter = new IntentFilter();
-        filter.addAction(AppConstants.INTENT_ACTION_TOGGLE);
-        filter.addAction(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
+        filter.addAction(AppConstants.ACTION_TOGGLE);
+        filter.addAction(AppConstants.ACTION_CLEAR_TOGGLE);
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, filter);
 
-        sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
+        sendIntent(AppConstants.ACTION_CLEAR_TOGGLE);
 
         if (!preferences.getRacingProcedureIsResultEntryEnabled(getRaceState().getRacingProcedure().getType())) {
             mList.setVisibility(View.GONE);
@@ -141,11 +141,10 @@ public class FinishedButtonFragment extends BasePanelFragment {
         @Override
         public void onClick(View v) {
             if (mRecordLock == null || mRecordLock.getVisibility() == View.GONE) {
-                sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA,
-                        AppConstants.INTENT_ACTION_TOGGLE_REPLAY);
+                sendIntent(AppConstants.ACTION_TOGGLE, AppConstants.EXTRA_DEFAULT, AppConstants.ACTION_TOGGLE_REPLAY);
                 switch (toggleMarker(v, R.id.record_marker)) {
                 case LEVEL_NORMAL:
-                    sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
+                    sendIntent(AppConstants.ACTION_SHOW_SUMMARY_CONTENT);
                     break;
 
                 case LEVEL_TOGGLED:
@@ -165,11 +164,10 @@ public class FinishedButtonFragment extends BasePanelFragment {
         @Override
         public void onClick(View v) {
             if (mPhotoLock == null || mPhotoLock.getVisibility() == View.GONE) {
-                sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA,
-                        AppConstants.INTENT_ACTION_TOGGLE_PHOTOS);
+                sendIntent(AppConstants.ACTION_TOGGLE, AppConstants.EXTRA_DEFAULT, AppConstants.ACTION_TOGGLE_PHOTOS);
                 switch (toggleMarker(v, R.id.photo_marker)) {
                 case LEVEL_NORMAL:
-                    sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
+                    sendIntent(AppConstants.ACTION_SHOW_SUMMARY_CONTENT);
                     break;
 
                 case LEVEL_TOGGLED:
@@ -190,11 +188,10 @@ public class FinishedButtonFragment extends BasePanelFragment {
         @Override
         public void onClick(View v) {
             if (mListLock == null || mListLock.getVisibility() == View.GONE) {
-                sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA,
-                        AppConstants.INTENT_ACTION_TOGGLE_LIST);
+                sendIntent(AppConstants.ACTION_TOGGLE, AppConstants.EXTRA_DEFAULT, AppConstants.ACTION_TOGGLE_LIST);
                 switch (toggleMarker(v, R.id.list_marker)) {
                 case LEVEL_NORMAL:
-                    sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
+                    sendIntent(AppConstants.ACTION_SHOW_SUMMARY_CONTENT);
                     break;
 
                 case LEVEL_TOGGLED:
@@ -215,21 +212,21 @@ public class FinishedButtonFragment extends BasePanelFragment {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if (AppConstants.INTENT_ACTION_CLEAR_TOGGLE.equals(action)) {
+            if (AppConstants.ACTION_CLEAR_TOGGLE.equals(action)) {
                 uncheckMarker(new View(context));
             }
 
-            if (AppConstants.INTENT_ACTION_TOGGLE.equals(action)) {
+            if (AppConstants.ACTION_TOGGLE.equals(action)) {
                 if (intent.getExtras() != null) {
-                    String data = intent.getExtras().getString(AppConstants.INTENT_ACTION_EXTRA);
+                    String data = intent.getExtras().getString(AppConstants.EXTRA_DEFAULT);
                     switch (data) {
-                    case AppConstants.INTENT_ACTION_TOGGLE_REPLAY:
+                    case AppConstants.ACTION_TOGGLE_REPLAY:
                         uncheckMarker(mRecord);
                         break;
-                    case AppConstants.INTENT_ACTION_TOGGLE_PHOTOS:
+                    case AppConstants.ACTION_TOGGLE_PHOTOS:
                         uncheckMarker(mPhoto);
                         break;
-                    case AppConstants.INTENT_ACTION_TOGGLE_LIST:
+                    case AppConstants.ACTION_TOGGLE_LIST:
                         uncheckMarker(mList);
                         break;
                     default:

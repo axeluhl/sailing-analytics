@@ -125,14 +125,14 @@ public class TimePanelFragment extends BasePanelFragment {
         getRaceState().addChangedListener(mStateListener);
 
         IntentFilter filter = new IntentFilter();
-        filter.addAction(AppConstants.INTENT_ACTION_TOGGLE);
-        filter.addAction(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
-        filter.addAction(AppConstants.INTENT_ACTION_TIME_SHOW);
-        filter.addAction(AppConstants.INTENT_ACTION_TIME_HIDE);
-        filter.addAction(AppConstants.INTENT_ACTION_ON_LIFECYCLE);
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, filter);
+        filter.addAction(AppConstants.ACTION_TOGGLE);
+        filter.addAction(AppConstants.ACTION_CLEAR_TOGGLE);
+        filter.addAction(AppConstants.ACTION_TIME_SHOW);
+        filter.addAction(AppConstants.ACTION_TIME_HIDE);
+        filter.addAction(AppConstants.ACTION_ON_LIFECYCLE);
+        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(mReceiver, filter);
 
-        sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
+        sendIntent(AppConstants.ACTION_CLEAR_TOGGLE);
     }
 
     @Override
@@ -323,11 +323,10 @@ public class TimePanelFragment extends BasePanelFragment {
         }
 
         private void toggleFragment() {
-            sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA,
-                    AppConstants.INTENT_ACTION_TOGGLE_TIME);
+            sendIntent(AppConstants.ACTION_TOGGLE, AppConstants.EXTRA_DEFAULT, AppConstants.ACTION_TOGGLE_TIME);
             switch (toggleMarker(container, markerId)) {
             case 0:
-                sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
                 break;
 
             case 1:
@@ -348,19 +347,18 @@ public class TimePanelFragment extends BasePanelFragment {
 
         @Override
         public void onClick(PanelButton view) {
-            sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA,
-                    AppConstants.INTENT_ACTION_TOGGLE_COMPETITOR);
+            sendIntent(AppConstants.ACTION_TOGGLE, AppConstants.EXTRA_DEFAULT, AppConstants.ACTION_TOGGLE_COMPETITOR);
             switch (view.toggleMarker()) {
             case PanelButton.LEVEL_NORMAL:
-                Intent intent = new Intent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
-                intent.putExtra(AppConstants.INTENT_ACTION_EXTRA_FORCED, true);
+                Intent intent = new Intent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
+                intent.putExtra(AppConstants.ACTION_EXTRA_FORCED, true);
                 BroadcastManager.getInstance(getActivity()).addIntent(intent);
                 break;
 
             case PanelButton.LEVEL_TOGGLED:
                 Bundle args = new Bundle();
                 RaceFragment content;
-                args.putSerializable(AppConstants.INTENT_EXTRA_RACE_ID, getRace().getId());
+                args.putSerializable(AppConstants.EXTRA_RACE_ID, getRace().getId());
                 if (getRace().getStatus() != RaceLogRaceStatus.FINISHING) {
                     content = PenaltyFragment.newInstance();
                 } else {
@@ -388,18 +386,18 @@ public class TimePanelFragment extends BasePanelFragment {
         public void onReceive(Context context, Intent intent) {
             if (isAdded()) {
                 String action = intent.getAction();
-                if (AppConstants.INTENT_ACTION_CLEAR_TOGGLE.equals(action)) {
+                if (AppConstants.ACTION_CLEAR_TOGGLE.equals(action)) {
                     uncheckMarker(null);
                 }
 
-                if (AppConstants.INTENT_ACTION_TOGGLE.equals(action)) {
+                if (AppConstants.ACTION_TOGGLE.equals(action)) {
                     if (intent.getExtras() != null) {
-                        String data = intent.getStringExtra(AppConstants.INTENT_ACTION_EXTRA);
+                        String data = intent.getStringExtra(AppConstants.EXTRA_DEFAULT);
                         switch (data) {
-                        case AppConstants.INTENT_ACTION_TOGGLE_TIME:
+                        case AppConstants.ACTION_TOGGLE_TIME:
                             uncheckMarker(mRaceHeader);
                             break;
-                        case AppConstants.INTENT_ACTION_TOGGLE_COMPETITOR:
+                        case AppConstants.ACTION_TOGGLE_COMPETITOR:
                             uncheckMarker(mCompetitorList);
                             break;
                         default:
@@ -409,17 +407,17 @@ public class TimePanelFragment extends BasePanelFragment {
                     }
                 }
 
-                if (AppConstants.INTENT_ACTION_ON_LIFECYCLE.equals(action)) {
+                if (AppConstants.ACTION_ON_LIFECYCLE.equals(action)) {
                     if (intent.getExtras() != null) {
-                        String event = intent.getStringExtra(AppConstants.INTENT_ACTION_EXTRA_LIFECYCLE);
-                        String data = intent.getStringExtra(AppConstants.INTENT_ACTION_EXTRA);
-                        if (AppConstants.INTENT_ACTION_EXTRA_START.equals(event)) {
-                            if (AppConstants.INTENT_ACTION_TOGGLE_COMPETITOR.equals(data)) {
+                        String event = intent.getStringExtra(AppConstants.ACTION_EXTRA_LIFECYCLE);
+                        String data = intent.getStringExtra(AppConstants.EXTRA_DEFAULT);
+                        if (AppConstants.ACTION_EXTRA_START.equals(event)) {
+                            if (AppConstants.ACTION_TOGGLE_COMPETITOR.equals(data)) {
                                 mCompetitorList.setMarkerLevel(PanelButton.LEVEL_TOGGLED);
                             }
                         }
-                        if (AppConstants.INTENT_ACTION_EXTRA_STOP.equals(event)) {
-                            if (AppConstants.INTENT_ACTION_TOGGLE_COMPETITOR.equals(data)) {
+                        if (AppConstants.ACTION_EXTRA_STOP.equals(event)) {
+                            if (AppConstants.ACTION_TOGGLE_COMPETITOR.equals(data)) {
                                 mCompetitorList.setMarkerLevel(PanelButton.LEVEL_NORMAL);
                             }
                         }
@@ -427,12 +425,12 @@ public class TimePanelFragment extends BasePanelFragment {
                 }
 
                 View view = getActivity().findViewById(R.id.race_panel_time);
-                if (getActivity().findViewById(R.id.race_edit) == null && view != null) {
-                    if (AppConstants.INTENT_ACTION_TIME_HIDE.equals(action)) {
+                if (requireActivity().findViewById(R.id.race_edit) == null && view != null) {
+                    if (AppConstants.ACTION_TIME_HIDE.equals(action)) {
                         view.setVisibility(View.GONE);
                     }
 
-                    if (AppConstants.INTENT_ACTION_TIME_SHOW.equals(action)) {
+                    if (AppConstants.ACTION_TIME_SHOW.equals(action)) {
                         view.setVisibility(View.VISIBLE);
                     }
                 }
