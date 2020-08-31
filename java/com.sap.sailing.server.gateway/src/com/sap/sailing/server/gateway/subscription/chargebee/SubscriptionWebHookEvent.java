@@ -2,6 +2,7 @@ package com.sap.sailing.server.gateway.subscription.chargebee;
 
 import java.util.logging.Logger;
 
+import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONObject;
 
 /**
@@ -54,7 +55,11 @@ public class SubscriptionWebHookEvent {
     }
 
     public String getCustomerId() {
-        return getJsonValue(content, "customer", "id");
+        String customerId = getJsonValue(content, "customer", "id");
+        if (StringUtils.isEmpty(customerId)) {
+            customerId = getInvoiceCustomerId();
+        }
+        return customerId;
     }
 
     public String getPlanId() {
@@ -62,7 +67,11 @@ public class SubscriptionWebHookEvent {
     }
 
     public String getSubscriptionId() {
-        return getJsonValue(content, "subscription", "id");
+        String subscriptionId = getJsonValue(content, "subscription", "id");
+        if (StringUtils.isEmpty(subscriptionId)) {
+            subscriptionId = getInvoiceSubscriptionId();
+        }
+        return subscriptionId;
     }
 
     public String getSubscriptionStatus() {

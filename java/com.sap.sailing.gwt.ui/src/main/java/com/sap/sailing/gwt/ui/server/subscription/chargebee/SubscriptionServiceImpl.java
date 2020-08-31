@@ -115,7 +115,7 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
                     content.subscription().status().name().toLowerCase(), null, transactionType, transactionStatus,
                     invoiceId, invoiceStatus, content.subscription().createdAt().getTime() / 1000,
                     content.subscription().updatedAt().getTime() / 1000, 0, System.currentTimeMillis() / 1000);
-            getSecurityService().updateUserSubscription(user.getName(), subscription);
+            updateUserSubscription(user, subscription);
             subscriptionDto = getSubscription();
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error in saving subscription ", e);
@@ -158,13 +158,14 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
             User user = getCurrentUser();
             Subscription subscription = user.getSubscriptionByPlan(planId);
             if (isValidSubscription(subscription)) {
+                logger.log(Level.INFO, "Cancel user subscription, user " + user.getName() + ", plan " + planId);
                 Result resultData = cancel(subscription.getSubscriptionId()).request();
                 if (resultData.subscription().status().name().toLowerCase()
                         .equals(ChargebeeSubscription.SUBSCRIPTION_STATUS_CANCELLED)) {
                     Subscription newSubscription = ChargebeeSubscription.createEmptySubscription(
                             subscription.getPlanId(), subscription.getLatestEventTime(),
                             System.currentTimeMillis() / 1000);
-                    getSecurityService().updateUserSubscription(user.getName(), newSubscription);
+                    updateUserSubscription(user, newSubscription);
                     result = true;
                 } else {
                     result = false;
@@ -177,6 +178,12 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
             result = false;
         }
         return result;
+    }
+
+    private void updateUserSubscription(User user, Subscription subscription) throws UserManagementException {
+        logger.log(Level.INFO,
+                "Update user subscription, user " + user.getName() + ", new subsription " + subscription.toString());
+        getSecurityService().updateUserSubscription(user.getName(), subscription);
     }
 
     private void initPaymentService() {
