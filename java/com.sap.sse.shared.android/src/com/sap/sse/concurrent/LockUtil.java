@@ -57,6 +57,14 @@ public class LockUtil {
         T run();
     }
     
+    public interface RunnableWithResultAndException<T, E extends Throwable> {
+        T run() throws E;
+    }
+    
+    public interface RunnableWithException<E extends Throwable> {
+        void run() throws E;
+    }
+    
     private static final int NUMBER_OF_SECONDS_TO_WAIT_FOR_LOCK = 5;
     private static final Logger logger = Logger.getLogger(Util.class.getName());
     private static final Map<NamedReentrantReadWriteLock, TimePoint> lastTimeWriteLockWasObtained = new ConcurrentWeakHashMap<NamedReentrantReadWriteLock, TimePoint>();
@@ -474,6 +482,42 @@ public class LockUtil {
             return runnable.run();
         } finally {
             unlockAfterWrite(lock);
+        }
+    }
+    
+    public static <T, E extends Throwable> T executeWithWriteLockAndResultExpectException(NamedReentrantReadWriteLock lock, RunnableWithResultAndException<T, E> runnable) throws E{
+        lockForWrite(lock);
+        try {
+            return runnable.run();
+        } finally {
+            unlockAfterWrite(lock);
+        }
+    }
+    
+    public static <E extends Throwable> void executeWithWriteLockExpectException(NamedReentrantReadWriteLock lock, RunnableWithException<E> runnable) throws E{
+        lockForWrite(lock);
+        try {
+            runnable.run();
+        } finally {
+            unlockAfterWrite(lock);
+        }
+    }
+    
+    public static <T, E extends Throwable> T executeWithReadLockAndResultExpectException(NamedReentrantReadWriteLock lock, RunnableWithResultAndException<T, E> runnable) throws E{
+        lockForRead(lock);
+        try {
+            return runnable.run();
+        } finally {
+            unlockAfterRead(lock);
+        }
+    }
+    
+    public static <E extends Throwable> void executeWithReadLockExpectException(NamedReentrantReadWriteLock lock, RunnableWithException<E> runnable) throws E{
+        lockForRead(lock);
+        try {
+            runnable.run();
+        } finally {
+            unlockAfterRead(lock);
         }
     }
 }
