@@ -23,6 +23,16 @@
             <div class="mainContent">
                 <h2 class="releaseHeadline">Release Notes - Administration Console</h2>
                 <div class="innerContent">
+                    <h2 class="articleSubheadline">August 2020</h2>
+                    <ul class="bulletList">
+                        <li>Fixed a problem with "None" implied wind source selection for ORC PCS races.
+                            It caused a serialization error of the race log, e.g., when requested by the
+                            Race Manager App.</li>
+                        <li>Added boat classes X-332, J/92, and J/92S.</li>
+                        <li>SwissTiming races can now also be loaded from log files named <tt>{race-id}.log</tt> located
+                            in the same folder as the JSON document holding the event information if the host name
+                            in the connectivity information is left empty.</li>
+                    </ul>
                     <h2 class="articleSubheadline">July 2020</h2>
                     <ul class="bulletList">
                         <li>Fixed a problem with cross-track error calculations in case no track can be found for a competitor</li>
