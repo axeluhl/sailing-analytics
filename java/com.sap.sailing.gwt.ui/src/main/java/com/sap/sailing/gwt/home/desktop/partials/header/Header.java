@@ -8,18 +8,19 @@ import static com.sap.sse.gwt.shared.DebugConstants.DEBUG_ID_ATTRIBUTE;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.Style.Display;
-import com.google.gwt.dom.client.Text;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyPressEvent;
@@ -81,9 +82,9 @@ public class Header extends Composite implements HeaderConstants {
     @UiField Anchor dataMiningPageLink;
     @UiField TextBox searchText;
     @UiField Button searchButton;
-    @UiField Anchor headerNavigationIcon;
+    @UiField Anchor hamburgerMenuIcon;
     @UiField Element headerNavigationDropDownMenuContainer;
-    @UiField Element rightMenuPanel;
+    @UiField Element centerMenuPanel;
     
     @UiField Anchor usermenu;
     
@@ -101,17 +102,18 @@ public class Header extends Composite implements HeaderConstants {
     }
     
     private static final class MenuItemVisibilityHandler implements ResizeHandler{
-        private static final int visibiltyThreshold = 40;
         private final Map<Anchor,Anchor> menuToDropDownItemMap;
-        private final Anchor headerNavigationIcon;
+        private final Map<Anchor, Integer> menuItemWidthMap = new HashMap<>();
+        private final Set<Anchor> ignorMenuItems = new HashSet<>();
+        private final Anchor hamburgerNavigationIcon;
         private final DropdownHandler dropdownHandler;
-        private final Element rightMenuPanel;
+        private final Element centerMenuPanel;
 
-        public MenuItemVisibilityHandler(Map<Anchor,Anchor> menuToDropDownItemMap, DropdownHandler dropdownHandler, Anchor headerNavigationIcon, Element rightMenuPanel) {
+        public MenuItemVisibilityHandler(Map<Anchor,Anchor> menuToDropDownItemMap, DropdownHandler dropdownHandler, Anchor hamburgerNavigationIcon, Element centerMenuPanel) {
             this.dropdownHandler = dropdownHandler;
-            this.headerNavigationIcon = headerNavigationIcon;
+            this.hamburgerNavigationIcon = hamburgerNavigationIcon;
             this.menuToDropDownItemMap = menuToDropDownItemMap;
-            this.rightMenuPanel = rightMenuPanel;
+            this.centerMenuPanel = centerMenuPanel;
         }
 
         @Override
@@ -119,30 +121,62 @@ public class Header extends Composite implements HeaderConstants {
             refreshVisibilityDeferred();
         }
 
-        private boolean isVisibilityInMenuBar(Anchor anchor) {
-            int offsetTop = anchor.getElement().getOffsetTop();
-            return offsetTop < visibiltyThreshold;
+        private boolean isVisibilityInMenuBar(Anchor anchor, int leftOffset) {
+            int anchorWidth = this.menuItemWidthMap.getOrDefault(anchor, 200);
+            if (LOG.isLoggable(Level.FINEST))
+                LOG.finest(anchor.getText() + " " + (leftOffset + anchorWidth) + " < "
+                        + this.centerMenuPanel.getAbsoluteRight());
+            boolean fitsFullyIntoPanel = leftOffset + anchorWidth < this.centerMenuPanel.getAbsoluteRight();
+            if (LOG.isLoggable(Level.FINEST))
+                LOG.finest(anchor.getText() + " centerMenuPanel right boundary: "
+                        + this.centerMenuPanel.getAbsoluteRight());
+            return fitsFullyIntoPanel;
         }
-        
 
         private void refreshVisibility() {
-            LOG.info("refesh visibility");
             int noOfVisibleItems = 0;
+            int leftOffset = centerMenuPanel.getAbsoluteLeft();
             for (Map.Entry<Anchor, Anchor> item : menuToDropDownItemMap.entrySet()) {
                 Anchor menuAnchor = item.getKey();
+                initStaticWidth(menuAnchor);
                 Element listItem = item.getValue().getElement().getParentElement();
-                Display isVisible = isVisibilityInMenuBar(menuAnchor) ? NONE : BLOCK;
-                listItem.getStyle().setDisplay(isVisible);
-                noOfVisibleItems += isVisible == BLOCK ? 1 : 0;
+                boolean visibilityInMenuBar = !ignorMenuItems.contains(menuAnchor)
+                        && isVisibilityInMenuBar(menuAnchor, leftOffset);
+                menuAnchor.setVisible(visibilityInMenuBar);
+                Display listItemDisplay = visibilityInMenuBar || ignorMenuItems.contains(menuAnchor) ? NONE : BLOCK;
+                listItem.getStyle().setDisplay(listItemDisplay);
+                noOfVisibleItems += listItemDisplay == BLOCK ? 1 : 0;
+                leftOffset += menuItemWidthMap.getOrDefault(menuAnchor, 200);
             }
-            this.headerNavigationIcon.getElement().getStyle()
+            this.hamburgerNavigationIcon.getElement().getStyle()
                     .setVisibility(noOfVisibleItems == 0 ? HIDDEN : VISIBLE);
             if (noOfVisibleItems == 0) { // hide if nothing to display. Otherwise do not touch visibility
                 this.dropdownHandler.setVisible(false);
             }
         }
 
-        private void refreshVisibility(int delayMillis) {
+        private void initStaticWidth(Anchor key) {
+            menuItemWidthMap.compute(key, (menuItem, oldWidth) -> {
+                int newWidth = menuItem.getElement().getClientWidth();
+                if (newWidth > 0) {
+                    return newWidth;
+                } else {
+                    if (LOG.isLoggable(Level.FINEST))
+                        LOG.finest(menuItem.getText() + " keep old width " + oldWidth);
+                    return oldWidth;
+                }
+            });
+        }
+        
+        public void addIgnore(Anchor menuItem) {
+            this.ignorMenuItems.add(menuItem);
+        }
+        
+        public boolean removeIgnore(Anchor menuItem) {
+            return this.ignorMenuItems.remove(menuItem);
+        }
+
+        public void refreshVisibility(int delayMillis) {
             new Timer() {
                 @Override
                 public void run() {
@@ -152,29 +186,8 @@ public class Header extends Composite implements HeaderConstants {
         }
 
         public void refreshVisibilityDeferred() {
-            LOG.info("refesh visibility deferred");
-            Anchor anchor = (Anchor)menuToDropDownItemMap.values().toArray()[0];
-            Element element = anchor.getElement();
-            redraw(element);
             Scheduler.get().scheduleDeferred(this::refreshVisibility);
         }
-
-        private void redraw(Element element) {
-            Text dummyText = element.getOwnerDocument().createTextNode(" ");
-            element.appendChild(dummyText);
-            String strDisplay = element.getStyle().getDisplay();
-            Display display = strDisplay == null || strDisplay.equals("") ? Display.INITIAL : Display.valueOf(strDisplay.toUpperCase());
-            element.getStyle().setDisplay(Display.NONE);
-
-            Scheduler.get().scheduleDeferred(() -> {
-                element.removeChild(dummyText);
-                element.getStyle().setDisplay(display);
-                Scheduler.get().scheduleDeferred(this::refreshVisibility);
-            });
-            Scheduler.get().scheduleEntry((ScheduledCommand)this::refreshVisibility);
-            Scheduler.get().scheduleFinally((ScheduledCommand)this::refreshVisibility);
-        }
-
     }
 
     private static HeaderUiBinder uiBinder = GWT.create(HeaderUiBinder.class);
@@ -199,8 +212,8 @@ public class Header extends Composite implements HeaderConstants {
         adminConsolePageLink.getElement().setId("adminConsolePageLink");
         dataMiningPageLink.getElement().setId("dataMiningPageLink");
         headerNavigationDropDownMenuContainer.getStyle().setDisplay(Display.NONE);
-        final DropdownHandler dropdownHandler = new DropdownHandler(headerNavigationIcon, headerNavigationDropDownMenuContainer);
-        menuItemVisibilityHandler = new MenuItemVisibilityHandler(menuToDropDownItemMap, dropdownHandler, headerNavigationIcon, rightMenuPanel);
+        final DropdownHandler dropdownHandler = new DropdownHandler(hamburgerMenuIcon, headerNavigationDropDownMenuContainer);
+        menuItemVisibilityHandler = new MenuItemVisibilityHandler(menuToDropDownItemMap, dropdownHandler, hamburgerMenuIcon, centerMenuPanel);
         Window.addResizeHandler(menuItemVisibilityHandler);
         links = Arrays.asList(new Anchor[] { startPageLink, eventsPageLink, solutionsPageLink, adminConsolePageLink, dataMiningPageLink });
         homeNavigation = navigator.getHomeNavigation();
@@ -212,6 +225,9 @@ public class Header extends Composite implements HeaderConstants {
         // make the Admin and DataMining links visible only for signed-in users
         adminConsolePageLink.getElement().getStyle().setDisplay(Display.NONE);
         dataMiningPageLink.getElement().getStyle().setDisplay(Display.NONE);
+        // initially hide admin console and data mining in hamburger menu
+        menuItemVisibilityHandler.addIgnore(adminConsolePageLink);
+        menuItemVisibilityHandler.addIgnore(dataMiningPageLink);
         eventBus.addHandler(AuthenticationContextEvent.TYPE, event->{
             AuthenticationContext authContext = event.getCtx();
             LOG.fine("current user:" + authContext.getCurrentUser());
@@ -222,6 +238,7 @@ public class Header extends Composite implements HeaderConstants {
                 adminConsolePageLink.setHref(ADMIN_CONSOLE_PATH);
                 adminConsolePageLink.setTarget(ADMIN_CONSOLE_WINDOW);
                 adminConsolePageLink.getElement().getStyle().setDisplay(Display.INLINE_BLOCK);
+                menuItemVisibilityHandler.removeIgnore(adminConsolePageLink);
             } else if (authContext.getCurrentUser() != null && !authContext.getCurrentUser().getName().equals("Anonymous")) {
                 // make it point to the default "manage events" self-service server configured in ServerInfo otherwise
                 String base = authContext.getServerInfo().getManageEventsBaseUrl();
@@ -230,8 +247,10 @@ public class Header extends Composite implements HeaderConstants {
                 adminConsolePageLink.setHref(UriUtils.fromString(base + ADMIN_CONSOLE_PATH));
                 adminConsolePageLink.setTarget(ADMIN_CONSOLE_WINDOW);
                 adminConsolePageLink.getElement().getStyle().setDisplay(Display.INLINE_BLOCK);
+                menuItemVisibilityHandler.removeIgnore(adminConsolePageLink);
             } else {
                 adminConsolePageLink.getElement().getStyle().setDisplay(Display.NONE);
+                menuItemVisibilityHandler.addIgnore(adminConsolePageLink);
             }
             if (authContext.hasServerPermission(ServerActions.DATA_MINING)) {
                 dataMiningPageLinkMenu.setHref(DATA_MINING_PATH);
@@ -239,8 +258,10 @@ public class Header extends Composite implements HeaderConstants {
                 dataMiningPageLink.setHref(DATA_MINING_PATH);
                 dataMiningPageLink.setTarget(DATA_MINING_WINDOW);
                 dataMiningPageLink.getElement().getStyle().setDisplay(Display.INLINE_BLOCK);
+                menuItemVisibilityHandler.removeIgnore(dataMiningPageLink);
             } else {
                 dataMiningPageLink.getElement().getStyle().setDisplay(Display.NONE);
+                menuItemVisibilityHandler.addIgnore(dataMiningPageLink);
             }
             menuItemVisibilityHandler.refreshVisibilityDeferred();
         });
