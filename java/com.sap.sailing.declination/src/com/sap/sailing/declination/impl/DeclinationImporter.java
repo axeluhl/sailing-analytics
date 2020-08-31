@@ -2,6 +2,11 @@ package com.sap.sailing.declination.impl;
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -33,34 +38,20 @@ public abstract class DeclinationImporter {
      */
     public Declination getDeclination(final Position position, final TimePoint timePoint,
             long timeoutForOnlineFetchInMilliseconds) throws IOException, ParseException {
-        final Declination[] result = new Declination[1];
-        Thread fetcher = new Thread("Declination fetcher for "+position+"@"+timePoint) {
-            @Override
-            public void run() {
-                try {
-                    Declination fetched = importRecord(position, timePoint);
-                    synchronized (result) {
-                        result[0] = fetched;
-                        result.notifyAll();
-                    }
-                } catch (IOException | ParserConfigurationException | SAXException e) {
-                    logger.log(Level.INFO, "Exception while trying to load magnetic declination online", e);
-                    synchronized (result) {
-                        result.notifyAll(); // wake up waiter; no result will show up anymore
-                    }
-                }
-            }
-        };
-        fetcher.start();
-        synchronized (result) {
-            if (result[0] == null) {
-                try {
-                    result.wait(timeoutForOnlineFetchInMilliseconds);
-                } catch (InterruptedException e) {
-                    // ignore; simply use value from file in this case
-                }
-            }
+        ExecutorService executorService = Executors.newFixedThreadPool(1);
+        try {
+            return executorService.submit(
+                    () -> importRecord(position, timePoint)
+                ).get(timeoutForOnlineFetchInMilliseconds, TimeUnit.MILLISECONDS);
+        } catch (TimeoutException e) {
+            logger.log(Level.INFO, "Timeout while getting declination.", e);
+            // ignore; simply use value from file in this case
+        } catch (InterruptedException e) {
+            logger.log(Level.INFO, "InterruptedException while getting declination", e);
+            // ignore; simply use value from file in this case
+        } catch (ExecutionException e) {
+            logger.log(Level.INFO, "Exception while trying to load magnetic declination online", e);
         }
-        return result[0];
+        return null;
     }
 }
