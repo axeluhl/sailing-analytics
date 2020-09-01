@@ -28,6 +28,7 @@ import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.interfaces.UserImpl;
 import com.sap.sse.security.interfaces.UserStore;
+import com.sap.sse.security.shared.UserStoreManagementException;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RoleDefinitionImpl;
 import com.sap.sse.security.shared.SecurityUser;
@@ -84,7 +85,7 @@ public class UserStoreWithPersistenceTest {
             store.ensureDefaultRolesExist();
             store.ensureServerGroupExists();
             store.loadAndMigrateUsers();
-        } catch (UserGroupManagementException | UserManagementException e) {
+        } catch (UserStoreManagementException e) {
             throw new RuntimeException(e);
         }
     }

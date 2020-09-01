@@ -23,11 +23,11 @@ import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.interfaces.AccessControlStore;
 import com.sap.sse.security.interfaces.UserImpl;
 import com.sap.sse.security.interfaces.UserStore;
+import com.sap.sse.security.shared.UserStoreManagementException;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.UserGroupManagementException;
-import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.QualifiedObjectIdentifierImpl;
 import com.sap.sse.security.shared.impl.User;
@@ -77,7 +77,7 @@ public class AccessControlStoreTest {
             userStore.loadAndMigrateUsers();
             userStore.ensureDefaultRolesExist();
             userStore.ensureServerGroupExists();
-        } catch (UserGroupManagementException | UserManagementException e) {
+        } catch (UserStoreManagementException e) {
             throw new RuntimeException(e);
         }
         accessControlStore = new AccessControlStoreImpl(userStore);
