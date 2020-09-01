@@ -111,7 +111,7 @@ public class SettingsTest extends AbstractSeleniumTest {
         leaderboardSettingsDialog.pressCancel();
         MapSettingsPO mapSettings = raceboard.openMapSettings();
         // Verify initial mode settings
-        Assert.assertFalse(mapSettings.isWindUp());
+        mapSettings.waitForWindUpUntil(false);
         Assert.assertFalse(mapSettings.isShowOnlySelectedCompetitors());
         mapSettings.setTransparentHoverlines(true);
         mapSettings.setWindUp(false);
@@ -148,7 +148,7 @@ public class SettingsTest extends AbstractSeleniumTest {
         leaderboardSettingsDialog.pressOk(false, false);
         mapSettings = raceboard.openMapSettings();
         // verify default mode settings override custom user settings
-        Assert.assertTrue(mapSettings.isWindUp());
+        mapSettings.waitForWindUpUntil(true);
         // verify default mode settings override system defaults
         Assert.assertTrue(mapSettings.isShowOnlySelectedCompetitors());
         // Verify custom user settings are independent for modes
@@ -168,7 +168,7 @@ public class SettingsTest extends AbstractSeleniumTest {
         leaderboardSettingsDialog.pressCancel();
         mapSettings = raceboard.openMapSettings();
         // Verify that mode settings are overridden by document settings
-        Assert.assertFalse(mapSettings.isWindUp());
+        mapSettings.waitForWindUpUntil(false);
         // Verify custom user settings are independent for modes
         Assert.assertFalse(mapSettings.isTransparentHoverlines());
         // verify that custom document settings override mode settings of other modes
@@ -191,7 +191,7 @@ public class SettingsTest extends AbstractSeleniumTest {
         Assert.assertArrayEquals(detailsToSelect, selectedDetails);
         leaderboardSettingsDialog.pressCancel();
         mapSettings = raceboard.openMapSettings();
-        Assert.assertTrue(mapSettings.isWindUp());
+        mapSettings.waitForWindUpUntil(true);
     }
 
     /**
@@ -259,7 +259,7 @@ public class SettingsTest extends AbstractSeleniumTest {
         
         MapSettingsPO mapSettings = raceboard.openMapSettings();
         // Verify initial mode settings
-        Assert.assertFalse(mapSettings.isWindUp());
+        mapSettings.waitForWindUpUntil(false);
         Assert.assertFalse(mapSettings.isShowOnlySelectedCompetitors());
         mapSettings.setWindUp(true);
         mapSettings.setShowOnlySelectedCompetitors(true);
@@ -270,7 +270,7 @@ public class SettingsTest extends AbstractSeleniumTest {
         
         mapSettings = raceboard.openMapSettings();
         // verify default settings work
-        Assert.assertTrue(mapSettings.isWindUp());
+        mapSettings.waitForWindUpUntil(true);
         Assert.assertTrue(mapSettings.isShowOnlySelectedCompetitors());
     }
     
@@ -292,7 +292,7 @@ public class SettingsTest extends AbstractSeleniumTest {
         
         MapSettingsPO mapSettings = raceboard.openMapSettings();
         // The following options are false in the system default but activated by the WINNING_LANES mode
-        Assert.assertTrue(mapSettings.isWindUp());
+        mapSettings.waitForWindUpUntil(true);
         Assert.assertTrue(mapSettings.isShowOnlySelectedCompetitors());
         mapSettings.setWindUp(false);
         mapSettings.setShowOnlySelectedCompetitors(false);
@@ -303,7 +303,7 @@ public class SettingsTest extends AbstractSeleniumTest {
         
         mapSettings = raceboard.openMapSettings();
         // verify mode settigns have been overwritten
-        Assert.assertFalse(mapSettings.isWindUp());
+        mapSettings.waitForWindUpUntil(false);
         Assert.assertFalse(mapSettings.isShowOnlySelectedCompetitors());
     }
 

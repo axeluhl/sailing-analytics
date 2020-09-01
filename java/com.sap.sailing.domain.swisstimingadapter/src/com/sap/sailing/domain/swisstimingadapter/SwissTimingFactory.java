@@ -2,6 +2,7 @@ package com.sap.sailing.domain.swisstimingadapter;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 
@@ -42,10 +43,13 @@ public interface SwissTimingFactory {
      * Generally, the connector needs to be instructed for which races it shall handle events using calls to the
      * {@link SailMasterConnector#trackRace} and {@link SailMasterConnector#stopTrackingRace} operations.
      * {@link MessageType#isRaceSpecific() Race-specific messages} for other races are ignored and not forwarded to any
-     * listener.
+     * listener.<p>
+     * 
+     * When the {@code hostname} is {@code null}, this is assumed to request a URL-based connection, and {@code raceDataUrl} has
+     * to provide a valid URL leading to a downloadable log file.
      */
-    SailMasterConnector getOrCreateSailMasterConnector(String hostname, int port, String raceId, String raceName,
-            String raceDescription, BoatClass boatClass, SwissTimingRaceTrackerImpl swissTimingRaceTracker)
+    SailMasterConnector getOrCreateSailMasterConnector(String hostname, int port, String raceId, URL raceDataUrl,
+            String raceName, String raceDescription, BoatClass boatClass, SwissTimingRaceTrackerImpl swissTimingRaceTracker)
             throws InterruptedException, ParseException;
 
     SailMasterConnector getOrCreateSailMasterLiveSimulatorConnector(String host, int port, String raceId, String raceName,
