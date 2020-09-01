@@ -192,12 +192,10 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
         Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.racing_view_container);
         if (fragment instanceof WelcomeFragment) {
             logoutSession();
-        } else if (fragment instanceof RaceInfoFragment || fragment instanceof MainScheduleFragment) {
+        } else {
             loadWelcomeFragment();
             mSelectedRace = null;
             mRaceList.resetSelectedRace();
-        } else {
-            super.onBackPressed();
         }
     }
 
