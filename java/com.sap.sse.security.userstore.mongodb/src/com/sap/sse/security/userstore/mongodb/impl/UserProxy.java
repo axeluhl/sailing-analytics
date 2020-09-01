@@ -223,4 +223,9 @@ public class UserProxy implements User {
     public Subscription getSubscriptionByPlan(String planId) {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public Subscription getSubscriptionById(String subscriptionId) {
+        throw new UnsupportedOperationException();
+    }
 }
