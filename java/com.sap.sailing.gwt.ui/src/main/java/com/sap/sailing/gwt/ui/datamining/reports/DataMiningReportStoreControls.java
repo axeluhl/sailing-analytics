@@ -35,6 +35,7 @@ import com.sap.sse.datamining.ui.client.CompositeResultsPresenter;
 import com.sap.sse.datamining.ui.client.DataMiningServiceAsync;
 import com.sap.sse.datamining.ui.client.QueryDefinitionProvider;
 import com.sap.sse.datamining.ui.client.StringMessages;
+import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 
@@ -62,6 +63,7 @@ public class DataMiningReportStoreControls extends Composite {
     @UiField(provided = true)
     SuggestBox suggestBoxUi;
 
+    private final ErrorReporter errorReporter;
     private final DataMiningSession session;
     private final DataMiningServiceAsync dataMiningService;
     private final StoredDataMiningReportsProvider reportsProvider;
@@ -69,9 +71,10 @@ public class DataMiningReportStoreControls extends Composite {
     private final CompositeResultsPresenter<?> resultsPresenter;
     private final MultiWordSuggestOracle oracle;
 
-    public DataMiningReportStoreControls(DataMiningSession session, DataMiningServiceAsync dataMiningService,
+    public DataMiningReportStoreControls(ErrorReporter errorReporter, DataMiningSession session, DataMiningServiceAsync dataMiningService,
             StoredDataMiningReportsProvider reportsProvider, QueryDefinitionProvider<?> queryDefinitionProvider,
             CompositeResultsPresenter<?> resultsPresenter) {
+        this.errorReporter = errorReporter;
         this.session = session;
         this.dataMiningService = dataMiningService;
         this.reportsProvider = reportsProvider;
@@ -214,7 +217,7 @@ public class DataMiningReportStoreControls extends Composite {
                     new AsyncCallback<QueryResultDTO<Serializable>>() {
                         @Override
                         public void onFailure(Throwable caught) {
-                            // TODO Report Error
+                            errorReporter.reportError("Error running the query: " + caught.getMessage());
                             errorOccurred = true;
                             handleQueryResult(null);
                         }

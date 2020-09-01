@@ -82,7 +82,8 @@ public class DataMiningEntryPoint extends AbstractSailingReadEntryPoint {
     }
 
     private void createDataminingPanel(ServerInfoDTO serverInfo, final String queryIdentifier) {
-        removeUrlParameter();;
+        removeUrlParameter();
+        ;
         SAPHeaderWithAuthentication header = new SAPSailingHeaderWithAuthentication(getStringMessages().dataMining());
         GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(getUserService(),
                 header.getAuthenticationMenuView());
@@ -98,8 +99,8 @@ public class DataMiningEntryPoint extends AbstractSailingReadEntryPoint {
             @Override
             public Widget get() {
                 DataMiningSettingsControl settingsControl = new AnchorDataMiningSettingsControl(null, null);
-                resultsPresenter = new TabbedSailingResultsPresenter(/* parent */ null,
-                        /* context */ null, /* drillDownCallback */ groupKey -> {
+                resultsPresenter = new TabbedSailingResultsPresenter(/* parent */ null, /* context */ null,
+                        /* drillDownCallback */ groupKey -> {
                             queryDefinitionProvider.drillDown(groupKey, () -> {
                                 queryRunner.run(queryDefinitionProvider.getQueryDefinition());
                             });
@@ -122,13 +123,15 @@ public class DataMiningEntryPoint extends AbstractSailingReadEntryPoint {
                     StoredDataMiningQueryDataProvider queryProvider = new StoredDataMiningQueryDataProvider(
                             queryDefinitionProvider, dataMiningService, queryRunner);
                     queryDefinitionProvider.addControl(new StoredDataMiningQueryPanel(queryProvider));
-                    
-                    StoredDataMiningReportsProvider reportsProvider = new StoredDataMiningReportsProvider(dataMiningService);
-                    queryDefinitionProvider.addControl(new DataMiningReportStoreControls(session, dataMiningService, reportsProvider, queryDefinitionProvider, resultsPresenter));
+
+                    StoredDataMiningReportsProvider reportsProvider = new StoredDataMiningReportsProvider(
+                            dataMiningService);
+                    queryDefinitionProvider.addControl(new DataMiningReportStoreControls(DataMiningEntryPoint.this,
+                            session, dataMiningService, reportsProvider, queryDefinitionProvider, resultsPresenter));
                 }
 
-                Anchor orientationAnchor = new Anchor(AbstractImagePrototype.create(
-                        dataMiningResources.orientationIcon()).getSafeHtml());
+                Anchor orientationAnchor = new Anchor(
+                        AbstractImagePrototype.create(dataMiningResources.orientationIcon()).getSafeHtml());
                 orientationAnchor.addStyleName("orientationAnchor");
                 orientationAnchor.setTitle(getStringMessages().changeOrientation());
                 orientationAnchor.addClickHandler(new ClickHandler() {
@@ -148,7 +151,7 @@ public class DataMiningEntryPoint extends AbstractSailingReadEntryPoint {
                 addDefinitionProviderAndResultPresenter();
                 if (queryIdentifier != null) {
                     CrossDomainStorage store = getUserService().getStorage();
-                    store.getItem(SailingSettingsConstants.DATAMINING_QUERY, storedElem->{
+                    store.getItem(SailingSettingsConstants.DATAMINING_QUERY, storedElem -> {
                         JSONArray arr = JSONParser.parseStrict(storedElem).isArray();
                         for (int i = 0; i < arr.size(); i++) {
                             JSONObject json = arr.get(i).isObject();
@@ -161,7 +164,7 @@ public class DataMiningEntryPoint extends AbstractSailingReadEntryPoint {
                                                 queryDefinitionProvider.applyQueryDefinition(result);
                                                 queryRunner.run(result);
                                             }
-    
+
                                             @Override
                                             public void onFailure(Throwable caught) {
                                                 LOG.log(Level.SEVERE, caught.getMessage(), caught);
@@ -190,10 +193,12 @@ public class DataMiningEntryPoint extends AbstractSailingReadEntryPoint {
     public void setQueryAndResultOrientation() {
         setQueryAndResultOrientation(!queryAndResultAreVertical);
     }
+
     /**
      * Sets the position of the {@link #resultsPresenter}.
-     * @param vertical {@code boolean} {@code true} places it in the south position
-     * and {@code false} in the east position.
+     * 
+     * @param vertical
+     *            {@code boolean} {@code true} places it in the south position and {@code false} in the east position.
      */
     public void setQueryAndResultOrientation(boolean vertical) {
         if (vertical != queryAndResultAreVertical) {
