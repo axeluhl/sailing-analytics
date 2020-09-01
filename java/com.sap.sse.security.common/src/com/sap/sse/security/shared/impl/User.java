@@ -118,4 +118,6 @@ public interface User extends SecurityUser<RoleDefinition, Role, UserGroup> {
     void setSubscriptions(Subscription[] subscriptions);
     
     Subscription getSubscriptionByPlan(String planId);
+    
+    Subscription getSubscriptionById(String subscriptionId);
 }

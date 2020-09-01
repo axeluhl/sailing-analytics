@@ -2535,6 +2535,11 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (user != null) {
             String newSubscriptionPlanId = newSubscription.getPlanId();
             Subscription currentSubscription = user.getSubscriptionByPlan(newSubscriptionPlanId);
+            logger.log(Level.INFO, "Update user subscription for plan " + newSubscriptionPlanId);
+            logger.log(Level.INFO, "Current user plan subscription: "
+                    + (currentSubscription != null ? currentSubscription.toString() : "null"));
+            logger.log(Level.INFO,
+                    "New plan subscription: " + (newSubscription != null ? newSubscription.toString() : "null"));
             if (shouldUpdateUserRolesForSubscription(currentSubscription, newSubscription)) {
                 updateUserRolesOnSubscriptionChange(user, currentSubscription, newSubscription);
             }
@@ -2620,6 +2625,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     private void removeUserPlanRoles(User user, SubscriptionPlan plan) throws UserManagementException {
         if (plan != null) {
+            logger.log(Level.INFO, "Remove user roles of subscription plan " + plan.getName());
             Role[] roles = getSubscriptionPlanUserRoles(user, plan);
             for (Role role : roles) {
                 store.removeRoleFromUser(user.getName(), role);
@@ -2629,6 +2635,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     private void addUserPlanRoles(User user, SubscriptionPlan plan) throws UserManagementException {
         if (plan != null) {
+            logger.log(Level.INFO, "Add user roles for subscription plan " + plan.getName());
             Role[] roles = getSubscriptionPlanUserRoles(user, plan);
             for (Role role : roles) {
                 store.addRoleForUser(user.getName(), role);

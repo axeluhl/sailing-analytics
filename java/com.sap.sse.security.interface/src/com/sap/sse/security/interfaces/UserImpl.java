@@ -400,4 +400,17 @@ public class UserImpl extends SecurityUserImpl<RoleDefinition, Role, UserGroup, 
         }
         return null;
     }
+
+    @Override
+    public Subscription getSubscriptionById(String subscriptionId) {
+        if (subscriptionId != null && !subscriptionId.isEmpty() && subscriptions.length > 0) {
+            for (Subscription subscription : subscriptions) {
+                if (subscription.getSubscriptionId() != null
+                        && subscription.getSubscriptionId().equals(subscriptionId)) {
+                    return subscription;
+                }
+            }
+        }
+        return null;
+    }
 }
