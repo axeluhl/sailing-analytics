@@ -49,7 +49,7 @@ name to make sure you get to the event you're interested in.
         <td>Migrates an existing event</td>
     </tr>
 	<tr>
-		<td><a href="eventGetDoc.html">/api/v1/events</a></td>
+		<td><a href="eventsGetDoc.html">/api/v1/events</a></td>
 		<td>Gets all events</td>
 	</tr>
 	<tr>
@@ -181,6 +181,14 @@ name to make sure you get to the event you're interested in.
 		<td>/api/v1/regattas/{regattaname}/competitors/{competitorId}/remove</td>
 		<td>Removes a competitor from a regatta (POST)</td>
 	</tr>
+	<tr>
+		<td><a href="regattaUpdateCompetitorToDHandicapPostDoc.html">/api/v1/regattas/{regattaname}/competitors/{competitorId}/updateToDHandicap</a></td>
+		<td>Updates a competitor's time on distance allowance per nautical mile handicap value. (POST)</td>
+	</tr>
+	<tr>
+		<td><a href="regattaUpdateCompetitorToTHandicapPostDoc.html">/api/v1/regattas/{regattaname}/competitors/{competitorId}/updateToTHandicap</a></td>
+		<td>Updates a competitor's time on time handicap value. (POST)</td>
+	</tr>
     <tr>
         <td><a href="regattasTrackingDevicesGet.html">/api/v1/regattas/{regattaName}/tracking_devices</a></td>
         <td>Gets the status for all GPS trackers associated to a regatta (GET)</td>
@@ -212,6 +220,10 @@ name to make sure you get to the event you're interested in.
 	<tr>
 		<td><a href="leaderboardUpdateDoc.html">/api/v1/leaderboards/{name}/update</a></td>
 		<td>Modifies attributes of a leaderboard</td>
+	</tr>
+	<tr>
+		<td><a href="leaderboardUpdateCompetitorDisplayNameDoc.html">/api/v1/leaderboards/{name}/updateCompetitorDisplayName</a></td>
+		<td>Modifies the display name of a competitor in the scope of a leaderboard</td>
 	</tr>
 	<tr>
 		<td><a href="leaderboardCheckinPostDoc.html">/api/v1/leaderboards/{name}/device_mappings/start</a></td>
@@ -359,22 +371,6 @@ name to make sure you get to the event you're interested in.
     <tr>
         <td><a href="tagsCRUDDoc.html">/api/v1/{leaderboard}/{racecolumn}/{fleet}/tags</a></td>
         <td>Gets, creates, updates and deletes tags.</td>
-    </tr>
-    <tr>
-        <td><a href="preferencesPut.html">/api/v1/preferences/{SETTINGS_KEY}</a></td>
-        <td><span class="deprecationMessage">deprecated </span>Stores a document into the preferences of a user</td>
-    </tr>
-    <tr>
-        <td><a href="preferencesGet.html">/api/v1/preferences/{SETTINGS_KEY}</a></td>
-        <td><span class="deprecationMessage">deprecated </span>Retrives a document that was stored into the preferences of a user</td>
-    </tr>
-    <tr>
-        <td><a href="preferencesDelete.html">/api/v1/preferences/{SETTINGS_KEY}</a></td>
-        <td><span class="deprecationMessage">deprecated </span>Removes a document from the preferences of a user</td>
-    </tr>
-    <tr>
-        <td><a href="usergroupsGet.html">/api/v1/usergroups/</a></td>
-        <td><span class="deprecationMessage">deprecated </span>Lists all usergroups and their id's the current user is part of, required to obtain id's for migration for example</td>
     </tr>
     <tr>
         <td><a href="status.html">/api/v1/status</a></td>

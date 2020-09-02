@@ -210,7 +210,7 @@ REPLICATE_MASTER_EXCHANGE_NAME=security_service
 REPLICATE_MASTER_BEARER_TOKEN="Gecx+W/dwFKRAxFbIvC/IMafEnJ8kTQF+MlYNVhEwD4="
 
 DEPLOY_TO=vsaw
-SERVER_NAME=vsaw
+SERVER_NAME=VSAW
 MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/VSAW?replicaSet=live&retryWrites=true"
 EXPEDITION_PORT=2015
 SERVER_PORT=8893

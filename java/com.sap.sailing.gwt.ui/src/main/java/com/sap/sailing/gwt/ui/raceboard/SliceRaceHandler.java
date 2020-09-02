@@ -13,6 +13,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.charts.ChartZoomChangedEvent;
@@ -56,12 +57,16 @@ public class SliceRaceHandler {
     private TimeRange visibleRange;
 
     private final String leaderboardGroupName;
+    
+    private final UUID leaderboardGroupId;
 
     private final String leaderboardName;
 
     private final UUID eventId;
 
     private final SailingServiceWriteAsync sailingServiceWrite;
+
+    private final SailingServiceAsync sailingService;
 
     private final UserService userService;
 
@@ -78,15 +83,17 @@ public class SliceRaceHandler {
     /**
      * Registers this handler as a zoom event handler on the {@code competitorRaceChart}.
      */
-    public SliceRaceHandler(SailingServiceWriteAsync sailingServiceWrite, UserService userService, final ErrorReporter errorReporter,
+    public SliceRaceHandler(SailingServiceWriteAsync sailingServiceWrite, SailingServiceAsync sailingService, UserService userService, final ErrorReporter errorReporter,
             MultiCompetitorRaceChart competitorRaceChart, RegattaAndRaceIdentifier selectedRaceIdentifier,
-            final String leaderboardGroupName, String leaderboardName, UUID eventId,
+            final String leaderboardGroupName, UUID leaderboardGroupId, String leaderboardName, UUID eventId,
             StrippedLeaderboardDTOWithSecurity leaderboardDTO, RaceWithCompetitorsAndBoatsDTO raceDTO, StringMessages stringMessages) {
         this.sailingServiceWrite = sailingServiceWrite;
+        this.sailingService = sailingService;
         this.userService = userService;
         this.errorReporter = errorReporter;
         this.selectedRaceIdentifier = selectedRaceIdentifier;
         this.leaderboardGroupName = leaderboardGroupName;
+        this.leaderboardGroupId = leaderboardGroupId;
         this.leaderboardName = leaderboardName;
         this.eventId = eventId;
         this.leaderboardDTO = leaderboardDTO;
@@ -125,7 +132,7 @@ public class SliceRaceHandler {
 
     private void updateCanSliceIfAuthorized() {
         if (allowsEditing()) {
-            sailingServiceWrite.canSliceRace(selectedRaceIdentifier, new AsyncCallback<Boolean>() {
+            sailingService.canSliceRace(selectedRaceIdentifier, new AsyncCallback<Boolean>() {
                 @Override
                 public void onSuccess(Boolean result) {
                     canSlice = Boolean.TRUE.equals(result);
@@ -152,7 +159,7 @@ public class SliceRaceHandler {
 
     private void doSlice() {
         if (visibleRange != null) {
-            sailingServiceWrite.prepareForSlicingOfRace(selectedRaceIdentifier,
+            sailingService.prepareForSlicingOfRace(selectedRaceIdentifier,
                     new AsyncCallback<SliceRacePreperationDTO>() {
                         @Override
                         public void onFailure(Throwable caught) {
@@ -177,7 +184,7 @@ public class SliceRaceHandler {
                                                 new TrackedRaceCreationResultDialog(StringMessages.INSTANCE.sliceRace(),
                                                         StringMessages.INSTANCE.slicingARaceWasSuccessful(), eventId,
                                                         result.getRegattaName(), result.getRaceName(), leaderboardName,
-                                                        leaderboardGroupName).show();
+                                                        leaderboardGroupName, leaderboardGroupId).show();
                                             }
                                         });
                             }).show();

@@ -158,9 +158,9 @@ public class ExpeditionAllInOneImportPanel extends Composite implements Regattas
                 Notification.notify(StringMessages.INSTANCE.unexpectedErrorDuringFileImport(), NotificationType.ERROR);
             } else if (response.hasEventId()) {
                 new ExpeditionAllInOneAfterImportHandler(response.getEventId(), response.getRegattaName(),
-                        response.getLeaderboardName(), response.getLeaderboardGroupName(), response.getRaceEntries(),
-                        response.getGpsDeviceIds(), response.getSensorDeviceIds(), response.getSensorFixImporterType(),
-                        response.getStartTimes(), sailingServiceWrite, userService,
+                        response.getLeaderboardName(), response.getLeaderboardGroupName(), response.getLeaderboardGroupId(), 
+                        response.getRaceEntries(), response.getGpsDeviceIds(), response.getSensorDeviceIds(),
+                        response.getSensorFixImporterType(), response.getStartTimes(), sailingServiceWrite, userService,
                         errorReporter, stringMessages);
                 regattaRefresher.fillRegattas();
             } else {

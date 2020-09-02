@@ -437,27 +437,25 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
 
     @Override
     public void selectTabByNames(String verticalTabName, String horizontalTabName, Map<String, String> params) {
-        if (verticalTabName == null) {
-            return;
-        }
-
-        Widget widgetForSetup = null; //Remember widget for set up
-        for (Triple<VerticalOrHorizontalTabLayoutPanel, Widget, String> e : roleSpecificTabs) {
-            VerticalOrHorizontalTabLayoutPanel panel = e.getA();
-            Widget currentWidget = e.getB();
-            if (panel == topLevelTabPanelWrapper && verticalTabName.equals(e.getC())) { // for vertical panel
-                int index = panel.getWidgetIndex(currentWidget);
-                panel.selectTab(index);
-                if (horizontalTabName == null) {//If we don't have horizontal tab will setup vertical tab.
+        if (verticalTabName != null) {
+            Widget widgetForSetup = null; // Remember widget for set up
+            for (Triple<VerticalOrHorizontalTabLayoutPanel, Widget, String> e : roleSpecificTabs) {
+                VerticalOrHorizontalTabLayoutPanel panel = e.getA();
+                Widget currentWidget = e.getB();
+                if (panel == topLevelTabPanelWrapper && verticalTabName.equals(e.getC())) { // for vertical panel
+                    int index = panel.getWidgetIndex(currentWidget);
+                    panel.selectTab(index);
+                    if (horizontalTabName == null) { // If we don't have horizontal tab will setup vertical tab.
+                        widgetForSetup = currentWidget;
+                    }
+                } else if (horizontalTabName != null && horizontalTabName.equals(e.getC())) { // for horizontal panel
+                    int index = panel.getWidgetIndex(currentWidget);
+                    panel.selectTab(index);
                     widgetForSetup = currentWidget;
                 }
-            } else if (horizontalTabName != null && horizontalTabName.equals(e.getC())) { // for horizontal panel
-                int index = panel.getWidgetIndex(currentWidget);
-                panel.selectTab(index);
-                widgetForSetup = currentWidget;
             }
+            panelsByWidget.get(unwrapScrollPanel(widgetForSetup)).setupWidgetByParams(params);
         }
-        panelsByWidget.get(unwrapScrollPanel(widgetForSetup)).setupWidgetByParams(params);
     }
 
     /**

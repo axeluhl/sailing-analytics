@@ -11,29 +11,39 @@
   overflow: hidden;
 }
 .siteheader_logo {
+  display: table-cell;
   font-size: 1rem;
+  padding: 0 1rem;
+  overflow: hidden;
+  white-space: nowrap;
 }
 .siteheader_logo:hover a {
   text-decoration: none;
 }
+
 .siteheader_logo_image {
-  float: left;
-  max-height: 2em;
-  margin-top: 0.466666666666667em;
+  max-height: 2rem;
+  margin-top: .45rem;
+  margin-bottom: .7rem;
+  display: inline;
+  vertical-align: middle;
 }
 .siteheader_logo_title {
   display: none;
   color: #f6f9fc;
+  white-space: nowrap;
 }
-@media (min-width: 61em) {
+@media (min-width: 64.2em) {
   .siteheader_logo_title {
     display: inline;
   }
 }
 .sitenavigation {
-  display: inline-block;
+  display: table-cell;
   overflow: hidden;
   text-align: right;
+  padding: 0 1rem;
+  width: 100%;
 }
 .sitenavigation_link {
   display: inline-block;
@@ -41,7 +51,7 @@
   font-weight: 600;
   color: #f6f9fc;
   text-transform: uppercase;
-  padding: 0 3%;
+  padding: 0 1rem;
 }
 .sitenavigation_link:hover,
 .sitenavigation_link:focus {
@@ -49,14 +59,38 @@
   background-color: #0a0a0a;
 }
 .sitenavigation_linkactive,
-.sitenavigation_link:hover,
-.sitenavigation_link:focus {
+.sitenavigation_link:hover
+{
   text-decoration: none;
   color: #f0ab00;
 }
+
+.sitenavigation_dropdown_container {
+  position: absolute;
+  background: #333;
+  display: block;
+  z-index: 1;
+  top: 3rem;
+}
+.sitenavigation_dropdown_container ul {
+    padding-left: 0px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+.sitenavigation_dropdown_container ul li a {
+    width: 100%;
+    cursor: pointer;
+}
+.sitenavigation_fixed {
+  white-space: nowrap;
+  display: table-cell;
+  text-align: right;
+  padding-right: 1rem;
+  box-sizing: border-box;
+}
 .sitenavigation_search {
   display: inline-block;
-  padding: 0 0 0 3%;
+  padding: 0 0 0 1rem;
   font-weight: 600;
   color: #f6f9fc;
   text-transform: uppercase;
@@ -115,6 +149,7 @@
   background-image: resourceUrl('loggedoutOpen');
   margin-left: 1rem;
   cursor: pointer;
+  margin-right: 1rem;
 }
 .user_menu_button.open {
   background-image: resourceUrl('loggedout');
@@ -125,3 +160,22 @@
 .user_menu_button.loggedin.open {
   background-image: resourceUrl('loggedinOpen');
 }
+
+.header_navigation_icon {
+  width: 1rem;
+  height: 1.333rem;
+  vertical-align: middle;
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: contain;
+  background-image: resourceUrl('navigation');
+  margin-left: 1rem;
+  cursor: pointer;
+  margin-right: 1rem;
+}
+
+.header_navigation_icon:hover,
+.header_navigation_iconactive {
+  background-image: resourceUrl('navigation_hover');
+}
+

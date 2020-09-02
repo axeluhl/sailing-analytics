@@ -1,5 +1,6 @@
 package com.sap.sse.security.ui.authentication.app;
 
+import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
@@ -41,4 +42,8 @@ public interface AuthenticationContext {
     String getUserSubtitle();
     
     boolean hasPermission(SecuredDTO securedDTO, Action action);
+
+    boolean hasServerPermission(Action action);
+
+    ServerInfoDTO getServerInfo();
 }

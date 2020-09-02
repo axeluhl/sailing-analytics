@@ -210,7 +210,7 @@ REPLICATE_MASTER_EXCHANGE_NAME=security_service
 REPLICATE_MASTER_BEARER_TOKEN="Gecx+W/dwFKRAxFbIvC/IMafEnJ8kTQF+MlYNVhEwD4="
 
 DEPLOY_TO=tractractest
-SERVER_NAME=tractractest
+SERVER_NAME=TracTracTest
 MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/TracTracTest?replicaSet=live&retryWrites=true"
 EXPEDITION_PORT=2013
 SERVER_PORT=8891

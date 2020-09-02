@@ -182,7 +182,8 @@ public class SharedDomainFactoryImpl<RLR extends RaceLogResolver> implements Sha
     public Mark getOrCreateMark(Serializable id, String name, String shortName, MarkType type, Color color, String shape, String pattern) {
         Mark result = markCache.get(id);
         if (result == null) {
-            result = new MarkImpl(id, name, type, color, shape, pattern);
+            result = new MarkImpl(id, name, shortName, type, color, shape, pattern,
+                    /* original mark template ID */ null, /* original mark properties ID */ null);
             cacheMark(id, result);
         }
         return result;

@@ -28,7 +28,7 @@ public class ConfirmationActivity extends AbstractActivity implements Confirmati
             break;
         case MAIL_VERIFIED:
             panel.setWidget(clientFactory.createBusyView());
-            clientFactory.getUserManagementService().validateEmail(place.getName(), place.getValidationSecret(),
+            clientFactory.getUserManagementWriteService().validateEmail(place.getName(), place.getValidationSecret(),
                     new MarkedAsyncCallback<Boolean>(new AsyncCallback<Boolean>() {
                         @Override
                         public void onFailure(Throwable caught) {

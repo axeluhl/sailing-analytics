@@ -210,7 +210,7 @@ REPLICATE_MASTER_EXCHANGE_NAME=security_service
 REPLICATE_MASTER_BEARER_TOKEN="Gecx+W/dwFKRAxFbIvC/IMafEnJ8kTQF+MlYNVhEwD4="
 
 DEPLOY_TO=peter-training
-SERVER_NAME=peter-training
+SERVER_NAME=peterwagner
 SERVER_PORT=8943
 MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/peterwagner?replicaSet=live&retryWrites=true"
 EXPEDITION_PORT=2065
