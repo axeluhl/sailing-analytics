@@ -32,6 +32,7 @@ import com.sap.sse.security.shared.RolePrototype;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.UserRole;
+import com.sap.sse.security.shared.UserStoreManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.Role;
@@ -57,6 +58,7 @@ import com.sap.sse.security.userstore.mongodb.impl.FieldNames.Tenant;
  *
  */
 public class UserStoreImpl implements UserStore {
+    
     private static final long serialVersionUID = -3860868283827473187L;
 
     private static final Logger logger = Logger.getLogger(UserStoreImpl.class.getName());
@@ -64,6 +66,8 @@ public class UserStoreImpl implements UserStore {
     private static final String ACCESS_TOKEN_KEY = "___access_token___";
 
     private final static String NAME = "MongoDB user store";
+    
+    private final ConcurrentHashMap<UUID, RoleDefinition> roleDefinitions;
 
     /**
      * If a valid default tenant name was passed to the constructor, this field will contain a valid
@@ -76,40 +80,40 @@ public class UserStoreImpl implements UserStore {
 
     private final ConcurrentHashMap<UUID, UserGroup> userGroups;
     private final ConcurrentHashMap<String, UserGroup> userGroupsByName;
-
-    /**
-     * Protects access to the maps {@link #userGroupsContainingUser}, {@link #usersInUserGroups}, {@link #userGroups},
-     * {@link #userGroupsByName} and {@link #roleDefinitionsToUserGroups}.<br>
-     * Lock may be aquired when having a lock for {@linkplain usersLock}. If both locks (no matter if read or write) are
-     * required, {@link #usersLock} must always be aquired before aquiring {@link #userGroupsLock}.
-     */
-    private final NamedReentrantReadWriteLock userGroupsLock = new NamedReentrantReadWriteLock(
-            "User Groups", /* fair */ false);
     private final ConcurrentHashMap<User, Set<UserGroup>> userGroupsContainingUser;
+    
     /**
      * This collection is important in particular to detect changes when {@link #updateUserGroup(UserGroupImpl)} is
      * called.
      */
     private final ConcurrentHashMap<UserGroup, Set<User>> usersInUserGroups;
-    
-    private final ConcurrentHashMap<RoleDefinition, Set<User>> roleDefinitionsToUsers;
     private final ConcurrentHashMap<RoleDefinition, Set<UserGroup>> roleDefinitionsToUserGroups;
+    
+    /**
+     * Protects access to the maps {@link #userGroupsContainingUser}, {@link #usersInUserGroups}, {@link #userGroups},
+     * {@link #userGroupsByName} and {@link #roleDefinitionsToUserGroups}.<br>
+     * Lock may be acquired when having a lock for {@linkplain usersLock}. If both locks (no matter if read or write) are
+     * required, {@link #usersLock} must always be acquired before acquiring {@link #userGroupsLock}.
+     */
+    private final NamedReentrantReadWriteLock userGroupsLock = new NamedReentrantReadWriteLock(
+            "User Groups", /* fair */ false);
+    
 
     /**
      * Protects access to the maps {@link #users}, {@link #usersByEmail}, {@link #roleDefinitionsToUsers},
      * {@link #usersByAccessToken} and {@link #emailForUsername}.<br>
      * Must not be locked when already having a lock for {@linkplain userGroupsLock}. If both locks (no matter if read
-     * or write) are required, {@link #usersLock} must always be aquired before aquiring {@link #userGroupsLock}.
+     * or write) are required, {@link #usersLock} must always be acquired before acquiring {@link #userGroupsLock}.
      */
     private final NamedReentrantReadWriteLock usersLock = new NamedReentrantReadWriteLock(
             "Users", /* fair */ false);
     
     private final ConcurrentHashMap<String, User> users;
     private final ConcurrentHashMap<String, Set<User>> usersByEmail;
-    private final ConcurrentHashMap<UUID, RoleDefinition> roleDefinitions;
-
     private final ConcurrentHashMap<String, User> usersByAccessToken;
     private final ConcurrentHashMap<String, String> emailForUsername;
+    private final ConcurrentHashMap<RoleDefinition, Set<User>> roleDefinitionsToUsers;
+
     private final ConcurrentHashMap<String, Object> settings;
     private final ConcurrentHashMap<String, Class<?>> settingTypes;
 
@@ -214,51 +218,57 @@ public class UserStoreImpl implements UserStore {
     /**
      * Do not call this before the security service is ready, as else role definition migration will not work correctly
      */
-    public void loadAndMigrateUsers() throws UserGroupManagementException, UserManagementException {
-        final Iterable<UserGroup> userGroups = domainObjectFactory
-                .loadAllUserGroupsAndTenantsWithProxyUsers(roleDefinitions);
-        for (UserGroup group : userGroups) {
-            this.userGroups.put(group.getId(), group);
-            userGroupsByName.put(group.getName(), group);
-        }
-        // do this here, in case the default tenant was just loaded before
-        ensureServerGroupExists();
-        for (User u : domainObjectFactory.loadAllUsers(roleDefinitions, this::convertToNewRoleModel, this.userGroups, this)) {
-            users.put(u.getName(), u);
-            addToUsersByEmail(u);
-            for (Role roleOfUser : u.getRoles()) {
-                Util.addToValueSet(roleDefinitionsToUsers, roleOfUser.getRoleDefinition(), u,
-                        () -> ConcurrentHashMap.newKeySet());
+    public void loadAndMigrateUsers() throws UserStoreManagementException {
+        LockUtil.executeWithWriteLockExpectException(usersLock, () -> {
+            LockUtil.executeWithWriteLockExpectException(userGroupsLock, () -> {
+                final Iterable<UserGroup> userGroups = domainObjectFactory
+                        .loadAllUserGroupsAndTenantsWithProxyUsers(roleDefinitions);
+                for (UserGroup group : userGroups) {
+                    this.userGroups.put(group.getId(), group);
+                    userGroupsByName.put(group.getName(), group);
+                }
+                // do this here, in case the default tenant was just loaded before
+                ensureServerGroupExists();
+            });
+            for (User u : domainObjectFactory.loadAllUsers(roleDefinitions, this::convertToNewRoleModel,
+                    this.userGroups, this)) {
+                users.put(u.getName(), u);
+                addToUsersByEmail(u);
+                for (Role roleOfUser : u.getRoles()) {
+                    Util.addToValueSet(roleDefinitionsToUsers, roleOfUser.getRoleDefinition(), u,
+                            () -> ConcurrentHashMap.newKeySet());
+                }
             }
-        }
-        // the users in the groups/tenants are still only proxies; now that the real users have been loaded,
-        // replace them based on the username key:
-        for (final UserGroup group : this.userGroups.values()) {
-            migrateProxyUsersInGroupToRealUsersByUsername(group);
-            for (final User userInGroup : group.getUsers()) {
-                Util.addToValueSet(usersInUserGroups, group, userInGroup);
-                Util.addToValueSet(userGroupsContainingUser, userInGroup, group);
+            // the users in the groups/tenants are still only proxies; now that the real users have been loaded,
+            // replace them based on the username key:
+            for (final UserGroup group : this.userGroups.values()) {
+                migrateProxyUsersInGroupToRealUsersByUsername(group);
+                for (final User userInGroup : group.getUsers()) {
+                    Util.addToValueSet(usersInUserGroups, group, userInGroup);
+                    Util.addToValueSet(userGroupsContainingUser, userInGroup, group);
+                }
+                for (RoleDefinition roleInUserGroup : group.getRoleDefinitionMap().keySet()) {
+                    Util.addToValueSet(roleDefinitionsToUserGroups, roleInUserGroup, group,
+                            () -> ConcurrentHashMap.newKeySet());
+                }
             }
-            for (RoleDefinition roleInUserGroup : group.getRoleDefinitionMap().keySet()) {
-                Util.addToValueSet(roleDefinitionsToUserGroups, roleInUserGroup, group,
-                        () -> ConcurrentHashMap.newKeySet());
-            }
-        }
-        // FIXME check for non migrated users, those are leftovers that are in some groups but have no user object anymore, remove them from the groups!
-        for (Entry<String, Map<String, String>> e : preferences.entrySet()) {
-            if (e.getValue() != null) {
-                final String accessToken = e.getValue().get(ACCESS_TOKEN_KEY);
-                if (accessToken != null) {
-                    final User user = users.get(e.getKey());
-                    if (user != null) {
-                        usersByAccessToken.put(accessToken, user);
-                    } else {
-                        logger.warning("Couldn't find user \"" + e.getKey()
-                                + "\" for which an access token was found in the preferences");
+            // FIXME check for non migrated users, those are leftovers that are in some groups but have no user object
+            // anymore, remove them from the groups!
+            for (Entry<String, Map<String, String>> e : preferences.entrySet()) {
+                if (e.getValue() != null) {
+                    final String accessToken = e.getValue().get(ACCESS_TOKEN_KEY);
+                    if (accessToken != null) {
+                        final User user = users.get(e.getKey());
+                        if (user != null) {
+                            usersByAccessToken.put(accessToken, user);
+                        } else {
+                            logger.warning("Couldn't find user \"" + e.getKey()
+                                    + "\" for which an access token was found in the preferences");
+                        }
                     }
                 }
             }
-        }
+        });
     }
     
     private Role convertToNewRoleModel(String oldRoleName, String username) {
@@ -356,19 +366,23 @@ public class UserStoreImpl implements UserStore {
     }
 
     private void migrateProxyUsersInGroupToRealUsersByUsername(final UserGroup group) {
-        // copy user set before looping to avoid concurrent modification exception
-        final Set<User> oldUsers = new HashSet<>();
-        Util.addAll(group.getUsers(), oldUsers);
-        for (final User proxyUser : oldUsers) {
-            group.remove(proxyUser);
-            final User realUser = users.get(proxyUser.getName());
-            if (realUser == null) {
-                logger.warning("Couldn't find user " + proxyUser.getName() + " which was part of user group "
-                        + group.getName());
-            } else {
-                group.add(realUser);
-            }
-        }
+        LockUtil.executeWithReadLock(usersLock, () -> {
+            LockUtil.executeWithWriteLock(userGroupsLock, () -> {
+                // copy user set before looping to avoid concurrent modification exception
+                final Set<User> oldUsers = new HashSet<>();
+                Util.addAll(group.getUsers(), oldUsers);
+                for (final User proxyUser : oldUsers) {
+                    group.remove(proxyUser);
+                    final User realUser = users.get(proxyUser.getName());
+                    if (realUser == null) {
+                        logger.warning("Couldn't find user " + proxyUser.getName() + " which was part of user group "
+                                + group.getName());
+                    } else {
+                        group.add(realUser);
+                    }
+                }
+            });
+        });
     }
 
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
@@ -392,8 +406,8 @@ public class UserStoreImpl implements UserStore {
     @Override
     public void clear() {
         if (mongoObjectFactory != null) {
-            users.values().forEach(mongoObjectFactory::deleteUser);
-            userGroups.values().forEach(mongoObjectFactory::deleteUserGroup);
+            LockUtil.executeWithReadLock(usersLock, () -> users.values().forEach(mongoObjectFactory::deleteUser));
+            LockUtil.executeWithReadLock(userGroupsLock, () -> userGroups.values().forEach(mongoObjectFactory::deleteUserGroup));
             roleDefinitions.values().forEach(mongoObjectFactory::deleteRoleDefinition);
             mongoObjectFactory.deleteAllPreferences();
             mongoObjectFactory.deleteAllSettings();
@@ -402,23 +416,24 @@ public class UserStoreImpl implements UserStore {
     }
 
     private void removeAll() {
-        LockUtil.executeWithWriteLock(userGroupsLock, () -> {
-            userGroups.clear();
-            userGroupsByName.clear();
-            userGroupsContainingUser.clear();
-            usersInUserGroups.clear();
-            roleDefinitionsToUserGroups.clear();
+        LockUtil.executeWithWriteLock(usersLock, () -> {
+            LockUtil.executeWithWriteLock(userGroupsLock, () -> {
+                userGroups.clear();
+                userGroupsByName.clear();
+                userGroupsContainingUser.clear();
+                usersInUserGroups.clear();
+                roleDefinitionsToUserGroups.clear();
+                clearAllPreferenceObjects();
+                emailForUsername.clear();
+                settings.clear();
+                settingTypes.clear();
+                users.clear();
+                roleDefinitionsToUsers.clear();
+                roleDefinitions.clear();
+                usersByEmail.clear();
+                usersByAccessToken.clear();
+            });
         });
-        clearAllPreferenceObjects();
-        emailForUsername.clear();
-        settings.clear();
-        settingTypes.clear();
-        users.clear();
-        roleDefinitionsToUsers.clear();
-        roleDefinitions.clear();
-        usersByEmail.clear();
-        usersByAccessToken.clear();
-
     }
 
     /**
@@ -436,37 +451,41 @@ public class UserStoreImpl implements UserStore {
     @Override
     public void replaceContentsFrom(UserStore newUserStore) {
         clear();
-        LockUtil.executeWithWriteLock(userGroupsLock, () -> {
-            for (UserGroup group : newUserStore.getUserGroups()) {
-                userGroups.put(group.getId(), group);
-                userGroupsByName.put(group.getName(), group);
-                final HashSet<User> usersInGroup = new HashSet<>();
-                Util.addAll(group.getUsers(), usersInGroup);
-                usersInUserGroups.put(group, usersInGroup);
-                for (final User userInGroup : group.getUsers()) {
-                    Util.addToValueSet(userGroupsContainingUser, userInGroup, group);
+        LockUtil.executeWithWriteLock(usersLock, () -> {
+            LockUtil.executeWithWriteLock(userGroupsLock, () -> {
+                for (UserGroup group : newUserStore.getUserGroups()) {
+                    userGroups.put(group.getId(), group);
+                    userGroupsByName.put(group.getName(), group);
+                    final HashSet<User> usersInGroup = new HashSet<>();
+                    Util.addAll(group.getUsers(), usersInGroup);
+                    usersInUserGroups.put(group, usersInGroup);
+                    for (final User userInGroup : group.getUsers()) {
+                        Util.addToValueSet(userGroupsContainingUser, userInGroup, group);
+                    }
                 }
-            }
+
+                for (RoleDefinition roleDefinition : newUserStore.getRoleDefinitions()) {
+                    roleDefinitions.put(roleDefinition.getId(), roleDefinition);
+                }
+
+                for (User user : newUserStore.getUsers()) {
+                    users.put(user.getName(), user);
+                    addToUsersByEmail(user);
+                    for (Entry<String, String> userPref : newUserStore.getAllPreferences(user.getName()).entrySet()) {
+                        setPreference(user.getName(), userPref.getKey(), userPref.getValue());
+                        if (userPref.getKey().equals(ACCESS_TOKEN_KEY)) {
+                            usersByAccessToken.put(userPref.getValue(), user);
+                        }
+                    }
+                }
+                for (Entry<String, Object> setting : newUserStore.getAllSettings().entrySet()) {
+                    settings.put(setting.getKey(), setting.getValue());
+                }
+                for (Entry<String, Class<?>> settingType : newUserStore.getAllSettingTypes().entrySet()) {
+                    settingTypes.put(settingType.getKey(), settingType.getValue());
+                }
+            });
         });
-        for (RoleDefinition roleDefinition : newUserStore.getRoleDefinitions()) {
-            roleDefinitions.put(roleDefinition.getId(), roleDefinition);
-        }
-        for (User user : newUserStore.getUsers()) {
-            users.put(user.getName(), user);
-            addToUsersByEmail(user);
-            for (Entry<String, String> userPref : newUserStore.getAllPreferences(user.getName()).entrySet()) {
-                setPreference(user.getName(), userPref.getKey(), userPref.getValue());
-                if (userPref.getKey().equals(ACCESS_TOKEN_KEY)) {
-                    usersByAccessToken.put(userPref.getValue(), user);
-                }
-            }
-        }
-        for (Entry<String, Object> setting : newUserStore.getAllSettings().entrySet()) {
-            settings.put(setting.getKey(), setting.getValue());
-        }
-        for (Entry<String, Class<?>> settingType : newUserStore.getAllSettingTypes().entrySet()) {
-            settingTypes.put(settingType.getKey(), settingType.getValue());
-        }
     }
 
     @Override
@@ -527,28 +546,34 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public void removeRoleDefinition(RoleDefinition roleDefinition) {
-        mongoObjectFactory.deleteRoleDefinition(roleDefinition);
-        roleDefinitions.remove(roleDefinition.getId());
-        roleDefinitionsToUsers.remove(roleDefinition);
-        roleDefinitionsToUserGroups.remove(roleDefinition);
+        LockUtil.executeWithWriteLock(usersLock, () -> {
+            LockUtil.executeWithWriteLock(userGroupsLock, () -> {
+                mongoObjectFactory.deleteRoleDefinition(roleDefinition);
+                roleDefinitions.remove(roleDefinition.getId());
+                roleDefinitionsToUsers.remove(roleDefinition);
+                roleDefinitionsToUserGroups.remove(roleDefinition);
+            });
+        });
     }
 
     @Override
     public boolean setAccessToken(String username, String accessToken) {
-        final boolean result;
-        final User user = getUserByName(username);
-        if (user == null) {
-            result = false;
-        } else {
-            result = true;
-            final String oldAccessToken = getPreference(username, ACCESS_TOKEN_KEY);
-            if (oldAccessToken != null) {
-                usersByAccessToken.remove(oldAccessToken);
+       return LockUtil.executeWithWriteLockAndResult(usersLock, () -> {
+            final boolean result;
+            final User user = getUserByName(username);
+            if (user == null) {
+                result = false;
+            } else {
+                result = true;
+                final String oldAccessToken = getPreference(username, ACCESS_TOKEN_KEY);
+                if (oldAccessToken != null) {
+                    usersByAccessToken.remove(oldAccessToken);
+                }
+                usersByAccessToken.put(accessToken, user);
+                setPreference(username, ACCESS_TOKEN_KEY, accessToken);
             }
-            usersByAccessToken.put(accessToken, user);
-            setPreference(username, ACCESS_TOKEN_KEY, accessToken);
-        }
-        return result;
+            return result;
+        });
     }
 
     @Override
@@ -558,6 +583,7 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public void removeAccessToken(String username) {
+        LockUtil.executeWithReadLock(usersLock, () -> {
             User user = users.get(username);
             if (user != null) {
                 final String accessToken = getPreference(username, ACCESS_TOKEN_KEY);
@@ -567,30 +593,35 @@ public class UserStoreImpl implements UserStore {
                 // the access token actually existed; now we need to update the preferences
                 unsetPreference(username, ACCESS_TOKEN_KEY);
             }
+        });
     }
 
     private void addToUsersByEmail(User u) {
-        if (u.getEmail() != null && !u.getEmail().isEmpty()) {
-            Set<User> set = usersByEmail.get(u.getEmail());
-            if (set == null) {
-                set = new HashSet<>();
-                usersByEmail.put(u.getEmail(), set);
+        LockUtil.executeWithWriteLock(usersLock, () -> {
+            if (u.getEmail() != null && !u.getEmail().isEmpty()) {
+                Set<User> set = usersByEmail.get(u.getEmail());
+                if (set == null) {
+                    set = new HashSet<>();
+                    usersByEmail.put(u.getEmail(), set);
+                }
+                set.add(u);
+                emailForUsername.put(u.getName(), u.getEmail());
             }
-            set.add(u);
-            emailForUsername.put(u.getName(), u.getEmail());
-        }
+        });
     }
 
     private void removeFromUsersByEmail(User u) {
-        if (u != null) {
-            final String email = emailForUsername.remove(u.getName());
-            if (email != null) {
-                Set<User> set = usersByEmail.get(email); // this also works if the user's e-mail has changed meanwhile
-                if (set != null) {
-                    set.remove(u);
+        LockUtil.executeWithWriteLock(usersLock, () -> {
+            if (u != null) {
+                final String email = emailForUsername.remove(u.getName());
+                if (email != null) {
+                    Set<User> set = usersByEmail.get(email); // this also works if the user's e-mail has changed meanwhile
+                    if (set != null) {
+                        set.remove(u);
+                    }
                 }
             }
-        }
+        });
     }
 
     private boolean initSocialSettingsIfEmpty() {
@@ -612,43 +643,58 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public Iterable<UserGroup> getUserGroups() {
-        return new ArrayList<>(userGroups.values());
+        return LockUtil.executeWithReadLockAndResult(userGroupsLock, () -> {
+            return new ArrayList<>(userGroups.values());
+        });
     }
 
     @Override
     public UserGroup getUserGroupByName(String name) {
-        return name == null ? null : userGroupsByName.get(name);
+        return LockUtil.executeWithReadLockAndResult(userGroupsLock, () -> {
+            return name == null ? null : userGroupsByName.get(name);
+        });
     }
 
     @Override
     public UserGroup getUserGroup(UUID id) {
-        return id == null ? null : userGroups.get(id);
+        return LockUtil.executeWithReadLockAndResult(userGroupsLock, () -> {
+            return id == null ? null : userGroups.get(id);
+        });
     }
 
     @Override
     public UserGroupImpl createUserGroup(UUID groupId, String name) throws UserGroupManagementException {
         checkGroupNameAndIdUniqueness(groupId, name);
-        logger.info("Creating user group: " + groupId + " with name " + name);
-        UserGroupImpl group = new UserGroupImpl(groupId, name);
-        if (mongoObjectFactory != null) {
-            mongoObjectFactory.storeUserGroup(group);
+        try {
+            LockUtil.lockForWrite(userGroupsLock);
+            logger.info("Creating user group: " + groupId + " with name " + name);
+            UserGroupImpl group = new UserGroupImpl(groupId, name);
+            if (mongoObjectFactory != null) {
+                mongoObjectFactory.storeUserGroup(group);
+            }
+            addGroupToInternalMaps(group);
+            return group;
+        }finally {
+            LockUtil.unlockAfterWrite(userGroupsLock);
         }
-        addGroupToInternalMaps(group);
-        return group;
     }
 
     private void addGroupToInternalMaps(UserGroup group) {
-        userGroups.put(group.getId(), group);
-        userGroupsByName.put(group.getName(), group);
+        LockUtil.executeWithWriteLock(userGroupsLock, () -> {
+            userGroups.put(group.getId(), group);
+            userGroupsByName.put(group.getName(), group);
+        });
     }
 
     private void checkGroupNameAndIdUniqueness(UUID groupId, String name) throws UserGroupManagementException {
-        if (userGroupsByName.contains(name)) {
-            throw new UserGroupManagementException(UserGroupManagementException.USER_GROUP_ALREADY_EXISTS);
-        }
-        if (userGroups.contains(groupId)) {
-            throw new UserGroupManagementException(UserGroupManagementException.USER_GROUP_ALREADY_EXISTS);
-        }
+        LockUtil.executeWithReadLockExpectException(userGroupsLock, () -> {
+            if (userGroupsByName.contains(name)) {
+                throw new UserGroupManagementException(UserGroupManagementException.USER_GROUP_ALREADY_EXISTS);
+            }
+            if (userGroups.contains(groupId)) {
+                throw new UserGroupManagementException(UserGroupManagementException.USER_GROUP_ALREADY_EXISTS);
+            }
+        });
     }
 
     @Override
@@ -698,21 +744,21 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public void deleteUserGroup(UserGroup userGroup) throws UserGroupManagementException {
-        if (!userGroups.containsKey(userGroup.getId())) {
-            throw new UserGroupManagementException(UserGroupManagementException.USER_GROUP_DOES_NOT_EXIST);
-        }
-        logger.info("Deleting user group: " + userGroup);
-        userGroupsByName.remove(userGroup.getName());
-        userGroups.remove(userGroup.getId());
-        LockUtil.executeWithWriteLock(userGroupsLock, () -> {
+        LockUtil.executeWithWriteLockExpectException(userGroupsLock, () -> {
+            if (!userGroups.containsKey(userGroup.getId())) {
+                throw new UserGroupManagementException(UserGroupManagementException.USER_GROUP_DOES_NOT_EXIST);
+            }
+            logger.info("Deleting user group: " + userGroup);
+            userGroupsByName.remove(userGroup.getName());
+            userGroups.remove(userGroup.getId());
             for (final User userInDeletedGroup : userGroup.getUsers()) {
                 Util.removeFromValueSet(userGroupsContainingUser, userInDeletedGroup, userGroup);
             }
             usersInUserGroups.remove(userGroup);
             userGroup.getRoleDefinitionMap().keySet()
-            .forEach(role -> Util.removeFromValueSet(roleDefinitionsToUserGroups, role, userGroup));
+                    .forEach(role -> Util.removeFromValueSet(roleDefinitionsToUserGroups, role, userGroup));
+            deleteUserGroupFromDB(userGroup);
         });
-        deleteUserGroupFromDB(userGroup);
     }
 
     private void deleteUserGroupFromDB(UserGroup userGroup) {
@@ -733,218 +779,252 @@ public class UserStoreImpl implements UserStore {
     }
 
     private void addAndStoreUserInternal(User user) {
-        if (mongoObjectFactory != null) {
-            mongoObjectFactory.storeUser(user);
-        }
-        users.put(user.getName(), user);
-        addToUsersByEmail(user);
+        LockUtil.executeWithWriteLock(usersLock, () -> {
+            if (mongoObjectFactory != null) {
+                mongoObjectFactory.storeUser(user);
+            }
+            users.put(user.getName(), user);
+            addToUsersByEmail(user);
+        });
     }
 
     private void checkUsernameUniqueness(String name) throws UserManagementException {
-        if (getUserByName(name) != null) {
-            throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
-        }
+        LockUtil.executeWithReadLockExpectException(usersLock, () -> {
+            if (getUserByName(name) != null) {
+                throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
+            }
+        });
     }
     
     @Override
     public void addUser(User user) throws UserManagementException {
-        checkUsernameUniqueness(user.getName());
-        logger.info("Adding user: "+user);
-        addAndStoreUserInternal(user);
+        LockUtil.executeWithWriteLockExpectException(usersLock, () -> {
+            checkUsernameUniqueness(user.getName());
+            logger.info("Adding user: "+user);
+            addAndStoreUserInternal(user);
+        });
     }
 
     @Override
     public void updateUser(User user) {
-        logger.info("Updating user " + user + " in DB");
-        users.put(user.getName(), user);
-        removeFromUsersByEmail(user);
-        addToUsersByEmail(user);
-        if (mongoObjectFactory != null) {
-            mongoObjectFactory.storeUser(user);
-        }
+        LockUtil.executeWithWriteLock(usersLock, () -> {
+            logger.info("Updating user " + user + " in DB");
+            users.put(user.getName(), user);
+            removeFromUsersByEmail(user);
+            addToUsersByEmail(user);
+            if (mongoObjectFactory != null) {
+                mongoObjectFactory.storeUser(user);
+            }
+        });
     }
 
     @Override
     public Iterable<User> getUsers() {
-        return new ArrayList<User>(users.values());
+        return LockUtil.executeWithReadLockAndResult(usersLock, () -> {
+            return new ArrayList<User>(users.values());
+        });
     }
 
     @Override
     public boolean hasUsers() {
-        return !users.isEmpty();
+        return LockUtil.executeWithReadLockAndResult(usersLock, () -> {
+            return !users.isEmpty();
+        });
     }
 
     @Override
     public User getUserByName(String name) {
-        final User result;
-        if (name == null) {
-            result = null;
-        } else {
-            result = users.get(name);
-        }
-        return result;
+        return LockUtil.executeWithReadLockAndResult(usersLock, () -> {
+            final User result;
+            if (name == null) {
+                result = null;
+            } else {
+                result = users.get(name);
+            }
+            return result;
+        });
     }
 
     @Override
     public User getUserByAccessToken(String accessToken) {
-        final User result;
-        if (accessToken == null) {
-            result = null;
-        } else {
-            result = usersByAccessToken.get(accessToken);
-        }
-        return result;
+        return LockUtil.executeWithReadLockAndResult(usersLock, () -> {
+            final User result;
+            if (accessToken == null) {
+                result = null;
+            } else {
+                result = usersByAccessToken.get(accessToken);
+            }
+            return result;
+        });
     }
 
     @Override
     public User getUserByEmail(String email) {
-        final User result;
-        if (email == null) {
-            result = null;
-        } else {
-            Set<User> set = usersByEmail.get(email);
-            if (set == null || set.isEmpty()) {
+        return LockUtil.executeWithReadLockAndResult(usersLock, () -> {
+            final User result;
+            if (email == null) {
                 result = null;
             } else {
-                result = set.iterator().next();
+                Set<User> set = usersByEmail.get(email);
+                if (set == null || set.isEmpty()) {
+                    result = null;
+                } else {
+                    result = set.iterator().next();
+                }
             }
-        }
-        return result;
+            return result;
+        });
     }
 
     @Override
     public Pair<Boolean, Set<Ownership>> getExistingQualificationsForRoleDefinition(RoleDefinition roleToCheck) {
-        return LockUtil.executeWithReadLockAndResult(userGroupsLock, () ->{
-            final Set<Ownership> ownerships = new HashSet<>();
-            final Set<User> usersHavingRole = roleDefinitionsToUsers.get(roleToCheck);
-            if (usersHavingRole != null) {
-                for (User user : usersHavingRole) {
-                    for (Role role : user.getRoles()) {
-                        if (!role.getRoleDefinition().equals(roleToCheck)) {
-                            // wrong role
-                            continue;
-                        }
-                        if (role.getQualifiedForTenant() == null && role.getQualifiedForUser() == null) {
-                            // wildcard rule exists -> return A=true
-                            return new Pair<>(true, null);
-                        } else {
-                            ownerships.add(new Ownership(role.getQualifiedForUser(), role.getQualifiedForTenant()));
+        return LockUtil.executeWithReadLockAndResult(usersLock, () -> {
+            return LockUtil.executeWithReadLockAndResult(userGroupsLock, () -> {
+                final Set<Ownership> ownerships = new HashSet<>();
+                final Set<User> usersHavingRole = roleDefinitionsToUsers.get(roleToCheck);
+                if (usersHavingRole != null) {
+                    for (User user : usersHavingRole) {
+                        for (Role role : user.getRoles()) {
+                            if (!role.getRoleDefinition().equals(roleToCheck)) {
+                                // wrong role
+                                continue;
+                            }
+                            if (role.getQualifiedForTenant() == null && role.getQualifiedForUser() == null) {
+                                // wildcard rule exists -> return A=true
+                                return new Pair<>(true, null);
+                            } else {
+                                ownerships.add(new Ownership(role.getQualifiedForUser(), role.getQualifiedForTenant()));
+                            }
                         }
                     }
                 }
-            }
-            final Set<UserGroup> userGroupsHavingRole = roleDefinitionsToUserGroups.get(roleToCheck);
-            if (userGroupsHavingRole != null) {
-                for (UserGroup userGroup : userGroupsHavingRole) {
-                    if (userGroup.getRoleDefinitionMap().containsKey(roleToCheck)) {
-                        ownerships.add(new Ownership(null, userGroup));
+                final Set<UserGroup> userGroupsHavingRole = roleDefinitionsToUserGroups.get(roleToCheck);
+                if (userGroupsHavingRole != null) {
+                    for (UserGroup userGroup : userGroupsHavingRole) {
+                        if (userGroup.getRoleDefinitionMap().containsKey(roleToCheck)) {
+                            ownerships.add(new Ownership(null, userGroup));
+                        }
                     }
                 }
-            }
-            return new Pair<>(false, ownerships);
+                return new Pair<>(false, ownerships);
+            });
         });
     }
 
     @Override
     public Set<Pair<User, Role>> getRolesQualifiedByUserGroup(UserGroup groupQualification) {
-        final Set<Pair<User, Role>> result = new HashSet<>();
-        for (User user : getUsers()) {
-            try {
-                for (Role role : getRolesFromUser(user.getName())) {
-                    if (groupQualification.equals(role.getQualifiedForTenant())) {
-                        result.add(new Pair<>(user, role));
+        return LockUtil.executeWithReadLockAndResult(usersLock, () -> {
+            final Set<Pair<User, Role>> result = new HashSet<>();
+            for (User user : getUsers()) {
+                try {
+                    for (Role role : getRolesFromUser(user.getName())) {
+                        if (groupQualification.equals(role.getQualifiedForTenant())) {
+                            result.add(new Pair<>(user, role));
+                        }
                     }
+                } catch (UserManagementException e) {
+                    // user did not exist -> should not happen
+                    logger.log(Level.SEVERE, e.getMessage(), e);
                 }
-            } catch (UserManagementException e) {
-                // user did not exist -> should not happen
-                logger.log(Level.SEVERE, e.getMessage(), e);
             }
-        }
-        return result;
+            return result;
+        });
     }
 
     @Override
     public Iterable<Role> getRolesFromUser(String username) throws UserManagementException {
-        if (users.get(username) == null) {
-            throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
-        }
-        return users.get(username).getRoles();
+        return LockUtil.executeWithReadLockAndResultExpectException(usersLock, () ->{
+            if (users.get(username) == null) {
+                throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
+            }
+            return users.get(username).getRoles();
+        });
     }
 
     @Override
     public void addRoleForUser(String name, Role role) throws UserManagementException {
-        final User user = users.get(name);
-        if (user == null) {
-            throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
-        }
-        user.addRole(role);
-        Util.addToValueSet(roleDefinitionsToUsers, role.getRoleDefinition(), user,
-                () -> ConcurrentHashMap.newKeySet());
-        if (mongoObjectFactory != null) {
-            mongoObjectFactory.storeUser(user);
-        }
+        LockUtil.executeWithWriteLockExpectException(usersLock, () -> {
+            final User user = users.get(name);
+            if (user == null) {
+                throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
+            }
+            user.addRole(role);
+            Util.addToValueSet(roleDefinitionsToUsers, role.getRoleDefinition(), user,
+                    () -> ConcurrentHashMap.newKeySet());
+            if (mongoObjectFactory != null) {
+                mongoObjectFactory.storeUser(user);
+            }
+        });
     }
 
     @Override
     public void removeRoleFromUser(String name, Role role) throws UserManagementException {
-        final User user = users.get(name);
-        if (user == null) {
-            throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
-        }
-        user.removeRole(role);
-        RoleDefinition roleDefinition = role.getRoleDefinition();
-        boolean roleDefinitionStillGrantedToUser = false;
-        for (Role roleOfUser : user.getRoles()) {
-            if (roleDefinition.equals(roleOfUser.getRoleDefinition())) {
-                roleDefinitionStillGrantedToUser = true;
-                break;
+        LockUtil.executeWithWriteLockExpectException(usersLock, () -> {
+            final User user = users.get(name);
+            if (user == null) {
+                throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
             }
-        }
-        if (!roleDefinitionStillGrantedToUser) {
-            Util.removeFromValueSet(roleDefinitionsToUsers, roleDefinition, user);
-        }
-        if (mongoObjectFactory != null) {
-            mongoObjectFactory.storeUser(users.get(name));
-        }
+            user.removeRole(role);
+            RoleDefinition roleDefinition = role.getRoleDefinition();
+            boolean roleDefinitionStillGrantedToUser = false;
+            for (Role roleOfUser : user.getRoles()) {
+                if (roleDefinition.equals(roleOfUser.getRoleDefinition())) {
+                    roleDefinitionStillGrantedToUser = true;
+                    break;
+                }
+            }
+            if (!roleDefinitionStillGrantedToUser) {
+                Util.removeFromValueSet(roleDefinitionsToUsers, roleDefinition, user);
+            }
+            if (mongoObjectFactory != null) {
+                mongoObjectFactory.storeUser(users.get(name));
+            }
+        });
     }
 
     @Override
     public void addPermissionForUser(String username, WildcardPermission permission) throws UserManagementException {
-        final User user = users.get(username);
-        if (user == null) {
-            throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
-        }
-        user.addPermission(permission);
-        if (mongoObjectFactory != null) {
-            mongoObjectFactory.storeUser(user);
-        }
+        LockUtil.executeWithWriteLockExpectException(usersLock, () -> {
+            final User user = users.get(username);
+            if (user == null) {
+                throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
+            }
+            user.addPermission(permission);
+            if (mongoObjectFactory != null) {
+                mongoObjectFactory.storeUser(user);
+            }
+        });
     }
 
     @Override
     public void removePermissionFromUser(String name, WildcardPermission permission) throws UserManagementException {
-        if (users.get(name) == null) {
-            throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
-        }
-        users.get(name).removePermission(permission);
-        if (mongoObjectFactory != null) {
-            mongoObjectFactory.storeUser(users.get(name));
-        }
+        LockUtil.executeWithWriteLockExpectException(usersLock, () -> {
+            if (users.get(name) == null) {
+                throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
+            }
+            users.get(name).removePermission(permission);
+            if (mongoObjectFactory != null) {
+                mongoObjectFactory.storeUser(users.get(name));
+            }
+        });
     }
 
     @Override
     public void deleteUser(String name) throws UserManagementException {
-        final User user = users.get(name);
-        if (user == null) {
-            throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
-        }
-        logger.info("Deleting user: " + users.get(name).toString());
-        if (mongoObjectFactory != null) {
-            mongoObjectFactory.deleteUser(user);
-        }
-        user.getRoles()
-                .forEach(role -> Util.removeFromValueSet(roleDefinitionsToUsers, role.getRoleDefinition(), user));
-        removeFromUsersByEmail(users.remove(name));
-        removeAllPreferencesForUser(name);
+        LockUtil.executeWithWriteLockExpectException(usersLock, () -> {
+            final User user = users.get(name);
+            if (user == null) {
+                throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
+            }
+            logger.info("Deleting user: " + users.get(name).toString());
+            if (mongoObjectFactory != null) {
+                mongoObjectFactory.deleteUser(user);
+            }
+            user.getRoles()
+            .forEach(role -> Util.removeFromValueSet(roleDefinitionsToUsers, role.getRoleDefinition(), user));
+            removeFromUsersByEmail(users.remove(name));
+            removeAllPreferencesForUser(name);
+        });
     }
 
     @Override
@@ -1217,8 +1297,7 @@ public class UserStoreImpl implements UserStore {
     @Override
     public void addPreferenceObjectListener(String key, PreferenceObjectListener<? extends Object> listener,
             boolean fireForAlreadyExistingPreferences) {
-        LockUtil.lockForWrite(listenersLock);
-        try {
+        LockUtil.executeWithWriteLock(listenersLock, () -> {
             Util.addToValueSet(listeners, key, listener);
             if (fireForAlreadyExistingPreferences) {
                 final Set<String> usersToProcess = new HashSet<>(preferences.keySet());
@@ -1234,66 +1313,74 @@ public class UserStoreImpl implements UserStore {
                     }
                 }
             }
-        } finally {
-            LockUtil.unlockAfterWrite(listenersLock);
-        }
+        });
     }
 
     @Override
     public void removePreferenceObjectListener(PreferenceObjectListener<?> listener) {
-        LockUtil.lockForWrite(listenersLock);
-        try {
+        LockUtil.executeWithWriteLock(listenersLock, () -> {
             Util.removeFromAllValueSets(listeners, listener);
-        } finally {
-            LockUtil.unlockAfterWrite(listenersLock);
-        }
+        });
     }
 
     @Override
     public void removeAllQualifiedRolesForUser(User user) {
-        for (User checkUser : users.values()) {
-            Set<Role> rolesToRemoveOrAdjust = new HashSet<>();
-            for (Role role : checkUser.getRoles()) {
-                if (Util.equalsWithNull(role.getQualifiedForUser(), user)) {
-                    rolesToRemoveOrAdjust.add(role);
-                }
-            }
-            for (Role removeOrAdjust : rolesToRemoveOrAdjust) {
-                try {
-                    removeRoleFromUser(checkUser.getName(), removeOrAdjust);
-                    if (removeOrAdjust.getQualifiedForTenant() != null) {
-                        addRoleForUser(checkUser.getName(), new Role(removeOrAdjust.getRoleDefinition(),
-                                removeOrAdjust.getQualifiedForTenant(), null));
+        LockUtil.executeWithWriteLock(usersLock, () -> {
+            for (User checkUser : users.values()) {
+                Set<Role> rolesToRemoveOrAdjust = new HashSet<>();
+                for (Role role : checkUser.getRoles()) {
+                    if (Util.equalsWithNull(role.getQualifiedForUser(), user)) {
+                        rolesToRemoveOrAdjust.add(role);
                     }
-                } catch (UserManagementException e) {
-                    logger.log(Level.WARNING,
-                            "Could not properly update qualified roles on user delete " + removeOrAdjust);
+                }
+                for (Role removeOrAdjust : rolesToRemoveOrAdjust) {
+                    try {
+                        removeRoleFromUser(checkUser.getName(), removeOrAdjust);
+                        if (removeOrAdjust.getQualifiedForTenant() != null) {
+                            addRoleForUser(checkUser.getName(), new Role(removeOrAdjust.getRoleDefinition(),
+                                    removeOrAdjust.getQualifiedForTenant(), null));
+                        }
+                    } catch (UserManagementException e) {
+                        logger.log(Level.WARNING,
+                                "Could not properly update qualified roles on user delete " + removeOrAdjust);
+                    }
                 }
             }
-        }
+        });
+    }
+
+    private void removeAllQualifiedRolesForUserGroup(UserGroup userGroup) {
+        LockUtil.executeWithWriteLock(usersLock, () -> {
+            for (User checkUser : users.values()) {
+                Set<Role> rolesToRemoveOrAdjust = new HashSet<>();
+                for (Role role : checkUser.getRoles()) {
+                    if (Util.equalsWithNull(role.getQualifiedForTenant(), userGroup)) {
+                        rolesToRemoveOrAdjust.add(role);
+                    }
+                }
+                for (Role removeOrAdjust : rolesToRemoveOrAdjust) {
+                    try {
+                        removeRoleFromUser(checkUser.getName(), removeOrAdjust);
+                        if (removeOrAdjust.getQualifiedForUser() != null) {
+                            addRoleForUser(checkUser.getName(), new Role(removeOrAdjust.getRoleDefinition(), null,
+                                    removeOrAdjust.getQualifiedForUser()));
+                        }
+                    } catch (UserManagementException e) {
+                        logger.log(Level.WARNING,
+                                "Could not properly update qualified roles on user delete " + removeOrAdjust);
+                    }
+                }
+            }
+        });
     }
 
     @Override
-    public void removeAllQualifiedRolesForUserGroup(UserGroup userGroup) {
-        for (User checkUser : users.values()) {
-            Set<Role> rolesToRemoveOrAdjust = new HashSet<>();
-            for (Role role : checkUser.getRoles()) {
-                if (Util.equalsWithNull(role.getQualifiedForTenant(), userGroup)) {
-                    rolesToRemoveOrAdjust.add(role);
-                }
-            }
-            for (Role removeOrAdjust : rolesToRemoveOrAdjust) {
-                try {
-                    removeRoleFromUser(checkUser.getName(), removeOrAdjust);
-                    if (removeOrAdjust.getQualifiedForUser() != null) {
-                        addRoleForUser(checkUser.getName(), new Role(removeOrAdjust.getRoleDefinition(), null,
-                                removeOrAdjust.getQualifiedForUser()));
-                    }
-                } catch (UserManagementException e) {
-                    logger.log(Level.WARNING,
-                            "Could not properly update qualified roles on user delete " + removeOrAdjust);
-                }
-            }
-        }
+    public void deleteUserGroupAndRemoveAllQualifiedRolesForUserGroup(UserGroup userGroup) throws UserGroupManagementException {
+        LockUtil.executeWithWriteLockExpectException(usersLock, () -> {
+            LockUtil.executeWithWriteLockExpectException(userGroupsLock, () -> {
+                removeAllQualifiedRolesForUserGroup(userGroup);
+                deleteUserGroup(userGroup);
+            });
+        });
     }
 }

@@ -1,10 +1,10 @@
 package com.sap.sse.security.interfaces;
 
 import com.sap.sse.security.shared.BasicUserStore;
+import com.sap.sse.security.shared.UserStoreManagementException;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RolePrototype;
 import com.sap.sse.security.shared.UserGroupManagementException;
-import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
@@ -94,7 +94,7 @@ public interface UserStore extends BasicUserStore {
      * Do not call this before the RolePrototypes are created/loaded, as else a migration cannot succeed. But do call
      * this before the SecurityService is created, as else new defaults (eg admin user) will be created
      */
-    void loadAndMigrateUsers() throws UserGroupManagementException, UserManagementException;
+    void loadAndMigrateUsers() throws UserStoreManagementException;
 
     /**
      * Looks up a {@link UserGroup} based on the server group name set for this user store. If no such group
@@ -105,7 +105,7 @@ public interface UserStore extends BasicUserStore {
 
     void removeAllQualifiedRolesForUser(User user);
 
-    void removeAllQualifiedRolesForUserGroup(UserGroup userGroup);
-
     RoleDefinition getRoleDefinitionByPrototype(RolePrototype rolePrototype);
+
+    void deleteUserGroupAndRemoveAllQualifiedRolesForUserGroup(UserGroup userGroup) throws UserGroupManagementException;
 }
