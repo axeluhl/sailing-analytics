@@ -186,7 +186,7 @@ public class EventsResource extends AbstractSailingServerResource {
                                     deleteReferencedOverallLeaderboard(deleteRegattas, securityService,
                                             racingEventService, group);
                                 }
-                                racingEventService.apply(new RemoveLeaderboardGroup(group.getName()));
+                                racingEventService.apply(new RemoveLeaderboardGroup(group.getId()));
                             });
                         }
                     }
