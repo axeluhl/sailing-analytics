@@ -78,16 +78,16 @@ public class UserStoreImpl implements UserStore {
      */
     private UserGroup serverGroup;
 
-    private final ConcurrentHashMap<UUID, UserGroup> userGroups;
-    private final ConcurrentHashMap<String, UserGroup> userGroupsByName;
-    private final ConcurrentHashMap<User, Set<UserGroup>> userGroupsContainingUser;
+    private final HashMap<UUID, UserGroup> userGroups;
+    private final HashMap<String, UserGroup> userGroupsByName;
+    private final HashMap<User, Set<UserGroup>> userGroupsContainingUser;
     
     /**
      * This collection is important in particular to detect changes when {@link #updateUserGroup(UserGroupImpl)} is
      * called.
      */
-    private final ConcurrentHashMap<UserGroup, Set<User>> usersInUserGroups;
-    private final ConcurrentHashMap<RoleDefinition, Set<UserGroup>> roleDefinitionsToUserGroups;
+    private final HashMap<UserGroup, Set<User>> usersInUserGroups;
+    private final HashMap<RoleDefinition, Set<UserGroup>> roleDefinitionsToUserGroups;
     
     /**
      * Protects access to the maps {@link #userGroupsContainingUser}, {@link #usersInUserGroups}, {@link #userGroups},
@@ -108,11 +108,11 @@ public class UserStoreImpl implements UserStore {
     private final NamedReentrantReadWriteLock usersLock = new NamedReentrantReadWriteLock(
             "Users", /* fair */ false);
     
-    private final ConcurrentHashMap<String, User> users;
-    private final ConcurrentHashMap<String, Set<User>> usersByEmail;
-    private final ConcurrentHashMap<String, User> usersByAccessToken;
-    private final ConcurrentHashMap<String, String> emailForUsername;
-    private final ConcurrentHashMap<RoleDefinition, Set<User>> roleDefinitionsToUsers;
+    private final HashMap<String, User> users;
+    private final HashMap<String, Set<User>> usersByEmail;
+    private final HashMap<String, User> usersByAccessToken;
+    private final HashMap<String, String> emailForUsername;
+    private final HashMap<RoleDefinition, Set<User>> roleDefinitionsToUsers;
 
     private final ConcurrentHashMap<String, Object> settings;
     private final ConcurrentHashMap<String, Class<?>> settingTypes;
@@ -165,18 +165,18 @@ public class UserStoreImpl implements UserStore {
         this.serverGroupName = defaultServerGroupName;
         this.domainObjectFactory = domainObjectFactory;
         roleDefinitions = new ConcurrentHashMap<>();
-        userGroups = new ConcurrentHashMap<>();
-        userGroupsByName = new ConcurrentHashMap<>();
-        userGroupsContainingUser = new ConcurrentHashMap<>();
-        usersInUserGroups = new ConcurrentHashMap<>();
-        roleDefinitionsToUsers = new ConcurrentHashMap<>();
-        roleDefinitionsToUserGroups = new ConcurrentHashMap<>();
-        users = new ConcurrentHashMap<>();
-        usersByEmail = new ConcurrentHashMap<>();
-        emailForUsername = new ConcurrentHashMap<>();
+        userGroups = new HashMap<>();
+        userGroupsByName = new HashMap<>();
+        userGroupsContainingUser = new HashMap<>();
+        usersInUserGroups = new HashMap<>();
+        roleDefinitionsToUsers = new HashMap<>();
+        roleDefinitionsToUserGroups = new HashMap<>();
+        users = new HashMap<>();
+        usersByEmail = new HashMap<>();
+        emailForUsername = new HashMap<>();
         settings = new ConcurrentHashMap<>();
         settingTypes = new ConcurrentHashMap<>();
-        usersByAccessToken = new ConcurrentHashMap<>();
+        usersByAccessToken = new HashMap<>();
         preferences = new ConcurrentHashMap<>();
         preferenceConverters = new ConcurrentHashMap<>();
         preferenceObjects = new ConcurrentHashMap<>();
@@ -688,10 +688,10 @@ public class UserStoreImpl implements UserStore {
 
     private void checkGroupNameAndIdUniqueness(UUID groupId, String name) throws UserGroupManagementException {
         LockUtil.executeWithReadLockExpectException(userGroupsLock, () -> {
-            if (userGroupsByName.contains(name)) {
+            if (userGroupsByName.containsKey(name)) {
                 throw new UserGroupManagementException(UserGroupManagementException.USER_GROUP_ALREADY_EXISTS);
             }
-            if (userGroups.contains(groupId)) {
+            if (userGroups.containsKey(groupId)) {
                 throw new UserGroupManagementException(UserGroupManagementException.USER_GROUP_ALREADY_EXISTS);
             }
         });
