@@ -94,7 +94,6 @@ public class TestUserGroupCreation extends AbstractSeleniumTest {
         createRole(userRolesPO);
         userGroupManagementPanel.selectGroup(TEST_GROUP_NAME);
         userRolesPO.removeRole(TEST_ROLE);
-        getWebDriver().switchTo().alert().accept();
         userGroupManagementPanel.selectGroup(TEST_GROUP_NAME);
         assertNull(userRolesPO.findRole(TEST_ROLE));
     }
