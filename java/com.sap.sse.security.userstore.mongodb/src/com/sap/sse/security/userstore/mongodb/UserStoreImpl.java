@@ -688,10 +688,7 @@ public class UserStoreImpl implements UserStore {
 
     private void checkGroupNameAndIdUniqueness(UUID groupId, String name) throws UserGroupManagementException {
         LockUtil.executeWithReadLockExpectException(userGroupsLock, () -> {
-            if (userGroupsByName.containsKey(name)) {
-                throw new UserGroupManagementException(UserGroupManagementException.USER_GROUP_ALREADY_EXISTS);
-            }
-            if (userGroups.containsKey(groupId)) {
+            if (userGroupsByName.containsKey(name) || userGroups.containsKey(groupId)) {
                 throw new UserGroupManagementException(UserGroupManagementException.USER_GROUP_ALREADY_EXISTS);
             }
         });
