@@ -1,8 +1,11 @@
 package com.sap.sailing.selenium.pages.gwt;
 
+import java.util.function.BooleanSupplier;
+
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
+import com.google.common.base.Objects;
 import com.sap.sailing.selenium.pages.PageObject;
 
 /**
@@ -15,6 +18,23 @@ public abstract class TextBoxBasePO extends AbstractInputPO {
      */
     protected TextBoxBasePO(WebDriver driver, WebElement element) {
         super(driver, element);
+    }
+    
+    /**
+     * Wait until text equals to expected one.
+     * @param expected expected text.
+     */
+    public void waitForElementUntil(String expected) {
+        waitUntil(new BooleanSupplier() {
+            @Override
+            public boolean getAsBoolean() {
+                try {
+                    return getWebElement().isDisplayed() && Objects.equal(getText(), expected);
+                } catch (Exception e) {
+                    return false;
+                }
+            }
+        });
     }
     
     /**

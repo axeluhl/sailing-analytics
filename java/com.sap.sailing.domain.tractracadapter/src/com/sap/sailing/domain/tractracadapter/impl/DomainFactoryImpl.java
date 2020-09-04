@@ -661,7 +661,7 @@ public class DomainFactoryImpl implements DomainFactory {
                         trackedRegatta.getRegatta().addRace(raceDefinition);
                         TrackingConnectorInfo trackingConnectorInfo = null;
                         if (tractracRace != null) {
-                            trackingConnectorInfo = new TrackingConnectorInfoImpl(TrackingConnectorType.TracTrac, tractracRace.getEvent().getWebURL());
+                            trackingConnectorInfo = new TrackingConnectorInfoImpl(TrackingConnectorType.TracTrac, tractracRace.getEvent().getWebURL(), tractracRace.getId());
                         }
                         trackedRace = createTrackedRace(trackedRegatta, raceDefinition, sidelines, windStore,
                                 delayToLiveInMillis, millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate, ignoreTracTracMarkPassings,

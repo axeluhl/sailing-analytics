@@ -2,6 +2,7 @@ package com.sap.sailing.server.gateway.deserialization.impl;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -28,8 +29,16 @@ public class TrackingConnectorInfoJsonDeserializer implements JsonDeserializer<T
             logger.log(Level.WARNING, "Error while parsing webUrl of TrackingConnectorInfo", e);
             webUrl = null;
         }
+        final String uuidString = (String) object.get(TrackingConnectorInfoJsonSerializer.FIELD_UUID);
+        UUID uuid;
+        try {
+            uuid = uuidString == null ? null : UUID.fromString(uuidString);
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Error while parsing uuid of TrackingConnectorInfo", e);
+            uuid = null;
+        }
         final TrackingConnectorInfo trackingConnectorInfo = new TrackingConnectorInfoImpl(trackingConnectorType,
-                webUrl);
+                webUrl, uuid);
         return trackingConnectorInfo;
     }
 }
