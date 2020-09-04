@@ -69,8 +69,10 @@ public class StringListEditorCompositePO extends PageArea {
     
     public void removeValueByName(String name) {
         ValueEntryPO findValue = findValue(name);
-        if(findValue != null) {
+        if (findValue != null) {
             findValue.deleteValueEntry();
+        } else {
+            throw new IllegalStateException("Expected value '" + name + "' not found");
         }
     }
 }
