@@ -349,7 +349,11 @@ public class UserStoreImpl implements UserStore {
         this.serverGroup = newServerGroup;
     }
 
+    /**
+     * To call this method, the caller must have obtained the write lock of {@link #userGroupsLock}.
+     */
     private UserGroup getOrCreateServerGroup(String defaultServerGroupName) throws UserGroupManagementException {
+        assert userGroupsLock.isWriteLockedByCurrentThread();
         final UserGroup result;
         if (defaultServerGroupName != null) {
             final UserGroup existingTenant = getUserGroupByName(defaultServerGroupName);
@@ -365,24 +369,25 @@ public class UserStoreImpl implements UserStore {
         return result;
     }
 
+    /**
+     * To call this method, the caller must have obtained the write lock of {@link #usersLock} and {@link #userGroupsLock}.
+     */
     private void migrateProxyUsersInGroupToRealUsersByUsername(final UserGroup group) {
-        LockUtil.executeWithReadLock(usersLock, () -> {
-            LockUtil.executeWithWriteLock(userGroupsLock, () -> {
-                // copy user set before looping to avoid concurrent modification exception
-                final Set<User> oldUsers = new HashSet<>();
-                Util.addAll(group.getUsers(), oldUsers);
-                for (final User proxyUser : oldUsers) {
-                    group.remove(proxyUser);
-                    final User realUser = users.get(proxyUser.getName());
-                    if (realUser == null) {
-                        logger.warning("Couldn't find user " + proxyUser.getName() + " which was part of user group "
-                                + group.getName());
-                    } else {
-                        group.add(realUser);
-                    }
-                }
-            });
-        });
+        assert usersLock.isWriteLockedByCurrentThread();
+        assert userGroupsLock.isWriteLockedByCurrentThread();
+        // copy user set before looping to avoid concurrent modification exception
+        final Set<User> oldUsers = new HashSet<>();
+        Util.addAll(group.getUsers(), oldUsers);
+        for (final User proxyUser : oldUsers) {
+            group.remove(proxyUser);
+            final User realUser = users.get(proxyUser.getName());
+            if (realUser == null) {
+                logger.warning("Couldn't find user " + proxyUser.getName() + " which was part of user group "
+                        + group.getName());
+            } else {
+                group.add(realUser);
+            }
+        }
     }
 
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
@@ -394,7 +399,11 @@ public class UserStoreImpl implements UserStore {
                 UserStoreImpl.class.getSimpleName() + " lock for listeners collection", false);
     }
 
+    /**
+     * To call this method, the caller must have obtained the read lock of {@link #usersLock}.
+     */
     protected Object readResolve() {
+        assert usersLock.getReadHoldCount() > 0;
         for (final User user : getUsers()) {
             if (user instanceof UserImpl) {
                 ((UserImpl) user).setUserGroupProvider(this);
@@ -405,35 +414,40 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public void clear() {
-        if (mongoObjectFactory != null) {
-            LockUtil.executeWithReadLock(usersLock, () -> users.values().forEach(mongoObjectFactory::deleteUser));
-            LockUtil.executeWithReadLock(userGroupsLock, () -> userGroups.values().forEach(mongoObjectFactory::deleteUserGroup));
-            roleDefinitions.values().forEach(mongoObjectFactory::deleteRoleDefinition);
-            mongoObjectFactory.deleteAllPreferences();
-            mongoObjectFactory.deleteAllSettings();
-        }
-        removeAll();
-    }
-
-    private void removeAll() {
         LockUtil.executeWithWriteLock(usersLock, () -> {
             LockUtil.executeWithWriteLock(userGroupsLock, () -> {
-                userGroups.clear();
-                userGroupsByName.clear();
-                userGroupsContainingUser.clear();
-                usersInUserGroups.clear();
-                roleDefinitionsToUserGroups.clear();
-                clearAllPreferenceObjects();
-                emailForUsername.clear();
-                settings.clear();
-                settingTypes.clear();
-                users.clear();
-                roleDefinitionsToUsers.clear();
-                roleDefinitions.clear();
-                usersByEmail.clear();
-                usersByAccessToken.clear();
+                if (mongoObjectFactory != null) {
+                    LockUtil.executeWithReadLock(usersLock, () -> users.values().forEach(mongoObjectFactory::deleteUser));
+                    LockUtil.executeWithReadLock(userGroupsLock, () -> userGroups.values().forEach(mongoObjectFactory::deleteUserGroup));
+                    roleDefinitions.values().forEach(mongoObjectFactory::deleteRoleDefinition);
+                    mongoObjectFactory.deleteAllPreferences();
+                    mongoObjectFactory.deleteAllSettings();
+                }
+                removeAll();
             });
         });
+    }
+
+    /**
+     * To call this method, the caller must have obtained the write lock of {@link #usersLock} and {@link #userGroupsLock}.
+     */
+    private void removeAll() {
+        assert usersLock.isWriteLockedByCurrentThread();
+        assert userGroupsLock.isWriteLockedByCurrentThread();
+        userGroups.clear();
+        userGroupsByName.clear();
+        userGroupsContainingUser.clear();
+        usersInUserGroups.clear();
+        roleDefinitionsToUserGroups.clear();
+        clearAllPreferenceObjects();
+        emailForUsername.clear();
+        settings.clear();
+        settingTypes.clear();
+        users.clear();
+        roleDefinitionsToUsers.clear();
+        roleDefinitions.clear();
+        usersByEmail.clear();
+        usersByAccessToken.clear();
     }
 
     /**
@@ -596,32 +610,36 @@ public class UserStoreImpl implements UserStore {
         });
     }
 
+    /**
+     * To call this method, the caller must have obtained the write lock of {@link #usersLock}.
+     */
     private void addToUsersByEmail(User u) {
-        LockUtil.executeWithWriteLock(usersLock, () -> {
-            if (u.getEmail() != null && !u.getEmail().isEmpty()) {
-                Set<User> set = usersByEmail.get(u.getEmail());
-                if (set == null) {
-                    set = new HashSet<>();
-                    usersByEmail.put(u.getEmail(), set);
-                }
-                set.add(u);
-                emailForUsername.put(u.getName(), u.getEmail());
+        assert usersLock.isWriteLockedByCurrentThread();
+        if (u.getEmail() != null && !u.getEmail().isEmpty()) {
+            Set<User> set = usersByEmail.get(u.getEmail());
+            if (set == null) {
+                set = new HashSet<>();
+                usersByEmail.put(u.getEmail(), set);
             }
-        });
+            set.add(u);
+            emailForUsername.put(u.getName(), u.getEmail());
+        }
     }
 
+    /**
+     * To call this method, the caller must have obtained the write lock of {@link #usersLock}.
+     */
     private void removeFromUsersByEmail(User u) {
-        LockUtil.executeWithWriteLock(usersLock, () -> {
-            if (u != null) {
-                final String email = emailForUsername.remove(u.getName());
-                if (email != null) {
-                    Set<User> set = usersByEmail.get(email); // this also works if the user's e-mail has changed meanwhile
-                    if (set != null) {
-                        set.remove(u);
-                    }
+        assert usersLock.isWriteLockedByCurrentThread();
+        if (u != null) {
+            final String email = emailForUsername.remove(u.getName());
+            if (email != null) {
+                Set<User> set = usersByEmail.get(email); // this also works if the user's e-mail has changed meanwhile
+                if (set != null) {
+                    set.remove(u);
                 }
             }
-        });
+        }
     }
 
     private boolean initSocialSettingsIfEmpty() {
@@ -664,9 +682,8 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public UserGroupImpl createUserGroup(UUID groupId, String name) throws UserGroupManagementException {
-        checkGroupNameAndIdUniqueness(groupId, name);
-        try {
-            LockUtil.lockForWrite(userGroupsLock);
+        return LockUtil.executeWithWriteLockAndResultExpectException(userGroupsLock, () -> {
+            checkGroupNameAndIdUniqueness(groupId, name);
             logger.info("Creating user group: " + groupId + " with name " + name);
             UserGroupImpl group = new UserGroupImpl(groupId, name);
             if (mongoObjectFactory != null) {
@@ -674,24 +691,26 @@ public class UserStoreImpl implements UserStore {
             }
             addGroupToInternalMaps(group);
             return group;
-        }finally {
-            LockUtil.unlockAfterWrite(userGroupsLock);
-        }
+        });
     }
-
+    
+    /**
+     * To call this method, the caller must have obtained the write lock of {@link #userGroupsLock}.
+     */
     private void addGroupToInternalMaps(UserGroup group) {
-        LockUtil.executeWithWriteLock(userGroupsLock, () -> {
-            userGroups.put(group.getId(), group);
-            userGroupsByName.put(group.getName(), group);
-        });
+        assert userGroupsLock.isWriteLockedByCurrentThread();
+        userGroups.put(group.getId(), group);
+        userGroupsByName.put(group.getName(), group);
     }
 
+    /**
+     * To call this method, the caller must have obtained the read lock of {@link #userGroupsLock}.
+     */
     private void checkGroupNameAndIdUniqueness(UUID groupId, String name) throws UserGroupManagementException {
-        LockUtil.executeWithReadLockExpectException(userGroupsLock, () -> {
-            if (userGroupsByName.containsKey(name) || userGroups.containsKey(groupId)) {
-                throw new UserGroupManagementException(UserGroupManagementException.USER_GROUP_ALREADY_EXISTS);
-            }
-        });
+        assert userGroupsLock.getReadHoldCount() > 0;
+        if (userGroupsByName.containsKey(name) || userGroups.containsKey(groupId)) {
+            throw new UserGroupManagementException(UserGroupManagementException.USER_GROUP_ALREADY_EXISTS);
+        }
     }
 
     @Override
@@ -758,7 +777,11 @@ public class UserStoreImpl implements UserStore {
         });
     }
 
+    /**
+     * To call this method, the caller must have obtained the write lock of {@link #userGroupsLock}.
+     */
     private void deleteUserGroupFromDB(UserGroup userGroup) {
+        assert userGroupsLock.isWriteLockedByCurrentThread();
         if (mongoObjectFactory != null) {
             mongoObjectFactory.deleteUserGroup(userGroup);
         }
@@ -767,30 +790,36 @@ public class UserStoreImpl implements UserStore {
     @Override
     public User createUser(String name, String email, Account... accounts)
             throws UserManagementException {
-        checkUsernameUniqueness(name);
-        ConcurrentHashMap<String, UserGroup> tenantsForServer = new ConcurrentHashMap<>();
-        User user = new UserImpl(name, email, tenantsForServer, /* user group provider */ this, accounts);
-        logger.info("Creating user: " + user + " with e-mail " + email);
-        addAndStoreUserInternal(user);
-        return user;
+        return LockUtil.executeWithWriteLockAndResultExpectException(usersLock, () -> {
+            checkUsernameUniqueness(name);
+            ConcurrentHashMap<String, UserGroup> tenantsForServer = new ConcurrentHashMap<>();
+            User user = new UserImpl(name, email, tenantsForServer, /* user group provider */ this, accounts);
+            logger.info("Creating user: " + user + " with e-mail " + email);
+            addAndStoreUserInternal(user);
+            return user;
+        });
     }
-
+    
+    /**
+     * To call this method, the caller must have obtained the write lock of {@link #usersLock}.
+     */
     private void addAndStoreUserInternal(User user) {
-        LockUtil.executeWithWriteLock(usersLock, () -> {
-            if (mongoObjectFactory != null) {
-                mongoObjectFactory.storeUser(user);
-            }
-            users.put(user.getName(), user);
-            addToUsersByEmail(user);
-        });
+        assert usersLock.isWriteLockedByCurrentThread();
+        if (mongoObjectFactory != null) {
+            mongoObjectFactory.storeUser(user);
+        }
+        users.put(user.getName(), user);
+        addToUsersByEmail(user);
     }
-
+    
+    /**
+     * To call this method, the caller must have obtained the write lock of {@link #usersLock}.
+     */
     private void checkUsernameUniqueness(String name) throws UserManagementException {
-        LockUtil.executeWithReadLockExpectException(usersLock, () -> {
-            if (getUserByName(name) != null) {
-                throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
-            }
-        });
+        assert usersLock.isWriteLockedByCurrentThread();
+        if (getUserByName(name) != null) {
+            throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
+        }
     }
     
     @Override
@@ -1275,7 +1304,7 @@ public class UserStoreImpl implements UserStore {
         }
         return stringPreference;
     }
-
+    
     private void notifyListenersOnPreferenceObjectChange(String username, String key, Object oldPreference,
             Object newPreference) {
         LockUtil.lockForRead(listenersLock);
@@ -1347,28 +1376,27 @@ public class UserStoreImpl implements UserStore {
     }
 
     private void removeAllQualifiedRolesForUserGroup(UserGroup userGroup) {
-        LockUtil.executeWithWriteLock(usersLock, () -> {
-            for (User checkUser : users.values()) {
-                Set<Role> rolesToRemoveOrAdjust = new HashSet<>();
-                for (Role role : checkUser.getRoles()) {
-                    if (Util.equalsWithNull(role.getQualifiedForTenant(), userGroup)) {
-                        rolesToRemoveOrAdjust.add(role);
-                    }
-                }
-                for (Role removeOrAdjust : rolesToRemoveOrAdjust) {
-                    try {
-                        removeRoleFromUser(checkUser.getName(), removeOrAdjust);
-                        if (removeOrAdjust.getQualifiedForUser() != null) {
-                            addRoleForUser(checkUser.getName(), new Role(removeOrAdjust.getRoleDefinition(), null,
-                                    removeOrAdjust.getQualifiedForUser()));
-                        }
-                    } catch (UserManagementException e) {
-                        logger.log(Level.WARNING,
-                                "Could not properly update qualified roles on user delete " + removeOrAdjust);
-                    }
+        assert usersLock.isWriteLockedByCurrentThread();
+        for (User checkUser : users.values()) {
+            Set<Role> rolesToRemoveOrAdjust = new HashSet<>();
+            for (Role role : checkUser.getRoles()) {
+                if (Util.equalsWithNull(role.getQualifiedForTenant(), userGroup)) {
+                    rolesToRemoveOrAdjust.add(role);
                 }
             }
-        });
+            for (Role removeOrAdjust : rolesToRemoveOrAdjust) {
+                try {
+                    removeRoleFromUser(checkUser.getName(), removeOrAdjust);
+                    if (removeOrAdjust.getQualifiedForUser() != null) {
+                        addRoleForUser(checkUser.getName(), new Role(removeOrAdjust.getRoleDefinition(), null,
+                                removeOrAdjust.getQualifiedForUser()));
+                    }
+                } catch (UserManagementException e) {
+                    logger.log(Level.WARNING,
+                            "Could not properly update qualified roles on user delete " + removeOrAdjust);
+                }
+            }
+        }
     }
 
     @Override
