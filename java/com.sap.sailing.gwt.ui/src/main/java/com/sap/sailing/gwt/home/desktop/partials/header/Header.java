@@ -101,9 +101,17 @@ public class Header extends Composite implements HeaderConstants {
     interface HeaderUiBinder extends UiBinder<Widget, Header> {
     }
     
+    /**
+     * Contains the logic for the dynamic hamburger menu on top of the page.
+     * @author Georg Herdt
+     *
+     */
     private static final class MenuItemVisibilityHandler implements ResizeHandler{
+        /** maps relationship between menu item in menu bar and menu item in hamburger dropdown */
         private final Map<Anchor,Anchor> menuToDropDownItemMap;
+        /** keeps with of the menu items in the menu bar */
         private final Map<Anchor, Integer> menuItemWidthMap = new HashMap<>();
+        /** list of menu item that shall not be rendered at all, e.g datamining or manage events entry */
         private final Set<Anchor> ignorMenuItems = new HashSet<>();
         private final Anchor hamburgerNavigationIcon;
         private final DropdownHandler dropdownHandler;
@@ -158,6 +166,8 @@ public class Header extends Composite implements HeaderConstants {
         private void initStaticWidth(Anchor key) {
             menuItemWidthMap.compute(key, (menuItem, oldWidth) -> {
                 int newWidth = menuItem.getElement().getClientWidth();
+                // might be called in a situation where the components do not have a width
+                // so we need a mechanism to update detected width later
                 if (newWidth > 0) {
                     return newWidth;
                 } else {
@@ -167,11 +177,11 @@ public class Header extends Composite implements HeaderConstants {
                 }
             });
         }
-        
+
         public void addIgnore(Anchor menuItem) {
             this.ignorMenuItems.add(menuItem);
         }
-        
+
         public boolean removeIgnore(Anchor menuItem) {
             return this.ignorMenuItems.remove(menuItem);
         }
