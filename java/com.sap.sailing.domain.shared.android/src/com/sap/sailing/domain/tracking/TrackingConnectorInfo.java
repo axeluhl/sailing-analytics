@@ -2,6 +2,7 @@ package com.sap.sailing.domain.tracking;
 
 import java.io.Serializable;
 import java.net.URL;
+import java.util.UUID;
 
 import com.sap.sailing.domain.common.tracking.TrackingConnectorType;
 
@@ -21,4 +22,9 @@ public interface TrackingConnectorInfo extends Serializable {
      * may be {@code null} if the API of the respective Tracking-Service does not provide a URL;
      */
     URL getWebUrl();
+    
+    /**
+     * gets a unique identifier for the tracked race matching the one given by the provider
+     */
+    UUID getUuid();
 }
