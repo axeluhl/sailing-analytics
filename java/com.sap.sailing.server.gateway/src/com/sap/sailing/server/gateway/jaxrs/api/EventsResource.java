@@ -26,6 +26,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -290,12 +291,14 @@ public class EventsResource extends AbstractSailingServerResource {
     
     @GET
     @Produces("application/json;charset=UTF-8")
-    public Response getEvents(@QueryParam("showNonPublic") String showNonPublic) {
+    public Response getEvents(@QueryParam("showNonPublic") String showNonPublic, @QueryParam("include") @DefaultValue("false") Boolean include,
+            @QueryParam("id") List<UUID> eventIds) {
         JsonSerializer<EventBase> eventSerializer = new EventBaseJsonSerializer(
                 new VenueJsonSerializer(new CourseAreaJsonSerializer()), new LeaderboardGroupBaseJsonSerializer(),
                 new TrackingConnectorInfoJsonSerializer());
         JSONArray result = new JSONArray();
-        for (Event event : getService().getAllEvents()) {
+        Iterable<Event> events = getService().getEventsSelectively(include, eventIds);
+        for (Event event : events) {
             if (getSecurityService().hasCurrentUserReadPermission(event)
                     && ((showNonPublic != null && Boolean.valueOf(showNonPublic)) || event.isPublic())) {
                 result.add(eventSerializer.serialize(event));
@@ -534,7 +537,7 @@ public class EventsResource extends AbstractSailingServerResource {
                             /* leaderboardDiscardThresholdsParam */ leaderboardDiscardThresholdsParam, numberOfRacesParam, canBoatsOfCompetitorsChangePerRace,
                             competitorRegistrationType, localCompetitorRegistrationSecret);
                     if (leaderboardGroup != null) {
-                        getService().apply(new UpdateLeaderboardGroup(leaderboardGroup.getName(), leaderboardGroup.getName(),
+                        getService().apply(new UpdateLeaderboardGroup(leaderboardGroup.getId(), leaderboardGroup.getName(),
                                 leaderboardGroup.getDescription(), leaderboardGroup.getDisplayName(),
                                 Collections.singletonList(leaderboard.getName()),
                                 leaderboardGroup.getOverallLeaderboard() == null ? null
@@ -598,7 +601,9 @@ public class EventsResource extends AbstractSailingServerResource {
     private String getDefaultEventName() {
         final String username;
         username = getCurrentUser().getName();
-        return "Session "+username+" "+dateTimeFormat.format(new Date());
+        synchronized (dateTimeFormat) {
+            return "Session "+username+" "+dateTimeFormat.format(new Date());
+        }
     }
 
     private User getCurrentUser() {
@@ -684,7 +689,7 @@ public class EventsResource extends AbstractSailingServerResource {
                 overallLeaderboardDiscardThresholds = resultDiscardingRule.getDiscardIndexResultsStartingWithHowManyRaces();
             }
             
-            getService().updateLeaderboardGroup(defaultLeaderboardGroup.getName(), defaultLeaderboardGroup.getName(), defaultLeaderboardGroup.getDescription(),
+            getService().updateLeaderboardGroup(defaultLeaderboardGroup.getId(), defaultLeaderboardGroup.getName(), defaultLeaderboardGroup.getDescription(),
                     defaultLeaderboardGroup.getDisplayName(), leaderboards, overallLeaderboardDiscardThresholds, 
                     defaultLeaderboardGroup.getOverallLeaderboard()==null?null:defaultLeaderboardGroup.getOverallLeaderboard().getScoringScheme().getType());
         }

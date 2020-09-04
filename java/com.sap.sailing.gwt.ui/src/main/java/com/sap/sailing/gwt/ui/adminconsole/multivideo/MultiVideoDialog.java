@@ -44,7 +44,7 @@ import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.VideoMetadataDTO;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaTrackWithSecurityDTO;
-import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
+import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.JSDownloadUtils;
@@ -84,7 +84,7 @@ public class MultiVideoDialog extends DialogBox {
     private StringMessages stringMessages;
     private List<RemoteFileInfo> remoteFiles = new ArrayList<>();
     private FlexTable dataTable;
-    private MediaServiceAsync mediaService;
+    private MediaServiceWriteAsync mediaServiceWrite;
     private Button doScanButton;
     private Label statusLabel;
     private SailingServiceAsync sailingService;
@@ -94,10 +94,10 @@ public class MultiVideoDialog extends DialogBox {
     protected int offsetTimeInMS;
     private boolean isWorking;
 
-    public MultiVideoDialog(SailingServiceAsync sailingService, MediaServiceAsync mediaService,
+    public MultiVideoDialog(SailingServiceAsync sailingService, MediaServiceWriteAsync mediaServiceWrite,
             StringMessages stringMessages, ErrorReporter errorReporter, Runnable afterLinking) {
         this.stringMessages = stringMessages;
-        this.mediaService = mediaService;
+        this.mediaServiceWrite = mediaServiceWrite;
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.afterLinking = afterLinking;
@@ -340,7 +340,7 @@ public class MultiVideoDialog extends DialogBox {
                 MediaTrack mediaTrack = new MediaTrack(remoteFile.url, remoteFile.url,
                         remoteFile.startTime.plus(offsetTimeInMS), remoteFile.duration, remoteFile.mime,
                         selectedCandidates);
-                mediaService.addMediaTrack(mediaTrack, new AsyncCallback<MediaTrackWithSecurityDTO>() {
+                mediaServiceWrite.addMediaTrack(mediaTrack, new AsyncCallback<MediaTrackWithSecurityDTO>() {
 
                     @Override
                     public void onSuccess(MediaTrackWithSecurityDTO result) {
@@ -426,7 +426,7 @@ public class MultiVideoDialog extends DialogBox {
                                 remoteFile.status = EStatus.GETTING_MEDIATRACK;
                                 remoteFile.isWorking = false;
                                 updateUI();
-                                mediaService.getMediaTrackByUrl(remoteFile.url, new AsyncCallback<MediaTrack>() {
+                                mediaServiceWrite.getMediaTrackByUrl(remoteFile.url, new AsyncCallback<MediaTrack>() {
 
                                     @Override
                                     public void onFailure(Throwable caught) {
@@ -517,7 +517,7 @@ public class MultiVideoDialog extends DialogBox {
         file.status = EStatus.SERVER_ANALYSE;
         updateUI();
         // check on server first
-        mediaService.checkMetadata(file.url, new AsyncCallback<VideoMetadataDTO>() {
+        mediaServiceWrite.checkMetadata(file.url, new AsyncCallback<VideoMetadataDTO>() {
 
             @Override
             public void onSuccess(VideoMetadataDTO result) {
@@ -563,7 +563,7 @@ public class MultiVideoDialog extends DialogBox {
                             jEnd[i] = end.get(i);
                         }
                         // Due to js represeting everything as 64double, the max safe file is around 4 petabytes
-                        mediaService.checkMetadata(jStart, jEnd, skipped.longValue(), asyncCallback);
+                        mediaServiceWrite.checkMetadata(jStart, jEnd, skipped.longValue(), asyncCallback);
                     }
                 });
             }

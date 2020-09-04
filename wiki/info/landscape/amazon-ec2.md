@@ -131,6 +131,7 @@ To set up a multi instance for a server with name "SSV", subdomain "ssv.sapsaili
    <pre>
    # JAVA_HOME=/opt/jdk1.8.0_20
    </pre>
+   Optional: setup event management URL by setting <pre>com.sap.sailing.eventmanagement.url</pre> system property. See ADDITIONAL_JAVA_ARGS at <pre>env.sh</pre>.
 
 8. White label switch, uncomment this line in env.sh
    <pre>

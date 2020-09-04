@@ -48,6 +48,7 @@ import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogExcep
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.impl.PreciseCompactGPSFixMovingImpl.PreciseCompactPosition;
 import com.sap.sailing.domain.common.windfinder.SpotDTO;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
 import com.sap.sailing.gwt.ui.client.shared.charts.MarkPositionService.MarkTrackDTO;
 import com.sap.sailing.gwt.ui.shared.AccountWithSecurityDTO;
@@ -150,7 +151,7 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
     SimulatorResultsDTO getSimulatorResults(LegIdentifier legIdentifier) throws UnauthorizedException;
 
     RaceboardDataDTO getRaceboardData(String regattaName, String raceName, String leaderboardName,
-            String leaderboardGroupName, UUID eventId) throws UnauthorizedException;
+            String leaderboardGroupName, UUID leaderboardGroupId, UUID eventId) throws UnauthorizedException;
 
     Map<CompetitorDTO, BoatDTO> getCompetitorBoats(RegattaAndRaceIdentifier raceIdentifier)
             throws UnauthorizedException;
@@ -160,11 +161,13 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
             boolean extrapolate, LegIdentifier simulationLegIdentifier,
             byte[] md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID,
             Date timeToGetTheEstimatedDurationFor, boolean estimatedDurationRequired, DetailType detailType,
-            String leaderboardName, String leaderboardGroupName) throws NoWindException, UnauthorizedException;
+            String leaderboardName, String leaderboardGroupName, UUID leaderboardGroupId)
+            throws NoWindException, UnauthorizedException;
 
     CompactBoatPositionsDTO getBoatPositions(RegattaAndRaceIdentifier raceIdentifier,
             Map<String, Date> fromPerCompetitorIdAsString, Map<String, Date> toPerCompetitorIdAsString,
-            boolean extrapolate, DetailType detailType, String leaderboardName, String leaderboardGroupName)
+            boolean extrapolate, DetailType detailType, String leaderboardName, String leaderboardGroupName,
+            UUID leaderboardGroupId)
                     throws NoWindException, UnauthorizedException;
 
     RaceTimesInfoDTO getRaceTimesInfo(RegattaAndRaceIdentifier raceIdentifier) throws UnauthorizedException;
@@ -227,10 +230,14 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
 
     LeaderboardGroupDTO getLeaderboardGroupByName(String groupName, boolean withGeoLocationData)
             throws UnauthorizedException;
+    
+    LeaderboardGroupDTO getLeaderboardGroupById(UUID groupId) throws UnauthorizedException;
+    
+    LeaderboardGroupDTO getLeaderboardGroupByUuidOrName(final UUID groupUuid, final String groupName);
 
     CompetitorsRaceDataDTO getCompetitorsRaceData(RegattaAndRaceIdentifier race, List<CompetitorDTO> competitors,
             Date from, Date to, long stepSizeInMs, DetailType detailType, String leaderboardGroupName,
-            String leaderboardName) throws NoWindException, UnauthorizedException;
+            UUID leaderboardGroupId, String leaderboardName) throws NoWindException, UnauthorizedException;
 
     Pair<Integer, Integer> resolveImageDimensions(String imageUrlAsString) throws UnauthorizedException, Exception;
 
@@ -256,11 +263,6 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
     void updateServerConfiguration(ServerConfigurationDTO serverConfiguration) throws UnauthorizedException;
 
     List<RemoteSailingServerReferenceDTO> getRemoteSailingServerReferences() throws UnauthorizedException;
-
-    void removeSailingServers(Set<String> toRemove) throws UnauthorizedException, Exception;
-
-    RemoteSailingServerReferenceDTO addRemoteSailingServerReference(RemoteSailingServerReferenceDTO sailingServer)
-            throws UnauthorizedException, Exception;
 
     List<UrlDTO> getResultImportUrls(String resultProviderName) throws UnauthorizedException;
 
@@ -299,7 +301,7 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
 
     RegattaLogDTO getRegattaLog(String leaderboardName) throws UnauthorizedException, DoesNotHaveRegattaLogException;
 
-    List<String> getLeaderboardGroupNamesFromRemoteServer(String url, String username, String password)
+    Map<String, String> getLeaderboardGroupNamesAndIdsAsStringsFromRemoteServer(String url, String username, String password)
             throws UnauthorizedException;
 
     Iterable<CompetitorDTO> getCompetitors(boolean filterCompetitorsWithBoat, boolean filterCompetitorsWithoutBoat)
@@ -468,7 +470,7 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
      * Used to determine for a Chart the available Detailtypes. This is for example used to only show the RideHeight as
      * an option for charts if it actually recorded for the race.
      */
-    Iterable<DetailType> determineDetailTypesForCompetitorChart(String leaderboardGroupName,
+    Iterable<DetailType> determineDetailTypesForCompetitorChart(String leaderboardGroupName, UUID leaderboardGroupId,
             RegattaAndRaceIdentifier identifier) throws UnauthorizedException;
 
     List<ExpeditionDeviceConfiguration> getExpeditionDeviceConfigurations() throws UnauthorizedException;
@@ -585,14 +587,11 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
 
     List<CourseTemplateDTO> getCourseTemplates();
 
-    /**
-     * Removes course templates list
-     * 
-     * @param courseTemplateDTOs
-     *            list of course templates to remove
-     */
-    void removeCourseTemplates(Collection<UUID> courseTemplatesUuids);
-
     List<MarkRoleDTO> getMarkRoles();
 
+    /**
+     * Returns {@code true} if the given race can be sliced. Only Smarthphone tracked races can be sliced. In addition
+     * the race must be part of a {@link RegattaLeaderboard}.
+     */
+    boolean canSliceRace(RegattaAndRaceIdentifier raceIdentifier) throws UnauthorizedException;
 }

@@ -180,7 +180,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 final UUID roleDefId = roleDefEntry.get(FieldNames.UserGroup.ROLE_DEFINITION_MAP_ROLE_ID.name(),
                         UUID.class);
                 final Boolean forAll = roleDefEntry.getBoolean(FieldNames.UserGroup.ROLE_DEFINITION_MAP_FOR_ALL.name());
-                roleDefinitionMap.put(roleDefinitionsById.get(roleDefId), forAll);
+                final RoleDefinition roleDefinition = roleDefinitionsById.get(roleDefId);
+                if (roleDefinition != null) {
+                    roleDefinitionMap.put(roleDefinition, forAll);
+                } else {
+                    logger.severe("RoleDefinition with ID "+roleDefId+" which the user group "+name+" with ID "+
+                            id+" grants cannot be found");
+                }
             }
         }
         return new UserGroupImpl(id, name, users, roleDefinitionMap);
@@ -226,14 +232,15 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 final User userQualifierProxy = roleWithUserQualifierProxy.getQualifiedForUser();
                 if (userQualifierProxy != null) {
                     final User resolvedUserQualifier = users.get(userQualifierProxy.getName());
-                    if (resolvedUserQualifier == null) {
-                        throw new UserManagementException("Unable to resolve user named "+userQualifierProxy.getName()+
-                                " which serves as a role qualifier for role "+roleWithUserQualifierProxy.getName()+
-                                " for user "+user.getName());
-                    }
                     user.removeRole(roleWithUserQualifierProxy);
-                    user.addRole(new Role(roleWithUserQualifierProxy.getRoleDefinition(),
-                            roleWithUserQualifierProxy.getQualifiedForTenant(), resolvedUserQualifier));
+                    if (resolvedUserQualifier == null) {
+                        logger.severe("Unable to resolve user named "+userQualifierProxy.getName()+
+                                " which serves as a role qualifier for role "+roleWithUserQualifierProxy.getName()+
+                                " for user "+user.getName()+". Removing role.");
+                    } else {
+                        user.addRole(new Role(roleWithUserQualifierProxy.getRoleDefinition(),
+                                roleWithUserQualifierProxy.getQualifiedForTenant(), resolvedUserQualifier));
+                    }
                 }
             }
         }
@@ -348,11 +355,17 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private Role loadRoleWithProxyUserQualifier(Document rolesO, Map<UUID, RoleDefinition> roleDefinitionsById,
             Map<UUID, UserGroup> userGroups) {
         final RoleDefinition roleDefinition = roleDefinitionsById.get(rolesO.get(FieldNames.Role.ID.name()));
-        final UUID qualifyingTenantId = (UUID) rolesO.get(FieldNames.Role.QUALIFYING_TENANT_ID.name());
-        final UserGroup qualifyingTenant = qualifyingTenantId == null ? null : userGroups.get(qualifyingTenantId);
-        final User proxyQualifyingUser = rolesO.get(FieldNames.Role.QUALIFYING_USERNAME.name()) == null ? null
-                : new UserProxy((String) rolesO.get(FieldNames.Role.QUALIFYING_USERNAME.name()));
-        return new Role(roleDefinition, qualifyingTenant, proxyQualifyingUser);
+        final Role result;
+        if (roleDefinition == null) {
+            result = null;
+        } else {
+            final UUID qualifyingTenantId = (UUID) rolesO.get(FieldNames.Role.QUALIFYING_TENANT_ID.name());
+            final UserGroup qualifyingTenant = qualifyingTenantId == null ? null : userGroups.get(qualifyingTenantId);
+            final User proxyQualifyingUser = rolesO.get(FieldNames.Role.QUALIFYING_USERNAME.name()) == null ? null
+                    : new UserProxy((String) rolesO.get(FieldNames.Role.QUALIFYING_USERNAME.name()));
+            result = new Role(roleDefinition, qualifyingTenant, proxyQualifyingUser);
+        }
+        return result;
     }
 
     private Map<AccountType, Account> createAccountMapFromdDBObject(Document accountsMap) {

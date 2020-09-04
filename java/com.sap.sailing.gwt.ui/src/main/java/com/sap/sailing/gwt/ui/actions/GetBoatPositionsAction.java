@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.actions;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.DetailType;
@@ -15,14 +16,17 @@ public class GetBoatPositionsAction extends AbstractGetMapRelatedDataAction<Comp
     private final DetailType detailType;
     private final String leaderboardName;
     private final String leaderboardGroupName;
+    private final UUID leaderboardGroupId;
 
     public GetBoatPositionsAction(SailingServiceAsync sailingService,
             RegattaAndRaceIdentifier raceIdentifier, Map<CompetitorDTO, Date> from,
-            Map<CompetitorDTO, Date> to, boolean extrapolate, DetailType detailType, String leaderboardName, String leaderboardGroupName) {
+            Map<CompetitorDTO, Date> to, boolean extrapolate, DetailType detailType, String leaderboardName, String leaderboardGroupName,
+            UUID leaderboardGroupId) {
         super(sailingService, raceIdentifier, from, to, extrapolate);
         this.detailType = detailType;
         this.leaderboardName = leaderboardName;
         this.leaderboardGroupName = leaderboardGroupName;
+        this.leaderboardGroupId = leaderboardGroupId;
     }
     
     @Override
@@ -36,7 +40,8 @@ public class GetBoatPositionsAction extends AbstractGetMapRelatedDataAction<Comp
             toByCompetitorIdAsString.put(toEntry.getKey().getIdAsString(), toEntry.getValue());
         }
         getSailingService().getBoatPositions(getRaceIdentifier(), fromByCompetitorIdAsString, toByCompetitorIdAsString,
-                isExtrapolate(), detailType, leaderboardName, leaderboardGroupName, new AsyncCallback<CompactBoatPositionsDTO>() {
+                isExtrapolate(), detailType, leaderboardName, leaderboardGroupName, leaderboardGroupId,
+                new AsyncCallback<CompactBoatPositionsDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         callback.onFailure(caught);

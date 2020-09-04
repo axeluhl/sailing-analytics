@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.authz.UnauthorizedException;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -40,6 +39,7 @@ import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
 import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
 import com.sap.sailing.gwt.ui.adminconsole.RaceLogSetTrackingTimesDTO;
+import com.sap.sailing.gwt.ui.adminconsole.RemoteSailingServerEventsSelectionDialog;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
@@ -51,6 +51,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.MigrateGroupOwnerForHierarchyDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationWithSecurityDTO;
@@ -182,15 +183,6 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void fillRaceLogsFromPairingListTemplate(final String leaderboardName, final int flightMultiplier,
             final List<String> selectedFlightNames,PairingListDTO pairingListDTO, AsyncCallback<Void> callback);
 
-    /**
-     * Checks whether the user may cut the race identified by {@code radeIdentifier} into multiple races. For this, it
-     * has to be found and it has to be a "smartphone-tracked" race with a valid start-of-tracking time. If not,
-     * {@code false} will be returned. If the user it not <em>permitted</em> to slice the race, e.g., because no
-     * permission has been granted to modify the leaderboard or regatta, an {@link AuthorizationException} will be
-     * thrown.
-     */
-    void canSliceRace(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<Boolean> callback);
-
     void sliceRace(RegattaAndRaceIdentifier raceIdentifier, String newRaceColumnName, TimePoint sliceFrom, TimePoint sliceTo,
             AsyncCallback<RegattaAndRaceIdentifier> callback);
 
@@ -232,6 +224,35 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void updateMarkPropertiesPositioning(UUID markPropertiesId, DeviceIdentifierDTO deviceIdentifier, Position position, AsyncCallback<MarkPropertiesDTO> asyncCallback);
 
     void createOrUpdateCourseTemplate(CourseTemplateDTO courseTemplate, AsyncCallback<CourseTemplateDTO> asyncCallback);
+
+    /**
+     * Remove course templates by UUIDs
+     * 
+     * @param courseTemplatesUuids
+     *            the {@link Collection} of course templates' UUIDs which will be remove
+     * @param asyncCallback
+     *            {@link AsyncCallback} object
+     */
+    void removeCourseTemplates(Collection<UUID> courseTemplatesUuids, AsyncCallback<Void> asyncCallback);
+
+    void removeSailingServers(Set<String> toRemove, AsyncCallback<Void> callback);
+
+    void addRemoteSailingServerReference(RemoteSailingServerReferenceDTO sailingServer,
+            AsyncCallback<RemoteSailingServerReferenceDTO> callback);
+
+    /**
+     * Updates {@link RemoteSailingServerReferenceDTO} sailingServer instance based on user selection regarding
+     * inclusion type and selected events.
+     */
+    void updateRemoteSailingServerReference(RemoteSailingServerReferenceDTO sailingServer,
+            AsyncCallback<RemoteSailingServerReferenceDTO> callback);
+
+    /**
+     * Loads remote sailing server data with all events not filtered by selection in order to show the full list of
+     * events on {@link RemoteSailingServerEventsSelectionDialog} dialog.
+     */
+    void getCompleteRemoteServerReference(String sailingServerName,
+            AsyncCallback<RemoteSailingServerReferenceDTO> callback);
 
     /**
      * Remove mark properties by UUIDs
@@ -377,7 +398,7 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     /**
      * Removes the leaderboard groups with the given names from the service and the persistant store.
      */
-    void removeLeaderboardGroups(Set<String> groupNames, AsyncCallback<Void> asyncCallback);
+    void removeLeaderboardGroups(Set<UUID> groupIds, AsyncCallback<Void> asyncCallback);
 
     /**
      * Creates a new group with the name <code>groupname</code>, the description <code>description</code> and an empty
@@ -471,7 +492,7 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
             boolean autoRestartTrackingUponCompetitorSetChange, String registrationLinkSecret,
             CompetitorRegistrationType registrationType, AsyncCallback<Void> callback);
 
-    void importMasterData(String host, String[] names, boolean override, boolean compress, boolean exportWind,
+    void importMasterData(String host, UUID[] leaderboardGroupIds, boolean override, boolean compress, boolean exportWind,
             boolean exportDeviceConfigurations, String targetServerUsername, String targetServerPassword,
             boolean exportTrackedRacesAndStartTracking, AsyncCallback<UUID> asyncCallback);
 

@@ -11,6 +11,7 @@ import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.server.impl.preferences.model.BoatClassNotificationPreference;
 import com.sap.sailing.server.impl.preferences.model.BoatClassNotificationPreferences;
+import com.sap.sse.gwt.dispatch.shared.commands.HasWriteAction;
 import com.sap.sse.gwt.dispatch.shared.commands.VoidResult;
 import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 
@@ -18,7 +19,7 @@ import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
  * {@link SailingAction} implementation to save favorite boat classes for the currently logged in user as selected on
  * the preferences page.
  */
-public class SaveFavoriteBoatClassesAction implements SailingAction<VoidResult> {
+public class SaveFavoriteBoatClassesAction implements SailingAction<VoidResult>, HasWriteAction {
     
     private FavoriteBoatClassesDTO favorites;
     

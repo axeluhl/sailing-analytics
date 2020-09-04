@@ -293,7 +293,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
         courseAreasColumn.setSortable(true);
         leaderboardColumnListHandler.setComparator(courseAreasColumn,
                 (o1, o2) -> new NaturalComparator().compare(Util.joinStrings(", ", Util.map(o1.courseAreas, CourseAreaDTO::getName)),
-                        Util.join(", ", Util.map(o2.courseAreas, CourseAreaDTO::getName))));
+                        Util.joinStrings(", ", Util.map(o2.courseAreas, CourseAreaDTO::getName))));
 
         final HasPermissions type = SecuredDomainType.LEADERBOARD;
         final AccessControlledActionsColumn<StrippedLeaderboardDTOWithSecurity, LeaderboardConfigImagesBarCell> leaderboardActionColumn = create(

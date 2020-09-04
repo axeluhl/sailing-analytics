@@ -41,7 +41,7 @@ public class CCGMessage {
         String s = "";
         for (Mark m : markList) {
             s = s + "|" + m.getIndex() + ";" + m.getDescription() + ";";
-            s += Util.join(";", m.getDeviceIds());
+            s += Util.joinStrings(";", m.getDeviceIds());
         }
         return "CCG|" +raceId + "|" +  markList.size() + s;
     }

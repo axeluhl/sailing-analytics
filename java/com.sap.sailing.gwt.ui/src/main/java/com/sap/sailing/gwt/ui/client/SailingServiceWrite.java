@@ -66,6 +66,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.MigrateGroupOwnerForHierarchyDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationWithSecurityDTO;
@@ -242,7 +243,7 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
 
     void allowCompetitorResetToDefaults(List<CompetitorDTO> competitors);
 
-    UUID importMasterData(String host, String[] groupNames, boolean override, boolean compress, boolean exportWind,
+    UUID importMasterData(String host, UUID[] leaderboardGroupIds, boolean override, boolean compress, boolean exportWind,
             boolean exportDeviceConfigurations, String targetServerUsername, String targetServerPassword,
             boolean exportTrackedRacesAndStartTracking) throws UnauthorizedException;
 
@@ -352,7 +353,7 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
 
     void removeLeaderboardColumn(String leaderboardName, String columnName) throws UnauthorizedException;
 
-    void removeLeaderboardGroups(Set<String> groupNames);
+    void removeLeaderboardGroups(Set<UUID> groupIds);
 
     void removeLeaderboard(String leaderboardName) throws UnauthorizedException;
 
@@ -394,6 +395,17 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
     void updateRaceCourse(RegattaAndRaceIdentifier raceIdentifier,
             List<Pair<ControlPointDTO, PassingInstruction>> courseDTO);
 
+    void removeSailingServers(Set<String> toRemove) throws UnauthorizedException, Exception;
+
+    RemoteSailingServerReferenceDTO addRemoteSailingServerReference(RemoteSailingServerReferenceDTO sailingServer)
+            throws UnauthorizedException, Exception;
+
+    RemoteSailingServerReferenceDTO updateRemoteSailingServerReference(
+            RemoteSailingServerReferenceDTO sailingServer) throws UnauthorizedException, Exception;
+
+    RemoteSailingServerReferenceDTO getCompleteRemoteServerReference(String sailingServerName)
+            throws UnauthorizedException, Exception;
+
     void setWind(RegattaAndRaceIdentifier raceIdentifier, WindDTO windDTO);
 
     void removeAndUntrackRaces(List<RegattaAndRaceIdentifier> regattaAndRaceIdentifiers);
@@ -418,6 +430,14 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
             Position fixedPosition);
 
     CourseTemplateDTO createOrUpdateCourseTemplate(CourseTemplateDTO courseTemplate);
+
+    /**
+     * Removes course templates list
+     * 
+     * @param courseTemplateDTOs
+     *            list of course templates to remove
+     */
+    void removeCourseTemplates(Collection<UUID> courseTemplatesUuids);
 
     /**
      * Removes mark properties list
@@ -582,12 +602,6 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
     SuccessInfo updateTag(String leaderboardName, String raceColumnName, String fleetName, TagDTO tagToUpdate,
             String tag, String comment, String imageURL, String resizedImageURL, boolean visibleForPublic)
             throws UnauthorizedException;
-    /**
-     * Returns {@code true} if the given race can be sliced. Only Smarthphone tracked races can be sliced. In addition
-     * the race must be part of a {@link RegattaLeaderboard}.
-     */
-    boolean canSliceRace(RegattaAndRaceIdentifier raceIdentifier) throws UnauthorizedException;
-    
 
     /**
      * @param raceLogFrom
