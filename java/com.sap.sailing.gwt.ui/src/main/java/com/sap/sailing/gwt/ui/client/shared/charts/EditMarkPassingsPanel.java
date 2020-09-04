@@ -41,14 +41,12 @@ import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.charts.RaceIdentifierToLeaderboardRaceColumnAndFleetMapper.LeaderboardNameRaceColumnNameAndFleetName;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
-import com.sap.sailing.gwt.ui.shared.ServerConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.common.settings.AbstractSettings;
-import com.sap.sse.gwt.client.DefaultErrorReporter;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
@@ -510,22 +508,11 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
 
     @Override
     public void checkBackendAvailability(Consumer<Boolean> callback) {
-        if (isVisible()) callback.accept(true); // always allow closing of panel
-        this.sailingServiceWrite.getServerConfiguration(new AsyncCallback<ServerConfigurationDTO>() {
-
-            @Override
-            public void onFailure(Throwable caught) {
-                DefaultErrorReporter<StringMessages> errorReporter = new DefaultErrorReporter<>(stringMessages, false);
-                errorReporter.reportError(stringMessages.error(), stringMessages.temporarilyUnavailable());
-                callback.accept(false);
-            }
-
-            @Override
-            public void onSuccess(ServerConfigurationDTO result) {
-                // nothing to do. validation query has succeeded.
-                callback.accept(true);
-            }
-        });
+        if (isVisible()) {
+            callback.accept(true); // always allow closing of panel
+        } else {
+            HasAvailabilityCheck.validateBackendAvailabilityAndExecuteBusinessLogic(sailingServiceWrite, callback, stringMessages);
+        }
     }
 
     public void setLeaderboard(LeaderboardDTO leaderboard) {

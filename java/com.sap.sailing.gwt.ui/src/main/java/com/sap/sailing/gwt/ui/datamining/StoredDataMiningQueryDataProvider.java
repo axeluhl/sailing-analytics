@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.charts.HasAvailabilityCheck;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.dto.StoredDataMiningQueryDTO;
 import com.sap.sse.datamining.shared.impl.dto.StoredDataMiningQueryDTOImpl;
@@ -78,9 +79,9 @@ public class StoredDataMiningQueryDataProvider {
                     @Override
                     public void onFailure(Throwable caught) {
                         GWT.log(caught.getMessage(), caught);
-                        DefaultErrorReporter<StringMessages> errorReporter = new DefaultErrorReporter<>(stringMessages,
-                                false);
-                        errorReporter.reportError(stringMessages.error(), stringMessages.temporarilyUnavailable());
+                        if (HasAvailabilityCheck.has5xxResponse(caught)) {
+                            DefaultErrorReporter.reportMasterTemporarilyUnavailable(stringMessages);
+                        }
                     }
 
                     @Override
@@ -107,9 +108,9 @@ public class StoredDataMiningQueryDataProvider {
                 @Override
                 public void onFailure(Throwable caught) {
                     GWT.log(caught.getMessage(), caught);
-                    DefaultErrorReporter<StringMessages> errorReporter = new DefaultErrorReporter<>(stringMessages,
-                            false);
-                    errorReporter.reportError(stringMessages.error(), stringMessages.temporarilyUnavailable());
+                    if (HasAvailabilityCheck.has5xxResponse(caught)) {
+                        DefaultErrorReporter.reportMasterTemporarilyUnavailable(stringMessages);
+                    }
                 }
 
                 @Override

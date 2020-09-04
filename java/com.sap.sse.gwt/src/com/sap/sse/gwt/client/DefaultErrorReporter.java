@@ -39,7 +39,12 @@ public class DefaultErrorReporter<S extends StringMessages> implements ErrorRepo
         errorDialogBox.center();
         dialogCloseButton.setFocus(true);
     }
-    
+
+    public static <S extends StringMessages> void reportMasterTemporarilyUnavailable(S stringMessages) {
+        DefaultErrorReporter<StringMessages> errorReporter = new DefaultErrorReporter<>(stringMessages, false);
+        errorReporter.reportError(stringMessages.error(), stringMessages.temporarilyUnavailable());
+    }
+
     @Override
     public void reportError(String message) {
         errorDialogBox.setText(message);

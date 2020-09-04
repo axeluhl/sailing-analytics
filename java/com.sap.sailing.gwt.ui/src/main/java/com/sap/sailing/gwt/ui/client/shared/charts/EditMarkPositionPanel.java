@@ -95,12 +95,10 @@ import com.sap.sailing.gwt.ui.raceboard.SideBySideComponentViewer;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegType;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
-import com.sap.sailing.gwt.ui.shared.ServerConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.CanvasOverlayV3;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.settings.AbstractSettings;
-import com.sap.sse.gwt.client.DefaultErrorReporter;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
@@ -1088,22 +1086,10 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
 
     @Override
     public void checkBackendAvailability(Consumer<Boolean> callback) {
-        if (isVisible()) callback.accept(true); // always allow closing of panel
-        this.sailingServiceWrite.getServerConfiguration(new AsyncCallback<ServerConfigurationDTO>() {
-
-            @Override
-            public void onFailure(Throwable caught) {
-                DefaultErrorReporter<StringMessages> errorReporter = new DefaultErrorReporter<>(stringMessages, false);
-                errorReporter.reportError(stringMessages.error(), stringMessages.temporarilyUnavailable());
-                callback.accept(false);
-            }
-
-            @Override
-            public void onSuccess(ServerConfigurationDTO result) {
-                // nothing to do. validation query has succeeded.
-                callback.accept(true);
-            }
-        });
+        if (isVisible()) {
+            callback.accept(true); // always allow closing of panel
+        } else {
+            HasAvailabilityCheck.validateBackendAvailabilityAndExecuteBusinessLogic(sailingServiceWrite, callback, stringMessages);
+        }
     }
-
 }
