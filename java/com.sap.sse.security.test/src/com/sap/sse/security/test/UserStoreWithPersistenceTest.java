@@ -56,10 +56,8 @@ public class UserStoreWithPersistenceTest {
 
     private final UUID userGroupId = UUID.randomUUID();
     private final String userGroupName = "usergroup";
-    private UserGroupImpl defaultTenant;
 
     private UserStoreImpl store;
-    private HashMap<String, UserGroup> defaultTenantForServers;
 
     @Before
     public void setUp() throws UnknownHostException, MongoException, UserGroupManagementException {
@@ -74,9 +72,10 @@ public class UserStoreWithPersistenceTest {
         db.getCollection(CollectionNames.SETTINGS.name()).drop();
         db.getCollection(CollectionNames.PREFERENCES.name()).drop();
         newStore();
-        defaultTenant = store.createUserGroup(userGroupId, userGroupName);
-        defaultTenantForServers = new HashMap<>();
-        defaultTenantForServers.put(serverName, defaultTenant);
+    }
+
+    private UserGroupImpl createUserGroup() throws UserGroupManagementException {
+        return store.createUserGroup(userGroupId, userGroupName);
     }
 
     private void newStore() {
@@ -102,8 +101,11 @@ public class UserStoreWithPersistenceTest {
     }
 
     @Test
-    public void testMasterdataIsSaved() throws UserManagementException {
+    public void testMasterdataIsSaved() throws UserStoreManagementException {
         store.createUser(username, email);
+        UserGroupImpl defaultTenant = createUserGroup();
+        HashMap<String, UserGroup> defaultTenantForServers = new HashMap<>();
+        defaultTenantForServers.put(serverName, defaultTenant);
         store.updateUser(new UserImpl(username, email, fullName, company, Locale.GERMAN, false, null, null,
                 defaultTenantForServers, Collections.emptySet(), /* userGroupProvider */ null));
         newStore();
@@ -164,11 +166,10 @@ public class UserStoreWithPersistenceTest {
 
     @Test
     public void testCreateUserGroup() throws UserGroupManagementException, UserManagementException {
-        store.deleteUserGroup(defaultTenant);
         final User user = store.createUser(username, email);
-        final UserGroupImpl group = store.createUserGroup(userGroupId, userGroupName);
-        group.add(user);
-        store.updateUserGroup(group);
+        UserGroupImpl createUserGroup = createUserGroup();
+        createUserGroup.add(user);
+        store.updateUserGroup(createUserGroup);
         assertNotNull(store.getUserGroup(userGroupId));
         assertNotNull(store.getUserGroupByName(userGroupName));
 
@@ -181,8 +182,8 @@ public class UserStoreWithPersistenceTest {
 
     @Test
     public void testDeleteUserGroup() throws UserGroupManagementException {
-        UserGroupImpl userGroup = store.createUserGroup(userGroupId, userGroupName);
-        store.deleteUserGroup(userGroup);
+        UserGroupImpl createUserGroup = createUserGroup();
+        store.deleteUserGroup(createUserGroup);
         assertNull(store.getUserGroup(userGroupId));
         assertNull(store.getUserGroupByName(userGroupName));
 
@@ -193,6 +194,7 @@ public class UserStoreWithPersistenceTest {
 
     @Test
     public void testTenantUsers() throws UserManagementException, UserGroupManagementException {
+        UserGroupImpl defaultTenant = createUserGroup();
         final User user = store.createUser(username, email);
         defaultTenant.add(user);
         store.updateUserGroup(defaultTenant);
