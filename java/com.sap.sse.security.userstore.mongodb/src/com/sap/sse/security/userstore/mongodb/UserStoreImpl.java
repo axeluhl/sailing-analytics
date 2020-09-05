@@ -132,15 +132,21 @@ public class UserStoreImpl implements UserStore {
      * usernames, values are the key/value pairs representing the user's preferences.
      */
     private transient ConcurrentHashMap<String, Map<String, Object>> preferenceObjects;
+    
+    /**
+     * Protects access to the maps {@link #preferences}, {@link #preferenceConverters}, {@link #preferenceObjects}.
+     */
+    private final NamedReentrantReadWriteLock preferenceLock = new NamedReentrantReadWriteLock(
+            "Preferences", /* fair */ false);
 
     /**
      * Keys are preferences keys as used by {@link #preferenceObjects}, values are the listeners to inform on changes of
      * the specific preference object for a {@link UserImpl}.
      */
-    private transient Map<String, Set<PreferenceObjectListener<?>>> listeners;
+    private transient Map<String, Set<PreferenceObjectListener<?>>> preferenceListeners;
 
     /**
-     * To be used for locking when working with {@link #listeners}.
+     * To be used for locking when working with {@link #preferenceListeners}.
      */
     private transient NamedReentrantReadWriteLock listenersLock;
 
@@ -180,7 +186,7 @@ public class UserStoreImpl implements UserStore {
         preferences = new ConcurrentHashMap<>();
         preferenceConverters = new ConcurrentHashMap<>();
         preferenceObjects = new ConcurrentHashMap<>();
-        listeners = new HashMap<>();
+        preferenceListeners = new HashMap<>();
         listenersLock = new NamedReentrantReadWriteLock(
                 UserStoreImpl.class.getSimpleName() + " lock for listeners collection", false);
         this.mongoObjectFactory = mongoObjectFactory;
@@ -390,11 +396,14 @@ public class UserStoreImpl implements UserStore {
         }
     }
 
+    /**
+     * used to deserialize the object, thus called during initialization and not subject to concurrency. No locks needed
+     */
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
         preferenceConverters = new ConcurrentHashMap<>();
         preferenceObjects = new ConcurrentHashMap<>();
-        listeners = new HashMap<>();
+        preferenceListeners = new HashMap<>();
         listenersLock = new NamedReentrantReadWriteLock(
                 UserStoreImpl.class.getSimpleName() + " lock for listeners collection", false);
     }
@@ -403,7 +412,7 @@ public class UserStoreImpl implements UserStore {
      * To call this method, the caller must have obtained the read lock of {@link #usersLock}.
      */
     protected Object readResolve() {
-        assert usersLock.getReadHoldCount() > 0;
+        assert usersLock.isWriteLockedByCurrentThread() || usersLock.getReadHoldCount() > 0;
         for (final User user : getUsers()) {
             if (user instanceof UserImpl) {
                 ((UserImpl) user).setUserGroupProvider(this);
@@ -456,10 +465,12 @@ public class UserStoreImpl implements UserStore {
      * notification objects.
      */
     private void clearAllPreferenceObjects() {
-        final Set<String> usersToProcess = new HashSet<>(preferences.keySet());
-        for (String username : usersToProcess) {
-            removeAllPreferencesForUser(username);
-        }
+        LockUtil.executeWithWriteLock(preferenceLock, () -> {
+            final Set<String> usersToProcess = new HashSet<>(preferences.keySet());
+            for (String username : usersToProcess) {
+                removeAllPreferencesForUser(username);
+            }
+        });
     }
 
     @Override
@@ -707,7 +718,7 @@ public class UserStoreImpl implements UserStore {
      * To call this method, the caller must have obtained the read lock of {@link #userGroupsLock}.
      */
     private void checkGroupNameAndIdUniqueness(UUID groupId, String name) throws UserGroupManagementException {
-        assert userGroupsLock.getReadHoldCount() > 0;
+        assert userGroupsLock.isWriteLockedByCurrentThread() || userGroupsLock.getReadHoldCount() > 0;
         if (userGroupsByName.containsKey(name) || userGroups.containsKey(groupId)) {
             throw new UserGroupManagementException(UserGroupManagementException.USER_GROUP_ALREADY_EXISTS);
         }
@@ -937,6 +948,9 @@ public class UserStoreImpl implements UserStore {
         });
     }
 
+    /**
+     * To call this method, the caller must have obtained the write lock of {@link #usersLock}.
+     */
     @Override
     public Set<Pair<User, Role>> getRolesQualifiedByUserGroup(UserGroup groupQualification) {
         return LockUtil.executeWithReadLockAndResult(usersLock, () -> {
@@ -1049,8 +1063,8 @@ public class UserStoreImpl implements UserStore {
             user.getRoles()
             .forEach(role -> Util.removeFromValueSet(roleDefinitionsToUsers, role.getRoleDefinition(), user));
             removeFromUsersByEmail(users.remove(name));
-            removeAllPreferencesForUser(name);
         });
+        LockUtil.executeWithWriteLock(preferenceLock, () -> removeAllPreferencesForUser(name));
     }
 
     @Override
@@ -1096,6 +1110,7 @@ public class UserStoreImpl implements UserStore {
     }
 
     private void setPreferenceInternal(String username, String key, String value) {
+        assert preferenceLock.isWriteLockedByCurrentThread();
         Map<String, String> userMap = preferences.get(username);
         if (userMap == null) {
             synchronized (preferences) {
@@ -1119,41 +1134,51 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public void unsetPreference(String username, String key) {
-        Map<String, String> userMap = preferences.get(username);
-        if (userMap != null) {
-            userMap.remove(key);
-            if (mongoObjectFactory != null) {
-                mongoObjectFactory.storePreferences(username, userMap);
+        LockUtil.executeWithWriteLock(preferenceLock, () -> {
+            Map<String, String> userMap = preferences.get(username);
+            if (userMap != null) {
+                userMap.remove(key);
+                if (mongoObjectFactory != null) {
+                    mongoObjectFactory.storePreferences(username, userMap);
+                }
             }
-        }
-        unsetPreferenceObject(username, key);
+            unsetPreferenceObject(username, key);
+        });
     }
 
     @Override
     public String getPreference(String username, String key) {
-        final String result;
-        Map<String, String> userMap = preferences.get(username);
-        if (userMap != null) {
-            result = userMap.get(key);
-        } else {
-            result = null;
-        }
-        return result;
+        return LockUtil.executeWithWriteLockAndResult(preferenceLock, () -> {
+            final String result;
+            Map<String, String> userMap = preferences.get(username);
+            if (userMap != null) {
+                result = userMap.get(key);
+            } else {
+                result = null;
+            }
+            return result;
+        });
     }
 
     @Override
     public Map<String, String> getAllPreferences(String username) {
-        final Map<String, String> userPrefs = preferences.get(username);
-        final Map<String, String> result;
-        if (userPrefs == null) {
-            result = Collections.emptyMap();
-        } else {
-            result = Collections.unmodifiableMap(userPrefs);
-        }
-        return result;
+        return LockUtil.executeWithReadLockAndResult(preferenceLock, () -> {
+            final Map<String, String> userPrefs = preferences.get(username);
+            final Map<String, String> result;
+            if (userPrefs == null) {
+                result = Collections.emptyMap();
+            } else {
+                result = Collections.unmodifiableMap(userPrefs);
+            }
+            return result;
+        });
     }
 
+    /**
+     * To call this method, the caller must have obtained the wrie lock of {@link #preferenceLock}.
+     */
     private void removeAllPreferencesForUser(String username) {
+        assert preferenceLock.isWriteLockedByCurrentThread();
         // TODO should we keep the preferences anonymized (e.g. use a UUID as username) to enable better statistics?
         synchronized (preferences) {
             preferences.remove(username);
@@ -1164,7 +1189,11 @@ public class UserStoreImpl implements UserStore {
         removeAllPreferenceObjectsForUser(username);
     }
 
+    /**
+     * To call this method, the caller must have obtained the write lock of {@link #preferenceLock}.
+     */
     private void removeAllPreferenceObjectsForUser(String username) {
+        assert preferenceLock.isWriteLockedByCurrentThread();
         Map<String, Object> preferenceObjectsToRemove;
         synchronized (preferenceObjects) {
             preferenceObjectsToRemove = preferenceObjects.remove(username);
@@ -1188,34 +1217,41 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public void registerPreferenceConverter(String preferenceKey, PreferenceConverter<?> converter) {
-        PreferenceConverter<?> alreadyAssociatedConverter = preferenceConverters.putIfAbsent(preferenceKey, converter);
-        if (alreadyAssociatedConverter == null) {
-            final Set<String> usersToProcess = new HashSet<>(preferences.keySet());
-            for (String user : usersToProcess) {
-                updatePreferenceObjectWithConverter(user, preferenceKey, converter);
+        LockUtil.executeWithWriteLock(preferenceLock, () -> {
+            PreferenceConverter<?> alreadyAssociatedConverter = preferenceConverters.putIfAbsent(preferenceKey, converter);
+            if (alreadyAssociatedConverter == null) {
+                final Set<String> usersToProcess = new HashSet<>(preferences.keySet());
+                for (String user : usersToProcess) {
+                    updatePreferenceObjectWithConverter(user, preferenceKey, converter);
+                }
+            } else {
+                logger.log(Level.SEVERE, "PreferenceConverter " + alreadyAssociatedConverter + " for key " + preferenceKey
+                        + " is already registered. Converter " + converter + " will not be registered");
             }
-        } else {
-            logger.log(Level.SEVERE, "PreferenceConverter " + alreadyAssociatedConverter + " for key " + preferenceKey
-                    + " is already registered. Converter " + converter + " will not be registered");
-        }
+        });
     }
 
     @Override
     public void removePreferenceConverter(String preferenceKey) {
-        PreferenceConverter<?> preferenceConverterToRemove = preferenceConverters.remove(preferenceKey);
-        if (preferenceConverterToRemove != null) {
-            final Set<String> usersToProcess = new HashSet<>(preferences.keySet());
-            for (String username : usersToProcess) {
-                unsetPreferenceObject(username, preferenceKey);
+        LockUtil.executeWithWriteLock(preferenceLock, () -> {
+            PreferenceConverter<?> preferenceConverterToRemove = preferenceConverters.remove(preferenceKey);
+            if (preferenceConverterToRemove != null) {
+                final Set<String> usersToProcess = new HashSet<>(preferences.keySet());
+                for (String username : usersToProcess) {
+                    unsetPreferenceObject(username, preferenceKey);
+                }
+            } else {
+                logger.log(Level.WARNING,
+                        "PreferenceConverter for key " + preferenceKey + " should be removed but wasn't registered");
             }
-        } else {
-            logger.log(Level.WARNING,
-                    "PreferenceConverter for key " + preferenceKey + " should be removed but wasn't registered");
-        }
-
+        });
     }
 
+    /**
+     * To call this method, the caller must have obtained the write lock of {@link #preferenceLock}.
+     */
     private void updatePreferenceObjectIfConverterIsAvailable(String username, String key) {
+        assert preferenceLock.isWriteLockedByCurrentThread();
         PreferenceConverter<?> preferenceConverter = preferenceConverters.get(key);
         if (preferenceConverter != null) {
             updatePreferenceObjectWithConverter(username, key, preferenceConverter);
@@ -1237,6 +1273,7 @@ public class UserStoreImpl implements UserStore {
     }
 
     private void setPreferenceObjectInternal(String username, String key, final Object convertedObject) {
+        assert preferenceLock.isWriteLockedByCurrentThread();
         Map<String, Object> userMap = preferenceObjects.get(username);
         if (userMap == null) {
             synchronized (preferenceObjects) {
@@ -1257,6 +1294,7 @@ public class UserStoreImpl implements UserStore {
     }
 
     private void unsetPreferenceObject(String username, String key) {
+        assert preferenceLock.isWriteLockedByCurrentThread();
         Map<String, Object> userObjectMap = preferenceObjects.get(username);
         if (userObjectMap != null) {
             Object oldPreference = userObjectMap.remove(key);
@@ -1268,63 +1306,66 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public <T> T getPreferenceObject(String username, String key) {
-        final Object result;
-        Map<String, Object> userMap = preferenceObjects.get(username);
-        if (userMap != null) {
-            result = userMap.get(key);
-        } else {
-            result = null;
-        }
-        @SuppressWarnings("unchecked")
-        T resultT = (T) result;
-        return resultT;
+        return LockUtil.executeWithWriteLockAndResult(preferenceLock, () -> {
+            final Object result;
+            Map<String, Object> userMap = preferenceObjects.get(username);
+            if (userMap != null) {
+                result = userMap.get(key);
+            } else {
+                result = null;
+            }
+            @SuppressWarnings("unchecked")
+            T resultT = (T) result;
+            return resultT;
+        });
     }
 
     @Override
     public String setPreferenceObject(String username, String key, Object preferenceObject)
             throws IllegalArgumentException {
-        @SuppressWarnings("unchecked")
-        PreferenceConverter<Object> preferenceConverter = (PreferenceConverter<Object>) preferenceConverters.get(key);
-        if (preferenceConverter == null) {
-            throw new IllegalArgumentException(
-                    "Setting preference for key " + key + " but there is no converter associated!");
-        }
-        String stringPreference = null;
-        if (preferenceObject == null) {
-            unsetPreference(username, key);
-        } else {
-            try {
-                stringPreference = preferenceConverter.toPreferenceString(preferenceObject);
-                setPreferenceInternal(username, key, stringPreference);
-                setPreferenceObjectInternal(username, key, preferenceObject);
-            } catch (Throwable t) {
-                logger.log(Level.SEVERE, "Error while converting preference for key " + key + " from Object \""
-                        + preferenceObject + "\"", t);
+        return LockUtil.executeWithWriteLockAndResultExpectException(preferenceLock, () -> {
+            @SuppressWarnings("unchecked")
+            PreferenceConverter<Object> preferenceConverter = (PreferenceConverter<Object>) preferenceConverters.get(key);
+            if (preferenceConverter == null) {
+                throw new IllegalArgumentException(
+                        "Tried to set preference for key " + key + " but there is no converter associated!");
             }
-        }
-        return stringPreference;
+            String stringPreference = null;
+            if (preferenceObject == null) {
+                unsetPreference(username, key);
+            } else {
+                try {
+                    stringPreference = preferenceConverter.toPreferenceString(preferenceObject);
+                    setPreferenceInternal(username, key, stringPreference);
+                    setPreferenceObjectInternal(username, key, preferenceObject);
+                } catch (Throwable t) {
+                    logger.log(Level.SEVERE, "Error while converting preference for key " + key + " from Object \""
+                            + preferenceObject + "\"", t);
+                }
+            }
+            return stringPreference;
+        });
     }
     
+    /**
+     * To call this method, the caller must have obtained the read lock of {@link #preferenceLock}.
+     */
     private void notifyListenersOnPreferenceObjectChange(String username, String key, Object oldPreference,
             Object newPreference) {
-        LockUtil.lockForRead(listenersLock);
-        try {
-            for (PreferenceObjectListener<? extends Object> listener : Util.get(listeners, key,
-                    Collections.<PreferenceObjectListener<? extends Object>> emptySet())) {
-                @SuppressWarnings("unchecked")
-                PreferenceObjectListener<Object> listenerToFire = (PreferenceObjectListener<Object>) listener;
-                listenerToFire.preferenceObjectChanged(username, key, oldPreference, newPreference);
-            }
-        } finally {
-            LockUtil.unlockAfterRead(listenersLock);
+        assert preferenceLock.isWriteLockedByCurrentThread() || preferenceLock.getReadHoldCount() > 0;
+        for (PreferenceObjectListener<? extends Object> listener : Util.get(preferenceListeners, key,
+                Collections.<PreferenceObjectListener<? extends Object>> emptySet())) {
+            @SuppressWarnings("unchecked")
+            PreferenceObjectListener<Object> listenerToFire = (PreferenceObjectListener<Object>) listener;
+            listenerToFire.preferenceObjectChanged(username, key, oldPreference, newPreference);
         }
     }
 
     @Override
     public void addPreferenceObjectListener(String key, PreferenceObjectListener<? extends Object> listener,
             boolean fireForAlreadyExistingPreferences) {
-        LockUtil.executeWithWriteLock(listenersLock, () -> {
-            Util.addToValueSet(listeners, key, listener);
+        LockUtil.executeWithWriteLock(preferenceLock, () -> {
+            Util.addToValueSet(preferenceListeners, key, listener);
             if (fireForAlreadyExistingPreferences) {
                 final Set<String> usersToProcess = new HashSet<>(preferences.keySet());
                 for (String username : usersToProcess) {
@@ -1344,8 +1385,8 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public void removePreferenceObjectListener(PreferenceObjectListener<?> listener) {
-        LockUtil.executeWithWriteLock(listenersLock, () -> {
-            Util.removeFromAllValueSets(listeners, listener);
+        LockUtil.executeWithWriteLock(preferenceLock, () -> {
+            Util.removeFromAllValueSets(preferenceListeners, listener);
         });
     }
 
