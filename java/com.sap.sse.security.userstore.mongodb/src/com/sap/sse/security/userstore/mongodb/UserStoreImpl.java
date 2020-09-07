@@ -498,16 +498,18 @@ public class UserStoreImpl implements UserStore {
                     roleDefinitions.put(roleDefinition.getId(), roleDefinition);
                 }
 
+                LockUtil.executeWithWriteLock(preferenceLock, () -> {
                 for (User user : newUserStore.getUsers()) {
                     users.put(user.getName(), user);
                     addToUsersByEmail(user);
                     for (Entry<String, String> userPref : newUserStore.getAllPreferences(user.getName()).entrySet()) {
-                        setPreference(user.getName(), userPref.getKey(), userPref.getValue());
+                            setPreferenceInternalAndUpdatePreferenceObjectIfConverterIsAvailable(user.getName(), userPref.getKey(), userPref.getValue());
                         if (userPref.getKey().equals(ACCESS_TOKEN_KEY)) {
                             usersByAccessToken.put(userPref.getValue(), user);
                         }
                     }
                 }
+                });
                 for (Entry<String, Object> setting : newUserStore.getAllSettings().entrySet()) {
                     settings.put(setting.getKey(), setting.getValue());
                 }
@@ -1111,9 +1113,14 @@ public class UserStoreImpl implements UserStore {
     @Override
     public void setPreference(String username, String key, String value) {
         LockUtil.executeWithWriteLock(preferenceLock, () -> {
+            setPreferenceInternalAndUpdatePreferenceObjectIfConverterIsAvailable(username, key, value);
+        });
+    }
+
+    private void setPreferenceInternalAndUpdatePreferenceObjectIfConverterIsAvailable(String username, String key, String value) {
+        assert preferenceLock.isWriteLockedByCurrentThread();
             setPreferenceInternal(username, key, value);
             updatePreferenceObjectIfConverterIsAvailable(username, key);
-        });
     }
 
     private void setPreferenceInternal(String username, String key, String value) {
