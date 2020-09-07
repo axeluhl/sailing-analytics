@@ -109,6 +109,9 @@ public interface TimeRange extends Comparable<TimeRange>, Serializable {
     
     /**
      * Intersection of the two ranges, only possible if {@code other} {@link #intersects()} this range.
+     * 
+     * @return {@code null} if the {@code other} time range does not {@link #intersects(TimeRange) intersect} with this
+     *         time range; the intersection time range otherwise.
      */
     TimeRange intersection(TimeRange other);
     

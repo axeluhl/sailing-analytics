@@ -12,6 +12,7 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 public class CompactBoatPositionsDTO implements IsSerializable {
     private Map<String, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatPositions;
 
+    @Deprecated
     CompactBoatPositionsDTO() {} // for GWT serialization only
     
     public CompactBoatPositionsDTO(Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatPositions) {
