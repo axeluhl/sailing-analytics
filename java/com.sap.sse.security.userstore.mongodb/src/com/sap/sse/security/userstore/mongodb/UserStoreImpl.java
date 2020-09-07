@@ -413,16 +413,14 @@ public class UserStoreImpl implements UserStore {
         preferenceLock = new NamedReentrantReadWriteLock("Preferences", /* fair */ false);
     }
 
-    /**
-     * To call this method, the caller must have obtained the read lock of {@link #usersLock}.
-     */
     protected Object readResolve() {
-        assert usersLock.isWriteLockedByCurrentThread() || usersLock.getReadHoldCount() > 0;
-        for (final User user : getUsers()) {
-            if (user instanceof UserImpl) {
-                ((UserImpl) user).setUserGroupProvider(this);
+        LockUtil.executeWithWriteLock(usersLock, () -> {
+            for (final User user : getUsers()) {
+                if (user instanceof UserImpl) {
+                    ((UserImpl) user).setUserGroupProvider(this);
+                }
             }
-        }
+        });
         return this;
     }
 
