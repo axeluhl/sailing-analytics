@@ -879,15 +879,13 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public User getUserByName(String name) {
-        return LockUtil.executeWithReadLockAndResult(usersLock, () -> {
-            final User result;
-            if (name == null) {
-                result = null;
-            } else {
-                result = users.get(name);
-            }
-            return result;
-        });
+        final User result;
+        if (name == null) {
+            result = null;
+        } else {
+            result = LockUtil.executeWithReadLockAndResult(usersLock, () -> users.get(name));
+        }
+        return result;
     }
 
     @Override
