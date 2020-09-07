@@ -733,9 +733,11 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public void addUserGroup(UserGroup group) throws UserGroupManagementException {
-        checkGroupNameAndIdUniqueness(group.getId(), group.getName());
-        addGroupToInternalMaps(group);
-        updateUserGroup(group);
+        LockUtil.executeWithWriteLockExpectException(userGroupsLock, () -> {
+            checkGroupNameAndIdUniqueness(group.getId(), group.getName());
+            addGroupToInternalMaps(group);
+            updateUserGroup(group);
+        });
     }
 
     @Override
