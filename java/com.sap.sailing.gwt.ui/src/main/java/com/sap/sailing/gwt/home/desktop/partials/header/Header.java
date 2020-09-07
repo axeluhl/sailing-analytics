@@ -106,18 +106,20 @@ public class Header extends Composite implements HeaderConstants {
      * @author Georg Herdt
      *
      */
-    private static final class MenuItemVisibilityHandler implements ResizeHandler{
-        /** maps relationship between menu item in menu bar and menu item in hamburger dropdown */
-        private final Map<Anchor,Anchor> menuToDropDownItemMap;
-        /** keeps with of the menu items in the menu bar */
+    private static final class MenuItemVisibilityHandler implements ResizeHandler {
+        /** maps relationship between menu item in menu bar and menu item in hamburger drop down */
+        private final Map<Anchor, Anchor> menuToDropDownItemMap;
+        /** keeps width of the menu items in the menu bar */
         private final Map<Anchor, Integer> menuItemWidthMap = new HashMap<>();
-        /** list of menu item that shall not be rendered at all, e.g datamining or manage events entry */
-        private final Set<Anchor> ignorMenuItems = new HashSet<>();
+        /** list of menu item that shall not be rendered at all, e.g data mining or manage events entry */
+        private final Set<Anchor> ignoreMenuItems = new HashSet<>();
         private final Anchor hamburgerNavigationIcon;
         private final DropdownHandler dropdownHandler;
+        /** view port of the entries in the menu bar */
         private final Element centerMenuPanel;
 
-        public MenuItemVisibilityHandler(Map<Anchor,Anchor> menuToDropDownItemMap, DropdownHandler dropdownHandler, Anchor hamburgerNavigationIcon, Element centerMenuPanel) {
+        public MenuItemVisibilityHandler(Map<Anchor, Anchor> menuToDropDownItemMap, DropdownHandler dropdownHandler,
+                Anchor hamburgerNavigationIcon, Element centerMenuPanel) {
             this.dropdownHandler = dropdownHandler;
             this.hamburgerNavigationIcon = hamburgerNavigationIcon;
             this.menuToDropDownItemMap = menuToDropDownItemMap;
@@ -129,11 +131,21 @@ public class Header extends Composite implements HeaderConstants {
             refreshVisibilityDeferred();
         }
 
+        /**
+         * Determine if menu item fits fully into the panel and should be visible then.
+         * 
+         * @param anchor
+         *            menu item that shall be checked
+         * @param leftOffset
+         *            left offset, where the given menu item can be placed
+         * @return true when the menu item can be fully displayed in menu bar.
+         */
         private boolean isVisibilityInMenuBar(Anchor anchor, int leftOffset) {
             int anchorWidth = this.menuItemWidthMap.getOrDefault(anchor, 200);
             if (LOG.isLoggable(Level.FINEST))
                 LOG.finest(anchor.getText() + " " + (leftOffset + anchorWidth) + " < "
                         + this.centerMenuPanel.getAbsoluteRight());
+            // calculate if the element is outside of the center menu panel, which is the view port here
             boolean fitsFullyIntoPanel = leftOffset + anchorWidth < this.centerMenuPanel.getAbsoluteRight();
             if (LOG.isLoggable(Level.FINEST))
                 LOG.finest(anchor.getText() + " centerMenuPanel right boundary: "
@@ -141,20 +153,24 @@ public class Header extends Composite implements HeaderConstants {
             return fitsFullyIntoPanel;
         }
 
+        /**
+         * Calculates the visibility of the menu items. Items which cannot be shown in the menu bar due to space
+         * limitation will be shown in a hamburger menu.
+         */
         private void refreshVisibility() {
             int noOfVisibleItems = 0;
-            int leftOffset = centerMenuPanel.getAbsoluteLeft();
+            int leftOffset = centerMenuPanel.getAbsoluteLeft(); // outer left where the next menu item can be placed
             for (Map.Entry<Anchor, Anchor> item : menuToDropDownItemMap.entrySet()) {
                 Anchor menuAnchor = item.getKey();
-                initStaticWidth(menuAnchor);
+                int currentWidth = getStaticWidth(menuAnchor, 200);
                 Element listItem = item.getValue().getElement().getParentElement();
-                boolean visibilityInMenuBar = !ignorMenuItems.contains(menuAnchor)
+                boolean visibilityInMenuBar = !ignoreMenuItems.contains(menuAnchor)
                         && isVisibilityInMenuBar(menuAnchor, leftOffset);
                 menuAnchor.setVisible(visibilityInMenuBar);
-                Display listItemDisplay = visibilityInMenuBar || ignorMenuItems.contains(menuAnchor) ? NONE : BLOCK;
+                Display listItemDisplay = visibilityInMenuBar || ignoreMenuItems.contains(menuAnchor) ? NONE : BLOCK;
                 listItem.getStyle().setDisplay(listItemDisplay);
                 noOfVisibleItems += listItemDisplay == BLOCK ? 1 : 0;
-                leftOffset += menuItemWidthMap.getOrDefault(menuAnchor, 200);
+                leftOffset += currentWidth;
             }
             this.hamburgerNavigationIcon.getElement().getStyle()
                     .setVisibility(noOfVisibleItems == 0 ? HIDDEN : VISIBLE);
@@ -163,8 +179,19 @@ public class Header extends Composite implements HeaderConstants {
             }
         }
 
-        private void initStaticWidth(Anchor key) {
-            menuItemWidthMap.compute(key, (menuItem, oldWidth) -> {
+        /**
+         * Calculate item width within the menu bar on top of the page. The width is stored within a map, because when
+         * the anchor is invisible the returned with of the element is zero.
+         * 
+         * @param key
+         *            the menu item for which the width shall be determined
+         * @param defaultWidth
+         *            default value as fall back, when there is no width available. Such cases  are, when the width from
+         *            browser is 0 and there is no previous value available, e.g. during initialization of page.
+         * @return the width of the menu item
+         */
+        private int getStaticWidth(Anchor key, int defaultWidth) {
+            Integer width = menuItemWidthMap.compute(key, (menuItem, oldWidth) -> {
                 int newWidth = menuItem.getElement().getClientWidth();
                 // might be called in a situation where the components do not have a width
                 // so we need a mechanism to update detected width later
@@ -176,14 +203,15 @@ public class Header extends Composite implements HeaderConstants {
                     return oldWidth;
                 }
             });
+            return width == null ? defaultWidth : width;
         }
 
         public void addIgnore(Anchor menuItem) {
-            this.ignorMenuItems.add(menuItem);
+            this.ignoreMenuItems.add(menuItem);
         }
 
         public boolean removeIgnore(Anchor menuItem) {
-            return this.ignorMenuItems.remove(menuItem);
+            return this.ignoreMenuItems.remove(menuItem);
         }
 
         public void refreshVisibility(int delayMillis) {
@@ -215,12 +243,7 @@ public class Header extends Composite implements HeaderConstants {
         menuToDropDownItemMap.put(solutionsPageLink, solutionsPageLinkMenu);
         menuToDropDownItemMap.put(adminConsolePageLink, adminConsolePageLinkMenu);
         menuToDropDownItemMap.put(dataMiningPageLink, dataMiningPageLinkMenu);
-        
-        startPageLink.getElement().setId("startPageLink");
-        eventsPageLink.getElement().setId("eventsPageLink");
-        solutionsPageLink.getElement().setId("solutionsPageLink");
-        adminConsolePageLink.getElement().setId("adminConsolePageLink");
-        dataMiningPageLink.getElement().setId("dataMiningPageLink");
+
         headerNavigationDropDownMenuContainer.getStyle().setDisplay(Display.NONE);
         final DropdownHandler dropdownHandler = new DropdownHandler(hamburgerMenuIcon, headerNavigationDropDownMenuContainer);
         menuItemVisibilityHandler = new MenuItemVisibilityHandler(menuToDropDownItemMap, dropdownHandler, hamburgerMenuIcon, centerMenuPanel);
@@ -304,27 +327,21 @@ public class Header extends Composite implements HeaderConstants {
         solutionsPageLink.getElement().setAttribute(DEBUG_ID_ATTRIBUTE, "solutionsPageLink");
         logoAnchor.setAttribute(DEBUG_ID_ATTRIBUTE, "logoAnchor");
         eventsPageLink.getElement().setAttribute(DEBUG_ID_ATTRIBUTE, "eventsPage");
-
-        // register event handler for dropdown items
-        startPageLinkMenu.addClickHandler(this::goToHome);
-        eventsPageLinkMenu.addClickHandler(this::goToEvents);
-        solutionsPageLinkMenu.addClickHandler(this::goToSolutions);
         //remaining entries please see at registration for AuthenticationContextEvent 
-        // refresh after UI has been put into place
         menuItemVisibilityHandler.refreshVisibilityDeferred();
     }
 
-    @UiHandler("startPageLink")
+    @UiHandler({ "startPageLink", "startPageLinkMenu" })
     public void goToHome(ClickEvent e) {
         handleClickEvent(e, homeNavigation, startPageLink);
     }
 
-    @UiHandler("eventsPageLink")
+    @UiHandler({ "eventsPageLink", "eventsPageLinkMenu" })
     public void goToEvents(ClickEvent e) {
         handleClickEvent(e, eventsNavigation, eventsPageLink);
     }
 
-    @UiHandler("solutionsPageLink")
+    @UiHandler({ "solutionsPageLink", "solutionsPageLinkMenu" })
     public void goToSolutions(ClickEvent e) {
         handleClickEvent(e, solutionsNavigation, solutionsPageLink);
     }

@@ -32,31 +32,31 @@
         <!-- -->
             <g:Anchor ui:field="hamburgerMenuIcon" styleName="{local_res.css.sitenavigation_link} {local_res.css.header_navigation_icon}"></g:Anchor>
             <div ui:field="headerNavigationDropDownMenuContainer" class="{local_res.css.sitenavigation_dropdown_container}">
-		    <ul>
-		        <li id="a">
-		            <g:Anchor ui:field="startPageLinkMenu"
-		                styleName="{local_res.css.sitenavigation_link}" text="{i18n.home}" />
-		        </li>
-		        <li id="b">
-		            <g:Anchor ui:field="eventsPageLinkMenu"
-		                styleName="{local_res.css.sitenavigation_link}" text="{i18n.events}" />
-		        </li>
-		        <li id="c">
-		            <g:Anchor ui:field="solutionsPageLinkMenu"
-		                styleName="{local_res.css.sitenavigation_link}"
-		                text="{i18n.solutions}" />
-		        </li>
-		        <li id="d">
-		            <g:Anchor ui:field="adminConsolePageLinkMenu"
-		                styleName="{local_res.css.sitenavigation_link}"
-		                text="{i18n.manageEvents}" target="adminConsoleWindow" />
-		        </li>
-		        <li id="e">
-		            <g:Anchor ui:field="dataMiningPageLinkMenu"
-		                styleName="{local_res.css.sitenavigation_link}"
-		                text="{i18n.dataMining}" target="dataMiningWindow" />
-		        </li>
-		    </ul>
+            <ul>
+                <li>
+                    <g:Anchor ui:field="startPageLinkMenu"
+                        styleName="{local_res.css.sitenavigation_link}" text="{i18n.home}" />
+                </li>
+                <li>
+                    <g:Anchor ui:field="eventsPageLinkMenu"
+                        styleName="{local_res.css.sitenavigation_link}" text="{i18n.events}" />
+                </li>
+                <li>
+                    <g:Anchor ui:field="solutionsPageLinkMenu"
+                        styleName="{local_res.css.sitenavigation_link}"
+                        text="{i18n.solutions}" />
+                </li>
+                <li>
+                    <g:Anchor ui:field="adminConsolePageLinkMenu"
+                        styleName="{local_res.css.sitenavigation_link}"
+                        text="{i18n.manageEvents}" target="adminConsoleWindow" />
+                </li>
+                <li>
+                    <g:Anchor ui:field="dataMiningPageLinkMenu"
+                        styleName="{local_res.css.sitenavigation_link}"
+                        text="{i18n.dataMining}" target="dataMiningWindow" />
+                </li>
+            </ul>
             </div>
             <span class="{local_res.css.search} {local_res.css.sitenavigation_search}">
             <g:TextBox ui:field="searchText" styleName="{local_res.css.search_textfield}" />
