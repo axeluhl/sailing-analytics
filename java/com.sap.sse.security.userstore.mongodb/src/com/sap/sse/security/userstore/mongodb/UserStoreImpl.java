@@ -258,22 +258,24 @@ public class UserStoreImpl implements UserStore {
                     }
                 }
             });
-            // FIXME check for non migrated users, those are leftovers that are in some groups but have no user object
-            // anymore, remove them from the groups!
-            for (Entry<String, Map<String, String>> e : preferences.entrySet()) {
-                if (e.getValue() != null) {
-                    final String accessToken = e.getValue().get(ACCESS_TOKEN_KEY);
-                    if (accessToken != null) {
-                        final User user = users.get(e.getKey());
-                        if (user != null) {
-                            usersByAccessToken.put(accessToken, user);
-                        } else {
-                            logger.warning("Couldn't find user \"" + e.getKey()
-                                    + "\" for which an access token was found in the preferences");
+            LockUtil.executeWithReadLock(preferenceLock, () -> {
+                // FIXME check for non migrated users, those are leftovers that are in some groups but have no user object
+                // anymore, remove them from the groups!
+                for (Entry<String, Map<String, String>> e : preferences.entrySet()) {
+                    if (e.getValue() != null) {
+                        final String accessToken = e.getValue().get(ACCESS_TOKEN_KEY);
+                        if (accessToken != null) {
+                            final User user = users.get(e.getKey());
+                            if (user != null) {
+                                usersByAccessToken.put(accessToken, user);
+                            } else {
+                                logger.warning("Couldn't find user \"" + e.getKey()
+                                + "\" for which an access token was found in the preferences");
+                            }
                         }
                     }
                 }
-            }
+            });
         });
     }
     
