@@ -777,23 +777,21 @@ public class UserStoreImpl implements UserStore {
         return preResult == null ? Collections.<UserGroup> emptySet() : preResult;
     }
 
-    @Override
-    public void deleteUserGroup(UserGroup userGroup) throws UserGroupManagementException {
-        LockUtil.executeWithWriteLockExpectException(userGroupsLock, () -> {
-            if (!userGroups.containsKey(userGroup.getId())) {
-                throw new UserGroupManagementException(UserGroupManagementException.USER_GROUP_DOES_NOT_EXIST);
-            }
-            logger.info("Deleting user group: " + userGroup);
-            userGroupsByName.remove(userGroup.getName());
-            userGroups.remove(userGroup.getId());
-            for (final User userInDeletedGroup : userGroup.getUsers()) {
-                Util.removeFromValueSet(userGroupsContainingUser, userInDeletedGroup, userGroup);
-            }
-            usersInUserGroups.remove(userGroup);
-            userGroup.getRoleDefinitionMap().keySet()
-                    .forEach(role -> Util.removeFromValueSet(roleDefinitionsToUserGroups, role, userGroup));
-            deleteUserGroupFromDB(userGroup);
-        });
+    private void deleteUserGroup(UserGroup userGroup) throws UserGroupManagementException {
+        assert userGroupsLock.isWriteLockedByCurrentThread();
+        if (!userGroups.containsKey(userGroup.getId())) {
+            throw new UserGroupManagementException(UserGroupManagementException.USER_GROUP_DOES_NOT_EXIST);
+        }
+        logger.info("Deleting user group: " + userGroup);
+        userGroupsByName.remove(userGroup.getName());
+        userGroups.remove(userGroup.getId());
+        for (final User userInDeletedGroup : userGroup.getUsers()) {
+            Util.removeFromValueSet(userGroupsContainingUser, userInDeletedGroup, userGroup);
+        }
+        usersInUserGroups.remove(userGroup);
+        userGroup.getRoleDefinitionMap().keySet()
+                .forEach(role -> Util.removeFromValueSet(roleDefinitionsToUserGroups, role, userGroup));
+        deleteUserGroupFromDB(userGroup);
     }
 
     /**
