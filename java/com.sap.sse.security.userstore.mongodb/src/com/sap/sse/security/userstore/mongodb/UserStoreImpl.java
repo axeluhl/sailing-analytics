@@ -497,16 +497,16 @@ public class UserStoreImpl implements UserStore {
                 }
 
                 LockUtil.executeWithWriteLock(preferenceLock, () -> {
-                for (User user : newUserStore.getUsers()) {
-                    users.put(user.getName(), user);
-                    addToUsersByEmail(user);
-                    for (Entry<String, String> userPref : newUserStore.getAllPreferences(user.getName()).entrySet()) {
+                    for (User user : newUserStore.getUsers()) {
+                        users.put(user.getName(), user);
+                        addToUsersByEmail(user);
+                        for (Entry<String, String> userPref : newUserStore.getAllPreferences(user.getName()).entrySet()) {
                             setPreferenceInternalAndUpdatePreferenceObjectIfConverterIsAvailable(user.getName(), userPref.getKey(), userPref.getValue());
-                        if (userPref.getKey().equals(ACCESS_TOKEN_KEY)) {
-                            usersByAccessToken.put(userPref.getValue(), user);
+                            if (userPref.getKey().equals(ACCESS_TOKEN_KEY)) {
+                                usersByAccessToken.put(userPref.getValue(), user);
+                            }
                         }
                     }
-                }
                 });
                 for (Entry<String, Object> setting : newUserStore.getAllSettings().entrySet()) {
                     settings.put(setting.getKey(), setting.getValue());
@@ -1115,8 +1115,8 @@ public class UserStoreImpl implements UserStore {
 
     private void setPreferenceInternalAndUpdatePreferenceObjectIfConverterIsAvailable(String username, String key, String value) {
         assert preferenceLock.isWriteLockedByCurrentThread();
-            setPreferenceInternal(username, key, value);
-            updatePreferenceObjectIfConverterIsAvailable(username, key);
+        setPreferenceInternal(username, key, value);
+        updatePreferenceObjectIfConverterIsAvailable(username, key);
     }
 
     private void setPreferenceInternal(String username, String key, String value) {
