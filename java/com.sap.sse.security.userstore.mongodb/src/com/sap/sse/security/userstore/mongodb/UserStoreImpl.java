@@ -78,16 +78,16 @@ public class UserStoreImpl implements UserStore {
      */
     private UserGroup serverGroup;
 
-    private final HashMap<UUID, UserGroup> userGroups;
-    private final HashMap<String, UserGroup> userGroupsByName;
-    private final HashMap<User, Set<UserGroup>> userGroupsContainingUser;
+    private final Map<UUID, UserGroup> userGroups;
+    private final Map<String, UserGroup> userGroupsByName;
+    private final Map<User, Set<UserGroup>> userGroupsContainingUser;
     
     /**
      * This collection is important in particular to detect changes when {@link #updateUserGroup(UserGroupImpl)} is
      * called.
      */
-    private final HashMap<UserGroup, Set<User>> usersInUserGroups;
-    private final HashMap<RoleDefinition, Set<UserGroup>> roleDefinitionsToUserGroups;
+    private final Map<UserGroup, Set<User>> usersInUserGroups;
+    private final Map<RoleDefinition, Set<UserGroup>> roleDefinitionsToUserGroups;
     
     /**
      * Protects access to the maps {@link #userGroupsContainingUser}, {@link #usersInUserGroups}, {@link #userGroups},
@@ -106,11 +106,11 @@ public class UserStoreImpl implements UserStore {
      */
     private transient NamedReentrantReadWriteLock usersLock;
     
-    private final HashMap<String, User> users;
-    private final HashMap<String, Set<User>> usersByEmail;
-    private final HashMap<String, User> usersByAccessToken;
-    private final HashMap<String, String> emailForUsername;
-    private final HashMap<RoleDefinition, Set<User>> roleDefinitionsToUsers;
+    private final Map<String, User> users;
+    private final Map<String, Set<User>> usersByEmail;
+    private final Map<String, User> usersByAccessToken;
+    private final Map<String, String> emailForUsername;
+    private final Map<RoleDefinition, Set<User>> roleDefinitionsToUsers;
 
     private final ConcurrentHashMap<String, Object> settings;
     private final ConcurrentHashMap<String, Class<?>> settingTypes;
