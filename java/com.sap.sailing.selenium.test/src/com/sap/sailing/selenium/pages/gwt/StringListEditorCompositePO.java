@@ -47,11 +47,11 @@ public class StringListEditorCompositePO extends PageArea {
         return new GenericCellTablePO<>(this.driver, this.valueGrid, ValueEntryPO.class);
     }
 
-    public ValueEntryPO findValue(final String permission) {
+    public ValueEntryPO findValue(final String valueToFind) {
         final CellTablePO<ValueEntryPO> table = getExpandedValuesGrid();
         for (ValueEntryPO entry : table.getEntries()) {
             final String name = entry.getValueEntryName();
-            if (name != null) {
+            if (name != null && name.equals(valueToFind)) {
                 return entry;
             }
         }
