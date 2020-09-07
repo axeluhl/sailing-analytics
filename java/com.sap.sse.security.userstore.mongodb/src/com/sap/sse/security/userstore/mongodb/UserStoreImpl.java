@@ -217,8 +217,10 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public UserGroup ensureServerGroupExists() throws UserGroupManagementException {
-        serverGroup = getOrCreateServerGroup(serverGroupName);
-        return serverGroup;
+        return LockUtil.executeWithWriteLockAndResultExpectException(userGroupsLock, () -> {
+            serverGroup = getOrCreateServerGroup(serverGroupName);
+            return serverGroup;
+        });
     }
 
     /**
@@ -235,29 +237,29 @@ public class UserStoreImpl implements UserStore {
                 }
                 // do this here, in case the default tenant was just loaded before
                 ensureServerGroupExists();
+                for (User u : domainObjectFactory.loadAllUsers(roleDefinitions, this::convertToNewRoleModel,
+                        this.userGroups, this)) {
+                    users.put(u.getName(), u);
+                    addToUsersByEmail(u);
+                    for (Role roleOfUser : u.getRoles()) {
+                        Util.addToValueSet(roleDefinitionsToUsers, roleOfUser.getRoleDefinition(), u,
+                                () -> ConcurrentHashMap.newKeySet());
+                    }
+                }
+                // the users in the groups/tenants are still only proxies; now that the real users have been loaded,
+                // replace them based on the username key:
+                for (final UserGroup group : this.userGroups.values()) {
+                    migrateProxyUsersInGroupToRealUsersByUsername(group);
+                    for (final User userInGroup : group.getUsers()) {
+                        Util.addToValueSet(usersInUserGroups, group, userInGroup);
+                        Util.addToValueSet(userGroupsContainingUser, userInGroup, group);
+                    }
+                    for (RoleDefinition roleInUserGroup : group.getRoleDefinitionMap().keySet()) {
+                        Util.addToValueSet(roleDefinitionsToUserGroups, roleInUserGroup, group,
+                                () -> ConcurrentHashMap.newKeySet());
+                    }
+                }
             });
-            for (User u : domainObjectFactory.loadAllUsers(roleDefinitions, this::convertToNewRoleModel,
-                    this.userGroups, this)) {
-                users.put(u.getName(), u);
-                addToUsersByEmail(u);
-                for (Role roleOfUser : u.getRoles()) {
-                    Util.addToValueSet(roleDefinitionsToUsers, roleOfUser.getRoleDefinition(), u,
-                            () -> ConcurrentHashMap.newKeySet());
-                }
-            }
-            // the users in the groups/tenants are still only proxies; now that the real users have been loaded,
-            // replace them based on the username key:
-            for (final UserGroup group : this.userGroups.values()) {
-                migrateProxyUsersInGroupToRealUsersByUsername(group);
-                for (final User userInGroup : group.getUsers()) {
-                    Util.addToValueSet(usersInUserGroups, group, userInGroup);
-                    Util.addToValueSet(userGroupsContainingUser, userInGroup, group);
-                }
-                for (RoleDefinition roleInUserGroup : group.getRoleDefinitionMap().keySet()) {
-                    Util.addToValueSet(roleDefinitionsToUserGroups, roleInUserGroup, group,
-                            () -> ConcurrentHashMap.newKeySet());
-                }
-            }
             // FIXME check for non migrated users, those are leftovers that are in some groups but have no user object
             // anymore, remove them from the groups!
             for (Entry<String, Map<String, String>> e : preferences.entrySet()) {
@@ -1105,8 +1107,10 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public void setPreference(String username, String key, String value) {
-        setPreferenceInternal(username, key, value);
-        updatePreferenceObjectIfConverterIsAvailable(username, key);
+        LockUtil.executeWithWriteLock(preferenceLock, () -> {
+            setPreferenceInternal(username, key, value);
+            updatePreferenceObjectIfConverterIsAvailable(username, key);
+        });
     }
 
     private void setPreferenceInternal(String username, String key, String value) {
