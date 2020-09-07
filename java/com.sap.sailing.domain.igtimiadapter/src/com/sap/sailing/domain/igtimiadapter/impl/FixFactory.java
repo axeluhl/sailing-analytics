@@ -43,22 +43,24 @@ public class FixFactory {
             JSONArray timePointsMillis = (JSONArray) fixesJson.get("t");
             int fixIndex = 0;
             for (Object timePointMillis : timePointsMillis) {
-                TimePoint timePoint = new MillisecondsTimePoint(((Number) timePointMillis).longValue());
-                Map<Integer, Object> valuesPerSubindex = new HashMap<>();
-                int i=1;
-                JSONArray values;
-                while ((values=(JSONArray) fixesJson.get(""+i)) != null) {
-                    valuesPerSubindex.put(i, values.get(fixIndex));
-                    i++;
-                }
-                Sensor sensor = new SensorImpl(deviceSerialNumber,
-                        fixTypeAndOptionalColonSeparatedSensorsSubId.length < 2 ? 0
-                                : Long.valueOf(fixTypeAndOptionalColonSeparatedSensorsSubId[1]));
-                final Type ft = Type.valueOf(fixType);
-                if (ft != null) {
-                    Fix fix = createFix(sensor, ft, timePoint, valuesPerSubindex);
-                    result.add(fix);
-                    fixIndex++;
+                if (timePointMillis != null) {
+                    TimePoint timePoint = new MillisecondsTimePoint(((Number) timePointMillis).longValue());
+                    Map<Integer, Object> valuesPerSubindex = new HashMap<>();
+                    int i=1;
+                    JSONArray values;
+                    while ((values=(JSONArray) fixesJson.get(""+i)) != null) {
+                        valuesPerSubindex.put(i, values.get(fixIndex));
+                        i++;
+                    }
+                    Sensor sensor = new SensorImpl(deviceSerialNumber,
+                            fixTypeAndOptionalColonSeparatedSensorsSubId.length < 2 ? 0
+                                    : Long.valueOf(fixTypeAndOptionalColonSeparatedSensorsSubId[1]));
+                    final Type ft = Type.valueOf(fixType);
+                    if (ft != null) {
+                        Fix fix = createFix(sensor, ft, timePoint, valuesPerSubindex);
+                        result.add(fix);
+                        fixIndex++;
+                    }
                 }
             }
         }
