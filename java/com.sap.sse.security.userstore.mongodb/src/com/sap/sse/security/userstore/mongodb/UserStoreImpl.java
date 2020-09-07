@@ -1124,16 +1124,16 @@ public class UserStoreImpl implements UserStore {
     private void setPreferenceInternal(String username, String key, String value) {
         assert preferenceLock.isWriteLockedByCurrentThread();
         Map<String, String> userMap = preferences.get(username);
-        if (userMap == null) {
-            userMap = preferences.get(username);
+        if (value == null && userMap != null) {
+            userMap.remove(key);
+            if (userMap.isEmpty()) {
+                preferences.remove(username);
+            }
+        } else if (value != null) {
             if (userMap == null) {
                 userMap = new HashMap<>();
                 preferences.put(username, userMap);
             }
-        }
-        if (value == null) {
-            userMap.remove(key);
-        } else {
             userMap.put(key, value);
         }
         if (mongoObjectFactory != null) {
@@ -1293,11 +1293,14 @@ public class UserStoreImpl implements UserStore {
 
     private void unsetPreferenceObject(String username, String key) {
         assert preferenceLock.isWriteLockedByCurrentThread();
-        Map<String, Object> userObjectMap = preferenceObjects.get(username);
+        final Map<String, Object> userObjectMap = preferenceObjects.get(username);
         if (userObjectMap != null) {
             Object oldPreference = userObjectMap.remove(key);
             if (oldPreference != null) {
                 notifyListenersOnPreferenceObjectChange(username, key, oldPreference, null);
+            }
+            if (userObjectMap.isEmpty()) {
+                preferenceObjects.remove(username);
             }
         }
     }
