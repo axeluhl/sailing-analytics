@@ -95,8 +95,7 @@ public class UserStoreImpl implements UserStore {
      * Lock may be acquired when having a lock for {@linkplain usersLock}. If both locks (no matter if read or write) are
      * required, {@link #usersLock} must always be acquired before acquiring {@link #userGroupsLock}.
      */
-    private final NamedReentrantReadWriteLock userGroupsLock = new NamedReentrantReadWriteLock(
-            "User Groups", /* fair */ false);
+    private transient NamedReentrantReadWriteLock userGroupsLock;
     
 
     /**
@@ -105,8 +104,7 @@ public class UserStoreImpl implements UserStore {
      * Must not be locked when already having a lock for {@linkplain userGroupsLock}. If both locks (no matter if read
      * or write) are required, {@link #usersLock} must always be acquired before acquiring {@link #userGroupsLock}.
      */
-    private final NamedReentrantReadWriteLock usersLock = new NamedReentrantReadWriteLock(
-            "Users", /* fair */ false);
+    private transient NamedReentrantReadWriteLock usersLock;
     
     private final HashMap<String, User> users;
     private final HashMap<String, Set<User>> usersByEmail;
@@ -136,8 +134,7 @@ public class UserStoreImpl implements UserStore {
     /**
      * Protects access to the maps {@link #preferences}, {@link #preferenceConverters}, {@link #preferenceObjects}.
      */
-    private final NamedReentrantReadWriteLock preferenceLock = new NamedReentrantReadWriteLock(
-            "Preferences", /* fair */ false);
+    private transient NamedReentrantReadWriteLock preferenceLock;
 
     /**
      * Keys are preferences keys as used by {@link #preferenceObjects}, values are the listeners to inform on changes of
@@ -187,8 +184,11 @@ public class UserStoreImpl implements UserStore {
         preferenceConverters = new ConcurrentHashMap<>();
         preferenceObjects = new ConcurrentHashMap<>();
         preferenceListeners = new HashMap<>();
+        usersLock = new NamedReentrantReadWriteLock("Users", /* fair */ false);
+        userGroupsLock = new NamedReentrantReadWriteLock("User Groups", /* fair */ false);
         listenersLock = new NamedReentrantReadWriteLock(
                 UserStoreImpl.class.getSimpleName() + " lock for listeners collection", false);
+        preferenceLock = new NamedReentrantReadWriteLock("Preferences", /* fair */ false);
         this.mongoObjectFactory = mongoObjectFactory;
         if (domainObjectFactory != null) {
             for (Entry<String, Class<?>> e : domainObjectFactory.loadSettingTypes().entrySet()) {
@@ -406,8 +406,11 @@ public class UserStoreImpl implements UserStore {
         preferenceConverters = new ConcurrentHashMap<>();
         preferenceObjects = new ConcurrentHashMap<>();
         preferenceListeners = new HashMap<>();
+        usersLock = new NamedReentrantReadWriteLock("Users", /* fair */ false);
+        userGroupsLock = new NamedReentrantReadWriteLock("User Groups", /* fair */ false);
         listenersLock = new NamedReentrantReadWriteLock(
                 UserStoreImpl.class.getSimpleName() + " lock for listeners collection", false);
+        preferenceLock = new NamedReentrantReadWriteLock("Preferences", /* fair */ false);
     }
 
     /**
