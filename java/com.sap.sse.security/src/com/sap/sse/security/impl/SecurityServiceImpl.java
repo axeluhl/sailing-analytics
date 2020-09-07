@@ -158,6 +158,7 @@ import com.sap.sse.security.shared.SecurityAccessControlList;
 import com.sap.sse.security.shared.Subscription;
 import com.sap.sse.security.shared.SubscriptionPlan;
 import com.sap.sse.security.shared.SubscriptionPlanHolder;
+import com.sap.sse.security.shared.SubscriptionPlanRole;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
@@ -2534,6 +2535,11 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (user != null) {
             String newSubscriptionPlanId = newSubscription.getPlanId();
             Subscription currentSubscription = user.getSubscriptionByPlan(newSubscriptionPlanId);
+            logger.log(Level.INFO, "Update user subscription for plan " + newSubscriptionPlanId);
+            logger.log(Level.INFO, "Current user plan subscription: "
+                    + (currentSubscription != null ? currentSubscription.toString() : "null"));
+            logger.log(Level.INFO,
+                    "New plan subscription: " + (newSubscription != null ? newSubscription.toString() : "null"));
             if (shouldUpdateUserRolesForSubscription(currentSubscription, newSubscription)) {
                 updateUserRolesOnSubscriptionChange(user, currentSubscription, newSubscription);
             }
@@ -2619,22 +2625,105 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     private void removeUserPlanRoles(User user, SubscriptionPlan plan) throws UserManagementException {
         if (plan != null) {
-            UUID[] roleDefinitionIds = plan.getRoleDefinitionIds();
-            for (UUID roleDefId : roleDefinitionIds) {
-                // TODO bug5260: shall the assignment really be qualified for objects owned by the user only? I think no. See addUserPlanRoles(...)
-                store.removeRoleFromUser(user.getName(), new Role(getRoleDefinition(roleDefId), null, user));
+            logger.log(Level.INFO, "Remove user roles of subscription plan " + plan.getName());
+            Role[] roles = getSubscriptionPlanUserRoles(user, plan);
+            for (Role role : roles) {
+                store.removeRoleFromUser(user.getName(), role);
             }
         }
     }
 
     private void addUserPlanRoles(User user, SubscriptionPlan plan) throws UserManagementException {
         if (plan != null) {
-            UUID[] roleDefinitionIds = plan.getRoleDefinitionIds();
-            for (UUID roleDefId : roleDefinitionIds) {
-                // TODO bug5260: shall the assignment really be qualified for objects owned by the user only? I think no. See also removeUserPlanRoles(...)
-                store.addRoleForUser(user.getName(), new Role(getRoleDefinition(roleDefId), null, user));
+            logger.log(Level.INFO, "Add user roles for subscription plan " + plan.getName());
+            Role[] roles = getSubscriptionPlanUserRoles(user, plan);
+            for (Role role : roles) {
+                store.addRoleForUser(user.getName(), role);
             }
         }
+    }
+
+    private Role[] getSubscriptionPlanUserRoles(User user, SubscriptionPlan plan) {
+        List<Role> roles = new ArrayList<Role>();
+        for (SubscriptionPlanRole planRole : plan.getRoles()) {
+            roles.add(getSubscriptionPlanUserRole(user, planRole));
+        }
+        return roles.toArray(new Role[] {});
+    }
+
+    /**
+     * Get a role {@code Role} for a subscription plan role definition {@code SubscriptionPlanRole}
+     * 
+     * @param user
+     *            plan subscription user
+     * @param planRole
+     * @return user role {@code Role}
+     */
+    private Role getSubscriptionPlanUserRole(User user, SubscriptionPlanRole planRole) {
+        User qualifiedUser = getSubscriptionPlanRoleQualifiedUser(user, planRole);
+        UserGroup qualifiedTenant = getSubscriptionPlanRoleQualifiedTenant(user, qualifiedUser, planRole);
+        return new Role(getRoleDefinition(planRole.getRoleId()), qualifiedTenant, qualifiedUser);
+    }
+
+    /**
+     * Check and return role qualified user {@code User} for a subscription plan role {@code SubscriptionPlanRole}
+     * definition
+     * 
+     * @param user
+     *            plan subscription user
+     * @param planRole
+     * @return role qualified user
+     */
+    private User getSubscriptionPlanRoleQualifiedUser(User user, SubscriptionPlanRole planRole) {
+        User qualifiedUser = null;
+        if (planRole.getUserQualification() != null
+                && planRole.getUserQualification() == SubscriptionPlanRole.UserQualification.USER) {
+            qualifiedUser = user;
+        } else if (planRole.getUserName() != null && !planRole.getUserName().isEmpty()) {
+            qualifiedUser = getUserByName(planRole.getUserName());
+        }
+
+        return qualifiedUser;
+    }
+
+    /**
+     * Check and return role qualified tenant {@code UserGroup} for a subscription plan role
+     * {@code SubscriptionPlanRole} definition
+     * 
+     * @param subscriptionUser
+     *            plan subscription user
+     * @param qualifiedUser
+     *            qualified user from
+     *            {@code SecurityServiceImpl#getSubscriptionPlanRoleQualifiedUser(User, SubscriptionPlanRole)}
+     * @param planRole
+     * @return role qualified tenant
+     */
+    private UserGroup getSubscriptionPlanRoleQualifiedTenant(User subscriptionUser, User qualifiedUser,
+            SubscriptionPlanRole planRole) {
+        UserGroup qualifiedTenant = null;
+        SubscriptionPlanRole.TenantQualification tenantQualification = planRole.getTenantQualification();
+        if (tenantQualification != null && tenantQualification != SubscriptionPlanRole.TenantQualification.NONE) {
+            User u = null;
+            switch (tenantQualification) {
+            case DEFAULT_QUALIFIED_USER_TENANT:
+                if (qualifiedUser != null) {
+                    u = qualifiedUser;
+                }
+                break;
+            case DEFAULT_SUBSCRIBED_USER_TENANT:
+                if (subscriptionUser != null) {
+                    u = subscriptionUser;
+                }
+            default:
+                break;
+            }
+            if (u != null) {
+                qualifiedTenant = getDefaultTenantForUser(u);
+            }
+        } else if (planRole.getTenantName() != null && !planRole.getTenantName().isEmpty()) {
+            qualifiedTenant = getUserGroupByName(planRole.getTenantName());
+        }
+        return qualifiedTenant;
     }
 
     /**

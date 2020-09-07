@@ -522,13 +522,17 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 final long trialStart = doc.getLong(FieldNames.Subscription.TRIAL_START.name());
                 final long trialEnd = doc.getLong(FieldNames.Subscription.TRIAL_END.name());
                 final String paymentStatus = doc.getString(FieldNames.Subscription.PAYMENT_STATUS.name());
+                final String transactionType = doc.getString(FieldNames.Subscription.TRANSACTION_TYPE.name());
+                final String transactionStatus = doc.getString(FieldNames.Subscription.TRANSACTION_STATUS.name());
+                final String invoiceId = doc.getString(FieldNames.Subscription.INVOICE_ID.name());
+                final String invoiceStatus = doc.getString(FieldNames.Subscription.INVOICE_STATUS.name());
                 final long subscriptionCreatedAt = doc.getLong(FieldNames.Subscription.SUBSCRIPTION_CREATED_AT.name());
                 final long subscriptionUpdatedAt = doc.getLong(FieldNames.Subscription.SUBSCRIPTION_UPDATED_AT.name());
                 final long latestEventTime = doc.getLong(FieldNames.Subscription.LATEST_EVENT_TIME.name());
                 final long manualUpdatedAt = doc.getLong(FieldNames.Subscription.MANUAL_UPDATED_AT.name());
                 subscriptions[i++] = new ChargebeeSubscription(subscriptionId, planId, customerId, trialStart, trialEnd,
-                        subscriptionStatus, paymentStatus, subscriptionCreatedAt, subscriptionUpdatedAt,
-                        latestEventTime, manualUpdatedAt);
+                        subscriptionStatus, paymentStatus, transactionType, transactionStatus, invoiceId, invoiceStatus,
+                        subscriptionCreatedAt, subscriptionUpdatedAt, latestEventTime, manualUpdatedAt);
             }
         } else {
             subscriptions = null;

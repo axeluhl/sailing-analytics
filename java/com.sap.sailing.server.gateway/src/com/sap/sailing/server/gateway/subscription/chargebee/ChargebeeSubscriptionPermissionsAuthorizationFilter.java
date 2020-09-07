@@ -20,15 +20,15 @@ public class ChargebeeSubscriptionPermissionsAuthorizationFilter extends Subscri
         try {
             final Object requestBody = JSONValue.parseWithException(request.getReader());
             final JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
-            logger.log(Level.INFO, "Payment service webhook data: " + requestObject.toJSONString());
+            logger.log(Level.INFO, "Received Chargebee webhook: " + requestObject.toJSONString());
             final SubscriptionWebHookEvent event = new SubscriptionWebHookEvent(requestObject);
             if (!event.isValidEvent()) {
-                throw new IllegalArgumentException("Invalid webhook event");
+                throw new IllegalArgumentException("Chargebee webhook event i");
             }
             request.setAttribute("event", event);
             return event.getCustomerId();
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Subscription permission checking error", e);
+            logger.log(Level.SEVERE, "Chargebee subscription webhook permission checking error", e);
             return null;
         }
     }

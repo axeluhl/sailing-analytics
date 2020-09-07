@@ -72,7 +72,8 @@ public class SubscriptionCell extends AbstractCell<SubscriptionItem> {
             if (subscription.isActive()) {
                 subscriptionStatusCssClass = renderer.getStyle().blueText();
                 paymentStatus = subscription.getPaymentStatusLabel();
-                paymentStatusCssClass = subscription.isPaymentSuccess() ? renderer.getStyle().blueText()
+                paymentStatusCssClass = subscription.isPaymentSuccess() && !subscription.isRefunded()
+                        ? renderer.getStyle().blueText()
                         : renderer.getStyle().errorText();
             } else {
                 paymentStatusCssClass = renderer.getStyle().hide();

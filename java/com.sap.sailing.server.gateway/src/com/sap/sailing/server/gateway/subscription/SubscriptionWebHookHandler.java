@@ -1,5 +1,8 @@
 package com.sap.sailing.server.gateway.subscription;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.Response;
@@ -9,6 +12,8 @@ import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.impl.User;
 
 public abstract class SubscriptionWebHookHandler {
+    private static final Logger logger = Logger.getLogger(SubscriptionWebHookHandler.class.getName());
+
     protected SubscriptionWebHookServlet context;
 
     public SubscriptionWebHookHandler(SubscriptionWebHookServlet context) {
@@ -22,6 +27,8 @@ public abstract class SubscriptionWebHookHandler {
     }
 
     protected void updateUserSubscription(User user, Subscription subscription) throws UserManagementException {
+        logger.log(Level.INFO, "Update subscription, user " + user.getName() + ", new subscription "
+                + (subscription != null ? subscription.toString() : "null"));
         context.getSecurityService().updateUserSubscription(user.getName(), subscription);
     }
 

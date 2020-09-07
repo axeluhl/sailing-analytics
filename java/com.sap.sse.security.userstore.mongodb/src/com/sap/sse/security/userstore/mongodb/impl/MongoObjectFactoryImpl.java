@@ -347,12 +347,16 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
                 doc.put(FieldNames.Subscription.TRIAL_END.name(), subscription.getTrialEnd());
                 doc.put(FieldNames.Subscription.SUBSCRIPTION_STATUS.name(), subscription.getSubscriptionStatus());
                 doc.put(FieldNames.Subscription.PAYMENT_STATUS.name(), subscription.getPaymentStatus());
+                doc.put(FieldNames.Subscription.TRANSACTION_TYPE.name(), subscription.getTransactionType());
+                doc.put(FieldNames.Subscription.TRANSACTION_STATUS.name(), subscription.getTransactionStatus());
+                doc.put(FieldNames.Subscription.INVOICE_ID.name(), subscription.getInvoiceId());
+                doc.put(FieldNames.Subscription.INVOICE_STATUS.name(), subscription.getInvoiceStatus());
                 doc.put(FieldNames.Subscription.SUBSCRIPTION_CREATED_AT.name(),
                         subscription.getSubscriptionCreatedAt());
                 doc.put(FieldNames.Subscription.SUBSCRIPTION_UPDATED_AT.name(),
                         subscription.getSubscriptionUpdatedAt());
                 doc.put(FieldNames.Subscription.LATEST_EVENT_TIME.name(), subscription.getLatestEventTime());
-                doc.put(FieldNames.Subscription.MANUAL_UPDATED_AT.name(), subscription.getManuallyUpdatedAt());
+                doc.put(FieldNames.Subscription.MANUAL_UPDATED_AT.name(), subscription.getManualUpdatedAt());
                 result.add(doc);
             }
         } else {
