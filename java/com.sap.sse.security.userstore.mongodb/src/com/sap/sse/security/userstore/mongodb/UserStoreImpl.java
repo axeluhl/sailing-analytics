@@ -118,18 +118,18 @@ public class UserStoreImpl implements UserStore {
     /**
      * Keys are the usernames, values are the key/value pairs representing the user's preferences
      */
-    private final ConcurrentHashMap<String, Map<String, String>> preferences;
+    private final Map<String, Map<String, String>> preferences;
 
     /**
      * Converter objects to map preference Strings to Objects. The keys must match the keys of the preferences.
      */
-    private transient ConcurrentHashMap<String, PreferenceConverter<?>> preferenceConverters;
+    private transient Map<String, PreferenceConverter<?>> preferenceConverters;
 
     /**
      * This is another view of the String preferences mapped by {@link #preferenceConverters} to Objects. Keys are the
      * usernames, values are the key/value pairs representing the user's preferences.
      */
-    private transient ConcurrentHashMap<String, Map<String, Object>> preferenceObjects;
+    private transient Map<String, Map<String, Object>> preferenceObjects;
     
     /**
      * Protects access to the maps {@link #preferences}, {@link #preferenceConverters}, {@link #preferenceObjects}.
@@ -180,9 +180,9 @@ public class UserStoreImpl implements UserStore {
         settings = new ConcurrentHashMap<>();
         settingTypes = new ConcurrentHashMap<>();
         usersByAccessToken = new HashMap<>();
-        preferences = new ConcurrentHashMap<>();
-        preferenceConverters = new ConcurrentHashMap<>();
-        preferenceObjects = new ConcurrentHashMap<>();
+        preferences = new HashMap<>();
+        preferenceConverters = new HashMap<>();
+        preferenceObjects = new HashMap<>();
         preferenceListeners = new HashMap<>();
         usersLock = new NamedReentrantReadWriteLock("Users", /* fair */ false);
         userGroupsLock = new NamedReentrantReadWriteLock("User Groups", /* fair */ false);
@@ -242,8 +242,7 @@ public class UserStoreImpl implements UserStore {
                     users.put(u.getName(), u);
                     addToUsersByEmail(u);
                     for (Role roleOfUser : u.getRoles()) {
-                        Util.addToValueSet(roleDefinitionsToUsers, roleOfUser.getRoleDefinition(), u,
-                                () -> ConcurrentHashMap.newKeySet());
+                        Util.addToValueSet(roleDefinitionsToUsers, roleOfUser.getRoleDefinition(), u);
                     }
                 }
                 // the users in the groups/tenants are still only proxies; now that the real users have been loaded,
@@ -255,8 +254,7 @@ public class UserStoreImpl implements UserStore {
                         Util.addToValueSet(userGroupsContainingUser, userInGroup, group);
                     }
                     for (RoleDefinition roleInUserGroup : group.getRoleDefinitionMap().keySet()) {
-                        Util.addToValueSet(roleDefinitionsToUserGroups, roleInUserGroup, group,
-                                () -> ConcurrentHashMap.newKeySet());
+                        Util.addToValueSet(roleDefinitionsToUserGroups, roleInUserGroup, group);
                     }
                 }
             });
@@ -403,8 +401,8 @@ public class UserStoreImpl implements UserStore {
      */
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
-        preferenceConverters = new ConcurrentHashMap<>();
-        preferenceObjects = new ConcurrentHashMap<>();
+        preferenceConverters = new HashMap<>();
+        preferenceObjects = new HashMap<>();
         preferenceListeners = new HashMap<>();
         usersLock = new NamedReentrantReadWriteLock("Users", /* fair */ false);
         userGroupsLock = new NamedReentrantReadWriteLock("User Groups", /* fair */ false);
@@ -760,8 +758,7 @@ public class UserStoreImpl implements UserStore {
             }
             Util.removeFromAllValueSets(roleDefinitionsToUserGroups, group);
             for (RoleDefinition roleInUserGroup : group.getRoleDefinitionMap().keySet()) {
-                Util.addToValueSet(roleDefinitionsToUserGroups, roleInUserGroup, group,
-                        () -> ConcurrentHashMap.newKeySet());
+                Util.addToValueSet(roleDefinitionsToUserGroups, roleInUserGroup, group);
             }
         });
         if (mongoObjectFactory != null) {
@@ -810,8 +807,8 @@ public class UserStoreImpl implements UserStore {
             throws UserManagementException {
         return LockUtil.executeWithWriteLockAndResultExpectException(usersLock, () -> {
             checkUsernameUniqueness(name);
-            ConcurrentHashMap<String, UserGroup> tenantsForServer = new ConcurrentHashMap<>();
-            User user = new UserImpl(name, email, tenantsForServer, /* user group provider */ this, accounts);
+            final Map<String, UserGroup> tenantsForServer = new HashMap<>();
+            final User user = new UserImpl(name, email, tenantsForServer, /* user group provider */ this, accounts);
             logger.info("Creating user: " + user + " with e-mail " + email);
             addAndStoreUserInternal(user);
             return user;
@@ -996,8 +993,7 @@ public class UserStoreImpl implements UserStore {
                 throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
             }
             user.addRole(role);
-            Util.addToValueSet(roleDefinitionsToUsers, role.getRoleDefinition(), user,
-                    () -> ConcurrentHashMap.newKeySet());
+            Util.addToValueSet(roleDefinitionsToUsers, role.getRoleDefinition(), user);
             if (mongoObjectFactory != null) {
                 mongoObjectFactory.storeUser(user);
             }
@@ -1129,7 +1125,7 @@ public class UserStoreImpl implements UserStore {
         if (userMap == null) {
             userMap = preferences.get(username);
             if (userMap == null) {
-                userMap = new ConcurrentHashMap<>();
+                userMap = new HashMap<>();
                 preferences.put(username, userMap);
             }
         }
@@ -1282,7 +1278,7 @@ public class UserStoreImpl implements UserStore {
         assert preferenceLock.isWriteLockedByCurrentThread();
         Map<String, Object> userMap = preferenceObjects.get(username);
         if (userMap == null) {
-            userMap = new ConcurrentHashMap<>();
+            userMap = new HashMap<>();
             preferenceObjects.put(username, userMap);
         }
         // if the new preference object is simply null, we remove the entry instead of putting null
