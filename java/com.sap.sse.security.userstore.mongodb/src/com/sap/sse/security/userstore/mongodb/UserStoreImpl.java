@@ -1127,13 +1127,10 @@ public class UserStoreImpl implements UserStore {
         assert preferenceLock.isWriteLockedByCurrentThread();
         Map<String, String> userMap = preferences.get(username);
         if (userMap == null) {
-            synchronized (preferences) {
-                // only synchronize when necessary
-                userMap = preferences.get(username);
-                if (userMap == null) {
-                    userMap = new ConcurrentHashMap<>();
-                    preferences.put(username, userMap);
-                }
+            userMap = preferences.get(username);
+            if (userMap == null) {
+                userMap = new ConcurrentHashMap<>();
+                preferences.put(username, userMap);
             }
         }
         if (value == null) {
@@ -1194,9 +1191,7 @@ public class UserStoreImpl implements UserStore {
     private void removeAllPreferencesForUser(String username) {
         assert preferenceLock.isWriteLockedByCurrentThread();
         // TODO should we keep the preferences anonymized (e.g. use a UUID as username) to enable better statistics?
-        synchronized (preferences) {
-            preferences.remove(username);
-        }
+        preferences.remove(username);
         if (mongoObjectFactory != null) {
             mongoObjectFactory.storePreferences(username, Collections.<String, String> emptyMap());
         }
@@ -1208,10 +1203,7 @@ public class UserStoreImpl implements UserStore {
      */
     private void removeAllPreferenceObjectsForUser(String username) {
         assert preferenceLock.isWriteLockedByCurrentThread();
-        Map<String, Object> preferenceObjectsToRemove;
-        synchronized (preferenceObjects) {
-            preferenceObjectsToRemove = preferenceObjects.remove(username);
-        }
+        final Map<String, Object> preferenceObjectsToRemove = preferenceObjects.remove(username);
         if (preferenceObjectsToRemove != null) {
             for (Map.Entry<String, Object> entry : preferenceObjectsToRemove.entrySet()) {
                 notifyListenersOnPreferenceObjectChange(username, entry.getKey(), entry.getValue(), null);
@@ -1290,14 +1282,8 @@ public class UserStoreImpl implements UserStore {
         assert preferenceLock.isWriteLockedByCurrentThread();
         Map<String, Object> userMap = preferenceObjects.get(username);
         if (userMap == null) {
-            synchronized (preferenceObjects) {
-                // only synchronize when necessary
-                userMap = preferenceObjects.get(username);
-                if (userMap == null) {
-                    userMap = new ConcurrentHashMap<>();
-                    preferenceObjects.put(username, userMap);
-                }
-            }
+            userMap = new ConcurrentHashMap<>();
+            preferenceObjects.put(username, userMap);
         }
         // if the new preference object is simply null, we remove the entry instead of putting null
         Object oldPreference = convertedObject == null ? userMap.remove(key) : userMap.put(key, convertedObject);
