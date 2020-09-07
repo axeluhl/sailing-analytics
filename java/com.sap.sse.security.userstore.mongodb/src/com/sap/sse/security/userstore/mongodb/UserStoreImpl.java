@@ -1307,7 +1307,7 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public <T> T getPreferenceObject(String username, String key) {
-        return LockUtil.executeWithWriteLockAndResult(preferenceLock, () -> {
+        return LockUtil.executeWithReadLockAndResult(preferenceLock, () -> {
             final Object result;
             Map<String, Object> userMap = preferenceObjects.get(username);
             if (userMap != null) {
