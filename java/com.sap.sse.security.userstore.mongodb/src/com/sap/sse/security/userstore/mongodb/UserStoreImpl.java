@@ -615,7 +615,7 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public void removeAccessToken(String username) {
-        LockUtil.executeWithReadLock(usersLock, () -> {
+        LockUtil.executeWithWriteLock(usersLock, () -> {
             User user = users.get(username);
             if (user != null) {
                 final String accessToken = getPreference(username, ACCESS_TOKEN_KEY);
