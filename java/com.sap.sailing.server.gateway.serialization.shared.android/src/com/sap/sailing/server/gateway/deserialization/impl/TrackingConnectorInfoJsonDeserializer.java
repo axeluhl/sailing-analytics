@@ -19,6 +19,8 @@ public class TrackingConnectorInfoJsonDeserializer implements JsonDeserializer<T
 
     public TrackingConnectorInfo deserialize(JSONObject object) throws JsonDeserializationException {
         final TrackingConnectorType trackingConnectorType = new TrackingConnectorType() {
+            private static final long serialVersionUID = -877942985197966636L;
+
             @Override
             public String name() {
                 return (String) object.get(TrackingConnectorInfoJsonSerializer.FIELD_TRACKING_CONNECTOR_TYPE);
