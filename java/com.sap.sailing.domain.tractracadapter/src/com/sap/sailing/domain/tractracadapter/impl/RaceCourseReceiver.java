@@ -276,7 +276,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
                 raceDefinitionSetToUpdate, useInternalMarkPassingAlgorithm, raceLogResolver,
                 /* ThreadLocalTransporter not needed because the RaceTracker is not active on a replica */ Optional
                         .empty(),
-                new TrackingConnectorInfoImpl(TrackingConnectorType.TracTrac, tractracRace.getEvent().getWebURL(), tractracRace.getId()));
+                new TrackingConnectorInfoImpl(TrackingConnectorType.TracTrac, tractracRace.getEvent().getWebURL()));
         if (runAfterCreatingTrackedRace != null) {
             runAfterCreatingTrackedRace.accept(trackedRace);
         }
