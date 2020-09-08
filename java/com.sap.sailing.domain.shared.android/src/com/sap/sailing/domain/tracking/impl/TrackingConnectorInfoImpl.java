@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import java.io.Serializable;
 import java.net.URL;
-import java.util.UUID;
 
 import com.sap.sailing.domain.common.tracking.TrackingConnectorType;
 import com.sap.sailing.domain.tracking.TrackingConnectorInfo;
@@ -10,9 +10,9 @@ public class TrackingConnectorInfoImpl implements TrackingConnectorInfo {
     private static final long serialVersionUID = 7970268841592389145L;
     private final TrackingConnectorType trackingConnectorType;
     private final URL webUrl;
-    private final UUID uuid;
+    private final Serializable uuid;
 
-    public TrackingConnectorInfoImpl(TrackingConnectorType trackingConnectorType, URL webUrl, UUID itemUUID) {
+    public TrackingConnectorInfoImpl(TrackingConnectorType trackingConnectorType, URL webUrl, Serializable itemUUID) {
         super();
         this.trackingConnectorType = trackingConnectorType;
         this.webUrl = webUrl;
@@ -27,7 +27,7 @@ public class TrackingConnectorInfoImpl implements TrackingConnectorInfo {
         return webUrl;
     }
     
-    public UUID getUuid() {
+    public Serializable getUniqueIdentifier() {
     	return uuid;
     }
 

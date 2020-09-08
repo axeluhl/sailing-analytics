@@ -1,7 +1,7 @@
 package com.sap.sailing.server.gateway.serialization.impl;
 
+import java.io.Serializable;
 import java.net.URL;
-import java.util.UUID;
 
 import org.json.simple.JSONObject;
 
@@ -21,7 +21,7 @@ public class TrackingConnectorInfoJsonSerializer implements JsonSerializer<Track
         if (webUrl != null) {
             result.put(FIELD_WEB_URL, webUrl.toString());
         }
-        UUID uuid = trackingConnectorInfo.getUuid();
+        Serializable uuid = trackingConnectorInfo.getUniqueIdentifier();
         if (uuid != null) {
         	result.put(FIELD_UUID, uuid.toString());
         }
