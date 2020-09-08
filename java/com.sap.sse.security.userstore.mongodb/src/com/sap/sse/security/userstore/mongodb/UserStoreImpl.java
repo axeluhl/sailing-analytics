@@ -452,17 +452,18 @@ public class UserStoreImpl implements UserStore {
     }
 
     /**
+     * To call this method, the caller must have obtained the write lock of {@link #preferenceLock}.
+     * 
      * Preference objects can't be simply removed by clearing {@link #preferenceObjects} because listeners can have a
      * state depending on the current preference objects. So we need to notify all listeners about the removal of the
      * notification objects.
      */
     private void clearAllPreferenceObjects() {
-        LockUtil.executeWithWriteLock(preferenceLock, () -> {
-            final Set<String> usersToProcess = new HashSet<>(preferences.keySet());
-            for (String username : usersToProcess) {
-                removeAllPreferencesForUser(username);
-            }
-        });
+        assert preferenceLock.isWriteLockedByCurrentThread();
+        final Set<String> usersToProcess = new HashSet<>(preferences.keySet());
+        for (String username : usersToProcess) {
+            removeAllPreferencesForUser(username);
+        }
     }
 
     @Override
