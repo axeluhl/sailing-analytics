@@ -56,7 +56,6 @@ import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
-import com.sap.sailing.domain.common.tracking.TrackingConnectorType;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -91,6 +90,7 @@ import com.sap.sailing.domain.tractracadapter.MetadataParser.ControlPointMetaDat
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
+import com.sap.sailing.domain.tractracadapter.TracTracConnectorType;
 import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
 import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
 import com.sap.sse.common.Color;
@@ -661,7 +661,7 @@ public class DomainFactoryImpl implements DomainFactory {
                         trackedRegatta.getRegatta().addRace(raceDefinition);
                         TrackingConnectorInfo trackingConnectorInfo = null;
                         if (tractracRace != null) {
-                            trackingConnectorInfo = new TrackingConnectorInfoImpl(TrackingConnectorType.TracTrac, tractracRace.getEvent().getWebURL(), tractracRace.getId());
+                            trackingConnectorInfo = new TrackingConnectorInfoImpl(new TracTracConnectorType(), tractracRace.getEvent().getWebURL());
                         }
                         trackedRace = createTrackedRace(trackedRegatta, raceDefinition, sidelines, windStore,
                                 delayToLiveInMillis, millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate, ignoreTracTracMarkPassings,
