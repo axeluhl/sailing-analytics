@@ -97,7 +97,6 @@ public class UserStoreImpl implements UserStore {
      */
     private transient NamedReentrantReadWriteLock userGroupsLock;
     
-
     /**
      * Protects access to the maps {@link #users}, {@link #usersByEmail}, {@link #roleDefinitionsToUsers},
      * {@link #usersByAccessToken} and {@link #emailForUsername}.<br>
@@ -105,7 +104,6 @@ public class UserStoreImpl implements UserStore {
      * or write) are required, {@link #usersLock} must always be acquired before acquiring {@link #userGroupsLock}.
      */
     private transient NamedReentrantReadWriteLock usersLock;
-    
     private final Map<String, User> users;
     private final Map<String, Set<User>> usersByEmail;
     private final Map<String, User> usersByAccessToken;
@@ -115,6 +113,10 @@ public class UserStoreImpl implements UserStore {
     private final ConcurrentHashMap<String, Object> settings;
     private final ConcurrentHashMap<String, Class<?>> settingTypes;
 
+    /**
+     * Protects access to the maps {@link #preferences}, {@link #preferenceConverters}, {@link #preferenceObjects} and {@link #preferenceListeners}.
+     */
+    private transient NamedReentrantReadWriteLock preferenceLock;
     /**
      * Keys are the usernames, values are the key/value pairs representing the user's preferences
      */
@@ -132,25 +134,16 @@ public class UserStoreImpl implements UserStore {
     private transient Map<String, Map<String, Object>> preferenceObjects;
     
     /**
-     * Protects access to the maps {@link #preferences}, {@link #preferenceConverters}, {@link #preferenceObjects}.
-     */
-    private transient NamedReentrantReadWriteLock preferenceLock;
-
-    /**
      * Keys are preferences keys as used by {@link #preferenceObjects}, values are the listeners to inform on changes of
      * the specific preference object for a {@link UserImpl}.
      */
     private transient Map<String, Set<PreferenceObjectListener<?>>> preferenceListeners;
-
-    /**
-     * To be used for locking when working with {@link #preferenceListeners}.
-     */
-    private transient NamedReentrantReadWriteLock listenersLock;
-
+    
     /**
      * Won't be serialized and remains <code>null</code> on the de-serializing end.
      */
     private final transient MongoObjectFactory mongoObjectFactory;
+    
     /**
      * Won't be serialized and remains <code>null</code> on the de-serializing end.
      */
@@ -186,8 +179,6 @@ public class UserStoreImpl implements UserStore {
         preferenceListeners = new HashMap<>();
         usersLock = new NamedReentrantReadWriteLock("Users", /* fair */ false);
         userGroupsLock = new NamedReentrantReadWriteLock("User Groups", /* fair */ false);
-        listenersLock = new NamedReentrantReadWriteLock(
-                UserStoreImpl.class.getSimpleName() + " lock for listeners collection", false);
         preferenceLock = new NamedReentrantReadWriteLock("Preferences", /* fair */ false);
         this.mongoObjectFactory = mongoObjectFactory;
         if (domainObjectFactory != null) {
@@ -408,8 +399,6 @@ public class UserStoreImpl implements UserStore {
         preferenceListeners = new HashMap<>();
         usersLock = new NamedReentrantReadWriteLock("Users", /* fair */ false);
         userGroupsLock = new NamedReentrantReadWriteLock("User Groups", /* fair */ false);
-        listenersLock = new NamedReentrantReadWriteLock(
-                UserStoreImpl.class.getSimpleName() + " lock for listeners collection", false);
         preferenceLock = new NamedReentrantReadWriteLock("Preferences", /* fair */ false);
     }
 
