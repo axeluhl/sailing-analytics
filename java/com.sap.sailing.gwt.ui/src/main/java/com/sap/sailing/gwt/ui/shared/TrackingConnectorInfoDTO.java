@@ -9,8 +9,8 @@ public class TrackingConnectorInfoDTO implements IsSerializable {
     private String trackingConnectorDefaultUrl;
     private String webUrl;
 
-    TrackingConnectorInfoDTO() {
-    } // GWT serialization
+    @Deprecated
+    TrackingConnectorInfoDTO() {} // GWT serialization
 
     @GwtIncompatible
     public TrackingConnectorInfoDTO(TrackingConnectorInfo trackingConnectorInfo) {
