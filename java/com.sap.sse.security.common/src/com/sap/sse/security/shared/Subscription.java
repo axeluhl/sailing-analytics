@@ -5,7 +5,8 @@ import java.io.Serializable;
 import com.sap.sse.security.shared.impl.User;
 
 /**
- * Subscription data model for user which is persisted into database as subscription property of a user
+ * Subscription data model for a {@link User} which is stored persistently together with the {@link User} object.
+ * See, e.g., {@link User#setSubscriptions(Subscription[])}.
  * 
  * @author tutran
  */
@@ -191,22 +192,21 @@ public abstract class Subscription implements Serializable {
     @Override
     public String toString() {
         final StringBuilder builder = new StringBuilder();
-        final String seperator = ", ";
-        builder.append("subscriptionId: ").append(getStringFieldValue(subscriptionId)).append(seperator)
-                .append("planId: ").append(getStringFieldValue(planId)).append(seperator).append("customerId: ")
-                .append(getStringFieldValue(customerId)).append(seperator).append("subscriptionStatus: ")
-                .append(getStringFieldValue(subscriptionStatus)).append(seperator).append("paymentStatus: ")
-                .append(getStringFieldValue(paymentStatus)).append(seperator).append("transactionType: ")
-                .append(getStringFieldValue(transactionType)).append(seperator).append("transactionStatus: ")
-                .append(getStringFieldValue(transactionStatus)).append(seperator).append("trialStart: ")
-                .append(trialStart).append(seperator).append("trialEnd: ").append(trialEnd).append(seperator)
-                .append("invoiceId: ").append(getStringFieldValue(invoiceId)).append(seperator)
-                .append("invoiceStatus: ").append(getStringFieldValue(invoiceStatus)).append(seperator)
-                .append("latestEventTime: ").append(latestEventTime).append(seperator).append("manualUpdatedAt: ")
-                .append(manualUpdatedAt).append(seperator).append("subscriptionCreatedAt: ")
-                .append(subscriptionCreatedAt).append(seperator).append("subscriptionUpdatedAt: ")
+        final String separator = ", ";
+        builder.append("subscriptionId: ").append(getStringFieldValue(subscriptionId)).append(separator)
+                .append("planId: ").append(getStringFieldValue(planId)).append(separator).append("customerId: ")
+                .append(getStringFieldValue(customerId)).append(separator).append("subscriptionStatus: ")
+                .append(getStringFieldValue(subscriptionStatus)).append(separator).append("paymentStatus: ")
+                .append(getStringFieldValue(paymentStatus)).append(separator).append("transactionType: ")
+                .append(getStringFieldValue(transactionType)).append(separator).append("transactionStatus: ")
+                .append(getStringFieldValue(transactionStatus)).append(separator).append("trialStart: ")
+                .append(trialStart).append(separator).append("trialEnd: ").append(trialEnd).append(separator)
+                .append("invoiceId: ").append(getStringFieldValue(invoiceId)).append(separator)
+                .append("invoiceStatus: ").append(getStringFieldValue(invoiceStatus)).append(separator)
+                .append("latestEventTime: ").append(latestEventTime).append(separator).append("manualUpdatedAt: ")
+                .append(manualUpdatedAt).append(separator).append("subscriptionCreatedAt: ")
+                .append(subscriptionCreatedAt).append(separator).append("subscriptionUpdatedAt: ")
                 .append(subscriptionUpdatedAt);
-
         return builder.toString();
     }
 

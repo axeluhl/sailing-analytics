@@ -3,8 +3,9 @@ package com.sap.sse.security.shared;
 import java.util.UUID;
 
 /**
- * Specify role UUID associated with a plan with qualification. Qualification can be specified by rules, such qualified
- * by subscription user, qualified by default user tenant..., or by specific user name, and/or tenant name
+ * Specify role UUID associated with a plan with qualification. Role qualification (by group/user ownership) can be
+ * specified by rules, such as qualifying for objetcs owned by the subscribing user, qualified by the subscribing user's
+ * own default group, etc. or by specific user name, and/or user group name.
  * 
  * @author Tu Tran
  */
@@ -18,14 +19,14 @@ public class SubscriptionPlanRole {
          */
         NONE,
         /**
-         * Qualified by subscription user
+         * Qualified by subscribing user
          */
         USER
     }
 
     /**
-     * Specify how role is qualified by tenant: none(unqualified), by qualified user default tenant, or by subscribed
-     * user default tenant
+     * Specify how role is qualified by user group: {@link #NONE NONE (unqualified)}, by qualified user default group
+     * (<tt>{username}-tenant</tt>), or by subscribed user default tenant
      */
     public static enum TenantQualification {
         /**

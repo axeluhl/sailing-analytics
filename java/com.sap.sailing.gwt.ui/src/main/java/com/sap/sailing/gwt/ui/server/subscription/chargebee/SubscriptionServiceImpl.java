@@ -53,7 +53,6 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-
         initPaymentService();
         initSecurityService();
     }
@@ -80,9 +79,8 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
                 logger.log(Level.SEVERE, "Error in generating Chargebee hosted page data ", e);
                 response.setError("Error in generating Chargebee hosted page");
             }
-
         } else {
-            response.setError("Invalid plan");
+            response.setError("Invalid plan: "+planId);
         }
         return response;
     }

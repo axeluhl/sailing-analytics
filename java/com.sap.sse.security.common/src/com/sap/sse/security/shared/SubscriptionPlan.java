@@ -6,14 +6,14 @@ package com.sap.sse.security.shared;
  * @author Tu Tran
  */
 public enum SubscriptionPlan {
-    STARTER("starter", "Starter",
-            new SubscriptionPlanRole[] { new SubscriptionPlanRole(PredefinedRoles.spectator.getId(),
+    STARTER("starter", "Starter", new SubscriptionPlanRole[] {
+            new SubscriptionPlanRole(PredefinedRoles.spectator.getId(),
                     SubscriptionPlanRole.TenantQualification.DEFAULT_QUALIFIED_USER_TENANT,
-                    SubscriptionPlanRole.UserQualification.USER) }), PREMIUM(
-                            "premium", "Premium",
-                            new SubscriptionPlanRole[] { new SubscriptionPlanRole(PredefinedRoles.moderator.getId(),
-                                    SubscriptionPlanRole.TenantQualification.DEFAULT_SUBSCRIBED_USER_TENANT,
-                                    SubscriptionPlanRole.UserQualification.NONE) }),;
+                    SubscriptionPlanRole.UserQualification.USER) }),
+    PREMIUM("premium", "Premium", new SubscriptionPlanRole[] {
+            new SubscriptionPlanRole(PredefinedRoles.moderator.getId(),
+                    SubscriptionPlanRole.TenantQualification.DEFAULT_SUBSCRIBED_USER_TENANT,
+                    SubscriptionPlanRole.UserQualification.NONE) });
 
     /**
      * Plan name
