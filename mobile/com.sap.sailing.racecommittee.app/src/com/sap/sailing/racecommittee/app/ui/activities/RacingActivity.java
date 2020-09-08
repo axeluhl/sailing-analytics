@@ -68,7 +68,6 @@ import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesRegattaConfigurationLoader;
 import com.sap.sailing.racecommittee.app.logging.LogEvent;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.RaceInfoFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment.RaceListCallbacks;
 import com.sap.sailing.racecommittee.app.ui.fragments.WelcomeFragment;
@@ -104,7 +103,6 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
 
     private IntentReceiver mReceiver;
     private ReadonlyDataManager dataManager;
-    private RaceInfoFragment infoFragment;
     private Wind mWind;
     private RaceListFragment mRaceList;
     private ManagedRace mSelectedRace;
@@ -346,15 +344,13 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
         if (forcedChange || mSelectedRace != managedRace) {
             preferences = AppPreferences.on(this,
                     PreferenceHelper.getRegattaPrefFileName(managedRace.getRaceGroup().getName()));
+            if (mSelectedRace != null) {
+                mSelectedRace.getState().removeChangedListener(stateChangedListener);
+            }
             mSelectedRace = managedRace;
-            infoFragment = new RaceInfoFragment();
-            infoFragment.setArguments(RaceFragment.createArguments(managedRace));
-
+            mSelectedRace.getState().addChangedListener(stateChangedListener);
             setupActionBar(managedRace);
-
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.racing_view_container, infoFragment)
-                    .commit();
+            switchToFragment();
         }
     }
 
@@ -703,6 +699,16 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
                 preferencesLoader.store();
             }
         }
+    }
+
+    private void switchToFragment() {
+        final Fragment fragment = RaceInfoFragmentChooser.choose(this, mSelectedRace);
+        ExLog.i(this, TAG, String.format("Switched to %s fragment for race %s with status %s",
+                fragment.getClass().getName(), mSelectedRace.getId(), mSelectedRace.getStatus()));
+        fragment.setArguments(RaceFragment.createArguments(mSelectedRace));
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.racing_view_container, fragment)
+                .commit();
     }
 
     private class RaceLoadClient implements LoadClient<Collection<ManagedRace>> {
