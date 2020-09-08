@@ -156,10 +156,6 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
     /**
      * Build new {@code Subscription} instance from current user subscription and webhook event
      * {@code SubscriptionWebHookEvent}
-     * 
-     * @param currentSubscription
-     * @param event
-     * @return
      */
     private Subscription buildSubscription(Subscription currentSubscription, SubscriptionWebHookEvent event) {
         String paymentStatus = null;
@@ -248,9 +244,6 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
 
     /**
      * Determine payment status value for {@code Subscription}
-     * 
-     * @param event
-     * @return
      */
     private String getEventPaymentStatus(SubscriptionWebHookEvent event) {
         String paymentStatus = null;
@@ -275,7 +268,6 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
      * 
      * @param invoiceStatus
      *            event invoice status
-     * @return
      */
     private String determinePaymentStatusFromInvoiceStatus(String invoiceStatus) {
         return invoiceStatus.equals(SubscriptionWebHookEvent.INVOICE_STATUS_PAID) ? Subscription.PAYMENT_STATUS_SUCCESS
@@ -288,7 +280,6 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
      * 
      * @param transactionStatus
      *            event transaction status
-     * @return
      */
     private String determinePaymentStatusFromTransactionStatus(String transactionStatus) {
         return transactionStatus.equals(ChargebeeSubscription.TRANSACTION_STATUS_SUCCESS)

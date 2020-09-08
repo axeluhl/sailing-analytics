@@ -503,7 +503,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         return accessControlStore.getOwnership(idOfOwnedObjectAsString);
     }
     
-    public UserGroup getDefaultTenantForUser(User user) {
+    private UserGroup getDefaultTenantForUser(User user) {
         UserGroup specificTenant = temporaryDefaultTenant.get();
         if (specificTenant == null) {
             specificTenant = user.getDefaultTenant(ServerInfo.getName());
@@ -2644,7 +2644,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     private Role[] getSubscriptionPlanUserRoles(User user, SubscriptionPlan plan) {
-        List<Role> roles = new ArrayList<Role>();
+        final List<Role> roles = new ArrayList<Role>();
         for (SubscriptionPlanRole planRole : plan.getRoles()) {
             roles.add(getSubscriptionPlanUserRole(user, planRole));
         }
@@ -2660,8 +2660,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
      * @return user role {@code Role}
      */
     private Role getSubscriptionPlanUserRole(User user, SubscriptionPlanRole planRole) {
-        User qualifiedUser = getSubscriptionPlanRoleQualifiedUser(user, planRole);
-        UserGroup qualifiedTenant = getSubscriptionPlanRoleQualifiedTenant(user, qualifiedUser, planRole);
+        final User qualifiedUser = getSubscriptionPlanRoleQualifiedUser(user, planRole);
+        final UserGroup qualifiedTenant = getSubscriptionPlanRoleQualifiedTenant(user, qualifiedUser, planRole);
         return new Role(getRoleDefinition(planRole.getRoleId()), qualifiedTenant, qualifiedUser);
     }
 
@@ -2675,14 +2675,15 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
      * @return role qualified user
      */
     private User getSubscriptionPlanRoleQualifiedUser(User user, SubscriptionPlanRole planRole) {
-        User qualifiedUser = null;
-        if (planRole.getUserQualification() != null
-                && planRole.getUserQualification() == SubscriptionPlanRole.UserQualification.USER) {
+        final User qualifiedUser;
+        if (planRole.getUserQualificationMode() != null
+                && planRole.getUserQualificationMode() == SubscriptionPlanRole.UserQualificationMode.SUBSCRIBING_USER) {
             qualifiedUser = user;
-        } else if (planRole.getUserName() != null && !planRole.getUserName().isEmpty()) {
-            qualifiedUser = getUserByName(planRole.getUserName());
+        } else if (planRole.getExplicitUserQualification() != null && !planRole.getExplicitUserQualification().isEmpty()) {
+            qualifiedUser = getUserByName(planRole.getExplicitUserQualification());
+        } else {
+            qualifiedUser = null;
         }
-
         return qualifiedUser;
     }
 
@@ -2700,30 +2701,46 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
      */
     private UserGroup getSubscriptionPlanRoleQualifiedTenant(User subscriptionUser, User qualifiedUser,
             SubscriptionPlanRole planRole) {
-        UserGroup qualifiedTenant = null;
-        SubscriptionPlanRole.TenantQualification tenantQualification = planRole.getTenantQualification();
-        if (tenantQualification != null && tenantQualification != SubscriptionPlanRole.TenantQualification.NONE) {
-            User u = null;
-            switch (tenantQualification) {
+        final UserGroup qualifiedForGroup;
+        final SubscriptionPlanRole.GroupQualificationMode groupQualificationMode = planRole.getGroupQualificationMode();
+        if (groupQualificationMode != null && groupQualificationMode != SubscriptionPlanRole.GroupQualificationMode.NONE) {
+            final User u;
+            switch (groupQualificationMode) {
             case DEFAULT_QUALIFIED_USER_TENANT:
                 if (qualifiedUser != null) {
                     u = qualifiedUser;
+                } else {
+                    u = null;
                 }
                 break;
-            case DEFAULT_SUBSCRIBED_USER_TENANT:
+            case SUBSCRIBING_USER_DEFAULT_TENANT:
                 if (subscriptionUser != null) {
                     u = subscriptionUser;
+                } else {
+                    u = null;
                 }
+                break;
             default:
+                u = null;
                 break;
             }
             if (u != null) {
-                qualifiedTenant = getDefaultTenantForUser(u);
+                // don't use the default tenant but the default tenant name to resolve the user's own default group;
+                // example: the user may have set a default object creation group (e.g., "kielerwoche2020-server") for
+                // the current server that is different from the user's own default group ("{username}-tenant"). Yet,
+                // when assigning a role based on a subscription, the "default tenant/group" has to be the user's own
+                // group, not the current object creation group that the user has currently set. Otherwise, those role
+                // assignments would be specific to a server which they shall not.
+                qualifiedForGroup = getUserGroupByName(getDefaultTenantNameForUsername(u.getName()));
+            } else {
+                qualifiedForGroup = null;
             }
-        } else if (planRole.getTenantName() != null && !planRole.getTenantName().isEmpty()) {
-            qualifiedTenant = getUserGroupByName(planRole.getTenantName());
+        } else if (planRole.getIdOfExplicitGroupQualification() != null) {
+            qualifiedForGroup = getUserGroup(planRole.getIdOfExplicitGroupQualification());
+        } else {
+            qualifiedForGroup = null;
         }
-        return qualifiedTenant;
+        return qualifiedForGroup;
     }
 
     /**

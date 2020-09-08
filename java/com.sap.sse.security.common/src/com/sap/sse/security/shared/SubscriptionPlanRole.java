@@ -13,7 +13,7 @@ public class SubscriptionPlanRole {
     /**
      * Specify how role is qualified by user: none(unqualified) or by subscription user
      */
-    public static enum UserQualification {
+    public static enum UserQualificationMode {
         /**
          * Unqualified
          */
@@ -21,14 +21,14 @@ public class SubscriptionPlanRole {
         /**
          * Qualified by subscribing user
          */
-        USER
+        SUBSCRIBING_USER
     }
 
     /**
      * Specify how role is qualified by user group: {@link #NONE NONE (unqualified)}, by qualified user default group
      * (<tt>{username}-tenant</tt>), or by subscribed user default tenant
      */
-    public static enum TenantQualification {
+    public static enum GroupQualificationMode {
         /**
          * Unqualified
          */
@@ -38,72 +38,61 @@ public class SubscriptionPlanRole {
          */
         DEFAULT_QUALIFIED_USER_TENANT,
         /**
-         * Default tenant of subscription user
+         * Default tenant of subscribing user
          */
-        DEFAULT_SUBSCRIBED_USER_TENANT
+        SUBSCRIBING_USER_DEFAULT_TENANT
     }
 
-    private UUID roleId;
-    private UserQualification userQualification;
-    private TenantQualification tenantQualification;
+    private final UUID roleId;
+    private final UserQualificationMode userQualificationMode;
+    private final GroupQualificationMode groupQualificationMode;
 
     /**
      * A specific qualified tenant name
      */
-    private String tenantName;
+    private final UUID idOfExplicitGroupQualification;
 
     /**
      * A specific qualified user name
      */
-    private String userName;
+    private final String explicitUserQualification;
 
-    public SubscriptionPlanRole(UUID roleId, TenantQualification tenantQualification,
-            UserQualification userQualification) {
-        this.roleId = roleId;
-        this.userQualification = userQualification;
-        this.tenantQualification = tenantQualification;
+    public SubscriptionPlanRole(UUID roleId, GroupQualificationMode groupQualificationMode,
+            UserQualificationMode userQualificationMode) {
+        this(roleId, groupQualificationMode, userQualificationMode, /* explicitUserQualification */ null, /* explicitGroupQualification */ null);
     }
 
-    public SubscriptionPlanRole(UUID roleId, String tenantName, UserQualification userQualification) {
+    public SubscriptionPlanRole(UUID roleId, GroupQualificationMode groupQualificationMode,
+            UserQualificationMode userQualificationMode, String explicitUserQualfication, UUID idOfExplicitGroupQualification) {
         this.roleId = roleId;
-        this.userQualification = userQualification;
-        this.tenantName = tenantName;
-    }
-
-    public SubscriptionPlanRole(UUID roleId, TenantQualification tenantQualification, String userName) {
-        this.roleId = roleId;
-        this.tenantQualification = tenantQualification;
-        this.userName = userName;
-    }
-
-    public SubscriptionPlanRole(UUID roleId, String tenantName, String userName) {
-        this.roleId = roleId;
-        this.tenantName = tenantName;
-        this.userName = userName;
+        this.userQualificationMode = userQualificationMode;
+        this.groupQualificationMode = groupQualificationMode;
+        this.explicitUserQualification = explicitUserQualfication;
+        this.idOfExplicitGroupQualification = idOfExplicitGroupQualification;
     }
 
     public SubscriptionPlanRole(UUID roleId) {
-        this.roleId = roleId;
+        this(roleId, /* groupQualificationMode */ null, /* userQualificationMode */ null, /* explicitUserQualfication */ null, /* explicitGroupQualification */ null);
     }
 
     public UUID getRoleId() {
         return roleId;
     }
 
-    public UserQualification getUserQualification() {
-        return userQualification;
+    public UserQualificationMode getUserQualificationMode() {
+        return userQualificationMode;
     }
 
-    public TenantQualification getTenantQualification() {
-        return tenantQualification;
+    public GroupQualificationMode getGroupQualificationMode() {
+        return groupQualificationMode;
     }
 
-    public String getTenantName() {
-        return tenantName;
+    public UUID getIdOfExplicitGroupQualification() {
+        return idOfExplicitGroupQualification;
     }
 
-    public String getUserName() {
-        return userName;
+    public String getExplicitUserQualification() {
+        return explicitUserQualification;
     }
 
 }

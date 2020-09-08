@@ -8,12 +8,12 @@ package com.sap.sse.security.shared;
 public enum SubscriptionPlan {
     STARTER("starter", "Starter", new SubscriptionPlanRole[] {
             new SubscriptionPlanRole(PredefinedRoles.spectator.getId(),
-                    SubscriptionPlanRole.TenantQualification.DEFAULT_QUALIFIED_USER_TENANT,
-                    SubscriptionPlanRole.UserQualification.USER) }),
+                    SubscriptionPlanRole.GroupQualificationMode.DEFAULT_QUALIFIED_USER_TENANT,
+                    SubscriptionPlanRole.UserQualificationMode.SUBSCRIBING_USER) }),
     PREMIUM("premium", "Premium", new SubscriptionPlanRole[] {
             new SubscriptionPlanRole(PredefinedRoles.moderator.getId(),
-                    SubscriptionPlanRole.TenantQualification.DEFAULT_SUBSCRIBED_USER_TENANT,
-                    SubscriptionPlanRole.UserQualification.NONE) });
+                    SubscriptionPlanRole.GroupQualificationMode.SUBSCRIBING_USER_DEFAULT_TENANT,
+                    SubscriptionPlanRole.UserQualificationMode.NONE) });
 
     /**
      * Plan name

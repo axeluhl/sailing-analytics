@@ -29,12 +29,9 @@ public class SubscriptionConfiguration {
         if (instance == null) {
             String site = System.getProperty(CHARGEBEE_SITE);
             String apiKey = System.getProperty(CHARGEBEE_APIKEY);
-
-            logger.log(Level.INFO, "Chargebee site: " + site + ", apiKey: " + apiKey);
-
+            logger.log(Level.INFO, "Chargebee site: " + site);
             instance = new SubscriptionConfiguration(site, apiKey);
         }
-
         return instance;
     }
 

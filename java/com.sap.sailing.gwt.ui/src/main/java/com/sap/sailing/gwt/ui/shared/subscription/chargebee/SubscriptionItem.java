@@ -6,11 +6,9 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 public class SubscriptionItem implements IsSerializable {
     public static final String PAYMENT_STATUS_SUCCESS = "success";
     public static final String PAYMENT_STATUS_NO_SUCCESS = "no_success";
-
     public static final String SUBSCRIPTION_STATUS_TRIAL = "in_trial";
     public static final String SUBSCRIPTION_STATUS_ACTIVE = "active";
     public static final String SUBSCRIPTION_STATUS_PAUSED = "paused";
-
     public static final String TRANSACTION_TYPE_REFUND = "refund";
 
     /**

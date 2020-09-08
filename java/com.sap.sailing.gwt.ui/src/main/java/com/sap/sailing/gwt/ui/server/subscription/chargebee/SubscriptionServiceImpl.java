@@ -116,7 +116,7 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
             updateUserSubscription(user, subscription);
             subscriptionDto = getSubscription();
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Error in saving subscription ", e);
+            logger.log(Level.SEVERE, "Error in saving subscription", e);
             subscriptionDto = new SubscriptionDTO(null, e.getMessage());
         }
         return subscriptionDto;
