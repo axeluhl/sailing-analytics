@@ -16,6 +16,8 @@ import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.xrr.schema.RegattaResults;
 
 public interface SwissTimingAdapter {
+    String NAME = "SwissTiming";
+
     List<com.sap.sailing.domain.swisstimingadapter.RaceRecord> getSwissTimingRaceRecords(String hostname, int port) throws InterruptedException, UnknownHostException, IOException, ParseException;
 
     /**

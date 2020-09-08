@@ -11,7 +11,7 @@ import com.google.gwt.resources.client.DataResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.tracking.TrackingConnectorType;
+import com.sap.sailing.domain.tractracadapter.TracTracConnectorType;
 import com.sap.sailing.gwt.ui.shared.TrackingConnectorInfoDTO;
 import com.sap.sse.gwt.shared.ClientConfiguration;
 import com.sap.sse.gwt.shared.DebugConstants;
@@ -56,7 +56,7 @@ public class DataByLogo extends Widget {
         if (trackingConnectorInfos != null && !trackingConnectorInfos.isEmpty()) {
             for (TrackingConnectorInfoDTO trackingConnectorInfo : trackingConnectorInfos) {
                 // This logic currently only supports TracTrac as ConnectorInfo
-                if (trackingConnectorInfo.getTrackingConnectorType() == TrackingConnectorType.TracTrac) {
+                if (trackingConnectorInfo.getTrackingConnectorType().name().equals(TracTracConnectorType.NAME)) {
                     potentialConnectorInfo = trackingConnectorInfo;
                     String webUrl = trackingConnectorInfo.getWebUrl();
                     if (webUrl != null && !webUrl.isEmpty()) {
@@ -70,7 +70,7 @@ public class DataByLogo extends Widget {
 
     private void setUpForConnectorType(boolean colorIfPossible, boolean enforceTextColor,
             TrackingConnectorInfoDTO trackingConnectorInfo) {
-        if (trackingConnectorInfo.getTrackingConnectorType() == TrackingConnectorType.TracTrac) {
+        if (trackingConnectorInfo.getTrackingConnectorType().name().equals(TracTracConnectorType.NAME)) {
             setUpTracTracLogo(colorIfPossible, enforceTextColor);
         }
         setUrl(trackingConnectorInfo);

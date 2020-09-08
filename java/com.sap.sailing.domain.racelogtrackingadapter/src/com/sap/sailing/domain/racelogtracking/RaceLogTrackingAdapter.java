@@ -32,6 +32,7 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.mail.MailException;
 
 public interface RaceLogTrackingAdapter {
+    String NAME = "RaceLog";
     /**
      * Performs the necessary steps to ensure that the race is tracked (aka that a {@link TrackedRace} is created from
      * the data in this {@code RaceLog}).

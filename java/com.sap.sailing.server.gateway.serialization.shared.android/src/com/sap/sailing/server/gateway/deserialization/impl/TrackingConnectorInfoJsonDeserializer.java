@@ -18,8 +18,17 @@ public class TrackingConnectorInfoJsonDeserializer implements JsonDeserializer<T
     private static final Logger logger = Logger.getLogger(TrackingConnectorInfoJsonDeserializer.class.getName());
 
     public TrackingConnectorInfo deserialize(JSONObject object) throws JsonDeserializationException {
-        final TrackingConnectorType trackingConnectorType = TrackingConnectorType
-                .valueOf((String) object.get(TrackingConnectorInfoJsonSerializer.FIELD_TRACKING_CONNECTOR_TYPE));
+        final TrackingConnectorType trackingConnectorType = new TrackingConnectorType() {
+            @Override
+            public String name() {
+                return (String) object.get(TrackingConnectorInfoJsonSerializer.FIELD_TRACKING_CONNECTOR_TYPE);
+            }
+
+            @Override
+            public String getDefaultUrl() {
+                return (String) object.get(TrackingConnectorInfoJsonSerializer.FIELD_CONNECTOR_DEFAULT_URL);
+            }
+        };
         final String webUrlString = (String) object.get(TrackingConnectorInfoJsonSerializer.FIELD_WEB_URL);
         URL webUrl;
         try {
