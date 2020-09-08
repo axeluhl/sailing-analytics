@@ -417,14 +417,16 @@ public class UserStoreImpl implements UserStore {
     public void clear() {
         LockUtil.executeWithWriteLock(usersLock, () -> {
             LockUtil.executeWithWriteLock(userGroupsLock, () -> {
-                if (mongoObjectFactory != null) {
-                    LockUtil.executeWithReadLock(usersLock, () -> users.values().forEach(mongoObjectFactory::deleteUser));
-                    LockUtil.executeWithReadLock(userGroupsLock, () -> userGroups.values().forEach(mongoObjectFactory::deleteUserGroup));
-                    roleDefinitions.values().forEach(mongoObjectFactory::deleteRoleDefinition);
-                    mongoObjectFactory.deleteAllPreferences();
-                    mongoObjectFactory.deleteAllSettings();
-                }
-                removeAll();
+                LockUtil.executeWithWriteLock(preferenceLock, () -> {
+                    if (mongoObjectFactory != null) {
+                        users.values().forEach(mongoObjectFactory::deleteUser);
+                        userGroups.values().forEach(mongoObjectFactory::deleteUserGroup);
+                        roleDefinitions.values().forEach(mongoObjectFactory::deleteRoleDefinition);
+                        mongoObjectFactory.deleteAllPreferences();
+                        mongoObjectFactory.deleteAllSettings();
+                    }
+                    removeAll();
+                });
             });
         });
     }
