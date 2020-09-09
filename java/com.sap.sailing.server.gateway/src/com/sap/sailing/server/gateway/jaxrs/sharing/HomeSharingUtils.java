@@ -21,6 +21,8 @@ import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.shared.media.ImageDescriptor;
 
 public class HomeSharingUtils {
+    private static final String HTML_COMMENT_START = "<!--";
+    private static final String HTML_COMMENT_END = "-->";
     private static final String REPLACEMENT_KEY_REDIRECT_URL_FALLBACK = "redirect_url_fallback";
     private static final String REPLACEMENT_KEY_IMAGE = "image";
     private static final String REPLACEMENT_KEY_REDIRECT_URL = "redirect_url";
@@ -33,6 +35,8 @@ public class HomeSharingUtils {
     private static final String DEFAULT_TITLE = "SAP Sailing";
     private static final String DEFAULT_DESCRIPTION = "Help sailors analyze performance and optimize strategy &#8226; Bring fans closer to the action "
             + "&#8226; Provide the media with information and insights to deliver a greater informed commentary";
+    private static final String REPLACEMENT_KEY_DISABLE_REDIRECT_START = "disable_redirect_start";
+    private static final String REPLACEMENT_KEY_DISABLE_REDIRECT_END = "disable_redirect_end";
 
     protected static String loadSharingHTML(ClassLoader classLoader, UriInfo uri) {
         try (InputStream stream = classLoader.getResourceAsStream(SHARED_PROXY_RESOURCE)) {
@@ -124,13 +128,21 @@ public class HomeSharingUtils {
     }
 
     public static Map<String, String> createReplacementMap(String title, String description,
-            String imageUrl, String placeUrl) {
+            String imageUrl, String placeUrl, String userAgent) {
         final Map<String, String> replacementMap = new HashMap<String, String>();
+        String disabledStart = "";
+        String disabledEnd = "";
+        if(userAgent != null && userAgent.contains("facebookexternalhit")) {
+            disabledStart = HTML_COMMENT_START;
+            disabledEnd = HTML_COMMENT_END;
+        }
         replacementMap.put(REPLACEMENT_KEY_TITLE, title);
         replacementMap.put(REPLACEMENT_KEY_DESCRIPTION, description);
         replacementMap.put(REPLACEMENT_KEY_DISPLAY_URL, placeUrl);
-        replacementMap.put(REPLACEMENT_KEY_REDIRECT_URL, placeUrl);
         replacementMap.put(REPLACEMENT_KEY_IMAGE, imageUrl);
+        replacementMap.put(REPLACEMENT_KEY_REDIRECT_URL, placeUrl);
+        replacementMap.put(REPLACEMENT_KEY_DISABLE_REDIRECT_START, disabledStart);
+        replacementMap.put(REPLACEMENT_KEY_DISABLE_REDIRECT_END, disabledEnd);
         replacementMap.put(REPLACEMENT_KEY_REDIRECT_URL_FALLBACK, placeUrl);
         return replacementMap;
     }

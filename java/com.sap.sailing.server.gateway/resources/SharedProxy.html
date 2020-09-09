@@ -7,7 +7,7 @@
 	    <meta property="og:image" content="${image}" />
 	    <meta property="og:url" content="${display_url}" />
 	    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-	    <meta http-equiv="refresh" content="0; url=${redirect_url}">
+	    ${disable_redirect_start}<meta http-equiv="refresh" content="0; url=${redirect_url}">${disable_redirect_end}
 	</head>
 	<body>
 	    <div>In case the redirect fails, please  <a href="${redirect_url_fallback}">click here</a>.</div>

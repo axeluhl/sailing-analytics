@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -33,7 +34,7 @@ public class HomeSharingResource extends AbstractSailingServerResource {
     @GET
     @Path("/events/{eventId}")
     @Produces("text/html")
-    public String getSharedEvent(@PathParam("eventId") String eventId) {
+    public String getSharedEvent(@HeaderParam("user-agent") String userAgent, @PathParam("eventId") String eventId) {
         RacingEventService eventService = getService();
         UUID uuid = UUID.fromString(eventId);
         final Event event = eventService.getEvent(uuid);
@@ -45,7 +46,7 @@ public class HomeSharingResource extends AbstractSailingServerResource {
             final String imageUrl = HomeSharingUtils.findTeaserImageUrl(event);
             String placeUrl = new TokenizedHomePlaceUrlBuilder(uriInfo).asEventPlaceLink(eventId);
             final Map<String, String> replacementMap = HomeSharingUtils.createReplacementMap(title,
-                    description, imageUrl, placeUrl);
+                    description, imageUrl, placeUrl, userAgent);
             String content = HomeSharingUtils.loadSharingHTML(this.getClass().getClassLoader(), uriInfo);
             return HomeSharingUtils.replaceMetatags(content, replacementMap);
         } else {
@@ -56,7 +57,8 @@ public class HomeSharingResource extends AbstractSailingServerResource {
     @GET
     @Path("/events/{eventId}/regattas/{regattaId}")
     @Produces("text/html")
-    public String getSharedRegatta(@PathParam("eventId") String eventId, @PathParam("regattaId") String regattaId) {
+    public String getSharedRegatta(@PathParam("eventId") String eventId, @PathParam("regattaId") String regattaId,
+            @HeaderParam("user-agent") String userAgent) {
         RacingEventService eventService = getService();
         SecurityService securityService = getSecurityService();
         UUID uuid = UUID.fromString(eventId);
@@ -90,7 +92,7 @@ public class HomeSharingResource extends AbstractSailingServerResource {
                 }
             }
             final Map<String, String> replacementMap = HomeSharingUtils.createReplacementMap(title,
-                    description, imageUrl, placeUrl);
+                    description, imageUrl, placeUrl, userAgent);
             final String content = HomeSharingUtils.loadSharingHTML(this.getClass().getClassLoader(), uriInfo);
             return HomeSharingUtils.replaceMetatags(content, replacementMap);
         } else {
@@ -101,7 +103,7 @@ public class HomeSharingResource extends AbstractSailingServerResource {
     @GET
     @Path("/series/{seriesId}")
     @Produces("text/html")
-    public String getSharedSeries(@PathParam("seriesId") String seriesId) {
+    public String getSharedSeries(@PathParam("seriesId") String seriesId, @HeaderParam("user-agent") String userAgent) {
         RacingEventService eventService = getService();
         SecurityService securityService = getSecurityService();
         final UUID leaderboardGroupId = UUID.fromString(seriesId);
@@ -113,7 +115,7 @@ public class HomeSharingResource extends AbstractSailingServerResource {
             final String title = HomeSharingUtils.findTitle(leaderboardGroup);
             final String placeUrl = new TokenizedHomePlaceUrlBuilder(uriInfo).asSeriesPlaceLink(seriesId);
             final Map<String, String> replacementMap = HomeSharingUtils.createReplacementMap(title,
-                    description, imageUrl, placeUrl);
+                    description, imageUrl, placeUrl, userAgent);
             final String content = HomeSharingUtils.loadSharingHTML(this.getClass().getClassLoader(), uriInfo);
             return HomeSharingUtils.replaceMetatags(content, replacementMap);
         }else {
