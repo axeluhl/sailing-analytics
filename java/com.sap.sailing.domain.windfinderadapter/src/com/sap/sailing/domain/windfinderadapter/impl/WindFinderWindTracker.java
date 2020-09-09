@@ -63,7 +63,8 @@ public class WindFinderWindTracker implements WindTracker, Runnable {
     public WindFinderWindTracker(DynamicTrackedRace trackedRace, WindFinderTrackerFactoryImpl factory) throws InterruptedException, ExecutionException {
         this.trackedRace = trackedRace;
         this.factory = factory;
-        this.allSpotCollections = factory.getReviewedSpotsCollections(/* cached */ false); // obtain fresh copy of all spots, updating cache
+        // obtain fresh copy of all spots, updating cache:
+        this.allSpotCollections = factory.getReviewedSpotsCollections(trackedRace.getTrackedRegatta().getRegatta().getRegattaIdentifier());
         this.timePointOfLastMeasurement = new WeakHashMap<>();
         this.poller = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor().scheduleAtFixedRate(this,
                 /* initialDelay */ 0, /* period */ POLL_EVERY.asMillis(), TimeUnit.MILLISECONDS);
@@ -102,7 +103,7 @@ public class WindFinderWindTracker implements WindTracker, Runnable {
         final Set<Spot> spots = new HashSet<>();
         for (final ReviewedSpotsCollection collection : allSpotCollections) {
             // TODO bug1301 judge each spot's usefulness given the location of trackedRace
-            Util.addAll(collection.getSpots(/* cached */ false), spots);
+            Util.addAll(collection.getSpots(/* cached */ true), spots);
         }
         return spots;
     }

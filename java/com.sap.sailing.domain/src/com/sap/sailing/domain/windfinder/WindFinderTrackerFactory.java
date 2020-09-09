@@ -6,14 +6,15 @@ import java.util.concurrent.ExecutionException;
 
 import org.json.simple.parser.ParseException;
 
+import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.tracking.WindTrackerFactory;
 
 public interface WindFinderTrackerFactory extends WindTrackerFactory {
 
     /**
      * Obtains the reviewed spot collections that this factory knows about. This set is constructed from the collections
-     * provided explicitly using {@link #addReviewedSpotCollection(ReviewedSpotCollection)} and
-     * {@link #removeReviewedSpotCollection(ReviewedSpotsCollection)}, and is extended by the collections obtained
+     * provided explicitly using {@code addReviewedSpotCollection(ReviewedSpotCollection)} and
+     * {@code removeReviewedSpotCollection(ReviewedSpotsCollection)}, and is extended by the collections obtained
      * through {@link #reviewedSpotsCollectionIdProvider} if a corresponding service can be resolved.
      * 
      * @param cached
@@ -23,7 +24,13 @@ public interface WindFinderTrackerFactory extends WindTrackerFactory {
      * 
      * @return a non-live set of spots collections known by this factory at this point in time
      */
-    Iterable<ReviewedSpotsCollection> getReviewedSpotsCollections(boolean cached) throws InterruptedException, ExecutionException;
+    Iterable<ReviewedSpotsCollection> getAllReviewedSpotsCollections(boolean cached) throws InterruptedException, ExecutionException;
+
+    /**
+     * Like {@link #getAllReviewedSpotsCollections(boolean)}, but never using caching, always asking the underlying provider for
+     * a fresh copy of spot collections, qualified by the regatta to which they shall apply.
+     */
+    Iterable<ReviewedSpotsCollection> getReviewedSpotsCollections(RegattaIdentifier regattaIdentifier) throws InterruptedException, ExecutionException;
 
     ReviewedSpotsCollection getReviewedSpotsCollectionById(String spotsCollectionId, boolean lookupInCache) throws InterruptedException, ExecutionException;
 
