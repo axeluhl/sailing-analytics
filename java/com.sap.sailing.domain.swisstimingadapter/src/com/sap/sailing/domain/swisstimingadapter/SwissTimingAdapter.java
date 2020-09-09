@@ -17,6 +17,7 @@ import com.sap.sailing.xrr.schema.RegattaResults;
 
 public interface SwissTimingAdapter {
     String NAME = "SwissTiming";
+    String DEFAULT_URL = null;
 
     List<com.sap.sailing.domain.swisstimingadapter.RaceRecord> getSwissTimingRaceRecords(String hostname, int port) throws InterruptedException, UnknownHostException, IOException, ParseException;
 
@@ -44,5 +45,5 @@ public interface SwissTimingAdapter {
     SwissTimingFactory getSwissTimingFactory();
 
     com.sap.sailing.domain.swisstimingadapter.DomainFactory getSwissTimingDomainFactory();
-
+    
 }

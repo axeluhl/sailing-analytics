@@ -89,8 +89,8 @@ import com.sap.sailing.domain.tractracadapter.MetadataParser.BoatMetaData;
 import com.sap.sailing.domain.tractracadapter.MetadataParser.ControlPointMetaData;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
+import com.sap.sailing.domain.tractracadapter.TracTracAdapter;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
-import com.sap.sailing.domain.tractracadapter.TracTracConnectorType;
 import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
 import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
 import com.sap.sse.common.Color;
@@ -633,11 +633,13 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public DynamicTrackedRace getOrCreateRaceDefinitionAndTrackedRace(DynamicTrackedRegatta trackedRegatta, UUID raceId,
-			String raceName, BoatClass boatClass, Map<Competitor, Boat> competitorsAndBoats, Course course, Iterable<Sideline> sidelines, WindStore windStore,
-			long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
-			DynamicRaceDefinitionSet raceDefinitionSetToUpdate, URI tracTracUpdateURI, UUID tracTracEventUuid,
-			String tracTracUsername, String tracTracPassword, boolean ignoreTracTracMarkPassings, RaceLogAndTrackedRaceResolver raceLogResolver,
-			Consumer<DynamicTrackedRace> runBeforeExposingRace, IRace tractracRace, RaceTrackingHandler raceTrackingHandler) {
+            String raceName, BoatClass boatClass, Map<Competitor, Boat> competitorsAndBoats, Course course,
+            Iterable<Sideline> sidelines, WindStore windStore, long delayToLiveInMillis,
+            long millisecondsOverWhichToAverageWind, DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
+            URI tracTracUpdateURI, UUID tracTracEventUuid, String tracTracUsername, String tracTracPassword,
+            boolean ignoreTracTracMarkPassings, RaceLogAndTrackedRaceResolver raceLogResolver,
+            Consumer<DynamicTrackedRace> runBeforeExposingRace, IRace tractracRace,
+            RaceTrackingHandler raceTrackingHandler) {
         synchronized (raceCache) {
             RaceDefinition raceDefinition = raceCache.get(raceId);
             if (raceDefinition == null) {
@@ -661,7 +663,10 @@ public class DomainFactoryImpl implements DomainFactory {
                         trackedRegatta.getRegatta().addRace(raceDefinition);
                         TrackingConnectorInfo trackingConnectorInfo = null;
                         if (tractracRace != null) {
-                            trackingConnectorInfo = new TrackingConnectorInfoImpl(new TracTracConnectorType(), tractracRace.getEvent().getWebURL());
+                            final URL webUrl = tractracRace.getEvent().getWebURL();
+                            final String webUrlString = webUrl == null ? null : webUrl.toString();
+                            trackingConnectorInfo = new TrackingConnectorInfoImpl(TracTracAdapter.NAME,
+                                    TracTracAdapter.DEFAULT_URL, webUrlString);
                         }
                         trackedRace = createTrackedRace(trackedRegatta, raceDefinition, sidelines, windStore,
                                 delayToLiveInMillis, millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate, ignoreTracTracMarkPassings,
