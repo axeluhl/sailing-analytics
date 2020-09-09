@@ -16,8 +16,10 @@ import com.sap.sse.common.TimePoint;
  *
  */
 public interface Spot extends SpotBase {
-    Wind getLatestMeasurement() throws NumberFormatException, ParseException, org.json.simple.parser.ParseException, MalformedURLException, IOException;
-
+    void addListener(WindFinderSpotListener listener);
+    
+    void removeListener(WindFinderSpotListener listener);
+    
     Iterable<Wind> getAllMeasurements() throws IOException, MalformedURLException, ParseException, org.json.simple.parser.ParseException;
 
     /**
