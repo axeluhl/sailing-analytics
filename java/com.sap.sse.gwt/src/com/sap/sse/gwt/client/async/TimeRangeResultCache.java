@@ -166,7 +166,8 @@ public class TimeRangeResultCache<SubResult> {
         public void onSuccess(SubResult result) {
             setResult(result);
             notifyActionSuccessIfHasAllResults();
-            parentSet.forEach(parent -> parent.onChildSuccess());
+            final HashSet<Request> parents = new HashSet<>(parentSet);
+            parents.forEach(parent -> parent.onChildSuccess());
         }
 
         /**
@@ -178,7 +179,7 @@ public class TimeRangeResultCache<SubResult> {
          */
         public void onFailure(Throwable caught) {
             notifyActionFailure(caught);
-            HashSet<Request> parents = new HashSet<>(parentSet); // onChildFailure will remove elements from parentSet
+            final HashSet<Request> parents = new HashSet<>(parentSet); // onChildFailure will remove elements from parentSet
             parents.forEach(parent -> parent.onChildFailure(caught));
         }
 

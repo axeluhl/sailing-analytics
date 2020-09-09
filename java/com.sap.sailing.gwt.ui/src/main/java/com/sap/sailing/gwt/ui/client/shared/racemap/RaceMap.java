@@ -597,7 +597,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
         this.raceIdentifier = raceIdentifier;
-        this.timeRangeActionsExecutor = new TimeRangeActionsExecutor<>(asyncActionsExecutor);
+        this.timeRangeActionsExecutor = new TimeRangeActionsExecutor<>();
         this.asyncActionsExecutor = asyncActionsExecutor;
         this.errorReporter = errorReporter;
         this.timer = timer;

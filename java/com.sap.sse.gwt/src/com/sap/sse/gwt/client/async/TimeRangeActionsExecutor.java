@@ -146,30 +146,9 @@ public class TimeRangeActionsExecutor<Result, SubResult, Key> {
         }
     }
 
-    /**
-     * {@link AsyncActionsExecutor} that will be used to actually execute remote procedures.
-     */
-    private final AsyncActionsExecutor executor;
-
-    /**
-     * Action category passed along to the {@link #executor}.
-     *
-     * @see AsyncActionsExecutor#execute(AsyncAction, String, AsyncCallback)
-     */
-    private final String actionCategory;
-
     private final Map<Key, TimeRangeResultCache<SubResult>> cacheMap = new HashMap<>(); //TODO Invalidation
 
-    /**
-     * Creates a new executor using a default action category {@link MarkedAsyncCallback#CATEGORY_GLOBAL}.
-     */
-    public TimeRangeActionsExecutor(AsyncActionsExecutor actionsExecutor) {
-        this(actionsExecutor, MarkedAsyncCallback.CATEGORY_GLOBAL);
-    }
-
-    public TimeRangeActionsExecutor(AsyncActionsExecutor actionsExecutor, String actionCategory) {
-        this.executor = Objects.requireNonNull(actionsExecutor);
-        this.actionCategory = actionCategory;
+    public TimeRangeActionsExecutor() {
     }
 
     /**
@@ -228,7 +207,7 @@ public class TimeRangeActionsExecutor<Result, SubResult, Key> {
                 trimmedTimeRanges.put(subRequest.getKey(), potentiallyTrimmedTimeRange);
             }
         }
-        executor.execute(cb -> action.execute(trimmedTimeRanges, cb), actionCategory, execCallback);
+        action.execute(trimmedTimeRanges, execCallback);
     }
 
     private TimeRangeResultCache<SubResult> getSubResultCache(Key key) {

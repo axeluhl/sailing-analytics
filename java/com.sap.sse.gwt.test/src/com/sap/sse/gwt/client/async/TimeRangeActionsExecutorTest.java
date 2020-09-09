@@ -20,12 +20,6 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.TimeRangeImpl;
 
 public class TimeRangeActionsExecutorTest {
-    private class MockAsyncActionsExecutor extends AsyncActionsExecutor {
-        @Override
-        public <T> void execute(AsyncAction<T> action, String category, AsyncCallback<T> callback) {
-            action.execute(callback);
-        }
-    }
 
     private class DelayedTimeRangeAsyncAction<Result, Key> implements TimeRangeAsyncAction<Result, Key> {
         private final Result result;
@@ -54,8 +48,7 @@ public class TimeRangeActionsExecutorTest {
 
     @Test
     public void testSimpleRequest() {
-        TimeRangeActionsExecutor<Map<String, Integer>, Integer, String> exec = new TimeRangeActionsExecutor<>(
-                new MockAsyncActionsExecutor());
+        TimeRangeActionsExecutor<Map<String, Integer>, Integer, String> exec = new TimeRangeActionsExecutor<>();
         final AtomicBoolean actionHasRun = new AtomicBoolean(false);
         final AtomicBoolean callbackHasRun = new AtomicBoolean(false);
         exec.execute(new TimeRangeAsyncAction<Map<String, Integer>, String>() {
@@ -113,8 +106,7 @@ public class TimeRangeActionsExecutorTest {
 
     @Test
     public void testRequestCachedResults() {
-        final TimeRangeActionsExecutor<Map<String, Integer>, Integer, String> exec = new TimeRangeActionsExecutor<>(
-                new MockAsyncActionsExecutor());
+        final TimeRangeActionsExecutor<Map<String, Integer>, Integer, String> exec = new TimeRangeActionsExecutor<>();
         final String key = "key";
         final TimeRange firstRange = TimeRangeImpl.create(10_000L, 20_000L);
         final TimeRange firstKeepAliveRange = TimeRangeImpl.create(8_000L, 12_000L);
@@ -203,8 +195,7 @@ public class TimeRangeActionsExecutorTest {
 
     @Test
     public void testOutOfOrderDelivery() {
-        TimeRangeActionsExecutor<Map<String, Integer>, Integer, String> exec = new TimeRangeActionsExecutor<>(
-                new MockAsyncActionsExecutor());
+        TimeRangeActionsExecutor<Map<String, Integer>, Integer, String> exec = new TimeRangeActionsExecutor<>();
         final AtomicBoolean callbackHasRun = new AtomicBoolean(false);
         AtomicReference<AsyncCallback<Map<String, Integer>>> lateCallback = new AtomicReference<>();
         // Fire off first request which will simulate a long round trip time
