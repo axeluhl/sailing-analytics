@@ -1,6 +1,7 @@
 package com.sap.sailing.server.gateway.jaxrs.sharing;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -12,6 +13,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.UriInfo;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Regatta;
@@ -21,24 +23,18 @@ import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.security.SecurityService;
 
-/**
- * Root resource (exposed at "helloworld" path)
- */
 @Path("/home")
 public class HomeSharingResource extends AbstractSailingServerResource {
 
     @Context
     private HttpServletRequest request;
+    
+    @Context
+    UriInfo uri;
 
-    /** Creates a new instance of HelloWorld */
     public HomeSharingResource() {
     }
 
-    /**
-     * Retrieves representation of an instance of helloWorld.HelloWorld
-     * 
-     * @return an instance of java.lang.String
-     */
     @GET
     @Path("/events/{eventId}")
     @Produces("text/html")
@@ -56,6 +52,7 @@ public class HomeSharingResource extends AbstractSailingServerResource {
             final Map<String, String> replacementMap = HomeSharingUtils.createReplacementMap(request, title,
                     description, imageUrl, placeUrl);
             String content = HomeSharingUtils.loadSharingHTML(this.getClass().getClassLoader(), request);
+            URI baseUri = uri.getBaseUri();
             return HomeSharingUtils.replaceMetatags(content, replacementMap);
         } else {
             throw new IllegalArgumentException();
