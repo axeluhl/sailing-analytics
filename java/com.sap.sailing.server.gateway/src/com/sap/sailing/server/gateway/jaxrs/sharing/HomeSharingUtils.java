@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.UriInfo;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.WithDescription;
@@ -34,12 +34,12 @@ public class HomeSharingUtils {
     private static final String DEFAULT_DESCRIPTION = "Help sailors analyze performance and optimize strategy &#8226; Bring fans closer to the action "
             + "&#8226; Provide the media with information and insights to deliver a greater informed commentary";
 
-    protected static String loadSharingHTML(ClassLoader classLoader, HttpServletRequest request) {
+    protected static String loadSharingHTML(ClassLoader classLoader, UriInfo uri) {
         try (InputStream stream = classLoader.getResourceAsStream(SHARED_PROXY_RESOURCE)) {
             String content = readInputStreamToString(stream);
             return content;
         } catch (Exception e) {
-            logger.log(Level.WARNING, "could not process or read resource " + request.getPathInfo(), e);
+            logger.log(Level.WARNING, "could not process or read resource " + uri.getPath(true), e);
             return null;
         }
     }
@@ -123,7 +123,7 @@ public class HomeSharingUtils {
         return name;
     }
 
-    public static Map<String, String> createReplacementMap(HttpServletRequest request, String title, String description,
+    public static Map<String, String> createReplacementMap(String title, String description,
             String imageUrl, String placeUrl) {
         final Map<String, String> replacementMap = new HashMap<String, String>();
         replacementMap.put(REPLACEMENT_KEY_TITLE, title);

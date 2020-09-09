@@ -1,13 +1,11 @@
 package com.sap.sailing.server.gateway.jaxrs.sharing;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.UUID;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -25,12 +23,9 @@ import com.sap.sse.security.SecurityService;
 
 @Path("/home")
 public class HomeSharingResource extends AbstractSailingServerResource {
-
-    @Context
-    private HttpServletRequest request;
     
     @Context
-    UriInfo uri;
+    UriInfo uriInfo;
 
     public HomeSharingResource() {
     }
@@ -48,11 +43,10 @@ public class HomeSharingResource extends AbstractSailingServerResource {
             final String title = event.getName();
             final String description = HomeSharingUtils.findDescription(event);
             final String imageUrl = HomeSharingUtils.findTeaserImageUrl(event);
-            String placeUrl = new TokenizedHomePlaceUrl(request).asEventPlaceLink(eventId);
-            final Map<String, String> replacementMap = HomeSharingUtils.createReplacementMap(request, title,
+            String placeUrl = new TokenizedHomePlaceUrlBuilder(uriInfo).asEventPlaceLink(eventId);
+            final Map<String, String> replacementMap = HomeSharingUtils.createReplacementMap(title,
                     description, imageUrl, placeUrl);
-            String content = HomeSharingUtils.loadSharingHTML(this.getClass().getClassLoader(), request);
-            URI baseUri = uri.getBaseUri();
+            String content = HomeSharingUtils.loadSharingHTML(this.getClass().getClassLoader(), uriInfo);
             return HomeSharingUtils.replaceMetatags(content, replacementMap);
         } else {
             throw new IllegalArgumentException();
@@ -71,7 +65,7 @@ public class HomeSharingResource extends AbstractSailingServerResource {
             securityService.checkCurrentUserReadPermission(event);
             final String description = HomeSharingUtils.findDescription(event);
             final String imageUrl = HomeSharingUtils.findTeaserImageUrl(event);
-            TokenizedHomePlaceUrl baseUrl = new TokenizedHomePlaceUrl(request);
+            TokenizedHomePlaceUrlBuilder baseUrl = new TokenizedHomePlaceUrlBuilder(uriInfo);
             String placeUrl = baseUrl.getBaseUrl().toString();
             String title;
             String decodedRegattaId;
@@ -95,9 +89,9 @@ public class HomeSharingResource extends AbstractSailingServerResource {
                     throw new IllegalArgumentException();
                 }
             }
-            final Map<String, String> replacementMap = HomeSharingUtils.createReplacementMap(request, title,
+            final Map<String, String> replacementMap = HomeSharingUtils.createReplacementMap(title,
                     description, imageUrl, placeUrl);
-            final String content = HomeSharingUtils.loadSharingHTML(this.getClass().getClassLoader(), request);
+            final String content = HomeSharingUtils.loadSharingHTML(this.getClass().getClassLoader(), uriInfo);
             return HomeSharingUtils.replaceMetatags(content, replacementMap);
         } else {
             throw new IllegalArgumentException();
@@ -117,10 +111,10 @@ public class HomeSharingResource extends AbstractSailingServerResource {
             final String description = HomeSharingUtils.findDescription(leaderboardGroup);
             final String imageUrl = HomeSharingUtils.findTeaserImageUrl(leaderboardGroup, eventService);
             final String title = HomeSharingUtils.findTitle(leaderboardGroup);
-            final String placeUrl = new TokenizedHomePlaceUrl(request).asSeriesPlaceLink(seriesId);
-            final Map<String, String> replacementMap = HomeSharingUtils.createReplacementMap(request, title,
+            final String placeUrl = new TokenizedHomePlaceUrlBuilder(uriInfo).asSeriesPlaceLink(seriesId);
+            final Map<String, String> replacementMap = HomeSharingUtils.createReplacementMap(title,
                     description, imageUrl, placeUrl);
-            final String content = HomeSharingUtils.loadSharingHTML(this.getClass().getClassLoader(), request);
+            final String content = HomeSharingUtils.loadSharingHTML(this.getClass().getClassLoader(), uriInfo);
             return HomeSharingUtils.replaceMetatags(content, replacementMap);
         }else {
             throw new IllegalArgumentException();

@@ -1,11 +1,12 @@
 package com.sap.sailing.server.gateway.jaxrs.sharing;
 
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 
-import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.UriInfo;
 
-public class TokenizedHomePlaceUrl {
+public class TokenizedHomePlaceUrlBuilder {
     private static final String EVENT_PATH = "/event";
     private static final String SERIES_PATH = "/series";
     private static final String REGATTA_OVERVIEW_PATH = "/regatta/overview";
@@ -20,10 +21,11 @@ public class TokenizedHomePlaceUrl {
     private URL baseUrl;
     private boolean tokenPresent;
 
-    public TokenizedHomePlaceUrl(HttpServletRequest request) {
+    public TokenizedHomePlaceUrlBuilder(UriInfo uri) {
+        URI baseUri = uri.getBaseUri();
+        String cleanedUri = baseUri.toString().replace(baseUri.getPath(), "");
         try {
-            baseUrl = new URL(request.getScheme(), request.getServerName(), request.getServerPort(),
-                    GWT_PREFIX + HOME_HTML);
+            baseUrl = new URL(cleanedUri + GWT_PREFIX + HOME_HTML);
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
