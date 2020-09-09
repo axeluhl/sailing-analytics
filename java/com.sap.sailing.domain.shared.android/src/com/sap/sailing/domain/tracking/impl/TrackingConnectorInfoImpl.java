@@ -1,34 +1,38 @@
 package com.sap.sailing.domain.tracking.impl;
 
-import java.net.URL;
-
-import com.sap.sailing.domain.common.tracking.TrackingConnectorType;
 import com.sap.sailing.domain.tracking.TrackingConnectorInfo;
 
 public class TrackingConnectorInfoImpl implements TrackingConnectorInfo {
     private static final long serialVersionUID = 7970268841592389145L;
-    private final TrackingConnectorType trackingConnectorType;
-    private final URL webUrl;
+    private final String trackingConnectorName;
+    private final String TtackingConnectorDefaultUrl;
+    private final String webUrl;
 
-    public TrackingConnectorInfoImpl(TrackingConnectorType trackingConnectorType, URL webUrl) {
+    public TrackingConnectorInfoImpl(String trackingConnectorName, String trackingConnectorDefaultUrl,  String webUrl) {
         super();
-        this.trackingConnectorType = trackingConnectorType;
+        this.trackingConnectorName = trackingConnectorName;
+        TtackingConnectorDefaultUrl = trackingConnectorDefaultUrl;
         this.webUrl = webUrl;
     }
 
-    public TrackingConnectorType getTrackingConnectorType() {
-        return trackingConnectorType;
+    public String getTrackingConnectorDefaultUrl() {
+        return TtackingConnectorDefaultUrl;
     }
 
-    public URL getWebUrl() {
+    public String getTrackingConnectorName() {
+        return trackingConnectorName;
+    }
+
+    public String getWebUrl() {
         return webUrl;
     }
-    
+
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((trackingConnectorType == null) ? 0 : trackingConnectorType.hashCode());
+        result = prime * result + ((TtackingConnectorDefaultUrl == null) ? 0 : TtackingConnectorDefaultUrl.hashCode());
+        result = prime * result + ((trackingConnectorName == null) ? 0 : trackingConnectorName.hashCode());
         result = prime * result + ((webUrl == null) ? 0 : webUrl.hashCode());
         return result;
     }
@@ -42,10 +46,15 @@ public class TrackingConnectorInfoImpl implements TrackingConnectorInfo {
         if (getClass() != obj.getClass())
             return false;
         TrackingConnectorInfoImpl other = (TrackingConnectorInfoImpl) obj;
-        if (trackingConnectorType == null) {
-            if (other.trackingConnectorType != null)
+        if (TtackingConnectorDefaultUrl == null) {
+            if (other.TtackingConnectorDefaultUrl != null)
                 return false;
-        } else if (!trackingConnectorType.equals(other.trackingConnectorType))
+        } else if (!TtackingConnectorDefaultUrl.equals(other.TtackingConnectorDefaultUrl))
+            return false;
+        if (trackingConnectorName == null) {
+            if (other.trackingConnectorName != null)
+                return false;
+        } else if (!trackingConnectorName.equals(other.trackingConnectorName))
             return false;
         if (webUrl == null) {
             if (other.webUrl != null)
