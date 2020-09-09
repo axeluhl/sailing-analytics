@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.tractracadapter.impl;
 
 import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -269,6 +270,8 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
 
     private DynamicTrackedRace createTrackedRace(RaceDefinition race, Iterable<Sideline> sidelines,
             Consumer<DynamicTrackedRace> runAfterCreatingTrackedRace) {
+        final URL webUrl = tractracRace.getEvent().getWebURL();
+        final String webUrlString = webUrl == null ? null : webUrl.toString();
         DynamicTrackedRace trackedRace = raceTrackingHandler.createTrackedRace(getTrackedRegatta(), race, sidelines,
                 windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind,
                 /* time over which to average speed: */ race.getBoatClass()
@@ -277,7 +280,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
                 /* ThreadLocalTransporter not needed because the RaceTracker is not active on a replica */ Optional
                         .empty(),
                 new TrackingConnectorInfoImpl(TracTracAdapter.NAME, TracTracAdapter.DEFAULT_URL,
-                        tractracRace.getEvent().getWebURL().toString()));
+                        webUrlString));
         if (runAfterCreatingTrackedRace != null) {
             runAfterCreatingTrackedRace.accept(trackedRace);
         }
