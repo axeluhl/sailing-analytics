@@ -23,6 +23,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -78,6 +79,7 @@ import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.RegattaName;
+import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TargetTimeInfo;
@@ -93,6 +95,7 @@ import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonConstants;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.racelogtracking.DeviceMappingWithRegattaLogEvent;
@@ -156,6 +159,7 @@ import com.sap.sailing.server.gateway.serialization.impl.TrackedRaceJsonSerializ
 import com.sap.sailing.server.gateway.serialization.impl.WindJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
 import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
+import com.sap.sailing.server.operationaltransformation.RemoveRegatta;
 import com.sap.sailing.server.operationaltransformation.UpdateSeries;
 import com.sap.sailing.server.operationaltransformation.UpdateSpecificRegatta;
 import com.sap.sse.InvalidDateException;
@@ -178,6 +182,8 @@ import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.OwnershipAnnotation;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.util.impl.UUIDHelper;
@@ -357,6 +363,45 @@ public class RegattasResource extends AbstractSailingServerResource {
             response = Response.ok(streamingOutput(serializedRegatta)).build();
         }
         return response;
+    }
+
+    @DELETE
+    @Path("{regattaname}")
+    public Response delete(@PathParam("regattaname") String regattaName) {
+        Regatta regatta = getService().getRegattaByName(regattaName);
+        // TODO this is the same code, as the one used by the SailingServiceImpl, consolidate if an additional layer is
+        // ever wrapped around the RacingEventService
+        if (regatta != null) {
+            Set<QualifiedObjectIdentifier> objectsThatWillBeImplicitlyCleanedByRemoveRegatta = new HashSet<>();
+            objectsThatWillBeImplicitlyCleanedByRemoveRegatta.add(regatta.getIdentifier());
+            for (RaceDefinition race : regatta.getAllRaces()) {
+                TypeRelativeObjectIdentifier typeRelativeObjectIdentifier = RegattaNameAndRaceName
+                        .getTypeRelativeObjectIdentifier(regatta.getName(), race.getName());
+                QualifiedObjectIdentifier identifier = SecuredDomainType.TRACKED_RACE
+                        .getQualifiedObjectIdentifier(typeRelativeObjectIdentifier);
+                objectsThatWillBeImplicitlyCleanedByRemoveRegatta.add(identifier);
+            }
+            for (Leaderboard leaderboard : getService().getLeaderboards().values()) {
+                if (leaderboard instanceof RegattaLeaderboard) {
+                    RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
+                    if (regattaLeaderboard.getRegatta() == regatta) {
+                        objectsThatWillBeImplicitlyCleanedByRemoveRegatta.add(regattaLeaderboard.getIdentifier());
+                    }
+                }
+            }
+            // check if we can delete everything RemoveRegatta will remove
+            for (QualifiedObjectIdentifier toRemovePermissionObjects : objectsThatWillBeImplicitlyCleanedByRemoveRegatta) {
+                getSecurityService().checkCurrentUserDeletePermission(toRemovePermissionObjects);
+            }
+            // we have all permissions, execute
+            getService().apply(new RemoveRegatta(regatta.getRegattaIdentifier()));
+            // cleanup the Ownership and ACLs
+            for (QualifiedObjectIdentifier toRemovePermissionObjects : objectsThatWillBeImplicitlyCleanedByRemoveRegatta) {
+                getSecurityService().deleteAllDataForRemovedObject(toRemovePermissionObjects);
+            }
+
+        }
+        return Response.ok().build();
     }
 
     /**
@@ -2139,12 +2184,14 @@ public class RegattasResource extends AbstractSailingServerResource {
                 TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
                 Course course = trackedRace.getRace().getCourse();
                 Waypoint lastWaypoint = course.getLastWaypoint();
+
                 TimePoint timePoint = MillisecondsTimePoint.now().minus(trackedRace.getDelayToLiveInMillis());
                 final WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache = new LeaderboardDTOCalculationReuseCache(timePoint);
                 final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(timePoint, cache);
                 JSONObject jsonLiveData = new JSONObject();
                 jsonLiveData.put("name", trackedRace.getRace().getName());
                 jsonLiveData.put("regatta", regatta.getName());
+
                 if (trackedRace.getStartOfRace() != null) {
                     TimePoint startOfRace = trackedRace.getStartOfRace();
                     TimePoint now = MillisecondsTimePoint.now();
@@ -2174,6 +2221,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                     if (getSecurityService().hasCurrentUserOneOfExplicitPermissions(competitor,
                             SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS)) {
                         JSONObject jsonCompetitorInLeg = new JSONObject();
+
                         if (topN != null && topN > 0 && rank > topN) {
                             break;
                         }
@@ -2218,6 +2266,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                             if (gapToLeader != null) {
                                 jsonCompetitorInLeg.put("gapToLeader-s", roundDouble(gapToLeader.asSeconds(), 2));
                             }
+
                             Distance windwardDistanceToCompetitorFarthestAhead = currentLegOfCompetitor
                                     .getWindwardDistanceToCompetitorFarthestAhead(timePoint,
                                             WindPositionMode.LEG_MIDDLE, rankingInfo, cache);

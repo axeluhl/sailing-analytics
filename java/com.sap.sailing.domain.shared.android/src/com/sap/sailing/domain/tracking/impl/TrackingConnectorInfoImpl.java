@@ -1,43 +1,39 @@
 package com.sap.sailing.domain.tracking.impl;
 
-import java.net.URL;
-import java.util.UUID;
-
-import com.sap.sailing.domain.common.tracking.TrackingConnectorType;
 import com.sap.sailing.domain.tracking.TrackingConnectorInfo;
 
 public class TrackingConnectorInfoImpl implements TrackingConnectorInfo {
     private static final long serialVersionUID = 7970268841592389145L;
-    private final TrackingConnectorType trackingConnectorType;
-    private final URL webUrl;
-    private final UUID uuid;
+    private final String trackingConnectorName;
+    private final String TtackingConnectorDefaultUrl;
+    private final String webUrl;
 
-    public TrackingConnectorInfoImpl(TrackingConnectorType trackingConnectorType, URL webUrl, UUID itemUUID) {
+    public TrackingConnectorInfoImpl(String trackingConnectorName, String trackingConnectorDefaultUrl,  String webUrl) {
         super();
-        this.trackingConnectorType = trackingConnectorType;
+        this.trackingConnectorName = trackingConnectorName;
+        TtackingConnectorDefaultUrl = trackingConnectorDefaultUrl;
         this.webUrl = webUrl;
-        this.uuid = itemUUID;
     }
 
-    public TrackingConnectorType getTrackingConnectorType() {
-        return trackingConnectorType;
+    public String getTrackingConnectorDefaultUrl() {
+        return TtackingConnectorDefaultUrl;
     }
 
-    public URL getWebUrl() {
+    public String getTrackingConnectorName() {
+        return trackingConnectorName;
+    }
+
+    public String getWebUrl() {
         return webUrl;
-    }
-    
-    public UUID getUuid() {
-    	return uuid;
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((trackingConnectorType == null) ? 0 : trackingConnectorType.hashCode());
+        result = prime * result + ((TtackingConnectorDefaultUrl == null) ? 0 : TtackingConnectorDefaultUrl.hashCode());
+        result = prime * result + ((trackingConnectorName == null) ? 0 : trackingConnectorName.hashCode());
         result = prime * result + ((webUrl == null) ? 0 : webUrl.hashCode());
-        result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
         return result;
     }
 
@@ -50,20 +46,20 @@ public class TrackingConnectorInfoImpl implements TrackingConnectorInfo {
         if (getClass() != obj.getClass())
             return false;
         TrackingConnectorInfoImpl other = (TrackingConnectorInfoImpl) obj;
-        if (trackingConnectorType == null) {
-            if (other.trackingConnectorType != null)
+        if (TtackingConnectorDefaultUrl == null) {
+            if (other.TtackingConnectorDefaultUrl != null)
                 return false;
-        } else if (!trackingConnectorType.equals(other.trackingConnectorType))
+        } else if (!TtackingConnectorDefaultUrl.equals(other.TtackingConnectorDefaultUrl))
+            return false;
+        if (trackingConnectorName == null) {
+            if (other.trackingConnectorName != null)
+                return false;
+        } else if (!trackingConnectorName.equals(other.trackingConnectorName))
             return false;
         if (webUrl == null) {
             if (other.webUrl != null)
                 return false;
         } else if (!webUrl.equals(other.webUrl))
-            return false;
-        if (uuid == null) {
-            if (other.uuid != null)
-                return false;
-        } else if (!uuid.equals(other.uuid))
             return false;
         return true;
     }
