@@ -4944,6 +4944,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 Util.addAll(event.getWindFinderReviewedSpotsCollectionIds(), result);
             }
         }
+        logger.info("Using WindFinder spot collections "+result+" for regatta "+regattaIdentifier);
         return result;
     }
 
