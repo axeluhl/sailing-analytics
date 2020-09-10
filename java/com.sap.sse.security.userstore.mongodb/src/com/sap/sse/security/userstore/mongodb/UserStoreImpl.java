@@ -1443,4 +1443,12 @@ public class UserStoreImpl implements UserStore {
             });
         });
     }
+
+    @Override
+    public void setDefaultTennantForUserAndUpdate(User user, UserGroup newDefaultTenant, String serverName) {
+        LockUtil.executeWithWriteLock(usersLock, () -> {
+            user.setDefaultTenant(newDefaultTenant, serverName);
+            updateUser(user);
+        });
+    }
 }

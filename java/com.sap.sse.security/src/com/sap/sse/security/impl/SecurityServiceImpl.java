@@ -2415,8 +2415,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public Void internalSetDefaultTenantForServerForUser(String username, UUID defaultTenantId, String serverName) {
         User user = getUserByName(username);
         UserGroup newDefaultTenant = getUserGroup(defaultTenantId);
-        user.setDefaultTenant(newDefaultTenant, serverName);
-        store.updateUser(user);
+        store.setDefaultTennantForUserAndUpdate(user, newDefaultTenant, serverName);
         return null;
     }
     

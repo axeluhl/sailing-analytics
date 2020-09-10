@@ -108,4 +108,6 @@ public interface UserStore extends BasicUserStore {
     RoleDefinition getRoleDefinitionByPrototype(RolePrototype rolePrototype);
 
     void deleteUserGroupAndRemoveAllQualifiedRolesForUserGroup(UserGroup userGroup) throws UserGroupManagementException;
+
+    void setDefaultTennantForUserAndUpdate(User user, UserGroup newDefaultTenant, String serverName);
 }
