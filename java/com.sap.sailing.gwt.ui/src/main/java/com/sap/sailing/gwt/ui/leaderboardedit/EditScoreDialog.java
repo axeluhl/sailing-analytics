@@ -26,13 +26,14 @@ public class EditScoreDialog extends DataEntryDialog<Util.Pair<MaxPointsReason, 
         this.stringMessages = stringMessages;
         maxPointsBox = createListBox(/* isMultipleSelect */ false);
         maxPointsBox.addItem("");
-        for (MaxPointsReason maxPointsReason : MaxPointsReason.values()) {
+        for (MaxPointsReason maxPointsReason : MaxPointsReason.getLexicographicalValues()) {
             maxPointsBox.addItem(maxPointsReason.name());
         }
         if (oldMaxPointsReason == null) {
             maxPointsBox.setSelectedIndex(0);
         } else {
-            maxPointsBox.setSelectedIndex(1+Arrays.asList(MaxPointsReason.values()).indexOf(oldMaxPointsReason));
+            maxPointsBox.setSelectedIndex(
+                    1 + Arrays.asList(MaxPointsReason.getLexicographicalValues()).indexOf(oldMaxPointsReason));
         }
         totalPointsBox = createDoubleBox(/* visibleLength */ 5);
         if (oldTotalPoints != null) {
