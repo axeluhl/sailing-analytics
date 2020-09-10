@@ -22,6 +22,11 @@ public class StringListEditorCompositePO extends PageArea {
         }
         
         public void deleteValueEntry() {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             deleteButton.click();
         }
         

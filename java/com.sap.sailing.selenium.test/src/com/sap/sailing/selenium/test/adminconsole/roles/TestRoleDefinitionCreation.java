@@ -49,6 +49,7 @@ public class TestRoleDefinitionCreation extends AbstractSeleniumTest {
         final RoleDefinitionCreationAndUpdateDialogPO openUpdateDialog = findRole.openUpdateDialog();
         // The Test Permission has been added in the default role creation
         openUpdateDialog.removePermission(TEST_PERMISSION);
+        assertFalse(openUpdateDialog.isPermissionPresent(TEST_PERMISSION));
         openUpdateDialog.clickOkButtonOrThrow();
         final RoleEntryPO secondFindRole = roleManagementPanel.findRole(TEST_ROLE);
         final RoleDefinitionCreationAndUpdateDialogPO secondOpenUpdateDialog = secondFindRole.openUpdateDialog();
