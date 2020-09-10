@@ -764,7 +764,9 @@ public class UserStoreImpl implements UserStore {
     public Iterable<UserGroup> getUserGroupsOfUser(User user) {
         final Iterable<UserGroup> preResult;
         preResult = LockUtil.executeWithReadLockAndResult(userGroupsLock, () -> userGroupsContainingUser.get(user));
-        return preResult == null ? Collections.<UserGroup> emptySet() : preResult;
+        Set<UserGroup> result = new HashSet<>();
+        preResult.forEach(result::add);
+        return result;
     }
 
     private void deleteUserGroup(UserGroup userGroup) throws UserGroupManagementException {
@@ -971,7 +973,10 @@ public class UserStoreImpl implements UserStore {
             if (users.get(username) == null) {
                 throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
             }
-            return users.get(username).getRoles();
+            Iterable<Role> roles = users.get(username).getRoles();
+            Set<Role> result = new HashSet<>();
+            roles.forEach(result::add);
+            return result;
         });
     }
 
@@ -1199,12 +1204,12 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public Map<String, Object> getAllSettings() {
-        return settings;
+        return new HashMap<>(settings);
     }
 
     @Override
     public Map<String, Class<?>> getAllSettingTypes() {
-        return settingTypes;
+        return new HashMap<>(settingTypes);
     }
 
     @Override
