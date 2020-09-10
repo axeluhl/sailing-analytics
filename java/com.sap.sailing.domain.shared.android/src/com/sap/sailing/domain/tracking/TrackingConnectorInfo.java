@@ -1,10 +1,7 @@
+
 package com.sap.sailing.domain.tracking;
 
 import java.io.Serializable;
-import java.net.URL;
-import java.util.UUID;
-
-import com.sap.sailing.domain.common.tracking.TrackingConnectorType;
 
 /**
  * Identifies the tracking connector that was used to create a TrackedRace.
@@ -13,18 +10,19 @@ import com.sap.sailing.domain.common.tracking.TrackingConnectorType;
 public interface TrackingConnectorInfo extends Serializable {
     
     /**
-     * gets the {@link TrackingConnectorType} associated with the tracking technology used for the Race
+     * gets the name associated with the tracking technology used for the Race
      */
-    TrackingConnectorType getTrackingConnectorType();
+    String getTrackingConnectorName();
     
     /**
-     * gets a {@link URL} representation of the web-URL associated with the Event; 
-     * may be {@code null} if the API of the respective Tracking-Service does not provide a URL;
+     * gets a {@link String} representation of the default web-URL associated with the tracking technology used for the Race.
+     * may be {@code null} if there is none provided in the adapter.
      */
-    URL getWebUrl();
+    String getTrackingConnectorDefaultUrl();
     
     /**
-     * gets a unique identifier for the tracked race matching the one given by the provider
+     * gets a {@link String} representation of the web-URL associated with the Event. 
+     * may be {@code null} if the API of the respective Tracking-Service does not provide a URL.
      */
-    UUID getUuid();
+    String getWebUrl();
 }
