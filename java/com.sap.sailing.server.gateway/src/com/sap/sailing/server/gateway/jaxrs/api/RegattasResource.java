@@ -2184,14 +2184,12 @@ public class RegattasResource extends AbstractSailingServerResource {
                 TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
                 Course course = trackedRace.getRace().getCourse();
                 Waypoint lastWaypoint = course.getLastWaypoint();
-
                 TimePoint timePoint = MillisecondsTimePoint.now().minus(trackedRace.getDelayToLiveInMillis());
                 final WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache = new LeaderboardDTOCalculationReuseCache(timePoint);
                 final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(timePoint, cache);
                 JSONObject jsonLiveData = new JSONObject();
                 jsonLiveData.put("name", trackedRace.getRace().getName());
                 jsonLiveData.put("regatta", regatta.getName());
-
                 if (trackedRace.getStartOfRace() != null) {
                     TimePoint startOfRace = trackedRace.getStartOfRace();
                     TimePoint now = MillisecondsTimePoint.now();
@@ -2203,9 +2201,9 @@ public class RegattasResource extends AbstractSailingServerResource {
                         jsonLiveData.put("timeToStart-s", (startOfRace.asMillis() - now.asMillis()) / 1000.0);
                     }
                 }
-                JSONArray jsonCompetitors = new JSONArray();
-                List<Competitor> competitorsFromBestToWorst = trackedRace.getCompetitorsFromBestToWorst(timePoint, cache);
-                Map<Competitor, Integer> overallRankPerCompetitor = new HashMap<>();
+                final JSONArray jsonCompetitors = new JSONArray();
+                final List<Competitor> competitorsFromBestToWorst = trackedRace.getCompetitorsFromBestToWorst(timePoint, cache);
+                final Map<Competitor, Integer> overallRankPerCompetitor = new HashMap<>();
                 if (leaderboard != null) {
                     List<Competitor> overallRanking = leaderboard.getCompetitorsFromBestToWorst(timePoint, cache);
                     Integer overallRank = 1;
@@ -2220,8 +2218,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 for (Competitor competitor : competitorsFromBestToWorst) {
                     if (getSecurityService().hasCurrentUserOneOfExplicitPermissions(competitor,
                             SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS)) {
-                        JSONObject jsonCompetitorInLeg = new JSONObject();
-
+                        final JSONObject jsonCompetitorInLeg = new JSONObject();
                         if (topN != null && topN > 0 && rank > topN) {
                             break;
                         }
@@ -2264,9 +2261,10 @@ public class RegattasResource extends AbstractSailingServerResource {
                             Duration gapToLeader = currentLegOfCompetitor.getGapToLeader(timePoint,
                                     WindPositionMode.LEG_MIDDLE, rankingInfo, cache);
                             if (gapToLeader != null) {
-                                jsonCompetitorInLeg.put("gapToLeader-s", roundDouble(gapToLeader.asSeconds(), 2));
+                                final double gapToLeaderAsSeconds = gapToLeader.asSeconds();
+                                jsonCompetitorInLeg.put("gapToLeader-s",
+                                        Double.isFinite(gapToLeaderAsSeconds) ? roundDouble(gapToLeaderAsSeconds, 2) : null);
                             }
-
                             Distance windwardDistanceToCompetitorFarthestAhead = currentLegOfCompetitor
                                     .getWindwardDistanceToCompetitorFarthestAhead(timePoint,
                                             WindPositionMode.LEG_MIDDLE, rankingInfo, cache);
@@ -2288,7 +2286,12 @@ public class RegattasResource extends AbstractSailingServerResource {
                     }
                 }
                 jsonLiveData.put("competitors", jsonCompetitors);
-                return Response.ok(streamingOutput(jsonLiveData)).build();
+                try {
+                    return Response.ok(streamingOutput(jsonLiveData)).build();
+                } catch (Exception e) {
+                    logger.log(Level.SEVERE, "Exception trying to obtain live data", e);
+                    throw e;
+                }
             }
         }
         return response;
