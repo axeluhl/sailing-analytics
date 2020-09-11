@@ -3,7 +3,7 @@
 	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
 	<ui:with field="local_res" type="com.sap.sailing.gwt.home.mobile.partials.sharing.SharingButtonsResources" />
-  	<g:HTMLPanel ui:field="htmlPanel" addStyleNames="{local_res.css.eventheader_sharing_container} {local_res.css.eventheader_sharing_faded_out}">
+  	<g:HTMLPanel ui:field="htmlPanel" addStyleNames="{local_res.css.eventheader_sharing_container} {local_res.css.eventheader_sharing_faded_in}">
     	<g:Button ui:field="shareButton" title="{i18n.sharingCopyToClipBoardTooltip}"
     			addStyleNames="{local_res.css.eventheader_sharing_item} {local_res.css.eventheader_sharing_itemshare}"></g:Button>
     	<g:Button ui:field="copyToClipBoard" title="{i18n.sharingCopyToClipBoardTooltip}"

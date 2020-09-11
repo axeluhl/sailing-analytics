@@ -97,6 +97,7 @@ public class SharingButtons extends Composite {
                 fadeOutSharingButtonsTimer.schedule(1500);
             }
         });
+        fadeOutSharingButtonsTimer.schedule(2000);
     }
 
     public static native void copyToClipboard(String text) /*-{
