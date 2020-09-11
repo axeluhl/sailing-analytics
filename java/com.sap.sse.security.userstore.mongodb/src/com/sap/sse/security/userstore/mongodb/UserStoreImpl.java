@@ -764,11 +764,10 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public Iterable<UserGroup> getUserGroupsOfUser(User user) {
-        final Iterable<UserGroup> preResult;
-        preResult = LockUtil.executeWithReadLockAndResult(userGroupsLock, () -> userGroupsContainingUser.get(user));
-        Set<UserGroup> result = new HashSet<>();
-        preResult.forEach(result::add);
-        return result;
+        return LockUtil.executeWithReadLockAndResult(userGroupsLock, () -> {
+            final Set<UserGroup> userGroups = userGroupsContainingUser.get(user);
+            return userGroups == null ? Collections.emptySet() : new HashSet<>(userGroups);
+        });
     }
 
     private void deleteUserGroup(UserGroup userGroup) throws UserGroupManagementException {
