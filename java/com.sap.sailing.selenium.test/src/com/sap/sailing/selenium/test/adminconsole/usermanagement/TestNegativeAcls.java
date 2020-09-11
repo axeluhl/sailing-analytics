@@ -295,13 +295,13 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         // // this is expected to fail because the negative ACL on the event
         // // causes user2 to not have all permissions implied by the permission
         // updateDialog.clickOkButtonAndExpectPermissionError();
-        
-        roleDefinitions = changeUserAndReloadAdminConsole(USER3_NAME).goToRoleDefinitions();
-        updateDialog = roleDefinitions.findRole(CUSTOM_ROLE).openUpdateDialog();
-        updateDialog.removePermission(eventAllPermission);
-        // in this case, it works because user3 isn't affected by the negative ACL
-        updateDialog.clickOkButtonOrThrow();
-        assertFalse(roleDefinitions.findRole(CUSTOM_ROLE).getPermissions().contains(eventAllPermission));
+        //
+        // roleDefinitions = changeUserAndReloadAdminConsole(USER3_NAME).goToRoleDefinitions();
+        // updateDialog = roleDefinitions.findRole(CUSTOM_ROLE).openUpdateDialog();
+        // updateDialog.removePermission(eventAllPermission);
+        // // in this case, it works because user3 isn't affected by the negative ACL
+        // updateDialog.clickOkButtonOrThrow();
+        // assertFalse(roleDefinitions.findRole(CUSTOM_ROLE).getPermissions().contains(eventAllPermission));
     }
     
     @Test
@@ -344,13 +344,13 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         // // this is expected to fail because the negative ACL on the event
         // // causes user2 to not have all permissions implied by the permission
         // updateDialog.clickOkButtonAndExpectPermissionError();
-        
-        roleDefinitions = changeUserAndReloadAdminConsole(USER3_NAME).goToRoleDefinitions();
-        updateDialog = roleDefinitions.findRole(CUSTOM_ROLE).openUpdateDialog();
-        updateDialog.removePermission(eventAllPermission);
-        // in this case, it works because user3 isn't affected by the negative ACL
-        updateDialog.clickOkButtonOrThrow();
-        assertFalse(roleDefinitions.findRole(CUSTOM_ROLE).getPermissions().contains(eventAllPermission));
+        //
+        // roleDefinitions = changeUserAndReloadAdminConsole(USER3_NAME).goToRoleDefinitions();
+        // updateDialog = roleDefinitions.findRole(CUSTOM_ROLE).openUpdateDialog();
+        // updateDialog.removePermission(eventAllPermission);
+        // // in this case, it works because user3 isn't affected by the negative ACL
+        // updateDialog.clickOkButtonOrThrow();
+        // assertFalse(roleDefinitions.findRole(CUSTOM_ROLE).getPermissions().contains(eventAllPermission));
     }
     
     private void addRUDForAllToAcl(AclPopupPO aclPopup) {
