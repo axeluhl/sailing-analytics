@@ -290,7 +290,7 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
         private void updateDateButton(final Calendar calendar) {
             if (mDateButton != null) {
                 final long millis = calendar.getTimeInMillis();
-                CharSequence text = DateUtils.formatDateTime(requireContext(), millis, 0);
+                CharSequence text = DateUtils.formatDateTime(requireContext(), millis, DateUtils.FORMAT_ABBREV_ALL);
                 if (DateUtils.isToday(millis)) {
                     text = TextUtils.concat(getText(R.string.today), ", ", text);
                 }

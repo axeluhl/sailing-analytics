@@ -735,7 +735,7 @@ public class StartTimeFragment extends BaseFragment
 
     private void updateDateButton() {
         if (mDateButton != null) {
-            CharSequence text = DateUtils.formatDateTime(requireContext(), mStartTime.asMillis(), 0);
+            CharSequence text = DateUtils.formatDateTime(requireContext(), mStartTime.asMillis(), DateUtils.FORMAT_ABBREV_ALL);
             if (DateUtils.isToday(mStartTime.asMillis())) {
                 text = TextUtils.concat(getText(R.string.today), ", ", text);
             }
