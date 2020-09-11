@@ -294,8 +294,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
 
         requireFragmentManager().beginTransaction()
                 .replace(R.id.racing_view_container, fragment)
-                .addToBackStack(null)
-                .commitAllowingStateLoss();
+                .commit();
     }
 
     @Override

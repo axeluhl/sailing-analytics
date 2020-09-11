@@ -141,12 +141,10 @@ public abstract class BasePanelFragment extends RaceFragment {
 
     protected void resetFragment(View lockIcon, @IdRes int idRes, Class<? extends BaseFragment> cls) {
         if (lockIcon != null && lockIcon.getVisibility() == View.VISIBLE) {
-            if (getFragmentManager() != null) {
-                Fragment fragment = getFragmentManager().findFragmentById(idRes);
-                if (fragment != null) {
-                    if (TextUtils.equals(cls.getCanonicalName(), fragment.getClass().getCanonicalName())) {
-                        sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
-                    }
+            Fragment fragment = requireFragmentManager().findFragmentById(idRes);
+            if (fragment != null) {
+                if (TextUtils.equals(cls.getCanonicalName(), fragment.getClass().getCanonicalName())) {
+                    sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
                 }
             }
         }
@@ -154,7 +152,7 @@ public abstract class BasePanelFragment extends RaceFragment {
 
     protected void resetFragment(boolean isLocked, @IdRes int idRes, Class<? extends BaseFragment> cls) {
         if (isLocked && getFragmentManager() != null) {
-            Fragment fragment = getFragmentManager().findFragmentById(idRes);
+            Fragment fragment = requireFragmentManager().findFragmentById(idRes);
             if (fragment != null) {
                 if (TextUtils.equals(cls.getCanonicalName(), fragment.getClass().getCanonicalName())) {
                     sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
@@ -173,15 +171,10 @@ public abstract class BasePanelFragment extends RaceFragment {
             args.putAll(fragment.getArguments());
         }
         fragment.setArguments(args);
-        FragmentManager manager = getFragmentManager();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            if (getParentFragment() != null) {
-                manager = getActivity().getSupportFragmentManager();
-            }
-        }
-        FragmentTransaction transaction = manager.beginTransaction();
-        if (idRes != R.id.race_content) {
-            Fragment frag = manager.findFragmentById(R.id.race_content);
+        final FragmentManager fragmentManager = requireFragmentManager();
+        final FragmentTransaction transaction = fragmentManager.beginTransaction();
+        if (idRes == R.id.race_edit) {
+            Fragment frag = fragmentManager.findFragmentById(R.id.race_content);
             if (frag != null) {
                 transaction.remove(frag);
             }

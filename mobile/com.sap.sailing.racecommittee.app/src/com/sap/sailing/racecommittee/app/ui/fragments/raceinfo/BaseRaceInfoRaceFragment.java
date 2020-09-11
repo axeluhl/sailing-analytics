@@ -76,7 +76,7 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
                 args.putAll(fragment.getArguments());
             }
             fragment.setArguments(args);
-            getChildFragmentManager().beginTransaction()
+            requireFragmentManager().beginTransaction()
                     .replace(id, fragment)
                     .commit();
         }

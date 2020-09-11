@@ -594,7 +594,7 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
             if (parentFragment == null) {
                 return;
             }
-            final FragmentManager fragmentManager = parentFragment.getChildFragmentManager();
+            final FragmentManager fragmentManager = getSupportFragmentManager();
             final FragmentTransaction transaction = fragmentManager.beginTransaction();
 
             if (AppConstants.ACTION_SHOW_MAIN_CONTENT.equals(action)) {

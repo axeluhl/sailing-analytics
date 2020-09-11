@@ -2,7 +2,6 @@ package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
@@ -323,10 +322,9 @@ public class CourseFragmentMarks extends CourseFragment
     }
 
     public void showMarkDialog(int type, CourseListDataElementWithIdImpl element) {
-        FragmentManager manager = getActivity().getSupportFragmentManager();
         mMarksDialog = CourseMarksDialogFragment.newInstance(mMarks, element, type);
         mMarksDialog.setListener(this);
-        mMarksDialog.show(manager, "course_marks");
+        mMarksDialog.show(requireFragmentManager(), "course_marks");
     }
 
     @Override

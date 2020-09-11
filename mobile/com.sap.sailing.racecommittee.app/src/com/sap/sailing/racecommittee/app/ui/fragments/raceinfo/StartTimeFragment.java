@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
@@ -780,10 +779,6 @@ public class StartTimeFragment extends BaseFragment
         int viewId = R.id.racing_view_container;
         TimePoint now = MillisecondsTimePoint.now();
         RaceFragment fragment = MainScheduleFragment.newInstance();
-        Bundle args = getRecentArguments();
-        RacingProcedureType procedureType = getRaceState().getTypedRacingProcedure().getType();
-        getRaceState().setRacingProcedure(now, procedureType);
-        FragmentTransaction transaction = requireFragmentManager().beginTransaction();
         if (getArguments() != null && startTime != null) {
             if (getArguments().getInt(START_MODE, START_MODE_PRESETUP) != START_MODE_PRESETUP) {
                 if (startTimeDiff == null && identifier == null) {
@@ -793,8 +788,8 @@ public class StartTimeFragment extends BaseFragment
                     // relative start time
                     getRaceState().forceNewDependentStartTime(now, startTimeDiff, identifier, mDataStore.getCourseAreaId());
                 }
-                fragment = RaceFlagViewerFragment.newInstance();
                 viewId = R.id.race_content;
+                fragment = RaceFlagViewerFragment.newInstance();
             }
             args.putAll(getArguments());
             if (startTimeDiff == null) {
@@ -805,8 +800,9 @@ public class StartTimeFragment extends BaseFragment
             }
         }
         fragment.setArguments(args);
-        transaction.replace(viewId, fragment);
-        transaction.commit();
+        requireFragmentManager().beginTransaction()
+                .replace(viewId, fragment)
+                .commit();
         sendIntent(AppConstants.ACTION_CLEAR_TOGGLE);
         if (requireActivity().findViewById(R.id.race_edit) != null) {
             sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);

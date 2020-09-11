@@ -47,12 +47,7 @@ public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingPro
 
         final ViewPager pager = ViewHelper.get(layout, R.id.panels_pager);
         if (pager != null) {
-            PanelsAdapter adapter;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                adapter = new PanelsAdapter(getChildFragmentManager(), getArguments());
-            } else {
-                adapter = new PanelsAdapter(getFragmentManager(), getArguments());
-            }
+            final PanelsAdapter adapter = new PanelsAdapter(requireFragmentManager(), getArguments());
             pager.setAdapter(adapter);
             pager.addOnPageChangeListener(new ViewPagerChangeListener(this));
             markDot(0);

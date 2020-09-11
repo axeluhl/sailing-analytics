@@ -244,7 +244,7 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
                 case R.id.date_button: {
                     final Object tag = mDateButton.getTag();
                     final Calendar time = tag instanceof Calendar ? (Calendar) tag : Calendar.getInstance();
-                    TimeUtils.showDatePickerDialog(getChildFragmentManager(), time, mEvent);
+                    TimeUtils.showDatePickerDialog(requireFragmentManager(), time, mEvent);
                     break;
                 }
                 case R.id.finish_custom: {
