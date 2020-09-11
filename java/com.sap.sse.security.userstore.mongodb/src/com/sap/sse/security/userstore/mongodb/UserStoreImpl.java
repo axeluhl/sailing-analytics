@@ -802,7 +802,7 @@ public class UserStoreImpl implements UserStore {
             throws UserManagementException {
         return LockUtil.executeWithWriteLockAndResultExpectException(usersLock, () -> {
             checkUsernameUniqueness(name);
-            final Map<String, UserGroup> tenantsForServer = new HashMap<>();
+            final Map<String, UserGroup> tenantsForServer = new ConcurrentHashMap<>();
             final User user = new UserImpl(name, email, tenantsForServer, /* user group provider */ this, accounts);
             logger.info("Creating user: " + user + " with e-mail " + email);
             addAndStoreUserInternal(user);
