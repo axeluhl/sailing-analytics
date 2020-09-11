@@ -5,7 +5,9 @@ import static com.sap.sailing.selenium.api.core.ApiContext.SERVER_CONTEXT;
 import static com.sap.sailing.selenium.api.core.ApiContext.createAdminApiContext;
 import static com.sap.sailing.selenium.api.core.ApiContext.createApiContext;
 import static java.lang.System.currentTimeMillis;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.UUID;
 
@@ -49,6 +51,51 @@ public class MarkApiTest extends AbstractSeleniumTest {
 
         assertNotNull("Mark result should not be null", mark);
         assertNotNull("Id of created mark should not be null", mark.getMarkId());
+    }
+
+    @Test(expected = HttpException.class)
+    public void testRevokeMarkOnRegattaMarkNotFound() {
+        final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
+        eventApi.createEvent(ctx, EVENT_NAME, BOAT_CLASS, CompetitorRegistrationType.CLOSED, "default");
+        final Regatta regatta = regattaApi.getRegatta(ctx, EVENT_NAME);
+        final RaceColumn race = regattaApi.addRaceColumn(ctx, EVENT_NAME, null, 1)[0];
+        try {
+            markApi.revokeMarkOnRegatta(ctx, "blah", race.getRaceName(), "Default", UUID.randomUUID());
+            assertFalse(true);
+        } catch (HttpException e) {
+            assertTrue(e.getMessage().contains("Could not find a regatta with name"));
+        }
+        try {
+            markApi.revokeMarkOnRegatta(ctx, regatta.getName(), "Blub", "Default", UUID.randomUUID());
+            assertFalse(true);
+        } catch (HttpException e) {
+            assertTrue(e.getMessage().contains("Could not find a race with raceColumn"));
+        }
+        try {
+            markApi.revokeMarkOnRegatta(ctx, regatta.getName(), race.getRaceName(), "Blume", UUID.randomUUID());
+            assertFalse(true);
+        } catch (HttpException e) {
+            assertTrue(e.getMessage().contains("Could not find a race with raceColumn"));
+        }
+        try {
+            markApi.revokeMarkOnRegatta(ctx, regatta.getName(), race.getRaceName(), "Default", UUID.randomUUID());
+            assertFalse(true);
+        } catch (HttpException e) {
+            assertTrue(e.getMessage().contains("Could not find a mark with id"));
+            throw e;
+        }
+        assertFalse(true);
+    }
+
+    @Test
+    public void testRevokeMarkOnRegatta() {
+        final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
+        eventApi.createEvent(ctx, EVENT_NAME, BOAT_CLASS, CompetitorRegistrationType.CLOSED, "default");
+        final Regatta regatta = regattaApi.getRegatta(ctx, EVENT_NAME);
+        final Mark mark = markApi.addMarkToRegatta(ctx, regatta.getName(), "Startboat");
+        final RaceColumn race = regattaApi.addRaceColumn(ctx, EVENT_NAME, null, 1)[0];
+        markApi.revokeMarkOnRegatta(ctx, regatta.getName(),
+                race.getRaceName(), "Default", mark.getMarkId());
     }
 
     @Test

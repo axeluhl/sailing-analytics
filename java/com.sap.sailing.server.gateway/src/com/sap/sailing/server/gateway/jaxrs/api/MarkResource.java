@@ -1,6 +1,7 @@
 package com.sap.sailing.server.gateway.jaxrs.api;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -25,11 +26,14 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.ParseException;
 
+import com.sap.sailing.domain.abstractlog.impl.AllEventsOfTypeFinder;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseDesignChangedEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDefineMarkEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDefineMarkEventImpl;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
@@ -97,6 +101,42 @@ public class MarkResource extends AbstractSailingServerResource {
     private static final String ORIGINATING_COURSE_TEMPLATE_ID = "originatingCourseTemplateId";
 
     private static final Logger LOG = Logger.getLogger(MarkResource.class.getName());
+
+    private Response getBadRaceErrorResponse(String regattaName, String raceColumn, String fleet) {
+        return Response.status(Status.NOT_FOUND)
+                .entity("Could not find a race with raceColumn '" + StringEscapeUtils.escapeHtml(raceColumn)
+                        + "' and fleet '" + StringEscapeUtils.escapeHtml(fleet) + "' in regatta '"
+                        + StringEscapeUtils.escapeHtml(regattaName) + "'.")
+                .type(MediaType.TEXT_PLAIN).build();
+    }
+
+    private Response getBadRegattaErrorResponse(String regattaName) {
+        return Response.status(Status.NOT_FOUND).entity("Could not find a regatta with name '" + StringEscapeUtils.escapeHtml(regattaName) + "'.")
+                .type(MediaType.TEXT_PLAIN).build();
+    }
+
+    private Response getBadMarkErrorResponse(String regattaName, String raceName, String markId) {
+        return Response.status(Status.NOT_FOUND)
+                .entity("Could not find a mark with id '" + StringEscapeUtils.escapeHtml(markId) 
+                + "' in regatta '" + StringEscapeUtils.escapeHtml(regattaName)
+                + "' and race '" + StringEscapeUtils.escapeHtml(raceName) + "'.")
+                .type(MediaType.TEXT_PLAIN).build();
+    }
+
+    private Response getNoLogFoundErrorResponse(String regattaName) {
+        return Response.status(Status.NOT_FOUND)
+                .entity("No log found for regatta '" + StringEscapeUtils.escapeHtml(regattaName) + "'.")
+                .type(MediaType.TEXT_PLAIN).build();
+    }
+
+    private Response getConflictingMarkErrorResponse(String markId, String raceNames) {
+        return Response.status(Status.CONFLICT)
+                .entity("Mark with id '" + StringEscapeUtils.escapeHtml(markId) 
+                + "' is already used in race " + StringEscapeUtils.escapeHtml(raceNames)
+                + ".")
+                .type(MediaType.TEXT_PLAIN).build();
+    }
+
     @POST
     @Path("/addMarkToRegatta")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -157,6 +197,58 @@ public class MarkResource extends AbstractSailingServerResource {
             response = Response.ok(streamingOutput(answer)).build();
         }
         return response;
+    }
+    
+    @POST
+    @Path("/revokeMarkOnRegatta")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces("application/json;charset=UTF-8")
+    public Response revokeMarkOnRegatta(String json) throws ParseException, JsonDeserializationException, DoesNotHaveRegattaLogException {
+        Object requestBody = JSONValue.parseWithException(json);
+        JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
+        String regattaName = (String) requestObject.get(REGATTA_NAME);
+        String raceColumnName = (String) requestObject.get(RACE_COLUMN_NAME);
+        String fleetName = (String) requestObject.get(FLEET_NAME);
+        String markId = (String) requestObject.get(MARK_ID);
+        Regatta regatta = findRegattaByName(regattaName);
+        if (regatta == null) {
+            return getBadRegattaErrorResponse(regattaName);
+        }
+        getSecurityService().checkCurrentUserReadPermission(regatta);
+        final RaceColumn raceColumn = findRaceColumnByName(regatta, raceColumnName);
+        if (raceColumn == null) {
+            return getBadRaceErrorResponse(regattaName, raceColumnName, fleetName);
+        }
+        final Fleet fleet = findFleetByName(raceColumn, fleetName);
+        if (fleet == null) {
+            return getBadRaceErrorResponse(regattaName, raceColumnName, fleetName);
+        }
+        RegattaLog regattaLog = getRegattaLogInternal(regattaName);
+        final List<RegattaLogEvent> regattaLogDefineMarkEvents = new AllEventsOfTypeFinder<>(regattaLog,
+                /* only unrevoked */ true, RegattaLogDefineMarkEvent.class).analyze();
+        String markIdToRevoke = null;
+        for (RegattaLogEvent event : regattaLogDefineMarkEvents) {
+            RegattaLogDefineMarkEvent defineMarkEvent = (RegattaLogDefineMarkEvent) event;
+            if (defineMarkEvent.getMark().getId().toString().equals(markId)) {
+                markIdToRevoke = markId;
+                break;
+            }
+        }
+        if (markIdToRevoke == null) {
+            return getBadMarkErrorResponse(regattaName, raceColumnName, markId);
+        }
+        Pair<Boolean, String> isMarkIsUsedInOtherRaces;
+        isMarkIsUsedInOtherRaces = getService().checkIfMarksAreUsedInOtherRaceLogs(regattaName, raceColumnName,
+                fleetName, Collections.singleton(markId));
+        if (isMarkIsUsedInOtherRaces.getA()) {
+            return getConflictingMarkErrorResponse(regattaName, isMarkIsUsedInOtherRaces.getB());
+        }
+        try {
+            getService().revokeMarkDefinitionEventInRegattaLog(regatta.getName(), markIdToRevoke);
+        } catch (DoesNotHaveRegattaLogException e) {
+            return getNoLogFoundErrorResponse(regattaName);
+        }
+        return Response.ok().build();
     }
 
     @POST
