@@ -19,7 +19,7 @@ public class DefaultErrorReporter<S extends StringMessages> implements ErrorRepo
     protected Label persistentAlertLabel;
     
     public DefaultErrorReporter(S stringMessages) {
-        this(stringMessages,true);
+        this(stringMessages, true);
     }
     
     public DefaultErrorReporter(S stringMessages, boolean showCommunicationErrorText) {
