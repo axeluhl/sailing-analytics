@@ -975,9 +975,7 @@ public class UserStoreImpl implements UserStore {
                 throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
             }
             Iterable<Role> roles = users.get(username).getRoles();
-            Set<Role> result = new HashSet<>();
-            roles.forEach(result::add);
-            return result;
+            return Util.addAll(roles, new HashSet<>());
         });
     }
 
