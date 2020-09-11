@@ -42,7 +42,6 @@ import org.apache.shiro.subject.Subject;
 import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
-import com.sap.sailing.domain.abstractlog.impl.AllEventsOfTypeFinder;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.orc.BaseORCCertificateAssignmentAnalyzer;
 import com.sap.sailing.domain.abstractlog.orc.ORCCertificateAssignmentEvent;
@@ -113,8 +112,6 @@ import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogCloseOpenEndedDeviceMappingEvent;
-import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDefineMarkEvent;
-import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDefineMarkEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceBoatMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorExpeditionExtendedMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorMappingEventImpl;
@@ -2165,31 +2162,14 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
 
     @Override
     public void addMarkToRegattaLog(String leaderboardName, MarkDTO markDTO) throws DoesNotHaveRegattaLogException {
-        getSecurityService().checkCurrentUserUpdatePermission(getService().getLeaderboardByName(leaderboardName));
         Mark mark = convertToMark(markDTO, false);
-
-        RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
-        RegattaLogDefineMarkEventImpl event = new RegattaLogDefineMarkEventImpl(MillisecondsTimePoint.now(),
-                getService().getServerAuthor(), MillisecondsTimePoint.now(), UUID.randomUUID(), mark);
-        regattaLog.add(event);
+        getService().addMarkToRegattaLog(leaderboardName, mark);
     }
 
     @Override
     public void revokeMarkDefinitionEventInRegattaLog(String leaderboardName, MarkDTO markDTO)
             throws DoesNotHaveRegattaLogException, NotFoundException {
-        getSecurityService().checkCurrentUserUpdatePermission(getLeaderboardByName(leaderboardName));
-        RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
-        final List<RegattaLogEvent> regattaLogDefineMarkEvents = new AllEventsOfTypeFinder<>(regattaLog,
-                /* only unrevoked */ true, RegattaLogDefineMarkEvent.class).analyze();
-        RegattaLogDefineMarkEvent eventToRevoke = null;
-        for (RegattaLogEvent event : regattaLogDefineMarkEvents) {
-            RegattaLogDefineMarkEvent defineMarkEvent = (RegattaLogDefineMarkEvent) event;
-            if (defineMarkEvent.getMark().getId().toString().equals(markDTO.getIdAsString())) {
-                eventToRevoke = defineMarkEvent;
-                break;
-            }
-        }
-        regattaLog.revokeDefineMarkEventAndRelatedDeviceMappings(eventToRevoke, getService().getServerAuthor(), logger);
+        getService().revokeMarkDefinitionEventInRegattaLog(leaderboardName, markDTO.getIdAsString());
     }
 
     @Override

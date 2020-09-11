@@ -5637,36 +5637,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         for (MarkDTO markDTO : marksToRemove) {
             markIds.add(markDTO.getIdAsString());
         }
-        RaceLog raceLogToIgnore = getRaceLog(leaderboardName, raceColumnName, fleetName);
-        HashSet<String> racesContainingMarksToDeleteInCourse = new HashSet<String>();
-        boolean marksAreUsedInOtherRaceLogs = false;
-        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-            for (Fleet fleet : raceColumn.getFleets()) {
-                RaceLog raceLog = raceColumn.getRaceLog(fleet);
-                if (raceLog != raceLogToIgnore) {
-                    LastPublishedCourseDesignFinder finder = new LastPublishedCourseDesignFinder(raceLog, /* onlyCoursesWithValidWaypointList */ true);
-                    CourseBase course = finder.analyze();
-                    if (course != null) {
-                        for (Waypoint waypoint : course.getWaypoints()) {
-                            for (Mark mark : waypoint.getMarks()) {
-                                if (markIds.contains(mark.getId().toString())) {
-                                    racesContainingMarksToDeleteInCourse.add(raceColumn.getName() + "/"
-                                            + fleet.getName());
-                                    marksAreUsedInOtherRaceLogs = true;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }         
-        StringBuilder racesInCollision = new StringBuilder();
-        for (String raceName : racesContainingMarksToDeleteInCourse) {
-            racesInCollision.append(raceName+", ");
-        }
-        return new Pair<Boolean, String>(marksAreUsedInOtherRaceLogs, 
-                racesInCollision.substring(0, Math.max(0, racesInCollision.length()-2)));
+        return getService().checkIfMarksAreUsedInOtherRaceLogs(leaderboardName, raceColumnName, fleetName, markIds);
     }
 
     @Override

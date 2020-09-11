@@ -90,6 +90,7 @@ import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
+import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogException;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
@@ -243,7 +244,22 @@ public class RegattasResource extends AbstractSailingServerResource {
                 .entity("Could not find a race with name '" + StringEscapeUtils.escapeHtml(raceName) + "' in regatta '" + StringEscapeUtils.escapeHtml(regattaName) + "'.")
                 .type(MediaType.TEXT_PLAIN).build();
     }
-    
+
+    private Response getBadMarkErrorResponse(String regattaName, String raceName, String markId) {
+        return Response.status(Status.NOT_FOUND)
+                .entity("Could not find a mark with id '" + StringEscapeUtils.escapeHtml(markId) 
+                + "' in regatta '" + StringEscapeUtils.escapeHtml(regattaName)
+                + "' and race '" + StringEscapeUtils.escapeHtml(raceName) + "'.")
+                .type(MediaType.TEXT_PLAIN).build();
+    }
+
+    private Response getBadCourseErrorResponse(String regattaName, String raceColumn, String fleet) {
+        return Response.status(Status.NOT_FOUND)
+                .entity("No course found for given race with raceColumn '" + StringEscapeUtils.escapeHtml(raceColumn)
+                        + "' and fleet '" + StringEscapeUtils.escapeHtml(fleet) + "' in regatta '"
+                        + StringEscapeUtils.escapeHtml(regattaName) + "'.").build();
+    }
+
     private Response getBadRaceErrorResponse(String regattaName, String raceColumn, String fleet) {
         return Response.status(Status.NOT_FOUND)
                 .entity("Could not find a race with raceColumn '" + StringEscapeUtils.escapeHtml(raceColumn)
@@ -267,6 +283,20 @@ public class RegattasResource extends AbstractSailingServerResource {
     private Response getNotEnoughDataAvailabeErrorResponse(String regattaName, String raceName) {
         return Response.status(Status.NOT_FOUND)
                 .entity("No wind or polar data for race with name '" + StringEscapeUtils.escapeHtml(raceName) + "' in regatta '" + StringEscapeUtils.escapeHtml(regattaName) + "'.")
+                .type(MediaType.TEXT_PLAIN).build();
+    }
+
+    private Response getNoLogFoundErrorResponse(String regattaName) {
+        return Response.status(Status.NOT_FOUND)
+                .entity("No log found for regatta '" + StringEscapeUtils.escapeHtml(regattaName) + "'.")
+                .type(MediaType.TEXT_PLAIN).build();
+    }
+
+    private Response getConflictingMarkErrorResponse(String markId, String raceNames) {
+        return Response.status(Status.CONFLICT)
+                .entity("Mark with id '" + StringEscapeUtils.escapeHtml(markId) 
+                + "' is already used in race " + StringEscapeUtils.escapeHtml(raceNames)
+                + ".")
                 .type(MediaType.TEXT_PLAIN).build();
     }
 
@@ -998,6 +1028,63 @@ public class RegattasResource extends AbstractSailingServerResource {
     }
 
     /**
+     * Revoke a mark, if not already used in other races.
+     */
+    @DELETE
+    @Path("{regattaname}/structure/{raceColumn}/{fleet}/marks/{markId}")
+    public Response deleteMark(@PathParam("regattaname") String regattaName,
+            @PathParam("raceColumn") String raceColumnName, @PathParam("fleet") String fleetName,
+            @PathParam("markId") String markId) {
+        Regatta regatta = findRegattaByName(regattaName);
+        if (regatta == null) {
+            return getBadRegattaErrorResponse(regattaName);
+        }
+        getSecurityService().checkCurrentUserReadPermission(regatta);
+        final RaceColumn raceColumn = findRaceColumnByName(regatta, raceColumnName);
+        final Fleet fleet = findFleetByName(raceColumn, fleetName);
+        if (raceColumn == null || fleet == null) {
+            return getBadRaceErrorResponse(regattaName, raceColumnName, fleetName);
+        }
+        final TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
+        final RaceDefinition raceDefinition = trackedRace == null ? null : trackedRace.getRace();
+        final CourseBase course;
+        if (raceDefinition != null) {
+            course = raceDefinition.getCourse();
+        } else {
+            final LastPublishedCourseDesignFinder courseDesginFinder = new LastPublishedCourseDesignFinder(
+                    raceColumn.getRaceLog(fleet), /* onlyCoursesWithValidWaypointList */ true);
+            course = courseDesginFinder.analyze();
+        }
+        if (course == null) {
+            return getBadCourseErrorResponse(regattaName, raceColumnName, fleetName);
+        }
+        Mark markToRevoke = null;
+        for (Waypoint waypoint : course.getWaypoints()) {
+            for (Mark mark : waypoint.getMarks()) {
+                if (mark.getId().equals(markId)) {
+                    markToRevoke = mark;
+                    break;
+                }
+            }
+        }
+        if (markToRevoke == null) {
+            return getBadMarkErrorResponse(regattaName, raceColumnName, markId);
+        }
+        Pair<Boolean, String> isMarkIsUsedInOtherRaces;
+        isMarkIsUsedInOtherRaces = getService().checkIfMarksAreUsedInOtherRaceLogs(regattaName, raceColumnName,
+                fleetName, Collections.singleton(markToRevoke.getId().toString()));
+        if (isMarkIsUsedInOtherRaces.getA()) {
+            return getConflictingMarkErrorResponse(regattaName, isMarkIsUsedInOtherRaces.getB());
+        }
+        try {
+            getService().revokeMarkDefinitionEventInRegattaLog(regatta.getName(), markId);
+        } catch (DoesNotHaveRegattaLogException e) {
+            return getNoLogFoundErrorResponse(regattaName);
+        }
+        return Response.ok().build();
+    }
+
+    /**
      * Gets all GPS positions of the course marks for a given race.
      * 
      * @param regattaName
@@ -1173,7 +1260,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                     course = courseDesginFinder.analyze();
                 }
                 if (course == null) {
-                    response = Response.status(Status.NOT_FOUND).entity("No course found for given race.").build();
+                    response = getBadCourseErrorResponse(regattaName, raceColumnName, fleetName);
                 } else {
                     response = getCourseResult(course, trackedRace);
                 }
