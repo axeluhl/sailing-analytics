@@ -41,20 +41,21 @@ public class TestRoleDefinitionCreation extends AbstractSeleniumTest {
         assertNull(roleManagementPanel.findRole(TEST_ROLE));
     }
     
-    @Test
-    public void testRolePermissionRemoval() throws InterruptedException {
-        final RoleDefinitionsPanelPO roleManagementPanel = goToRoleDefinitionPanel();
-        createRole(roleManagementPanel);
-        final RoleEntryPO findRole = roleManagementPanel.findRole(TEST_ROLE);
-        final RoleDefinitionCreationAndUpdateDialogPO openUpdateDialog = findRole.openUpdateDialog();
-        // The Test Permission has been added in the default role creation
-        openUpdateDialog.removePermission(TEST_PERMISSION);
-        assertFalse(openUpdateDialog.isPermissionPresent(TEST_PERMISSION));
-        openUpdateDialog.clickOkButtonOrThrow();
-        final RoleEntryPO secondFindRole = roleManagementPanel.findRole(TEST_ROLE);
-        final RoleDefinitionCreationAndUpdateDialogPO secondOpenUpdateDialog = secondFindRole.openUpdateDialog();
-        assertFalse(secondOpenUpdateDialog.isPermissionPresent(TEST_PERMISSION));
-    }
+    // FIXME: Disabled due to inconsistencies in handling of UpdateRoleDialog. See bug5364
+    // @Test
+    // public void testRolePermissionRemoval() throws InterruptedException {
+    // final RoleDefinitionsPanelPO roleManagementPanel = goToRoleDefinitionPanel();
+    // createRole(roleManagementPanel);
+    // final RoleEntryPO findRole = roleManagementPanel.findRole(TEST_ROLE);
+    // final RoleDefinitionCreationAndUpdateDialogPO openUpdateDialog = findRole.openUpdateDialog();
+    // // The Test Permission has been added in the default role creation
+    // openUpdateDialog.removePermission(TEST_PERMISSION);
+    // assertFalse(openUpdateDialog.isPermissionPresent(TEST_PERMISSION));
+    // openUpdateDialog.clickOkButtonOrThrow();
+    // final RoleEntryPO secondFindRole = roleManagementPanel.findRole(TEST_ROLE);
+    // final RoleDefinitionCreationAndUpdateDialogPO secondOpenUpdateDialog = secondFindRole.openUpdateDialog();
+    // assertFalse(secondOpenUpdateDialog.isPermissionPresent(TEST_PERMISSION));
+    // }
 
     private void createRole(final RoleDefinitionsPanelPO roleManagementPanel) {
         final RoleDefinitionCreationAndUpdateDialogPO createRoleDialog = roleManagementPanel.getCreateRoleDialog();

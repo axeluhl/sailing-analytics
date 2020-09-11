@@ -287,13 +287,14 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         updateDialog.clickOkButtonOrThrow();
         assertTrue(roleDefinitions.findRole(CUSTOM_ROLE).getPermissions().contains(eventAllPermission));
         
-        // user2 tries to remove a permission from custom-role
-        roleDefinitions = changeUserAndReloadAdminConsole(USER2_NAME).goToRoleDefinitions();
-        updateDialog = roleDefinitions.findRole(CUSTOM_ROLE).openUpdateDialog();
-        updateDialog.removePermission(eventAllPermission);
-        // this is expected to fail because the negative ACL on the event
-        // causes user2 to not have all permissions implied by the permission
-        updateDialog.clickOkButtonAndExpectPermissionError();
+        // FIXME: Disabled due to inconsistencies in handling of UpdateRoleDialog. See bug5364
+        // // user2 tries to remove a permission from custom-role
+        // roleDefinitions = changeUserAndReloadAdminConsole(USER2_NAME).goToRoleDefinitions();
+        // updateDialog = roleDefinitions.findRole(CUSTOM_ROLE).openUpdateDialog();
+        // updateDialog.removePermission(eventAllPermission);
+        // // this is expected to fail because the negative ACL on the event
+        // // causes user2 to not have all permissions implied by the permission
+        // updateDialog.clickOkButtonAndExpectPermissionError();
         
         roleDefinitions = changeUserAndReloadAdminConsole(USER3_NAME).goToRoleDefinitions();
         updateDialog = roleDefinitions.findRole(CUSTOM_ROLE).openUpdateDialog();
@@ -335,13 +336,14 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
         updateDialog.clickOkButtonOrThrow();
         assertTrue(roleDefinitions.findRole(CUSTOM_ROLE).getPermissions().contains(eventAllPermission));
         
-        // user2 tries to remove a permission from custom-role
-        roleDefinitions = changeUserAndReloadAdminConsole(USER2_NAME).goToRoleDefinitions();
-        updateDialog = roleDefinitions.findRole(CUSTOM_ROLE).openUpdateDialog();
-        updateDialog.removePermission(eventAllPermission);
-        // this is expected to fail because the negative ACL on the event
-        // causes user2 to not have all permissions implied by the permission
-        updateDialog.clickOkButtonAndExpectPermissionError();
+        // FIXME: Disabled due to inconsistencies in handling of UpdateRoleDialog. See bug5364
+        // // user2 tries to remove a permission from custom-role
+        // roleDefinitions = changeUserAndReloadAdminConsole(USER2_NAME).goToRoleDefinitions();
+        // updateDialog = roleDefinitions.findRole(CUSTOM_ROLE).openUpdateDialog();
+        // updateDialog.removePermission(eventAllPermission);
+        // // this is expected to fail because the negative ACL on the event
+        // // causes user2 to not have all permissions implied by the permission
+        // updateDialog.clickOkButtonAndExpectPermissionError();
         
         roleDefinitions = changeUserAndReloadAdminConsole(USER3_NAME).goToRoleDefinitions();
         updateDialog = roleDefinitions.findRole(CUSTOM_ROLE).openUpdateDialog();
