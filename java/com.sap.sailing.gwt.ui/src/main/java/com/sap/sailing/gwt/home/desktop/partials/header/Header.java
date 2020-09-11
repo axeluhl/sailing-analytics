@@ -170,7 +170,7 @@ public class Header extends Composite implements HeaderConstants {
                 Display listItemDisplay = visibilityInMenuBar || ignoreMenuItems.contains(menuAnchor) ? NONE : BLOCK;
                 listItem.getStyle().setDisplay(listItemDisplay);
                 noOfVisibleItems += listItemDisplay == BLOCK ? 1 : 0;
-                leftOffset += currentWidth;
+                leftOffset += ignoreMenuItems.contains(menuAnchor) ? 0 : currentWidth;
             }
             this.hamburgerNavigationIcon.getElement().getStyle()
                     .setVisibility(noOfVisibleItems == 0 ? HIDDEN : VISIBLE);
@@ -322,6 +322,7 @@ public class Header extends Composite implements HeaderConstants {
             logoImage.getStyle().setDisplay(Display.NONE);
             solutionsPageLink.getElement().getStyle().setDisplay(Display.NONE);
             logoAnchor.setHref("");
+            menuItemVisibilityHandler.addIgnore(solutionsPageLink);
         }
         logoImage.setAttribute(DebugConstants.DEBUG_ID_ATTRIBUTE, "logoImage");
         solutionsPageLink.getElement().setAttribute(DEBUG_ID_ATTRIBUTE, "solutionsPageLink");
