@@ -20,6 +20,7 @@ public interface SectionHeaderResources extends SharedHomeResources {
         String sectionheader_item_image_seperator();
         String sectionheader_item_title();
         String sectionheader_item_label();
+        String sectionheader_item_title_label();
         String sectionheader_item_subtitle();
         String sectionheader_itemright_container();
         String sectionheader_item_infotext();
