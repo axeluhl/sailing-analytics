@@ -115,6 +115,8 @@ public class UserStoreImpl implements UserStore {
 
     /**
      * Protects access to the maps {@link #preferences}, {@link #preferenceConverters}, {@link #preferenceObjects} and {@link #preferenceListeners}.
+     * If access to {@linkplain userGroupsLock} or {@link #usersLock} is required, these locks must be obtained first in the correct order. See {@link #usersLock}
+     * This lock always has to be locked last. 
      */
     private transient NamedReentrantReadWriteLock preferenceLock;
     /**
