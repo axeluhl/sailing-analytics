@@ -13,5 +13,14 @@ package com.sap.sailing.domain.common;
  *
  */
 public interface WindFinderReviewedSpotsCollectionIdProvider {
-    Iterable<String> getWindFinderReviewedSpotsCollectionIds();
+    Iterable<String> getAllWindFinderReviewedSpotsCollectionIds();
+
+    /**
+     * If WindFinder spot collections are provided scoped to events, regattas, or races, this method
+     * allows for a qualified search for WindFinder spot collections, using a regatta identifier as a
+     * qualifier. For example, if events specify WindFinder spot collection IDs, the regatta identifier
+     * can be traced to the events to which this regatta belongs, and then only those events' WindFinder
+     * spot collection IDs will be considered.
+     */
+    Iterable<String> getWindFinderReviewedSpotsCollectionIdsByRegatta(RegattaIdentifier regattaIdentifier);
 }
