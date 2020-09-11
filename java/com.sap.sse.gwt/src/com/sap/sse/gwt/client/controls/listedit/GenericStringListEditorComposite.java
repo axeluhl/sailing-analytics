@@ -6,6 +6,9 @@ import java.util.List;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyPressEvent;
+import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
@@ -158,12 +161,21 @@ public abstract class GenericStringListEditorComposite<ValueType> extends ListEd
                 public void onClick(ClickEvent event) {
                     addValue(getContext().parse(inputBox.getValue()));
                     inputBox.setText("");
+                    inputBox.setFocus(true);
                 }
             });
             inputBox.addKeyUpHandler(new KeyUpHandler() {
                 @Override
                 public void onKeyUp(KeyUpEvent event) {
                     addButton.setEnabled(!inputBox.getValue().isEmpty());
+                }
+            });
+            inputBox.addKeyPressHandler(new KeyPressHandler() {
+                @Override
+                public void onKeyPress(KeyPressEvent event) {
+                    if (event.getUnicodeCharCode() == KeyCodes.KEY_ENTER) {
+                        addButton.click();
+                    }
                 }
             });
             // Add addition handler for selection because cannot use one handler for changed SuggestBox value by reason
