@@ -65,7 +65,6 @@ public class SettingsPanel extends LayoutPanel {
             }
         });
         userManagementService.getSettings(new AsyncCallback<Map<String, String>>() {
-
             @Override
             public void onSuccess(Map<String, String> result) {
                 settings = result;
@@ -85,7 +84,6 @@ public class SettingsPanel extends LayoutPanel {
         TabLayoutPanel tabPanel = new TabLayoutPanel(30, Unit.PX);
         tabPanel.setHeight("95%");
         AbstractEntryPoint.setTabPanelSize(tabPanel, "100%", "95%");
-
         Map<String, Integer> numberOfSettings = new HashMap<>();
         for (Entry<String, String> e : settingTypes.entrySet()) {
             String[] split = e.getKey().split("_");
@@ -102,7 +100,6 @@ public class SettingsPanel extends LayoutPanel {
                 scrollPanel.addStyleName("settingsPanel-grid");
                 tabPanel.add(scrollPanel, split[0]);
             }
-
             if (split[0].equals("URLS")) {
                 if (!split[1].equals("AUTH")) {
                     createUrlRowEntry(e.getKey(), e.getValue(), flexTable, row);
@@ -123,9 +120,7 @@ public class SettingsPanel extends LayoutPanel {
             table.setWidget(newline, 0, key);
             table.setWidget(newline, 1, url);
             table.setWidget(newline, 2, filter);
-            
             Button add = new Button(stringMessages.addURLFilter(), new ClickHandler() {
-                
                 @Override
                 public void onClick(ClickEvent event) {
                     userManagementWriteService.addSetting("URLS_" + key.getText(), String.class.getName(), url.getText(), new AsyncCallback<Void>() {
@@ -162,26 +157,20 @@ public class SettingsPanel extends LayoutPanel {
     private void createSettingRowEntry(final String key, String sValue, final FlexTable flexTable, final Integer row) {
         Label keyLabel = new Label(key.substring(key.indexOf('_') + 1));
         flexTable.setWidget(row, 0, keyLabel);
-        
         ImageResourceRenderer renderer = new ImageResourceRenderer();
         final ImageResource statusRedImageResource = IconResources.INSTANCE.statusRed();
         final HTML statusRed =  new HTML(renderer.render(statusRedImageResource));
         statusRed.setTitle("Could not safe property!");
-        
         final ImageResource statusGreenImageResource = IconResources.INSTANCE.statusGreen();
         final HTML statusGreen =  new HTML(renderer.render(statusGreenImageResource));
         statusGreen.setTitle("Saved property!");
-        
         final ImageResource statusYellowImageResource = IconResources.INSTANCE.statusYellow();
         final HTML statusYellow =  new HTML(renderer.render(statusYellowImageResource));
         statusYellow.setTitle("Trying to safe property...");
-        
         flexTable.setWidget(row, 2, statusGreen);
-        
         final ImageResource deleteImageResource = com.sap.sse.gwt.client.IconResources.INSTANCE.removeIcon();
         HTML delete = new HTML(renderer.render(deleteImageResource));
         delete.addClickHandler(new ClickHandler() {
-            
             @Override
             public void onClick(ClickEvent event) {
                 boolean deleteS = Window.confirm("Are you sure you want to delete this setting?");
@@ -192,18 +181,15 @@ public class SettingsPanel extends LayoutPanel {
             }
         });
         flexTable.setWidget(row, 3, delete);
-
         if (sValue.equals(Boolean.class.getName())) {
             final CheckBox value = new CheckBox();
             value.setValue(Boolean.parseBoolean(settings.get(key)));
             value.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-
                 @Override
                 public void onValueChange(ValueChangeEvent<Boolean> event) {
                     flexTable.setWidget(row, 2, statusYellow);
                     userManagementWriteService.setSetting(key, Boolean.class.getName(), value.getValue().toString(),
                             new AsyncCallback<Void>() {
-
                                 @Override
                                 public void onFailure(Throwable caught) {
                                     flexTable.setWidget(row, 2, statusRed);
@@ -221,13 +207,11 @@ public class SettingsPanel extends LayoutPanel {
             final IntegerBox value = new IntegerBox();
             value.setValue(Integer.parseInt(settings.get(key)));
             value.addValueChangeHandler(new ValueChangeHandler<Integer>() {
-
                 @Override
                 public void onValueChange(ValueChangeEvent<Integer> event) {
                     flexTable.setWidget(row, 2, statusYellow);
                     userManagementWriteService.setSetting(key, Integer.class.getName(), value.getValue().toString(),
                             new AsyncCallback<Void>() {
-
                                 @Override
                                 public void onFailure(Throwable caught) {
                                     flexTable.setWidget(row, 2, statusRed);
@@ -245,13 +229,11 @@ public class SettingsPanel extends LayoutPanel {
             final TextBox value = new TextBox();
             value.setText(settings.get(key));
             value.addChangeHandler(new ChangeHandler() {
-
                 @Override
                 public void onChange(ChangeEvent event) {
                     flexTable.setWidget(row, 2, statusYellow);
                     userManagementWriteService.setSetting(key, String.class.getName(), value.getText(),
                             new AsyncCallback<Void>() {
-
                                 @Override
                                 public void onFailure(Throwable caught) {
                                     flexTable.setWidget(row, 2, statusRed);
@@ -272,26 +254,20 @@ public class SettingsPanel extends LayoutPanel {
         final String labelKey = key.substring(key.indexOf('_') + 1);
         Label keyLabel = new Label(labelKey);
         flexTable.setWidget(row, 0, keyLabel);
-        
         ImageResourceRenderer renderer = new ImageResourceRenderer();
         final ImageResource statusRedImageResource = IconResources.INSTANCE.statusRed();
         final HTML statusRed =  new HTML(renderer.render(statusRedImageResource));
         statusRed.setTitle("Could not safe property!");
-        
         final ImageResource statusGreenImageResource = IconResources.INSTANCE.statusGreen();
         final HTML statusGreen =  new HTML(renderer.render(statusGreenImageResource));
         statusGreen.setTitle("Saved property!");
-        
         final ImageResource statusYellowImageResource = IconResources.INSTANCE.statusYellow();
         final HTML statusYellow =  new HTML(renderer.render(statusYellowImageResource));
         statusYellow.setTitle("Trying to safe property...");
-        
         flexTable.setWidget(row, 3, statusGreen);
-        
         final ImageResource deleteImageResource = com.sap.sse.gwt.client.IconResources.INSTANCE.removeIcon();
         HTML delete = new HTML(renderer.render(deleteImageResource));
         delete.addClickHandler(new ClickHandler() {
-            
             @Override
             public void onClick(ClickEvent event) {
                 boolean deleteS = Window.confirm("Are you sure you want to delete this setting?");
@@ -302,17 +278,14 @@ public class SettingsPanel extends LayoutPanel {
             }
         });
         flexTable.setWidget(row, 4, delete);
-
         final TextBox value1 = new TextBox();
         value1.setText(settings.get(key));
         value1.addChangeHandler(new ChangeHandler() {
-
             @Override
             public void onChange(ChangeEvent event) {
                 flexTable.setWidget(row, 3, statusYellow);
                 userManagementWriteService.setSetting(key, String.class.getName(), value1.getText(),
                         new AsyncCallback<Void>() {
-
                             @Override
                             public void onFailure(Throwable caught) {
                                 flexTable.setWidget(row, 3, statusRed);
@@ -326,17 +299,14 @@ public class SettingsPanel extends LayoutPanel {
             }
         });
         flexTable.setWidget(row, 1, value1);
-
         final TextBox value2 = new TextBox();
         value2.setText(settings.get("URLS_AUTH_" + labelKey));
         value2.addChangeHandler(new ChangeHandler() {
-
             @Override
             public void onChange(ChangeEvent event) {
                 flexTable.setWidget(row, 3, statusYellow);
                 userManagementWriteService.setSetting("URLS_AUTH_" + labelKey, String.class.getName(), value2.getText(),
                         new AsyncCallback<Void>() {
-
                             @Override
                             public void onFailure(Throwable caught) {
                                 flexTable.setWidget(row, 3, statusRed);

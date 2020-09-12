@@ -699,7 +699,6 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
                         proceed(componentViewer, splitter, associatedComponent, splitterTogglerButton,
                                 componentWasVisibleUntilNow);
                     }
-                    
                 }
 
                 private void proceed(final SideBySideComponentViewer componentViewer, final Splitter splitter,
