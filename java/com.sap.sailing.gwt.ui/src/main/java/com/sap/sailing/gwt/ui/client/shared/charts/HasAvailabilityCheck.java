@@ -23,7 +23,6 @@ public interface HasAvailabilityCheck {
     static void validateBackendAvailabilityAndExecuteBusinessLogic(SailingServiceWriteAsync sailingServiceWrite,
             Consumer<Boolean> callback, StringMessages stringMessages) {
         sailingServiceWrite.getServerConfiguration(new AsyncCallback<ServerConfigurationDTO>() {
-
             @Override
             public void onFailure(Throwable caught) {
                 if (has5xxResponse(caught)) {
