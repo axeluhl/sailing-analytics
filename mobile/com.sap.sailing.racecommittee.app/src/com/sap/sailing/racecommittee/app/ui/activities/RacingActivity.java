@@ -74,7 +74,6 @@ import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFinishingFrag
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFlagViewerFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceSummaryFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.TrackingListFragment;
-import com.sap.sailing.racecommittee.app.ui.views.PanelButton;
 import com.sap.sailing.racecommittee.app.utils.PreferenceHelper;
 import com.sap.sailing.racecommittee.app.utils.RaceHelper;
 import com.sap.sse.common.TimePoint;
@@ -91,7 +90,6 @@ import java.util.Set;
 
 public class RacingActivity extends SessionActivity implements RaceListCallbacks {
     private static final String TAG = RacingActivity.class.getName();
-    private static final String WIND = "wind";
     private static final String RACE = "race";
 
     private static final int RacesLoaderId = 2;
@@ -100,7 +98,6 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
 
     private IntentReceiver mReceiver;
     private ReadonlyDataManager dataManager;
-    private Wind mWind;
     private RaceListFragment mRaceList;
     private ManagedRace mSelectedRace;
     private TimePoint startTime;
@@ -354,10 +351,6 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
         if (raceId != null) {
             mSelectedRace = dataManager.getDataStore().getRace(raceId);
         }
-        mWind = (Wind) savedInstanceState.getSerializable(WIND);
-        if (mWind != null) {
-            onWindEntered(mWind);
-        }
     }
 
     @Override
@@ -366,7 +359,6 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
         if (mSelectedRace != null) {
             outState.putString(RACE, mSelectedRace.getId());
         }
-        outState.putSerializable(WIND, mWind);
     }
 
     @Override
@@ -394,34 +386,6 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
 
             default:
                 return super.onOptionsItemSelected(item);
-        }
-    }
-
-    private void onWindEntered(Wind windFix) {
-        PanelButton windValue = findViewById(R.id.button_wind);
-        if (windFix != null) {
-            if (windValue != null) {
-                windValue.setPanelText(String.format(getString(R.string.wind_info), windFix.getKnots(),
-                        windFix.getBearing().reverse().toString()));
-            }
-            if (mSelectedRace != null) {
-                mSelectedRace.getState().setWindFix(MillisecondsTimePoint.now(), windFix, preferences.isMagnetic());
-            }
-
-            mWind = windFix;
-        } else {
-            if (windValue != null) {
-                windValue.setPanelText(getString(R.string.wind_unknown));
-            }
-        }
-
-        getSupportFragmentManager().popBackStackImmediate();
-
-        if (infoFragment != null && infoFragment.isFragmentUIActive()) {
-            ExLog.i(this, this.getClass().getCanonicalName(), "Returning to RaceInfoFragment from WindFragment");
-            getFragmentManager().popBackStackImmediate();
-
-            onRaceItemClicked(mSelectedRace);
         }
     }
 
