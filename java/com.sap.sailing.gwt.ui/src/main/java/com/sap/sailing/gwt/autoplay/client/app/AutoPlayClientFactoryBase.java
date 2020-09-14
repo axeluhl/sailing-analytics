@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.autoplay.client.app;
 
 import static com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants.mediaServiceRemotePath;
-import static com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants.mediaServiceWriteRemotePath;
 import static com.sap.sse.gwt.shared.RpcConstants.HEADER_FORWARD_TO_MASTER;
 import static com.sap.sse.gwt.shared.RpcConstants.HEADER_FORWARD_TO_REPLICA;
 
@@ -49,7 +48,7 @@ public abstract class AutoPlayClientFactoryBase
                 RemoteServiceMappingConstants.sailingServiceRemotePath);
         EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService, mediaServiceRemotePath,
                 HEADER_FORWARD_TO_REPLICA);
-        EntryPointHelper.registerASyncService((ServiceDefTarget) mediaServiceWrite, mediaServiceWriteRemotePath,
+        EntryPointHelper.registerASyncService((ServiceDefTarget) mediaServiceWrite, mediaServiceRemotePath,
                 HEADER_FORWARD_TO_MASTER);
         getUserService().addKnownHasPermissions(SecuredDomainType.getAllInstances());
     }

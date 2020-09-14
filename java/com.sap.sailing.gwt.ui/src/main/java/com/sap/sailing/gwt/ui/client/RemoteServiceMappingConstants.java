@@ -16,20 +16,14 @@ public interface RemoteServiceMappingConstants {
     public static final String WEB_CONTEXT_PATH = "gwt";
 
     public static final String mediaServiceRemotePath = "service/media";
-
-    public static final String mediaServiceWriteRemotePath = "service/mediamaster";
-
+    
     public static final String sailingServiceRemotePath = "service/sailing";
-
-    public static final String sailingServiceWriteRemotePath = "service/sailingmaster";
-
+    
     public static final String serverConfigurationServiceRemotePath = "service/serverconfiguration";
 
     public static final String simulatorServiceRemotePath = "service/simulator";
 
     public static final String dataMiningServiceRemotePath = "service/datamining";
-
-    public static final String dataMiningWriteServiceRemotePath = "service/dataminingmaster";
 
     public static final String dispatchServiceRemotePath = "service/dispatch";
 }

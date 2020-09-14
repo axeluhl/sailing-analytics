@@ -52,7 +52,7 @@ public class EditProfileEntryPoint implements EntryPoint {
                 HEADER_FORWARD_TO_REPLICA);
         UserManagementWriteServiceAsync userManagementWriteService = GWT.create(UserManagementWriteService.class);
         EntryPointHelper.registerASyncService((ServiceDefTarget) userManagementWriteService,
-                com.sap.sse.security.ui.client.RemoteServiceMappingConstants.userManagementServiceWriteRemotePath,
+                com.sap.sse.security.ui.client.RemoteServiceMappingConstants.userManagementServiceRemotePath,
                 HEADER_FORWARD_TO_MASTER);
         final UserService userService = new UserService(userManagementService, userManagementWriteService);
         

@@ -83,7 +83,7 @@ public class DataMiningEntryPoint extends AbstractSailingReadEntryPoint {
         EntryPointHelper.registerASyncService((ServiceDefTarget) dataMiningService,
                 RemoteServiceMappingConstants.dataMiningServiceRemotePath, HEADER_FORWARD_TO_REPLICA);
         EntryPointHelper.registerASyncService((ServiceDefTarget) dataMiningWriteService,
-                RemoteServiceMappingConstants.dataMiningWriteServiceRemotePath, HEADER_FORWARD_TO_MASTER);
+                RemoteServiceMappingConstants.dataMiningServiceRemotePath, HEADER_FORWARD_TO_MASTER);
         getUserService().executeWithServerInfo(s -> createDataminingPanel(s, Window.Location.getParameter("q")));
     }
 
