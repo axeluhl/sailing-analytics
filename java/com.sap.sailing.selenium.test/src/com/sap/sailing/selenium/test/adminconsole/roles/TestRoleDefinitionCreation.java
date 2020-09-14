@@ -1,6 +1,5 @@
 package com.sap.sailing.selenium.test.adminconsole.roles;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
@@ -10,7 +9,6 @@ import org.junit.Test;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.roles.RoleDefinitionCreationAndUpdateDialogPO;
 import com.sap.sailing.selenium.pages.adminconsole.roles.RoleDefinitionsPanelPO;
-import com.sap.sailing.selenium.pages.adminconsole.roles.RoleDefinitionsPanelPO.RoleEntryPO;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class TestRoleDefinitionCreation extends AbstractSeleniumTest {
