@@ -129,7 +129,7 @@ public class TimePanelFragment extends BasePanelFragment {
 
         getRaceState().removeChangedListener(stateChangedListener);
 
-        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mReceiver);
+        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(mReceiver);
     }
 
     @Override

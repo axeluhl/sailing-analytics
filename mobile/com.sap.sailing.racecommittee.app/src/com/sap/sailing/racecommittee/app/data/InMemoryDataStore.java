@@ -35,7 +35,7 @@ public enum InMemoryDataStore implements DataStore {
     private LinkedHashMap<SimpleRaceLogIdentifier, ManagedRace> managedRaceById;
     private LinkedHashMap<RaceGroup, LinkedHashMap<Serializable, Mark>> marksData;
     private LinkedHashMap<RaceGroup, CourseBase> courseData;
-    private SharedDomainFactory domainFactory;
+    private SharedDomainFactory<?> domainFactory;
 
     private Serializable eventUUID;
     private UUID courseAreaId;
@@ -50,7 +50,7 @@ public enum InMemoryDataStore implements DataStore {
         managedRaceById = new LinkedHashMap<>();
         marksData = new LinkedHashMap<>();
         courseData = new LinkedHashMap<>();
-        domainFactory = new SharedDomainFactoryImpl(new AndroidRaceLogResolver());
+        domainFactory = new SharedDomainFactoryImpl<>(new AndroidRaceLogResolver());
 
         eventUUID = null;
         courseAreaId = null;

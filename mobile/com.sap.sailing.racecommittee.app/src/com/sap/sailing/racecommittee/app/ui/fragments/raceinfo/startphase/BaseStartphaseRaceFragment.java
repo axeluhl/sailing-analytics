@@ -65,13 +65,10 @@ public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingPro
 
         ImageView nav_next = ViewHelper.get(layout, R.id.nav_next);
         if (nav_next != null) {
-            nav_next.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    viewPanel(MOVE_UP);
-                    if (pager != null) {
-                        pager.setCurrentItem(mActivePage);
-                    }
+            nav_next.setOnClickListener(view -> {
+                viewPanel(MOVE_UP);
+                if (pager != null) {
+                    pager.setCurrentItem(mActivePage);
                 }
             });
         }

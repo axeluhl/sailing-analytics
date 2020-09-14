@@ -1,8 +1,16 @@
 package com.sap.sailing.racecommittee.app.ui.fragments;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.util.ArrayList;
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.drawable.Drawable;
+import android.os.Bundle;
+import android.support.annotation.IdRes;
+import android.support.annotation.IntDef;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.view.View;
+import android.widget.ImageView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.BitmapHelper;
@@ -25,18 +33,13 @@ import com.sap.sailing.racecommittee.app.utils.TickSingleton;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
-import android.app.Activity;
-import android.content.Intent;
-import android.graphics.drawable.Drawable;
-import android.os.Bundle;
-import android.support.annotation.IdRes;
-import android.support.annotation.IntDef;
-import android.view.View;
-import android.widget.ImageView;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 
 public abstract class RaceFragment extends LoggableFragment {
 
-    @IntDef({ MOVE_DOWN, MOVE_NONE, MOVE_UP })
+    @IntDef({MOVE_DOWN, MOVE_NONE, MOVE_UP})
     @Retention(RetentionPolicy.SOURCE)
     protected @interface MOVE_VALUES {
     }
@@ -71,12 +74,14 @@ public abstract class RaceFragment extends LoggableFragment {
         return arguments;
     }
 
+    @NonNull
     public ManagedRace getRace() {
         return managedRace;
     }
 
+    @NonNull
     public RaceState getRaceState() {
-        return getRace().getState();
+        return managedRace.getState();
     }
 
     /**
@@ -149,14 +154,11 @@ public abstract class RaceFragment extends LoggableFragment {
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-
-        BaseActivity baseActivity = (BaseActivity) activity;
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        BaseActivity baseActivity = (BaseActivity) context;
         if (baseActivity != null) {
             preferences = baseActivity.getPreferences();
-        } else {
-            preferences = AppPreferences.on(activity);
         }
     }
 
@@ -193,21 +195,17 @@ public abstract class RaceFragment extends LoggableFragment {
     }
 
     protected String getCourseName() {
-        String courseName = "";
-        if (getRace() != null && getRaceState() != null) {
-            CourseBase courseDesign = getRaceState().getCourseDesign();
-            if (courseDesign != null) {
-                if (Util.isEmpty(courseDesign.getWaypoints())) {
-                    courseName = courseDesign.getName();
-                } else {
-                    courseName = String.format(getString(R.string.course_design_number_waypoints),
-                            Util.size(courseDesign.getWaypoints()));
-                }
+        CourseBase courseDesign = getRaceState().getCourseDesign();
+        if (courseDesign != null) {
+            if (Util.isEmpty(courseDesign.getWaypoints())) {
+                return courseDesign.getName();
             } else {
-                courseName = getString(R.string.no_course_active);
+                return String.format(getString(R.string.course_design_number_waypoints),
+                        Util.size(courseDesign.getWaypoints()));
             }
+        } else {
+            return getString(R.string.no_course_active);
         }
-        return courseName;
     }
 
     @IdRes

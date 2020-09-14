@@ -237,12 +237,12 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
         } else {
             if (courseArea != null) {
                 loadRaces(courseArea);
+                loadNavDrawer(courseArea);
                 ExLog.i(this, this.getClass().toString(), "did load courseArea!");
             } else {
                 ExLog.i(this, this.getClass().toString(), "courseArea == null :(");
                 Toast.makeText(this, getString(R.string.racing_course_area_missing), Toast.LENGTH_LONG).show();
             }
-            loadNavDrawer(courseArea);
             if (savedInstanceState != null) {
                 String raceId = savedInstanceState.getString(RACE);
                 if (raceId != null) {

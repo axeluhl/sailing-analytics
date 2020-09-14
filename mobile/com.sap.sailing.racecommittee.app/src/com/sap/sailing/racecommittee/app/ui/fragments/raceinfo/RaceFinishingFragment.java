@@ -48,23 +48,15 @@ public class RaceFinishingFragment extends BaseFragment {
         Button down = ViewHelper.get(layout, R.id.flag_down);
 
         if (down != null) {
-            down.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    replaceFragment(MoreFlagsFragment.FinishTimeFragment.newInstance(1),
-                            getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false));
-                }
-            });
+            down.setOnClickListener(view -> replaceFragment(MoreFlagsFragment.FinishTimeFragment.newInstance(1),
+                    getFrameId(requireActivity(), R.id.race_edit, R.id.race_content, false)));
         }
         Button revoke = ViewHelper.get(layout, R.id.flag_finishing_revoke);
         if (revoke != null) {
-            revoke.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    final Result result = getRace().revokeFinishing(preferences.getAuthor());
-                    if (result.hasError()) {
-                        Toast.makeText(getActivity(), result.getMessage(getActivity()), Toast.LENGTH_LONG).show();
-                    }
+            revoke.setOnClickListener(view -> {
+                final Result result = getRace().revokeFinishing(preferences.getAuthor());
+                if (result.hasError()) {
+                    Toast.makeText(getActivity(), result.getMessage(requireContext()), Toast.LENGTH_LONG).show();
                 }
             });
         }

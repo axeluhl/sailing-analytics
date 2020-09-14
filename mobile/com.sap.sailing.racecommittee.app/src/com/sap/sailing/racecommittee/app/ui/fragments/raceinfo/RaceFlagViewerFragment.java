@@ -38,9 +38,7 @@ public class RaceFlagViewerFragment extends BaseFragment {
     private LinearLayout mLayout;
     private View mRecall;
 
-    private ImageView mXrayFlag;
     private TextView mXrayCountdown;
-    private Button mXrayButton;
 
     private FlagsCache mFlagsCache;
     private int mFlagSize;
@@ -60,16 +58,16 @@ public class RaceFlagViewerFragment extends BaseFragment {
         mRecall = ViewHelper.get(layout, R.id.individual_recall);
         mFlagSize = getResources().getInteger(R.integer.flag_size_xlarge);
 
-        mXrayButton = ViewHelper.get(layout, R.id.flag_down);
-        if (mXrayButton != null) {
-            mXrayButton.setOnClickListener(v -> {
+        Button xrayButton = ViewHelper.get(layout, R.id.flag_down);
+        if (xrayButton != null) {
+            xrayButton.setOnClickListener(v -> {
                 RacingProcedure procedure = getRaceState().getTypedRacingProcedure();
                 procedure.removeIndividualRecall(MillisecondsTimePoint.now());
             });
         }
-        mXrayFlag = ViewHelper.get(layout, R.id.flag);
-        if (mXrayFlag != null) {
-            mXrayFlag.setImageDrawable(FlagsResources.getFlagDrawable(getActivity(), Flags.XRAY.name(), mFlagSize));
+        ImageView xrayFlag = ViewHelper.get(layout, R.id.flag);
+        if (xrayFlag != null) {
+            xrayFlag.setImageDrawable(FlagsResources.getFlagDrawable(getActivity(), Flags.XRAY.name(), mFlagSize));
         }
         mXrayCountdown = ViewHelper.get(layout, R.id.xray_down);
 

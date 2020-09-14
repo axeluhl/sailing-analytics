@@ -161,9 +161,13 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
             } else if (mRacingProcedure instanceof ESSRacingProcedure) {
                 ESSRacingProcedure procedure = getRaceState().getTypedRacingProcedure();
                 if (procedure != null) {
-                    boolean checked = getArguments().getBoolean(RACE_GROUP,
-                            getRaceState().isAdditionalScoringInformationEnabled(
-                                    AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE));
+                    boolean checked = false;
+                    final Bundle args = getArguments();
+                    if (args != null) {
+                        checked = args.getBoolean(RACE_GROUP,
+                                getRaceState().isAdditionalScoringInformationEnabled(
+                                        AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE));
+                    }
                     mItemRaceGroup = new SelectionItem(getString(R.string.race_group), null, null, true, checked, null);
                     mItems.add(mItemRaceGroup);
                 }
@@ -204,14 +208,11 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
     }
 
     @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.start_race:
-                startRace();
-                break;
-
-            default:
-                ExLog.i(getActivity(), TAG, "Clicked on " + v);
+    public void onClick(View view) {
+        if (view.getId() == R.id.start_race) {
+            startRace();
+        } else {
+            ExLog.i(getActivity(), TAG, "Clicked on " + view);
         }
     }
 
@@ -256,7 +257,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
             }
         }
 
-        if (getRace() != null && getRaceState() != null && getRaceState().getWindFix() != null) {
+        if (getRaceState().getWindFix() != null) {
             Wind wind = getRaceState().getWindFix();
             String sensorData = getString(R.string.wind_sensor, TimeUtils.formatTime(wind.getTimePoint()),
                     wind.getFrom().getDegrees(), wind.getKnots());
