@@ -70,11 +70,9 @@ public class AutoplayHelper {
         if (fastCurrentTimeProvider.getRefreshInterval() != 1000) {
             fastCurrentTimeProvider.setRefreshInterval(1000);
         }
-
         // only update once (very high timer to retry, meanwhile the forceUpdate will terminate the provider)
         RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, asyncActionsExecutor,
                 errorReporter, new ArrayList<RegattaAndRaceIdentifier>(), 10000);
-
         StrippedLeaderboardDTO selectedLeaderboard = getSelectedLeaderboard(event, leaderBoardName);
         if (selectedLeaderboard != null) {
             for (RaceColumnDTO race : selectedLeaderboard.getRaceList()) {
