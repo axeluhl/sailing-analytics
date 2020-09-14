@@ -688,7 +688,7 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
                 @Override
                 public void onClick(ClickEvent event) {
                     boolean componentWasVisibleUntilNow = associatedComponent.isVisible();
-                    if (associatedComponent instanceof HasAvailabilityCheck) {
+                    if (associatedComponent instanceof HasAvailabilityCheck && !associatedComponent.isVisible()) {
                         ((HasAvailabilityCheck)associatedComponent).checkBackendAvailability(available->{
                             if (available) {
                             proceed(componentViewer, splitter, associatedComponent, splitterTogglerButton,

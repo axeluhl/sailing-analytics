@@ -1086,10 +1086,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
 
     @Override
     public void checkBackendAvailability(Consumer<Boolean> callback) {
-        if (isVisible()) {
-            callback.accept(true); // always allow closing of panel
-        } else {
-            HasAvailabilityCheck.validateBackendAvailabilityAndExecuteBusinessLogic(sailingServiceWrite, callback, stringMessages);
-        }
+        HasAvailabilityCheck.validateBackendAvailabilityAndExecuteBusinessLogic(sailingServiceWrite, callback,
+                stringMessages);
     }
 }
