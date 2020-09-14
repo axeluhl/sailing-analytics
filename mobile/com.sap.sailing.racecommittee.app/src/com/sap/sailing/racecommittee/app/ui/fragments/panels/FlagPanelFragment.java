@@ -14,6 +14,8 @@ import android.widget.TextView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.domain.abstractlog.race.state.RaceState;
+import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.domain.common.racelog.Flags;
@@ -23,13 +25,12 @@ import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.AbortFlagsFragmen
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.EmptyFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.MoreFlagsFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RecallFlagsFragment;
+import com.sap.sailing.racecommittee.app.utils.TickListener;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
 
 public class FlagPanelFragment extends BasePanelFragment {
 
-    private RaceStateChangedListener mStateListener;
-    private IntentReceiver mReceiver;
 
     // Abandon Toggle
     private View mAbandonFlags;
@@ -59,9 +60,13 @@ public class FlagPanelFragment extends BasePanelFragment {
     private View mBlueLastLock;
     private TextView mBlueLastText;
 
-    public FlagPanelFragment() {
-        mReceiver = new IntentReceiver();
-    }
+    private final RaceStateChangedListener stateChangedListener = new BaseRaceStateChangedListener() {
+        @Override
+        public void onStatusChanged(ReadonlyRaceState state) {
+            checkStatus();
+        }
+    };
+    private final IntentReceiver receiver = new IntentReceiver();
 
     public static FlagPanelFragment newInstance(Bundle args) {
         FlagPanelFragment fragment = new FlagPanelFragment();
@@ -122,14 +127,12 @@ public class FlagPanelFragment extends BasePanelFragment {
 
         checkStatus();
 
-        mStateListener = new RaceStateChangedListener();
-
-        getRaceState().addChangedListener(mStateListener);
+        getRaceState().addChangedListener(stateChangedListener);
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(AppConstants.ACTION_TOGGLE);
         filter.addAction(AppConstants.ACTION_CLEAR_TOGGLE);
-        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(mReceiver, filter);
+        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(receiver, filter);
 
         sendIntent(AppConstants.ACTION_CLEAR_TOGGLE);
     }
@@ -138,8 +141,9 @@ public class FlagPanelFragment extends BasePanelFragment {
     public void onPause() {
         super.onPause();
 
-        getRaceState().removeChangedListener(mStateListener);
-        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(mReceiver);
+        getRaceState().removeChangedListener(stateChangedListener);
+
+        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(receiver);
     }
 
     private void checkStatus() {
@@ -279,47 +283,39 @@ public class FlagPanelFragment extends BasePanelFragment {
     }
 
     @Override
-    public void notifyTick(TimePoint now) {
-        super.notifyTick(now);
+    public TickListener getStartTimeTickListener() {
+        return this::onStartTimeTick;
+    }
 
-        if (getRace() != null && getRaceState() != null) {
-            switch (getRaceState().getStatus()) {
-                case RUNNING:
-                    TimePoint start = getRaceState().getStartTime();
-                    if (start != null) {
-                        long diff = now.minus(start.asMillis()).asMillis();
-                        if (diff >= 60000) {
-                            changeVisibility(mRecallLock, mRecallLayer, View.VISIBLE);
-                        } else {
-                            changeVisibility(mRecallLock, mRecallLayer, View.GONE);
-                        }
+    private void onStartTimeTick(TimePoint now) {
+        final RaceState state = getRaceState();
+        switch (state.getStatus()) {
+            case RUNNING:
+                TimePoint start = state.getStartTime();
+                if (start != null) {
+                    long diff = now.minus(start.asMillis()).asMillis();
+                    if (diff >= 60000) {
+                        changeVisibility(mRecallLock, mRecallLayer, View.VISIBLE);
                     } else {
                         changeVisibility(mRecallLock, mRecallLayer, View.GONE);
                     }
-                    break;
+                } else {
+                    changeVisibility(mRecallLock, mRecallLayer, View.GONE);
+                }
+                break;
 
-                case FINISHING:
-                    mBlueLastText.setText(TimeUtils.formatTimeAgo(getActivity(),
-                            now.minus(getRaceState().getFinishingTime().asMillis()).asMillis()));
-                    changeVisibility(mRecallLock, mRecallLayer, View.VISIBLE);
-                    break;
+            case FINISHING:
+                mBlueLastText.setText(TimeUtils.formatTimeAgo(getActivity(),
+                        now.minus(state.getFinishingTime().asMillis()).asMillis()));
+                changeVisibility(mRecallLock, mRecallLayer, View.VISIBLE);
+                break;
 
-                case FINISHED:
-                    changeVisibility(mRecallLock, mRecallLayer, View.VISIBLE);
-                    break;
+            case FINISHED:
+                changeVisibility(mRecallLock, mRecallLayer, View.VISIBLE);
+                break;
 
-                default:
-                    // nothing
-            }
-        }
-    }
-
-    private class RaceStateChangedListener extends BaseRaceStateChangedListener {
-        @Override
-        public void onStatusChanged(ReadonlyRaceState state) {
-            super.onStatusChanged(state);
-
-            checkStatus();
+            default:
+                // nothing
         }
     }
 

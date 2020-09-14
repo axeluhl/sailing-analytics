@@ -19,6 +19,7 @@ import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
+import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
@@ -33,10 +34,10 @@ import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.TrackingListFragm
 import com.sap.sailing.racecommittee.app.ui.layouts.TimePanelHeaderLayout;
 import com.sap.sailing.racecommittee.app.ui.views.PanelButton;
 import com.sap.sailing.racecommittee.app.utils.RaceHelper;
+import com.sap.sailing.racecommittee.app.utils.TickListener;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import static com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult.ResolutionFailed.NO_START_TIME_SET;
 
@@ -44,7 +45,6 @@ public class TimePanelFragment extends BasePanelFragment {
 
     private final static String TOGGLED = "toggled";
 
-    private RaceStateChangedListener mStateListener;
     private IntentReceiver mReceiver;
 
     private TimePanelHeaderLayout mRaceHeader;
@@ -73,8 +73,6 @@ public class TimePanelFragment extends BasePanelFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.race_panel_time, container, false);
-
-        mStateListener = new RaceStateChangedListener();
 
         mRaceHeader = ViewHelper.get(layout, R.id.race_content_header);
         mRaceHeader.setRunnable(() -> new RaceHeaderClick().onClick(null));
@@ -110,10 +108,9 @@ public class TimePanelFragment extends BasePanelFragment {
     public void onStart() {
         super.onStart();
 
-        notifyTick(MillisecondsTimePoint.now());
         checkStatus();
 
-        getRaceState().addChangedListener(mStateListener);
+        getRaceState().addChangedListener(stateChangedListener);
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(AppConstants.ACTION_TOGGLE);
@@ -130,41 +127,46 @@ public class TimePanelFragment extends BasePanelFragment {
     public void onStop() {
         super.onStop();
 
-        getRaceState().removeChangedListener(mStateListener);
+        getRaceState().removeChangedListener(stateChangedListener);
 
-        TickSingleton.INSTANCE.unregisterListener(this);
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mReceiver);
     }
 
     @Override
-    public void notifyTick(TimePoint now) {
-        super.notifyTick(now);
+    public TickListener getCurrentTimeTickListener() {
+        return this::onCurrentTimeTick;
+    }
 
+    @Override
+    public TickListener getStartTimeTickListener() {
+        return this::onStartTimeTick;
+    }
+
+    private void onCurrentTimeTick(TimePoint now) {
         if (mCurrentTime != null) {
             mCurrentTime.setText(TimeUtils.formatTime(now));
-            mCurrentTime.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void onStartTimeTick(TimePoint now) {
+        final TimePoint startTime = getRaceState().getStartTime();
+
+        if (mTimeStart != null) {
+            if (startTime != null) {
+                mTimeStart.setText(getString(R.string.time_start, TimeUtils.formatTime(startTime, false)));
+            } else {
+                mTimeStart.setText(getString(R.string.time_start, "N/A"));
+            }
         }
 
-        if (getRace() != null && getRace().getState() != null) {
-            TimePoint startTime = getRace().getState().getStartTime();
-
-            if (mTimeStart != null) {
-                if (startTime != null) {
-                    mTimeStart.setText(getString(R.string.time_start, TimeUtils.formatTime(startTime, false)));
-                } else {
-                    mTimeStart.setText(getString(R.string.time_start, "N/A"));
-                }
+        if (mHeaderTime != null && startTime != null) {
+            String duration;
+            if (startTime.after(now)) {
+                duration = "-" + TimeUtils.formatDurationUntil(startTime.minus(now.asMillis()).asMillis(), false);
+            } else {
+                duration = TimeUtils.formatDurationSince(now.minus(startTime.asMillis()).asMillis(), false);
             }
-
-            if (mHeaderTime != null && startTime != null) {
-                String duration;
-                if (startTime.after(now)) {
-                    duration = "-" + TimeUtils.formatDurationUntil(startTime.minus(now.asMillis()).asMillis(), false);
-                } else {
-                    duration = TimeUtils.formatDurationSince(now.minus(startTime.asMillis()).asMillis(), false);
-                }
-                mHeaderTime.setText(duration);
-            }
+            mHeaderTime.setText(duration);
         }
 
         if (mLinkedRace == null) {
@@ -193,6 +195,57 @@ public class TimePanelFragment extends BasePanelFragment {
             }
         }
     }
+
+    //@Override
+    //public void notifyTick(TimePoint now) {
+    //    if (getRace() != null && getRace().getState() != null) {
+    //        TimePoint startTime = getRace().getState().getStartTime();
+    //
+    //        if (mTimeStart != null) {
+    //            if (startTime != null) {
+    //                mTimeStart.setText(getString(R.string.time_start, TimeUtils.formatTime(startTime, false)));
+    //            } else {
+    //                mTimeStart.setText(getString(R.string.time_start, "N/A"));
+    //            }
+    //        }
+    //
+    //        if (mHeaderTime != null && startTime != null) {
+    //            String duration;
+    //            if (startTime.after(now)) {
+    //                duration = "-" + TimeUtils.formatDurationUntil(startTime.minus(now.asMillis()).asMillis(), false);
+    //            } else {
+    //                duration = TimeUtils.formatDurationSince(now.minus(startTime.asMillis()).asMillis(), false);
+    //            }
+    //            mHeaderTime.setText(duration);
+    //        }
+    //    }
+    //
+    //    if (mLinkedRace == null) {
+    //        StartTimeFinderResult result = getRaceState().getStartTimeFinderResult();
+    //        if (result != null) {
+    //            mLinkedRace = result.isDependentStartTime();
+    //            if (mLinkedRace && mHeaderTime != null && result.getResolutionFailed() == NO_START_TIME_SET) {
+    //                SimpleRaceLogIdentifier identifier = Util.get(result.getDependingOnRaces(), 0);
+    //                ManagedRace race = DataManager.create(getActivity()).getDataStore().getRace(identifier);
+    //                mHeaderTime.setText(getString(R.string.minutes_after_long, result.getStartTimeDiff().asMinutes(),
+    //                        RaceHelper.getShortReverseRaceName(race, " / ", getRace())));
+    //            }
+    //        }
+    //    }
+    //
+    //    if (mLinkedRace != null && mLinkIcon != null) {
+    //        mLinkIcon.setVisibility(mLinkedRace ? View.VISIBLE : View.GONE);
+    //    }
+    //
+    //    if (mFirstVesselDuration != null && mFirstVesselDuration.getVisibility() == View.VISIBLE) {
+    //        if (!getRaceState().getFinishingTime().equals(mLastFinishingTime)) {
+    //            mLastFinishingTime = getRaceState().getFinishingTime();
+    //            String raceDuration = TimeUtils.formatTimeAgo(getActivity(),
+    //                    mLastFinishingTime.minus(getRaceState().getStartTime().asMillis()).asMillis());
+    //            mFirstVesselDuration.setText(raceDuration);
+    //        }
+    //    }
+    //}
 
     private void uncheckMarker(View view) {
         if (isAdded()) {
@@ -237,37 +290,28 @@ public class TimePanelFragment extends BasePanelFragment {
                 (draft != null && draft.hasConflicts()) || (confirmed != null && confirmed.hasConflicts()));
     }
 
-    private class RaceStateChangedListener extends BaseRaceStateChangedListener {
-
+    private final RaceStateChangedListener stateChangedListener = new BaseRaceStateChangedListener() {
         @Override
         public void onStatusChanged(ReadonlyRaceState state) {
-            super.onStatusChanged(state);
-
             checkStatus();
             uncheckMarker(null);
         }
 
         @Override
         public void onStartTimeChanged(ReadonlyRaceState state) {
-            super.onStartTimeChanged(state);
-
             mLinkedRace = null;
         }
 
         @Override
         public void onFinishingPositionsChanged(ReadonlyRaceState state) {
-            super.onFinishingPositionsChanged(state);
-
             checkWarnings(state);
         }
 
         @Override
         public void onFinishingPositionsConfirmed(ReadonlyRaceState state) {
-            super.onFinishingPositionsConfirmed(state);
-
             checkWarnings(state);
         }
-    }
+    };
 
     private class RaceHeaderClick implements View.OnClickListener, DialogInterface.OnClickListener {
 

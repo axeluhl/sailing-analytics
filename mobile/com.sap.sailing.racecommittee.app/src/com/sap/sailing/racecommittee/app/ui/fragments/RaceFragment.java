@@ -9,6 +9,9 @@ import com.sap.sailing.android.shared.util.BitmapHelper;
 import com.sap.sailing.android.shared.util.BroadcastManager;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
+import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
+import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
+import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
@@ -21,7 +24,6 @@ import com.sap.sailing.racecommittee.app.utils.TickListener;
 import com.sap.sailing.racecommittee.app.utils.TickSingleton;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -32,7 +34,7 @@ import android.support.annotation.IntDef;
 import android.view.View;
 import android.widget.ImageView;
 
-public abstract class RaceFragment extends LoggableFragment implements TickListener {
+public abstract class RaceFragment extends LoggableFragment {
 
     @IntDef({ MOVE_DOWN, MOVE_NONE, MOVE_UP })
     @Retention(RetentionPolicy.SOURCE)
@@ -51,6 +53,17 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
     protected final static int MOVE_DOWN = -1;
     protected final static int MOVE_NONE = 0;
     protected final static int MOVE_UP = 1;
+
+    private final TickListener currentTimeListener = getCurrentTimeTickListener();
+    private final TickListener startTimeListener = getStartTimeTickListener();
+
+    private final RaceStateChangedListener stateChangedListener = new BaseRaceStateChangedListener() {
+        @Override
+        public void onStartTimeChanged(ReadonlyRaceState state) {
+            unregisterTickListeners();
+            registerTickListeners();
+        }
+    };
 
     public static Bundle createArguments(ManagedRace race) {
         Bundle arguments = new Bundle();
@@ -77,9 +90,43 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
         return args;
     }
 
-    @Override
-    public void notifyTick(TimePoint now) {
-        // see subclasses.
+    @Nullable
+    public TickListener getCurrentTimeTickListener() {
+        //See subclassess
+        return null;
+    }
+
+    @Nullable
+    public TickListener getStartTimeTickListener() {
+        //See subclassess
+        return null;
+    }
+
+    /**
+     * Registers a {@link TickListener} for the start time.
+     */
+    public void registerTickListeners() {
+        //Register the {@link TickListener} for the current time without millis
+        if (currentTimeListener != null) {
+            TickSingleton.INSTANCE.registerListener(currentTimeListener);
+        }
+        if (startTimeListener != null) {
+            final RaceState state = getRaceState();
+            final TimePoint startTime = state.getStartTime();
+            if (startTime != null) {
+                //Register the {@link TickListener} for the start time
+                TickSingleton.INSTANCE.registerListener(startTimeListener, startTime);
+            }
+        }
+    }
+
+    public void unregisterTickListeners() {
+        if (currentTimeListener != null) {
+            TickSingleton.INSTANCE.unregisterListener(currentTimeListener);
+        }
+        if (startTimeListener != null) {
+            TickSingleton.INSTANCE.unregisterListener(startTimeListener);
+        }
     }
 
     public boolean isFragmentUIActive() {
@@ -116,16 +163,15 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
     @Override
     public void onStart() {
         super.onStart();
-
-        TickSingleton.INSTANCE.registerListener(this);
-        notifyTick(MillisecondsTimePoint.now());
+        registerTickListeners();
+        getRaceState().addChangedListener(stateChangedListener);
     }
 
     @Override
     public void onStop() {
         super.onStop();
-
-        TickSingleton.INSTANCE.unregisterListener(this);
+        unregisterTickListeners();
+        getRaceState().removeChangedListener(stateChangedListener);
     }
 
     protected void sendIntent(String action) {

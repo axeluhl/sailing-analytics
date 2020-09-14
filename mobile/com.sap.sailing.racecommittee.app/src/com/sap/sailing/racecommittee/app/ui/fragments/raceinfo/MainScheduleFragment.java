@@ -14,6 +14,7 @@ import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.scoring.AdditionalScoringInformationType;
+import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
@@ -31,8 +32,10 @@ import com.sap.sailing.racecommittee.app.domain.impl.SelectionItem;
 import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
 import com.sap.sailing.racecommittee.app.ui.adapters.SelectionAdapter;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.chooser.RaceInfoFragmentChooser;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 import com.sap.sailing.racecommittee.app.utils.RaceHelper;
+import com.sap.sailing.racecommittee.app.utils.TickListener;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -62,8 +65,6 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
     private Duration mStartTimeDiff;
     private RacingProcedure mRacingProcedure;
 
-    private RaceStateChangedListener mStateListener;
-
     private int mFlagSize;
 
     public MainScheduleFragment() {}
@@ -77,7 +78,6 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
         View layout = inflater.inflate(R.layout.race_schedule, container, false);
 
         mItems = new ArrayList<>();
-        mStateListener = new RaceStateChangedListener();
         RecyclerView raceData = ViewHelper.get(layout, R.id.race_data);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
@@ -107,12 +107,15 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
+    public void onStart() {
+        super.onStart();
+        getRaceState().addChangedListener(stateChangedListener);
+    }
 
-        if (getRace() != null && getRaceState() != null) {
-            getRaceState().addChangedListener(mStateListener);
-        }
+    @Override
+    public void onStop() {
+        super.onStop();
+        getRaceState().removeChangedListener(stateChangedListener);
     }
 
     private void initCourse() {
@@ -169,8 +172,14 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
     }
 
     private void initStartTime() {
-        RacingActivity activity = (RacingActivity) getActivity();
-        TimePoint timePoint = (TimePoint) getArguments().getSerializable(START_TIME);
+        final RacingActivity activity = (RacingActivity) getActivity();
+        TimePoint timePoint = null;
+        final Bundle args = getArguments();
+        if (args != null) {
+            timePoint = (TimePoint) args.getSerializable(START_TIME);
+            mRaceId = (SimpleRaceLogIdentifier) getArguments().getSerializable(DEPENDENT_RACE);
+            mStartTimeDiff = (Duration) getArguments().getSerializable(START_TIME_DIFF);
+        }
         if (timePoint == null && activity != null) {
             timePoint = activity.getStartTime();
         }
@@ -182,9 +191,6 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
             mStartTimeString = TimeUtils.formatTime(timePoint);
         }
 
-        mStartTimeDiff = (Duration) getArguments().getSerializable(START_TIME_DIFF);
-        mRaceId = (SimpleRaceLogIdentifier) getArguments().getSerializable(DEPENDENT_RACE);
-
         if (mRaceId != null && mStartTimeDiff != null) {
             ManagedRace race = DataManager.create(getActivity()).getDataStore().getRace(mRaceId);
             mStartTimeString = getString(R.string.minutes_after_long, mStartTimeDiff.asMinutes(),
@@ -195,15 +201,6 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
         mItemStartTime = new SelectionItem(getString(R.string.start_time), mStartTimeString, null, false, false,
                 runnable);
         mItems.add(mItemStartTime);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-
-        if (getRace() != null && getRaceState() != null) {
-            getRaceState().removeChangedListener(mStateListener);
-        }
     }
 
     @Override
@@ -245,9 +242,11 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
     }
 
     @Override
-    public void notifyTick(TimePoint now) {
-        super.notifyTick(now);
+    public TickListener getStartTimeTickListener() {
+        return this::onStartTimeTick;
+    }
 
+    private void onStartTimeTick(TimePoint now) {
         if (mItemStartTime != null && !TextUtils.isEmpty(mStartTimeString)) {
             if (mRaceId == null && mStartTimeDiff == null) {
                 String startTimeValue = getString(R.string.start_time_value, mStartTimeString, calcCountdown(now));
@@ -305,12 +304,11 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
         }
     }
 
-    private class RaceStateChangedListener extends BaseRaceStateChangedListener {
+    private final RaceStateChangedListener stateChangedListener = new BaseRaceStateChangedListener() {
         @Override
         public void onStatusChanged(ReadonlyRaceState state) {
             super.onStatusChanged(state);
-            RacingActivity activity = (RacingActivity) requireActivity();
-            activity.onRaceItemClicked(getRace(), true);
+            openFragment(RaceInfoFragmentChooser.choose(getActivity(), getRace()));
         }
-    }
+    };
 }

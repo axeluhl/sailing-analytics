@@ -32,6 +32,7 @@ import com.sap.sailing.racecommittee.app.ui.adapters.MoreFlagsAdapter.MoreFlag;
 import com.sap.sailing.racecommittee.app.ui.adapters.MoreFlagsAdapter.MoreFlagItemClick;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DatePickerFragment;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
+import com.sap.sailing.racecommittee.app.utils.TickListener;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -270,12 +271,13 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
         }
 
         @Override
-        public void notifyTick(TimePoint now) {
-            super.notifyTick(now);
+        public TickListener getCurrentTimeTickListener() {
+            return this::onCurrentTimeTick;
+        }
 
+        private void onCurrentTimeTick(TimePoint now) {
             if (mCurrentTime != null) {
                 mCurrentTime.setText(TimeUtils.formatTime(now));
-                mCurrentTime.setVisibility(View.VISIBLE);
             }
         }
 

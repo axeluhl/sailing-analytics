@@ -9,11 +9,11 @@ import com.sap.sailing.racecommittee.app.utils.TickListener;
 import com.sap.sailing.racecommittee.app.utils.TickSingleton;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class RaceTimeView extends android.support.v7.widget.AppCompatTextView implements TickListener {
+public class RaceTimeView extends android.support.v7.widget.AppCompatTextView {
 
     private TimePoint startTime;
+    private TickListener listener;
 
     public RaceTimeView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -22,17 +22,20 @@ public class RaceTimeView extends android.support.v7.widget.AppCompatTextView im
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        TickSingleton.INSTANCE.registerListener(this);
+        if (listener != null) {
+            TickSingleton.INSTANCE.registerListener(listener, startTime);
+        }
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        TickSingleton.INSTANCE.unregisterListener(this);
+        unregisterListener();
     }
 
     public void setRaceState(RaceState state) {
         startTime = state.getStartTime();
+        unregisterListener();
         switch (state.getStatus()) {
             case UNKNOWN:
             case UNSCHEDULED:
@@ -42,15 +45,15 @@ public class RaceTimeView extends android.support.v7.widget.AppCompatTextView im
                 break;
             default:
                 setVisibility(VISIBLE);
-                notifyTick(MillisecondsTimePoint.now());
+                listener = now -> setText(TimeUtils.formatDuration(now, startTime));
+                TickSingleton.INSTANCE.registerListener(listener, startTime);
         }
     }
 
-    @Override
-    public void notifyTick(TimePoint now) {
-        if (startTime != null) {
-            String duration = TimeUtils.formatDuration(now, startTime);
-            setText(duration);
+    private void unregisterListener() {
+        if (listener != null) {
+            TickSingleton.INSTANCE.unregisterListener(listener);
+            listener = null;
         }
     }
 }

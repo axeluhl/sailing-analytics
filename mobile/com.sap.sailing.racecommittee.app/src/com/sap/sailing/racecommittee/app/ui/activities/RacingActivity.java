@@ -40,9 +40,6 @@ import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
-import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
-import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
-import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.ConfigurableStartModeFlagRacingProcedure;
 import com.sap.sailing.domain.base.CourseArea;
@@ -344,11 +341,7 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
         if (forcedChange || mSelectedRace != managedRace) {
             preferences = AppPreferences.on(this,
                     PreferenceHelper.getRegattaPrefFileName(managedRace.getRaceGroup().getName()));
-            if (mSelectedRace != null) {
-                mSelectedRace.getState().removeChangedListener(stateChangedListener);
-            }
             mSelectedRace = managedRace;
-            mSelectedRace.getState().addChangedListener(stateChangedListener);
             setupActionBar(managedRace);
             switchToFragment();
         }

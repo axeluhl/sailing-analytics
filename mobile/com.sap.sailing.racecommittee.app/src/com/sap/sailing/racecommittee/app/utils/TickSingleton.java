@@ -47,7 +47,7 @@ public enum TickSingleton {
      * @param toRegister The listener to register
      */
     public void registerListener(TickListener toRegister) {
-        registerListenerForMillis(toRegister, 0);
+        registerListenerForMillisecond(toRegister, 0);
     }
 
     /**
@@ -62,12 +62,12 @@ public enum TickSingleton {
         }
         final Calendar calendar = Calendar.getInstance();
         calendar.setTime(timePoint.asDate());
-        final int millis = calendar.get(Calendar.MILLISECOND);
-        registerListenerForMillis(toRegister, millis);
+        final int millisecond = calendar.get(Calendar.MILLISECOND);
+        registerListenerForMillisecond(toRegister, millisecond);
     }
 
     /**
-     * Unregister a listener.
+     * Unregisters a listener.
      *
      * @param toUnregister The listener to unregister
      */
@@ -83,7 +83,7 @@ public enum TickSingleton {
         }
     }
 
-    private void registerListenerForMillis(TickListener listener, int millis) {
+    private void registerListenerForMillisecond(TickListener listener, int millis) {
         Set<TickListener> listeners = listenersByMillisecond.get(millis);
         if (listeners == null) {
             listeners = new CopyOnWriteArraySet<>();

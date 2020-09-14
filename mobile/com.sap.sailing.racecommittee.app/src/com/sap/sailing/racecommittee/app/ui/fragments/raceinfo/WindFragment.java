@@ -66,6 +66,7 @@ import com.sap.sailing.racecommittee.app.utils.GeoUtils;
 import com.sap.sailing.racecommittee.app.utils.RaceHelper;
 import com.sap.sailing.racecommittee.app.utils.RangeInputFilter;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
+import com.sap.sailing.racecommittee.app.utils.TickListener;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sailing.racecommittee.app.utils.WindHelper;
 import com.sap.sse.common.Bearing;
@@ -282,9 +283,11 @@ public class WindFragment extends BaseFragment
     }
 
     @Override
-    public void notifyTick(TimePoint now) {
-        super.notifyTick(now);
+    public TickListener getCurrentTimeTickListener() {
+        return this::onCurrentTimeTick;
+    }
 
+    private void onCurrentTimeTick(TimePoint now) {
         refreshUI(true);
     }
 

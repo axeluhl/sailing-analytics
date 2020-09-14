@@ -9,15 +9,14 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.sap.sailing.android.shared.util.BitmapHelper;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
-import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
-import com.sap.sailing.domain.abstractlog.race.impl.BaseRaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedureChangedListener;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ReadonlyRacingProcedure;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.BaseRacingProcedureChangedListener;
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
-import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 import com.sap.sailing.racecommittee.app.utils.TickListener;
@@ -28,7 +27,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import java.util.List;
 
-public class FlagTimeView extends LinearLayout implements TickListener {
+public class FlagTimeView extends LinearLayout {
 
     private final ImageView imageView;
     private final TextView textView;
@@ -36,11 +35,11 @@ public class FlagTimeView extends LinearLayout implements TickListener {
     private final int flagSize;
 
     private RaceState state;
-    private RaceLogRaceStatus status;
-    private RacingProcedure procedure;
     private TimePoint startTime;
     private TimePoint finishingTime;
     private TimePoint nextTime;
+
+    private TickListener listener;
 
     public FlagTimeView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -56,60 +55,49 @@ public class FlagTimeView extends LinearLayout implements TickListener {
         }
     }
 
-    private final RaceLogEventVisitor raceLogFlagEventListener = new BaseRaceLogEventVisitor() {
-        @Override
-        public void visit(RaceLogFlagEvent event) {
-            final TimePoint now = MillisecondsTimePoint.now();
-            setVisibility(VISIBLE);
-            setProcedureFlag(now);
-            notifyTick(now);
-        }
-    };
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        TickSingleton.INSTANCE.registerListener(this);
         if (state != null) {
-            state.getRaceLog().addListener(raceLogFlagEventListener);
+            state.getRacingProcedure().addChangedListener(procedureChangedListener);
+        }
+        if (listener != null) {
+            final TimePoint timePoint = startTime != null ? startTime : finishingTime;
+            TickSingleton.INSTANCE.registerListener(listener, timePoint);
         }
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        TickSingleton.INSTANCE.unregisterListener(this);
         if (state != null) {
-            state.getRaceLog().removeListener(raceLogFlagEventListener);
+            state.getRacingProcedure().removeChangedListener(procedureChangedListener);
         }
+        unregisterListener();
     }
 
     public void setRaceState(RaceState state) {
-        final TimePoint now = MillisecondsTimePoint.now();
+        final TimePoint timePoint = MillisecondsTimePoint.now();
         this.state = state;
-        state.getRaceLog().addListener(raceLogFlagEventListener);
-        status = state.getStatus();
-        procedure = state.getTypedRacingProcedure();
+        state.getRacingProcedure().addChangedListener(procedureChangedListener);
+        final RacingProcedure procedure = state.getTypedRacingProcedure();
         startTime = state.getStartTime();
         finishingTime = state.getFinishingTime();
-        switch (status) {
+        unregisterListener();
+        switch (state.getStatus()) {
             case SCHEDULED:
             case STARTPHASE:
-                setVisibility(VISIBLE);
-                setProcedureFlag(now);
-                notifyTick(now);
-                break;
             case RUNNING:
-                if (procedure.isIndividualRecallDisplayed() && now.before(procedure.getIndividualRecallRemovalTime())) {
-                    setVisibility(VISIBLE);
-                    setProcedureFlag(now);
-                    notifyTick(now);
-                }
+                checkFlag(procedure, timePoint);
                 break;
             case FINISHING:
-                setVisibility(VISIBLE);
-                setFinishingFlag(now);
-                notifyTick(now);
+                setFinishingFlag(procedure, timePoint);
+                listener = now -> {
+                    final long millis = now.minus(finishingTime.asMillis()).asMillis();
+                    textView.setText(TimeUtils.formatDurationSince(millis, false));
+                };
+                TickSingleton.INSTANCE.registerListener(listener, finishingTime);
                 break;
             default:
                 setVisibility(GONE);
@@ -117,38 +105,33 @@ public class FlagTimeView extends LinearLayout implements TickListener {
         }
     }
 
-    @Override
-    public void notifyTick(TimePoint now) {
-        switch (status) {
-            case SCHEDULED:
-            case STARTPHASE:
-            case RUNNING:
-                if (nextTime != null && !now.before(nextTime)) {
-                    setProcedureFlag(now);
-                }
-                if (nextTime != null) {
-                    textView.setText(TimeUtils.formatDuration(now, nextTime, false));
-                }
-                break;
-            case FINISHING:
-                textView.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
-                textView.setText(TimeUtils.formatDurationSince(now.minus(finishingTime.asMillis()).asMillis(), false));
-                break;
+    private void unregisterListener() {
+        if (listener != null) {
+            TickSingleton.INSTANCE.unregisterListener(listener);
+            listener = null;
         }
     }
 
-    private void setProcedureFlag(TimePoint now) {
-        Drawable flag = null;
-        Drawable arrow = null;
-        final FlagPoleState poleState = procedure.getActiveFlags(startTime, now);
+    private void checkFlag(ReadonlyRacingProcedure procedure, TimePoint timePoint) {
+        final FlagPoleState poleState = procedure.getActiveFlags(startTime, timePoint);
         nextTime = poleState.getNextStateValidFrom();
-        if (nextTime == null) {
+        if (nextTime == null || nextTime.before(timePoint)) {
+            unregisterListener();
             setVisibility(GONE);
             clear();
             return;
         }
-        final List<FlagPole> poles = poleState.getCurrentState();
+        setVisibility(VISIBLE);
+        setFlag(poleState);
+        listener = now -> textView.setText(TimeUtils.formatDuration(now, nextTime != null ? nextTime : now, false));
+        TickSingleton.INSTANCE.registerListener(listener, startTime);
+    }
+
+    private void setFlag(FlagPoleState poleState) {
+        Drawable flag = null;
+        Drawable arrow = null;
         final FlagPole nextPole = FlagPoleState.getMostInterestingFlagPole(poleState.computeUpcomingChanges());
+        final List<FlagPole> poles = poleState.getCurrentState();
         for (FlagPole pole : poles) {
             final Flags upperFlag = pole.getUpperFlag();
             if (isNextFlag(upperFlag, nextPole)) {
@@ -168,14 +151,16 @@ public class FlagTimeView extends LinearLayout implements TickListener {
         textView.setCompoundDrawablesWithIntrinsicBounds(arrow, null, null, null);
     }
 
-    private void setFinishingFlag(TimePoint now) {
+    private void setFinishingFlag(ReadonlyRacingProcedure procedure, TimePoint now) {
         final FlagPoleState poleState = procedure.getActiveFlags(startTime, now);
         final List<FlagPole> poles = poleState.getCurrentState();
         if (poles.isEmpty()) {
+            setVisibility(GONE);
             clear();
             return;
         }
         final Drawable flag = FlagsResources.getFlagDrawable(getContext(), poles.get(0).getUpperFlag().name(), flagSize);
+        setVisibility(VISIBLE);
         imageView.setImageDrawable(flag);
         textView.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
     }
@@ -189,4 +174,13 @@ public class FlagTimeView extends LinearLayout implements TickListener {
     private boolean isNextFlag(Flags flag, FlagPole pole) {
         return pole != null && flag.equals(pole.getUpperFlag());
     }
+
+    private final RacingProcedureChangedListener procedureChangedListener = new BaseRacingProcedureChangedListener() {
+        @Override
+        public void onActiveFlagsChanged(ReadonlyRacingProcedure procedure) {
+            super.onActiveFlagsChanged(procedure);
+            unregisterListener();
+            checkFlag(procedure, MillisecondsTimePoint.now());
+        }
+    };
 }

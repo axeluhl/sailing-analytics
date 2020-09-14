@@ -43,6 +43,7 @@ import com.sap.sailing.racecommittee.app.ui.adapters.DependentRaceSpinnerAdapter
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DatePickerFragment;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
+import com.sap.sailing.racecommittee.app.utils.TickListener;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -209,7 +210,7 @@ public class StartTimeFragment extends BaseFragment
             @Override
             public void onStartTimeChanged(ReadonlyRaceState state) {
                 mStartTime = state.getStartTime();
-                notifyTick(MillisecondsTimePoint.now());
+                onCurrentTimeTick(MillisecondsTimePoint.now());
             }
         };
 
@@ -229,12 +230,10 @@ public class StartTimeFragment extends BaseFragment
                     }
                     break;
 
-                case MODE_TIME_PANEL:
-                    if (getRace() != null && getRaceState() != null) {
-                        final TimePoint startTime = getRaceState().getStartTime();
-                        if (startTime != null) {
-                            mStartTime = startTime;
-                        }
+                case MODE_TIME_PANEL: {
+                    final TimePoint startTime = getRaceState().getStartTime();
+                    if (startTime != null) {
+                        mStartTime = startTime;
                     }
                     if (AppUtils.with(getActivity()).isLandscape()) {
                         if (header != null) {
@@ -258,8 +257,9 @@ public class StartTimeFragment extends BaseFragment
                         mRaceId = Util.get(result.getDependingOnRaces(), 0);
                     }
                     break;
-
-                default: // MODE_SETUP
+                }
+                //MODE_SETUP
+                default: {
                     final TimePoint startTime = (TimePoint) getArguments().getSerializable(MainScheduleFragment.START_TIME);
                     if (startTime == null) {
                         final Calendar calendar = Calendar.getInstance();
@@ -292,6 +292,7 @@ public class StartTimeFragment extends BaseFragment
                         startSeconds.setVisibility(View.GONE);
                     }
                     break;
+                }
             }
 
             initViewsAbsolute(getView());
@@ -581,10 +582,12 @@ public class StartTimeFragment extends BaseFragment
     }
 
     @Override
-    public void notifyTick(TimePoint now) {
-        super.notifyTick(now);
+    public TickListener getStartTimeTickListener() {
+        return this::onCurrentTimeTick;
+    }
 
-        if (mAbsolute.getVisibility() == View.VISIBLE) {
+    private void onCurrentTimeTick(TimePoint now) {
+        if (mAbsolute.getVisibility() == View.VISIBLE && mStartTime != null) {
             TimePoint timePoint;
             String duration;
             if (mStartTime.after(now)) {
@@ -679,6 +682,8 @@ public class StartTimeFragment extends BaseFragment
         mListenerIgnore = true;
         updateTimePickerAndSeconds();
         activateSetTime(ABSOLUTE);
+        unregisterTickListeners();
+        registerTickListeners();
     }
 
     @Override
@@ -689,23 +694,27 @@ public class StartTimeFragment extends BaseFragment
         mStartTime = new MillisecondsTimePoint(calendar.getTime());
         updateDateButton();
         activateSetTime(ABSOLUTE);
+        unregisterTickListeners();
+        registerTickListeners();
     }
 
     @Override
     public void onTimeChanged(TimePicker view, int hourOfDay, int minute) {
-        if (mListenerIgnore) {
-            mListenerIgnore = false;
-            return;
-        }
         final Calendar calendar = Calendar.getInstance();
         calendar.setTime(mStartTime.asDate());
         calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
         calendar.set(Calendar.MINUTE, minute);
-        calendar.set(Calendar.SECOND, 0);
-        calendar.set(Calendar.MILLISECOND, 0);
+        if (mListenerIgnore) {
+            mListenerIgnore = false;
+        } else {
+            calendar.set(Calendar.SECOND, 0);
+            calendar.set(Calendar.MILLISECOND, 0);
+            setSeconds(0, 0);
+        }
         mStartTime = new MillisecondsTimePoint(calendar.getTime());
-        setSeconds(0, 0);
         activateSetTime(ABSOLUTE);
+        unregisterTickListeners();
+        registerTickListeners();
     }
 
     private void activateSetTime(int tab) {
@@ -776,8 +785,11 @@ public class StartTimeFragment extends BaseFragment
     }
 
     private void changeFragment(TimePoint startTime, Duration startTimeDiff, SimpleRaceLogIdentifier identifier) {
+        final TimePoint now = MillisecondsTimePoint.now();
+        final Bundle args = getRecentArguments();
+        final RacingProcedureType procedureType = getRaceState().getTypedRacingProcedure().getType();
+        getRaceState().setRacingProcedure(now, procedureType);
         int viewId = R.id.racing_view_container;
-        TimePoint now = MillisecondsTimePoint.now();
         RaceFragment fragment = MainScheduleFragment.newInstance();
         if (getArguments() != null && startTime != null) {
             if (getArguments().getInt(START_MODE, START_MODE_PRESETUP) != START_MODE_PRESETUP) {
