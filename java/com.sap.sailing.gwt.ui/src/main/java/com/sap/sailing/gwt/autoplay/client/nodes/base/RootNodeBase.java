@@ -59,7 +59,6 @@ public abstract class RootNodeBase extends BaseCompositeNode {
         checkTimer.schedule(UPDATE_STATE_TIMER);
         final UUID eventUUID = cf.getAutoPlayCtxSignalError().getContextDefinition().getEventId();
         cf.getSailingService().getEventById(eventUUID, true, new AsyncCallback<EventDTO>() {
-
             @Override
             public void onSuccess(final EventDTO event) {
                 if (firstTimeEventLoaded) {
