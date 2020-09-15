@@ -635,7 +635,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         headerPanel.setStyleName("RaceMap-HeaderPanel");
         panelForLeftHeaderLabels = new AbsolutePanel();
         panelForRightHeaderLabels = new AbsolutePanel();
-        initializeData(settings.isShowMapControls(), showHeaderPanel);
         raceMapStyle = raceMapResources.raceMapStyle();
         raceMapStyle.ensureInjected();
         combinedWindPanel = new CombinedWindPanel(this, raceMapImageManager, raceMapStyle, stringMessages, coordinateSystem);
@@ -649,6 +648,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         mapFirstZoomDone = false;
         // TODO bug 494: reset zoom settings to user preferences
         initWidget(rootPanel);
+        initializeData(settings.isShowMapControls(), showHeaderPanel);
         this.setSize("100%", "100%");
     }
 
