@@ -777,10 +777,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         rootPanel.add(sapLogo);
                     }
                 }
-
                 map.setControls(ControlPosition.LEFT_TOP, topLeftControlsWrapperPanel);
                 adjustLeftControlsIndent();
-
                 RaceMap.this.raceMapImageManager.loadMapIcons(map);
                 map.setSize("100%", "100%");
                 map.addZoomChangeHandler(new ZoomChangeMapHandler() {
@@ -839,14 +837,12 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         }
                     }
                 });
-
                 map.addDragStartHandler(event -> {
                     currentlyDragging = true;
                     if (streamletOverlay != null && settings.isShowWindStreamletOverlay()) {
                         streamletOverlay.onDragStart();
                     }
                 });
-
                 map.addIdleHandler(new IdleMapHandler() {
                     @Override
                     public void onEvent(IdleMapEvent event) {
@@ -861,7 +857,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                             map.panTo(autoZoomLatLngBounds.getCenter());
                             autoZoomOut = false;
                         }
-
                         if (streamletOverlay != null && settings.isShowWindStreamletOverlay()) {
                             streamletOverlay.setCanvasSettings();
                         }
@@ -889,14 +884,12 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         if (!isAutoZoomInProgress() && (newZoomLevel != currentZoomLevel)) {
                             removeTransitions();
                         }
-
                         currentMapBounds = map.getBounds();
                         currentZoomLevel = newZoomLevel;
                         headerPanel.getElement().getStyle().setWidth(map.getOffsetWidth(), Unit.PX);
                         refreshMapWithoutAnimationButLeaveTransitionsAlive();
                     }
                 });
-
                 // If there was a time change before the API was loaded, reset the time
                 if (lastTimeChangeBeforeInitialization != null) {
                     timeChanged(lastTimeChangeBeforeInitialization, null);
@@ -911,7 +904,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 if (settings.isShowWindStreamletOverlay()) {
                     streamletOverlay.setVisible(true);
                 }
-
                 if (isSimulationEnabled) {
                     // determine availability of polar diagram
                     setHasPolar();
