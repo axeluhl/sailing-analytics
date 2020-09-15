@@ -39,9 +39,9 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
 
     protected ArrayList<T> namedList;
     protected List<CheckedItem> checkedItems;
-    private ItemSelectedListener<T> listener;
-    private CheckedItemAdapter listAdapter;
-    private int mSelectedIndex = -1;
+    protected ItemSelectedListener<T> listener;
+    protected CheckedItemAdapter listAdapter;
+    protected int mSelectedIndex = -1;
 
     protected abstract ItemSelectedListener<T> attachListener(Activity activity);
 
@@ -69,7 +69,6 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
         setListAdapter(listAdapter);
 
         showProgressBar(true);
-        loadItems();
     }
 
     @Override
@@ -91,7 +90,7 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
 
         // this unchecked cast here seems unavoidable.
         // even SDK example code does it...
-        listener.itemSelected(this, namedList.get(position));
+        listener.itemSelected(this, namedList.get(position), true);
     }
 
     @Override
@@ -168,6 +167,12 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        loadItems();
+    }
+
+    @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putInt("position", mSelectedIndex);
 
@@ -194,5 +199,13 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
         if (activity != null) {
             activity.setProgressBarIndeterminateVisibility(visible);
         }
+    }
+
+    protected void selectEvent(T eventBase) {
+        final int position = namedList.indexOf(eventBase);
+        listAdapter.setCheckedPosition(position);
+
+        mSelectedIndex = position;
+        listener.itemSelected(this, eventBase, false);
     }
 }

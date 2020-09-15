@@ -15,16 +15,18 @@ import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelect
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 
 public class CourseAreaListFragment extends NamedListFragment<CourseArea> {
-
+    private static final String PARAM_SELECTED_ID = "SELECTED_ID";
     private Serializable parentEventId;
 
-    public static CourseAreaListFragment newInstance(Serializable eventId) {
+    public static CourseAreaListFragment newInstance(Serializable eventId, @Nullable final String selectedId) {
         CourseAreaListFragment fragment = new CourseAreaListFragment();
         Bundle args = new Bundle();
         args.putSerializable(AppConstants.EventIdTag, eventId);
+        args.putSerializable(PARAM_SELECTED_ID, selectedId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -65,6 +67,15 @@ public class CourseAreaListFragment extends NamedListFragment<CourseArea> {
             for (String allowedCourse : courses) {
                 if ("*".equals(allowedCourse) || allowedCourse.equals(item.getText())) {
                     item.setDisabled(false);
+                }
+            }
+        }
+        final Bundle arguments = getArguments();
+        if (arguments != null && mSelectedIndex == -1) {
+            final String eventId = arguments.getString(PARAM_SELECTED_ID);
+            for (CourseArea area : data) {
+                if (area.getId().toString().equals(eventId)) {
+                    selectEvent(area);
                 }
             }
         }

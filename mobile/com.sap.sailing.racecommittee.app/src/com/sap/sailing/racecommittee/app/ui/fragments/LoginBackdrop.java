@@ -1,16 +1,12 @@
 package com.sap.sailing.racecommittee.app.ui.fragments;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.text.SpannableString;
 import android.text.Spanned;
@@ -32,13 +28,10 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.barcode.Barcode;
-import com.sap.sailing.android.shared.data.LoginData;
 import com.sap.sailing.android.shared.data.http.UnauthorizedException;
-import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.ui.activities.BarcodeCaptureActivity;
 import com.sap.sailing.android.shared.util.AuthCheckTask;
 import com.sap.sailing.android.shared.util.BroadcastManager;
-import com.sap.sailing.android.shared.util.LoginTask;
 import com.sap.sailing.android.shared.util.LoginTask.LoginTaskListener;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.common.impl.DeviceConfigurationQRCodeUtils;
@@ -53,15 +46,12 @@ import com.sap.sailing.racecommittee.app.ui.fragments.preference.GeneralPreferen
 import com.sap.sailing.racecommittee.app.utils.QRHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
-import java.net.MalformedURLException;
-
 public class LoginBackdrop extends Fragment implements BackPressListener {
 
     private static final String TAG = LoginBackdrop.class.getName();
     private static final int requestCodeQR = 45392;
     private static final String SHOW_BACKDROP_TEXT = "SHOW_BACKDROP_TEXT";
 
-    private IntentReceiver receiver;
     private View login;
     private View onboarding;
     private boolean useBack;
@@ -138,8 +128,6 @@ public class LoginBackdrop extends Fragment implements BackPressListener {
                 LoginBackdrop.this.onException(exception);
             }
         };
-        receiver = new IntentReceiver();
-
         return layout;
     }
 
@@ -179,13 +167,6 @@ public class LoginBackdrop extends Fragment implements BackPressListener {
                 view.setVisibility(View.GONE);
             }
         }
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-
-        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(receiver);
     }
 
     private void refreshData() {
@@ -289,20 +270,17 @@ public class LoginBackdrop extends Fragment implements BackPressListener {
         }
 
         final EditText userName = ViewHelper.get(layout, R.id.user_name);
+        if (!TextUtils.isEmpty(username)){
+            userName.setText(username);
+        }
         final EditText userPassword = ViewHelper.get(layout, R.id.user_password);
+        if (!TextUtils.isEmpty(password)){
+            userPassword.setText(password);
+        }
         Button login = ViewHelper.get(layout, R.id.login_request);
         if (login != null) {
             login.setOnClickListener(v -> {
-                LoginTask task;
-                try {
-                    task = new LoginTask(getActivity(), AppPreferences.on(getActivity()).getServerBaseURL(),
-                            loginTaskListener);
-                    task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
-                            new LoginData(userName.getText().toString(), userPassword.getText().toString()));
-                } catch (Exception e) {
-                    ExLog.e(getActivity(), TAG,
-                            "Error: Failed to perform checkin due to a MalformedURLException: " + e.getMessage());
-                }
+                BoardingService.get().login(requireActivity(), userName.getText().toString(), userPassword.getText().toString(), loginTaskListener);
             });
         }
     }
@@ -332,7 +310,7 @@ public class LoginBackdrop extends Fragment implements BackPressListener {
         }
     }
 
-    private void onException(Exception exception) {
+    public void onException(Exception exception) {
         if (login != null) {
             if (login.getVisibility() == View.VISIBLE) { // login call
                 if (exception instanceof UnauthorizedException) {
@@ -374,6 +352,14 @@ public class LoginBackdrop extends Fragment implements BackPressListener {
         } else {
             return false;
         }
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     private class OverFlowButton implements View.OnClickListener {

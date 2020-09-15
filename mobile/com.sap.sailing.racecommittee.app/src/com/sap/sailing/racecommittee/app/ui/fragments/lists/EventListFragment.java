@@ -9,12 +9,19 @@ import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.EventSelec
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
 
 import android.app.Activity;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 
 public class EventListFragment extends NamedListFragment<EventBase> {
 
-    public static EventListFragment newInstance() {
-        EventListFragment fragment = new EventListFragment();
+    private static final String PARAM_EVENT_ID = "EVENT_ID";
+
+    public static EventListFragment newInstance(@Nullable final String eventId) {
+        final EventListFragment fragment = new EventListFragment();
+        final Bundle args = new Bundle();
+        args.putString(PARAM_EVENT_ID, eventId);
+        fragment.setArguments(args);
         return fragment;
     }
 
@@ -38,5 +45,19 @@ public class EventListFragment extends NamedListFragment<EventBase> {
     @Override
     public DialogResultListener getListener() {
         return (DialogResultListener) getActivity();
+    }
+
+    @Override
+    public void onLoadSucceeded(Collection<EventBase> data, boolean isCached) {
+        super.onLoadSucceeded(data, isCached);
+        final Bundle arguments = getArguments();
+        if (arguments != null && mSelectedIndex == -1) {
+            final String eventId = arguments.getString(PARAM_EVENT_ID);
+            for (EventBase eventBase : data) {
+                if (eventBase.getId().toString().equals(eventId)) {
+                    selectEvent(eventBase);
+                }
+            }
+        }
     }
 }

@@ -32,8 +32,14 @@ public class PositionListFragment extends LoggableListFragment {
         values = new ArrayList<>();
     }
 
-    public static PositionListFragment newInstance() {
-        return new PositionListFragment();
+    public static final String PARAM_POSITION = "POSITION";
+
+    public static PositionListFragment newInstance(String branchPosition) {
+        final PositionListFragment positionListFragment = new PositionListFragment();
+        final Bundle params = new Bundle();
+        params.putString(PARAM_POSITION, branchPosition);
+        positionListFragment.setArguments(params);
+        return positionListFragment;
     }
 
     @Override
@@ -67,12 +73,34 @@ public class PositionListFragment extends LoggableListFragment {
 
         host = (PositionSelectedListenerHost) getActivity();
 
+        final Bundle args = getArguments();
+        if (args != null) {
+            String position = args.getString(PARAM_POSITION);
+            try {
+                LoginType loginType = LoginType.valueOf(position);
+                int index = 0;
+                int pos = -1;
+                for (LoginTypeItem loginTypeItem : values) {
+                    if (loginTypeItem.mType == loginType) {
+                        pos = index;
+                    }
+                    index += 1;
+                }
+                positionSelected(pos, adapter);
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
+        }
         return view;
     }
 
     @Override
     public void onListItemClick(ListView listView, View view, int position, long id) {
         ListAdapter adapter = listView.getAdapter();
+        positionSelected(position, adapter);
+    }
+
+    private void positionSelected(int position, ListAdapter adapter) {
         if (adapter instanceof CheckedItemAdapter) {
             CheckedItemAdapter checkedItemAdapter = (CheckedItemAdapter) adapter;
             checkedItemAdapter.setCheckedPosition(position);
