@@ -89,7 +89,8 @@ public class SecurityResource extends AbstractSecurityResource {
     @POST
     @Path("/forgot_password")
     @Produces("text/plain;charset=UTF-8")
-    public Response forgotPassword(@Context UriInfo uriInfo, @QueryParam("username") String username, @QueryParam("email") String email) {
+    public Response forgotPassword(@Context UriInfo uriInfo, @QueryParam("username") String username,
+            @QueryParam("email") String email, @QueryParam("application") String application) {
         try {
             final User user;
             if (username != null) {
@@ -102,7 +103,7 @@ public class SecurityResource extends AbstractSecurityResource {
             if (user == null) {
                 return Response.status(Status.PRECONDITION_FAILED).entity("user not found").build();
             } else {
-                getService().resetPassword(user.getName(), getPasswordResetURL(uriInfo));
+                getService().resetPassword(user.getName(), getPasswordResetURL(uriInfo, application));
                 return Response.ok().build();
             }
         } catch (UserManagementException | MailException e) {
@@ -157,8 +158,8 @@ public class SecurityResource extends AbstractSecurityResource {
         return getContextUrl(uriInfo, urlPath);
     }
 
-    private String getPasswordResetURL(UriInfo uriInfo) {
-        final SecurityUrlPathProvider securityUrlPathProvider = getSecurityUrlPathProvider();
+    private String getPasswordResetURL(UriInfo uriInfo, String application) {
+        final SecurityUrlPathProvider securityUrlPathProvider = getSecurityUrlPathProvider(application);
         final String urlPath = securityUrlPathProvider.getPasswordResetUrlPath();
         return getContextUrl(uriInfo, urlPath);
     }
