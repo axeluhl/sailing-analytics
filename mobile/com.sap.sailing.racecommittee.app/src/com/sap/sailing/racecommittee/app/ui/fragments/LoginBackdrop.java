@@ -34,11 +34,11 @@ import com.sap.sailing.android.shared.util.AuthCheckTask;
 import com.sap.sailing.android.shared.util.BroadcastManager;
 import com.sap.sailing.android.shared.util.LoginTask.LoginTaskListener;
 import com.sap.sailing.android.shared.util.ViewHelper;
-import com.sap.sailing.domain.common.impl.DeviceConfigurationQRCodeUtils;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.BackPressListener;
+import com.sap.sailing.racecommittee.app.services.BoardingService;
 import com.sap.sailing.racecommittee.app.ui.activities.BaseActivity;
 import com.sap.sailing.racecommittee.app.ui.activities.PreferenceActivity;
 import com.sap.sailing.racecommittee.app.ui.activities.SystemInformationActivity;
@@ -56,8 +56,10 @@ public class LoginBackdrop extends Fragment implements BackPressListener {
     private View onboarding;
     private boolean useBack;
     private String server;
-    private AuthCheckTask.AuthCheckTaskListener mAuthCheckTaskListener;
+
     private LoginTaskListener loginTaskListener;
+    private String username;
+    private String password;
 
     public static LoginBackdrop newInstance() {
 
@@ -94,22 +96,7 @@ public class LoginBackdrop extends Fragment implements BackPressListener {
         setupOnboarding(layout);
         setupLogin(layout);
 
-        mAuthCheckTaskListener = new AuthCheckTask.AuthCheckTaskListener() {
-            @Override
-            public void onResultReceived(Boolean authenticated) {
-                if (authenticated) {
-                    BroadcastManager.getInstance(getActivity())
-                            .addIntent(new Intent(AppConstants.INTENT_ACTION_VALID_DATA));
-                } else {
-                    Toast.makeText(getActivity(), "User is not authenticated", Toast.LENGTH_LONG).show();
-                }
-            }
 
-            @Override
-            public void onException(Exception exception) {
-                LoginBackdrop.this.onException(exception);
-            }
-        };
         loginTaskListener = new LoginTaskListener() {
             @Override
             public void onResultReceived(String accessToken) {
@@ -154,13 +141,6 @@ public class LoginBackdrop extends Fragment implements BackPressListener {
     @Override
     public void onResume() {
         super.onResume();
-
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(AppConstants.INTENT_ACTION_CHECK_LOGIN);
-        filter.addAction(AppConstants.INTENT_ACTION_SHOW_LOGIN);
-        filter.addAction(AppConstants.INTENT_ACTION_SHOW_ONBOARDING);
-        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(receiver, filter);
-
         if (getArguments() != null && getView() != null && !getArguments().getBoolean(SHOW_BACKDROP_TEXT, true)) {
             View view = getView().findViewById(R.id.backdrop_title);
             if (view != null) {
@@ -224,13 +204,7 @@ public class LoginBackdrop extends Fragment implements BackPressListener {
                 AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
                 builder.setView(view);
                 builder.setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                    if (QRHelper.with(getActivity())
-                            .saveData(url.getText().toString() + "#"
-                                    + DeviceConfigurationQRCodeUtils.deviceIdentifierKey + "="
-                                    + device_id.getText().toString())) {
-                        LocalBroadcastManager.getInstance(requireContext())
-                                .sendBroadcast(new Intent(AppConstants.INTENT_ACTION_CHECK_LOGIN));
-                    }
+                    BoardingService.get().saveBackendUrl(requireContext(), url.getText().toString());
                 });
                 builder.setNegativeButton(android.R.string.cancel, null);
                 AlertDialog dialog = builder.show();
@@ -322,24 +296,43 @@ public class LoginBackdrop extends Fragment implements BackPressListener {
                 server = null;
                 if (exception instanceof UnauthorizedException) { // wrong credentials (access token)
                     server = exception.getMessage().split("=")[1];
-                    BroadcastManager.getInstance(getActivity())
-                            .addIntent(new Intent(AppConstants.INTENT_ACTION_SHOW_LOGIN));
+                    showLoginView();
                 } else { // connection error
                     AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
                     builder.setTitle(R.string.hello_call_error_title);
                     builder.setMessage(R.string.hello_call_error_message);
                     builder.setPositiveButton(R.string.hello_call_error_positive, (dialog, which) ->
-                            BroadcastManager.getInstance(getActivity())
-                                    .addIntent(new Intent(AppConstants.INTENT_ACTION_CHECK_LOGIN)));
+                            checkLogin());
                     builder.setNegativeButton(R.string.hello_call_error_negative, (dialog, which) ->
                             requireActivity().finish());
                     builder.setNeutralButton(R.string.hello_call_error_neutral, (dialog, which) ->
-                            BroadcastManager.getInstance(getActivity())
-                                    .addIntent(new Intent(AppConstants.INTENT_ACTION_SHOW_ONBOARDING)));
+                            showOnboarding());
                     builder.setCancelable(false);
                     builder.show();
                 }
             }
+        }
+    }
+
+    public void checkLogin() {
+        if (!BoardingService.get().checkLogin(requireContext(), new AuthCheckTask.AuthCheckTaskListener() {
+            @Override
+            public void onResultReceived(Boolean authenticated) {
+                if (authenticated) {
+                    BroadcastManager.getInstance(getActivity())
+                            .addIntent(new Intent(AppConstants.INTENT_ACTION_VALID_DATA));
+                } else {
+                    Toast.makeText(getActivity(), "User is not authenticated", Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onException(Exception exception) {
+                showOnboarding();
+                LoginBackdrop.this.onException(exception);
+            }
+        })){
+            showOnboarding();
         }
     }
 
@@ -397,40 +390,24 @@ public class LoginBackdrop extends Fragment implements BackPressListener {
         }
     }
 
-    private class IntentReceiver extends BroadcastReceiver {
+    private void showOnboarding() {
+        hideAll();
+        setVisibility(onboarding, View.VISIBLE);
+    }
 
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            setVisibility(onboarding, View.GONE);
-            setVisibility(login, View.GONE);
-            if (AppConstants.INTENT_ACTION_CHECK_LOGIN.equals(action)) {
-                AppPreferences pref = AppPreferences.on(getActivity());
-                if (TextUtils.isEmpty(pref.getServerBaseURL())) {
-                    BroadcastManager.getInstance(getActivity())
-                            .addIntent(new Intent(AppConstants.INTENT_ACTION_SHOW_ONBOARDING));
-                } else {
-                    try {
-                        AuthCheckTask task = new AuthCheckTask(getActivity(), pref.getServerBaseURL(),
-                                mAuthCheckTaskListener);
-                        task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                    } catch (MalformedURLException e) {
-                        ExLog.e(getActivity(), TAG,
-                                "Error: Failed to perform check-in due to a MalformedURLException: " + e.getMessage());
-                    }
-                }
-            } else if (AppConstants.INTENT_ACTION_SHOW_ONBOARDING.equals(action)) {
-                setVisibility(onboarding, View.VISIBLE);
-            } else if (AppConstants.INTENT_ACTION_SHOW_LOGIN.equals(action)) {
-                setupLogin(getView());
-                setVisibility(login, View.VISIBLE);
-            }
+    private void setVisibility(View view, int visibility) {
+        if (view != null) {
+            view.setVisibility(visibility);
         }
+    }
 
-        private void setVisibility(View view, int visibility) {
-            if (view != null) {
-                view.setVisibility(visibility);
-            }
-        }
+    void hideAll() {
+        setVisibility(onboarding, View.GONE);
+        setVisibility(login, View.GONE);
+    }
+    private void showLoginView() {
+        hideAll();
+        setupLogin(getView());
+        setVisibility(login, View.VISIBLE);
     }
 }

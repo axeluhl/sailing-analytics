@@ -19,6 +19,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -49,6 +50,8 @@ import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.LoginType;
 import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesDeviceConfigurationLoader;
 import com.sap.sailing.racecommittee.app.logging.LogEvent;
+import com.sap.sailing.racecommittee.app.services.BoardingService;
+import com.sap.sailing.racecommittee.app.ui.fragments.LoginBackdrop;
 import com.sap.sailing.racecommittee.app.ui.fragments.LoginListViews;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AttachedDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DialogListenerHost;
@@ -68,6 +71,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
+
+import io.branch.referral.Branch;
 
 public class LoginActivity extends BaseActivity implements EventSelectedListenerHost, CourseAreaSelectedListenerHost,
         PositionSelectedListenerHost, DialogListenerHost.DialogResultListener {
@@ -147,6 +152,44 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
     public LoginActivity() {
 
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        Branch.sessionBuilder(this).withCallback((referringParams, error) -> {
+            if (referringParams != null) {
+                final LoginBackdrop loginBackdrop = (LoginBackdrop) getSupportFragmentManager().findFragmentById(R.id.login_view_backdrop);
+                final String url = referringParams.optString("url");
+                final String username = referringParams.optString("username");
+                final String password = referringParams.optString("password");
+                branchEventId = referringParams.optString("eventId");
+                branchCourceId = referringParams.optString("courseId");
+                branchPosition = referringParams.optString("positionId");
+                if (!TextUtils.isEmpty(url)) {
+                    BoardingService.get().saveBackendUrl(LoginActivity.this, url);
+                    if (!TextUtils.isEmpty(username) && !TextUtils.isEmpty(password)) {
+                        BoardingService.get().login(LoginActivity.this, username, password, new LoginTask.LoginTaskListener() {
+                            @Override
+                            public void onResultReceived(String accessToken) {
+                                AppPreferences.on(LoginActivity.this).setAccessToken(accessToken);
+                                gotAccessToken();
+                            }
+
+                            @Override
+                            public void onException(Exception exception) {
+                                loginBackdrop.checkLogin();
+                            }
+                        });
+                        return;
+                    } else {
+                        loginBackdrop.setUsername(username);
+                        loginBackdrop.setPassword(password);
+                    }
+                }
+                loginBackdrop.checkLogin();
+            }
+        }).withData(getIntent() != null ? getIntent().getData() : null).init();
     }
 
     private void setupSignInButton() {
