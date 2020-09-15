@@ -20,7 +20,6 @@ import com.sap.sse.mail.MailService;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.security.SecurityInitializationCustomizer;
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.SecurityUrlPathProvider;
 import com.sap.sse.security.UsernamePasswordRealm;
 import com.sap.sse.security.interfaces.AccessControlStore;
 import com.sap.sse.security.interfaces.UserStore;
@@ -64,8 +63,6 @@ public class Activator implements BundleActivator {
     private ServiceTracker<UserStore, UserStore> userStoreTracker;
 
     private ServiceTracker<AccessControlStore, AccessControlStore> accessControlStoreTracker;
-    
-    private ServiceTracker<SecurityUrlPathProvider, SecurityUrlPathProvider> securityUrlPathProviderTracker;
     
     public static final String SHARED_ACROSS_SUBDOMAINS_OF_PROPERTY_NAME = "security.sharedAcrossSubdomainsOf";
     /**
@@ -148,29 +145,6 @@ public class Activator implements BundleActivator {
                 Activator.this.clearState();
             }
         }, null);
-        findOrCreateSSEUrlPathProvider(bundleContext);
-    }
-
-    private void findOrCreateSSEUrlPathProvider(BundleContext bundleContext) {
-        securityUrlPathProviderTracker = new ServiceTracker<>(bundleContext, SecurityUrlPathProvider.class, /* customizer */ null);
-        securityUrlPathProviderTracker.open();
-        new Thread("ServiceTracker waiting for SecurityUrlPathProvider") {
-            @Override
-            public void run() {
-                try {
-                    logger.info("Waiting for SecurityUrlPathProvider...");
-                    final SecurityUrlPathProvider securityUrlPathProvider = securityUrlPathProviderTracker.waitForService(5000);
-                    if(securityUrlPathProvider == null) {
-                        logger.info("No SecurityUrlPathProvider provided, instantiating SecurityUrlPathProviderDefaultImpl" + SecurityUrlPathProviderDefaultImpl.class.getSimpleName());
-                        bundleContext.registerService(SecurityUrlPathProvider.class, new SecurityUrlPathProviderDefaultImpl(), /* customizer */ null);
-                    }else {
-                        logger.info("Obtained SecurityUrlPathProvider " + securityUrlPathProvider);
-                    }
-                } catch (InterruptedException e) {
-                    logger.log(Level.SEVERE, "Interrupted while waiting for SecurityUrlPathProvider", e);
-                }
-            }
-        }.start();
     }
 
     /**
