@@ -114,7 +114,7 @@ public abstract class RootNodeBase extends BaseCompositeNode {
                                 log("Received different live race, hard switching to AFTER_LIVE race");
                                 setCurrentState(isPreLiveRace, loadedLiveRace, RootNodeState.AFTER_LIVE, currentState);
                             } else {
-                                log("New " + (isPreLiveRace ? "live " : "pre live") + " race found: " + loadedLiveRace
+                                log("New " + (isPreLiveRace ? "live" : "pre live") + " race found: " + loadedLiveRace
                                         + " starting in " + (timeToRaceStartInMs / 1000) + "s");
                                 setCurrentState(isPreLiveRace, loadedLiveRace,
                                         isPreLiveRace ? RootNodeState.PRE_RACE : RootNodeState.LIVE, currentState);
