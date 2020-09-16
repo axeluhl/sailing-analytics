@@ -20,6 +20,7 @@ import org.json.simple.parser.ParseException;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.WindFinderReviewedSpotsCollectionIdProvider;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -47,7 +48,7 @@ public class WindFinderTrackerFactoryImpl implements WindFinderTrackerFactory {
     /**
      * Can hold reviewed spots collections. Starts out valid but empty. Useful if we're running outside of an OSGi
      * environment such as a test set-up. The collections provided here will be added to the set returned by
-     * {@link #getReviewedSpotsCollections(boolean)}.
+     * {@link #getAllReviewedSpotsCollections(boolean)}.
      */
     private Set<ReviewedSpotsCollection> reviewedSpotsCollections;
     private final ServiceTracker<WindFinderReviewedSpotsCollectionIdProvider, WindFinderReviewedSpotsCollectionIdProvider> reviewedSpotsCollectionIdProvider;
@@ -63,9 +64,8 @@ public class WindFinderTrackerFactoryImpl implements WindFinderTrackerFactory {
             reviewedSpotsCollectionsByIdCache = executor.schedule(
                     ()->{
                         final ConcurrentMap<String, ReviewedSpotsCollection> result = new ConcurrentHashMap<>();
-                        reviewedSpotsCollectionIdProvider.getService();
                         try {
-                            for (final ReviewedSpotsCollection c : loadSpotCollectionsFromProvider(/* lookupInCache */ false)) {
+                            for (final ReviewedSpotsCollection c : loadAllSpotCollectionsFromProvider(/* lookupInCache */ false)) {
                                 result.put(c.getId(), c);
                             }
                         } catch (Exception e) {
@@ -119,13 +119,26 @@ public class WindFinderTrackerFactoryImpl implements WindFinderTrackerFactory {
     }
 
     @Override
-    public Iterable<ReviewedSpotsCollection> getReviewedSpotsCollections(boolean cached) throws InterruptedException, ExecutionException {
+    public Iterable<ReviewedSpotsCollection> getReviewedSpotsCollections(RegattaIdentifier regattaIdentifier) throws InterruptedException, ExecutionException {
+        final Set<ReviewedSpotsCollection> result = new HashSet<>();
+        result.addAll(reviewedSpotsCollections);
+        final WindFinderReviewedSpotsCollectionIdProvider provider;
+        if (reviewedSpotsCollectionIdProvider != null && (provider = reviewedSpotsCollectionIdProvider.getService()) != null) {
+            for (String id : provider.getWindFinderReviewedSpotsCollectionIdsByRegatta(regattaIdentifier)) {
+                result.add(getReviewedSpotsCollectionById(id, /* lookupInCache, re-use existing spot collection objects */ true));
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public Iterable<ReviewedSpotsCollection> getAllReviewedSpotsCollections(boolean cached) throws InterruptedException, ExecutionException {
         final Set<ReviewedSpotsCollection> result = new HashSet<>();
         if (cached) {
             result.addAll(reviewedSpotsCollectionsByIdCache.get().values());
         } else {
             result.addAll(reviewedSpotsCollections);
-            Util.addAll(loadSpotCollectionsFromProvider(/* lookupInCache */ true), result);
+            Util.addAll(loadAllSpotCollectionsFromProvider(/* lookupInCache */ true), result);
             for (final ReviewedSpotsCollection c : result) {
                 reviewedSpotsCollectionsByIdCache.get().putIfAbsent(c.getId(), c);
             }
@@ -133,11 +146,11 @@ public class WindFinderTrackerFactoryImpl implements WindFinderTrackerFactory {
         return result;
     }
 
-    private Iterable<ReviewedSpotsCollection> loadSpotCollectionsFromProvider(boolean lookupInCache) throws InterruptedException, ExecutionException {
+    private Iterable<ReviewedSpotsCollection> loadAllSpotCollectionsFromProvider(boolean lookupInCache) throws InterruptedException, ExecutionException {
         final Set<ReviewedSpotsCollection> result = new HashSet<>();
         final WindFinderReviewedSpotsCollectionIdProvider provider;
         if (reviewedSpotsCollectionIdProvider != null && (provider = reviewedSpotsCollectionIdProvider.getService()) != null) {
-            for (String id : provider.getWindFinderReviewedSpotsCollectionIds()) {
+            for (String id : provider.getAllWindFinderReviewedSpotsCollectionIds()) {
                 result.add(getReviewedSpotsCollectionById(id, lookupInCache));
             }
         }
@@ -158,7 +171,7 @@ public class WindFinderTrackerFactoryImpl implements WindFinderTrackerFactory {
     @Override
     public Spot getSpotById(String spotId, boolean cached) throws MalformedURLException, IOException, ParseException, InterruptedException, ExecutionException {
         Spot result = null;
-        for (final ReviewedSpotsCollection coll : getReviewedSpotsCollections(/* cached */ cached)) {
+        for (final ReviewedSpotsCollection coll : getAllReviewedSpotsCollections(/* cached */ cached)) {
             for (final Spot spot : coll.getSpots(/* cached */ cached)) {
                 if (Util.equalsWithNull(spot.getId(), spotId)) {
                     result = spot;
@@ -178,4 +191,5 @@ public class WindFinderTrackerFactoryImpl implements WindFinderTrackerFactory {
         reviewedSpotsCollections.remove(collection);
         reviewedSpotsCollectionsByIdCache.get().remove(collection.getId());
     }
+
 }

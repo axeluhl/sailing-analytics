@@ -1,4 +1,4 @@
-package com.sap.sse.gwt.test.client;
+package com.sap.sse.gwt.client.async;
 
 import org.junit.Test;
 
@@ -7,8 +7,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.gwt.client.async.AsyncAction;
-import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 
 /**
  * Some simple tests for the {@link AsyncActionsExecutor}.

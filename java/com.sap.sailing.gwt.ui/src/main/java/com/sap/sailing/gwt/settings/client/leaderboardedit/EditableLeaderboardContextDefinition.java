@@ -3,16 +3,16 @@ package com.sap.sailing.gwt.settings.client.leaderboardedit;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.StringSetting;
 
-public class LeaderboardEditContextDefinition extends AbstractGenericSerializableSettings {
+public class EditableLeaderboardContextDefinition extends AbstractGenericSerializableSettings {
 
     private static final long serialVersionUID = -2634678952043877600L;
     
     private transient StringSetting leaderboardName;
     
-    public LeaderboardEditContextDefinition() {
+    public EditableLeaderboardContextDefinition() {
     }
     
-    public LeaderboardEditContextDefinition(String leaderboardName) {
+    public EditableLeaderboardContextDefinition(String leaderboardName) {
         this.leaderboardName.setValue(leaderboardName);
     }
     

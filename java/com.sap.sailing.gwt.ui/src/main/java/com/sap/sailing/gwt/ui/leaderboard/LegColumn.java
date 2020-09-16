@@ -491,7 +491,7 @@ public class LegColumn extends ExpandableSortableColumn<String> {
         LegEntryDTO legEntry = getLegEntry(row);
         if (legEntry != null && legEntry.rank != 0) {
             return ""+legEntry.rank;
-        }  else if (leaderboardEntryDTO.legDetails != null && legIndex+1 > leaderboardEntryDTO.legDetails.size()) {
+        }  else if (leaderboardEntryDTO != null && leaderboardEntryDTO.legDetails != null && legIndex+1 > leaderboardEntryDTO.legDetails.size()) {
             return "n/a";
         } else {
             return "";
