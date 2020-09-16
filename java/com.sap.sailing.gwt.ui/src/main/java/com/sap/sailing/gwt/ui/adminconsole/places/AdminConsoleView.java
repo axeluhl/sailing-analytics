@@ -22,6 +22,8 @@ public interface AdminConsoleView extends IsWidget {
     
     HeaderPanel createUI(final ServerInfoDTO serverInfo);
     
+    void selectTabByNames(String verticalTabName, String horizontalTabName);
+    
     public interface Presenter extends LeaderboardGroupsRefresher, RegattaRefresher, LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity> {
         
         public ErrorReporter getErrorReporter();
@@ -37,4 +39,5 @@ public interface AdminConsoleView extends IsWidget {
         UserService getUserService();
         
     }
+
 }

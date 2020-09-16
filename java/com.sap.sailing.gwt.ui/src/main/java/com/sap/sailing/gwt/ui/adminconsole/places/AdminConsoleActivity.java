@@ -9,6 +9,7 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.sap.sailing.gwt.ui.adminconsole.AdminConsoleClientFactory;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
 import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
@@ -27,16 +28,18 @@ import com.sap.sse.security.ui.client.UserService;
 
 public class AdminConsoleActivity extends AbstractActivity implements AdminConsoleView.Presenter {
 
-    private String token;
+    private final String menu;
+    private final String tab;
     
-    private AdminConsoleClientFactory clientFactory;
+    private final AdminConsoleClientFactory clientFactory;
     
     private HashSet<RegattasDisplayer> regattasDisplayers;
     private HashSet<LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity>> leaderboardsDisplayers;
     private HashSet<LeaderboardGroupsDisplayer> leaderboardGroupsDisplayers;
     
-    public AdminConsoleActivity(AdminConsolePlace place, AdminConsoleClientFactory clientFactory) {
-        this.token = place.getToken();
+    public AdminConsoleActivity(final AdminConsolePlace place, final AdminConsoleClientFactory clientFactory) {
+        this.menu = place.getMenu();
+        this.tab = place.getTab();
         this.clientFactory = clientFactory;
     }
     
@@ -48,12 +51,17 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
         
         AdminConsoleView adminConsoleView = new AdminConsoleViewImpl();
         adminConsoleView.setPresenter(this);
+        adminConsoleView.selectTabByNames(menu, tab);
+        
         
         // TODO sarah
         clientFactory.getUserService().executeWithServerInfo(adminConsoleView::createUI);
         clientFactory.getUserService().addUserStatusEventHandler((u, p) -> checkPublicServerNonPublicUserWarning());
 
         containerWidget.setWidget(adminConsoleView.asWidget());
+        
+        RootLayoutPanel.get().clear();
+        RootLayoutPanel.get().add(adminConsoleView);
     }
     
     @Override

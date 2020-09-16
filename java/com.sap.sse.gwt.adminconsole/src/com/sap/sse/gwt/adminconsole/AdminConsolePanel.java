@@ -12,6 +12,7 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
@@ -110,7 +111,8 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
                 if (source instanceof HorizontalTabLayoutPanel) {
                     final HorizontalTabLayoutPanel tabPanel = ((HorizontalTabLayoutPanel) source);
                     final Widget selectedPanel = tabPanel.getWidget(event.getSelectedItem());
-                    refreshDataFor(selectedPanel);
+                    updateBrowserHistory(tabPanel.getTitle(), selectedPanel.getTitle());                             
+                    refreshDataFor(selectedPanel);    
                 } else if (source instanceof VerticalTabLayoutPanel) {
                     final VerticalTabLayoutPanel verticalTabLayoutPanel = (VerticalTabLayoutPanel) source;
                     Widget widgetAssociatedToVerticalTab = verticalTabLayoutPanel.getWidget(verticalTabLayoutPanel.getSelectedIndex());
@@ -120,6 +122,7 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
                         if (selectedIndex >= 0) {
                             widgetAssociatedToVerticalTab = selectedTabLayoutPanel.getWidget(selectedIndex);
                         }
+                        updateBrowserHistory(selectedTabLayoutPanel.getTitle(), widgetAssociatedToVerticalTab.getTitle());                        
                     }
                     refreshDataFor(widgetAssociatedToVerticalTab);
                 }
@@ -132,7 +135,10 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
                 refreshTarget.refreshAfterBecomingVisible();
             }
         }
-
+    }
+    
+    private void updateBrowserHistory(final String menu, final String tab) {
+        History.newItem("AdminConsolePlace:" + menu + ":" + tab, false);
     }
     
     /**
@@ -170,6 +176,7 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
         topLevelTabPanelWrapper = new VerticalOrHorizontalTabLayoutPanel() {
             @Override
             public void add(Widget child, String text, boolean asHtml) {
+                child.setTitle(text);
                 topLevelTabPanel.add(child, text, asHtml);
                 topLevelTabPanel.forceLayout();
             }
@@ -267,7 +274,7 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
         AbstractEntryPoint.setTabPanelSize(newTabPanel, "100%", "100%");
         newTabPanel.addSelectionHandler(tabSelectionHandler);
         newTabPanel.ensureDebugId(tabDebugId);
-        rememberWidgetLocationAndPermissions(topLevelTabPanelWrapper, newTabPanel, tabTitle, anyPermissionCheck(requiresAnyOfThesePermissions));
+        rememberWidgetLocationAndPermissions(topLevelTabPanelWrapper, newTabPanel, tabTitle, anyPermissionCheck(requiresAnyOfThesePermissions));     
         return newTabPanel;
     }
 
@@ -313,6 +320,8 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
         VerticalOrHorizontalTabLayoutPanel wrapper = new VerticalOrHorizontalTabLayoutPanel() {
             @Override
             public void add(Widget child, String text, boolean asHtml) {
+                // TODO sarah
+                child.setTitle(text);
                 tabPanel.add(child, text, asHtml);
                 tabPanel.forceLayout();
             }
@@ -335,7 +344,6 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
             @Override
             public void selectTab(int index) {
                tabPanel.selectTab(index);
-                
             }
 
             @Override
@@ -352,6 +360,7 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
      * method can be called.
      */
     private void addToTabPanel(VerticalOrHorizontalTabLayoutPanel tabPanel, RefreshableAdminConsolePanel panelToAdd, String tabTitle, BooleanSupplier permissionCheck) {
+        panelToAdd.getWidget().setTitle(tabTitle);
         rememberWidgetLocationAndPermissions(tabPanel, wrapInScrollPanel(panelToAdd.getWidget()), tabTitle, permissionCheck);
         panelsByWidget.put(panelToAdd.getWidget(), panelToAdd);
     }
@@ -368,7 +377,7 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
      *            will be shown the widget.
      */
     private void rememberWidgetLocationAndPermissions(VerticalOrHorizontalTabLayoutPanel tabPanel, Widget widgetToAdd,
-            String tabTitle, BooleanSupplier permissionCheck) {
+            String tabTitle, BooleanSupplier permissionCheck) {        
         roleSpecificTabs.add(new Triple<VerticalOrHorizontalTabLayoutPanel, Widget, String>(tabPanel, widgetToAdd, tabTitle));
         final Set<BooleanSupplier> permissionChecksAsSet = new HashSet<>(Arrays.asList(permissionCheck));
         permissionsAnyOfWhichIsRequiredToSeeWidget.put(widgetToAdd, permissionChecksAsSet);

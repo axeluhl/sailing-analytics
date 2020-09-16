@@ -5,8 +5,11 @@ import static com.sap.sse.gwt.shared.RpcConstants.HEADER_FORWARD_TO_MASTER;
 import com.google.gwt.activity.shared.ActivityManager;
 import com.google.gwt.activity.shared.ActivityMapper;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.place.shared.PlaceHistoryHandler;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -52,9 +55,31 @@ public class AdminConsoleEntryPoint extends AbstractSailingWriteEntryPoint {
         PlaceHistoryHandler historyHandler = new PlaceHistoryHandler(historyMapper);
         historyHandler.register(placeController, eventBus, new AdminConsolePlace());
         
+        addHistoryToken(clientFactory);
+        
         RootLayoutPanel.get().add(appWidget);
         
         historyHandler.handleCurrentHistory();
+    }
+    
+    private void addHistoryToken(final AdminConsoleClientFactory clientFactory) {
+        History.addValueChangeHandler(new ValueChangeHandler<String>() {
+            
+            public void onValueChange(ValueChangeEvent<String> event) {
+                final String token = event.getValue();
+                
+                AdminConsolePlace place;
+                
+                if (token != null && token.contains(":")) { 
+                    final String[] tabAndMenu = token.split(":");
+                    place = new AdminConsolePlace(tabAndMenu[1], tabAndMenu[2]);
+                } else {
+                    place = new AdminConsolePlace();
+                }
+ 
+                clientFactory.getPlaceController().goTo(place);
+              }
+            });
     }
 
 }

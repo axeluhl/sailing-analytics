@@ -147,7 +147,7 @@ public class LocalServerManagementPanel extends SimplePanel {
         });
     }
 
-    void refreshServerConfiguration() {
+    public void refreshServerConfiguration() {
         sailingService.getServerConfiguration(new RefreshAsyncCallback<>(this::updateServerConfiguration));
     }
 

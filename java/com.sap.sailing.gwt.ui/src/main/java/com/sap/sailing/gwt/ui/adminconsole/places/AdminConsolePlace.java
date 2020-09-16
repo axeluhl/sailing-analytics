@@ -5,24 +5,40 @@ import com.google.gwt.place.shared.PlaceTokenizer;
 
 public class AdminConsolePlace extends Place {
 
-    private String token;
+    private final String menu;
+    private final String tab;
     
     public AdminConsolePlace() {
-        this.token = "testToken";
+        this.menu = "Leaderboards";
+        this.tab = "Leaderboard groups";
     }
     
-    public String getToken() {
-        return token;
+    public AdminConsolePlace(final String menu, final String tab) {
+        this.menu = menu;
+        this.tab = tab;
+    }
+    
+    public String getTab() {
+        return tab;
+    }
+    
+    public String getMenu() {
+        return menu;
     }
     
     public static class Tokenizer implements PlaceTokenizer<AdminConsolePlace> {
         @Override
-        public String getToken(AdminConsolePlace place) {
-            return place.getToken();
+        public String getToken(final AdminConsolePlace place) {
+            return place.getMenu() + ":" + place.getTab();
         }
 
         @Override
-        public AdminConsolePlace getPlace(String token) {
+        public AdminConsolePlace getPlace(final String token) {
+            if (token != null && token.contains(":")) {
+                final String[] tabAndMenu = token.split(":");
+                return new AdminConsolePlace(tabAndMenu[0], tabAndMenu[1]);
+            }
+            
             return new AdminConsolePlace();
         }
     }
