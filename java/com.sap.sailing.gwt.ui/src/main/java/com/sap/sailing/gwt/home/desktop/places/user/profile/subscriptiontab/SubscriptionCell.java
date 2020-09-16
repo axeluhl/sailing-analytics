@@ -1,10 +1,7 @@
 package com.sap.sailing.gwt.home.desktop.places.user.profile.subscriptiontab;
 
-import java.util.Date;
-
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.ValueUpdater;
-import com.google.gwt.core.client.Duration;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.ButtonElement;
 import com.google.gwt.dom.client.Element;
@@ -18,6 +15,7 @@ import com.google.gwt.uibinder.client.UiRenderer;
 import com.sap.sailing.gwt.home.shared.places.user.profile.subscription.UserSubscriptionView;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.subscription.chargebee.SubscriptionItem;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.security.shared.SubscriptionPlan;
 import com.sap.sse.security.shared.SubscriptionPlanHolder;
 
@@ -106,22 +104,21 @@ public class SubscriptionCell extends AbstractCell<SubscriptionItem> {
 
     private String buildTrialText(SubscriptionItem subscription) {
         return StringMessages.INSTANCE.trialText(getTrialRemainingText(subscription),
-                DateTimeFormat.getFormat("yyyy-MM-dd HH:mm").format(new Date(subscription.getTrialEnd() * 1000)));
+                DateTimeFormat.getFormat("yyyy-MM-dd HH:mm").format(subscription.getTrialEnd().asDate()));
     }
 
     private String getTrialRemainingText(SubscriptionItem subscription) {
-        long now = Math.round(Duration.currentTimeMillis() / 1000);
-        long remain = subscription.getTrialEnd() - now;
+        long remainingSecs = Math.round(TimePoint.now().until(subscription.getTrialEnd()).asSeconds());
         StringBuilder remainText = new StringBuilder();
-        if (remain <= 0) {
+        if (remainingSecs <= 0) {
             remainText.append(StringMessages.INSTANCE.numHours(0));
         } else {
-            int days = (int) (remain / 86400);
+            int days = (int) (remainingSecs / 86400);
             if (days > 0) {
                 remainText.append(StringMessages.INSTANCE.numDays(days));
             }
-            remain = remain % 86400;
-            int hours = (int) (remain / 3600);
+            remainingSecs = remainingSecs % 86400;
+            int hours = (int) (remainingSecs / 3600);
             if (hours > 0) {
                 if (remainText.length() > 0) {
                     remainText.append(" ");
@@ -129,8 +126,8 @@ public class SubscriptionCell extends AbstractCell<SubscriptionItem> {
                 remainText.append(StringMessages.INSTANCE.numHours(hours));
             }
             if (days == 0) {
-                remain = remain % 3600;
-                int mins = (int) (remain / 60);
+                remainingSecs = remainingSecs % 3600;
+                int mins = (int) (remainingSecs / 60);
                 if (mins > 0) {
                     if (remainText.length() > 0) {
                         remainText.append(" ");

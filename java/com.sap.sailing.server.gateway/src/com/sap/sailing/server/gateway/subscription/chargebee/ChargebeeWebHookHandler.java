@@ -10,6 +10,7 @@ import org.apache.commons.lang.StringUtils;
 
 import com.sap.sailing.server.gateway.subscription.SubscriptionWebHookHandler;
 import com.sap.sailing.server.gateway.subscription.SubscriptionWebHookServlet;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.shared.Subscription;
 import com.sap.sse.security.shared.UserManagementException;
@@ -52,7 +53,7 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
      * @return {@code true} if event occurred at time is less than latest user subscription updated time
      */
     private boolean isOutdatedEvent(SubscriptionWebHookEvent event, User user) {
-        final long occuredAt = event.getEventOccurredAt();
+        final TimePoint occuredAt = event.getEventOccurredAt();
         final String planId = event.getPlanId();
         boolean isOutdated = false;
         if (StringUtils.isNotEmpty(planId)) {
@@ -87,8 +88,8 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
         return isOutdated;
     }
 
-    private boolean isOutdatedEventTime(long occuredAt, Subscription subscription) {
-        return occuredAt < subscription.getLatestEventTime() || occuredAt < subscription.getManualUpdatedAt();
+    private boolean isOutdatedEventTime(TimePoint occuredAt, Subscription subscription) {
+        return occuredAt.before(subscription.getLatestEventTime()) || occuredAt.before(subscription.getManualUpdatedAt());
     }
 
     private void processEvent(SubscriptionWebHookEvent event, User user) throws UserManagementException {
@@ -150,7 +151,7 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
 
     private Subscription buildEmptySubscription(Subscription currentSubscription, SubscriptionWebHookEvent event) {
         return ChargebeeSubscription.createEmptySubscription(event.getPlanId(), event.getEventOccurredAt(),
-                currentSubscription != null ? currentSubscription.getManualUpdatedAt() : 0);
+                currentSubscription != null ? currentSubscription.getManualUpdatedAt() : Subscription.emptyTime());
     }
 
     /**
@@ -185,7 +186,7 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
                 event.getSubscriptionTrialStart(), event.getSubscriptionTrialEnd(), subscriptionStatus, paymentStatus,
                 transactionType, transactionStatus, invoiceId, invoiceStatus, event.getSubscriptionCreatedAt(),
                 event.getSubscriptionUpdatedAt(), event.getEventOccurredAt(),
-                currentSubscription != null ? currentSubscription.getManualUpdatedAt() : 0);
+                currentSubscription != null ? currentSubscription.getManualUpdatedAt() : Subscription.emptyTime());
     }
 
     /**

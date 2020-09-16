@@ -2679,7 +2679,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (planRole.getUserQualificationMode() != null
                 && planRole.getUserQualificationMode() == SubscriptionPlanRole.UserQualificationMode.SUBSCRIBING_USER) {
             qualifiedUser = user;
-        } else if (planRole.getExplicitUserQualification() != null && !planRole.getExplicitUserQualification().isEmpty()) {
+        } else if (planRole.getExplicitUserQualification() != null
+                && !planRole.getExplicitUserQualification().isEmpty()) {
             qualifiedUser = getUserByName(planRole.getExplicitUserQualification());
         } else {
             qualifiedUser = null;
@@ -2703,7 +2704,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             SubscriptionPlanRole planRole) {
         final UserGroup qualifiedForGroup;
         final SubscriptionPlanRole.GroupQualificationMode groupQualificationMode = planRole.getGroupQualificationMode();
-        if (groupQualificationMode != null && groupQualificationMode != SubscriptionPlanRole.GroupQualificationMode.NONE) {
+        if (groupQualificationMode != null
+                && groupQualificationMode != SubscriptionPlanRole.GroupQualificationMode.NONE) {
             final User u;
             switch (groupQualificationMode) {
             case DEFAULT_QUALIFIED_USER_TENANT:

@@ -2,17 +2,26 @@ package com.sap.sse.security.shared;
 
 import java.io.Serializable;
 
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.security.shared.impl.User;
 
 /**
- * Subscription data model for a {@link User} which is stored persistently together with the {@link User} object.
- * See, e.g., {@link User#setSubscriptions(Subscription[])}.
+ * Subscription data model for a {@link User} which is stored persistently together with the {@link User} object. See,
+ * e.g., {@link User#setSubscriptions(Subscription[])}.
  * 
  * @author tutran
  */
 public abstract class Subscription implements Serializable {
     public static final String PAYMENT_STATUS_SUCCESS = "success";
     public static final String PAYMENT_STATUS_NO_SUCCESS = "no_success";
+
+    public static TimePoint emptyTime() {
+        return getTime(0);
+    }
+
+    public static TimePoint getTime(long milisTimestamp) {
+        return TimePoint.of(milisTimestamp);
+    }
 
     private static final long serialVersionUID = 96845123954667808L;
 
@@ -32,14 +41,14 @@ public abstract class Subscription implements Serializable {
     private final String customerId;
 
     /**
-     * Subscription trial start timestamp
+     * Subscription trial start time
      */
-    private final long trialStart;
+    private final TimePoint trialStart;
 
     /**
-     * Subscription trial end timestamp
+     * Subscription trial end time
      */
-    private final long trialEnd;
+    private final TimePoint trialEnd;
 
     /**
      * Subscription status, it could be trial, active, or cancelled.
@@ -74,33 +83,33 @@ public abstract class Subscription implements Serializable {
     private final String transactionStatus;
 
     /**
-     * Record the creating timestamp of the subscription
+     * Record the creating time of the subscription
      */
-    private final long subscriptionCreatedAt;
+    private final TimePoint subscriptionCreatedAt;
 
     /**
-     * Record the updating timestamp of the subscription
+     * Record the updating time of the subscription
      */
-    private final long subscriptionUpdatedAt;
+    private final TimePoint subscriptionUpdatedAt;
 
     /**
-     * Record the timestamp of the latest handled WebHook event. Because a WebHook event might be retried to send to our
-     * system if it has been failed on the previous time, so we will this timestamp to only process a newer event,
-     * otherwise we will update wrong data for a user.
+     * Record the time of the latest handled WebHook event. Because a WebHook event might be retried to send to our
+     * system if it has been failed on the previous time, so we will this time to only process a newer event, otherwise
+     * we will update wrong data for a user.
      */
-    private final long latestEventTime;
+    private final TimePoint latestEventTime;
 
     /**
-     * Record the timestamp the subscription was updated by user using the system, like changing plan or cancel
-     * subscription. Reason is payment service will retried to send us failed WebHook events, so with this timestamp
-     * we'll process only WebHook events occur after this timestamp, otherwise we'll update our system with old data.
+     * Record the time the subscription was updated by user using the system, like changing plan or cancel subscription.
+     * Reason is payment service will retried to send us failed WebHook events, so with this time we'll process only
+     * WebHook events occur after this time, otherwise we'll update our system with old data.
      */
-    private final long manualUpdatedAt;
+    private final TimePoint manualUpdatedAt;
 
-    public Subscription(String subscriptionId, String planId, String customerId, long trialStart, long trialEnd,
-            String subscriptionStatus, String paymentStatus, String transactionType, String transactionStatus,
-            String invoiceId, String invoiceStatus, long subscriptionCreatedAt, long subscriptionUpdatedAt,
-            long latestEventTime, long manualUpdatedAt) {
+    public Subscription(String subscriptionId, String planId, String customerId, TimePoint trialStart,
+            TimePoint trialEnd, String subscriptionStatus, String paymentStatus, String transactionType,
+            String transactionStatus, String invoiceId, String invoiceStatus, TimePoint subscriptionCreatedAt,
+            TimePoint subscriptionUpdatedAt, TimePoint latestEventTime, TimePoint manualUpdatedAt) {
         this.subscriptionId = subscriptionId;
         this.planId = planId;
         this.customerId = customerId;
@@ -130,11 +139,11 @@ public abstract class Subscription implements Serializable {
         return customerId;
     }
 
-    public long getTrialStart() {
+    public TimePoint getTrialStart() {
         return trialStart;
     }
 
-    public long getTrialEnd() {
+    public TimePoint getTrialEnd() {
         return trialEnd;
     }
 
@@ -162,19 +171,19 @@ public abstract class Subscription implements Serializable {
         return invoiceStatus;
     }
 
-    public long getSubscriptionCreatedAt() {
+    public TimePoint getSubscriptionCreatedAt() {
         return subscriptionCreatedAt;
     }
 
-    public long getSubscriptionUpdatedAt() {
+    public TimePoint getSubscriptionUpdatedAt() {
         return subscriptionUpdatedAt;
     }
 
-    public long getLatestEventTime() {
+    public TimePoint getLatestEventTime() {
         return latestEventTime;
     }
 
-    public long getManualUpdatedAt() {
+    public TimePoint getManualUpdatedAt() {
         return manualUpdatedAt;
     }
 
@@ -200,13 +209,13 @@ public abstract class Subscription implements Serializable {
                 .append(getStringFieldValue(paymentStatus)).append(separator).append("transactionType: ")
                 .append(getStringFieldValue(transactionType)).append(separator).append("transactionStatus: ")
                 .append(getStringFieldValue(transactionStatus)).append(separator).append("trialStart: ")
-                .append(trialStart).append(separator).append("trialEnd: ").append(trialEnd).append(separator)
-                .append("invoiceId: ").append(getStringFieldValue(invoiceId)).append(separator)
+                .append(trialStart.asMillis()).append(separator).append("trialEnd: ").append(trialEnd.asMillis())
+                .append(separator).append("invoiceId: ").append(getStringFieldValue(invoiceId)).append(separator)
                 .append("invoiceStatus: ").append(getStringFieldValue(invoiceStatus)).append(separator)
-                .append("latestEventTime: ").append(latestEventTime).append(separator).append("manualUpdatedAt: ")
-                .append(manualUpdatedAt).append(separator).append("subscriptionCreatedAt: ")
-                .append(subscriptionCreatedAt).append(separator).append("subscriptionUpdatedAt: ")
-                .append(subscriptionUpdatedAt);
+                .append("latestEventTime: ").append(latestEventTime.asMillis()).append(separator)
+                .append("manualUpdatedAt: ").append(manualUpdatedAt.asMillis()).append(separator)
+                .append("subscriptionCreatedAt: ").append(subscriptionCreatedAt.asMillis()).append(separator)
+                .append("subscriptionUpdatedAt: ").append(subscriptionUpdatedAt.asMillis());
         return builder.toString();
     }
 

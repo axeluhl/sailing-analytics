@@ -1,5 +1,6 @@
 package com.sap.sse.security.shared.impl;
 
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.security.shared.Subscription;
 
 public class ChargebeeSubscription extends Subscription {
@@ -15,15 +16,17 @@ public class ChargebeeSubscription extends Subscription {
 
     private static final long serialVersionUID = -3682427457347116687L;
 
-    public static Subscription createEmptySubscription(String planId, long latestEventTime, long manualUpdatedAt) {
-        return new ChargebeeSubscription(null, planId, null, 0, 0, null, null, null, null, null, null, 0, 0,
-                latestEventTime, manualUpdatedAt);
+    public static Subscription createEmptySubscription(String planId, TimePoint latestEventTime,
+            TimePoint manualUpdatedAt) {
+        return new ChargebeeSubscription(null, planId, null, Subscription.emptyTime(), Subscription.emptyTime(), null,
+                null, null, null, null, null, Subscription.emptyTime(), Subscription.emptyTime(), latestEventTime,
+                manualUpdatedAt);
     }
 
-    public ChargebeeSubscription(String subscriptionId, String planId, String customerId, long trialStart,
-            long trialEnd, String subscriptionStatus, String paymentStatus, String transactionType,
-            String transactionStatus, String invoiceId, String invoiceStatus, long subscriptionCreatedAt,
-            long subscriptionUpdatedAt, long latestEventTime, long manualUpdatedAt) {
+    public ChargebeeSubscription(String subscriptionId, String planId, String customerId, TimePoint trialStart,
+            TimePoint trialEnd, String subscriptionStatus, String paymentStatus, String transactionType,
+            String transactionStatus, String invoiceId, String invoiceStatus, TimePoint subscriptionCreatedAt,
+            TimePoint subscriptionUpdatedAt, TimePoint latestEventTime, TimePoint manualUpdatedAt) {
         super(subscriptionId, planId, customerId, trialStart, trialEnd, subscriptionStatus, paymentStatus,
                 transactionType, transactionStatus, invoiceId, invoiceStatus, subscriptionCreatedAt,
                 subscriptionUpdatedAt, latestEventTime, manualUpdatedAt);

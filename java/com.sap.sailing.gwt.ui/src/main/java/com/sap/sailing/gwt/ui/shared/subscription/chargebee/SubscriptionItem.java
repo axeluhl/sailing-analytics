@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.shared.subscription.chargebee;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.TimePoint;
 
 public class SubscriptionItem implements IsSerializable {
     public static final String PAYMENT_STATUS_SUCCESS = "success";
@@ -19,12 +20,12 @@ public class SubscriptionItem implements IsSerializable {
     /**
      * Trial start timestamp
      */
-    private long trialStart;
+    private TimePoint trialStart;
 
     /**
      * Trial end timestamp
      */
-    private long trialEnd;
+    private TimePoint trialEnd;
 
     /**
      * Subscription status: active or in_trial
@@ -44,7 +45,7 @@ public class SubscriptionItem implements IsSerializable {
     public SubscriptionItem() {
     }
 
-    public SubscriptionItem(String planId, long trialStart, long trialEnd, String subscriptionStatus,
+    public SubscriptionItem(String planId, TimePoint trialStart, TimePoint trialEnd, String subscriptionStatus,
             String paymentStatus, String transactionType) {
         this.planId = planId;
         this.trialStart = trialStart;
@@ -129,11 +130,11 @@ public class SubscriptionItem implements IsSerializable {
         return planId;
     }
 
-    public long getTrialStart() {
+    public TimePoint getTrialStart() {
         return trialStart;
     }
 
-    public long getTrialEnd() {
+    public TimePoint getTrialEnd() {
         return trialEnd;
     }
 
@@ -149,11 +150,11 @@ public class SubscriptionItem implements IsSerializable {
         this.planId = planId;
     }
 
-    public void setTrialStart(long trialStart) {
+    public void setTrialStart(TimePoint trialStart) {
         this.trialStart = trialStart;
     }
 
-    public void setTrialEnd(long trialEnd) {
+    public void setTrialEnd(TimePoint trialEnd) {
         this.trialEnd = trialEnd;
     }
 

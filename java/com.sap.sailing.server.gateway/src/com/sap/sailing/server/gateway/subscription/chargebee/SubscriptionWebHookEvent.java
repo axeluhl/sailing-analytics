@@ -5,6 +5,9 @@ import java.util.logging.Logger;
 import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONObject;
 
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.security.shared.Subscription;
+
 /**
  * Wrapped class for WebHook event JSON object
  * 
@@ -78,24 +81,24 @@ public class SubscriptionWebHookEvent {
         return toLowerCase(getJsonValue(content, "subscription", "status"));
     }
 
-    public long getSubscriptionTrialStart() {
-        return getJsonValue(content, "subscription", "trial_start");
+    public TimePoint getSubscriptionTrialStart() {
+        return getTime(getJsonValue(content, "subscription", "trial_start"));
     }
 
-    public long getSubscriptionTrialEnd() {
-        return getJsonValue(content, "subscription", "trial_end");
+    public TimePoint getSubscriptionTrialEnd() {
+        return getTime(getJsonValue(content, "subscription", "trial_end"));
     }
 
-    public long getSubscriptionCreatedAt() {
-        return getJsonValue(content, "subscription", "created_at");
+    public TimePoint getSubscriptionCreatedAt() {
+        return getTime(getJsonValue(content, "subscription", "created_at"));
     }
 
-    public long getSubscriptionUpdatedAt() {
-        return getJsonValue(content, "subscription", "updated_at");
+    public TimePoint getSubscriptionUpdatedAt() {
+        return getTime(getJsonValue(content, "subscription", "updated_at"));
     }
 
-    public long getEventOccurredAt() {
-        return getJsonValue(eventJSON, "occurred_at");
+    public TimePoint getEventOccurredAt() {
+        return getTime(getJsonValue(eventJSON, "occurred_at"));
     }
 
     public String getTransactionStatus() {
@@ -120,6 +123,10 @@ public class SubscriptionWebHookEvent {
 
     public String getInvoiceStatus() {
         return toLowerCase(getJsonValue(content, "invoice", "status"));
+    }
+
+    private TimePoint getTime(long timestamp) {
+        return Subscription.getTime(timestamp * 1000);
     }
 
     @SuppressWarnings("unchecked")

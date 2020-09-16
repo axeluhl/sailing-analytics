@@ -343,8 +343,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
                 doc.put(FieldNames.Subscription.SUBSCRIPTION_ID.name(), subscription.getSubscriptionId());
                 doc.put(FieldNames.Subscription.PLAN_ID.name(), subscription.getPlanId());
                 doc.put(FieldNames.Subscription.CUSTOMER_ID.name(), subscription.getCustomerId());
-                doc.put(FieldNames.Subscription.TRIAL_START.name(), subscription.getTrialStart());
-                doc.put(FieldNames.Subscription.TRIAL_END.name(), subscription.getTrialEnd());
+                doc.put(FieldNames.Subscription.TRIAL_START.name(), subscription.getTrialStart().asMillis());
+                doc.put(FieldNames.Subscription.TRIAL_END.name(), subscription.getTrialEnd().asMillis());
                 doc.put(FieldNames.Subscription.SUBSCRIPTION_STATUS.name(), subscription.getSubscriptionStatus());
                 doc.put(FieldNames.Subscription.PAYMENT_STATUS.name(), subscription.getPaymentStatus());
                 doc.put(FieldNames.Subscription.TRANSACTION_TYPE.name(), subscription.getTransactionType());
@@ -352,11 +352,11 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
                 doc.put(FieldNames.Subscription.INVOICE_ID.name(), subscription.getInvoiceId());
                 doc.put(FieldNames.Subscription.INVOICE_STATUS.name(), subscription.getInvoiceStatus());
                 doc.put(FieldNames.Subscription.SUBSCRIPTION_CREATED_AT.name(),
-                        subscription.getSubscriptionCreatedAt());
+                        subscription.getSubscriptionCreatedAt().asMillis());
                 doc.put(FieldNames.Subscription.SUBSCRIPTION_UPDATED_AT.name(),
-                        subscription.getSubscriptionUpdatedAt());
-                doc.put(FieldNames.Subscription.LATEST_EVENT_TIME.name(), subscription.getLatestEventTime());
-                doc.put(FieldNames.Subscription.MANUAL_UPDATED_AT.name(), subscription.getManualUpdatedAt());
+                        subscription.getSubscriptionUpdatedAt().asMillis());
+                doc.put(FieldNames.Subscription.LATEST_EVENT_TIME.name(), subscription.getLatestEventTime().asMillis());
+                doc.put(FieldNames.Subscription.MANUAL_UPDATED_AT.name(), subscription.getManualUpdatedAt().asMillis());
                 result.add(doc);
             }
         } else {

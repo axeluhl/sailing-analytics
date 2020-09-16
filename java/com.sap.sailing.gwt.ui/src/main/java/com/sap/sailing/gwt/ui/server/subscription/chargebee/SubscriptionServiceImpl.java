@@ -27,6 +27,7 @@ import com.sap.sailing.gwt.ui.client.subscription.chargebee.SubscriptionService;
 import com.sap.sailing.gwt.ui.shared.subscription.chargebee.HostedPageResultDTO;
 import com.sap.sailing.gwt.ui.shared.subscription.chargebee.SubscriptionDTO;
 import com.sap.sailing.gwt.ui.shared.subscription.chargebee.SubscriptionItem;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.Subscription;
@@ -80,7 +81,7 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
                 response.setError("Error in generating Chargebee hosted page");
             }
         } else {
-            response.setError("Invalid plan: "+planId);
+            response.setError("Invalid plan: " + planId);
         }
         return response;
     }
@@ -108,11 +109,10 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
             }
             Subscription subscription = new ChargebeeSubscription(content.subscription().id(),
                     content.subscription().planId(), content.customer().id(),
-                    content.subscription().trialStart().getTime() / 1000,
-                    content.subscription().trialEnd().getTime() / 1000,
+                    TimePoint.of(content.subscription().trialStart()), TimePoint.of(content.subscription().trialEnd()),
                     content.subscription().status().name().toLowerCase(), null, transactionType, transactionStatus,
-                    invoiceId, invoiceStatus, content.subscription().createdAt().getTime() / 1000,
-                    content.subscription().updatedAt().getTime() / 1000, 0, System.currentTimeMillis() / 1000);
+                    invoiceId, invoiceStatus, TimePoint.of(content.subscription().createdAt()),
+                    TimePoint.of(content.subscription().updatedAt()), Subscription.emptyTime(), TimePoint.now());
             updateUserSubscription(user, subscription);
             subscriptionDto = getSubscription();
         } catch (Exception e) {
@@ -161,8 +161,7 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
                 if (resultData.subscription().status().name().toLowerCase()
                         .equals(ChargebeeSubscription.SUBSCRIPTION_STATUS_CANCELLED)) {
                     Subscription newSubscription = ChargebeeSubscription.createEmptySubscription(
-                            subscription.getPlanId(), subscription.getLatestEventTime(),
-                            System.currentTimeMillis() / 1000);
+                            subscription.getPlanId(), subscription.getLatestEventTime(), TimePoint.now());
                     updateUserSubscription(user, newSubscription);
                     result = true;
                 } else {
