@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import static com.sap.sse.gwt.shared.RpcConstants.HEADER_FORWARD_TO_MASTER;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -20,13 +22,13 @@ import com.sap.sailing.gwt.ui.adminconsole.coursecreation.CourseTemplatePanel;
 import com.sap.sailing.gwt.ui.adminconsole.coursecreation.MarkPropertiesPanel;
 import com.sap.sailing.gwt.ui.adminconsole.coursecreation.MarkRolePanel;
 import com.sap.sailing.gwt.ui.adminconsole.coursecreation.MarkTemplatePanel;
-import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
+import com.sap.sailing.gwt.ui.client.AbstractSailingWriteEntryPoint;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsRefresher;
 import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
 import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
-import com.sap.sailing.gwt.ui.client.MediaService;
-import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
+import com.sap.sailing.gwt.ui.client.MediaServiceWrite;
+import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
@@ -61,7 +63,7 @@ import com.sap.sse.security.ui.client.component.UserGroupManagementPanel;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.client.usermanagement.UserManagementPanel;
 
-public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
+public class AdminConsoleEntryPoint extends AbstractSailingWriteEntryPoint
         implements RegattaRefresher, LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity>, LeaderboardGroupsRefresher {
     private final AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
 
@@ -69,13 +71,13 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
     private Set<LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity>> leaderboardsDisplayers;
     private Set<LeaderboardGroupsDisplayer> leaderboardGroupsDisplayers;
 
-    private final MediaServiceAsync mediaService = GWT.create(MediaService.class);
+    private final MediaServiceWriteAsync mediaServiceWrite = GWT.create(MediaServiceWrite.class);
     
     @Override
     protected void doOnModuleLoad() {
         Highcharts.ensureInjectedWithMore();
         super.doOnModuleLoad();
-        EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService, RemoteServiceMappingConstants.mediaServiceRemotePath);
+        EntryPointHelper.registerASyncService((ServiceDefTarget) mediaServiceWrite, RemoteServiceMappingConstants.mediaServiceWriteRemotePath, HEADER_FORWARD_TO_MASTER);
         getUserService().executeWithServerInfo(this::createUI);
         getUserService().addUserStatusEventHandler((u, p) -> checkPublicServerNonPublicUserWarning());
     }
@@ -127,7 +129,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
             /** Changes the default tenant for the current user. */
             private void changeDefaultTenantForCurrentUser(final StrippedUserGroupDTO serverTenant) {
                 final UserDTO user = getUserService().getCurrentUser();
-                getUserService().getUserManagementService().updateUserProperties(user.getName(), user.getFullName(),
+                getUserManagementWriteService().updateUserProperties(user.getName(), user.getFullName(),
                         user.getCompany(), user.getLocale(), serverTenant.getId().toString(),
                         new AsyncCallback<UserDTO>() {
                             @Override
@@ -273,7 +275,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
         }, getStringMessages().wind(), SecuredDomainType.TRACKED_RACE.getPermission(DefaultActions.UPDATE));
         regattasDisplayers.add(windPanel);
 
-        final MediaPanel mediaPanel = new MediaPanel(regattasDisplayers, getSailingService(), this, mediaService, this,
+        final MediaPanel mediaPanel = new MediaPanel(regattasDisplayers, getSailingService(), this, mediaServiceWrite, this,
                 getStringMessages(), getUserService());
         panel.addToTabPanel(racesTabPanel, new DefaultRefreshableAdminConsolePanel<MediaPanel>(mediaPanel) {
             @Override
@@ -349,7 +351,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
                 },
                 getStringMessages().igtimiAccounts(),
                 SecuredDomainType.IGTIMI_ACCOUNT.getPermission(DefaultActions.values()));
-        ExpeditionDeviceConfigurationsPanel expeditionDeviceConfigurationsPanel = new ExpeditionDeviceConfigurationsPanel(getSailingService(), this, getStringMessages());
+        ExpeditionDeviceConfigurationsPanel expeditionDeviceConfigurationsPanel = new ExpeditionDeviceConfigurationsPanel(getSailingService(), this, getStringMessages(), getUserService());
         expeditionDeviceConfigurationsPanel.ensureDebugId("ExpeditionDeviceConfigurations");
         panel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<ExpeditionDeviceConfigurationsPanel>(expeditionDeviceConfigurationsPanel) {
             @Override
@@ -370,7 +372,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
                 getSailingService(), getUserService(), this, getStringMessages(), this, eventManagementPanel);
         panel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<StructureImportManagementPanel>(structureImportUrlsManagementPanel),
                 getStringMessages().manage2Sail() + " " + getStringMessages().regattaStructureImport(),
-                SecuredDomainType.REGATTA.getPermission(DefaultActions.CREATE)); // TODO bug4763 provide the default CREATE ownership for REGATTA / EVENT
+                SecuredDomainType.REGATTA.getPermission(DefaultActions.CREATE));
 
         /* ADVANCED */
         final HorizontalTabLayoutPanel advancedTabPanel = panel.addVerticalTab(getStringMessages().advanced(),
@@ -385,20 +387,18 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
                 }, getStringMessages().replication(),
                 () -> getUserService().hasAnyServerPermission(ServerActions.REPLICATE, ServerActions.START_REPLICATION,
                         ServerActions.READ_REPLICATOR));
-
         final MasterDataImportPanel masterDataImportPanel = new MasterDataImportPanel(getStringMessages(), getSailingService(),
                 this, eventManagementPanel, this, this, mediaPanel);
         masterDataImportPanel.ensureDebugId("MasterDataImport");
         panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<MasterDataImportPanel>(masterDataImportPanel),
                 getStringMessages().masterDataImportPanel(), SecuredSecurityTypes.SERVER.getPermissionForObject(
                         SecuredSecurityTypes.ServerActions.CAN_IMPORT_MASTERDATA, serverInfo));
-
-        RemoteServerInstancesManagementPanel remoteServerInstancesManagementPanel = new RemoteServerInstancesManagementPanel(getSailingService(), this, getStringMessages());
+        RemoteServerInstancesManagementPanel remoteServerInstancesManagementPanel = new RemoteServerInstancesManagementPanel(getSailingService(), getUserService(),
+                this, getStringMessages(), tableResources);
         panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<RemoteServerInstancesManagementPanel>(remoteServerInstancesManagementPanel),
                 getStringMessages().remoteServerInstances(),
                 SecuredSecurityTypes.SERVER.getPermissionForObject(
                         SecuredSecurityTypes.ServerActions.CONFIGURE_REMOTE_INSTANCES, serverInfo));
-
         final LocalServerManagementPanel localServerInstancesManagementPanel = new LocalServerManagementPanel(
                 getSailingService(), getUserService(), this, getStringMessages());
         localServerInstancesManagementPanel.ensureDebugId("LocalServer");
@@ -450,27 +450,23 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
                         userGroupManagementPanel.refreshSuggests();
                     }
                 }, getStringMessages().userGroupManagement(), SecuredSecurityTypes.USER_GROUP.getPermission(DefaultActions.MUTATION_ACTIONS));
-
         final FileStoragePanel fileStoragePanel = new FileStoragePanel(getSailingService(), this);
         panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<FileStoragePanel>(fileStoragePanel),
                 getStringMessages().fileStorage(), SecuredSecurityTypes.SERVER.getPermissionForObject(
                         SecuredSecurityTypes.ServerActions.CONFIGURE_FILE_STORAGE, serverInfo));
-
         /* COURSE CREATION */
         final HorizontalTabLayoutPanel courseCreationTabPanel = panel
                 .addVerticalTab(getStringMessages().courseCreation(), "CourseCreationTab");
-
         final MarkTemplatePanel markTemplatePanel = new MarkTemplatePanel(getSailingService(), this,
                 getStringMessages(), getUserService());
         panel.addToTabPanel(courseCreationTabPanel,
                 new DefaultRefreshableAdminConsolePanel<MarkTemplatePanel>(markTemplatePanel) {
-            @Override
-            public void refreshAfterBecomingVisible() {
-                        markTemplatePanel.refreshMarkTemplates();
-            }
-                }, getStringMessages().markTemplates(),
-                SecuredDomainType.MARK_TEMPLATE.getPermission(DefaultActions.MUTATION_ACTIONS));
-
+                @Override
+                public void refreshAfterBecomingVisible() {
+                            markTemplatePanel.refreshMarkTemplates();
+                }
+            }, getStringMessages().markTemplates(),
+            SecuredDomainType.MARK_TEMPLATE.getPermission(DefaultActions.MUTATION_ACTIONS));
         final MarkPropertiesPanel markPropertiesPanel = new MarkPropertiesPanel(getSailingService(), this,
                 getStringMessages(), getUserService());
         panel.addToTabPanel(courseCreationTabPanel,
@@ -481,7 +477,6 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
                     }
                 }, getStringMessages().markProperties(),
                 SecuredDomainType.MARK_PROPERTIES.getPermission(DefaultActions.MUTATION_ACTIONS));
-
         final CourseTemplatePanel courseTemplatePanel = new CourseTemplatePanel(getSailingService(), this,
                 getStringMessages(), getUserService());
         panel.addToTabPanel(courseCreationTabPanel,
@@ -492,7 +487,6 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
                     }
                 }, getStringMessages().courseTemplates(),
                 SecuredDomainType.COURSE_TEMPLATE.getPermission(DefaultActions.MUTATION_ACTIONS));
-
         final MarkRolePanel markRolePanel = new MarkRolePanel(getSailingService(), this, getStringMessages(),
                 getUserService());
         panel.addToTabPanel(courseCreationTabPanel,
@@ -503,7 +497,6 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
                     }
                 }, getStringMessages().markRoles(),
                 SecuredDomainType.MARK_ROLE.getPermission(DefaultActions.MUTATION_ACTIONS));
-
         panel.initUI();
         fillRegattas();
         fillLeaderboardGroups();

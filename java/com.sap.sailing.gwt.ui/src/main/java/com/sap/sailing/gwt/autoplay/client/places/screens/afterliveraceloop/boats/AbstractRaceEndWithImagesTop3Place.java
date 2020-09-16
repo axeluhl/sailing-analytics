@@ -13,7 +13,7 @@ public abstract class AbstractRaceEndWithImagesTop3Place extends Place {
         return lifeRace;
     }
 
-    public void setLifeRace(RegattaAndRaceIdentifier lifeRace) {
+    public void setLiveRace(RegattaAndRaceIdentifier lifeRace) {
         this.lifeRace = lifeRace;
     }
     

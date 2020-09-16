@@ -17,6 +17,47 @@ It contains also some files:
  - Manifest.txt -> manifest used to create the test.jar file
 
 ********************************************
+      TracAPI 3.13.4
+********************************************
+This is a final version. It fixes a bug. It keeps the backward compatibility.
+It keeps the backward compatibility.
+
+ Release date: 17/08/2020
+ Build number: 3949342626e65a5d7f19bcc21ebd5146e2b3fdac
+
+ 1) Bugs
+
+  - If a race is not initialized and the race start time is edited, the library invokes
+    the method IRacesListener.abandonRace (Reported by Axe Uhl, 15/08/2020)
+
+
+********************************************
+      TracAPI 3.13.3
+********************************************
+This is a final version. The only difference with the previous version is the JDK used to compile the sources.
+It keeps the backward compatibility.
+
+ Release date: 01/05/2020
+ Build number: dfa0d7732ebb374236628868810547d28a357f92
+
+ 1) Bugs
+
+  - The previous version was compiled using Java 13 (Reported by Axel Uhl, 01/05/2020)
+
+********************************************
+     TracAPI 3.13.2
+********************************************
+This is a final version. It adds fixes some features. It keeps the backward compatibility.
+
+Release date: 30/04/2020
+Build number: 242936347afa7ec28fc8b61996caf92693ab11af
+
+1) Bugs
+
+ - Checking if a control exists before to add it to the route (Reported by Axel Uhl, 24/03/2020)
+ - The EventFactory has to synchronize the access to the "Map of IControls" (Reported by Axel Uhl, 30/04/2020)
+
+********************************************
      TracAPI 3.13.1
 ********************************************
 This is a final version. It adds a some features. It keeps the backward compatibility.

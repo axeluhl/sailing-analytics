@@ -1,0 +1,185 @@
+{
+"Version": "2012-10-17",
+"Statement": [
+    {
+        "Action": "autoscaling:DescribeAutoScalingGroups",
+        "Resource": "*",
+        "Effect": "Allow",
+        "Condition": {
+            "StringEquals": {
+                "aws:RequestedRegion": "eu-west-3"
+            }
+        }
+    },
+    {
+        "Action": "autoscaling:AttachLoadBalancers",
+        "Resource": "*",
+        "Effect": "Allow",
+        "Condition": {
+            "StringEquals": {
+                "aws:RequestedRegion": "eu-west-3"
+            }
+        }
+    },
+    {
+        "Action": "autoscaling:DetachLoadBalancers",
+        "Resource": "*",
+        "Effect": "Allow",
+        "Condition": {
+            "StringEquals": {
+                "aws:RequestedRegion": "eu-west-3"
+            }
+        }
+    },
+    {
+        "Action": "autoscaling:DetachLoadBalancerTargetGroups",
+        "Resource": "*",
+        "Effect": "Allow",
+        "Condition": {
+            "StringEquals": {
+                "aws:RequestedRegion": "eu-west-3"
+            }
+        }
+    },
+    {
+        "Action": "autoscaling:AttachLoadBalancerTargetGroups",
+        "Resource": "*",
+        "Effect": "Allow",
+        "Condition": {
+            "StringEquals": {
+                "aws:RequestedRegion": "eu-west-3"
+            }
+        }
+    },
+    {
+        "Action": "autoscaling:DescribeLoadBalancerTargetGroups",
+        "Resource": "*",
+        "Effect": "Allow",
+        "Condition": {
+            "StringEquals": {
+                "aws:RequestedRegion": "eu-west-3"
+            }
+        }
+    },
+    {
+        "Action": "elasticloadbalancing:*",
+        "Resource": "*",
+        "Effect": "Allow",
+        "Condition": {
+            "StringEquals": {
+                "aws:RequestedRegion": "eu-west-3"
+            }
+        }
+    },
+    {
+        "Action": "ec2:DescribeInstances",
+        "Resource": "*",
+        "Effect": "Allow",
+        "Condition": {
+            "StringEquals": {
+                "aws:RequestedRegion": "eu-west-3"
+            }
+        }
+    },
+    {
+        "Action": "ec2:DescribeSubnets",
+        "Resource": "*",
+        "Effect": "Allow",
+        "Condition": {
+            "StringEquals": {
+                "aws:RequestedRegion": "eu-west-3"
+            }
+        }
+    },
+    {
+        "Action": "ec2:DescribeSecurityGroups",
+        "Resource": "*",
+        "Effect": "Allow",
+        "Condition": {
+            "StringEquals": {
+                "aws:RequestedRegion": "eu-west-3"
+            }
+        }
+    },
+    {
+        "Action": "ec2:DescribeRouteTables",
+        "Resource": "*",
+        "Effect": "Allow",
+        "Condition": {
+            "StringEquals": {
+                "aws:RequestedRegion": "eu-west-3"
+            }
+        }
+    },
+    {
+        "Action": "ec2:DescribeVpcs",
+        "Resource": "*",
+        "Effect": "Allow",
+        "Condition": {
+            "StringEquals": {
+                "aws:RequestedRegion": "eu-west-3"
+            }
+        }
+    },
+    {
+        "Action": "acm:GetCertificate",
+        "Resource": "*",
+        "Effect": "Allow",
+        "Condition": {
+            "StringEquals": {
+                "aws:RequestedRegion": "eu-west-3"
+            }
+        }
+    },
+    {
+        "Action": "acm:ListCertificates",
+        "Resource": "*",
+        "Effect": "Allow",
+        "Condition": {
+            "StringEquals": {
+                "aws:RequestedRegion": "eu-west-3"
+            }
+        }
+    },
+    {
+        "Action": "acm:DescribeCertificate",
+        "Resource": "*",
+        "Effect": "Allow",
+        "Condition": {
+            "StringEquals": {
+                "aws:RequestedRegion": "eu-west-3"
+            }
+        }
+    },
+    {
+        "Action": "iam:ListServerCertificates",
+        "Resource": "*",
+        "Effect": "Allow",
+        "Condition": {
+            "StringEquals": {
+                "aws:RequestedRegion": "eu-west-3"
+            }
+        }
+    },
+    {
+        "Action": "iam:GetServerCertificate",
+        "Resource": "*",
+        "Effect": "Allow",
+        "Condition": {
+            "StringEquals": {
+                "aws:RequestedRegion": "eu-west-3"
+            }
+        }
+    },
+    {
+        "Action": "cloudformation:*",
+        "Resource": "*",
+        "Effect": "Allow",
+        "Condition": {
+            "StringEquals": {
+                "aws:RequestedRegion": "eu-west-3"
+            }
+        }
+    }
+]
+}

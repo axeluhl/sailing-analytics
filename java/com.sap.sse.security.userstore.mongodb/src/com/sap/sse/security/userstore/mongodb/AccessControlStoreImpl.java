@@ -199,21 +199,6 @@ public class AccessControlStoreImpl implements AccessControlStore {
         });
     }
 
-    @Override
-    public void denyAclPermission(final QualifiedObjectIdentifier idOfAccessControlledObjectAsString,
-            final UserGroup userGroup, final String action) {
-        LockUtil.executeWithWriteLock(lockForManagementMappings, new Runnable() {
-            @Override
-            public void run() {
-                final AccessControlListAnnotation acl = getOrCreateAcl(idOfAccessControlledObjectAsString);
-                if (acl.getAnnotation().denyPermission(userGroup, action)) {
-                    internalMapUserGroupToACL(userGroup, acl);
-                    mongoObjectFactory.storeAccessControlList(acl);
-                }
-            }
-        });
-    }
-
     private void internalMapUserGroupToACL(final UserGroup userGroup2, final AccessControlListAnnotation acl) {
         if (!lockForManagementMappings.isWriteLockedByCurrentThread()) {
             throw new IllegalStateException("Current thread has no write lock!");
@@ -244,22 +229,6 @@ public class AccessControlStoreImpl implements AccessControlStore {
                 userGroupToAccessControlListAnnotation.remove(userGroup);
             }
         }
-    }
-
-    @Override
-    public void removeAclDenial(final QualifiedObjectIdentifier idOfAccessControlledObject, final UserGroup userGroup2,
-            final String action) {
-        final UserGroup userGroup = userGroup2 == null ? NULL_GROUP : userGroup2;
-        LockUtil.executeWithWriteLock(lockForManagementMappings, new Runnable() {
-            @Override
-            public void run() {
-                final AccessControlListAnnotation acl = getOrCreateAcl(idOfAccessControlledObject);
-                if (acl.getAnnotation().removeDenial(userGroup, action)) {
-                    internalRemoveUserGroupToACLMapping(userGroup, acl);
-                    mongoObjectFactory.storeAccessControlList(acl);
-                }
-            }
-        });
     }
 
     @Override
@@ -393,13 +362,19 @@ public class AccessControlStoreImpl implements AccessControlStore {
         LockUtil.executeWithWriteLock(lockForManagementMappings, new Runnable() {
             @Override
             public void run() {
-                accessControlLists.clear();
-                ownerships.clear();
-                userGroupToAccessControlListAnnotation.clear();
-                userGroupToOwnership.clear();
-                userToOwnership.clear();
+                mongoObjectFactory.deleteAllOwnerships();
+                mongoObjectFactory.deleteAllAccessControlLists();
+                removeAll();
             }
         });
+    }
+
+    private void removeAll() {
+        accessControlLists.clear();
+        ownerships.clear();
+        userGroupToAccessControlListAnnotation.clear();
+        userGroupToOwnership.clear();
+        userToOwnership.clear();
     }
 
     @Override

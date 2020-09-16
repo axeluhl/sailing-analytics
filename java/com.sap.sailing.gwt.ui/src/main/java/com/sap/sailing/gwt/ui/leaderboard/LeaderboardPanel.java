@@ -313,7 +313,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
      */
     Anchor playPause;
 
-    final CompetitorSelectionProvider competitorSelectionProvider;
+    protected final CompetitorSelectionProvider competitorSelectionProvider;
     private final HorizontalPanel filterControlPanel;
     private Label filterStatusLabel;
     private Button filterClearButton;
@@ -412,13 +412,13 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             CompetitorSelectionProvider competitorSelectionProvider, String leaderboardName,
             ErrorReporter errorReporter, final StringMessages stringMessages, boolean showRaceDetails,
             LeaderBoardStyle style, FlagImageResolver flagImageResolver, Iterable<DetailType> availableDetailTypes) {
-        this(parent, context, sailingService, asyncActionsExecutor, settings, false, competitorSelectionProvider, null,
+        this(parent, context, sailingService, asyncActionsExecutor, settings, false, competitorSelectionProvider,
                 leaderboardName, errorReporter, stringMessages, showRaceDetails, style, flagImageResolver, availableDetailTypes);
     }
 
     public LeaderboardPanel(Component<?> parent, ComponentContext<?> context, SailingServiceAsync sailingService,
             AsyncActionsExecutor asyncActionsExecutor, LS settings, boolean isEmbedded,
-            CompetitorSelectionProvider competitorSelectionProvider, String leaderboardGroupName,
+            CompetitorSelectionProvider competitorSelectionProvider,
             String leaderboardName, ErrorReporter errorReporter, final StringMessages stringMessages,
             boolean showRaceDetails, LeaderBoardStyle style, FlagImageResolver flagImageResolver, Iterable<DetailType> availableDetailTypes) {
         this(parent, context, sailingService, asyncActionsExecutor, settings, isEmbedded, competitorSelectionProvider,
@@ -426,7 +426,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                         // perform the first request as "live" but don't by default auto-play
                         PlayModes.Live, PlayStates.Paused,
                         /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS),
-                leaderboardGroupName, leaderboardName, errorReporter, stringMessages, showRaceDetails,
+                leaderboardName, errorReporter, stringMessages, showRaceDetails,
                 /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true,
                 /* optionalRaceTimesInfoProvider */ null, /* autoExpandLastRaceColumn */ false,
                 /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false, /* showCompetitorFilterStatus */ false,
@@ -435,7 +435,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
 
     public LeaderboardPanel(Component<?> parent, ComponentContext<?> context, SailingServiceAsync sailingService,
             AsyncActionsExecutor asyncActionsExecutor, LS settings, boolean isEmbedded,
-            CompetitorSelectionProvider competitorSelectionProvider, Timer timer, String leaderboardGroupName,
+            CompetitorSelectionProvider competitorSelectionProvider, Timer timer,
             String leaderboardName, final ErrorReporter errorReporter, final StringMessages stringMessages,
             boolean showRaceDetails, CompetitorFilterPanel competitorSearchTextBox, boolean showSelectionCheckbox,
             RaceTimesInfoProvider optionalRaceTimesInfoProvider, boolean autoExpandLastRaceColumn,
@@ -481,6 +481,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         timer.addTimeListener(this);
 
         totalRankColumn = new TotalRankColumn();
+        totalRankColumn.setCellStyleNames("totalRankColumn");
         leaderboardTable = new FlushableSortedCellTableWithStylableHeaders<LeaderboardRowDTO>(/* pageSize */10000,
                 style.getTableresources());
         leaderboardTable.addCellPreviewHandler(new CellPreviewEvent.Handler<LeaderboardRowDTO>() {
@@ -906,7 +907,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     private class BoatInfoColumn<T> extends LeaderboardSortableColumnWithMinMax<T, String> {
         private final BoatFetcher<T> boatFetcher;
 
-        public BoatInfoColumn(BoatFetcher<T> boatFetcher, LeaderBoardStyle style) {            
+        public BoatInfoColumn(BoatFetcher<T> boatFetcher, LeaderBoardStyle style) {
             super(new TextCell(), SortingOrder.ASCENDING, LeaderboardPanel.this);
             this.boatFetcher = boatFetcher;
             // This style is adding to avoid contained images CSS property "max-width: 100%", which could cause
@@ -1904,34 +1905,11 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             }
         }
 
-        private abstract class AbstractLastLegDetailField<T extends Comparable<?>> implements DataExtractor<T, LeaderboardRowDTO> {
+        private abstract class AbstractLastLegDetailField<T extends Comparable<?>> extends com.sap.sailing.gwt.ui.leaderboard.AbstractLastLegDetailField<T> {
             @Override
-            public final T get(LeaderboardRowDTO row) {
-                T result = null;
-                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
-                if (fieldsForRace != null && fieldsForRace.legDetails != null) {
-                    int lastLegIndex = fieldsForRace.legDetails.size() - 1;
-                    if (lastLegIndex >= 0) {
-                        LegEntryDTO lastLegDetail = fieldsForRace.legDetails.get(lastLegIndex);
-                        // competitor may be in leg prior to the one the leader is in; find competitors current leg
-                        while (lastLegDetail == null && lastLegIndex > 0) {
-                            lastLegDetail = fieldsForRace.legDetails.get(--lastLegIndex);
-                        }
-                        if (lastLegDetail != null) {
-                            if (lastLegDetail.finished) {
-                                result = getAfterLastLegFinished(row);
-                            } else {
-                                result = getBeforeLastLegFinished(lastLegDetail);
-                            }
-                        }
-                    }
-                }
-                return result;
+            public String getRaceColumnName() {
+                return TextRaceColumn.this.getRaceColumnName();
             }
-
-            protected abstract T getBeforeLastLegFinished(LegEntryDTO currentLegDetail);
-
-            protected abstract T getAfterLastLegFinished(LeaderboardRowDTO row);
         }
 
         private class RaceCurrentSpeedOverGroundInKnots extends AbstractLastLegDetailField<Double> {
@@ -2235,8 +2213,8 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     private static class TimeOnDistanceAllowanceInSecondsPerNauticalMileColumn implements DataExtractor<Double, LeaderboardRowDTO> {
         @Override
         public Double get(LeaderboardRowDTO row) {
-            return row.competitor.getTimeOnDistanceAllowancePerNauticalMile() == null ? null
-                    : row.competitor.getTimeOnDistanceAllowancePerNauticalMile().asSeconds();
+            return row.effectiveTimeOnDistanceAllowancePerNauticalMile == null ? null
+                    : row.effectiveTimeOnDistanceAllowancePerNauticalMile.asSeconds();
         }
     }
 
@@ -2273,7 +2251,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                 new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.OVERALL_TOTAL_DISTANCE_FOILED_IN_METERS,
                         e -> e.totalDistanceFoiledInMeters, RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
         result.put(DetailType.OVERALL_TIME_ON_TIME_FACTOR, new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.OVERALL_TIME_ON_TIME_FACTOR,
-                e -> e.competitor.getTimeOnTimeFactor(), RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
+                e -> e.effectiveTimeOnTimeFactor, RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
         result.put(DetailType.OVERALL_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE,
                 new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.OVERALL_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE,
                         new TimeOnDistanceAllowanceInSecondsPerNauticalMileColumn(), RACE_COLUMN_HEADER_STYLE,
@@ -3235,7 +3213,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         return needsCarryColumn ? zeroBasedIndexOfCarryColumn + 1 : zeroBasedIndexOfCarryColumn;
     }
 
-    private void ensureNoCarryColumn(int zeroBasedIndexOfCarryColumn) {
+    protected void ensureNoCarryColumn(int zeroBasedIndexOfCarryColumn) {
         if (getLeaderboardTable().getColumnCount() > zeroBasedIndexOfCarryColumn && getLeaderboardTable()
                 .getColumn(zeroBasedIndexOfCarryColumn) instanceof LeaderboardPanel.CarryColumn) {
             removeColumn(zeroBasedIndexOfCarryColumn);

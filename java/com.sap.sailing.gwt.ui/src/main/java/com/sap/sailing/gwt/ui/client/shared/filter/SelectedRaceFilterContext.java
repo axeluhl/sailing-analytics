@@ -5,7 +5,7 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 public interface SelectedRaceFilterContext {
     void setSelectedRace(RaceIdentifier selectedRace);
     
-    void setQuickRankProvider(QuickRankProvider quickRankProvider);
+    void setQuickRankProvider(QuickFlagDataValuesProvider quickRankProvider);
     
     RaceIdentifier getSelectedRace();
 }

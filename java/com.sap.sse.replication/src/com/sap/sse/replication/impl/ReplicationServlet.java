@@ -112,8 +112,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
      * The operation performed is selected by passing one of the {@link Action} enumeration values for the URL parameter
      * named {@link #ACTION}.
      */
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    private void handleAction(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
             String action = req.getParameter(ACTION);
             logger.info("Received replication-related request, action is "+action+", subject is "+
@@ -235,7 +234,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
         result.put("replicables", replicablesJSON);
         result.put("available", status.isAvailable());
         resp.setContentType("application/json;charset=UTF-8");
-        resp.getWriter().print(result.toJSONString());
+        result.writeJSONString(resp.getWriter());
         if (status.isAvailable()) {
             resp.setStatus(HttpServletResponse.SC_OK);
         } else {
@@ -248,37 +247,42 @@ public class ReplicationServlet extends AbstractHttpServlet {
      */
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        InputStream is = req.getInputStream();
-        DataInputStream dis = new DataInputStream(is);
-        String replicableIdAsString = dis.readUTF();
-        Replicable<?, ?> replicable = replicablesProvider.getReplicable(replicableIdAsString, /* wait */ false);
-        if (replicable != null) {
-            logger.info("Received request to apply and replicate an operation from a replica for replicable "+replicable);
-            checkReplicatorPermission(ServerActions.REPLICATE);
-            try {
-                applyOperationToReplicable(replicable, is);
-            } catch (InvocationTargetException ite) {
-                Throwable originalException = ite.getTargetException();
-                if (originalException instanceof RuntimeException && originalException.getCause() != null) {
-                    originalException = originalException.getCause();
-                }
-                logger.log(Level.SEVERE, "Unrecoverable error applying operation received from replica", originalException);
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Exception " + ite.getCause()
-                        + " occurred while trying to receive and apply operation initiated on replica. Please do not re-send.");
-            } catch (ClassNotFoundException cnfe) {
-                logger.log(Level.SEVERE,
-                        "Exception occurred while trying to de-serialize operation", cnfe);
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Exception " + cnfe
-                        + " occurred while trying to de-serialize operation initiated on replica. Please do not re-send");
-            } catch (IOException ioe) {
-                logger.log(Level.SEVERE,
-                        "Exception occurred while trying to receive and apply operation initiated on replica", ioe);
-                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Exception " + ioe
-                        + " occurred while trying to receive and apply operation initiated on replica. Re-trying can make sense.");
-            }
+        if (req.getParameter(ACTION) != null) {
+            handleAction(req, resp);
         } else {
-            logger.warning("Received operation for replicable "+replicableIdAsString+
-                    ", but a replicable with that ID couldn't be found. Ignoring the operation.");
+            // no action --> a stream of serialized operations is expected in the POST request's body
+            InputStream is = req.getInputStream();
+            DataInputStream dis = new DataInputStream(is);
+            String replicableIdAsString = dis.readUTF();
+            Replicable<?, ?> replicable = replicablesProvider.getReplicable(replicableIdAsString, /* wait */ false);
+            if (replicable != null) {
+                logger.info("Received request to apply and replicate an operation from a replica for replicable "+replicable);
+                checkReplicatorPermission(ServerActions.REPLICATE);
+                try {
+                    applyOperationToReplicable(replicable, is);
+                } catch (InvocationTargetException ite) {
+                    Throwable originalException = ite.getTargetException();
+                    if (originalException instanceof RuntimeException && originalException.getCause() != null) {
+                        originalException = originalException.getCause();
+                    }
+                    logger.log(Level.SEVERE, "Unrecoverable error applying operation received from replica", originalException);
+                    resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Exception " + ite.getCause()
+                            + " occurred while trying to receive and apply operation initiated on replica. Please do not re-send.");
+                } catch (ClassNotFoundException cnfe) {
+                    logger.log(Level.SEVERE,
+                            "Exception occurred while trying to de-serialize operation", cnfe);
+                    resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Exception " + cnfe
+                            + " occurred while trying to de-serialize operation initiated on replica. Please do not re-send");
+                } catch (IOException ioe) {
+                    logger.log(Level.SEVERE,
+                            "Exception occurred while trying to receive and apply operation initiated on replica", ioe);
+                    resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Exception " + ioe
+                            + " occurred while trying to receive and apply operation initiated on replica. Re-trying can make sense.");
+                }
+            } else {
+                logger.warning("Received operation for replicable "+replicableIdAsString+
+                        ", but a replicable with that ID couldn't be found. Ignoring the operation.");
+            }
         }
     }
 

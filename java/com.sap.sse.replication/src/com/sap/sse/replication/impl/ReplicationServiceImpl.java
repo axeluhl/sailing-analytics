@@ -698,7 +698,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
             replicatorThread.start();
             logger.info("Started replicator thread");
             final URLConnection initialLoadConnection = HttpUrlConnectionHelper
-                    .redirectConnectionWithBearerToken(initialLoadURL, master.getBearerToken());
+                    .redirectConnectionWithBearerToken(initialLoadURL, /* HTTP request method */ "POST", master.getBearerToken());
             final InputStream is = (InputStream) initialLoadConnection.getContent();
             final InputStreamReader queueNameReader = new InputStreamReader(is);
             final String queueName = new BufferedReader(queueNameReader).readLine();
@@ -746,7 +746,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
                 ServerInfo.getBuildVersion());
         logger.info("Replication registration request URL: "+replicationRegistrationRequestURL);
         final URLConnection registrationRequestConnection = HttpUrlConnectionHelper
-                .redirectConnectionWithBearerToken(replicationRegistrationRequestURL, master.getBearerToken());
+                .redirectConnectionWithBearerToken(replicationRegistrationRequestURL, /* HTTP method */ "POST", master.getBearerToken());
         final InputStream content = (InputStream) registrationRequestConnection.getContent();
         final StringBuilder uuid = new StringBuilder();
         final byte[] buf = new byte[256];
@@ -772,7 +772,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
                     .getReplicationDeRegistrationRequestURL(getServerIdentifier());
             logger.info("Unregistering replica from master "+master+" using URL "+replicationDeRegistrationRequestURL);
             final URLConnection deregistrationRequestConnection = HttpUrlConnectionHelper
-                    .redirectConnectionWithBearerToken(replicationDeRegistrationRequestURL, master.getBearerToken());
+                    .redirectConnectionWithBearerToken(replicationDeRegistrationRequestURL, /* HTTP method */ "POST", master.getBearerToken());
             StringBuilder uuid = new StringBuilder();
             InputStream content = (InputStream) deregistrationRequestConnection.getContent();
             byte[] buf = new byte[256];

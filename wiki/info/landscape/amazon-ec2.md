@@ -30,7 +30,6 @@ USE_ENVIRONMENT=live-master-server
 SERVER_NAME=myspecificevent
 REPLICATION_CHANNEL=myspecificevent
 MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/myspecificevent?replicaSet=live&retryWrites=true"
-SERVER_STARTUP_NOTIFY=you@email.com
 # Provide authentication credentials for a user on security-service.sapsailing.com permitted to replicate, either by username/password...
 #REPLICATE_MASTER_USERNAME=(user for replicator login on security-service.sapsailing.com server having SERVER:REPLICATE:&lt;server-name&gt; permission)
 #REPLICATE_MASTER_PASSWORD=(password of the user for replication login on security-service.sapsailing.com)
@@ -39,6 +38,8 @@ SERVER_STARTUP_NOTIFY=you@email.com
 # or by logging in to the security-service.sapsailing.com server using your web browser and then navigating to
 #     https://security-service.sapsailing.com/security/api/restsecurity/access_token
 REPLICATE_MASTER_BEARER_TOKEN=(a bearer token allowing this master to replicate from security-service.sapsailing.com)
+EVENT_ID={some-uuid-of-an-event-you-want-to-feature}
+SERVER_STARTUP_NOTIFY=you@email.com
 ```
 
 Have at least a public-facing target group ready. If you want to expose the master to the public (single-instance scenario or master-replica scenario where the master also handles reading client requests) add the master to the public target group.
@@ -65,7 +66,7 @@ REPLICATE_MASTER_EXCHANGE_NAME=myspecificevent
 REPLICATE_MASTER_BEARER_TOKEN=(a bearer token allowing this master to replicate from your master)
 SERVER_NAME=MYSPECIFICEVENT
 MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/myspecificevent-replica?replicaSet=live&retryWrites=true"
-EVENT_ID=&lt;some-uuid-of-an-event-you-want-to-feature&gt;
+EVENT_ID={some-uuid-of-an-event-you-want-to-feature}
 SERVER_STARTUP_NOTIFY=you@email.com
 ```
 
@@ -131,8 +132,15 @@ To set up a multi instance for a server with name "SSV", subdomain "ssv.sapsaili
    <pre>
    # JAVA_HOME=/opt/jdk1.8.0_20
    </pre>
+   Optional: setup event management URL by setting <pre>com.sap.sailing.eventmanagement.url</pre> system property. See ADDITIONAL_JAVA_ARGS at <pre>env.sh</pre>.
 
-8. Find the next unused ports for the variables SERVER_PORT, TELNET_PORT and EXPEDITION_PORT. You can do this by extracting all existing variable assignments from all env.sh files within the /home/sailing/servers directory. 
+8. White label switch, uncomment this line in env.sh
+   <pre>
+   #ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Dcom.sap.sse.debranding=true"
+   </pre>
+   to enable white labeling.
+
+9. Find the next unused ports for the variables SERVER_PORT, TELNET_PORT and EXPEDITION_PORT. You can do this by extracting all existing variable assignments from all env.sh files within the /home/sailing/servers directory. 
 
    <pre>
    for i in /home/sailing/servers/*/env.sh; do cat $i | grep "^ *SERVER_PORT=" | tail -1 | tr -d "SERVER_PORT="; done | sort -n
@@ -142,7 +150,7 @@ To set up a multi instance for a server with name "SSV", subdomain "ssv.sapsaili
 
    If this is the first multi instance on the server, use the values SERVER_PORT=8888, TELNET_PORT=14888, EXPEDITION_PORT=2010.
 
-9. Append the following variable assignments to your env.sh file.
+10. Append the following variable assignments to your env.sh file.
    <pre>
    SERVER_NAME=SSV
    TELNET_PORT=14888
@@ -154,7 +162,7 @@ To set up a multi instance for a server with name "SSV", subdomain "ssv.sapsaili
    DEPLOY_TO=ssv
    </pre>
 
-10. Append the following description to the /home/sailing/servers/README file.
+11. Append the following description to the /home/sailing/servers/README file.
 
   <pre>
   # ssv (Schwartauer Segler-Verein, www.ssv-net.de, Alexander Probst, webmaster@alexprobst.de)
@@ -165,15 +173,15 @@ To set up a multi instance for a server with name "SSV", subdomain "ssv.sapsaili
   EXPEDITION_PORT=2000
   </pre>
 
-11. Start the multi instance.
+12. Start the multi instance.
     <pre>
     cd /home/sailing/servers/ssv
     ./start
     </pre>
 
-12. Change the admin password now and create a new user with admin role.
+13. Change the admin password now and create a new user with admin role.
 
-13. Your multi instance is now configured and started. It can be reached over ec2-34-250-136-229.eu-west-1.compute.amazonaws.com:8888. 
+14. Your multi instance is now configured and started. It can be reached over ec2-34-250-136-229.eu-west-1.compute.amazonaws.com:8888. 
 
 
 ##### Reachability

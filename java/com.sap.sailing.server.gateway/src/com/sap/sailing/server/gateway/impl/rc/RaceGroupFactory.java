@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
@@ -50,11 +49,10 @@ public class RaceGroupFactory {
      */
     public RaceGroup convert(RegattaLeaderboard leaderboard) {
         String name = leaderboard.getName();
-        CourseArea courseArea = leaderboard.getDefaultCourseArea();
         Regatta regatta = ((RegattaLeaderboard) leaderboard).getRegatta();
         Iterable<SeriesWithRows> series = getSeries(leaderboard);
         return new RaceGroupImpl(name, leaderboard.getDisplayName(), regatta.getBoatClass(), regatta.canBoatsOfCompetitorsChangePerRace(), 
-                courseArea, series, regatta.getRegattaConfiguration());
+                series, regatta.getRegattaConfiguration());
     }
 
     /**
@@ -64,11 +62,10 @@ public class RaceGroupFactory {
      */
     public RaceGroup convert(FlexibleLeaderboard leaderboard) {
         String name = leaderboard.getName();
-        CourseArea courseArea = leaderboard.getDefaultCourseArea();
         BoatClass boatClass = null;
         RegattaConfiguration configuration = null;
         Iterable<SeriesWithRows> series = getSeries(leaderboard);
-        return new RaceGroupImpl(name, leaderboard.getDisplayName(), boatClass, false, courseArea, series, configuration);
+        return new RaceGroupImpl(name, leaderboard.getDisplayName(), boatClass, false, series, configuration);
     }
 
     private Iterable<SeriesWithRows> getSeries(Leaderboard leaderboard) {

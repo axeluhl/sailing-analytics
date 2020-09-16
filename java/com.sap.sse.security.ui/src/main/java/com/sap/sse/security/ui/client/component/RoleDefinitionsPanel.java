@@ -46,7 +46,7 @@ import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
 import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
-import com.sap.sse.security.ui.client.UserManagementServiceAsync;
+import com.sap.sse.security.ui.client.UserManagementWriteServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
@@ -66,7 +66,7 @@ public class RoleDefinitionsPanel extends VerticalPanel {
     private final FlushableCellTable<RoleDefinitionDTO> roleDefinitionsTable;
     private final ErrorReporter errorReporter;
     private final UserService userService;
-    private final UserManagementServiceAsync userManagementService;
+    private final UserManagementWriteServiceAsync userManagementWriteService;
     private final ListDataProvider<RoleDefinitionDTO> rolesListDataProvider;
     private final StringMessages stringMessages;
     private final LabeledAbstractFilterablePanel<RoleDefinitionDTO> filterablePanelRoleDefinitions;
@@ -77,7 +77,8 @@ public class RoleDefinitionsPanel extends VerticalPanel {
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
         this.userService = userService;
-        this.userManagementService = userService.getUserManagementService();
+        // using write service to enforce round trip going to master for consistency purposes
+        this.userManagementWriteService = userService.getUserManagementWriteService();
         rolesListDataProvider = new ListDataProvider<>();
         filterablePanelRoleDefinitions = new LabeledAbstractFilterablePanel<RoleDefinitionDTO>(new Label(stringMessages.filterRoles()), new ArrayList<>(),
                 rolesListDataProvider, stringMessages) {
@@ -120,7 +121,7 @@ public class RoleDefinitionsPanel extends VerticalPanel {
         new RoleDefinitionCreationDialog(stringMessages, getAllPermissions(), getAllRoleDefinitions(), new DialogCallback<RoleDefinitionDTO>() {
             @Override
             public void ok(RoleDefinitionDTO editedObject) {
-                userManagementService.createRoleDefinition(editedObject.getId().toString(), editedObject.getName(), new AsyncCallback<RoleDefinitionDTO>() {
+                userManagementWriteService.createRoleDefinition(editedObject.getId().toString(), editedObject.getName(), new AsyncCallback<RoleDefinitionDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError(stringMessages.errorCreatingRole(editedObject.getName(), caught.getMessage()));
@@ -128,7 +129,7 @@ public class RoleDefinitionsPanel extends VerticalPanel {
 
                     @Override
                     public void onSuccess(RoleDefinitionDTO result) {
-                        userManagementService.updateRoleDefinition(editedObject, new AsyncCallback<Void>() {
+                        userManagementWriteService.updateRoleDefinition(editedObject, new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 errorReporter.reportError(stringMessages.errorEditingRoles(editedObject.getName(), caught.getMessage()));
@@ -209,14 +210,14 @@ public class RoleDefinitionsPanel extends VerticalPanel {
                 removeRole(roleDefinition);
             }
         });
-        final DialogConfig<RoleDefinitionDTO> config = EditOwnershipDialog.create(userManagementService, type,
+        final DialogConfig<RoleDefinitionDTO> config = EditOwnershipDialog.create(userManagementWriteService, type,
                 roleDefinition -> updateRoleDefinitions(), stringMessages);
-        roleActionColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, config::openDialog);
+        roleActionColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, config::openOwnershipDialog);
         final EditACLDialog.DialogConfig<RoleDefinitionDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementService(), type, roleDefinition -> updateRoleDefinitions(),
                 stringMessages);
         roleActionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                configACL::openDialog);
+                configACL::openACLDialog);
 
         table.addColumn(roleSelectionCheckboxColumn, roleSelectionCheckboxColumn.getHeader());
         table.addColumn(roleDefinitionNameColumn, stringMessages.name());
@@ -229,7 +230,7 @@ public class RoleDefinitionsPanel extends VerticalPanel {
     }
 
     private void removeRole(RoleDefinition roleDefinition) {
-        userManagementService.deleteRoleDefinition(roleDefinition.getId().toString(), new AsyncCallback<Void>() {
+        userManagementWriteService.deleteRoleDefinition(roleDefinition.getId().toString(), new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(stringMessages.errorTryingToDeleteRole(roleDefinition.getName(), caught.getMessage()));
@@ -249,7 +250,7 @@ public class RoleDefinitionsPanel extends VerticalPanel {
                 new DialogCallback<RoleDefinitionDTO>() {
                     @Override
                     public void ok(RoleDefinitionDTO editedObject) {
-                        userManagementService.updateRoleDefinition(editedObject, new AsyncCallback<Void>() {
+                        userManagementWriteService.updateRoleDefinition(editedObject, new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 errorReporter.reportError(stringMessages.errorEditingRoles(editedObject.getName(), caught.getMessage()));
@@ -291,7 +292,7 @@ public class RoleDefinitionsPanel extends VerticalPanel {
     }
 
     public void updateRoleDefinitions() {
-        userManagementService.getRoleDefinitions(new AsyncCallback<ArrayList<RoleDefinitionDTO>>() {
+        userManagementWriteService.getRoleDefinitions(new AsyncCallback<ArrayList<RoleDefinitionDTO>>() {
             @Override
             public void onSuccess(ArrayList<RoleDefinitionDTO> allRoles) {
                 filterablePanelRoleDefinitions.updateAll(allRoles);

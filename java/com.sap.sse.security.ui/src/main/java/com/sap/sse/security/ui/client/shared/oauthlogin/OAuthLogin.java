@@ -11,7 +11,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sse.security.ui.client.UserManagementServiceAsync;
+import com.sap.sse.security.ui.client.UserManagementWriteServiceAsync;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.oauth.client.util.ClientUtils;
 
@@ -38,10 +38,10 @@ public class OAuthLogin extends Composite {
 
     public static OAuthLoginResources images = OAuthLoginResources.INSTANCE;
 
-    private UserManagementServiceAsync userManagementService;
+    private UserManagementWriteServiceAsync userManagementWriteService;
 
-    public OAuthLogin(UserManagementServiceAsync userManagementService) {
-        this.userManagementService = userManagementService;
+    public OAuthLogin(UserManagementWriteServiceAsync userManagementWriteService) {
+        this.userManagementWriteService = userManagementWriteService;
         
         OAuthLoginResources.INSTANCE.css().ensureInjected();
 
@@ -55,7 +55,7 @@ public class OAuthLogin extends Composite {
         final CredentialDTO credential = new CredentialDTO();
         credential.setRedirectUrl(callbackUrl);
         credential.setAuthProvider(authProvider);
-        userManagementService.getAuthorizationUrl(credential, new AsyncCallback<String>() {
+        userManagementWriteService.getAuthorizationUrl(credential, new AsyncCallback<String>() {
             @Override
             public void onFailure(Throwable caught) {
                 ClientUtils.handleException(caught);

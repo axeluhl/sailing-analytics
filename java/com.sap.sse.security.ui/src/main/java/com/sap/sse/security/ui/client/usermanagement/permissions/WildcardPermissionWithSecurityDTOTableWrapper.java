@@ -77,7 +77,7 @@ public class WildcardPermissionWithSecurityDTOTableWrapper extends
         userActionColumn.addAction(ACTION_DELETE, DELETE, selectedPermission -> {
             UserDTO selectedObject = userSelectionModel.getSelectedObject();
             if (selectedObject != null) {
-                userService.getUserManagementService().removePermissionFromUser(selectedObject.getName(),
+                userService.getUserManagementWriteService().removePermissionFromUser(selectedObject.getName(),
                         selectedPermission, new AsyncCallback<SuccessInfo>() {
                             @Override
                             public void onFailure(Throwable caught) {
@@ -105,9 +105,9 @@ public class WildcardPermissionWithSecurityDTOTableWrapper extends
                         stringMessages);
         final EditACLDialog.DialogConfig<WildcardPermissionWithSecurityDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementService(), type, user -> user.getAccessControlList(), stringMessages);
-        userActionColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, configOwnership::openDialog);
+        userActionColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, configOwnership::openOwnershipDialog);
         userActionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                permission -> configACL.openDialog(permission));
+                permission -> configACL.openACLDialog(permission));
         // filter field configuration
         filterField = new LabeledAbstractFilterablePanel<WildcardPermissionWithSecurityDTO>(
                 new Label(stringMessages.filterPermission()), new ArrayList<WildcardPermissionWithSecurityDTO>(),

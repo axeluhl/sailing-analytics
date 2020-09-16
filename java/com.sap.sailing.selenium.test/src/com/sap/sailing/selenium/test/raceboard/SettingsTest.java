@@ -10,7 +10,6 @@ import javax.xml.bind.DatatypeConverter;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
@@ -83,8 +82,6 @@ public class SettingsTest extends AbstractSeleniumTest {
      * settings and global settings.
      */
     @Test
-    // FIXME Bug 5246: temporarily ignored due to Selenium test instabilities
-    @Ignore
     public void testRaceBoardPageSettingsStorage() throws InterruptedException, UnsupportedEncodingException {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         EventConfigurationPanelPO events = adminConsole.goToEvents();
@@ -93,7 +90,7 @@ public class SettingsTest extends AbstractSeleniumTest {
                 BMW_START_EVENT_TIME, BMW_STOP_EVENT_TIME, false);
         initTrackingForBmwCupRace(adminConsole);
         RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA,
-                BMW_CUP_REGATTA, String.format(BMW_RACE, 1), "PLAYER");
+                BMW_CUP_REGATTA, String.format(BMW_RACE, 1), "PLAYER", false);
         DetailCheckboxInfo[] detailsToSelect = new DetailCheckboxInfo[] {
                 // Overall details
                 // Race details
@@ -114,13 +111,13 @@ public class SettingsTest extends AbstractSeleniumTest {
         leaderboardSettingsDialog.pressCancel();
         MapSettingsPO mapSettings = raceboard.openMapSettings();
         // Verify initial mode settings
-        Assert.assertFalse(mapSettings.isWindUp());
+        mapSettings.waitForWindUpUntil(false);
         Assert.assertFalse(mapSettings.isShowOnlySelectedCompetitors());
         mapSettings.setTransparentHoverlines(true);
         mapSettings.setWindUp(false);
         mapSettings.pressMakeDefault();
         raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA, BMW_CUP_REGATTA,
-                String.format(BMW_RACE, 1), "WINNING_LANES");
+                String.format(BMW_RACE, 1), "WINNING_LANES", false);
         detailsToSelect = new DetailCheckboxInfo[] {
                 // Race details
                 DetailCheckboxInfo.RACE_DISTANCE, DetailCheckboxInfo.RACE_TIME,
@@ -151,7 +148,7 @@ public class SettingsTest extends AbstractSeleniumTest {
         leaderboardSettingsDialog.pressOk(false, false);
         mapSettings = raceboard.openMapSettings();
         // verify default mode settings override custom user settings
-        Assert.assertTrue(mapSettings.isWindUp());
+        mapSettings.waitForWindUpUntil(true);
         // verify default mode settings override system defaults
         Assert.assertTrue(mapSettings.isShowOnlySelectedCompetitors());
         // Verify custom user settings are independent for modes
@@ -160,7 +157,7 @@ public class SettingsTest extends AbstractSeleniumTest {
         mapSettings.setTransparentHoverlines(false);
         mapSettings.pressOk(false, false);
         raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA, BMW_CUP_REGATTA,
-                String.format(BMW_RACE, 1), "WINNING_LANES");
+                String.format(BMW_RACE, 1), "WINNING_LANES", false);
         leaderboardSettingsDialog = raceboard.openLeaderboardSettingsDialog();
         leaderboardSettingsPanelPO = leaderboardSettingsDialog.getLeaderboardSettingsPanelPO();
         selectedDetails = leaderboardSettingsPanelPO.getSelectedDetails();
@@ -171,12 +168,12 @@ public class SettingsTest extends AbstractSeleniumTest {
         leaderboardSettingsDialog.pressCancel();
         mapSettings = raceboard.openMapSettings();
         // Verify that mode settings are overridden by document settings
-        Assert.assertFalse(mapSettings.isWindUp());
+        mapSettings.waitForWindUpUntil(false);
         // Verify custom user settings are independent for modes
         Assert.assertFalse(mapSettings.isTransparentHoverlines());
         // verify that custom document settings override mode settings of other modes
         raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA, BMW_CUP_REGATTA,
-                String.format(BMW_RACE, 1), "START_ANALYSIS");
+                String.format(BMW_RACE, 1), "START_ANALYSIS", false);
         leaderboardSettingsDialog = raceboard.openLeaderboardSettingsDialog();
         leaderboardSettingsPanelPO = leaderboardSettingsDialog.getLeaderboardSettingsPanelPO();
         selectedDetails = leaderboardSettingsPanelPO.getSelectedDetails();
@@ -194,7 +191,7 @@ public class SettingsTest extends AbstractSeleniumTest {
         Assert.assertArrayEquals(detailsToSelect, selectedDetails);
         leaderboardSettingsDialog.pressCancel();
         mapSettings = raceboard.openMapSettings();
-        Assert.assertTrue(mapSettings.isWindUp());
+        mapSettings.waitForWindUpUntil(true);
     }
 
     /**
@@ -211,7 +208,7 @@ public class SettingsTest extends AbstractSeleniumTest {
         initTrackingForBmwCupRace(adminConsole);
         
         RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA,
-                BMW_CUP_REGATTA, String.format(BMW_RACE, 1), "PLAYER");
+                BMW_CUP_REGATTA, String.format(BMW_RACE, 1), "PLAYER", false);
         
         MapSettingsPO mapSettings = raceboard.openMapSettings();
         // Verify initial settings for mode PLAYER
@@ -222,14 +219,14 @@ public class SettingsTest extends AbstractSeleniumTest {
         mapSettings.pressMakeDefault();
         
         raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA, BMW_CUP_REGATTA,
-                String.format(BMW_RACE, 1), "WINNING_LANES");
+                String.format(BMW_RACE, 1), "WINNING_LANES", false);
 
         mapSettings = raceboard.openMapSettings();
         // Verify initial settings for mode WINNING_LANES
         Assert.assertFalse(mapSettings.isShowWindStreamletOverlay());
         
         raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA,
-                BMW_CUP_REGATTA, String.format(BMW_RACE, 1), "PLAYER");
+                BMW_CUP_REGATTA, String.format(BMW_RACE, 1), "PLAYER", false);
         
         // Map settings for mode PLAYER are changed
         mapSettings = raceboard.openMapSettings();
@@ -237,7 +234,7 @@ public class SettingsTest extends AbstractSeleniumTest {
         mapSettings.pressMakeDefault();
         
         raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA, BMW_CUP_REGATTA,
-                String.format(BMW_RACE, 1), "WINNING_LANES");
+                String.format(BMW_RACE, 1), "WINNING_LANES", false);
 
         mapSettings = raceboard.openMapSettings();
         // Verify settings for mode WINNING_LANES are unchanged
@@ -258,22 +255,22 @@ public class SettingsTest extends AbstractSeleniumTest {
         initTrackingForBmwCupRace(adminConsole);
         
         RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA,
-                BMW_CUP_REGATTA, String.format(BMW_RACE, 1), "PLAYER");
+                BMW_CUP_REGATTA, String.format(BMW_RACE, 1), "PLAYER", false);
         
         MapSettingsPO mapSettings = raceboard.openMapSettings();
         // Verify initial mode settings
-        Assert.assertFalse(mapSettings.isWindUp());
+        mapSettings.waitForWindUpUntil(false);
         Assert.assertFalse(mapSettings.isShowOnlySelectedCompetitors());
         mapSettings.setWindUp(true);
         mapSettings.setShowOnlySelectedCompetitors(true);
         mapSettings.pressMakeDefault();
         
         raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA, BMW_CUP_REGATTA,
-                String.format(BMW_RACE, 1), "PLAYER");
+                String.format(BMW_RACE, 1), "PLAYER", false);
         
         mapSettings = raceboard.openMapSettings();
         // verify default settings work
-        Assert.assertTrue(mapSettings.isWindUp());
+        mapSettings.waitForWindUpUntil(true);
         Assert.assertTrue(mapSettings.isShowOnlySelectedCompetitors());
     }
     
@@ -291,22 +288,22 @@ public class SettingsTest extends AbstractSeleniumTest {
         initTrackingForBmwCupRace(adminConsole);
         
         RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA,
-                BMW_CUP_REGATTA, String.format(BMW_RACE, 1), "WINNING_LANES");
+                BMW_CUP_REGATTA, String.format(BMW_RACE, 1), "WINNING_LANES", false);
         
         MapSettingsPO mapSettings = raceboard.openMapSettings();
         // The following options are false in the system default but activated by the WINNING_LANES mode
-        Assert.assertTrue(mapSettings.isWindUp());
+        mapSettings.waitForWindUpUntil(true);
         Assert.assertTrue(mapSettings.isShowOnlySelectedCompetitors());
         mapSettings.setWindUp(false);
         mapSettings.setShowOnlySelectedCompetitors(false);
         mapSettings.pressMakeDefault();
         
         raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA, BMW_CUP_REGATTA,
-                String.format(BMW_RACE, 1), "WINNING_LANES");
+                String.format(BMW_RACE, 1), "WINNING_LANES", false);
         
         mapSettings = raceboard.openMapSettings();
         // verify mode settigns have been overwritten
-        Assert.assertFalse(mapSettings.isWindUp());
+        mapSettings.waitForWindUpUntil(false);
         Assert.assertFalse(mapSettings.isShowOnlySelectedCompetitors());
     }
 
@@ -657,7 +654,7 @@ public class SettingsTest extends AbstractSeleniumTest {
         // add a second regatta to the event and link its leaderboard to the event leaderboard
         RegattaStructureManagementPanelPO regattas = adminConsole.goToRegattaStructure();
         regattas.createRegattaAndAddToEvent(new RegattaDescriptor(AUDI_CUP_REGATTA, AUDI_CUP_BOAT_CLASS), BMW_CUP_EVENT,
-                CUSTOM_COURSE_AREA);
+                new String[] { CUSTOM_COURSE_AREA });
         // open regatta overview for the created event
         events = adminConsole.goToEvents();
         RegattaOverviewPage regattaOverviewPage = events.goToRegattaOverviewOfEvent(BMW_CUP_EVENT);
@@ -721,7 +718,7 @@ public class SettingsTest extends AbstractSeleniumTest {
         // add a second regatta to the event and link its leaderboard to the event leaderboard
         regattas = adminConsole.goToRegattaStructure();
         regattas.createRegattaAndAddToEvent(new RegattaDescriptor(BMW_CUP_REGATTA, BMW_CUP_BOAT_CLASS), AUDI_CUP_EVENT,
-                CUSTOM_COURSE_AREA);
+                new String[] { CUSTOM_COURSE_AREA });
         // open regatta overview without ignoreLocalSettings flag for the recently created event
         events = adminConsole.goToEvents();
         String audiCupRegattaOverviewUrl = events.getRegattaOverviewUrlOfEvent(AUDI_CUP_EVENT);

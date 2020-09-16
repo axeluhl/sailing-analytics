@@ -176,6 +176,7 @@ import difflib.Patch;
 import difflib.PatchFailedException;
 
 public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials implements CourseListener {
+
     private static final long serialVersionUID = -4825546964220003507L;
 
     private static final Logger logger = Logger.getLogger(TrackedRaceImpl.class.getName());
@@ -758,7 +759,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     private SmartFutureCache<Competitor, List<Maneuver>, EmptyUpdateInterval> createManeuverCache() {
         return new SmartFutureCache<Competitor, List<Maneuver>, EmptyUpdateInterval>(
                 new AbstractCacheUpdater<Competitor, List<Maneuver>, EmptyUpdateInterval>() {
-
                     @Override
                     public List<Maneuver> computeCacheUpdate(Competitor competitor, EmptyUpdateInterval updateInterval)
                             throws NoWindException {
@@ -777,7 +777,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                             return Collections.emptyList();
                         }
                     }
-                }, /* nameForLocks */"Maneuver cache for race " + getRace().getName());
+                }, /* nameForLocks */ "Maneuver cache for race " + getRace().getName());
     }
     
     /**
@@ -1566,7 +1566,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         final TimePoint timePoint;
         // normalize the time point to get cache hits when asking for time points that are later than
         // the last time point affected by any event received for this tracked race
-        if (Util.compareToWithNull(unadjustedTimePoint, getTimePointOfNewestEvent(), /* nullIsLess */ true) <= 0) {
+        if (Util.compareToWithNull(unadjustedTimePoint, getTimePointOfNewestEvent(), /* nullIsLess */ false) <= 0) {
             timePoint = unadjustedTimePoint;
         } else {
             timePoint = getTimePointOfNewestEvent();
@@ -2918,12 +2918,17 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     /**
-     * Changes to the {@link #status} variable are synchronized on the {@link #statusNotifier} field.
-     * 
-     * @return
+     * Changes to the {@link #status} variable are synchronized on the {@link #statusNotifier} field
      */
     protected Object getStatusNotifier() {
         return statusNotifier;
+    }
+    
+    @Override
+    public void runSynchronizedOnStatus(Runnable runnable) {
+        synchronized (getStatusNotifier()) {
+            runnable.run();
+        }
     }
 
     protected void setStatus(TrackedRaceStatus newStatus) {
@@ -2989,6 +2994,39 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     logger.info("waitUntilNotLoading on tracked race " + this + " interrupted: " + e.getMessage()
                             + ". Continuing to wait.");
                 }
+            }
+        }
+    }
+    
+    @Override
+    public boolean hasFinishedLoading() {
+        synchronized (getStatusNotifier()) {
+            final TrackedRaceStatusEnum status = getStatus().getStatus();
+            return hasFinishedLoading(status);
+        }
+    }
+    
+    private boolean hasFinishedLoading(TrackedRaceStatusEnum status) {
+        return (status != TrackedRaceStatusEnum.PREPARED && status != TrackedRaceStatusEnum.LOADING && status != TrackedRaceStatusEnum.ERROR);
+    }
+    
+    @Override
+    public void runWhenDoneLoading(final Runnable runnable) {
+        synchronized (getStatusNotifier()) {
+            if (!hasFinishedLoading()) {
+                addListener(new AbstractRaceChangeListener() {
+                    @Override
+                    public void statusChanged(TrackedRaceStatus newStatus, TrackedRaceStatus oldStatus) {
+                        logger.info("race "+TrackedRaceImpl.this+" went from "+oldStatus+" to "+newStatus);
+                        if (hasFinishedLoading(newStatus.getStatus())) {
+                            logger.info("race "+TrackedRaceImpl.this+" is considered having finished loading; running "+runnable);
+                            removeListener(this);
+                            runnable.run();
+                        }
+                    }
+                });
+            } else {
+                runnable.run();
             }
         }
     }

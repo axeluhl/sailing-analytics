@@ -36,6 +36,10 @@ name to make sure you get to the event you're interested in.
 		<td><a href="eventCreateEvent.html">/api/v1/events/createEvent</a></td>
 		<td>Creates a new event</td>
 	</tr>
+	   <tr>
+        <td><a href="eventDeleteDoc.html">/api/v1/events/{event-id}/</a></td>
+        <td>Deletes and Event</td>
+    </tr>
 	<tr>
 		<td><a href="eventUpdate.html">/api/v1/events/{event-id}/update</a></td>
 		<td>Updates an existing event</td>
@@ -45,7 +49,7 @@ name to make sure you get to the event you're interested in.
         <td>Migrates an existing event</td>
     </tr>
 	<tr>
-		<td><a href="eventGetDoc.html">/api/v1/events</a></td>
+		<td><a href="eventsGetDoc.html">/api/v1/events</a></td>
 		<td>Gets all events</td>
 	</tr>
 	<tr>
@@ -64,6 +68,10 @@ name to make sure you get to the event you're interested in.
 		<td><a href="regattaGetDoc.html">/api/v1/regattas/{name}</a></td>
 		<td>Gets the details of a regatta</td>
 	</tr>
+	   <tr>
+        <td><a href="regattaDeleteDoc.html">/api/v1/regattas/{name}</a></td>
+        <td>Delete the regatta and all regatta leaderboards</td>
+    </tr>
 	<tr>
 		<td><a href="regattaUpdateDoc.html">/api/v1/regattas/{name}</a></td>
 		<td>Updates the details of a regatta</td>
@@ -173,6 +181,14 @@ name to make sure you get to the event you're interested in.
 		<td>/api/v1/regattas/{regattaname}/competitors/{competitorId}/remove</td>
 		<td>Removes a competitor from a regatta (POST)</td>
 	</tr>
+	<tr>
+		<td><a href="regattaUpdateCompetitorToDHandicapPostDoc.html">/api/v1/regattas/{regattaname}/competitors/{competitorId}/updateToDHandicap</a></td>
+		<td>Updates a competitor's time on distance allowance per nautical mile handicap value. (POST)</td>
+	</tr>
+	<tr>
+		<td><a href="regattaUpdateCompetitorToTHandicapPostDoc.html">/api/v1/regattas/{regattaname}/competitors/{competitorId}/updateToTHandicap</a></td>
+		<td>Updates a competitor's time on time handicap value. (POST)</td>
+	</tr>
     <tr>
         <td><a href="regattasTrackingDevicesGet.html">/api/v1/regattas/{regattaName}/tracking_devices</a></td>
         <td>Gets the status for all GPS trackers associated to a regatta (GET)</td>
@@ -204,6 +220,10 @@ name to make sure you get to the event you're interested in.
 	<tr>
 		<td><a href="leaderboardUpdateDoc.html">/api/v1/leaderboards/{name}/update</a></td>
 		<td>Modifies attributes of a leaderboard</td>
+	</tr>
+	<tr>
+		<td><a href="leaderboardUpdateCompetitorDisplayNameDoc.html">/api/v1/leaderboards/{name}/updateCompetitorDisplayName</a></td>
+		<td>Modifies the display name of a competitor in the scope of a leaderboard</td>
 	</tr>
 	<tr>
 		<td><a href="leaderboardCheckinPostDoc.html">/api/v1/leaderboards/{name}/device_mappings/start</a></td>
@@ -282,6 +302,10 @@ name to make sure you get to the event you're interested in.
 		<td>Gets the details of a competitor</td>
 	</tr>
 	<tr>
+        <td><a href="competitorUpdateDoc.html">/api/v1/competitors/{id}</a></td>
+        <td>Updates the details of a competitor</td>
+    </tr>
+	<tr>
 		<td><a href="competitorTeamGetDoc.html">/api/v1/competitors/{id}/team</a></td>
 		<td>Gets the details of a competitor's team</td>
 	</tr>
@@ -349,22 +373,6 @@ name to make sure you get to the event you're interested in.
         <td>Gets, creates, updates and deletes tags.</td>
     </tr>
     <tr>
-        <td><a href="preferencesPut.html">/api/v1/preferences/{SETTINGS_KEY}</a></td>
-        <td>Stores a document into the preferences of a user</td>
-    </tr>
-    <tr>
-        <td><a href="preferencesGet.html">/api/v1/preferences/{SETTINGS_KEY}</a></td>
-        <td>Retrives a document that was stored into the preferences of a user</td>
-    </tr>
-    <tr>
-        <td><a href="preferencesDelete.html">/api/v1/preferences/{SETTINGS_KEY}</a></td>
-        <td>Removes a document from the preferences of a user</td>
-    </tr>
-    <tr>
-        <td><a href="usergroupsGet.html">/api/v1/usergroups/</a></td>
-        <td>Lists all usergroups and their id's the current user is part of, required to obtain id's for migration for example</td>
-    </tr>
-    <tr>
         <td><a href="status.html">/api/v1/status</a></td>
         <td>Returns a status description for the "RacingEventService" core service</td>
     </tr>
@@ -403,6 +411,18 @@ name to make sure you get to the event you're interested in.
     <tr>
         <td><a href="courseConfigurationGetFromCourse.html">/api/v1/courseconfiguration/getFromCourse/{regattaName}/{raceColumn}/{fleet}</a></td>
         <td>Gets the course from a race defined by regattaName, raceColumn and fleet and returns it as course configuration.</td>
+    </tr>
+    <tr>
+        <td><a href="masterdataimport.html">/api/v1/masterdataimport</a></td>
+        <td>Triggers a master data import from a remote server.</td>
+    </tr>
+    <tr>
+        <td><a href="remoteserverreferenceAdd.html">/api/v1/remoteserverreference/add</a></td>
+        <td>Adds a remote server reference to a server.</td>
+    </tr>
+    <tr>
+        <td><a href="remoteserverreferenceRemove.html">/api/v1/remoteserverreference/remove</a></td>
+        <td>Removes a remote server reference from a server.</td>
     </tr>
 </tbody>
 </table>

@@ -44,6 +44,7 @@ import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.ui.client.EntryPointLinkFactory;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
+import com.sap.sse.security.ui.client.UserManagementWriteServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
 import com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell;
@@ -84,7 +85,6 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
                 }, tableResources);
         this.userService = userService;
         ListHandler<UserDTO> userColumnListHandler = getColumnSortHandler();
-        
         // users table
         TextColumn<UserDTO> usernameColumn = new AbstractSortableTextColumn<UserDTO>(user->user.getName(), userColumnListHandler);
         TextColumn<UserDTO> fullNameColumn = new AbstractSortableTextColumn<UserDTO>(user->user.getFullName(), userColumnListHandler);
@@ -155,14 +155,13 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
                 return new NaturalComparator().compare(r1.getRoles().toString(), r2.getRoles().toString());
             }
         });
-
         final HasPermissions type = SecuredSecurityTypes.USER;
         final AccessControlledActionsColumn<UserDTO, DefaultActionsImagesBarCell> userActionColumn = create(
                 new DefaultActionsImagesBarCell(stringMessages), userService);
         userActionColumn.addAction(ACTION_UPDATE, UPDATE, user -> editUser(user, additionalPermissions));
         userActionColumn.addAction(ACTION_DELETE, DELETE, user -> {
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveUser(user.getName()))) {
-                getUserManagementService().deleteUser(user.getName(), new AsyncCallback<SuccessInfo>() {
+                getUserManagementWriteService().deleteUser(user.getName(), new AsyncCallback<SuccessInfo>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         deletingUserFailed(user, caught.getMessage());
@@ -186,14 +185,12 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
         final EditOwnershipDialog.DialogConfig<UserDTO> configOwnership = EditOwnershipDialog.create(
                 userService.getUserManagementService(), type,
                 user -> refreshUserList((Callback<Iterable<UserDTO>, Throwable>) null), stringMessages);
-        
         final EditACLDialog.DialogConfig<UserDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementService(), type,
                 user -> user.getAccessControlList(), stringMessages);
-        userActionColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, configOwnership::openDialog);
+        userActionColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, configOwnership::openOwnershipDialog);
         userActionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                u -> configACL.openDialog(u));
-        
+                u -> configACL.openACLDialog(u));
         filterField = new LabeledAbstractFilterablePanel<UserDTO>(new Label(stringMessages.filterUsers()),
                 new ArrayList<UserDTO>(), dataProvider, stringMessages) {
             @Override
@@ -214,7 +211,6 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
         };
         registerSelectionModelOnNewDataProvider(filterField.getAllListDataProvider());
         filterField.setUpdatePermissionFilterForCheckbox(user -> userService.hasPermission(user, DefaultActions.UPDATE));
-        
         mainPanel.insert(filterField, 0);
         table.addColumnSortHandler(userColumnListHandler);
         table.addColumn(usernameColumn, getStringMessages().username());
@@ -282,7 +278,7 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
         final UserEditDialog dialog = new UserEditDialog(originalUser, new DialogCallback<UserDTO>() {
             @Override
             public void ok(final UserDTO user) {
-                getUserManagementService().updateUserProperties(user.getName(), user.getFullName(), user.getCompany(),
+                getUserManagementWriteService().updateUserProperties(user.getName(), user.getFullName(), user.getCompany(),
                         user.getLocale(),
                         user.getDefaultTenant() != null ? user.getDefaultTenant().getId().toString() : null,
                         new AsyncCallback<UserDTO>() {
@@ -312,7 +308,7 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
                             }
                         });
                 if (!originalUser.getEmail().equals(user.getEmail())) {
-                    getUserManagementService().updateSimpleUserEmail(user.getName(), user.getEmail(),
+                    getUserManagementWriteService().updateSimpleUserEmail(user.getName(), user.getEmail(),
                             EntryPointLinkFactory.createEmailValidationLink(new HashMap<String, String>()),
                             new AsyncCallback<Void>() {
                                 @Override
@@ -339,5 +335,9 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
 
     private UserManagementServiceAsync getUserManagementService() {
         return userService.getUserManagementService();
+    }
+    
+    private UserManagementWriteServiceAsync getUserManagementWriteService() {
+        return userService.getUserManagementWriteService();
     }
 }

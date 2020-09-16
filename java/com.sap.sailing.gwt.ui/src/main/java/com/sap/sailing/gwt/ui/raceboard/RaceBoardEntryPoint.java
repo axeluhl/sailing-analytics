@@ -1,6 +1,10 @@
 
 package com.sap.sailing.gwt.ui.raceboard;
 
+import static com.sap.sailing.gwt.ui.client.SailingServiceHelper.createSailingServiceWriteInstance;
+import static com.sap.sse.gwt.shared.RpcConstants.HEADER_FORWARD_TO_MASTER;
+import static com.sap.sse.gwt.shared.RpcConstants.HEADER_FORWARD_TO_REPLICA;
+
 import java.util.Collections;
 
 import com.google.gwt.core.client.GWT;
@@ -19,10 +23,12 @@ import com.sap.sailing.gwt.common.communication.routing.ProvidesLeaderboardRouti
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceboardContextDefinition;
 import com.sap.sailing.gwt.settings.client.utils.StoredSettingsLocationFactory;
-import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
+import com.sap.sailing.gwt.ui.client.AbstractSailingReadEntryPoint;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.MediaService;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
+import com.sap.sailing.gwt.ui.client.MediaServiceWrite;
+import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -40,19 +46,22 @@ import com.sap.sse.security.ui.authentication.generic.sapheader.SAPHeaderWithAut
 import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorage;
 import com.sap.sse.security.ui.settings.StoredSettingsLocation;
 
-public class RaceBoardEntryPoint extends AbstractSailingEntryPoint implements ProvidesLeaderboardRouting {
+public class RaceBoardEntryPoint extends AbstractSailingReadEntryPoint implements ProvidesLeaderboardRouting {
 
     /**
      * Controls the predefined mode into which to switch or configure the race viewer.
      */
     private final MediaServiceAsync mediaService = GWT.create(MediaService.class);
+    private final MediaServiceWriteAsync mediaServiceWrite = GWT.create(MediaServiceWrite.class);
     private RaceboardContextDefinition raceboardContextDefinition;
 
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
         EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService,
-                RemoteServiceMappingConstants.mediaServiceRemotePath);
+                RemoteServiceMappingConstants.mediaServiceRemotePath, HEADER_FORWARD_TO_REPLICA);
+        EntryPointHelper.registerASyncService((ServiceDefTarget) mediaServiceWrite,
+                RemoteServiceMappingConstants.mediaServiceWriteRemotePath, HEADER_FORWARD_TO_MASTER);
         raceboardContextDefinition = new SettingsToUrlSerializer()
                 .deserializeFromCurrentLocation(new RaceboardContextDefinition());
         if (raceboardContextDefinition.getRegattaName() == null || raceboardContextDefinition.getRegattaName().isEmpty()
@@ -64,7 +73,9 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint implements Pr
         } else {
             getSailingService().getRaceboardData(raceboardContextDefinition.getRegattaName(),
                     raceboardContextDefinition.getRaceName(), raceboardContextDefinition.getLeaderboardName(),
-                    raceboardContextDefinition.getLeaderboardGroupName(), raceboardContextDefinition.getEventId(),
+                    raceboardContextDefinition.getLeaderboardGroupName(),
+                    raceboardContextDefinition.getLeaderboardGroupId(),
+                    raceboardContextDefinition.getEventId(),
                     new AbstractRaceBoardAsyncCallback<RaceboardDataDTO>() {
                         @Override
                         public void onSuccess(RaceboardDataDTO raceboardData) {
@@ -149,12 +160,14 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint implements Pr
                 asyncActionsExecutor, this, Collections.singletonList(selectedRace.getRaceIdentifier()),
                 5000l /* requestInterval */);
         RaceBoardPanel raceBoardPerspective = new RaceBoardPanel(/* parent */ null, context, raceLifeCycle, settings,
-                getSailingService(), mediaService, getUserService(), asyncActionsExecutor,
+                getSailingService(), mediaService, mediaServiceWrite, getUserService(), asyncActionsExecutor,
                 raceboardData.getCompetitorAndTheirBoats(), timer, selectedRace.getRaceIdentifier(),
                 raceboardContextDefinition.getLeaderboardName(), raceboardContextDefinition.getLeaderboardGroupName(),
+                raceboardContextDefinition.getLeaderboardGroupId(),
                 raceboardContextDefinition.getEventId(), RaceBoardEntryPoint.this, getStringMessages(), userAgent,
                 raceTimesInfoProvider, showChartMarkEditMediaButtonsAndVideo, true, availableDetailTypes,
-                raceboardData.getLeaderboard(), selectedRace, raceboardData.getTrackingConnectorInfo());
+                raceboardData.getLeaderboard(), selectedRace, raceboardData.getTrackingConnectorInfo(),
+                createSailingServiceWriteInstance() /* create write instance for later admin usage */);
         RootLayoutPanel.get().add(raceBoardPerspective.getEntryWidget());
 
         if (raceBoardMode != null) {

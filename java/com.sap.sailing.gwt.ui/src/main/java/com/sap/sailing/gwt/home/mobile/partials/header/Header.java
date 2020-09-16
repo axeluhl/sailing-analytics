@@ -1,15 +1,19 @@
 package com.sap.sailing.gwt.home.mobile.partials.header;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.UIObject;
@@ -18,31 +22,33 @@ import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.app.ResettableNavigationPathDisplay;
+import com.sap.sailing.gwt.home.shared.partials.header.HeaderConstants;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.home.shared.utils.DropdownHandler;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.LinkUtil;
+import com.sap.sse.gwt.shared.ClientConfiguration;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
 import com.sap.sse.security.ui.authentication.AuthenticationSignOutRequestEvent;
+import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 
 /**
  * Mobile page header with SAP logo title and a dropdown menu (burger button) on the right.
  */
-public class Header extends Composite {
-
-    // @UiField TextBox searchText;
-    // @UiField Button searchButton;
-    
+public class Header extends Composite implements HeaderConstants {
     @UiField HeaderResources local_res;
     @UiField DivElement dropdownTriggerUi;
     @UiField Element dropdownContainerUi;
     @UiField FlowPanel dropdownListUi;
     @UiField FlowPanel dropdownListExtUi;
     @UiField Element searchUi;
+    @UiField AnchorElement logoAnchor;
+    @UiField ImageElement logoImage;
 
     @UiField
     DivElement locationTitleUi;
-    
+
     private final ResettableNavigationPathDisplay navigationPathDisplay;
 
     interface HeaderUiBinder extends UiBinder<Widget, Header> {
@@ -57,13 +63,18 @@ public class Header extends Composite {
     public Header(final MobilePlacesNavigator placeNavigator, final EventBus eventBus) {
         initWidget(uiBinder.createAndBindUi(this));
         local_res.css().ensureInjected();
-        
         dropdownListExtUi.getElement().getStyle().setDisplay(Display.NONE);
         navigationPathDisplay = new DropdownNavigationPathDisplay();
-        
         addNavigation(placeNavigator.getHomeNavigation(), StringMessages.INSTANCE.home());
         addNavigation(placeNavigator.getEventsNavigation(), StringMessages.INSTANCE.events());
-        addNavigation(placeNavigator.getSolutionsNavigation(SolutionsNavigationTabs.SailingAnalytics), StringMessages.INSTANCE.solutions());
+        addNavigation(placeNavigator.getSolutionsNavigation(SolutionsNavigationTabs.SailingAnalytics),
+                StringMessages.INSTANCE.solutions());
+        HeaderNavigationItem manageEventsNavItem = addNavigation(ADMIN_CONSOLE_PATH,
+                StringMessages.INSTANCE.manageEvents(), ()->{});
+        manageEventsNavItem.getElement().getStyle().setDisplay(Display.NONE);
+        manageEventsNavItem.addClickHandler(event -> {
+            Window.open(manageEventsNavItem.getHref(), manageEventsNavItem.getTarget(), null);
+        });
         signInNavigationItem = addNavigation(com.sap.sse.security.ui.client.i18n.StringMessages.INSTANCE.signIn(), new Runnable() {
             @Override
             public void run() {
@@ -77,9 +88,7 @@ public class Header extends Composite {
                         eventBus.fireEvent(new AuthenticationSignOutRequestEvent());
             }
         });
-        
         dropdownHandler = new DropdownHandler(dropdownTriggerUi, dropdownContainerUi);
-        
         Event.sinkEvents(searchUi, Event.ONCLICK);
         Event.setEventListener(searchUi, new EventListener() {
             @Override
@@ -91,23 +100,40 @@ public class Header extends Composite {
                 
             }
         });
-        
         eventBus.addHandler(AuthenticationContextEvent.TYPE, new AuthenticationContextEvent.Handler() {
             @Override
             public void onUserChangeEvent(AuthenticationContextEvent event) {
                 String loggedInStyle = HeaderResources.INSTANCE.css().header_navigation_iconsignedin();
-                UIObject.setStyleName(dropdownTriggerUi, loggedInStyle, event.getCtx().isLoggedIn());
-                signInNavigationItem.setVisible(!event.getCtx().isLoggedIn());
-                userDetailsNavigationItem.setVisible(event.getCtx().isLoggedIn());
-                signOutNavigationItem.setVisible(event.getCtx().isLoggedIn());
+                AuthenticationContext authContext = event.getCtx();
+                UIObject.setStyleName(dropdownTriggerUi, loggedInStyle, authContext.isLoggedIn());
+                signInNavigationItem.setVisible(!authContext.isLoggedIn());
+                userDetailsNavigationItem.setVisible(authContext.isLoggedIn());
+                signOutNavigationItem.setVisible(authContext.isLoggedIn());
+                if (authContext.hasServerPermission(ServerActions.CREATE_OBJECT)) {
+                    manageEventsNavItem.setHref(UriUtils.fromString(ADMIN_CONSOLE_PATH));
+                    manageEventsNavItem.setTarget(ADMIN_CONSOLE_WINDOW);
+                    manageEventsNavItem.getElement().getStyle().setDisplay(Display.INLINE_BLOCK);
+                } else if (authContext.getCurrentUser() != null
+                        && !authContext.getCurrentUser().getName().equals("Anonymous")) {
+                    String base = authContext.getServerInfo().getManageEventsBaseUrl();
+                    manageEventsNavItem.setHref(UriUtils.fromString(base + ADMIN_CONSOLE_PATH));
+                    manageEventsNavItem.setTarget(ADMIN_CONSOLE_WINDOW);
+                    manageEventsNavItem.getElement().getStyle().setDisplay(Display.INLINE_BLOCK);
+                } else {
+                    manageEventsNavItem.getElement().getStyle().setDisplay(Display.NONE);
+                }
             }
         });
+        if (!ClientConfiguration.getInstance().isBrandingActive()) {
+            logoImage.getStyle().setDisplay(Display.NONE);
+            logoAnchor.setHref("");
+        }
     }
-    
+
     public ResettableNavigationPathDisplay getNavigationPathDisplay() {
         return navigationPathDisplay;
     }
-    
+
     private HeaderNavigationItem addNavigation(final PlaceNavigation<?> placeNavigation, String name) {
         return addNavigation(placeNavigation.getTargetUrl(), name, new Runnable() {
             @Override
@@ -121,7 +147,7 @@ public class Header extends Composite {
     private HeaderNavigationItem addNavigation(String name, final Runnable action) {
         return addNavigation(null, name, action);
     }
-    
+
     private HeaderNavigationItem addNavigation(String url, String name, final Runnable action) {
         HeaderNavigationItem navigationItem = new HeaderNavigationItem(name, url);
         navigationItem.addClickHandler(new ClickHandler() {
@@ -141,7 +167,7 @@ public class Header extends Composite {
     public void setLocationTitle(String locationTitle) {
         locationTitleUi.setInnerText(locationTitle);
     }
-    
+
     private class DropdownNavigationPathDisplay implements ResettableNavigationPathDisplay {
         @Override
         public void showNavigationPath(NavigationItem... navigationPath) {

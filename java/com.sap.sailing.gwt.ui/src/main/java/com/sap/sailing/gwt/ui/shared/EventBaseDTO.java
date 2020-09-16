@@ -6,9 +6,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.WithID;
 import com.sap.sse.common.media.ImageSize;
 import com.sap.sse.common.media.MediaTagConstants;
@@ -16,6 +18,14 @@ import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
 import com.sap.sse.security.shared.dto.NamedDTO;
 
+/**
+ * Basic event information as a DTO. The inherited {@link NamedDTO#equals(Object)} and {@link NamedDTO#hashCode()}
+ * methods that are based on the {@link NamedDTO#getName()} response are overridden here to be based on this event's
+ * {@link #getId() ID}.
+ * 
+ * @author Axel Uhl (D043530)
+ *
+ */
 public class EventBaseDTO extends NamedDTO implements WithID, IsSerializable {
     private static final long serialVersionUID = 818666323178097939L;
 
@@ -68,6 +78,16 @@ public class EventBaseDTO extends NamedDTO implements WithID, IsSerializable {
         sailorsInfoWebsiteURLs = new HashMap<>();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        return Util.equalsWithNull(this.getId(), ((EventBaseDTO) o).getId());
+    }
+    
+    @Override
+    public int hashCode() {
+        return this.getId().hashCode();
+    }
+    
     public ImageDTO getLogoImage() {
         ImageDTO result = null;
         for (ImageDTO image : images) {
@@ -99,8 +119,18 @@ public class EventBaseDTO extends NamedDTO implements WithID, IsSerializable {
         return officialWebsiteURL;
     }
 
+    private String getUrlWithHttpsAsDefaultProtocolIfMissing(String url) {
+        final String result;
+        if (url != null && !url.contains("://")) {
+            result = "https://" + url;
+        } else {
+            result = url;
+        }
+        return result;
+    }
+    
     public void setOfficialWebsiteURL(String officialWebsiteURL) {
-        this.officialWebsiteURL = officialWebsiteURL;
+        this.officialWebsiteURL = getUrlWithHttpsAsDefaultProtocolIfMissing(officialWebsiteURL);
     }
     
     public Map<String, String> getSailorsInfoWebsiteURLs() {
@@ -112,17 +142,17 @@ public class EventBaseDTO extends NamedDTO implements WithID, IsSerializable {
     }
     
     public void setSailorsInfoWebsiteURL(String locale, String url) {
-        if(url == null || url.isEmpty()) {
+        if (url == null || url.isEmpty()) {
             sailorsInfoWebsiteURLs.remove(locale);
         } else {
-            sailorsInfoWebsiteURLs.put(locale, url);
+            sailorsInfoWebsiteURLs.put(locale, getUrlWithHttpsAsDefaultProtocolIfMissing(url));
         }
     }
 
     public void setSailorsInfoWebsiteURLs(Map<String, String> sailorsInfoWebsiteURLs) {
         this.sailorsInfoWebsiteURLs.clear();
-        if(sailorsInfoWebsiteURLs != null) {
-            this.sailorsInfoWebsiteURLs.putAll(sailorsInfoWebsiteURLs);
+        for (final Entry<String, String> e : sailorsInfoWebsiteURLs.entrySet()) {
+            this.sailorsInfoWebsiteURLs.put(e.getKey(), getUrlWithHttpsAsDefaultProtocolIfMissing(e.getValue()));
         }
     }
 
@@ -135,8 +165,13 @@ public class EventBaseDTO extends NamedDTO implements WithID, IsSerializable {
         return baseURL;
     }
 
+    /**
+     * Assign the event's base URL.
+     *
+     * NOTE: <code>https://</code> will be assumed if no protocol has been provided.
+     */
     public void setBaseURL(String baseURL) {
-        this.baseURL = baseURL;
+        this.baseURL = getUrlWithHttpsAsDefaultProtocolIfMissing(baseURL);
     }
 
     public Iterable<? extends LeaderboardGroupBaseDTO> getLeaderboardGroups() {

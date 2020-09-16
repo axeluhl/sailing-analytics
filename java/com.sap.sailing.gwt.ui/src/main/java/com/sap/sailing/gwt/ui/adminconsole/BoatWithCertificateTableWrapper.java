@@ -19,7 +19,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -43,11 +43,11 @@ public class BoatWithCertificateTableWrapper<S extends RefreshableSelectionModel
     private final Consumer<BoatDTO> unlinkAction;
     private final Function<BoatDTO, Boolean> isLinkedChecker;
     
-    public BoatWithCertificateTableWrapper(SailingServiceAsync sailingService, final UserService userService,
+    public BoatWithCertificateTableWrapper(SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
             StringMessages stringMessages, ErrorReporter errorReporter, boolean multiSelection, boolean enablePager,
             int pagingSize, boolean allowActions, Consumer<BoatDTO> unlinkAction,
             SecuredDTO objectToCheckUpdatePermissionFor, Function<BoatDTO, Boolean> isLinkedChecker) {
-        super(sailingService, stringMessages, errorReporter, multiSelection, enablePager, pagingSize,
+        super(sailingServiceWrite, stringMessages, errorReporter, multiSelection, enablePager, pagingSize,
                 new EntityIdentityComparator<BoatDTO>() {
                     @Override
                     public boolean representSameEntity(BoatDTO dto1, BoatDTO dto2) {

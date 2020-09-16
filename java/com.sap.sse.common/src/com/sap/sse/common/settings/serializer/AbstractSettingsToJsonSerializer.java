@@ -80,7 +80,7 @@ public abstract class AbstractSettingsToJsonSerializer<OBJECT, ARRAY> {
     public <T extends GenericSerializableSettings> T deserialize(T settings, String jsonString) {
         if (jsonString != null && !jsonString.isEmpty()) {
             OBJECT jsonObject = parseStringToJsonObjectWithExceptionHandling(jsonString);
-            if(jsonObject != null) {
+            if (jsonObject != null) {
                 deserialize(settings, jsonObject);
             }
         }
@@ -218,7 +218,7 @@ public abstract class AbstractSettingsToJsonSerializer<OBJECT, ARRAY> {
         if (json != null) {
             for (Map.Entry<String, Setting> entry : settings.getChildSettings().entrySet()) {
                 Setting setting = entry.getValue();
-                if(hasProperty(json, entry.getKey())) {
+                if (hasProperty(json, entry.getKey())) {
                     Object jsonValue = get(json, entry.getKey());
                     deserializeSetting(setting, jsonValue);
                 }

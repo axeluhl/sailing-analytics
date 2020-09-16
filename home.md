@@ -35,6 +35,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[Creating an EC2 image from scratch|wiki/info/landscape/creating-ec2-image-from-scratch]]
   * [[Creating a webserver EC2 image from scratch|wiki/info/landscape/creating-ec2-image-for-webserver-from-scratch]]
   * [[EC2 mail relaying vs. Amazon Simple E-Mail Service (SES)|wiki/info/landscape/mail-relaying]]
+  * [[Establishing support@sapsailing.com with AWS SES, SNS, and Lambda|wiki/info/landscape/support-email]]
   * [[Creating an EC2 image for a MongoDB Replica Set from scratch|wiki/info/landscape/creating-ec2-mongodb-image-from-scratch]]
   * [[Setting up dedicated S3 buckets|wiki/info/landscape/s3-bucket-setup]]
 * [[Building and Deploying|wiki/info/landscape/building-and-deploying]]
@@ -42,7 +43,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Typical Data Mining Scenarios|wiki/info/landscape/typical-data-mining-scenarios]]
 * [[Create clickable UI prototypes with Axure|wiki/info/landscape/ui-clickable-prototypes]]
 * [[Webdesign|wiki/info/landscape/webdesign]]
-
+* [[sail-insight.com website|wiki/info/landscape/sail-insight.com-website]]
 
 ### Mobile
 
@@ -161,8 +162,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 
 ## Internal services (not related to wiki but useful)
 
-* [Bugzilla Issue Tracking System](http://bugzilla.sapsailing.com/bugzilla/)
+* [Bugzilla Issue Tracking System](https://bugzilla.sapsailing.com/bugzilla/)
 * [GIT Repository (SAP)](ssh://git.wdf.sap.corp:29418/SAPSail/sapsailingcapture.git)
-* [Maven Repository Browser](http://maven.sapsailing.com/maven/) (see [[how to setup repository for Android builds|wiki/info/mobile/racecommittee-app-environment]])
-* [Main Sailing Website](http://www.sapsailing.com)
-* [Visitor Statistics](http://analysis.sapsailing.com/)
+* [Maven Repository Browser](https://maven.sapsailing.com/maven/) (see [[how to setup repository for Android builds|wiki/info/mobile/racecommittee-app-environment]])
+* [Main Sailing Website](https://www.sapsailing.com)

@@ -16,20 +16,6 @@ public interface MediaServiceAsync {
 
     void getAllMediaTracks(AsyncCallback<Iterable<MediaTrackWithSecurityDTO>> asyncCallback);
 
-    void addMediaTrack(MediaTrack mediaTrack, AsyncCallback<MediaTrackWithSecurityDTO> asyncCallback);
-
-    void deleteMediaTrack(MediaTrack mediaTrack, AsyncCallback<Void> asyncCallback);
-
-    void updateTitle(MediaTrack mediaTrack, AsyncCallback<Void> asyncCallback);
-
-    void updateUrl(MediaTrack mediaTrack, AsyncCallback<Void> asyncCallback);
-
-    void updateStartTime(MediaTrack mediaTrack, AsyncCallback<Void> asyncCallback);
-
-    void updateDuration(MediaTrack mediaTrack, AsyncCallback<Void> asyncCallback);
-
-    void updateRace(MediaTrack mediaTrack, AsyncCallback<Void> asyncCallback);
-
     void checkMetadata(byte[] jStart, byte[] jEnd, Long skipped, AsyncCallback<VideoMetadataDTO> asyncCallback);
 
     void checkMetadata(String url, AsyncCallback<VideoMetadataDTO> asyncCallback);
