@@ -49,7 +49,7 @@ public class AutoplayHelper {
     private static final RaceMapResources raceMapResources = GWT.create(RaceMapResources.class);
     private static Timer fastCurrentTimeProvider = new Timer(PlayModes.Live,
             /* delayBetweenAutoAdvancesInMilliseconds */1000l);
-    private static Date startOfLifeRace;
+    private static Date startOfLiveRace;
     public static final AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
     /**
      * If a racestart is longer ago, the race is never considered live, even if all other checks pass
@@ -57,8 +57,8 @@ public class AutoplayHelper {
     private static final long NEGATIVE_SANITY_CHECK = -24 * 60 * 60 * 1000;
 
     public static long durationOfCurrentLiveRaceRunning() {
-        if (startOfLifeRace != null) {
-            return fastCurrentTimeProvider.getLiveTimePointInMillis() - startOfLifeRace.getTime();
+        if (startOfLiveRace != null) {
+            return fastCurrentTimeProvider.getLiveTimePointInMillis() - startOfLiveRace.getTime();
         } else {
             return 0;
         }
@@ -122,7 +122,10 @@ public class AutoplayHelper {
     }
 
     /**
-     * Side effect free method to get a LifeRace from a timesProvider and a leaderboard
+     * Side effect free method to get a live race from a timesProvider and a leaderboard.
+     * 
+     * @return the time to the start of the live race in milliseconds, and the identifier of the live race; or
+     *         {@code null} if no live race is found
      */
     public static Pair<Long, RegattaAndRaceIdentifier> checkForLiveRace(AbstractLeaderboardDTO currentLeaderboard,
             Date serverTimeDuringRequest, RaceTimesInfoProvider raceTimesInfoProvider,
@@ -144,14 +147,14 @@ public class AutoplayHelper {
                         long startTimeInMs = raceTimes.getStartOfRace().getTime();
                         long startIn = startTimeInMs - serverTimeDuringRequest.getTime() - raceTimes.delayToLiveInMs;
                         if (startIn <= switchBeforeRaceStartInMillis && startIn > NEGATIVE_SANITY_CHECK) {
-                            startOfLifeRace = raceTimes.getStartOfRace();
+                            startOfLiveRace = raceTimes.getStartOfRace();
                             return new Pair<Long, RegattaAndRaceIdentifier>(startIn, raceIdentifier);
                         }
                     }
                 }
             }
         }
-        startOfLifeRace = null;
+        startOfLiveRace = null;
         return null;
     }
 
