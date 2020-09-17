@@ -10,16 +10,21 @@
                 <div class="{local_res.css.sectionheader_item_image}" style="display:none;" ui:field="imageUi">
                     <div class="{local_res.css.sectionheader_item_image_seperator}"></div>
                 </div>
-                <div ui:field="titleAndLabelContainerUi">
+			    <div ui:field="titleAndLabelContainerUi" class="{local_res.css.sectionheader_item_title_label}">
+			        <div>
                     <h2 class="{local_res.css.sectionheader_item_title}" ui:field="titleUi"></h2>
                     <div class="{local_res.css.sectionheader_item_label} {res.mainCss.label}" style="display:none;"
                         ui:field="labelUi"></div>
                 </div>
+	                <div>
+	                    <g:SimplePanel addStyleNames="{local_res.css.sectionheader_itemright_container}"
+	                        ui:field="widgetContainerUi" />
+	                </div> 
+				</div>
                 <div class="{local_res.css.sectionheader_item_subtitle}" style="display:none;" ui:field="subtitleUi"></div>
             </div>
             <g:HTMLPanel addStyleNames="{local_res.css.sectionheader_item} {local_res.css.sectionheader_itemright}"
                 ui:field="headerRightUi">
-                <g:SimplePanel addStyleNames="{local_res.css.sectionheader_itemright_container}" ui:field="widgetContainerUi" />
                 <div class="{local_res.css.sectionheader_item_infotext}" style="display:none;" ui:field="infoTextUi"></div>
                 <div class="{local_res.css.sectionheader_item_arrow}" style="display:none;" ui:field="actionArrowUi"></div>
             </g:HTMLPanel>

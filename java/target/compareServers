@@ -40,7 +40,7 @@ if [ "$continue" != "1" ]; then
 fi
 
 download_and_fix_boatclasses () {
-    wget --no-cache $WGET_QUIET -O - "$1/sailingserver/api/v1/leaderboardgroups/`echo $OLD_LB | sed -e 's/ /%20/g'`" |  jq 'del(.leaderboards[].series[].fleets[].races[].raceViewerUrls) | del(.events)' | grep -v "\"id\": \"[^\"]*\"" | grep -v "\"timepoint\": \"[^\"]*\"" >"$2" 2>$WGET_ERR
+    wget --no-cache $WGET_QUIET -O - "$1/sailingserver/api/v1/leaderboardgroups/`echo $OLD_LB | sed -e 's/ /%20/g'`" |  jq 'del(.leaderboards[].series[].fleets[].races[].raceViewerUrls) | del(.leaderboards[].series[].fleets[].races[].trackingProviderType) | del(.leaderboards[].series[].fleets[].races[].raceId) | del(.events)' | grep -v "\"id\": \"[^\"]*\"" | grep -v "\"timepoint\": \"[^\"]*\"" >"$2" 2>$WGET_ERR
     #wget --no-cache $WGET_QUIET -O - "$1/sailingserver/api/v1/leaderboardgroups/`echo $OLD_LB | sed -e 's/ /%20/g'`" | python -m json.tool | grep -v "\"id\": \"[^\"]*\"" | grep -v "\"timepoint\": \"[^\"]*\"" >"$2" 2>$WGET_ERR
 }
 

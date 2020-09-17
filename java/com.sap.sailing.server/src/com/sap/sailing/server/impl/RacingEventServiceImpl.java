@@ -4798,12 +4798,13 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     private Event findEventContainingLeaderboardAndMatchingAtLeastOneCourseArea(Leaderboard leaderboard) {
-        assert !Util.isEmpty(leaderboard.getCourseAreas());
-        for (final Event event : getAllEvents()) {
-            if (Util.containsAny(event.getVenue().getCourseAreas(), leaderboard.getCourseAreas())) {
-                for (final LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
-                    if (leaderboardGroup.getIndexOf(leaderboard) >= 0) {
-                        return event;
+        if (!Util.isEmpty(leaderboard.getCourseAreas())) {
+            for (final Event event : getAllEvents()) {
+                if (Util.containsAny(event.getVenue().getCourseAreas(), leaderboard.getCourseAreas())) {
+                    for (final LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
+                        if (leaderboardGroup.getIndexOf(leaderboard) >= 0) {
+                            return event;
+                        }
                     }
                 }
             }
@@ -4921,7 +4922,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public Iterable<String> getWindFinderReviewedSpotsCollectionIds() {
+    public Iterable<String> getAllWindFinderReviewedSpotsCollectionIds() {
         final Set<String> result = new HashSet<>();
         for (final Event event : getAllEvents()) {
             Util.addAll(event.getWindFinderReviewedSpotsCollectionIds(), result);
@@ -4929,6 +4930,25 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         return result;
     }
     
+    @Override
+    public Iterable<String> getWindFinderReviewedSpotsCollectionIdsByRegatta(RegattaIdentifier regattaIdentifier) {
+        final Set<String> result = new HashSet<>();
+        final Regatta regatta = getRegatta(regattaIdentifier);
+        if (regatta == null) {
+            throw new IllegalArgumentException("The regatta identified by "+regattaIdentifier+" was not found.");
+        }
+        final Leaderboard regattaLeaderboard = getLeaderboardByName(regatta.getName());
+        assert regattaLeaderboard instanceof RegattaLeaderboard;
+        if (regattaLeaderboard != null) {
+            final Event event = findEventContainingLeaderboardAndMatchingAtLeastOneCourseArea(regattaLeaderboard);
+            if (event != null) {
+                Util.addAll(event.getWindFinderReviewedSpotsCollectionIds(), result);
+            }
+        }
+        logger.info("Using WindFinder spot collections "+result+" for regatta "+regattaIdentifier);
+        return result;
+    }
+
     /**
      * Creates a new {@link CompetitorWithBoat} objects from a {@link CompetitorDescriptor}.
      * 
