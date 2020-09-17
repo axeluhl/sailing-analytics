@@ -17,4 +17,6 @@ public interface RemoteServiceMappingConstants {
     public static final String WEB_CONTEXT_PATH = "security/ui";
     
     public static final String userManagementServiceRemotePath = "service/usermanagement";
+    
+    public static final String userManagementServiceWriteRemotePath = "service/usermanagementmaster";
 }

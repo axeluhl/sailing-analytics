@@ -5,9 +5,13 @@ repositories {
 }
 
 dependencies {
-    implementation platform('software.amazon.awssdk:bom:2.13.50')
+    implementation platform('software.amazon.awssdk:bom:2.13.61')
     implementation 'software.amazon.awssdk:s3'
     implementation 'software.amazon.awssdk:ec2'
+    implementation 'software.amazon.awssdk:route53'
+    implementation 'software.amazon.awssdk:cloudwatch'
+    implementation 'software.amazon.awssdk:elasticloadbalancingv2'
+    implementation 'software.amazon.awssdk:firehose'
     implementation group: 'software.amazon.awssdk', name: 'sdk-core', classifier: 'sources'
     implementation group: 'software.amazon.awssdk', name: 'arns', classifier: 'sources'
     implementation group: 'software.amazon.awssdk', name: 'aws-core', classifier: 'sources'
@@ -17,6 +21,10 @@ dependencies {
     implementation group: 'software.amazon.awssdk', name: 'regions', classifier: 'sources'
     implementation group: 'software.amazon.awssdk', name: 'profiles', classifier: 'sources'
     implementation group: 'software.amazon.awssdk', name: 'utils', classifier: 'sources'
+    implementation group: 'software.amazon.awssdk', name: 'route53', classifier: 'sources'
+    implementation group: 'software.amazon.awssdk', name: 'cloudwatch', classifier: 'sources'
+    implementation group: 'software.amazon.awssdk', name: 'elasticloadbalancingv2', classifier: 'sources'
+    implementation group: 'software.amazon.awssdk', name: 'firehose', classifier: 'sources'
 }
 task downloadLibs(type: Copy) {
     into file('lib')

@@ -154,6 +154,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String raceDetailsToShow();
     String tracking();
     String legDetailsToShow();
+    String showCarryColumn();
+    String showCarryColumnCheckbox();
+    String showCarryColumnTitle();
     String columnMoveUp();
     String columnMoveDown();
     String raceStartTimeColumn();
@@ -422,6 +425,10 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String errorAddingResultImportUrl(String message);
     String eventIdOrUrl();
     String remoteServerInstances();
+    String remoteServerEventsSelection();
+    String eventsListIsEmpty();
+    String include();
+    String exclude();
     String localServer();
     String errorRefreshingSailingServers(String message);
     String successfullyUpdatedSailingServers();
@@ -497,6 +504,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String publicationUrl();
     String suppress();
     String isListedOnHomepage();
+    String raceSelection();
     String unsuppress();
     String suppressedCompetitors();
     String pleaseSelectASeries();
@@ -1800,6 +1808,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String appendResult();
     String sampleColor();
     String leaderboardPage();
+    String editableLeaderboardPage();
     String showLiveNow();
     String useOnlyOneOfStartTimeInferenceAndControlTrackingFromStartAndFinishTimes();
     String estimatedDistance();

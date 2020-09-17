@@ -131,6 +131,7 @@ import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Nationality;
@@ -138,6 +139,7 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.impl.BoatImpl;
@@ -255,6 +257,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.MigrateGroupOwnerForHierarchyDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationWithSecurityDTO;
@@ -277,6 +280,7 @@ import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
 import com.sap.sailing.server.operationaltransformation.AddCourseAreas;
 import com.sap.sailing.server.operationaltransformation.AddOrReplaceExpeditionDeviceConfiguration;
+import com.sap.sailing.server.operationaltransformation.AddRemoteSailingServerReference;
 import com.sap.sailing.server.operationaltransformation.AddSpecificRegatta;
 import com.sap.sailing.server.operationaltransformation.AllowBoatResetToDefaults;
 import com.sap.sailing.server.operationaltransformation.AllowCompetitorResetToDefaults;
@@ -298,6 +302,7 @@ import com.sap.sailing.server.operationaltransformation.RemoveLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardColumn;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.RemoveRegatta;
+import com.sap.sailing.server.operationaltransformation.RemoveRemoteSailingServerReference;
 import com.sap.sailing.server.operationaltransformation.RemoveSeries;
 import com.sap.sailing.server.operationaltransformation.RenameEvent;
 import com.sap.sailing.server.operationaltransformation.RenameLeaderboardColumn;
@@ -319,6 +324,7 @@ import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardMaxPoin
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardScoreCorrection;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardScoreCorrectionMetadata;
 import com.sap.sailing.server.operationaltransformation.UpdateRaceDelayToLive;
+import com.sap.sailing.server.operationaltransformation.UpdateSailingServerReference;
 import com.sap.sailing.server.operationaltransformation.UpdateSeries;
 import com.sap.sailing.server.operationaltransformation.UpdateSpecificRegatta;
 import com.sap.sailing.server.util.WaitForTrackedRaceUtil;
@@ -462,6 +468,13 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                             optionalRepeatablePart, courseTemplate.getTags(), optionalImageURL, courseTemplate.getDefaultNumberOfLaps()));
         }
         return result;
+    }
+
+    @Override
+    public void removeCourseTemplates(Collection<UUID> courseTemplateUuids) {
+        for (UUID uuid : courseTemplateUuids) {
+            getSharedSailingData().deleteCourseTemplate(getSharedSailingData().getCourseTemplateById(uuid));
+        }
     }
 
     @Override
@@ -670,6 +683,55 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    @Override
+    public void removeSailingServers(Set<String> namesOfSailingServersToRemove) throws Exception {
+        getSecurityService().checkCurrentUserUpdatePermission(getServerInfo());
+        for (String serverName : namesOfSailingServersToRemove) {
+            getService().apply(new RemoveRemoteSailingServerReference(serverName));
+        }
+    }
+
+    @Override
+    public RemoteSailingServerReferenceDTO addRemoteSailingServerReference(RemoteSailingServerReferenceDTO sailingServer) throws MalformedURLException {
+        getSecurityService().checkCurrentUserUpdatePermission(getServerInfo());
+        final String expandedURL;
+        if (sailingServer.getUrl().contains("//")) {
+            expandedURL = sailingServer.getUrl();
+        } else {
+            expandedURL = "https://" + sailingServer.getUrl();
+        }
+        URL serverURL = new URL(expandedURL);
+        RemoteSailingServerReference serverRef = getService().apply(new AddRemoteSailingServerReference(sailingServer.getName(), serverURL, sailingServer.isInclude()));
+        com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception> eventsOrException = getService()
+                .updateRemoteServerEventCacheSynchronously(serverRef, false);
+        return createRemoteSailingServerReferenceDTO(serverRef, eventsOrException);
+        
+    }
+
+    @Override
+    public RemoteSailingServerReferenceDTO updateRemoteSailingServerReference(
+            final RemoteSailingServerReferenceDTO sailingServer) throws MalformedURLException {
+        getSecurityService().checkCurrentUserUpdatePermission(getServerInfo());
+        RemoteSailingServerReference serverRef = getService()
+                .apply(new UpdateSailingServerReference(sailingServer.getName(),
+                        sailingServer.isInclude(), sailingServer.getSelectedEvents().stream().map(element -> {
+                            return (UUID) element;
+                        }).collect(Collectors.toSet())));
+        com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception> eventsOrException = getService()
+                .updateRemoteServerEventCacheSynchronously(serverRef, true);
+        return createRemoteSailingServerReferenceDTO(serverRef, eventsOrException);
+    }
+
+    @Override
+    public RemoteSailingServerReferenceDTO getCompleteRemoteServerReference(final String sailingServerName)
+            throws MalformedURLException {
+        getSecurityService().checkCurrentUserUpdatePermission(getServerInfo());
+        RemoteSailingServerReference serverRef = getService().getRemoteServerReferenceByName(sailingServerName);
+        com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception> eventsOrException = getService()
+                .getCompleteRemoteServerReference(serverRef);
+        return createRemoteSailingServerReferenceDTO(serverRef, eventsOrException);
     }
 
     @Override
@@ -1269,16 +1331,16 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                 new Callable<EventDTO>() {
                     @Override
                     public EventDTO call() throws Exception {
-                        TimePoint startTimePoint = startDate != null ? new MillisecondsTimePoint(startDate) : null;
-                        TimePoint endTimePoint = endDate != null ? new MillisecondsTimePoint(endDate) : null;
-                        URL officialWebsiteURL = officialWebsiteURLAsString != null
-                                ? new URL(officialWebsiteURLAsString)
-                                : null;
-                        URL baseURL = baseURLAsString != null ? new URL(baseURLAsString) : null;
-                        Map<Locale, URL> sailorsInfoWebsiteURLs = convertToLocalesAndUrls(
+                        final TimePoint startTimePoint = startDate != null ? new MillisecondsTimePoint(startDate) : null;
+                        final TimePoint endTimePoint = endDate != null ? new MillisecondsTimePoint(endDate) : null;
+                                final URL officialWebsiteURL = officialWebsiteURLAsString != null
+                                        ? new URL(officialWebsiteURLAsString)
+                                        : null;
+                                final URL baseURL = baseURLAsString != null ? new URL(baseURLAsString) : null;
+                        final Map<Locale, URL> sailorsInfoWebsiteURLs = convertToLocalesAndUrls(
                                 sailorsInfoWebsiteURLsByLocaleName);
-                        List<ImageDescriptor> eventImages = convertToImages(images);
-                        List<VideoDescriptor> eventVideos = convertToVideos(videos);
+                        final List<ImageDescriptor> eventImages = convertToImages(images);
+                        final List<VideoDescriptor> eventVideos = convertToVideos(videos);
                         getService().apply(new CreateEvent(eventName, eventDescription, startTimePoint, endTimePoint,
                                 venue, isPublic, eventUuid, officialWebsiteURL, baseURL, sailorsInfoWebsiteURLs,
                                 eventImages, eventVideos, leaderboardGroupIds));
@@ -1508,7 +1570,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     }
 
     @Override
-    public UUID importMasterData(final String urlAsString, final String[] leaderboardGroupIds, final boolean override,
+    public UUID importMasterData(final String urlAsString, final UUID[] leaderboardGroupIds, final boolean override,
             final boolean compress, final boolean exportWind, final boolean exportDeviceConfigurations,
             String targetServerUsername, String targetServerPassword,
             final boolean exportTrackedRacesAndStartTracking) {
@@ -2685,28 +2747,6 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                 return null;
             }
         });
-    }
-
-    @Override
-    public boolean canSliceRace(RegattaAndRaceIdentifier raceIdentifier) {
-        final Regatta regatta = getService().getRegattaByName(raceIdentifier.getRegattaName());
-        final Leaderboard regattaLeaderboard = getService().getLeaderboardByName(raceIdentifier.getRegattaName());
-        final DynamicTrackedRace trackedRace = getService().getTrackedRace(raceIdentifier);
-        getSecurityService().checkCurrentUserUpdatePermission(raceIdentifier);
-        getSecurityService().checkCurrentUserUpdatePermission(regattaLeaderboard);
-        getSecurityService().checkCurrentUserUpdatePermission(regatta);
-
-        final boolean result;
-        if (regatta == null || !(regattaLeaderboard instanceof RegattaLeaderboard) || trackedRace == null
-                || trackedRace.getStartOfTracking() == null || !isSmartphoneTrackingEnabled(trackedRace)) {
-            result = false;
-        } else {
-            final Pair<RaceColumn, Fleet> raceColumnAndFleetOfRaceToSlice = regattaLeaderboard
-                    .getRaceColumnAndFleet(trackedRace);
-            result = (raceColumnAndFleetOfRaceToSlice != null); // is the TrackedRace associated to the given
-                                                                // RegattaLeaderboard?
-        }
-        return result;
     }
 
     @Override

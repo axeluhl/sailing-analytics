@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCImpliedWindSourceEventImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseDesignChangedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFinishPositioningConfirmedEventImpl;
@@ -148,6 +149,13 @@ public class RaceLogEventSerializerTest {
         RaceLogEvent event = new RaceLogRaceStatusEventImpl(null, author, 0, RaceLogRaceStatus.SCHEDULED);
         serializer.serialize(event);
         verify(raceStatusSerializer).serialize(event);
+    }
+    
+    @Test
+    public void testNullImpliedWindSourceSerializer() {
+        RaceLogEvent event = new RaceLogORCImpliedWindSourceEventImpl(null, null, author, null, 0, null);
+        serializer.serialize(event);
+        verify(orcSetImpliedWindEventSerializer).serialize(event);
     }
 
     @Test

@@ -35,7 +35,7 @@ public class FileUploadServlet extends AbstractFileUploadServlet {
     /**
      * The maximum size of an image uploaded by a user as a team image, in megabytes (1024*1024 bytes)
      */
-    private static final int MAX_SIZE_IN_MB = 8192;
+    private static final long MAX_SIZE_IN_MB = 8192;
 
     @Override
     protected void process(List<FileItem> fileItems, HttpServletRequest req, HttpServletResponse resp) throws UnsupportedEncodingException, IOException {
@@ -65,7 +65,7 @@ public class FileUploadServlet extends AbstractFileUploadServlet {
                 }
             }
             try {
-                if (fileItem.getSize() > 1024 * 1024 * MAX_SIZE_IN_MB) {
+                if (fileItem.getSize() > 1024l * 1024l * MAX_SIZE_IN_MB) {
                     final String errorMessage = "Image is larger than " + MAX_SIZE_IN_MB + "MB";
                     logger.warning("Ignoring file storage request because file "+fileName+" is larger than "+MAX_SIZE_IN_MB+"MB");
                     result.put(FileUploadConstants.STATUS, Status.INTERNAL_SERVER_ERROR.name());

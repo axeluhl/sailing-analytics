@@ -29,14 +29,13 @@ public class RaceLogDependentStartTimeEventSerializer extends RaceLogRaceStatusE
     @Override
     public JSONObject serialize(RaceLogEvent object) {
         RaceLogDependentStartTimeEvent event = (RaceLogDependentStartTimeEvent) object;
-        
         JSONObject result = super.serialize(event);
         result.put(FIELD_DEPDENDENT_ON_FLEET, event.getDependentOnRaceIdentifier().getFleetName());
         result.put(FIELD_DEPDENDENT_ON_RACECOLUMN, event.getDependentOnRaceIdentifier().getRaceColumnName());
         result.put(FIELD_DEPDENDENT_ON_REGATTALIKE, event.getDependentOnRaceIdentifier().getRegattaLikeParentName());
         result.put(FIELD_START_TIME_DIFFERENCE, event.getStartTimeDifference().asMillis());
         result.put(FIELD_NEXT_STATUS, event.getNextStatus().toString());
-        
+        result.put(FIELD_COURSE_AREA_ID_AS_STRING, event.getCourseAreaId()==null?null:event.getCourseAreaId().toString());
         return result;
     }
 
