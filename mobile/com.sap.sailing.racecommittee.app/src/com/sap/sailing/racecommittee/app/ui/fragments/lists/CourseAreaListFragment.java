@@ -1,8 +1,8 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.lists;
 
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.List;
+import android.app.Activity;
+import android.os.Bundle;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
 
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.racecommittee.app.AppConstants;
@@ -13,9 +13,9 @@ import com.sap.sailing.racecommittee.app.ui.adapters.checked.CheckedItem;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.CourseAreaSelectedListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
 
-import android.app.Activity;
-import android.os.Bundle;
-import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.List;
 
 public class CourseAreaListFragment extends NamedListFragment<CourseArea> {
 
@@ -24,7 +24,7 @@ public class CourseAreaListFragment extends NamedListFragment<CourseArea> {
     public static CourseAreaListFragment newInstance(Serializable eventId) {
         CourseAreaListFragment fragment = new CourseAreaListFragment();
         Bundle args = new Bundle();
-        args.putSerializable(AppConstants.EventIdTag, eventId);
+        args.putSerializable(AppConstants.EXTRA_EVENT_ID, eventId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -32,7 +32,7 @@ public class CourseAreaListFragment extends NamedListFragment<CourseArea> {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        parentEventId = getArguments().getSerializable(AppConstants.EventIdTag);
+        parentEventId = getArguments().getSerializable(AppConstants.EXTRA_EVENT_ID);
     }
 
     @Override
