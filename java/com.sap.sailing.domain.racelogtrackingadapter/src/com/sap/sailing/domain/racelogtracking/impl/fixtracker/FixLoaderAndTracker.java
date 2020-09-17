@@ -230,6 +230,9 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                                     DynamicSensorFixTrack<Competitor, SensorFix> track = mapper.getTrack(trackedRace, competitor);
                                     if (track != null && trackedRace.isWithinStartAndEndOfTracking(fix.getTimePoint())) {
                                         mapper.addFix(track, (DoubleVectorFix) fix);
+                                        if (returnLiveDelay) {
+                                            delayToLive.put(trackedRace.getRaceIdentifier(), new MillisecondsDurationImpl(trackedRace.getDelayToLiveInMillis()));
+                                        }
                                     }
                                 }
                             }
@@ -339,6 +342,9 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                                         }
                                     }
                                     trackedRace.recordFix(mark, (GPSFix) fix, /* only when in tracking interval */ !forceFix);
+                                    if (returnLiveDelay) {
+                                        delayToLive.put(trackedRace.getRaceIdentifier(), new MillisecondsDurationImpl(trackedRace.getDelayToLiveInMillis()));
+                                    }
                                 }
                             }
                         });
