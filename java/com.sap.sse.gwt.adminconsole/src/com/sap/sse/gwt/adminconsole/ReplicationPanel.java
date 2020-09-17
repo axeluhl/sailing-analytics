@@ -265,9 +265,7 @@ public class ReplicationPanel extends FlowPanel {
             public void onSuccess(ReplicationStateDTO replicas) {
                 int i=0;
                 int replicaCount = 0;
-                while (registeredReplicas.getRowCount() > 0) {
-                    registeredReplicas.removeRow(0);
-                }
+                registeredReplicas.clear();
                 boolean replicaRegistered = false;
                 for (final ReplicaDTO replica : replicas.getReplicas()) {
                     replicaCount++;

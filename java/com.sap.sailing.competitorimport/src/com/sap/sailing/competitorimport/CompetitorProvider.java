@@ -1,6 +1,7 @@
 package com.sap.sailing.competitorimport;
 
 import java.io.IOException;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -44,4 +45,11 @@ public interface CompetitorProvider extends Named {
      *            <code>eventName</code> as returned by {@link #getHasCompetitorsForRegattasInEvent()}.
      */
     Iterable<CompetitorDescriptor> getCompetitorDescriptors(String eventName, String regattaName) throws JAXBException, IOException;
+
+    /**
+     * A hint for users about this competitor provider; ideally mapped to the user's locale with i18n support.
+     * 
+     * @return may return {@code null}
+     */
+    String getHint(Locale locale);
 }

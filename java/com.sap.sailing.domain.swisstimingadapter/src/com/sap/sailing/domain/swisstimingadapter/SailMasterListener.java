@@ -4,6 +4,7 @@ import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.List;
 
+import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -26,8 +27,12 @@ public interface SailMasterListener {
     /**
      * Announces the progress of data loaded from a local persistent store (as opposed to receiving it live from a
      * SailMaster instance). 0.0 means no progress so far, 1.0 means loading from persistent store completed.
+     * 
+     * @param statusAfterLoadingComplete
+     *            the status into which to put the race if 100% loading status have been reached; usually one of
+     *            TRACKING or FINISHED
      */
-    void storedDataProgress(String raceID, double progress);
+    void storedDataProgress(String raceID, double progress, TrackedRaceStatusEnum statusAfterLoadingComplete);
 
     void receivedWindData(String raceID, int zeroBasedMarkIndex, double windDirectionTrueDegrees, double windSpeedInKnots);
 }

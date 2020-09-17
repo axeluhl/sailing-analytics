@@ -162,7 +162,7 @@
 <setEntry value="com.sap.sailing.sailwave.resultimport@4:true"/>
 <setEntry value="com.sap.sailing.server.gateway.serialization.shared.android@default:default"/>
 <setEntry value="com.sap.sailing.server.gateway.serialization@default:default"/>
-<setEntry value="com.sap.sailing.server.gateway.test.support@default:default"/>
+<setEntry value="com.sap.sailing.server.gateway.test.support@default:true"/>
 <setEntry value="com.sap.sailing.server.gateway@5:true"/>
 <setEntry value="com.sap.sailing.server.interface@default:default"/>
 <setEntry value="com.sap.sailing.server.trackfiles@default:default"/>
@@ -191,9 +191,6 @@
 <setEntry value="com.sap.sse.gwt@default:default"/>
 <setEntry value="com.sap.sse.jersey.jaxbdependencyfragment@default:false"/>
 <setEntry value="com.sap.sse.jettyextensions@default:false"/>
-<setEntry value="com.sap.sse.landscape.aws.persistence@default:default"/>
-<setEntry value="com.sap.sse.landscape.aws@default:default"/>
-<setEntry value="com.sap.sse.landscape@default:default"/>
 <setEntry value="com.sap.sse.mail@5:true"/>
 <setEntry value="com.sap.sse.mongodb@default:default"/>
 <setEntry value="com.sap.sse.operationaltransformation@default:default"/>

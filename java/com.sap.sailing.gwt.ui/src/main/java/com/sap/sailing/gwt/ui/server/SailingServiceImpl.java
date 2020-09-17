@@ -758,18 +758,18 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     //READ
     @Override
-    public List<CompetitorDescriptor> getCompetitorDescriptors(String competitorProviderName, String eventName,
-            String regattaName) throws Exception {
+    public Pair<List<CompetitorDescriptor>, String> getCompetitorDescriptorsAndHint(String competitorProviderName, String eventName,
+            String regattaName, String localeForHint) throws Exception {
         final Regatta regatta = getService().getRegattaByName(regattaName);
         getSecurityService().checkCurrentUserReadPermission(regatta);
         for (CompetitorProvider cp : getAllCompetitorProviders()) {
             if (cp.getName().equals(competitorProviderName)) {
                 final List<CompetitorDescriptor> result = new ArrayList<>();
                 Util.addAll(cp.getCompetitorDescriptors(eventName, regattaName), result);
-                return result;
+                return new Pair<>(result, cp.getHint(ResourceBundleStringMessages.Util.getLocaleFor(localeForHint)));
             }
         }
-        return Collections.emptyList();
+        return new Pair<>(Collections.emptyList(), /* hint */ null);
     }
     
     //READ
@@ -2664,19 +2664,16 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         return result;
     }
     
-    //??
     protected RaceLogStore getRaceLogStore() {
         return MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory,
                 domainObjectFactory);
     }
     
-    //??
     protected RegattaLogStore getRegattaLogStore() {
         return MongoRegattaLogStoreFactory.INSTANCE.getMongoRegattaLogStore(
                 mongoObjectFactory, domainObjectFactory);
     }
 
-    //??
     protected SwissTimingReplayService getSwissTimingReplayService() {
         return swissTimingReplayService;
     }

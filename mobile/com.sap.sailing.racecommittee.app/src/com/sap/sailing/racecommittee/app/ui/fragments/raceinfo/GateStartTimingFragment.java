@@ -89,14 +89,14 @@ public class GateStartTimingFragment extends BaseFragment {
     public void onResume() {
         super.onResume();
 
-        sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
+        sendIntent(AppConstants.ACTION_TIME_HIDE);
     }
 
     @Override
     public void onPause() {
         super.onPause();
 
-        sendIntent(AppConstants.INTENT_ACTION_TIME_SHOW);
+        sendIntent(AppConstants.ACTION_TIME_SHOW);
     }
 
     private void setTimeLaunchWidget() {

@@ -27,6 +27,7 @@ import com.sap.sailing.gwt.ui.adminconsole.CompetitorImportProviderSelectionDial
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyDisplay;
@@ -212,10 +213,10 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
         return new MatchImportedCompetitorsDialogFactory() {
             @Override
             public MatchImportedCompetitorsDialog createMatchImportedCompetitorsDialog(
-                    final Iterable<CompetitorDescriptor> competitorDescriptors,
+                    final Pair<List<CompetitorDescriptor>, String> competitorDescriptorsAndHint,
                     final Iterable<CompetitorDTO> competitors) {
-                return new MatchImportedCompetitorsDialog(competitorDescriptors, competitors, stringMessages,
-                        sailingServiceWrite, userService, errorReporter, importCompetitorCallback);
+                return new MatchImportedCompetitorsDialog(competitorDescriptorsAndHint.getA(), competitors, competitorDescriptorsAndHint.getB(),
+                        stringMessages, sailingServiceWrite, userService, errorReporter, importCompetitorCallback);
             }
         };
     }
