@@ -28,6 +28,10 @@
                         <li>In the /competitor/live API end point, if a gap to leader turns "infinite" because a VMG
                             goes down to 0.0kts, the API will now output a <tt>null</tt> value for <tt>gapToLeader-s</tt>
                             instead of throwing an exception.</li>
+                        <li>When generating a pairing list for a league style event, competitor-to-number assignments
+                            are now shuffled randomly before applying the numeric pairing list template to the competitor
+                            list. This way, the same numeric pairing list table will generate different competitor pairings
+                            each time applied.</li>
                     </ul>
                     <h2 class="articleSubheadline">August 2020</h2>
                     <ul class="bulletList">
