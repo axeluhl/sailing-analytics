@@ -60,7 +60,7 @@
             </intent-filter>
             <!-- Branch URI Scheme -->
             <intent-filter>
-                <data android:scheme="sap" />
+                <data android:scheme="comsapsailingracemanager" />
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
@@ -71,9 +71,12 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https" android:host="example.app.link" />
-                <!-- example-alternate domain is required for App Links when the Journeys/Web SDK and Deepviews are used inside your website.  -->
-                <data android:scheme="https" android:host="example-alternate.app.link" />
+                <data
+                    android:host="5z0o.test-app.link"
+                    android:scheme="https" />
+                <data
+                    android:host="5z0o-alternate.test-app.link"
+                    android:scheme="https" />
             </intent-filter>
         </activity>
         <activity android:name=".ui.activities.RacingActivity" />
@@ -131,7 +134,12 @@
                     android:resource="@xml/filepaths" />
         </provider>
 
-        <meta-data android:name="io.branch.sdk.BranchKey" android:value="key_test_piFyCvg3lpSL3eoYFXduwfdfwrbA8bK2" />
+        <meta-data
+            android:name="io.branch.sdk.BranchKey"
+            android:value="key_live_jgDZ6HTD063Wiy7rDt5clbdmEFplJRdd" />
+        <meta-data
+            android:name="io.branch.sdk.BranchKey.test"
+            android:value="key_test_netW6MGq3YW5az2uCv2fwgmbttafGPdB" />
         <meta-data android:name="io.branch.sdk.TestMode" android:value="false" />     <!-- Set to true to use Branch_Test_Key (useful when simulating installs and/or switching between debug and production flavors) -->
 
     </application>
