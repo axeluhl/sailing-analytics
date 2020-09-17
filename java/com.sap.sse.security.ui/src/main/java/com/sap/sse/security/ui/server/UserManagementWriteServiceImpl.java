@@ -105,27 +105,22 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
     public void updateRoleDefinition(RoleDefinitionDTO roleDefinitionWithNewProperties) throws UnauthorizedException {
         SecurityUtils.getSubject().checkPermission(SecuredSecurityTypes.ROLE_DEFINITION.getStringPermissionForObject(
                 DefaultActions.UPDATE, roleDefinitionWithNewProperties));
-        
         RoleDefinition existingRole = getSecurityService().getRoleDefinition(roleDefinitionWithNewProperties.getId());
         if (existingRole == null) {
             throw new UnauthorizedException("Role does not exist");
         }
         Set<WildcardPermission> addedPermissions = new HashSet<>(roleDefinitionWithNewProperties.getPermissions());
         addedPermissions.removeAll(existingRole.getPermissions());
-        
         if (!getSecurityService().hasUserAllWildcardPermissionsForAlreadyRealizedQualifications(existingRole, addedPermissions)) {
             throw new UnauthorizedException("Not permitted to grant permissions for role "
                     + roleDefinitionWithNewProperties.getName());
         }
-        
         Set<WildcardPermission> removedPermissions = new HashSet<>(existingRole.getPermissions());
         removedPermissions.removeAll(roleDefinitionWithNewProperties.getPermissions());
-        
         if (!getSecurityService().hasUserAllWildcardPermissionsForAlreadyRealizedQualifications(existingRole, removedPermissions)) {
             throw new UnauthorizedException("Not permitted to revoke permissions for role "
                     + roleDefinitionWithNewProperties.getName());
         }
-        
         getSecurityService().updateRoleDefinition(roleDefinitionWithNewProperties);
     }
 
@@ -475,18 +470,13 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
         try {
             // get user for which to add a role
             final User user = getOrThrowUser(username);
-
             // get user for which the role is qualified, if one exists
             getOrThrowQualifiedUser(userQualifierName);
-
             // get the group tenant the role is qualified for if one exists
             final UserGroup tenant = getOrThrowTenant(tenantQualifierName);
-
             final Role role = getOrThrowRoleFromIDsAndCheckMetaPermissions(roleDefinitionId, tenant == null ? null : tenant.getId(),
                     userQualifierName);
-
             final TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(role, user);
-
             final String message = "added role " + role.getName() + " for user " + username;
             getSecurityService().setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(
                     SecuredSecurityTypes.ROLE_ASSOCIATION, associationTypeIdentifier,
@@ -564,8 +554,7 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
                         "Not permitted to grant/revoke permission " + permission + " for user " + user.getName());
             }
             // grant permission
-            final TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(permission,
-                    user);
+            final TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(permission, user);
             final String message = "Added permission " + permission + " for user " + username;
             getSecurityService().setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(
                     SecuredSecurityTypes.PERMISSION_ASSOCIATION, associationTypeIdentifier,
