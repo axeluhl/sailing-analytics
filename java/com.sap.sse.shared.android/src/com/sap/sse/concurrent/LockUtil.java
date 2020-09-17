@@ -485,7 +485,7 @@ public class LockUtil {
         }
     }
     
-    public static <T, E extends Throwable> T executeWithWriteLockAndResultExpectException(NamedReentrantReadWriteLock lock, RunnableWithResultAndException<T, E> runnable) throws E{
+    public static <T, E extends Throwable> T executeWithWriteLockAndResultExpectException(NamedReentrantReadWriteLock lock, RunnableWithResultAndException<T, E> runnable) throws E {
         lockForWrite(lock);
         try {
             return runnable.run();
@@ -494,7 +494,7 @@ public class LockUtil {
         }
     }
     
-    public static <E extends Throwable> void executeWithWriteLockExpectException(NamedReentrantReadWriteLock lock, RunnableWithException<E> runnable) throws E{
+    public static <E extends Throwable> void executeWithWriteLockExpectException(NamedReentrantReadWriteLock lock, RunnableWithException<E> runnable) throws E {
         lockForWrite(lock);
         try {
             runnable.run();
@@ -503,7 +503,7 @@ public class LockUtil {
         }
     }
     
-    public static <T, E extends Throwable> T executeWithReadLockAndResultExpectException(NamedReentrantReadWriteLock lock, RunnableWithResultAndException<T, E> runnable) throws E{
+    public static <T, E extends Throwable> T executeWithReadLockAndResultExpectException(NamedReentrantReadWriteLock lock, RunnableWithResultAndException<T, E> runnable) throws E {
         lockForRead(lock);
         try {
             return runnable.run();
@@ -512,7 +512,7 @@ public class LockUtil {
         }
     }
     
-    public static <E extends Throwable> void executeWithReadLockExpectException(NamedReentrantReadWriteLock lock, RunnableWithException<E> runnable) throws E{
+    public static <E extends Throwable> void executeWithReadLockExpectException(NamedReentrantReadWriteLock lock, RunnableWithException<E> runnable) throws E {
         lockForRead(lock);
         try {
             runnable.run();

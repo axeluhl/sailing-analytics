@@ -114,11 +114,12 @@ public class UserStoreImpl implements UserStore {
     private final ConcurrentHashMap<String, Class<?>> settingTypes;
 
     /**
-     * Protects access to the maps {@link #preferences}, {@link #preferenceConverters}, {@link #preferenceObjects} and {@link #preferenceListeners}.
-     * If access to {@linkplain userGroupsLock} or {@link #usersLock} is required, these locks must be obtained first in the correct order. See {@link #usersLock}
-     * This lock always has to be locked last.
+     * Protects access to the maps {@link #preferences}, {@link #preferenceConverters}, {@link #preferenceObjects} and
+     * {@link #preferenceListeners}. If access to {@link #userGroupsLock} or {@link #usersLock} is required, these locks
+     * must be obtained first in the correct order. This lock always has to be locked last.
      */
     private transient NamedReentrantReadWriteLock preferenceLock;
+    
     /**
      * Keys are the usernames, values are the key/value pairs representing the user's preferences
      */
@@ -485,11 +486,9 @@ public class UserStoreImpl implements UserStore {
                         Util.addToValueSet(userGroupsContainingUser, userInGroup, group);
                     }
                 }
-
                 for (RoleDefinition roleDefinition : newUserStore.getRoleDefinitions()) {
                     roleDefinitions.put(roleDefinition.getId(), roleDefinition);
                 }
-
                 LockUtil.executeWithWriteLock(preferenceLock, () -> {
                     for (User user : newUserStore.getUsers()) {
                         users.put(user.getName(), user);
