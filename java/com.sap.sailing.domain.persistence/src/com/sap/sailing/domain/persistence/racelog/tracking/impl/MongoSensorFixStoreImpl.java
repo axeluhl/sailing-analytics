@@ -185,11 +185,15 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
 
     /**
      * Store fixes in batches, reducing metadata storage update.
+     * 
+     * @return the identifiers of those races in which new maneuvers have been discovered since the last update for the
+     *         competitor / boat to which the device is mapped; always a valid, non-{@code null} but potentially empty
+     *         collection.
      */
     @Override
     public <FixT extends Timed> Iterable<RegattaAndRaceIdentifier> storeFixes(DeviceIdentifier device,
             Iterable<FixT> fixes) {
-        Set<RegattaAndRaceIdentifier> maneuverChanged = new HashSet<>();
+        final Set<RegattaAndRaceIdentifier> maneuverChanged = new HashSet<>();
         if (!Util.isEmpty(fixes)) {
             try {
                 final Object dbDeviceId = storeDeviceId(deviceServiceFinder, device);
@@ -251,7 +255,7 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
 
     private <FixT extends Timed> Iterable<RegattaAndRaceIdentifier> notifyListeners(DeviceIdentifier device,
             Iterable<FixT> fixes) {
-        Set<RegattaAndRaceIdentifier> raceWithChangedManeuver = new HashSet<>();
+        final Set<RegattaAndRaceIdentifier> raceWithChangedManeuver = new HashSet<>();
         @SuppressWarnings({ "unchecked", "rawtypes" })
         final Map<DeviceIdentifier, Set<FixReceivedListener<FixT>>> listenersWithFixType = (Map) listeners;
         final Set<FixReceivedListener<FixT>> listenersToInform = LockUtil.executeWithReadLockAndResult(listenersLock, () -> {

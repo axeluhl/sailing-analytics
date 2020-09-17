@@ -339,7 +339,6 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
     };
 
     /**
-     * 
      * @param comp
      *            The resolved competitor for wich a gpsfix was just recorded.
      * @return Will return null or an RegattaAndRaceIdentifier, if the last maneuver for the given competitor changed

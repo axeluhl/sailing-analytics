@@ -57,7 +57,7 @@ public class GPSFixesResourceTest {
                 return service;
             };
         };
-        Response response = resource.postFixes(FIXES_JSON);
+        Response response = resource.postFixes(FIXES_JSON, /* receive maneuvers */ false);
         assertThat("response is ok", response.getStatus(), equalTo(Response.Status.OK.getStatusCode()));
         DeviceIdentifier device = new SmartphoneUUIDIdentifierImpl(UUID.fromString("af855a56-9726-4a9c-a77e-da955bd289bf"));
         assertThat("all fixes stored", service.getSensorFixStore().getNumberOfFixes(device), equalTo(2L));
