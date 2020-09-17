@@ -283,7 +283,7 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
 
     void getCompetitorProviderDTOByName(String providerName, AsyncCallback<CompetitorProviderDTO> callback);
 
-    void getCompetitorDescriptors(String competitorProviderName, String eventName, String regattaName, AsyncCallback<List<CompetitorDescriptor>> callback);
+    void getCompetitorDescriptorsAndHint(String competitorProviderName, String eventName, String regattaName, String localeForHint, AsyncCallback<Pair<List<CompetitorDescriptor>, String>> callback);
 
     void getWindSourcesInfo(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<WindInfoForRaceDTO> callback);
 
