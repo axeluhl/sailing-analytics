@@ -6,6 +6,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -28,10 +29,12 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 @Path("/v1/gps_fixes")
@@ -43,7 +46,8 @@ public class GPSFixesResource extends AbstractSailingServerResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces("application/json;charset=UTF-8")
-    public Response postFixes(String json, @QueryParam("returnManeuvers") Boolean returnManeuvers) {
+    public Response postFixes(String json, @QueryParam("returnManeuverUpdate") @DefaultValue("false") Boolean returnManeuverUpdate,
+            @QueryParam("returnLiveDelay") @DefaultValue("false") Boolean returnLiveDelay) {
         final TimePoint received = MillisecondsTimePoint.now();
         Pair<UUID, List<GPSFixMoving>> data = null;
         try {
@@ -60,14 +64,16 @@ public class GPSFixesResource extends AbstractSailingServerResource {
         List<GPSFixMoving> fixes = data.getB();
         JSONObject answer = new JSONObject();
         try {
-            Iterable<RegattaAndRaceIdentifier> racesWithManeuverChanged = getService().getSensorFixStore().storeFixes(device, fixes);
-            if (!Util.isEmpty(racesWithManeuverChanged)) {
+            Iterable<Triple<RegattaAndRaceIdentifier, Boolean, Duration>> racesWithManeuverChangedAndLiveDelay = getService().getSensorFixStore().storeFixes(device, fixes, returnManeuverUpdate, returnLiveDelay);
+            if (!Util.isEmpty(racesWithManeuverChangedAndLiveDelay)) {
                 JSONArray changed = new JSONArray();
                 answer.put("maneuverchanged", changed);
-                for (RegattaAndRaceIdentifier raceWithManeuverChanged : racesWithManeuverChanged) {
+                for (Triple<RegattaAndRaceIdentifier, Boolean, Duration> raceWithManeuverChangedAndLiveDelay : racesWithManeuverChangedAndLiveDelay) {
                     JSONObject singleRaceRegatta = new JSONObject();
-                    singleRaceRegatta.put("regattaName", raceWithManeuverChanged.getRegattaName());
-                    singleRaceRegatta.put("raceName", raceWithManeuverChanged.getRaceName());
+                    singleRaceRegatta.put("regattaName", raceWithManeuverChangedAndLiveDelay.getA().getRegattaName());
+                    singleRaceRegatta.put("raceName", raceWithManeuverChangedAndLiveDelay.getA().getRaceName());
+                    singleRaceRegatta.put("maneuverChanged", raceWithManeuverChangedAndLiveDelay.getB());
+                    singleRaceRegatta.put("liveDelayInMillis", raceWithManeuverChangedAndLiveDelay.getC().asMillis());
                     changed.add(singleRaceRegatta);
                 }
             }
