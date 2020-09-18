@@ -348,7 +348,6 @@ public class SensorFixStoreTest {
     private List<Timed> loadFixes(long start, long end, DeviceIdentifier device, boolean endIsInclusive)
             throws TransformationException {
         List<Timed> loadedFixes = new ArrayList<>();
-        
         store.loadFixes(loadedFixes::add, device, new MillisecondsTimePoint(start), new MillisecondsTimePoint(end), endIsInclusive);
         return loadedFixes;
     }
