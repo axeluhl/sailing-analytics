@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <string name="running_on_course">(Kurs %s)</string>
     <string name="course_design_number_waypoints">Kurs hat %d Wegpunkte</string>
     <string name="service_text_no_races">Warte auf Rennen&#8230;</string>
@@ -47,7 +46,6 @@
     <string name="currentlyLoading">Lädt &#8230;</string>
     <string name="racingview_header">Wettfahrten auf Bahn \'%s\'</string>
     <string name="running_on_unknown">(Kurs setzen)</string>
-    <string name="empty"></string>
     <string name="updateIndicator">Update Icon</string>
     <string name="reset_race">Rennen zurücksetzen</string>
     <string name="postpone">Verschieben</string>
@@ -335,8 +333,6 @@
     <string name="race_reset_cancel">Nein danke</string>
     <string name="race_reset_message">Möchten Sie wirklich das Rennen inklusive aller Einstellungen und getätigten Aktionen zurücksetzen? Das kann nicht rückgängig gemacht werden!</string>
     <string name="race_set_time">Zeit setzen</string>
-    <string name="race_start_time_in">-%s</string>
-    <string name="race_start_time_ago">%s</string>
     <string name="race_begin_finish_header">Beginn des Zieleinlaufs</string>
     <string name="race_begin_finish_current">Aktuelle Zeit</string>
     <string name="race_begin_finish_custom">Individuelle Zeit</string>

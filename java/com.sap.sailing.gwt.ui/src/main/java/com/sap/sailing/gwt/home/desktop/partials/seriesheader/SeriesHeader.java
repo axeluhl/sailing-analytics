@@ -15,12 +15,13 @@ import com.sap.sailing.gwt.home.communication.event.EventAndLeaderboardReference
 import com.sap.sailing.gwt.home.communication.event.EventState;
 import com.sap.sailing.gwt.home.communication.fakeseries.EventSeriesViewDTO;
 import com.sap.sailing.gwt.home.desktop.partials.sharing.SharingButtons;
-import com.sap.sailing.gwt.home.desktop.partials.sharing.SharingMetadataProvider;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.overviewtab.RegattaOverviewPlace;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.SeriesView;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.SeriesView.Presenter;
+import com.sap.sailing.gwt.home.shared.SharedHomeResources;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
-import com.sap.sailing.gwt.home.shared.resources.SharedHomeResources;
+import com.sap.sailing.gwt.home.shared.partials.shared.SharingMetadataProvider;
+import com.sap.sailing.gwt.home.shared.places.ShareablePlaceContext;
 import com.sap.sailing.gwt.home.shared.utils.LabelTypeUtil;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.LinkUtil;
@@ -46,10 +47,8 @@ public class SeriesHeader extends Composite {
     public SeriesHeader(SeriesView.Presenter presenter) {
         this.series = presenter.getSeriesDTO();
         this.presenter = presenter;
-        
         SeriesHeaderResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
-        
         initFields();
         initSharing();
     }
@@ -60,11 +59,11 @@ public class SeriesHeader extends Composite {
             public String getShortText() {
                 return StringMessages.INSTANCE.seriesSharingShortText(series.getDisplayName());
             }
-
             @Override
-            public String getLongText(String url) {
-                return StringMessages.INSTANCE.seriesSharingLongText(series.getDisplayName(), url);
+            public ShareablePlaceContext getContext() {
+                return presenter.getCtx();
             }
+            
         });
     }
 

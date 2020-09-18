@@ -2,15 +2,52 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/navigation_drawer_cell_height"
-    android:background="?attr/sap_gray">
+    android:layout_height="@dimen/navigation_drawer_cell_height">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:background="?sap_gray"
+        android:paddingLeft="@dimen/navigation_drawer_text_margin"
+        android:paddingRight="@dimen/navigation_drawer_text_margin"
+        android:layout_toLeftOf="@id/delimiter_line"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/boat_class"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="middle"
+            android:singleLine="true"
+            android:textAppearance="?attr/textNormal"
+            tools:text="Extreme 40" />
+
+        <TextView
+            android:id="@+id/fleet_series"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="middle"
+            android:maxLines="2"
+            android:textAppearance="?attr/textSmall"
+            tools:text="Day 1\nYellow" />
+    </LinearLayout>
+
+    <View
+        android:id="@+id/delimiter_line"
+        android:layout_width="@dimen/thin_line"
+        android:layout_height="match_parent"
+        android:layout_toLeftOf="@id/protest_layout"
+        android:background="?attr/black" />
 
     <LinearLayout
         android:id="@+id/protest_layout"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_alignParentRight="true"
-        android:gravity="center_vertical"
+        android:layout_alignParentBottom="true"
+        android:background="?selectableItemBackground"
+        android:gravity="center"
         android:orientation="vertical">
 
         <RelativeLayout
@@ -44,45 +81,10 @@
             android:textAppearance="?attr/textPanelCaption" />
     </LinearLayout>
 
-    <ImageView
-        android:id="@+id/delimiter_line"
-        android:layout_width="@dimen/thin_line"
-        android:layout_height="match_parent"
-        android:layout_toLeftOf="@id/protest_layout"
-        android:background="?attr/black" />
-
-    <ImageView
+    <View
         android:id="@+id/bottom_line"
         android:layout_width="match_parent"
         android:layout_height="@dimen/thin_line"
         android:layout_alignParentBottom="true"
         android:background="?attr/black" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_marginLeft="@dimen/navigation_drawer_text_margin"
-        android:layout_marginRight="@dimen/navigation_drawer_text_margin"
-        android:layout_toLeftOf="@id/delimiter_line"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/boat_class"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ellipsize="middle"
-            android:singleLine="true"
-            android:textAppearance="?attr/textNormal"
-            tools:text="Extreme 40" />
-
-        <TextView
-            android:id="@+id/fleet_series"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ellipsize="middle"
-            android:maxLines="2"
-            android:textAppearance="?attr/textSmall"
-            tools:text="Day 1\nYellow" />
-    </LinearLayout>
 </RelativeLayout>

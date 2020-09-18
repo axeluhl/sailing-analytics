@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.persistence.racelog.tracking.impl;
 
 import static com.sap.sailing.shared.persistence.impl.MongoObjectFactoryImpl.storeDeviceId;
-import static com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl.storeTimeRange;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -43,6 +42,7 @@ import com.sap.sse.common.Timed;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
@@ -185,11 +185,15 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
 
     /**
      * Store fixes in batches, reducing metadata storage update.
+     * 
+     * @return the identifiers of those races in which new maneuvers have been discovered since the last update for the
+     *         competitor / boat to which the device is mapped and/or information about the race's live delay, if
+     *         requested; always a valid, non-{@code null} but potentially empty collection.
      */
     @Override
-    public <FixT extends Timed> Iterable<RegattaAndRaceIdentifier> storeFixes(DeviceIdentifier device,
-            Iterable<FixT> fixes) {
-        Set<RegattaAndRaceIdentifier> maneuverChanged = new HashSet<>();
+    public <FixT extends Timed> Iterable<Triple<RegattaAndRaceIdentifier, Boolean, Duration>> storeFixes(DeviceIdentifier device,
+            Iterable<FixT> fixes, boolean returnManeuverChanges, boolean returnLiveDelay) {
+        final Set<Triple<RegattaAndRaceIdentifier, Boolean, Duration>> racesWithManeuverChangesOrLiveDelay = new HashSet<>();
         if (!Util.isEmpty(fixes)) {
             try {
                 final Object dbDeviceId = storeDeviceId(deviceServiceFinder, device);
@@ -217,7 +221,7 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
                 if (latestFix != null) {
                     newMetadata.put(FieldNames.LAST_FIX_RECEIVED.name(), storeFixToDocument(new Document(), latestFix));
                 }
-                storeTimeRange(newTimeRange, newMetadata, FieldNames.TIMERANGE);
+                MongoObjectFactoryImpl.storeTimeRange(newTimeRange, newMetadata, FieldNames.TIMERANGE);
                 updateOperation.append("$set", newMetadata);
                 updateOperation.append("$inc", new Document(FieldNames.NUM_FIXES.name(), nrOfTotalFixes));
                 metadataCollection.withWriteConcern(WriteConcern.UNACKNOWLEDGED).updateOne(getDeviceQuery(device), updateOperation, new UpdateOptions().upsert(true));
@@ -225,9 +229,9 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
                 logger.log(Level.WARNING, "Could not store fix in MongoDB");
                 e.printStackTrace();
             }
-            Util.addAll(notifyListeners(device, fixes), maneuverChanged);
+            Util.addAll(notifyListeners(device, fixes, returnManeuverChanges, returnLiveDelay), racesWithManeuverChangesOrLiveDelay);
         }
-        return maneuverChanged;
+        return racesWithManeuverChangesOrLiveDelay;
     }
 
     /**
@@ -246,12 +250,12 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
 
     @Override
     public <FixT extends Timed> void storeFix(DeviceIdentifier device, FixT fix) {
-        storeFixes(device, Collections.singletonList(fix));
+        storeFixes(device, Collections.singletonList(fix), /* returnManeuverUpdate */ false, /* returnLiveDelay */ false);
     }
 
-    private <FixT extends Timed> Iterable<RegattaAndRaceIdentifier> notifyListeners(DeviceIdentifier device,
-            Iterable<FixT> fixes) {
-        Set<RegattaAndRaceIdentifier> raceWithChangedManeuver = new HashSet<>();
+    private <FixT extends Timed> Iterable<Triple<RegattaAndRaceIdentifier, Boolean, Duration>> notifyListeners(DeviceIdentifier device,
+            Iterable<FixT> fixes, boolean returnManeuverChanges, boolean returnLiveDelay) {
+        final Set<Triple<RegattaAndRaceIdentifier, Boolean, Duration>> raceWithChangedManeuver = new HashSet<>();
         @SuppressWarnings({ "unchecked", "rawtypes" })
         final Map<DeviceIdentifier, Set<FixReceivedListener<FixT>>> listenersWithFixType = (Map) listeners;
         final Set<FixReceivedListener<FixT>> listenersToInform = LockUtil.executeWithReadLockAndResult(listenersLock, () -> {
@@ -260,7 +264,7 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
         });
         for (FixT fix : fixes) {
             for (FixReceivedListener<FixT> listener : listenersToInform) {
-                final Iterable<RegattaAndRaceIdentifier> racesWithManeuverChangeFromListener = listener.fixReceived(device, fix);
+                final Iterable<Triple<RegattaAndRaceIdentifier, Boolean, Duration>> racesWithManeuverChangeFromListener = listener.fixReceived(device, fix, returnManeuverChanges, returnLiveDelay);
                 Util.addAll(racesWithManeuverChangeFromListener, raceWithChangedManeuver);
             }
         }

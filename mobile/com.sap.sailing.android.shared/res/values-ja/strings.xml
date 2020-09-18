@@ -1,7 +1,5 @@
-<?xml version="1.0" encoding="utf-8" standalone="no"?><resources xmlns:tools="http://schemas.android.com/tools">
-
-    
-    
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<resources>
     <string name="options_menu_live">"接続情報"</string>
     <string name="remove">"削除"</string>
     <string name="enter_new_item">"新規アイテム入力"</string>
@@ -9,17 +7,10 @@
     <string name="there_are_no_items_yet_">"アイテムがまだありません。"</string>
 
     <!-- SystemInformationActivity -->
-    
-    
-    
-    
-    
-    
-    
-    
+
 
     <!-- Generic -->
-    
+
     <string name="generic_error">"エラー"</string>
     <string name="about">"情報"</string>
 
@@ -45,9 +36,7 @@
     <string name="notify_user_api_call_failed">"サーバとの接続中にエラーが発生しました。再試行してください。"</string>
     <string name="please_wait">"お待ちください"</string>
     <string name="error_invalid_qr_code">"無効な QR コード"</string>
-    
-    
-    
+
 
     <!-- Eula -->
     <string name="eula_title">"EULA"</string>
@@ -61,10 +50,7 @@
     <string name="license_information">"ライセンス情報"</string>
 
     <!-- HTTP Requests -->
-    
-    
-    
-    
+
 
     <!-- Dialog -->
     <string name="yes">"はい"</string>
@@ -83,9 +69,4 @@
     <string name="yesterday">"昨日"</string>
     <string name="today">"本日"</string>
     <string name="tomorrow">"明日"</string>
-    
-    
-
-    
-
 </resources>

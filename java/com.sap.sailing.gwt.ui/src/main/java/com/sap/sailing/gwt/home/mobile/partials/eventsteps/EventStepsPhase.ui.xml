@@ -4,7 +4,7 @@
 	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
 	<ui:with field="local_res" type="com.sap.sailing.gwt.home.mobile.partials.eventsteps.EventStepsResources" />
-	<ui:with field="shr" type="com.sap.sailing.gwt.home.shared.resources.SharedHomeResources" />
+	<ui:with field="shr" type="com.sap.sailing.gwt.home.shared.SharedHomeResources" />
 	<g:HTMLPanel addStyleNames="{local_res.css.eventsteps_phases_phase}">
 		<a class="{local_res.css.eventsteps_phases_phase_link}" ui:field="anchorUi">
 			<div class="{local_res.css.eventsteps_phases_phase_progress}">
