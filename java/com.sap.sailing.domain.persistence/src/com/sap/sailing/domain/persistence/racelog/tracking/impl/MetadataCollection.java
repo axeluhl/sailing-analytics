@@ -30,13 +30,15 @@ public class MetadataCollection extends MongoFixHandler {
     private static final Logger logger = Logger.getLogger(MetadataCollection.class.getName());
     private final MongoCollection<Document> metadataCollection;
     private final ConcurrentHashMap<DeviceIdentifier, MetadataUpdater> metadataUpdaters;
+    private final WriteConcern writeConcern;
 
     public MetadataCollection(MongoObjectFactoryImpl mongoOF,
             TypeBasedServiceFinder<FixMongoHandler<?>> fixServiceFinder,
-            TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceServiceFinder) {
+            TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceServiceFinder, WriteConcern writeConcern) {
         super(fixServiceFinder, deviceServiceFinder);
         this.metadataCollection = mongoOF.getGPSFixMetadataCollection();
         this.metadataUpdaters = new ConcurrentHashMap<>();
+        this.writeConcern = writeConcern;
     }
 
     /**
@@ -146,6 +148,6 @@ public class MetadataCollection extends MongoFixHandler {
         MongoObjectFactoryImpl.storeTimeRange(newTimeRange, newMetadata, FieldNames.TIMERANGE);
         updateOperation.append("$set", newMetadata);
         updateOperation.append("$inc", new Document(FieldNames.NUM_FIXES.name(), update.getNrOfTotalFixes()));
-        metadataCollection.withWriteConcern(WriteConcern.UNACKNOWLEDGED).updateOne(getDeviceQuery(update.getDevice()), updateOperation, new UpdateOptions().upsert(true));
+        metadataCollection.withWriteConcern(writeConcern).updateOne(getDeviceQuery(update.getDevice()), updateOperation, new UpdateOptions().upsert(true));
     }
 }

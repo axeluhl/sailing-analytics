@@ -59,6 +59,12 @@ public class MongoSensorFixStoreImpl extends MongoFixHandler implements MongoSen
     private final MongoObjectFactoryImpl mongoOF;
     
     /**
+     * The write concern to use for updating the fixes and metadata collections. Tests can use this, e.g., to work with
+     * {@link WriteConcern#MAJORITY} in order to ensure they can read their own writes.
+     */
+    private final WriteConcern writeConcern;
+    
+    /**
      * Lock object to be used when accessing {@link #listeners}.
      */
     private final NamedReentrantReadWriteLock listenersLock = new NamedReentrantReadWriteLock("Listeners collection lock of " + MongoSensorFixStoreImpl.class.getName(), false);
@@ -66,11 +72,17 @@ public class MongoSensorFixStoreImpl extends MongoFixHandler implements MongoSen
 
     public MongoSensorFixStoreImpl(MongoObjectFactory mongoObjectFactory, DomainObjectFactory domainObjectFactory,
             TypeBasedServiceFinderFactory serviceFinderFactory) {
+        this(mongoObjectFactory, domainObjectFactory, serviceFinderFactory, WriteConcern.UNACKNOWLEDGED);
+    }
+    
+    public MongoSensorFixStoreImpl(MongoObjectFactory mongoObjectFactory, DomainObjectFactory domainObjectFactory,
+            TypeBasedServiceFinderFactory serviceFinderFactory, WriteConcern writeConcern) {
         super(serviceFinderFactory != null ? createFixServiceFinder(serviceFinderFactory) : null,
               serviceFinderFactory != null ? serviceFinderFactory.createServiceFinder(DeviceIdentifierMongoHandler.class) : null);
         mongoOF = (MongoObjectFactoryImpl) mongoObjectFactory;
         fixesCollection = mongoOF.getGPSFixCollection();
-        metadataCollection = new MetadataCollection(mongoOF, fixServiceFinder, deviceServiceFinder);
+        metadataCollection = new MetadataCollection(mongoOF, fixServiceFinder, deviceServiceFinder, writeConcern);
+        this.writeConcern = writeConcern;
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -197,7 +209,7 @@ public class MongoSensorFixStoreImpl extends MongoFixHandler implements MongoSen
                     final TimeRangeImpl fixTimeRange = new TimeRangeImpl(fixTP, fixTP, /* toIsInclusive */ true);
                     newTimeRange = newTimeRange == null ? fixTimeRange : newTimeRange.extend(fixTimeRange);
                 }
-                fixesCollection.withWriteConcern(WriteConcern.UNACKNOWLEDGED).insertMany(dbFixes);
+                fixesCollection.withWriteConcern(writeConcern).insertMany(dbFixes);
                 metadataCollection.enqueueMetadataUpdate(device, dbDeviceId, nrOfTotalFixes, newTimeRange, latestFix);
             } catch (TransformationException e) {
                 logger.log(Level.WARNING, "Could not store fix in MongoDB", e);

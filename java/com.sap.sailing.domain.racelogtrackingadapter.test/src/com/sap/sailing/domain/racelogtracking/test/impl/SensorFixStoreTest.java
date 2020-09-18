@@ -13,6 +13,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.mongodb.MongoException;
+import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoDatabase;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.impl.DegreePosition;
@@ -62,7 +63,7 @@ public class SensorFixStoreTest {
 
     private void newStore() {
         store = new MongoSensorFixStoreImpl(PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(),
-                PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(), serviceFinderFactory);
+                PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(), serviceFinderFactory, WriteConcern.MAJORITY);
     }
 
     @After
@@ -88,7 +89,7 @@ public class SensorFixStoreTest {
     @Test
     public void testFixIsFoundByOtherStoreInstance() throws Exception {
         addBravoFix(device, FIX_TIMESTAMP, FIX_RIDE_HEIGHT);
-
+        store.getNumberOfFixes(device); // ensure the metadata has been updated
         newStore();
         assertEquals(1, store.getNumberOfFixes(device));
     }
