@@ -4,6 +4,13 @@ import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Timed;
 
+/**
+ * Stores update requests to the {@link MetadataCollection}. Later requests can be {@link #merge(MetadataUpdate) merged} with
+ * this request to produce a new, combined request. This way, slower background updates to the metadata collection can still
+ * keep up with fast fix insertions.
+ * 
+ * @author Axel Uhl (D043530)
+ */
 public class MetadataUpdate<FixT extends Timed> {
     private final DeviceIdentifier device;
     private final Object dbDeviceId;

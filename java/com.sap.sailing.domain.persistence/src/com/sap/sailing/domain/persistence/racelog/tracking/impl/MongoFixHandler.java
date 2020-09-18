@@ -10,6 +10,13 @@ import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.TypeBasedServiceFinder;
 
+/**
+ * Abstract base class for both, the {@link MongoSensorFixStoreImpl} and the {@link MetadataCollection}. Both need
+ * functionality to store and load GPS/sensor fix objects.
+ * 
+ * @author Axel Uhl (D043530)
+ *
+ */
 abstract class MongoFixHandler {
     protected final TypeBasedServiceFinder<FixMongoHandler<?>> fixServiceFinder;
     protected final TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceServiceFinder;

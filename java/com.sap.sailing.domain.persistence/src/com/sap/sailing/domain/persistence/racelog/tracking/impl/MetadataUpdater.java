@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.persistence.racelog.tracking.impl;
 
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.logging.Level;
@@ -13,6 +12,24 @@ import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Timed;
 import com.sap.sse.util.ThreadPoolUtil;
 
+/**
+ * Manages the actual updates to the {@link MetadataCollection}, batching the update statements to the MongoDB by
+ * combining update requests {@link #enqueueMetadataUpdate(DeviceIdentifier, Object, int, TimeRange, Timed) enqueued}
+ * with this updater in case an update is currently running.
+ * <p>
+ * 
+ * When holding this object's monitor (using {@code synchronized}), if {@link #runningUpdate} is not {@code null},
+ * {@link #setNextUpdate(MetadataUpdate) setting an update request} will have this update request be picked up
+ * by the running updating task. Also, under this object's monitor, if {@link #runningUpdate} is not {@code null}
+ * and the update task has picked by an update for processing, {@link #getNextUpdate()} will return {@code null}
+ * until a next update is {@link #setNextUpdate(MetadataUpdate) set}.<p>
+ * 
+ * The {@link #waitForPendingUpdates()} method can be used to wait until the pending update request(s) up to the
+ * point when {@link #waitForPendingUpdates()} is called have been sent to MongoDB.
+ * 
+ * @author Axel Uhl (D043530)
+ *
+ */
 public class MetadataUpdater {
     private static final Logger logger = Logger.getLogger(MetadataUpdater.class.getName());
     private final ScheduledExecutorService executor;
@@ -20,6 +37,11 @@ public class MetadataUpdater {
     private final MetadataCollection metadataCollection;
     private Future<?> runningUpdate;
     private MetadataUpdate<?> nextUpdate;
+    
+    /**
+     * A counter for the updates processed. Can be used for synchronization purposes, e.g., by {@link #waitForPendingUpdates()}.
+     */
+    private long updatesProcessed;
 
     MetadataUpdater(ScheduledExecutorService executor, MetadataCollection metadataCollection, DeviceIdentifier forDevice) {
         super();
@@ -62,7 +84,7 @@ public class MetadataUpdater {
      * found, it is applied again; otherwise, the task ends.
      */
     private synchronized <FixT extends Timed> void scheduleUpdate() {
-        assert runningUpdate == null;
+        assert runningUpdate == null && nextUpdate != null;
         runningUpdate = executor.submit((Callable<Void>) ()->{
             MetadataUpdate<FixT> theNextUpdate;
             logger.fine(()->"Starting metadata updater task for device "+forDevice);
@@ -74,6 +96,8 @@ public class MetadataUpdater {
                     } else {
                         setNextUpdate(null);
                     }
+                    updatesProcessed++;
+                    MetadataUpdater.this.notifyAll();
                 }
                 if (theNextUpdate != null) {
                     metadataCollection.update(theNextUpdate);
@@ -94,16 +118,22 @@ public class MetadataUpdater {
         return (MetadataUpdate<FixT>) nextUpdate;
     }
 
+    /**
+     * An update may either currently be in progress, on its way to MongoDB, with no {@link #nextUpdate} in the queue, or
+     * an update may have been queued in {@link #nextUpdate} which will be picked up by an already running update task
+     * and will then be in progress.
+     */
     void waitForPendingUpdates() {
-        final Future<?> theRunningUpdate;
         synchronized (this) {
-            theRunningUpdate = runningUpdate;
-        }
-        if (theRunningUpdate != null) {
-            try {
-                theRunningUpdate.get();
-            } catch (InterruptedException | ExecutionException e) {
-                logger.log(Level.INFO, "Exception waiting for pending metadata updates", e);
+            if (runningUpdate != null) {
+                final long waitUntilTheseManyUpdatesProcessed = getNextUpdate() == null ? updatesProcessed+1 : updatesProcessed+2;
+                while (updatesProcessed < waitUntilTheseManyUpdatesProcessed) {
+                    try {
+                        wait();
+                    } catch (InterruptedException e) {
+                        logger.log(Level.WARNING, "Interrupted while waiting for pending updates; continuing to wait...", e);
+                    }
+                }
             }
         }
     }

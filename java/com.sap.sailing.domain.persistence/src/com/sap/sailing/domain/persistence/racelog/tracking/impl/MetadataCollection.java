@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
+import com.mongodb.ReadConcern;
 import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
@@ -26,6 +27,22 @@ import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.TypeBasedServiceFinder;
 
+/**
+ * Encapsulates the collection that holds some metadata for each device that has ever sent fixes to this
+ * store, such as the last fix received, the time range between oldest and newest fix, as well as the total
+ * number of fixes received from that device.<p>
+ * 
+ * The updates to the collection are handled asynchronously, in a background executor, so as to not impede
+ * throughput for the actual fixes. The updates, recorded in the form of {@link MetadataUpdate} objects,
+ * can be merged to reduce the effective number of updates required to the collection, e.g., in case fast
+ * fix inserts outperform the slower background updates to the metadata collection.<p>
+ * 
+ * Reads from the collection wait for the last batch of updates to complete so that they return a state that
+ * corresponds to the time point when the read was triggered.
+ * 
+ * @author Axel Uhl (D043530)
+ *
+ */
 public class MetadataCollection extends MongoFixHandler {
     private static final Logger logger = Logger.getLogger(MetadataCollection.class.getName());
     private final MongoCollection<Document> metadataCollection;
@@ -57,7 +74,7 @@ public class MetadataCollection extends MongoFixHandler {
      */
     private Document findMetadataObjectInternal(DeviceIdentifier device) throws TransformationException {
         Bson query = getDeviceQuery(device);
-        Document result = metadataCollection.find(query).first();
+        Document result = metadataCollection.withReadConcern(ReadConcern.MAJORITY).find(query).first();
         return result;
     }
 
