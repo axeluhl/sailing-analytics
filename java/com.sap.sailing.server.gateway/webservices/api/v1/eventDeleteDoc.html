@@ -1,0 +1,51 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+	<link href='../../../../sailing-fontface-1.0.cache.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+	<title>SAP Sailing Analytics Webservices API Version 1.0</title>
+</head>
+<body>
+<h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
+<h2>URL: /api/v1/events/{event-id}/</h2>
+
+<b>Description:</b>
+<p>Deletes an Event, optionally also allows to delete related LeaderboardGroups and/or all related Leaderboards and/or all related Regattas</p>
+<br/>
+<table>
+	<tr>
+		<td>Webservice Type:</td>
+		<td>PUT</td>
+	</tr>
+	<tr>
+		<td>Output format:</td>
+		<td>empty</td>
+	</tr>
+	<tr>
+		<td>Mandatory parameters:</td>
+		<td>none;</td>
+	</tr>
+	<tr>
+		<td>Optional parameters:</td>
+		<td>
+			<div>withLeaderboardGroups - if true, deletes all associated LeaderboardGroups. Doing so will also delete the overall Leaderboards of each group.</div>
+			<div>withLeaderboards - if true, deletes all associated Leaderboards. The deletion of a RegattaLeaderboard entails the deletion of all Leaderboards holding the same Regatta.</div>
+			<div>withRegattas - if true, deletes all associated Regattas. Doing so will also delete all their RegattaLeaderboards and TrackedRaces.</div>
+		</td>
+	</tr>
+	<tr>
+		<td>Request method:</td>
+		<td>DELETE</td>
+	</tr>
+	<tr>
+		<td>Example:</td>
+		<td>curl -X DELETE -H "Authorization: Bearer w9YSIfr/Zf6a127SZDddkhdAtQuuv0Jm1PSXlo1Yvd0=" "http://127.0.0.1:8888/sailingserver/api/v1/events/0065b870-9ddb-42be-a7d4-6be2081cb63e?withLeaderboardGroups=true"<br>
+		</pre></td>
+	</tr>
+</table>
+<div style="height: 1em;"></div>
+<a href="index.html">Back to Web Service Overview</a> 
+</body>
+</html>

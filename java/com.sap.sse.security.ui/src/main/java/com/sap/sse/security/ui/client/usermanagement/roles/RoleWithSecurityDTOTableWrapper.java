@@ -132,6 +132,7 @@ public class RoleWithSecurityDTOTableWrapper extends
         table.addColumnSortHandler(userColumnListHandler);
         table.addColumn(userGroupWithSecurityDTONameColumn, stringMessages.roleName());
         table.addColumn(userActionColumn);
+        table.ensureDebugId("RoleWithSecurityDTOTable");
     }
 
     public LabeledAbstractFilterablePanel<RoleWithSecurityDTO> getFilterField() {

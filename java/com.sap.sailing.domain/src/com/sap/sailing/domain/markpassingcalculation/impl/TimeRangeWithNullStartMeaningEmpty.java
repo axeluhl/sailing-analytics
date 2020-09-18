@@ -20,7 +20,10 @@ public class TimeRangeWithNullStartMeaningEmpty {
     private final boolean toIsInclusive;
 
     public TimeRangeWithNullStartMeaningEmpty(TimePoint from, TimePoint to, boolean toIsInclusive) {
-        timeRangeOrNull = from == null ? null : new TimeRangeImpl(from, to, toIsInclusive);
+        // the time range will be adjusted to an empty time range starting at "to" in case "from" is after
+        // "to"; this to avoid an IllegalArgumentException should "from" be after "to"; see bug 5362
+        timeRangeOrNull = from == null ? null : new TimeRangeImpl(
+                to==null || from.before(to) ? from : to, to, toIsInclusive);
         this.from = from;
         this.to = to;
         this.toIsInclusive = toIsInclusive;
@@ -54,6 +57,11 @@ public class TimeRangeWithNullStartMeaningEmpty {
         return getWithNewTo(toExclusive, /* toIsInclusive */ false);
     }
 
+    /**
+     * @return {@code null} if {@link #from} is {@code null}, representing a time range that is open at its start;
+     *         should {@link #from} have been set to a time point later than {@link #to}, the time range returned is
+     *         {@link TimeRange#isEmpty() empty} and positioned at {@link #to}.
+     */
     public TimeRange getTimeRangeOrNull() {
         return timeRangeOrNull;
     }

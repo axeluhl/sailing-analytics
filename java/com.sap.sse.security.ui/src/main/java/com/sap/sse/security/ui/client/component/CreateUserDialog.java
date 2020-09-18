@@ -51,5 +51,6 @@ public class CreateUserDialog extends AbstractUserDialog {
                     public void cancel() {
                     }
                 });
+        this.ensureDebugId(this.getClass().getSimpleName());
     }
 }

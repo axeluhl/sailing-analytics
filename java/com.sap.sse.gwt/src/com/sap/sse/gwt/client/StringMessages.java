@@ -38,6 +38,10 @@ public interface StringMessages extends Messages {
     String resetToDefaultInProgress();
     String settingsRemoved();
     String settingsRemovedError();
+    String settingsGetError();
+    String getAvailableDetailTypesForLeaderboardError();
+    String getLeaderboardNamesError();
+    String getLeaderboardError();
     String pagerStateInfo(int start , int end, int size, @Select boolean exact);
     String yes();
     String no();

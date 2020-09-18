@@ -2,6 +2,7 @@ package com.sap.sailing.domain.racelogtracking.impl.fixtracker;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -56,13 +57,17 @@ import com.sap.sailing.domain.tracking.TrackingDataLoader;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.domain.tracking.impl.TimedComparator;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.MultiTimeRange;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.WithID;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.util.ThreadPoolUtil;
 
@@ -189,8 +194,9 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
     };
     private final FixReceivedListener<Timed> listener = new FixReceivedListener<Timed>() {
         @Override
-        public Iterable<RegattaAndRaceIdentifier> fixReceived(DeviceIdentifier device, Timed fix) {
-            Set<RegattaAndRaceIdentifier> maneuverChanged = new HashSet<>();
+        public Iterable<Triple<RegattaAndRaceIdentifier, Boolean, Duration>> fixReceived(DeviceIdentifier device, Timed fix, boolean returnManeuverChanges, boolean returnLiveDelay) {
+            final Set<RegattaAndRaceIdentifier> maneuverChanged = new HashSet<>();
+            final Map<RegattaAndRaceIdentifier, Duration> delayToLive = new HashMap<>();
             if (!preemptiveStopRequested.get() && trackedRace.getStartOfTracking() != null) {
                 final TimePoint timePoint = fix.getTimePoint();
                 deviceMappings.forEachMappingOfDeviceIncludingTimePoint(device, fix.getTimePoint(),
@@ -224,6 +230,9 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                                     DynamicSensorFixTrack<Competitor, SensorFix> track = mapper.getTrack(trackedRace, competitor);
                                     if (track != null && trackedRace.isWithinStartAndEndOfTracking(fix.getTimePoint())) {
                                         mapper.addFix(track, (DoubleVectorFix) fix);
+                                        if (returnLiveDelay) {
+                                            delayToLive.put(trackedRace.getRaceIdentifier(), new MillisecondsDurationImpl(trackedRace.getDelayToLiveInMillis()));
+                                        }
                                     }
                                 }
                             }
@@ -254,9 +263,14 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                                         // by the race or the track, e.g., because the race's end-of-tracking
                                         // comes before the fix's time point
                                         if (trackedRace.recordFix(comp, (GPSFixMoving) fix)) {
-                                            RegattaAndRaceIdentifier maneuverChangedAnswer = detectIfManeuverChanged(comp);
-                                            if (maneuverChangedAnswer != null) {
-                                                maneuverChanged.add(maneuverChangedAnswer);
+                                            if (returnManeuverChanges) {
+                                                RegattaAndRaceIdentifier maneuverChangedAnswer = detectIfManeuverChanged(comp);
+                                                if (maneuverChangedAnswer != null) {
+                                                    maneuverChanged.add(maneuverChangedAnswer);
+                                                }
+                                            }
+                                            if (returnLiveDelay) {
+                                                delayToLive.put(trackedRace.getRaceIdentifier(), new MillisecondsDurationImpl(trackedRace.getDelayToLiveInMillis()));
                                             }
                                         }
                                     } else {
@@ -328,18 +342,34 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                                         }
                                     }
                                     trackedRace.recordFix(mark, (GPSFix) fix, /* only when in tracking interval */ !forceFix);
+                                    if (returnLiveDelay) {
+                                        delayToLive.put(trackedRace.getRaceIdentifier(), new MillisecondsDurationImpl(trackedRace.getDelayToLiveInMillis()));
+                                    }
                                 }
                             }
                         });
                     }
                 });
             }
-            return maneuverChanged;
+            return mergeManeuverChangedAndLiveDelayResult(maneuverChanged, delayToLive);
+        }
+
+        private Iterable<Triple<RegattaAndRaceIdentifier, Boolean, Duration>> mergeManeuverChangedAndLiveDelayResult(
+                Set<RegattaAndRaceIdentifier> maneuverChanged, Map<RegattaAndRaceIdentifier, Duration> delayToLive) {
+            final Map<RegattaAndRaceIdentifier, Pair<Boolean, Duration>> preResult = new HashMap<>();
+            for (final Entry<RegattaAndRaceIdentifier, Duration> e : delayToLive.entrySet()) {
+                preResult.put(e.getKey(), new Pair<>(maneuverChanged.contains(e.getKey()), e.getValue()));
+            }
+            for (final RegattaAndRaceIdentifier maneuverChanges : maneuverChanged) {
+                if (!preResult.containsKey(maneuverChanges)) {
+                    preResult.put(maneuverChanges, new Pair<>(true, null));
+                }
+            }
+            return Util.map(preResult.entrySet(), e->new Triple<>(e.getKey(), e.getValue().getA(), e.getValue().getB()));
         }
     };
 
     /**
-     * 
      * @param comp
      *            The resolved competitor for wich a gpsfix was just recorded.
      * @return Will return null or an RegattaAndRaceIdentifier, if the last maneuver for the given competitor changed

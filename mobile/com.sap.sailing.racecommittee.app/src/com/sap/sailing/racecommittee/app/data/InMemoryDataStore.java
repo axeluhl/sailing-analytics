@@ -35,7 +35,7 @@ public enum InMemoryDataStore implements DataStore {
     private LinkedHashMap<SimpleRaceLogIdentifier, ManagedRace> managedRaceById;
     private LinkedHashMap<RaceGroup, LinkedHashMap<Serializable, Mark>> marksData;
     private LinkedHashMap<RaceGroup, CourseBase> courseData;
-    private SharedDomainFactory domainFactory;
+    private SharedDomainFactory<?> domainFactory;
 
     private Serializable eventUUID;
     private UUID courseAreaId;
@@ -50,7 +50,7 @@ public enum InMemoryDataStore implements DataStore {
         managedRaceById = new LinkedHashMap<>();
         marksData = new LinkedHashMap<>();
         courseData = new LinkedHashMap<>();
-        domainFactory = new SharedDomainFactoryImpl(new AndroidRaceLogResolver());
+        domainFactory = new SharedDomainFactoryImpl<>(new AndroidRaceLogResolver());
 
         eventUUID = null;
         courseAreaId = null;
@@ -327,8 +327,8 @@ public enum InMemoryDataStore implements DataStore {
     public void registerRaces(Context context, Collection<ManagedRace> races) {
         for (ManagedRace race : races) {
             final Intent registerIntent = new Intent(context, RaceStateService.class);
-            registerIntent.setAction(AppConstants.INTENT_ACTION_REGISTER_RACE);
-            registerIntent.putExtra(AppConstants.INTENT_EXTRA_RACE_ID, race.getId());
+            registerIntent.setAction(AppConstants.ACTION_REGISTER_RACE);
+            registerIntent.putExtra(AppConstants.EXTRA_RACE_ID, race.getId());
             context.startService(registerIntent);
         }
     }
@@ -337,14 +337,14 @@ public enum InMemoryDataStore implements DataStore {
     public void clearRaces(Context context) {
         managedRaceById.clear();
         final Intent intent = new Intent(context, RaceStateService.class);
-        intent.setAction(AppConstants.INTENT_ACTION_CLEAR_RACES);
+        intent.setAction(AppConstants.ACTION_CLEAR_RACES);
         context.startService(intent);
     }
 
     private void unregisterRace(Context context, ManagedRace race) {
         final Intent intent = new Intent(context, RaceStateService.class);
-        intent.setAction(AppConstants.INTENT_ACTION_UNREGISTER_RACE);
-        intent.putExtra(AppConstants.INTENT_EXTRA_RACE_ID, race.getId());
+        intent.setAction(AppConstants.ACTION_UNREGISTER_RACE);
+        intent.putExtra(AppConstants.EXTRA_RACE_ID, race.getId());
         context.startService(intent);
     }
 }

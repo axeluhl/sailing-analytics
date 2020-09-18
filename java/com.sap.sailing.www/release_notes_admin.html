@@ -23,6 +23,21 @@
             <div class="mainContent">
                 <h2 class="releaseHeadline">Release Notes - Administration Console</h2>
                 <div class="innerContent">
+                    <h2 class="articleSubheadline">September 2020</h2>
+                    <ul class="bulletList">
+                        <li>In the /competitor/live API end point, if a gap to leader turns "infinite" because a VMG
+                            goes down to 0.0kts, the API will now output a <tt>null</tt> value for <tt>gapToLeader-s</tt>
+                            instead of throwing an exception.</li>
+                        <li>When generating a pairing list for a league style event, competitor-to-number assignments
+                            are now shuffled randomly before applying the numeric pairing list template to the competitor
+                            list. This way, the same numeric pairing list table will generate different competitor pairings
+                            each time applied.</li>
+                        <li>The REST API end point for posting GPS fixes has changed its behavior and offers two new query parameters to control this
+                            change. Maneuver changes are now only returned if the <tt>returnManeuverUpdate</tt> parameter is explicitly set to <tt>true</tt>.
+                            Additionally, the client posting the fixes can use the <tt>returnLiveDelay</tt> boolean parameter to request the live delay
+                            of each race the fixes were posted to. Clients may use this to adjust their sending delay and buffering behavior, e.g., as to
+                            preserve energy and bandwidth in case the server-side live delay permits for more latency in data transmission.</li>
+                    </ul>
                     <h2 class="articleSubheadline">August 2020</h2>
                     <ul class="bulletList">
                         <li>Fixed a problem with "None" implied wind source selection for ORC PCS races.

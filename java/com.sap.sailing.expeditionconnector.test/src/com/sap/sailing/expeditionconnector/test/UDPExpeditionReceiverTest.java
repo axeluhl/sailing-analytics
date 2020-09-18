@@ -64,11 +64,13 @@ import com.sap.sailing.expeditionconnector.UDPExpeditionReceiver;
 import com.sap.sailing.expeditionconnector.persistence.ExpeditionGpsDeviceIdentifier;
 import com.sap.sailing.expeditionconnector.persistence.ExpeditionGpsDeviceIdentifierImpl;
 import com.sap.sailing.expeditionconnector.persistence.ExpeditionSensorDeviceIdentifierImpl;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class UDPExpeditionReceiverTest {
@@ -153,8 +155,8 @@ public class UDPExpeditionReceiverTest {
         }
 
         @Override
-        public <FixT extends Timed> Iterable<RegattaAndRaceIdentifier> storeFixes(DeviceIdentifier device,
-                Iterable<FixT> fixes) {
+        public <FixT extends Timed> Iterable<Triple<RegattaAndRaceIdentifier, Boolean, Duration>> storeFixes(DeviceIdentifier device,
+                Iterable<FixT> fixes, boolean returnManeuverUpdate, boolean returnLiveDelay) {
             for (final FixT fix : fixes) {
                 storeFix(device, fix);
             }

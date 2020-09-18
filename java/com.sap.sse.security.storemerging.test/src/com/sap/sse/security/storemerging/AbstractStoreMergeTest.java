@@ -13,8 +13,7 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.security.interfaces.AccessControlStore;
 import com.sap.sse.security.interfaces.UserStore;
-import com.sap.sse.security.shared.UserGroupManagementException;
-import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.UserStoreManagementException;
 import com.sap.sse.security.storemerging.test.MongoDBFiller;
 import com.sap.sse.security.userstore.mongodb.impl.CollectionNames;
 
@@ -79,7 +78,7 @@ public abstract class AbstractStoreMergeTest {
     protected UserStore targetUserStore;
     protected AccessControlStore targetAccessControlStore;
 
-    protected void setUp(String sourceVariant, String targetVariant) throws IOException, UserGroupManagementException, UserManagementException {
+    protected void setUp(String sourceVariant, String targetVariant) throws IOException, UserStoreManagementException {
         cfgForTarget = MongoDBConfiguration.getDefaultTestConfiguration();
         targetDb = cfgForTarget.getService().getDB();
         fill(targetVariant, targetDb);
@@ -119,7 +118,7 @@ public abstract class AbstractStoreMergeTest {
      * 
      * @return the source user store and the source access control store in their original, merge-unmodified version
      */
-    protected Pair<UserStore, AccessControlStore> readSourceStores() throws UserGroupManagementException, UserManagementException {
+    protected Pair<UserStore, AccessControlStore> readSourceStores() throws UserStoreManagementException {
         return merger.readStores(cfgForSource, defaultCreationGroupNameForSource);
     }
 
@@ -130,7 +129,7 @@ public abstract class AbstractStoreMergeTest {
      */
     protected void mergeSourceIntoTarget(final UserStore sourceUserStore,
             final AccessControlStore sourceAccessControlStore)
-            throws UserGroupManagementException, UserManagementException {
+            throws UserStoreManagementException {
         merger.importStores(sourceUserStore, sourceAccessControlStore);
     }
 }

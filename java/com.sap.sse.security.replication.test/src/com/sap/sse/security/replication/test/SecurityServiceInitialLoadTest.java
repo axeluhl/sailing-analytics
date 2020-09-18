@@ -14,8 +14,7 @@ import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.impl.SecurityServiceImpl;
 import com.sap.sse.security.interfaces.AccessControlStore;
 import com.sap.sse.security.interfaces.UserStore;
-import com.sap.sse.security.shared.UserGroupManagementException;
-import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.UserStoreManagementException;
 import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
 import com.sap.sse.security.userstore.mongodb.PersistenceFactory;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
@@ -32,7 +31,7 @@ public class SecurityServiceInitialLoadTest extends AbstractServerWithSingleServ
         super(new AbstractSecurityReplicationTest.SecurityServerReplicationTestSetUp() {
             @Override
             protected SecurityServiceImpl createNewMaster()
-                    throws MalformedURLException, IOException, InterruptedException, UserManagementException, MailException, UserGroupManagementException {
+                    throws MalformedURLException, IOException, InterruptedException, MailException, UserStoreManagementException {
                 final UserStore userStore = new UserStoreImpl(PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(),
                         PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), "TestDefaultTenant");
                 userStore.ensureDefaultRolesExist();

@@ -24,14 +24,11 @@ public class RaceEndWithCompetitorsFlagsNode extends FiresPlaceNode {
 
     public void onStart() {
         RaceEndWithCompetitorFlagsPlace place = new RaceEndWithCompetitorFlagsPlace();
-
         RegattaAndRaceIdentifier lastRace = cf.getAutoPlayCtxSignalError().getLastRace();
-        place.setLifeRace(lastRace);
+        place.setLiveRace(lastRace);
         setPlaceToGo(place);
-
         cf.getDispatch().execute(new GetSixtyInchStatisticAction(lastRace.getRaceName(), lastRace.getRegattaName()),
                 new AsyncCallback<GetSixtyInchStatisticDTO>() {
-
                     @Override
                     public void onFailure(Throwable caught) {
                         LOGGER.log(Level.WARNING, "Could not get statistics" , caught);
