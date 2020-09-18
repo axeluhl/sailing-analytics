@@ -7,7 +7,6 @@ import com.sap.sse.pairinglist.PairingListTemplateFactory;
 public class PairingListTemplateFactoryImpl implements PairingListTemplateFactory {
 
     public PairingListTemplateFactoryImpl() { }
-
     
     @Override
     public PairingListTemplate createPairingListTemplate(PairingFrameProvider pairingFrameProvider, int flightMultiplier, int boatChangeFactor) {

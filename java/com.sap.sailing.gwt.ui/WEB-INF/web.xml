@@ -13,9 +13,9 @@
 			<param-value>false</param-value>
 		</init-param>
 		<init-param>
-			<param-name>useFileMappedBuffer</param-name>
-			<param-value>false</param-value>
-		</init-param>
+	   		<param-name>useFileMappedBuffer</param-name>
+	   		<param-value>false</param-value>
+	 	</init-param>
 	</servlet>
 
 	<!-- Apache Shiro -->
@@ -60,25 +60,25 @@
 		<url-pattern>*.html</url-pattern>
 	</filter-mapping>
 
+    <servlet>
+        <display-name>ClientConfigurationServlet</display-name>
+        <servlet-name>ClientConfigurationServlet</servlet-name>
+        <servlet-class>com.sap.sse.debranding.ClientConfigurationServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ClientConfigurationServlet</servlet-name>
+        <url-pattern>*.html</url-pattern>
+    </servlet-mapping>
 	<servlet>
-		<display-name>ClientConfigurationServlet</display-name>
-		<servlet-name>ClientConfigurationServlet</servlet-name>
-		<servlet-class>com.sap.sse.debranding.ClientConfigurationServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>ClientConfigurationServlet</servlet-name>
-		<url-pattern>*.html</url-pattern>
-	</servlet-mapping>
-	<servlet>
-		<display-name>Status</display-name>
-		<servlet-name>Status</servlet-name>
-		<servlet-class>com.sap.sailing.gwt.ui.server.StatusServlet</servlet-class>
+	    <display-name>Status</display-name>
+	    <servlet-name>Status</servlet-name>
+    	<servlet-class>com.sap.sailing.gwt.ui.server.StatusServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>Status</servlet-name>
 		<url-pattern>/status</url-pattern>
 	</servlet-mapping>
-
+	
 	<servlet>
 		<display-name>Sailing Service</display-name>
 		<servlet-name>SailingService</servlet-name>
@@ -91,9 +91,9 @@
 	</servlet-mapping>
 
 	<servlet>
-		<display-name>Server Configuration Service</display-name>
-		<servlet-name>ServerConfigurationService</servlet-name>
-		<servlet-class>com.sap.sailing.gwt.server.ServerConfigurationServiceImpl</servlet-class>
+	    <display-name>Server Configuration Service</display-name>
+	    <servlet-name>ServerConfigurationService</servlet-name>
+    	<servlet-class>com.sap.sailing.gwt.server.ServerConfigurationServiceImpl</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>ServerConfigurationService</servlet-name>
@@ -101,9 +101,9 @@
 	</servlet-mapping>
 
 	<servlet>
-		<display-name>Sailing Dispatch Service</display-name>
-		<servlet-name>sailingDispatch</servlet-name>
-		<servlet-class>com.sap.sailing.gwt.home.server.servlets.SailingDispatchServlet</servlet-class>
+	    <display-name>Sailing Dispatch Service</display-name>
+	    <servlet-name>sailingDispatch</servlet-name>
+	    	<servlet-class>com.sap.sailing.gwt.home.server.servlets.SailingDispatchServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>sailingDispatch</servlet-name>
@@ -121,9 +121,9 @@
 		<url-pattern>/service/media</url-pattern>
 	</servlet-mapping>
 	<servlet>
-		<display-name>Simulator Service</display-name>
-		<servlet-name>SimulatorService</servlet-name>
-		<servlet-class>com.sap.sailing.gwt.ui.server.SimulatorServiceImpl</servlet-class>
+	    <display-name>Simulator Service</display-name>
+	    <servlet-name>SimulatorService</servlet-name>
+    	<servlet-class>com.sap.sailing.gwt.ui.server.SimulatorServiceImpl</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>SimulatorService</servlet-name>

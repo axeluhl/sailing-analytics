@@ -7,6 +7,7 @@ import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -28,17 +29,15 @@ public class ManagedRacesDataHandler extends DataHandler<Collection<ManagedRace>
 
     @Override
     public Collection<ManagedRace> getCachedResults() {
-        return manager.getDataStore().getRaces();
+        return new ArrayList<>(manager.getDataStore().getRaces());
     }
 
     @Override
     public void onResult(Collection<ManagedRace> data, boolean isCached) {
-        if (!isCached) {
-            manager.getDataStore().clearRaces(context);
-            manager.addRaces(data);
-            calcRaceState(data);
-            manager.getDataStore().registerRaces(context, data);
-        }
+        manager.getDataStore().clearRaces(context);
+        manager.addRaces(data);
+        calcRaceState(data);
+        manager.getDataStore().registerRaces(context, data);
     }
 
     private void calcRaceState(Collection<ManagedRace> data) {

@@ -250,8 +250,8 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
 
     CompetitorProviderDTO getCompetitorProviderDTOByName(String providerName) throws UnauthorizedException, Exception;
 
-    List<CompetitorDescriptor> getCompetitorDescriptors(String competitorProviderName, String eventName,
-            String regattaName) throws UnauthorizedException, Exception;
+    Pair<List<CompetitorDescriptor>, String> getCompetitorDescriptorsAndHint(String competitorProviderName, String eventName,
+            String regattaName, String localeForHint) throws UnauthorizedException, Exception;
 
     WindInfoForRaceDTO getWindSourcesInfo(RegattaAndRaceIdentifier raceIdentifier) throws UnauthorizedException;
 

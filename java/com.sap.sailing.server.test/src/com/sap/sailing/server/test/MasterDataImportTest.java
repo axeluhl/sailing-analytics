@@ -518,7 +518,7 @@ public class MasterDataImportTest {
             fixesToSave.add(new GPSFixMovingImpl(new DegreePosition(54.333, 10.133), logTimePoint.plus(i),
                     new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(90))));
         }
-        sourceService.getSensorFixStore().storeFixes(deviceIdentifier, fixesToSave);
+        sourceService.getSensorFixStore().storeFixes(deviceIdentifier, fixesToSave, /* returnManeuverUpdate */ false, /* returnLiveDelay */ false);
         return deviceIdentifier;
     }
     
