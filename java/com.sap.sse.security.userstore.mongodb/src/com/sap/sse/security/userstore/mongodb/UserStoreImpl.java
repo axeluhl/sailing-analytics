@@ -571,10 +571,24 @@ public class UserStoreImpl implements UserStore {
     public void removeRoleDefinition(RoleDefinition roleDefinition) {
         LockUtil.executeWithWriteLock(usersLock, () -> {
             LockUtil.executeWithWriteLock(userGroupsLock, () -> {
-                mongoObjectFactory.deleteRoleDefinition(roleDefinition);
-                roleDefinitions.remove(roleDefinition.getId());
+                for (User user : roleDefinitionsToUsers.get(roleDefinition)) {
+                    for (Role role : user.getRoles()) {
+                        if (role.getRoleDefinition().equals(roleDefinition)) {
+                            user.removeRole(role);
+                            mongoObjectFactory.storeUser(user);
+                        }
+                    }
+                }
                 roleDefinitionsToUsers.remove(roleDefinition);
+                for (UserGroup userGroup : roleDefinitionsToUserGroups.get(roleDefinition)) {
+                    if (userGroup.getRoleAssociation(roleDefinition)) {
+                        userGroup.remove(roleDefinition);
+                        mongoObjectFactory.storeUserGroup(userGroup);
+                    }
+                }
                 roleDefinitionsToUserGroups.remove(roleDefinition);
+                roleDefinitions.remove(roleDefinition.getId());
+                mongoObjectFactory.deleteRoleDefinition(roleDefinition);
             });
         });
     }
@@ -1426,7 +1440,7 @@ public class UserStoreImpl implements UserStore {
                     }
                 } catch (UserManagementException e) {
                     logger.log(Level.WARNING,
-                            "Could not properly update qualified roles on user delete " + removeOrAdjust);
+                            "Could not properly update qualified roles on userGroup delete " + removeOrAdjust);
                 }
             }
         }
