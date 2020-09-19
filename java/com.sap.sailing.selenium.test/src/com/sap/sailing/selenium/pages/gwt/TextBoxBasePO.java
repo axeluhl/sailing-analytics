@@ -73,5 +73,15 @@ public abstract class TextBoxBasePO extends AbstractInputPO {
     public String getText() {
         return getWebElement().getText();
     }
+    
+    /**
+     * Gets the text contained in the underlying {@link WebElement}s "value" attribute.
+     * This might be necessary for input elements that do not maintain their contained text in the "innerText" attribute, that is returned by #WebElement#getText()
+     * @return the contained text
+     * 
+     */
+    public String getValue() {
+        return getWebElement().getAttribute("value");
+    }
 
 }

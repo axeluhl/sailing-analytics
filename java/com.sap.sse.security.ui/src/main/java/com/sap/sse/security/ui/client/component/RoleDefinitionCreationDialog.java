@@ -13,6 +13,7 @@ public class RoleDefinitionCreationDialog extends AbstractRoleDefinitionDialog {
             Iterable<RoleDefinitionDTO> allOtherRoles, DialogCallback<RoleDefinitionDTO> callback) {
         super(stringMessages, allExistingPermissions, allOtherRoles, callback);
         newRoleDefinitionId = UUID.randomUUID();
+        this.ensureDebugId(this.getClass().getSimpleName());
     }
 
     @Override

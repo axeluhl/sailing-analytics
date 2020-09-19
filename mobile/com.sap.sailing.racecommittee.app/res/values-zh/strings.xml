@@ -1,21 +1,13 @@
-<?xml version="1.0" encoding="UTF-8"?><resources xmlns:tools="http://schemas.android.com/tools">
-
-    <string-array name="empty_array" tools:ignore="UnusedResources"/>
-    <string name="empty"/>
-    
-    
-
-    
-    
-    
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
     <string name="url_google_geocoder">"http://maps.googleapis.com/maps/api/geocode/json?address="</string>
     <string name="urlpart_google_geocoder_sensor">"\?sensor=true"</string>
     <string name="running_on_course">"（在场地%s上）"</string>
     <string name="course_design_number_waypoints">"场地具有%d个航路点"</string>
-    
+
     <string name="service_text_no_races">"正在等待要监控的比赛轮次…"</string>
     <string name="service_text_num_races">"目前正在监控%d轮比赛。"</string>
-    
+
     <string name="set_time">"开始"</string>
     <string name="reset_time">"重新开始"</string>
     <string name="choose">"选择"</string>
@@ -257,8 +249,6 @@
     <string name="race_start_in_4_minutes">"4 分钟"</string>
     <string name="race_start_in_2_minutes">"2 分钟"</string>
     <string name="race_start_in_1_minute">"1 分钟"</string>
-    <string name="race_start_time_in">"-%s"</string>
-    <string name="race_start_time_ago">"%s"</string>
     <string name="race_set_time">"设置时间"</string>
     <string name="race_reset_course">"重置场地"</string>
     <string name="no_course_active">"没有有效的场地"</string>
@@ -378,9 +368,9 @@
     <string name="race_summary_wind_direction">"平均风向"</string>
     <string name="race_summary_wind_direction_value">"风向：%.0f°"</string>
     <string name="race_summary_wind_speed">"平均风速"</string>
-    
+
     <string name="race_summary_individual_recalls">"个别召回"</string>
-    
+
     <string name="record_voice">"录制语音"</string>
     <string name="finishing_started">"首位结束时间：%1$s"</string>
     <string name="finishing_started_since">"(%s)"</string>
@@ -480,9 +470,8 @@
     <string name="gate_time_schedule_long">"%1$d + %2$d = %3$d分钟"</string>
     <string name="gate_time_schedule_short">"%d分钟"</string>
     <string name="not_available">"不适用"</string>
-    
-    
-    
+
+
     <string name="accuracy_timestamp">"（自%s）"</string>
     <string name="prev_course">"先前场地"</string>
     <string name="layout_course">"场地设置"</string>
@@ -493,7 +482,7 @@
     <string name="reset_state_2">"重置"</string>
     <string name="reset_message_1">"是否要清除此清单？"</string>
     <string name="reset_message_2">"是否要重置上次的状态？"</string>
-    
+
     <string name="onboarding_scan">"扫描二维码"</string>
     <string name="onboarding_input">"手动输入"</string>
     <string name="race_group">"小组赛"</string>
@@ -535,7 +524,7 @@
     <string name="abort_title">"中止比赛轮次"</string>
     <string name="abort_hint">"要中止哪轮比赛？"</string>
     <string name="abort_dismiss">"取消"</string>
-    
+
     <string name="set_column_factor">"设置因素"</string>
     <string name="set_factor_error">"设置因素时出错：%s"</string>
     <string name="sync_to_minute">"同步到分钟"</string>

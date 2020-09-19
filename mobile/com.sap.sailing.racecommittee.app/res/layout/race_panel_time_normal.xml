@@ -110,9 +110,7 @@
                             android:gravity="center"
                             android:textColor="?attr/white"
                             android:textSize="@dimen/panel_button_caption_size"
-                            android:visibility="invisible"
-                            tools:text="@string/time"
-                            tools:visibility="visible" />
+                            tools:text="@string/time" />
                     </RelativeLayout>
 
                     <TextView
