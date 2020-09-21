@@ -103,9 +103,7 @@
                             android:drawablePadding="6dp"
                             android:gravity="center"
                             android:textAppearance="?attr/textSmall"
-                            android:visibility="invisible"
-                            tools:text="@string/time"
-                            tools:visibility="visible" />
+                            tools:text="@string/time" />
 
                     </RelativeLayout>
 

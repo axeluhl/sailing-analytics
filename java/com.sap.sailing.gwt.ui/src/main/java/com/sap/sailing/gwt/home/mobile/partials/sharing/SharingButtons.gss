@@ -1,0 +1,64 @@
+.eventheader_sharing_container {
+ position: fixed;
+ z-index: 999;
+ right: 25px;
+ bottom: 25px;
+}
+
+.eventheader_sharing_faded_in {
+ visibility:visible;
+ -webkit-transition: opacity 0.5s ease-in-out;
+ -moz-transition: opacity 0.5s ease-in-out;
+ -ms-transition: opacity 0.5s ease-in-out;
+ -o-transition: opacity 0.5s ease-in-out;
+ opacity: 1;
+}
+
+.eventheader_sharing_faded_out {
+  visibility: hidden;
+ -webkit-transition: visibility 0s 2s, opacity 2s;
+ -moz-transition: visibility 0s 2s, opacity 2s;
+ -ms-transition: visibility 0s 2s, opacity 2s;
+ -o-transition: visibility 0s 2s, opacity 2s;
+ opacity: 0;
+}
+
+.eventheader_sharing_item {
+ display: inline-block;
+ height: 3.5em;
+ width: 3.5em;
+ background-position: center center;
+ background-repeat: no-repeat;
+ border-radius: 100%;
+ border-width: thin;
+ border-style: solid;
+ background-size: contain;
+ background-color: rgb(0, 143, 204) !important;
+}
+
+eventheader_sharing_item:hover,
+eventheader_sharing_item:focus{
+ background-color: rgb(0, 143, 204);
+}
+
+.eventheader_sharing_itemcopytoclipboard {
+}
+
+.eventheader_sharing_itemcopytoclipboard:after {
+  content: "";
+  position: absolute;
+  width: 50%;
+  height: 50%;
+  top: 25%;
+  left: 25%;
+  background-image: resourceUrl("copyIcon");
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  border: none;
+}
+
+.eventheader_sharing_itemshare {
+  background-image: resourceUrl("sharingIcon");
+  background-size: 50%;
+}

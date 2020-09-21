@@ -4,7 +4,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.DataResource;
 import com.google.gwt.resources.client.DataResource.MimeType;
-import com.sap.sailing.gwt.home.shared.resources.SharedHomeResources;
+import com.sap.sailing.gwt.home.shared.SharedHomeResources;
 
 public interface RegattaStatusResources extends SharedHomeResources {
     public static final RegattaStatusResources INSTANCE = GWT.create(RegattaStatusResources.class);

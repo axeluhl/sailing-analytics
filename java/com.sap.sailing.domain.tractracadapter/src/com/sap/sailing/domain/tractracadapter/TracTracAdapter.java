@@ -24,6 +24,9 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
 public interface TracTracAdapter {
+    static final String NAME = "TracTrac";
+    static final String DEFAULT_URL = "https://www.tractrac.com/";
+
     DomainFactory getTracTracDomainFactory();
     
     /**
@@ -105,5 +108,5 @@ public interface TracTracAdapter {
     TracTracConfiguration createTracTracConfiguration(String creatorName, String name, String jsonURL,
             String liveDataURI,
             String storedDataURI, String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword);
-
+    
 }
