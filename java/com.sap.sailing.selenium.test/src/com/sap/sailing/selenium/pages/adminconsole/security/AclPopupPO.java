@@ -1,12 +1,12 @@
-package com.sap.sailing.selenium.pages.adminconsole;
+package com.sap.sailing.selenium.pages.adminconsole.security;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import com.sap.sailing.selenium.core.BySeleniumId;
-import com.sap.sailing.selenium.pages.PageArea;
+import com.sap.sailing.selenium.pages.common.DataEntryDialogPO;
 
-public class AclPopupPO extends PageArea {
+public class AclPopupPO extends DataEntryDialogPO {
 
     public static final String INPUT_SUGGEST_BOX = "InputSuggestBox";
     public static final String ALLOWED_ACTIONS_CONTAINER = "allowedActionsContainer";
@@ -23,14 +23,19 @@ public class AclPopupPO extends PageArea {
         driver.findElement(new BySeleniumId(ADD_USER_GROUP_BUTTON)).click();
     }
 
-    public WebElement getDeniedActionsInput() {
-        WebElement parent = context.findElement(new BySeleniumId(DENIED_ACTIONS_CONTAINER));
-        return parent.findElement(new BySeleniumId(INPUT_SUGGEST_BOX));
+    public AclActionInputPO getDeniedActionsInput() {
+        return new AclActionInputPO(driver, context.findElement(new BySeleniumId(DENIED_ACTIONS_CONTAINER)));
     }
 
-    public WebElement getAllowedActionsInput() {
-        WebElement parent = context.findElement(new BySeleniumId(ALLOWED_ACTIONS_CONTAINER));
-        return parent.findElement(new BySeleniumId(INPUT_SUGGEST_BOX));
+    public AclActionInputPO getAllowedActionsInput() {
+        return new AclActionInputPO(driver, context.findElement(new BySeleniumId(ALLOWED_ACTIONS_CONTAINER)));
     }
 
+    @Override
+    public void clickOkButtonOrThrow() {
+        // On Hudson the limited screen height may cause notifications to cover the buttons
+        dismissAllExistingNotifications();
+        super.clickOkButtonOrThrow();
+        waitForAjaxRequests();
+    }
 }

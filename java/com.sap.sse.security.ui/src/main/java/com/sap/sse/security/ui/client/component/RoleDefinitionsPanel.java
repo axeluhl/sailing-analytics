@@ -25,6 +25,7 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
@@ -74,6 +75,7 @@ public class RoleDefinitionsPanel extends VerticalPanel {
     
     public RoleDefinitionsPanel(StringMessages stringMessages, UserService userService,
             CellTableWithCheckboxResources tableResources, ErrorReporter errorReporter) {
+        this.ensureDebugId(this.getClass().getSimpleName());
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
         this.userService = userService;
@@ -101,16 +103,17 @@ public class RoleDefinitionsPanel extends VerticalPanel {
 
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, ROLE_DEFINITION);
         buttonPanel.addUnsecuredAction(stringMessages.refresh(), this::updateRoleDefinitions);
-        buttonPanel.addCreateActionWithoutServerCreateObjectPermissionCheck(stringMessages.add(),
+        final Button createButton = buttonPanel.addCreateActionWithoutServerCreateObjectPermissionCheck(stringMessages.add(),
                 this::createRoleDefinition);
-        buttonPanel.addRemoveAction(stringMessages.remove(), () -> {
+        createButton.ensureDebugId("CreateRoleButton");
+        final Button removeButton = buttonPanel.addRemoveAction(stringMessages.remove(), () -> {
             final String roles = String.join(", ", Util.map(getSelectedRoleDefinitions(), RoleDefinitionDTO::getName));
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveRole(roles))) {
                 final Set<RoleDefinitionDTO> selectedRoles = new HashSet<>(getSelectedRoleDefinitions());
                 filterablePanelRoleDefinitions.removeAll(selectedRoles);
             }
         });
-
+        removeButton.ensureDebugId("RemoveRoleButton");
         add(buttonPanel);
         add(filterablePanelRoleDefinitions);
         add(roleDefinitionsTable);

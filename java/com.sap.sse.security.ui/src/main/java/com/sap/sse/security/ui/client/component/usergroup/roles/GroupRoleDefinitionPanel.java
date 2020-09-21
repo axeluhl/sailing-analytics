@@ -34,7 +34,7 @@ import com.sap.sse.security.ui.client.component.UserGroupListDataProvider;
 import com.sap.sse.security.ui.client.component.UserGroupListDataProvider.UserGroupListDataProviderChangeHandler;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
-public class UserGroupRoleDefinitionPanel extends Composite
+public class GroupRoleDefinitionPanel extends Composite
         implements Handler, ChangeHandler, KeyUpHandler, UserGroupListDataProviderChangeHandler {
 
     private final RoleDefinitionTableWrapper roleDefinitionTableWrapper;
@@ -43,7 +43,7 @@ public class UserGroupRoleDefinitionPanel extends Composite
     private final UserGroupRoleResources userGroupRoleResources = GWT.create(UserGroupRoleResources.class);
     private final RoleDefinitionSuggestOracle oracle;
 
-    public UserGroupRoleDefinitionPanel(final UserService userService, final StringMessages stringMessages,
+    public GroupRoleDefinitionPanel(final UserService userService, final StringMessages stringMessages,
             Iterable<HasPermissions> additionalPermissions, ErrorReporter errorReporter,
             CellTableWithCheckboxResources tableResources,
             final MultiSelectionModel<UserGroupDTO> userGroupSelectionModel,
@@ -56,6 +56,7 @@ public class UserGroupRoleDefinitionPanel extends Composite
         userGroupRoleResources.css().ensureInjected();
         suggestRole.addStyleName(userGroupRoleResources.css().roleDefinitionSuggest());
         suggestRole.getElement().setPropertyString("placeholder", stringMessages.enterRoleName());
+        suggestRole.ensureDebugId("RoleSuggestion");
         // create UserGroup Table
         userGroupListDataProvider.addChangeHandler(this);
         roleDefinitionTableWrapper = new RoleDefinitionTableWrapper(userService, additionalPermissions, stringMessages,
@@ -68,17 +69,14 @@ public class UserGroupRoleDefinitionPanel extends Composite
             buttonPanel.setVisible(userService.hasPermission(selectedUserGroup, UPDATE));
         });
         mainPanel.add(buttonPanel);
-
         final ScrollPanel scrollPanel = new ScrollPanel(roleDefinitionTableWrapper.asWidget());
         final LabeledAbstractFilterablePanel<Pair<StrippedRoleDefinitionDTO, Boolean>> userGroupfilterBox = roleDefinitionTableWrapper
                 .getFilterField();
         userGroupfilterBox.getElement().setPropertyString("placeholder", stringMessages.filterUserGroups());
-
         mainPanel.add(userGroupfilterBox);
         mainPanel.add(scrollPanel);
-
         initWidget(mainPanel);
-
+        this.ensureDebugId(this.getClass().getSimpleName());
         this.userGroupSelectionModel.addSelectionChangeHandler(e -> updateOracle());
     }
 
@@ -102,7 +100,7 @@ public class UserGroupRoleDefinitionPanel extends Composite
     private Widget createButtonPanel(final UserService userService, final StringMessages stringMessages) {
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, USER_GROUP);
         final UserManagementWriteServiceAsync userManagementService = userService.getUserManagementWriteService();
-        buttonPanel.addUpdateAction(stringMessages.addRole(), () -> {
+        Button addButton = buttonPanel.addUpdateAction(stringMessages.addRole(), () -> {
             final UserGroupDTO selectedObject = TableWrapper.getSingleSelectedUserGroup(userGroupSelectionModel);
             if (selectedObject != null) {
                 StrippedRoleDefinitionDTO role = ((RoleDefinitionSuggestOracle) suggestRole.getSuggestOracle())
@@ -127,6 +125,7 @@ public class UserGroupRoleDefinitionPanel extends Composite
                 }
             }
         });
+        addButton.ensureDebugId("AddGroupUserButton");
         final Button removeButton = buttonPanel.addUpdateAction(stringMessages.removeRole(), () -> {
             Pair<StrippedRoleDefinitionDTO, Boolean> selectedRole = roleDefinitionTableWrapper.getSelectionModel()
                     .getSelectedObject();
@@ -157,7 +156,6 @@ public class UserGroupRoleDefinitionPanel extends Composite
                 .setEnabled(!roleDefinitionTableWrapper.getSelectionModel().getSelectedSet().isEmpty()));
         removeButton.setEnabled(false);
         buttonPanel.insertWidgetAtPosition(suggestRole, 0);
-
         return buttonPanel;
     }
 

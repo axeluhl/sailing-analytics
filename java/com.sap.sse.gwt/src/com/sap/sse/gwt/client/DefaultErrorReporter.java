@@ -10,6 +10,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.gwt.client.Notification.NotificationType;
+import com.sap.sse.gwt.shared.DebugConstants;
 
 public class DefaultErrorReporter<S extends StringMessages> implements ErrorReporter {
     private DialogBox errorDialogBox;
@@ -76,11 +77,14 @@ public class DefaultErrorReporter<S extends StringMessages> implements ErrorRepo
     private DialogBox createErrorDialog(boolean showCommunicationErrorText) {
         // Create the popup dialog box
         final DialogBox myErrorDialogBox = new DialogBox();
+        myErrorDialogBox.getElement().setAttribute(DebugConstants.DEBUG_ID_ATTRIBUTE, "ErrorDialog");
         myErrorDialogBox.setText(stringMessages.remoteProcedureCall());
+        myErrorDialogBox.getCaption().asWidget().getElement().setAttribute(DebugConstants.DEBUG_ID_ATTRIBUTE, "ErrorDialogTitle");
         myErrorDialogBox.setAnimationEnabled(true);
         dialogCloseButton = new Button(stringMessages.close());
         // We can set the id of a widget by accessing its Element
         dialogCloseButton.getElement().setId("closeButton"); //$NON-NLS-1$
+        dialogCloseButton.getElement().setAttribute(DebugConstants.DEBUG_ID_ATTRIBUTE, "ErrorDialogCloseButton"); //$NON-NLS-1$
         final Label textToServerLabel = new Label();
         serverResponseLabel = new HTML();
         VerticalPanel dialogVPanel = new VerticalPanel();

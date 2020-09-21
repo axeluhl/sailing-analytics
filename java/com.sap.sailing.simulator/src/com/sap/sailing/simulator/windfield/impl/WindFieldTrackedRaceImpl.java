@@ -23,7 +23,6 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  * 
  */
 public class WindFieldTrackedRaceImpl extends WindFieldGeneratorImpl implements WindFieldGenerator {
-
     private static final long serialVersionUID = -7005970781594631010L;
     private static final double EPSILON_DISTANCE_METER = 20;
     private static final long EPSILON_TIME_MILLIS = 5000;
@@ -31,7 +30,6 @@ public class WindFieldTrackedRaceImpl extends WindFieldGeneratorImpl implements 
     private final ConcurrentMap<TimedPosition, Wind> cache;
     private TimePoint startSimulationTime = null;
 
-    
     public WindFieldTrackedRaceImpl(TrackedRace race) {
         super(null, null);
         this.race = race;
@@ -60,10 +58,9 @@ public class WindFieldTrackedRaceImpl extends WindFieldGeneratorImpl implements 
         TimedPosition qTimedPosition = new TimedPositionImpl(qTime, qPosition);
         Wind wind = cache.get(qTimedPosition);
         if (wind == null) {
-                wind = this.race.getWind(qPosition, qTime);
-                cache.put(qTimedPosition, wind);
+            wind = this.race.getWind(qPosition, qTime);
+            cache.put(qTimedPosition, wind);
         }
         return wind;
     }
-    
 }

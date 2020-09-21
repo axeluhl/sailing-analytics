@@ -61,6 +61,7 @@ public class CreateUserGroupDialog extends DataEntryDialog<UserGroupData> {
                     public void cancel() {
                     }
                 });
+        this.ensureDebugId(this.getClass().getSimpleName());
     }
     
     private CreateUserGroupDialog(final StringMessages stringMessages, final String title, final String message,
@@ -82,7 +83,7 @@ public class CreateUserGroupDialog extends DataEntryDialog<UserGroupData> {
         }
         this.stringMessages = stringMessages;
         this.userManagementService = userManagementService;
-
+        nameBox.ensureDebugId("GroupNameInput");
         nameBox.addKeyUpHandler(e -> checkIfUserGroupnameExists());
     }
 
