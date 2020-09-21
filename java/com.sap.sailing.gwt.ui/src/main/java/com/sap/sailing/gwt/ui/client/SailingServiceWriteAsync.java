@@ -41,6 +41,7 @@ import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
 import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
 import com.sap.sailing.gwt.ui.adminconsole.RaceLogSetTrackingTimesDTO;
 import com.sap.sailing.gwt.ui.adminconsole.RemoteSailingServerEventsSelectionDialog;
+import com.sap.sailing.gwt.ui.client.shared.charts.MarkPositionService.MarkTrackDTO;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
@@ -62,6 +63,7 @@ import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
+import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.TypedDeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.UrlDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
@@ -609,4 +611,11 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void setImpliedWindSource(String leaderboardName, String raceColumnName, String fleetName,
             ImpliedWindSource impliedWindSource, AsyncCallback<Void> callback);
 
+    void getTrackFileImportDeviceIds(List<String> uuids,
+            AsyncCallback<List<TrackFileImportDeviceIdentifierDTO>> callback);
+
+    void getMarkTrack(String leaderboardName, String raceColumnName, String fleetName, String markIdAsString, 
+            AsyncCallback<MarkTrackDTO> callback);
+
+    void getDeviceMappings(String leaderboardName, AsyncCallback<List<DeviceMappingDTO>> asyncCallback);
 }

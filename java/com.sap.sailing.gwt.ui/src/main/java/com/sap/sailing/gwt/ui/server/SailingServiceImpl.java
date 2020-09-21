@@ -107,7 +107,6 @@ import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceBo
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceMarkMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.BaseRegattaLogDeviceMappingFinder;
-import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceMappingFinder;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceMarkMappingFinder;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
@@ -218,7 +217,6 @@ import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogException;
-import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
@@ -267,10 +265,8 @@ import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.RaceStateOfSameDayHelper;
-import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifierStringSerializationHandler;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
-import com.sap.sailing.domain.racelogtracking.DeviceMappingWithRegattaLogEvent;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.racelogtracking.impl.DeviceMappingImpl;
@@ -291,8 +287,6 @@ import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterP
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayRace;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayService;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayServiceFactory;
-import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
-import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifierImpl;
 import com.sap.sailing.domain.trackimport.DoubleVectorFixImporter;
 import com.sap.sailing.domain.trackimport.GPSFixImporter;
 import com.sap.sailing.domain.tracking.BravoFixTrack;
@@ -311,7 +305,6 @@ import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformance
 import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
-import com.sap.sailing.domain.tracking.impl.DynamicGPSFixTrackImpl;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
 import com.sap.sailing.domain.tractracadapter.TracTracAdapter;
 import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
@@ -324,7 +317,6 @@ import com.sap.sailing.expeditionconnector.ExpeditionTrackerFactory;
 import com.sap.sailing.gwt.common.client.EventWindFinderUtil;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.gwt.ui.client.SailingService;
-import com.sap.sailing.gwt.ui.client.shared.charts.MarkPositionService.MarkTrackDTO;
 import com.sap.sailing.gwt.ui.shared.AccountWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.CompactBoatPositionsDTO;
 import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
@@ -395,7 +387,6 @@ import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingReplayRaceDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
-import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.TrackingConnectorInfoDTO;
 import com.sap.sailing.gwt.ui.shared.UrlDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
@@ -443,7 +434,6 @@ import com.sap.sse.common.PairingListCreationException;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
-import com.sap.sse.common.Timed;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
@@ -935,7 +925,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         return result;
     }
     
-    private MarkDTO convertToMarkDTO(Mark mark, Position position) {
+    protected MarkDTO convertToMarkDTO(Mark mark, Position position) {
         MarkDTO markDTO;
         if (position != null) {
             markDTO = new MarkDTO(mark.getId().toString(), mark.getName(), mark.getShortName(), position.getLatDeg(), position.getLngDeg());
@@ -4931,52 +4921,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         return handler.deserialize(deviceId, type, deviceId);
     }
     
-    private String serializeDeviceIdentifier(DeviceIdentifier deviceId) throws TransformationException {
+    protected String serializeDeviceIdentifier(DeviceIdentifier deviceId) throws TransformationException {
         return getDeviceIdentifierStringSerializerHandlerFinder(true).findService(
                 deviceId.getIdentifierType()).serialize(deviceId).getB();
-    }
-    
-    private DeviceMappingDTO convertToDeviceMappingDTO(DeviceMapping<?> mapping) throws TransformationException {
-        final Map<DeviceIdentifier, Timed> lastFixes = getService().getSensorFixStore().getFixLastReceived(Collections.singleton(mapping.getDevice()));
-        final Timed lastFix;
-        if (lastFixes != null && lastFixes.containsKey(mapping.getDevice())) {
-            lastFix = lastFixes.get(mapping.getDevice());
-        } else {
-            lastFix = null;
-        }
-        String deviceId = serializeDeviceIdentifier(mapping.getDevice());
-        Date from = mapping.getTimeRange().from() == null || mapping.getTimeRange().from().equals(TimePoint.BeginningOfTime) ? 
-                null : mapping.getTimeRange().from().asDate();
-        Date to = mapping.getTimeRange().to() == null || mapping.getTimeRange().to().equals(TimePoint.EndOfTime) ?
-                null : mapping.getTimeRange().to().asDate();
-        MappableToDevice item = null;
-        final WithID mappedTo = mapping.getMappedTo();
-        if (mappedTo == null) {
-            throw new RuntimeException("Device mapping not mapped to any object");
-        } else if (mappedTo instanceof Competitor) {
-            item = baseDomainFactory.convertToCompetitorDTO((Competitor) mapping.getMappedTo());
-        } else if (mappedTo instanceof Mark) {
-            item = convertToMarkDTO((Mark) mapping.getMappedTo(), null);
-        } else if (mappedTo instanceof Boat) {
-            item = baseDomainFactory.convertToBoatDTO((Boat) mappedTo);
-        } else {
-            throw new RuntimeException("Can only handle Competitor, Boat or Mark as mapped item type, but not "
-                    + mappedTo.getClass().getName());
-        }
-        //Only deal with UUIDs - otherwise we would have to pass Serializable to browser context - which
-        //has a large performance implact for GWT.
-        //As any Serializable subclass is converted to String by the BaseRaceLogEventSerializer, and only UUIDs are
-        //recovered by the BaseRaceLogEventDeserializer, only UUIDs are safe to use anyway.
-        List<UUID> originalRaceLogEventUUIDs = new ArrayList<UUID>();
-        for (Serializable id : mapping.getOriginalRaceLogEventIds()) {
-            if (! (id instanceof UUID)) {
-                logger.log(Level.WARNING, "Got RaceLogEvent with id that was not UUID, but " + id.getClass().getName());
-                throw new TransformationException("Could not send device mapping to browser: can only deal with UUIDs");
-            }
-            originalRaceLogEventUUIDs.add((UUID) id);
-        }
-        return new DeviceMappingDTO(new DeviceIdentifierDTO(mapping.getDevice().getIdentifierType(),
-                deviceId), from, to, item, originalRaceLogEventUUIDs, lastFix==null?null:lastFix.getTimePoint());
     }
     
     protected List<AbstractLog<?, ?>> getLogHierarchy(String leaderboardName, String raceColumnName,
@@ -4991,18 +4938,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         if (leaderboard instanceof HasRegattaLike) {
             result.add(((HasRegattaLike) leaderboard).getRegattaLike().getRegattaLog());
-        }
-        return result;
-    }
-    
-    private List<DeviceMappingDTO> getDeviceMappings(RegattaLog regattaLog)
-            throws TransformationException {
-        List<DeviceMappingDTO> result = new ArrayList<DeviceMappingDTO>();
-        for (List<? extends DeviceMapping<WithID>> list : new RegattaLogDeviceMappingFinder<>(
-                regattaLog).analyze().values()) {
-            for (DeviceMapping<WithID> mapping : list) {
-                result.add(convertToDeviceMappingDTO(mapping));
-            }
         }
         return result;
     }
@@ -5079,28 +5014,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         return Collections.emptyList();
     }
     
-    @Override
-    public List<TrackFileImportDeviceIdentifierDTO> getTrackFileImportDeviceIds(List<String> uuids)
-            throws NoCorrespondingServiceRegisteredException, TransformationException {
-        try {
-            final List<TrackFileImportDeviceIdentifierDTO> result = new ArrayList<>();
-            for (String uuidAsString : uuids) {
-                UUID uuid = UUID.fromString(uuidAsString);
-                TrackFileImportDeviceIdentifier device = TrackFileImportDeviceIdentifierImpl.getOrCreate(uuid);
-                long numFixes = getService().getSensorFixStore().getNumberOfFixes(device);
-                TimeRange timeRange = getService().getSensorFixStore().getTimeRangeCoveredByFixes(device);
-                Date from = timeRange == null ? null : timeRange.from().asDate();
-                Date to = timeRange == null ? null : timeRange.to().asDate();
-                result.add(new TrackFileImportDeviceIdentifierDTO(uuidAsString, device.getFileName(), device.getTrackName(),
-                        numFixes, from, to));
-            }
-            return result;
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, "Exception trying to obtain track file import device IDs", e);
-            throw e;
-        }
-    }
-
     @Override
     public ArrayList<EventDTO> getEventsForLeaderboard(String leaderboardName) {
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
@@ -5387,14 +5300,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public List<DeviceMappingDTO> getDeviceMappings(String leaderboardName)
-            throws DoesNotHaveRegattaLogException, TransformationException, NotFoundException {
-        getSecurityService().checkCurrentUserReadPermission(getLeaderboardByName(leaderboardName));
-        RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
-        return getDeviceMappings(regattaLog);
-    }
-    
-    @Override
     public Iterable<MarkDTO> getMarksInTrackedRace(String leaderboardName, String raceColumnName, String fleetName) {
         final List<MarkDTO> marks = new ArrayList<>();
         final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
@@ -5413,78 +5318,11 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         return marks;
     }
 
-    private MarkTrackDTO getMarkTrack(Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet,
-            String markIdAsString) {
-        getSecurityService().checkCurrentUserReadPermission(leaderboard);
-        MarkDTO markDTO = null;
-        Mark mark = null;
-        for (final Mark currMark : raceColumn.getAvailableMarks(fleet)) {
-            if (currMark.getId().toString().equals(markIdAsString)) {
-                mark = currMark;
-                markDTO = convertToMarkDTO(currMark, /* position */ null);
-                break;
-            }
-        }
-        if (markDTO != null) {
-            final TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
-            final GPSFixTrack<Mark, ? extends GPSFix> markTrack;
-            if (trackedRace != null) {
-                markTrack = trackedRace.getOrCreateTrack(mark);
-            } else {
-                DynamicGPSFixTrackImpl<Mark> writeableMarkTrack = new DynamicGPSFixTrackImpl<Mark>(mark,
-                        BoatClass.APPROXIMATE_AVERAGE_MANEUVER_DURATION.asMillis());
-                markTrack = writeableMarkTrack;
-                final RaceLog raceLog = raceColumn.getRaceLog(fleet);
-                final RegattaLog regattaLog = raceColumn.getRegattaLog();
-                final TrackingTimesFinder trackingTimesFinder = new TrackingTimesFinder(raceLog);
-                final Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> trackingTimes = trackingTimesFinder
-                        .analyze();
-                try {
-                    SensorFixStore sensorFixStore = getService().getSensorFixStore();
-                    List<DeviceMappingWithRegattaLogEvent<Mark>> mappings = new RegattaLogDeviceMarkMappingFinder(
-                            regattaLog).analyze().get(mark);
-                    if (mappings != null) {
-                        for (DeviceMapping<Mark> mapping : mappings) {
-                            final TimePoint from = Util.getLatestOfTimePoints(trackingTimes.getA().getTimePoint(),
-                                    mapping.getTimeRange().from());
-                            final TimePoint to = Util.getEarliestOfTimePoints(trackingTimes.getB().getTimePoint(),
-                                    mapping.getTimeRange().to());
-                            sensorFixStore.<GPSFix> loadFixes(loadedFix -> writeableMarkTrack.add(loadedFix, true),
-                                    mapping.getDevice(), from, to, false, () -> false, progressIgnoringConsumer -> {
-                                    });
-                        }
-                    }
-                } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
-                    logger.info("Error trying to load mark track for mark " + mark + " from " + trackingTimes.getA()
-                            + " to " + trackingTimes.getB());
-                }
-            }
-            Iterable<GPSFixDTO> gpsFixDTOTrack = convertToGPSFixDTOTrack(markTrack);
-            return new MarkTrackDTO(markDTO, gpsFixDTOTrack, /* thinned out */ false);
-        }
-        return null;
-    }
-    
-    @Override
-    public MarkTrackDTO getMarkTrack(String leaderboardName, String raceColumnName, String fleetName, String markIdAsString) {
-        final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        if (leaderboard != null) {
-            final RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
-            if (raceColumn != null) {
-                final Fleet fleet = raceColumn.getFleetByName(fleetName);
-                if (fleet != null) {
-                    return getMarkTrack(leaderboard, raceColumn, fleet, markIdAsString);
-                }
-            }
-        }
-        return null;
-    }
-    
     /**
      * Uses all fixed from {@code track} with the outliers removed, {@link #convertToGPSFixDTO(GPSFix) converts} each
      * of them to a {@link GPSFixDTO} and adds them to the resulting list.
      */
-    private Iterable<GPSFixDTO> convertToGPSFixDTOTrack(Track<? extends GPSFix> track) {
+    protected Iterable<GPSFixDTO> convertToGPSFixDTOTrack(Track<? extends GPSFix> track) {
         final List<GPSFixDTO> result = new ArrayList<>();
         track.lockForRead();
         try {

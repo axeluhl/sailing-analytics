@@ -45,12 +45,10 @@ import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogException;
-import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.impl.PreciseCompactGPSFixMovingImpl.PreciseCompactPosition;
 import com.sap.sailing.domain.common.windfinder.SpotDTO;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
-import com.sap.sailing.gwt.ui.client.shared.charts.MarkPositionService.MarkTrackDTO;
 import com.sap.sailing.gwt.ui.shared.AccountWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.CompactBoatPositionsDTO;
 import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
@@ -58,7 +56,6 @@ import com.sap.sailing.gwt.ui.shared.CompetitorProviderDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationWithSecurityDTO;
-import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegType;
@@ -89,7 +86,6 @@ import com.sap.sailing.gwt.ui.shared.SwissTimingEventRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingReplayRaceDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
-import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.UrlDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.CourseTemplateDTO;
@@ -98,7 +94,6 @@ import com.sap.sailing.gwt.ui.shared.courseCreation.MarkRoleDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkTemplateDTO;
 import com.sap.sse.common.CountryCode;
 import com.sap.sse.common.Duration;
-import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.PairingListCreationException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
@@ -153,14 +148,6 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
     Map<CompetitorDTO, BoatDTO> getCompetitorBoats(RegattaAndRaceIdentifier raceIdentifier)
             throws UnauthorizedException;
 
-    CompactRaceMapDataDTO getRaceMapData(RegattaAndRaceIdentifier raceIdentifier, Date date,
-            Map<String, Date> fromPerCompetitorIdAsString, Map<String, Date> toPerCompetitorIdAsString,
-            boolean extrapolate, LegIdentifier simulationLegIdentifier,
-            byte[] md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID,
-            Date timeToGetTheEstimatedDurationFor, boolean estimatedDurationRequired, DetailType detailType,
-            String leaderboardName, String leaderboardGroupName, UUID leaderboardGroupId)
-            throws NoWindException, UnauthorizedException;
-
     CompactBoatPositionsDTO getBoatPositions(RegattaAndRaceIdentifier raceIdentifier,
             Map<String, Date> fromPerCompetitorIdAsString, Map<String, Date> toPerCompetitorIdAsString,
             boolean extrapolate, DetailType detailType, String leaderboardName, String leaderboardGroupName,
@@ -188,11 +175,6 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
      */
     List<RaceTimesInfoDTO> getRaceTimesInfosIncludingTags(Collection<RegattaAndRaceIdentifier> raceIdentifiers,
             Map<RegattaAndRaceIdentifier, TimePoint> searchSinceMap) throws UnauthorizedException;
-
-    CoursePositionsDTO getCoursePositions(RegattaAndRaceIdentifier raceIdentifier, Date date)
-            throws UnauthorizedException;
-
-    RaceCourseDTO getRaceCourse(RegattaAndRaceIdentifier raceIdentifier, Date date) throws UnauthorizedException;
 
     public List<String> getLeaderboardNames() throws UnauthorizedException;
 
@@ -286,10 +268,6 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
     /** for backward compatibility with the regatta overview */
     List<RaceGroupDTO> getRegattaStructureForEvent(UUID eventId) throws UnauthorizedException;
 
-    List<RegattaOverviewEntryDTO> getRaceStateEntriesForRaceGroup(UUID eventId, List<UUID> visibleCourseAreas,
-            List<String> visibleRegattas, boolean showOnlyCurrentlyRunningRaces, boolean showOnlyRacesOfSameDay,
-            Duration clientTimeZoneOffset) throws UnauthorizedException, Exception;
-
     void reloadRaceLog(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet)
             throws UnauthorizedException, NotFoundException;
 
@@ -341,17 +319,11 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
     List<TagDTO> getPrivateTags(String leaderboardName, String raceColumnName, String fleetName)
             throws UnauthorizedException;
 
-    RaceCourseDTO getLastCourseDefinitionInRaceLog(String leaderboardName, String raceColumnName, String fleetName)
-            throws UnauthorizedException, NotFoundException;
-
     List<String> getDeserializableDeviceIdentifierTypes() throws UnauthorizedException;
 
     Collection<String> getGPSFixImporterTypes() throws UnauthorizedException;
 
     Collection<String> getSensorDataImporterTypes() throws UnauthorizedException;
-
-    List<TrackFileImportDeviceIdentifierDTO> getTrackFileImportDeviceIds(List<String> uuids)
-            throws NoCorrespondingServiceRegisteredException, TransformationException;
 
     /**
      * @see SailingServiceAsync#getCompetitorMarkPassings(RegattaAndRaceIdentifier, CompetitorWithBoatDTO, boolean,
@@ -384,12 +356,6 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
      *            the URL pointing to a Manage2Sail JSON document that contains the link to the XRR document
      */
     Iterable<RegattaDTO> getRegattas(String manage2SailJsonUrl) throws UnauthorizedException;
-
-    Iterable<MarkDTO> getMarksInRegattaLog(String leaderboardName)
-            throws UnauthorizedException, DoesNotHaveRegattaLogException;
-
-    List<DeviceMappingDTO> getDeviceMappings(String leaderboardName)
-            throws UnauthorizedException, DoesNotHaveRegattaLogException, TransformationException, NotFoundException;
 
     boolean doesRegattaLogContainCompetitors(String name)
             throws UnauthorizedException, DoesNotHaveRegattaLogException, NotFoundException;
@@ -434,9 +400,6 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
             throws UnauthorizedException, NotFoundException;
 
     Iterable<MarkDTO> getMarksInTrackedRace(String leaderboardName, String raceColumnName, String fleetName)
-            throws UnauthorizedException;
-
-    MarkTrackDTO getMarkTrack(String leaderboardName, String raceColumnName, String fleetName, String markIdAsString)
             throws UnauthorizedException;
 
     /**
@@ -518,11 +481,6 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
     BoatDTO getBoat(UUID boatId, String regattaName, String regattaRegistrationLinkSecret);
 
     /**
-     * Allows reading public Marks, or Marks that are registered in the given regatta
-     */
-    MarkDTO getMark(UUID markId, String regattaName, String regattaRegistrationLinkSecret);
-
-    /**
      * Allows reading public Events, or Events that are related to the given regatta
      */
     QRCodeEvent getEvent(UUID eventId, String regattaName, String regattaRegistrationLinkSecret);
@@ -580,4 +538,32 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
      * the race must be part of a {@link RegattaLeaderboard}.
      */
     boolean canSliceRace(RegattaAndRaceIdentifier raceIdentifier) throws UnauthorizedException;
+
+    Iterable<MarkDTO> getMarksInRegattaLog(String leaderboardName)
+            throws UnauthorizedException, DoesNotHaveRegattaLogException;
+
+    /**
+     * Allows reading public Marks, or Marks that are registered in the given regatta
+     */
+    MarkDTO getMark(UUID markId, String regattaName, String regattaRegistrationLinkSecret);
+
+    CoursePositionsDTO getCoursePositions(RegattaAndRaceIdentifier raceIdentifier, Date date)
+            throws UnauthorizedException;
+
+    CompactRaceMapDataDTO getRaceMapData(RegattaAndRaceIdentifier raceIdentifier, Date date,
+            Map<String, Date> fromPerCompetitorIdAsString, Map<String, Date> toPerCompetitorIdAsString,
+            boolean extrapolate, LegIdentifier simulationLegIdentifier,
+            byte[] md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID,
+            Date timeToGetTheEstimatedDurationFor, boolean estimatedDurationRequired, DetailType detailType,
+            String leaderboardName, String leaderboardGroupName, UUID leaderboardGroupId)
+            throws NoWindException, UnauthorizedException;
+
+    RaceCourseDTO getRaceCourse(RegattaAndRaceIdentifier raceIdentifier, Date date) throws UnauthorizedException;
+
+    List<RegattaOverviewEntryDTO> getRaceStateEntriesForRaceGroup(UUID eventId, List<UUID> visibleCourseAreas,
+            List<String> visibleRegattas, boolean showOnlyCurrentlyRunningRaces, boolean showOnlyRacesOfSameDay,
+            Duration clientTimeZoneOffset) throws UnauthorizedException, Exception;
+
+    RaceCourseDTO getLastCourseDefinitionInRaceLog(String leaderboardName, String raceColumnName, String fleetName)
+            throws UnauthorizedException, NotFoundException;
 }
