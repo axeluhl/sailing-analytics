@@ -21,13 +21,11 @@ import com.mongodb.WriteConcern;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.UpdateOptions;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
-import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.FieldNames;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.racelog.tracking.FixMongoHandler;
@@ -54,13 +52,18 @@ import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
  * @author Fredrik Teschke
  *
  */
-public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
+public class MongoSensorFixStoreImpl extends MongoFixHandler implements MongoSensorFixStore {
     private static final Logger logger = Logger.getLogger(MongoSensorFixStoreImpl.class.getName());
-    private final TypeBasedServiceFinder<FixMongoHandler<?>> fixServiceFinder;
-    private final TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceServiceFinder;
     private final MongoCollection<Document> fixesCollection;
-    private final MongoCollection<Document> metadataCollection;
+    private final MetadataCollection metadataCollection;
     private final MongoObjectFactoryImpl mongoOF;
+    
+    /**
+     * The write concern to use for updating the fixes and metadata collections. Tests can use this, e.g., to work with
+     * {@link WriteConcern#MAJORITY} in order to ensure they can read their own writes.
+     */
+    private final WriteConcern writeConcern;
+    
     /**
      * Lock object to be used when accessing {@link #listeners}.
      */
@@ -69,30 +72,23 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
 
     public MongoSensorFixStoreImpl(MongoObjectFactory mongoObjectFactory, DomainObjectFactory domainObjectFactory,
             TypeBasedServiceFinderFactory serviceFinderFactory) {
+        this(mongoObjectFactory, domainObjectFactory, serviceFinderFactory, WriteConcern.UNACKNOWLEDGED);
+    }
+    
+    public MongoSensorFixStoreImpl(MongoObjectFactory mongoObjectFactory, DomainObjectFactory domainObjectFactory,
+            TypeBasedServiceFinderFactory serviceFinderFactory, WriteConcern writeConcern) {
+        super(serviceFinderFactory != null ? createFixServiceFinder(serviceFinderFactory) : null,
+              serviceFinderFactory != null ? serviceFinderFactory.createServiceFinder(DeviceIdentifierMongoHandler.class) : null);
         mongoOF = (MongoObjectFactoryImpl) mongoObjectFactory;
-        if (serviceFinderFactory != null) {
-            fixServiceFinder = createFixServiceFinder(serviceFinderFactory);
-            deviceServiceFinder = serviceFinderFactory.createServiceFinder(DeviceIdentifierMongoHandler.class);
-        } else {
-            fixServiceFinder = null;
-            deviceServiceFinder = null;
-        }
         fixesCollection = mongoOF.getGPSFixCollection();
-        metadataCollection = mongoOF.getGPSFixMetadataCollection();
-
+        metadataCollection = new MetadataCollection(mongoOF, fixServiceFinder, deviceServiceFinder, writeConcern);
+        this.writeConcern = writeConcern;
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private TypeBasedServiceFinder<FixMongoHandler<?>> createFixServiceFinder(
+    private static TypeBasedServiceFinder<FixMongoHandler<?>> createFixServiceFinder(
             TypeBasedServiceFinderFactory serviceFinderFactory) {
         return (TypeBasedServiceFinder) serviceFinderFactory.createServiceFinder(FixMongoHandler.class);
-    }
-
-    private <T extends Timed> T loadFix(Document object)
-            throws TransformationException, NoCorrespondingServiceRegisteredException {
-        String type = (String) object.get(FieldNames.GPSFIX_TYPE.name());
-        Document fixObject = (Document) object.get(FieldNames.GPSFIX.name());
-        return this.<T> findService(type).transformBack(fixObject);
     }
 
     @Override
@@ -199,8 +195,7 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
                 final Object dbDeviceId = storeDeviceId(deviceServiceFinder, device);
                 final int nrOfTotalFixes = Util.size(fixes);
                 final ArrayList<Document> dbFixes = new ArrayList<>(nrOfTotalFixes);
-                final TimeRange oldTimeRange = getTimeRangeCoveredByFixes(device);
-                TimeRange newTimeRange = oldTimeRange;
+                TimeRange newTimeRange = null;
                 FixT latestFix = null;
                 for (FixT fix : fixes) {
                     if (latestFix == null || latestFix.getTimePoint().before(fix.getTimePoint())) {
@@ -214,38 +209,14 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
                     final TimeRangeImpl fixTimeRange = new TimeRangeImpl(fixTP, fixTP, /* toIsInclusive */ true);
                     newTimeRange = newTimeRange == null ? fixTimeRange : newTimeRange.extend(fixTimeRange);
                 }
-                fixesCollection.withWriteConcern(WriteConcern.UNACKNOWLEDGED).insertMany(dbFixes);
-                final Document updateOperation = new Document();
-                final Document newMetadata = new Document();
-                newMetadata.put(FieldNames.DEVICE_ID.name(), dbDeviceId);
-                if (latestFix != null) {
-                    newMetadata.put(FieldNames.LAST_FIX_RECEIVED.name(), storeFixToDocument(new Document(), latestFix));
-                }
-                MongoObjectFactoryImpl.storeTimeRange(newTimeRange, newMetadata, FieldNames.TIMERANGE);
-                updateOperation.append("$set", newMetadata);
-                updateOperation.append("$inc", new Document(FieldNames.NUM_FIXES.name(), nrOfTotalFixes));
-                metadataCollection.withWriteConcern(WriteConcern.UNACKNOWLEDGED).updateOne(getDeviceQuery(device), updateOperation, new UpdateOptions().upsert(true));
+                fixesCollection.withWriteConcern(writeConcern).insertMany(dbFixes);
+                metadataCollection.enqueueMetadataUpdate(device, dbDeviceId, nrOfTotalFixes, newTimeRange, latestFix);
             } catch (TransformationException e) {
-                logger.log(Level.WARNING, "Could not store fix in MongoDB");
-                e.printStackTrace();
+                logger.log(Level.WARNING, "Could not store fix in MongoDB", e);
             }
             Util.addAll(notifyListeners(device, fixes, returnManeuverChanges, returnLiveDelay), racesWithManeuverChangesOrLiveDelay);
         }
         return racesWithManeuverChangesOrLiveDelay;
-    }
-
-    /**
-     * Writes the {@code fix} to the {@code entry} document such that {@link #loadFix(Document)} can re-establish
-     * the fix from that document.
-     * 
-     * @return for convenience and call chaining, the updated {@code entry} is returned
-     */
-    private <FixT extends Timed> Document storeFixToDocument(Document entry, FixT fix) throws TransformationException {
-        String type = fix.getClass().getName();
-        FixMongoHandler<FixT> mongoHandler = findService(type);
-        Object fixObject = mongoHandler.transformForth(fix);
-        entry.append(FieldNames.GPSFIX_TYPE.name(), type).append(FieldNames.GPSFIX.name(), fixObject);
-        return entry;
     }
 
     @Override
@@ -286,81 +257,25 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
         LockUtil.executeWithWriteLock(listenersLock, () -> Util.removeFromValueSet(listeners, device, listener));
     }
 
-    private Bson getDeviceQuery(DeviceIdentifier device)
-            throws TransformationException, NoCorrespondingServiceRegisteredException {
-        Document dbDeviceId = storeDeviceId(deviceServiceFinder, device);
-        Bson query = Filters.eq(FieldNames.DEVICE_ID.name(), dbDeviceId);
-        return query;
-    }
-
-    private Document findMetadataObject(DeviceIdentifier device)
-            throws TransformationException, NoCorrespondingServiceRegisteredException {
-        Bson query = getDeviceQuery(device);
-        Document result = metadataCollection.find(query).first();
-        return result;
-    }
-
     @Override
     public TimeRange getTimeRangeCoveredByFixes(DeviceIdentifier device)
             throws TransformationException, NoCorrespondingServiceRegisteredException {
-        final Document resultDocument = findMetadataObject(device);
-        final TimeRange result;
-        if (resultDocument == null) {
-            result = null;
-        } else {
-            result = DomainObjectFactoryImpl.loadTimeRange(resultDocument, FieldNames.TIMERANGE);
-        }
-        return result;
+        return getMetadataCollection().getTimeRangeCoveredByFixes(device);
+    }
+
+    private MetadataCollection getMetadataCollection() {
+        return metadataCollection;
     }
 
     @Override
     public long getNumberOfFixes(DeviceIdentifier device)
             throws TransformationException, NoCorrespondingServiceRegisteredException {
-        final Document resultDocument = findMetadataObject(device);
-        final long result;
-        if (resultDocument == null) {
-            result = 0;
-        } else {
-            result = ((Number) resultDocument.get(FieldNames.NUM_FIXES.name())).longValue();
-        }
-        return result;
-    }
-
-    /**
-     * Try to find a service implementing specified type of objects interface using the {@link #fixServiceFinder}.
-     * <p>
-     * To support an additional fix type, an implementation of {@link FixMongoHandler} is required, which specifies how
-     * to transform a fix forth to and back from database. This implementation needs to be registered during OSGi bundle
-     * activator startup, providing respective type mapping properties.
-     * </p>
-     * 
-     * @param type
-     *            type object to find service for
-     * @return the registered {@link FixMongoHandler} implementation
-     * 
-     * @see TypeBasedServiceFinder#findService(String)
-     */
-    @SuppressWarnings("unchecked")
-    private <FixT extends Timed> FixMongoHandler<FixT> findService(String type) {
-        return (FixMongoHandler<FixT>) fixServiceFinder.findService(type);
+        return metadataCollection.getNumberOfFixes(device);
     }
 
     @Override
     public <FixT extends Timed> Map<DeviceIdentifier, FixT> getFixLastReceived(Iterable<DeviceIdentifier> forDevices)
             throws TransformationException, NoCorrespondingServiceRegisteredException {
-        Map<DeviceIdentifier, FixT> result = new HashMap<>();
-        for (final DeviceIdentifier deviceIdentifier : forDevices) {
-            final Document metadataDoc = findMetadataObject(deviceIdentifier);
-            if (metadataDoc != null) {
-                final Document lastFixForDeviceDbObject = (Document) metadataDoc.get(FieldNames.LAST_FIX_RECEIVED.name());
-                if (lastFixForDeviceDbObject != null) {
-                    final Timed lastFixForDevice = loadFix(lastFixForDeviceDbObject);
-                    @SuppressWarnings("unchecked")
-                    final FixT lastFixForDeviceTyped = (FixT) lastFixForDevice;
-                    result.put(deviceIdentifier, lastFixForDeviceTyped);
-                }
-            }
-        }
-        return result;
+        return metadataCollection.getFixLastReceived(forDevices);
     }
 }
