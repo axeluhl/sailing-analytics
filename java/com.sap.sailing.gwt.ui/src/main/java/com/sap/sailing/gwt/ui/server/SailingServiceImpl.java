@@ -5182,13 +5182,13 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         return handler.deserialize(deviceId, type, deviceId);
     }
     
-  //READ
+    //READ
     private String serializeDeviceIdentifier(DeviceIdentifier deviceId) throws TransformationException {
         return getDeviceIdentifierStringSerializerHandlerFinder(true).findService(
                 deviceId.getIdentifierType()).serialize(deviceId).getB();
     }
     
-  //READ
+    //READ
     private DeviceMappingDTO convertToDeviceMappingDTO(DeviceMapping<?> mapping) throws TransformationException {
         final Map<DeviceIdentifier, Timed> lastFixes = getService().getSensorFixStore().getFixLastReceived(Collections.singleton(mapping.getDevice()));
         final Timed lastFix;
@@ -5216,10 +5216,10 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             throw new RuntimeException("Can only handle Competitor, Boat or Mark as mapped item type, but not "
                     + mappedTo.getClass().getName());
         }
-        //Only deal with UUIDs - otherwise we would have to pass Serializable to browser context - which
-        //has a large performance implact for GWT.
-        //As any Serializable subclass is converted to String by the BaseRaceLogEventSerializer, and only UUIDs are
-        //recovered by the BaseRaceLogEventDeserializer, only UUIDs are safe to use anyway.
+        // Only deal with UUIDs - otherwise we would have to pass Serializable to browser context - which
+        // has a large performance impact for GWT.
+        // As any Serializable subclass is converted to String by the BaseRaceLogEventSerializer, and only UUIDs are
+        // recovered by the BaseRaceLogEventDeserializer, only UUIDs are safe to use anyway.
         List<UUID> originalRaceLogEventUUIDs = new ArrayList<UUID>();
         for (Serializable id : mapping.getOriginalRaceLogEventIds()) {
             if (! (id instanceof UUID)) {
