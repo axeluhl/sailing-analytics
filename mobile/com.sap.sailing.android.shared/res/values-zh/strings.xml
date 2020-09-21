@@ -1,7 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?><resources xmlns:tools="http://schemas.android.com/tools">
-
-    
-    
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
     <string name="options_menu_live">"连接信息"</string>
     <string name="remove">"移除"</string>
     <string name="enter_new_item">"输入新项目"</string>
@@ -9,17 +7,10 @@
     <string name="there_are_no_items_yet_">"尚无任何项目。"</string>
 
     <!-- SystemInformationActivity -->
-    
-    
-    
-    
-    
-    
-    
-    
+
 
     <!-- Generic -->
-    
+
     <string name="generic_error">"错误"</string>
     <string name="about">"信息"</string>
 
@@ -45,9 +36,7 @@
     <string name="notify_user_api_call_failed">"联系服务器时发生错误。请重试。"</string>
     <string name="please_wait">"请稍候"</string>
     <string name="error_invalid_qr_code">"二维码无效"</string>
-    
-    
-    
+
 
     <!-- Eula -->
     <string name="eula_title">"最终用户许可协议"</string>
@@ -61,10 +50,7 @@
     <string name="license_information">"许可证信息"</string>
 
     <!-- HTTP Requests -->
-    
-    
-    
-    
+
 
     <!-- Dialog -->
     <string name="yes">"是"</string>
@@ -83,9 +69,4 @@
     <string name="yesterday">"昨天"</string>
     <string name="today">"今天"</string>
     <string name="tomorrow">"明天"</string>
-    
-    
-
-    
-
 </resources>

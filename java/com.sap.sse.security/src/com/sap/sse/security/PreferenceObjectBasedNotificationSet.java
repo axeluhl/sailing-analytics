@@ -125,7 +125,7 @@ public abstract class PreferenceObjectBasedNotificationSet<PrefT, T> implements 
      * @param preference
      *            a notification preference of some sort which typically describes or contains a set of domain objects
      *            the user is "interested" in and for changes of which the user wants to be notified.
-     * @return the domain objects described by the {@code preference} object thta the user is "interested" in
+     * @return the domain objects described by the {@code preference} object that the user is "interested" in
      */
     protected abstract Collection<T> calculateObjectsToNotify(PrefT preference);
 

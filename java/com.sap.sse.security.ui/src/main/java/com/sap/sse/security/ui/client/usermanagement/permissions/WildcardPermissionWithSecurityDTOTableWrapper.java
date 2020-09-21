@@ -129,6 +129,7 @@ public class WildcardPermissionWithSecurityDTOTableWrapper extends
                 .setUpdatePermissionFilterForCheckbox(permission -> userService.hasPermission(permission, DefaultActions.UPDATE));
         mainPanel.insert(filterField, 0);
         // setup table
+        table.ensureDebugId("WildcardPermissionWithSecurityDTOTable");
         table.addColumnSortHandler(userColumnListHandler);
         table.addColumn(userGroupWithSecurityDTONameColumn, stringMessages.permission());
         table.addColumn(userActionColumn, stringMessages.actions());

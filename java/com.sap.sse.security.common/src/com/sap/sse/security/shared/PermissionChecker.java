@@ -9,11 +9,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.security.shared.HasPermissions.Action;
+import com.sap.sse.security.shared.impl.AccessControlList;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.Role;
+import com.sap.sse.security.shared.impl.UserGroup;
 
 /**
  * The {@link PermissionChecker} is an implementation of the permission checking algorithm also described in <a href=
@@ -31,6 +35,52 @@ public class PermissionChecker {
         GRANTED,
         REVOKED,
         NONE
+    }
+    
+    /**
+     * {@link AclResolver} is used to resolve all relevant ACLs during meta permission check.
+     */
+    public interface AclResolver<A extends SecurityAccessControlList<?>, O extends AbstractOwnership<?, ?>> {
+        /**
+         * Resolves all relevant ACLs during meta permission check and searches for the first ACL to match the
+         * {@code filterCondition}. If and only if at least one such ACL is found, {@code null} is returned. As this
+         * could happen before having discovered all applicable ACLs for the {@code type} /
+         * {@code objectIdentifiersAsStringOrNull} combination, the full set of ACLs isn't known in this case. However,
+         * if no ACL matched the {@code filterCondition}, all ACLs applicable to the {@code type} /
+         * {@code objectIdentifiersAsStringOrNull} combination have been scanned and can be returned for caching, to be
+         * passed in for future invocations for the same combination of type and object ID.
+         * <p>
+         * 
+         * Relevant ACLs are determined on several constraints:
+         * <ul>
+         * <li>The security type is required to be given. Due to the fact that the meta permission check expands the
+         * permission to distinct permissions regarding the type and action part, the effective check always takes place
+         * for one type only. This means, the type is always known.
+         * <li>An ownership may be given. This is the ownership that can be derived from an expanded permission, if this
+         * permission includes an ID. In cases where a qualified permission is granted (e.g. adding a qualified
+         * {@link Role} or adding a {@link Role} to a {@link UserGroup}), this ownership can be directly derived by the
+         * qualification because the check only affects objects that are appropriately owned. Knowing the ownership
+         * means, ACLs are only relevant for the meta permission check if the associated object is owned as defined by
+         * the given ownership.
+         * <li>A set of stringified object identifiers may be given in addition to the type. If the meta permission to
+         * check includes distinct identifiers, we can enumerate the objects based on the type (we always have this one)
+         * and identifiers, which means, a direct lookup for the ACLs by {@link QualifiedObjectIdentifier} is possible.
+         * </ul>
+         * 
+         * @param filterCondition
+         *            if any of the ACLs found matches this predicate, {@code true} is returned; {@code false} otherwise
+         * 
+         * @param allAclsForTypeAndObjectIdsOrNull
+         *            if not {@code null} these ACLs are assumed to be the full set of ACLs applicable to the combination
+         *            of {@code type} and {@code objectIdentifiersAsStringOrNull}. In this case a potentially expensive
+         *            computation to determine those can be avoided. If {@code null}, the ACLs need to be determined here.
+         * 
+         * @return {@code null} if any of the ACLs found passed the {@code filterCondition}; the set of
+         *         {@link AccessControlList}s relevant for the combination of {@code type} and
+         *         {@code objectIdentifiersAsStringOrNull} otherwise
+         */
+        Iterable<AccessControlList> resolveDenyingAclsAndCheckIfAnyMatches(O ownershipOrNull, String type, Iterable<String> objectIdentifiersAsStringOrNull,
+                Predicate<A> filterCondition, Iterable<AccessControlList> allAclsForTypeAndObjectIdsOrNull);
     }
     
     private static final BiFunction<WildcardPermission, WildcardPermission, Boolean> impliesChecker = WildcardPermission::implies;
@@ -75,14 +125,38 @@ public class PermissionChecker {
             WildcardPermission permission, U user,
             Iterable<G> groupsOfWhichUserIsMember, U allUser,
             Iterable<G> groupsOfWhichAllUserIsMember, O ownership, A acl) {
+        PermissionState result = checkAcl(permission, groupsOfWhichUserIsMember, groupsOfWhichAllUserIsMember, acl);
+        // anonymous can only grant it if not already decided by acl
+        if (result == PermissionState.NONE) {
+            PermissionState anonymous = checkUserPermissions(permission, allUser, groupsOfWhichAllUserIsMember,
+                    ownership, impliesChecker, /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true);
+            if (anonymous == PermissionState.GRANTED) {
+                result = anonymous;
+            }
+        }
+        if (result == PermissionState.NONE) {
+            result = checkUserPermissions(permission, user, groupsOfWhichUserIsMember, ownership, impliesChecker,
+                    /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true);
+        }
+        return result == PermissionState.GRANTED;
+    }
+
+    private static <A extends SecurityAccessControlList<G>, G extends SecurityUserGroup<?>> PermissionState checkAcl(
+            WildcardPermission permission, Iterable<G> groupsOfWhichUserIsMember,
+            Iterable<G> groupsOfWhichAllUserIsMember, A acl) {
         List<Set<String>> parts = permission.getParts();
+        return checkAcl(permission, groupsOfWhichUserIsMember, groupsOfWhichAllUserIsMember, acl, parts);
+    }
+
+    private static <G extends SecurityUserGroup<?>, A extends SecurityAccessControlList<G>> PermissionState checkAcl(
+            WildcardPermission permission, Iterable<G> groupsOfWhichUserIsMember,
+            Iterable<G> groupsOfWhichAllUserIsMember, A acl, List<Set<String>> parts) {
         // permission has at least data object type and action as parts
         // and data object part only has one sub-part
         if (parts.get(0).size() != 1) {
             throw new WrongPermissionFormatException(permission);
         }
         PermissionState result = PermissionState.NONE;
-        
         // 1. check ACL
         if (acl != null) {
             // if no specific action is requested then this translates to a request for all permissions ("*")
@@ -100,20 +174,7 @@ public class PermissionChecker {
             Util.addAll(groupsOfWhichAllUserIsMember, allGroups);
             result = acl.hasPermission(action, allGroups);
         }
-
-        // anonymous can only grant it if not already decided by acl
-        if (result == PermissionState.NONE) {
-            PermissionState anonymous = checkUserPermissions(permission, allUser, groupsOfWhichAllUserIsMember,
-                    ownership, impliesChecker, /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true);
-            if (anonymous == PermissionState.GRANTED) {
-                result = anonymous;
-            }
-        }
-        if (result == PermissionState.NONE) {
-            result = checkUserPermissions(permission, user, groupsOfWhichUserIsMember, ownership, impliesChecker,
-                    /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true);
-        }
-        return result == PermissionState.GRANTED;
+        return result;
     }
 
     /**
@@ -176,8 +237,8 @@ public class PermissionChecker {
      */
     public static <RD extends RoleDefinition, R extends AbstractRole<RD, G, UR>, O extends AbstractOwnership<G, UR>, UR extends UserReference, U extends SecurityUser<RD, R, G>, G extends SecurityUserGroup<RD>, A extends SecurityAccessControlList<G>> boolean checkMetaPermission(
             WildcardPermission permission,
-            Iterable<HasPermissions> allPermissionTypes, U user, U allUser, O ownership) {
-        return checkMetaPermissionInternal(permission, allPermissionTypes, user, allUser, wp -> ownership);
+            Iterable<HasPermissions> allPermissionTypes, U user, U allUser, O ownership, AclResolver<A, O> aclResolver) {
+        return checkMetaPermissionInternal(permission, allPermissionTypes, user, allUser, wp -> ownership, aclResolver);
     }
     
     /**
@@ -199,7 +260,7 @@ public class PermissionChecker {
      */
     public static <RD extends RoleDefinition, R extends AbstractRole<RD, G, UR>, O extends AbstractOwnership<G, UR>, UR extends UserReference, U extends SecurityUser<RD, R, G>, G extends SecurityUserGroup<RD>, A extends SecurityAccessControlList<G>> boolean checkMetaPermissionWithOwnershipResolution(
             WildcardPermission permission, Iterable<HasPermissions> allPermissionTypes, U user, U allUser,
-            Function<QualifiedObjectIdentifier, O> ownershipResolver) {
+            Function<QualifiedObjectIdentifier, O> ownershipResolver, AclResolver<A, O> aclResolver) {
         return checkMetaPermissionInternal(permission, allPermissionTypes, user, allUser, wp -> {
             final Iterable<QualifiedObjectIdentifier> qualifiedObjectIdentifiers = wp.getQualifiedObjectIdentifiers();
             final O ownership;
@@ -216,20 +277,54 @@ public class PermissionChecker {
                 }
             }
             return ownership;
-        });
+        }, aclResolver);
     }
     
     private static <RD extends RoleDefinition, R extends AbstractRole<RD, G, UR>, O extends AbstractOwnership<G, UR>, UR extends UserReference, U extends SecurityUser<RD, R, G>, G extends SecurityUserGroup<RD>, A extends SecurityAccessControlList<G>> boolean checkMetaPermissionInternal(
             WildcardPermission permission,
-            Iterable<HasPermissions> allPermissionTypes, U user, U allUser, Function<WildcardPermission, O> ownershipResolver) {
+            Iterable<HasPermissions> allPermissionTypes, U user, U allUser,
+            Function<WildcardPermission, O> ownershipResolver, AclResolver<A, O> aclResolver) {
         assert permission != null;
         assert allPermissionTypes != null;
-        final Set<WildcardPermission> effectivePermissionsToCheck = expandSingleWildcardPermissionToDistinctPermissions(permission, allPermissionTypes, true);
+        final Set<WildcardPermission> effectivePermissionsToCheck = expandSingleWildcardPermissionToDistinctPermissions(
+                permission, allPermissionTypes, /* expand multiple to single object IDs */ true);
+        final Iterable<G> groupsOfUser = getGroupsOfUser(user);
+        final Iterable<G> groupsOfAllUser = getGroupsOfUser(allUser);
+        // for resolveAcls, all effectivePermissionsToCheck can be collated based on their types and object IDs; the action can be ignored;
+        // this map remembers for which type/object-id combinations the check has already been performed
+        final Map<Triple<String, Set<String>, O>, Iterable<AccessControlList>> typesAndIdsAndOwnershipsWithFullSetOfAcls = new HashMap<>();
         for (WildcardPermission effectiveWildcardPermissionToCheck : effectivePermissionsToCheck) {
+            // Ownership may be null in case of an unqualified meta permission check
+            // That's the case when e.g. assigning an unqualified role to a user
             final O ownership = ownershipResolver.apply(effectiveWildcardPermissionToCheck);
-            if (checkUserPermissions(effectiveWildcardPermissionToCheck, user, getGroupsOfUser(user), ownership,
+            final List<Set<String>> wildcardPermissionParts = effectiveWildcardPermissionToCheck.getParts();
+            // expanded permissions always have a single non-wildcard type part
+            final String type = wildcardPermissionParts.get(0).iterator().next();
+            final boolean identifierWildcard;
+            final Set<String> identifiers;
+            if (wildcardPermissionParts.size() >= 3) {
+                identifiers = wildcardPermissionParts.get(2);
+                identifierWildcard = WildcardPermission.WILDCARD_TOKEN.equals(identifiers.iterator().next());
+            } else {
+                identifiers = Collections.emptySet();
+                identifierWildcard = true;
+            }
+            final Triple<String, Set<String>, O> collationKeyBasedOnTypeAndObjectIdAndOwnership = new Triple<>(type, identifiers, ownership);
+            final Iterable<AccessControlList> denyingAclsFromPreviousRunForSameTypeAndObjectIds =
+                    typesAndIdsAndOwnershipsWithFullSetOfAcls.get(collationKeyBasedOnTypeAndObjectIdAndOwnership);
+            final Iterable<AccessControlList> denyingAcls = aclResolver.resolveDenyingAclsAndCheckIfAnyMatches(ownership, type,
+                    identifierWildcard ? null : identifiers,
+                    acl->checkAcl(effectiveWildcardPermissionToCheck, groupsOfUser, groupsOfAllUser, acl) == PermissionState.REVOKED,
+                    denyingAclsFromPreviousRunForSameTypeAndObjectIds);
+            if (denyingAcls == null) { // this means an ACL was found that REVOKED the permission
+                return false;
+            } else if (denyingAclsFromPreviousRunForSameTypeAndObjectIds == null) {
+                // now we have the full scan of ACLs for the type/object-id combination; cache it
+                typesAndIdsAndOwnershipsWithFullSetOfAcls.put(collationKeyBasedOnTypeAndObjectIdAndOwnership, denyingAcls);
+            }
+            if (checkUserPermissions(effectiveWildcardPermissionToCheck, user, groupsOfUser, ownership,
                     impliesChecker, /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true) != PermissionState.GRANTED
-                    && checkUserPermissions(effectiveWildcardPermissionToCheck, allUser, getGroupsOfUser(allUser),
+                    && checkUserPermissions(effectiveWildcardPermissionToCheck, allUser, groupsOfAllUser,
                             ownership, impliesChecker, /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true) != PermissionState.GRANTED) {
                 return false;
             }
@@ -279,7 +374,6 @@ public class PermissionChecker {
             typeParts = null;
             isTypePartWildcard = true;
         }
-
         final Set<String> actionParts;
         final boolean isActionPartWildcard;
         if (parts.size() >= 2) {
@@ -289,7 +383,6 @@ public class PermissionChecker {
             actionParts = null;
             isActionPartWildcard = true;
         }
-
         final Set<String> idParts;
         final boolean isIdPartWildcard;
         if (parts.size() >= 3) {
@@ -299,12 +392,10 @@ public class PermissionChecker {
             idParts = null;
             isIdPartWildcard = true;
         }
-
         Map<String, HasPermissions> allPermissionTypesByName = new HashMap<>();
         for (HasPermissions hasPermissions : allPermissionTypes) {
             allPermissionTypesByName.put(hasPermissions.getName(), hasPermissions);
         }
-
         final Set<String> effectiveIdPartsToCheck;
         if (isIdPartWildcard) {
             effectiveIdPartsToCheck = Collections.singleton("");
@@ -313,14 +404,12 @@ public class PermissionChecker {
         } else {
             effectiveIdPartsToCheck = Collections.singleton(Util.joinStrings(WildcardPermission.SUBPART_DIVIDER_TOKEN, idParts));
         }
-        
         final Set<String> effectiveTypePartsToCheck;
         if (isTypePartWildcard) {
             effectiveTypePartsToCheck = allPermissionTypesByName.keySet();
         } else {
             effectiveTypePartsToCheck = typeParts;
         }
-
         final Set<WildcardPermission> effectivePermissionsToCheck = new HashSet<>();
         for (String typePart : effectiveTypePartsToCheck) {
             HasPermissions hasPermissions = allPermissionTypesByName.get(typePart);
@@ -361,7 +450,6 @@ public class PermissionChecker {
         assert permission != null;
         assert allPermissionTypes != null;
         final Set<WildcardPermission> effectivePermissionsToCheck = expandSingleWildcardPermissionToDistinctPermissions(permission, allPermissionTypes, false);
-        
         for (WildcardPermission effectiveWildcardPermissionToCheck : effectivePermissionsToCheck) {
             if (checkUserPermissions(effectiveWildcardPermissionToCheck, user, getGroupsOfUser(user), ownership, impliesAnyChecker,
                     /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ false) == PermissionState.GRANTED
@@ -380,7 +468,7 @@ public class PermissionChecker {
      *            check this needs to call {@link WildcardPermission#impliesAny(WildcardPermission)).
      * @param matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven
      *            If {@code false} and no ownership is given, all associated {@link Role Roles} of an user are checked.
-     *            For a normal permission check, this needs to be {@code true}, because Qualified {@link Roles Roles}
+     *            For a normal permission check, this needs to be {@code true}, because Qualified {@link Role Roles}
      *            can not grant unqualified permissions. In case of an any check it is necessary to include all
      *            qualified roles of an user, because even a qualified {@link Role} may grant any of the included
      *            permissions. in this case, the parameter is intended to be {@code false}.
@@ -398,7 +486,6 @@ public class PermissionChecker {
                 }
             }
         }
-        
         // TODO documentation
         final boolean ownershipIsGiven = ownership != null
                 && (ownership.getTenantOwner() != null || ownership.getUserOwner() != null);
@@ -469,7 +556,7 @@ public class PermissionChecker {
      *            check this needs to call {@link WildcardPermission#impliesAny(WildcardPermission)).
      * @param matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven
      *            If {@code false} and no ownership is given, all associated {@link Role Roles} of an user are checked.
-     *            For a normal permission check, this needs to be {@code true}, because Qualified {@link Roles Roles}
+     *            For a normal permission check, this needs to be {@code true}, because Qualified {@link Role Roles}
      *            can not grant unqualified permissions. In case of an any check it is necessary to include all
      *            qualified roles of an user, because even a qualified {@link Role} may grant any of the included
      *            permissions.
