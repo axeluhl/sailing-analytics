@@ -11,20 +11,14 @@ import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpSession;
-
 import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authz.AuthorizationException;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.mail.MailException;
-import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.security.Action;
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.interfaces.Credential;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
@@ -33,6 +27,8 @@ import com.sap.sse.security.shared.UnauthorizedException;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.dto.AccessControlListDTO;
+import com.sap.sse.security.shared.dto.OwnershipDTO;
 import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
 import com.sap.sse.security.shared.dto.StrippedUserDTO;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
@@ -55,7 +51,19 @@ import com.sap.sse.security.ui.shared.SuccessInfo;
 public class UserManagementWriteServiceImpl extends UserManagementServiceImpl implements UserManagementWriteService {
     private static final long serialVersionUID = -8123229851467370537L;
     private static final Logger logger = Logger.getLogger(UserManagementWriteServiceImpl.class.getName());
-    
+
+    @Override
+    public OwnershipDTO setOwnership(final String username, final UUID userGroupId,
+            final QualifiedObjectIdentifier idOfOwnedObject, final String displayNameOfOwnedObject) {
+        SecurityUtils.getSubject()
+                .checkPermission(idOfOwnedObject.getStringPermission(DefaultActions.CHANGE_OWNERSHIP));
+        final User user = getSecurityService().getUserByName(username);
+        // no security check if current user can see the user associated with the given username
+        final Ownership result = getSecurityService().setOwnership(idOfOwnedObject, user,
+                getSecurityService().getUserGroup(userGroupId), displayNameOfOwnedObject);
+        return securityDTOFactory.createOwnershipDTO(result, new HashMap<>(), new HashMap<>());
+    }
+
     @Override
     public RoleDefinitionDTO createRoleDefinition(String roleDefinitionIdAsString, String name) {
         RoleDefinition role = getSecurityService().setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(
@@ -245,32 +253,6 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
             throw new UnauthorizedException("Not permitted to remove role definition from group");
         }
     }
-    
-    @Override
-    public SuccessInfo logout() {
-        logger.info("Logging out user: " + SecurityUtils.getSubject());
-        getSecurityService().logout();
-        getHttpSession().invalidate();
-        final Cookie cookie = new Cookie(UserManagementConstants.LOCALE_COOKIE_NAME, "");
-        cookie.setMaxAge(0);
-        cookie.setPath("/");
-        getThreadLocalResponse().addCookie(cookie);
-        logger.info("Invalidated HTTP session");
-        return new SuccessInfo(true, "Logged out.", /* redirectURL */ null, null);
-    }
-
-    @Override
-    public SuccessInfo login(String username, String password) {
-        try {
-            String redirectURL = getSecurityService().login(username, password);
-            UserDTO user = securityDTOFactory.createUserDTOFromUser(getSecurityService().getUserByName(username),
-                    getSecurityService());
-            return new SuccessInfo(true, "Success. Redirecting to " + redirectURL, redirectURL,
-                    new Triple<>(user, getAllUser(), getServerInfo()));
-        } catch (UserManagementException | AuthenticationException e) {
-            return new SuccessInfo(false, SuccessInfo.FAILED_TO_LOGIN, /* redirectURL */ null, null);
-        }
-    }
 
     @Override
     public UserDTO createSimpleUser(final String username, final String email, final String password,
@@ -406,18 +388,6 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
             throw new OAuthException(e.getMessage());
         }
         return authorizationUrl;
-    }
-
-    @Override
-    public Triple<UserDTO, UserDTO, ServerInfoDTO> verifySocialUser(CredentialDTO credentialDTO) {
-        User user = null;
-        try {
-            user = getSecurityService().verifySocialUser(createCredentialFromDTO(credentialDTO));
-        } catch (UserManagementException e) {
-            e.printStackTrace();
-        }
-        final UserDTO userDTO = securityDTOFactory.createUserDTOFromUser(user, getSecurityService());
-        return new Triple<>(userDTO, getAllUser(), getServerInfo());
     }
 
     @Override
@@ -616,20 +586,6 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
         return successInfo;
     }
 
-    protected Credential createCredentialFromDTO(CredentialDTO credentialDTO) {
-        Credential credential = new Credential();
-        credential.setAuthProvider(credentialDTO.getAuthProvider());
-        credential.setAuthProviderName(credentialDTO.getAuthProviderName());
-        credential.setEmail(credentialDTO.getEmail());
-        credential.setLoginName(credentialDTO.getLoginName());
-        credential.setPassword(credentialDTO.getPassword());
-        credential.setRedirectUrl(credentialDTO.getRedirectUrl());
-        credential.setState(credentialDTO.getState());
-        credential.setVerifier(credentialDTO.getVerifier());
-        credential.setOauthToken(credentialDTO.getOauthToken());
-        return credential;
-    }
-
     protected void sendPasswordChangedMailAsync(final String username) {
         new Thread("sending updated password to user "+username+" by e-mail") {
             @Override public void run() {
@@ -649,10 +605,6 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
             logger.log(Level.WARNING, e, () -> "Error while parsing locale with name '" + localeName + "'");
             return null;
         }
-    }
-
-    protected HttpSession getHttpSession() {
-        return getThreadLocalRequest().getSession();
     }
 
     /**
@@ -726,6 +678,31 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
         return new Role(
                 getSecurityService().getRoleDefinition(roleDefinitionId),
                 qualifyingTenantId == null ? null : getSecurityService().getUserGroup(qualifyingTenantId), user);
+    }
+
+    @Override
+    public AccessControlListDTO overrideAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
+            AccessControlListDTO acl) throws UnauthorizedException {
+        if (SecurityUtils.getSubject()
+                .isPermitted(idOfAccessControlledObject.getStringPermission(DefaultActions.CHANGE_ACL))) {
+            
+            Map<UserGroup, Set<String>> aclActionsByGroup = new HashMap<>();
+            for (Entry<StrippedUserGroupDTO, Set<String>> entry : acl.getActionsByUserGroup().entrySet()) {
+                final StrippedUserGroupDTO groupDTO = entry.getKey();
+                final UserGroup userGroup;
+                if (groupDTO == null) {
+                    userGroup = null;
+                } else {
+                    userGroup = getSecurityService().getUserGroup(groupDTO.getId());
+                }
+                aclActionsByGroup.put(userGroup, entry.getValue());
+            }
+
+            return securityDTOFactory.createAccessControlListDTO(getSecurityService()
+                    .overrideAccessControlList(idOfAccessControlledObject, aclActionsByGroup));
+        } else {
+            throw new UnauthorizedException("Not permitted to update the ACL for a user");
+        }
     }
 
 }
