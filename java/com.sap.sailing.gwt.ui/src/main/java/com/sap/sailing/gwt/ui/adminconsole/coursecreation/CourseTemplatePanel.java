@@ -308,9 +308,9 @@ public class CourseTemplatePanel extends FlowPanel {
         final AccessControlledActionsColumn<CourseTemplateDTO, DefaultActionsImagesBarCell> actionsColumn = create(
                 new DefaultActionsImagesBarCell(stringMessages), userService);
         final EditOwnershipDialog.DialogConfig<CourseTemplateDTO> configOwnership = EditOwnershipDialog
-                .create(userService.getUserManagementService(), type, courseTemplateDTO -> courseTemplateListDataProvider.refresh(), stringMessages);
+                .create(userService.getUserManagementWriteService(), type, courseTemplateDTO -> courseTemplateListDataProvider.refresh(), stringMessages);
         final EditACLDialog.DialogConfig<CourseTemplateDTO> configACL = EditACLDialog.create(
-                userService.getUserManagementService(), type, courseTemplate -> courseTemplate.getAccessControlList(),
+                userService.getUserManagementWriteService(), type, courseTemplate -> courseTemplate.getAccessControlList(),
                 stringMessages);
         actionsColumn.addAction(ACTION_DELETE, DELETE, e -> {
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveCourseTemplate(e.getName()))) {

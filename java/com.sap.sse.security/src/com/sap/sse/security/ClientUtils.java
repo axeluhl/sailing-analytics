@@ -92,7 +92,6 @@ public class ClientUtils {
             return TUMBLR;
         else if (authProviderName.equals("foursquare"))
             return FOURSQUARE;
-
         return authProvider;
     }
 
@@ -125,7 +124,6 @@ public class ClientUtils {
             return "tumblr.";
         else if (authProvider == FOURSQUARE)
             return "foursquare";
-
         return "Default";
     }
 
@@ -138,55 +136,42 @@ public class ClientUtils {
         case FACEBOOK: {
             return FACEBOOK_PROTECTED_RESOURCE_URL;
         }
-
         case GOOGLE: {
             return GOOGLE_PROTECTED_RESOURSE_URL;
         }
-
         case TWITTER: {
             return TWITTER_PROTECTED_RESOURCE_URL;
         }
-
         case YAHOO: {
             return YAHOO_PROTECTED_RESOURCE_URL;
         }
-
         case LINKEDIN: {
             return LINKEDIN_PROTECTED_RESOURCE_URL;
         }
-
         case INSTAGRAM: {
             return INSTAGRAM_PROTECTED_RESOURCE_URL;
         }
-
         case IMGUR: {
             return IMGUR_PROTECTED_RESOURCE_URL;
         }
-
         case GITHUB: {
             return GITHUB_PROTECTED_RESOURCE_URL;
         }
-
         case FLICKR: {
             return FLICKR_PROTECTED_RESOURCE_URL;
         }
-
         case VIMEO: {
             return VIMEO_PROTECTED_RESOURCE_URL;
         }
-
         case WINDOWS_LIVE: {
             return LIVE_PROTECTED_RESOURCE_URL;
         }
-
         case TUMBLR: {
             return TUMBLR_PROTECTED_RESOURCE_URL;
         }
-
         case FOURSQUARE: {
             return FOURSQUARE_PROTECTED_RESOURCE_URL;
         }
-
         default: {
             return null;
         }

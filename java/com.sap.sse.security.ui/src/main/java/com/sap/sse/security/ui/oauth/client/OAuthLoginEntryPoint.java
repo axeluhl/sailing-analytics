@@ -42,11 +42,11 @@ public class OAuthLoginEntryPoint implements EntryPoint, UserChangeEventHandler 
                 HEADER_FORWARD_TO_REPLICA);
         UserManagementWriteServiceAsync userManagementWriteService = GWT.create(UserManagementWriteService.class);
         EntryPointHelper.registerASyncService((ServiceDefTarget) userManagementWriteService,
-                com.sap.sse.security.ui.client.RemoteServiceMappingConstants.userManagementServiceWriteRemotePath,
+                com.sap.sse.security.ui.client.RemoteServiceMappingConstants.userManagementServiceRemotePath,
                 HEADER_FORWARD_TO_MASTER);
         userService = new UserService(userManagementService, userManagementWriteService);
         loginScreen = new OAuthLogin(userManagementWriteService);
-     
+
         RootPanel.get().add(content);
         setContentMessage(stringMessages.loading());
         try {
