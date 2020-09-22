@@ -42,6 +42,7 @@ import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.TagDTO;
+import com.sap.sailing.domain.common.orc.ImpliedWindSource;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
 import com.sap.sailing.domain.common.racelog.tracking.CompetitorRegistrationOnRaceLogDisabledException;
@@ -55,8 +56,10 @@ import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
 import com.sap.sailing.gwt.ui.adminconsole.RaceLogSetTrackingTimesDTO;
+import com.sap.sailing.gwt.ui.client.shared.charts.MarkPositionService.MarkTrackDTO;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
+import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
@@ -65,13 +68,17 @@ import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.MigrateGroupOwnerForHierarchyDTO;
+import com.sap.sailing.gwt.ui.shared.RaceLogSetFinishingAndFinishTimeDTO;
+import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
+import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.TypedDeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.UrlDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
@@ -394,6 +401,17 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
     void updateRaceCourse(RegattaAndRaceIdentifier raceIdentifier,
             List<Pair<ControlPointDTO, PassingInstruction>> courseDTO);
 
+    void removeSailingServers(Set<String> toRemove) throws UnauthorizedException, Exception;
+
+    RemoteSailingServerReferenceDTO addRemoteSailingServerReference(RemoteSailingServerReferenceDTO sailingServer)
+            throws UnauthorizedException, Exception;
+
+    RemoteSailingServerReferenceDTO updateRemoteSailingServerReference(
+            RemoteSailingServerReferenceDTO sailingServer) throws UnauthorizedException, Exception;
+
+    RemoteSailingServerReferenceDTO getCompleteRemoteServerReference(String sailingServerName)
+            throws UnauthorizedException, Exception;
+
     void setWind(RegattaAndRaceIdentifier raceIdentifier, WindDTO windDTO);
 
     void removeAndUntrackRaces(List<RegattaAndRaceIdentifier> regattaAndRaceIdentifiers);
@@ -418,6 +436,14 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
             Position fixedPosition);
 
     CourseTemplateDTO createOrUpdateCourseTemplate(CourseTemplateDTO courseTemplate);
+
+    /**
+     * Removes course templates list
+     * 
+     * @param courseTemplateDTOs
+     *            list of course templates to remove
+     */
+    void removeCourseTemplates(Collection<UUID> courseTemplatesUuids);
 
     /**
      * Removes mark properties list
@@ -582,12 +608,6 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
     SuccessInfo updateTag(String leaderboardName, String raceColumnName, String fleetName, TagDTO tagToUpdate,
             String tag, String comment, String imageURL, String resizedImageURL, boolean visibleForPublic)
             throws UnauthorizedException;
-    /**
-     * Returns {@code true} if the given race can be sliced. Only Smarthphone tracked races can be sliced. In addition
-     * the race must be part of a {@link RegattaLeaderboard}.
-     */
-    boolean canSliceRace(RegattaAndRaceIdentifier raceIdentifier) throws UnauthorizedException;
-    
 
     /**
      * @param raceLogFrom
@@ -652,5 +672,25 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
      */
     SuccessInfo removeTag(String leaderboardName, String raceColumnName, String fleetName, TagDTO tag)
             throws UnauthorizedException;
+
+    boolean setStartTimeAndProcedure(RaceLogSetStartTimeAndProcedureDTO dto)
+            throws UnauthorizedException, NotFoundException;
+
+    Pair<Boolean, Boolean> setFinishingAndEndTime(RaceLogSetFinishingAndFinishTimeDTO dto)
+            throws UnauthorizedException, NotFoundException;
+
+    void setImpliedWindSource(String leaderboardName, String raceColumnName, String fleetName,
+            ImpliedWindSource impliedWindSource) throws NotFoundException;
+
+    void createOrUpdateDeviceConfiguration(DeviceConfigurationDTO configurationDTO) throws UnauthorizedException;
+
+    List<TrackFileImportDeviceIdentifierDTO> getTrackFileImportDeviceIds(List<String> uuids)
+            throws NoCorrespondingServiceRegisteredException, TransformationException;
+
+    MarkTrackDTO getMarkTrack(String leaderboardName, String raceColumnName, String fleetName, String markIdAsString)
+            throws UnauthorizedException;
+
+    List<DeviceMappingDTO> getDeviceMappings(String leaderboardName)
+            throws UnauthorizedException, DoesNotHaveRegattaLogException, TransformationException, NotFoundException;
 
 }

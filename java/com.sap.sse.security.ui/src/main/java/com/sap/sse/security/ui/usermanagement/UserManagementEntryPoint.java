@@ -32,7 +32,7 @@ public class UserManagementEntryPoint extends AbstractSecurityEntryPoint {
         });
         UserManagementPanel<CellTableWithCheckboxResources> userManagementPanel = new UserManagementPanel<>(getUserService(), getStringMessages(), this, tableResources);
         center.add(new ScrollPanel(userManagementPanel), getStringMessages().users());
-        final SettingsPanel settingsPanel = new SettingsPanel(getUserManagementService(), getStringMessages());
+        final SettingsPanel settingsPanel = new SettingsPanel(getUserManagementService(), getUserManagementWriteService(), getStringMessages());
         center.add(new ScrollPanel(settingsPanel), getStringMessages().settings());
         RootLayoutPanel.get().add(center);
         RootPanel.get().add(new LoginPanel(Resources.INSTANCE.loginPanelCss(), getUserService()));

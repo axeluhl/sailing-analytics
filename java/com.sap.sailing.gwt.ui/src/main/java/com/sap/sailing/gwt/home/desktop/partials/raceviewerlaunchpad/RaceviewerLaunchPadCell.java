@@ -12,7 +12,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.sap.sailing.gwt.home.communication.race.RaceMetadataDTO;
-import com.sap.sailing.gwt.home.shared.resources.SharedHomeResources;
+import com.sap.sailing.gwt.home.shared.SharedHomeResources;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util;
 

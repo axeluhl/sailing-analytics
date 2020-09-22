@@ -34,7 +34,29 @@ These can be mapped to a competitor or a mark via the DeviceMappings in the Race
 	</tr>
 	<tr>
 		<td>Optional parameters:</td>
-		<td>None</td>
+		<td>returnManeuverUpdate (boolean, default false): if true, a list of races, identified by regatta name and race name,
+		    will be returned as a response document that shows those races for which the fix(es) was/were mapped to a competitor
+		    for which the maneuver list changed since the last such request. Example output:<pre>
+		{
+		  "maneuverchanged": [
+		    {
+		      "regattaName": "Ddd",
+		      "raceName": "R3",
+		      "maneuverChanged": false,
+		      "liveDelayInMillis": 5000
+		    },
+		    {
+		      "regattaName": "Ddd",
+		      "raceName": "R1",
+		      "maneuverChanged": false,
+		      "liveDelayInMillis": 5000
+		    }
+		  ]
+		}
+		    </pre><br>
+		    returnLiveDelay (boolean, default false): if true, a list of races, identified by regatta name and race name, will
+		    be returned as a response document, showing for each race to which the fix was mapped what the race's live delay
+		    is in milliseconds. Note that this can be combined with <tt>returnManeuverUpdate</tt>. For example output see above.</td>
 	</tr>
 	<tr>
 		<td>Request method:</td>

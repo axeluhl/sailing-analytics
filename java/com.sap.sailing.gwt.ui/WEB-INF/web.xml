@@ -7,8 +7,7 @@
 	<!-- Disable directory listing: -->
 	<servlet>
 		<servlet-name>default</servlet-name>
-		<servlet-class>org.eclipse.jetty.servlet.DefaultServlet
-		</servlet-class>
+		<servlet-class>org.eclipse.jetty.servlet.DefaultServlet</servlet-class>
 		<init-param>
 			<param-name>dirAllowed</param-name>
 			<param-value>false</param-value>
@@ -81,26 +80,15 @@
 	</servlet-mapping>
 	
 	<servlet>
-	    <display-name>Sailing Service</display-name>
-	    <servlet-name>SailingService</servlet-name>
-    	<servlet-class>com.sap.sailing.gwt.ui.server.SailingServiceImpl</servlet-class>
+		<display-name>Sailing Service</display-name>
+		<servlet-name>SailingService</servlet-name>
+		<servlet-class>com.sap.sailing.gwt.ui.server.SailingServiceWriteImpl</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>SailingService</servlet-name>
 		<url-pattern>/service/sailing</url-pattern>
 		<url-pattern>/service/sailing/*</url-pattern>
 	</servlet-mapping>
-
-    <servlet>
-        <display-name>Sailing ServiceWrite</display-name>
-        <servlet-name>SailingServiceWrite</servlet-name>
-        <servlet-class>com.sap.sailing.gwt.ui.server.SailingServiceWriteImpl</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>SailingServiceWrite</servlet-name>
-        <url-pattern>/service/sailingmaster</url-pattern>
-        <url-pattern>/service/sailingmaster/*</url-pattern>
-    </servlet-mapping>
 
 	<servlet>
 	    <display-name>Server Configuration Service</display-name>
@@ -124,15 +112,14 @@
 	</servlet-mapping>
 
 	<servlet>
-            <display-name>Media Service</display-name>
-	    <servlet-name>MediaService</servlet-name>
-    	<servlet-class>com.sap.sailing.gwt.ui.server.MediaServiceImpl</servlet-class>
+		<display-name>Media Service</display-name>
+		<servlet-name>MediaService</servlet-name>
+		<servlet-class>com.sap.sailing.gwt.ui.server.MediaServiceWriteImpl</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>MediaService</servlet-name>
 		<url-pattern>/service/media</url-pattern>
 	</servlet-mapping>
-
 	<servlet>
 	    <display-name>Simulator Service</display-name>
 	    <servlet-name>SimulatorService</servlet-name>
@@ -142,20 +129,19 @@
 		<servlet-name>SimulatorService</servlet-name>
 		<url-pattern>/service/simulator</url-pattern>
 	</servlet-mapping>
-
+    <servlet>
+        <display-name>Data Mining Service</display-name>
+        <servlet-name>DataMiningService</servlet-name>
+        <servlet-class>com.sap.sailing.gwt.ui.server.DataMiningWriteServiceImpl</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>DataMiningService</servlet-name>
+        <url-pattern>/service/datamining</url-pattern>
+    </servlet-mapping>
 	<servlet>
-	    <display-name>Data Mining Service</display-name>
-	    <servlet-name>DataMiningService</servlet-name>
-    	<servlet-class>com.sap.sailing.gwt.ui.server.DataMiningServiceImpl</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>DataMiningService</servlet-name>
-		<url-pattern>/service/datamining</url-pattern>
-	</servlet-mapping>
-	<servlet>
-		<display-name>User Management Service</display-name>
+		<display-name>User Management Write</display-name>
 		<servlet-name>UserManagementService</servlet-name>
-		<servlet-class>com.sap.sse.security.ui.server.UserManagementServiceImpl</servlet-class>
+		<servlet-class>com.sap.sse.security.ui.server.UserManagementWriteServiceImpl</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>UserManagementService</servlet-name>
