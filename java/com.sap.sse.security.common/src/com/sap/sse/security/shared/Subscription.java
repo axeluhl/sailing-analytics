@@ -9,7 +9,7 @@ import com.sap.sse.security.shared.impl.User;
  * Subscription data model for a {@link User} which is stored persistently together with the {@link User} object. See,
  * e.g., {@link User#setSubscriptions(Subscription[])}.
  * 
- * @author tutran
+ * @author Tu Tran
  */
 public abstract class Subscription implements Serializable {
     public static final String PAYMENT_STATUS_SUCCESS = "success";

@@ -11,6 +11,16 @@ import org.json.simple.JSONValue;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.subscription.SubscriptionPermissionsAuthorizationFilter;
 
+/**
+ * Shiro authorization filter for Chargebee webhook handler servlet, implementation of
+ * {@code SubscriptionPermissionsAuthorizationFilter}. Use this filter by adding configuration into shiro.ini:<br>
+ * <code>
+ * subscriptionPermissions = com.sap.sailing.server.gateway.subscription.chargebee.ChargebeeSubscriptionPermissionsAuthorizationFilter
+ * /subscription/hooks = bearerToken,subscriptionPermissions
+ * </code>
+ * 
+ * @author Tu Tran
+ */
 public class ChargebeeSubscriptionPermissionsAuthorizationFilter extends SubscriptionPermissionsAuthorizationFilter {
     private static final Logger logger = Logger
             .getLogger(ChargebeeSubscriptionPermissionsAuthorizationFilter.class.getName());
@@ -20,10 +30,10 @@ public class ChargebeeSubscriptionPermissionsAuthorizationFilter extends Subscri
         try {
             final Object requestBody = JSONValue.parseWithException(request.getReader());
             final JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
-            logger.log(Level.INFO, "Received Chargebee webhook: " + requestObject.toJSONString());
+            logger.info(() -> "Received Chargebee webhook: " + requestObject.toJSONString());
             final SubscriptionWebHookEvent event = new SubscriptionWebHookEvent(requestObject);
             if (!event.isValidEvent()) {
-                throw new IllegalArgumentException("Chargebee webhook event i");
+                throw new IllegalArgumentException("Invalid Chargebee webhook event");
             }
             request.setAttribute("event", event);
             return event.getCustomerId();

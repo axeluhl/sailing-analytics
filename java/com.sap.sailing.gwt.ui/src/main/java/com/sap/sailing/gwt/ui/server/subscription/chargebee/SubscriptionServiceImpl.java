@@ -156,7 +156,7 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
             User user = getCurrentUser();
             Subscription subscription = user.getSubscriptionByPlan(planId);
             if (isValidSubscription(subscription)) {
-                logger.log(Level.INFO, "Cancel user subscription, user " + user.getName() + ", plan " + planId);
+                logger.info(() -> "Cancel user subscription, user " + user.getName() + ", plan " + planId);
                 Result resultData = cancel(subscription.getSubscriptionId()).request();
                 if (resultData.subscription().status().name().toLowerCase()
                         .equals(ChargebeeSubscription.SUBSCRIPTION_STATUS_CANCELLED)) {
@@ -178,8 +178,8 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
     }
 
     private void updateUserSubscription(User user, Subscription subscription) throws UserManagementException {
-        logger.log(Level.INFO,
-                "Update user subscription, user " + user.getName() + ", new subsription " + subscription.toString());
+        logger.info(() -> "Update user subscription, user " + user.getName() + ", new subsription "
+                + subscription.toString());
         getSecurityService().updateUserSubscription(user.getName(), subscription);
     }
 

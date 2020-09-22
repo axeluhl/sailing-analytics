@@ -659,12 +659,6 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     /**
      * Persist user subscription data
-     * 
-     * @param username
-     *            system user name
-     * @param subscription
-     *            Updated subscription model
-     * @throws UserManagementException
      */
     void updateUserSubscription(String username, Subscription subscription) throws UserManagementException;
 

@@ -17,8 +17,6 @@ public interface UserSubscriptionView extends IsWidget {
 
     /**
      * Update the view with subscription data returned from back-end
-     * 
-     * @param subscription
      */
     public void updateView(SubscriptionDTO subscription);
 
@@ -29,15 +27,11 @@ public interface UserSubscriptionView extends IsWidget {
 
     /**
      * Called on checkout modal has errors
-     * 
-     * @param error
      */
     public void onOpenCheckoutError(String error);
 
     /**
      * Presenter for {@link UserSubscriptionView}
-     * 
-     * @author tutran
      */
     public interface Presenter {
         /**

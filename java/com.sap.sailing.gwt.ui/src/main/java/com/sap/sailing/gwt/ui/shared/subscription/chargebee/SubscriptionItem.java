@@ -18,12 +18,12 @@ public class SubscriptionItem implements IsSerializable {
     private String planId;
 
     /**
-     * Trial start timestamp
+     * Trial start time
      */
     private TimePoint trialStart;
 
     /**
-     * Trial end timestamp
+     * Trial end time
      */
     private TimePoint trialEnd;
 
@@ -57,8 +57,6 @@ public class SubscriptionItem implements IsSerializable {
 
     /**
      * Check if subscription is in trial status
-     * 
-     * @return
      */
     public boolean isInTrial() {
         return subscriptionStatus != null && subscriptionStatus.equals(SUBSCRIPTION_STATUS_TRIAL);
@@ -66,8 +64,6 @@ public class SubscriptionItem implements IsSerializable {
 
     /**
      * Check if subscription is in active status
-     * 
-     * @return
      */
     public boolean isActive() {
         return subscriptionStatus != null && subscriptionStatus.equals(SUBSCRIPTION_STATUS_ACTIVE);
@@ -79,8 +75,6 @@ public class SubscriptionItem implements IsSerializable {
 
     /**
      * Get subscription status i18n label
-     * 
-     * @return
      */
     public String getSubscriptionStatusLabel() {
         String label = "";
@@ -98,8 +92,6 @@ public class SubscriptionItem implements IsSerializable {
 
     /**
      * Get subscription payment status i18n label
-     * 
-     * @return
      */
     public String getPaymentStatusLabel() {
         final String label;

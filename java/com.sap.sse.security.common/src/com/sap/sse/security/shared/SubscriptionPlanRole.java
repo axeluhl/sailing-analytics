@@ -4,7 +4,7 @@ import java.util.UUID;
 
 /**
  * Specify role UUID associated with a plan with qualification. Role qualification (by group/user ownership) can be
- * specified by rules, such as qualifying for objetcs owned by the subscribing user, qualified by the subscribing user's
+ * specified by rules, such as qualifying for objects owned by the subscribing user, qualified by the subscribing user's
  * own default group, etc. or by specific user name, and/or user group name.
  * 
  * @author Tu Tran

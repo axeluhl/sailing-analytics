@@ -18,7 +18,8 @@ import com.sap.sse.security.shared.impl.ChargebeeSubscription;
 import com.sap.sse.security.shared.impl.User;
 
 /**
- * Servlet for handling WebHook events, response with status 200 in success handling
+ * Servlet for handling WebHook events, response with status 200 in success handling. The servlet has to be secured by
+ * {@code ChargebeeSubscriptionPermissionsAuthorizationFilter}
  * 
  * {@link https://www.chargebee.com/docs/events_and_webhooks.html}
  * 
@@ -49,7 +50,6 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
     }
 
     /**
-     * 
      * @return {@code true} if event occurred at time is less than latest user subscription updated time
      */
     private boolean isOutdatedEvent(SubscriptionWebHookEvent event, User user) {
@@ -83,20 +83,20 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
             }
         }
         if (isOutdated) {
-            logger.log(Level.INFO, "Webhook event is outdated and won't be processed");
+            logger.info(() -> "Webhook event is outdated and won't be processed");
         }
         return isOutdated;
     }
 
     private boolean isOutdatedEventTime(TimePoint occuredAt, Subscription subscription) {
-        return occuredAt.before(subscription.getLatestEventTime()) || occuredAt.before(subscription.getManualUpdatedAt());
+        return occuredAt.before(subscription.getLatestEventTime())
+                || occuredAt.before(subscription.getManualUpdatedAt());
     }
 
     private void processEvent(SubscriptionWebHookEvent event, User user) throws UserManagementException {
         final SubscriptionWebHookEventType eventType = event.getEventType();
         if (eventType != null) {
-            logger.log(Level.INFO,
-                    "Start process webhook event \"" + eventType.getName() + "\" for user " + user.getName());
+            logger.info(() -> "Start process webhook event \"" + eventType.getName() + "\" for user " + user.getName());
             final Subscription userSubscription = getCurrentUserSubscriptionFromEvent(user, event);
             switch (eventType) {
             case CUSTOMER_DELETED:
@@ -134,8 +134,8 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
                 }
                 break;
             }
-            logger.log(Level.INFO,
-                    "Webhook event \"" + eventType.getName() + "\" has been processed for user " + user.getName());
+            logger.info(() -> "Webhook event \"" + eventType.getName() + "\" has been processed for user "
+                    + user.getName());
         }
     }
 
@@ -192,12 +192,6 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
     /**
      * Update user subscription from invoice webhook events {@code SubscriptionWebHookEventType#INVOICE_GENERATED}
      * {@code SubscriptionWebHookEventType#INVOICE_UPDATED}
-     * 
-     * @param currentSubscription
-     *            current user subscription
-     * @param event
-     *            webhook event
-     * @throws UserManagementException
      */
     private void updateSubscriptionInvoice(User user, Subscription currentSubscription, SubscriptionWebHookEvent event)
             throws UserManagementException {
@@ -225,10 +219,6 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
      * Get subscription invoice id and invoice status. If the data do not exist in webhook event then they will get
      * value from user current subscription if it's not null
      * 
-     * @param currentSubscription
-     *            current user subscription
-     * @param event
-     *            webhook event
      * @return subscription invoice id and invoice status
      */
     private Pair<String, String> getInvoiceData(Subscription currentSubscription, SubscriptionWebHookEvent event) {
@@ -266,9 +256,6 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
     /**
      * If invoice is paid then payment status will be {@code Subscription#PAYMENT_STATUS_SUCCESS}, and
      * {@code Subscription#PAYMENT_STATUS_NO_SUCCESS} otherwise
-     * 
-     * @param invoiceStatus
-     *            event invoice status
      */
     private String determinePaymentStatusFromInvoiceStatus(String invoiceStatus) {
         return invoiceStatus.equals(SubscriptionWebHookEvent.INVOICE_STATUS_PAID) ? Subscription.PAYMENT_STATUS_SUCCESS
@@ -278,9 +265,6 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
     /**
      * If transaction is success then payment status will be {@code Subscription#PAYMENT_STATUS_SUCCESS}, and
      * {@code Subscription#PAYMENT_STATUS_NO_SUCCESS} otherwise
-     * 
-     * @param transactionStatus
-     *            event transaction status
      */
     private String determinePaymentStatusFromTransactionStatus(String transactionStatus) {
         return transactionStatus.equals(ChargebeeSubscription.TRANSACTION_STATUS_SUCCESS)

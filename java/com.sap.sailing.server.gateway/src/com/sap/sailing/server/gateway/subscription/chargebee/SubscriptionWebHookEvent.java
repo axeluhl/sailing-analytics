@@ -18,6 +18,34 @@ public class SubscriptionWebHookEvent {
     public static final String SUBSCRIPTION_STATUS_ACTIVE = "active";
     public static final String INVOICE_STATUS_PAID = "paid";
 
+    private static final String CONTENT_JSON_OBJECT = "content";
+    private static final String EVENT_ID = "id";
+    private static final String EVENT_OCCURRED_AT = "occurred_at";
+    private static final String EVENT_TYPE = "event_type";
+
+    private static final String CUSTOMER_JSON_OBJECT = "customer";
+    private static final String CUSTOMER_ID = "id";
+    private static final String CUSTOMER_EMAIL = "email";
+
+    private static final String SUBSCRIPTION_JSON_OBJECT = "subscription";
+    private static final String SUBSCRIPTION_ID = "id";
+    private static final String SUBSCRIPTION_PLAN_ID = "plan_id";
+    private static final String SUBSCRIPTION_STATUS = "status";
+    private static final String SUBSCRIPTION_TRIAL_START = "trial_start";
+    private static final String SUBSCRIPTION_TRIAL_END = "trial_end";
+    private static final String SUBSCRIPTION_CREATED_AT = "created_at";
+    private static final String SUBSCRIPTION_UPDTAED_AT = "updated_at";
+
+    private static final String TRANSACTION_JSON_OBJECT = "transaction";
+    private static final String TRANSACTION_STATUS = "status";
+    private static final String TRANSACTION_TYPE = "type";
+
+    private static final String INVOICE_JSON_OBJECT = "invoice";
+    private static final String INVOICE_ID = "id";
+    private static final String INVOICE_CUSTOMER_ID = "customer_id";
+    private static final String INVOICE_SUBSCRIPTION_ID = "subscription_id";
+    private static final String INVOICE_STATUS = "status";
+
     private final JSONObject eventJSON;
     private final String eventId;
     private final SubscriptionWebHookEventType eventType;
@@ -25,9 +53,9 @@ public class SubscriptionWebHookEvent {
 
     public SubscriptionWebHookEvent(JSONObject eventJSON) {
         this.eventJSON = eventJSON;
-        eventId = getJsonValue(eventJSON, "id");
+        eventId = getJsonValue(eventJSON, EVENT_ID);
         eventType = getEventType(eventJSON);
-        content = getJsonValue(eventJSON, "content");
+        content = getJsonValue(eventJSON, CONTENT_JSON_OBJECT);
     }
 
     public boolean isValidEvent() {
@@ -39,12 +67,12 @@ public class SubscriptionWebHookEvent {
     }
 
     private SubscriptionWebHookEventType getEventType(JSONObject eventJSON) {
-        final String eventTypeAsUppercaseString = toUpperCase(getJsonValue(eventJSON, "event_type"));
+        final String eventTypeAsUppercaseString = toUpperCase(getJsonValue(eventJSON, EVENT_TYPE));
         try {
             return SubscriptionWebHookEventType.valueOf(eventTypeAsUppercaseString);
         } catch (NullPointerException | IllegalArgumentException e) {
-            logger.warning("Exception trying to extract subscription event type " + eventTypeAsUppercaseString + ": "
-                    + e.getMessage());
+            logger.warning(() -> "Exception trying to extract subscription event type " + eventTypeAsUppercaseString
+                    + ": " + e.getMessage());
             return null;
         }
     }
@@ -54,11 +82,11 @@ public class SubscriptionWebHookEvent {
     }
 
     public String getCustomerEmail() {
-        return getJsonValue(content, "customer", "email");
+        return getJsonValue(content, CUSTOMER_JSON_OBJECT, CUSTOMER_EMAIL);
     }
 
     public String getCustomerId() {
-        String customerId = getJsonValue(content, "customer", "id");
+        String customerId = getJsonValue(content, CUSTOMER_JSON_OBJECT, CUSTOMER_ID);
         if (StringUtils.isEmpty(customerId)) {
             customerId = getInvoiceCustomerId();
         }
@@ -66,11 +94,11 @@ public class SubscriptionWebHookEvent {
     }
 
     public String getPlanId() {
-        return getJsonValue(content, "subscription", "plan_id");
+        return getJsonValue(content, SUBSCRIPTION_JSON_OBJECT, SUBSCRIPTION_PLAN_ID);
     }
 
     public String getSubscriptionId() {
-        String subscriptionId = getJsonValue(content, "subscription", "id");
+        String subscriptionId = getJsonValue(content, SUBSCRIPTION_JSON_OBJECT, SUBSCRIPTION_ID);
         if (StringUtils.isEmpty(subscriptionId)) {
             subscriptionId = getInvoiceSubscriptionId();
         }
@@ -78,51 +106,51 @@ public class SubscriptionWebHookEvent {
     }
 
     public String getSubscriptionStatus() {
-        return toLowerCase(getJsonValue(content, "subscription", "status"));
+        return toLowerCase(getJsonValue(content, SUBSCRIPTION_JSON_OBJECT, SUBSCRIPTION_STATUS));
     }
 
     public TimePoint getSubscriptionTrialStart() {
-        return getTime(getJsonValue(content, "subscription", "trial_start"));
+        return getTime(getJsonValue(content, SUBSCRIPTION_JSON_OBJECT, SUBSCRIPTION_TRIAL_START));
     }
 
     public TimePoint getSubscriptionTrialEnd() {
-        return getTime(getJsonValue(content, "subscription", "trial_end"));
+        return getTime(getJsonValue(content, SUBSCRIPTION_JSON_OBJECT, SUBSCRIPTION_TRIAL_END));
     }
 
     public TimePoint getSubscriptionCreatedAt() {
-        return getTime(getJsonValue(content, "subscription", "created_at"));
+        return getTime(getJsonValue(content, SUBSCRIPTION_JSON_OBJECT, SUBSCRIPTION_CREATED_AT));
     }
 
     public TimePoint getSubscriptionUpdatedAt() {
-        return getTime(getJsonValue(content, "subscription", "updated_at"));
+        return getTime(getJsonValue(content, SUBSCRIPTION_JSON_OBJECT, SUBSCRIPTION_UPDTAED_AT));
     }
 
     public TimePoint getEventOccurredAt() {
-        return getTime(getJsonValue(eventJSON, "occurred_at"));
+        return getTime(getJsonValue(eventJSON, EVENT_OCCURRED_AT));
     }
 
     public String getTransactionStatus() {
-        return toLowerCase(getJsonValue(content, "transaction", "status"));
+        return toLowerCase(getJsonValue(content, TRANSACTION_JSON_OBJECT, TRANSACTION_STATUS));
     }
 
     public String getTransactionType() {
-        return toLowerCase(getJsonValue(content, "transaction", "type"));
+        return toLowerCase(getJsonValue(content, TRANSACTION_JSON_OBJECT, TRANSACTION_TYPE));
     }
 
     public String getInvoiceId() {
-        return getJsonValue(content, "invoice", "id");
+        return getJsonValue(content, INVOICE_JSON_OBJECT, INVOICE_ID);
     }
 
     public String getInvoiceCustomerId() {
-        return getJsonValue(content, "invoice", "customer_id");
+        return getJsonValue(content, INVOICE_JSON_OBJECT, INVOICE_CUSTOMER_ID);
     }
 
     public String getInvoiceSubscriptionId() {
-        return getJsonValue(content, "invoice", "subscription_id");
+        return getJsonValue(content, INVOICE_JSON_OBJECT, INVOICE_SUBSCRIPTION_ID);
     }
 
     public String getInvoiceStatus() {
-        return toLowerCase(getJsonValue(content, "invoice", "status"));
+        return toLowerCase(getJsonValue(content, INVOICE_JSON_OBJECT, INVOICE_STATUS));
     }
 
     private TimePoint getTime(long timestamp) {

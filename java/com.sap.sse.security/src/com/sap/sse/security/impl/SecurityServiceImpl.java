@@ -2535,11 +2535,11 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (user != null) {
             String newSubscriptionPlanId = newSubscription.getPlanId();
             Subscription currentSubscription = user.getSubscriptionByPlan(newSubscriptionPlanId);
-            logger.log(Level.INFO, "Update user subscription for plan " + newSubscriptionPlanId);
-            logger.log(Level.INFO, "Current user plan subscription: "
+            logger.info(() -> "Update user subscription for plan " + newSubscriptionPlanId);
+            logger.info(() -> "Current user plan subscription: "
                     + (currentSubscription != null ? currentSubscription.toString() : "null"));
-            logger.log(Level.INFO,
-                    "New plan subscription: " + (newSubscription != null ? newSubscription.toString() : "null"));
+            logger.info(
+                    () -> "New plan subscription: " + (newSubscription != null ? newSubscription.toString() : "null"));
             if (shouldUpdateUserRolesForSubscription(currentSubscription, newSubscription)) {
                 updateUserRolesOnSubscriptionChange(user, currentSubscription, newSubscription);
             }
@@ -2554,12 +2554,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     /**
      * Build new subscription list for user from new subscription. This might update a subscription model, or add new
      * one to user's subscription list
-     * 
-     * @param user
-     *            User
-     * @param newSubscription
-     *            New subscription
-     * @return new subscription list for user
      */
     private Subscription[] buildNewUserSubscriptions(User user, Subscription newSubscription) {
         Subscription[] newUserSubscriptions = null;
@@ -2590,18 +2584,10 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     /**
      * Add or remove subscription plan's roles for user
-     * 
-     * @param user
-     *            User
-     * @param currentSubscription
-     *            current user subscription
-     * @param newSubscription
-     *            new user subscription
-     * @throws UserManagementException
      */
     private void updateUserRolesOnSubscriptionChange(User user, Subscription currentSubscription,
             Subscription newSubscription) throws UserManagementException {
-        logger.log(Level.INFO, "Update user subscription roles for user " + user.getName());
+        logger.info(() -> "Update user subscription roles for user " + user.getName());
         // in case new subscription has no planId, it means user doesn't subscribe to any plans
         // so all plan's roles assigned to the user must be removed
         if (newSubscription != null && !newSubscription.hasPlan()) {
@@ -2625,7 +2611,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     private void removeUserPlanRoles(User user, SubscriptionPlan plan) throws UserManagementException {
         if (plan != null) {
-            logger.log(Level.INFO, "Remove user roles of subscription plan " + plan.getName());
+            logger.info(() -> "Remove user roles of subscription plan " + plan.getName());
             Role[] roles = getSubscriptionPlanUserRoles(user, plan);
             for (Role role : roles) {
                 store.removeRoleFromUser(user.getName(), role);
@@ -2635,7 +2621,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     private void addUserPlanRoles(User user, SubscriptionPlan plan) throws UserManagementException {
         if (plan != null) {
-            logger.log(Level.INFO, "Add user roles for subscription plan " + plan.getName());
+            logger.info(() -> "Add user roles for subscription plan " + plan.getName());
             Role[] roles = getSubscriptionPlanUserRoles(user, plan);
             for (Role role : roles) {
                 store.addRoleForUser(user.getName(), role);
@@ -2653,11 +2639,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     /**
      * Get a role {@code Role} for a subscription plan role definition {@code SubscriptionPlanRole}
-     * 
-     * @param user
-     *            plan subscription user
-     * @param planRole
-     * @return user role {@code Role}
      */
     private Role getSubscriptionPlanUserRole(User user, SubscriptionPlanRole planRole) {
         final User qualifiedUser = getSubscriptionPlanRoleQualifiedUser(user, planRole);
@@ -2668,11 +2649,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     /**
      * Check and return role qualified user {@code User} for a subscription plan role {@code SubscriptionPlanRole}
      * definition
-     * 
-     * @param user
-     *            plan subscription user
-     * @param planRole
-     * @return role qualified user
      */
     private User getSubscriptionPlanRoleQualifiedUser(User user, SubscriptionPlanRole planRole) {
         final User qualifiedUser;
@@ -2692,13 +2668,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
      * Check and return role qualified tenant {@code UserGroup} for a subscription plan role
      * {@code SubscriptionPlanRole} definition
      * 
-     * @param subscriptionUser
-     *            plan subscription user
      * @param qualifiedUser
      *            qualified user from
      *            {@code SecurityServiceImpl#getSubscriptionPlanRoleQualifiedUser(User, SubscriptionPlanRole)}
-     * @param planRole
-     * @return role qualified tenant
      */
     private UserGroup getSubscriptionPlanRoleQualifiedTenant(User subscriptionUser, User qualifiedUser,
             SubscriptionPlanRole planRole) {
