@@ -137,7 +137,7 @@ public class StartTimeFragment extends BaseFragment
         final Serializable id = mDataStore.getEventUUID();
         if (id != null) {
             mEvent = mDataStore.getEvent(id);
-            if (calendar.before(null)) {
+            if (calendar.before(mEvent.getStartDate().asDate())) {
                 //Today is before the start date of the event
                 calendar.setTime(mEvent.getStartDate().asDate());
             } else if (calendar.after(mEvent.getEndDate().asDate())) {
