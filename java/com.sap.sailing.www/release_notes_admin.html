@@ -25,12 +25,12 @@
                 <div class="innerContent">
                     <h2 class="articleSubheadline">September 2020</h2>
                     <ul class="bulletList">
-                        <li>Due to loadbalancing request between master and replica all GET requests are routed to replicas. As API calls 
-                            going to /sailingserver/api/v1/tracking_devices/[deviceUUID] need to be answered by master, HTTP Post is required from now.
-                            Please update existing applications. As support for GET will be removed in the future. 
+                        <li>Due to loadbalancing between master and replica all GET requests are routed to replicas. As API calls 
+                            going to /sailingserver/api/v1/tracking_devices/[deviceUUID] need to be answered by master, HTTP POST is required from now.
+                            Please update existing applications. As support for GET will be removed in the near future. 
                         </li>
-                        <li>Master/replica loadbalancing introduced. GWT Async Services are now splitted between read and write operations. 
-                            Requests being a HTTP Post or having the HTTP header X-SAPSSE-Forward-Request-To set to master will go to the master instance.
+                        <li>Master/replica loadbalancing introduced. GWT Async Services are now split between read and write operations. 
+                            Requests being an HTTP POST or having the HTTP header X-SAPSSE-Forward-Request-To set to master will go to the master instance.
                         </li>
                         <li>In the /competitor/live API end point, if a gap to leader turns "infinite" because a VMG
                             goes down to 0.0kts, the API will now output a <tt>null</tt> value for <tt>gapToLeader-s</tt>
