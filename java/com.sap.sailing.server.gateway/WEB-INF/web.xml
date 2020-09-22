@@ -213,55 +213,56 @@
 		<servlet-name>FileUploadServlet</servlet-name>
 		<url-pattern>/fileupload</url-pattern>
 	</servlet-mapping>
-        <servlet>
-                <servlet-name>ORCCertificateImportServlet</servlet-name>
-                <servlet-class>com.sap.sailing.server.gateway.orc.ORCCertificateImportServlet</servlet-class>
-        </servlet>
-        <servlet-mapping>
-                <servlet-name>ORCCertificateImportServlet</servlet-name>
-                <url-pattern>/orc-certificate-import</url-pattern>
-        </servlet-mapping>
+	<servlet>
+		<servlet-name>ORCCertificateImportServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.orc.ORCCertificateImportServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ORCCertificateImportServlet</servlet-name>
+		<url-pattern>/orc-certificate-import</url-pattern>
+	</servlet-mapping>
 	
-    <servlet>
-    	<servlet-name>Jersey REST API</servlet-name>
+	<servlet>
+		<servlet-name>Jersey REST API</servlet-name>
 		<servlet-class>com.sap.sailing.server.gateway.jaxrs.RestServletContainer</servlet-class>
 		<init-param>
-        		<param-name>javax.ws.rs.Application</param-name>
-        		<param-value>com.sap.sailing.server.gateway.jaxrs.api.RestApiApplication</param-value>
-   		</init-param>
+			<param-name>javax.ws.rs.Application</param-name>
+			<param-value>com.sap.sailing.server.gateway.jaxrs.api.RestApiApplication</param-value>
+		</init-param>
 		<init-param>
-   			<param-name>com.sun.jersey.spi.container.ContainerResponseFilters</param-name>
-   			<param-value>com.sap.sailing.server.gateway.jaxrs.AccessControlAndEncodingResponseFilter</param-value>
-		</init-param>   
+			<param-name>com.sun.jersey.spi.container.ContainerResponseFilters</param-name>
+			<param-value>com.sap.sailing.server.gateway.jaxrs.AccessControlAndEncodingResponseFilter</param-value>
+		</init-param>
 		<load-on-startup>1</load-on-startup>
-  </servlet>
-  <servlet-mapping>
-    	<servlet-name>Jersey REST API</servlet-name>
-    	<url-pattern>/api/*</url-pattern>
-  </servlet-mapping>
-  <servlet>
-    	<servlet-name>Jersey REST SPI</servlet-name>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>Jersey REST API</servlet-name>
+		<url-pattern>/api/*</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>Jersey REST SPI</servlet-name>
 		<servlet-class>com.sap.sailing.server.gateway.jaxrs.RestServletContainer</servlet-class>
 		<init-param>
-         		<param-name>javax.ws.rs.Application</param-name>
-         		<param-value>com.sap.sailing.server.gateway.jaxrs.spi.RestSpiApplication</param-value>
-   		</init-param>
+			<param-name>javax.ws.rs.Application</param-name>
+			<param-value>com.sap.sailing.server.gateway.jaxrs.spi.RestSpiApplication</param-value>
+		</init-param>
 		<init-param>
-   			<param-name>com.sun.jersey.spi.container.ContainerResponseFilters</param-name>
-   			<param-value>com.sap.sailing.server.gateway.jaxrs.AccessControlAndEncodingResponseFilter</param-value>
-		</init-param>   
-                <init-param>
-                        <param-name>com.sun.jersey.config.property.packages</param-name>
-                        <param-value>com.sap.sailing.server.gateway.jaxrs</param-value>
-                </init-param>   
-    		<load-on-startup>1</load-on-startup>
-  </servlet>
-  <servlet-mapping>
-    	<servlet-name>Jersey REST SPI</servlet-name>
-    	<url-pattern>/spi/*</url-pattern>
-  </servlet-mapping>
-  
-    <servlet>
+			<param-name>com.sun.jersey.spi.container.ContainerResponseFilters</param-name>
+			<param-value>com.sap.sailing.server.gateway.jaxrs.AccessControlAndEncodingResponseFilter</param-value>
+		</init-param>
+		<init-param>
+			<param-name>com.sun.jersey.config.property.packages</param-name>
+			<param-value>com.sap.sailing.server.gateway.jaxrs</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>Jersey REST SPI</servlet-name>
+		<url-pattern>/spi/*</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
         <servlet-name>SubscriptionWebhookServlet</servlet-name>
         <servlet-class>com.sap.sailing.server.gateway.subscription.SubscriptionWebHookServlet</servlet-class>
     </servlet>
@@ -269,5 +270,23 @@
         <servlet-name>SubscriptionWebhookServlet</servlet-name>
         <url-pattern>/subscription/hooks</url-pattern>
     </servlet-mapping>
+
+	<servlet>
+		<servlet-name>SharingApi</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.jaxrs.RestServletContainer</servlet-class>
+		<init-param>
+			<param-name>javax.ws.rs.Application</param-name>
+			<param-value>com.sap.sailing.server.gateway.jaxrs.sharing.SharingApiApplication</param-value>
+		</init-param>
+		<init-param>
+			<param-name>com.sun.jersey.spi.container.ContainerResponseFilters</param-name>
+			<param-value>com.sap.sailing.server.gateway.jaxrs.AccessControlAndEncodingResponseFilter</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>SharingApi</servlet-name>
+		<url-pattern>/shared/*</url-pattern>
+	</servlet-mapping>
  </web-app>
  

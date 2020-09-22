@@ -13,12 +13,32 @@ public class LocalServerPO extends PageArea {
         super(driver, element);
     }
 
-    @FindBy(how = BySeleniumId.class, using = "isSelfServiceServerCheckbox")
+    @FindBy(how = BySeleniumId.class, using = "isSelfServiceServerCheckbox-input")
     private WebElement isSelfServiceServerCheckbox;
+    
+    @FindBy(how = BySeleniumId.class, using = "isPublicServerCheckbox-input")
+    private WebElement isPublicServerCheckbox;
+    
+    @FindBy(how = BySeleniumId.class, using = "isStandaloneServerCheckbox-input")
+    private WebElement isStandaloneServerCheckbox;
 
     public void setSelfServiceServer(boolean selfService) {
         if (selfService != isSelfServiceServerCheckbox.isSelected()) {
             isSelfServiceServerCheckbox.click();
+            awaitServerConfigurationUpdated();
+        }
+    }
+    
+    public void setPublicServer(boolean publicServer) {
+        if (publicServer != isPublicServerCheckbox.isSelected()) {
+            isPublicServerCheckbox.click();
+            awaitServerConfigurationUpdated();
+        }
+    }
+    
+    public void setStandaloneServer(boolean standalone) {
+        if (standalone != isStandaloneServerCheckbox.isSelected()) {
+            isStandaloneServerCheckbox.click();
             awaitServerConfigurationUpdated();
         }
     }

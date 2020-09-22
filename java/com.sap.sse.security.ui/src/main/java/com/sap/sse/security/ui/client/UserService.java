@@ -203,7 +203,7 @@ public class UserService {
      * signed-in user will remain to be signed in.
      */
     public void login(String username, String password, final AsyncCallback<SuccessInfo> callback) {
-        userManagementWriteService.login(username, password,
+        userManagementService.login(username, password,
                 new MarkedAsyncCallback<SuccessInfo>(new AsyncCallback<SuccessInfo>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -223,7 +223,7 @@ public class UserService {
     public void verifySocialUser(final AsyncCallback<UserDTO> callback) throws Exception {
         final String authProviderName = ClientUtils.getAuthProviderNameFromCookie();
         logger.info("Verifying " + authProviderName + " user ...");
-        userManagementWriteService.verifySocialUser(ClientUtils.getCredential(),
+        userManagementService.verifySocialUser(ClientUtils.getCredential(),
                 new MarkedAsyncCallback<Triple<UserDTO, UserDTO, ServerInfoDTO>>(new AsyncCallback<Triple<UserDTO, UserDTO, ServerInfoDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -240,7 +240,7 @@ public class UserService {
     }
 
     public void logout() {
-        userManagementWriteService.logout(new AsyncCallback<SuccessInfo>() {
+        userManagementService.logout(new AsyncCallback<SuccessInfo>() {
             @Override
             public void onFailure(Throwable caught) {
                 Notification.notify(stringMessages.couldNotSignOut(caught.getMessage()), NotificationType.ERROR);
@@ -502,11 +502,6 @@ public class UserService {
     
     public void addKnownHasPermissions(Iterable<HasPermissions> hasPermissions) {
         Util.addAll(hasPermissions, allKnownHasPermissions);
-    }
-    
-    public boolean hasCurrentUserMetaPermission(WildcardPermission permissionToCheck, OwnershipDTO ownership) {
-        return PermissionChecker.checkMetaPermission(permissionToCheck, allKnownHasPermissions, getCurrentUser(),
-                anonymousUser, ownership);
     }
 
     public boolean hasCurrentUserAnyPermission(WildcardPermission permissionToCheck, OwnershipDTO ownership) {

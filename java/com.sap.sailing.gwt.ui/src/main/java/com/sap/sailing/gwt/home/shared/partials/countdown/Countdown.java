@@ -18,10 +18,10 @@ import com.sap.sailing.gwt.common.client.SharedResources.MainCss;
 import com.sap.sailing.gwt.home.communication.event.eventoverview.EventOverviewRaceTickerStageDTO;
 import com.sap.sailing.gwt.home.communication.event.eventoverview.EventOverviewRegattaTickerStageDTO;
 import com.sap.sailing.gwt.home.communication.event.eventoverview.EventOverviewTickerStageDTO;
+import com.sap.sailing.gwt.home.shared.SharedHomeResources;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.partials.countdown.CountdownResources.LocalCss;
 import com.sap.sailing.gwt.home.shared.partials.countdowntimer.CountdownTimer;
-import com.sap.sailing.gwt.home.shared.resources.SharedHomeResources;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.LinkUtil;
 

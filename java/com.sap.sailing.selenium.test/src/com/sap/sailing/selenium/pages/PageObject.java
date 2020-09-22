@@ -513,6 +513,20 @@ public class PageObject {
      * 
      * @param supplier {@link PageAreaSupplier} used to instantiate the {@link PageArea}
      * @param seleniumId the selenium id of the desired element
+     * @return {@link PageArea} representing the first matching element
+     * 
+     * @see #findElementBySeleniumId(SearchContext, String)
+     */
+    protected <T extends PageArea> T waitForPO(PageAreaSupplier<T> supplier, String seleniumId) {
+        return waitForPO(supplier, seleniumId, DEFAULT_WAIT_TIMEOUT_SECONDS);
+    }
+    
+    /**
+     * Waits for the element with the given seleniumId and returns a {@link PageArea} instance representing the element. The 
+     * {@link WebDriver} is used as search context.
+     * 
+     * @param supplier {@link PageAreaSupplier} used to instantiate the {@link PageArea}
+     * @param seleniumId the selenium id of the desired element
      * @param timeoutInSeconds the timeout in seconds to wait for the element
      * @return {@link PageArea} representing the first matching element
      * 
@@ -532,8 +546,22 @@ public class PageObject {
      * 
      * @see #findElementBySeleniumId(String)
      */
+    protected <T extends PageArea> T waitForChildPO(PageAreaSupplier<T> supplier, String seleniumId) {
+        return supplier.get(driver, waitForElementBySeleniumId(context, seleniumId, DEFAULT_WAIT_TIMEOUT_SECONDS));
+    }
+    
+    /**
+     * Returns a {@link PageArea} instance representing the element with the specified selenium id in the search
+     * context of this page area.
+     * 
+     * @param supplier {@link PageAreaSupplier} used to instantiate the {@link PageArea}
+     * @param seleniumId the selenium id of the desired element
+     * @return {@link PageArea} representing the first matching element
+     * 
+     * @see #findElementBySeleniumId(String)
+     */
     protected <T extends PageArea> T getChildPO(PageAreaSupplier<T> supplier, String seleniumId) {
-        return supplier.get(driver, findElementBySeleniumId(seleniumId));
+        return supplier.get(driver, findElementBySeleniumId(context, seleniumId));
     }
     
     protected interface PageAreaSupplier<T extends PageArea> {
@@ -587,8 +615,35 @@ public class PageObject {
      * Waits for an alert box to appear and accepts the alert. If no alert shows up, an Exception is thrown.
      */
     protected void waitForAlertAndAccept(int timeoutInSeconds) {
-        final Alert expectedAlert = new WebDriverWait(driver, timeoutInSeconds).until(ExpectedConditions.alertIsPresent());
-        expectedAlert.accept();
+        waitForAlert(timeoutInSeconds).accept();
+    }
+    
+    /**
+     * Waits for an alert box to appear and accepts the alert if the given message is contained in the alert box. If no
+     * alert shows up or the message does not match, an Exception is thrown.
+     */
+    protected void waitForAlertContainingMessageAndAccept(String message) {
+        waitForAlertContainingMessageAndAccept(DEFAULT_WAIT_TIMEOUT_SECONDS, message);
+    }
+    
+    /**
+     * Waits for an alert box to appear and accepts the alert if the given message is contained in the alert box. If no
+     * alert shows up or the message does not match, an Exception is thrown.
+     */
+    protected void waitForAlertContainingMessageAndAccept(int timeoutInSeconds, String message) {
+        Alert alert = waitForAlert(timeoutInSeconds);
+        if (!alert.getText().contains(message)) {
+            throw new RuntimeException("The expected message '" + message + "' does not math the actual message '"
+                    + alert.getText() + "' in the alert.");
+        }
+        alert.accept();
+    }
+    
+    /**
+     * Waits for an alert box to appear. If no alert shows up, an Exception is thrown.
+     */
+    protected Alert waitForAlert(int timeoutInSeconds) {
+        return new WebDriverWait(driver, timeoutInSeconds).until(ExpectedConditions.alertIsPresent());
     }
     
     protected void waitForAlertAndAccept(String expectedMessage) {
@@ -649,6 +704,28 @@ public class PageObject {
                 return clickedNotifications;
             }
         });
+    }
+    
+    protected void dismissAllExistingNotifications() {
+        boolean retryNecessary = true;
+        while (retryNecessary) {
+            retryNecessary = false;
+            try {
+                List<WebElement> notificationBar = driver.findElements(By.id("notificationBar"));
+                if (!notificationBar.isEmpty()) {
+                    // we got the enclosing panel
+                    List<WebElement> notifications = notificationBar.get(0).findElements(By.cssSelector("*"));
+                    if (!notifications.isEmpty()) {
+                        for (WebElement messageElement : notifications) {
+                            messageElement.click();
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                // This call can fail temporarily while notifications are being updated
+                retryNecessary = true;
+            }
+        }
     }
     
     protected void scrollToView(WebElement webElement) {

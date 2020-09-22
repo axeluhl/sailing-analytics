@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.client;
 
-
 /**
  * Constants for remote services. The path value must fit with the corresponding path of the service in the web.xml The
  * <code>@RemoteServiceRelativePath</code> annotation can't be used to automatically resolve the right path because it
@@ -17,19 +16,15 @@ public interface RemoteServiceMappingConstants {
     public static final String WEB_CONTEXT_PATH = "gwt";
 
     public static final String mediaServiceRemotePath = "service/media";
-
-    public static final String mediaServiceWriteRemotePath = "service/mediamaster";
-
+    
     public static final String sailingServiceRemotePath = "service/sailing";
-
-    public static final String sailingServiceWriteRemotePath = "service/sailingmaster";
-
+    
     public static final String serverConfigurationServiceRemotePath = "service/serverconfiguration";
 
     public static final String simulatorServiceRemotePath = "service/simulator";
 
     public static final String dataMiningServiceRemotePath = "service/datamining";
-    
+
     public static final String dispatchServiceRemotePath = "service/dispatch";
 
     public static final String subscriptionServiceRemotePath = "service/subscription";

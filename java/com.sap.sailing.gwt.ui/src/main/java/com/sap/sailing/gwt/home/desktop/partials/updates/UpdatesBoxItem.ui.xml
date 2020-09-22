@@ -3,7 +3,7 @@
 		xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
 	<ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.partials.updates.UpdatesBoxResources" />
-	<ui:with field="shr" type="com.sap.sailing.gwt.home.shared.resources.SharedHomeResources" />
+	<ui:with field="shr" type="com.sap.sailing.gwt.home.shared.SharedHomeResources" />
 	<li class="{local_res.css.box_content_item}">
 		<a ui:field="link" class="{local_res.css.updatesbox_item} {local_res.css.updatesbox_itemlink}">
 			<div ui:field="icon" class="{local_res.css.updatesbox_item_icon}"></div>

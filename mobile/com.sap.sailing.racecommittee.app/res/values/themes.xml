@@ -6,6 +6,7 @@
 
     <style name="AppTheme.Base" parent="AppTheme.Custom">
         <item name="windowActionModeOverlay">true</item>
+        <item name="android:windowBackground">?sap_gray_black_30</item>
         <item name="android:actionOverflowButtonStyle">@style/OverFlow</item>
         <item name="android:tabWidgetStyle">@style/AppTheme.Light.TabWidget</item>
 

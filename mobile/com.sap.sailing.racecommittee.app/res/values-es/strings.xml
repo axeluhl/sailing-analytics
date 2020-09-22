@@ -1,21 +1,13 @@
-<?xml version="1.0" encoding="UTF-8"?><resources xmlns:tools="http://schemas.android.com/tools">
-
-    <string-array name="empty_array" tools:ignore="UnusedResources"/>
-    <string name="empty"/>
-    
-    
-
-    
-    
-    
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
     <string name="url_google_geocoder">"http://maps.googleapis.com/maps/api/geocode/json?address="</string>
     <string name="urlpart_google_geocoder_sensor">"\?sensor=true"</string>
     <string name="running_on_course">"(En regata %s)"</string>
     <string name="course_design_number_waypoints">"La regata tiene %d puntos de ruta"</string>
-    
-    <string name="service_text_no_races">"Esperando a las carreras para supervisar..."</string>
+
+    <string name="service_text_no_races">"Esperando a las carreras para supervisar…"</string>
     <string name="service_text_num_races">"Actualmente supervisando %d carreras."</string>
-    
+
     <string name="set_time">"Salida"</string>
     <string name="reset_time">"Reiniciar"</string>
     <string name="choose">"Seleccionar"</string>
@@ -59,7 +51,7 @@
     <string name="racelist_finishing">"En finalización"</string>
     <string name="racelist_finished">"Finalizado"</string>
     <string name="racelist_unknown">"Desconocido"</string>
-    <string name="currentlyLoading">"Actualmente cargándose..."</string>
+    <string name="currentlyLoading">"Actualmente cargándose…"</string>
     <string name="racingview_header">"Carreras en zona de regata %s\'"</string>
     <string name="running_on_unknown">"(Clic para configurar regata)"</string>
     <string name="updateIndicator">"Actualizar indicador"</string>
@@ -143,11 +135,11 @@
     <string name="in_knots">"en nudos"</string>
     <string name="wind_speed_direction_not_a_valid_number">"La velocidad o la dirección del viento no es un número válido. Corrija el valor."</string>
     <string name="wind_location_or_fields_not_valid">"La ubicación, la velocidad del viento o la dirección introducidas esta vacía. Corrija los valores."</string>
-    <string name="waiting_for_gps">"Esperando señal de GPS..."</string>
+    <string name="waiting_for_gps">"Esperando señal de GPS…"</string>
     <string name="manual_entry">"Entrada manual de posición"</string>
     <string name="found_gps_position">"Posición basada en GPS"</string>
     <string name="set_position_manually">"Añadir posición manualmente"</string>
-    <string name="searchPosition">"Búsqueda de ubicación..."</string>
+    <string name="searchPosition">"Búsqueda de ubicación…"</string>
     <string name="no_location_found">"No se ha encontrado la ubicación basada en su consulta."</string>
     <string name="store_position">"Utilice esta posición"</string>
     <string name="store_wind">"Guardar viento"</string>
@@ -194,7 +186,7 @@
     <string name="change_dialog_title">"Modificar regata"</string>
     <string name="change_dialog_message">"¿Desea modificar una regata y/o la zona? Las carreras que estén monitorizándose ahora se desconectarán."</string>
     <string name="logout">"Cerrar sesión"</string>
-    <string name="loading_configuration">"Cargando configuración..."</string>
+    <string name="loading_configuration">"Cargando configuración…"</string>
     <string name="loading_configuration_failed">"Se ha producido un error al cargar la configuración"</string>
     <string name="loading_configuration_not_found">"No existe una configuración remota para este dispositivo."</string>
     <string name="loading_configuration_succeded">"Configuración remota aplicada."</string>
@@ -235,14 +227,14 @@
     <string name="preference_regatta_specific_save_title">"Guardar %1$s configuraciones"</string>
     <string name="preference_regatta_specific_save_description">"Esto guardará la configuración que se muestra para todas las carreras de %1$s."</string>
     <string name="auto_update">"Actualización automática"</string>
-    <string name="auto_update_checking_version">"Comprobando información de versión en el servidor..."</string>
+    <string name="auto_update_checking_version">"Comprobando información de versión en el servidor…"</string>
     <string name="auto_update_downloading_version">"Intentando descargar la información de actualización automática desde %1$s"</string>
     <string name="auto_update_version_file_url_invalid">"El enlace de archivo de versión no era válido."</string>
     <string name="auto_update_click_install">"Haga clic en \"Instalar\" para actualizar a la versión %1$d."</string>
     <string name="auto_update_force_install">"Ya ha instalado la versión que ofrecía el servidor (versión %1$d)."</string>
     <string name="auto_update_with_store">"Su versión actual está instalada desde %1$s. La descarga desde el servidor no se puede instalar sin desintalar la aplicación actual."</string>
     <string name="auto_update_already_up_to_date">"Ya está actualizado"</string>
-    <string name="auto_update_downloading_apk">"Descargando APK desde el servidor..."</string>
+    <string name="auto_update_downloading_apk">"Descargando APK desde el servidor…"</string>
     <string name="auto_update_apk_link_invalid">"El enlace de descarga no era válido."</string>
     <string name="auto_update_apk_file_error">"El archivo de descarga no se pudo crear."</string>
     <string name="auto_update_error">"Error al intentar realizar una actualización automática."</string>
@@ -257,8 +249,6 @@
     <string name="race_start_in_4_minutes">"4 minutos"</string>
     <string name="race_start_in_2_minutes">"2 minutos"</string>
     <string name="race_start_in_1_minute">"1 minuto"</string>
-    <string name="race_start_time_in">"-%s"</string>
-    <string name="race_start_time_ago">"%s"</string>
     <string name="race_set_time">"Fijar hora"</string>
     <string name="race_reset_course">"Reinicializar regata"</string>
     <string name="no_course_active">"Ninguna regata activa"</string>
@@ -378,9 +368,9 @@
     <string name="race_summary_wind_direction">"Promedio de la dirección del viento"</string>
     <string name="race_summary_wind_direction_value">"De %.0f°"</string>
     <string name="race_summary_wind_speed">"Promedio de la velocidad del viento"</string>
-    
+
     <string name="race_summary_individual_recalls">"Recordatorios individuales"</string>
-    
+
     <string name="record_voice">"Grabar voz"</string>
     <string name="finishing_started">"Primero en meta a %1$s"</string>
     <string name="finishing_started_since">"(%s)"</string>
@@ -480,9 +470,8 @@
     <string name="gate_time_schedule_long">"%1$d + %2$d = %3$d minutos"</string>
     <string name="gate_time_schedule_short">"%d minutos"</string>
     <string name="not_available">"n/a"</string>
-    
-    
-    
+
+
     <string name="accuracy_timestamp">"(desde %s)"</string>
     <string name="prev_course">"Regata anterior"</string>
     <string name="layout_course">"Disposición de regata"</string>
@@ -493,7 +482,7 @@
     <string name="reset_state_2">"Reinicializar"</string>
     <string name="reset_message_1">"¿Desea borrar la lista?"</string>
     <string name="reset_message_2">"¿Desea reinicializar el último estado?"</string>
-    
+
     <string name="onboarding_scan">"Escanear código QR"</string>
     <string name="onboarding_input">"Entrada manual"</string>
     <string name="race_group">"Carrera de grupo"</string>
@@ -535,7 +524,7 @@
     <string name="abort_title">"Abortar carreras"</string>
     <string name="abort_hint">"¿Qué carreras en ejecución desea abortar?"</string>
     <string name="abort_dismiss">"Descartar"</string>
-    
+
     <string name="set_column_factor">"Configurar factor"</string>
     <string name="set_factor_error">"Se ha producido un error al configurar el factor: %s"</string>
     <string name="sync_to_minute">"Sincronizar al minuto"</string>

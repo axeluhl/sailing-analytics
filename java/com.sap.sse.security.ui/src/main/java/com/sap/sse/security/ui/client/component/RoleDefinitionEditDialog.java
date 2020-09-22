@@ -17,6 +17,7 @@ public class RoleDefinitionEditDialog extends AbstractRoleDefinitionDialog {
         roleDefinitionId = roleDefinition.getId();
         roleDefinitionNameField.setText(roleDefinition.getName());
         permissionsList.setValue(roleDefinition.getPermissions());
+        this.ensureDebugId(this.getClass().getSimpleName());
     }
 
     @Override
