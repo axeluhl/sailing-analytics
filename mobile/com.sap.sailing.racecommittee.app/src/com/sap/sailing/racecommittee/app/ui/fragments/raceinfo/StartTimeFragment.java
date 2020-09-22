@@ -210,7 +210,7 @@ public class StartTimeFragment extends BaseFragment
             @Override
             public void onStartTimeChanged(ReadonlyRaceState state) {
                 mStartTime = state.getStartTime();
-                onCurrentTimeTick(MillisecondsTimePoint.now());
+                onStartTimeTick(MillisecondsTimePoint.now());
             }
         };
 
@@ -577,11 +577,16 @@ public class StartTimeFragment extends BaseFragment
     }
 
     @Override
-    public TickListener getStartTimeTickListener() {
-        return this::onCurrentTimeTick;
+    public TimePoint getStartTime() {
+        return mStartTime;
     }
 
-    private void onCurrentTimeTick(TimePoint now) {
+    @Override
+    public TickListener getStartTimeTickListener() {
+        return this::onStartTimeTick;
+    }
+
+    private void onStartTimeTick(TimePoint now) {
         if (mAbsolute.getVisibility() == View.VISIBLE && mStartTime != null) {
             TimePoint timePoint;
             String duration;

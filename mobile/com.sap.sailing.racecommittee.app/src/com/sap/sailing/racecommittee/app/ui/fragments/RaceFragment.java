@@ -84,6 +84,10 @@ public abstract class RaceFragment extends LoggableFragment {
         return managedRace.getState();
     }
 
+    public TimePoint getStartTime() {
+        return managedRace.getState().getStartTime();
+    }
+
     /**
      * Creates a bundle that contains the race id as parameter for the next fragment
      *
@@ -116,8 +120,7 @@ public abstract class RaceFragment extends LoggableFragment {
             TickSingleton.INSTANCE.registerListener(currentTimeListener);
         }
         if (startTimeListener != null) {
-            final RaceState state = getRaceState();
-            final TimePoint startTime = state.getStartTime();
+            final TimePoint startTime = getStartTime();
             if (startTime != null) {
                 //Register the {@link TickListener} for the start time
                 TickSingleton.INSTANCE.registerListener(startTimeListener, startTime);
