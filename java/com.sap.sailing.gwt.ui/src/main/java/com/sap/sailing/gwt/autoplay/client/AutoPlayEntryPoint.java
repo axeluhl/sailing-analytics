@@ -14,12 +14,9 @@ public class AutoPlayEntryPoint
         extends AbstractMvpEntryPoint<StringMessages, AutoPlayClientFactory> {
     @Override
     public void doOnModuleLoad() {
-
         AutoPlayClientFactory clientFactory = new AutoPlayClientFactoryImpl();
-
         AutoPlayHistoryMapper applicationHistoryMapper = GWT.create(AutoPlayHistoryMapper.class);
         initMvp(clientFactory, applicationHistoryMapper, new AutoPlayActivityMapperImpl(clientFactory));
-
         SharedResources.INSTANCE.mediaCss().ensureInjected();
         SharedResources.INSTANCE.mainCss().ensureInjected();
         Document.get().getBody().addClassName(SharedResources.INSTANCE.mainCss().desktop());

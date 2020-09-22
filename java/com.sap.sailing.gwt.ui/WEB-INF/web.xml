@@ -7,8 +7,7 @@
 	<!-- Disable directory listing: -->
 	<servlet>
 		<servlet-name>default</servlet-name>
-		<servlet-class>org.eclipse.jetty.servlet.DefaultServlet
-		</servlet-class>
+		<servlet-class>org.eclipse.jetty.servlet.DefaultServlet</servlet-class>
 		<init-param>
 			<param-name>dirAllowed</param-name>
 			<param-value>false</param-value>
@@ -134,6 +133,16 @@
 	</servlet-mapping>
 
 	<servlet>
+		<display-name>Media Service Write</display-name>
+		<servlet-name>MediaServiceWrite</servlet-name>
+		<servlet-class>com.sap.sailing.gwt.ui.server.MediaServiceWriteImpl</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>MediaServiceWrite</servlet-name>
+		<url-pattern>/service/mediamaster</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
 	    <display-name>Simulator Service</display-name>
 	    <servlet-name>SimulatorService</servlet-name>
     	<servlet-class>com.sap.sailing.gwt.ui.server.SimulatorServiceImpl</servlet-class>
@@ -160,6 +169,15 @@
 	<servlet-mapping>
 		<servlet-name>UserManagementService</servlet-name>
 		<url-pattern>/service/usermanagement</url-pattern>
+	</servlet-mapping>
+	<servlet>
+		<display-name>User Management Write Service</display-name>
+		<servlet-name>UserManagementWriteService</servlet-name>
+		<servlet-class>com.sap.sse.security.ui.server.UserManagementWriteServiceImpl</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>UserManagementWriteService</servlet-name>
+		<url-pattern>/service/usermanagementmaster</url-pattern>
 	</servlet-mapping>
 
 	<!-- enabling remote logging -->

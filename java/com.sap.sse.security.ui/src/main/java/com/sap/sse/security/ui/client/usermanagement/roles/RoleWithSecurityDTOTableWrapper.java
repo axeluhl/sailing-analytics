@@ -77,7 +77,7 @@ public class RoleWithSecurityDTOTableWrapper extends
             if (selectedObject != null) {
                 StrippedUserGroupDTO qualifiedForTenant = selectedRole.getQualifiedForTenant();
                 StrippedUserDTO qualifiedForUser = selectedRole.getQualifiedForUser();
-                userService.getUserManagementService().removeRoleFromUser(selectedObject.getName(),
+                userService.getUserManagementWriteService().removeRoleFromUser(selectedObject.getName(),
                         qualifiedForUser != null ? qualifiedForUser.getName() : null,
                         selectedRole.getRoleDefinition().getId(),
                         qualifiedForTenant == null ? null : qualifiedForTenant.getName(),
@@ -132,6 +132,7 @@ public class RoleWithSecurityDTOTableWrapper extends
         table.addColumnSortHandler(userColumnListHandler);
         table.addColumn(userGroupWithSecurityDTONameColumn, stringMessages.roleName());
         table.addColumn(userActionColumn);
+        table.ensureDebugId("RoleWithSecurityDTOTable");
     }
 
     public LabeledAbstractFilterablePanel<RoleWithSecurityDTO> getFilterField() {

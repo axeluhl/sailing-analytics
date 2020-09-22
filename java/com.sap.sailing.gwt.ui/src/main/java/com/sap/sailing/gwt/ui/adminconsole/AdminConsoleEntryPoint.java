@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import static com.sap.sse.gwt.shared.RpcConstants.HEADER_FORWARD_TO_MASTER;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -25,8 +27,8 @@ import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsRefresher;
 import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
 import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
-import com.sap.sailing.gwt.ui.client.MediaService;
-import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
+import com.sap.sailing.gwt.ui.client.MediaServiceWrite;
+import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
@@ -69,13 +71,13 @@ public class AdminConsoleEntryPoint extends AbstractSailingWriteEntryPoint
     private Set<LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity>> leaderboardsDisplayers;
     private Set<LeaderboardGroupsDisplayer> leaderboardGroupsDisplayers;
 
-    private final MediaServiceAsync mediaService = GWT.create(MediaService.class);
+    private final MediaServiceWriteAsync mediaServiceWrite = GWT.create(MediaServiceWrite.class);
     
     @Override
     protected void doOnModuleLoad() {
         Highcharts.ensureInjectedWithMore();
         super.doOnModuleLoad();
-        EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService, RemoteServiceMappingConstants.mediaServiceRemotePath);
+        EntryPointHelper.registerASyncService((ServiceDefTarget) mediaServiceWrite, RemoteServiceMappingConstants.mediaServiceWriteRemotePath, HEADER_FORWARD_TO_MASTER);
         getUserService().executeWithServerInfo(this::createUI);
         getUserService().addUserStatusEventHandler((u, p) -> checkPublicServerNonPublicUserWarning());
     }
@@ -127,7 +129,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingWriteEntryPoint
             /** Changes the default tenant for the current user. */
             private void changeDefaultTenantForCurrentUser(final StrippedUserGroupDTO serverTenant) {
                 final UserDTO user = getUserService().getCurrentUser();
-                getUserService().getUserManagementService().updateUserProperties(user.getName(), user.getFullName(),
+                getUserManagementWriteService().updateUserProperties(user.getName(), user.getFullName(),
                         user.getCompany(), user.getLocale(), serverTenant.getId().toString(),
                         new AsyncCallback<UserDTO>() {
                             @Override
@@ -273,7 +275,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingWriteEntryPoint
         }, getStringMessages().wind(), SecuredDomainType.TRACKED_RACE.getPermission(DefaultActions.UPDATE));
         regattasDisplayers.add(windPanel);
 
-        final MediaPanel mediaPanel = new MediaPanel(regattasDisplayers, getSailingService(), this, mediaService, this,
+        final MediaPanel mediaPanel = new MediaPanel(regattasDisplayers, getSailingService(), this, mediaServiceWrite, this,
                 getStringMessages(), getUserService());
         panel.addToTabPanel(racesTabPanel, new DefaultRefreshableAdminConsolePanel<MediaPanel>(mediaPanel) {
             @Override

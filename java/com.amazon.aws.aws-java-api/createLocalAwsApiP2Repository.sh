@@ -92,7 +92,7 @@ mv bin/com.amazon.aws.aws-java-api-${VERSION}.jar ${UPDATE_SITE_PROJECT}/plugins
 echo "Unpacking source bundles..."
 cd ${LIB}
 for l in *-sources.jar; do
-  jar xvf $l software
+  "${JAR}" xvf $l software
 done
 echo "Creating sources JAR..."
 SOURCE_JAR_MANIFEST=source-manifest.mf
@@ -102,7 +102,7 @@ Bundle-Name: AWS SDK Sources
 Bundle-Version: ${VERSION}
 Eclipse-SourceBundle: com.amazon.aws.aws-java-api;version=\"${VERSION}\"
 Bundle-ManifestVersion: 2" >${SOURCE_JAR_MANIFEST}
-jar cvfm com.amazon.aws.aws-java-api.source_${VERSION}.jar ${SOURCE_JAR_MANIFEST} software/
+"${JAR}" cvfm com.amazon.aws.aws-java-api.source_${VERSION}.jar ${SOURCE_JAR_MANIFEST} software/
 rm ${SOURCE_JAR_MANIFEST}
 echo "Removing extracted sources..."
 rm -rf software

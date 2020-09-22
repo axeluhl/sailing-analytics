@@ -64,7 +64,6 @@ public class Solutions extends Composite {
     
     private final PlaceNavigation<WhatsNewPlace> sailingAnalyticsDetailsNavigation;
     private final PlaceNavigation<WhatsNewPlace> raceCommitteeAppDetailsNavigation;
-    private final PlaceNavigation<WhatsNewPlace> inSightAppDetailsNavigation;
     private final PlaceNavigation<WhatsNewPlace> buoyPingerAppDetailsNavigation;
     private final PlaceNavigation<WhatsNewPlace> simulatorAppDetailsNavigation;
     private final DesktopPlacesNavigator placesNavigator;
@@ -77,13 +76,12 @@ public class Solutions extends Composite {
 
         sailingAnalyticsDetailsNavigation = placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.SailingAnalytics);
         raceCommitteeAppDetailsNavigation =  placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.RaceManagerApp);
-        inSightAppDetailsNavigation =  placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.InSightApp);
         buoyPingerAppDetailsNavigation =  placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.BuoyPingerApp);
         simulatorAppDetailsNavigation =  placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.SailingSimulator);
         
         sailingAnalyticsDetailsAnchor.setHref(sailingAnalyticsDetailsNavigation.getTargetUrl());
         raceCommitteeAppDetailsAnchor.setHref(raceCommitteeAppDetailsNavigation.getTargetUrl());
-        inSightAppDetailsAnchor.setHref(inSightAppDetailsNavigation.getTargetUrl());
+        inSightAppDetailsAnchor.setHref("https://sail-insight.com");
         buoyPingerAppDetailsAnchor.setHref(buoyPingerAppDetailsNavigation.getTargetUrl());
         simulatorAppDetailsAnchor.setHref(simulatorAppDetailsNavigation.getTargetUrl());
 

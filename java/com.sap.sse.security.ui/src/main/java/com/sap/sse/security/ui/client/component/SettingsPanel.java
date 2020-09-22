@@ -29,28 +29,29 @@ import com.sap.sse.gwt.client.AbstractEntryPoint;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.security.ui.client.IconResources;
-import com.sap.sse.security.ui.client.UserManagementServiceAsync;
+import com.sap.sse.security.ui.client.UserManagementWriteServiceAsync;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 public class SettingsPanel extends LayoutPanel {
 
-    private UserManagementServiceAsync userManagementService;
+    private UserManagementWriteServiceAsync userManagementWriteService;
     private Map<String, String> settings = null;
     private Map<String, String> settingTypes = null;
     private Map<String, FlexTable> savedTabs = new HashMap<>();
     private final StringMessages stringMessages;
 
-    public SettingsPanel(UserManagementServiceAsync userManagementService, StringMessages stringMessages) {
+    public SettingsPanel(UserManagementWriteServiceAsync userManagementWriteService, StringMessages stringMessages) {
         super();
         setHeight("600px"); // TODO this is ugly; it should be 100%, but then the nested tab panels lead to zero height for this panel's tab panel
         this.stringMessages = stringMessages;
-        this.userManagementService = userManagementService;
+        //using write service only to get consistent roundtrip
+        this.userManagementWriteService = userManagementWriteService;
         initComponents();
     }
 
     private void initComponents() {
         clear();
-        userManagementService.getSettingTypes(new AsyncCallback<Map<String, String>>() {
+        userManagementWriteService.getSettingTypes(new AsyncCallback<Map<String, String>>() {
             @Override
             public void onFailure(Throwable caught) {
             }
@@ -61,7 +62,7 @@ public class SettingsPanel extends LayoutPanel {
                 updateSettings();
             }
         });
-        userManagementService.getSettings(new AsyncCallback<Map<String, String>>() {
+        userManagementWriteService.getSettings(new AsyncCallback<Map<String, String>>() {
 
             @Override
             public void onSuccess(Map<String, String> result) {
@@ -125,7 +126,7 @@ public class SettingsPanel extends LayoutPanel {
                 
                 @Override
                 public void onClick(ClickEvent event) {
-                    userManagementService.addSetting("URLS_" + key.getText(), String.class.getName(), url.getText(), new AsyncCallback<Void>() {
+                    userManagementWriteService.addSetting("URLS_" + key.getText(), String.class.getName(), url.getText(), new AsyncCallback<Void>() {
 
                         @Override
                         public void onFailure(Throwable caught) {
@@ -137,7 +138,7 @@ public class SettingsPanel extends LayoutPanel {
                             Notification.notify("Added url!", NotificationType.SUCCESS);
                         }
                     });
-                    userManagementService.addSetting("URLS_AUTH_" + key.getText(), String.class.getName(), filter.getText(), new AsyncCallback<Void>() {
+                    userManagementWriteService.addSetting("URLS_AUTH_" + key.getText(), String.class.getName(), filter.getText(), new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
                             Notification.notify(caught.getMessage(), NotificationType.ERROR);
@@ -198,7 +199,7 @@ public class SettingsPanel extends LayoutPanel {
                 @Override
                 public void onValueChange(ValueChangeEvent<Boolean> event) {
                     flexTable.setWidget(row, 2, statusYellow);
-                    userManagementService.setSetting(key, Boolean.class.getName(), value.getValue().toString(),
+                    userManagementWriteService.setSetting(key, Boolean.class.getName(), value.getValue().toString(),
                             new AsyncCallback<Void>() {
 
                                 @Override
@@ -222,7 +223,7 @@ public class SettingsPanel extends LayoutPanel {
                 @Override
                 public void onValueChange(ValueChangeEvent<Integer> event) {
                     flexTable.setWidget(row, 2, statusYellow);
-                    userManagementService.setSetting(key, Integer.class.getName(), value.getValue().toString(),
+                    userManagementWriteService.setSetting(key, Integer.class.getName(), value.getValue().toString(),
                             new AsyncCallback<Void>() {
 
                                 @Override
@@ -246,7 +247,7 @@ public class SettingsPanel extends LayoutPanel {
                 @Override
                 public void onChange(ChangeEvent event) {
                     flexTable.setWidget(row, 2, statusYellow);
-                    userManagementService.setSetting(key, String.class.getName(), value.getText(),
+                    userManagementWriteService.setSetting(key, String.class.getName(), value.getText(),
                             new AsyncCallback<Void>() {
 
                                 @Override
@@ -307,7 +308,7 @@ public class SettingsPanel extends LayoutPanel {
             @Override
             public void onChange(ChangeEvent event) {
                 flexTable.setWidget(row, 3, statusYellow);
-                userManagementService.setSetting(key, String.class.getName(), value1.getText(),
+                userManagementWriteService.setSetting(key, String.class.getName(), value1.getText(),
                         new AsyncCallback<Void>() {
 
                             @Override
@@ -331,7 +332,7 @@ public class SettingsPanel extends LayoutPanel {
             @Override
             public void onChange(ChangeEvent event) {
                 flexTable.setWidget(row, 3, statusYellow);
-                userManagementService.setSetting("URLS_AUTH_" + labelKey, String.class.getName(), value2.getText(),
+                userManagementWriteService.setSetting("URLS_AUTH_" + labelKey, String.class.getName(), value2.getText(),
                         new AsyncCallback<Void>() {
 
                             @Override

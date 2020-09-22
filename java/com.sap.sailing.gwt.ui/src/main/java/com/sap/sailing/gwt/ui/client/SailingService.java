@@ -48,6 +48,7 @@ import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogExcep
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.impl.PreciseCompactGPSFixMovingImpl.PreciseCompactPosition;
 import com.sap.sailing.domain.common.windfinder.SpotDTO;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
 import com.sap.sailing.gwt.ui.client.shared.charts.MarkPositionService.MarkTrackDTO;
 import com.sap.sailing.gwt.ui.shared.AccountWithSecurityDTO;
@@ -252,8 +253,8 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
 
     CompetitorProviderDTO getCompetitorProviderDTOByName(String providerName) throws UnauthorizedException, Exception;
 
-    List<CompetitorDescriptor> getCompetitorDescriptors(String competitorProviderName, String eventName,
-            String regattaName) throws UnauthorizedException, Exception;
+    Pair<List<CompetitorDescriptor>, String> getCompetitorDescriptorsAndHint(String competitorProviderName, String eventName,
+            String regattaName, String localeForHint) throws UnauthorizedException, Exception;
 
     WindInfoForRaceDTO getWindSourcesInfo(RegattaAndRaceIdentifier raceIdentifier) throws UnauthorizedException;
 
@@ -262,17 +263,6 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
     void updateServerConfiguration(ServerConfigurationDTO serverConfiguration) throws UnauthorizedException;
 
     List<RemoteSailingServerReferenceDTO> getRemoteSailingServerReferences() throws UnauthorizedException;
-
-    void removeSailingServers(Set<String> toRemove) throws UnauthorizedException, Exception;
-
-    RemoteSailingServerReferenceDTO addRemoteSailingServerReference(RemoteSailingServerReferenceDTO sailingServer)
-            throws UnauthorizedException, Exception;
-    
-    RemoteSailingServerReferenceDTO updateRemoteSailingServerReference(
-            RemoteSailingServerReferenceDTO sailingServer) throws UnauthorizedException, Exception;
-    
-    RemoteSailingServerReferenceDTO getCompleteRemoteServerReference(String sailingServerName)
-            throws UnauthorizedException, Exception;
 
     List<UrlDTO> getResultImportUrls(String resultProviderName) throws UnauthorizedException;
 
@@ -597,14 +587,11 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
 
     List<CourseTemplateDTO> getCourseTemplates();
 
-    /**
-     * Removes course templates list
-     * 
-     * @param courseTemplateDTOs
-     *            list of course templates to remove
-     */
-    void removeCourseTemplates(Collection<UUID> courseTemplatesUuids);
-
     List<MarkRoleDTO> getMarkRoles();
 
+    /**
+     * Returns {@code true} if the given race can be sliced. Only Smarthphone tracked races can be sliced. In addition
+     * the race must be part of a {@link RegattaLeaderboard}.
+     */
+    boolean canSliceRace(RegattaAndRaceIdentifier raceIdentifier) throws UnauthorizedException;
 }

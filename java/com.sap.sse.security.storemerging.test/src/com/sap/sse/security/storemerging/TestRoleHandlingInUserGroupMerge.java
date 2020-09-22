@@ -13,19 +13,18 @@ import org.junit.Test;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.interfaces.AccessControlStore;
 import com.sap.sse.security.interfaces.UserStore;
+import com.sap.sse.security.shared.UserStoreManagementException;
 import com.sap.sse.security.shared.RoleDefinition;
-import com.sap.sse.security.shared.UserGroupManagementException;
-import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.impl.UserGroup;
 
 public class TestRoleHandlingInUserGroupMerge extends AbstractStoreMergeTest {
     @Before
-    public void setUp() throws IOException, UserGroupManagementException, UserManagementException {
+    public void setUp() throws IOException, UserStoreManagementException {
         setUp("source_TestRoleHandlingInUserGroupMerge", "target_TestRoleHandlingInUserGroupMerge");
     }
     
     @Test
-    public void testImportFromSource1ToTarget1() throws UserGroupManagementException, UserManagementException {
+    public void testImportFromSource1ToTarget1() throws UserStoreManagementException {
         final RoleDefinition sailingViewerRoleInTargetStore = StreamSupport.stream(targetUserStore.getRoleDefinitions().spliterator(), /* parallel */ false).
                 filter(rd->rd.getName().equals("sailing_viewer")).findAny().get();
         // assertions against unmodified target

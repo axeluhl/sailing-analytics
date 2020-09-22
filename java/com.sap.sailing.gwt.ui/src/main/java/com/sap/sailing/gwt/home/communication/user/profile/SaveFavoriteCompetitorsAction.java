@@ -11,6 +11,7 @@ import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.server.impl.preferences.model.CompetitorNotificationPreference;
 import com.sap.sailing.server.impl.preferences.model.CompetitorNotificationPreferences;
+import com.sap.sse.gwt.dispatch.shared.commands.HasWriteAction;
 import com.sap.sse.gwt.dispatch.shared.commands.VoidResult;
 import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 
@@ -18,7 +19,7 @@ import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
  * {@link SailingAction} implementation to save favorite competitors for the currently logged in user as selected on
  * the preferences page.
  */
-public class SaveFavoriteCompetitorsAction implements SailingAction<VoidResult> {
+public class SaveFavoriteCompetitorsAction implements SailingAction<VoidResult>, HasWriteAction {
     
     private FavoriteCompetitorsDTO favorites;
     

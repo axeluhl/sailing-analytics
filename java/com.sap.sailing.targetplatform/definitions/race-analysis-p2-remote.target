@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.8"?>
-<target name="Race Analysis Target" sequenceNumber="157">
+<target name="Race Analysis Target" sequenceNumber="158">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="javax.ws.rs" version="1.1.1.v20130318-1750"/>
@@ -16,9 +16,6 @@
 <unit id="org.hamcrest.text" version="1.1.0.v20090501071000"/>
 <unit id="org.junit" version="4.12.0.v201504281640"/>
 <unit id="org.junit.source" version="4.12.0.v201504281640"/>
-<unit id="com.fasterxml.jackson.core.jackson-annotations" version="2.9.2.v20180207-1730"/>
-<unit id="com.fasterxml.jackson.core.jackson-core" version="2.9.2.v20180207-1730"/>
-<unit id="com.fasterxml.jackson.core.jackson-databind" version="2.9.2.v20180207-1730"/>
 <unit id="com.sun.jersey" version="1.17.0.v201503170330"/>
 <unit id="com.sun.jersey.source" version="1.17.0.v201503170330"/>
 <unit id="javax.servlet" version="3.1.0.v201410161800"/>
@@ -128,9 +125,6 @@
 </location>
 </locations>
 <includeBundles>
-<plugin id="com.fasterxml.jackson.core.jackson-annotations"/>
-<plugin id="com.fasterxml.jackson.core.jackson-core"/>
-<plugin id="com.fasterxml.jackson.core.jackson-databind"/>
 <plugin id="com.rabbitmq.client"/>
 <plugin id="com.sun.activation.javax.activation"/>
 <plugin id="com.sun.istack.commons-runtime"/>
@@ -277,9 +271,6 @@
 <plugin id="com.amazon.aws.aws-java-api"/>
 <plugin id="com.jcraft.jsch"/>
 <plugin id="com.jcraft.jsch.source"/>
-<plugin id="com.fasterxml.jackson.core.jackson-databind.source"/>
-<plugin id="com.fasterxml.jackson.core.jackson-core.source"/>
-<plugin id="com.fasterxml.jackson.core.jackson-annotations.source"/>
 <plugin id="org.apache.commons.codec.source"/>
 <plugin id="org.apache.poi.ooxml.schemas.source"/>
 <plugin id="org.apache.poi.ooxml.source"/>

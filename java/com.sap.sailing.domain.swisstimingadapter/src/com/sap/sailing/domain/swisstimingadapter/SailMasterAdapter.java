@@ -3,6 +3,7 @@ package com.sap.sailing.domain.swisstimingadapter;
 import java.util.Collection;
 import java.util.List;
 
+import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -38,7 +39,7 @@ public abstract class SailMasterAdapter implements SailMasterListener {
     }
 
     @Override
-    public void storedDataProgress(String raceID, double progress) {
+    public void storedDataProgress(String raceID, double progress, TrackedRaceStatusEnum statusAfterLoadingComplete) {
     }
 
     @Override

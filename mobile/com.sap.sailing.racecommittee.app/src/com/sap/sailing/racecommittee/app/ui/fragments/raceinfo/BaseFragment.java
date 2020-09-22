@@ -1,19 +1,19 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import android.support.annotation.IdRes;
+import android.support.annotation.IntDef;
+import android.support.v4.app.FragmentTransaction;
 
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 
-import android.support.annotation.IdRes;
-import android.support.annotation.IntDef;
-import android.support.v4.app.FragmentTransaction;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 public class BaseFragment extends RaceFragment {
 
-    @IntDef({ START_MODE_PRESETUP, START_MODE_PLANNED })
+    @IntDef({START_MODE_PRESETUP, START_MODE_PLANNED})
     @Retention(RetentionPolicy.SOURCE)
     public @interface START_MODE_VALUES {
     }
@@ -50,7 +50,7 @@ public class BaseFragment extends RaceFragment {
         if (getArguments() != null) {
             fragment.getArguments().putAll(getArguments());
         }
-        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        FragmentTransaction transaction = requireFragmentManager().beginTransaction();
         transaction.replace(viewId, fragment);
         transaction.commit();
     }
@@ -59,8 +59,8 @@ public class BaseFragment extends RaceFragment {
         if (getArguments() != null && getArguments().getInt(START_MODE, START_MODE_PRESETUP) == START_MODE_PRESETUP) {
             openMainScheduleFragment();
         } else {
-            sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
-            sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+            sendIntent(AppConstants.ACTION_CLEAR_TOGGLE);
+            sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
         }
     }
 

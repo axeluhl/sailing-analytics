@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import org.apache.shiro.authz.AuthorizationException;
+
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.CompetitorDescriptor;
 import com.sap.sailing.domain.common.DetailType;
@@ -281,7 +283,7 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
 
     void getCompetitorProviderDTOByName(String providerName, AsyncCallback<CompetitorProviderDTO> callback);
 
-    void getCompetitorDescriptors(String competitorProviderName, String eventName, String regattaName, AsyncCallback<List<CompetitorDescriptor>> callback);
+    void getCompetitorDescriptorsAndHint(String competitorProviderName, String eventName, String regattaName, String localeForHint, AsyncCallback<Pair<List<CompetitorDescriptor>, String>> callback);
 
     void getWindSourcesInfo(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<WindInfoForRaceDTO> callback);
 
@@ -292,25 +294,6 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
     void updateServerConfiguration(ServerConfigurationDTO serverConfiguration, AsyncCallback<Void> callback);
 
     void getRemoteSailingServerReferences(AsyncCallback<List<RemoteSailingServerReferenceDTO>> callback);
-
-    void removeSailingServers(Set<String> toRemove, AsyncCallback<Void> callback);
-
-    void addRemoteSailingServerReference(RemoteSailingServerReferenceDTO sailingServer,
-            AsyncCallback<RemoteSailingServerReferenceDTO> callback);
-    
-    /*
-     * Updates {@link RemoteSailingServerReferenceDTO} sailingServer instance based on user selection regarding
-     * inclusion type and selected events.
-     */
-    void updateRemoteSailingServerReference(RemoteSailingServerReferenceDTO sailingServer,
-            AsyncCallback<RemoteSailingServerReferenceDTO> callback);
-
-    /*
-     * Loads remote sailing server data with all events not filtered by selection in order to show the full list of
-     * events on {@link RemoteSailingServerEventsSelectionDialog} dialog.
-     */
-    void getCompleteRemoteServerReference(String sailingServerName,
-            AsyncCallback<RemoteSailingServerReferenceDTO> callback);
 
     void getResultImportUrls(String resultProviderName, AsyncCallback<List<UrlDTO>> callback);
 
@@ -681,16 +664,6 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
 
     void getCourseTemplates(AsyncCallback<List<CourseTemplateDTO>> asyncCallback);
 
-    /**
-     * Remove course templates by UUIDs
-     * 
-     * @param courseTemplatesUuids
-     *            the {@link Collection} of course templates' UUIDs which will be remove
-     * @param asyncCallback
-     *            {@link AsyncCallback} object
-     */
-    void removeCourseTemplates(Collection<UUID> courseTemplatesUuids, AsyncCallback<Void> asyncCallback);
-
     void getMarkRoles(AsyncCallback<List<MarkRoleDTO>> callback);
 
     void areCompetitorRegistrationsEnabledForRace(String leaderboardName, String raceColumnName, String fleetName,
@@ -700,4 +673,13 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
             AsyncCallback<Collection<CompetitorAndBoatDTO>> callback);
 
     void getEventById(UUID id, boolean withStatisticalData, AsyncCallback<EventDTO> callback);
+
+    /**
+     * Checks whether the user may cut the race identified by {@code radeIdentifier} into multiple races. For this, it
+     * has to be found and it has to be a "smartphone-tracked" race with a valid start-of-tracking time. If not,
+     * {@code false} will be returned. If the user it not <em>permitted</em> to slice the race, e.g., because no
+     * permission has been granted to modify the leaderboard or regatta, an {@link AuthorizationException} will be
+     * thrown.
+     */
+    void canSliceRace(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<Boolean> callback);
 }

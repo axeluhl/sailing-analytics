@@ -1,21 +1,13 @@
-<?xml version="1.0" encoding="UTF-8"?><resources xmlns:tools="http://schemas.android.com/tools">
-
-    <string-array name="empty_array" tools:ignore="UnusedResources"/>
-    <string name="empty"/>
-    
-    
-
-    
-    
-    
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
     <string name="url_google_geocoder">"http://maps.googleapis.com/maps/api/geocode/json?address="</string>
     <string name="urlpart_google_geocoder_sensor">"\?sensor=true"</string>
     <string name="running_on_course">"(sur le parcours %s)"</string>
     <string name="course_design_number_waypoints">"Le parcours comporte %d points de cheminement."</string>
-    
-    <string name="service_text_no_races">"En attente de courses à suivre..."</string>
+
+    <string name="service_text_no_races">"En attente de courses à suivre…"</string>
     <string name="service_text_num_races">"Actuellement, %d courses suivies."</string>
-    
+
     <string name="set_time">"Lancer"</string>
     <string name="reset_time">"Relancer"</string>
     <string name="choose">"Sélectionner"</string>
@@ -59,7 +51,7 @@
     <string name="racelist_finishing">"En cours d\'achèvement"</string>
     <string name="racelist_finished">"Terminée"</string>
     <string name="racelist_unknown">"Inconnu"</string>
-    <string name="currentlyLoading">"Chargement en cours..."</string>
+    <string name="currentlyLoading">"Chargement en cours…"</string>
     <string name="racingview_header">"Courses sur la zone de course \'%s\'"</string>
     <string name="running_on_unknown">"(Cliquer pour définir le parcours)"</string>
     <string name="updateIndicator">"Mettre à jour indicateur"</string>
@@ -143,11 +135,11 @@
     <string name="in_knots">"en nœuds"</string>
     <string name="wind_speed_direction_not_a_valid_number">"La direction ou la vitesse du vent n\'est pas un chiffre valide. Veuillez corriger la valeur."</string>
     <string name="wind_location_or_fields_not_valid">"La position, la vitesse du vent ou la direction du vent n\'est pas correcte. Veuillez corriger les valeurs."</string>
-    <string name="waiting_for_gps">"En attente de signal GPS..."</string>
+    <string name="waiting_for_gps">"En attente de signal GPS…"</string>
     <string name="manual_entry">"Saisie de position manuelle"</string>
     <string name="found_gps_position">"Position déterminée par GPS"</string>
     <string name="set_position_manually">"Ajouter manuellement la position"</string>
-    <string name="searchPosition">"Recherche de localisation..."</string>
+    <string name="searchPosition">"Recherche de localisation…"</string>
     <string name="no_location_found">"Impossible de trouver une localisation basée sur votre requête."</string>
     <string name="store_position">"Utiliser cette position"</string>
     <string name="store_wind">"Enregistrer vent"</string>
@@ -194,7 +186,7 @@
     <string name="change_dialog_title">"Modifier la régate"</string>
     <string name="change_dialog_message">"Voulez-vous modifier une régate et/ou une zone ? Les courses actuellement suivies vont être déconnectées."</string>
     <string name="logout">"Déconnexion"</string>
-    <string name="loading_configuration">"Chargement de la configuration..."</string>
+    <string name="loading_configuration">"Chargement de la configuration…"</string>
     <string name="loading_configuration_failed">"Une erreur s\'est produite lors du chargement de la configuration."</string>
     <string name="loading_configuration_not_found">"Aucune configuration à distance n\'a été trouvée pour cet appareil."</string>
     <string name="loading_configuration_succeded">"Configuration à distance appliquée"</string>
@@ -235,14 +227,14 @@
     <string name="preference_regatta_specific_save_title">"Sauvegarder la configuration de %1$s"</string>
     <string name="preference_regatta_specific_save_description">"La configuration sera sauvegardée pour toutes les courses de %1$s."</string>
     <string name="auto_update">"Mise à jour automatique"</string>
-    <string name="auto_update_checking_version">"Contrôle des informations de version sur le serveur..."</string>
+    <string name="auto_update_checking_version">"Contrôle des informations de version sur le serveur…"</string>
     <string name="auto_update_downloading_version">"Tentative de téléchargement des informations de mise à jour automatique à partir de %1$s"</string>
     <string name="auto_update_version_file_url_invalid">"Le lien du fichier de version n\'était pas valide."</string>
     <string name="auto_update_click_install">"Cliquez sur \"Installer\" pour exécuter la mise à jour vers la version %1$d."</string>
     <string name="auto_update_force_install">"Vous avez déjà installé la version disponible sur le serveur (version %1$d)."</string>
     <string name="auto_update_with_store">"Votre version actuelle est installée depuis %1$s. Vous ne pouvez pas installer le téléchargement depuis le serveur sans désinstaller l\'application actuelle."</string>
     <string name="auto_update_already_up_to_date">"Vous êtes déjà à jour !"</string>
-    <string name="auto_update_downloading_apk">"Téléchargement d\'APK depuis le serveur..."</string>
+    <string name="auto_update_downloading_apk">"Téléchargement d\'APK depuis le serveur…"</string>
     <string name="auto_update_apk_link_invalid">"Le lien de téléchargement n\'était pas valide."</string>
     <string name="auto_update_apk_file_error">"Impossible de créer le fichier de téléchargement."</string>
     <string name="auto_update_error">"Erreur lors de la tentative de mise à jour automatique."</string>
@@ -257,8 +249,6 @@
     <string name="race_start_in_4_minutes">"4 minutes"</string>
     <string name="race_start_in_2_minutes">"2 minutes"</string>
     <string name="race_start_in_1_minute">"1 minute"</string>
-    <string name="race_start_time_in">"-%s"</string>
-    <string name="race_start_time_ago">"%s"</string>
     <string name="race_set_time">"Définir heure"</string>
     <string name="race_reset_course">"Réinitialiser parcours"</string>
     <string name="no_course_active">"Aucun parcours actif"</string>
@@ -378,9 +368,9 @@
     <string name="race_summary_wind_direction">"Direction moyenne du vent"</string>
     <string name="race_summary_wind_direction_value">"vent de %.0f°"</string>
     <string name="race_summary_wind_speed">"Vitesse moyenne du vent"</string>
-    
+
     <string name="race_summary_individual_recalls">"Rappels individuels"</string>
-    
+
     <string name="record_voice">"Enregistrement vocal"</string>
     <string name="finishing_started">"Premier à l\'arrivée à %1$s"</string>
     <string name="finishing_started_since">"(%s)"</string>
@@ -453,7 +443,7 @@
     <string name="change_cancel">"Annuler"</string>
     <string name="change_message">"Selon les règles de course, ces données ne sont pas modifiables au statut \nactuel de la course. Vous pouvez toutefois continuer à corriger les saisies erronées."</string>
     <string name="change_title">"Avertissement"</string>
-    <string name="send_mail">"Envoyer e-mail..."</string>
+    <string name="send_mail">"Envoyer e-mail…"</string>
     <string name="data_reload_title">"Les données ont été modifiées en externe."</string>
     <string name="data_reload_message">"Les données doivent être rechargées. Perte de données possible."</string>
     <string name="preference_allow_dependent_races_header">"Heure de départ relative (minutes)"</string>
@@ -480,9 +470,8 @@
     <string name="gate_time_schedule_long">"%1$d + %2$d = %3$d minutes"</string>
     <string name="gate_time_schedule_short">"%d minutes"</string>
     <string name="not_available">"sans objet"</string>
-    
-    
-    
+
+
     <string name="accuracy_timestamp">"(depuis %s)"</string>
     <string name="prev_course">"Parcours précédent"</string>
     <string name="layout_course">"Configuration du parcours"</string>
@@ -493,7 +482,7 @@
     <string name="reset_state_2">"Réinitialiser"</string>
     <string name="reset_message_1">"Voulez-vous effacer les listes ?"</string>
     <string name="reset_message_2">"Voulez-vous réinitialiser au dernier état ?"</string>
-    
+
     <string name="onboarding_scan">"Scanner code QR"</string>
     <string name="onboarding_input">"Saisie manuelle"</string>
     <string name="race_group">"Course en groupe"</string>
@@ -535,7 +524,7 @@
     <string name="abort_title">"Annuler les courses"</string>
     <string name="abort_hint">"Quelles courses dont le départ a été donné voulez-vous annuler ?"</string>
     <string name="abort_dismiss">"Ignorer"</string>
-    
+
     <string name="set_column_factor">"Définir facteur"</string>
     <string name="set_factor_error">"Une erreur s\'est produite lors de la définition du facteur : %s"</string>
     <string name="sync_to_minute">"Synchroniser le temps"</string>

@@ -77,7 +77,7 @@ public class WildcardPermissionWithSecurityDTOTableWrapper extends
         userActionColumn.addAction(ACTION_DELETE, DELETE, selectedPermission -> {
             UserDTO selectedObject = userSelectionModel.getSelectedObject();
             if (selectedObject != null) {
-                userService.getUserManagementService().removePermissionFromUser(selectedObject.getName(),
+                userService.getUserManagementWriteService().removePermissionFromUser(selectedObject.getName(),
                         selectedPermission, new AsyncCallback<SuccessInfo>() {
                             @Override
                             public void onFailure(Throwable caught) {
@@ -129,6 +129,7 @@ public class WildcardPermissionWithSecurityDTOTableWrapper extends
                 .setUpdatePermissionFilterForCheckbox(permission -> userService.hasPermission(permission, DefaultActions.UPDATE));
         mainPanel.insert(filterField, 0);
         // setup table
+        table.ensureDebugId("WildcardPermissionWithSecurityDTOTable");
         table.addColumnSortHandler(userColumnListHandler);
         table.addColumn(userGroupWithSecurityDTONameColumn, stringMessages.permission());
         table.addColumn(userActionColumn, stringMessages.actions());

@@ -8,7 +8,7 @@ import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.authentication.AuthenticationManager;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
-import com.sap.sse.security.ui.client.UserManagementServiceAsync;
+import com.sap.sse.security.ui.client.UserManagementWriteServiceAsync;
 import com.sap.sse.security.ui.client.component.NewAccountValidator;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
@@ -23,11 +23,11 @@ public class UserDetailsPresenter implements AbstractUserDetails.Presenter {
     
     private final AuthenticationManager authenticationManager;
 
-    private final UserManagementServiceAsync userManagementService;
+    private final UserManagementWriteServiceAsync userManagementService;
     private final String mailVerifiedConfirmationUrlToken;
     private final UserDetailsView view;
 
-    public UserDetailsPresenter(UserDetailsView view, AuthenticationManager authenticationManager, UserManagementServiceAsync userManagementService, String mailVerifiedConfirmationUrlToken) {
+    public UserDetailsPresenter(UserDetailsView view, AuthenticationManager authenticationManager, UserManagementWriteServiceAsync userManagementService, String mailVerifiedConfirmationUrlToken) {
         this.view = view;
         this.authenticationManager = authenticationManager;
         this.userManagementService = userManagementService;

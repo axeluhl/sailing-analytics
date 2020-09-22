@@ -92,7 +92,7 @@ public class EventViewDTO extends EventMetadataDTO implements Result, HasLogo {
     
     /**
      * In addition to the spots from the wind finder spot collections specified by this event explicitly (see
-     * {@link #getWindFinderReviewedSpotsCollectionIds()}), this method may return additional spots based
+     * {@link #getAllWindFinderReviewedSpotsCollectionIds()}), this method may return additional spots based
      * on the tracked races reachable from this event's associated leaderboard groups and their wind sources. The
      * {@link WindSource#getId() wind source IDs} of all wind sources of type {@link WindSourceType#WINDFINDER} will be
      * collected and the corresponding {@link SpotDTO} objects are then returned.

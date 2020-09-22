@@ -82,6 +82,8 @@ public class UserService {
     protected static final Duration SUPRESSION_DELAY = Duration.ONE_WEEK;
     
     private final UserManagementServiceAsync userManagementService;
+    
+    private final UserManagementWriteServiceAsync userManagementWriteService;
 
     private final Set<UserStatusEventHandler> handlers;
 
@@ -104,9 +106,10 @@ public class UserService {
      */
     private final DelegatingCrossDomainStorageFuture crossDomainStorage;
 
-    public UserService(UserManagementServiceAsync userManagementService) {
+    public UserService(UserManagementServiceAsync userManagementService, UserManagementWriteServiceAsync userManagementWriteService) {
         this.id = UUID.randomUUID().toString();
         this.userManagementService = userManagementService;
+        this.userManagementWriteService = userManagementWriteService;
         handlers = new HashSet<>();
         allKnownHasPermissions = new HashSet<>();
         crossDomainStorage = new DelegatingCrossDomainStorageFuture();
@@ -200,7 +203,7 @@ public class UserService {
      * signed-in user will remain to be signed in.
      */
     public void login(String username, String password, final AsyncCallback<SuccessInfo> callback) {
-        userManagementService.login(username, password,
+        userManagementWriteService.login(username, password,
                 new MarkedAsyncCallback<SuccessInfo>(new AsyncCallback<SuccessInfo>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -220,7 +223,7 @@ public class UserService {
     public void verifySocialUser(final AsyncCallback<UserDTO> callback) throws Exception {
         final String authProviderName = ClientUtils.getAuthProviderNameFromCookie();
         logger.info("Verifying " + authProviderName + " user ...");
-        userManagementService.verifySocialUser(ClientUtils.getCredential(),
+        userManagementWriteService.verifySocialUser(ClientUtils.getCredential(),
                 new MarkedAsyncCallback<Triple<UserDTO, UserDTO, ServerInfoDTO>>(new AsyncCallback<Triple<UserDTO, UserDTO, ServerInfoDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -237,7 +240,7 @@ public class UserService {
     }
 
     public void logout() {
-        userManagementService.logout(new AsyncCallback<SuccessInfo>() {
+        userManagementWriteService.logout(new AsyncCallback<SuccessInfo>() {
             @Override
             public void onFailure(Throwable caught) {
                 Notification.notify(stringMessages.couldNotSignOut(caught.getMessage()), NotificationType.ERROR);
@@ -317,6 +320,10 @@ public class UserService {
         return userManagementService;
     }
     
+    public UserManagementWriteServiceAsync getUserManagementWriteService() {
+        return userManagementWriteService;
+    }
+    
     /**
      * Loads the {@link #getCurrentUser() current user}'s preference with the given {@link String key} from server.
      * The preferences are passed to the {@link AsyncCallback} as serialized in {@link String}.
@@ -354,13 +361,13 @@ public class UserService {
      */
     public void setPreference(String key, String serializedSettings, final AsyncCallback<Void> callback) {
         String username = getCurrentUser().getName();
-        getUserManagementService().setPreference(username, key, serializedSettings, callback);
+        userManagementWriteService.setPreference(username, key, serializedSettings, callback);
     }
     
     public void setPreferences(Map<String, String> keyValuePairs,
             final AsyncCallback<Void> callback) {
         String username = getCurrentUser().getName();
-        getUserManagementService().setPreferences(username, keyValuePairs, callback);
+        userManagementWriteService.setPreferences(username, keyValuePairs, callback);
     }
     
     /**
@@ -373,7 +380,7 @@ public class UserService {
      */
     public void unsetPreference(String key) {
         String username = getCurrentUser().getName();
-        getUserManagementService().unsetPreference(username, key, new AsyncCallback<Void>() {
+        userManagementWriteService.unsetPreference(username, key, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
                 Notification.notify(caught.getMessage(), NotificationType.ERROR);
@@ -495,11 +502,6 @@ public class UserService {
     
     public void addKnownHasPermissions(Iterable<HasPermissions> hasPermissions) {
         Util.addAll(hasPermissions, allKnownHasPermissions);
-    }
-    
-    public boolean hasCurrentUserMetaPermission(WildcardPermission permissionToCheck, OwnershipDTO ownership) {
-        return PermissionChecker.checkMetaPermission(permissionToCheck, allKnownHasPermissions, getCurrentUser(),
-                anonymousUser, ownership);
     }
 
     public boolean hasCurrentUserAnyPermission(WildcardPermission permissionToCheck, OwnershipDTO ownership) {

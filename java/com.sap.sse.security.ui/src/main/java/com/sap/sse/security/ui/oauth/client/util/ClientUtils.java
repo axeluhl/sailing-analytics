@@ -7,7 +7,7 @@ import com.google.gwt.user.client.Window.Location;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
-import com.sap.sse.security.ui.client.UserManagementServiceAsync;
+import com.sap.sse.security.ui.client.UserManagementWriteServiceAsync;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
@@ -399,9 +399,9 @@ public class ClientUtils {
         Notification.notify(message, NotificationType.ERROR);
     }
 
-    public static void logout(UserManagementServiceAsync userManagementService) {
+    public static void logout(UserManagementWriteServiceAsync userManagementWriteService) {
 
-        userManagementService.logout(new AsyncCallback<SuccessInfo>() {
+        userManagementWriteService.logout(new AsyncCallback<SuccessInfo>() {
 
             @Override
             public void onFailure(Throwable caught) {

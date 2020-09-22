@@ -56,6 +56,7 @@ public class WildcardPermissionPanel extends HorizontalPanel
             Function<SuggestOracle, SuggestBox> suggestBoxConstructor) {
         // create multi to single selection adapter
         final SingleSelectionModel<UserDTO> multiToSingleSelectionModelAdapter = new SingleSelectionModel<>();
+        this.ensureDebugId(this.getClass().getSimpleName());
         userSelectionModel.addSelectionChangeHandler(event -> {
             multiToSingleSelectionModelAdapter.clear();
             if (userSelectionModel.getSelectedSet().size() != 1) {
@@ -78,6 +79,7 @@ public class WildcardPermissionPanel extends HorizontalPanel
             }
         }
         suggestPermission = suggestBoxConstructor.apply(oracle);
+        suggestPermission.ensureDebugId("suggestPermission");
         roleAndPermissionResources.css().ensureInjected();
         suggestPermission.addStyleName(roleAndPermissionResources.css().enterPermissionSuggest());
         suggestPermission.getElement().setPropertyString("placeholder", stringMessages.enterPermissionName());
@@ -90,7 +92,7 @@ public class WildcardPermissionPanel extends HorizontalPanel
             if (selectedPermission != null) {
                 UserDTO selectedUser = this.userSelectionModel.getSelectedObject();
                 if (selectedUser != null) {
-                    userService.getUserManagementService().addPermissionForUser(selectedUser.getName(),
+                    userService.getUserManagementWriteService().addPermissionForUser(selectedUser.getName(),
                             selectedPermission, new AsyncCallback<SuccessInfo>() {
                                 @Override
                                 public void onFailure(Throwable caught) {
@@ -110,6 +112,7 @@ public class WildcardPermissionPanel extends HorizontalPanel
             }
             suggestPermission.setText("");
         });
+        addPermissionButton.ensureDebugId("addPermissionButton");
         final Command addPermissionButtonUpdater = () -> addPermissionButton
                 .setEnabled(!suggestPermission.getValue().isEmpty());
         suggestPermission.addKeyUpHandler(event -> addPermissionButtonUpdater.execute());
