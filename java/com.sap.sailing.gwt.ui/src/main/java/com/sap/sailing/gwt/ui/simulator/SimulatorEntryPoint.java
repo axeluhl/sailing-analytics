@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.simulator;
 
+import static com.sap.sse.gwt.shared.RpcConstants.HEADER_FORWARD_TO_REPLICA;
+
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
@@ -51,7 +53,7 @@ public class SimulatorEntryPoint extends AbstractSailingReadEntryPoint {
     protected void doOnModuleLoad() {
         Highcharts.ensureInjectedWithExport();
         super.doOnModuleLoad();
-        EntryPointHelper.registerASyncService((ServiceDefTarget) simulatorService, RemoteServiceMappingConstants.simulatorServiceRemotePath);
+        EntryPointHelper.registerASyncService((ServiceDefTarget) simulatorService, RemoteServiceMappingConstants.simulatorServiceRemotePath, HEADER_FORWARD_TO_REPLICA);
         checkUrlParameters();
         createSimulatorPanel();
     }

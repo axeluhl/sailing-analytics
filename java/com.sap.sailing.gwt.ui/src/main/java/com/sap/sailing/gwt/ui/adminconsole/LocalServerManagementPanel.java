@@ -85,9 +85,9 @@ public class LocalServerManagementPanel extends SimplePanel {
         final HasPermissions type = SecuredSecurityTypes.SERVER;
         final Consumer<ServerInfoDTO> updateCallback = event -> userService.updateUser(false);
         final EditOwnershipDialog.DialogConfig<ServerInfoDTO> configOwner = EditOwnershipDialog
-                .create(userService.getUserManagementService(), type, updateCallback, stringMessages);
+                .create(userService.getUserManagementWriteService(), type, updateCallback, stringMessages);
         final EditACLDialog.DialogConfig<ServerInfoDTO> configACL = EditACLDialog
-                .create(userService.getUserManagementService(), type, updateCallback, stringMessages);
+                .create(userService.getUserManagementWriteService(), type, updateCallback, stringMessages);
 
         final Predicate<DefaultActions> permissionCheck = action -> currentServerInfo != null
                 && userService.hasPermission(type.getPermission(action), currentServerInfo.getOwnership());
