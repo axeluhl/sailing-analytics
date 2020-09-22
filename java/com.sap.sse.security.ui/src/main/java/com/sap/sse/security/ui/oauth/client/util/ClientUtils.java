@@ -236,7 +236,6 @@ public class ClientUtils {
                 return UNKNOWN;
             }
         }
-
         return authProvider;
     }
 
@@ -322,7 +321,6 @@ public class ClientUtils {
         if (authProvider == null)
             return null;
         int ap = DEFAULT;
-
         try {
             ap = Integer.parseInt(authProvider);
         } catch (Exception e) {
@@ -368,7 +366,6 @@ public class ClientUtils {
             credential.setVerifier(Location.getParameter("oauth_verifier"));
             return credential;
         }
-
         default: {
             throw new Exception("ClientUtils.getCredential: Auth Provider " + authProvider + " Not implemented yet");
         }
@@ -400,9 +397,7 @@ public class ClientUtils {
     }
 
     public static void logout(UserManagementServiceAsync userManagementService) {
-
         userManagementService.logout(new AsyncCallback<SuccessInfo>() {
-
             @Override
             public void onFailure(Throwable caught) {
                 Notification.notify("Could not log out! " + caught, NotificationType.ERROR);

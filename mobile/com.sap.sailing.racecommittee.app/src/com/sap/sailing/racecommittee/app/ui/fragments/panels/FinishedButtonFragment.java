@@ -1,13 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.panels;
 
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.util.ViewHelper;
-import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
-import com.sap.sailing.racecommittee.app.AppConstants;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.PhotoListFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.TrackingListFragment;
-
 import android.annotation.TargetApi;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -22,6 +14,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
+import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.PhotoListFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.TrackingListFragment;
 
 public class FinishedButtonFragment extends BasePanelFragment {
 
@@ -72,7 +72,7 @@ public class FinishedButtonFragment extends BasePanelFragment {
             mPhoto.setOnClickListener(new PhotoClick());
         }
         mPhotoLock = ViewHelper.get(layout, R.id.photo_lock);
-        if (!isCameraAvailable(getActivity())) {
+        if (!isCameraAvailable(requireContext())) {
             mPhotoLock.setVisibility(View.VISIBLE);
         }
 
@@ -92,11 +92,11 @@ public class FinishedButtonFragment extends BasePanelFragment {
         super.onResume();
 
         IntentFilter filter = new IntentFilter();
-        filter.addAction(AppConstants.INTENT_ACTION_TOGGLE);
-        filter.addAction(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, filter);
+        filter.addAction(AppConstants.ACTION_TOGGLE);
+        filter.addAction(AppConstants.ACTION_CLEAR_TOGGLE);
+        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(mReceiver, filter);
 
-        sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
+        sendIntent(AppConstants.ACTION_CLEAR_TOGGLE);
 
         if (!preferences.getRacingProcedureIsResultEntryEnabled(getRaceState().getRacingProcedure().getType())) {
             mList.setVisibility(View.GONE);
@@ -112,7 +112,7 @@ public class FinishedButtonFragment extends BasePanelFragment {
     public void onPause() {
         super.onPause();
 
-        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mReceiver);
+        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(mReceiver);
     }
 
     private void uncheckMarker(View view) {
@@ -123,13 +123,13 @@ public class FinishedButtonFragment extends BasePanelFragment {
             }
 
             if (!view.equals(mPhoto)) {
-                resetFragment(null, getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false),
+                resetFragment(null, getFrameId(requireActivity(), R.id.race_edit, R.id.race_content, false),
                         PhotoListFragment.class);
                 setMarkerLevel(mPhoto, R.id.photo_marker, LEVEL_NORMAL);
             }
 
             if (!view.equals(mList)) {
-                resetFragment(null, getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false),
+                resetFragment(null, getFrameId(requireActivity(), R.id.race_edit, R.id.race_content, false),
                         TrackingListFragment.class);
                 setMarkerLevel(mList, R.id.list_marker, LEVEL_NORMAL);
             }
@@ -141,20 +141,19 @@ public class FinishedButtonFragment extends BasePanelFragment {
         @Override
         public void onClick(View v) {
             if (mRecordLock == null || mRecordLock.getVisibility() == View.GONE) {
-                sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA,
-                        AppConstants.INTENT_ACTION_TOGGLE_REPLAY);
+                sendIntent(AppConstants.ACTION_TOGGLE, AppConstants.EXTRA_DEFAULT, AppConstants.ACTION_TOGGLE_REPLAY);
                 switch (toggleMarker(v, R.id.record_marker)) {
-                case LEVEL_NORMAL:
-                    sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
-                    break;
+                    case LEVEL_NORMAL:
+                        sendIntent(AppConstants.ACTION_SHOW_SUMMARY_CONTENT);
+                        break;
 
-                case LEVEL_TOGGLED:
-                    // TODO
-                    break;
+                    case LEVEL_TOGGLED:
+                        // TODO
+                        break;
 
-                default:
-                    ExLog.i(getActivity(), TAG, "Unknown return value");
-                    break;
+                    default:
+                        ExLog.i(getActivity(), TAG, "Unknown return value");
+                        break;
                 }
             }
         }
@@ -165,21 +164,20 @@ public class FinishedButtonFragment extends BasePanelFragment {
         @Override
         public void onClick(View v) {
             if (mPhotoLock == null || mPhotoLock.getVisibility() == View.GONE) {
-                sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA,
-                        AppConstants.INTENT_ACTION_TOGGLE_PHOTOS);
+                sendIntent(AppConstants.ACTION_TOGGLE, AppConstants.EXTRA_DEFAULT, AppConstants.ACTION_TOGGLE_PHOTOS);
                 switch (toggleMarker(v, R.id.photo_marker)) {
-                case LEVEL_NORMAL:
-                    sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
-                    break;
+                    case LEVEL_NORMAL:
+                        sendIntent(AppConstants.ACTION_SHOW_SUMMARY_CONTENT);
+                        break;
 
-                case LEVEL_TOGGLED:
-                    replaceFragment(PhotoListFragment.newInstance(getRecentArguments()),
-                            getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content, true));
-                    break;
+                    case LEVEL_TOGGLED:
+                        replaceFragment(PhotoListFragment.newInstance(getRecentArguments()),
+                                getFrameId(requireActivity(), R.id.finished_edit, R.id.finished_content, true));
+                        break;
 
-                default:
-                    ExLog.i(getActivity(), TAG, "Unknown return value");
-                    break;
+                    default:
+                        ExLog.i(getActivity(), TAG, "Unknown return value");
+                        break;
                 }
             }
         }
@@ -190,21 +188,20 @@ public class FinishedButtonFragment extends BasePanelFragment {
         @Override
         public void onClick(View v) {
             if (mListLock == null || mListLock.getVisibility() == View.GONE) {
-                sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA,
-                        AppConstants.INTENT_ACTION_TOGGLE_LIST);
+                sendIntent(AppConstants.ACTION_TOGGLE, AppConstants.EXTRA_DEFAULT, AppConstants.ACTION_TOGGLE_LIST);
                 switch (toggleMarker(v, R.id.list_marker)) {
-                case LEVEL_NORMAL:
-                    sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
-                    break;
+                    case LEVEL_NORMAL:
+                        sendIntent(AppConstants.ACTION_SHOW_SUMMARY_CONTENT);
+                        break;
 
-                case LEVEL_TOGGLED:
-                    replaceFragment(TrackingListFragment.newInstance(getRecentArguments(), 0),
-                            getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content, true));
-                    break;
+                    case LEVEL_TOGGLED:
+                        replaceFragment(TrackingListFragment.newInstance(getRecentArguments(), 0),
+                                getFrameId(requireActivity(), R.id.finished_edit, R.id.finished_content, true));
+                        break;
 
-                default:
-                    ExLog.i(getActivity(), TAG, "Unknown return value");
-                    break;
+                    default:
+                        ExLog.i(getActivity(), TAG, "Unknown return value");
+                        break;
                 }
             }
         }
@@ -215,28 +212,26 @@ public class FinishedButtonFragment extends BasePanelFragment {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if (AppConstants.INTENT_ACTION_CLEAR_TOGGLE.equals(action)) {
-                uncheckMarker(new View(context));
-            }
-
-            if (AppConstants.INTENT_ACTION_TOGGLE.equals(action)) {
+            if (AppConstants.ACTION_TOGGLE.equals(action)) {
                 if (intent.getExtras() != null) {
-                    String data = intent.getExtras().getString(AppConstants.INTENT_ACTION_EXTRA);
+                    String data = intent.getStringExtra(AppConstants.EXTRA_DEFAULT);
                     switch (data) {
-                    case AppConstants.INTENT_ACTION_TOGGLE_REPLAY:
-                        uncheckMarker(mRecord);
-                        break;
-                    case AppConstants.INTENT_ACTION_TOGGLE_PHOTOS:
-                        uncheckMarker(mPhoto);
-                        break;
-                    case AppConstants.INTENT_ACTION_TOGGLE_LIST:
-                        uncheckMarker(mList);
-                        break;
-                    default:
-                        uncheckMarker(new View(context));
-                        break;
+                        case AppConstants.ACTION_TOGGLE_REPLAY:
+                            uncheckMarker(mRecord);
+                            break;
+                        case AppConstants.ACTION_TOGGLE_PHOTOS:
+                            uncheckMarker(mPhoto);
+                            break;
+                        case AppConstants.ACTION_TOGGLE_LIST:
+                            uncheckMarker(mList);
+                            break;
+                        default:
+                            uncheckMarker(new View(context));
+                            break;
                     }
                 }
+            } else if (AppConstants.ACTION_CLEAR_TOGGLE.equals(action)) {
+                uncheckMarker(new View(context));
             }
         }
     }

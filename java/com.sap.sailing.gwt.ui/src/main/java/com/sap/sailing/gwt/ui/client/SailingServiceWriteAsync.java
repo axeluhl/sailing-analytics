@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.authz.UnauthorizedException;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -36,12 +35,16 @@ import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.TagDTO;
+import com.sap.sailing.domain.common.orc.ImpliedWindSource;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
 import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
 import com.sap.sailing.gwt.ui.adminconsole.RaceLogSetTrackingTimesDTO;
+import com.sap.sailing.gwt.ui.adminconsole.RemoteSailingServerEventsSelectionDialog;
+import com.sap.sailing.gwt.ui.client.shared.charts.MarkPositionService.MarkTrackDTO;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
+import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
@@ -50,13 +53,17 @@ import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.MigrateGroupOwnerForHierarchyDTO;
+import com.sap.sailing.gwt.ui.shared.RaceLogSetFinishingAndFinishTimeDTO;
+import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
+import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.TypedDeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.UrlDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
@@ -182,15 +189,6 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void fillRaceLogsFromPairingListTemplate(final String leaderboardName, final int flightMultiplier,
             final List<String> selectedFlightNames,PairingListDTO pairingListDTO, AsyncCallback<Void> callback);
 
-    /**
-     * Checks whether the user may cut the race identified by {@code radeIdentifier} into multiple races. For this, it
-     * has to be found and it has to be a "smartphone-tracked" race with a valid start-of-tracking time. If not,
-     * {@code false} will be returned. If the user it not <em>permitted</em> to slice the race, e.g., because no
-     * permission has been granted to modify the leaderboard or regatta, an {@link AuthorizationException} will be
-     * thrown.
-     */
-    void canSliceRace(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<Boolean> callback);
-
     void sliceRace(RegattaAndRaceIdentifier raceIdentifier, String newRaceColumnName, TimePoint sliceFrom, TimePoint sliceTo,
             AsyncCallback<RegattaAndRaceIdentifier> callback);
 
@@ -232,6 +230,35 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void updateMarkPropertiesPositioning(UUID markPropertiesId, DeviceIdentifierDTO deviceIdentifier, Position position, AsyncCallback<MarkPropertiesDTO> asyncCallback);
 
     void createOrUpdateCourseTemplate(CourseTemplateDTO courseTemplate, AsyncCallback<CourseTemplateDTO> asyncCallback);
+
+    /**
+     * Remove course templates by UUIDs
+     * 
+     * @param courseTemplatesUuids
+     *            the {@link Collection} of course templates' UUIDs which will be remove
+     * @param asyncCallback
+     *            {@link AsyncCallback} object
+     */
+    void removeCourseTemplates(Collection<UUID> courseTemplatesUuids, AsyncCallback<Void> asyncCallback);
+
+    void removeSailingServers(Set<String> toRemove, AsyncCallback<Void> callback);
+
+    void addRemoteSailingServerReference(RemoteSailingServerReferenceDTO sailingServer,
+            AsyncCallback<RemoteSailingServerReferenceDTO> callback);
+
+    /**
+     * Updates {@link RemoteSailingServerReferenceDTO} sailingServer instance based on user selection regarding
+     * inclusion type and selected events.
+     */
+    void updateRemoteSailingServerReference(RemoteSailingServerReferenceDTO sailingServer,
+            AsyncCallback<RemoteSailingServerReferenceDTO> callback);
+
+    /**
+     * Loads remote sailing server data with all events not filtered by selection in order to show the full list of
+     * events on {@link RemoteSailingServerEventsSelectionDialog} dialog.
+     */
+    void getCompleteRemoteServerReference(String sailingServerName,
+            AsyncCallback<RemoteSailingServerReferenceDTO> callback);
 
     /**
      * Remove mark properties by UUIDs
@@ -560,5 +587,35 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void closeOpenEndedDeviceMapping(String leaderboardName, DeviceMappingDTO mappingDto, Date closingTimePoint,
             AsyncCallback<Void> asyncCallback);
 
+    void createOrUpdateDeviceConfiguration(DeviceConfigurationDTO configurationDTO, AsyncCallback<Void> callback);
 
+    /**
+     * Sets the a new start time.
+     * 
+     * @param dto
+     *            {@link RaceLogSetStartTimeAndProcedureDTO} identifying the race to set the start time on and the new
+     *            start time.
+     */
+    void setStartTimeAndProcedure(RaceLogSetStartTimeAndProcedureDTO dto, AsyncCallback<Boolean> callback);
+
+    /**
+     * Sets the a new finishing and end time.
+     * 
+     * @param dto
+     *            {@link RaceLogSetFinishingAndFinishTimeDTO} identifying the race and the new finishing and
+     *            end time.
+     */
+    void setFinishingAndEndTime(RaceLogSetFinishingAndFinishTimeDTO editedObject, AsyncCallback<Pair<Boolean, Boolean>> asyncCallback);
+    
+
+    void setImpliedWindSource(String leaderboardName, String raceColumnName, String fleetName,
+            ImpliedWindSource impliedWindSource, AsyncCallback<Void> callback);
+
+    void getTrackFileImportDeviceIds(List<String> uuids,
+            AsyncCallback<List<TrackFileImportDeviceIdentifierDTO>> callback);
+
+    void getMarkTrack(String leaderboardName, String raceColumnName, String fleetName, String markIdAsString, 
+            AsyncCallback<MarkTrackDTO> callback);
+
+    void getDeviceMappings(String leaderboardName, AsyncCallback<List<DeviceMappingDTO>> asyncCallback);
 }

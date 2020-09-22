@@ -12,17 +12,16 @@ import org.junit.Test;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.interfaces.AccessControlStore;
 import com.sap.sse.security.interfaces.UserStore;
-import com.sap.sse.security.shared.UserGroupManagementException;
-import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.UserStoreManagementException;
 
 public class TestDefaultUserGroupMerge extends AbstractStoreMergeTest {
     @Before
-    public void setUp() throws IOException, UserGroupManagementException, UserManagementException {
+    public void setUp() throws IOException, UserStoreManagementException {
         setUp("source_TestDefaultUserGroupMerge", "target_TestDefaultUserGroupMerge");
     }
     
     @Test
-    public void testDefaultUserGroupMerge() throws UserGroupManagementException, UserManagementException {
+    public void testDefaultUserGroupMerge() throws UserStoreManagementException {
         // assertions against unmodified target
         assertNotNull(targetUserStore.getUserGroupByName("aaa-tenant"));
         assertNotNull(targetUserStore.getUserGroupByName("bbb-tenant"));

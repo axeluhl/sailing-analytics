@@ -1,5 +1,8 @@
 package com.sap.sse.security.ui.oauth.client;
 
+import static com.sap.sse.gwt.shared.RpcConstants.HEADER_FORWARD_TO_MASTER;
+import static com.sap.sse.gwt.shared.RpcConstants.HEADER_FORWARD_TO_REPLICA;
+
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -15,26 +18,35 @@ import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.security.shared.dto.UserDTO;
-import com.sap.sse.security.ui.client.RemoteServiceMappingConstants;
 import com.sap.sse.security.ui.client.UserChangeEventHandler;
 import com.sap.sse.security.ui.client.UserManagementService;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
+import com.sap.sse.security.ui.client.UserManagementWriteService;
+import com.sap.sse.security.ui.client.UserManagementWriteServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.client.shared.oauthlogin.OAuthLogin;
 import com.sap.sse.security.ui.oauth.client.util.ClientUtils;
 
 public class OAuthLoginEntryPoint implements EntryPoint, UserChangeEventHandler {
-    private final UserManagementServiceAsync userManagementService = GWT.create(UserManagementService.class);
     private final StringMessages stringMessages = GWT.create(StringMessages.class);
-    private final UserService userService = new UserService(userManagementService);
-
-    private OAuthLogin loginScreen = new OAuthLogin(userManagementService);
+    private OAuthLogin loginScreen;
+    private UserService userService;
+    
     private FlowPanel content = new FlowPanel();
 
     public void onModuleLoad() {
+        UserManagementServiceAsync userManagementService = GWT.create(UserManagementService.class);
         EntryPointHelper.registerASyncService((ServiceDefTarget) userManagementService,
-                RemoteServiceMappingConstants.userManagementServiceRemotePath);
+                com.sap.sse.security.ui.client.RemoteServiceMappingConstants.userManagementServiceRemotePath,
+                HEADER_FORWARD_TO_REPLICA);
+        UserManagementWriteServiceAsync userManagementWriteService = GWT.create(UserManagementWriteService.class);
+        EntryPointHelper.registerASyncService((ServiceDefTarget) userManagementWriteService,
+                com.sap.sse.security.ui.client.RemoteServiceMappingConstants.userManagementServiceRemotePath,
+                HEADER_FORWARD_TO_MASTER);
+        userService = new UserService(userManagementService, userManagementWriteService);
+        loginScreen = new OAuthLogin(userManagementWriteService);
+
         RootPanel.get().add(content);
         setContentMessage(stringMessages.loading());
         try {

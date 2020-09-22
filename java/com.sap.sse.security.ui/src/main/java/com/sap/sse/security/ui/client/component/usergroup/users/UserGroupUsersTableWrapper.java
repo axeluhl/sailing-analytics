@@ -46,7 +46,7 @@ public class UserGroupUsersTableWrapper extends
             final UserGroupDTO tenant = getSingleSelectedUserGroup(userGroupSelectionModel);
             if (tenant != null) {
                 final String username = user.getName();
-                userService.getUserManagementService().removeUserFromUserGroup(tenant.getId().toString(), username,
+                userService.getUserManagementWriteService().removeUserFromUserGroup(tenant.getId().toString(), username,
                         new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable caught) {
@@ -72,6 +72,7 @@ public class UserGroupUsersTableWrapper extends
             }
         });
         table.addColumn(usernameColumn, stringMessages.username());
+        table.ensureDebugId("UserGroupUserDTOTable");
         table.addColumn(actionColumns);
     }
 

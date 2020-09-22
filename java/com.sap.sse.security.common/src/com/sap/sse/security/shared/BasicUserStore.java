@@ -34,8 +34,6 @@ public interface BasicUserStore extends UserGroupProvider, Named {
     
     void updateUserGroup(UserGroup userGroup);
     
-    void deleteUserGroup(UserGroup userGroup) throws UserGroupManagementException;
-    
     Iterable<User> getUsers();
     
     boolean hasUsers();

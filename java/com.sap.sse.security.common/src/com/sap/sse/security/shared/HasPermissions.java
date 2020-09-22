@@ -14,6 +14,9 @@ import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
  *
  */
 public interface HasPermissions {
+    /**
+     * Used for the first part ("type") of the permissions constructed for this object.
+     */
     String getName();
 
     /**

@@ -16,7 +16,7 @@ public class UserProfileDetailsPresenter implements UserProfileDetailsView.Prese
         view.setPresenter(this);
         this.userDetailsPresenter = new UserDetailsPresenter(view.getUserDetailsView(),
                 userProfilePresenter.getClientFactory().getAuthenticationManager(),
-                userProfilePresenter.getClientFactory().getUserManagementService(),
+                userProfilePresenter.getClientFactory().getUserManagementWriteService(),
                 userProfilePresenter.getMailVerifiedUrl());
     }
 

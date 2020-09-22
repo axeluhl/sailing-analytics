@@ -10,7 +10,7 @@
         android:layout_height="match_parent"
         android:layout_above="@+id/two_buttons_layout"
         android:layout_alignParentTop="true"
-        android:contentDescription="@string/empty"
+        android:contentDescription="@null"
         android:scaleType="centerCrop"
         android:src="@drawable/working_title" />
 
@@ -67,5 +67,4 @@
         android:layout_alignParentTop="true"
         android:divider="@color/separator_color"
         android:dividerHeight="1dp" />
-
 </RelativeLayout>
