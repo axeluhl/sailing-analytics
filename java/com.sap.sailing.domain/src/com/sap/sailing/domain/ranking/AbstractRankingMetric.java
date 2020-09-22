@@ -312,16 +312,16 @@ public abstract class AbstractRankingMetric implements RankingMetric {
      * For the situation at <code>timePoint</code>, determines how long in real, uncorrected time <code>who</code> lags
      * behind <code>to</code> in the leg identified by <code>legWho</code>. If both are still sailing in the leg at
      * <code>timePoint</code>, this is the time <code>who</code> needs with constant average VMG to reach
-     * <code>to</code>'s position at <code>timePoint</code>. If only <code>to</code> has already finished the leg at
-     * {@code timePoint} then <code>who</code> is projected to the end of the leg using her average VMG on the leg, and
-     * the difference between <code>who</code>'s projected and <code>to</code>'s actual mark passing times is returned.
-     * Note that in this latter case it doesn't matter whether {@code who} already has a mark passing for the end of the
-     * leg or not; the idea is to not "rewrite history" by letting the mark passing have an impact on the rankings prior
-     * to the mark passing.
+     * <code>to</code>'s "windward" (or along course for reaching legs) position at <code>timePoint</code>. If only
+     * <code>to</code> has already finished the leg at {@code timePoint} then <code>who</code>'s projected duration to the end
+     * of the leg using her average VMG on the leg is used. Note that in this latter case it doesn't matter whether
+     * {@code who} already has a mark passing for the end of the leg or not; the idea is to not "rewrite history" by
+     * letting the mark passing have an impact on the rankings prior to the mark passing.
      * <p>
      * 
      * The result may be a negative duration in case <code>who</code> reached the position in question before
-     * <code>timePoint</code>.
+     * <code>timePoint</code>. If <code>who</code> sailed past the waypoint without receiving a mark passing, we assume
+     * <code>who</code> has to spend as much time to get back to the waypoint and will return a positive duration.
      * <p>
      * 
      * Precondition: <code>who</code> and <code>to</code> have both started sailing the leg at <code>timePoint</code>
@@ -339,12 +339,14 @@ public abstract class AbstractRankingMetric implements RankingMetric {
             if (whosLegFinishTime != null && !whosLegFinishTime.after(timePoint)) {
                 // who's leg finishing time is known and is already reached at timePoint; we don't need to extrapolate;
                 // "who" needs no more time at timePoint to reach the end of the leg
-                toEndOfLegOrTo = Duration.NULL;
+                toEndOfLegOrTo = timePoint.until(whosLegFinishTime);
             } else {
                 // estimate who's leg finishing time by extrapolating with the average VMG (if available) or the current VMG
                 // (if no average VMG can currently be computed, e.g., because the time point is exactly at the leg start)
                 final Position positionOfEndOfLeg = getTrackedRace().getApproximatePosition(legWho.getLeg().getTo(), timePoint);
-                toEndOfLegOrTo = getDurationToReach(positionOfEndOfLeg, timePoint, legWho, cache);
+                // Turn into a positive duration because a negative duration can only occur if "who" sailed past the waypoint without
+                // receiving a mark passing and hence now has to sail back, taking a positive duration to get there.
+                toEndOfLegOrTo = getDurationToReach(positionOfEndOfLeg, timePoint, legWho, cache).abs();
             }
         } else {
             // competitor "to" is still in same leg; project "who" to "to"'s position using VMG

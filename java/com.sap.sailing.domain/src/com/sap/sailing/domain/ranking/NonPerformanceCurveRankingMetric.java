@@ -199,8 +199,9 @@ public abstract class NonPerformanceCurveRankingMetric extends AbstractRankingMe
                 // when "who" has sailed (or is extrapolated) beyond the end of the leg without having received a mark passing.
                 // In this case we want to assume that it will take "who" approximately that long again to reach back to
                 // the waypoint to actually pass it; so we use the absolute duration instead.
-                final Duration signedDuration = getPredictedDurationToEndOfLegOrTo(timePoint, legWho, legWho.getTrackedLeg().getTrackedLeg(to), cache);
-                final Duration toEndOfLegOrTo = signedDuration == null ? null : signedDuration.abs();
+                final Duration toEndOfLegOrTo = getPredictedDurationToEndOfLegOrTo(timePoint, legWho, legWho.getTrackedLeg().getTrackedLeg(to), cache);
+                // toEndOfLegOrTo may be a negative Duration in case both have finished the leg before timePoint; it will then represent the duration
+                // between "who"'s leg finish mark passing and timePoint.
                 if (toEndOfLegOrTo == null) {
                     result = null;
                 } else {
@@ -208,6 +209,7 @@ public abstract class NonPerformanceCurveRankingMetric extends AbstractRankingMe
                     if (legWho.getLeg() == legTo.getLeg()) {
                         durationForSubsequentLegsToReachAtEqualPerformance = Duration.NULL;
                     } else {
+                        // FIXME bug5316: isn't it strange to assume that "to" reached its current position at timePoint? It could have been way earlier than that...
                         durationForSubsequentLegsToReachAtEqualPerformance = getDurationToReachAtEqualPerformance(who, to,
                                 legWho.getLeg().getTo(), timePoint, cache);
                     }
