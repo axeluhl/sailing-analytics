@@ -282,11 +282,6 @@ public class StartTimeFragment extends BaseFragment
                     mStartTimeOffset = (Duration) getArguments().getSerializable(MainScheduleFragment.START_TIME_DIFF);
                     mRaceId = (SimpleRaceLogIdentifier) getArguments().getSerializable(MainScheduleFragment.DEPENDENT_RACE);
 
-                    View syncButtons = ViewHelper.get(getView(), R.id.buttonBar);
-                    if (syncButtons != null) {
-                        syncButtons.setVisibility(View.GONE);
-                    }
-
                     View startSeconds = ViewHelper.get(getView(), R.id.start_time_seconds);
                     if (startSeconds != null) {
                         startSeconds.setVisibility(View.GONE);
