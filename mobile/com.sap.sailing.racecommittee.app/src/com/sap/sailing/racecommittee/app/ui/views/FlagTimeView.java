@@ -92,12 +92,7 @@ public class FlagTimeView extends LinearLayout {
                 checkFlag(procedure, timePoint);
                 break;
             case FINISHING:
-                setFinishingFlag(procedure, timePoint);
-                listener = now -> {
-                    final long millis = now.minus(finishingTime.asMillis()).asMillis();
-                    textView.setText(TimeUtils.formatDurationSince(millis, false));
-                };
-                TickSingleton.INSTANCE.registerListener(listener, finishingTime);
+                checkFinishingFlag(procedure, timePoint);
                 break;
             default:
                 setVisibility(GONE);
@@ -113,10 +108,14 @@ public class FlagTimeView extends LinearLayout {
     }
 
     private void checkFlag(ReadonlyRacingProcedure procedure, TimePoint timePoint) {
+        if (startTime == null) {
+            setVisibility(GONE);
+            clear();
+            return;
+        }
         final FlagPoleState poleState = procedure.getActiveFlags(startTime, timePoint);
         nextTime = poleState.getNextStateValidFrom();
         if (nextTime == null || nextTime.before(timePoint)) {
-            unregisterListener();
             setVisibility(GONE);
             clear();
             return;
@@ -151,8 +150,13 @@ public class FlagTimeView extends LinearLayout {
         textView.setCompoundDrawablesWithIntrinsicBounds(arrow, null, null, null);
     }
 
-    private void setFinishingFlag(ReadonlyRacingProcedure procedure, TimePoint now) {
-        final FlagPoleState poleState = procedure.getActiveFlags(startTime, now);
+    private void checkFinishingFlag(ReadonlyRacingProcedure procedure, TimePoint timePoint) {
+        if (startTime == null || finishingTime == null) {
+            setVisibility(GONE);
+            clear();
+            return;
+        }
+        final FlagPoleState poleState = procedure.getActiveFlags(startTime, timePoint);
         final List<FlagPole> poles = poleState.getCurrentState();
         if (poles.isEmpty()) {
             setVisibility(GONE);
@@ -163,6 +167,11 @@ public class FlagTimeView extends LinearLayout {
         setVisibility(VISIBLE);
         imageView.setImageDrawable(flag);
         textView.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
+        listener = now -> {
+            final long millis = now.minus(finishingTime != null ? finishingTime.asMillis() : now.asMillis()).asMillis();
+            textView.setText(TimeUtils.formatDurationSince(millis, false));
+        };
+        TickSingleton.INSTANCE.registerListener(listener, finishingTime);
     }
 
     private void clear() {
