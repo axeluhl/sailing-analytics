@@ -4,12 +4,13 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithDispatch;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
+import com.sap.sailing.gwt.ui.client.subscription.WithSubscriptionService;
 import com.sap.sailing.gwt.ui.client.subscription.chargebee.Chargebee;
 import com.sap.sailing.gwt.ui.client.subscription.chargebee.CheckoutOption;
 import com.sap.sailing.gwt.ui.client.subscription.chargebee.SubscriptionConfiguration;
-import com.sap.sailing.gwt.ui.client.subscription.chargebee.WithSubscriptionService;
-import com.sap.sailing.gwt.ui.shared.subscription.chargebee.HostedPageResultDTO;
-import com.sap.sailing.gwt.ui.shared.subscription.chargebee.SubscriptionDTO;
+import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionDTO;
+import com.sap.sailing.gwt.ui.shared.subscription.chargebee.FinishCheckoutDTO;
+import com.sap.sailing.gwt.ui.shared.subscription.chargebee.PrepareCheckoutDTO;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.security.ui.authentication.WithAuthenticationManager;
@@ -81,10 +82,10 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
 
     @Override
     public void openCheckout(String planId) {
-        clientFactory.getSubscriptionService().generateHostedPageObject(planId,
-                new AsyncCallback<HostedPageResultDTO>() {
+        clientFactory.getSubscriptionService().getChargebeeService().prepareCheckout(planId,
+                new AsyncCallback<PrepareCheckoutDTO>() {
                     @Override
-                    public void onSuccess(HostedPageResultDTO hostedPage) {
+                    public void onSuccess(PrepareCheckoutDTO hostedPage) {
                         if (hostedPage.getError() != null && !hostedPage.getError().isEmpty()) {
                             view.onOpenCheckoutError(hostedPage.getError());
                         } else if (hostedPage.getHostedPageJSONString() != null
@@ -108,56 +109,61 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
 
     @Override
     public void cancelSubscription(String planId) {
-        clientFactory.getSubscriptionService().cancelSubscription(planId, new AsyncCallback<Boolean>() {
-            @Override
-            public void onSuccess(Boolean result) {
-                if (!result) {
-                    showError(StringMessages.INSTANCE.failedCancelSubscription());
-                } else {
-                    fetchSubscription();
-                }
-            }
+        clientFactory.getSubscriptionService().getChargebeeService().cancelSubscription(planId,
+                new AsyncCallback<Boolean>() {
+                    @Override
+                    public void onSuccess(Boolean result) {
+                        if (!result) {
+                            showError(StringMessages.INSTANCE.failedCancelSubscription());
+                        } else {
+                            fetchSubscription();
+                        }
+                    }
 
-            @Override
-            public void onFailure(Throwable caught) {
-                showError(StringMessages.INSTANCE.errorCancelSubscription(caught.getMessage()));
-            }
-        });
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        showError(StringMessages.INSTANCE.errorCancelSubscription(caught.getMessage()));
+                    }
+                });
     }
 
     private void fetchSubscription() {
-        clientFactory.getSubscriptionService().getSubscription(new AsyncCallback<SubscriptionDTO>() {
-            @Override
-            public void onSuccess(SubscriptionDTO result) {
-                if (result != null && result.getError() != null && !result.getError().isEmpty()) {
-                    showError(StringMessages.INSTANCE.errorLoadingUserSubscription(result.getError()));
-                } else {
-                    view.updateView(result);
-                }
-            }
+        clientFactory.getSubscriptionService().getChargebeeService()
+                .getSubscription(new AsyncCallback<SubscriptionDTO>() {
+                    @Override
+                    public void onSuccess(SubscriptionDTO result) {
+                        if (result != null && result.getError() != null && !result.getError().isEmpty()) {
+                            showError(StringMessages.INSTANCE.errorLoadingUserSubscription(result.getError()));
+                        } else {
+                            view.updateView(result);
+                        }
+                    }
 
-            @Override
-            public void onFailure(Throwable caught) {
-                showError(StringMessages.INSTANCE.errorLoadingUserSubscription(caught.getMessage()));
-            }
-        });
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        showError(StringMessages.INSTANCE.errorLoadingUserSubscription(caught.getMessage()));
+                    }
+                });
     }
 
     private void requestFinishingPlanUpdating(String hostedPageId) {
-        clientFactory.getSubscriptionService().updatePlanSuccess(hostedPageId, new AsyncCallback<SubscriptionDTO>() {
+        final FinishCheckoutDTO data = new FinishCheckoutDTO();
+        data.setHostedPageId(hostedPageId);
+        clientFactory.getSubscriptionService().getChargebeeService().finishCheckout(null, data,
+                new AsyncCallback<SubscriptionDTO>() {
 
-            @Override
-            public void onSuccess(SubscriptionDTO result) {
-                view.updateView(result);
-                Chargebee.getInstance().closeAll();
-            }
+                    @Override
+                    public void onSuccess(SubscriptionDTO result) {
+                        view.updateView(result);
+                        Chargebee.getInstance().closeAll();
+                    }
 
-            @Override
-            public void onFailure(Throwable caught) {
-                Chargebee.getInstance().closeAll();
-                showError(StringMessages.INSTANCE.errorSaveSubscription(caught.getMessage()));
-            }
-        });
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        Chargebee.getInstance().closeAll();
+                        showError(StringMessages.INSTANCE.errorSaveSubscription(caught.getMessage()));
+                    }
+                });
     }
 
     private void showError(String message) {

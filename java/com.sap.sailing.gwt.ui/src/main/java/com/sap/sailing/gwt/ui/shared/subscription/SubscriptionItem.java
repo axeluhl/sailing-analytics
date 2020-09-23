@@ -1,16 +1,11 @@
-package com.sap.sailing.gwt.ui.shared.subscription.chargebee;
+package com.sap.sailing.gwt.ui.shared.subscription;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.TimePoint;
 
-public class SubscriptionItem implements IsSerializable {
+public abstract class SubscriptionItem implements IsSerializable {
     public static final String PAYMENT_STATUS_SUCCESS = "success";
     public static final String PAYMENT_STATUS_NO_SUCCESS = "no_success";
-    public static final String SUBSCRIPTION_STATUS_TRIAL = "in_trial";
-    public static final String SUBSCRIPTION_STATUS_ACTIVE = "active";
-    public static final String SUBSCRIPTION_STATUS_PAUSED = "paused";
-    public static final String TRANSACTION_TYPE_REFUND = "refund";
 
     /**
      * User current subscription plan id
@@ -28,12 +23,13 @@ public class SubscriptionItem implements IsSerializable {
     private TimePoint trialEnd;
 
     /**
-     * Subscription status: active or in_trial
+     * Subscription status: active or trial
      */
     private String subscriptionStatus;
 
     /**
-     * Subscription payment status: success or no_success
+     * Subscription payment status: {@code SubscriptionItem#PAYMENT_STATUS_SUCCESS} or
+     * {@code SubscriptionItem#PAYMENT_STATUS_NO_SUCCESS}
      */
     private String paymentStatus;
 
@@ -58,16 +54,12 @@ public class SubscriptionItem implements IsSerializable {
     /**
      * Check if subscription is in trial status
      */
-    public boolean isInTrial() {
-        return subscriptionStatus != null && subscriptionStatus.equals(SUBSCRIPTION_STATUS_TRIAL);
-    }
+    public abstract boolean isInTrial();
 
     /**
      * Check if subscription is in active status
      */
-    public boolean isActive() {
-        return subscriptionStatus != null && subscriptionStatus.equals(SUBSCRIPTION_STATUS_ACTIVE);
-    }
+    public abstract boolean isActive();
 
     public boolean isPaymentSuccess() {
         return paymentStatus != null && paymentStatus.equals(PAYMENT_STATUS_SUCCESS);
@@ -76,47 +68,17 @@ public class SubscriptionItem implements IsSerializable {
     /**
      * Get subscription status i18n label
      */
-    public String getSubscriptionStatusLabel() {
-        String label = "";
-        if (subscriptionStatus != null) {
-            if (subscriptionStatus.equals(SUBSCRIPTION_STATUS_TRIAL)) {
-                label = StringMessages.INSTANCE.inTrial();
-            } else if (subscriptionStatus.equals(SUBSCRIPTION_STATUS_ACTIVE)) {
-                label = StringMessages.INSTANCE.active();
-            } else if (subscriptionStatus.equals(SUBSCRIPTION_STATUS_PAUSED)) {
-                label = StringMessages.INSTANCE.paused();
-            }
-        }
-        return label;
-    }
+    public abstract String getSubscriptionStatusLabel();
 
     /**
      * Get subscription payment status i18n label
      */
-    public String getPaymentStatusLabel() {
-        final String label;
-        if (paymentStatus != null) {
-            if (paymentStatus.equals(PAYMENT_STATUS_SUCCESS)) {
-                if (isRefunded()) {
-                    label = StringMessages.INSTANCE.refunded();
-                } else {
-                    label = StringMessages.INSTANCE.paymentStatusSuccess();
-                }
-            } else {
-                label = StringMessages.INSTANCE.paymentStatusNoSuccess();
-            }
-        } else {
-            label = "";
-        }
-        return label;
-    }
+    public abstract String getPaymentStatusLabel();
 
     /**
      * Check if subscription transaction is refunded
      */
-    public boolean isRefunded() {
-        return transactionType != null && transactionType.equals(TRANSACTION_TYPE_REFUND);
-    }
+    public abstract boolean isRefunded();
 
     public String getPlanId() {
         return planId;

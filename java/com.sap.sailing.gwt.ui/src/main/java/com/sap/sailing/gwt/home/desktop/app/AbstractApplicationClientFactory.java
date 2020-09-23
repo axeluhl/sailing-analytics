@@ -19,8 +19,7 @@ import com.sap.sailing.gwt.ui.client.MediaServiceWrite;
 import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceHelper;
-import com.sap.sailing.gwt.ui.client.subscription.chargebee.SubscriptionService;
-import com.sap.sailing.gwt.ui.client.subscription.chargebee.SubscriptionServiceAsync;
+import com.sap.sailing.gwt.ui.client.subscription.SubscriptionServiceFactory;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.security.ui.client.SecureClientFactoryImpl;
 
@@ -30,7 +29,7 @@ public abstract class AbstractApplicationClientFactory<ATLV extends ApplicationT
     private final MediaServiceAsync mediaService;
     private final MediaServiceWriteAsync mediaServiceWrite;
     private final DesktopPlacesNavigator navigator;
-    private final SubscriptionServiceAsync subscriptionService;
+    private final SubscriptionServiceFactory subscriptionService;
 
     public AbstractApplicationClientFactory(ATLV root, EventBus eventBus, PlaceController placeController,
             final DesktopPlacesNavigator navigator) {
@@ -38,8 +37,9 @@ public abstract class AbstractApplicationClientFactory<ATLV extends ApplicationT
         this.navigator = navigator;
         sailingService = SailingServiceHelper.createSailingServiceInstance();
         mediaService = GWT.create(MediaService.class);
-        subscriptionService = GWT.create(SubscriptionService.class);
-        EntryPointHelper.registerASyncService((ServiceDefTarget) subscriptionService, subscriptionServiceRemotePath);
+        subscriptionService = SubscriptionServiceFactory.getInstance();
+        EntryPointHelper.registerASyncService((ServiceDefTarget) subscriptionService.getDefaultService(),
+                subscriptionServiceRemotePath);
         EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService, mediaServiceRemotePath,
                 HEADER_FORWARD_TO_REPLICA);
         mediaServiceWrite = GWT.create(MediaServiceWrite.class);
@@ -48,7 +48,7 @@ public abstract class AbstractApplicationClientFactory<ATLV extends ApplicationT
         getUserService().addKnownHasPermissions(SecuredDomainType.getAllInstances());
     }
 
-    @Override
+    @Override 
     public Place getDefaultPlace() {
         return new StartPlace();
     }
@@ -83,7 +83,7 @@ public abstract class AbstractApplicationClientFactory<ATLV extends ApplicationT
     }
 
     @Override
-    public SubscriptionServiceAsync getSubscriptionService() {
+    public SubscriptionServiceFactory getSubscriptionService() {
         return subscriptionService;
     }
 }

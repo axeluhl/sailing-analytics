@@ -14,7 +14,7 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.uibinder.client.UiRenderer;
 import com.sap.sailing.gwt.home.shared.places.user.profile.subscription.UserSubscriptionView;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.subscription.chargebee.SubscriptionItem;
+import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionItem;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.security.shared.SubscriptionPlan;
 import com.sap.sse.security.shared.SubscriptionPlanHolder;

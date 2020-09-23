@@ -23,10 +23,12 @@ import com.chargebee.models.HostedPage.Content;
 import com.chargebee.models.Invoice;
 import com.chargebee.models.Transaction;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-import com.sap.sailing.gwt.ui.client.subscription.chargebee.SubscriptionService;
-import com.sap.sailing.gwt.ui.shared.subscription.chargebee.HostedPageResultDTO;
-import com.sap.sailing.gwt.ui.shared.subscription.chargebee.SubscriptionDTO;
-import com.sap.sailing.gwt.ui.shared.subscription.chargebee.SubscriptionItem;
+import com.sap.sailing.gwt.ui.client.subscription.chargebee.ChargebeeSubscriptionService;
+import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionDTO;
+import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionItem;
+import com.sap.sailing.gwt.ui.shared.subscription.chargebee.ChargebeeSubscriptionItem;
+import com.sap.sailing.gwt.ui.shared.subscription.chargebee.FinishCheckoutDTO;
+import com.sap.sailing.gwt.ui.shared.subscription.chargebee.PrepareCheckoutDTO;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.SecurityService;
@@ -43,10 +45,10 @@ import static com.chargebee.models.Subscription.cancel;
  * 
  * @author Tu Tran
  */
-public class SubscriptionServiceImpl extends RemoteServiceServlet implements SubscriptionService {
+public class ChargebeeSubscriptionServiceImpl extends RemoteServiceServlet implements ChargebeeSubscriptionService {
     private static final long serialVersionUID = -4276839013785711262L;
 
-    private static final Logger logger = Logger.getLogger(SubscriptionServiceImpl.class.getName());
+    private static final Logger logger = Logger.getLogger(ChargebeeSubscriptionServiceImpl.class.getName());
 
     private BundleContext context;
     private CompletableFuture<SecurityService> securityService;
@@ -59,8 +61,8 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
     }
 
     @Override
-    public HostedPageResultDTO generateHostedPageObject(String planId) {
-        HostedPageResultDTO response = new HostedPageResultDTO();
+    public PrepareCheckoutDTO prepareCheckout(String planId) {
+        PrepareCheckoutDTO response = new PrepareCheckoutDTO();
         if (isValidPlan(planId)) {
             try {
                 User user = getCurrentUser();
@@ -87,11 +89,12 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
     }
 
     @Override
-    public SubscriptionDTO updatePlanSuccess(String hostedPageId) {
+    public SubscriptionDTO finishCheckout(String planId, FinishCheckoutDTO data) {
+        logger.info("finishCheckout hostedPageId: " + data.getHostedPageId());
         SubscriptionDTO subscriptionDto;
         try {
             User user = getCurrentUser();
-            Result result = HostedPage.acknowledge(hostedPageId).request();
+            Result result = HostedPage.acknowledge(data.getHostedPageId()).request();
             Content content = result.hostedPage().content();
             String transactionType = null;
             String transactionStatus = null;
@@ -132,9 +135,10 @@ public class SubscriptionServiceImpl extends RemoteServiceServlet implements Sub
                 List<SubscriptionItem> itemList = new ArrayList<SubscriptionItem>();
                 for (Subscription subscription : subscriptions) {
                     if (StringUtils.isNotEmpty(subscription.getSubscriptionId())) {
-                        itemList.add(new SubscriptionItem(subscription.getPlanId(), subscription.getTrialStart(),
-                                subscription.getTrialEnd(), subscription.getSubscriptionStatus(),
-                                subscription.getPaymentStatus(), subscription.getTransactionType()));
+                        itemList.add(
+                                new ChargebeeSubscriptionItem(subscription.getPlanId(), subscription.getTrialStart(),
+                                        subscription.getTrialEnd(), subscription.getSubscriptionStatus(),
+                                        subscription.getPaymentStatus(), subscription.getTransactionType()));
                     }
                 }
                 if (!itemList.isEmpty()) {

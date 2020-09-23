@@ -1,14 +1,15 @@
 package com.sap.sailing.gwt.ui.shared.subscription.chargebee;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.gwt.ui.client.subscription.chargebee.SubscriptionService;
+import com.sap.sailing.gwt.ui.client.subscription.chargebee.ChargebeeSubscriptionService;
 
 /**
- * Data transfer object of generating hosted page object {@link SubscriptionService#generateHostedPageObject(String)}
+ * Data transfer object for preparing checkout {@link ChargebeeSubscriptionService#prepareCheckout}. Data contains
+ * hosted page object returned from Chargebee
  * 
  * @author Tu Tran
  */
-public class HostedPageResultDTO implements IsSerializable {
+public class PrepareCheckoutDTO implements IsSerializable {
     /**
      * In success case, hostedPageJSONString has value of JSON encoded string of hosted page object
      */
