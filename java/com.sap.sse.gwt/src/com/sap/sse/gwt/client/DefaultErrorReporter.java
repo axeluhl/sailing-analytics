@@ -20,9 +20,13 @@ public class DefaultErrorReporter<S extends StringMessages> implements ErrorRepo
     protected Label persistentAlertLabel;
     
     public DefaultErrorReporter(S stringMessages) {
+        this(stringMessages, true);
+    }
+    
+    public DefaultErrorReporter(S stringMessages, boolean showCommunicationErrorText) {
         this.stringMessages = stringMessages;
         /* TODO: Make this more generic (e.g. make it support all kinds of messages) */
-        errorDialogBox = createErrorDialog();
+        errorDialogBox = createErrorDialog(showCommunicationErrorText); 
         persistentAlertLabel = new Label("");
         persistentAlertLabel.setStyleName("global-alert-message");
     }
@@ -36,7 +40,12 @@ public class DefaultErrorReporter<S extends StringMessages> implements ErrorRepo
         errorDialogBox.center();
         dialogCloseButton.setFocus(true);
     }
-    
+
+    public static <S extends StringMessages> void reportMasterTemporarilyUnavailable(S stringMessages) {
+        DefaultErrorReporter<StringMessages> errorReporter = new DefaultErrorReporter<>(stringMessages, false);
+        errorReporter.reportError(stringMessages.error(), stringMessages.temporarilyUnavailable());
+    }
+
     @Override
     public void reportError(String message) {
         errorDialogBox.setText(message);
@@ -65,7 +74,7 @@ public class DefaultErrorReporter<S extends StringMessages> implements ErrorRepo
         return persistentAlertLabel;
     }
 
-    private DialogBox createErrorDialog() {
+    private DialogBox createErrorDialog(boolean showCommunicationErrorText) {
         // Create the popup dialog box
         final DialogBox myErrorDialogBox = new DialogBox();
         myErrorDialogBox.getElement().setAttribute(DebugConstants.DEBUG_ID_ATTRIBUTE, "ErrorDialog");
@@ -79,9 +88,11 @@ public class DefaultErrorReporter<S extends StringMessages> implements ErrorRepo
         final Label textToServerLabel = new Label();
         serverResponseLabel = new HTML();
         VerticalPanel dialogVPanel = new VerticalPanel();
-        dialogVPanel.add(new HTML("<b>"+stringMessages.errorCommunicatingWithServer()+"</b>")); //$NON-NLS-1$
-        dialogVPanel.add(textToServerLabel);
-        dialogVPanel.add(new HTML("<br><b>"+stringMessages.serverReplies()+"</b>")); //$NON-NLS-1$
+        if (showCommunicationErrorText) {
+            dialogVPanel.add(new HTML("<b>" + stringMessages.errorCommunicatingWithServer() + "</b>")); //$NON-NLS-1$
+            dialogVPanel.add(textToServerLabel);
+            dialogVPanel.add(new HTML("<br><b>"+stringMessages.serverReplies()+"</b>")); //$NON-NLS-1$
+        }
         dialogVPanel.add(serverResponseLabel);
         dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_RIGHT);
         dialogVPanel.add(dialogCloseButton);

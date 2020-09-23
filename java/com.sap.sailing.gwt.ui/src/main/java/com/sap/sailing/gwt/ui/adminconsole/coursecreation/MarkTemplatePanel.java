@@ -272,9 +272,9 @@ public class MarkTemplatePanel extends FlowPanel {
         final AccessControlledActionsColumn<MarkTemplateDTO, DefaultActionsImagesBarCell> actionsColumn = create(
                 new DefaultActionsImagesBarCell(stringMessages), userService);
         final EditOwnershipDialog.DialogConfig<MarkTemplateDTO> configOwnership = EditOwnershipDialog
-                .create(userService.getUserManagementService(), type, markTemplate -> markTemplateListDataProvider.refresh(), stringMessages);
+                .create(userService.getUserManagementWriteService(), type, markTemplate -> markTemplateListDataProvider.refresh(), stringMessages);
         final EditACLDialog.DialogConfig<MarkTemplateDTO> configACL = EditACLDialog.create(
-                userService.getUserManagementService(), type, markTemplate -> markTemplate.getAccessControlList(),
+                userService.getUserManagementWriteService(), type, markTemplate -> markTemplate.getAccessControlList(),
                 stringMessages);
         actionsColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, configOwnership::openOwnershipDialog);
         actionsColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,

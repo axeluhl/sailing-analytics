@@ -4,13 +4,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.mail.MailException;
-import com.sap.sse.gwt.client.ServerInfoDTO;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.UnauthorizedException;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.dto.AccessControlListDTO;
+import com.sap.sse.security.shared.dto.OwnershipDTO;
 import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
@@ -20,6 +21,9 @@ import com.sap.sse.security.ui.oauth.shared.OAuthException;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
 public interface UserManagementWriteService extends UserManagementService {
+
+    OwnershipDTO setOwnership(String username, UUID userGroupId, QualifiedObjectIdentifier idOfOwnedObject,
+            String displayNameOfOwnedObject) throws org.apache.shiro.authz.UnauthorizedException;
 
     UserGroupDTO createUserGroup(String name)
             throws UserGroupManagementException, UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;
@@ -46,8 +50,6 @@ public interface UserManagementWriteService extends UserManagementService {
 
     void updateRoleDefinition(RoleDefinitionDTO roleWithNewProperties)
             throws UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;
-
-    SuccessInfo login(String username, String password) throws org.apache.shiro.authz.UnauthorizedException;
 
     UserDTO createSimpleUser(String name, String email, String password, String fullName, String company,
             String localeName, String validationBaseURL) throws UserManagementException, MailException,
@@ -77,8 +79,6 @@ public interface UserManagementWriteService extends UserManagementService {
 
     Set<SuccessInfo> deleteUsers(Set<String> usernames)
             throws UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;
-
-    SuccessInfo logout() throws org.apache.shiro.authz.UnauthorizedException;
 
     void setSetting(String key, String clazz, String setting) throws org.apache.shiro.authz.UnauthorizedException;
 
@@ -112,9 +112,6 @@ public interface UserManagementWriteService extends UserManagementService {
     public String getAuthorizationUrl(CredentialDTO credential)
             throws OAuthException, org.apache.shiro.authz.UnauthorizedException;
 
-    public Triple<UserDTO, UserDTO, ServerInfoDTO> verifySocialUser(CredentialDTO credential)
-            throws OAuthException, org.apache.shiro.authz.UnauthorizedException;
-
     SuccessInfo addRoleToUser(String username, String userQualifierName, UUID roleDefinitionId,
             String tenantQualifierName)
             throws UserManagementException, UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;
@@ -129,4 +126,6 @@ public interface UserManagementWriteService extends UserManagementService {
     SuccessInfo removePermissionFromUser(String username, WildcardPermissionWithSecurityDTO permissions)
             throws UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;
 
+    AccessControlListDTO overrideAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
+            AccessControlListDTO acl) throws UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;
 }

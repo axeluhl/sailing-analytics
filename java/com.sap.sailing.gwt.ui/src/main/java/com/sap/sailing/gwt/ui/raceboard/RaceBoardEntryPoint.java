@@ -61,7 +61,7 @@ public class RaceBoardEntryPoint extends AbstractSailingReadEntryPoint implement
         EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService,
                 RemoteServiceMappingConstants.mediaServiceRemotePath, HEADER_FORWARD_TO_REPLICA);
         EntryPointHelper.registerASyncService((ServiceDefTarget) mediaServiceWrite,
-                RemoteServiceMappingConstants.mediaServiceWriteRemotePath, HEADER_FORWARD_TO_MASTER);
+                RemoteServiceMappingConstants.mediaServiceRemotePath, HEADER_FORWARD_TO_MASTER);
         raceboardContextDefinition = new SettingsToUrlSerializer()
                 .deserializeFromCurrentLocation(new RaceboardContextDefinition());
         if (raceboardContextDefinition.getRegattaName() == null || raceboardContextDefinition.getRegattaName().isEmpty()
