@@ -66,7 +66,6 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
         currentState = initialState;
         this.role = role;
         this.merger = createMerger();
-        
     }
     
     public PeerImpl(String name, Transformer<S, O> transformer, S initialState, Role role) {

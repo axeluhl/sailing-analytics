@@ -104,9 +104,9 @@ public class RoleWithSecurityDTOTableWrapper extends
         });
         final HasPermissions type = SecuredSecurityTypes.PERMISSION_ASSOCIATION;
         final EditOwnershipDialog.DialogConfig<RoleWithSecurityDTO> configOwnership = EditOwnershipDialog
-                .create(userService.getUserManagementService(), type, permission -> refreshRoleList(), stringMessages);
+                .create(userService.getUserManagementWriteService(), type, permission -> refreshRoleList(), stringMessages);
         final EditACLDialog.DialogConfig<RoleWithSecurityDTO> configACL = EditACLDialog.create(
-                userService.getUserManagementService(), type, user -> user.getAccessControlList(), stringMessages);
+                userService.getUserManagementWriteService(), type, user -> user.getAccessControlList(), stringMessages);
         userActionColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, configOwnership::openOwnershipDialog);
         userActionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 permission -> configACL.openACLDialog(permission));
@@ -132,6 +132,7 @@ public class RoleWithSecurityDTOTableWrapper extends
         table.addColumnSortHandler(userColumnListHandler);
         table.addColumn(userGroupWithSecurityDTONameColumn, stringMessages.roleName());
         table.addColumn(userActionColumn);
+        table.ensureDebugId("RoleWithSecurityDTOTable");
     }
 
     public LabeledAbstractFilterablePanel<RoleWithSecurityDTO> getFilterField() {
