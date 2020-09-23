@@ -42,7 +42,9 @@ public class KnowsExecutorAndTracingGetImpl<V> extends HasTracingGetImpl<V> impl
             threadLocalsField = Thread.class.getDeclaredField("threadLocals");
             threadLocalsField.setAccessible(true);
         } catch (NoSuchFieldException | SecurityException | NoSuchMethodException e) {
-            logger.log(Level.SEVERE, "Problem finding field inheritableThreadLocals; will be unable to forward InheritableThreadLocal values to thread pool threads", e);
+            logger.log(Level.SEVERE,
+                    "Problem finding field inheritableThreadLocals; will be unable to forward InheritableThreadLocal values to thread pool threads",
+                    e);
         }
     }
     
@@ -78,11 +80,11 @@ public class KnowsExecutorAndTracingGetImpl<V> extends HasTracingGetImpl<V> impl
         handleThreadLocals(Thread.currentThread(), threadLocalsField, (key, value) -> key.remove());
     }
 
-    private void handleThreadLocals(final Thread thread, final Field threadLocalSourceField, final BiConsumer<ThreadLocal<Object>, Object> valueHandler) {
+    private void handleThreadLocals(final Thread thread, final Field threadLocalSourceField,
+            final BiConsumer<ThreadLocal<Object>, Object> valueHandler) {
         try {
             final Object threadLocals = threadLocalSourceField.get(thread);
             if (threadLocals != null) {
-                
                 final Method expungeStaleEntries = threadLocals.getClass().getDeclaredMethod("expungeStaleEntries");
                 expungeStaleEntries.setAccessible(true);
                 expungeStaleEntries.invoke(threadLocals);
@@ -97,14 +99,18 @@ public class KnowsExecutorAndTracingGetImpl<V> extends HasTracingGetImpl<V> impl
                         if (key != null) {
                             final Field valueField = entry.getClass().getDeclaredField("value");
                             valueField.setAccessible(true);
-                            final Object value = key instanceof InheritableThreadLocal ? childValueMethod.invoke(key, valueField.get(entry)) : key.get();
+                            final Object value = key instanceof InheritableThreadLocal
+                                    ? childValueMethod.invoke(key, valueField.get(entry))
+                                    : key.get();
                             valueHandler.accept(key, value);
                         }
                     }
                 }
             }
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Problem accessing field inheritableThreadLocals; will be unable to forward InheritableThreadLocal values to thread pool threads", e);
+            logger.log(Level.SEVERE,
+                    "Problem accessing field inheritableThreadLocals; will be unable to forward InheritableThreadLocal values to thread pool threads",
+                    e);
         }
     }
 
