@@ -774,7 +774,14 @@ public class UserStoreImpl implements UserStore {
             mongoObjectFactory.storeUserGroup(group);
         }
     }
-
+    
+    private void removeUserFromUserGroup(User user , UserGroup group) {
+        assert userGroupsLock.isWriteLockedByCurrentThread();
+        group.remove(user);
+        Util.removeFromValueSet(usersInUserGroups, group, user);
+        Util.removeFromValueSet(userGroupsContainingUser, user, group);
+    }
+    
     @Override
     public Iterable<UserGroup> getUserGroupsOfUser(User user) {
         return LockUtil.executeWithReadLockAndResult(userGroupsLock, () -> {
@@ -1070,9 +1077,17 @@ public class UserStoreImpl implements UserStore {
             if (mongoObjectFactory != null) {
                 mongoObjectFactory.deleteUser(user);
             }
+            users.remove(name);
+            removeFromUsersByEmail(user);
+            removeAllQualifiedRolesForUser(user);
             user.getRoles()
             .forEach(role -> Util.removeFromValueSet(roleDefinitionsToUsers, role.getRoleDefinition(), user));
-            removeFromUsersByEmail(users.remove(name));
+            // also remove from all usergroups
+            LockUtil.executeWithWriteLock(userGroupsLock, () -> {
+                for (UserGroup userGroup : user.getUserGroups()) {
+                    removeUserFromUserGroup(user, userGroup);
+                }
+            });
         });
         LockUtil.executeWithWriteLock(preferenceLock, () -> removeAllPreferencesForUser(name));
     }

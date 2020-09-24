@@ -1229,13 +1229,13 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (userToDelete != null) {
             // remove all permissions the user has
             accessControlStore.removeAllOwnershipsFor(userToDelete);
-            store.removeAllQualifiedRolesForUser(userToDelete);
+            store.deleteUser(username);
             final String defaultTenantNameForUsername = getDefaultTenantNameForUsername(username);
             final UserGroup defaultTenantUserGroup = getUserGroupByName(defaultTenantNameForUsername);
             if (defaultTenantUserGroup != null) {
                 List<User> usersInGroupList = Util.asList(defaultTenantUserGroup.getUsers());
-                if (usersInGroupList.size() == 1 && usersInGroupList.contains(userToDelete)) {
-                    // no other user is in group, delete it as well
+                if (usersInGroupList.isEmpty()) {
+                    // no other user is in group, delete it as well and remove Owenerships
                     try {
                         internalDeleteUserGroup(defaultTenantUserGroup.getId());
                     } catch (UserGroupManagementException e) {
@@ -1243,16 +1243,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                     }
                 }
             }
-            // also remove from all usergroups
-            final Iterable<UserGroup> userGroups = userToDelete.getUserGroups();
-            final Collection<UserGroup> userGroupsToLoopOver = new ArrayList<>();
-            Util.addAll(userGroups, userGroupsToLoopOver); // avoid concurrent modification exception
-            for (UserGroup userGroup : userGroupsToLoopOver) {
-                if (userGroup != defaultTenantUserGroup) { // the defaultTenantUserGroup has already been deleted above
-                    internalRemoveUserFromUserGroup(userGroup.getId(), userToDelete.getName());
-                }
-            }
-            store.deleteUser(username);
         }
         return null;
     }
