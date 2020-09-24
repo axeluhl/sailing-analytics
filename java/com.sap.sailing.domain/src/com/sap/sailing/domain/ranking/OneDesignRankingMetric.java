@@ -142,7 +142,8 @@ public class OneDesignRankingMetric extends NonPerformanceCurveRankingMetric {
 
                     @Override
                     public Duration getDurationSinceStartOfRaceUntilTimePoint() {
-                        return getTrackedRace().getStartOfRace().until(getTimePoint());
+                        final TimePoint startOfRace = getTrackedRace().getStartOfRace();
+                        return startOfRace==null?null:startOfRace.until(getTimePoint());
                     }
 
                     @Override
