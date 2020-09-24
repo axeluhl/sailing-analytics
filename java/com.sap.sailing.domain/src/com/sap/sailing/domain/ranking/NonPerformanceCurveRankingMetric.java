@@ -37,7 +37,7 @@ public abstract class NonPerformanceCurveRankingMetric extends AbstractRankingMe
         @Override
         public Duration getActualTimeFromRaceStartToReachFarthestAheadInLeg(Competitor competitor, Leg leg, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
             final Duration result;
-            final TrackedLegOfCompetitor tloc = getTrackedRace().getTrackedLeg(competitor, getTimePoint());
+            final TrackedLegOfCompetitor tloc = getTrackedRace().getTrackedLeg(competitor, leg);
             final Duration raceDurationAtTimePoint = getTrackedRace().getStartOfRace().until(getTimePoint());
             if (tloc != null && tloc.hasStartedLeg(getTimePoint())) {
                 final Competitor competitorFarthestAheadInLeg = getCompetitorFarthestAheadInLeg(leg, getTimePoint(), cache);
