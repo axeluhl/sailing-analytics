@@ -26,7 +26,7 @@ public class DefaultWithSecurityImpl implements WithSecurity {
                 HEADER_FORWARD_TO_REPLICA);
         userManagementWriteService = GWT.create(UserManagementWriteService.class);
         EntryPointHelper.registerASyncService((ServiceDefTarget) userManagementWriteService,
-                com.sap.sse.security.ui.client.RemoteServiceMappingConstants.userManagementServiceWriteRemotePath,
+                com.sap.sse.security.ui.client.RemoteServiceMappingConstants.userManagementServiceRemotePath,
                 HEADER_FORWARD_TO_MASTER);
         userService = new UserService(userManagementService, userManagementWriteService);
     }
