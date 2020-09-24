@@ -106,8 +106,8 @@ public class UserStoreImpl implements UserStore {
     private transient NamedReentrantReadWriteLock usersLock;
     private final Map<String, User> users;
     private final Map<String, Set<User>> usersByEmail;
-    private final Map<String, User> usersByAccessToken;
     private final Map<String, String> emailForUsername;
+    private final Map<String, User> usersByAccessToken;
     private final Map<RoleDefinition, Set<User>> roleDefinitionsToUsers;
 
     private final ConcurrentHashMap<String, Object> settings;
@@ -775,6 +775,9 @@ public class UserStoreImpl implements UserStore {
         }
     }
     
+    /**
+     * To call this method, the caller must have obtained the read lock of {@link #userGroupsLock}.
+     */
     private void removeUserFromUserGroup(User user , UserGroup group) {
         assert userGroupsLock.isWriteLockedByCurrentThread();
         group.remove(user);
@@ -1078,6 +1081,7 @@ public class UserStoreImpl implements UserStore {
                 mongoObjectFactory.deleteUser(user);
             }
             users.remove(name);
+            removeFromUsersByAccessToken(user);
             removeFromUsersByEmail(user);
             removeAllQualifiedRolesForUser(user);
             user.getRoles()
@@ -1090,6 +1094,17 @@ public class UserStoreImpl implements UserStore {
             });
         });
         LockUtil.executeWithWriteLock(preferenceLock, () -> removeAllPreferencesForUser(name));
+    }
+    
+    private void removeFromUsersByAccessToken(User user){
+        assert usersLock.isWriteLockedByCurrentThread();
+        final Set<String> entriesToRemove = new HashSet<>();
+        for (Entry<String, User> entry : usersByAccessToken.entrySet()) {
+            if (entry.getValue().equals(user)) {
+                entriesToRemove.add(entry.getKey());
+            }
+        }
+        entriesToRemove.forEach(entry -> usersByAccessToken.remove(entry));
     }
 
     @Override
