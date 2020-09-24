@@ -755,7 +755,7 @@ implements com.sap.sailing.domain.orc.ORCPerformanceCurveRankingMetric {
                 } else {
                     final TimePoint timeForLegLeaderImpliedWindCalculation = timePointOrLegFinishTimeIfFinishedAtTimePoint(
                             getTrackedRace().getTrackedLeg(legLeader, trackedLegOfCompetitor.getLeg()), timePoint, cache);
-                    final Speed legLeaderImpliedWindInOrAtEndOfLeg = cache.getImpliedWind(timeForLegLeaderImpliedWindCalculation, getTrackedRace(), competitor,
+                    final Speed legLeaderImpliedWindInOrAtEndOfLeg = cache.getImpliedWind(timeForLegLeaderImpliedWindCalculation, getTrackedRace(), legLeader,
                             getImpliedWindSupplier(cache));
                     if (legLeaderImpliedWindInOrAtEndOfLeg != null) {
                         final Duration correctedTimeOfLegLeaderInCompetitorsPerformanceCurve = competitorPerformanceCurveForLeg.getAllowancePerCourse(legLeaderImpliedWindInOrAtEndOfLeg);
