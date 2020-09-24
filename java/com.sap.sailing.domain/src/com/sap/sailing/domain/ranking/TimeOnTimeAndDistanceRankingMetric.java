@@ -184,7 +184,7 @@ public class TimeOnTimeAndDistanceRankingMetric extends NonPerformanceCurveRanki
                     for (TrackedLeg tl : getTrackedRace().getTrackedLegs()) {
                         totalWindwardDistanceIncludingCompleteLeg = totalWindwardDistanceIncludingCompleteLeg.add(tl
                                 .getWindwardDistance(cache));
-                        if (tl == trackedLeg) {
+                        if (tl == trackedLeg || totalWindwardDistanceIncludingCompleteLeg == null) {
                             break;
                         }
                     }

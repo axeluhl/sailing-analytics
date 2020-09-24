@@ -636,16 +636,19 @@ implements com.sap.sailing.domain.orc.ORCPerformanceCurveRankingMetric {
         final TimePoint startOfRace = getTrackedRace().getStartOfRace();
         final Competitor competitorFarthestAhead = getCompetitorFarthestAhead(timePoint, cache);
         if (startOfRace != null) {
-            final Duration actualRaceDuration = startOfRace.until(timePoint);
+            final Duration durationSinceStartOfRaceUntilTimePoint = startOfRace.until(timePoint);
             final Set<ForkJoinTask<Pair<Competitor, CompetitorRankingInfoImpl>>> futures = new HashSet<>();
             for (final Competitor competitor : getTrackedRace().getRace().getCompetitors()) {
                 futures.add(ForkJoinTask.adapt(()->{
                     final Duration correctedTime = getCorrectedTime(competitor, timePoint, cache);
-                    return new Pair<>(competitor, new CompetitorRankingInfoImpl(
-                            timePoint, competitor, getWindwardDistanceTraveled(competitor, timePoint, cache),
-                            actualRaceDuration, correctedTime,
-                            getEstimatedActualDurationToCompetitorFarthestAhead(competitor, competitorFarthestAhead, timePoint, cache),
-                            correctedTime));
+                    return new Pair<>(competitor,
+                            new CompetitorRankingInfoImpl(timePoint, competitor,
+                                    getWindwardDistanceTraveled(competitor, timePoint, cache),
+                                    durationSinceStartOfRaceUntilTimePoint,
+                                    getTrackedRace().getTimeSailedSinceRaceStart(competitor, timePoint), correctedTime,
+                                    getEstimatedActualDurationToCompetitorFarthestAhead(competitor,
+                                            competitorFarthestAhead, timePoint, cache),
+                                    correctedTime));
                 }).fork());
             }
             for (final ForkJoinTask<Pair<Competitor, CompetitorRankingInfoImpl>> future : futures) {

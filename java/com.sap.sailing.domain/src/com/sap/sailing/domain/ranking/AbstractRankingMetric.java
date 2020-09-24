@@ -57,21 +57,29 @@ public abstract class AbstractRankingMetric implements RankingMetric {
          */
         private final Distance windwardDistanceSailed;
         
+        private final Duration durationSinceStartOfRaceUntilTimePoint;
+        
         /**
          * Usually the difference between {@link #timePoint} and the start of the race
+         * 
+         * FIXME bug5316: there is an important difference to be made here in case {@link #timePoint} is after the {@link #competitor} has finished the race;
+         * then, timeElapsed should probably stop counting when the race is finished, but the difference betten {@link #timePoint} and the start of the race keeps counting...
          */
         private final Duration timeElapsed;
         
         /**
          * The corrected time for the {@link #competitor}, assuming the race ended at {@link #timePoint}. This
          * is applying the handicaps proportionately to the time and distance the competitor sailed so far.
+         * 
+         * FIXME bug5316: we probably want this to reflect the {@link #timeElapsed}, so stop counting when the {@link #competitor} finished the race
          */
         private final Duration correctedTime;
         
         /**
          * Based on the {@link #competitor}'s average VMG in the current leg and the windward position
          * of the competitor that is farthest ahead in the race, how long would it take {@link #competitor}
-         * to reach the competitor farthest ahead if that competitor stopped at {@link #timePoint}?
+         * to reach the competitor farthest ahead if that competitor stopped at {@link #timePoint}? Can be
+         * a negative number if {@link #competitor} finished the race before {@link #timePoint}.
          */
         private final Duration estimatedActualDurationToCompetitorFarthestAhead;
         
@@ -83,12 +91,13 @@ public abstract class AbstractRankingMetric implements RankingMetric {
         private final Duration correctedTimeAtEstimatedArrivalAtCompetitorFarthestAhead;
 
         public CompetitorRankingInfoImpl(TimePoint timePoint, Competitor competitor, Distance windwardDistanceSailed,
-                Duration timeElapsed, Duration correctedTime, Duration estimatedActualDurationToCompetitorFarthestAhead,
-                Duration correctedTimeAtEstimatedArrivalAtCompetitorFarthestAhead) {
+                Duration durationSinceStartOfRaceUntilTimePoint, Duration timeElapsed, Duration correctedTime,
+                Duration estimatedActualDurationToCompetitorFarthestAhead, Duration correctedTimeAtEstimatedArrivalAtCompetitorFarthestAhead) {
             super();
             this.timePoint = timePoint;
             this.competitor = competitor;
             this.windwardDistanceSailed = windwardDistanceSailed;
+            this.durationSinceStartOfRaceUntilTimePoint = durationSinceStartOfRaceUntilTimePoint;
             this.timeElapsed = timeElapsed;
             this.correctedTime = correctedTime;
             this.estimatedActualDurationToCompetitorFarthestAhead = estimatedActualDurationToCompetitorFarthestAhead;
@@ -108,6 +117,11 @@ public abstract class AbstractRankingMetric implements RankingMetric {
         @Override
         public Distance getWindwardDistanceSailed() {
             return windwardDistanceSailed;
+        }
+
+        @Override
+        public Duration getDurationSinceStartOfRaceUntilTimePoint() {
+            return durationSinceStartOfRaceUntilTimePoint;
         }
 
         @Override
@@ -346,7 +360,8 @@ public abstract class AbstractRankingMetric implements RankingMetric {
                 final Position positionOfEndOfLeg = getTrackedRace().getApproximatePosition(legWho.getLeg().getTo(), timePoint);
                 // Turn into a positive duration because a negative duration can only occur if "who" sailed past the waypoint without
                 // receiving a mark passing and hence now has to sail back, taking a positive duration to get there.
-                toEndOfLegOrTo = getDurationToReach(positionOfEndOfLeg, timePoint, legWho, cache).abs();
+                final Duration durationToReach = getDurationToReach(positionOfEndOfLeg, timePoint, legWho, cache);
+                toEndOfLegOrTo = durationToReach==null?null:durationToReach.abs();
             }
         } else {
             // competitor "to" is still in same leg; project "who" to "to"'s position using VMG
