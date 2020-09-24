@@ -3,6 +3,7 @@ package com.sap.sailing.racecommittee.app.ui.fragments.preference;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.preference.CheckBoxPreference;
@@ -122,14 +123,21 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
         EditTextPreference serverUrlPreference = findPreference(R.string.preference_server_url_key);
         addOnPreferenceChangeListener(serverUrlPreference, new OnPreferenceChangeListener() {
             @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-                AppPreferences.on(getActivity()).setNeedConfigRefresh(true);
+            public boolean onPreferenceChange(Preference preference, @NonNull Object newValue) {
+                final String summary = (String) newValue;
+                final AppPreferences prefs = AppPreferences.on(getActivity());
+                if (summary.isEmpty()) {
+                    preference.setSummary(prefs.getServerBaseURL());
+                } else {
+                    preference.setSummary(summary);
+                }
+                prefs.setNeedConfigRefresh(true);
                 if (DataManager.create(getActivity()).getDataStore().getCourseAreaId() != null) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-                    builder.setTitle(getString(R.string.url_refresh_title));
-                    builder.setMessage(getString(R.string.app_refresh_message));
-                    builder.setPositiveButton(android.R.string.ok, null);
-                    builder.show();
+                    new AlertDialog.Builder(requireContext())
+                            .setTitle(getString(R.string.url_refresh_title))
+                            .setMessage(getString(R.string.app_refresh_message))
+                            .setPositiveButton(android.R.string.ok, null)
+                            .show();
                 }
                 return true;
             }

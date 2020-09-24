@@ -76,10 +76,5 @@ public interface DataMiningService extends RemoteService {
 
     ArrayList<StoredDataMiningQueryDTOImpl> retrieveStoredQueries() throws UnauthorizedException;
 
-    StoredDataMiningQueryDTOImpl updateOrCreateStoredQuery(StoredDataMiningQueryDTOImpl query)
-            throws UnauthorizedException;
-
-    StoredDataMiningQueryDTOImpl removeStoredQuery(StoredDataMiningQueryDTOImpl query) throws UnauthorizedException;
-
     ModifiableStatisticQueryDefinitionDTO getDeserializedQuery(String serializedQuery) throws UnauthorizedException;
 }
