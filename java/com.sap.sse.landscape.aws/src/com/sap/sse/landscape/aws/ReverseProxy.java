@@ -42,7 +42,7 @@ public interface ReverseProxy<ShardingKey, MetricsT extends ApplicationProcessMe
      * 
      * @return at least one host
      */
-    Iterable<AwsInstance> getHosts();
+    Iterable<AwsInstance<ShardingKey, MetricsT>> getHosts();
     
     /**
      * The target group that will be managed by this object when hosts are added and removed. This instance asserts that
@@ -50,7 +50,7 @@ public interface ReverseProxy<ShardingKey, MetricsT extends ApplicationProcessMe
      * {@link #removeHost(AwsInstance)} the {@link TargetGroup#getRegisteredTargets()} will match the response of
      * {@link #getHosts()}.
      */
-    TargetGroup getTargetGroup();
+    TargetGroup<ShardingKey, MetricsT> getTargetGroup();
     
     /**
      * Adds a single host to this reverse proxy in availability zone {@code az}, using a default instance type
@@ -59,7 +59,7 @@ public interface ReverseProxy<ShardingKey, MetricsT extends ApplicationProcessMe
      * 
      * @return the host that was added by this request; it will also be part of the response of {@link #getHosts()} now
      */
-    default AwsInstance addHost(AwsAvailabilityZone az) {
+    default AwsInstance<ShardingKey, MetricsT> addHost(AwsAvailabilityZone az) {
         return addHosts(getDefaultInstanceType(), az, /* numberOfHostsToAdd */ 1).iterator().next();
     }
 
@@ -73,7 +73,7 @@ public interface ReverseProxy<ShardingKey, MetricsT extends ApplicationProcessMe
      * @return the hosts that were added by this request; they will also be part of the response of {@link #getHosts()}
      *         now
      */
-    Iterable<AwsInstance> addHosts(InstanceType instanceType, AwsAvailabilityZone az, int numberOfHostsToAdd);
+    Iterable<AwsInstance<ShardingKey, MetricsT>> addHosts(InstanceType instanceType, AwsAvailabilityZone az, int numberOfHostsToAdd);
     
     /**
      * Configures a redirect in this reverse proxy such that requests for it will go to the
@@ -123,7 +123,7 @@ public interface ReverseProxy<ShardingKey, MetricsT extends ApplicationProcessMe
      * an {@link IllegalStateException} will be thrown and the method will not complete the request. Consider
      * using {@link #terminate()} to terminate all hosts forming this reverse proxy.
      */
-    void removeHost(AwsInstance host);
+    void removeHost(AwsInstance<ShardingKey, MetricsT> host);
 
     /**
      * {@link AwsLandscape#terminate(AwsInstance) Terminates} all {@link #getHosts() hosts} that form this reverse

@@ -39,7 +39,7 @@ public class ApacheReverseProxy<ShardingKey, MetricsT extends ApplicationProcess
         super(name);
         this.landscape = landscape;
         this.region = region;
-        final TargetGroup targetGroup = landscape.createTargetGroup(region, getTargetGroupName(), /* port */ 80,
+        final TargetGroup<ShardingKey, MetricsT> targetGroup = landscape.createTargetGroup(region, getTargetGroupName(), /* port */ 80,
                 getHealthCheckUrl(), /* health check port */ 80);
         targetGroupArn = targetGroup.getTargetGroupArn();
         for (final Entry<AwsAvailabilityZone, Integer> e : numberOfInstancesPerAz.entrySet()) {
@@ -98,19 +98,19 @@ public class ApacheReverseProxy<ShardingKey, MetricsT extends ApplicationProcess
     }
 
     @Override
-    public Iterable<AwsInstance> getHosts() {
+    public Iterable<AwsInstance<ShardingKey, MetricsT>> getHosts() {
         // TODO Implement ReverseProxy.getHosts(...)
         return null;
     }
 
     @Override
-    public Iterable<AwsInstance> addHosts(InstanceType instanceType, AwsAvailabilityZone az, int numberOfHostsToAdd) {
+    public Iterable<AwsInstance<ShardingKey, MetricsT>> addHosts(InstanceType instanceType, AwsAvailabilityZone az, int numberOfHostsToAdd) {
         // TODO Implement ReverseProxy.addHost(...)
         return null;
     }
     
     @Override
-    public void removeHost(AwsInstance host) {
+    public void removeHost(AwsInstance<ShardingKey, MetricsT> host) {
         assert Util.contains(getHosts(), host);
         if (Util.size(getHosts()) == 1) {
             throw new IllegalStateException("Trying to remove the last hosts of reverse proxy "+this+". Use terminate() instead");
@@ -120,16 +120,16 @@ public class ApacheReverseProxy<ShardingKey, MetricsT extends ApplicationProcess
     
     @Override
     public void terminate() {
-        Set<AwsInstance> hosts = new HashSet<>();
+        Set<AwsInstance<ShardingKey, MetricsT>> hosts = new HashSet<>();
         Util.addAll(getHosts(), hosts);
-        for (final AwsInstance host : hosts) {
+        for (final AwsInstance<ShardingKey, MetricsT> host : hosts) {
             landscape.terminate(host);
         }
         landscape.deleteTargetGroup(getTargetGroup());
     }
 
     @Override
-    public TargetGroup getTargetGroup() {
+    public TargetGroup<ShardingKey, MetricsT> getTargetGroup() {
         return landscape.getTargetGroup(region, getTargetGroupName(), targetGroupArn);
     }
 }

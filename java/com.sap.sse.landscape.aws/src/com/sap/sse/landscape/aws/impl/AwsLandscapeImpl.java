@@ -275,10 +275,10 @@ public class AwsLandscapeImpl<ShardingKey, MetricsT extends ApplicationProcessMe
     }
 
     @Override
-    public AmazonMachineImage getImage(com.sap.sse.landscape.Region region, String imageId) {
+    public AmazonMachineImage<ShardingKey, MetricsT> getImage(com.sap.sse.landscape.Region region, String imageId) {
         final DescribeImagesResponse response = getEc2Client(getRegion(region))
                 .describeImages(DescribeImagesRequest.builder().imageIds(imageId).build());
-        return new AmazonMachineImage(response.images().iterator().next(), region);
+        return new AmazonMachineImage<>(response.images().iterator().next(), region);
     }
     
     private AwsCredentials getCredentials() {
@@ -334,7 +334,7 @@ public class AwsLandscapeImpl<ShardingKey, MetricsT extends ApplicationProcessMe
     }
 
     @Override
-    public Iterable<AwsInstance> launchHosts(int numberOfHostsToLaunch, MachineImage<AwsInstance> fromImage,
+    public Iterable<AwsInstance<ShardingKey, MetricsT>> launchHosts(int numberOfHostsToLaunch, MachineImage<AwsInstance<ShardingKey, MetricsT>> fromImage,
             InstanceType instanceType, AwsAvailabilityZone az, String keyName, Iterable<SecurityGroup> securityGroups) {
         if (!fromImage.getRegion().equals(az.getRegion())) {
             throw new IllegalArgumentException("Trying to launch an instance in region "+az.getRegion()+
@@ -351,15 +351,15 @@ public class AwsLandscapeImpl<ShardingKey, MetricsT extends ApplicationProcessMe
             .securityGroupIds(Util.mapToArrayList(securityGroups, sg->sg.getId())).build();
         logger.info("Launching instance(s): "+launchRequest);
         final RunInstancesResponse response = getEc2Client(getRegion(az.getRegion())).runInstances(launchRequest);
-        final List<AwsInstance> result = new ArrayList<>();
+        final List<AwsInstance<ShardingKey, MetricsT>> result = new ArrayList<>();
         for (final Instance instance : response.instances()) {
-            result.add(new AwsInstanceImpl(instance.instanceId(), az, this));
+            result.add(new AwsInstanceImpl<>(instance.instanceId(), az, this));
         }
         return result;
     }
 
     @Override
-    public void terminate(AwsInstance host) {
+    public void terminate(AwsInstance<ShardingKey, MetricsT> host) {
         logger.info("Terminating instance "+host);
         getEc2Client(getRegion(host.getAvailabilityZone().getRegion())).terminateInstances(
                 TerminateInstancesRequest.builder().instanceIds(host.getInstanceId()).build());
@@ -376,7 +376,7 @@ public class AwsLandscapeImpl<ShardingKey, MetricsT extends ApplicationProcessMe
     }
 
     @Override
-    public TargetGroup createTargetGroup(AwsRegion region, String targetGroupName, int port, String healthCheckPath, int healthCheckPort) {
+    public TargetGroup<ShardingKey, MetricsT> createTargetGroup(AwsRegion region, String targetGroupName, int port, String healthCheckPath, int healthCheckPort) {
         final ElasticLoadBalancingV2Client loadBalancingClient = getLoadBalancingClient(getRegion(region));
         final software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup targetGroup =
                 loadBalancingClient.createTargetGroup(CreateTargetGroupRequest.builder()
@@ -399,7 +399,7 @@ public class AwsLandscapeImpl<ShardingKey, MetricsT extends ApplicationProcessMe
                 .attributes(TargetGroupAttribute.builder().key("stickiness.enabled").value("true").build(),
                             TargetGroupAttribute.builder().key("load_balancing.algorithm.type").value("least_outstanding_requests")
                             .build()).build());
-        return new AwsTargetGroupImpl(this, region, targetGroupName, targetGroupArn);
+        return new AwsTargetGroupImpl<>(this, region, targetGroupName, targetGroupArn);
     }
     
     private String getVpcId(AwsRegion region) {
@@ -415,19 +415,19 @@ public class AwsLandscapeImpl<ShardingKey, MetricsT extends ApplicationProcessMe
     }
     
     @Override
-    public void deleteTargetGroup(TargetGroup targetGroup) {
+    public void deleteTargetGroup(TargetGroup<ShardingKey, MetricsT> targetGroup) {
         getLoadBalancingClient(getRegion(targetGroup.getRegion())).deleteTargetGroup(DeleteTargetGroupRequest.builder().targetGroupArn(
                 targetGroup.getTargetGroupArn()).build());
     }
 
     @Override
-    public Map<AwsInstance, TargetHealth> getTargetHealthDescriptions(TargetGroup targetGroup) {
-        final Map<AwsInstance, TargetHealth> result = new HashMap<>();
+    public Map<AwsInstance<ShardingKey, MetricsT>, TargetHealth> getTargetHealthDescriptions(TargetGroup<ShardingKey, MetricsT> targetGroup) {
+        final Map<AwsInstance<ShardingKey, MetricsT>, TargetHealth> result = new HashMap<>();
         final Region region = getRegion(targetGroup.getRegion());
         getLoadBalancingClient(region)
                 .describeTargetHealth(DescribeTargetHealthRequest.builder().build()).targetHealthDescriptions().forEach(
                 targetHealthDescription->result.put(
-                        new AwsInstanceImpl(targetHealthDescription.target().id(),
+                        new AwsInstanceImpl<>(targetHealthDescription.target().id(),
                                 getAvailabilityZoneByName(targetGroup.getRegion(), targetHealthDescription.target().availabilityZone()), this),
                                 targetHealthDescription.targetHealth()));
         return result;

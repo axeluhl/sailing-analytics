@@ -21,9 +21,11 @@ import com.sap.sse.landscape.Log;
 import com.sap.sse.landscape.Metrics;
 import com.sap.sse.landscape.Process;
 import com.sap.sse.landscape.SecurityGroup;
+import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
+import com.sap.sse.landscape.aws.ReverseProxy;
 import com.sap.sse.landscape.aws.SshCommandChannel;
 import com.sap.sse.landscape.ssh.JCraftLogAdapter;
 import com.sap.sse.landscape.ssh.SSHKeyPair;
@@ -31,7 +33,7 @@ import com.sap.sse.landscape.ssh.YesUserInfo;
 
 import software.amazon.awssdk.services.ec2.model.Instance;
 
-public class AwsInstanceImpl implements AwsInstance {
+public class AwsInstanceImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics> implements AwsInstance<ShardingKey, MetricsT> {
     private final static Logger logger = Logger.getLogger(AwsInstanceImpl.class.getName());
     private static final String ROOT_USER_NAME = "root";
     private final String instanceId;
@@ -182,6 +184,12 @@ public class AwsInstanceImpl implements AwsInstance {
     @Override
     public Iterable<SecurityGroup> getSecurityGroups() {
         // TODO Implement AwsInstance.getSecurityGroups(...)
+        return null;
+    }
+
+    @Override
+    public ReverseProxy<ShardingKey, MetricsT> getReverseProxy() {
+        // TODO Implement AwsInstanceImpl.getReverseProxy(...)
         return null;
     }
 

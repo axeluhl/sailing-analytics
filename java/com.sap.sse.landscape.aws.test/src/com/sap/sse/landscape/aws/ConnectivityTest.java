@@ -60,7 +60,7 @@ public class ConnectivityTest {
     
     @Test
     public void testConnectivity() {
-        final AwsInstance host = landscape.launchHost(landscape.getImage(region, "ami-01b4b27a5699e33e6"),
+        final AwsInstance<String, ApplicationProcessMetrics> host = landscape.launchHost(landscape.getImage(region, "ami-01b4b27a5699e33e6"),
                 InstanceType.T3_SMALL, landscape.getAvailabilityZoneByName(region, "eu-west-2b"), "Axel", Collections.singleton(()->"sg-0b2afd48960251280"));
         try {
             assertNotNull(host);
@@ -130,7 +130,7 @@ public class ConnectivityTest {
     }
 
     private void testSshConnectWithKey(final String keyName) throws InterruptedException, JSchException, IOException {
-        final AwsInstance host = landscape.launchHost(landscape.getImage(region, "ami-01b4b27a5699e33e6"),
+        final AwsInstance<String, ApplicationProcessMetrics> host = landscape.launchHost(landscape.getImage(region, "ami-01b4b27a5699e33e6"),
                 InstanceType.T3_SMALL, landscape.getAvailabilityZoneByName(region, "eu-west-2b"), keyName, Collections.singleton(()->"sg-0b2afd48960251280"));
         try {
             assertNotNull(host);
@@ -174,7 +174,7 @@ public class ConnectivityTest {
     
     @Test
     public void testImageDate() throws ParseException {
-        final AmazonMachineImage image = landscape.getImage(region, "ami-01b4b27a5699e33e6");
+        final AmazonMachineImage<String, ApplicationProcessMetrics> image = landscape.getImage(region, "ami-01b4b27a5699e33e6");
         assertEquals(TimePoint.of(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz").parse("2020-07-08T12:41:06+0200")),
                 image.getCreatedAt());
     }
@@ -212,9 +212,9 @@ public class ConnectivityTest {
     @Test
     public void createAndDeleteTargetGroupTest() {
         final String targetGroupName = "TestTargetGroup-"+new Random().nextInt();
-        final TargetGroup targetGroup = landscape.createTargetGroup(region, targetGroupName, 80, "/gwt/status", 80);
+        final TargetGroup<String, ApplicationProcessMetrics> targetGroup = landscape.createTargetGroup(region, targetGroupName, 80, "/gwt/status", 80);
         try {
-            final TargetGroup fetchedTargetGroup = landscape.getTargetGroup(region, targetGroupName, targetGroup.getTargetGroupArn());
+            final TargetGroup<String, ApplicationProcessMetrics> fetchedTargetGroup = landscape.getTargetGroup(region, targetGroupName, targetGroup.getTargetGroupArn());
             assertEquals(targetGroupName, fetchedTargetGroup.getName());
         } finally {
             landscape.deleteTargetGroup(targetGroup);
