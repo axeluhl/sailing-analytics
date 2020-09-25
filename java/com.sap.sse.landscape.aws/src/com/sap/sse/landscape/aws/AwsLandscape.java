@@ -9,7 +9,9 @@ import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.MachineImage;
 import com.sap.sse.landscape.Region;
 import com.sap.sse.landscape.SecurityGroup;
+import com.sap.sse.landscape.application.ApplicationMasterProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
+import com.sap.sse.landscape.application.ApplicationReplicaProcess;
 import com.sap.sse.landscape.aws.impl.AmazonMachineImage;
 import com.sap.sse.landscape.aws.impl.AwsLandscapeImpl;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
@@ -37,7 +39,10 @@ import software.amazon.awssdk.services.route53.model.RRType;
  * @param <ShardingKey>
  * @param <MetricsT>
  */
-public interface AwsLandscape<ShardingKey, MetricsT extends ApplicationProcessMetrics> extends Landscape<ShardingKey, MetricsT> {
+public interface AwsLandscape<ShardingKey, MetricsT extends ApplicationProcessMetrics,
+MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
+ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>
+extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
     static String ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME = "com.sap.sse.landscape.aws.accesskeyid";
 
     static String SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME = "com.sap.sse.landscape.aws.secretaccesskey";
@@ -48,7 +53,10 @@ public interface AwsLandscape<ShardingKey, MetricsT extends ApplicationProcessMe
      * returns a landscape object which internally has access to the clients for the underlying AWS landscape, such as
      * an EC2 client, a Route53 client, etc.
      */
-    static <ShardingKey, MetricsT extends ApplicationProcessMetrics> AwsLandscape<ShardingKey, MetricsT> obtain() {
+    static <ShardingKey, MetricsT extends ApplicationProcessMetrics,
+    MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
+    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>
+    AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> obtain() {
         return new AwsLandscapeImpl<>();
     }
     

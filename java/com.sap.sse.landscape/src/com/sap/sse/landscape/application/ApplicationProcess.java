@@ -4,11 +4,14 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.Process;
 import com.sap.sse.landscape.RotatingFileBasedLog;
 
-public interface ApplicationProcess<ShardingKey, MetricsT extends ApplicationProcessMetrics> extends Process<RotatingFileBasedLog, MetricsT> {
+public interface ApplicationProcess<ShardingKey, MetricsT extends ApplicationProcessMetrics,
+MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
+ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>
+        extends Process<RotatingFileBasedLog, MetricsT> {
     /**
      * @return the configuration as requested when this process was launched
      */
-    ApplicationProcessConfiguration<ShardingKey, MetricsT> getRequestedConfiguration();
+    ApplicationProcessConfiguration<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> getRequestedConfiguration();
     
     /**
      * @return the effective configuration with which this process is running, resulting from the
@@ -16,12 +19,12 @@ public interface ApplicationProcess<ShardingKey, MetricsT extends ApplicationPro
      *         deemed appropriate by the {@link ApplicationHost} {@link Process#getHost() running} this this process, e.g.,
      *         to avoid any conflicting resource assignments.
      */
-    ApplicationProcessConfiguration<ShardingKey, MetricsT> getEffectiveConfiguration();
+    ApplicationProcessConfiguration<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> getEffectiveConfiguration();
 
     /**
      * @return the replica set to which this process belongs
      */
-    ApplicationReplicaSet<ShardingKey, MetricsT> getReplicaSet();
+    ApplicationReplicaSet<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> getReplicaSet();
     
     String getJavaVirtualMachineName();
     

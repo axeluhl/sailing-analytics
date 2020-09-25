@@ -8,7 +8,9 @@ import java.util.UUID;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.NamedImpl;
+import com.sap.sse.landscape.application.ApplicationMasterProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
+import com.sap.sse.landscape.application.ApplicationReplicaProcess;
 import com.sap.sse.landscape.application.ApplicationReplicaSet;
 import com.sap.sse.landscape.application.Scope;
 import com.sap.sse.landscape.aws.AwsAvailabilityZone;
@@ -29,13 +31,16 @@ import software.amazon.awssdk.services.ec2.model.InstanceType;
  * @author Axel Uhl (D043530)
  *
  */
-public class ApacheReverseProxy<ShardingKey, MetricsT extends ApplicationProcessMetrics> extends NamedImpl implements ReverseProxy<ShardingKey, MetricsT> {
+public class ApacheReverseProxy<ShardingKey, MetricsT extends ApplicationProcessMetrics,
+MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
+ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>
+extends NamedImpl implements ReverseProxy<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
     private static final long serialVersionUID = 8019146973512856147L;
-    private final AwsLandscape<ShardingKey, MetricsT> landscape;
+    private final AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape;
     private final AwsRegion region;
     private final String targetGroupArn;
     
-    public ApacheReverseProxy(String name, AwsLandscape<ShardingKey, MetricsT> landscape, AwsRegion region, Map<AwsAvailabilityZone, Integer> numberOfInstancesPerAz) {
+    public ApacheReverseProxy(String name, AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape, AwsRegion region, Map<AwsAvailabilityZone, Integer> numberOfInstancesPerAz) {
         super(name);
         this.landscape = landscape;
         this.region = region;
@@ -57,35 +62,35 @@ public class ApacheReverseProxy<ShardingKey, MetricsT extends ApplicationProcess
 
     @Override
     public void setScopeRedirect(Scope<ShardingKey> scope,
-            ApplicationReplicaSet<ShardingKey, MetricsT> applicationReplicaSet) {
+            ApplicationReplicaSet<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> applicationReplicaSet) {
         // TODO Implement ApacheReverseProxy.setScopeRedirect(...)
         
     }
 
     @Override
     public void setPlainRedirect(String hostname,
-            ApplicationReplicaSet<ShardingKey, MetricsT> applicationReplicaSet) {
+            ApplicationReplicaSet<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> applicationReplicaSet) {
         // TODO Implement ReverseProxy.setPlainRedirect(...)
         
     }
 
     @Override
     public void setHomeRedirect(String hostname,
-            ApplicationReplicaSet<ShardingKey, MetricsT> applicationReplicaSet) {
+            ApplicationReplicaSet<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> applicationReplicaSet) {
         // TODO Implement ReverseProxy.setHomeRedirect(...)
         
     }
 
     @Override
     public void setEventRedirect(String hostname,
-            ApplicationReplicaSet<ShardingKey, MetricsT> applicationReplicaSet, UUID eventId) {
+            ApplicationReplicaSet<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> applicationReplicaSet, UUID eventId) {
         // TODO Implement ReverseProxy.setEventRedirect(...)
         
     }
 
     @Override
     public void setEventSeriesRedirect(String hostname,
-            ApplicationReplicaSet<ShardingKey, MetricsT> applicationReplicaSet,
+            ApplicationReplicaSet<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> applicationReplicaSet,
             UUID leaderboardGroupId) {
         // TODO Implement ReverseProxy.setEventSeriesRedirect(...)
         

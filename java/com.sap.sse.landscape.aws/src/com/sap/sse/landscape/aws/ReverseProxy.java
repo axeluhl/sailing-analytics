@@ -4,7 +4,9 @@ import java.util.UUID;
 
 import com.sap.sse.common.Named;
 import com.sap.sse.landscape.Host;
+import com.sap.sse.landscape.application.ApplicationMasterProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
+import com.sap.sse.landscape.application.ApplicationReplicaProcess;
 import com.sap.sse.landscape.application.ApplicationReplicaSet;
 import com.sap.sse.landscape.application.Scope;
 
@@ -36,7 +38,9 @@ import software.amazon.awssdk.services.ec2.model.InstanceType;
  * @author Axel Uhl (D043530)
  *
  */
-public interface ReverseProxy<ShardingKey, MetricsT extends ApplicationProcessMetrics> extends Named {
+public interface ReverseProxy<ShardingKey, MetricsT extends ApplicationProcessMetrics,
+MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
+ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>> extends Named {
     /**
      * A reverse proxy may scale out by adding more hosts.
      * 
@@ -80,14 +84,14 @@ public interface ReverseProxy<ShardingKey, MetricsT extends ApplicationProcessMe
      * {@code /index.html} landing page for the application replica set provided.
      */
     void setPlainRedirect(String hostname,
-            ApplicationReplicaSet<ShardingKey, MetricsT> applicationReplicaSet);
+            ApplicationReplicaSet<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> applicationReplicaSet);
     
     /**
      * Configures a redirect in this reverse proxy such that requests for it will go to the
      * {@code /gwt/Home.html} landing page for the application replica set provided.
      */
     void setHomeRedirect(String hostname,
-            ApplicationReplicaSet<ShardingKey, MetricsT> applicationReplicaSet);
+            ApplicationReplicaSet<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> applicationReplicaSet);
 
     /**
      * Configures a redirect in this reverse proxy such that requests for it will go to the
@@ -95,7 +99,7 @@ public interface ReverseProxy<ShardingKey, MetricsT extends ApplicationProcessMe
      * application replica set provided.
      */
     void setEventRedirect(String hostname,
-            ApplicationReplicaSet<ShardingKey, MetricsT> applicationReplicaSet, UUID eventId);
+            ApplicationReplicaSet<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> applicationReplicaSet, UUID eventId);
 
     /**
      * Configures a redirect in this reverse proxy such that requests for it will go to the event series page for the
@@ -103,14 +107,14 @@ public interface ReverseProxy<ShardingKey, MetricsT extends ApplicationProcessMe
      * be hosted by the application replica set provided.
      */
     void setEventSeriesRedirect(String hostname,
-            ApplicationReplicaSet<ShardingKey, MetricsT> applicationReplicaSet,
+            ApplicationReplicaSet<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> applicationReplicaSet,
             UUID leaderboardGroupId);
     
     /**
      * Configures a rule for requests for anything from within {@code scope} such that those requests
      * are sent to the {@code applicationReplicaSet}.
      */
-    void setScopeRedirect(Scope<ShardingKey> scope, ApplicationReplicaSet<ShardingKey, MetricsT> applicationReplicaSet);
+    void setScopeRedirect(Scope<ShardingKey> scope, ApplicationReplicaSet<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> applicationReplicaSet);
     
     /**
      * Removes any existing redirect mapping for the {@code hostname} provided. If no such mapping

@@ -25,7 +25,6 @@ import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
-import com.sap.sse.landscape.aws.ReverseProxy;
 import com.sap.sse.landscape.aws.SshCommandChannel;
 import com.sap.sse.landscape.ssh.JCraftLogAdapter;
 import com.sap.sse.landscape.ssh.SSHKeyPair;
@@ -38,9 +37,9 @@ public class AwsInstanceImpl<ShardingKey, MetricsT extends ApplicationProcessMet
     private static final String ROOT_USER_NAME = "root";
     private final String instanceId;
     private final AwsAvailabilityZone availabilityZone;
-    private final AwsLandscape<?, ?> landscape;
+    private final AwsLandscape<?, ?, ?, ?> landscape;
     
-    public AwsInstanceImpl(String instanceId, AwsAvailabilityZone availabilityZone, AwsLandscape<?, ?> landscape) {
+    public AwsInstanceImpl(String instanceId, AwsAvailabilityZone availabilityZone, AwsLandscape<?, ?, ?, ?> landscape) {
         this.instanceId = instanceId;
         this.availabilityZone = availabilityZone;
         this.landscape = landscape;
@@ -184,12 +183,6 @@ public class AwsInstanceImpl<ShardingKey, MetricsT extends ApplicationProcessMet
     @Override
     public Iterable<SecurityGroup> getSecurityGroups() {
         // TODO Implement AwsInstance.getSecurityGroups(...)
-        return null;
-    }
-
-    @Override
-    public ReverseProxy<ShardingKey, MetricsT> getReverseProxy() {
-        // TODO Implement AwsInstanceImpl.getReverseProxy(...)
         return null;
     }
 

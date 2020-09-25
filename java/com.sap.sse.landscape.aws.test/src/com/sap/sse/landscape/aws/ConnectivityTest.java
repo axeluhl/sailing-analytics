@@ -47,7 +47,7 @@ import software.amazon.awssdk.services.route53.model.ChangeStatus;
  */
 public class ConnectivityTest {
     private static final Logger logger = Logger.getLogger(ConnectivityTest.class.getName());
-    private AwsLandscape<String, ApplicationProcessMetrics> landscape;
+    private AwsLandscape<String, ApplicationProcessMetrics, ?, ?> landscape;
     private AwsRegion region;
     private byte[] keyPass;
     

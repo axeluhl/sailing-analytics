@@ -18,7 +18,9 @@ import com.sap.sse.landscape.AvailabilityZone;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.MachineImage;
 import com.sap.sse.landscape.SecurityGroup;
+import com.sap.sse.landscape.application.ApplicationMasterProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
+import com.sap.sse.landscape.application.ApplicationReplicaProcess;
 import com.sap.sse.landscape.application.ApplicationReplicaSet;
 import com.sap.sse.landscape.application.Scope;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
@@ -85,7 +87,9 @@ import software.amazon.awssdk.services.route53.model.RRType;
 import software.amazon.awssdk.services.route53.model.ResourceRecord;
 import software.amazon.awssdk.services.route53.model.ResourceRecordSet;
 
-public class AwsLandscapeImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics> implements AwsLandscape<ShardingKey, MetricsT> {
+public class AwsLandscapeImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics,
+MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
+ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>> implements AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
     private static final Logger logger = Logger.getLogger(AwsLandscapeImpl.class.getName());
     private static final long DEFAULT_DNS_TTL_MILLIS = 60000l;
     private final String accessKeyId;
@@ -328,7 +332,7 @@ public class AwsLandscapeImpl<ShardingKey, MetricsT extends ApplicationProcessMe
     }
 
     @Override
-    public Map<Scope<ShardingKey>, ApplicationReplicaSet<ShardingKey, MetricsT>> getScopes() {
+    public Map<Scope<ShardingKey>, ApplicationReplicaSet<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>> getScopes() {
         // TODO Implement Landscape<ShardingKey,MetricsT>.getScopes(...)
         return null;
     }
