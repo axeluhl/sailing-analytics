@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.net.MalformedURLException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -41,6 +42,7 @@ import org.junit.Test;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
 
+import com.mongodb.MongoException;
 import com.mongodb.WriteConcern;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
@@ -124,6 +126,7 @@ import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
+import com.sap.sailing.domain.persistence.racelog.tracking.MongoSensorFixStoreFactory;
 import com.sap.sailing.domain.racelog.tracking.EmptySensorFixStore;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockSmartphoneImeiServiceFinderFactory;
@@ -258,7 +261,10 @@ public class MasterDataImportTest {
         // Setup source service
         MockSmartphoneImeiServiceFinderFactory serviceFinderFactory = new MockSmartphoneImeiServiceFinderFactory();
         RacingEventServiceImpl sourceService = Mockito
-                .spy(new RacingEventServiceImpl(null, null, serviceFinderFactory));
+                .spy(new RacingEventServiceImpl(null, MongoSensorFixStoreFactory.INSTANCE.getMongoGPSFixStore(
+                        PersistenceFactory.INSTANCE
+                        .getDefaultMongoObjectFactory(serviceFinderFactory), PersistenceFactory.INSTANCE
+                        .getDefaultDomainObjectFactory(), serviceFinderFactory, WriteConcern.MAJORITY), serviceFinderFactory));
         Mockito.doReturn(securityService).when(sourceService).getSecurityService();
         Event event = sourceService.addEvent(TEST_EVENT_NAME, /* eventDescription */null, eventStartDate, eventEndDate,
                 "testVenue", false, eventUUID);
@@ -709,15 +715,13 @@ public class MasterDataImportTest {
         return destService;
     }
 
-    private RacingEventService getDestService(UUID randomUUID, TypeBasedServiceFinderFactory serviceFinderFactory) {
+    private RacingEventService getDestService(UUID randomUUID, TypeBasedServiceFinderFactory serviceFinderFactory) throws UnknownHostException, MongoException {
         RacingEventServiceImplMock destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID),
                 serviceFinderFactory) {
-
             @Override
             public SecurityService getSecurityService() {
                 return MasterDataImportTest.this.securityService;
             }
-
         };
         return destService;
     }
