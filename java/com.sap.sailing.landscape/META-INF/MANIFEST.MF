@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Landscape
+Bundle-SymbolicName: com.sap.sailing.landscape
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: SAP
+Automatic-Module-Name: com.sap.sailing.landscape
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: com.sap.sse.landscape,
+ com.sap.sse.landscape.aws,
+ com.sap.sse.common
