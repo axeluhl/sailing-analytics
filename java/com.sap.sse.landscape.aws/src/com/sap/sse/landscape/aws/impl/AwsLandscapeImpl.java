@@ -335,7 +335,7 @@ public class AwsLandscapeImpl<ShardingKey, MetricsT extends ApplicationProcessMe
 
     @Override
     public Iterable<AwsInstance<ShardingKey, MetricsT>> launchHosts(int numberOfHostsToLaunch, MachineImage<AwsInstance<ShardingKey, MetricsT>> fromImage,
-            InstanceType instanceType, AwsAvailabilityZone az, String keyName, Iterable<SecurityGroup> securityGroups) {
+            InstanceType instanceType, AwsAvailabilityZone az, String keyName, Iterable<SecurityGroup> securityGroups, String... userData) {
         if (!fromImage.getRegion().equals(az.getRegion())) {
             throw new IllegalArgumentException("Trying to launch an instance in region "+az.getRegion()+
                     " with image "+fromImage+" that lives in region "+fromImage.getRegion()+" which is different."+
@@ -348,7 +348,8 @@ public class AwsLandscapeImpl<ShardingKey, MetricsT extends ApplicationProcessMe
             .maxCount(numberOfHostsToLaunch)
             .instanceType(instanceType).keyName(keyName)
             .placement(Placement.builder().availabilityZone(az.getName()).build())
-            .securityGroupIds(Util.mapToArrayList(securityGroups, sg->sg.getId())).build();
+            .securityGroupIds(Util.mapToArrayList(securityGroups, sg->sg.getId()))
+            .userData(String.join("\n", userData)).build();
         logger.info("Launching instance(s): "+launchRequest);
         final RunInstancesResponse response = getEc2Client(getRegion(az.getRegion())).runInstances(launchRequest);
         final List<AwsInstance<ShardingKey, MetricsT>> result = new ArrayList<>();

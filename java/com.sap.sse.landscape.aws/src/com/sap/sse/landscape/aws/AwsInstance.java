@@ -42,6 +42,10 @@ public interface AwsInstance<ShardingKey, MetricsT extends ApplicationProcessMet
 
     ChannelSftp createRootSftpChannel() throws JSchException, IOException;
     
+    /**
+     * Obtains an object through which, if present, an Apache reverse proxy running on this AWS host can be
+     * configured.
+     */
     ReverseProxy<ShardingKey, MetricsT> getReverseProxy();
     
     String getInstanceId();

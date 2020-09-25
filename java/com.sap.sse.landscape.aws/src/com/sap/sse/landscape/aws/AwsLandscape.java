@@ -55,13 +55,18 @@ public interface AwsLandscape<ShardingKey, MetricsT extends ApplicationProcessMe
     /**
      * Launches a new {@link Host} from a given image into the availability zone specified and controls network access
      * to that instance by setting the security groups specified for the resulting host.
+     * 
      * @param keyName
      *            the SSH key pair name to use when launching; this will grant root access with the corresponding
      *            private key; see also {@link #getKeyPairInfo(Region, String)}
+     * @param userData
+     *            zero or more strings representing the user data to be passed to the instance; multiple strings will be
+     *            concatenated, using the line separator to join them. The instance is able to read the user data throuh
+     *            the AWS SDK installed on the instance.
      */
     default AwsInstance<ShardingKey, MetricsT> launchHost(MachineImage<AwsInstance<ShardingKey, MetricsT>> fromImage, InstanceType instanceType,
-            AwsAvailabilityZone az, String keyName, Iterable<SecurityGroup> securityGroups) {
-        return launchHosts(1, fromImage, instanceType, az, keyName, securityGroups).iterator().next();
+            AwsAvailabilityZone az, String keyName, Iterable<SecurityGroup> securityGroups, String... userData) {
+        return launchHosts(1, fromImage, instanceType, az, keyName, securityGroups, userData).iterator().next();
     }
 
     /**
@@ -70,9 +75,10 @@ public interface AwsLandscape<ShardingKey, MetricsT extends ApplicationProcessMe
      * @param keyName
      *            the SSH key pair name to use when launching; this will grant root access with the corresponding
      *            private key; see also {@link #getKeyPairInfo(Region, String)}
+     * @param userData TODO
      */
     Iterable<AwsInstance<ShardingKey, MetricsT>> launchHosts(int numberOfHostsToLaunch, MachineImage<AwsInstance<ShardingKey, MetricsT>> fromImage, InstanceType instanceType,
-            AwsAvailabilityZone az, String keyName, Iterable<SecurityGroup> securityGroups);
+            AwsAvailabilityZone az, String keyName, Iterable<SecurityGroup> securityGroups, String... userData);
     
     AmazonMachineImage<ShardingKey, MetricsT> getImage(Region region, String imageId);
     
