@@ -8,5 +8,7 @@ public class QualtricsInjectingEntryPoint implements EntryPoint {
     public void onModuleLoad() {
         GWT.log("Inject Qualtrics");
         Qualtrics.ensureInjected();
+        // we'd like to trigger the "count-down" intercepts always when loading the page
+        Qualtrics.triggerIntercepts();
     }
 }
