@@ -2,7 +2,8 @@ package com.sap.sse.gwt.qualtrics;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.user.client.Timer;
+import com.sap.sse.common.Duration;
 
 public class QualtricsInjectingEntryPoint implements EntryPoint {
     @Override
@@ -10,6 +11,11 @@ public class QualtricsInjectingEntryPoint implements EntryPoint {
         GWT.log("Inject Qualtrics");
         Qualtrics.ensureInjected();
         // we'd like to trigger the "count-down" intercepts always when loading the page
-        Scheduler.get().scheduleFinally(()->Qualtrics.triggerIntercepts());
+        new Timer() {
+            @Override
+            public void run() {
+                Qualtrics.triggerIntercepts();
+            }
+        }.schedule((int) Duration.ONE_MINUTE.asMillis());
     }
 }
