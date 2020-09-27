@@ -3,6 +3,7 @@ package com.sap.sse.datamining.ui.client;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.datamining.shared.dto.StoredDataMiningQueryDTO;
 import com.sap.sse.datamining.shared.impl.dto.StoredDataMiningQueryDTOImpl;
+import com.sap.sse.datamining.shared.impl.dto.StoredDataMiningReportDTOImpl;
 
 public interface DataMiningWriteServiceAsync {
 
@@ -12,5 +13,9 @@ public interface DataMiningWriteServiceAsync {
 
     /** Removes the {@link StoredDataMiningQueryDTO} if it exists from the back end. */
     void removeStoredQuery(StoredDataMiningQueryDTOImpl query, AsyncCallback<StoredDataMiningQueryDTOImpl> callback);
+
+    void updateOrCreateStoredReport(StoredDataMiningReportDTOImpl report, AsyncCallback<StoredDataMiningReportDTOImpl> callback);
+
+    void removeStoredReport(StoredDataMiningReportDTOImpl report, AsyncCallback<StoredDataMiningReportDTOImpl> callback);
 
 }

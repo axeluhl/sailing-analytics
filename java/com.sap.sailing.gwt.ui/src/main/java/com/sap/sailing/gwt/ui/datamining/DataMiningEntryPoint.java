@@ -133,7 +133,7 @@ public class DataMiningEntryPoint extends AbstractSailingReadEntryPoint {
                     queryDefinitionProvider.addControl(new StoredDataMiningQueryPanel(queryProvider));
 
                     StoredDataMiningReportsProvider reportsProvider = new StoredDataMiningReportsProvider(
-                            dataMiningService);
+                            dataMiningService, dataMiningWriteService);
                     queryDefinitionProvider.addControl(new DataMiningReportStoreControls(DataMiningEntryPoint.this,
                             session, dataMiningService, reportsProvider, queryDefinitionProvider, resultsPresenter));
                 }

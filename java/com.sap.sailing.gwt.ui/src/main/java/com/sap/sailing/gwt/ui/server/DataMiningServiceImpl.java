@@ -62,7 +62,7 @@ public class DataMiningServiceImpl extends ProxiedRemoteServiceServlet implement
     private final ServiceTracker<DataMiningServer, DataMiningServer> dataMiningServerTracker;
     private final FullyInitializedReplicableTracker<SecurityService> securityServiceTracker;
     protected final StoredDataMiningQueryPersister storedDataMiningQueryPersistor;
-    private final StoredDataMiningReportPersister storedDataMiningReportPersistor;
+    protected final StoredDataMiningReportPersister storedDataMiningReportPersistor;
     private final DataMiningDTOFactory dtoFactory;
 
     public DataMiningServiceImpl() {
@@ -430,20 +430,6 @@ public class DataMiningServiceImpl extends ProxiedRemoteServiceServlet implement
     public ArrayList<StoredDataMiningReportDTOImpl> retrieveStoredReports() throws UnauthorizedException {
         checkDataMiningPermission();
         return storedDataMiningReportPersistor.getStoredReports();
-    }
-
-    @Override
-    public StoredDataMiningReportDTOImpl updateOrCreateStoredReport(StoredDataMiningReportDTOImpl report)
-            throws UnauthorizedException {
-        checkDataMiningPermission();
-        return storedDataMiningReportPersistor.updateOrCreateStoredReport(report);
-    }
-
-    @Override
-    public StoredDataMiningReportDTOImpl removeStoredReport(StoredDataMiningReportDTOImpl report)
-            throws UnauthorizedException {
-        checkDataMiningPermission();
-        return storedDataMiningReportPersistor.removeStoredReport(report);
     }
 
     @Override

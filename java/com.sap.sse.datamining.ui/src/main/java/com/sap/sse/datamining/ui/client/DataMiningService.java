@@ -77,11 +77,6 @@ public interface DataMiningService extends RemoteService {
 
     ArrayList<StoredDataMiningReportDTOImpl> retrieveStoredReports() throws UnauthorizedException;
 
-    StoredDataMiningReportDTOImpl updateOrCreateStoredReport(StoredDataMiningReportDTOImpl report)
-            throws UnauthorizedException;
-
-    StoredDataMiningReportDTOImpl removeStoredReport(StoredDataMiningReportDTOImpl report) throws UnauthorizedException;
-
     ModifiableStatisticQueryDefinitionDTO getDeserializedQuery(String serializedQuery) throws UnauthorizedException;
 
     SerializationDummy pseudoMethodSoThatSomeClassesAreAddedToTheGWTSerializationPolicy() throws UnauthorizedException;

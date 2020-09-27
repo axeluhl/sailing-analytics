@@ -14,15 +14,18 @@ import com.sap.sse.datamining.shared.dto.DataMiningReportDTO;
 import com.sap.sse.datamining.shared.dto.StoredDataMiningReportDTO;
 import com.sap.sse.datamining.shared.impl.dto.StoredDataMiningReportDTOImpl;
 import com.sap.sse.datamining.ui.client.DataMiningServiceAsync;
+import com.sap.sse.datamining.ui.client.DataMiningWriteServiceAsync;
 
 public class StoredDataMiningReportsProvider {
     private final Set<StoredDataMiningReportDTO> storedReports = new HashSet<>();
     private final Set<Consumer<Collection<StoredDataMiningReportDTO>>> listeners = new HashSet<>();
 
     private final DataMiningServiceAsync dataMiningService;
+    private final DataMiningWriteServiceAsync dataMiningWriteService;
 
-    public StoredDataMiningReportsProvider(DataMiningServiceAsync dataMiningService) {
+    public StoredDataMiningReportsProvider(DataMiningServiceAsync dataMiningService, DataMiningWriteServiceAsync dataMiningWriteService) {
         this.dataMiningService = dataMiningService;
+        this.dataMiningWriteService = dataMiningWriteService;
         reloadReports();
     }
     
@@ -47,7 +50,7 @@ public class StoredDataMiningReportsProvider {
             storedReport = new StoredDataMiningReportDTOImpl(UUID.randomUUID(), name, report);
         }
 
-        dataMiningService.updateOrCreateStoredReport(storedReport, new AsyncCallback<StoredDataMiningReportDTOImpl>() {
+        dataMiningWriteService.updateOrCreateStoredReport(storedReport, new AsyncCallback<StoredDataMiningReportDTOImpl>() {
             @Override
             public void onFailure(Throwable caught) {
                 GWT.log(caught.getMessage(), caught);
@@ -69,7 +72,7 @@ public class StoredDataMiningReportsProvider {
             return false;
         }
 
-        dataMiningService.removeStoredReport((StoredDataMiningReportDTOImpl) existingStoredReport.get(),
+        dataMiningWriteService.removeStoredReport((StoredDataMiningReportDTOImpl) existingStoredReport.get(),
                 new AsyncCallback<StoredDataMiningReportDTOImpl>() {
                     @Override
                     public void onFailure(Throwable caught) {

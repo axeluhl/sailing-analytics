@@ -79,10 +79,6 @@ public interface DataMiningServiceAsync {
 
     void retrieveStoredReports(AsyncCallback<ArrayList<StoredDataMiningReportDTOImpl>> callback);
 
-    void updateOrCreateStoredReport(StoredDataMiningReportDTOImpl report, AsyncCallback<StoredDataMiningReportDTOImpl> callback);
-
-    void removeStoredReport(StoredDataMiningReportDTOImpl report, AsyncCallback<StoredDataMiningReportDTOImpl> callback);
-
     /** Gets the {@link StatisticQueryDefinitionDTO} from the serialized String. */
     void getDeserializedQuery(String serializedQuery, AsyncCallback<ModifiableStatisticQueryDefinitionDTO> callback);
 
