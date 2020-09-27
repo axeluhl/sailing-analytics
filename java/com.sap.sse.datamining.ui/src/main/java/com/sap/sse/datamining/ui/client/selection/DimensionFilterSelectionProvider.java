@@ -24,6 +24,7 @@ import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
@@ -185,6 +186,13 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
         headerPanel.add(headerLabel);
         headerPanel.setCellWidth(headerLabel, "100%");
         headerPanel.setCellHorizontalAlignment(headerLabel, HasHorizontalAlignment.ALIGN_CENTER);
+        
+        ToggleButton parameterSettingsButton = new ToggleButton("P");
+        parameterSettingsButton.addClickHandler(e -> {
+            // TODO Open Parameter Settings Modal
+        });
+        headerPanel.add(parameterSettingsButton);
+        headerPanel.setCellHorizontalAlignment(parameterSettingsButton, HasHorizontalAlignment.ALIGN_RIGHT);
 
         ToggleButton toggleFilterButton = new ToggleButton(new Image(resources.searchIcon()));
         toggleFilterButton.addClickHandler(e -> {
