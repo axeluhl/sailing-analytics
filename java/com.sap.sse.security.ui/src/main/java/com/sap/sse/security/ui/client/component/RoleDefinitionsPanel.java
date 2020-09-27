@@ -217,7 +217,7 @@ public class RoleDefinitionsPanel extends VerticalPanel {
                 roleDefinition -> updateRoleDefinitions(), stringMessages);
         roleActionColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, config::openOwnershipDialog);
         final EditACLDialog.DialogConfig<RoleDefinitionDTO> configACL = EditACLDialog.create(
-                userService.getUserManagementService(), type, roleDefinition -> updateRoleDefinitions(),
+                userService.getUserManagementWriteService(), type, roleDefinition -> updateRoleDefinitions(),
                 stringMessages);
         roleActionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 configACL::openACLDialog);

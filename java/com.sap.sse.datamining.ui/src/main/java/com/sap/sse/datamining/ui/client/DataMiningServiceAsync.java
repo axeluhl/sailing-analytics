@@ -77,13 +77,6 @@ public interface DataMiningServiceAsync {
     /** Retrieves the {@link StoredDataMiningQueryDTO}s from the back end. */
     void retrieveStoredQueries(AsyncCallback<ArrayList<StoredDataMiningQueryDTOImpl>> callback);
 
-    /** Updates or creates a {@link StoredDataMiningQueryDTO} in the back end. */
-    void updateOrCreateStoredQuery(StoredDataMiningQueryDTOImpl query,
-            AsyncCallback<StoredDataMiningQueryDTOImpl> callback);
-
-    /** Removes the {@link StoredDataMiningQueryDTO} if it exists from the back end. */
-    void removeStoredQuery(StoredDataMiningQueryDTOImpl query, AsyncCallback<StoredDataMiningQueryDTOImpl> callback);
-
     void retrieveStoredReports(AsyncCallback<ArrayList<StoredDataMiningReportDTOImpl>> callback);
 
     void updateOrCreateStoredReport(StoredDataMiningReportDTOImpl report, AsyncCallback<StoredDataMiningReportDTOImpl> callback);

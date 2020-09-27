@@ -69,6 +69,7 @@ import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.security.SecurityInitializationCustomizer;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.SecurityUrlPathProvider;
 import com.sap.sse.security.interfaces.PreferenceConverter;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.HasPermissionsProvider;
@@ -223,11 +224,17 @@ public class Activator implements BundleActivator {
         mailQueue = new ExecutorMailQueue(mailServiceTracker);
         notificationService = new SailingNotificationServiceImpl(context, mailQueue);
         trackedRegattaListener = new OSGiBasedTrackedRegattaListener(context);
+        final Dictionary<String, String> sailingSecurityUrlPathProviderProperties = new Hashtable<>();
+        sailingSecurityUrlPathProviderProperties.put(TypeBasedServiceFinder.TYPE,
+                SecurityUrlPathProviderSailingImpl.APPLICATION);
+        context.registerService(SecurityUrlPathProvider.class, new SecurityUrlPathProviderSailingImpl(),
+                sailingSecurityUrlPathProviderProperties);
         registrations.add(context.registerService(HasPermissionsProvider.class,
                 (HasPermissionsProvider) SecuredDomainType::getAllInstances, null));
         registrations.add(context.registerService(SecurityInitializationCustomizer.class,
                 (SecurityInitializationCustomizer) securityService -> {
-                    final RoleDefinition sailingViewerRoleDefinition = securityService.getOrCreateRoleDefinitionFromPrototype(SailingViewerRole.getInstance());
+                    final RoleDefinition sailingViewerRoleDefinition = securityService
+                            .getOrCreateRoleDefinitionFromPrototype(SailingViewerRole.getInstance());
                     if (securityService.isNewServer()) {
                         // The server is initially set to be public by adding sailing_viewer role to the server group
                         // with forAll=true
@@ -236,7 +243,8 @@ public class Activator implements BundleActivator {
                     }
                     if (securityService.isInitialOrMigration()) {
                         // sailing_viewer role is publicly readable
-                        securityService.addToAccessControlList(sailingViewerRoleDefinition.getIdentifier(), null, DefaultActions.READ.name());
+                                securityService.addToAccessControlList(sailingViewerRoleDefinition.getIdentifier(),
+                                        null, DefaultActions.READ.name());
                     }
                 }, null));
         final TrackedRaceStatisticsCache trackedRaceStatisticsCache = new TrackedRaceStatisticsCacheImpl();
@@ -255,15 +263,16 @@ public class Activator implements BundleActivator {
                 .createAndOpen(context, ResultUrlRegistry.class);
         racingEventService = new RacingEventServiceImpl(clearPersistentCompetitors,
                 serviceFinderFactory, trackedRegattaListener, notificationService,
-                trackedRaceStatisticsCache, restoreTrackedRaces, securityServiceTracker,
-                sharedSailingDataTracker, replicationServiceTracker, scoreCorrectionProviderServiceTracker, resultUrlRegistryServiceTracker);
+                trackedRaceStatisticsCache, restoreTrackedRaces, securityServiceTracker, sharedSailingDataTracker,
+                replicationServiceTracker, scoreCorrectionProviderServiceTracker, resultUrlRegistryServiceTracker);
         notificationService.setRacingEventService(racingEventService);
-        final MasterDataImportClassLoaderServiceTrackerCustomizer mdiClassLoaderCustomizer = new MasterDataImportClassLoaderServiceTrackerCustomizer(context, racingEventService);
+        final MasterDataImportClassLoaderServiceTrackerCustomizer mdiClassLoaderCustomizer = new MasterDataImportClassLoaderServiceTrackerCustomizer(
+                context, racingEventService);
         masterDataImportClassLoaderServiceTracker = new ServiceTracker<MasterDataImportClassLoaderService, MasterDataImportClassLoaderService>(
-                context, MasterDataImportClassLoaderService.class,
-                mdiClassLoaderCustomizer);
+                context, MasterDataImportClassLoaderService.class, mdiClassLoaderCustomizer);
         masterDataImportClassLoaderServiceTracker.open();
-        for (final ServiceReference<MasterDataImportClassLoaderService> mdiClassLoaderService : masterDataImportClassLoaderServiceTracker.getServiceReferences()) {
+        for (final ServiceReference<MasterDataImportClassLoaderService> mdiClassLoaderService : masterDataImportClassLoaderServiceTracker
+                .getServiceReferences()) {
             mdiClassLoaderCustomizer.addingService(mdiClassLoaderService);
         }
         polarDataServiceTracker = new ServiceTracker<PolarDataService, PolarDataService>(context,

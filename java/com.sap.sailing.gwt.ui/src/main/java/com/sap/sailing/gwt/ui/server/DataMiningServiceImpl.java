@@ -61,7 +61,7 @@ public class DataMiningServiceImpl extends ProxiedRemoteServiceServlet implement
     private final BundleContext context;
     private final ServiceTracker<DataMiningServer, DataMiningServer> dataMiningServerTracker;
     private final FullyInitializedReplicableTracker<SecurityService> securityServiceTracker;
-    private final StoredDataMiningQueryPersister storedDataMiningQueryPersistor;
+    protected final StoredDataMiningQueryPersister storedDataMiningQueryPersistor;
     private final StoredDataMiningReportPersister storedDataMiningReportPersistor;
     private final DataMiningDTOFactory dtoFactory;
 
@@ -119,7 +119,7 @@ public class DataMiningServiceImpl extends ProxiedRemoteServiceServlet implement
      * @throws AuthorizationException
      *             if permission does not exist
      */
-    private void checkDataMiningPermission() {
+    protected void checkDataMiningPermission() {
         getSecurityService().checkCurrentUserServerPermission(ServerActions.DATA_MINING);
     }
 
@@ -419,18 +419,6 @@ public class DataMiningServiceImpl extends ProxiedRemoteServiceServlet implement
     public ArrayList<StoredDataMiningQueryDTOImpl> retrieveStoredQueries() {
         checkDataMiningPermission();
         return storedDataMiningQueryPersistor.retrieveStoredQueries();
-    }
-
-    @Override
-    public StoredDataMiningQueryDTOImpl updateOrCreateStoredQuery(StoredDataMiningQueryDTOImpl query) {
-        checkDataMiningPermission();
-        return (StoredDataMiningQueryDTOImpl) storedDataMiningQueryPersistor.updateOrCreateStoredQuery(query);
-    }
-
-    @Override
-    public StoredDataMiningQueryDTOImpl removeStoredQuery(StoredDataMiningQueryDTOImpl query) {
-        checkDataMiningPermission();
-        return (StoredDataMiningQueryDTOImpl) storedDataMiningQueryPersistor.removeStoredQuery(query);
     }
 
     @Override
