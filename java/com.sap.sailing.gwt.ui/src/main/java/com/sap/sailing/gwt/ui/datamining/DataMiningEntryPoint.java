@@ -21,6 +21,8 @@ import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
+import com.google.gwt.user.client.ui.LayoutPanel;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -64,7 +66,7 @@ public class DataMiningEntryPoint extends AbstractSailingReadEntryPoint {
     private static final Logger LOG = Logger.getLogger(DataMiningEntryPoint.class.getName());
 
     private static final DataMiningResources dataMiningResources = GWT.create(DataMiningResources.class);
-
+    
     private final DataMiningServiceAsync dataMiningService = GWT.create(DataMiningService.class);
     private final DataMiningWriteServiceAsync dataMiningWriteService = GWT.create(DataMiningWriteService.class);
     private DataMiningSession session;
@@ -74,6 +76,7 @@ public class DataMiningEntryPoint extends AbstractSailingReadEntryPoint {
     private Integer resultsPresenterSouthHeight = 350;
     private Integer resultsPresenterEastWidth = 750;
 
+    private Panel mainPanel;
     private SplitLayoutPanel queryAndResultSplitPanel;
     private boolean queryAndResultAreVertical = true;
 
@@ -106,6 +109,8 @@ public class DataMiningEntryPoint extends AbstractSailingReadEntryPoint {
 
             @Override
             public Widget get() {
+                mainPanel = new LayoutPanel();
+                
                 DataMiningSettingsControl settingsControl = new AnchorDataMiningSettingsControl(null, null);
                 resultsPresenter = new TabbedSailingResultsPresenter(/* parent */ null, /* context */ null,
                         /* drillDownCallback */ groupKey -> {
@@ -135,7 +140,7 @@ public class DataMiningEntryPoint extends AbstractSailingReadEntryPoint {
                     StoredDataMiningReportsProvider reportsProvider = new StoredDataMiningReportsProvider(
                             dataMiningService, dataMiningWriteService);
                     queryDefinitionProvider.addControl(new DataMiningReportStoreControls(DataMiningEntryPoint.this,
-                            session, dataMiningService, reportsProvider, queryDefinitionProvider, resultsPresenter));
+                            session, dataMiningService, reportsProvider, mainPanel, resultsPresenter));
                 }
 
                 Anchor orientationAnchor = new Anchor(
@@ -156,6 +161,7 @@ public class DataMiningEntryPoint extends AbstractSailingReadEntryPoint {
                  */
                 // settingsControl.addSettingsComponent(queryRunner);
                 queryAndResultSplitPanel = new SplitLayoutPanel(10);
+                mainPanel.add(queryAndResultSplitPanel);
                 addDefinitionProviderAndResultPresenter();
                 if (queryIdentifier != null) {
                     CrossDomainStorage store = getUserService().getStorage();
@@ -183,7 +189,8 @@ public class DataMiningEntryPoint extends AbstractSailingReadEntryPoint {
                         }
                     });
                 }
-                return queryAndResultSplitPanel;
+                
+                return mainPanel;
             }
         });
 

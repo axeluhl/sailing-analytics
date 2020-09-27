@@ -12,13 +12,18 @@ import java.util.stream.StreamSupport;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.SuggestBox.DefaultSuggestionDisplay;
 import com.google.gwt.user.client.ui.TextBox;
@@ -33,7 +38,6 @@ import com.sap.sse.datamining.shared.impl.dto.ModifiableStatisticQueryDefinition
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.datamining.ui.client.CompositeResultsPresenter;
 import com.sap.sse.datamining.ui.client.DataMiningServiceAsync;
-import com.sap.sse.datamining.ui.client.QueryDefinitionProvider;
 import com.sap.sse.datamining.ui.client.StringMessages;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
@@ -50,6 +54,8 @@ public class DataMiningReportStoreControls extends Composite {
 
     interface PersistDataMiningReportStoreControlsUiBinder extends UiBinder<Widget, DataMiningReportStoreControls> {
     }
+    
+    private final StringMessages stringMessages = StringMessages.INSTANCE;
 
     @UiField
     Button saveReportButtonUi;
@@ -66,14 +72,14 @@ public class DataMiningReportStoreControls extends Composite {
     private final ErrorReporter errorReporter;
     private final DataMiningSession session;
     private final DataMiningServiceAsync dataMiningService;
+    private final Panel dataminingContentPanel;
     private final StoredDataMiningReportsProvider reportsProvider;
-    private final QueryDefinitionProvider<?> queryDefinitionProvider;
     private final CompositeResultsPresenter<?> resultsPresenter;
     private final MultiWordSuggestOracle oracle;
+    private final Panel applyReportBusyIndicator;
 
     public DataMiningReportStoreControls(ErrorReporter errorReporter, DataMiningSession session, DataMiningServiceAsync dataMiningService,
-            StoredDataMiningReportsProvider reportsProvider, QueryDefinitionProvider<?> queryDefinitionProvider,
-            CompositeResultsPresenter<?> resultsPresenter) {
+            StoredDataMiningReportsProvider reportsProvider, Panel dataminingContentPanel, CompositeResultsPresenter<?> resultsPresenter) {
         this.errorReporter = errorReporter;
         this.session = session;
         this.dataMiningService = dataMiningService;
@@ -81,7 +87,8 @@ public class DataMiningReportStoreControls extends Composite {
         this.reportsProvider.addReportsChangedListener(
                 reports -> updateOracle(reports.stream().map(r -> r.getName()).collect(Collectors.toList())));
         this.reportsProvider.reloadReports();
-        this.queryDefinitionProvider = queryDefinitionProvider;
+        
+        this.dataminingContentPanel = dataminingContentPanel;
         this.resultsPresenter = resultsPresenter;
         oracle = new MultiWordSuggestOracle();
         suggestBoxUi = new SuggestBox(oracle, new TextBox(), new DefaultSuggestionDisplay() {
@@ -100,6 +107,14 @@ public class DataMiningReportStoreControls extends Composite {
         suggestBoxUi.getValueBox().addClickHandler(e -> suggestBoxUi.showSuggestionList());
         suggestBoxUi.getValueBox().addKeyUpHandler(e -> updateSaveLoadButtons());
         suggestBoxUi.getValueBox().addBlurHandler(e -> updateSaveLoadButtons());
+
+        Widget glass = new SimplePanel();
+        glass.addStyleName("whiteGlass");
+        HTML labeledBusyIndicator = new HTML(SafeHtmlUtils.fromString(stringMessages.applyingReport()));
+        labeledBusyIndicator.setStyleName("applyQueryBusyMessage");
+        applyReportBusyIndicator = new LayoutPanel();
+        applyReportBusyIndicator.add(glass);
+        applyReportBusyIndicator.add(labeledBusyIndicator);
     }
 
     private void updateSaveLoadButtons() {
@@ -162,16 +177,14 @@ public class DataMiningReportStoreControls extends Composite {
     }
 
     private void applyReport(StoredDataMiningReportDTO storedReport) {
-        // TODO Show busy indicator until all queries are executed
+        showBusyIndicator(true);
         DataMiningReportDTO report = storedReport.getReport();
         ArrayList<StatisticQueryDefinitionDTO> reportQueries = report.getQueryDefinitions();
-        StatisticQueryDefinitionDTO queryDefinition = reportQueries.get(0);
-        this.queryDefinitionProvider.applyQueryDefinition(queryDefinition);
 
         SequentialQueryExecutor executor = new SequentialQueryExecutor(reportQueries);
         executor.run(results -> {
             resultsPresenter.showResults(results);
-            // TODO Hide busy Indicator
+            showBusyIndicator(false);
             if (!executor.hasErrorOccurred()) {
                 Notification.notify(
                         StringMessages.INSTANCE.dataMiningStoredReportLoadedSuccessful(storedReport.getName()),
@@ -182,6 +195,14 @@ public class DataMiningReportStoreControls extends Composite {
                         NotificationType.WARNING);
             }
         });
+    }
+    
+    private void showBusyIndicator(boolean show) {
+        if (show) {
+            dataminingContentPanel.add(applyReportBusyIndicator);
+        } else {
+            dataminingContentPanel.remove(applyReportBusyIndicator);
+        }
     }
 
     /** Updates the oracle of the suggest box with the names of the stored queries. */
