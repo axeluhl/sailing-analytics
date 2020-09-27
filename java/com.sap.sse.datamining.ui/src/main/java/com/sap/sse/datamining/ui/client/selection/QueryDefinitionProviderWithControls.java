@@ -404,6 +404,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         applyQueryBusyIndicator.removeFromParent();
         setBlockChangeNotification(false);
         queryDefinitionChanged = false;
+        notifyQueryDefinitionChanged();
     }
     
     private void showErrorWhileApplyingQueryDialog(Iterable<String> errorMessages, String retrieverChainName) {

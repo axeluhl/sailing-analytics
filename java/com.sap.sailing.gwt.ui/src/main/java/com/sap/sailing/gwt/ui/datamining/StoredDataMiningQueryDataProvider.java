@@ -136,7 +136,6 @@ public class StoredDataMiningQueryDataProvider {
         Optional<StoredDataMiningQueryDTO> query = findByName(name);
         if (query.isPresent()) {
             queryDefinitionProvider.applyQueryDefinition(query.get().getQuery());
-            queryRunner.queryDefinitionChanged(query.get().getQuery());
             return true;
         }
         return false;

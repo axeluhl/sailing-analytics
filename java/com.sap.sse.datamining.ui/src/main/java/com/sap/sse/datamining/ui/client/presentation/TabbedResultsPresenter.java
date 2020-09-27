@@ -156,6 +156,8 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
                 break;
             }
         }
+        
+        tabPanel.selectTab(0);
     }
     
     native void consoleLog( String message) /*-{
