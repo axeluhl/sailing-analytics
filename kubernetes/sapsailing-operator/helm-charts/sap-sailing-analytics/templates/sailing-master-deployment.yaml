@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-master
+  labels:
+    app: {{ template "sapsailing-app-name" . }}
+    role: sailing-deployment
+    environment: {{ .Values.environment }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ template "sapsailing-app-name" . }}
+      role: {{ .Values.master.role }}
+      environment: {{ .Values.environment }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "sapsailing-app-name" . }}
+        role: {{ .Values.master.role }}
+        environment: {{ .Values.environment }}
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9102"
+    spec:
+      initContainers:
+      - name: wait-for-rabbit-to-be-ready
+        image: alstolten/alpine-with-curl:latest
+        args:
+        - /bin/sh
+        - "-c"
+        - |
+          set -x
+          while [ $(curl -sw '%{http_code}' "http://guest:guest@rabbitmq:15672/api/aliveness-test/%2F" -o /dev/null) -ne 200 ]; do sleep 10; done
+      containers:
+      - name: sailing
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - containerPort: 8888
+          name: http-port
+        - containerPort: 14888
+          name: telnet-port       
+        resources:
+{{- if .Values.master.resources }}
+{{- tpl (toYaml .Values.master.resources) . | nindent 10 }}
+{{- end }}
+        volumeMounts:
+        - name: prometheus-java-agent
+          mountPath: /home/sailing/servers/server/configuration/prometheus-java-agent
+        env:
+        - name: MONGODB_URI
+          value: {{ template "mongodb-connection-string-master" . }}
+        - name: REPLICATION_CHANNEL
+          value: {{ template "sapsailing-app-name" . }}-{{ .Values.master.role }}
+        - name: REPLICATION_HOST
+          value: {{ .Values.rabbitmq.host }}
+        - name: REPLICATE_MASTER_QUEUE_HOST
+          value: {{ .Values.rabbitmq.host }}
+        - name: REPLICATE_MASTER_QUEUE_PORT
+          value: "{{ .Values.rabbitmq.port }}"
+        - name: SERVER_NAME
+          value: {{ template "sapsailing-app-name" . }}-{{ .Values.master.role }}
+        - name: ADDITIONAL_JAVA_ARGS
+          value: -javaagent:/home/sailing/servers/server/configuration/prometheus-java-agent/jmx_prometheus_javaagent-0.13.0.jar=9102:/home/sailing/servers/server/configuration/prometheus-java-agent/jmx-prometheus-config.yaml
+        livenessProbe:
+          httpGet:
+            path: /
+            port: http-port
+          initialDelaySeconds: 10
+          periodSeconds: 30
+        readinessProbe:
+          exec:
+            command:
+            - ./status
+          initialDelaySeconds: 10
+          periodSeconds: 30
+      volumes:
+        - name: prometheus-java-agent
+          configMap:
+            name: prometheus-java-agent
+      imagePullSecrets:
+      - name: {{ .Values.imagePullSecret }}

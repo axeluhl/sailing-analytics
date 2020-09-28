@@ -8,7 +8,7 @@ First of all, make sure you've looked at [http://www.amazon.de/Patterns-Elements
 
 #### Installations
 
-1. Eclipse (Eclipse IDE for Eclipse Committers, version 4.15.0 ["2020-03"]https://www.eclipse.org/downloads/packages/release/2020-03/r/eclipse-ide-eclipse-committers)), [http://www.eclipse.org](http://www.eclipse.org)
+1. Eclipse (Eclipse IDE for Eclipse Committers, version 4.15.0 ["2020-06"](https://www.eclipse.org/downloads/packages/release/2020-06/r/eclipse-ide-eclipse-committers)), [http://www.eclipse.org](http://www.eclipse.org)
 2. Get the content of the git repository (see
 Steps to build and run the Race Analysis Suite below)
 3. Install the eclipse plugins (see Automatic Eclipse plugin installation below)
@@ -22,9 +22,9 @@ Steps to build and run the Race Analysis Suite below)
 
 #### Automatic Eclipse plugin installation
 
-The necessary Eclipse plugins described above can be automatically be installed into a newly unzipped version of [Eclipse IDE for Eclipse Committers "2020-03"](https://www.eclipse.org/downloads/packages/release/2020-03/r/eclipse-ide-eclipse-committers) by using the script "configuration/installPluginsForEclipse2020-03.sh". In addition, the script applies some updates to plugins packaged with Eclipse itself. To start the plugin installation, run the following command using your Eclipse installation directory as command line parameter for the script:
+The necessary Eclipse plugins described above can be automatically be installed into a newly unzipped version of [Eclipse IDE for Eclipse Committers "2020-06"](https://www.eclipse.org/downloads/packages/release/2020-06/r/eclipse-ide-eclipse-committers) by using the script "configuration/installPluginsForEclipse2020-06.sh". In addition, the script applies some updates to plugins packaged with Eclipse itself. To start the plugin installation, run the following command using your Eclipse installation directory as command line parameter for the script:
 
-    ./installPluginsForEclipse2020-03.sh "/some/path/on/my/computer/eclipse"
+    ./installPluginsForEclipse2020-06.sh "/some/path/on/my/computer/eclipse"
 
 Be aware that with this script it's not possible to update the plugins to newer versions. Instead you can install a new version by unpacking the base package and executing the script.
 
@@ -140,6 +140,9 @@ Copy the settings.xml **and** the toolchains.xml from the top-level git folder t
 - Configure Eclipse to use Chrome or Firefox as the default browser
 - Install the GWT Browser Plugin for the GWT Development mode <del>(Chrome or Firefox; as of this writing (2013-11-05), Firefox is the only platform where the plug-in runs stably)</del> (As of 2016-08-31 Firefox is the only browser supporting the GWT plugin, you have to download Firefox version 24 for it to work)
 - Use SAP JVM Profiler. If you used the script above and installed the SAPJVM instead of the jdk, you can now open the profiling perspective by clicking on Window -> Perspective -> Open Perspective -> Profiling)
+- Make sure you run Eclipse with a JRE containing javax/xml/bind, otherwise you will not be able to use the SDM. See [https://github.com/sdbg/sdbg/pull/162](https://github.com/sdbg/sdbg/pull/162). To start Eclipse with Java 8 add the following two lines above the `-vmargs` in your eclipse.ini:    
+`-vm`    
+`<path/to/sapjvm8/jre/bin/java>`    
 
 #### Git usage troubleshooting
 

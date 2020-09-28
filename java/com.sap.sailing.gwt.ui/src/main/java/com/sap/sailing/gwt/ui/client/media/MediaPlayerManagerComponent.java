@@ -30,6 +30,7 @@ import com.sap.sailing.domain.common.media.MediaTrackWithSecurityDTO;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.adminconsole.FileStorageServiceConnectionTestObservable;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
+import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -65,7 +66,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
         MediaPlayerManager, CloseHandler<Window>, ClosingHandler {
 
     static interface VideoContainerFactory<T> {
-        T createVideoContainer(MediaSynchPlayer videoPlayer, UserService userService, MediaServiceAsync mediaService,
+        T createVideoContainer(MediaSynchPlayer videoPlayer, UserService userService, MediaServiceWriteAsync mediaService,
                 ErrorReporter errorReporter, PlayerCloseListener playerCloseListener, PopoutListener popoutListener);
     }
     
@@ -82,6 +83,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     private final RaceTimesInfoProvider raceTimesInfoProvider;
     private final Timer raceTimer;
     private final MediaServiceAsync mediaService;
+    private final MediaServiceWriteAsync mediaServiceWrite;
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
     private final UserAgentDetails userAgent;
@@ -95,8 +97,8 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
 
     public MediaPlayerManagerComponent(Component<?> parent, ComponentContext<?> context,
             MediaPlayerLifecycle mediaPlayerLifecycle, SailingServiceWriteAsync sailingServiceWrite,
-            RegattaAndRaceIdentifier selectedRaceIdentifier,
-            RaceTimesInfoProvider raceTimesInfoProvider, Timer raceTimer, MediaServiceAsync mediaService,
+            RegattaAndRaceIdentifier selectedRaceIdentifier, RaceTimesInfoProvider raceTimesInfoProvider,
+            Timer raceTimer, MediaServiceAsync mediaService, MediaServiceWriteAsync mediaServiceWrite,
             UserService userService, StringMessages stringMessages, ErrorReporter errorReporter,
             UserAgentDetails userAgent, PopupPositionProvider popupPositionProvider, MediaPlayerSettings settings,
             RaceDTO raceDto) {
@@ -113,6 +115,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
         this.timeChanged(raceTimer.getTime(), null);
         this.playStateChanged(raceTimer.getPlayState(), raceTimer.getPlayMode());
         this.mediaService = mediaService;
+        this.mediaServiceWrite = mediaServiceWrite;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
         this.userAgent = userAgent;
@@ -332,7 +335,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
                     new VideoContainerFactory<VideoDockedContainer>() {
                         @Override
                         public VideoDockedContainer createVideoContainer(MediaSynchPlayer videoPlayer,
-                                UserService userService, MediaServiceAsync mediaService, ErrorReporter errorReporter,
+                                UserService userService, MediaServiceWriteAsync mediaServiceWrite, ErrorReporter errorReporter,
                                 PlayerCloseListener playerCloseListener, PopoutListener popoutListener) {
                             VideoDockedContainer videoDockedContainer = new VideoDockedContainer(rootPanel,
                                     videoPlayer, playerCloseListener, popoutListener);
@@ -384,10 +387,10 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
                     new VideoContainerFactory<FloatingMediaPlayerContainer>() {
                         @Override
                         public FloatingMediaPlayerContainer createVideoContainer(MediaSynchPlayer videoPlayer,
-                                UserService userservice, MediaServiceAsync mediaService, ErrorReporter errorReporter,
+                                UserService userservice, MediaServiceWriteAsync mediaServiceWrite, ErrorReporter errorReporter,
                                 PlayerCloseListener playerCloseListener, PopoutListener popoutListener) {
                             FloatingMediaPlayerContainer videoFloatingContainer = new FloatingMediaPlayerContainer(videoPlayer, popupPositionProvider,
-                                    userservice, mediaService, errorReporter, playerCloseListener, popoutListener);
+                                    userservice, mediaServiceWrite, errorReporter, playerCloseListener, popoutListener);
                             return videoFloatingContainer;
                         }
                     });
@@ -437,7 +440,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
             videoPlayer = new VideoJSSyncPlayer(videoTrack, getRaceStartTime(), raceTimer);
         }
 
-        return videoContainerFactory.createVideoContainer(videoPlayer, userService, getMediaService(), errorReporter,
+        return videoContainerFactory.createVideoContainer(videoPlayer, userService, getMediaServiceWrite(), errorReporter,
                 playerCloseListener, popoutListener);
     }
 
@@ -538,7 +541,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
 
                     @Override
                     public void ok(final MediaTrack mediaTrack) {
-                        MediaPlayerManagerComponent.this.getMediaService().addMediaTrack(mediaTrack,
+                        MediaPlayerManagerComponent.this.mediaServiceWrite.addMediaTrack(mediaTrack,
                                 new AsyncCallback<MediaTrackWithSecurityDTO>() {
 
                                 @Override
@@ -562,7 +565,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     @Override
     public boolean deleteMediaTrack(final MediaTrackWithSecurityDTO mediaTrack) {
         if (Window.confirm(stringMessages.reallyRemoveMediaTrack(mediaTrack.title))) {
-            getMediaService().deleteMediaTrack(mediaTrack, new AsyncCallback<Void>() {
+            mediaServiceWrite.deleteMediaTrack(mediaTrack, new AsyncCallback<Void>() {
 
                 @Override
                 public void onFailure(Throwable t) {
@@ -708,6 +711,11 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     @Override
     public MediaServiceAsync getMediaService() {
         return mediaService;
+    }
+
+    @Override
+    public MediaServiceWriteAsync getMediaServiceWrite() {
+        return mediaServiceWrite;
     }
 
     @Override

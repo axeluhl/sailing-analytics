@@ -14,6 +14,7 @@ import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.scoring.AdditionalScoringInformationType;
+import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
@@ -31,15 +32,16 @@ import com.sap.sailing.racecommittee.app.domain.impl.SelectionItem;
 import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
 import com.sap.sailing.racecommittee.app.ui.adapters.SelectionAdapter;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.chooser.RaceInfoFragmentChooser;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 import com.sap.sailing.racecommittee.app.utils.RaceHelper;
+import com.sap.sailing.racecommittee.app.utils.TickListener;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.UUID;
 
 public class MainScheduleFragment extends BaseFragment implements View.OnClickListener, SelectionAdapter.ItemClick {
@@ -62,17 +64,10 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
     private TimePoint mStartTime;
     private Duration mStartTimeDiff;
     private RacingProcedure mRacingProcedure;
-    private TimePoint lastTick;
-
-    private Calendar mCalendar;
-
-    private RaceStateChangedListener mStateListener;
 
     private int mFlagSize;
 
-    public MainScheduleFragment() {
-        mCalendar = Calendar.getInstance();
-    }
+    public MainScheduleFragment() {}
 
     public static MainScheduleFragment newInstance() {
         return new MainScheduleFragment();
@@ -83,7 +78,6 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
         View layout = inflater.inflate(R.layout.race_schedule, container, false);
 
         mItems = new ArrayList<>();
-        mStateListener = new RaceStateChangedListener();
         RecyclerView raceData = ViewHelper.get(layout, R.id.race_data);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
@@ -110,25 +104,22 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
         initStartMode();
         initCourse();
         initWind();
-        lastTick = MillisecondsTimePoint.now().minus(2000);
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
+    public void onStart() {
+        super.onStart();
+        getRaceState().addChangedListener(stateChangedListener);
+    }
 
-        if (getRace() != null && getRaceState() != null) {
-            getRaceState().addChangedListener(mStateListener);
-        }
+    @Override
+    public void onStop() {
+        super.onStop();
+        getRaceState().removeChangedListener(stateChangedListener);
     }
 
     private void initCourse() {
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                openFragment(CourseFragment.newInstance(START_MODE_PRESETUP, preferences));
-            }
-        };
+        Runnable runnable = () -> openFragment(CourseFragment.newInstance(START_MODE_PRESETUP, preferences));
         SelectionItem courseItem = new SelectionItem(getString(R.string.course), null, null, false, false, runnable);
         if (getRaceState().getCourseDesign() != null) {
             courseItem.setValue(getCourseName());
@@ -137,12 +128,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
     }
 
     private void initWind() {
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                openFragment(WindFragment.newInstance(START_MODE_PRESETUP));
-            }
-        };
+        Runnable runnable = () -> openFragment(WindFragment.newInstance(START_MODE_PRESETUP));
         mItemStartWind = new SelectionItem(getString(R.string.wind), null, null, false, false, runnable);
         mItems.add(mItemStartWind);
     }
@@ -150,44 +136,24 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
     private void initStartMode() {
         mRacingProcedure = getRaceState().getRacingProcedure();
         if (mRacingProcedure != null) {
-            Runnable runnableProcedure = new Runnable() {
-                @Override
-                public void run() {
-                    openFragment(StartProcedureFragment.newInstance(START_MODE_PRESETUP));
-                }
-            };
+            Runnable runnableProcedure = () -> openFragment(StartProcedureFragment.newInstance(START_MODE_PRESETUP));
             mItems.add(new SelectionItem(getString(R.string.start_procedure), mRacingProcedure.getType().toString(),
                     null, false, false, runnableProcedure));
             if (mRacingProcedure instanceof ConfigurableStartModeFlagRacingProcedure) {
                 final ConfigurableStartModeFlagRacingProcedure procedure = getRaceState().getTypedRacingProcedure();
                 Flags flag = procedure.getStartModeFlag();
-                Runnable runnableMode = new Runnable() {
-                    @Override
-                    public void run() {
-                        openFragment(StartModeFragment.newInstance(START_MODE_PRESETUP));
-                    }
-                };
+                Runnable runnableMode = () -> openFragment(StartModeFragment.newInstance(START_MODE_PRESETUP));
                 Drawable drawable = FlagsResources.getFlagDrawable(getActivity(), flag.name(), mFlagSize);
                 mItems.add(new SelectionItem(getString(R.string.start_mode), flag.name(), drawable, false, false,
                         runnableMode));
             } else if (mRacingProcedure instanceof GateStartRacingProcedure) {
                 GateStartRacingProcedure procedure = getRaceState().getTypedRacingProcedure();
                 if (procedure != null) {
-                    Runnable runnablePathfinder = new Runnable() {
-                        @Override
-                        public void run() {
-                            openFragment(GateStartPathFinderFragment.newInstance(START_MODE_PRESETUP));
-                        }
-                    };
+                    Runnable runnablePathfinder = () -> openFragment(GateStartPathFinderFragment.newInstance(START_MODE_PRESETUP));
                     mItems.add(new SelectionItem(getString(R.string.gate_start_pathfinder), procedure.getPathfinder(),
                             null, false, false, runnablePathfinder));
 
-                    Runnable runnableTiming = new Runnable() {
-                        @Override
-                        public void run() {
-                            openFragment(GateStartTimingFragment.newInstance(START_MODE_PRESETUP));
-                        }
-                    };
+                    Runnable runnableTiming = () -> openFragment(GateStartTimingFragment.newInstance(START_MODE_PRESETUP));
                     mItems.add(new SelectionItem(getString(R.string.gate_start_timing),
                             RaceHelper.getGateTiming(getActivity(), procedure, getRace().getRaceGroup()), null, false,
                             false, runnableTiming));
@@ -195,9 +161,13 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
             } else if (mRacingProcedure instanceof ESSRacingProcedure) {
                 ESSRacingProcedure procedure = getRaceState().getTypedRacingProcedure();
                 if (procedure != null) {
-                    boolean checked = getArguments().getBoolean(RACE_GROUP,
-                            getRaceState().isAdditionalScoringInformationEnabled(
-                                    AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE));
+                    boolean checked = false;
+                    final Bundle args = getArguments();
+                    if (args != null) {
+                        checked = args.getBoolean(RACE_GROUP,
+                                getRaceState().isAdditionalScoringInformationEnabled(
+                                        AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE));
+                    }
                     mItemRaceGroup = new SelectionItem(getString(R.string.race_group), null, null, true, checked, null);
                     mItems.add(mItemRaceGroup);
                 }
@@ -206,8 +176,14 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
     }
 
     private void initStartTime() {
-        RacingActivity activity = (RacingActivity) getActivity();
-        TimePoint timePoint = (TimePoint) getArguments().getSerializable(START_TIME);
+        final RacingActivity activity = (RacingActivity) getActivity();
+        TimePoint timePoint = null;
+        final Bundle args = getArguments();
+        if (args != null) {
+            timePoint = (TimePoint) args.getSerializable(START_TIME);
+            mRaceId = (SimpleRaceLogIdentifier) getArguments().getSerializable(DEPENDENT_RACE);
+            mStartTimeDiff = (Duration) getArguments().getSerializable(START_TIME_DIFF);
+        }
         if (timePoint == null && activity != null) {
             timePoint = activity.getStartTime();
         }
@@ -219,44 +195,24 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
             mStartTimeString = TimeUtils.formatTime(timePoint);
         }
 
-        mStartTimeDiff = (Duration) getArguments().getSerializable(START_TIME_DIFF);
-        mRaceId = (SimpleRaceLogIdentifier) getArguments().getSerializable(DEPENDENT_RACE);
-
         if (mRaceId != null && mStartTimeDiff != null) {
             ManagedRace race = DataManager.create(getActivity()).getDataStore().getRace(mRaceId);
             mStartTimeString = getString(R.string.minutes_after_long, mStartTimeDiff.asMinutes(),
                     RaceHelper.getShortReverseRaceName(race, " / ", getRace()));
         }
 
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                openFragment(StartTimeFragment.newInstance(getArguments()));
-            }
-        };
+        Runnable runnable = () -> openFragment(StartTimeFragment.newInstance(getArguments()));
         mItemStartTime = new SelectionItem(getString(R.string.start_time), mStartTimeString, null, false, false,
                 runnable);
         mItems.add(mItemStartTime);
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-
-        if (getRace() != null && getRaceState() != null) {
-            getRaceState().removeChangedListener(mStateListener);
-        }
-    }
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.start_race:
-                startRace();
-                break;
-
-            default:
-                ExLog.i(getActivity(), TAG, "Clicked on " + v);
+    public void onClick(View view) {
+        if (view.getId() == R.id.start_race) {
+            startRace();
+        } else {
+            ExLog.i(getActivity(), TAG, "Clicked on " + view);
         }
     }
 
@@ -287,39 +243,43 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
     }
 
     @Override
-    public void notifyTick(TimePoint now) {
-        super.notifyTick(now);
+    public TimePoint getStartTime() {
+        return mStartTime;
+    }
 
-        if (!now.minus(1000).before(lastTick)) {
-            if (mItemStartTime != null && !TextUtils.isEmpty(mStartTimeString)) {
-                if (mRaceId == null && mStartTimeDiff == null) {
-                    String startTimeValue = getString(R.string.start_time_value, mStartTimeString, calcCountdown(now));
-                    mItemStartTime.setValue(startTimeValue);
-                } else {
-                    mItemStartTime.setValue(mStartTimeString);
-                }
-            }
+    @Override
+    public TickListener getStartTimeTickListener() {
+        return this::onStartTimeTick;
+    }
 
-            if (getRace() != null && getRaceState() != null && getRaceState().getWindFix() != null) {
-                Wind wind = getRaceState().getWindFix();
-                String sensorData = getString(R.string.wind_sensor, TimeUtils.formatTime(wind.getTimePoint()),
-                        wind.getFrom().getDegrees(), wind.getKnots());
-                mItemStartWind.setValue(sensorData);
+    private void onStartTimeTick(TimePoint now) {
+        if (mItemStartTime != null && !TextUtils.isEmpty(mStartTimeString)) {
+            if (mRaceId == null && mStartTimeDiff == null) {
+                String startTimeValue = getString(R.string.start_time_value, mStartTimeString, calcCountdown(now));
+                mItemStartTime.setValue(startTimeValue);
+            } else {
+                mItemStartTime.setValue(mStartTimeString);
             }
+        }
 
-            if (mAdapter != null) {
-                mAdapter.notifyDataSetChanged();
-            }
-            lastTick = now;
+        if (getRaceState().getWindFix() != null) {
+            Wind wind = getRaceState().getWindFix();
+            String sensorData = getString(R.string.wind_sensor, TimeUtils.formatTime(wind.getTimePoint()),
+                    wind.getFrom().getDegrees(), wind.getKnots());
+            mItemStartWind.setValue(sensorData);
+        }
+
+        if (mAdapter != null) {
+            mAdapter.notifyDataSetChanged();
         }
     }
 
     private String calcCountdown(TimePoint timePoint) {
-        RacingActivity activity = (RacingActivity) getActivity();
-        if (activity != null) {
-            return TimeUtils.formatDuration(activity.getStartTime(), timePoint, true);
+        if (mStartTime.before(timePoint)) {
+            final String duration = TimeUtils.formatDurationSince(timePoint.minus(mStartTime.asMillis()).asMillis());
+            return "-" + duration;
         }
-        return "";
+        return TimeUtils.formatDurationUntil(mStartTime.minus(timePoint.asMillis()).asMillis());
     }
 
     private void openFragment(RaceFragment fragment) {
@@ -337,10 +297,9 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
             args.putBoolean(RACE_GROUP, mItemRaceGroup.isChecked());
         }
 
-        getFragmentManager().beginTransaction()
+        requireFragmentManager().beginTransaction()
                 .replace(R.id.racing_view_container, fragment)
-                .addToBackStack(null)
-                .commitAllowingStateLoss();
+                .commit();
     }
 
     @Override
@@ -351,12 +310,11 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
         }
     }
 
-    private class RaceStateChangedListener extends BaseRaceStateChangedListener {
+    private final RaceStateChangedListener stateChangedListener = new BaseRaceStateChangedListener() {
         @Override
         public void onStatusChanged(ReadonlyRaceState state) {
             super.onStatusChanged(state);
-            RacingActivity activity = (RacingActivity) requireActivity();
-            activity.onRaceItemClicked(getRace(), true);
+            openFragment(RaceInfoFragmentChooser.choose(getActivity(), getRace()));
         }
-    }
+    };
 }

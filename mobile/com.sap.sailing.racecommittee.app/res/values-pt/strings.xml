@@ -1,7 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><resources xmlns:tools="http://schemas.android.com/tools">
-
-    <string-array name="empty_array" tools:ignore="UnusedResources"/>
-    <string name="empty"/>
+<?xml version="1.0" encoding="UTF-8"?><resources>
     
     
 
@@ -257,8 +254,6 @@
     <string name="race_start_in_4_minutes">"4 minutos"</string>
     <string name="race_start_in_2_minutes">"2 minutos"</string>
     <string name="race_start_in_1_minute">"1 minuto"</string>
-    <string name="race_start_time_in">"-%s"</string>
-    <string name="race_start_time_ago">"%s"</string>
     <string name="race_set_time">"Definir hora"</string>
     <string name="race_reset_course">"Reinicializar percurso"</string>
     <string name="no_course_active">"Nenhum percurso ativo"</string>

@@ -9,6 +9,7 @@ import org.mockito.stubbing.Answer;
 
 import com.sap.sse.security.Action;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 import com.sap.sse.security.shared.impl.UserGroupImpl;
 
@@ -38,6 +39,12 @@ public class SecurityServiceMockFactory {
             }
         }).when(result).setOwnershipCheckPermissionForObjectCreationAndRevertOnError(Mockito.any(),
                 Mockito.any(), Mockito.any(), Mockito.any(Callable.class));
+        Mockito.doAnswer(new Answer<Object>() {
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                invocation.getArgumentAt(1, Action.class).run();
+                return null;
+            }
+        }).when(result).checkPermissionAndDeleteOwnershipForObjectRemoval(Mockito.any(QualifiedObjectIdentifier.class), Mockito.any(Action.class));
         Mockito.doReturn(true).when(result)
                 .hasCurrentUserReadPermission(Mockito.any(WithQualifiedObjectIdentifier.class));
         Mockito.doNothing().when(result).checkCurrentUserReadPermission(Mockito.any());

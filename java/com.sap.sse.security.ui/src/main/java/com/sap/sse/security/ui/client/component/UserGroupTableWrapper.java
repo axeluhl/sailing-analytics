@@ -66,7 +66,7 @@ public class UserGroupTableWrapper extends
                 new DefaultActionsImagesBarCell(stringMessages), userService);
         actionColumn.addAction(ACTION_DELETE, DELETE, userGroupDTO -> {
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveUserGroup(userGroupDTO.getName()))) {
-                userService.getUserManagementService().deleteUserGroup(userGroupDTO.getId().toString(),
+                userService.getUserManagementWriteService().deleteUserGroup(userGroupDTO.getId().toString(),
                         new AsyncCallback<SuccessInfo>() {
                             @Override
                             public void onFailure(Throwable caught) {
@@ -92,11 +92,11 @@ public class UserGroupTableWrapper extends
         });
 
         final EditOwnershipDialog.DialogConfig<UserGroupDTO> configOwnership = EditOwnershipDialog.create(
-                userService.getUserManagementService(), type,
+                userService.getUserManagementWriteService(), type,
                 user -> refreshUserList(null), stringMessages);
 
         final EditACLDialog.DialogConfig<UserGroupDTO> configACL = EditACLDialog.create(
-                userService.getUserManagementService(), type, user -> user.getAccessControlList(),
+                userService.getUserManagementWriteService(), type, user -> user.getAccessControlList(),
                 stringMessages);
 
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_OWNERSHIP, DefaultActions.CHANGE_OWNERSHIP,

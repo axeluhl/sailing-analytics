@@ -181,7 +181,7 @@ public class RaceTimeChangeFragment extends BaseFragment implements View.OnClick
     }
 
     private void closeFragment() {
-        Intent intent = new Intent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
+        Intent intent = new Intent(AppConstants.ACTION_SHOW_SUMMARY_CONTENT);
         BroadcastManager.getInstance(getActivity()).addIntent(intent);
     }
 }

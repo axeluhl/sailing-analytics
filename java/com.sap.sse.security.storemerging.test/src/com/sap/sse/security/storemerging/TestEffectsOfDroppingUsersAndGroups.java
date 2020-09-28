@@ -22,9 +22,8 @@ import com.sap.sse.security.interfaces.AccessControlStore;
 import com.sap.sse.security.interfaces.UserStore;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.Account.AccountType;
+import com.sap.sse.security.shared.UserStoreManagementException;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
-import com.sap.sse.security.shared.UserGroupManagementException;
-import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.PermissionAndRoleAssociation;
@@ -35,12 +34,12 @@ import com.sap.sse.security.shared.impl.UserGroup;
 
 public class TestEffectsOfDroppingUsersAndGroups extends AbstractStoreMergeTest {
     @Before
-    public void setUp() throws IOException, UserGroupManagementException, UserManagementException {
+    public void setUp() throws IOException, UserStoreManagementException {
         setUp("source_TestEffectsOfDroppingUsersAndGroups", "target_TestEffectsOfDroppingUsersAndGroups");
     }
     
     @Test
-    public void testImportFromSource1ToTarget1() throws UserGroupManagementException, UserManagementException {
+    public void testImportFromSource1ToTarget1() throws UserStoreManagementException {
         final String PREFERENCE_NAME = "preference";
         final String PREFERENCE_VALUE = "value";
         // *********** assertions against unmodified target ***********

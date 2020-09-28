@@ -1,6 +1,5 @@
 package com.sap.sailing.selenium.pages.adminconsole.usermanagement;
 
-import org.openqa.selenium.ElementNotSelectableException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
@@ -28,13 +27,4 @@ public class ChangePasswordDialogPO extends DataEntryDialogPO {
         PasswordTextBoxPO.create(driver, textBoxPw).appendText(newPassword);
         PasswordTextBoxPO.create(driver, textBoxPwRepeat).appendText(newPassword);
     }
-
-    public void clickOkButtonOrThrow() {
-        if (!okButton.isEnabled()) {
-            throw new ElementNotSelectableException("OK Button was disabled");
-        } else {
-            okButton.click();
-        }
-    }
-
 }

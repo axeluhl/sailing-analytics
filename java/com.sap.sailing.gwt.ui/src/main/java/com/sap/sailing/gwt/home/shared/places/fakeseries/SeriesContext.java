@@ -4,12 +4,13 @@ import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.EventSeriesAnalyticsDataManager;
+import com.sap.sailing.gwt.home.shared.places.ShareablePlaceContext;
 
 /**
  * Common context used by the different tabs in the series place.
  * 
  */
-public class SeriesContext {
+public class SeriesContext implements ShareablePlaceContext{
     private final UUID seriesId;
     private UUID leaderboardGroupId;
     
@@ -44,8 +45,8 @@ public class SeriesContext {
 
     public UUID getSeriesId() {
         if(leaderboardGroupId != null) {
-            GWT.log("Access to seriesid! when leaderboardgroupid exist!" + seriesId + " lid " + leaderboardGroupId);
-            GWT.debugger();
+            GWT.log("Access to seriesid! Use leaderboardgroupid instead"
+                    + " seriesId:" + seriesId + "; lid: " + leaderboardGroupId);
         }
         return seriesId;
     }
@@ -62,5 +63,13 @@ public class SeriesContext {
     public void updateLeaderboardGroupId(UUID leaderboardGroupUUID) {
         this.leaderboardGroupId = leaderboardGroupUUID;
     }
-
+    
+    @Override
+    public String getContextAsPathParameters() {
+        if(leaderboardGroupId != null) {
+            return "/series/" + leaderboardGroupId;
+        }else {
+            return null;
+        }
+    }
 }

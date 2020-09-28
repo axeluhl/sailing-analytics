@@ -23,6 +23,38 @@
             <div class="mainContent">
                 <h2 class="releaseHeadline">Release Notes - Administration Console</h2>
                 <div class="innerContent">
+                    <h2 class="articleSubheadline">September 2020</h2>
+                    <ul class="bulletList">
+                        <li>Due to loadbalancing between master and replica all GET requests are routed to replicas. As API calls 
+                            going to /sailingserver/api/v1/tracking_devices/[deviceUUID] need to be answered by master, HTTP POST is required from now.
+                            Please update existing applications. As support for GET will be removed in the near future. 
+                        </li>
+                        <li>Master/replica loadbalancing introduced. GWT Async Services are now split between read and write operations. 
+                            Requests being an HTTP POST or having the HTTP header X-SAPSSE-Forward-Request-To set to master will go to the master instance.
+                        </li>
+                        <li>In the /competitor/live API end point, if a gap to leader turns "infinite" because a VMG
+                            goes down to 0.0kts, the API will now output a <tt>null</tt> value for <tt>gapToLeader-s</tt>
+                            instead of throwing an exception.</li>
+                        <li>When generating a pairing list for a league style event, competitor-to-number assignments
+                            are now shuffled randomly before applying the numeric pairing list template to the competitor
+                            list. This way, the same numeric pairing list table will generate different competitor pairings
+                            each time applied.</li>
+                        <li>The REST API end point for posting GPS fixes has changed its behavior and offers two new query parameters to control this
+                            change. Maneuver changes are now only returned if the <tt>returnManeuverUpdate</tt> parameter is explicitly set to <tt>true</tt>.
+                            Additionally, the client posting the fixes can use the <tt>returnLiveDelay</tt> boolean parameter to request the live delay
+                            of each race the fixes were posted to. Clients may use this to adjust their sending delay and buffering behavior, e.g., as to
+                            preserve energy and bandwidth in case the server-side live delay permits for more latency in data transmission.</li>
+                    </ul>
+                    <h2 class="articleSubheadline">August 2020</h2>
+                    <ul class="bulletList">
+                        <li>Fixed a problem with "None" implied wind source selection for ORC PCS races.
+                            It caused a serialization error of the race log, e.g., when requested by the
+                            Race Manager App.</li>
+                        <li>Added boat classes X-332, J/92, and J/92S.</li>
+                        <li>SwissTiming races can now also be loaded from log files named <tt>{race-id}.log</tt> located
+                            in the same folder as the JSON document holding the event information if the host name
+                            in the connectivity information is left empty.</li>
+                    </ul>
                     <h2 class="articleSubheadline">July 2020</h2>
                     <ul class="bulletList">
                         <li>Fixed a problem with cross-track error calculations in case no track can be found for a competitor</li>
@@ -32,6 +64,42 @@
                          When logging into a server without administration rights the event management entry will point to the value configured with the system property com.sap.sailing.eventmanagement.url (default: https://my.sapsailing.com). </li>
                         <li>Fixed the passing through of a new mark's short name; so far, erroneously, the long name was stored
                             also as the short name when using the AdminConsole to create a new mark.</li>
+                        <li>Added boat classes Spaekhugger, Scan Kap 99, and Dansk BB 10M.</li>
+                        <li>Fixed an internal locking problem that led to errors when trying to revoke a regatta log event, such as when
+                            removing a device mapping from a regatta.</li>
+                        <li>The <tt>/sailingserver/api/v1/regattas/{regattaname}/competitors</tt> endpoint now tells the effective,
+                            not the competitor-local handicap values which may have been adjusted at regatta level, overriding the
+                            default values that the competitor object provides. Compare with
+                            <tt>/sailingserver/api/v1/competitors/{competitorId}</tt>.</li>
+                        <li>Fixed a problem with assigning existing competitors (with boats) to regattas that are
+                            configured for competitors changing boats across races. Previously, competitors used
+                            in regattas where competitors don't change boats were not selectable for regattas
+                            where competitors <em>do</em> change boats. This is now changed such that competitors
+                            with boat assignments can also be used (without their boat assignments) in regattas
+                            where competitors change boats.</li>
+                        <li>Added boat class "Wayfarer"</li>
+                        <li>Fixed an issue with the <tt>/sailingserver/api/v1/boatclasses</tt> REST API which now delivers
+                            all known boat classes, regardless of whether any polar data exists for them or not.</li>
+                        <li>The file upload size limit was increased to a more contemporary 8GB.</li>
+                        <li>Added a field <tt>courseAreaId</tt> to the REST API output for regattas which now tells
+                            for each race in the regatta on which course area it saw its last start attempt.</li>
+                        <li>When creating or editing an event, URLs entered without protocol will now automatically be
+                            completed with "https://" as the protocol specification to avoid unnecessary errors.</li>
+                        <li>Remote Server Instance management has been made more selective. So far, all public events
+                            ("list on homepage == Yes") on a remote server were featured in the referencing server's
+                            event list and stage, as well as in a search operation. Now, administrators can pick and choose
+                            from the public event list on the remote server which ones to expose on the referencing side.
+                            The list can be including or excluding. Existing remote server references are handled as having
+                            and "excluding" with an empty list of events excluded, giving the classic behavior of drawing
+                            from all events. When creating new remote references, from now on they will be created as
+                            "including" starting out with an empty event list. The administrator hence has to pick events
+                            to feature explicitly, and new events added on the remote side will no longer automatically show
+                            on the referencing side. An "excluding" remote reference needs to be set up for this "legacy"
+                            behavior.</li>
+                        <li>Based on user input, the "selected" marker in rows supporting multiple selection now uses
+                            a stronger "SAP Blue" color so that selected rows can be recognized even easier.</li>
+                        <li>Passwords or secret access keys of file storage configuration are no longer displayed after submitting.</li>
+                        <li>Added "aarhus" as new <a href="https://www.windfinder.com">WindFinder</a> spot collection.</li>
                     </ul>
                     <h2 class="articleSubheadline">June 2020</h2>
                     <ul class="bulletList">

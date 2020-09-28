@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import org.apache.shiro.subject.PrincipalCollection;
@@ -28,6 +29,7 @@ import com.sap.sse.security.shared.AdminRole;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.PermissionChecker;
+import com.sap.sse.security.shared.PermissionChecker.AclResolver;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RoleDefinitionImpl;
@@ -45,6 +47,14 @@ import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 
 public class PermissionCheckerTest {
+    private final AclResolver<AccessControlList, Ownership> noopAclResolver = new AclResolver<AccessControlList, Ownership>() {
+        @Override
+        public Iterable<AccessControlList> resolveDenyingAclsAndCheckIfAnyMatches(Ownership ownershipOrNull,
+                String type, Iterable<String> objectIdentifiersAsStringOrNull, Predicate<AccessControlList> filterCondition,
+                Iterable<AccessControlList> allAclsForTypeAndObjectIdsOrNull) {
+            return Collections.emptySet(); // assuming an empty ACL set
+        }
+    };
     private final UUID eventId = UUID.randomUUID();
     private final WildcardPermission eventReadPermission = SecuredDomainType.EVENT
             .getPermissionForTypeRelativeIdentifier(DefaultActions.READ,
@@ -259,7 +269,6 @@ public class PermissionCheckerTest {
                 type1.getPermission(DefaultActions.READ)));
         assertTrue(checkMetaPermissionWithGrantedUserPermissions(singleTypePermission,
                 type1.getPermission(DefaultActions.READ, DefaultActions.UPDATE)));
-
         final WildcardPermission combinedTypePermission = WildcardPermission.builder().withTypes(type1, type2).build();
         assertFalse(checkMetaPermissionWithGrantedUserPermissions(combinedTypePermission));
         assertFalse(checkMetaPermissionWithGrantedUserPermissions(combinedTypePermission, type1.getPermission()));
@@ -271,7 +280,6 @@ public class PermissionCheckerTest {
                 type2.getPermission(DefaultActions.READ)));
         assertTrue(checkMetaPermissionWithGrantedUserPermissions(combinedTypePermission, type1.getPermission(),
                 type2.getPermission(DefaultActions.READ, DefaultActions.DELETE)));
-
         final WildcardPermission combinedTypeWithDistinctActionPermission = WildcardPermission.builder()
                 .withTypes(type1, type2).withActions(DefaultActions.READ).build();
         assertFalse(checkMetaPermissionWithGrantedUserPermissions(combinedTypeWithDistinctActionPermission));
@@ -294,7 +302,7 @@ public class PermissionCheckerTest {
         for (WildcardPermission p : grantedPermissions) {
             user.addPermission(p);
         }
-        boolean result = PermissionChecker.checkMetaPermission(permissionToCheck, allHasPermissions, user, null, null);
+        boolean result = PermissionChecker.checkMetaPermission(permissionToCheck, allHasPermissions, user, null, null, noopAclResolver);
         for (WildcardPermission p : grantedPermissions) {
             user.removePermission(p);
         }
@@ -309,19 +317,18 @@ public class PermissionCheckerTest {
         WildcardPermission permissionToCheck = type1.getPermissionForTypeRelativeIdentifier(DefaultActions.READ,
                 new TypeRelativeObjectIdentifier("someid"));
         // The assigned role is qualified by the tenant. This makes a check without ownership fail
-        assertFalse(PermissionChecker.checkMetaPermission(permissionToCheck, allHasPermissions, user, null, null));
+        assertFalse(PermissionChecker.checkMetaPermission(permissionToCheck, allHasPermissions, user, null, null, noopAclResolver));
         // In addition a check with ownership without tentant will also fail
         assertFalse(PermissionChecker.checkMetaPermission(permissionToCheck, allHasPermissions, user, null,
-                new Ownership(user, null)));
+                new Ownership(user, null), noopAclResolver));
         // A check with the wrong tentant owner will also fail
         assertFalse(PermissionChecker.checkMetaPermission(permissionToCheck, allHasPermissions, user, null,
-                new Ownership(user, adminTenant)));
-        
+                new Ownership(user, adminTenant), noopAclResolver));
         // Only an ownership with a tenant owner matching the roles qualification makes the check succeed
         assertTrue(PermissionChecker.checkMetaPermission(permissionToCheck, allHasPermissions, user, null,
-                new Ownership(null, userTenant)));
+                new Ownership(null, userTenant), noopAclResolver));
         assertTrue(PermissionChecker.checkMetaPermission(permissionToCheck, allHasPermissions, user, null,
-                new Ownership(user, userTenant)));
+                new Ownership(user, userTenant), noopAclResolver));
     }
     
     @Test
@@ -330,11 +337,10 @@ public class PermissionCheckerTest {
                 Collections.singleton(WildcardPermission.builder().build()));
         user.addRole(new Role(rd, userTenant, null));
         final String objectId = "someid";
-        
         // wildcard for the action part
         assertTrue(PermissionChecker.checkMetaPermissionWithOwnershipResolution(
                 WildcardPermission.builder().withTypes(type1).withIds(objectId).build(), allHasPermissions, user, null,
-                id -> new Ownership(null, userTenant)));
+                id -> new Ownership(null, userTenant), noopAclResolver));
     }
     
     @Test
@@ -344,7 +350,6 @@ public class PermissionCheckerTest {
         final String objectId = "someid";
         WildcardPermission permissionToCheck = type1.getPermissionForTypeRelativeIdentifier(DefaultActions.READ,
                 new TypeRelativeObjectIdentifier(objectId));
-        
         Function<QualifiedObjectIdentifier, Ownership> ownershipResolver = id -> {
             final String typeRelativeIdentifierString = id.getTypeRelativeObjectIdentifier().toString();
             if (objectId.equals(typeRelativeIdentifierString)) {
@@ -352,10 +357,8 @@ public class PermissionCheckerTest {
             }
             return null;
         };
-        
         BooleanSupplier permissionCheck = () -> PermissionChecker.checkMetaPermissionWithOwnershipResolution(permissionToCheck, allHasPermissions,
-                user, null, ownershipResolver);
-        
+                user, null, ownershipResolver, noopAclResolver);
         assertFalse(permissionCheck.getAsBoolean());
         // Not the right qualification -> check still fails
         user.addRole(new Role(rd, adminTenant, null));
@@ -387,7 +390,7 @@ public class PermissionCheckerTest {
         };
         
         BooleanSupplier permissionCheck = () -> PermissionChecker.checkMetaPermissionWithOwnershipResolution(permissionToCheck, allHasPermissions,
-                user, null, ownershipResolver);
+                user, null, ownershipResolver, noopAclResolver);
         
         assertFalse(permissionCheck.getAsBoolean());
         user.addRole(new Role(rd, userTenant, null));

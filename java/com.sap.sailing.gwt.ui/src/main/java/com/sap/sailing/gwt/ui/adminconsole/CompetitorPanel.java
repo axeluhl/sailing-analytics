@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import static com.sap.sailing.domain.common.security.SecuredDomainType.COMPETITOR;
 
+import java.util.List;
 import java.util.Set;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -16,6 +17,7 @@ import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTOImpl;
 import com.sap.sailing.gwt.ui.adminconsole.CompetitorImportProviderSelectionDialog.MatchImportedCompetitorsDialogFactory;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyDisplay;
@@ -114,7 +116,7 @@ public class CompetitorPanel extends SimplePanel implements BusyDisplay {
         return new MatchImportedCompetitorsDialogFactory() {
             @Override
             public MatchImportedCompetitorsDialog createMatchImportedCompetitorsDialog(
-                    final Iterable<CompetitorDescriptor> competitorDescriptors,
+                    final Pair<List<CompetitorDescriptor>, String> competitorDescriptorsAndHint,
                     final Iterable<CompetitorDTO> competitors) {
                 ImportCompetitorCallback importCompetitorCallback = new ImportCompetitorCallback(sailingServiceWrite, errorReporter, stringMessages) {
                     @Override
@@ -123,8 +125,8 @@ public class CompetitorPanel extends SimplePanel implements BusyDisplay {
                         refreshCompetitorList();
                     }
                 };
-                return new MatchImportedCompetitorsDialog(competitorDescriptors, competitors, stringMessages,
-                        sailingServiceWrite, userService, errorReporter, importCompetitorCallback);
+                return new MatchImportedCompetitorsDialog(competitorDescriptorsAndHint.getA(), competitors, competitorDescriptorsAndHint.getB(),
+                        stringMessages, sailingServiceWrite, userService, errorReporter, importCompetitorCallback);
             }
         };
     }
