@@ -9,8 +9,8 @@ public class AdminConsolePlace extends Place {
     private final String tab;
     
     public AdminConsolePlace() {
-        this.menu = "Leaderboards";
-        this.tab = "Leaderboard groups";
+        this.menu = "Events";
+        this.tab = "";
     }
     
     public AdminConsolePlace(final String menu, final String tab) {
@@ -36,7 +36,8 @@ public class AdminConsolePlace extends Place {
         public AdminConsolePlace getPlace(final String token) {
             if (token != null && token.contains(":")) {
                 final String[] tabAndMenu = token.split(":");
-                return new AdminConsolePlace(tabAndMenu[0], tabAndMenu[1]);
+                final String tab = tabAndMenu.length < 2 ? "" : tabAndMenu[1];
+                return new AdminConsolePlace(tabAndMenu[0], tab);
             }
             
             return new AdminConsolePlace();

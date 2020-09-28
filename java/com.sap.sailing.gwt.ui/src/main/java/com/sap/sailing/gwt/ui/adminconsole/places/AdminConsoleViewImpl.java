@@ -39,7 +39,6 @@ import com.sap.sailing.gwt.ui.adminconsole.coursecreation.MarkRolePanel;
 import com.sap.sailing.gwt.ui.adminconsole.coursecreation.MarkTemplatePanel;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
 import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
-import com.sap.sailing.gwt.ui.client.MediaServiceWrite;
 import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
@@ -72,8 +71,6 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
 
     private final AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
     
-    private final MediaServiceWriteAsync mediaServiceWrite = GWT.create(MediaServiceWrite.class);
-    
     private HeaderPanel headerPanel;
     
     private Presenter presenter;
@@ -83,6 +80,8 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
     private UserService userService;
     
     private SailingServiceWriteAsync sailingService;
+
+    private MediaServiceWriteAsync mediaServiceWrite;
     
     private ErrorReporter errorReporter;
     
@@ -110,6 +109,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
         
         this.userService = presenter.getUserService();
         this.sailingService = presenter.getSailingService();
+        this.mediaServiceWrite = presenter.getMediaServiceWrite();
         
         this.stringMessages = StringMessages.INSTANCE;
         this.errorReporter = presenter.getErrorReporter();
@@ -120,26 +120,16 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
         return stringMessages;
     }
     
-    private UserService getUserService() {
-        return userService;
-    }
-    
-    private SailingServiceWriteAsync getSailingService() {
-        return sailingService;
-    }
-    
     @Override
     public HeaderPanel createUI(final ServerInfoDTO serverInfo) {
         SAPSailingHeaderWithAuthentication header = new SAPSailingHeaderWithAuthentication(getStringMessages().administration());
-        GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
+        GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(userService, header.getAuthenticationMenuView());
         AuthorizedContentDecorator authorizedContentDecorator = new GenericAuthorizedContentDecorator(genericSailingAuthentication);
         authorizedContentDecorator.setContentWidgetFactory(new WidgetFactory() {
           
             @Override
             public Widget get() {
-                adminConsolePanel = createAdminConsolePanel(serverInfo);
-                adminConsolePanel.selectTabByNames(verticalTabName, horizontalTabName, new HashMap<String, String>());
-                return adminConsolePanel;
+                return createAdminConsolePanel(serverInfo);
             }
         });
         headerPanel.setHeaderWidget(header);
@@ -154,16 +144,23 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
         this.horizontalTabName = horizontalTabName;
     }
     
+    @Override
+    public void goToTabByNames(final String verticalTabName, final String horizontalTabName) {
+        this.verticalTabName = verticalTabName;
+        this.horizontalTabName = horizontalTabName;
+        adminConsolePanel.selectTabByNames(verticalTabName, horizontalTabName, new HashMap<>());
+    }
+    
     private AdminConsolePanel createAdminConsolePanel(final ServerInfoDTO serverInfo) {
-        adminConsolePanel = new AdminConsolePanel(getUserService(), 
+        adminConsolePanel = new AdminConsolePanel(userService, 
                 serverInfo, getStringMessages().releaseNotes(), "/release_notes_admin.html", errorReporter,
                 SecurityStylesheetResources.INSTANCE.css(), stringMessages);
         adminConsolePanel.addStyleName("adminConsolePanel");
 
         
         /* EVENTS */
-        final EventManagementPanel eventManagementPanel = new EventManagementPanel(getSailingService(),
-                getUserService(), errorReporter, presenter, getStringMessages(), adminConsolePanel);
+        final EventManagementPanel eventManagementPanel = new EventManagementPanel(sailingService,
+                userService, errorReporter, presenter, getStringMessages(), adminConsolePanel);
         eventManagementPanel.ensureDebugId("EventManagement");
         adminConsolePanel.addToVerticalTabPanel(new DefaultRefreshableAdminConsolePanel<EventManagementPanel>(eventManagementPanel) {
             @Override
@@ -180,7 +177,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
         //ErrorReporter errorReporter, StringMessages stringMessages, RegattaRefresher regattaRefresher,
         //EventsRefresher eventsRefresher
         RegattaManagementPanel regattaManagementPanel = new RegattaManagementPanel(
-                getSailingService(), getUserService(), errorReporter, getStringMessages(), presenter, eventManagementPanel);
+                sailingService, userService, errorReporter, getStringMessages(), presenter, eventManagementPanel);
         regattaManagementPanel.ensureDebugId("RegattaStructureManagement");
         adminConsolePanel.addToVerticalTabPanel(new DefaultRefreshableAdminConsolePanel<RegattaManagementPanel>(regattaManagementPanel) {
             @Override
@@ -192,7 +189,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
         
         /* LEADERBOARDS */
         final HorizontalTabLayoutPanel leaderboardTabPanel = adminConsolePanel.addVerticalTab(getStringMessages().leaderboards(), "LeaderboardPanel");
-        final LeaderboardConfigPanel leaderboardConfigPanel = new LeaderboardConfigPanel(getSailingService(), getUserService(), presenter, errorReporter,
+        final LeaderboardConfigPanel leaderboardConfigPanel = new LeaderboardConfigPanel(sailingService, userService, presenter, errorReporter,
                 getStringMessages(), /* showRaceDetails */true, presenter);
         leaderboardConfigPanel.ensureDebugId("LeaderboardConfiguration");
         adminConsolePanel.addToTabPanel(leaderboardTabPanel, new DefaultRefreshableAdminConsolePanel<LeaderboardConfigPanel>(leaderboardConfigPanel) {
@@ -206,7 +203,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
         leaderboardsDisplayers.add(leaderboardConfigPanel);
 
         final LeaderboardGroupConfigPanel leaderboardGroupConfigPanel = new LeaderboardGroupConfigPanel(
-                getSailingService(), getUserService(), presenter, presenter, presenter, errorReporter, getStringMessages());
+                sailingService, userService, presenter, presenter, presenter, errorReporter, getStringMessages());
         leaderboardGroupConfigPanel.ensureDebugId("LeaderboardGroupConfiguration");
         adminConsolePanel.addToTabPanel(leaderboardTabPanel, new DefaultRefreshableAdminConsolePanel<LeaderboardGroupConfigPanel>(leaderboardGroupConfigPanel) {
             @Override
@@ -229,7 +226,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
         final HorizontalTabLayoutPanel racesTabPanel = adminConsolePanel.addVerticalTab(getStringMessages().trackedRaces(), "RacesPanel");
 
         final TrackedRacesManagementPanel trackedRacesManagementPanel = new TrackedRacesManagementPanel(
-                getSailingService(), getUserService(), errorReporter, presenter, getStringMessages());
+                sailingService, userService, errorReporter, presenter, getStringMessages());
         trackedRacesManagementPanel.ensureDebugId("TrackedRacesManagement");
         adminConsolePanel.addToTabPanel(racesTabPanel,
                 new DefaultRefreshableAdminConsolePanel<TrackedRacesManagementPanel>(trackedRacesManagementPanel) {
@@ -241,7 +238,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                 SecuredDomainType.TRACKED_RACE.getPermission(TrackedRaceActions.MUTATION_ACTIONS));
         regattasDisplayers.add(trackedRacesManagementPanel);
 
-        final CompetitorPanel competitorPanel = new CompetitorPanel(getSailingService(), getUserService(), getStringMessages(), errorReporter);
+        final CompetitorPanel competitorPanel = new CompetitorPanel(sailingService, userService, getStringMessages(), errorReporter);
         competitorPanel.ensureDebugId("CompetitorPanel");
         adminConsolePanel.addToTabPanel(racesTabPanel, new DefaultRefreshableAdminConsolePanel<CompetitorPanel>(competitorPanel) {
             @Override
@@ -251,7 +248,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
         }, getStringMessages().competitors(),
                 SecuredDomainType.COMPETITOR.getPermission(DefaultActions.MUTATION_ACTIONS_FOR_NON_DELETABLE_TYPES));
 
-        final BoatPanel boatPanel = new BoatPanel(getSailingService(), getUserService(), getStringMessages(), errorReporter);
+        final BoatPanel boatPanel = new BoatPanel(sailingService, userService, getStringMessages(), errorReporter);
         boatPanel.ensureDebugId("BoatPanel");
         adminConsolePanel.addToTabPanel(racesTabPanel, new DefaultRefreshableAdminConsolePanel<BoatPanel>(boatPanel) {
             @Override
@@ -261,8 +258,8 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
         }, getStringMessages().boats(),
                 SecuredDomainType.BOAT.getPermission(DefaultActions.MUTATION_ACTIONS_FOR_NON_DELETABLE_TYPES));
 
-        RaceCourseManagementPanel raceCourseManagementPanel = new RaceCourseManagementPanel(getSailingService(), errorReporter,
-                presenter, getStringMessages(), getUserService());
+        RaceCourseManagementPanel raceCourseManagementPanel = new RaceCourseManagementPanel(sailingService, errorReporter,
+                presenter, getStringMessages(), userService);
         adminConsolePanel.addToTabPanel(racesTabPanel,
                 new DefaultRefreshableAdminConsolePanel<RaceCourseManagementPanel>(raceCourseManagementPanel) {
                     @Override
@@ -275,7 +272,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
 
         final AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
 
-        final WindPanel windPanel = new WindPanel(getSailingService(), getUserService(), asyncActionsExecutor, errorReporter,
+        final WindPanel windPanel = new WindPanel(sailingService, userService, asyncActionsExecutor, errorReporter,
                 presenter, getStringMessages());
         adminConsolePanel.addToTabPanel(racesTabPanel, new DefaultRefreshableAdminConsolePanel<WindPanel>(windPanel) {
             @Override
@@ -285,8 +282,8 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
         }, getStringMessages().wind(), SecuredDomainType.TRACKED_RACE.getPermission(DefaultActions.UPDATE));
         regattasDisplayers.add(windPanel);
 
-        final MediaPanel mediaPanel = new MediaPanel(regattasDisplayers, getSailingService(), presenter, mediaServiceWrite, errorReporter,
-                getStringMessages(), getUserService());
+        final MediaPanel mediaPanel = new MediaPanel(regattasDisplayers, sailingService, presenter, mediaServiceWrite, errorReporter,
+                getStringMessages(), userService);
         adminConsolePanel.addToTabPanel(racesTabPanel, new DefaultRefreshableAdminConsolePanel<MediaPanel>(mediaPanel) {
             @Override
             public void refreshAfterBecomingVisible() {
@@ -298,7 +295,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
         /* RACE COMMITTEE APP */
         final HorizontalTabLayoutPanel raceCommitteeTabPanel = adminConsolePanel.addVerticalTab(getStringMessages().raceCommitteeApp(), "RaceCommiteeAppPanel");
         final DeviceConfigurationPanel deviceConfigurationUserPanel = new DeviceConfigurationPanel(
-                getSailingService(), getUserService(), getStringMessages(), errorReporter);
+                sailingService, userService, getStringMessages(), errorReporter);
         adminConsolePanel.addToTabPanel(raceCommitteeTabPanel,
                 new DefaultRefreshableAdminConsolePanel<DeviceConfigurationPanel>(deviceConfigurationUserPanel),
                 getStringMessages().deviceConfiguration(),
@@ -307,7 +304,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
         /* CONNECTORS */
         final HorizontalTabLayoutPanel connectorsTabPanel = adminConsolePanel.addVerticalTab(getStringMessages().connectors(), "TrackingProviderPanel");
         TracTracEventManagementPanel tractracEventManagementPanel = new TracTracEventManagementPanel(
-                getSailingService(), getUserService(), errorReporter, presenter, getStringMessages(), tableResources);
+                sailingService, userService, errorReporter, presenter, getStringMessages(), tableResources);
         tractracEventManagementPanel.ensureDebugId("TracTracEventManagement");
         adminConsolePanel.addToTabPanel(connectorsTabPanel,
                 new DefaultRefreshableAdminConsolePanel<TracTracEventManagementPanel>(tractracEventManagementPanel) {
@@ -321,21 +318,21 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
         regattasDisplayers.add(tractracEventManagementPanel);
         
         SwissTimingReplayConnectorPanel swissTimingReplayConnectorPanel = new SwissTimingReplayConnectorPanel(
-                getSailingService(), getUserService(), errorReporter, presenter, getStringMessages(), tableResources);
+                sailingService, userService, errorReporter, presenter, getStringMessages(), tableResources);
         adminConsolePanel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<SwissTimingReplayConnectorPanel>(swissTimingReplayConnectorPanel),
                 getStringMessages().swissTimingArchiveConnector(),
                 SecuredDomainType.SWISS_TIMING_ARCHIVE_ACCOUNT.getPermission(DefaultActions.values()));
         regattasDisplayers.add(swissTimingReplayConnectorPanel);
 
         SwissTimingEventManagementPanel swisstimingEventManagementPanel = new SwissTimingEventManagementPanel(
-                getSailingService(), getUserService(), errorReporter, presenter, getStringMessages(), tableResources);
+                sailingService, userService, errorReporter, presenter, getStringMessages(), tableResources);
         adminConsolePanel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<SwissTimingEventManagementPanel>(swisstimingEventManagementPanel),
                 getStringMessages().swissTimingEvents(),
                 SecuredDomainType.SWISS_TIMING_ACCOUNT.getPermission(DefaultActions.values()));
         regattasDisplayers.add(swisstimingEventManagementPanel);
 
         final SmartphoneTrackingEventManagementPanel raceLogTrackingEventManagementPanel = new SmartphoneTrackingEventManagementPanel(
-                getSailingService(), getUserService(), presenter, presenter, errorReporter, getStringMessages());
+                sailingService, userService, presenter, presenter, errorReporter, getStringMessages());
         raceLogTrackingEventManagementPanel.ensureDebugId("SmartphoneTrackingPanel");
         adminConsolePanel.addToTabPanel(connectorsTabPanel,
                 new DefaultRefreshableAdminConsolePanel<SmartphoneTrackingEventManagementPanel>(
@@ -349,8 +346,8 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
         regattasDisplayers.add(raceLogTrackingEventManagementPanel);
         leaderboardsDisplayers.add(raceLogTrackingEventManagementPanel);
 
-        IgtimiAccountsPanel igtimiAccountsPanel = new IgtimiAccountsPanel(getSailingService(), errorReporter,
-                getStringMessages(), getUserService());
+        IgtimiAccountsPanel igtimiAccountsPanel = new IgtimiAccountsPanel(sailingService, errorReporter,
+                getStringMessages(), userService);
         igtimiAccountsPanel.ensureDebugId("IgtimiAccounts");
         adminConsolePanel.addToTabPanel(connectorsTabPanel,
                 new DefaultRefreshableAdminConsolePanel<IgtimiAccountsPanel>(igtimiAccountsPanel) {
@@ -361,7 +358,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                 },
                 getStringMessages().igtimiAccounts(),
                 SecuredDomainType.IGTIMI_ACCOUNT.getPermission(DefaultActions.values()));
-        ExpeditionDeviceConfigurationsPanel expeditionDeviceConfigurationsPanel = new ExpeditionDeviceConfigurationsPanel(getSailingService(), errorReporter, getStringMessages(), getUserService());
+        ExpeditionDeviceConfigurationsPanel expeditionDeviceConfigurationsPanel = new ExpeditionDeviceConfigurationsPanel(sailingService, errorReporter, getStringMessages(), userService);
         expeditionDeviceConfigurationsPanel.ensureDebugId("ExpeditionDeviceConfigurations");
         adminConsolePanel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<ExpeditionDeviceConfigurationsPanel>(expeditionDeviceConfigurationsPanel) {
             @Override
@@ -371,15 +368,15 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
         }, getStringMessages().expeditionDeviceConfigurations(),
                 SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION.getPermission(DefaultActions.values()));
 
-        ResultImportUrlsListComposite resultUrlsListComposite = new ResultImportUrlsListComposite(getSailingService(),
-                getUserService(), errorReporter, getStringMessages());
+        ResultImportUrlsListComposite resultUrlsListComposite = new ResultImportUrlsListComposite(sailingService,
+                userService, errorReporter, getStringMessages());
         adminConsolePanel.addToTabPanel(connectorsTabPanel,
                 new DefaultRefreshableAdminConsolePanel<ResultImportUrlsListComposite>(resultUrlsListComposite),
                 getStringMessages().resultImportUrls(),
                 SecuredDomainType.RESULT_IMPORT_URL.getPermission(DefaultActions.values()));
 
         StructureImportManagementPanel structureImportUrlsManagementPanel = new StructureImportManagementPanel(
-                getSailingService(), getUserService(), errorReporter, getStringMessages(), presenter, eventManagementPanel);
+                sailingService, userService, errorReporter, getStringMessages(), presenter, eventManagementPanel);
         adminConsolePanel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<StructureImportManagementPanel>(structureImportUrlsManagementPanel),
                 getStringMessages().manage2Sail() + " " + getStringMessages().regattaStructureImport(),
                 SecuredDomainType.REGATTA.getPermission(DefaultActions.CREATE));
@@ -387,7 +384,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
         /* ADVANCED */
         final HorizontalTabLayoutPanel advancedTabPanel = adminConsolePanel.addVerticalTab(getStringMessages().advanced(),
                 "AdvancedTab");
-        final ReplicationPanel replicationPanel = new ReplicationPanel(getSailingService(), getUserService(), errorReporter,
+        final ReplicationPanel replicationPanel = new ReplicationPanel(sailingService, userService, errorReporter,
                 getStringMessages());
         adminConsolePanel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<ReplicationPanel>(replicationPanel) {
             @Override
@@ -395,22 +392,22 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                 replicationPanel.updateReplicaList();
             }
                 }, getStringMessages().replication(),
-                () -> getUserService().hasAnyServerPermission(ServerActions.REPLICATE, ServerActions.START_REPLICATION,
+                () -> userService.hasAnyServerPermission(ServerActions.REPLICATE, ServerActions.START_REPLICATION,
                         ServerActions.READ_REPLICATOR));
-        final MasterDataImportPanel masterDataImportPanel = new MasterDataImportPanel(getStringMessages(), getSailingService(),
+        final MasterDataImportPanel masterDataImportPanel = new MasterDataImportPanel(getStringMessages(), sailingService,
                 presenter, eventManagementPanel, presenter, presenter, mediaPanel);
         masterDataImportPanel.ensureDebugId("MasterDataImport");
         adminConsolePanel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<MasterDataImportPanel>(masterDataImportPanel),
                 getStringMessages().masterDataImportPanel(), SecuredSecurityTypes.SERVER.getPermissionForObject(
                         SecuredSecurityTypes.ServerActions.CAN_IMPORT_MASTERDATA, serverInfo));
-        RemoteServerInstancesManagementPanel remoteServerInstancesManagementPanel = new RemoteServerInstancesManagementPanel(getSailingService(), getUserService(),
+        RemoteServerInstancesManagementPanel remoteServerInstancesManagementPanel = new RemoteServerInstancesManagementPanel(sailingService, userService,
                 errorReporter, getStringMessages(), tableResources);
         adminConsolePanel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<RemoteServerInstancesManagementPanel>(remoteServerInstancesManagementPanel),
                 getStringMessages().remoteServerInstances(),
                 SecuredSecurityTypes.SERVER.getPermissionForObject(
                         SecuredSecurityTypes.ServerActions.CONFIGURE_REMOTE_INSTANCES, serverInfo));
         final LocalServerManagementPanel localServerInstancesManagementPanel = new LocalServerManagementPanel(
-                getSailingService(), getUserService(), errorReporter, getStringMessages());
+                sailingService, userService, errorReporter, getStringMessages());
         localServerInstancesManagementPanel.ensureDebugId("LocalServer");
         adminConsolePanel.addToTabPanel(advancedTabPanel,
                 new DefaultRefreshableAdminConsolePanel<LocalServerManagementPanel>(
@@ -425,10 +422,10 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                 // potentially existing object to decide about the visibility.
                 // The local server tab is about the specific server object. This check needs to contain the ownership
                 // information to work as intended.
-                () -> getUserService().hasAnyServerPermission(ServerActions.CONFIGURE_LOCAL_SERVER,
+                () -> userService.hasAnyServerPermission(ServerActions.CONFIGURE_LOCAL_SERVER,
                         DefaultActions.CHANGE_OWNERSHIP, DefaultActions.CHANGE_ACL));
 
-        final UserManagementPanel<AdminConsoleTableResources> userManagementPanel = new UserManagementPanel<>(getUserService(), StringMessages.INSTANCE,
+        final UserManagementPanel<AdminConsoleTableResources> userManagementPanel = new UserManagementPanel<>(userService, StringMessages.INSTANCE,
                 SecuredDomainType.getAllInstances(), errorReporter, tableResources);
         userManagementPanel.ensureDebugId("UserManagementPanel");
         adminConsolePanel.addToTabPanel(advancedTabPanel,
@@ -441,7 +438,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                 }, getStringMessages().userManagement(), SecuredSecurityTypes.USER.getPermission(DefaultActions.MUTATION_ACTIONS));
 
         final RoleDefinitionsPanel roleManagementPanel = new RoleDefinitionsPanel(StringMessages.INSTANCE,
-                getUserService(), tableResources, errorReporter);
+                userService, tableResources, errorReporter);
         adminConsolePanel.addToTabPanel(advancedTabPanel,
                 new DefaultRefreshableAdminConsolePanel<RoleDefinitionsPanel>(roleManagementPanel) {
                     @Override
@@ -450,7 +447,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                     }
                 }, getStringMessages().roles(), SecuredSecurityTypes.ROLE_DEFINITION.getPermission(DefaultActions.MUTATION_ACTIONS));
 
-        final UserGroupManagementPanel userGroupManagementPanel = new UserGroupManagementPanel(getUserService(),
+        final UserGroupManagementPanel userGroupManagementPanel = new UserGroupManagementPanel(userService,
                 StringMessages.INSTANCE, SecuredDomainType.getAllInstances(), errorReporter, tableResources);
         adminConsolePanel.addToTabPanel(advancedTabPanel,
                 new DefaultRefreshableAdminConsolePanel<UserGroupManagementPanel>(userGroupManagementPanel) {
@@ -460,15 +457,15 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                         userGroupManagementPanel.refreshSuggests();
                     }
                 }, getStringMessages().userGroupManagement(), SecuredSecurityTypes.USER_GROUP.getPermission(DefaultActions.MUTATION_ACTIONS));
-        final FileStoragePanel fileStoragePanel = new FileStoragePanel(getSailingService(), errorReporter);
+        final FileStoragePanel fileStoragePanel = new FileStoragePanel(sailingService, errorReporter);
         adminConsolePanel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<FileStoragePanel>(fileStoragePanel),
                 getStringMessages().fileStorage(), SecuredSecurityTypes.SERVER.getPermissionForObject(
                         SecuredSecurityTypes.ServerActions.CONFIGURE_FILE_STORAGE, serverInfo));
         /* COURSE CREATION */
         final HorizontalTabLayoutPanel courseCreationTabPanel = adminConsolePanel
                 .addVerticalTab(getStringMessages().courseCreation(), "CourseCreationTab");
-        final MarkTemplatePanel markTemplatePanel = new MarkTemplatePanel(getSailingService(), errorReporter,
-                getStringMessages(), getUserService());
+        final MarkTemplatePanel markTemplatePanel = new MarkTemplatePanel(sailingService, errorReporter,
+                getStringMessages(), userService);
         adminConsolePanel.addToTabPanel(courseCreationTabPanel,
                 new DefaultRefreshableAdminConsolePanel<MarkTemplatePanel>(markTemplatePanel) {
                 @Override
@@ -477,8 +474,8 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                 }
             }, getStringMessages().markTemplates(),
             SecuredDomainType.MARK_TEMPLATE.getPermission(DefaultActions.MUTATION_ACTIONS));
-        final MarkPropertiesPanel markPropertiesPanel = new MarkPropertiesPanel(getSailingService(), errorReporter,
-                getStringMessages(), getUserService());
+        final MarkPropertiesPanel markPropertiesPanel = new MarkPropertiesPanel(sailingService, errorReporter,
+                getStringMessages(), userService);
         adminConsolePanel.addToTabPanel(courseCreationTabPanel,
                 new DefaultRefreshableAdminConsolePanel<MarkPropertiesPanel>(markPropertiesPanel) {
                     @Override
@@ -487,8 +484,8 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                     }
                 }, getStringMessages().markProperties(),
                 SecuredDomainType.MARK_PROPERTIES.getPermission(DefaultActions.MUTATION_ACTIONS));
-        final CourseTemplatePanel courseTemplatePanel = new CourseTemplatePanel(getSailingService(), errorReporter,
-                getStringMessages(), getUserService());
+        final CourseTemplatePanel courseTemplatePanel = new CourseTemplatePanel(sailingService, errorReporter,
+                getStringMessages(), userService);
         adminConsolePanel.addToTabPanel(courseCreationTabPanel,
                 new DefaultRefreshableAdminConsolePanel<CourseTemplatePanel>(courseTemplatePanel) {
                     @Override
@@ -497,8 +494,8 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                     }
                 }, getStringMessages().courseTemplates(),
                 SecuredDomainType.COURSE_TEMPLATE.getPermission(DefaultActions.MUTATION_ACTIONS));
-        final MarkRolePanel markRolePanel = new MarkRolePanel(getSailingService(), errorReporter, getStringMessages(),
-                getUserService());
+        final MarkRolePanel markRolePanel = new MarkRolePanel(sailingService, errorReporter, getStringMessages(),
+                userService);
         adminConsolePanel.addToTabPanel(courseCreationTabPanel,
                 new DefaultRefreshableAdminConsolePanel<MarkRolePanel>(markRolePanel) {
                     @Override
@@ -507,7 +504,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                     }
                 }, getStringMessages().markRoles(),
                 SecuredDomainType.MARK_ROLE.getPermission(DefaultActions.MUTATION_ACTIONS));
-        adminConsolePanel.initUI();
+        adminConsolePanel.initUI(verticalTabName, horizontalTabName);
         presenter.fillRegattas();
         presenter.fillLeaderboardGroups();
         presenter.fillLeaderboards();

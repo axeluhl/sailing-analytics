@@ -8,6 +8,7 @@ import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsRefresher;
 import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
 import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
+import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
@@ -24,6 +25,8 @@ public interface AdminConsoleView extends IsWidget {
     
     void selectTabByNames(String verticalTabName, String horizontalTabName);
     
+    void goToTabByNames(String menu, String tab);
+    
     public interface Presenter extends LeaderboardGroupsRefresher, RegattaRefresher, LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity> {
         
         public ErrorReporter getErrorReporter();
@@ -37,7 +40,10 @@ public interface AdminConsoleView extends IsWidget {
         SailingServiceWriteAsync getSailingService();
         
         UserService getUserService();
+
+        MediaServiceWriteAsync getMediaServiceWrite();
         
     }
+
 
 }

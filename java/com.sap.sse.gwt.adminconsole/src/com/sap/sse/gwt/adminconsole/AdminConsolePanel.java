@@ -114,15 +114,20 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
                     updateBrowserHistory(tabPanel.getTitle(), selectedPanel.getTitle());                             
                     refreshDataFor(selectedPanel);    
                 } else if (source instanceof VerticalTabLayoutPanel) {
+                    boolean browserHistoryUpdated = false;
                     final VerticalTabLayoutPanel verticalTabLayoutPanel = (VerticalTabLayoutPanel) source;
                     Widget widgetAssociatedToVerticalTab = verticalTabLayoutPanel.getWidget(verticalTabLayoutPanel.getSelectedIndex());
-                    if (widgetAssociatedToVerticalTab instanceof HorizontalTabLayoutPanel) {
+                    if (widgetAssociatedToVerticalTab instanceof HorizontalTabLayoutPanel) {                      
                         HorizontalTabLayoutPanel selectedTabLayoutPanel = (HorizontalTabLayoutPanel) widgetAssociatedToVerticalTab;
                         final int selectedIndex = selectedTabLayoutPanel.getSelectedIndex();
                         if (selectedIndex >= 0) {
                             widgetAssociatedToVerticalTab = selectedTabLayoutPanel.getWidget(selectedIndex);
                         }
-                        updateBrowserHistory(selectedTabLayoutPanel.getTitle(), widgetAssociatedToVerticalTab.getTitle());                        
+                        updateBrowserHistory(selectedTabLayoutPanel.getTitle(), widgetAssociatedToVerticalTab.getTitle());
+                        browserHistoryUpdated = true;
+                    }
+                    if (!browserHistoryUpdated) {
+                        updateBrowserHistory(widgetAssociatedToVerticalTab.getTitle(), "");
                     }
                     refreshDataFor(widgetAssociatedToVerticalTab);
                 }
@@ -166,7 +171,7 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
         getUserService().addUserStatusEventHandler(new UserStatusEventHandler() {
             @Override
             public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
-                updateTabDisplayForCurrentUser(user);
+                updateTabDisplayForCurrentUser(user, true);
             }
         });
         tabSelectionHandler = new TabSelectionHandler();
@@ -174,12 +179,13 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
         topLevelTabPanel.addSelectionHandler(tabSelectionHandler);
         topLevelTabPanel.ensureDebugId("AdministrationTabs");
         topLevelTabPanelWrapper = new VerticalOrHorizontalTabLayoutPanel() {
+            
             @Override
-            public void add(Widget child, String text, boolean asHtml) {
+            public void add(Widget child, String text, boolean asHtml, boolean fireEvents) {
                 child.setTitle(text);
-                topLevelTabPanel.add(child, text, asHtml);
+                topLevelTabPanel.add(child, text, asHtml, fireEvents);
                 topLevelTabPanel.forceLayout();
-            }
+            }  
 
             @Override
             public boolean remove(Widget child) {
@@ -198,8 +204,7 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
 
             @Override
             public void selectTab(int index) {
-                topLevelTabPanel.selectTab(index);
-                
+                topLevelTabPanel.selectTab(index);      
             }
 
             @Override
@@ -238,10 +243,14 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
      * this method, but then this method needs to be invoked again to ensure that all all tabs are properly displayed
      * for the current panel's state.
      */
-    public void initUI() {
-        updateTabDisplayForCurrentUser(getUserService().getCurrentUser());
+    public void initUI(final String menu, final String tab) {
+        updateTabDisplayForCurrentUser(getUserService().getCurrentUser(), false);
         if (topLevelTabPanel.getWidgetCount() > 0) {
-            topLevelTabPanel.selectTab(0);
+            if (menu != null && tab != null) {
+                selectTabByNamesWithoutSetup(menu, tab);
+            } else {
+                topLevelTabPanel.selectTab(0);
+            }
         }
     }
 
@@ -250,7 +259,8 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
     }
 
     private static interface VerticalOrHorizontalTabLayoutPanel {
-        void add(Widget child, String text, boolean asHtml);
+        
+        void add(Widget child, String text, boolean asHtml, boolean fireEvents);
 
         boolean remove(Widget child);
         
@@ -319,10 +329,9 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
     public void addToTabPanel(final HorizontalTabLayoutPanel tabPanel, RefreshableAdminConsolePanel panelToAdd, String tabTitle, BooleanSupplier permissionCheck) {
         VerticalOrHorizontalTabLayoutPanel wrapper = new VerticalOrHorizontalTabLayoutPanel() {
             @Override
-            public void add(Widget child, String text, boolean asHtml) {
-                // TODO sarah
+            public void add(Widget child, String text, boolean asHtml, boolean fireEvents) {
                 child.setTitle(text);
-                tabPanel.add(child, text, asHtml);
+                tabPanel.add(child, text, asHtml, fireEvents);
                 tabPanel.forceLayout();
             }
 
@@ -350,6 +359,7 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
             public int getWidgetIndex(Widget child) {
                 return tabPanel.getWidgetIndex(child);
             }
+
         };
         addToTabPanel(wrapper, panelToAdd, tabTitle, permissionCheck);
     }
@@ -394,13 +404,13 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
      * to see which tabs. See {@link #roleSpecificTabs}. A selection event is fired when the tab currently selected
      * was removed and another tab was therefore selected.
      */
-    private void updateTabDisplayForCurrentUser(UserDTO user) {
+    private void updateTabDisplayForCurrentUser(UserDTO user, boolean fireEvents) {
         final Widget selectedPanel = getSelectedTab(null);
         for (Triple<VerticalOrHorizontalTabLayoutPanel, Widget, String> e : roleSpecificTabs) {
             final Widget widgetToAddOrRemove = e.getB();
             if (user != null && userHasPermissionsToSeeWidget(user, e.getB())) {
                 if (e.getA().getWidgetIndex(widgetToAddOrRemove) == -1) {
-                    e.getA().add(widgetToAddOrRemove, e.getC(), /* asHtml */false);
+                    e.getA().add(widgetToAddOrRemove, e.getC(), /* asHtml */false, fireEvents);
                 }
             } else {
                 e.getA().remove(widgetToAddOrRemove, /* fireEvents */ false);
@@ -445,6 +455,26 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
     }
 
     @Override
+    public void selectTabByNamesWithoutSetup(String verticalTabName, String horizontalTabName) {
+        if (verticalTabName != null) {
+            for (Triple<VerticalOrHorizontalTabLayoutPanel, Widget, String> e : roleSpecificTabs) {
+                VerticalOrHorizontalTabLayoutPanel panel = e.getA();
+                Widget currentWidget = e.getB();
+                if (panel == topLevelTabPanelWrapper && verticalTabName.equals(e.getC())) { // for vertical panel
+                    int index = panel.getWidgetIndex(currentWidget);
+                    panel.selectTab(index);
+                    if (horizontalTabName == null || horizontalTabName.isEmpty()) { // If we don't have horizontal tab will setup vertical tab.
+                        return;
+                    }
+                } else if (horizontalTabName != null && horizontalTabName.equals(e.getC())) { // for horizontal panel
+                    int index = panel.getWidgetIndex(currentWidget);
+                    panel.selectTab(index);
+                }
+            }
+        }
+    }
+    
+    @Override
     public void selectTabByNames(String verticalTabName, String horizontalTabName, Map<String, String> params) {
         if (verticalTabName != null) {
             Widget widgetForSetup = null; // Remember widget for set up
@@ -454,7 +484,7 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
                 if (panel == topLevelTabPanelWrapper && verticalTabName.equals(e.getC())) { // for vertical panel
                     int index = panel.getWidgetIndex(currentWidget);
                     panel.selectTab(index);
-                    if (horizontalTabName == null) { // If we don't have horizontal tab will setup vertical tab.
+                    if (horizontalTabName == null || horizontalTabName.isEmpty()) { // If we don't have horizontal tab will setup vertical tab.
                         widgetForSetup = currentWidget;
                     }
                 } else if (horizontalTabName != null && horizontalTabName.equals(e.getC())) { // for horizontal panel

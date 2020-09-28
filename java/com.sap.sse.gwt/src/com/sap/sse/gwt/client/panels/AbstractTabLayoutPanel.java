@@ -265,7 +265,11 @@ public abstract class AbstractTabLayoutPanel extends ResizeComposite implements 
      *            <code>true</code> to treat the specified text as HTML
      */
     public void add(Widget child, String text, boolean asHtml) {
-        insert(child, text, asHtml, getWidgetCount());
+        add(child, text, asHtml, true);
+    }
+    
+    public void add(Widget child, String text, boolean asHtml, boolean fireEvents) {
+        insert(child, text, asHtml, getWidgetCount(), fireEvents);
     }
 
     /**
@@ -452,13 +456,17 @@ public abstract class AbstractTabLayoutPanel extends ResizeComposite implements 
      *            the index before which it will be inserted
      */
     public void insert(Widget child, String text, boolean asHtml, int beforeIndex) {
+        insert(child, text, asHtml, beforeIndex, true);    
+    }
+    
+    public void insert(Widget child, String text, boolean asHtml, int beforeIndex, boolean fireEvents) {
         Widget contents;
         if (asHtml) {
             contents = new HTML(text);
         } else {
             contents = new Label(text);
         }
-        insert(child, contents, beforeIndex);
+        insert(child, contents, beforeIndex, fireEvents);
     }
 
     /**
@@ -487,6 +495,10 @@ public abstract class AbstractTabLayoutPanel extends ResizeComposite implements 
      */
     public void insert(Widget child, Widget tab, int beforeIndex) {
         insert(child, new Tab(tab), beforeIndex);
+    }
+    
+    public void insert(Widget child, Widget tab, int beforeIndex, boolean fireEvents) {
+        insert(child, new Tab(tab), beforeIndex, fireEvents);
     }
 
     /**
@@ -696,7 +708,7 @@ public abstract class AbstractTabLayoutPanel extends ResizeComposite implements 
         assert (index >= 0) && (index < getWidgetCount()) : "Index out of bounds";
     }
 
-    private void insert(final Widget child, Tab tab, int beforeIndex) {
+    private void insert(final Widget child, Tab tab, int beforeIndex, boolean fireEvents) {
         assert (beforeIndex >= 0) && (beforeIndex <= getWidgetCount()) : "beforeIndex out of bounds";
 
         // Check to see if the TabPanel already contains the Widget. If so,
@@ -722,11 +734,15 @@ public abstract class AbstractTabLayoutPanel extends ResizeComposite implements 
         child.addStyleName(getContentStyle());
 
         if (selectedIndex == -1) {
-            selectTab(0);
+            selectTab(0, fireEvents);
         } else if (selectedIndex >= beforeIndex) {
             // If we inserted before the currently selected tab, its index has just
             // increased.
             selectedIndex++;
         }
+    }
+    
+    private void insert(final Widget child, Tab tab, int beforeIndex) {
+        insert(child, tab, beforeIndex, true);  
     }
 }

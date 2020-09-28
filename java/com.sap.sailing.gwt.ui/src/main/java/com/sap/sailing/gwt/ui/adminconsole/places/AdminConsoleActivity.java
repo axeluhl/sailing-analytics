@@ -13,6 +13,7 @@ import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.sap.sailing.gwt.ui.adminconsole.AdminConsoleClientFactory;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
 import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
+import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -37,10 +38,17 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
     private HashSet<LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity>> leaderboardsDisplayers;
     private HashSet<LeaderboardGroupsDisplayer> leaderboardGroupsDisplayers;
     
-    public AdminConsoleActivity(final AdminConsolePlace place, final AdminConsoleClientFactory clientFactory) {
+    private AdminConsoleView adminConsoleView;
+    
+    private final MediaServiceWriteAsync mediaServiceWrite;
+    private final SailingServiceWriteAsync sailingService;
+    
+    public AdminConsoleActivity(final AdminConsolePlace place, final AdminConsoleClientFactory clientFactory, final MediaServiceWriteAsync mediaServiceWrite, final SailingServiceWriteAsync sailingService) {
         this.menu = place.getMenu();
         this.tab = place.getTab();
         this.clientFactory = clientFactory;
+        this.mediaServiceWrite = mediaServiceWrite;
+        this.sailingService = sailingService;
     }
     
     @Override
@@ -49,12 +57,10 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
         leaderboardsDisplayers = new HashSet<>();
         leaderboardGroupsDisplayers = new HashSet<>();
         
-        AdminConsoleView adminConsoleView = new AdminConsoleViewImpl();
+        adminConsoleView = new AdminConsoleViewImpl();
         adminConsoleView.setPresenter(this);
         adminConsoleView.selectTabByNames(menu, tab);
         
-        
-        // TODO sarah
         clientFactory.getUserService().executeWithServerInfo(adminConsoleView::createUI);
         clientFactory.getUserService().addUserStatusEventHandler((u, p) -> checkPublicServerNonPublicUserWarning());
 
@@ -64,6 +70,10 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
         RootLayoutPanel.get().add(adminConsoleView);
     }
     
+    public void goToMenuAndTab(String menu, String tab) {
+        adminConsoleView.goToTabByNames(menu, tab);       
+    }
+    
     @Override
     public UserService getUserService() {
         return clientFactory.getUserService();
@@ -71,7 +81,12 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
     
     @Override
     public SailingServiceWriteAsync getSailingService() {
-        return clientFactory.getSailingService();
+        return sailingService;
+    }
+    
+    @Override
+    public MediaServiceWriteAsync getMediaServiceWrite() {
+        return mediaServiceWrite;
     }
     
     @Override
@@ -96,7 +111,7 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
     
     @Override
     public void fillLeaderboards() {
-        clientFactory.getSailingService().getLeaderboardsWithSecurity(new MarkedAsyncCallback<List<StrippedLeaderboardDTOWithSecurity>>(
+        sailingService.getLeaderboardsWithSecurity(new MarkedAsyncCallback<List<StrippedLeaderboardDTOWithSecurity>>(
                 new AsyncCallback<List<StrippedLeaderboardDTOWithSecurity>>() {
                     @Override
                     public void onSuccess(List<StrippedLeaderboardDTOWithSecurity> leaderboards) {
@@ -124,7 +139,7 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
 
     @Override
     public void fillLeaderboardGroups() {
-        clientFactory.getSailingService().getLeaderboardGroups(false /*withGeoLocationData*/,
+        sailingService.getLeaderboardGroups(false /*withGeoLocationData*/,
                 new MarkedAsyncCallback<List<LeaderboardGroupDTO>>(
                         new AsyncCallback<List<LeaderboardGroupDTO>>() {
                             @Override
@@ -152,7 +167,7 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
 
     @Override
     public void fillRegattas() {
-        clientFactory.getSailingService().getRegattas(new MarkedAsyncCallback<List<RegattaDTO>>(
+        sailingService.getRegattas(new MarkedAsyncCallback<List<RegattaDTO>>(
                 new AsyncCallback<List<RegattaDTO>>() {
                     @Override
                     public void onSuccess(List<RegattaDTO> result) {
@@ -175,7 +190,7 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
 
  
     protected void checkPublicServerNonPublicUserWarning() {
-        clientFactory.getSailingService().getServerConfiguration(new AsyncCallback<ServerConfigurationDTO>() {
+        sailingService.getServerConfiguration(new AsyncCallback<ServerConfigurationDTO>() {
             @Override
             public void onFailure(Throwable caught) {
             }
@@ -220,4 +235,6 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
             }
         }); 
     }
+
+ 
 }

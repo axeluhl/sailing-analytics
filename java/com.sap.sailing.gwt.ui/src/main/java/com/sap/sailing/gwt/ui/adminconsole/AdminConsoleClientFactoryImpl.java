@@ -1,9 +1,8 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import com.google.gwt.event.shared.EventBus;
-import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.place.shared.PlaceController;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.google.web.bindery.event.shared.EventBus;
+import com.google.web.bindery.event.shared.SimpleEventBus;
 import com.sap.sse.gwt.client.DefaultErrorReporter;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.StringMessages;
@@ -19,8 +18,6 @@ public class AdminConsoleClientFactoryImpl implements AdminConsoleClientFactory 
     private final EventBus eventBus = new SimpleEventBus();
     private final PlaceController placeController = new PlaceController(eventBus);
     private final ErrorReporter errorReporter = new DefaultErrorReporter<StringMessages>(StringMessages.INSTANCE);
-    
-    private SailingServiceWriteAsync sailingService;
     
     @Override
     public EventBus getEventBus() {
@@ -50,14 +47,5 @@ public class AdminConsoleClientFactoryImpl implements AdminConsoleClientFactory 
     @Override
     public UserService getUserService() {
         return securityProvider.getUserService();
-    }
-    
-    public void setSailingService(SailingServiceWriteAsync sailingService) {
-        this.sailingService = sailingService;
-    }
-    
-    @Override
-    public SailingServiceWriteAsync getSailingService() {
-        return sailingService;
     }
 }

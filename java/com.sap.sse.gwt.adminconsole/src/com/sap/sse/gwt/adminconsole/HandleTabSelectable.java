@@ -10,4 +10,6 @@ public interface HandleTabSelectable {
      * @param params - map of strings parameters
      */
     void selectTabByNames(String verticalTabName, String horizontalTabName, Map<String, String> params);
+    
+    void selectTabByNamesWithoutSetup(String verticalTabName, String horizontalTabName);
 }
