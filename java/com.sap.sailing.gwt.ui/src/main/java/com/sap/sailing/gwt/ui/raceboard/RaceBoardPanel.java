@@ -281,10 +281,10 @@ public class RaceBoardPanel
             @Override
             protected String getLeftControlsIndentStyle() {
                 // Calculate style name for left control indent based on race map height an leaderboard panel visibility
-                if (raceMap.getOffsetHeight() <= 300) {
+                if (getOffsetHeight() <= 300) {
                     return INDENT_BIG_CONTROL_STYLE;
                 }
-                if (leaderboardPanel.isVisible() && raceMap.getOffsetHeight() <= 500) {
+                if (leaderboardPanel.isVisible() && getOffsetHeight() <= 500) {
                     return INDENT_SMALL_CONTROL_STYLE;
                 }
                 return super.getLeftControlsIndentStyle();

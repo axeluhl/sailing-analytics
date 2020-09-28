@@ -636,16 +636,19 @@ implements com.sap.sailing.domain.orc.ORCPerformanceCurveRankingMetric {
         final TimePoint startOfRace = getTrackedRace().getStartOfRace();
         final Competitor competitorFarthestAhead = getCompetitorFarthestAhead(timePoint, cache);
         if (startOfRace != null) {
-            final Duration actualRaceDuration = startOfRace.until(timePoint);
+            final Duration durationSinceStartOfRaceUntilTimePoint = startOfRace.until(timePoint);
             final Set<ForkJoinTask<Pair<Competitor, CompetitorRankingInfoImpl>>> futures = new HashSet<>();
             for (final Competitor competitor : getTrackedRace().getRace().getCompetitors()) {
                 futures.add(ForkJoinTask.adapt(()->{
                     final Duration correctedTime = getCorrectedTime(competitor, timePoint, cache);
-                    return new Pair<>(competitor, new CompetitorRankingInfoImpl(
-                            timePoint, competitor, getWindwardDistanceTraveled(competitor, timePoint, cache),
-                            actualRaceDuration, correctedTime,
-                            getEstimatedActualDurationToCompetitorFarthestAhead(competitor, competitorFarthestAhead, timePoint, cache),
-                            correctedTime));
+                    return new Pair<>(competitor,
+                            new CompetitorRankingInfoImpl(timePoint, competitor,
+                                    getWindwardDistanceTraveled(competitor, timePoint, cache),
+                                    durationSinceStartOfRaceUntilTimePoint,
+                                    getTrackedRace().getTimeSailedSinceRaceStart(competitor, timePoint), correctedTime,
+                                    getEstimatedActualDurationToCompetitorFarthestAhead(competitor,
+                                            competitorFarthestAhead, timePoint, cache),
+                                    correctedTime));
                 }).fork());
             }
             for (final ForkJoinTask<Pair<Competitor, CompetitorRankingInfoImpl>> future : futures) {
@@ -706,7 +709,7 @@ implements com.sap.sailing.domain.orc.ORCPerformanceCurveRankingMetric {
         Duration result;
         final TimePoint startOfRace = getTrackedRace().getStartOfRace();
         if (startOfRace != null) {
-            final Duration actualRaceDuration = startOfRace.until(rankingInfo.getTimePoint());
+            final Duration timeSailedSinceRaceStart = getTrackedRace().getTimeSailedSinceRaceStart(competitor, rankingInfo.getTimePoint());
             final Competitor leader = rankingInfo.getLeaderByCorrectedEstimatedTimeToCompetitorFarthestAhead();
             try {
                 final ORCPerformanceCurve competitorPerformanceCurve = cache.getPerformanceCurveForPartialCourse(
@@ -719,7 +722,7 @@ implements com.sap.sailing.domain.orc.ORCPerformanceCurveRankingMetric {
                             leader, getImpliedWindSupplier(cache));
                     if (impliedWindOfLeader != null) {
                         final Duration allowanceForLeaderInCompetitorsPerformanceCurve = competitorPerformanceCurve.getAllowancePerCourse(impliedWindOfLeader);
-                        result = actualRaceDuration.minus(allowanceForLeaderInCompetitorsPerformanceCurve);
+                        result = timeSailedSinceRaceStart.minus(allowanceForLeaderInCompetitorsPerformanceCurve);
                     } else {
                         result = null; // no implied wind for leader could be determined
                     }
@@ -741,35 +744,30 @@ implements com.sap.sailing.domain.orc.ORCPerformanceCurveRankingMetric {
         Duration result;
         final TimePoint startOfRace = getTrackedRace().getStartOfRace();
         if (trackedLegOfCompetitor.hasStartedLeg(timePoint) && startOfRace != null) {
-            final Duration actualRaceDurationForCompetitor = startOfRace.until(rankingInfo.getTimePoint());
-            final ORCPerformanceCurveRankingInfo orcpcsRankingInfo = (ORCPerformanceCurveRankingInfo) rankingInfo;
-            final Competitor legLeader = orcpcsRankingInfo.getLeaderInLegByCalculatedTime(trackedLegOfCompetitor.getLeg(), cache);
+            final ORCPerformanceCurveRankingInfo orcPcsRankingInfo = (ORCPerformanceCurveRankingInfo) rankingInfo;
+            final Competitor legLeader = orcPcsRankingInfo.getLeaderInLegByCalculatedTime(trackedLegOfCompetitor.getLeg(), cache);
             final Competitor competitor = trackedLegOfCompetitor.getCompetitor();
-            if (competitor == legLeader) {
-                result = Duration.NULL;
-            } else {
-                TimePoint timeForCompetitorImpliedWindCalculation;
-                try {
-                    timeForCompetitorImpliedWindCalculation = nowOrLegFinishTimeIfFinishedAtTimePoint(trackedLegOfCompetitor, timePoint, cache);
-                    final ORCPerformanceCurve competitorPerformanceCurveForLeg = getPerformanceCurveForPartialCourse(competitor, timeForCompetitorImpliedWindCalculation, cache);
-                    if (competitorPerformanceCurveForLeg == null) {
-                        result = null;
-                    } else {
-                        final TimePoint timeForLegLeaderImpliedWindCalculation = nowOrLegFinishTimeIfFinishedAtTimePoint(
-                                getTrackedRace().getTrackedLeg(legLeader, trackedLegOfCompetitor.getLeg()), timePoint, cache);
-                        final Speed legLeaderImpliedWindInOrAtEndOfLeg = cache.getImpliedWind(timeForLegLeaderImpliedWindCalculation, getTrackedRace(), competitor,
-                                getImpliedWindSupplier(cache));
-                        if (legLeaderImpliedWindInOrAtEndOfLeg != null) {
-                            final Duration correctedTimeOfLegLeaderInCompetitorsPerformanceCurve = competitorPerformanceCurveForLeg.getAllowancePerCourse(legLeaderImpliedWindInOrAtEndOfLeg);
-                            result = actualRaceDurationForCompetitor.minus(correctedTimeOfLegLeaderInCompetitorsPerformanceCurve);
-                        } else {
-                            result = null;
-                        }
-                    }
-                } catch (FunctionEvaluationException e) {
-                    logger.log(Level.WARNING, "Problem with performance curve calculation for competitor "+competitor+" or "+legLeader, e);
+            try {
+                final TimePoint timeForCompetitorImpliedWindCalculation = timePointOrLegFinishTimeIfFinishedAtTimePoint(trackedLegOfCompetitor, timePoint, cache);
+                final ORCPerformanceCurve competitorPerformanceCurveForLeg = getPerformanceCurveForPartialCourse(competitor, timeForCompetitorImpliedWindCalculation, cache);
+                if (competitorPerformanceCurveForLeg == null) {
                     result = null;
+                } else {
+                    final TimePoint timeForLegLeaderImpliedWindCalculation = timePointOrLegFinishTimeIfFinishedAtTimePoint(
+                            getTrackedRace().getTrackedLeg(legLeader, trackedLegOfCompetitor.getLeg()), timePoint, cache);
+                    final Speed legLeaderImpliedWindInOrAtEndOfLeg = cache.getImpliedWind(timeForLegLeaderImpliedWindCalculation, getTrackedRace(), legLeader,
+                            getImpliedWindSupplier(cache));
+                    if (legLeaderImpliedWindInOrAtEndOfLeg != null) {
+                        final Duration correctedTimeOfLegLeaderInCompetitorsPerformanceCurve = competitorPerformanceCurveForLeg.getAllowancePerCourse(legLeaderImpliedWindInOrAtEndOfLeg);
+                        final Duration actualRaceDurationForCompetitor = startOfRace.until(timeForCompetitorImpliedWindCalculation);
+                        result = actualRaceDurationForCompetitor.minus(correctedTimeOfLegLeaderInCompetitorsPerformanceCurve);
+                    } else {
+                        result = null;
+                    }
                 }
+            } catch (FunctionEvaluationException e) {
+                logger.log(Level.WARNING, "Problem with performance curve calculation for competitor "+competitor+" or "+legLeader, e);
+                result = null;
             }
         } else {
             result = null; // competitor didn't start leg yet at timePoint
@@ -777,7 +775,7 @@ implements com.sap.sailing.domain.orc.ORCPerformanceCurveRankingMetric {
         return result;
     }
 
-    private TimePoint nowOrLegFinishTimeIfFinishedAtTimePoint(TrackedLegOfCompetitor trackedLegOfCompetitor, TimePoint timePoint,
+    private TimePoint timePointOrLegFinishTimeIfFinishedAtTimePoint(TrackedLegOfCompetitor trackedLegOfCompetitor, TimePoint timePoint,
             WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws FunctionEvaluationException {
         final TimePoint timeForImpliedWindCalculation;
         if (trackedLegOfCompetitor.hasFinishedLeg(timePoint)) {
