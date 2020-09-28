@@ -60,11 +60,9 @@ public final class WhatsNewDialogFactory {
         final long charactersInWhatsChangedDocument = WhatsNewResources.INSTANCE.getSailingAnalyticsNotesHtml()
                 .getText().length();
         userService.getPreference(WhatsNewSettings.PREF_NAME, new AsyncCallback<String>() {
-
             @Override
             public void onSuccess(String result) {
                 SettingsToJsonSerializerGWT settingsToJsonSerializerGWT = new SettingsToJsonSerializerGWT();
-
                 DialogCallback<Void> dialogCallback = new DialogCallback<Void>() {
                     @Override
                     public void ok(Void editedObject) {
@@ -77,11 +75,9 @@ public final class WhatsNewDialogFactory {
                         updateOrCreatePreference(charactersInWhatsChangedDocument, settingsToJsonSerializerGWT);
                     }
                 };
-
                 if (result != null) {
                     // deserialize whats-new-setting
                     WhatsNewSettings pref = settingsToJsonSerializerGWT.deserialize(new WhatsNewSettings(), result);
-
                     if (pref.getNumberOfCharsOnLastLogin() > charactersInWhatsChangedDocument + THRESHOLD_WHATS_NEW) {
                         // check if length change is over threshold
                         WhatsNewDialogFactory.showWhatsNewDialog(placeController, dialogCallback);
@@ -103,7 +99,6 @@ public final class WhatsNewDialogFactory {
                 String serializedSetting = settingsToJsonSerializerGWT
                         .serializeToString(new WhatsNewSettings(charactersInWhatsChangedDocument));
                 userService.setPreference(WhatsNewSettings.PREF_NAME, serializedSetting, new AsyncCallback<Void>() {
-
                     @Override
                     public void onFailure(Throwable caught) {
                         LOG.log(Level.SEVERE, caught.getMessage(), caught);
@@ -116,5 +111,4 @@ public final class WhatsNewDialogFactory {
             }
         });
     }
-
 }
