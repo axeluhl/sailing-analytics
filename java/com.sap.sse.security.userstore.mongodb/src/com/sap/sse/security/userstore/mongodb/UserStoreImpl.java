@@ -571,22 +571,28 @@ public class UserStoreImpl implements UserStore {
     public void removeRoleDefinition(RoleDefinition roleDefinition) {
         LockUtil.executeWithWriteLock(usersLock, () -> {
             LockUtil.executeWithWriteLock(userGroupsLock, () -> {
-                for (User user : roleDefinitionsToUsers.get(roleDefinition)) {
-                    for (Role role : user.getRoles()) {
-                        if (role.getRoleDefinition().equals(roleDefinition)) {
-                            user.removeRole(role);
-                            mongoObjectFactory.storeUser(user);
+                final Set<User> usersHavingRoleWithRoleDefiniton = roleDefinitionsToUsers.get(roleDefinition);
+                if(usersHavingRoleWithRoleDefiniton != null) {
+                    for (User user : usersHavingRoleWithRoleDefiniton) {
+                        for (Role role : user.getRoles()) {
+                            if (role.getRoleDefinition().equals(roleDefinition)) {
+                                user.removeRole(role);
+                                mongoObjectFactory.storeUser(user);
+                            }
                         }
                     }
+                    roleDefinitionsToUsers.remove(roleDefinition);
                 }
-                roleDefinitionsToUsers.remove(roleDefinition);
-                for (UserGroup userGroup : roleDefinitionsToUserGroups.get(roleDefinition)) {
-                    if (userGroup.getRoleAssociation(roleDefinition)) {
-                        userGroup.remove(roleDefinition);
-                        mongoObjectFactory.storeUserGroup(userGroup);
+                final Set<UserGroup> userGroupsHavingRoleWithRoleDefinition = roleDefinitionsToUserGroups.get(roleDefinition);
+                if(userGroupsHavingRoleWithRoleDefinition != null) {
+                    for (UserGroup userGroup : userGroupsHavingRoleWithRoleDefinition) {
+                        if (userGroup.getRoleAssociation(roleDefinition)) {
+                            userGroup.remove(roleDefinition);
+                            mongoObjectFactory.storeUserGroup(userGroup);
+                        }
                     }
+                    roleDefinitionsToUserGroups.remove(roleDefinition);
                 }
-                roleDefinitionsToUserGroups.remove(roleDefinition);
                 roleDefinitions.remove(roleDefinition.getId());
                 mongoObjectFactory.deleteRoleDefinition(roleDefinition);
             });
