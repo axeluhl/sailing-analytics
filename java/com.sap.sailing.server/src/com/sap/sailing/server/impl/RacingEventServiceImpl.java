@@ -309,7 +309,6 @@ import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.search.Result;
 import com.sap.sse.common.search.ResultImpl;
-import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 import com.sap.sse.filestorage.FileStorageManagementService;
@@ -4798,12 +4797,13 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     private Event findEventContainingLeaderboardAndMatchingAtLeastOneCourseArea(Leaderboard leaderboard) {
-        assert !Util.isEmpty(leaderboard.getCourseAreas());
-        for (final Event event : getAllEvents()) {
-            if (Util.containsAny(event.getVenue().getCourseAreas(), leaderboard.getCourseAreas())) {
-                for (final LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
-                    if (leaderboardGroup.getIndexOf(leaderboard) >= 0) {
-                        return event;
+        if (!Util.isEmpty(leaderboard.getCourseAreas())) {
+            for (final Event event : getAllEvents()) {
+                if (Util.containsAny(event.getVenue().getCourseAreas(), leaderboard.getCourseAreas())) {
+                    for (final LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
+                        if (leaderboardGroup.getIndexOf(leaderboard) >= 0) {
+                            return event;
+                        }
                     }
                 }
             }
@@ -4878,9 +4878,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public PairingList<RaceColumn, Fleet, Competitor, Boat> getPairingListFromTemplate(PairingListTemplate pairingListTemplate,
             final String leaderboardName, final Iterable<RaceColumn> selectedRaceColumns) throws PairingListCreationException {
-        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
-        List<Competitor> competitors = Util.createList(leaderboard.getAllCompetitors());
-        Collections.sort(competitors, getCompetitorsComparator());
+        final Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        final List<Competitor> competitors = Util.createList(leaderboard.getAllCompetitors());
+        Collections.shuffle(competitors);
         PairingList<RaceColumn, Fleet, Competitor, Boat> pairingList = pairingListTemplate
                 .createPairingList(new CompetitionFormat<RaceColumn, Fleet, Competitor, Boat>() {
                     @Override
@@ -4911,17 +4911,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         return pairingList;
     }
     
-    /**
-     * This comparator for competitors produces a stable ordering. It is based on the string representation
-     * of the competitors' {@link Competitor#getId() ID}.
-     */
-    private Comparator<Competitor> getCompetitorsComparator() {
-        final Comparator<String> naturalComparator = new NaturalComparator();
-        return (c1, c2) -> naturalComparator.compare(c1.getId().toString(), c2.getId().toString());
-    }
-
     @Override
-    public Iterable<String> getWindFinderReviewedSpotsCollectionIds() {
+    public Iterable<String> getAllWindFinderReviewedSpotsCollectionIds() {
         final Set<String> result = new HashSet<>();
         for (final Event event : getAllEvents()) {
             Util.addAll(event.getWindFinderReviewedSpotsCollectionIds(), result);
@@ -4929,6 +4920,25 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         return result;
     }
     
+    @Override
+    public Iterable<String> getWindFinderReviewedSpotsCollectionIdsByRegatta(RegattaIdentifier regattaIdentifier) {
+        final Set<String> result = new HashSet<>();
+        final Regatta regatta = getRegatta(regattaIdentifier);
+        if (regatta == null) {
+            throw new IllegalArgumentException("The regatta identified by "+regattaIdentifier+" was not found.");
+        }
+        final Leaderboard regattaLeaderboard = getLeaderboardByName(regatta.getName());
+        assert regattaLeaderboard instanceof RegattaLeaderboard;
+        if (regattaLeaderboard != null) {
+            final Event event = findEventContainingLeaderboardAndMatchingAtLeastOneCourseArea(regattaLeaderboard);
+            if (event != null) {
+                Util.addAll(event.getWindFinderReviewedSpotsCollectionIds(), result);
+            }
+        }
+        logger.info("Using WindFinder spot collections "+result+" for regatta "+regattaIdentifier);
+        return result;
+    }
+
     /**
      * Creates a new {@link CompetitorWithBoat} objects from a {@link CompetitorDescriptor}.
      * 

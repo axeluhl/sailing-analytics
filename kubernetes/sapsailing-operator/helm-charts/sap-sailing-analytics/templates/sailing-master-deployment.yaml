@@ -23,6 +23,15 @@ spec:
         prometheus.io/scrape: "true"
         prometheus.io/port: "9102"
     spec:
+      initContainers:
+      - name: wait-for-rabbit-to-be-ready
+        image: alstolten/alpine-with-curl:latest
+        args:
+        - /bin/sh
+        - "-c"
+        - |
+          set -x
+          while [ $(curl -sw '%{http_code}' "http://guest:guest@rabbitmq:15672/api/aliveness-test/%2F" -o /dev/null) -ne 200 ]; do sleep 10; done
       containers:
       - name: sailing
         image: {{ .Values.image.repository }}:{{ .Values.image.tag }}

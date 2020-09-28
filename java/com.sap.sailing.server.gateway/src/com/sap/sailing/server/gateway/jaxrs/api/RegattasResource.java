@@ -23,6 +23,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -78,6 +79,7 @@ import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.RegattaName;
+import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TargetTimeInfo;
@@ -93,6 +95,7 @@ import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonConstants;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.racelogtracking.DeviceMappingWithRegattaLogEvent;
@@ -156,6 +159,7 @@ import com.sap.sailing.server.gateway.serialization.impl.TrackedRaceJsonSerializ
 import com.sap.sailing.server.gateway.serialization.impl.WindJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
 import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
+import com.sap.sailing.server.operationaltransformation.RemoveRegatta;
 import com.sap.sailing.server.operationaltransformation.UpdateSeries;
 import com.sap.sailing.server.operationaltransformation.UpdateSpecificRegatta;
 import com.sap.sse.InvalidDateException;
@@ -178,6 +182,8 @@ import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.OwnershipAnnotation;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.util.impl.UUIDHelper;
@@ -357,6 +363,45 @@ public class RegattasResource extends AbstractSailingServerResource {
             response = Response.ok(streamingOutput(serializedRegatta)).build();
         }
         return response;
+    }
+
+    @DELETE
+    @Path("{regattaname}")
+    public Response delete(@PathParam("regattaname") String regattaName) {
+        Regatta regatta = getService().getRegattaByName(regattaName);
+        // TODO this is the same code, as the one used by the SailingServiceImpl, consolidate if an additional layer is
+        // ever wrapped around the RacingEventService
+        if (regatta != null) {
+            Set<QualifiedObjectIdentifier> objectsThatWillBeImplicitlyCleanedByRemoveRegatta = new HashSet<>();
+            objectsThatWillBeImplicitlyCleanedByRemoveRegatta.add(regatta.getIdentifier());
+            for (RaceDefinition race : regatta.getAllRaces()) {
+                TypeRelativeObjectIdentifier typeRelativeObjectIdentifier = RegattaNameAndRaceName
+                        .getTypeRelativeObjectIdentifier(regatta.getName(), race.getName());
+                QualifiedObjectIdentifier identifier = SecuredDomainType.TRACKED_RACE
+                        .getQualifiedObjectIdentifier(typeRelativeObjectIdentifier);
+                objectsThatWillBeImplicitlyCleanedByRemoveRegatta.add(identifier);
+            }
+            for (Leaderboard leaderboard : getService().getLeaderboards().values()) {
+                if (leaderboard instanceof RegattaLeaderboard) {
+                    RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
+                    if (regattaLeaderboard.getRegatta() == regatta) {
+                        objectsThatWillBeImplicitlyCleanedByRemoveRegatta.add(regattaLeaderboard.getIdentifier());
+                    }
+                }
+            }
+            // check if we can delete everything RemoveRegatta will remove
+            for (QualifiedObjectIdentifier toRemovePermissionObjects : objectsThatWillBeImplicitlyCleanedByRemoveRegatta) {
+                getSecurityService().checkCurrentUserDeletePermission(toRemovePermissionObjects);
+            }
+            // we have all permissions, execute
+            getService().apply(new RemoveRegatta(regatta.getRegattaIdentifier()));
+            // cleanup the Ownership and ACLs
+            for (QualifiedObjectIdentifier toRemovePermissionObjects : objectsThatWillBeImplicitlyCleanedByRemoveRegatta) {
+                getSecurityService().deleteAllDataForRemovedObject(toRemovePermissionObjects);
+            }
+
+        }
+        return Response.ok().build();
     }
 
     /**
@@ -2156,9 +2201,9 @@ public class RegattasResource extends AbstractSailingServerResource {
                         jsonLiveData.put("timeToStart-s", (startOfRace.asMillis() - now.asMillis()) / 1000.0);
                     }
                 }
-                JSONArray jsonCompetitors = new JSONArray();
-                List<Competitor> competitorsFromBestToWorst = trackedRace.getCompetitorsFromBestToWorst(timePoint, cache);
-                Map<Competitor, Integer> overallRankPerCompetitor = new HashMap<>();
+                final JSONArray jsonCompetitors = new JSONArray();
+                final List<Competitor> competitorsFromBestToWorst = trackedRace.getCompetitorsFromBestToWorst(timePoint, cache);
+                final Map<Competitor, Integer> overallRankPerCompetitor = new HashMap<>();
                 if (leaderboard != null) {
                     List<Competitor> overallRanking = leaderboard.getCompetitorsFromBestToWorst(timePoint, cache);
                     Integer overallRank = 1;
@@ -2173,7 +2218,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 for (Competitor competitor : competitorsFromBestToWorst) {
                     if (getSecurityService().hasCurrentUserOneOfExplicitPermissions(competitor,
                             SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS)) {
-                        JSONObject jsonCompetitorInLeg = new JSONObject();
+                        final JSONObject jsonCompetitorInLeg = new JSONObject();
                         if (topN != null && topN > 0 && rank > topN) {
                             break;
                         }
@@ -2216,7 +2261,9 @@ public class RegattasResource extends AbstractSailingServerResource {
                             Duration gapToLeader = currentLegOfCompetitor.getGapToLeader(timePoint,
                                     WindPositionMode.LEG_MIDDLE, rankingInfo, cache);
                             if (gapToLeader != null) {
-                                jsonCompetitorInLeg.put("gapToLeader-s", roundDouble(gapToLeader.asSeconds(), 2));
+                                final double gapToLeaderAsSeconds = gapToLeader.asSeconds();
+                                jsonCompetitorInLeg.put("gapToLeader-s",
+                                        Double.isFinite(gapToLeaderAsSeconds) ? roundDouble(gapToLeaderAsSeconds, 2) : null);
                             }
                             Distance windwardDistanceToCompetitorFarthestAhead = currentLegOfCompetitor
                                     .getWindwardDistanceToCompetitorFarthestAhead(timePoint,
@@ -2239,7 +2286,12 @@ public class RegattasResource extends AbstractSailingServerResource {
                     }
                 }
                 jsonLiveData.put("competitors", jsonCompetitors);
-                return Response.ok(streamingOutput(jsonLiveData)).build();
+                try {
+                    return Response.ok(streamingOutput(jsonLiveData)).build();
+                } catch (Exception e) {
+                    logger.log(Level.SEVERE, "Exception trying to obtain live data", e);
+                    throw e;
+                }
             }
         }
         return response;

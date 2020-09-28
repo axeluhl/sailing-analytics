@@ -17,7 +17,6 @@ import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.TrackerManager;
 
 public interface SwissTimingReplayService {
-
     List<SwissTimingReplayRace> parseJSONObject(InputStream inputStream, String swissTimingUrlText) throws IOException,
             ParseException, org.json.simple.parser.ParseException;
 

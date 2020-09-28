@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -28,7 +29,7 @@ import com.sap.sse.security.shared.dto.UserGroupDTO;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserManagementWriteServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
-import com.sap.sse.security.ui.client.component.usergroup.roles.UserGroupRoleDefinitionPanel;
+import com.sap.sse.security.ui.client.component.usergroup.roles.GroupRoleDefinitionPanel;
 import com.sap.sse.security.ui.client.component.usergroup.users.UserGroupDetailPanel;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.SuccessInfo;
@@ -40,7 +41,7 @@ import com.sap.sse.security.ui.shared.SuccessInfo;
 public class UserGroupManagementPanel extends Composite {
     private final UserGroupListDataProvider userGroupListDataProvider;
     private UserGroupDetailPanel userGroupDetailPanel;
-    private UserGroupRoleDefinitionPanel userGroupRoleDefinitionPanel;
+    private GroupRoleDefinitionPanel userGroupRoleDefinitionPanel;
 
     private final UserGroupTableWrapper userGroupTableWrapper;
 
@@ -61,6 +62,7 @@ public class UserGroupManagementPanel extends Composite {
         mainPanel.add(createUserGroupDetailsPanel(stringMessages, userManagementWriteService,
                 userService, additionalPermissions, errorReporter, tableResources));
         initWidget(mainPanel);
+        this.ensureDebugId(this.getClass().getSimpleName());
     }
 
     /** Creates the button bar with add/remove/refresh buttons. 
@@ -70,10 +72,11 @@ public class UserGroupManagementPanel extends Composite {
             RefreshableSelectionModel<UserGroupDTO> userGroupSelectionModel) {
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, USER_GROUP);
         buttonPanel.addUnsecuredAction(stringMessages.refresh(), () -> updateUserGroups());
-        buttonPanel.addCreateActionWithoutServerCreateObjectPermissionCheck(stringMessages.createUserGroup(),
+        final Button createGroupButton = buttonPanel.addCreateActionWithoutServerCreateObjectPermissionCheck(stringMessages.createUserGroup(),
                 () -> new CreateUserGroupDialog(stringMessages, userService, userManagementWriteService,
                         userGroupListDataProvider, () -> updateUserGroups()).show());
-        buttonPanel.addRemoveAction(stringMessages.removeUserGroup(), userGroupSelectionModel, false, () -> {
+        createGroupButton.ensureDebugId("CreateGroupButton");
+        final Button removeGroupButton = buttonPanel.addRemoveAction(stringMessages.removeUserGroup(), userGroupSelectionModel, false, () -> {
             Set<UserGroupDTO> userGroups = userGroupTableWrapper.getSelectionModel().getSelectedSet();
             if (userGroups == null || userGroups.isEmpty()) {
                 Window.alert(stringMessages.youHaveToSelectAUserGroup());
@@ -105,6 +108,7 @@ public class UserGroupManagementPanel extends Composite {
                 }
             }
         });
+        removeGroupButton.ensureDebugId("DeleteUserGroupButton");
         return buttonPanel;
     }
 
@@ -117,7 +121,7 @@ public class UserGroupManagementPanel extends Composite {
             CellTableWithCheckboxResources tableResources) {
         userGroupDetailPanel = new UserGroupDetailPanel(userGroupTableWrapper.getSelectionModel(),
                 userGroupListDataProvider, userService, stringMessages, errorReporter, tableResources);
-        userGroupRoleDefinitionPanel = new UserGroupRoleDefinitionPanel(userService,
+        userGroupRoleDefinitionPanel = new GroupRoleDefinitionPanel(userService,
                 stringMessages, additionalPermissions, errorReporter, tableResources,
                 userGroupTableWrapper.getSelectionModel(), userGroupListDataProvider);
 

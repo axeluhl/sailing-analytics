@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><resources xmlns:tools="http://schemas.android.com/tools">
+<?xml version="1.0" encoding="UTF-8"?><resources>
 
     
     
@@ -19,7 +19,6 @@
     
 
     <!-- Generic -->
-    
     <string name="generic_error">"错误"</string>
     <string name="about">"信息"</string>
 
@@ -87,5 +86,4 @@
     
 
     
-
 </resources>

@@ -1,7 +1,7 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
 	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
-    <ui:with field="shr" type="com.sap.sailing.gwt.home.shared.resources.SharedHomeResources" />
+    <ui:with field="shr" type="com.sap.sailing.gwt.home.shared.SharedHomeResources" />
 	<ui:style gss="true" type="com.sap.sailing.gwt.home.shared.partials.fullscreen.FullscreenContainer.Style">
 		.popup {
 			position: fixed !important;

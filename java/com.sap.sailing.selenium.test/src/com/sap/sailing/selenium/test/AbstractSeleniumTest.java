@@ -168,15 +168,21 @@ public abstract class AbstractSeleniumTest {
         }
     }
     
-    
-    
     protected void setUpAuthenticatedSession(WebDriver webDriver) {
+        setUpAuthenticatedSession(webDriver, "admin", "admin");
+    }
+    
+    protected void clearSession(WebDriver webDriver) {
+        webDriver.manage().deleteCookieNamed("JSESSIONID");
+    }
+    
+    protected void setUpAuthenticatedSession(WebDriver webDriver, String username, String password) {
         // To be able to set a cookie we need to load a page having the target origin
         webDriver.get(getContextRoot());
         logger.info("Authenticating session...");
         Cookie sessionCookie;
         try {
-            sessionCookie = authenticate(getContextRoot());
+            sessionCookie = authenticate(getContextRoot(), username, password);
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
@@ -203,7 +209,7 @@ public abstract class AbstractSeleniumTest {
      * @return the cookie that represents the authenticated session or <code>null</code> if the session
      * couldn't successfully be authenticated
      */
-    protected Cookie authenticate(String contextRoot) throws JSONException {
+    protected Cookie authenticate(String contextRoot, String username, String password) throws JSONException {
         try {
             Cookie result = null;
             URL accessTokenUrl = new URL(contextRoot + OBTAIN_ACCESS_TOKEN_URL);
@@ -211,7 +217,7 @@ public abstract class AbstractSeleniumTest {
             connection.setRequestMethod("POST");
             connection.setDoOutput(true);
             connection.connect();
-            connection.getOutputStream().write("username=admin&password=admin".getBytes());
+            connection.getOutputStream().write(("username=" + username + "&password=" + password).getBytes());
             final JSONObject jsonResponse = new JSONObject(new JSONTokener(new InputStreamReader((InputStream) connection.getContent())));
             final String accessToken = jsonResponse.getString("access_token");
             URL createSessionUrl = new URL(contextRoot + CREATE_SESSION_URL);
