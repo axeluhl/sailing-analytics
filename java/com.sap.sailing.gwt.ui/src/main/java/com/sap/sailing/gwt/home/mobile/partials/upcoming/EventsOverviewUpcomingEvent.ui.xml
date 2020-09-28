@@ -5,7 +5,7 @@
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
 	<ui:with field="local_res"
 		type="com.sap.sailing.gwt.home.mobile.partials.upcoming.EventsOverviewUpcomingResources" />
-	<ui:with field="shr" type="com.sap.sailing.gwt.home.shared.resources.SharedHomeResources" />
+	<ui:with field="shr" type="com.sap.sailing.gwt.home.shared.SharedHomeResources" />
 	<ui:style>
 	.holder {
 		

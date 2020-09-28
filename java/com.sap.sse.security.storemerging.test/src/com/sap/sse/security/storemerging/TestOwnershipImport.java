@@ -16,9 +16,8 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.interfaces.AccessControlStore;
 import com.sap.sse.security.interfaces.UserStore;
+import com.sap.sse.security.shared.UserStoreManagementException;
 import com.sap.sse.security.shared.OwnershipAnnotation;
-import com.sap.sse.security.shared.UserGroupManagementException;
-import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.User;
@@ -26,12 +25,12 @@ import com.sap.sse.security.shared.impl.UserGroup;
 
 public class TestOwnershipImport extends AbstractStoreMergeTest {
     @Before
-    public void setUp() throws IOException, UserGroupManagementException, UserManagementException {
+    public void setUp() throws IOException, UserStoreManagementException {
         setUp("source_TestOwnershipImport", "target_TestOwnershipImport");
     }
     
     @Test
-    public void testTestOwnershipImport() throws UserGroupManagementException, UserManagementException {
+    public void testTestOwnershipImport() throws UserStoreManagementException {
         final String NAME_OF_USER_TO_BE_DROPPED = "UserToBeDropped";
         final String NAME_OF_GROUP_TO_BE_DROPPED = "GroupToBeDropped";
         final String NAME_OF_GROUP_OWNED_BY_DROPPED_GROUP_BUT_KEPT_USER = "OwnedByDroppedGroupButKeptUser";

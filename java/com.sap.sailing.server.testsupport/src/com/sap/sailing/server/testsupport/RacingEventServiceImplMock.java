@@ -1,10 +1,15 @@
 package com.sap.sailing.server.testsupport;
 
+import java.net.UnknownHostException;
 import java.util.Map;
 import java.util.Set;
 
+import com.mongodb.MongoException;
+import com.mongodb.WriteConcern;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.impl.DataImportProgressImpl;
+import com.sap.sailing.domain.persistence.PersistenceFactory;
+import com.sap.sailing.domain.persistence.racelog.tracking.MongoSensorFixStoreFactory;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.interfaces.DataImportLockWithProgress;
@@ -26,8 +31,12 @@ public abstract class RacingEventServiceImplMock extends RacingEventServiceImpl 
         super(/* clearPersistentCompetitorStore */ false, null, /* restoreTrackedRaces */ false);
     }
     
-    public RacingEventServiceImplMock(DataImportProgressImpl dataImportProgressImpl, TypeBasedServiceFinderFactory serviceFinderFactory) {
-        super(null, null, serviceFinderFactory);
+    public RacingEventServiceImplMock(DataImportProgressImpl dataImportProgressImpl,
+            TypeBasedServiceFinderFactory serviceFinderFactory) throws UnknownHostException, MongoException {
+        super(null, MongoSensorFixStoreFactory.INSTANCE.getMongoGPSFixStore(
+                PersistenceFactory.INSTANCE
+                .getDefaultMongoObjectFactory(serviceFinderFactory), PersistenceFactory.INSTANCE
+                .getDefaultDomainObjectFactory(), serviceFinderFactory, WriteConcern.MAJORITY), serviceFinderFactory);
         lock = new DataImportLockWithProgress();
         lock.addProgress(dataImportProgressImpl.getOperationId(), dataImportProgressImpl);
     }

@@ -1,16 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
-    
-    <PreferenceCategory android:title="By-Name Course Designer" >
-		
-	    <com.sap.sailing.android.shared.ui.views.EditSetPreference
-	        android:key="@string/preference_course_designer_by_name_course_names_key"
-	        android:defaultValue="@array/preference_course_designer_by_name_course_names_default"
-	        android:title="@string/settings_course_designer_by_name_course_names_header"
-	        android:summary="@string/empty" />
-		
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="By-Name Course Designer">
+
+        <com.sap.sailing.android.shared.ui.views.EditSetPreference
+            android:key="@string/preference_course_designer_by_name_course_names_key"
+            android:defaultValue="@array/preference_course_designer_by_name_course_names_default"
+            android:title="@string/settings_course_designer_by_name_course_names_header" />
     </PreferenceCategory>
-    
+
     <!--<PreferenceCategory android:title="By-Map Course Designer" >
         <CheckBoxPreference
             android:defaultValue="false"
@@ -26,5 +24,4 @@
             android:summary="@string/empty"
             android:title="@string/empty" />
     </PreferenceCategory> -->
-
 </PreferenceScreen>

@@ -29,10 +29,10 @@ import com.sap.sse.security.shared.PredefinedRoles;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RoleDefinitionImpl;
 import com.sap.sse.security.shared.RolePrototype;
-import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.UserRole;
+import com.sap.sse.security.shared.UserStoreManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.Role;
@@ -58,6 +58,7 @@ import com.sap.sse.security.userstore.mongodb.impl.FieldNames.Tenant;
  *
  */
 public class UserStoreImpl implements UserStore {
+    
     private static final long serialVersionUID = -3860868283827473187L;
 
     private static final Logger logger = Logger.getLogger(UserStoreImpl.class.getName());
@@ -65,6 +66,8 @@ public class UserStoreImpl implements UserStore {
     private static final String ACCESS_TOKEN_KEY = "___access_token___";
 
     private final static String NAME = "MongoDB user store";
+    
+    private final ConcurrentHashMap<UUID, RoleDefinition> roleDefinitions;
 
     /**
      * If a valid default tenant name was passed to the constructor, this field will contain a valid
@@ -75,64 +78,75 @@ public class UserStoreImpl implements UserStore {
      */
     private UserGroup serverGroup;
 
-    private final ConcurrentHashMap<UUID, UserGroup> userGroups;
-    private final ConcurrentHashMap<String, UserGroup> userGroupsByName;
-
-    /**
-     * Protects access to the two maps {@link #userGroupsContainingUser} and {@link #usersInUserGroups} which implement
-     * an efficient lookup for the m:n association between {@link UserGroupImpl#getUsers()} and {@link SecurityUser}.
-     * The collections also contain the relationships for the specialized {@link Tenant} objects which are not part of
-     * {@link #userGroups} but of {@link #tenants}.
-     */
-    private final NamedReentrantReadWriteLock userGroupsUserCacheLock = new NamedReentrantReadWriteLock(
-            "User Groups Cache", /* fair */ false);
-    private final ConcurrentHashMap<User, Set<UserGroup>> userGroupsContainingUser;
+    private final Map<UUID, UserGroup> userGroups;
+    private final Map<String, UserGroup> userGroupsByName;
+    private final Map<User, Set<UserGroup>> userGroupsContainingUser;
+    
     /**
      * This collection is important in particular to detect changes when {@link #updateUserGroup(UserGroupImpl)} is
      * called.
      */
-    private final ConcurrentHashMap<UserGroup, Set<User>> usersInUserGroups;
+    private final Map<UserGroup, Set<User>> usersInUserGroups;
+    private final Map<RoleDefinition, Set<UserGroup>> roleDefinitionsToUserGroups;
+    
+    /**
+     * Protects access to the maps {@link #userGroupsContainingUser}, {@link #usersInUserGroups}, {@link #userGroups},
+     * {@link #userGroupsByName} and {@link #roleDefinitionsToUserGroups}.<br>
+     * Lock may be acquired when having a lock for {@linkplain usersLock}. If both locks (no matter if read or write) are
+     * required, {@link #usersLock} must always be acquired before acquiring {@link #userGroupsLock}.
+     */
+    private transient NamedReentrantReadWriteLock userGroupsLock;
+    
+    /**
+     * Protects access to the maps {@link #users}, {@link #usersByEmail}, {@link #roleDefinitionsToUsers},
+     * {@link #usersByAccessToken} and {@link #emailForUsername}.<br>
+     * Must not be locked when already having a lock for {@linkplain userGroupsLock}. If both locks (no matter if read
+     * or write) are required, {@link #usersLock} must always be acquired before acquiring {@link #userGroupsLock}.
+     */
+    private transient NamedReentrantReadWriteLock usersLock;
+    private final Map<String, User> users;
+    private final Map<String, Set<User>> usersByEmail;
+    private final Map<String, User> usersByAccessToken;
+    private final Map<String, String> emailForUsername;
+    private final Map<RoleDefinition, Set<User>> roleDefinitionsToUsers;
 
-    private final ConcurrentHashMap<String, User> users;
-    private final ConcurrentHashMap<String, Set<User>> usersByEmail;
-    private final ConcurrentHashMap<UUID, RoleDefinition> roleDefinitions;
-
-    private final ConcurrentHashMap<String, User> usersByAccessToken;
-    private final ConcurrentHashMap<String, String> emailForUsername;
     private final ConcurrentHashMap<String, Object> settings;
     private final ConcurrentHashMap<String, Class<?>> settingTypes;
 
     /**
+     * Protects access to the maps {@link #preferences}, {@link #preferenceConverters}, {@link #preferenceObjects} and
+     * {@link #preferenceListeners}. If access to {@link #userGroupsLock} or {@link #usersLock} is required, these locks
+     * must be obtained first in the correct order. This lock always has to be locked last.
+     */
+    private transient NamedReentrantReadWriteLock preferenceLock;
+    
+    /**
      * Keys are the usernames, values are the key/value pairs representing the user's preferences
      */
-    private final ConcurrentHashMap<String, Map<String, String>> preferences;
+    private final Map<String, Map<String, String>> preferences;
 
     /**
      * Converter objects to map preference Strings to Objects. The keys must match the keys of the preferences.
      */
-    private transient ConcurrentHashMap<String, PreferenceConverter<?>> preferenceConverters;
+    private transient Map<String, PreferenceConverter<?>> preferenceConverters;
 
     /**
      * This is another view of the String preferences mapped by {@link #preferenceConverters} to Objects. Keys are the
      * usernames, values are the key/value pairs representing the user's preferences.
      */
-    private transient ConcurrentHashMap<String, Map<String, Object>> preferenceObjects;
-
+    private transient Map<String, Map<String, Object>> preferenceObjects;
+    
     /**
      * Keys are preferences keys as used by {@link #preferenceObjects}, values are the listeners to inform on changes of
      * the specific preference object for a {@link UserImpl}.
      */
-    private transient Map<String, Set<PreferenceObjectListener<?>>> listeners;
-
-    /**
-     * To be used for locking when working with {@link #listeners}.
-     */
-    private transient NamedReentrantReadWriteLock listenersLock;
-
+    private transient Map<String, Set<PreferenceObjectListener<?>>> preferenceListeners;
+    
     /**
      * Won't be serialized and remains <code>null</code> on the de-serializing end.
      */
     private final transient MongoObjectFactory mongoObjectFactory;
+    
     /**
      * Won't be serialized and remains <code>null</code> on the de-serializing end.
      */
@@ -150,22 +164,25 @@ public class UserStoreImpl implements UserStore {
         this.serverGroupName = defaultServerGroupName;
         this.domainObjectFactory = domainObjectFactory;
         roleDefinitions = new ConcurrentHashMap<>();
-        userGroups = new ConcurrentHashMap<>();
-        userGroupsByName = new ConcurrentHashMap<>();
-        userGroupsContainingUser = new ConcurrentHashMap<>();
-        usersInUserGroups = new ConcurrentHashMap<>();
-        users = new ConcurrentHashMap<>();
-        usersByEmail = new ConcurrentHashMap<>();
-        emailForUsername = new ConcurrentHashMap<>();
+        userGroups = new HashMap<>();
+        userGroupsByName = new HashMap<>();
+        userGroupsContainingUser = new HashMap<>();
+        usersInUserGroups = new HashMap<>();
+        roleDefinitionsToUsers = new HashMap<>();
+        roleDefinitionsToUserGroups = new HashMap<>();
+        users = new HashMap<>();
+        usersByEmail = new HashMap<>();
+        emailForUsername = new HashMap<>();
         settings = new ConcurrentHashMap<>();
         settingTypes = new ConcurrentHashMap<>();
-        usersByAccessToken = new ConcurrentHashMap<>();
-        preferences = new ConcurrentHashMap<>();
-        preferenceConverters = new ConcurrentHashMap<>();
-        preferenceObjects = new ConcurrentHashMap<>();
-        listeners = new HashMap<>();
-        listenersLock = new NamedReentrantReadWriteLock(
-                UserStoreImpl.class.getSimpleName() + " lock for listeners collection", false);
+        usersByAccessToken = new HashMap<>();
+        preferences = new HashMap<>();
+        preferenceConverters = new HashMap<>();
+        preferenceObjects = new HashMap<>();
+        preferenceListeners = new HashMap<>();
+        usersLock = new NamedReentrantReadWriteLock("Users", /* fair */ false);
+        userGroupsLock = new NamedReentrantReadWriteLock("User Groups", /* fair */ false);
+        preferenceLock = new NamedReentrantReadWriteLock("Preferences", /* fair */ false);
         this.mongoObjectFactory = mongoObjectFactory;
         if (domainObjectFactory != null) {
             for (Entry<String, Class<?>> e : domainObjectFactory.loadSettingTypes().entrySet()) {
@@ -194,50 +211,66 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public UserGroup ensureServerGroupExists() throws UserGroupManagementException {
-        serverGroup = getOrCreateServerGroup(serverGroupName);
-        return serverGroup;
+        return LockUtil.executeWithWriteLockAndResultExpectException(userGroupsLock, () -> {
+            serverGroup = getOrCreateServerGroup(serverGroupName);
+            return serverGroup;
+        });
     }
 
     /**
      * Do not call this before the security service is ready, as else role definition migration will not work correctly
      */
-    public void loadAndMigrateUsers() throws UserGroupManagementException, UserManagementException {
-        final Iterable<UserGroup> userGroups = domainObjectFactory
-                .loadAllUserGroupsAndTenantsWithProxyUsers(roleDefinitions);
-        for (UserGroup group : userGroups) {
-            this.userGroups.put(group.getId(), group);
-            userGroupsByName.put(group.getName(), group);
-        }
-        // do this here, in case the default tenant was just loaded before
-        ensureServerGroupExists();
-        for (User u : domainObjectFactory.loadAllUsers(roleDefinitions, this::convertToNewRoleModel, this.userGroups, this)) {
-            users.put(u.getName(), u);
-            addToUsersByEmail(u);
-        }
-        // the users in the groups/tenants are still only proxies; now that the real users have been loaded,
-        // replace them based on the username key:
-        for (final UserGroup group : this.userGroups.values()) {
-            migrateProxyUsersInGroupToRealUsersByUsername(group);
-            for (final User userInGroup : group.getUsers()) {
-                Util.addToValueSet(usersInUserGroups, group, userInGroup);
-                Util.addToValueSet(userGroupsContainingUser, userInGroup, group);
-            }
-        }
-        // FIXME check for non migrated users, those are leftovers that are in some groups but have no user object anymore, remove them from the groups!
-        for (Entry<String, Map<String, String>> e : preferences.entrySet()) {
-            if (e.getValue() != null) {
-                final String accessToken = e.getValue().get(ACCESS_TOKEN_KEY);
-                if (accessToken != null) {
-                    final User user = users.get(e.getKey());
-                    if (user != null) {
-                        usersByAccessToken.put(accessToken, user);
-                    } else {
-                        logger.warning("Couldn't find user \"" + e.getKey()
-                                + "\" for which an access token was found in the preferences");
+    public void loadAndMigrateUsers() throws UserStoreManagementException {
+        LockUtil.executeWithWriteLockExpectException(usersLock, () -> {
+            LockUtil.executeWithWriteLockExpectException(userGroupsLock, () -> {
+                final Iterable<UserGroup> userGroups = domainObjectFactory
+                        .loadAllUserGroupsAndTenantsWithProxyUsers(roleDefinitions);
+                for (UserGroup group : userGroups) {
+                    this.userGroups.put(group.getId(), group);
+                    userGroupsByName.put(group.getName(), group);
+                }
+                // do this here, in case the default tenant was just loaded before
+                ensureServerGroupExists();
+                for (User u : domainObjectFactory.loadAllUsers(roleDefinitions, this::convertToNewRoleModel,
+                        this.userGroups, this)) {
+                    users.put(u.getName(), u);
+                    addToUsersByEmail(u);
+                    for (Role roleOfUser : u.getRoles()) {
+                        Util.addToValueSet(roleDefinitionsToUsers, roleOfUser.getRoleDefinition(), u);
                     }
                 }
-            }
-        }
+                // the users in the groups/tenants are still only proxies; now that the real users have been loaded,
+                // replace them based on the username key:
+                for (final UserGroup group : this.userGroups.values()) {
+                    migrateProxyUsersInGroupToRealUsersByUsername(group);
+                    for (final User userInGroup : group.getUsers()) {
+                        Util.addToValueSet(usersInUserGroups, group, userInGroup);
+                        Util.addToValueSet(userGroupsContainingUser, userInGroup, group);
+                    }
+                    for (RoleDefinition roleInUserGroup : group.getRoleDefinitionMap().keySet()) {
+                        Util.addToValueSet(roleDefinitionsToUserGroups, roleInUserGroup, group);
+                    }
+                }
+            });
+            LockUtil.executeWithReadLock(preferenceLock, () -> {
+                // FIXME check for non migrated users, those are leftovers that are in some groups but have no user object
+                // anymore, remove them from the groups!
+                for (Entry<String, Map<String, String>> e : preferences.entrySet()) {
+                    if (e.getValue() != null) {
+                        final String accessToken = e.getValue().get(ACCESS_TOKEN_KEY);
+                        if (accessToken != null) {
+                            final User user = users.get(e.getKey());
+                            if (user != null) {
+                                usersByAccessToken.put(accessToken, user);
+                            } else {
+                                logger.warning("Couldn't find user \"" + e.getKey()
+                                + "\" for which an access token was found in the preferences");
+                            }
+                        }
+                    }
+                }
+            });
+        });
     }
     
     private Role convertToNewRoleModel(String oldRoleName, String username) {
@@ -318,7 +351,11 @@ public class UserStoreImpl implements UserStore {
         this.serverGroup = newServerGroup;
     }
 
+    /**
+     * To call this method, the caller must have obtained the write lock of {@link #userGroupsLock}.
+     */
     private UserGroup getOrCreateServerGroup(String defaultServerGroupName) throws UserGroupManagementException {
+        assert userGroupsLock.isWriteLockedByCurrentThread();
         final UserGroup result;
         if (defaultServerGroupName != null) {
             final UserGroup existingTenant = getUserGroupByName(defaultServerGroupName);
@@ -334,7 +371,12 @@ public class UserStoreImpl implements UserStore {
         return result;
     }
 
+    /**
+     * To call this method, the caller must have obtained the write lock of {@link #usersLock} and {@link #userGroupsLock}.
+     */
     private void migrateProxyUsersInGroupToRealUsersByUsername(final UserGroup group) {
+        assert usersLock.isWriteLockedByCurrentThread();
+        assert userGroupsLock.isWriteLockedByCurrentThread();
         // copy user set before looping to avoid concurrent modification exception
         final Set<User> oldUsers = new HashSet<>();
         Util.addAll(group.getUsers(), oldUsers);
@@ -350,63 +392,79 @@ public class UserStoreImpl implements UserStore {
         }
     }
 
+    /**
+     * used to deserialize the object, thus called during initialization and not subject to concurrency. No locks needed
+     */
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
-        preferenceConverters = new ConcurrentHashMap<>();
-        preferenceObjects = new ConcurrentHashMap<>();
-        listeners = new HashMap<>();
-        listenersLock = new NamedReentrantReadWriteLock(
-                UserStoreImpl.class.getSimpleName() + " lock for listeners collection", false);
+        preferenceConverters = new HashMap<>();
+        preferenceObjects = new HashMap<>();
+        preferenceListeners = new HashMap<>();
+        usersLock = new NamedReentrantReadWriteLock("Users", /* fair */ false);
+        userGroupsLock = new NamedReentrantReadWriteLock("User Groups", /* fair */ false);
+        preferenceLock = new NamedReentrantReadWriteLock("Preferences", /* fair */ false);
     }
 
     protected Object readResolve() {
-        for (final User user : getUsers()) {
-            if (user instanceof UserImpl) {
-                ((UserImpl) user).setUserGroupProvider(this);
+        LockUtil.executeWithWriteLock(usersLock, () -> {
+            for (final User user : getUsers()) {
+                if (user instanceof UserImpl) {
+                    ((UserImpl) user).setUserGroupProvider(this);
+                }
             }
-        }
+        });
         return this;
     }
 
     @Override
     public void clear() {
-        if (mongoObjectFactory != null) {
-            users.values().forEach(mongoObjectFactory::deleteUser);
-            userGroups.values().forEach(mongoObjectFactory::deleteUserGroup);
-            roleDefinitions.values().forEach(mongoObjectFactory::deleteRoleDefinition);
-            mongoObjectFactory.deleteAllPreferences();
-            mongoObjectFactory.deleteAllSettings();
-        }
-        removeAll();
+        LockUtil.executeWithWriteLock(usersLock, () -> {
+            LockUtil.executeWithWriteLock(userGroupsLock, () -> {
+                LockUtil.executeWithWriteLock(preferenceLock, () -> {
+                    if (mongoObjectFactory != null) {
+                        users.values().forEach(mongoObjectFactory::deleteUser);
+                        userGroups.values().forEach(mongoObjectFactory::deleteUserGroup);
+                        roleDefinitions.values().forEach(mongoObjectFactory::deleteRoleDefinition);
+                        mongoObjectFactory.deleteAllPreferences();
+                        mongoObjectFactory.deleteAllSettings();
+                    }
+                    removeAll();
+                });
+            });
+        });
     }
 
+    /**
+     * To call this method, the caller must have obtained the write lock of {@link #usersLock} and {@link #userGroupsLock}.
+     */
     private void removeAll() {
+        assert usersLock.isWriteLockedByCurrentThread();
+        assert userGroupsLock.isWriteLockedByCurrentThread();
         userGroups.clear();
         userGroupsByName.clear();
-        LockUtil.lockForWrite(userGroupsUserCacheLock);
-        try {
-            userGroupsContainingUser.clear();
-            usersInUserGroups.clear();
-        } finally {
-            LockUtil.unlockAfterWrite(userGroupsUserCacheLock);
-        }
+        userGroupsContainingUser.clear();
+        usersInUserGroups.clear();
+        roleDefinitionsToUserGroups.clear();
         clearAllPreferenceObjects();
         emailForUsername.clear();
         settings.clear();
         settingTypes.clear();
         users.clear();
+        roleDefinitionsToUsers.clear();
         roleDefinitions.clear();
         usersByEmail.clear();
         usersByAccessToken.clear();
-
     }
 
     /**
+     * To call this method, the caller must have obtained the write lock of {@link #preferenceLock}.
+     * 
      * Preference objects can't be simply removed by clearing {@link #preferenceObjects} because listeners can have a
      * state depending on the current preference objects. So we need to notify all listeners about the removal of the
      * notification objects.
      */
     private void clearAllPreferenceObjects() {
+        assert preferenceLock.isWriteLockedByCurrentThread();
         final Set<String> usersToProcess = new HashSet<>(preferences.keySet());
         for (String username : usersToProcess) {
             removeAllPreferencesForUser(username);
@@ -416,40 +474,41 @@ public class UserStoreImpl implements UserStore {
     @Override
     public void replaceContentsFrom(UserStore newUserStore) {
         clear();
-        LockUtil.lockForWrite(userGroupsUserCacheLock);
-        try {
-            for (UserGroup group : newUserStore.getUserGroups()) {
-                userGroups.put(group.getId(), group);
-                userGroupsByName.put(group.getName(), group);
-                final HashSet<User> usersInGroup = new HashSet<>();
-                Util.addAll(group.getUsers(), usersInGroup);
-                usersInUserGroups.put(group, usersInGroup);
-                for (final User userInGroup : group.getUsers()) {
-                    Util.addToValueSet(userGroupsContainingUser, userInGroup, group);
+        LockUtil.executeWithWriteLock(usersLock, () -> {
+            LockUtil.executeWithWriteLock(userGroupsLock, () -> {
+                for (UserGroup group : newUserStore.getUserGroups()) {
+                    userGroups.put(group.getId(), group);
+                    userGroupsByName.put(group.getName(), group);
+                    final HashSet<User> usersInGroup = new HashSet<>();
+                    Util.addAll(group.getUsers(), usersInGroup);
+                    usersInUserGroups.put(group, usersInGroup);
+                    for (final User userInGroup : group.getUsers()) {
+                        Util.addToValueSet(userGroupsContainingUser, userInGroup, group);
+                    }
                 }
-            }
-        } finally {
-            LockUtil.unlockAfterWrite(userGroupsUserCacheLock);
-        }
-        for (RoleDefinition roleDefinition : newUserStore.getRoleDefinitions()) {
-            roleDefinitions.put(roleDefinition.getId(), roleDefinition);
-        }
-        for (User user : newUserStore.getUsers()) {
-            users.put(user.getName(), user);
-            addToUsersByEmail(user);
-            for (Entry<String, String> userPref : newUserStore.getAllPreferences(user.getName()).entrySet()) {
-                setPreference(user.getName(), userPref.getKey(), userPref.getValue());
-                if (userPref.getKey().equals(ACCESS_TOKEN_KEY)) {
-                    usersByAccessToken.put(userPref.getValue(), user);
+                for (RoleDefinition roleDefinition : newUserStore.getRoleDefinitions()) {
+                    roleDefinitions.put(roleDefinition.getId(), roleDefinition);
                 }
-            }
-        }
-        for (Entry<String, Object> setting : newUserStore.getAllSettings().entrySet()) {
-            settings.put(setting.getKey(), setting.getValue());
-        }
-        for (Entry<String, Class<?>> settingType : newUserStore.getAllSettingTypes().entrySet()) {
-            settingTypes.put(settingType.getKey(), settingType.getValue());
-        }
+                LockUtil.executeWithWriteLock(preferenceLock, () -> {
+                    for (User user : newUserStore.getUsers()) {
+                        users.put(user.getName(), user);
+                        addToUsersByEmail(user);
+                        for (Entry<String, String> userPref : newUserStore.getAllPreferences(user.getName()).entrySet()) {
+                            setPreferenceInternalAndUpdatePreferenceObjectIfConverterIsAvailable(user.getName(), userPref.getKey(), userPref.getValue());
+                            if (userPref.getKey().equals(ACCESS_TOKEN_KEY)) {
+                                usersByAccessToken.put(userPref.getValue(), user);
+                            }
+                        }
+                    }
+                });
+                for (Entry<String, Object> setting : newUserStore.getAllSettings().entrySet()) {
+                    settings.put(setting.getKey(), setting.getValue());
+                }
+                for (Entry<String, Class<?>> settingType : newUserStore.getAllSettingTypes().entrySet()) {
+                    settingTypes.put(settingType.getKey(), settingType.getValue());
+                }
+            });
+        });
     }
 
     @Override
@@ -510,26 +569,34 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public void removeRoleDefinition(RoleDefinition roleDefinition) {
-        mongoObjectFactory.deleteRoleDefinition(roleDefinition);
-        roleDefinitions.remove(roleDefinition.getId());
+        LockUtil.executeWithWriteLock(usersLock, () -> {
+            LockUtil.executeWithWriteLock(userGroupsLock, () -> {
+                mongoObjectFactory.deleteRoleDefinition(roleDefinition);
+                roleDefinitions.remove(roleDefinition.getId());
+                roleDefinitionsToUsers.remove(roleDefinition);
+                roleDefinitionsToUserGroups.remove(roleDefinition);
+            });
+        });
     }
 
     @Override
     public boolean setAccessToken(String username, String accessToken) {
-        final boolean result;
-        final User user = getUserByName(username);
-        if (user == null) {
-            result = false;
-        } else {
-            result = true;
-            final String oldAccessToken = getPreference(username, ACCESS_TOKEN_KEY);
-            if (oldAccessToken != null) {
-                usersByAccessToken.remove(oldAccessToken);
+       return LockUtil.executeWithWriteLockAndResult(usersLock, () -> {
+            final boolean result;
+            final User user = getUserByName(username);
+            if (user == null) {
+                result = false;
+            } else {
+                result = true;
+                final String oldAccessToken = getPreference(username, ACCESS_TOKEN_KEY);
+                if (oldAccessToken != null) {
+                    usersByAccessToken.remove(oldAccessToken);
+                }
+                usersByAccessToken.put(accessToken, user);
+                setPreference(username, ACCESS_TOKEN_KEY, accessToken);
             }
-            usersByAccessToken.put(accessToken, user);
-            setPreference(username, ACCESS_TOKEN_KEY, accessToken);
-        }
-        return result;
+            return result;
+        });
     }
 
     @Override
@@ -539,6 +606,7 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public void removeAccessToken(String username) {
+        LockUtil.executeWithWriteLock(usersLock, () -> {
             User user = users.get(username);
             if (user != null) {
                 final String accessToken = getPreference(username, ACCESS_TOKEN_KEY);
@@ -548,9 +616,14 @@ public class UserStoreImpl implements UserStore {
                 // the access token actually existed; now we need to update the preferences
                 unsetPreference(username, ACCESS_TOKEN_KEY);
             }
+        });
     }
 
+    /**
+     * To call this method, the caller must have obtained the write lock of {@link #usersLock}.
+     */
     private void addToUsersByEmail(User u) {
+        assert usersLock.isWriteLockedByCurrentThread();
         if (u.getEmail() != null && !u.getEmail().isEmpty()) {
             Set<User> set = usersByEmail.get(u.getEmail());
             if (set == null) {
@@ -562,7 +635,11 @@ public class UserStoreImpl implements UserStore {
         }
     }
 
+    /**
+     * To call this method, the caller must have obtained the write lock of {@link #usersLock}.
+     */
     private void removeFromUsersByEmail(User u) {
+        assert usersLock.isWriteLockedByCurrentThread();
         if (u != null) {
             final String email = emailForUsername.remove(u.getName());
             if (email != null) {
@@ -593,57 +670,71 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public Iterable<UserGroup> getUserGroups() {
-        return new ArrayList<>(userGroups.values());
+        return LockUtil.executeWithReadLockAndResult(userGroupsLock, () -> {
+            return new ArrayList<>(userGroups.values());
+        });
     }
 
     @Override
     public UserGroup getUserGroupByName(String name) {
-        return name == null ? null : userGroupsByName.get(name);
+        return LockUtil.executeWithReadLockAndResult(userGroupsLock, () -> {
+            return name == null ? null : userGroupsByName.get(name);
+        });
     }
 
     @Override
     public UserGroup getUserGroup(UUID id) {
-        return id == null ? null : userGroups.get(id);
+        return LockUtil.executeWithReadLockAndResult(userGroupsLock, () -> {
+            return id == null ? null : userGroups.get(id);
+        });
     }
 
     @Override
     public UserGroupImpl createUserGroup(UUID groupId, String name) throws UserGroupManagementException {
-        checkGroupNameAndIdUniqueness(groupId, name);
-        logger.info("Creating user group: " + groupId + " with name " + name);
-        UserGroupImpl group = new UserGroupImpl(groupId, name);
-        if (mongoObjectFactory != null) {
-            mongoObjectFactory.storeUserGroup(group);
-        }
-        addGroupToInternalMaps(group);
-        return group;
+        return LockUtil.executeWithWriteLockAndResultExpectException(userGroupsLock, () -> {
+            checkGroupNameAndIdUniqueness(groupId, name);
+            logger.info("Creating user group: " + groupId + " with name " + name);
+            UserGroupImpl group = new UserGroupImpl(groupId, name);
+            if (mongoObjectFactory != null) {
+                mongoObjectFactory.storeUserGroup(group);
+            }
+            addGroupToInternalMaps(group);
+            return group;
+        });
     }
-
+    
+    /**
+     * To call this method, the caller must have obtained the write lock of {@link #userGroupsLock}.
+     */
     private void addGroupToInternalMaps(UserGroup group) {
+        assert userGroupsLock.isWriteLockedByCurrentThread();
         userGroups.put(group.getId(), group);
         userGroupsByName.put(group.getName(), group);
     }
 
+    /**
+     * To call this method, the caller must have obtained the read lock of {@link #userGroupsLock}.
+     */
     private void checkGroupNameAndIdUniqueness(UUID groupId, String name) throws UserGroupManagementException {
-        if (userGroupsByName.contains(name)) {
-            throw new UserGroupManagementException(UserGroupManagementException.USER_GROUP_ALREADY_EXISTS);
-        }
-        if (userGroups.contains(groupId)) {
+        assert userGroupsLock.isWriteLockedByCurrentThread() || userGroupsLock.getReadHoldCount() > 0;
+        if (userGroupsByName.containsKey(name) || userGroups.containsKey(groupId)) {
             throw new UserGroupManagementException(UserGroupManagementException.USER_GROUP_ALREADY_EXISTS);
         }
     }
 
     @Override
     public void addUserGroup(UserGroup group) throws UserGroupManagementException {
-        checkGroupNameAndIdUniqueness(group.getId(), group.getName());
-        addGroupToInternalMaps(group);
-        updateUserGroup(group);
+        LockUtil.executeWithWriteLockExpectException(userGroupsLock, () -> {
+            checkGroupNameAndIdUniqueness(group.getId(), group.getName());
+            addGroupToInternalMaps(group);
+            updateUserGroup(group);
+        });
     }
 
     @Override
     public void updateUserGroup(UserGroup group) {
         logger.info("Updating user group " + group.getName() + " in DB");
-        LockUtil.lockForWrite(userGroupsUserCacheLock);
-        try {
+        LockUtil.executeWithWriteLock(userGroupsLock, () -> {
             Set<User> usersInGroupBefore = new HashSet<>();
             Util.addAll(usersInUserGroups.get(group), usersInGroupBefore);
             for (final User userNowInUpdatedGroup : group.getUsers()) {
@@ -660,9 +751,11 @@ public class UserStoreImpl implements UserStore {
                     Util.removeFromValueSet(userGroupsContainingUser, userInGroupBefore, group);
                 }
             }
-        } finally {
-            LockUtil.unlockAfterWrite(userGroupsUserCacheLock);
-        }
+            Util.removeFromAllValueSets(roleDefinitionsToUserGroups, group);
+            for (RoleDefinition roleInUserGroup : group.getRoleDefinitionMap().keySet()) {
+                Util.addToValueSet(roleDefinitionsToUserGroups, roleInUserGroup, group);
+            }
+        });
         if (mongoObjectFactory != null) {
             mongoObjectFactory.storeUserGroup(group);
         }
@@ -670,37 +763,34 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public Iterable<UserGroup> getUserGroupsOfUser(User user) {
-        final Iterable<UserGroup> preResult;
-        LockUtil.lockForRead(userGroupsUserCacheLock);
-        try {
-            preResult = userGroupsContainingUser.get(user);
-        } finally {
-            LockUtil.unlockAfterRead(userGroupsUserCacheLock);
-        }
-        return preResult == null ? Collections.<UserGroup> emptySet() : preResult;
+        return LockUtil.executeWithReadLockAndResult(userGroupsLock, () -> {
+            final Set<UserGroup> userGroups = userGroupsContainingUser.get(user);
+            return userGroups == null ? Collections.emptySet() : new HashSet<>(userGroups);
+        });
     }
 
-    @Override
-    public void deleteUserGroup(UserGroup userGroup) throws UserGroupManagementException {
+    private void deleteUserGroup(UserGroup userGroup) throws UserGroupManagementException {
+        assert userGroupsLock.isWriteLockedByCurrentThread();
         if (!userGroups.containsKey(userGroup.getId())) {
             throw new UserGroupManagementException(UserGroupManagementException.USER_GROUP_DOES_NOT_EXIST);
         }
         logger.info("Deleting user group: " + userGroup);
         userGroupsByName.remove(userGroup.getName());
         userGroups.remove(userGroup.getId());
-        LockUtil.lockForWrite(userGroupsUserCacheLock);
-        try {
-            for (final User userInDeletedGroup : userGroup.getUsers()) {
-                Util.removeFromValueSet(userGroupsContainingUser, userInDeletedGroup, userGroup);
-            }
-            usersInUserGroups.remove(userGroup);
-        } finally {
-            LockUtil.unlockAfterWrite(userGroupsUserCacheLock);
+        for (final User userInDeletedGroup : userGroup.getUsers()) {
+            Util.removeFromValueSet(userGroupsContainingUser, userInDeletedGroup, userGroup);
         }
+        usersInUserGroups.remove(userGroup);
+        userGroup.getRoleDefinitionMap().keySet()
+                .forEach(role -> Util.removeFromValueSet(roleDefinitionsToUserGroups, role, userGroup));
         deleteUserGroupFromDB(userGroup);
     }
 
+    /**
+     * To call this method, the caller must have obtained the write lock of {@link #userGroupsLock}.
+     */
     private void deleteUserGroupFromDB(UserGroup userGroup) {
+        assert userGroupsLock.isWriteLockedByCurrentThread();
         if (mongoObjectFactory != null) {
             mongoObjectFactory.deleteUserGroup(userGroup);
         }
@@ -709,23 +799,33 @@ public class UserStoreImpl implements UserStore {
     @Override
     public User createUser(String name, String email, Account... accounts)
             throws UserManagementException {
-        checkUsernameUniqueness(name);
-        ConcurrentHashMap<String, UserGroup> tenantsForServer = new ConcurrentHashMap<>();
-        User user = new UserImpl(name, email, tenantsForServer, /* user group provider */ this, accounts);
-        logger.info("Creating user: " + user + " with e-mail " + email);
-        addAndStoreUserInternal(user);
-        return user;
+        return LockUtil.executeWithWriteLockAndResultExpectException(usersLock, () -> {
+            checkUsernameUniqueness(name);
+            final Map<String, UserGroup> tenantsForServer = new ConcurrentHashMap<>();
+            final User user = new UserImpl(name, email, tenantsForServer, /* user group provider */ this, accounts);
+            logger.info("Creating user: " + user + " with e-mail " + email);
+            addAndStoreUserInternal(user);
+            return user;
+        });
     }
-
+    
+    /**
+     * To call this method, the caller must have obtained the write lock of {@link #usersLock}.
+     */
     private void addAndStoreUserInternal(User user) {
+        assert usersLock.isWriteLockedByCurrentThread();
         if (mongoObjectFactory != null) {
             mongoObjectFactory.storeUser(user);
         }
         users.put(user.getName(), user);
         addToUsersByEmail(user);
     }
-
+    
+    /**
+     * To call this method, the caller must have obtained the write lock of {@link #usersLock}.
+     */
     private void checkUsernameUniqueness(String name) throws UserManagementException {
+        assert usersLock.isWriteLockedByCurrentThread();
         if (getUserByName(name) != null) {
             throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
         }
@@ -733,30 +833,38 @@ public class UserStoreImpl implements UserStore {
     
     @Override
     public void addUser(User user) throws UserManagementException {
-        checkUsernameUniqueness(user.getName());
-        logger.info("Adding user: "+user);
-        addAndStoreUserInternal(user);
+        LockUtil.executeWithWriteLockExpectException(usersLock, () -> {
+            checkUsernameUniqueness(user.getName());
+            logger.info("Adding user: "+user);
+            addAndStoreUserInternal(user);
+        });
     }
 
     @Override
     public void updateUser(User user) {
-        logger.info("Updating user " + user + " in DB");
-        users.put(user.getName(), user);
-        removeFromUsersByEmail(user);
-        addToUsersByEmail(user);
-        if (mongoObjectFactory != null) {
-            mongoObjectFactory.storeUser(user);
-        }
+        LockUtil.executeWithWriteLock(usersLock, () -> {
+            logger.info("Updating user " + user + " in DB");
+            users.put(user.getName(), user);
+            removeFromUsersByEmail(user);
+            addToUsersByEmail(user);
+            if (mongoObjectFactory != null) {
+                mongoObjectFactory.storeUser(user);
+            }
+        });
     }
 
     @Override
     public Iterable<User> getUsers() {
-        return new ArrayList<User>(users.values());
+        return LockUtil.executeWithReadLockAndResult(usersLock, () -> {
+            return new ArrayList<User>(users.values());
+        });
     }
 
     @Override
     public boolean hasUsers() {
-        return !users.isEmpty();
+        return LockUtil.executeWithReadLockAndResult(usersLock, () -> {
+            return !users.isEmpty();
+        });
     }
 
     @Override
@@ -765,146 +873,194 @@ public class UserStoreImpl implements UserStore {
         if (name == null) {
             result = null;
         } else {
-            result = users.get(name);
+            result = LockUtil.executeWithReadLockAndResult(usersLock, () -> users.get(name));
         }
         return result;
     }
 
     @Override
     public User getUserByAccessToken(String accessToken) {
-        final User result;
-        if (accessToken == null) {
-            result = null;
-        } else {
-            result = usersByAccessToken.get(accessToken);
-        }
-        return result;
+        return LockUtil.executeWithReadLockAndResult(usersLock, () -> {
+            final User result;
+            if (accessToken == null) {
+                result = null;
+            } else {
+                result = usersByAccessToken.get(accessToken);
+            }
+            return result;
+        });
     }
 
     @Override
     public User getUserByEmail(String email) {
-        final User result;
-        if (email == null) {
-            result = null;
-        } else {
-            Set<User> set = usersByEmail.get(email);
-            if (set == null || set.isEmpty()) {
+        return LockUtil.executeWithReadLockAndResult(usersLock, () -> {
+            final User result;
+            if (email == null) {
                 result = null;
             } else {
-                result = set.iterator().next();
+                Set<User> set = usersByEmail.get(email);
+                if (set == null || set.isEmpty()) {
+                    result = null;
+                } else {
+                    result = set.iterator().next();
+                }
             }
-        }
-        return result;
+            return result;
+        });
     }
 
     @Override
     public Pair<Boolean, Set<Ownership>> getExistingQualificationsForRoleDefinition(RoleDefinition roleToCheck) {
-        final Set<Ownership> ownerships = new HashSet<>();
-        for (User user : getUsers()) {
-            try {
-                for (Role role : getRolesFromUser(user.getName())) {
-                    if (!role.getRoleDefinition().equals(roleToCheck)) {
-                        // wrong role
-                        continue;
-                    }
-                    if (role.getQualifiedForTenant() == null && role.getQualifiedForUser() == null) {
-                        // wildcard rule exists -> return A=true
-                        return new Pair<>(true, null);
-                    } else {
-                        ownerships.add(new Ownership(role.getQualifiedForUser(), role.getQualifiedForTenant()));
+        return LockUtil.executeWithReadLockAndResult(usersLock, () -> {
+            return LockUtil.executeWithReadLockAndResult(userGroupsLock, () -> {
+                final Set<Ownership> ownerships = new HashSet<>();
+                final Set<User> usersHavingRole = roleDefinitionsToUsers.get(roleToCheck);
+                if (usersHavingRole != null) {
+                    for (User user : usersHavingRole) {
+                        for (Role role : user.getRoles()) {
+                            if (!role.getRoleDefinition().equals(roleToCheck)) {
+                                // wrong role
+                                continue;
+                            }
+                            if (role.getQualifiedForTenant() == null && role.getQualifiedForUser() == null) {
+                                // wildcard rule exists -> return A=true
+                                return new Pair<>(true, null);
+                            } else {
+                                ownerships.add(new Ownership(role.getQualifiedForUser(), role.getQualifiedForTenant()));
+                            }
+                        }
                     }
                 }
-            } catch (UserManagementException e) {
-                // user did not exist -> should not happen
-                logger.log(Level.SEVERE, e.getMessage(), e);
-            }
-        }
-        return new Pair<>(false, ownerships);
+                final Set<UserGroup> userGroupsHavingRole = roleDefinitionsToUserGroups.get(roleToCheck);
+                if (userGroupsHavingRole != null) {
+                    for (UserGroup userGroup : userGroupsHavingRole) {
+                        if (userGroup.getRoleDefinitionMap().containsKey(roleToCheck)) {
+                            ownerships.add(new Ownership(null, userGroup));
+                        }
+                    }
+                }
+                return new Pair<>(false, ownerships);
+            });
+        });
     }
 
+    /**
+     * To call this method, the caller must have obtained the write lock of {@link #usersLock}.
+     */
     @Override
     public Set<Pair<User, Role>> getRolesQualifiedByUserGroup(UserGroup groupQualification) {
-        final Set<Pair<User, Role>> result = new HashSet<>();
-        for (User user : getUsers()) {
-            try {
-                for (Role role : getRolesFromUser(user.getName())) {
-                    if (groupQualification.equals(role.getQualifiedForTenant())) {
-                        result.add(new Pair<>(user, role));
+        return LockUtil.executeWithReadLockAndResult(usersLock, () -> {
+            final Set<Pair<User, Role>> result = new HashSet<>();
+            for (User user : getUsers()) {
+                try {
+                    for (Role role : getRolesFromUser(user.getName())) {
+                        if (groupQualification.equals(role.getQualifiedForTenant())) {
+                            result.add(new Pair<>(user, role));
+                        }
                     }
+                } catch (UserManagementException e) {
+                    // user did not exist -> should not happen
+                    logger.log(Level.SEVERE, e.getMessage(), e);
                 }
-            } catch (UserManagementException e) {
-                // user did not exist -> should not happen
-                logger.log(Level.SEVERE, e.getMessage(), e);
             }
-        }
-        return result;
+            return result;
+        });
     }
 
     @Override
     public Iterable<Role> getRolesFromUser(String username) throws UserManagementException {
-        if (users.get(username) == null) {
-            throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
-        }
-        return users.get(username).getRoles();
+        return LockUtil.executeWithReadLockAndResultExpectException(usersLock, () ->{
+            if (users.get(username) == null) {
+                throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
+            }
+            Iterable<Role> roles = users.get(username).getRoles();
+            return Util.addAll(roles, new HashSet<>());
+        });
     }
 
     @Override
     public void addRoleForUser(String name, Role role) throws UserManagementException {
-        final User user = users.get(name);
-        if (user == null) {
-            throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
-        }
-        user.addRole(role);
-        if (mongoObjectFactory != null) {
-            mongoObjectFactory.storeUser(user);
-        }
+        LockUtil.executeWithWriteLockExpectException(usersLock, () -> {
+            final User user = users.get(name);
+            if (user == null) {
+                throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
+            }
+            user.addRole(role);
+            Util.addToValueSet(roleDefinitionsToUsers, role.getRoleDefinition(), user);
+            if (mongoObjectFactory != null) {
+                mongoObjectFactory.storeUser(user);
+            }
+        });
     }
 
     @Override
     public void removeRoleFromUser(String name, Role role) throws UserManagementException {
-        if (users.get(name) == null) {
-            throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
-        }
-        users.get(name).removeRole(role);
-        if (mongoObjectFactory != null) {
-            mongoObjectFactory.storeUser(users.get(name));
-        }
+        LockUtil.executeWithWriteLockExpectException(usersLock, () -> {
+            final User user = users.get(name);
+            if (user == null) {
+                throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
+            }
+            user.removeRole(role);
+            RoleDefinition roleDefinition = role.getRoleDefinition();
+            boolean roleDefinitionStillGrantedToUser = false;
+            for (Role roleOfUser : user.getRoles()) {
+                if (roleDefinition.equals(roleOfUser.getRoleDefinition())) {
+                    roleDefinitionStillGrantedToUser = true;
+                    break;
+                }
+            }
+            if (!roleDefinitionStillGrantedToUser) {
+                Util.removeFromValueSet(roleDefinitionsToUsers, roleDefinition, user);
+            }
+            if (mongoObjectFactory != null) {
+                mongoObjectFactory.storeUser(users.get(name));
+            }
+        });
     }
 
     @Override
     public void addPermissionForUser(String username, WildcardPermission permission) throws UserManagementException {
-        final User user = users.get(username);
-        if (user == null) {
-            throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
-        }
-        user.addPermission(permission);
-        if (mongoObjectFactory != null) {
-            mongoObjectFactory.storeUser(user);
-        }
+        LockUtil.executeWithWriteLockExpectException(usersLock, () -> {
+            final User user = users.get(username);
+            if (user == null) {
+                throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
+            }
+            user.addPermission(permission);
+            if (mongoObjectFactory != null) {
+                mongoObjectFactory.storeUser(user);
+            }
+        });
     }
 
     @Override
     public void removePermissionFromUser(String name, WildcardPermission permission) throws UserManagementException {
-        if (users.get(name) == null) {
-            throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
-        }
-        users.get(name).removePermission(permission);
-        if (mongoObjectFactory != null) {
-            mongoObjectFactory.storeUser(users.get(name));
-        }
+        LockUtil.executeWithWriteLockExpectException(usersLock, () -> {
+            if (users.get(name) == null) {
+                throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
+            }
+            users.get(name).removePermission(permission);
+            if (mongoObjectFactory != null) {
+                mongoObjectFactory.storeUser(users.get(name));
+            }
+        });
     }
 
     @Override
     public void deleteUser(String name) throws UserManagementException {
-        if (users.get(name) == null) {
-            throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
-        }
-        logger.info("Deleting user: " + users.get(name).toString());
-        if (mongoObjectFactory != null) {
-            mongoObjectFactory.deleteUser(users.get(name));
-        }
-        removeFromUsersByEmail(users.remove(name));
-        removeAllPreferencesForUser(name);
+        LockUtil.executeWithWriteLockExpectException(usersLock, () -> {
+            final User user = users.get(name);
+            if (user == null) {
+                throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
+            }
+            logger.info("Deleting user: " + users.get(name).toString());
+            if (mongoObjectFactory != null) {
+                mongoObjectFactory.deleteUser(user);
+            }
+            user.getRoles()
+            .forEach(role -> Util.removeFromValueSet(roleDefinitionsToUsers, role.getRoleDefinition(), user));
+            removeFromUsersByEmail(users.remove(name));
+        });
+        LockUtil.executeWithWriteLock(preferenceLock, () -> removeAllPreferencesForUser(name));
     }
 
     @Override
@@ -945,25 +1101,30 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public void setPreference(String username, String key, String value) {
+        LockUtil.executeWithWriteLock(preferenceLock, () -> {
+            setPreferenceInternalAndUpdatePreferenceObjectIfConverterIsAvailable(username, key, value);
+        });
+    }
+
+    private void setPreferenceInternalAndUpdatePreferenceObjectIfConverterIsAvailable(String username, String key, String value) {
+        assert preferenceLock.isWriteLockedByCurrentThread();
         setPreferenceInternal(username, key, value);
         updatePreferenceObjectIfConverterIsAvailable(username, key);
     }
 
     private void setPreferenceInternal(String username, String key, String value) {
+        assert preferenceLock.isWriteLockedByCurrentThread();
         Map<String, String> userMap = preferences.get(username);
-        if (userMap == null) {
-            synchronized (preferences) {
-                // only synchronize when necessary
-                userMap = preferences.get(username);
-                if (userMap == null) {
-                    userMap = new ConcurrentHashMap<>();
-                    preferences.put(username, userMap);
-                }
-            }
-        }
-        if (value == null) {
+        if (value == null && userMap != null) {
             userMap.remove(key);
-        } else {
+            if (userMap.isEmpty()) {
+                preferences.remove(username);
+            }
+        } else if (value != null) {
+            if (userMap == null) {
+                userMap = new HashMap<>();
+                preferences.put(username, userMap);
+            }
             userMap.put(key, value);
         }
         if (mongoObjectFactory != null) {
@@ -973,56 +1134,65 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public void unsetPreference(String username, String key) {
-        Map<String, String> userMap = preferences.get(username);
-        if (userMap != null) {
-            userMap.remove(key);
-            if (mongoObjectFactory != null) {
-                mongoObjectFactory.storePreferences(username, userMap);
+        LockUtil.executeWithWriteLock(preferenceLock, () -> {
+            Map<String, String> userMap = preferences.get(username);
+            if (userMap != null) {
+                userMap.remove(key);
+                if (mongoObjectFactory != null) {
+                    mongoObjectFactory.storePreferences(username, userMap);
+                }
             }
-        }
-        unsetPreferenceObject(username, key);
+            unsetPreferenceObject(username, key);
+        });
     }
 
     @Override
     public String getPreference(String username, String key) {
-        final String result;
-        Map<String, String> userMap = preferences.get(username);
-        if (userMap != null) {
-            result = userMap.get(key);
-        } else {
-            result = null;
-        }
-        return result;
+        return LockUtil.executeWithWriteLockAndResult(preferenceLock, () -> {
+            final String result;
+            Map<String, String> userMap = preferences.get(username);
+            if (userMap != null) {
+                result = userMap.get(key);
+            } else {
+                result = null;
+            }
+            return result;
+        });
     }
 
     @Override
     public Map<String, String> getAllPreferences(String username) {
-        final Map<String, String> userPrefs = preferences.get(username);
-        final Map<String, String> result;
-        if (userPrefs == null) {
-            result = Collections.emptyMap();
-        } else {
-            result = Collections.unmodifiableMap(userPrefs);
-        }
-        return result;
+        return LockUtil.executeWithReadLockAndResult(preferenceLock, () -> {
+            final Map<String, String> userPrefs = preferences.get(username);
+            final Map<String, String> result;
+            if (userPrefs == null) {
+                result = Collections.emptyMap();
+            } else {
+                result = Collections.unmodifiableMap(userPrefs);
+            }
+            return result;
+        });
     }
 
+    /**
+     * To call this method, the caller must have obtained the wrie lock of {@link #preferenceLock}.
+     */
     private void removeAllPreferencesForUser(String username) {
+        assert preferenceLock.isWriteLockedByCurrentThread();
         // TODO should we keep the preferences anonymized (e.g. use a UUID as username) to enable better statistics?
-        synchronized (preferences) {
-            preferences.remove(username);
-        }
+        preferences.remove(username);
         if (mongoObjectFactory != null) {
             mongoObjectFactory.storePreferences(username, Collections.<String, String> emptyMap());
         }
         removeAllPreferenceObjectsForUser(username);
     }
 
+    /**
+     * To call this method, the caller must have obtained the write lock of {@link #preferenceLock}.
+     */
     private void removeAllPreferenceObjectsForUser(String username) {
-        Map<String, Object> preferenceObjectsToRemove;
-        synchronized (preferenceObjects) {
-            preferenceObjectsToRemove = preferenceObjects.remove(username);
-        }
+        assert preferenceLock.isWriteLockedByCurrentThread();
+        final Map<String, Object> preferenceObjectsToRemove = preferenceObjects.remove(username);
         if (preferenceObjectsToRemove != null) {
             for (Map.Entry<String, Object> entry : preferenceObjectsToRemove.entrySet()) {
                 notifyListenersOnPreferenceObjectChange(username, entry.getKey(), entry.getValue(), null);
@@ -1032,44 +1202,51 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public Map<String, Object> getAllSettings() {
-        return settings;
+        return new HashMap<>(settings);
     }
 
     @Override
     public Map<String, Class<?>> getAllSettingTypes() {
-        return settingTypes;
+        return new HashMap<>(settingTypes);
     }
 
     @Override
     public void registerPreferenceConverter(String preferenceKey, PreferenceConverter<?> converter) {
-        PreferenceConverter<?> alreadyAssociatedConverter = preferenceConverters.putIfAbsent(preferenceKey, converter);
-        if (alreadyAssociatedConverter == null) {
-            final Set<String> usersToProcess = new HashSet<>(preferences.keySet());
-            for (String user : usersToProcess) {
-                updatePreferenceObjectWithConverter(user, preferenceKey, converter);
+        LockUtil.executeWithWriteLock(preferenceLock, () -> {
+            PreferenceConverter<?> alreadyAssociatedConverter = preferenceConverters.putIfAbsent(preferenceKey, converter);
+            if (alreadyAssociatedConverter == null) {
+                final Set<String> usersToProcess = new HashSet<>(preferences.keySet());
+                for (String user : usersToProcess) {
+                    updatePreferenceObjectWithConverter(user, preferenceKey, converter);
+                }
+            } else {
+                logger.log(Level.SEVERE, "PreferenceConverter " + alreadyAssociatedConverter + " for key " + preferenceKey
+                        + " is already registered. Converter " + converter + " will not be registered");
             }
-        } else {
-            logger.log(Level.SEVERE, "PreferenceConverter " + alreadyAssociatedConverter + " for key " + preferenceKey
-                    + " is already registered. Converter " + converter + " will not be registered");
-        }
+        });
     }
 
     @Override
     public void removePreferenceConverter(String preferenceKey) {
-        PreferenceConverter<?> preferenceConverterToRemove = preferenceConverters.remove(preferenceKey);
-        if (preferenceConverterToRemove != null) {
-            final Set<String> usersToProcess = new HashSet<>(preferences.keySet());
-            for (String username : usersToProcess) {
-                unsetPreferenceObject(username, preferenceKey);
+        LockUtil.executeWithWriteLock(preferenceLock, () -> {
+            PreferenceConverter<?> preferenceConverterToRemove = preferenceConverters.remove(preferenceKey);
+            if (preferenceConverterToRemove != null) {
+                final Set<String> usersToProcess = new HashSet<>(preferences.keySet());
+                for (String username : usersToProcess) {
+                    unsetPreferenceObject(username, preferenceKey);
+                }
+            } else {
+                logger.log(Level.WARNING,
+                        "PreferenceConverter for key " + preferenceKey + " should be removed but wasn't registered");
             }
-        } else {
-            logger.log(Level.WARNING,
-                    "PreferenceConverter for key " + preferenceKey + " should be removed but wasn't registered");
-        }
-
+        });
     }
 
+    /**
+     * To call this method, the caller must have obtained the write lock of {@link #preferenceLock}.
+     */
     private void updatePreferenceObjectIfConverterIsAvailable(String username, String key) {
+        assert preferenceLock.isWriteLockedByCurrentThread();
         PreferenceConverter<?> preferenceConverter = preferenceConverters.get(key);
         if (preferenceConverter != null) {
             updatePreferenceObjectWithConverter(username, key, preferenceConverter);
@@ -1091,16 +1268,11 @@ public class UserStoreImpl implements UserStore {
     }
 
     private void setPreferenceObjectInternal(String username, String key, final Object convertedObject) {
+        assert preferenceLock.isWriteLockedByCurrentThread();
         Map<String, Object> userMap = preferenceObjects.get(username);
         if (userMap == null) {
-            synchronized (preferenceObjects) {
-                // only synchronize when necessary
-                userMap = preferenceObjects.get(username);
-                if (userMap == null) {
-                    userMap = new ConcurrentHashMap<>();
-                    preferenceObjects.put(username, userMap);
-                }
-            }
+            userMap = new HashMap<>();
+            preferenceObjects.put(username, userMap);
         }
         // if the new preference object is simply null, we remove the entry instead of putting null
         Object oldPreference = convertedObject == null ? userMap.remove(key) : userMap.put(key, convertedObject);
@@ -1111,75 +1283,81 @@ public class UserStoreImpl implements UserStore {
     }
 
     private void unsetPreferenceObject(String username, String key) {
-        Map<String, Object> userObjectMap = preferenceObjects.get(username);
+        assert preferenceLock.isWriteLockedByCurrentThread();
+        final Map<String, Object> userObjectMap = preferenceObjects.get(username);
         if (userObjectMap != null) {
             Object oldPreference = userObjectMap.remove(key);
             if (oldPreference != null) {
                 notifyListenersOnPreferenceObjectChange(username, key, oldPreference, null);
+            }
+            if (userObjectMap.isEmpty()) {
+                preferenceObjects.remove(username);
             }
         }
     }
 
     @Override
     public <T> T getPreferenceObject(String username, String key) {
-        final Object result;
-        Map<String, Object> userMap = preferenceObjects.get(username);
-        if (userMap != null) {
-            result = userMap.get(key);
-        } else {
-            result = null;
-        }
-        @SuppressWarnings("unchecked")
-        T resultT = (T) result;
-        return resultT;
+        return LockUtil.executeWithReadLockAndResult(preferenceLock, () -> {
+            final Object result;
+            Map<String, Object> userMap = preferenceObjects.get(username);
+            if (userMap != null) {
+                result = userMap.get(key);
+            } else {
+                result = null;
+            }
+            @SuppressWarnings("unchecked")
+            T resultT = (T) result;
+            return resultT;
+        });
     }
 
     @Override
     public String setPreferenceObject(String username, String key, Object preferenceObject)
             throws IllegalArgumentException {
-        @SuppressWarnings("unchecked")
-        PreferenceConverter<Object> preferenceConverter = (PreferenceConverter<Object>) preferenceConverters.get(key);
-        if (preferenceConverter == null) {
-            throw new IllegalArgumentException(
-                    "Setting preference for key " + key + " but there is no converter associated!");
-        }
-        String stringPreference = null;
-        if (preferenceObject == null) {
-            unsetPreference(username, key);
-        } else {
-            try {
-                stringPreference = preferenceConverter.toPreferenceString(preferenceObject);
-                setPreferenceInternal(username, key, stringPreference);
-                setPreferenceObjectInternal(username, key, preferenceObject);
-            } catch (Throwable t) {
-                logger.log(Level.SEVERE, "Error while converting preference for key " + key + " from Object \""
-                        + preferenceObject + "\"", t);
+        return LockUtil.executeWithWriteLockAndResultExpectException(preferenceLock, () -> {
+            @SuppressWarnings("unchecked")
+            PreferenceConverter<Object> preferenceConverter = (PreferenceConverter<Object>) preferenceConverters.get(key);
+            if (preferenceConverter == null) {
+                throw new IllegalArgumentException(
+                        "Tried to set preference for key " + key + " but there is no converter associated!");
             }
-        }
-        return stringPreference;
+            String stringPreference = null;
+            if (preferenceObject == null) {
+                unsetPreference(username, key);
+            } else {
+                try {
+                    stringPreference = preferenceConverter.toPreferenceString(preferenceObject);
+                    setPreferenceInternal(username, key, stringPreference);
+                    setPreferenceObjectInternal(username, key, preferenceObject);
+                } catch (Throwable t) {
+                    logger.log(Level.SEVERE, "Error while converting preference for key " + key + " from Object \""
+                            + preferenceObject + "\"", t);
+                }
+            }
+            return stringPreference;
+        });
     }
-
+    
+    /**
+     * To call this method, the caller must have obtained the read lock of {@link #preferenceLock}.
+     */
     private void notifyListenersOnPreferenceObjectChange(String username, String key, Object oldPreference,
             Object newPreference) {
-        LockUtil.lockForRead(listenersLock);
-        try {
-            for (PreferenceObjectListener<? extends Object> listener : Util.get(listeners, key,
-                    Collections.<PreferenceObjectListener<? extends Object>> emptySet())) {
-                @SuppressWarnings("unchecked")
-                PreferenceObjectListener<Object> listenerToFire = (PreferenceObjectListener<Object>) listener;
-                listenerToFire.preferenceObjectChanged(username, key, oldPreference, newPreference);
-            }
-        } finally {
-            LockUtil.unlockAfterRead(listenersLock);
+        assert preferenceLock.isWriteLockedByCurrentThread() || preferenceLock.getReadHoldCount() > 0;
+        for (PreferenceObjectListener<? extends Object> listener : Util.get(preferenceListeners, key,
+                Collections.<PreferenceObjectListener<? extends Object>> emptySet())) {
+            @SuppressWarnings("unchecked")
+            PreferenceObjectListener<Object> listenerToFire = (PreferenceObjectListener<Object>) listener;
+            listenerToFire.preferenceObjectChanged(username, key, oldPreference, newPreference);
         }
     }
 
     @Override
     public void addPreferenceObjectListener(String key, PreferenceObjectListener<? extends Object> listener,
             boolean fireForAlreadyExistingPreferences) {
-        LockUtil.lockForWrite(listenersLock);
-        try {
-            Util.addToValueSet(listeners, key, listener);
+        LockUtil.executeWithWriteLock(preferenceLock, () -> {
+            Util.addToValueSet(preferenceListeners, key, listener);
             if (fireForAlreadyExistingPreferences) {
                 final Set<String> usersToProcess = new HashSet<>(preferences.keySet());
                 for (String username : usersToProcess) {
@@ -1194,47 +1372,44 @@ public class UserStoreImpl implements UserStore {
                     }
                 }
             }
-        } finally {
-            LockUtil.unlockAfterWrite(listenersLock);
-        }
+        });
     }
 
     @Override
     public void removePreferenceObjectListener(PreferenceObjectListener<?> listener) {
-        LockUtil.lockForWrite(listenersLock);
-        try {
-            Util.removeFromAllValueSets(listeners, listener);
-        } finally {
-            LockUtil.unlockAfterWrite(listenersLock);
-        }
+        LockUtil.executeWithWriteLock(preferenceLock, () -> {
+            Util.removeFromAllValueSets(preferenceListeners, listener);
+        });
     }
 
     @Override
     public void removeAllQualifiedRolesForUser(User user) {
-        for (User checkUser : users.values()) {
-            Set<Role> rolesToRemoveOrAdjust = new HashSet<>();
-            for (Role role : checkUser.getRoles()) {
-                if (Util.equalsWithNull(role.getQualifiedForUser(), user)) {
-                    rolesToRemoveOrAdjust.add(role);
-                }
-            }
-            for (Role removeOrAdjust : rolesToRemoveOrAdjust) {
-                try {
-                    removeRoleFromUser(checkUser.getName(), removeOrAdjust);
-                    if (removeOrAdjust.getQualifiedForTenant() != null) {
-                        addRoleForUser(checkUser.getName(), new Role(removeOrAdjust.getRoleDefinition(),
-                                removeOrAdjust.getQualifiedForTenant(), null));
+        LockUtil.executeWithWriteLock(usersLock, () -> {
+            for (User checkUser : users.values()) {
+                Set<Role> rolesToRemoveOrAdjust = new HashSet<>();
+                for (Role role : checkUser.getRoles()) {
+                    if (Util.equalsWithNull(role.getQualifiedForUser(), user)) {
+                        rolesToRemoveOrAdjust.add(role);
                     }
-                } catch (UserManagementException e) {
-                    logger.log(Level.WARNING,
-                            "Could not properly update qualified roles on user delete " + removeOrAdjust);
+                }
+                for (Role removeOrAdjust : rolesToRemoveOrAdjust) {
+                    try {
+                        removeRoleFromUser(checkUser.getName(), removeOrAdjust);
+                        if (removeOrAdjust.getQualifiedForTenant() != null) {
+                            addRoleForUser(checkUser.getName(), new Role(removeOrAdjust.getRoleDefinition(),
+                                    removeOrAdjust.getQualifiedForTenant(), null));
+                        }
+                    } catch (UserManagementException e) {
+                        logger.log(Level.WARNING,
+                                "Could not properly update qualified roles on user delete " + removeOrAdjust);
+                    }
                 }
             }
-        }
+        });
     }
 
-    @Override
-    public void removeAllQualifiedRolesForUserGroup(UserGroup userGroup) {
+    private void removeAllQualifiedRolesForUserGroup(UserGroup userGroup) {
+        assert usersLock.isWriteLockedByCurrentThread();
         for (User checkUser : users.values()) {
             Set<Role> rolesToRemoveOrAdjust = new HashSet<>();
             for (Role role : checkUser.getRoles()) {
@@ -1255,5 +1430,23 @@ public class UserStoreImpl implements UserStore {
                 }
             }
         }
+    }
+
+    @Override
+    public void deleteUserGroupAndRemoveAllQualifiedRolesForUserGroup(UserGroup userGroup) throws UserGroupManagementException {
+        LockUtil.executeWithWriteLockExpectException(usersLock, () -> {
+            LockUtil.executeWithWriteLockExpectException(userGroupsLock, () -> {
+                removeAllQualifiedRolesForUserGroup(userGroup);
+                deleteUserGroup(userGroup);
+            });
+        });
+    }
+
+    @Override
+    public void setDefaultTennantForUserAndUpdate(User user, UserGroup newDefaultTenant, String serverName) {
+        LockUtil.executeWithWriteLock(usersLock, () -> {
+            user.setDefaultTenant(newDefaultTenant, serverName);
+            updateUser(user);
+        });
     }
 }
