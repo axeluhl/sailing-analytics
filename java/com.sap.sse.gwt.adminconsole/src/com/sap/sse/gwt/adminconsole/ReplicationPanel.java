@@ -269,7 +269,9 @@ public class ReplicationPanel extends FlowPanel {
                 boolean replicaRegistered = false;
                 for (final ReplicaDTO replica : replicas.getReplicas()) {
                     replicaCount++;
-                    registeredReplicas.insertRow(i);
+                    if (registeredReplicas.getRowCount() < i-1) {
+                        registeredReplicas.insertRow(i);
+                    }
                     registeredReplicas.setWidget(i, 0, new Label(replicaCount + ". " + replica.getHostname() + " (" + replica.getIdentifier() + ")"));
                     registeredReplicas.setWidget(i, 1, new Label(stringMessages.registeredAt(replica.getRegistrationTime().toString())));
                     final Button removeReplicaButton = new Button(stringMessages.dropReplicaConnection());
@@ -330,20 +332,21 @@ public class ReplicationPanel extends FlowPanel {
                     i++;
                     replicaRegistered = true;
                 }
-                
                 if (!replicaRegistered) {
                     registeredReplicas.insertRow(i);
                     registeredReplicas.setWidget(i, 0, new Label(stringMessages.explainNoConnectionsFromReplicas()));
                     removeAllReplicas.setEnabled(false);
+                    i++;
                 } else {
                     removeAllReplicas.setEnabled(true);
                 }
-                
+                while (registeredReplicas.getRowCount() > i) {
+                    registeredReplicas.removeRow(registeredReplicas.getRowCount()-1);
+                }
                 while (registeredMasters.getRowCount() > 0) {
                     registeredMasters.removeRow(0);
                 }
                 i = 0;
-                
                 registeredMasters.insertRow(i);
                 registeredMasters.setWidget(i, 0, new Label("Client UUID: " + replicas.getServerIdentifier()));
                 i++;
@@ -370,7 +373,6 @@ public class ReplicationPanel extends FlowPanel {
                     addButton.setEnabled(true);
                     stopReplicationButton.setEnabled(false);
                 }
-                
             }
             
             @Override
