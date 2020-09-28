@@ -166,7 +166,7 @@ figcaption {
   margin-left: 0.666666666666667em;
   width: 0.466666666666667em;
   height: 0.8em;
-  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAAMCAYAAACulacQAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAFtJREFUeNpi+P///wEgPgzEokDMgIxBxMn/EHAVXQGIkIBKYCiAqUJXIIEsiVUBA5ojRJEUnGFiwAR/ofQvXLpQjMXpILxeOY8rEEAOegfER4DYAYhfI7sMIMAAiXvwy2upI1UAAAAASUVORK5CYII=");
+  background-image: resourceUrl("buttonarrowrightwhite");
   background-size: contain;
   background-repeat: no-repeat;
 }
@@ -410,7 +410,7 @@ figcaption {
   overflow: hidden;
 }
 .lightbox_close {
-  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAHVJREFUeNqsk4EJACEIReWawY2bMLh5LME7JNQEE4So/x9pCUTUVvaVuBKSieJpIAuOkYSgaDn6t/EmIdrMHtQHJ4g2/5pd4EFM8w7whK7ZAliQEZWWaVbY3AeqcbuEUhMj4fEZ8XTV6CNlzC7kyjCVxnkKMABEXRUAnXsRRQAAAABJRU5ErkJggg==");
+  background-image: resourceUrl("lightboxclose");
   background-repeat: no-repeat;
   background-position: center center;
   width: 1.333333333333333em;
