@@ -3,7 +3,6 @@ package com.sap.sailing.server.gateway.jaxrs.api;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -24,23 +23,6 @@ import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdent
 @Path("/v1/tracking_devices")
 public class TrackingDevicesResource extends AbstractSailingServerResource {
 
-    @GET
-    @Produces("application/json;charset=UTF-8")
-    @Path("{deviceUUID}")
-    @Deprecated
-    public Response getDeviceStatusDeprecated(@PathParam("deviceUUID") UUID deviceUUID) {
-        return getDeviceStatus(deviceUUID);
-    }
-
-    @GET
-    @Produces("application/json;charset=UTF-8")
-    @Deprecated
-    public Response getDeviceStatusesDeprecated(@QueryParam("deviceUUIDs") Set<UUID> deviceUUIDs) {
-        return getDeviceStatuses(deviceUUIDs);
-    }
-    
-    
-    
     @POST
     @Produces("application/json;charset=UTF-8")
     @Path("{deviceUUID}")
