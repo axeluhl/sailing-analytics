@@ -14,5 +14,9 @@ public interface ApplicationHost extends Host {
      * in case the configuration is incompatible with the host, for example, if it requests a port to be used
      * that is already taken.
      */
-    <ShardingKey, MetricsT extends ApplicationProcessMetrics> ApplicationProcess<ShardingKey, MetricsT> launchApplication(ApplicationProcessConfiguration<ShardingKey, MetricsT> configuration);
+    <ShardingKey, MetricsT extends ApplicationProcessMetrics,
+    MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
+    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>
+    ApplicationProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> launchApplication(
+            ApplicationProcessConfiguration<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> configuration);
 }

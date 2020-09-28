@@ -6,7 +6,7 @@ import com.sap.sse.landscape.SecurityGroup;
 import com.sap.sse.landscape.aws.AwsLandscape;
 
 public class AwsRegion implements Region {
-    private AwsLandscape<?, ?> landscape;
+    private AwsLandscape<?, ?, ?, ?> landscape;
     private final String id;
     
     public AwsRegion(String id) {
