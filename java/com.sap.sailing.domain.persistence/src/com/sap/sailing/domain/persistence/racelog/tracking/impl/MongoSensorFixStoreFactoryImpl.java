@@ -3,6 +3,7 @@ package com.sap.sailing.domain.persistence.racelog.tracking.impl;
 import java.net.UnknownHostException;
 
 import com.mongodb.MongoException;
+import com.mongodb.WriteConcern;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.racelog.tracking.MongoSensorFixStore;
@@ -15,5 +16,12 @@ public class MongoSensorFixStoreFactoryImpl implements MongoSensorFixStoreFactor
             DomainObjectFactory domainObjectFactory, TypeBasedServiceFinderFactory serviceFinderFactory)
                     throws UnknownHostException, MongoException {
         return new MongoSensorFixStoreImpl(mongoObjectFactory, domainObjectFactory, serviceFinderFactory);
+    }
+
+    @Override
+    public MongoSensorFixStore getMongoGPSFixStore(MongoObjectFactory mongoObjectFactory,
+            DomainObjectFactory domainObjectFactory, TypeBasedServiceFinderFactory serviceFinderFactory,
+            WriteConcern writeConcern) throws UnknownHostException, MongoException {
+        return new MongoSensorFixStoreImpl(mongoObjectFactory, domainObjectFactory, serviceFinderFactory, writeConcern);
     }
 }
