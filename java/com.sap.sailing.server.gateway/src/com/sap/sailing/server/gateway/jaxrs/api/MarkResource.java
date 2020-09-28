@@ -110,6 +110,14 @@ public class MarkResource extends AbstractSailingServerResource {
                 .type(MediaType.TEXT_PLAIN).build();
     }
 
+    private Response getAlreadyTrackedRaceErrorResponse(String regattaName, String raceColumn, String fleet) {
+        return Response.status(Status.CONFLICT)
+                .entity("Race with raceColumn '" + StringEscapeUtils.escapeHtml(raceColumn)
+                        + "' and fleet '" + StringEscapeUtils.escapeHtml(fleet) + "' in regatta '"
+                        + StringEscapeUtils.escapeHtml(regattaName) + "' is already tracked.")
+                .type(MediaType.TEXT_PLAIN).build();
+    }
+
     private Response getBadRegattaErrorResponse(String regattaName) {
         return Response.status(Status.NOT_FOUND).entity("Could not find a regatta with name '" + StringEscapeUtils.escapeHtml(regattaName) + "'.")
                 .type(MediaType.TEXT_PLAIN).build();
@@ -202,7 +210,6 @@ public class MarkResource extends AbstractSailingServerResource {
     @POST
     @Path("/revokeMarkOnRegatta")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces("application/json;charset=UTF-8")
     public Response revokeMarkOnRegatta(String json) throws ParseException, JsonDeserializationException, DoesNotHaveRegattaLogException {
         Object requestBody = JSONValue.parseWithException(json);
         JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
@@ -222,6 +229,9 @@ public class MarkResource extends AbstractSailingServerResource {
         final Fleet fleet = findFleetByName(raceColumn, fleetName);
         if (fleet == null) {
             return getBadRaceErrorResponse(regattaName, raceColumnName, fleetName);
+        }
+        if (raceColumn.getTrackedRace(fleet) != null) {
+            return getAlreadyTrackedRaceErrorResponse(regattaName, raceColumnName, fleetName);
         }
         RegattaLog regattaLog = getRegattaLogInternal(regattaName);
         final List<RegattaLogEvent> regattaLogDefineMarkEvents = new AllEventsOfTypeFinder<>(regattaLog,
