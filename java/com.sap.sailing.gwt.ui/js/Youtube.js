@@ -244,9 +244,9 @@ THE SOFTWARE. */
         }
       };
 
-      //if (typeof this.options_.enablePrivacyEnhancedMode !== 'undefined' && this.options_.enablePrivacyEnhancedMode) {
+      if (typeof this.options_.enablePrivacyEnhancedMode !== 'undefined' && this.options_.enablePrivacyEnhancedMode) {
         playerConfig.host = 'https://www.youtube-nocookie.com';
-      //}
+      }
 
       this.ytPlayer = new YT.Player(this.options_.techId, playerConfig);
     },
