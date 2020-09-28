@@ -278,7 +278,7 @@ public class UserService {
         userInitiallyLoaded = true;
         logger.info("User changed to "
                 + (currentUser == null ? "No User" : (currentUser.getName() + " roles: " + currentUser.getRoles())));
-        logger.info("User anonymous changed to " + anonymousUser.getName() + " roles: " + anonymousUser.getRoles());
+        logger.info("User anonymous changed to " + (anonymousUser == null ? "No User" : (anonymousUser.getName() + " roles: " + anonymousUser.getRoles())));
         notifyUserStatusEventHandlers(preAuthenticated);
         if (notifyOtherInstances) {
             fireUserUpdateEvent();
