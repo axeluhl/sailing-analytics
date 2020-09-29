@@ -9,11 +9,12 @@ import java.util.TimeZone;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.landscape.MachineImage;
 import com.sap.sse.landscape.Region;
+import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.aws.AwsInstance;
 
 import software.amazon.awssdk.services.ec2.model.Image;
 
-public class AmazonMachineImage implements MachineImage<AwsInstance> {
+public class AmazonMachineImage<ShardingKey, MetricsT extends ApplicationProcessMetrics> implements MachineImage<AwsInstance<ShardingKey, MetricsT>> {
     private final Image image;
     private final Region region;
     
@@ -46,7 +47,7 @@ public class AmazonMachineImage implements MachineImage<AwsInstance> {
     }
 
     @Override
-    public AmazonMachineImage updateAllPackages() {
+    public AmazonMachineImage<ShardingKey, MetricsT> updateAllPackages() {
         // TODO Implement MachineImage<AwsInstance>.updateAllPackages(...)
         return null;
     }

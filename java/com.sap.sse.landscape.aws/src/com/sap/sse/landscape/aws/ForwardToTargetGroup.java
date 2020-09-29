@@ -1,5 +1,7 @@
 package com.sap.sse.landscape.aws;
 
-public interface ForwardToTargetGroup extends LoadBalancerRuleAction {
-    TargetGroup getTargetGroupToForwardTo();
+import com.sap.sse.landscape.application.ApplicationProcessMetrics;
+
+public interface ForwardToTargetGroup<ShardingKey, MetricsT extends ApplicationProcessMetrics> extends LoadBalancerRuleAction {
+    TargetGroup<ShardingKey, MetricsT> getTargetGroupToForwardTo();
 }

@@ -25,6 +25,10 @@
                 <div class="innerContent">
                     <h2 class="articleSubheadline">September 2020</h2>
                     <ul class="bulletList">
+                        <li>Due to loadbalancing request between master and replica all GET requests are routed to replicas. As API calls 
+                            going to /api/v1/regattas/{regattaName}/tracking_devices need to be answered by master, HTTP Post is required from now.
+                            Please update existing applications. Support for GET will be removed in the future.</li>
+                        <li>GET request for /sailingserver/api/v1/tracking_devices/[deviceUUID] are removed. Please use POST instead.</li>
                         <li>Due to loadbalancing between master and replica all GET requests are routed to replicas. As API calls 
                             going to /sailingserver/api/v1/tracking_devices/[deviceUUID] need to be answered by master, HTTP POST is required from now.
                             Please update existing applications. As support for GET will be removed in the near future. 
