@@ -58,6 +58,8 @@ import com.sap.sse.datamining.ui.client.StringMessages;
 import com.sap.sse.datamining.ui.client.WithControls;
 import com.sap.sse.datamining.ui.client.developer.PredefinedQueryRunner;
 import com.sap.sse.datamining.ui.client.developer.QueryDefinitionViewer;
+import com.sap.sse.datamining.ui.client.event.ConfigureDimensionParameterEvent;
+import com.sap.sse.datamining.ui.client.event.DataMiningEventBus;
 import com.sap.sse.datamining.ui.client.selection.statistic.SuggestBoxStatisticProvider;
 import com.sap.sse.datamining.ui.client.settings.AdvancedDataMiningSettings;
 import com.sap.sse.datamining.ui.client.settings.AdvancedDataMiningSettings.ChangeLossStrategy;
@@ -107,6 +109,8 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
             Consumer<StatisticQueryDefinitionDTO> queryRunner) {
         super(parent, context, dataMiningService, errorReporter);
         providerListener = new ProviderListener();
+        mainPanel = new LayoutPanel();
+        
         // Creating the header panel, that contains the retriever chain provider and the controls
         controlsPanel = new FlowPanel();
         controlsPanel.addStyleName("dataMiningMarginBase");
@@ -114,7 +118,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         // instead of pushing its content into the next line when there is not enough space.
         controlsPanel.getElement().getStyle().setOverflow(Overflow.HIDDEN);
         controlsPanel.getElement().getStyle().setWhiteSpace(WhiteSpace.NOWRAP);
-
+        
         this.settingsControl = settingsControl;
         addControl(this.settingsControl.getEntryWidget());
         settings = new AdvancedDataMiningSettings();
@@ -135,7 +139,6 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         addQueryDefinitionChangedListener(queryDefinitionViewer);
         predefinedQueryRunner = new PredefinedQueryRunner(parent, context, getDataMiningStringMessages(),
                                                           dataMiningService, errorReporter, this, queryRunner);
-
         reloadComponentsButton = new Button(getDataMiningStringMessages().reloadComponents());
         reloadComponentsButton.addClickHandler(new ClickHandler() {
             @Override
@@ -143,7 +146,6 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
                 reloadComponents();
             }
         });
-
         if (settings.isDeveloperOptions()) {
             addControl(reloadComponentsButton);
             addControl(queryDefinitionViewerToggleButton);
@@ -151,7 +153,9 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         }
         
         confirmChangeLossDialog = createConfirmChangeLossDialog();
+        DataMiningEventBus.addHandler(ConfigureDimensionParameterEvent.TYPE, this::onConfigureDimensionParameter);
 
+        // Setting up the query component providers
         statisticProvider = new SuggestBoxStatisticProvider(parent, context, dataMiningService,
                                                             errorReporter, settingsControl, settingsManager);
         Widget statisticProviderWidget = statisticProvider.getEntryWidget();
@@ -189,8 +193,6 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         DockLayoutPanel contentPanel = new DockLayoutPanel(Unit.PX);
         contentPanel.addNorth(headerPanel, HeaderPanelHeight);
         contentPanel.add(filterSplitPanel);
-        
-        mainPanel = new LayoutPanel();
         mainPanel.add(contentPanel);
 
         // Storing the different component providers in a list
@@ -247,6 +249,10 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
 
         dialog.setWidget(contentPanel);
         return dialog;
+    }
+    
+    private void onConfigureDimensionParameter(ConfigureDimensionParameterEvent event) {
+        // TODO Open parameter dialog
     }
 
     /**
