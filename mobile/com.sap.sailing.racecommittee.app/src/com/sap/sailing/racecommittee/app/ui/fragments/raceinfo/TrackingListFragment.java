@@ -334,7 +334,7 @@ public class TrackingListFragment extends BaseFragment
     public void onStart() {
         super.onStart();
 
-        if (getRace() != null && getRaceState() != null) {
+        if (getRaceState() != null) {
             getRaceState().addChangedListener(mStateChangeListener);
         }
 
@@ -345,7 +345,7 @@ public class TrackingListFragment extends BaseFragment
     public void onStop() {
         super.onStop();
 
-        if (getRace() != null && getRaceState() != null) {
+        if (getRaceState() != null) {
             getRaceState().removeChangedListener(mStateChangeListener);
         }
 

@@ -1,5 +1,13 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
+import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.NumberPicker;
+import android.widget.TextView;
+
 import com.sap.sailing.android.shared.util.ActivityHelper;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.GateStartRacingProcedure;
@@ -7,13 +15,6 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.NumberPicker;
-import android.widget.TextView;
 
 public class GateStartTimingFragment extends BaseFragment {
 
@@ -40,7 +41,7 @@ public class GateStartTimingFragment extends BaseFragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = LayoutInflater.from(getActivity()).inflate(R.layout.race_schedule_procedure_timing, container,
                 false);
 
@@ -113,7 +114,7 @@ public class GateStartTimingFragment extends BaseFragment {
     }
 
     private void setButton() {
-        View button = getActivity().findViewById(R.id.set_gate_time);
+        View button = requireActivity().findViewById(R.id.set_gate_time);
         if (button != null) {
             button.setOnClickListener(v -> {
                 ActivityHelper.with(getActivity()).hideKeyboard();

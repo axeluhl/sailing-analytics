@@ -229,8 +229,8 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
             for (final ManagedRace raceToAbort : racesToAbort) { // raceToAbort is "R" from bug 3148 comment #2
                 final List<ManagedRace> dependentRaces = activity.getRacesWithStartTimeImmediatelyDependingOn(
                         raceToAbort,
-                        new RaceLogRaceStatus[] { RaceLogRaceStatus.STARTPHASE, RaceLogRaceStatus.RUNNING,
-                                RaceLogRaceStatus.FINISHING, RaceLogRaceStatus.FINISHED }); // Q
+                        new RaceLogRaceStatus[]{RaceLogRaceStatus.STARTPHASE, RaceLogRaceStatus.RUNNING,
+                                RaceLogRaceStatus.FINISHING, RaceLogRaceStatus.FINISHED}); // Q
                 final Iterable<SimpleRaceLogIdentifier> dependingOnRaces = raceToAbort.getState()
                         .getStartTimeFinderResult().getDependingOnRaces();
                 final SimpleRaceLogIdentifier immediatelyDependsOnRace = dependingOnRaces.iterator().hasNext()
@@ -257,8 +257,7 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
                 } else {
                     actions.add(new AbortAction(raceToAbort, now, flag));
                 }
-                for (final ManagedRace dependentRace : dependentRaces) { // dependentRace is "Q" from bug 3148
-                                                                         // comment #2
+                for (final ManagedRace dependentRace : dependentRaces) { // dependentRace is "Q" from bug 3148 comment #2
                     final RaceState raceStateOfDependentRace = dependentRace.getState();
                     if (!racesToAbort.contains(dependentRace)) {
                         // materialize an absolute start time for dependentRace

@@ -1,12 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import com.sap.sailing.android.shared.util.ActivityHelper;
-import com.sap.sailing.android.shared.util.ViewHelper;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.GateStartRacingProcedure;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
-
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputFilter;
@@ -16,6 +9,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+
+import com.sap.sailing.android.shared.util.ActivityHelper;
+import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.GateStartRacingProcedure;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class GateStartPathFinderFragment extends BaseFragment {
 
@@ -60,7 +60,7 @@ public class GateStartPathFinderFragment extends BaseFragment {
         if (getArguments() != null) {
             if (mNat != null) {
                 mNat.setText(getArguments().getString(NAT));
-                mNat.setFilters(new InputFilter[] { new InputFilter.AllCaps() });
+                mNat.setFilters(new InputFilter[]{new InputFilter.AllCaps()});
                 mNat.addTextChangedListener(new TextWatcher() {
                     @Override
                     public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -82,7 +82,7 @@ public class GateStartPathFinderFragment extends BaseFragment {
 
             if (mNum != null) {
                 mNum.setText(getArguments().getString(NUM));
-                mNum.setFilters(new InputFilter[] { new InputFilter.LengthFilter(6) });
+                mNum.setFilters(new InputFilter[]{new InputFilter.LengthFilter(6)});
                 mNum.addTextChangedListener(new TextWatcher() {
                     @Override
                     public void beforeTextChanged(CharSequence s, int start, int count, int after) {

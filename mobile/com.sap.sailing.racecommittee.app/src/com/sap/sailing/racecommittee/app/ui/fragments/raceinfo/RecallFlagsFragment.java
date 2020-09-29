@@ -40,7 +40,9 @@ public class RecallFlagsFragment extends RaceFragment implements RecallFlagItemC
 
         HeaderLayout header = ViewHelper.get(layout, R.id.header);
         if (header != null) {
-            header.setHeaderText(getArguments().getString(HEADER_TEXT, getString(R.string.not_available)));
+            if (getArguments() != null) {
+                header.setHeaderText(getArguments().getString(HEADER_TEXT, getString(R.string.not_available)));
+            }
             header.setHeaderOnClickListener(v -> sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT));
         }
 

@@ -270,7 +270,7 @@ public class PenaltyFragment extends BaseFragment
                 }
             case FINISHING:
                 if (mListButton != null) {
-                    mListButton.setImageDrawable(BitmapHelper.getAttrDrawable(getActivity(), R.attr.list_both_24dp));
+                    mListButton.setImageDrawable(BitmapHelper.getAttrDrawable(requireContext(), R.attr.list_both_24dp));
                 }
                 if (mListButtonLayout != null) {
                     mListButtonLayout.setVisibility(View.VISIBLE);
@@ -294,7 +294,7 @@ public class PenaltyFragment extends BaseFragment
     public void onStart() {
         super.onStart();
 
-        if (getRace() != null && getRaceState() != null) {
+        if (getRaceState() != null) {
             getRaceState().addChangedListener(mStateChangeListener);
         }
 
@@ -305,7 +305,7 @@ public class PenaltyFragment extends BaseFragment
     public void onStop() {
         super.onStop();
 
-        if (getRace() != null && getRaceState() != null) {
+        if (getRace() != null) {
             getRaceState().removeChangedListener(mStateChangeListener);
         }
 
@@ -407,7 +407,7 @@ public class PenaltyFragment extends BaseFragment
                     MergeState.OK);
             mCompetitorResults.add(new CompetitorResultEditableImpl(result));
         }
-        if (getRaceState() != null && getRaceState().getFinishPositioningList() != null) { // mix with finish position
+        if (getRaceState().getFinishPositioningList() != null) { // mix with finish position
             // list
             for (CompetitorResult result : getRaceState().getFinishPositioningList()) {
                 int pos = 0;
@@ -691,7 +691,7 @@ public class PenaltyFragment extends BaseFragment
 
     @Override
     public void onEditClicked(final CompetitorResultEditableImpl competitor) {
-        Context context = getActivity();
+        Context context = requireContext();
         if (context instanceof AppCompatActivity) {
             ActionBar actionBar = ((AppCompatActivity) context).getSupportActionBar();
             if (actionBar != null) {
