@@ -6,3 +6,6 @@ and established manifest, classpath and build.properties file so the project
 can be built both, in Eclipse and with Maven.
 
 See /java/com.amazon.aws.aws-java-api/README for further instructions.
+
+See also /java/com.sap.sailing.targetplatform/scripts/uploadAwsApiRepositoryToServer.sh
+for uploading the update site to the p2 repository at p2.sapsailing.com.

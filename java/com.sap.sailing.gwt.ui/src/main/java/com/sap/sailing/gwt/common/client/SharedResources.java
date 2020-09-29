@@ -3,6 +3,8 @@ package com.sap.sailing.gwt.common.client;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.resources.client.DataResource;
+import com.google.gwt.resources.client.DataResource.MimeType;
 import com.sap.sse.gwt.common.CommonIcons;
 import com.sap.sse.gwt.common.CommonSharedResources;
 
@@ -11,6 +13,14 @@ public interface SharedResources extends ClientBundle, CommonSharedResources, Co
 
     @Source("main.gss")
     MainCss mainCss();
+
+    @Source("buttonarrowrightwhite.png")
+    @MimeType("image/png")
+    DataResource buttonarrowrightwhite();
+
+    @Source("lightboxclose.png")
+    @MimeType("image/png")
+    DataResource lightboxclose();
 
     @Source(CommonSharedResources.MEDIA)
     MediaCss mediaCss();
