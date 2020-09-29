@@ -100,6 +100,8 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
     private final Panel applyQueryBusyIndicator;
     
     private final DialogBox confirmChangeLossDialog;
+    private final ConfigureQueryParametersDialog configureQueryParametersDialog;
+    
     private StatisticQueryDefinitionDTO queryDefinitionToBeApplied;
     private boolean queryDefinitionChanged;
 
@@ -153,7 +155,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         }
         
         confirmChangeLossDialog = createConfirmChangeLossDialog();
-        DataMiningEventBus.addHandler(ConfigureDimensionParameterEvent.TYPE, this::onConfigureDimensionParameter);
+        configureQueryParametersDialog = new ConfigureQueryParametersDialog(this, context);
 
         // Setting up the query component providers
         statisticProvider = new SuggestBoxStatisticProvider(parent, context, dataMiningService,
@@ -201,6 +203,9 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         providers.add(groupingProvider);
         providers.add(filterSelectionProvider);
         reloadComponents();
+        
+        // Setting up event handlers
+        DataMiningEventBus.addHandler(ConfigureDimensionParameterEvent.TYPE, this::onConfigureDimensionParameter);
     }
 
     private DialogBox createConfirmChangeLossDialog() {
@@ -252,7 +257,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
     }
     
     private void onConfigureDimensionParameter(ConfigureDimensionParameterEvent event) {
-        // TODO Open parameter dialog
+        this.configureQueryParametersDialog.setVisible(true);
     }
 
     /**
