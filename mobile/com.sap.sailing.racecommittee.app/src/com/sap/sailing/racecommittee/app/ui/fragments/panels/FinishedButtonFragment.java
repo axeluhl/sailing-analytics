@@ -1,15 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.panels;
 
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.util.ViewHelper;
-import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
-import com.sap.sailing.racecommittee.app.AppConstants;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.ui.NavigationEvents;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.PenaltyFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.PhotoListFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.TrackingListFragment;
-
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -21,6 +11,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
+import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.NavigationEvents;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.PenaltyFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.PhotoListFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.TrackingListFragment;
 
 public class FinishedButtonFragment extends BasePanelFragment implements NavigationEvents.NavigationListener {
 
@@ -35,7 +35,6 @@ public class FinishedButtonFragment extends BasePanelFragment implements Navigat
     private ImageView mWarning;
 
     public FinishedButtonFragment() {
-
     }
 
     public static FinishedButtonFragment newInstance(Bundle args) {
@@ -181,7 +180,7 @@ public class FinishedButtonFragment extends BasePanelFragment implements Navigat
             if (mRecordLock == null || mRecordLock.getVisibility() == View.GONE) {
                 switch (toggleMarker(v, R.id.record_marker)) {
                     case LEVEL_NORMAL:
-                        sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
+                        sendIntent(AppConstants.ACTION_SHOW_SUMMARY_CONTENT);
                         break;
 
                     case LEVEL_TOGGLED:
@@ -203,7 +202,7 @@ public class FinishedButtonFragment extends BasePanelFragment implements Navigat
             if (mPhotoLock == null || mPhotoLock.getVisibility() == View.GONE) {
                 switch (toggleMarker(v, R.id.photo_marker)) {
                     case LEVEL_NORMAL:
-                        sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
+                        sendIntent(AppConstants.ACTION_SHOW_SUMMARY_CONTENT);
                         break;
 
                     case LEVEL_TOGGLED:
@@ -226,7 +225,7 @@ public class FinishedButtonFragment extends BasePanelFragment implements Navigat
             if (mListLock == null || mListLock.getVisibility() == View.GONE) {
                 switch (toggleMarker(v, R.id.list_marker)) {
                     case LEVEL_NORMAL:
-                        sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
+                        sendIntent(AppConstants.ACTION_SHOW_SUMMARY_CONTENT);
                         break;
 
                     case LEVEL_TOGGLED:

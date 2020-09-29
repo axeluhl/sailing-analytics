@@ -41,7 +41,7 @@ public abstract class CourseFragment extends BaseFragment {
         super.onActivityCreated(savedInstanceState);
 
         if (getView() != null && getArguments() != null) {
-            HeaderLayout header = getView().findViewById(R.id.header);
+            final HeaderLayout header = getView().findViewById(R.id.header);
             if (header != null) {
                 header.setHeaderOnClickListener(v -> goHome());
                 switch (getArguments().getInt(START_MODE, START_MODE_PRESETUP)) {

@@ -261,7 +261,7 @@ public class PenaltyFragment extends BaseFragment
                         mHeader.setHeaderOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
+                                sendIntent(AppConstants.ACTION_SHOW_SUMMARY_CONTENT);
                             }
                         });
                     } else {
@@ -841,8 +841,8 @@ public class PenaltyFragment extends BaseFragment
         }
 
         @Override
-        public void onFinishingPositioningsChanged(ReadonlyRaceState state) {
-            super.onFinishingPositioningsChanged(state);
+        public void onFinishingPositionsChanged(ReadonlyRaceState state) {
+            super.onFinishingPositionsChanged(state);
 
             PenaltyFragment fragment = mReference.get();
             if (fragment != null) {

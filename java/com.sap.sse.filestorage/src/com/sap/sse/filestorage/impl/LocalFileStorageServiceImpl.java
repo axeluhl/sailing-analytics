@@ -50,8 +50,8 @@ public class LocalFileStorageServiceImpl extends BaseFileStorageServiceImpl impl
     
     private static final Logger logger = Logger.getLogger(LocalFileStorageServiceImpl.class.getName());
 
-    private final FileStorageServicePropertyImpl baseURL = new FileStorageServicePropertyImpl("baseURL", true, "localBaseUrlDesc");
-    private final FileStorageServicePropertyImpl localPath = new FileStorageServicePropertyImpl("localPath", true, "localLocalPathDesc");
+    private final FileStorageServicePropertyImpl baseURL = new FileStorageServicePropertyImpl("baseURL", true, /* isPassword */ false, "localBaseUrlDesc");
+    private final FileStorageServicePropertyImpl localPath = new FileStorageServicePropertyImpl("localPath", true, /* isPassword */ false, "localLocalPathDesc");
 
     
     protected LocalFileStorageServiceImpl(BundleContext bundleContext) {

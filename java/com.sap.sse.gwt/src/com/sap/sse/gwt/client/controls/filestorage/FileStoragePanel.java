@@ -60,6 +60,7 @@ public class FileStoragePanel extends FlowPanel {
     private final Map<String, FileStorageServiceDTO> availableServices = new HashMap<>();
     private final Map<FileStorageServicePropertyDTO, String> perPropertyErrors = new HashMap<>();
     private final ListDataProvider<FileStorageServicePropertyDTO> propertiesListDataProvider;
+    private final TabbingTextInputCell valueCell;
 
     public FileStoragePanel(FileStorageManagementGwtServiceAsync sailingService, ErrorReporter errorReporter) {
         this.sailingService = sailingService;
@@ -90,7 +91,7 @@ public class FileStoragePanel extends FlowPanel {
         serviceDescriptionLabel = new Label();
         editServicePanelContent.add(serviceDescriptionLabel);
         propertiesTable = new BaseCelltable<>();
-        propertiesTable.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.DISABLED); //allow for default tabbing behaviour
+        propertiesTable.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.DISABLED); // allow for default tabbing behaviour
         propertiesListDataProvider = new ListDataProvider<>(new ArrayList<FileStorageServicePropertyDTO>());
         properties = propertiesListDataProvider.getList();
         propertiesListDataProvider.addDataDisplay(propertiesTable);
@@ -101,8 +102,8 @@ public class FileStoragePanel extends FlowPanel {
             }
         };
         propertiesTable.addColumn(nameColumn, stringMessages.name());
-        Column<FileStorageServicePropertyDTO, String> inputColumn = new Column<FileStorageServicePropertyDTO, String>(
-                new TabbingTextInputCell()) {
+        valueCell = new TabbingTextInputCell();
+        Column<FileStorageServicePropertyDTO, String> inputColumn = new Column<FileStorageServicePropertyDTO, String>(valueCell) {
             @Override
             public String getValue(FileStorageServicePropertyDTO object) {
                 return object.value;
@@ -165,8 +166,6 @@ public class FileStoragePanel extends FlowPanel {
     /**
      * Test the properties using {@link FileStorageService#testProperties()}, and display global errors and per-property
      * errors in the according label and table cells.
-     * 
-     * @param callback
      */
     private void testProperties(final Callback<Void, Void> callback) {
         sailingService.testFileStorageServiceProperties(getSelectedServiceName(), getLocaleInfo(),
@@ -181,6 +180,14 @@ public class FileStoragePanel extends FlowPanel {
                         }
                         if (callback != null) {
                             callback.onSuccess(null);
+                        }
+                        // clear all password properties:
+                        for (int i=0; i<properties.size(); i++) {
+                            final FileStorageServicePropertyDTO p = properties.get(i);
+                            if (p.isPassword) {
+                                p.value = null;
+                                valueCell.clearViewData(p);
+                            }
                         }
                         propertiesListDataProvider.refresh();
                     }

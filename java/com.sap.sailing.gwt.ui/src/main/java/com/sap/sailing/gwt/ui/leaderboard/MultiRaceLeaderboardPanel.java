@@ -49,14 +49,14 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderb
     public MultiRaceLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             MultiRaceLeaderboardSettings settings, boolean isEmbedded,
-            CompetitorSelectionProvider competitorSelectionProvider, Timer timer, String leaderboardGroupName,
+            CompetitorSelectionProvider competitorSelectionProvider, Timer timer,
             String leaderboardName, ErrorReporter errorReporter, StringMessages stringMessages, boolean showRaceDetails,
             CompetitorFilterPanel competitorSearchTextBox, boolean showSelectionCheckbox,
             RaceTimesInfoProvider optionalRaceTimesInfoProvider, boolean autoExpandLastRaceColumn,
             boolean adjustTimerDelay, boolean autoApplyTopNFilter, boolean showCompetitorFilterStatus,
             boolean enableSyncScroller, LeaderBoardStyle style, FlagImageResolver flagImageResolver, Iterable<DetailType> availableDetailTypes) {
         super(parent, context, sailingService, asyncActionsExecutor, settings, isEmbedded, competitorSelectionProvider,
-                timer, leaderboardGroupName, leaderboardName, errorReporter, stringMessages, showRaceDetails,
+                timer, leaderboardName, errorReporter, stringMessages, showRaceDetails,
                 competitorSearchTextBox, showSelectionCheckbox, optionalRaceTimesInfoProvider, autoExpandLastRaceColumn,
                 adjustTimerDelay, autoApplyTopNFilter, showCompetitorFilterStatus, enableSyncScroller, style, flagImageResolver, availableDetailTypes);
         initialize(settings);

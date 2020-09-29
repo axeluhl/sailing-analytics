@@ -1,7 +1,6 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
 import android.app.Activity;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -12,6 +11,7 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ListView;
 
@@ -57,12 +57,11 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
 
         AbortFlagsFragment fragment = new AbortFlagsFragment();
         Bundle args = new Bundle();
-        args.putString(AppConstants.FLAG_KEY, flag.name());
+        args.putString(AppConstants.KEY_RACE_FLAG, flag.name());
         args.putString(HEADER_TEXT, headerText);
         fragment.setArguments(args);
         return fragment;
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -76,15 +75,20 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
 
         HeaderLayout header = ViewHelper.get(layout, R.id.header);
         if (header != null) {
-            header.setHeaderText(getArguments().getString(HEADER_TEXT, getString(R.string.not_available)));
-            header.setHeaderOnClickListener(v -> sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT));
+            if (getArguments() != null) {
+                header.setHeaderText(getArguments().getString(HEADER_TEXT, getString(R.string.not_available)));
+            }
+            header.setHeaderOnClickListener(v -> sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT));
         }
 
         return layout;
     }
 
     public Flags getFlag() {
-        return Flags.valueOf(getArguments().getString(AppConstants.FLAG_KEY));
+        if (getArguments() != null) {
+            return Flags.valueOf(getArguments().getString(AppConstants.KEY_RACE_FLAG));
+        }
+        return Flags.NONE;
     }
 
     @Override
@@ -93,40 +97,40 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
         RaceState state = getRaceState();
         Flags mainFlag = getFlag();
         switch (mainFlag) {
-        case AP:
-            logFlag(flag);
-            state.setAborted(now, /* postponed */ true, flag);
-            if (flag != Flags.NONE) {
-                setProtestTime();
-            }
-            state.setAdvancePass(now);
-            break;
+            case AP:
+                logFlag(flag);
+                state.setAborted(now, /* postponed */ true, flag);
+                if (flag != Flags.NONE) {
+                    setProtestTime();
+                }
+                state.setAdvancePass(now);
+                break;
 
-        case NOVEMBER:
-            logFlag(flag);
-            abortRunningRaces(now, flag);
-            break;
+            case NOVEMBER:
+                logFlag(flag);
+                abortRunningRaces(now, flag);
+                break;
 
-        default:
-            logFlag(flag);
-            state.setAdvancePass(now);
-            break;
+            default:
+                logFlag(flag);
+                state.setAdvancePass(now);
+                break;
         }
     }
 
     private void logFlag(Flags flag) {
         switch (flag) {
-        case ALPHA:
-            ExLog.i(getActivity(), LogEvent.RACE_CHOOSE_ABORT_ALPHA, getRace().getId());
-            break;
+            case ALPHA:
+                ExLog.i(getActivity(), LogEvent.RACE_CHOOSE_ABORT_ALPHA, getRace().getId());
+                break;
 
-        case HOTEL:
-            ExLog.i(getActivity(), LogEvent.RACE_CHOOSE_ABORT_HOTEL, getRace().getId());
-            break;
+            case HOTEL:
+                ExLog.i(getActivity(), LogEvent.RACE_CHOOSE_ABORT_HOTEL, getRace().getId());
+                break;
 
-        default:
-            ExLog.i(getActivity(), LogEvent.RACE_CHOOSE_ABORT_NONE, getRace().getId());
-            break;
+            default:
+                ExLog.i(getActivity(), LogEvent.RACE_CHOOSE_ABORT_NONE, getRace().getId());
+                break;
         }
     }
 
@@ -172,7 +176,7 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
         private final SimpleRaceLogIdentifier dependentOn;
 
         public AbortAndRenewRelativeStartTime(ManagedRace raceToAbort, TimePoint now, Flags flag,
-                Duration startTimeDiff, SimpleRaceLogIdentifier dependentOn) {
+                                              Duration startTimeDiff, SimpleRaceLogIdentifier dependentOn) {
             super(raceToAbort, now, flag);
             this.startTimeDiff = startTimeDiff;
             this.dependentOn = dependentOn;
@@ -205,11 +209,11 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
     }
 
     private void abortRunningRaces(final TimePoint now, final Flags flag) {
-        final RacingActivity activity = (RacingActivity) getActivity();
+        final RacingActivity activity = (RacingActivity) requireActivity();
         final LinkedHashMap<String, ManagedRace> races = activity.getRunningRaces();
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         View layout = LayoutInflater.from(builder.getContext()).inflate(R.layout.race_november_dialog, null);
-        RecyclerView recyclerView = (RecyclerView) layout.findViewById(R.id.abort_list);
+        RecyclerView recyclerView = layout.findViewById(R.id.abort_list);
         recyclerView.setLayoutManager(new LinearLayoutManager(activity));
         final AbortNovemberAdapter adapter = new AbortNovemberAdapter(races, getRace());
         recyclerView.setAdapter(adapter);
@@ -271,22 +275,25 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
             }
             if (!racesToAbort.contains(getRace())) {
                 BroadcastManager.getInstance(getActivity())
-                        .addIntent(new Intent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT));
+                        .addIntent(new Intent(AppConstants.ACTION_SHOW_MAIN_CONTENT));
             }
         });
         builder.setNegativeButton(R.string.abort_dismiss, null);
         AlertDialog dialog = builder.create();
         dialog.show();
-        WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
-        lp.copyFrom(dialog.getWindow().getAttributes());
-        int maxItemHeight = (int) getItemHeight(activity) * races.size()
-                + getActivity().getResources().getDimensionPixelSize(R.dimen.abort_dialog_height);
-        lp.height = Math.min(maxItemHeight, (int) getMaxScreenHeight(activity));
-        dialog.getWindow().setAttributes(lp);
+        final Window window = dialog.getWindow();
+        if (window != null) {
+            WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+            lp.copyFrom(window.getAttributes());
+            int maxItemHeight = (int) getItemHeight(activity) * races.size()
+                    + getResources().getDimensionPixelSize(R.dimen.abort_dialog_height);
+            lp.height = Math.min(maxItemHeight, (int) getMaxScreenHeight(activity));
+            window.setAttributes(lp);
+        }
     }
 
     private ManagedRace getManagedRace(final Iterable<ManagedRace> managedRaces,
-            final SimpleRaceLogIdentifier raceLogIdentifier) {
+                                       final SimpleRaceLogIdentifier raceLogIdentifier) {
         for (final ManagedRace managedRace : managedRaces) {
             if (RaceHelper.getSimpleRaceLogIdentifier(managedRace).equals(raceLogIdentifier)) {
                 return managedRace;

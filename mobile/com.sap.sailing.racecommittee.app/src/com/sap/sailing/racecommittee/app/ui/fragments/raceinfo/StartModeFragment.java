@@ -43,8 +43,10 @@ public class StartModeFragment extends BaseFragment {
         if (getArguments() != null) {
             final View view = getView();
             if (getArguments().getInt(START_MODE, START_MODE_PRESETUP) == START_MODE_PLANNED && AppUtils.with(getActivity()).isLandscape() && view != null) {
-                View header = view.findViewById(R.id.header);
-                header.setVisibility(View.GONE);
+                if (view != null) {
+                    View header = view.findViewById(R.id.header);
+                    header.setVisibility(View.GONE);
+                }
             }
         }
 
@@ -113,7 +115,7 @@ public class StartModeFragment extends BaseFragment {
             openMainScheduleFragment();
         } else {
             if (sameFlag) {
-                sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
             }
         }
     }

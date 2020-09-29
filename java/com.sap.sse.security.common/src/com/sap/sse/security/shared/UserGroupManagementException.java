@@ -2,7 +2,7 @@ package com.sap.sse.security.shared;
 
 import java.io.Serializable;
 
-public class UserGroupManagementException extends Exception implements Serializable {
+public class UserGroupManagementException extends UserStoreManagementException implements Serializable {
     private static final long serialVersionUID = -1262664226208506392L;
     
     public static final String USER_GROUP_DOES_NOT_EXIST = "User group does not exist";

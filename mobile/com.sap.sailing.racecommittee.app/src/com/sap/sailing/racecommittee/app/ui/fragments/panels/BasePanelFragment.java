@@ -1,10 +1,8 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.panels;
 
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.IdRes;
@@ -14,6 +12,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -24,6 +23,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseFragment;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
 public abstract class BasePanelFragment extends RaceFragment {
+
     /**
      * Marker level is unknown, due to an error
      */
@@ -115,11 +115,10 @@ public abstract class BasePanelFragment extends RaceFragment {
                 if (drawable != null) {
                     drawable.setLevel(level);
                     retValue = drawable.getLevel();
-                    final FragmentActivity activity = requireActivity();
                     if (retValue == LEVEL_TOGGLED) {
-                        view.setBackgroundColor(ThemeHelper.getColor(activity, R.attr.sap_gray_black_20));
+                        view.setBackgroundColor(ThemeHelper.getColor(requireContext(), R.attr.sap_gray_black_20));
                     } else {
-                        view.setBackgroundColor(ThemeHelper.getColor(activity, R.attr.sap_gray));
+                        view.setBackgroundColor(ThemeHelper.getColor(requireContext(), R.attr.sap_gray));
                     }
                 }
             }
@@ -143,12 +142,10 @@ public abstract class BasePanelFragment extends RaceFragment {
 
     protected void resetFragment(View lockIcon, @IdRes int idRes, Class<? extends BaseFragment> cls) {
         if (lockIcon != null && lockIcon.getVisibility() == View.VISIBLE) {
-            if (getFragmentManager() != null) {
-                Fragment fragment = getFragmentManager().findFragmentById(idRes);
-                if (fragment != null) {
-                    if (cls.getCanonicalName().equals(fragment.getClass().getCanonicalName())) {
-                        sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
-                    }
+            Fragment fragment = requireFragmentManager().findFragmentById(idRes);
+            if (fragment != null) {
+                if (TextUtils.equals(cls.getCanonicalName(), fragment.getClass().getCanonicalName())) {
+                    sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
                 }
             }
         }
@@ -156,10 +153,10 @@ public abstract class BasePanelFragment extends RaceFragment {
 
     protected void resetFragment(boolean isLocked, @IdRes int idRes, Class<? extends BaseFragment> cls) {
         if (isLocked && getFragmentManager() != null) {
-            final Fragment fragment = getFragmentManager().findFragmentById(idRes);
+            final Fragment fragment = requireFragmentManager().findFragmentById(idRes);
             if (fragment != null) {
-                if (cls.getCanonicalName().equals(fragment.getClass().getCanonicalName())) {
-                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                if (TextUtils.equals(cls.getCanonicalName(), fragment.getClass().getCanonicalName())) {
+                    sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
                 }
             }
         }
@@ -169,27 +166,16 @@ public abstract class BasePanelFragment extends RaceFragment {
         replaceFragment(fragment, getFrameId(requireActivity(), R.id.race_edit, R.id.race_content, true));
     }
 
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     protected void replaceFragment(RaceFragment fragment, @IdRes int idRes) {
-        final FragmentActivity activity = requireActivity();
-
-        Bundle args = getRecentArguments();
+        final Bundle args = getRecentArguments();
         if (fragment.getArguments() != null) {
             args.putAll(fragment.getArguments());
         }
         fragment.setArguments(args);
-        FragmentManager manager = getFragmentManager();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            if (getParentFragment() != null) {
-                manager = activity.getSupportFragmentManager();
-            }
-        }
-        if (manager == null) {
-            return;
-        }
-        FragmentTransaction transaction = manager.beginTransaction();
-        if (idRes != R.id.race_content) {
-            Fragment frag = manager.findFragmentById(R.id.race_content);
+        final FragmentManager fragmentManager = requireFragmentManager();
+        final FragmentTransaction transaction = fragmentManager.beginTransaction();
+        if (idRes == R.id.race_edit) {
+            Fragment frag = fragmentManager.findFragmentById(R.id.race_content);
             if (frag != null) {
                 transaction.remove(frag);
             }
@@ -199,31 +185,22 @@ public abstract class BasePanelFragment extends RaceFragment {
     }
 
     protected void showChangeDialog(DialogInterface.OnClickListener positiveButton) {
-        showChangeDialog(positiveButton, null);
-    }
-
-    protected void showChangeDialog(DialogInterface.OnClickListener positiveButton,
-            DialogInterface.OnClickListener negativeButton) {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setTitle(getString(R.string.change_title));
         builder.setMessage(getString(R.string.change_message));
         builder.setPositiveButton(getString(R.string.change_proceed), positiveButton);
-        builder.setNegativeButton(getString(R.string.change_cancel), negativeButton);
+        builder.setNegativeButton(getString(R.string.change_cancel), null);
         builder.setCancelable(true);
         builder.create().show();
     }
 
-    protected void disableToggle(View container, @IdRes int resId) {
-        disableToggle(container, resId, 200);
-    }
-
-    protected void disableToggle(final View container, @IdRes final int resId, int delay) {
+    protected void disableToggle(final View container, @IdRes final int resId) {
         container.setClickable(false);
         container.setBackgroundColor(getResources().getColor(R.color.constant_sap_yellow_1));
         Handler handler = new Handler();
         handler.postDelayed(() -> {
             container.setClickable(true);
             setMarkerLevel(container, resId, getMarkerLevel(container, resId));
-        }, delay);
+        }, 200L);
     }
 }

@@ -30,7 +30,6 @@ USE_ENVIRONMENT=live-master-server
 SERVER_NAME=myspecificevent
 REPLICATION_CHANNEL=myspecificevent
 MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/myspecificevent?replicaSet=live&retryWrites=true"
-SERVER_STARTUP_NOTIFY=you@email.com
 # Provide authentication credentials for a user on security-service.sapsailing.com permitted to replicate, either by username/password...
 #REPLICATE_MASTER_USERNAME=(user for replicator login on security-service.sapsailing.com server having SERVER:REPLICATE:&lt;server-name&gt; permission)
 #REPLICATE_MASTER_PASSWORD=(password of the user for replication login on security-service.sapsailing.com)
@@ -39,6 +38,8 @@ SERVER_STARTUP_NOTIFY=you@email.com
 # or by logging in to the security-service.sapsailing.com server using your web browser and then navigating to
 #     https://security-service.sapsailing.com/security/api/restsecurity/access_token
 REPLICATE_MASTER_BEARER_TOKEN=(a bearer token allowing this master to replicate from security-service.sapsailing.com)
+EVENT_ID={some-uuid-of-an-event-you-want-to-feature}
+SERVER_STARTUP_NOTIFY=you@email.com
 ```
 
 Have at least a public-facing target group ready. If you want to expose the master to the public (single-instance scenario or master-replica scenario where the master also handles reading client requests) add the master to the public target group.
@@ -65,7 +66,7 @@ REPLICATE_MASTER_EXCHANGE_NAME=myspecificevent
 REPLICATE_MASTER_BEARER_TOKEN=(a bearer token allowing this master to replicate from your master)
 SERVER_NAME=MYSPECIFICEVENT
 MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/myspecificevent-replica?replicaSet=live&retryWrites=true"
-EVENT_ID=&lt;some-uuid-of-an-event-you-want-to-feature&gt;
+EVENT_ID={some-uuid-of-an-event-you-want-to-feature}
 SERVER_STARTUP_NOTIFY=you@email.com
 ```
 
@@ -131,6 +132,7 @@ To set up a multi instance for a server with name "SSV", subdomain "ssv.sapsaili
    <pre>
    # JAVA_HOME=/opt/jdk1.8.0_20
    </pre>
+   Optional: setup event management URL by setting <pre>com.sap.sailing.eventmanagement.url</pre> system property. See ADDITIONAL_JAVA_ARGS at <pre>env.sh</pre>.
 
 8. White label switch, uncomment this line in env.sh
    <pre>

@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Consumer;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
@@ -86,6 +87,7 @@ import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalablePosition;
 import com.sap.sailing.domain.common.windfinder.SpotDTO;
 import com.sap.sailing.gwt.ui.actions.GetBoatPositionsAction;
+import com.sap.sailing.gwt.ui.actions.GetBoatPositionsCallback;
 import com.sap.sailing.gwt.ui.actions.GetPolarAction;
 import com.sap.sailing.gwt.ui.actions.GetRaceMapDataAction;
 import com.sap.sailing.gwt.ui.actions.GetWindInfoAction;
@@ -152,6 +154,7 @@ import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.async.TimeRangeActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
@@ -378,7 +381,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private final CombinedWindPanel combinedWindPanel;
     private final TrueNorthIndicatorPanel trueNorthIndicatorPanel;
     private final FlowPanel topLeftControlsWrapperPanel;
-    
+
+    private final TimeRangeActionsExecutor<CompactBoatPositionsDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>, String> timeRangeActionsExecutor;
     private final AsyncActionsExecutor asyncActionsExecutor;
 
     /**
@@ -455,6 +459,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
      * Needed to get some metrics from {@link SailingServiceImpl.getCompetitorRaceDataEntry}.
      */
     private final String leaderboardGroupName;
+    /**
+     * Needed to get some metrics from {@link SailingServiceImpl.getCompetitorRaceDataEntry}.
+     */
+    private final UUID leaderboardGroupId;
 
     /**
      * Contains all available {@link DetailType}s for this race. Gets filled by {@link #loadAvailableDetailTypes()} and
@@ -559,7 +567,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             RaceMapResources raceMapResources, boolean showHeaderPanel, QuickFlagDataProvider quickRanksDTOProvider) {
         this(parent, context, raceMapLifecycle, raceMapSettings, sailingService, asyncActionsExecutor, errorReporter,
                 timer, competitorSelection, raceCompetitorSet, stringMessages, raceIdentifier, raceMapResources,
-                showHeaderPanel, quickRanksDTOProvider, /* leaderboardName */ "", /* leaderboardGroupName */ "");
+                showHeaderPanel, quickRanksDTOProvider, /* leaderboardName */ "", /* leaderboardGroupName */ "", /* leaderboardGroupId */ null);
     }
     
     public RaceMap(Component<?> parent, ComponentContext<?> context, RaceMapLifecycle raceMapLifecycle,
@@ -568,10 +576,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             ErrorReporter errorReporter, Timer timer, RaceCompetitorSelectionProvider competitorSelection,
             RaceCompetitorSet raceCompetitorSet, StringMessages stringMessages, RegattaAndRaceIdentifier raceIdentifier, 
             RaceMapResources raceMapResources, boolean showHeaderPanel, QuickFlagDataProvider quickRanksDTOProvider,
-            String leaderboardName, String leaderboardGroupName) {
+            String leaderboardName, String leaderboardGroupName, UUID leaderboardGroupId) {
         this(parent, context, raceMapLifecycle, raceMapSettings, sailingService, asyncActionsExecutor, errorReporter,
                 timer, competitorSelection, raceCompetitorSet, stringMessages, raceIdentifier, raceMapResources,
-                showHeaderPanel, quickRanksDTOProvider, visible -> {}, leaderboardName, leaderboardGroupName);
+                showHeaderPanel, quickRanksDTOProvider, visible -> {}, leaderboardName, leaderboardGroupName, leaderboardGroupId);
     }
     
     public RaceMap(Component<?> parent, ComponentContext<?> context, RaceMapLifecycle raceMapLifecycle,
@@ -579,7 +587,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             ErrorReporter errorReporter, Timer timer, RaceCompetitorSelectionProvider competitorSelection, RaceCompetitorSet raceCompetitorSet,
             StringMessages stringMessages, RegattaAndRaceIdentifier raceIdentifier, RaceMapResources raceMapResources, boolean showHeaderPanel,
-            QuickFlagDataProvider quickFlagDataProvider, Consumer<WindSource> showWindChartForProvider, String leaderboardName, String leaderboardGroupName) {
+            QuickFlagDataProvider quickFlagDataProvider, Consumer<WindSource> showWindChartForProvider, String leaderboardName, String leaderboardGroupName,
+            UUID leaderboardGroupId) {
         super(parent, context);
         this.maneuverMarkersAndLossIndicators = new ManeuverMarkersAndLossIndicators(this, sailingService, errorReporter, stringMessages);
         this.showHeaderPanel = showHeaderPanel;
@@ -588,6 +597,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
         this.raceIdentifier = raceIdentifier;
+        this.timeRangeActionsExecutor = new TimeRangeActionsExecutor<>();
         this.asyncActionsExecutor = asyncActionsExecutor;
         this.errorReporter = errorReporter;
         this.timer = timer;
@@ -595,6 +605,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         this.showWindChartForProvider = showWindChartForProvider;
         this.leaderboardName = leaderboardName;
         this.leaderboardGroupName = leaderboardGroupName;
+        this.leaderboardGroupId = leaderboardGroupId;
         timer.addTimeListener(this);
         raceMapImageManager = new RaceMapImageManager(raceMapResources);
         markDTOs = new HashMap<String, MarkDTO>();
@@ -624,7 +635,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         headerPanel.setStyleName("RaceMap-HeaderPanel");
         panelForLeftHeaderLabels = new AbsolutePanel();
         panelForRightHeaderLabels = new AbsolutePanel();
-        initializeData(settings.isShowMapControls(), showHeaderPanel);
         raceMapStyle = raceMapResources.raceMapStyle();
         raceMapStyle.ensureInjected();
         combinedWindPanel = new CombinedWindPanel(this, raceMapImageManager, raceMapStyle, stringMessages, coordinateSystem);
@@ -638,6 +648,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         mapFirstZoomDone = false;
         // TODO bug 494: reset zoom settings to user preferences
         initWidget(rootPanel);
+        initializeData(settings.isShowMapControls(), showHeaderPanel);
         this.setSize("100%", "100%");
     }
 
@@ -736,7 +747,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     }
     
     private void loadAvailableDetailTypes() {
-        sailingService.determineDetailTypesForCompetitorChart(leaderboardGroupName, raceIdentifier,
+        sailingService.determineDetailTypesForCompetitorChart(leaderboardGroupName, leaderboardGroupId, raceIdentifier,
                 new AsyncCallback<Iterable<DetailType>>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -766,10 +777,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         rootPanel.add(sapLogo);
                     }
                 }
-
                 map.setControls(ControlPosition.LEFT_TOP, topLeftControlsWrapperPanel);
                 adjustLeftControlsIndent();
-
                 RaceMap.this.raceMapImageManager.loadMapIcons(map);
                 map.setSize("100%", "100%");
                 map.addZoomChangeHandler(new ZoomChangeMapHandler() {
@@ -828,14 +837,12 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         }
                     }
                 });
-
                 map.addDragStartHandler(event -> {
                     currentlyDragging = true;
                     if (streamletOverlay != null && settings.isShowWindStreamletOverlay()) {
                         streamletOverlay.onDragStart();
                     }
                 });
-
                 map.addIdleHandler(new IdleMapHandler() {
                     @Override
                     public void onEvent(IdleMapEvent event) {
@@ -850,7 +857,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                             map.panTo(autoZoomLatLngBounds.getCenter());
                             autoZoomOut = false;
                         }
-
                         if (streamletOverlay != null && settings.isShowWindStreamletOverlay()) {
                             streamletOverlay.setCanvasSettings();
                         }
@@ -878,14 +884,12 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         if (!isAutoZoomInProgress() && (newZoomLevel != currentZoomLevel)) {
                             removeTransitions();
                         }
-
                         currentMapBounds = map.getBounds();
                         currentZoomLevel = newZoomLevel;
                         headerPanel.getElement().getStyle().setWidth(map.getOffsetWidth(), Unit.PX);
                         refreshMapWithoutAnimationButLeaveTransitionsAlive();
                     }
                 });
-
                 // If there was a time change before the API was loaded, reset the time
                 if (lastTimeChangeBeforeInitialization != null) {
                     timeChanged(lastTimeChangeBeforeInitialization, null);
@@ -900,7 +904,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 if (settings.isShowWindStreamletOverlay()) {
                     streamletOverlay.setVisible(true);
                 }
-
                 if (isSimulationEnabled) {
                     // determine availability of polar diagram
                     setHasPolar();
@@ -1234,20 +1237,21 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             race, useNullAsTimePoint() ? null : newTime, fromTimesForQuickCall, toTimesForQuickCall, /* extrapolate */true,
                     (settings.isShowSimulationOverlay() ? simulationOverlay.getLegIdentifier() : null),
                     raceCompetitorSet.getMd5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID(),
-                    newTime, settings.isShowEstimatedDuration(), detailType, leaderboardName, leaderboardGroupName),
+                    newTime, settings.isShowEstimatedDuration(), detailType, leaderboardName, leaderboardGroupName, leaderboardGroupId),
             GET_RACE_MAP_DATA_CATEGORY,
                 getRaceMapDataCallback(newTime, transitionTimeInMillis, fromAndToAndOverlap.getC(), competitorsToShow,
                         ++boatPositionRequestIDCounter, isRedraw, detailTypeChanged));
         // next, if necessary, do the full thing; the two calls have different action classes, so throttling should not drop one for the other
         if (!fromTimesForNonOverlappingTailsCall.keySet().isEmpty()) {
-            asyncActionsExecutor.execute(new GetBoatPositionsAction(sailingService, race, fromTimesForNonOverlappingTailsCall, toTimesForNonOverlappingTailsCall,
-                    /* extrapolate */ true, detailType, leaderboardName, leaderboardGroupName), GET_RACE_MAP_DATA_CATEGORY,
-                    new MarkedAsyncCallback<>(new AsyncCallback<CompactBoatPositionsDTO>() {
+            timeRangeActionsExecutor.execute(new GetBoatPositionsAction(sailingService, race,
+                    fromTimesForNonOverlappingTailsCall, toTimesForNonOverlappingTailsCall, /* extrapolate */ true,
+                    detailType, leaderboardName, leaderboardGroupName, leaderboardGroupId),
+                    new GetBoatPositionsCallback(new AsyncCallback<CompactBoatPositionsDTO>() {
                         @Override
                         public void onFailure(Throwable t) {
                             errorReporter.reportError("Error obtaining racemap data: " + t.getMessage(), true /*silentMode */);
                         }
-                        
+
                         @Override
                         public void onSuccess(CompactBoatPositionsDTO result) {
                             // Note: the fromAndToAndOverlap.getC() map will be UPDATED by the call to updateBoatPositions for those
@@ -1259,8 +1263,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                                             competitorsByIdAsString), /* updateTailsOnly */ true, detailTypeChanged);
                         }
                     }));
-        }
-        else {
         }
     }
 

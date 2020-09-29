@@ -110,7 +110,7 @@ public class PhotoListFragment extends BaseFragment {
                 header.setHeaderOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
+                        sendIntent(AppConstants.ACTION_SHOW_SUMMARY_CONTENT);
                     }
                 });
             }

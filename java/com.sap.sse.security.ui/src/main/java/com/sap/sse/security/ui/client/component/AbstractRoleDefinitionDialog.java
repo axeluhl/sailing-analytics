@@ -57,6 +57,7 @@ public abstract class AbstractRoleDefinitionDialog extends DataEntryDialog<RoleD
                 new RoleValidator(stringMessages, allOtherRoles), /* animationEnabled */ true, callback);
         this.stringMessages = stringMessages;
         roleDefinitionNameField = createTextBox("", /* visible length */ 20);
+        roleDefinitionNameField.ensureDebugId("name");
         permissionsList = new GenericStringListInlineEditorComposite<WildcardPermission>(Collections.emptySet(),
                 stringMessages, IconResources.INSTANCE.removeIcon(), Util.map(allExistingPermissions, p->p.toString()),
                 /* text box size */ 20) {
@@ -76,6 +77,7 @@ public abstract class AbstractRoleDefinitionDialog extends DataEntryDialog<RoleD
                     }
         };
         permissionsList.addValueChangeHandler(e->validateAndUpdate());
+        permissionsList.ensureDebugId("permissions");
     }
 
     @Override

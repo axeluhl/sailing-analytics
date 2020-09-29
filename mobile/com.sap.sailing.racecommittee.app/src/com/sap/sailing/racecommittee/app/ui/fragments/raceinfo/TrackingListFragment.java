@@ -188,10 +188,10 @@ public class TrackingListFragment extends BaseFragment
                     //Check if finished or not
                     boolean finished = getRaceState().getFinishedTime() != null;
                     if (finished) {
-                        sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
+                        sendIntent(AppConstants.ACTION_SHOW_SUMMARY_CONTENT);
                     } else {
-                        Intent intent = new Intent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
-                        intent.putExtra(AppConstants.INTENT_ACTION_EXTRA_FORCED, true);
+                        Intent intent = new Intent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
+                        intent.putExtra(AppConstants.ACTION_EXTRA_FORCED, true);
                         sendIntent(intent);
                     }
                 }
@@ -315,10 +315,10 @@ public class TrackingListFragment extends BaseFragment
                     //Check if finished or not
                     boolean finished = getRaceState().getFinishedTime() != null;
                     if (finished) {
-                        sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
+                        sendIntent(AppConstants.ACTION_SHOW_SUMMARY_CONTENT);
                     } else {
-                        Intent intent = new Intent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
-                        intent.putExtra(AppConstants.INTENT_ACTION_EXTRA_FORCED, true);
+                        Intent intent = new Intent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
+                        intent.putExtra(AppConstants.ACTION_EXTRA_FORCED, true);
                         sendIntent(intent);
                     }
                 }
@@ -1246,8 +1246,8 @@ public class TrackingListFragment extends BaseFragment
         }
 
         @Override
-        public void onFinishingPositioningsChanged(ReadonlyRaceState state) {
-            super.onFinishingPositioningsChanged(state);
+        public void onFinishingPositionsChanged(ReadonlyRaceState state) {
+            super.onFinishingPositionsChanged(state);
 
             TrackingListFragment fragment = mReference.get();
             if (fragment != null) {

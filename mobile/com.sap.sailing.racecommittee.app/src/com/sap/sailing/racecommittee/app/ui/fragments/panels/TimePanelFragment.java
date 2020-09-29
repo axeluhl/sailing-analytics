@@ -19,6 +19,7 @@ import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
+import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
@@ -45,11 +46,11 @@ import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.WindFragment;
 import com.sap.sailing.racecommittee.app.ui.layouts.TimePanelHeaderLayout;
 import com.sap.sailing.racecommittee.app.ui.views.PanelButton;
 import com.sap.sailing.racecommittee.app.utils.RaceHelper;
+import com.sap.sailing.racecommittee.app.utils.TickListener;
 import com.sap.sailing.racecommittee.app.utils.TickSingleton;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import static com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult.ResolutionFailed.NO_START_TIME_SET;
 
@@ -57,8 +58,6 @@ public class TimePanelFragment extends BasePanelFragment implements NavigationEv
 
     private final static String TOGGLED = "toggled";
     private final static String COMPETITOR_TOGGLE_STATE_ON = "competitor-toggle-state-on";
-
-    private RaceStateChangedListener mStateListener;
 
     private TimePanelHeaderLayout mRaceHeader;
     private PanelButton mCompetitorList;
@@ -75,7 +74,6 @@ public class TimePanelFragment extends BasePanelFragment implements NavigationEv
     private boolean mCompetitorToggleOn;
 
     public TimePanelFragment() {
-
     }
 
     public static TimePanelFragment newInstance(Bundle args) {
@@ -87,8 +85,6 @@ public class TimePanelFragment extends BasePanelFragment implements NavigationEv
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.race_panel_time, container, false);
-
-        mStateListener = new RaceStateChangedListener();
 
         mRaceHeader = ViewHelper.get(layout, R.id.race_content_header);
         mRaceHeader.setRunnable(() -> new RaceHeaderClick().onClick(null));
@@ -102,7 +98,7 @@ public class TimePanelFragment extends BasePanelFragment implements NavigationEv
         mLinkIcon = ViewHelper.get(layout, R.id.linked_race);
         mFirstVesselDuration = ViewHelper.get(layout, R.id.first_vessel_duration);
 
-        if (getArguments() != null && getArguments().getBoolean(TOGGLED, false)) {
+        if (getArguments() != null && getArguments().getBoolean(TOGGLED)) {
             toggleMarker(layout, R.id.time_marker);
         }
 
@@ -126,8 +122,7 @@ public class TimePanelFragment extends BasePanelFragment implements NavigationEv
         super.onActivityCreated(savedInstanceState);
 
         if (preferences.getRacingProcedureIsResultEntryEnabled(getRaceState().getRacingProcedure().getType())) {
-            CompetitorPanelClick mClickListener = new CompetitorPanelClick();
-            mCompetitorList.setListener(mClickListener);
+            mCompetitorList.setListener(new CompetitorPanelClick());
             mCompetitorList.setVisibility(View.VISIBLE);
             checkWarnings(getRaceState());
         }
@@ -137,13 +132,12 @@ public class TimePanelFragment extends BasePanelFragment implements NavigationEv
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
+    public void onStart() {
+        super.onStart();
 
-        notifyTick(MillisecondsTimePoint.now());
         checkStatus();
 
-        getRaceState().addChangedListener(mStateListener);
+        getRaceState().addChangedListener(stateChangedListener);
 
         if (mCompetitorToggleOn) {
             mCompetitorList.setMarkerLevel(PanelButton.LEVEL_TOGGLED);
@@ -151,46 +145,47 @@ public class TimePanelFragment extends BasePanelFragment implements NavigationEv
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
+    public void onStop() {
+        super.onStop();
 
-        getRaceState().removeChangedListener(mStateListener);
-
-        TickSingleton.INSTANCE.unregisterListener(this);
+        getRaceState().removeChangedListener(stateChangedListener);
     }
 
     @Override
-    public void notifyTick(TimePoint now) {
-        super.notifyTick(now);
+    public TickListener getCurrentTimeTickListener() {
+        return this::onCurrentTimeTick;
+    }
 
+    @Override
+    public TickListener getStartTimeTickListener() {
+        return this::onStartTimeTick;
+    }
+
+    private void onCurrentTimeTick(TimePoint now) {
         if (mCurrentTime != null) {
             mCurrentTime.setText(TimeUtils.formatTime(now));
-            mCurrentTime.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void onStartTimeTick(TimePoint now) {
+        final TimePoint startTime = getRaceState().getStartTime();
+
+        if (mTimeStart != null) {
+            if (startTime != null) {
+                mTimeStart.setText(getString(R.string.time_start, TimeUtils.formatTime(startTime, false)));
+            } else {
+                mTimeStart.setText(getString(R.string.time_start, "N/A"));
+            }
         }
 
-        if (getRace() != null && getRace().getState() != null) {
-            TimePoint startTime = getRace().getState().getStartTime();
-
-            if (mTimeStart != null) {
-                if (startTime != null) {
-                    mTimeStart.setText(getString(R.string.time_start, TimeUtils.formatTime(startTime, false)));
-                } else {
-                    mTimeStart.setText(getString(R.string.time_start, "N/A"));
-                }
+        if (mHeaderTime != null && startTime != null) {
+            String duration;
+            if (startTime.after(now)) {
+                duration = "-" + TimeUtils.formatDurationUntil(startTime.minus(now.asMillis()).asMillis(), false);
+            } else {
+                duration = TimeUtils.formatDurationSince(now.minus(startTime.asMillis()).asMillis(), false);
             }
-
-            if (mHeaderTime != null && startTime != null) {
-                String time;
-                int resId;
-                if (startTime.after(now)) {
-                    resId = R.string.race_start_time_in;
-                    time = TimeUtils.formatDurationUntil(startTime.minus(now.asMillis()).asMillis(), false);
-                } else {
-                    resId = R.string.race_start_time_ago;
-                    time = TimeUtils.formatDurationSince(now.minus(startTime.asMillis()).asMillis(), false);
-                }
-                mHeaderTime.setText(getString(resId, time));
-            }
+            mHeaderTime.setText(duration);
         }
 
         if (mLinkedRace == null) {
@@ -222,14 +217,13 @@ public class TimePanelFragment extends BasePanelFragment implements NavigationEv
 
     private void uncheckMarker() {
         if (isAdded()) {
-            final FragmentActivity activity = requireActivity();
             if (!isNormal(mRaceHeader, R.id.time_marker)) {
-                resetFragment(mTimeLock, getFrameId(activity, R.id.race_edit, R.id.race_content, false),
+                resetFragment(mTimeLock, getFrameId(requireActivity(), R.id.race_edit, R.id.race_content, false),
                         StartTimeFragment.class);
                 setMarkerLevel(mRaceHeader, R.id.time_marker, LEVEL_NORMAL);
             }
             resetFragment(mCompetitorList.isLocked(),
-                    getFrameId(activity, R.id.race_edit, R.id.race_content, false), PenaltyFragment.class);
+                    getFrameId(requireActivity(), R.id.race_edit, R.id.race_content, false), PenaltyFragment.class);
             mCompetitorList.setMarkerLevel(PanelButton.LEVEL_NORMAL);
         }
     }
@@ -240,17 +234,14 @@ public class TimePanelFragment extends BasePanelFragment implements NavigationEv
             case PRESCHEDULED:
             case SCHEDULED:
             case STARTPHASE:
-            case RUNNING:
                 changeVisibility(mTimeLock, null, View.GONE);
                 changeVisibility(mFirstVesselDuration, null, View.GONE);
                 break;
-
             case FINISHING:
             case FINISHED:
                 changeVisibility(mTimeLock, null, View.VISIBLE);
                 changeVisibility(mFirstVesselDuration, null, View.VISIBLE);
                 break;
-
             default:
                 changeVisibility(mTimeLock, null, View.VISIBLE);
                 changeVisibility(mFirstVesselDuration, null, View.GONE);
@@ -267,7 +258,7 @@ public class TimePanelFragment extends BasePanelFragment implements NavigationEv
 
     @Override
     public void onFragmentAttach(Fragment fragment) {
-        if (fragment instanceof RaceFlagViewerFragment){
+        if (fragment instanceof RaceFlagViewerFragment) {
             setMarkerLevel(mRaceHeader, R.id.time_marker, LEVEL_NORMAL);
             mCompetitorList.setMarkerLevel(PanelButton.LEVEL_NORMAL);
         }
@@ -314,37 +305,28 @@ public class TimePanelFragment extends BasePanelFragment implements NavigationEv
         }
     }
 
-    private class RaceStateChangedListener extends BaseRaceStateChangedListener {
-
+    private final RaceStateChangedListener stateChangedListener = new BaseRaceStateChangedListener() {
         @Override
         public void onStatusChanged(ReadonlyRaceState state) {
-            super.onStatusChanged(state);
-
             checkStatus();
             uncheckMarker();
         }
 
         @Override
         public void onStartTimeChanged(ReadonlyRaceState state) {
-            super.onStartTimeChanged(state);
-
             mLinkedRace = null;
         }
 
         @Override
-        public void onFinishingPositioningsChanged(ReadonlyRaceState state) {
-            super.onFinishingPositioningsChanged(state);
-
+        public void onFinishingPositionsChanged(ReadonlyRaceState state) {
             checkWarnings(state);
         }
 
         @Override
         public void onFinishingPositionsConfirmed(ReadonlyRaceState state) {
-            super.onFinishingPositionsConfirmed(state);
-
             checkWarnings(state);
         }
-    }
+    };
 
     private class RaceHeaderClick implements View.OnClickListener, DialogInterface.OnClickListener {
 
@@ -370,7 +352,7 @@ public class TimePanelFragment extends BasePanelFragment implements NavigationEv
         private void toggleFragment() {
             switch (toggleMarker(container, markerId)) {
                 case 0:
-                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                    sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
                     break;
 
                 case 1:
@@ -391,19 +373,19 @@ public class TimePanelFragment extends BasePanelFragment implements NavigationEv
 
         @Override
         public void onClick(PanelButton view) {
-            int toggle = view.toggleMarker();
+            final int toggle = view.toggleMarker();
             mCompetitorToggleOn = toggle == PanelButton.LEVEL_TOGGLED;
             switch (toggle) {
                 case PanelButton.LEVEL_NORMAL:
-                    Intent intent = new Intent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
-                    intent.putExtra(AppConstants.INTENT_ACTION_EXTRA_FORCED, true);
+                    Intent intent = new Intent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
+                    intent.putExtra(AppConstants.ACTION_EXTRA_FORCED, true);
                     BroadcastManager.getInstance(getActivity()).addIntent(intent);
                     break;
 
                 case PanelButton.LEVEL_TOGGLED:
                     Bundle args = new Bundle();
                     RaceFragment content;
-                    args.putSerializable(AppConstants.INTENT_EXTRA_RACE_ID, getRace().getId());
+                    args.putSerializable(AppConstants.EXTRA_RACE_ID, getRace().getId());
                     if (getRace().getStatus() != RaceLogRaceStatus.FINISHING) {
                         content = PenaltyFragment.newInstance();
                     } else {
@@ -451,10 +433,10 @@ public class TimePanelFragment extends BasePanelFragment implements NavigationEv
                 fragment instanceof StartProcedureFragment ||
                 fragment instanceof WindFragment;
         boolean shouldShow = fragment instanceof PenaltyFragment ||
-                             fragment instanceof TrackingListFragment ||
-                             fragment instanceof RaceFinishingFragment ||
-                             fragment instanceof StartTimeFragment ||
-                             fragment instanceof RaceFlagViewerFragment;
+                fragment instanceof TrackingListFragment ||
+                fragment instanceof RaceFinishingFragment ||
+                fragment instanceof StartTimeFragment ||
+                fragment instanceof RaceFlagViewerFragment;
         setPanelTimeVisibility(!shouldHide && shouldShow);
     }
 }

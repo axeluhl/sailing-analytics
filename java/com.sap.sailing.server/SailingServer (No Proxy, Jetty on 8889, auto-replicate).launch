@@ -26,9 +26,11 @@
 <stringAttribute key="org.eclipse.jdt.launching.WORKING_DIRECTORY" value="${workspace_loc}"/>
 <stringAttribute key="pde.version" value="3.3"/>
 <setAttribute key="selected_target_bundles">
+<setEntry value="com.amazon.aws.aws-java-api@default:default"/>
 <setEntry value="com.fasterxml.jackson.core.jackson-annotations@default:default"/>
 <setEntry value="com.fasterxml.jackson.core.jackson-core@default:default"/>
 <setEntry value="com.fasterxml.jackson.core.jackson-databind@default:default"/>
+<setEntry value="com.jcraft.jsch@default:default"/>
 <setEntry value="com.rabbitmq.client@default:default"/>
 <setEntry value="com.sun.activation.javax.activation@default:default"/>
 <setEntry value="com.sun.istack.commons-runtime@default:default"/>
@@ -66,7 +68,6 @@
 <setEntry value="org.apache.poi.ooxml.schemas@default:default"/>
 <setEntry value="org.apache.poi.ooxml@default:default"/>
 <setEntry value="org.apache.poi@default:default"/>
-<setEntry value="org.apache.servicemix.bundles.aws-java-sdk@default:default"/>
 <setEntry value="org.apache.servicemix.bundles.ehcache@default:default"/>
 <setEntry value="org.apache.servicemix.bundles.scribe@default:default"/>
 <setEntry value="org.apache.servicemix.bundles.zxing@default:default"/>
@@ -184,6 +185,9 @@
 <setEntry value="com.sap.sse.gwt@default:default"/>
 <setEntry value="com.sap.sse.jersey.jaxbdependencyfragment@default:false"/>
 <setEntry value="com.sap.sse.jettyextensions@default:false"/>
+<setEntry value="com.sap.sse.landscape.aws.persistence@default:default"/>
+<setEntry value="com.sap.sse.landscape.aws@default:default"/>
+<setEntry value="com.sap.sse.landscape@default:default"/>
 <setEntry value="com.sap.sse.mail@5:true"/>
 <setEntry value="com.sap.sse.mongodb@default:default"/>
 <setEntry value="com.sap.sse.operationaltransformation@default:default"/>

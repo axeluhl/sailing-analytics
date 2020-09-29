@@ -10,7 +10,7 @@ public class RegisterEntryPoint extends AbstractSecurityEntryPoint {
     public void doOnModuleLoad() {
         super.doOnModuleLoad();
         RootPanel rootPanel = RootPanel.get();
-        rootPanel.add(new RegisterView(getUserManagementService(), StringMessages.INSTANCE, 
+        rootPanel.add(new RegisterView(getUserManagementWriteService(), StringMessages.INSTANCE, 
                 getApplicationName(StringMessages.INSTANCE.signUp())));
     }
 }

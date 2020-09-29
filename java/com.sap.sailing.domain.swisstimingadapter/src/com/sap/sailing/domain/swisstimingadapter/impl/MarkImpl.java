@@ -52,7 +52,7 @@ public class MarkImpl implements Mark {
         result.append(": ");
         result.append(getDescription());
         result.append(" [");
-        result.append(Util.join(", ", getDeviceIds()));
+        result.append(Util.joinStrings(", ", getDeviceIds()));
         result.append("]");
         return result.toString();
     }

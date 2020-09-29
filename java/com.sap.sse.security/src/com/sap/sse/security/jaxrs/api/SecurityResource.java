@@ -26,6 +26,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.common.mail.MailException;
+import com.sap.sse.security.SecurityUrlPathProvider;
 import com.sap.sse.security.jaxrs.AbstractSecurityResource;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
@@ -88,7 +89,8 @@ public class SecurityResource extends AbstractSecurityResource {
     @POST
     @Path("/forgot_password")
     @Produces("text/plain;charset=UTF-8")
-    public Response forgotPassword(@Context UriInfo uriInfo, @QueryParam("username") String username, @QueryParam("email") String email) {
+    public Response forgotPassword(@Context UriInfo uriInfo, @QueryParam("username") String username,
+            @QueryParam("email") String email, @QueryParam("application") String application) {
         try {
             final User user;
             if (username != null) {
@@ -101,7 +103,7 @@ public class SecurityResource extends AbstractSecurityResource {
             if (user == null) {
                 return Response.status(Status.PRECONDITION_FAILED).entity("user not found").build();
             } else {
-                getService().resetPassword(user.getName(), getPasswordResetURL(uriInfo));
+                getService().resetPassword(user.getName(), getPasswordResetURL(uriInfo, application));
                 return Response.ok().build();
             }
         } catch (UserManagementException | MailException e) {
@@ -156,8 +158,9 @@ public class SecurityResource extends AbstractSecurityResource {
         return getContextUrl(uriInfo, urlPath);
     }
 
-    private String getPasswordResetURL(UriInfo uriInfo) {
-        final String urlPath = SECURITY_UI_URL_PATH+"EditProfile.html";
+    private String getPasswordResetURL(UriInfo uriInfo, String application) {
+        final SecurityUrlPathProvider securityUrlPathProvider = getSecurityUrlPathProvider(application);
+        final String urlPath = securityUrlPathProvider.getPasswordResetUrlPath();
         return getContextUrl(uriInfo, urlPath);
     }
 
@@ -296,7 +299,7 @@ public class SecurityResource extends AbstractSecurityResource {
             entry.put("permission", permissionAsString);
             entry.put("granted", SecurityUtils.getSubject().isPermitted(permissionAsString));
         }
-        return Response.ok(result.toJSONString(), MediaType.APPLICATION_JSON_TYPE).build(); 
+        return Response.ok(streamingOutput(result), MediaType.APPLICATION_JSON_TYPE).build(); 
     }
 
     Response respondToRemoveAccessTokenForUser(final String username) {

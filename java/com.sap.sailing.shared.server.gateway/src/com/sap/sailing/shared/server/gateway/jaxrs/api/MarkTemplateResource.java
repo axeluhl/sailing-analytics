@@ -46,8 +46,7 @@ public class MarkTemplateResource extends SharedAbstractSailingServerResource {
         for (MarkTemplate markTemplates : markTemplateList) {
             result.add(markTemplateSerializer.serialize(markTemplates));
         }
-        final String json = result.toJSONString();
-        return Response.ok(json).build();
+        return Response.ok(streamingOutput(result)).build();
     }
 
     @GET

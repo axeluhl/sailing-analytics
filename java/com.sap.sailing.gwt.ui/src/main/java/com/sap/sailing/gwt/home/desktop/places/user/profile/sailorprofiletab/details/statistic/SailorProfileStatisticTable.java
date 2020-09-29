@@ -28,7 +28,7 @@ import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.Sai
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.ShowAndEditSailorProfile;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.events.CompetitorWithoutClubnameItemDescription;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.events.NavigatorColumn;
-import com.sap.sailing.gwt.home.shared.resources.SharedHomeResources;
+import com.sap.sailing.gwt.home.shared.SharedHomeResources;
 import com.sap.sailing.gwt.settings.client.EntryPointWithSettingsLinkFactory;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceboardContextDefinition;
@@ -207,7 +207,8 @@ public class SailorProfileStatisticTable extends Composite {
             RaceboardContextDefinition raceboardContext = new RaceboardContextDefinition(
                     raceIdentifier.getRegattaName(), raceIdentifier.getRaceName(),
                     entry.getB().getLeaderboardNameOrNull(), entry.getB().getLeaderboardGroupNameOrNull(),
-                    entry.getB().getEventIdOrNull(), type.getPlayerMode().name(), entry.getA().getIdAsString());
+                    entry.getB().getLeaderboardGroupIdOrNull(), entry.getB().getEventIdOrNull(),
+                    type.getPlayerMode().name(), entry.getA().getIdAsString());
             RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = new RaceBoardPerspectiveOwnSettings(
                     new MillisecondsDurationImpl(entry.getB().getRelatedTimePointOrNull().asMillis()
                             - entry.getB().getRelatedRaceStartTimePointOrNull().asMillis()));

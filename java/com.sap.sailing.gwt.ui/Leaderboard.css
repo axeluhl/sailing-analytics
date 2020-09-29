@@ -81,7 +81,11 @@ input.magnifier{
 
 body, table td, select, button {
     font-family: 'Open Sans', Arial, Verdana, sans-serif;
-    font-size: 14px;
+    font-size: 12px;
+}
+
+table button {
+	float: right;
 }
 
 .errorLabel {
@@ -165,8 +169,96 @@ body, table td, select, button {
 }
 
 .busyIndicator-Simple {
-	margin-top: 7px;	
+	margin-top: 7px;
 }
 
 .busyIndicator-Circle {
+}
+
+/* quick fix general styles editable leaderboard */
+.editableLeaderboardPanel {
+	padding: 5px;
+}
+.suppressedCompetitorsLabel {
+	margin-top: 10px;
+	margin-bottom: 5px;
+}
+
+/* quick fix to hide unused selection row of editable leaderboard table */
+table.editableLeaderboardTable tr th:first-child { display: none; }
+table.editableLeaderboardTable tr td:first-child { display: none; }
+
+.editableLeaderboardContentPanel.mobile {
+    display: inline-block;
+    width: auto;
+}
+
+.editableLeaderboardContentPanel.mobile .editableLeaderboardTable {
+	width: auto;
+}
+
+.editableLeaderboardContentPanel.mobile .editableLeaderboardTable .totalRankColumn {
+	width: 60px;
+}
+
+/* edit button of editable leaderboard table
+.editableLeaderboardTable .editButton {
+  padding: 0; 
+  margin-left: 3px;
+  cursor: pointer; 
+  width: 20px;
+  height: 20px;
+  display: flex;
+}
+.editableLeaderboardTable .editButton span {
+  background: url(images/edit.png) center center no-repeat;
+  width: 16px;
+  height: 16px;
+} */
+.editableLeaderboardTable .editButton {
+  margin-left: 3px;
+  padding: 0 2px; 
+  cursor: pointer;
+  height: 20px;
+  font-size: 10px;
+}
+
+.editableLeaderboardTable .suppressButton, 
+.suppressedCompetitorsTable .suppressButton {
+  padding: 0 2px; 
+  cursor: pointer;
+  height: 20px;
+  font-size: 10px;
+}
+
+.editableLeaderboardTable .raceCell div {
+	white-space: nowrap;
+}
+
+.editableLeaderboardTable .raceCell span {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.editableLeaderboardTable .accumulatedCell div {
+    white-space: nowrap;
+}
+
+.editableLeaderboardTable .accumulatedCell span {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.editableLeaderboardTable .competitorNameCell div {
+    white-space: nowrap;
+    display: flex;
+}
+
+.editableLeaderboardTable .competitorNameCell div span {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.editableLeaderboardTable .competitorNameCell div span:first-child {
+    width: 100%;
 }

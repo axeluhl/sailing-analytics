@@ -1,7 +1,19 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.panels;
 
+import android.content.Context;
+import android.content.DialogInterface;
+import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
+
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.domain.abstractlog.race.state.RaceState;
+import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.domain.common.racelog.Flags;
@@ -12,27 +24,15 @@ import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.AbortFlagsFragmen
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.EmptyFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.MoreFlagsFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RecallFlagsFragment;
+import com.sap.sailing.racecommittee.app.utils.TickListener;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
-
-import android.content.Context;
-import android.content.DialogInterface;
-
-import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
 
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
 public class FlagPanelFragment extends BasePanelFragment implements NavigationEvents.NavigationListener {
-
-    private RaceStateChangedListener mStateListener;
 
     // Abandon Toggle
     private View mAbandonFlags;
@@ -65,8 +65,12 @@ public class FlagPanelFragment extends BasePanelFragment implements NavigationEv
     private static final String STATE_CURRENT_FLAG = "state-current-flag";
     private Map<Integer, Boolean> flagStates = new HashMap<>();
 
-    public FlagPanelFragment() {
-    }
+    private final RaceStateChangedListener stateChangedListener = new BaseRaceStateChangedListener() {
+        @Override
+        public void onStatusChanged(ReadonlyRaceState state) {
+            checkStatus();
+        }
+    };
 
     public static FlagPanelFragment newInstance(Bundle args) {
         FlagPanelFragment fragment = new FlagPanelFragment();
@@ -150,9 +154,7 @@ public class FlagPanelFragment extends BasePanelFragment implements NavigationEv
 
         checkStatus();
 
-        mStateListener = new RaceStateChangedListener();
-
-        getRaceState().addChangedListener(mStateListener);
+        getRaceState().addChangedListener(stateChangedListener);
 
         View view = getView();
         if (view != null) {
@@ -167,7 +169,7 @@ public class FlagPanelFragment extends BasePanelFragment implements NavigationEv
     public void onPause() {
         super.onPause();
 
-        getRaceState().removeChangedListener(mStateListener);
+        getRaceState().removeChangedListener(stateChangedListener);
     }
 
     private void checkStatus() {
@@ -339,38 +341,39 @@ public class FlagPanelFragment extends BasePanelFragment implements NavigationEv
     }
 
     @Override
-    public void notifyTick(TimePoint now) {
-        super.notifyTick(now);
+    public TickListener getStartTimeTickListener() {
+        return this::onStartTimeTick;
+    }
 
-        if (getRace() != null && getRaceState() != null) {
-            switch (getRaceState().getStatus()) {
-                case RUNNING:
-                    TimePoint start = getRaceState().getStartTime();
-                    if (start != null) {
-                        long diff = now.minus(start.asMillis()).asMillis();
-                        if (diff >= 60000) {
-                            changeVisibility(mRecallLock, mRecallLayer, View.VISIBLE);
-                        } else {
-                            changeVisibility(mRecallLock, mRecallLayer, View.GONE);
-                        }
+    private void onStartTimeTick(TimePoint now) {
+        final RaceState state = getRaceState();
+        switch (state.getStatus()) {
+            case RUNNING:
+                TimePoint start = state.getStartTime();
+                if (start != null) {
+                    long diff = now.minus(start.asMillis()).asMillis();
+                    if (diff >= 60000) {
+                        changeVisibility(mRecallLock, mRecallLayer, View.VISIBLE);
                     } else {
                         changeVisibility(mRecallLock, mRecallLayer, View.GONE);
                     }
-                    break;
+                } else {
+                    changeVisibility(mRecallLock, mRecallLayer, View.GONE);
+                }
+                break;
 
-                case FINISHING:
-                    mBlueLastText.setText(TimeUtils.formatTimeAgo(getActivity(),
-                            now.minus(getRaceState().getFinishingTime().asMillis()).asMillis()));
-                    changeVisibility(mRecallLock, mRecallLayer, View.VISIBLE);
-                    break;
+            case FINISHING:
+                mBlueLastText.setText(TimeUtils.formatTimeAgo(getActivity(),
+                        now.minus(state.getFinishingTime().asMillis()).asMillis()));
+                changeVisibility(mRecallLock, mRecallLayer, View.VISIBLE);
+                break;
 
-                case FINISHED:
-                    changeVisibility(mRecallLock, mRecallLayer, View.VISIBLE);
-                    break;
+            case FINISHED:
+                changeVisibility(mRecallLock, mRecallLayer, View.VISIBLE);
+                break;
 
-                default:
-                    // nothing
-            }
+            default:
+                // nothing
         }
     }
 
@@ -432,15 +435,6 @@ public class FlagPanelFragment extends BasePanelFragment implements NavigationEv
 
     }
 
-    private class RaceStateChangedListener extends BaseRaceStateChangedListener {
-        @Override
-        public void onStatusChanged(ReadonlyRaceState state) {
-            super.onStatusChanged(state);
-
-            checkStatus();
-        }
-    }
-
     private class AbandonFlagsClick implements View.OnClickListener, DialogInterface.OnClickListener {
 
         private final String TAG = AbandonFlagsClick.class.getName();
@@ -463,11 +457,11 @@ public class FlagPanelFragment extends BasePanelFragment implements NavigationEv
         }
 
         private void toggleFragment() {
-            int toggle = toggleMarker(container, markerId);
+            final int toggle = toggleMarker(container, markerId);
             flagStates.put(container.getId(), toggle == LEVEL_TOGGLED);
             switch (toggle) {
                 case LEVEL_NORMAL:
-                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                    sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
                     break;
 
                 case LEVEL_TOGGLED:
@@ -503,12 +497,11 @@ public class FlagPanelFragment extends BasePanelFragment implements NavigationEv
         }
 
         private void toggleFragment() {
-
-            int toggle = toggleMarker(container, markerId);
+            final int toggle = toggleMarker(container, markerId);
             flagStates.put(container.getId(), toggle == LEVEL_TOGGLED);
             switch (toggle) {
                 case LEVEL_NORMAL:
-                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                    sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
                     break;
 
                 case LEVEL_TOGGLED:
@@ -544,11 +537,11 @@ public class FlagPanelFragment extends BasePanelFragment implements NavigationEv
         }
 
         private void toggleFragment() {
-            int toggle = toggleMarker(container, markerId);
+            final int toggle = toggleMarker(container, markerId);
             flagStates.put(container.getId(), toggle == LEVEL_TOGGLED);
             switch (toggle) {
                 case LEVEL_NORMAL:
-                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                    sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
                     break;
 
                 case LEVEL_TOGGLED:
@@ -584,11 +577,11 @@ public class FlagPanelFragment extends BasePanelFragment implements NavigationEv
         }
 
         private void toggleFragment() {
-            int toggle = toggleMarker(container, markerId);
+            final int toggle = toggleMarker(container, markerId);
             flagStates.put(container.getId(), toggle == LEVEL_TOGGLED);
             switch (toggle) {
                 case LEVEL_NORMAL:
-                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                    sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
                     break;
 
                 case LEVEL_TOGGLED:
@@ -625,11 +618,11 @@ public class FlagPanelFragment extends BasePanelFragment implements NavigationEv
         }
 
         private void toggleFragment() {
-            int toggle = toggleMarker(container, markerId);
+            final int toggle = toggleMarker(container, markerId);
             flagStates.put(container.getId(), toggle == LEVEL_TOGGLED);
             switch (toggle) {
                 case LEVEL_NORMAL:
-                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                    sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
                     break;
 
                 case LEVEL_TOGGLED:
@@ -666,11 +659,11 @@ public class FlagPanelFragment extends BasePanelFragment implements NavigationEv
         }
 
         private void toggleFragment() {
-            int toggle = toggleMarker(container, markerId);
+            final int toggle = toggleMarker(container, markerId);
             flagStates.put(container.getId(), toggle == LEVEL_TOGGLED);
             switch (toggle) {
                 case LEVEL_NORMAL:
-                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                    sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
                     break;
 
                 case LEVEL_TOGGLED:

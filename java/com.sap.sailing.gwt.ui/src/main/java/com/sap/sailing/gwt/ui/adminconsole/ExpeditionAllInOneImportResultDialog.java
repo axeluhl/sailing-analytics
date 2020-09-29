@@ -10,8 +10,8 @@ import com.sap.sse.common.Util.Pair;
 public class ExpeditionAllInOneImportResultDialog extends TrackedRaceCreationResultDialog {
 
     public ExpeditionAllInOneImportResultDialog(UUID eventId, String regattaName, List<Pair<String, String>> raceEntries,
-            String leaderboardName, String leaderboardGroupName) {
+            String leaderboardName, String leaderboardGroupName, UUID leaderboardGroupId) {
         super(StringMessages.INSTANCE.importFinished(), StringMessages.INSTANCE.importFinishedMessage(), eventId,
-                regattaName, raceEntries, leaderboardName, leaderboardGroupName);
+                regattaName, raceEntries, leaderboardName, leaderboardGroupName, leaderboardGroupId);
     }
 }

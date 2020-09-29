@@ -265,13 +265,11 @@ public class ReplicationPanel extends FlowPanel {
             public void onSuccess(ReplicationStateDTO replicas) {
                 int i=0;
                 int replicaCount = 0;
-                while (registeredReplicas.getRowCount() > 0) {
-                    registeredReplicas.removeRow(0);
-                }
+                registeredReplicas.clear();
                 boolean replicaRegistered = false;
                 for (final ReplicaDTO replica : replicas.getReplicas()) {
                     replicaCount++;
-                    registeredReplicas.insertRow(i);
+                    insertRowIfNeeded(registeredReplicas, i);
                     registeredReplicas.setWidget(i, 0, new Label(replicaCount + ". " + replica.getHostname() + " (" + replica.getIdentifier() + ")"));
                     registeredReplicas.setWidget(i, 1, new Label(stringMessages.registeredAt(replica.getRegistrationTime().toString())));
                     final Button removeReplicaButton = new Button(stringMessages.dropReplicaConnection());
@@ -293,59 +291,60 @@ public class ReplicationPanel extends FlowPanel {
                     });
                     registeredReplicas.setWidget(i, 2, removeReplicaButton);
                     i++;
-                    registeredReplicas.insertRow(i);
+                    insertRowIfNeeded(registeredReplicas, i);
                     registeredReplicas.setWidget(i, 1, new Label(stringMessages.replicables()));
                     HTML replicablesLabel = new HTML(new SafeHtmlBuilder().appendEscapedLines(Arrays.toString(replica.getReplicableIdsAsStrings()).replaceAll(",", "\n")).toSafeHtml());
                     registeredReplicas.setWidget(i, 2, replicablesLabel);
                     i++;
-                    registeredReplicas.insertRow(i);
+                    insertRowIfNeeded(registeredReplicas, i);
                     registeredReplicas.setWidget(i, 1, new Label(stringMessages.averageNumberOfOperationsPerMessage()));
                     registeredReplicas.setWidget(i, 2, new Label(""+replica.getAverageNumberOfOperationsPerMessage()));
                     i++;
-                    registeredReplicas.insertRow(i);
+                    insertRowIfNeeded(registeredReplicas, i);
                     registeredReplicas.setWidget(i, 1, new Label(stringMessages.additionalInformation()));
                     registeredReplicas.setWidget(i, 2, new Label(""+replica.getAdditionalInformation()));
                     i++;
-                    registeredReplicas.insertRow(i);
+                    insertRowIfNeeded(registeredReplicas, i);
                     registeredReplicas.setWidget(i, 1, new Label(stringMessages.numberOfQueueMessagesSent()));
                     registeredReplicas.setWidget(i, 2, new Label(""+replica.getNumberOfMessagesSent()));
                     i++;
-                    registeredReplicas.insertRow(i);
+                    insertRowIfNeeded(registeredReplicas, i);
                     registeredReplicas.setWidget(i, 1, new Label(stringMessages.averageMessageSize()));
                     registeredReplicas.setWidget(i, 2, new Label(""+replica.getAverageMessageSizeInBytes()));
                     i++;
-                    registeredReplicas.insertRow(i);
+                    insertRowIfNeeded(registeredReplicas, i);
                     registeredReplicas.setWidget(i, 1, new Label(stringMessages.totalSize()));
                     registeredReplicas.setWidget(i, 2, new Label(""+replica.getNumberOfBytesSent()+"B ("+replica.getNumberOfBytesSent()/1024.0/1024.0+"MB)"));
                     i++;
                     long totalNumberOfOperations = 0;
                     for (Map.Entry<String, Integer> e : replica.getOperationCountByOperationClassName().entrySet()) {
-                        registeredReplicas.insertRow(i);
+                        insertRowIfNeeded(registeredReplicas, i);
                         registeredReplicas.setWidget(i, 1, new Label(e.getKey()));
                         registeredReplicas.setWidget(i, 2, new Label(e.getValue().toString()));
                         totalNumberOfOperations += e.getValue();
                         i++;
                     }
-                    registeredReplicas.insertRow(i);
+                    insertRowIfNeeded(registeredReplicas, i);
                     registeredReplicas.setWidget(i, 1, new Label(stringMessages.totalNumberOfOperations()));
                     registeredReplicas.setWidget(i, 2, new Label(""+totalNumberOfOperations));
                     i++;
                     replicaRegistered = true;
                 }
-                
                 if (!replicaRegistered) {
-                    registeredReplicas.insertRow(i);
+                    insertRowIfNeeded(registeredReplicas, i);
                     registeredReplicas.setWidget(i, 0, new Label(stringMessages.explainNoConnectionsFromReplicas()));
                     removeAllReplicas.setEnabled(false);
+                    i++;
                 } else {
                     removeAllReplicas.setEnabled(true);
                 }
-                
+                while (registeredReplicas.getRowCount() > i) {
+                    registeredReplicas.removeRow(registeredReplicas.getRowCount()-1);
+                }
                 while (registeredMasters.getRowCount() > 0) {
                     registeredMasters.removeRow(0);
                 }
                 i = 0;
-                
                 registeredMasters.insertRow(i);
                 registeredMasters.setWidget(i, 0, new Label("Client UUID: " + replicas.getServerIdentifier()));
                 i++;
@@ -372,7 +371,6 @@ public class ReplicationPanel extends FlowPanel {
                     addButton.setEnabled(true);
                     stopReplicationButton.setEnabled(false);
                 }
-                
             }
             
             @Override
@@ -382,6 +380,12 @@ public class ReplicationPanel extends FlowPanel {
         });
     }
     
+    private void insertRowIfNeeded(Grid grid, int zeroBasedRowNumber) {
+        if (grid.getRowCount() <= zeroBasedRowNumber) {
+            grid.insertRow(zeroBasedRowNumber);
+        }
+    }
+
     /**
      * A text entry dialog with ok/cancel button and configurable validation rule. Subclasses may provide a redefinition for
      * {@link #getAdditionalWidget()} to add a widget below the text field, e.g., for capturing additional data. The result of
