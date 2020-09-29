@@ -31,8 +31,6 @@ import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthenticat
 import com.sap.sailing.gwt.ui.client.AbstractSailingReadEntryPoint;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.datamining.presentation.TabbedSailingResultsPresenter;
-import com.sap.sailing.gwt.ui.datamining.reports.DataMiningReportStoreControls;
-import com.sap.sailing.gwt.ui.datamining.reports.StoredDataMiningReportsProvider;
 import com.sap.sailing.gwt.ui.shared.settings.SailingSettingsConstants;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
@@ -134,7 +132,7 @@ public class DataMiningEntryPoint extends AbstractSailingReadEntryPoint {
                 queryDefinitionProvider.addControl(queryRunner.getEntryWidget());
                 if (getUserService().hasServerPermission(ServerActions.DATA_MINING)) {
                     StoredDataMiningQueryDataProvider queryProvider = new StoredDataMiningQueryDataProvider(
-                            queryDefinitionProvider, dataMiningService, dataMiningWriteService, queryRunner, getStringMessages());
+                            queryDefinitionProvider, dataMiningService, dataMiningWriteService, getStringMessages());
                     queryDefinitionProvider.addControl(new StoredDataMiningQueryPanel(queryProvider));
 
                     StoredDataMiningReportsProvider reportsProvider = new StoredDataMiningReportsProvider(

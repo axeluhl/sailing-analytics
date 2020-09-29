@@ -17,7 +17,6 @@ import com.sap.sse.datamining.shared.dto.StoredDataMiningQueryDTO;
 import com.sap.sse.datamining.shared.impl.dto.StoredDataMiningQueryDTOImpl;
 import com.sap.sse.datamining.ui.client.DataMiningServiceAsync;
 import com.sap.sse.datamining.ui.client.DataMiningWriteServiceAsync;
-import com.sap.sse.datamining.ui.client.QueryRunner;
 import com.sap.sse.datamining.ui.client.selection.QueryDefinitionProviderWithControls;
 import com.sap.sse.gwt.client.DefaultErrorReporter;
 
@@ -31,16 +30,14 @@ public class StoredDataMiningQueryDataProvider {
     private final QueryDefinitionProviderWithControls queryDefinitionProvider;
     private final DataMiningServiceAsync dataMiningService;
     private final DataMiningWriteServiceAsync dataMiningWriteService;
-    private final QueryRunner queryRunner;
     private final StringMessages stringMessages;
 
     private StoredDataMiningQueryPanel uiPanel;
 
     public StoredDataMiningQueryDataProvider(QueryDefinitionProviderWithControls queryDefinitionProvider,
-            DataMiningServiceAsync dataMiningService, DataMiningWriteServiceAsync dataMiningWriteService, QueryRunner queryRunner, StringMessages stringMessages) {
+            DataMiningServiceAsync dataMiningService, DataMiningWriteServiceAsync dataMiningWriteService, StringMessages stringMessages) {
         this.queryDefinitionProvider = queryDefinitionProvider;
         this.dataMiningService = dataMiningService;
-        this.queryRunner = queryRunner;
         this.dataMiningWriteService = dataMiningWriteService;
         this.stringMessages = stringMessages;
     }
