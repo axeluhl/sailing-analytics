@@ -9,13 +9,12 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang.StringUtils;
 
 import com.sap.sailing.server.gateway.subscription.SubscriptionWebHookHandler;
-import com.sap.sailing.server.gateway.subscription.SubscriptionWebHookServlet;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.security.shared.Subscription;
 import com.sap.sse.security.shared.UserManagementException;
-import com.sap.sse.security.shared.impl.ChargebeeSubscription;
 import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.shared.subscription.Subscription;
+import com.sap.sse.security.shared.subscription.chargebee.ChargebeeSubscription;
 
 /**
  * Servlet for handling WebHook events, response with status 200 in success handling. The servlet has to be secured by
@@ -27,10 +26,7 @@ import com.sap.sse.security.shared.impl.User;
  */
 public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
     private static final Logger logger = Logger.getLogger(ChargebeeWebHookHandler.class.getName());
-
-    public ChargebeeWebHookHandler(SubscriptionWebHookServlet context) {
-        super(context);
-    }
+    private static final String HANDLER_PATH = "chargebee";
 
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response) {
@@ -47,6 +43,11 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
                     + (event != null ? event.getEventType().getName() : ""), e);
             sendFail(response);
         }
+    }
+
+    @Override
+    public String getHandlerPath() {
+        return HANDLER_PATH;
     }
 
     /**

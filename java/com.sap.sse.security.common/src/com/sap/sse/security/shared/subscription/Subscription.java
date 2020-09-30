@@ -1,4 +1,4 @@
-package com.sap.sse.security.shared;
+package com.sap.sse.security.shared.subscription;
 
 import java.io.Serializable;
 
@@ -106,10 +106,15 @@ public abstract class Subscription implements Serializable {
      */
     private final TimePoint manualUpdatedAt;
 
+    /**
+     * Subscription provider name
+     */
+    private final String provider;
+
     public Subscription(String subscriptionId, String planId, String customerId, TimePoint trialStart,
             TimePoint trialEnd, String subscriptionStatus, String paymentStatus, String transactionType,
             String transactionStatus, String invoiceId, String invoiceStatus, TimePoint subscriptionCreatedAt,
-            TimePoint subscriptionUpdatedAt, TimePoint latestEventTime, TimePoint manualUpdatedAt) {
+            TimePoint subscriptionUpdatedAt, TimePoint latestEventTime, TimePoint manualUpdatedAt, String provider) {
         this.subscriptionId = subscriptionId;
         this.planId = planId;
         this.customerId = customerId;
@@ -125,6 +130,7 @@ public abstract class Subscription implements Serializable {
         this.subscriptionUpdatedAt = subscriptionUpdatedAt;
         this.latestEventTime = latestEventTime;
         this.manualUpdatedAt = manualUpdatedAt;
+        this.provider = provider;
     }
 
     public String getSubscriptionId() {
@@ -187,6 +193,10 @@ public abstract class Subscription implements Serializable {
         return manualUpdatedAt;
     }
 
+    public String getProvider() {
+        return provider;
+    }
+
     public boolean hasPlan() {
         return planId != null && !planId.isEmpty();
     }
@@ -202,8 +212,9 @@ public abstract class Subscription implements Serializable {
     public String toString() {
         final StringBuilder builder = new StringBuilder();
         final String separator = ", ";
-        builder.append("subscriptionId: ").append(getStringFieldValue(subscriptionId)).append(separator)
-                .append("planId: ").append(getStringFieldValue(planId)).append(separator).append("customerId: ")
+        builder.append("provider: ").append(provider).append(separator).append("subscriptionId: ")
+                .append(getStringFieldValue(subscriptionId)).append(separator).append("planId: ")
+                .append(getStringFieldValue(planId)).append(separator).append("customerId: ")
                 .append(getStringFieldValue(customerId)).append(separator).append("subscriptionStatus: ")
                 .append(getStringFieldValue(subscriptionStatus)).append(separator).append("paymentStatus: ")
                 .append(getStringFieldValue(paymentStatus)).append(separator).append("transactionType: ")

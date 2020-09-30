@@ -1,4 +1,4 @@
-package com.sap.sse.security.shared;
+package com.sap.sse.security.shared.subscription;
 
 import java.util.HashMap;
 import java.util.Map;

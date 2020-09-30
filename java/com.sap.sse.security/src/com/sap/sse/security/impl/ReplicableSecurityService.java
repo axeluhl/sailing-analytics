@@ -10,12 +10,12 @@ import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
-import com.sap.sse.security.shared.Subscription;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.shared.subscription.Subscription;
 
 /**
  * Publishes those methods of {@link SecurityServiceImpl} that are required by operations implemented as lambda

@@ -98,6 +98,7 @@ public class FieldNames {
         SUBSCRIPTION_CREATED_AT,
         SUBSCRIPTION_UPDATED_AT,
         LATEST_EVENT_TIME,
-        MANUAL_UPDATED_AT;
+        MANUAL_UPDATED_AT,
+        PROVIDER;
     }
 }

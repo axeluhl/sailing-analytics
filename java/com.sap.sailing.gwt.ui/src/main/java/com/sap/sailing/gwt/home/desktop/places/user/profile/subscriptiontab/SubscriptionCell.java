@@ -16,8 +16,8 @@ import com.sap.sailing.gwt.home.shared.places.user.profile.subscription.UserSubs
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionItem;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.security.shared.SubscriptionPlan;
-import com.sap.sse.security.shared.SubscriptionPlanHolder;
+import com.sap.sse.security.shared.subscription.SubscriptionPlan;
+import com.sap.sse.security.shared.subscription.SubscriptionPlanHolder;
 
 public class SubscriptionCell extends AbstractCell<SubscriptionItem> {
     interface Style extends CssResource {

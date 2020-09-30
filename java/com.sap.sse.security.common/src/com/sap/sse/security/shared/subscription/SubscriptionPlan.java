@@ -1,4 +1,6 @@
-package com.sap.sse.security.shared;
+package com.sap.sse.security.shared.subscription;
+
+import com.sap.sse.security.shared.PredefinedRoles;
 
 /**
  * Payment subscription plan

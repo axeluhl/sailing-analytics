@@ -32,11 +32,11 @@ import com.sap.sailing.gwt.ui.shared.subscription.chargebee.PrepareCheckoutDTO;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.shared.Subscription;
-import com.sap.sse.security.shared.SubscriptionPlanHolder;
 import com.sap.sse.security.shared.UserManagementException;
-import com.sap.sse.security.shared.impl.ChargebeeSubscription;
 import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.shared.subscription.Subscription;
+import com.sap.sse.security.shared.subscription.SubscriptionPlanHolder;
+import com.sap.sse.security.shared.subscription.chargebee.ChargebeeSubscription;
 import com.sap.sse.security.ui.server.Activator;
 import static com.chargebee.models.Subscription.cancel;
 

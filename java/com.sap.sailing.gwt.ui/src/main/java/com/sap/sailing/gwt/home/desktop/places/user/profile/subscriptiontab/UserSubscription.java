@@ -23,8 +23,8 @@ import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionDTO;
 import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionItem;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
-import com.sap.sse.security.shared.SubscriptionPlan;
-import com.sap.sse.security.shared.SubscriptionPlanHolder;
+import com.sap.sse.security.shared.subscription.SubscriptionPlan;
+import com.sap.sse.security.shared.subscription.SubscriptionPlanHolder;
 
 /**
  * Implementation view for {@link UserSubscriptionView}

@@ -6,7 +6,7 @@ import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONObject;
 
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.security.shared.Subscription;
+import com.sap.sse.security.shared.subscription.Subscription;
 
 /**
  * Wrapped class for WebHook event JSON object

@@ -1,7 +1,7 @@
 package com.sap.sse.security.operations;
 
 import com.sap.sse.security.impl.ReplicableSecurityService;
-import com.sap.sse.security.shared.Subscription;
+import com.sap.sse.security.shared.subscription.Subscription;
 
 /**
  * Update user's subscription operation

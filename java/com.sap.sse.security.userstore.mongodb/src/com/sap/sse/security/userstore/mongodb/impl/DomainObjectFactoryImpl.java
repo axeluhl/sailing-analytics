@@ -31,19 +31,21 @@ import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RoleDefinitionImpl;
 import com.sap.sse.security.shared.SocialUserAccount;
-import com.sap.sse.security.shared.Subscription;
 import com.sap.sse.security.shared.UserGroupProvider;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.AccessControlList;
-import com.sap.sse.security.shared.impl.ChargebeeSubscription;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.QualifiedObjectIdentifierImpl;
 import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.shared.impl.UserGroupImpl;
+import com.sap.sse.security.shared.subscription.InvalidSubscriptionProvderException;
+import com.sap.sse.security.shared.subscription.Subscription;
+import com.sap.sse.security.shared.subscription.SubscriptionFactory;
+import com.sap.sse.security.shared.subscription.SubscriptionProvider;
 import com.sap.sse.security.userstore.mongodb.DomainObjectFactory;
 import com.sap.sse.security.userstore.mongodb.impl.FieldNames.Tenant;
 
@@ -515,6 +517,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             subscriptions = new Subscription[subscriptionsDoc.size()];
             int i = 0;
             for (Object o : subscriptionsDoc) {
+
                 final Document doc = (Document) o;
                 final String customerId = doc.getString(FieldNames.Subscription.CUSTOMER_ID.name());
                 final String planId = doc.getString(FieldNames.Subscription.PLAN_ID.name());
@@ -536,9 +539,17 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                         .getTime(doc.getLong(FieldNames.Subscription.LATEST_EVENT_TIME.name()));
                 final TimePoint manualUpdatedAt = Subscription
                         .getTime(doc.getLong(FieldNames.Subscription.MANUAL_UPDATED_AT.name()));
-                subscriptions[i++] = new ChargebeeSubscription(subscriptionId, planId, customerId, trialStart, trialEnd,
-                        subscriptionStatus, paymentStatus, transactionType, transactionStatus, invoiceId, invoiceStatus,
-                        subscriptionCreatedAt, subscriptionUpdatedAt, latestEventTime, manualUpdatedAt);
+                final String providerName = doc.getString(FieldNames.Subscription.PROVIDER.name());
+                try {
+                    final SubscriptionProvider subscriptionProvider = SubscriptionFactory.getInstance()
+                            .getSubscriptionProvider(providerName);
+                    subscriptions[i++] = subscriptionProvider.createSubscription(subscriptionId, planId, customerId,
+                            trialStart, trialEnd, subscriptionStatus, paymentStatus, transactionType, transactionStatus,
+                            invoiceId, invoiceStatus, subscriptionCreatedAt, subscriptionUpdatedAt, latestEventTime,
+                            manualUpdatedAt);
+                } catch (InvalidSubscriptionProvderException e) {
+                    logger.log(Level.SEVERE, "Failed to load subscription for user " + customerId, e);
+                }
             }
         } else {
             subscriptions = null;

@@ -1,7 +1,7 @@
-package com.sap.sse.security.shared.impl;
+package com.sap.sse.security.shared.subscription.chargebee;
 
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.security.shared.Subscription;
+import com.sap.sse.security.shared.subscription.Subscription;
 
 public class ChargebeeSubscription extends Subscription {
     public static final String SUBSCRIPTION_STATUS_TRIAL = "in_trial";
@@ -29,7 +29,8 @@ public class ChargebeeSubscription extends Subscription {
             TimePoint subscriptionUpdatedAt, TimePoint latestEventTime, TimePoint manualUpdatedAt) {
         super(subscriptionId, planId, customerId, trialStart, trialEnd, subscriptionStatus, paymentStatus,
                 transactionType, transactionStatus, invoiceId, invoiceStatus, subscriptionCreatedAt,
-                subscriptionUpdatedAt, latestEventTime, manualUpdatedAt);
+                subscriptionUpdatedAt, latestEventTime, manualUpdatedAt,
+                ChargeeSubscriptionProvider.getInstance().getProviderName());
     }
 
     public boolean isActiveSubscription() {

@@ -24,7 +24,6 @@ import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.SocialUserAccount;
-import com.sap.sse.security.shared.Subscription;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.AccessControlList;
@@ -32,6 +31,7 @@ import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
+import com.sap.sse.security.shared.subscription.Subscription;
 import com.sap.sse.security.userstore.mongodb.MongoObjectFactory;
 
 public class MongoObjectFactoryImpl implements MongoObjectFactory {
@@ -357,6 +357,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
                         subscription.getSubscriptionUpdatedAt().asMillis());
                 doc.put(FieldNames.Subscription.LATEST_EVENT_TIME.name(), subscription.getLatestEventTime().asMillis());
                 doc.put(FieldNames.Subscription.MANUAL_UPDATED_AT.name(), subscription.getManualUpdatedAt().asMillis());
+                doc.put(FieldNames.Subscription.PROVIDER.name(), subscription.getProvider());
                 result.add(doc);
             }
         } else {
