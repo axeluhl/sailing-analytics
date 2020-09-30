@@ -96,6 +96,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Importing Sessions from Expedition|wiki/howto/expeditionimport]]
 * [[Checking our DBs for a user record by e-mail|wiki/howto/privacy]]
 * [[Managing ORC Performance Curve Regattas|wiki/howto/setup-orc-regatta]]
+* [[Qualtrics Surveys|wiki/howto/qualtrics/qualtrics]]
 
 ### Development
 

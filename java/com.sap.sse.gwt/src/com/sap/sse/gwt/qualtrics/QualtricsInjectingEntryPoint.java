@@ -7,6 +7,6 @@ public class QualtricsInjectingEntryPoint implements EntryPoint {
     @Override
     public void onModuleLoad() {
         GWT.log("Inject Qualtrics");
-        Qualtrics.ensureInjected();
+        Qualtrics.ensureInjected(/* project ID */ "ZN_7WmsxxHQyCeUivX");
     }
 }

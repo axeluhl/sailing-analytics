@@ -58,13 +58,13 @@ public final class Qualtrics {
     /**
      * inject minimal js required for Qualtrics survey
      */
-    static void ensureInjected() {
+    static void ensureInjected(final String projectId) {
         if (!isInjected) {
             ScriptInjector.fromString(QUALTRICS_RESSOURCES.qualtricsLoadingCode().getText()).setWindow(ScriptInjector.TOP_WINDOW).inject();
             // Now produce the following div:
             //          <div id='ZN_7WmsxxHQyCeUivX'><!--DO NOT REMOVE-CONTENTS PLACED HERE--></div>
             final DivElement div = Document.get().createDivElement();
-            div.setId(QUALTRICS_RESSOURCES.qualtricsProjectId().getText());
+            div.setId(projectId);
             div.setInnerHTML("<!--DO NOT REMOVE-CONTENTS PLACED HERE-->");
             isInjected = true;
         }
