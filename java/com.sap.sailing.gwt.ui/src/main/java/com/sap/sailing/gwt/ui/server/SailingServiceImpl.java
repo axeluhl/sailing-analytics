@@ -1351,21 +1351,26 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
      * Uses <code>wind</code> for both, the non-dampened and dampened fields of the {@link WindDTO} object returned
      */
     protected WindDTO createWindDTOFromAlreadyAveraged(Wind wind, TimePoint requestTimepoint) {
-        WindDTO windDTO = new WindDTO();
-        windDTO.requestTimepoint = requestTimepoint.asMillis();
-        windDTO.trueWindBearingDeg = wind.getBearing().getDegrees();
-        windDTO.trueWindFromDeg = wind.getBearing().reverse().getDegrees();
-        windDTO.trueWindSpeedInKnots = wind.getKnots();
-        windDTO.trueWindSpeedInMetersPerSecond = wind.getMetersPerSecond();
-        windDTO.dampenedTrueWindBearingDeg = wind.getBearing().getDegrees();
-        windDTO.dampenedTrueWindFromDeg = wind.getBearing().reverse().getDegrees();
-        windDTO.dampenedTrueWindSpeedInKnots = wind.getKnots();
-        windDTO.dampenedTrueWindSpeedInMetersPerSecond = wind.getMetersPerSecond();
-        if (wind.getPosition() != null) {
-            windDTO.position = wind.getPosition();
-        }
-        if (wind.getTimePoint() != null) {
-            windDTO.measureTimepoint = wind.getTimePoint().asMillis();
+        WindDTO windDTO;
+        if (wind == null) {
+            windDTO = null;
+        } else {
+            windDTO = new WindDTO();
+            windDTO.requestTimepoint = requestTimepoint.asMillis();
+            windDTO.trueWindBearingDeg = wind.getBearing().getDegrees();
+            windDTO.trueWindFromDeg = wind.getBearing().reverse().getDegrees();
+            windDTO.trueWindSpeedInKnots = wind.getKnots();
+            windDTO.trueWindSpeedInMetersPerSecond = wind.getMetersPerSecond();
+            windDTO.dampenedTrueWindBearingDeg = wind.getBearing().getDegrees();
+            windDTO.dampenedTrueWindFromDeg = wind.getBearing().reverse().getDegrees();
+            windDTO.dampenedTrueWindSpeedInKnots = wind.getKnots();
+            windDTO.dampenedTrueWindSpeedInMetersPerSecond = wind.getMetersPerSecond();
+            if (wind.getPosition() != null) {
+                windDTO.position = wind.getPosition();
+            }
+            if (wind.getTimePoint() != null) {
+                windDTO.measureTimepoint = wind.getTimePoint().asMillis();
+            }
         }
         return windDTO;
     }
@@ -3293,7 +3298,13 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     private GPSFixDTOWithSpeedWindTackAndLegType createDouglasPeuckerGPSFixDTO(TrackedRace trackedRace, Competitor competitor, GPSFix fix,
             SpeedWithBearing speedWithBearing) throws NoWindException {
-        Tack tack = trackedRace.getTack(competitor, fix.getTimePoint());
+        Tack tack;
+        try {
+            tack = trackedRace.getTack(competitor, fix.getTimePoint());
+        } catch (NoWindException nwe) {
+            // tack is not so relevant for a Douglas Peucker Point
+            tack = null;
+        }
         TrackedLegOfCompetitor trackedLegOfCompetitor = trackedRace.getTrackedLeg(competitor,
                 fix.getTimePoint());
         LegType legType = trackedLegOfCompetitor == null ? null : trackedRace.getTrackedLeg(

@@ -35,3 +35,6 @@ captures
 /.recommenders/
 /java/.recommenders/
 java/com.sap.sailing.selenium.test/com.sap.sailing.selenium.test (No Proxy) individual.launch
+
+## Kubernetes
+kubernetes/aws-alb-ingress-controller.yaml

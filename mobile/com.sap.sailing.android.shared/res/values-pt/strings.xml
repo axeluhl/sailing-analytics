@@ -1,5 +1,7 @@
-<?xml version="1.0" encoding="utf-8" standalone="no"?>
-<resources>
+<?xml version="1.0" encoding="UTF-8"?><resources>
+
+    
+    
     <string name="options_menu_live">"Informação de conexão"</string>
     <string name="remove">"Remover"</string>
     <string name="enter_new_item">"Inserir item novo"</string>
@@ -7,10 +9,16 @@
     <string name="there_are_no_items_yet_">"Ainda não existem itens."</string>
 
     <!-- SystemInformationActivity -->
-
+    
+    
+    
+    
+    
+    
+    
+    
 
     <!-- Generic -->
-
     <string name="generic_error">"Erro"</string>
     <string name="about">"Info"</string>
 
@@ -36,7 +44,9 @@
     <string name="notify_user_api_call_failed">"Ocorreu um erro ao contatar o servidor, tente novamente."</string>
     <string name="please_wait">"Aguarde"</string>
     <string name="error_invalid_qr_code">"Código QR inválido"</string>
-
+    
+    
+    
 
     <!-- Eula -->
     <string name="eula_title">"EULA"</string>
@@ -50,7 +60,10 @@
     <string name="license_information">"Informações sobre a licença"</string>
 
     <!-- HTTP Requests -->
-
+    
+    
+    
+    
 
     <!-- Dialog -->
     <string name="yes">"Sim"</string>
@@ -69,4 +82,8 @@
     <string name="yesterday">"Ontem"</string>
     <string name="today">"Hoje"</string>
     <string name="tomorrow">"Amanhã"</string>
+    
+    
+
+    
 </resources>

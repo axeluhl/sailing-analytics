@@ -56,3 +56,8 @@ replica:
   #    memory: "12Gi"
   #    cpu: "2" 
 
+# Metrics (no switch available yet, default enabled)
+# Setting to true means that the replica set is started together with a java agent that collects JMX beans and that the pods will have the correct annotation to let prometheus scrape them. The port may be defined here. 
+#metrics:
+#  enabled: true
+#  prometheusPort: 9102

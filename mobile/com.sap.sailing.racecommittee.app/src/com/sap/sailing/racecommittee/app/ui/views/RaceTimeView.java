@@ -37,16 +37,23 @@ public class RaceTimeView extends android.support.v7.widget.AppCompatTextView {
         startTime = state.getStartTime();
         unregisterListener();
         switch (state.getStatus()) {
-            case UNKNOWN:
-            case UNSCHEDULED:
-            case FINISHED:
-                setVisibility(GONE);
-                setText(null);
+            case SCHEDULED:
+            case STARTPHASE:
+            case RUNNING:
+            case FINISHING:
+                if (startTime == null) {
+                    setVisibility(GONE);
+                    setText(null);
+                    return;
+                }
+                setVisibility(VISIBLE);
+                listener = now -> setText(startTime != null ? TimeUtils.formatDuration(now, startTime) : null);
+                TickSingleton.INSTANCE.registerListener(listener, startTime);
                 break;
             default:
-                setVisibility(VISIBLE);
-                listener = now -> setText(TimeUtils.formatDuration(now, startTime));
-                TickSingleton.INSTANCE.registerListener(listener, startTime);
+                setVisibility(GONE);
+                setText(null);
+
         }
     }
 
