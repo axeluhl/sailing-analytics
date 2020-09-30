@@ -569,6 +569,9 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public void removeRoleDefinition(RoleDefinition roleDefinition) {
+        if(roleDefinition == null) {
+            return;
+        }
         LockUtil.executeWithWriteLock(usersLock, () -> {
             LockUtil.executeWithWriteLock(userGroupsLock, () -> {
                 final Set<User> usersHavingRoleWithRoleDefiniton = roleDefinitionsToUsers.get(roleDefinition);
@@ -1100,6 +1103,7 @@ public class UserStoreImpl implements UserStore {
             });
         });
         LockUtil.executeWithWriteLock(preferenceLock, () -> removeAllPreferencesForUser(name));
+        
     }
     
     private void removeFromUsersByAccessToken(User user){
