@@ -148,12 +148,12 @@
 		<url-pattern>/service/usermanagement</url-pattern>
 	</servlet-mapping>
 	<servlet>
-        <display-name>Subscription Service</display-name>
-        <servlet-name>SubscriptionService</servlet-name>
-        <servlet-class>com.sap.sailing.gwt.ui.server.subscription.chargebee.SubscriptionServiceImpl</servlet-class>
+        <display-name>Chargebee Subscription Service</display-name>
+        <servlet-name>ChargebeeSubscriptionService</servlet-name>
+        <servlet-class>com.sap.sailing.gwt.ui.server.subscription.chargebee.ChargebeeSubscriptionServiceImpl</servlet-class>
     </servlet>
     <servlet-mapping>
-        <servlet-name>SubscriptionService</servlet-name>
+        <servlet-name>ChargebeeSubscriptionService</servlet-name>
         <url-pattern>/service/subscription</url-pattern>
     </servlet-mapping>
 
