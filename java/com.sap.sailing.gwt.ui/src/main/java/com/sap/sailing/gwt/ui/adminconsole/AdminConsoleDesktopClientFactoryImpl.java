@@ -25,7 +25,7 @@ import com.sap.sse.security.ui.client.UserManagementWriteServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.WithSecurity;
 
-public class AdminConsoleClientFactoryImpl implements AdminConsoleClientFactory {
+public class AdminConsoleDesktopClientFactoryImpl implements AdminConsoleClientFactory {
 
     private final WithSecurity securityProvider = new DefaultWithSecurityImpl();
     private final EventBus eventBus = new SimpleEventBus();
@@ -35,15 +35,15 @@ public class AdminConsoleClientFactoryImpl implements AdminConsoleClientFactory 
     private SailingServiceWriteAsync sailingService;
     private TopLevelView topLevelView;
     
-    public AdminConsoleClientFactoryImpl() {
+    public AdminConsoleDesktopClientFactoryImpl() {
         
     }
     
-    public AdminConsoleClientFactoryImpl(final SailingServiceWriteAsync sailingService) {
+    public AdminConsoleDesktopClientFactoryImpl(final SailingServiceWriteAsync sailingService) {
         this.sailingService = sailingService;
         EntryPointHelper.registerASyncService((ServiceDefTarget) mediaServiceWrite, RemoteServiceMappingConstants.mediaServiceRemotePath, HEADER_FORWARD_TO_MASTER);
             
-        //topLevelView = new AdminConsoleDesktopView(eventBus);
+        topLevelView = new AdminConsoleDesktopView(eventBus);
     }
     
     @Override

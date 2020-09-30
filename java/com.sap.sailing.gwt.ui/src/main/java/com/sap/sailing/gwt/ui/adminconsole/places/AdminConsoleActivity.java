@@ -43,12 +43,12 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
     private final MediaServiceWriteAsync mediaServiceWrite;
     private final SailingServiceWriteAsync sailingService;
     
-    public AdminConsoleActivity(final AdminConsolePlace place, final AdminConsoleClientFactory clientFactory, final MediaServiceWriteAsync mediaServiceWrite, final SailingServiceWriteAsync sailingService) {
+    public AdminConsoleActivity(final AdminConsolePlace place, final AdminConsoleClientFactory clientFactory) {
         this.menu = place.getMenu();
         this.tab = place.getTab();
         this.clientFactory = clientFactory;
-        this.mediaServiceWrite = mediaServiceWrite;
-        this.sailingService = sailingService;
+        this.mediaServiceWrite = clientFactory.getMediaServiceWrite();
+        this.sailingService = clientFactory.getSailingService();
     }
     
     @Override

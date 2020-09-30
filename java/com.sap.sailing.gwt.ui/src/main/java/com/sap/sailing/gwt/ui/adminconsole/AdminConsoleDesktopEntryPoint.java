@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import static com.sap.sse.gwt.shared.RpcConstants.HEADER_FORWARD_TO_MASTER;
-
 import com.google.gwt.activity.shared.ActivityManager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -9,47 +7,37 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.place.shared.PlaceHistoryHandler;
 import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.rpc.ServiceDefTarget;
-import com.google.gwt.user.client.ui.RootLayoutPanel;
-import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsolePlace;
 import com.sap.sailing.gwt.ui.client.AbstractSailingWriteEntryPoint;
-import com.sap.sailing.gwt.ui.client.MediaServiceWrite;
-import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
-import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
-import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.resources.Highcharts;
 
-public class AdminConsoleEntryPoint extends AbstractSailingWriteEntryPoint {    
-    
-    private final MediaServiceWriteAsync mediaServiceWrite = GWT.create(MediaServiceWrite.class);
-    
-    private SimplePanel appWidget = new SimplePanel();
+public class AdminConsoleDesktopEntryPoint extends AbstractSailingWriteEntryPoint {         
     
     @Override
     protected void doOnModuleLoad() {
         Highcharts.ensureInjectedWithMore();
-        super.doOnModuleLoad();
-        EntryPointHelper.registerASyncService((ServiceDefTarget) mediaServiceWrite, RemoteServiceMappingConstants.mediaServiceRemotePath, HEADER_FORWARD_TO_MASTER);
+        super.doOnModuleLoad();      
                 
         initActivitiesAndPlaces();
     }
      
     private void initActivitiesAndPlaces() {
-        final AdminConsoleClientFactory clientFactory = new AdminConsoleClientFactoryImpl(getSailingService());
+        final AdminConsoleClientFactory clientFactory = new AdminConsoleDesktopClientFactoryImpl(getSailingService());
         EventBus eventBus = clientFactory.getEventBus();
         PlaceController placeController = clientFactory.getPlaceController();
         
         AdminConsoleActivityMapper activityMapper = new AdminConsoleActivityMapper(clientFactory);
         ActivityManager activityManager = new ActivityManager(activityMapper, eventBus);
-        activityManager.setDisplay(appWidget);
+        activityManager.setDisplay(clientFactory.getContent());
         
         AdminConsolePlaceHistoryMapper historyMapper = GWT.create(AdminConsolePlaceHistoryMapper.class);
         PlaceHistoryHandler historyHandler = new PlaceHistoryHandler(historyMapper);
         historyHandler.register(placeController, eventBus, new AdminConsolePlace());
         
-        RootLayoutPanel.get().add(appWidget);      
+        placeWidgetOnRootPanel(clientFactory.getRoot()); 
         
         addHistoryValueChangeHandler(clientFactory, activityMapper);
         
@@ -60,16 +48,18 @@ public class AdminConsoleEntryPoint extends AbstractSailingWriteEntryPoint {
         History.addValueChangeHandler(new ValueChangeHandler<String>() {
             
             public void onValueChange(ValueChangeEvent<String> event) {
-                handleHistoryChange(clientFactory, event);
+                final String token = event.getValue();
+                
+                if (token == null || token.isEmpty()) { 
+                    clientFactory.getPlaceController().goTo(new AdminConsolePlace());       
+                }
             }
             });
     }
     
-    private void handleHistoryChange(AdminConsoleClientFactory clientFactory, ValueChangeEvent<String> event) {
-        final String token = event.getValue();
-        
-        if (token == null || token.isEmpty()) { 
-            clientFactory.getPlaceController().goTo(new AdminConsolePlace());       
+    protected void placeWidgetOnRootPanel(Widget rootWidget) {
+        if (rootWidget != null) {
+            RootPanel.get().add(rootWidget);
         }
     }
 

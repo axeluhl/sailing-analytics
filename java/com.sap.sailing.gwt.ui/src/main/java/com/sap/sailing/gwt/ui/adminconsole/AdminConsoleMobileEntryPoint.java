@@ -21,7 +21,7 @@ import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.resources.Highcharts;
 
-public class AdminConsoleEntryPoint extends AbstractSailingWriteEntryPoint {    
+public class AdminConsoleMobileEntryPoint extends AbstractSailingWriteEntryPoint {    
     
     private final MediaServiceWriteAsync mediaServiceWrite = GWT.create(MediaServiceWrite.class);
     
@@ -37,7 +37,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingWriteEntryPoint {
     }
      
     private void initActivitiesAndPlaces() {
-        final AdminConsoleClientFactory clientFactory = new AdminConsoleClientFactoryImpl(getSailingService());
+        final AdminConsoleClientFactory clientFactory = new AdminConsoleDesktopClientFactoryImpl(getSailingService());
         EventBus eventBus = clientFactory.getEventBus();
         PlaceController placeController = clientFactory.getPlaceController();
         
