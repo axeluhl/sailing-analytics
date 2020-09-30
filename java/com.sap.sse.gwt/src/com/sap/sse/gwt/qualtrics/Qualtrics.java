@@ -79,4 +79,23 @@ public final class Qualtrics {
         $wnd.QSI.API.load();
         $wnd.QSI.API.run();
     }-*/;
+    
+    public static native void unload() /*-{
+        $wnd.QSI.API.unload();
+    }-*/;
+
+    public static native void load() /*-{
+        $wnd.QSI.API.load();
+    }-*/;
+
+    public static native void run() /*-{
+        $wnd.QSI.API.run();
+    }-*/;
+
+    public static native void setExplicitTrigger(boolean trigger) /*-{
+        $wnd.QSI.triggerExplicitly = trigger ? 1 : 0;
+        $wnd.QSI.API.unload();
+        $wnd.QSI.API.load();
+        $wnd.QSI.API.run();
+    }-*/;
 }

@@ -63,7 +63,7 @@ public class Footer extends Composite {
             if (Event.ONCLICK == event.getTypeInt()) {
                 event.preventDefault();
                 event.stopPropagation();
-                Qualtrics.triggerIntercepts();
+                Qualtrics.setExplicitTrigger(true);
             }
         });
         if (!ClientConfiguration.getInstance().isBrandingActive()) {
